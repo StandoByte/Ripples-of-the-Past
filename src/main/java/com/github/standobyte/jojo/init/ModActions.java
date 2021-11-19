@@ -180,7 +180,7 @@ public class ModActions {
     
 
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_STRING_ATTACK = ACTIONS.register("hierophant_green_attack", 
-            () -> new HierophantGreenStringAttack(new StandEntityAction.Builder().manaCost(75).cooldown(10)));
+            () -> new HierophantGreenStringAttack(new StandEntityAction.Builder().manaCost(60).cooldown(10)));
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_STRING_BIND = ACTIONS.register("hierophant_green_attack_binding", 
             () -> new HierophantGreenStringAttack(new StandEntityAction.Builder().manaCost(75).cooldown(25).expRequirement(200)
@@ -239,7 +239,7 @@ public class ModActions {
                     .cooldown(6).shout(ModSounds.POLNAREFF_HORA_HORA_HORA).shiftVariationOf(SILVER_CHARIOT_ATTACK)));
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_RAPIER_LAUNCH = ACTIONS.register("silver_chariot_rapier_launch", 
-            () -> new SilverChariotRapierLaunch(new StandEntityAction.Builder().manaCost(0).expRequirement(200)));
+            () -> new SilverChariotRapierLaunch(new StandEntityAction.Builder().manaCost(0).cooldown(400).expRequirement(200)));
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_BLOCK = ACTIONS.register("silver_chariot_block", 
             () -> new StandEntityBlock());
@@ -255,14 +255,14 @@ public class ModActions {
             () -> new StandEntityHeldRangedAttack(new StandEntityHeldRangedAttack.Builder().holdType(2).expRequirement(50).shiftVariationOf(MAGICIANS_RED_PUNCH)));
     
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_FIREBALL = ACTIONS.register("magicians_red_fireball", 
-            () -> new MagiciansRedFireball(new StandEntityAction.Builder().manaCost(40).expRequirement(150)));
+            () -> new MagiciansRedFireball(new StandEntityAction.Builder().manaCost(50).expRequirement(150)));
     
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_CROSSFIRE_HURRICANE = ACTIONS.register("magicians_red_crossfire_hurricane", 
-            () -> new MagiciansRedCrossfireHurricane(new StandEntityAction.Builder().manaCost(750)
+            () -> new MagiciansRedCrossfireHurricane(new StandEntityAction.Builder().manaCost(400)
                     .expRequirement(700).holdToFire(40, false, 0).shout(ModSounds.AVDOL_CROSSFIRE_HURRICANE)));
     
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_CROSSFIRE_HURRICANE_SPECIAL = ACTIONS.register("magicians_red_ch_special", 
-            () -> new MagiciansRedCrossfireHurricane(new StandEntityAction.Builder().manaCost(1000).expRequirement(1000)
+            () -> new MagiciansRedCrossfireHurricane(new StandEntityAction.Builder().manaCost(450).expRequirement(1000)
                     .holdToFire(60, false, 0).shout(ModSounds.AVDOL_CROSSFIRE_HURRICANE_SPECIAL).shiftVariationOf(MAGICIANS_RED_CROSSFIRE_HURRICANE)));
     
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_BLOCK = ACTIONS.register("magicians_red_block", 

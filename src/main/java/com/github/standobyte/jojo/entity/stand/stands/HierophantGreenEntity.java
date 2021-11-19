@@ -10,7 +10,6 @@ import com.github.standobyte.jojo.entity.damaging.projectile.HGEmeraldEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGBarrierEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
-import com.github.standobyte.jojo.entity.stand.StandEntity.StandFlag;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.util.JojoModUtil;
@@ -79,7 +78,7 @@ public class HierophantGreenEntity extends StandEntity {
             int barriers = getPlacedBarriersCount();
             if (barriers > 0) {
                 RayTraceResult rayTrace = JojoModUtil.rayTrace(isManuallyControlled() ? this : getUser(), 
-                        maxRange, entity -> entity instanceof LivingEntity && canAttack((LivingEntity) entity));
+                        getMaxRange(), entity -> entity instanceof LivingEntity && canAttack((LivingEntity) entity));
                 if (rayTrace.getType() != RayTraceResult.Type.MISS) {
                     shootEmeraldsFromBarriers(rayTrace.getLocation(), shift, 1);
                 }

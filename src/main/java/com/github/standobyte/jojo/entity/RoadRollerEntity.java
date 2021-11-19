@@ -27,7 +27,7 @@ import net.minecraftforge.fml.network.NetworkHooks;
 
 public class RoadRollerEntity extends Entity {
     private static final DataParameter<Float> HEALTH = EntityDataManager.defineId(RoadRollerEntity.class, DataSerializers.FLOAT);
-    private static final float MAX_HEALTH = 400F;
+    private static final float MAX_HEALTH = 300;
     private int explosionTimeStamp = -1;
     private int ticksInAir = 0;
 

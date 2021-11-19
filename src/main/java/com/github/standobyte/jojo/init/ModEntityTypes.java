@@ -236,7 +236,7 @@ public class ModEntityTypes {
     public static final RegistryObject<StandEntityType<HierophantGreenEntity>> HIEROPHANT_GREEN = ENTITIES.register("hierophant_green", 
             () -> new StandEntityType<HierophantGreenEntity>(HierophantGreenEntity::new, false, 0.55F, 1.75F, 
                     new StandEntityStats.Builder()
-                    .damage(1.5)
+                    .damage(1.25)
                     .maxRange(100)
                     .build())
             .addSound(StandSoundType.SUMMON, ModSounds.HIEROPHANT_GREEN_SUMMON)
@@ -262,7 +262,10 @@ public class ModEntityTypes {
                     .damage(8)
                     .attackKnockback(0.1)
                     .attackSpeed(50)
+                    .summonTicks(3)
                     .armor(15)
+                    .armorToughness(8)
+                    .precision(1.0)
                     .build())
             .addSound(StandSoundType.SUMMON, ModSounds.SILVER_CHARIOT_SUMMON)
             .addSound(StandSoundType.UNSUMMON, ModSounds.SILVER_CHARIOT_UNSUMMON)

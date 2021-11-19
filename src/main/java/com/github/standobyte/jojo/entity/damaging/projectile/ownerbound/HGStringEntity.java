@@ -73,6 +73,9 @@ public class HGStringEntity extends OwnerBoundProjectileEntity {
                     attachToEntity(livingTarget);
                 }
             }
+            else {
+                setIsRetracting(true);
+            }
         }
     }
     
