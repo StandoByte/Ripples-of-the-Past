@@ -154,8 +154,8 @@
   "jojo.key.stand_remote_control": "Stand Remote Control",
   "jojo.key.scroll_attack": "Scroll Attack",
   "jojo.key.scroll_ability": "Scroll Ability",
-  "jojo.key.attack_hotbar": "(+ 1-9) Choose Attack",
-  "jojo.key.ability_hotbar": "(+ 1-9) Choose Ability",
+  "jojo.key.attack_hotbar": "(hold) Attack Hotbar",
+  "jojo.key.ability_hotbar": "(hold) Ability Hotbar",
   "jojo.key.hamon_skills_window": "Hamon Skills",
   
   "overlay.actions.attack": "Attack: %s",  
