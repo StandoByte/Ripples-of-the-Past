@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.client.renderer.entity.stand;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.model.entity.stand.StarPlatinumModel;
-import com.github.standobyte.jojo.entity.stand.StarPlatinumEntity;
+import com.github.standobyte.jojo.entity.stand.stands.StarPlatinumEntity;
 
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.util.ResourceLocation;

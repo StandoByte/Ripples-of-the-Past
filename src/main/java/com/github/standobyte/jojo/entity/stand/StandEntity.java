@@ -1045,7 +1045,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return (entityData.get(STAND_FLAGS) & flag.bit) != 0;
     }
     
-    protected static enum StandFlag {
+    public static enum StandFlag {
         MANUAL_CONTROL,
         FIXED_REMOTE_POSITION,
         BEING_RETRACTED,

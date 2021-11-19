@@ -1,8 +1,10 @@
-package com.github.standobyte.jojo.entity.stand;
+package com.github.standobyte.jojo.entity.stand.stands;
 
 import java.util.UUID;
 
 import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntityType;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;

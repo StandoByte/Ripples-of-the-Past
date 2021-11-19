@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.client.model.entity.stand;
 
-import com.github.standobyte.jojo.entity.stand.HierophantGreenEntity;
+import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
 

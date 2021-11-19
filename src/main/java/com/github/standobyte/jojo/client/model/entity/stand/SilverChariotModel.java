@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.client.model.entity.stand;
 
-import com.github.standobyte.jojo.entity.stand.SilverChariotEntity;
+import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.util.MathUtil;
 
 import net.minecraft.client.renderer.model.ModelRenderer;

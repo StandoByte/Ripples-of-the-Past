@@ -1,6 +1,8 @@
-package com.github.standobyte.jojo.entity.stand;
+package com.github.standobyte.jojo.entity.stand.stands;
 
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.SPStarFingerEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.init.ModActions;
 
 import net.minecraft.world.World;

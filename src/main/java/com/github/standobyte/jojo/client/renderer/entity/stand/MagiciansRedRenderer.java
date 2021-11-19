@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.client.renderer.entity.stand;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.model.entity.stand.MagiciansRedModel;
 import com.github.standobyte.jojo.client.renderer.entity.stand.layer.MagiciansRedFlameLayer;
-import com.github.standobyte.jojo.entity.stand.MagiciansRedEntity;
+import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
 
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.util.ResourceLocation;

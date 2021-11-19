@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.github.standobyte.jojo.entity.stand.StarPlatinumEntity;
+import com.github.standobyte.jojo.entity.stand.stands.StarPlatinumEntity;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.math.MathHelper;

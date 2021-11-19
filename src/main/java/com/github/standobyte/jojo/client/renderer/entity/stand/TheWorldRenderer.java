@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.client.renderer.entity.stand;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.model.entity.stand.TheWorldModel;
-import com.github.standobyte.jojo.entity.stand.TheWorldEntity;
+import com.github.standobyte.jojo.entity.stand.stands.TheWorldEntity;
 
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.util.ResourceLocation;
