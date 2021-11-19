@@ -36,13 +36,13 @@ import com.github.standobyte.jojo.entity.itemprojectile.ClackersEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.KnifeEntity;
 import com.github.standobyte.jojo.entity.mob.HamonMasterEntity;
 import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
-import com.github.standobyte.jojo.entity.stand.HierophantGreenEntity;
-import com.github.standobyte.jojo.entity.stand.MagiciansRedEntity;
-import com.github.standobyte.jojo.entity.stand.SilverChariotEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityStats;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
-import com.github.standobyte.jojo.entity.stand.StarPlatinumEntity;
-import com.github.standobyte.jojo.entity.stand.TheWorldEntity;
+import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
+import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
+import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
+import com.github.standobyte.jojo.entity.stand.stands.StarPlatinumEntity;
+import com.github.standobyte.jojo.entity.stand.stands.TheWorldEntity;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandSoundPacket.StandSoundType;
 
 import net.minecraft.entity.EntityClassification;

@@ -4,7 +4,7 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.model.entity.stand.HierophantGreenModel;
 import com.github.standobyte.jojo.client.renderer.entity.stand.HierophantGreenRenderer;
-import com.github.standobyte.jojo.entity.stand.HierophantGreenEntity;
+import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 
 import net.minecraft.util.ResourceLocation;
 
