@@ -219,7 +219,13 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
 
     @Override
     public final void setManaLimitFactor(float factor) {
+        boolean send = factor != manaLimitFactor;
         manaLimitFactor = Math.max(factor, 1);
+        if (send) {
+            serverPlayerUser.ifPresent(player -> {
+                PacketManager.sendToClient(new SyncManaLimitFactorPacket(getPowerClassification(), getManaLimitFactor()), player);
+            });
+        }
     }
     
     @Override
