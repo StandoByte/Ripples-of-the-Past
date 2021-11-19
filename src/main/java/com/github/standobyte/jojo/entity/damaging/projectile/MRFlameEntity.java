@@ -87,7 +87,7 @@ public class MRFlameEntity extends ModdedProjectileEntity {
 
     @Override
     protected boolean canBreakBlock(BlockPos blockPos, BlockState blockState) {
-        return super.canBreakBlock(blockPos, blockState) && blockState.getBlock() != Blocks.FIRE;
+        return super.canBreakBlock(blockPos, blockState) && !(blockState.getBlock() instanceof AbstractFireBlock);
     }
     
     @Override
@@ -128,13 +128,12 @@ public class MRFlameEntity extends ModdedProjectileEntity {
         return 8;
     }
     
-    private static final Vector3d OFFSET_MOUTH = new Vector3d(0.0, -0.2, 0.0);
     @Override
     protected Vector3d getOwnerRelativeOffset() {
-        return OFFSET_MOUTH;
+        return Vector3d.ZERO;
     }
     
-    private static final Vector3d OFFSET_XROT = new Vector3d(0, 0.1, 0.0);
+    private static final Vector3d OFFSET_XROT = new Vector3d(0, 0.2, 0.0);
     @Override
     protected Vector3d getXRotOffset() {
         return OFFSET_XROT;

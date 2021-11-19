@@ -24,7 +24,7 @@ public class RangedAttackTask extends StandEntityTask {
 
     @Override
     protected void tick() {
-        standEntity.rangedAttackTick(ticksLeft, shift);
+        standEntity.rangedAttackTick(ticks - ticksLeft, shift);
     }
     
     @Override

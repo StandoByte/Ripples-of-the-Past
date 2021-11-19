@@ -162,4 +162,13 @@ public class SilverChariotEntity extends StandEntity {
         }
         return damage;
     }
+    
+    @Override
+    protected double getMaxRange() {
+        double range = super.getMaxRange();
+        if (!hasArmor()) {
+            range *= 2;
+        }
+        return range;
+    }
 }

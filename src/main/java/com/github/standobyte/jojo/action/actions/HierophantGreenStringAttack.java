@@ -20,9 +20,9 @@ public class HierophantGreenStringAttack extends StandEntityAction {
         if (!world.isClientSide()) {
             LivingEntity stand = getPerformer(user, power);
             boolean shift = isShiftVariation();
-            int n = shift ? 3 : 7;
+            int n = shift ? 4 : 7;
             for (int i = 0; i < n; i++) {
-                Vector2f rotOffsets = MathUtil.xRotYRotOffsets((double) i / (double) n * Math.PI * 2, 10);
+                Vector2f rotOffsets = i > 0 ? MathUtil.xRotYRotOffsets((double) i / (double) n * Math.PI * 2, 10) : Vector2f.ZERO;
                 HGStringEntity string = new HGStringEntity(world, stand, rotOffsets.y, rotOffsets.x, shift);
                 world.addFreshEntity(string);
             }

@@ -23,7 +23,7 @@ public class MRFlameRenderer extends EntityRenderer<MRFlameEntity> {
         return null;
     }
 
-    private static final double STEP_LENGTH = 0.75D;
+    private static final double STEP_LENGTH = 0.4D;
     @Override
     public void render(MRFlameEntity entity, float yRotation, float partialTick, 
             MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {

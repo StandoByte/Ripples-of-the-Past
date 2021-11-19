@@ -13,8 +13,8 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.renderer.entity.stand.AdditionalArmSwing;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
@@ -99,7 +99,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     private float alpha;
     
     private final StandEntityType<?> type;
-    protected final double maxRange;
+    private final double maxRange;
     private double basePrecision;
 
     private int summonPoseRandomByte;
@@ -935,7 +935,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             }
         }
         else {
-            damage *= 0.05;
+            damage *= 0.04;
             if (random.nextDouble() > precision) {
                 damage *= 1 - (random.nextDouble() * (1 - precision));
             }
@@ -1009,12 +1009,17 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         LivingEntity user = getUser();
         if (user != null) {
             double distanceSq = distanceToSqr(user);
-            double rangeSq = maxRange * maxRange;
+            double rangeSq = getMaxRange();
+            rangeSq *= rangeSq;
             if (distanceSq > rangeSq / 4) {
                 return (float) (rangeSq / distanceSq / 4);
             }
         }
         return 1.0F;
+    }
+    
+    protected double getMaxRange() {
+        return maxRange;
     }
 
 
@@ -1156,7 +1161,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         LivingEntity user = getUser();
         if (user != null) {
             double distanceSqr = distanceToSqr(user);
-            double rangeSq = maxRange * maxRange;
+            double rangeSq = getMaxRange();
+            rangeSq *= rangeSq;
             if (distanceSqr > rangeSq) {
                 super.move(MoverType.SELF, user.position().subtract(position()).scale(1 - rangeSq / distanceSqr));
             }

@@ -16,7 +16,7 @@ public class StarPlatinumEntity extends StandEntity {
     
     @Override
     public void rangedAttackTick(int ticks, boolean shift) {
-        if (ticks == rangedAttackDuration(shift) && starFinger == null) {
+        if (ticks == 0 && starFinger == null) {
             starFinger = new SPStarFingerEntity(level, this);
             starFinger.setDamageFactor(rangeEfficiencyFactor());
             level.addFreshEntity(starFinger);

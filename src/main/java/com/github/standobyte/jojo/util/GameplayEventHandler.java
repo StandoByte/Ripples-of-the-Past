@@ -248,13 +248,9 @@ public class GameplayEventHandler {
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onAttackByStand(LivingAttackEvent event) {
-        StandType.setLastHurtByStand(event);
-    }
-
-    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingDamage(LivingDamageEvent event) {
         activateStoneMasks(event);
+        StandType.setLastHurtByStand(event);
     }
 
 

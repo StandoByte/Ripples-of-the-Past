@@ -24,7 +24,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
@@ -142,7 +142,7 @@ public abstract class StandType extends ForgeRegistryEntry<StandType> implements
     
     
     
-    public static void setLastHurtByStand(LivingAttackEvent event) {
+    public static void setLastHurtByStand(LivingDamageEvent event) {
         event.getEntityLiving().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
             DamageSource damageSrc = event.getSource();
             if (damageSrc instanceof StandEntityDamageSource) {
