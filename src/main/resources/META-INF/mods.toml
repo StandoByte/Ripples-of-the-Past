@@ -1,0 +1,23 @@
+modLoader="javafml"
+loaderVersion="[36,)"
+license="GPL v3.0"
+issueTrackerURL="https://github.com/StandoByte/Ripples-of-the-Past/issues"
+
+[[mods]]
+	modId="jojo"
+	version="${file.jarVersion}"
+	displayName="Ripples of the Past"
+	updateJSONURL="https://github.com/StandoByte/Ripples-of-the-Past/updates.json"
+	displayURL="https://curseforge.com/minecraft/mc-mods/ripples-of-the-past/"
+	logoFile="logo.png"
+	credits="https://youtube.com/user/Spybreak001/ - stand sound effects, https://sounds-resource.com/ - voice lines from Eyes of Heaven and All Star Battle games"
+	authors="StandoByte"
+	description='''
+    This mod adds items and supernatural powers (Hamon, vampirism and Stands) from the JoJo's Bizarre Adventure manga and anime series.'''
+
+[[dependencies.jojo]]
+    modId="forge"
+    mandatory=true
+    versionRange="[36.2.0,)"
+    ordering="NONE"
+    side="BOTH"

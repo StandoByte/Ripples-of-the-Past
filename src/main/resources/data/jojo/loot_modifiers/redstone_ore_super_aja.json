@@ -1,0 +1,19 @@
+{
+  "conditions": [
+    {
+      "condition": "block_state_property",
+      "block":"minecraft:redstone_ore"
+    },
+    {
+      "condition": "minecraft:table_bonus",
+      "enchantment": "minecraft:fortune",
+      "chances": [
+        0.0002,
+        0.0003,
+        0.0004,
+        0.0005
+      ]
+    }
+  ],
+  "additional_item": "jojo:super_aja_stone"
+}

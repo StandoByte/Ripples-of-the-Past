@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "jojo:stand_arrow"
+    ]
+  },
+  "criteria": {
+    "has_meteoric_ingot": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "jojo:meteoric_ingot"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "jojo:stand_arrow"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_meteoric_ingot",
+      "has_the_recipe"
+    ]
+  ]
+}

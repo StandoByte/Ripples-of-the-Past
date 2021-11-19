@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "facing=north,pillarman_part=0": { "model": "jojo:block/pillarman_0_0" },
+    "facing=north,pillarman_part=1": { "model": "jojo:block/pillarman_0_1" },
+    "facing=north,pillarman_part=2": { "model": "jojo:block/pillarman_1_0" },
+    "facing=north,pillarman_part=3": { "model": "jojo:block/pillarman_1_1" },
+    "facing=north,pillarman_part=4": { "model": "jojo:block/pillarman_2_0" },
+    "facing=north,pillarman_part=5": { "model": "jojo:block/pillarman_2_1" },
+    "facing=east,pillarman_part=0": { "model": "jojo:block/pillarman_0_0", "y": 90 },
+    "facing=east,pillarman_part=1": { "model": "jojo:block/pillarman_0_1", "y": 90 },
+    "facing=east,pillarman_part=2": { "model": "jojo:block/pillarman_1_0", "y": 90 },
+    "facing=east,pillarman_part=3": { "model": "jojo:block/pillarman_1_1", "y": 90 },
+    "facing=east,pillarman_part=4": { "model": "jojo:block/pillarman_2_0", "y": 90 },
+    "facing=east,pillarman_part=5": { "model": "jojo:block/pillarman_2_1", "y": 90 },
+    "facing=south,pillarman_part=0": { "model": "jojo:block/pillarman_0_0", "y": 180  },
+    "facing=south,pillarman_part=1": { "model": "jojo:block/pillarman_0_1", "y": 180  },
+    "facing=south,pillarman_part=2": { "model": "jojo:block/pillarman_1_0", "y": 180  },
+    "facing=south,pillarman_part=3": { "model": "jojo:block/pillarman_1_1", "y": 180  },
+    "facing=south,pillarman_part=4": { "model": "jojo:block/pillarman_2_0", "y": 180  },
+    "facing=south,pillarman_part=5": { "model": "jojo:block/pillarman_2_1", "y": 180  },
+    "facing=west,pillarman_part=0": { "model": "jojo:block/pillarman_0_0", "y": 270 },
+    "facing=west,pillarman_part=1": { "model": "jojo:block/pillarman_0_1", "y": 270 },
+    "facing=west,pillarman_part=2": { "model": "jojo:block/pillarman_1_0", "y": 270 },
+    "facing=west,pillarman_part=3": { "model": "jojo:block/pillarman_1_1", "y": 270 },
+    "facing=west,pillarman_part=4": { "model": "jojo:block/pillarman_2_0", "y": 270 },
+    "facing=west,pillarman_part=5": { "model": "jojo:block/pillarman_2_1", "y": 270 }
+  }
+}

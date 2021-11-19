@@ -1,0 +1,61 @@
+{
+  "credit": "Made with Blockbench",
+  "textures": {
+    "particle": "minecraft:block/stone",
+    "base": "minecraft:block/stone",
+    "pillarman": "jojo:block/santana",
+    "pillarman_face": "jojo:block/santana_face"
+  },
+  "elements": [
+    {
+      "name": "base",
+      "from": [0, 0, 0],
+      "to": [16, 16, 8],
+      "faces": {
+        "north": {"uv": [0, 0, 16, 16], "texture": "#base", "cullface": "north"},
+        "east":  {"uv": [8, 0, 16, 16], "texture": "#base", "cullface": "east"},
+        "south": {"uv": [0, 0, 16, 16], "texture": "#base"},
+        "west":  {"uv": [0, 0, 8, 16], "texture": "#base", "cullface": "west"},
+        "up":    {"uv": [0, 0, 16, 8], "texture": "#base", "cullface": "up"},
+        "down":  {"uv": [0, 8, 16, 16], "texture": "#base", "cullface": "down"}
+      }
+    },
+    {
+      "name": "right_shoulder",
+      "from": [6, 0, 8],
+      "to": [16, 2, 10],
+      "rotation": {"angle": 0, "axis": "y", "origin": [14, 8, 16]},
+      "faces": {
+        "south": {"uv": [6, 14, 16, 16], "texture": "#pillarman"},
+        "west":  {"uv": [8, 14, 10, 16], "texture": "#pillarman"},
+        "up":    {"uv": [6, 8, 16, 10], "texture": "#pillarman"}
+      }
+    },
+    {
+      "name": "head_right",
+      "from": [11, 2, 7.5],
+      "to": [16, 12, 12.5],
+      "rotation": {"angle": 0, "axis": "y", "origin": [19, 10, 16]},
+      "faces": {
+        "south": {"uv": [4, 5, 8, 13], "texture": "#pillarman_face"},
+        "west": {"uv": [8, 6, 12, 14], "texture": "#pillarman"},
+        "up": {"uv": [12, 8, 16, 12], "texture": "#pillarman"},
+        "down": {"uv": [12, 5, 16, 9], "texture": "#pillarman"}
+      }
+    },
+    {
+      "name": "horn",
+      "from": [13, 11, 12],
+      "to": [14, 13, 13],
+      "rotation": {"angle": 45, "axis": "x", "origin": [13.5, 12, 12.5]},
+      "faces": {
+        "north": {"uv": [0, 0, 1, 2], "texture": "#pillarman"},
+        "east": {"uv": [0, 0, 1, 2], "texture": "#pillarman"},
+        "south": {"uv": [0, 0, 1, 2], "texture": "#pillarman"},
+        "west": {"uv": [0, 0, 1, 2], "texture": "#pillarman"},
+        "up": {"uv": [0, 0, 1, 1], "texture": "#pillarman"},
+        "down": {"uv": [0, 0, 1, 1], "texture": "#pillarman"}
+      }
+    }
+  ]
+}

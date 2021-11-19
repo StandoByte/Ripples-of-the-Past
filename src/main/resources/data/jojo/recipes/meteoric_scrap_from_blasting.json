@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:blasting",
+  "ingredient": {
+    "item": "jojo:meteoric_ore"
+  },
+  "result": "jojo:meteoric_scrap",
+  "experience": 1.0,
+  "cookingtime": 100
+}

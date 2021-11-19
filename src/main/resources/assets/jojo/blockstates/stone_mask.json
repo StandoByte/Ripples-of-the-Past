@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "face=ceiling,facing=north": { "model": "jojo:block/stone_mask", "x": 180 },
+    "face=ceiling,facing=east":  { "model": "jojo:block/stone_mask", "x": 180, "y": 90 },
+    "face=ceiling,facing=south": { "model": "jojo:block/stone_mask", "x": 180, "y": 180 },
+    "face=ceiling,facing=west":  { "model": "jojo:block/stone_mask", "x": 180, "y": 270 },
+    "face=floor,facing=north,blood_activation=false": { "model": "jojo:block/stone_mask"  },
+    "face=floor,facing=east,blood_activation=false":  { "model": "jojo:block/stone_mask", "y": 90},
+    "face=floor,facing=south,blood_activation=false": { "model": "jojo:block/stone_mask", "y": 180 },
+    "face=floor,facing=west,blood_activation=false":  { "model": "jojo:block/stone_mask", "y": 270 },
+    "face=floor,facing=north,blood_activation=true": { "model": "jojo:block/stone_mask_activated"  },
+    "face=floor,facing=east,blood_activation=true":  { "model": "jojo:block/stone_mask_activated", "y": 90},
+    "face=floor,facing=south,blood_activation=true": { "model": "jojo:block/stone_mask_activated", "y": 180 },
+    "face=floor,facing=west,blood_activation=true":  { "model": "jojo:block/stone_mask_activated", "y": 270 },
+    "face=wall,facing=north": { "model": "jojo:block/stone_mask", "x": 270, "y": 180 },
+    "face=wall,facing=east":  { "model": "jojo:block/stone_mask", "x": 270, "y": 270 },
+    "face=wall,facing=south": { "model": "jojo:block/stone_mask", "x": 270 },
+    "face=wall,facing=west":  { "model": "jojo:block/stone_mask", "x": 270, "y": 90 }
+  }
+}

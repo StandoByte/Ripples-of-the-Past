@@ -1,0 +1,34 @@
+{
+  "credit": "Made with Blockbench",
+  "textures": {
+  	"particle": "minecraft:block/stone",
+  	"base": "minecraft:block/stone",
+    "pillarman": "jojo:block/santana"
+  },
+  "elements": [
+    {
+      "name": "base",
+      "from": [0, 0, 0],
+      "to": [16, 16, 8],
+      "faces": {
+        "north": {"uv": [0, 0, 16, 16], "texture": "#base", "cullface": "north" },
+        "east":  {"uv": [8, 0, 16, 16], "texture": "#base", "cullface": "east" },
+        "south": {"uv": [0, 0, 16, 16], "texture": "#base" },
+        "west":  {"uv": [0, 0, 8, 16], "texture": "#base", "cullface": "west" },
+        "up":    {"uv": [0, 0, 16, 8], "texture": "#base", "cullface": "up" },
+        "down":  {"uv": [0, 8, 16, 16], "texture": "#base", "cullface": "down" }
+      }
+    },
+    {
+      "name": "right_leg",
+      "from": [11, 4, 8],
+      "to": [16, 16, 10],
+      "rotation": {"angle": 0, "axis": "y", "origin": [19, 12, 16]},
+      "faces": {
+        "south": {"uv": [11, 0, 16, 12], "texture": "#pillarman" },
+        "west":  {"uv": [8, 0, 10, 12], "texture": "#pillarman" },
+        "down":  {"uv": [11, 6, 16, 8], "texture": "#pillarman" }
+      }
+    }
+  ]
+}

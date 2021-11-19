@@ -1,0 +1,13 @@
+{
+  "conditions": [
+    {
+      "condition": "forge:loot_table_id",
+      "loot_table_id": "minecraft:chests/jungle_temple"
+    },
+    {
+      "condition": "random_chance",
+      "chance": 0.08
+    }
+  ],
+  "additional_item": "jojo:stone_mask"
+}

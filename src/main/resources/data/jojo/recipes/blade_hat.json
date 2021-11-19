@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " w ",
+    "iwi"
+  ],
+  "key": {
+    "w": {
+      "item": "minecraft:black_wool"
+    },
+    "i": {
+      "tag": "forge:ingots/iron"
+    }
+  },
+  "result": {
+    "item": "jojo:blade_hat"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "parent": "item/handheld",
+  "textures": {
+    "layer0": "jojo:item/knife"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "jojo:count": 2
+      },
+      "model": "jojo:item/knives2"
+    },
+    {
+      "predicate": {
+        "jojo:count": 3
+      },
+      "model": "jojo:item/knives3"
+    },
+    {
+      "predicate": {
+        "jojo:count": 4
+      },
+      "model": "jojo:item/knives4"
+    },
+    {
+      "predicate": {
+        "jojo:count": 5
+      },
+      "model": "jojo:item/knives5"
+    },
+    {
+      "predicate": {
+        "jojo:count": 6
+      },
+      "model": "jojo:item/knives6"
+    },
+    {
+      "predicate": {
+        "jojo:count": 7
+      },
+      "model": "jojo:item/knives7"
+    },
+    {
+      "predicate": {
+        "jojo:count": 8
+      },
+      "model": "jojo:item/knives8"
+    }
+  ]
+}
