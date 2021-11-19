@@ -42,7 +42,7 @@ public class StandEntityType<T extends StandEntity> extends EntityType<T> {
         this.sounds.put(StandSoundType.UNSUMMON, ModSounds.STAND_UNSUMMON_DEFAULT);
     }
     
-    public StandEntityType<T> addSound(StandSoundType soundType, Supplier<SoundEvent> soundSupplier) {
+    public StandEntityType<T> addStandSound(StandSoundType soundType, Supplier<SoundEvent> soundSupplier) {
         if (soundType != null) {
             sounds.put(soundType, soundSupplier);
         }

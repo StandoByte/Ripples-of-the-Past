@@ -227,11 +227,11 @@ public class ModEntityTypes {
                     .knockbackResistance(0.2)
                     .precision(1.0)
                     .build())
-            .addSound(StandSoundType.SUMMON, ModSounds.STAR_PLATINUM_SUMMON)
-            .addSound(StandSoundType.UNSUMMON, ModSounds.STAR_PLATINUM_UNSUMMON)
-            .addSound(StandSoundType.MELEE_ATTACK, ModSounds.STAR_PLATINUM_ORA)
-            .addSound(StandSoundType.MELEE_BARRAGE, ModSounds.STAR_PLATINUM_ORA_ORA_ORA)
-            .addSound(StandSoundType.RANGED_ATTACK, ModSounds.STAR_PLATINUM_STAR_FINGER));
+            .addStandSound(StandSoundType.SUMMON, ModSounds.STAR_PLATINUM_SUMMON)
+            .addStandSound(StandSoundType.UNSUMMON, ModSounds.STAR_PLATINUM_UNSUMMON)
+            .addStandSound(StandSoundType.MELEE_ATTACK, ModSounds.STAR_PLATINUM_ORA)
+            .addStandSound(StandSoundType.MELEE_BARRAGE, ModSounds.STAR_PLATINUM_ORA_ORA_ORA)
+            .addStandSound(StandSoundType.RANGED_ATTACK, ModSounds.STAR_PLATINUM_STAR_FINGER));
     
     public static final RegistryObject<StandEntityType<HierophantGreenEntity>> HIEROPHANT_GREEN = ENTITIES.register("hierophant_green", 
             () -> new StandEntityType<HierophantGreenEntity>(HierophantGreenEntity::new, false, 0.55F, 1.75F, 
@@ -239,8 +239,8 @@ public class ModEntityTypes {
                     .damage(1.25)
                     .maxRange(100)
                     .build())
-            .addSound(StandSoundType.SUMMON, ModSounds.HIEROPHANT_GREEN_SUMMON)
-            .addSound(StandSoundType.RANGED_ATTACK, ModSounds.HIEROPHANT_GREEN_EMERALD_SPLASH));
+            .addStandSound(StandSoundType.SUMMON, ModSounds.HIEROPHANT_GREEN_SUMMON)
+            .addStandSound(StandSoundType.RANGED_ATTACK, ModSounds.HIEROPHANT_GREEN_EMERALD_SPLASH));
     
     public static final RegistryObject<StandEntityType<TheWorldEntity>> THE_WORLD = ENTITIES.register("the_world", 
             () -> new StandEntityType<TheWorldEntity>(TheWorldEntity::new, false, 0.7F, 2.1F,
@@ -252,9 +252,9 @@ public class ModEntityTypes {
                     .knockbackResistance(0.2)
                     .precision(0.6)
                     .build())
-            .addSound(StandSoundType.SUMMON, ModSounds.THE_WORLD_SUMMON)
-            .addSound(StandSoundType.MELEE_ATTACK, ModSounds.THE_WORLD_MUDA)
-            .addSound(StandSoundType.MELEE_BARRAGE, ModSounds.THE_WORLD_MUDA_MUDA_MUDA));
+            .addStandSound(StandSoundType.SUMMON, ModSounds.THE_WORLD_SUMMON)
+            .addStandSound(StandSoundType.MELEE_ATTACK, ModSounds.THE_WORLD_MUDA)
+            .addStandSound(StandSoundType.MELEE_BARRAGE, ModSounds.THE_WORLD_MUDA_MUDA_MUDA));
     
     public static final RegistryObject<StandEntityType<SilverChariotEntity>> SILVER_CHARIOT = ENTITIES.register("silver_chariot", 
             () -> new StandEntityType<SilverChariotEntity>(SilverChariotEntity::new, false, 0.6F, 1.8F, 
@@ -267,9 +267,9 @@ public class ModEntityTypes {
                     .armorToughness(8)
                     .precision(1.0)
                     .build())
-            .addSound(StandSoundType.SUMMON, ModSounds.SILVER_CHARIOT_SUMMON)
-            .addSound(StandSoundType.UNSUMMON, ModSounds.SILVER_CHARIOT_UNSUMMON)
-            .addSound(StandSoundType.RANGED_ATTACK, ModSounds.SILVER_CHARIOT_RAPIER_SHOT));
+            .addStandSound(StandSoundType.SUMMON, ModSounds.SILVER_CHARIOT_SUMMON)
+            .addStandSound(StandSoundType.UNSUMMON, ModSounds.SILVER_CHARIOT_UNSUMMON)
+            .addStandSound(StandSoundType.RANGED_ATTACK, ModSounds.SILVER_CHARIOT_RAPIER_SHOT));
     
     public static final RegistryObject<StandEntityType<MagiciansRedEntity>> MAGICIANS_RED = ENTITIES.register("magicians_red", 
             () -> new StandEntityType<MagiciansRedEntity>(MagiciansRedEntity::new, false, 0.6F, 1.8F,
@@ -277,5 +277,5 @@ public class ModEntityTypes {
                     .damage(7)
                     .armor(7)
                     .build())
-            .addSound(StandSoundType.SUMMON, ModSounds.MAGICIANS_RED_SUMMON));
+            .addStandSound(StandSoundType.SUMMON, ModSounds.MAGICIANS_RED_SUMMON));
 }
