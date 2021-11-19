@@ -506,32 +506,34 @@ public class ActionsOverlayGui extends AbstractGui { // TODO config to move it t
     }
     
     public void updateActionName(ActionType type) {
-        ITextComponent actionName;
-        ITextComponent actionNameShift;
-        
-        List<Action> actions = currentPower.getActions(type);
-        ActionsHotbarData hotbarData = getHotbarData(type);
-        int selectedAction = hotbarData.getSelectedIndex();
-        if (actions.size() > 0 && selectedAction > -1) {
-            Action action = actions.get(selectedAction);
-            String key = type.toString().toLowerCase();
-            if (action.hasShiftVariation() && currentPower.isActionUnlocked(action.getShiftVariationIfPresent())) {
-                Action shiftAction = action.getShiftVariationIfPresent();
-                actionName = actionNameLine(action, shiftAction, key);
-                actionNameShift = actionNameLine(shiftAction, null, key);
+        if (currentPower != null) {
+            ITextComponent actionName;
+            ITextComponent actionNameShift;
+            
+            List<Action> actions = currentPower.getActions(type);
+            ActionsHotbarData hotbarData = getHotbarData(type);
+            int selectedAction = hotbarData.getSelectedIndex();
+            if (actions.size() > 0 && selectedAction > -1) {
+                Action action = actions.get(selectedAction);
+                String key = type.toString().toLowerCase();
+                if (action.hasShiftVariation() && currentPower.isActionUnlocked(action.getShiftVariationIfPresent())) {
+                    Action shiftAction = action.getShiftVariationIfPresent();
+                    actionName = actionNameLine(action, shiftAction, key);
+                    actionNameShift = actionNameLine(shiftAction, null, key);
+                }
+                else {
+                    actionName = actionNameLine(action, null, key);
+                    actionNameShift = actionName;
+                }
             }
             else {
-                actionName = actionNameLine(action, null, key);
-                actionNameShift = actionName;
+                actionName = EMPTY_STRING_COMPONENT;
+                actionNameShift = EMPTY_STRING_COMPONENT;
             }
+            
+            hotbarData.name = actionName;
+            hotbarData.nameShift = actionNameShift;
         }
-        else {
-            actionName = EMPTY_STRING_COMPONENT;
-            actionNameShift = EMPTY_STRING_COMPONENT;
-        }
-        
-        hotbarData.name = actionName;
-        hotbarData.nameShift = actionNameShift;
     }
     
     private ITextComponent actionNameLine(Action action, @Nullable Action shiftVariation, String actionTypeKey) {

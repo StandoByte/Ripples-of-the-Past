@@ -46,6 +46,7 @@ import net.minecraft.util.math.RayTraceResult.Type;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.event.InputEvent.ClickInputEvent;
+import net.minecraftforge.client.event.InputEvent.MouseScrollEvent;
 import net.minecraftforge.client.event.InputUpdateEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
@@ -105,9 +106,30 @@ public class InputHandler {
         ClientRegistry.registerKeyBinding(hamonSkillsWindow = new KeyBinding(JojoMod.MOD_ID + ".key.hamon_skills_window", GLFW_KEY_H, KEY_CATEGORY));
     }
     
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public void onMouseScroll(MouseScrollEvent event) {
+        if (standPower == null || nonStandPower == null || actionsOverlay == null) {
+            return;
+        }
+
+        if (actionsOverlay.getMode() != UiMode.NONE && !mc.player.isSpectator()) {
+            boolean scrollAttack = attackHotbar.isDown();
+            boolean scrollAbility = abilityHotbar.isDown();
+            if (scrollAttack || scrollAbility) {
+                if (scrollAttack) {
+                    actionsOverlay.scrollActiveAttack(event.getScrollDelta() > 0.0D);
+                }
+                if (scrollAbility) {
+                    actionsOverlay.scrollActiveAbility(event.getScrollDelta() > 0.0D);
+                }
+                event.setCanceled(true);
+            }
+        }
+    }
+    
     @SubscribeEvent
     public void handleKeyBindings(ClientTickEvent event) {
-        if (mc.overlay != null || (mc.screen != null && !mc.screen.passEvents) || standPower == null || nonStandPower == null) {
+        if (mc.overlay != null || (mc.screen != null && !mc.screen.passEvents) || standPower == null || nonStandPower == null || actionsOverlay == null) {
             return;
         }
         
