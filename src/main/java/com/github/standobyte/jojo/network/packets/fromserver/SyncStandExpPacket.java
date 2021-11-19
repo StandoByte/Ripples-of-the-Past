@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.ui.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.toasts.ActionToast;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.ActionType;
@@ -47,6 +48,8 @@ public class SyncStandExpPacket {
                         updateToasts(ActionType.ATTACK, power, oldAttacks, toastGui);
                         updateToasts(ActionType.ABILITY, power, oldAbilities, toastGui);
                     }
+                    ActionsOverlayGui.getInstance().updateActionName(ActionType.ATTACK);
+                    ActionsOverlayGui.getInstance().updateActionName(ActionType.ABILITY);
                 }
                 else {
                     power.setExp(msg.exp);

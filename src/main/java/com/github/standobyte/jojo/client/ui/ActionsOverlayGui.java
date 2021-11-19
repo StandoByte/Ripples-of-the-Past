@@ -226,7 +226,6 @@ public class ActionsOverlayGui extends AbstractGui { // TODO config to move it t
         }
     }
     
-    @SuppressWarnings("deprecation")
     private void renderIcons(MatrixStack matrixStack, int x, int y, ActionType type, float hotbarAlpha, float partialTick) {
         List<Action> actions = currentPower.getActions(type);
         for (int i = 0; i < actions.size(); i++) {
