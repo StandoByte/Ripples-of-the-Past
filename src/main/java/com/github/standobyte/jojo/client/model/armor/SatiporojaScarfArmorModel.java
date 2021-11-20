@@ -17,6 +17,8 @@ public class SatiporojaScarfArmorModel extends BipedModel<LivingEntity> {
 
     public SatiporojaScarfArmorModel(float size) {
         super(size);
+        texWidth = 32;
+        texHeight = 32;
 
         head = new ModelRenderer(this);
         head.setPos(0.0F, 0.5F, 0.0F);
