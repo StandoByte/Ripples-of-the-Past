@@ -91,8 +91,13 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
 
     @Override
     protected void drawDesc(MatrixStack matrixStack) {
-        for (int i = 0; i < descLines.size(); i++) {
-            minecraft.font.draw(matrixStack, descLines.get(i), (float) scrollX + 6, (float) scrollY + 5 + i * 9, 0xFFFFFF);
+        if (selectedSkill != null) {
+            drawSkillDesc(matrixStack);
+        }
+        else {
+            for (int i = 0; i < descLines.size(); i++) {
+                minecraft.font.draw(matrixStack, descLines.get(i), (float) scrollX + 6, (float) scrollY + 5 + i * 9, 0xFFFFFF);
+            }
         }
     }
     
