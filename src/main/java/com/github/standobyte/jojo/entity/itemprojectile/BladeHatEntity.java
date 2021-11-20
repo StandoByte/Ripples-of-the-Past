@@ -14,6 +14,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -25,8 +26,9 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.RayTraceResult.Type;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 
-public class BladeHatEntity extends ItemNbtProjectileEntity {
+public class BladeHatEntity extends ItemNbtProjectileEntity implements IEntityAdditionalSpawnData {
     private static final DataParameter<Boolean> RETURNING_TO_OWNER = EntityDataManager.defineId(BladeHatEntity.class, DataSerializers.BOOLEAN);
 
     public BladeHatEntity(World world, LivingEntity thrower, ItemStack thrownStack) {
@@ -37,9 +39,6 @@ public class BladeHatEntity extends ItemNbtProjectileEntity {
     
     public BladeHatEntity(EntityType<? extends ItemNbtProjectileEntity> type, World world) {
         super(type, world);
-        if (level.isClientSide()) {
-            ClientTickingSoundsHelper.playBladeHatSound(this);
-        }
     }
     
     @Override
@@ -118,6 +117,14 @@ public class BladeHatEntity extends ItemNbtProjectileEntity {
     public void addAdditionalSaveData(CompoundNBT compound) {
         super.addAdditionalSaveData(compound);
         compound.putBoolean("Returning", isReturningToOwner());
+    }
+
+    @Override
+    public void writeSpawnData(PacketBuffer buffer) {}
+
+    @Override
+    public void readSpawnData(PacketBuffer additionalData) {
+        ClientTickingSoundsHelper.playBladeHatSound(this);
     }
 
 }
