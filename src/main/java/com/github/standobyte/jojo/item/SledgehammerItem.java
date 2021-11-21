@@ -39,8 +39,6 @@ public class SledgehammerItem extends PickaxeItem {
     @Override
     public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
         return super.canApplyAtEnchantingTable(stack, enchantment) || 
-                enchantment.category.equals(EnchantmentType.WEAPON) && !(enchantment instanceof SweepingEnchantment)
-                || enchantment.category.equals(EnchantmentType.BREAKABLE);
+                enchantment.category.equals(EnchantmentType.WEAPON) && !(enchantment instanceof SweepingEnchantment);
     }
-
 }
