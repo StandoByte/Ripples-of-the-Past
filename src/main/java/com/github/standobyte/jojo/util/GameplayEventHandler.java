@@ -104,6 +104,7 @@ import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.entity.player.PlayerWakeUpEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.Event.Result;
@@ -655,6 +656,16 @@ public class GameplayEventHandler {
                         world.setBlockAndUpdate(pos, AbstractFireBlock.getState(world, pos));
                     }
                 }
+            }
+        }
+    }
+    
+    @SubscribeEvent
+    public static void onWakeUp(PlayerWakeUpEvent event) {
+        if (!event.wakeImmediately() && !event.updateWorld()) {
+            IStandPower stand = IStandPower.getPlayerStandPower(event.getPlayer());
+            if (stand.hasPower()) {
+                stand.setMana(stand.getMaxMana());
             }
         }
     }
