@@ -142,13 +142,13 @@ public abstract class ItemProjectileEntity extends AbstractArrowEntity {
         if (!level.isClientSide()) {
             Entity shooter = getOwner();
             if (inGround || shooter == null || shooter.getUUID() == player.getUUID()) {
-                boolean pickUp = (pickup == AbstractArrowEntity.PickupStatus.ALLOWED 
+                boolean canPickUp = (pickup == AbstractArrowEntity.PickupStatus.ALLOWED 
                         || pickup == AbstractArrowEntity.PickupStatus.CREATIVE_ONLY && player.abilities.instabuild)
                         && (inGround || isNoPhysics() || throwerCanCatch());
-                if (pickUp && pickup == AbstractArrowEntity.PickupStatus.ALLOWED && !player.inventory.add(getPickupItem())) {
-                    pickUp = false;
+                if (canPickUp && pickup == AbstractArrowEntity.PickupStatus.ALLOWED && !player.inventory.add(getPickupItem())) {
+                    canPickUp = false;
                 }
-                if (pickUp) {
+                if (canPickUp) {
                     pickUp(player);
                     return;
                 }
