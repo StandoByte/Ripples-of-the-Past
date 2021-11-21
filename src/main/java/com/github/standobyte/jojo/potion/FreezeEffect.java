@@ -7,8 +7,8 @@ import net.minecraft.potion.EffectType;
 
 public class FreezeEffect extends UncurableEffect {
     
-    public FreezeEffect() {
-        super(EffectType.HARMFUL, 0xD6D6FF);
+    public FreezeEffect(EffectType type, int liquidColor) {
+        super(type, liquidColor);
         addAttributeModifier(Attributes.MOVEMENT_SPEED, "e30ee41c-6ea2-468c-99ab-fd0a7d6be8c3", -0.1, AttributeModifier.Operation.MULTIPLY_TOTAL).
         addAttributeModifier(Attributes.ATTACK_SPEED, "e4d278d8-a38b-434f-9c65-20c944abcff9", -0.1, AttributeModifier.Operation.MULTIPLY_TOTAL);
     }
