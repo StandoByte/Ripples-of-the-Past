@@ -7,8 +7,8 @@ import net.minecraft.potion.EffectType;
 
 public class HamonSpreadEffect extends UncurableEffect {
 
-    public HamonSpreadEffect() {
-        super(EffectType.HARMFUL, 0xFDF34B);
+    public HamonSpreadEffect(EffectType type, int liquidColor) {
+        super(type, liquidColor);
     }
     
     @Override

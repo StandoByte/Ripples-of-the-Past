@@ -12,8 +12,8 @@ import net.minecraftforge.common.ForgeMod;
 
 public class StunEffect extends UncurableEffect {
 
-    public StunEffect() {
-        super(EffectType.HARMFUL, 0x404040);
+    public StunEffect(EffectType type, int liquidColor) {
+        super(type, liquidColor);
         addAttributeModifier(Attributes.MOVEMENT_SPEED, "7abfcba6-295c-4310-9952-1c58d0eb58fb", -1, AttributeModifier.Operation.MULTIPLY_TOTAL);
         addAttributeModifier(Attributes.FLYING_SPEED, "be6a9866-e25d-4466-9364-521b570c9b81", -1, AttributeModifier.Operation.MULTIPLY_TOTAL);
         addAttributeModifier(Attributes.ATTACK_SPEED, "018041e0-654d-48cf-a392-8dcb47ca48a3", -1, AttributeModifier.Operation.MULTIPLY_TOTAL);
