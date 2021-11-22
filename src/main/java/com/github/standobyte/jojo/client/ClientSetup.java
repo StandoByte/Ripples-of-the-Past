@@ -69,6 +69,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
+import net.minecraft.item.CrossbowItem;
 import net.minecraft.item.ItemModelsProperties;
 import net.minecraft.item.Items;
 import net.minecraft.util.ResourceLocation;
@@ -148,6 +149,11 @@ public class ClientSetup {
             ItemModelsProperties.register(Items.BOW, new ResourceLocation("stand_arrow"), (itemStack, clientWorld, livingEntity) -> {
                 return livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack
                         && livingEntity.getProjectile(itemStack).getItem() instanceof StandArrowItem ? 1 : 0;
+            });
+            ItemModelsProperties.register(Items.CROSSBOW, new ResourceLocation("stand_arrow"), (itemStack, clientWorld, livingEntity) -> {
+                return livingEntity != null && CrossbowItem.isCharged(itemStack) && (
+                        CrossbowItem.containsChargedProjectile(itemStack, ModItems.STAND_ARROW.get()) || 
+                        CrossbowItem.containsChargedProjectile(itemStack, ModItems.STAND_ARROW_BEETLE.get())) ? 1 : 0;
             });
 
             RenderTypeLookup.setRenderLayer(ModBlocks.STONE_MASK.get(), RenderType.cutoutMipped());
