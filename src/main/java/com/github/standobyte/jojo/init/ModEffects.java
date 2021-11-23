@@ -44,7 +44,7 @@ public class ModEffects {
             () -> new UncurableEffect(EffectType.BENEFICIAL, 0xEADB84));
     
     public static final RegistryObject<StaminaRegenEffect> STAMINA_REGEN = EFFECTS.register("stamina_regen", 
-            () -> new StaminaRegenEffect(EffectType.BENEFICIAL, 0xEADB84));
+            () -> new StaminaRegenEffect(EffectType.BENEFICIAL, 0x149900));
     
     public static final RegistryObject<UncurableEffect> TIME_STOP = EFFECTS.register("time_stop", 
             () -> new UncurableEffect(EffectType.BENEFICIAL, 0x707070));
