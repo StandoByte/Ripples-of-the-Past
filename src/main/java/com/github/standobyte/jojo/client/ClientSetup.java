@@ -43,6 +43,7 @@ import com.github.standobyte.jojo.client.renderer.entity.damaging.stretching.Zoo
 import com.github.standobyte.jojo.client.renderer.entity.itemprojectile.BladeHatRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.itemprojectile.ClackersRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.itemprojectile.KnifeRenderer;
+import com.github.standobyte.jojo.client.renderer.entity.itemprojectile.StandArrowRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.mob.HamonMasterRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.mob.HungryZombieRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.stand.HierophantGreenRenderer;
@@ -59,6 +60,7 @@ import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.item.ClackersItem;
+import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
 
 import net.minecraft.client.Minecraft;
@@ -67,7 +69,9 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
+import net.minecraft.item.CrossbowItem;
 import net.minecraft.item.ItemModelsProperties;
+import net.minecraft.item.Items;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ColorHandlerEvent;
@@ -101,6 +105,7 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SATIPOROJA_SCARF_BINDING.get(), SatiporojaScarfBindingRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SNAKE_MUFFLER.get(), SnakeMufflerRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.KNIFE.get(), KnifeRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STAND_ARROW.get(), StandArrowRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.PILLARMAN_TEMPLE_ENGRAVING.get(), PillarmanTempleEngravingRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SP_STAR_FINGER.get(), SPStarFingerRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HG_STRING.get(), HGStringRenderer::new);
@@ -142,8 +147,14 @@ public class ClientSetup {
                 }
                 return 0;
             });
-            ItemModelsProperties.register(ModItems.STAND_REMOVER.get(), new ResourceLocation(JojoMod.MOD_ID, "shift"), (itemStack, clientWorld, livingEntity) -> {
-                return livingEntity != null && livingEntity.isShiftKeyDown() ? 1 : 0;
+            ItemModelsProperties.register(Items.BOW, new ResourceLocation("stand_arrow"), (itemStack, clientWorld, livingEntity) -> {
+                return livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack
+                        && livingEntity.getProjectile(itemStack).getItem() instanceof StandArrowItem ? 1 : 0;
+            });
+            ItemModelsProperties.register(Items.CROSSBOW, new ResourceLocation("stand_arrow"), (itemStack, clientWorld, livingEntity) -> {
+                return livingEntity != null && CrossbowItem.isCharged(itemStack) && (
+                        CrossbowItem.containsChargedProjectile(itemStack, ModItems.STAND_ARROW.get()) || 
+                        CrossbowItem.containsChargedProjectile(itemStack, ModItems.STAND_ARROW_BEETLE.get())) ? 1 : 0;
             });
 
             RenderTypeLookup.setRenderLayer(ModBlocks.STONE_MASK.get(), RenderType.cutoutMipped());
