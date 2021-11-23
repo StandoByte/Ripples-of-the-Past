@@ -344,28 +344,6 @@
   "time_stop_blink": {
     "sounds": [ "jojo:stand/time_stop_blink" ]
   },
-  "kakyoin_hierophant_green": {
-    "subtitle": "jojo.subtitle.hierophant_green_name",
-    "sounds": [ "jojo:stand_user/kakyoin_hierophant_green" ]
-  },
-  "kakyoin_hierophant": {
-    "subtitle": "jojo.subtitle.hierophant_green_name_short",
-    "sounds": [ "jojo:stand_user/kakyoin_hierophant" ]
-  },
-  "kakyoin_emerald_splash": {
-    "subtitle": "jojo.subtitle.emerald_splash_name",
-    "sounds": [ "jojo:stand_user/kakyoin_emerald_splash" ]
-  },
-  "hierophant_green_summon": {
-    "subtitle": "jojo.subtitle.stand_summon",
-    "sounds": [ "jojo:stand/hierophant_green_summon", "jojo:stand/hierophant_green_summon_2" ]
-  },
-  "hierophant_green_emerald_splash": {
-    "sounds": [ "jojo:stand/hierophant_green_emerald_splash", "jojo:stand/hierophant_green_emerald_splash_2", "jojo:stand/hierophant_green_emerald_splash_3" ]
-  },
-  "hierophant_green_barrier_ripped": {
-    "sounds": [ "jojo:stand/hierophant_green_barrier_ripped" ]
-  },
   "dio_the_world": {
     "subtitle": "jojo.subtitle.the_world_name",
     "sounds": [ "jojo:stand_user/dio_the_world", "jojo:stand_user/dio_the_world_2", "jojo:stand_user/dio_the_world_3" ] 
@@ -415,6 +393,28 @@
   "road_roller_hit": {
     "subtitle": "jojo.subtitle.road_roller_hit",
     "sounds": [ "jojo:road_roller_hit", "jojo:road_roller_hit_2", "jojo:road_roller_hit_3" ]
+  },
+  "kakyoin_hierophant_green": {
+    "subtitle": "jojo.subtitle.hierophant_green_name",
+    "sounds": [ "jojo:stand_user/kakyoin_hierophant_green" ]
+  },
+  "kakyoin_hierophant": {
+    "subtitle": "jojo.subtitle.hierophant_green_name_short",
+    "sounds": [ "jojo:stand_user/kakyoin_hierophant" ]
+  },
+  "kakyoin_emerald_splash": {
+    "subtitle": "jojo.subtitle.emerald_splash_name",
+    "sounds": [ "jojo:stand_user/kakyoin_emerald_splash" ]
+  },
+  "hierophant_green_summon": {
+    "subtitle": "jojo.subtitle.stand_summon",
+    "sounds": [ "jojo:stand/hierophant_green_summon", "jojo:stand/hierophant_green_summon_2" ]
+  },
+  "hierophant_green_emerald_splash": {
+    "sounds": [ "jojo:stand/hierophant_green_emerald_splash", "jojo:stand/hierophant_green_emerald_splash_2", "jojo:stand/hierophant_green_emerald_splash_3" ]
+  },
+  "hierophant_green_barrier_ripped": {
+    "sounds": [ "jojo:stand/hierophant_green_barrier_ripped" ]
   },
   "polnareff_silver_chariot": {
     "subtitle": "jojo.subtitle.silver_chariot_name",

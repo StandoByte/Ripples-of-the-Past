@@ -65,8 +65,8 @@ public class CommonSetup {
         event.put(ModEntityTypes.HUNGRY_ZOMBIE.get(), HungryZombieEntity.createAttributes().build());
         
         event.put(ModEntityTypes.STAR_PLATINUM.get(), StandEntity.createAttributes().build());
-        event.put(ModEntityTypes.HIEROPHANT_GREEN.get(), StandEntity.createAttributes().build());
         event.put(ModEntityTypes.THE_WORLD.get(), StandEntity.createAttributes().build());
+        event.put(ModEntityTypes.HIEROPHANT_GREEN.get(), StandEntity.createAttributes().build());
         event.put(ModEntityTypes.SILVER_CHARIOT.get(), StandEntity.createAttributes().build());
         event.put(ModEntityTypes.MAGICIANS_RED.get(), StandEntity.createAttributes().build());
     }

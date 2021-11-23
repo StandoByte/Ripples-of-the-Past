@@ -233,15 +233,6 @@ public class ModEntityTypes {
             .addStandSound(StandSoundType.MELEE_BARRAGE, ModSounds.STAR_PLATINUM_ORA_ORA_ORA)
             .addStandSound(StandSoundType.RANGED_ATTACK, ModSounds.STAR_PLATINUM_STAR_FINGER));
     
-    public static final RegistryObject<StandEntityType<HierophantGreenEntity>> HIEROPHANT_GREEN = ENTITIES.register("hierophant_green", 
-            () -> new StandEntityType<HierophantGreenEntity>(HierophantGreenEntity::new, false, 0.55F, 1.75F, 
-                    new StandEntityStats.Builder()
-                    .damage(1.25)
-                    .maxRange(100)
-                    .build())
-            .addStandSound(StandSoundType.SUMMON, ModSounds.HIEROPHANT_GREEN_SUMMON)
-            .addStandSound(StandSoundType.RANGED_ATTACK, ModSounds.HIEROPHANT_GREEN_EMERALD_SPLASH));
-    
     public static final RegistryObject<StandEntityType<TheWorldEntity>> THE_WORLD = ENTITIES.register("the_world", 
             () -> new StandEntityType<TheWorldEntity>(TheWorldEntity::new, false, 0.7F, 2.1F,
                     new StandEntityStats.Builder()
@@ -255,6 +246,15 @@ public class ModEntityTypes {
             .addStandSound(StandSoundType.SUMMON, ModSounds.THE_WORLD_SUMMON)
             .addStandSound(StandSoundType.MELEE_ATTACK, ModSounds.THE_WORLD_MUDA)
             .addStandSound(StandSoundType.MELEE_BARRAGE, ModSounds.THE_WORLD_MUDA_MUDA_MUDA));
+    
+    public static final RegistryObject<StandEntityType<HierophantGreenEntity>> HIEROPHANT_GREEN = ENTITIES.register("hierophant_green", 
+            () -> new StandEntityType<HierophantGreenEntity>(HierophantGreenEntity::new, false, 0.55F, 1.75F, 
+                    new StandEntityStats.Builder()
+                    .damage(1.25)
+                    .maxRange(100)
+                    .build())
+            .addStandSound(StandSoundType.SUMMON, ModSounds.HIEROPHANT_GREEN_SUMMON)
+            .addStandSound(StandSoundType.RANGED_ATTACK, ModSounds.HIEROPHANT_GREEN_EMERALD_SPLASH));
     
     public static final RegistryObject<StandEntityType<SilverChariotEntity>> SILVER_CHARIOT = ENTITIES.register("silver_chariot", 
             () -> new StandEntityType<SilverChariotEntity>(SilverChariotEntity::new, false, 0.6F, 1.8F, 
