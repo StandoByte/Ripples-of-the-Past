@@ -34,6 +34,7 @@ import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.ZoomPunc
 import com.github.standobyte.jojo.entity.itemprojectile.BladeHatEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.ClackersEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.KnifeEntity;
+import com.github.standobyte.jojo.entity.itemprojectile.StandArrowEntity;
 import com.github.standobyte.jojo.entity.mob.HamonMasterEntity;
 import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityStats;
@@ -142,8 +143,12 @@ public class ModEntityTypes {
             .build(new ResourceLocation(JojoMod.MOD_ID, "snake_muffler").toString()));
     
     public static final RegistryObject<EntityType<KnifeEntity>> KNIFE = ENTITIES.register("knife", 
-            () -> EntityType.Builder.<KnifeEntity>of(KnifeEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).setUpdateInterval(20)
+            () -> EntityType.Builder.<KnifeEntity>of(KnifeEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).setUpdateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "knife").toString()));
+    
+    public static final RegistryObject<EntityType<StandArrowEntity>> STAND_ARROW = ENTITIES.register("stand_arrow", 
+            () -> EntityType.Builder.<StandArrowEntity>of(StandArrowEntity::new, EntityClassification.MISC).sized(0.75F, 0.75F).clientTrackingRange(4).updateInterval(20)
+            .build(new ResourceLocation(JojoMod.MOD_ID, "stand_arrow").toString()));
     
     public static final RegistryObject<EntityType<PillarmanTempleEngravingEntity>> PILLARMAN_TEMPLE_ENGRAVING = ENTITIES.register("pillarman_temple_engraving", 
             () -> EntityType.Builder.<PillarmanTempleEngravingEntity>of(PillarmanTempleEngravingEntity::new, EntityClassification.MISC).sized(0.5F, 0.5F).noSummon().setUpdateInterval(Integer.MAX_VALUE).setShouldReceiveVelocityUpdates(false)
