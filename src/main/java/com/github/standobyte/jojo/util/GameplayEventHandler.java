@@ -621,7 +621,7 @@ public class GameplayEventHandler {
         for (ServerPlayerEntity joseph : josephTechniqueUsers) {
             if (joseph.getChatVisibility() != ChatVisibility.HIDDEN && joseph.getRandom().nextFloat() < 0.05F) {
                 String tlKey = "chat.joseph.next_line." + (joseph.getRandom().nextInt(3) + 1);
-                ITextComponent message = new TranslationTextComponent("chat.type.text", event.getPlayer().getDisplayName(), 
+                ITextComponent message = new TranslationTextComponent("chat.type.text", joseph.getDisplayName(), 
                         new TranslationTextComponent(tlKey, event.getMessage()));
                 LanguageMap map = LanguageMap.getInstance();
                 if (map != null) {
