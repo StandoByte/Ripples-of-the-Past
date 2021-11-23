@@ -36,17 +36,17 @@ public class ModStandTypes {
                     new StandAction[] {ModActions.STAR_PLATINUM_BLOCK.get(), ModActions.STAR_PLATINUM_ZOOM.get(), ModActions.STAR_PLATINUM_TIME_STOP.get()},
                     ModSounds.JOTARO_STAR_PLATINUM, ModEntityTypes.STAR_PLATINUM));
     
-    public static final RegistryObject<EntityStandType> HIEROPHANT_GREEN = STANDS.register("hierophant_green", 
-            () -> new EntityStandType(4, 0x00B000, PART_3_NAME,
-                    new StandAction[] {ModActions.HIEROPHANT_GREEN_STRING_ATTACK.get(), ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get()},
-                    new StandAction[] {ModActions.HIEROPHANT_GREEN_BLOCK.get(), ModActions.HIEROPHANT_GREEN_GRAPPLE.get(), ModActions.HIEROPHANT_GREEN_BARRIER.get()},
-                    ModSounds.KAKYOIN_HIEROPHANT_GREEN, ModEntityTypes.HIEROPHANT_GREEN));
-    
     public static final RegistryObject<EntityStandType> THE_WORLD = STANDS.register("the_world", 
             () -> new EntityStandType(6, 0xFFD000, PART_3_NAME,
                     new StandAction[] {ModActions.THE_WORLD_PUNCH.get()},
                     new StandAction[] {ModActions.THE_WORLD_BLOCK.get(), ModActions.THE_WORLD_TIME_STOP.get(), ModActions.THE_WORLD_ROAD_ROLLER.get()},
                     ModSounds.DIO_THE_WORLD, ModEntityTypes.THE_WORLD));
+    
+    public static final RegistryObject<EntityStandType> HIEROPHANT_GREEN = STANDS.register("hierophant_green", 
+            () -> new EntityStandType(4, 0x00B000, PART_3_NAME,
+                    new StandAction[] {ModActions.HIEROPHANT_GREEN_STRING_ATTACK.get(), ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get()},
+                    new StandAction[] {ModActions.HIEROPHANT_GREEN_BLOCK.get(), ModActions.HIEROPHANT_GREEN_GRAPPLE.get(), ModActions.HIEROPHANT_GREEN_BARRIER.get()},
+                    ModSounds.KAKYOIN_HIEROPHANT_GREEN, ModEntityTypes.HIEROPHANT_GREEN));
     
     public static final RegistryObject<EntityStandType> SILVER_CHARIOT = STANDS.register("silver_chariot", 
             () -> new EntityStandType(5, 0xBEC8D6, PART_3_NAME,

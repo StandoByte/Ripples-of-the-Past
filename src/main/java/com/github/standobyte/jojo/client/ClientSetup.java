@@ -117,9 +117,10 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.MR_DETECTOR.get(), MRDetectorRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HUNGRY_ZOMBIE.get(), HungryZombieRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HAMON_MASTER.get(), HamonMasterRenderer::new);
+        
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STAR_PLATINUM.get(), StarPlatinumRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HIEROPHANT_GREEN.get(), HierophantGreenRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.THE_WORLD.get(), TheWorldRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HIEROPHANT_GREEN.get(), HierophantGreenRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SILVER_CHARIOT.get(), SilverChariotRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.MAGICIANS_RED.get(), MagiciansRedRenderer::new);
         
