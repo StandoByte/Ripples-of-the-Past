@@ -58,7 +58,7 @@ public class HamonSendoOverdrive extends HamonAction {
             List<Entity> entities = world.getEntitiesOfClass(LivingEntity.class, aabb, EntityPredicates.NO_CREATIVE_OR_SPECTATOR);
             boolean givePoints = false;
             for (Entity entity : entities) {
-                if (ModDamageSources.dealHamonDamage(entity, 0.25F, user, null)) {
+                if (!entity.is(user) && ModDamageSources.dealHamonDamage(entity, 0.25F, user, null)) {
                     givePoints = true;
                 }
             }

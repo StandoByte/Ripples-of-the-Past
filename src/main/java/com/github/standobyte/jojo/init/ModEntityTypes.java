@@ -266,7 +266,7 @@ public class ModEntityTypes {
                     new StandEntityStats.Builder()
                     .damage(8)
                     .attackKnockback(0.1)
-                    .attackSpeed(50)
+                    .attackSpeed(75)
                     .summonTicks(3)
                     .armor(15)
                     .armorToughness(8)

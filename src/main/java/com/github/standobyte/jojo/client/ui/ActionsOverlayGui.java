@@ -340,7 +340,7 @@ public class ActionsOverlayGui extends AbstractGui { // TODO config to move it t
     }
 
     public void scrollMode() {
-        switch(mode) {
+        switch (mode) {
         case NONE:
             if (nonStandPower.hasPower()) {
                 setMode(UiMode.NON_STAND);

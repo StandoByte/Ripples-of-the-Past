@@ -25,7 +25,7 @@ public class SilverChariotEntity extends StandEntity {
     private static final UUID NO_RAPIER_DAMAGE_DECREASE_ID = UUID.fromString("84331a3b-73f1-4461-b240-6d688897e3f4");
     private static final UUID NO_RAPIER_ATTACK_SPEED_DECREASE_ID = UUID.fromString("485642f9-5475-4d74-8b54-dea9c53fe62e");
     private static final AttributeModifier NO_ARMOR_MOVEMENT_SPEED_BOOST = new AttributeModifier(NO_ARMOR_MOVEMENT_SPEED_BOOST_ID, "Movement speed boost with no armor", 2D, AttributeModifier.Operation.MULTIPLY_BASE);
-    private static final AttributeModifier NO_ARMOR_ATTACK_SPEED_BOOST = new AttributeModifier(NO_ARMOR_ATTACK_SPEED_BOOST_ID, "Attack speed boost with no armor", 2D, AttributeModifier.Operation.MULTIPLY_BASE);
+    private static final AttributeModifier NO_ARMOR_ATTACK_SPEED_BOOST = new AttributeModifier(NO_ARMOR_ATTACK_SPEED_BOOST_ID, "Attack speed boost with no armor", 1D, AttributeModifier.Operation.MULTIPLY_BASE);
     private static final AttributeModifier NO_RAPIER_DAMAGE_DECREASE = new AttributeModifier(NO_RAPIER_DAMAGE_DECREASE_ID, "Attack damage decrease without rapier", -0.25D, AttributeModifier.Operation.MULTIPLY_BASE);
     private static final AttributeModifier NO_RAPIER_ATTACK_SPEED_DECREASE = new AttributeModifier(NO_RAPIER_ATTACK_SPEED_DECREASE_ID, "Attack speed decrease without rapier", -0.75D, AttributeModifier.Operation.MULTIPLY_BASE);
     private static final DataParameter<Boolean> HAS_RAPIER = EntityDataManager.defineId(SilverChariotEntity.class, DataSerializers.BOOLEAN);
@@ -158,7 +158,7 @@ public class SilverChariotEntity extends StandEntity {
     protected double getAttackDamage(Entity target, boolean strongAttack, double rangeFactor, double attackDistance, double precision) {
         double damage = super.getAttackDamage(target, strongAttack, rangeFactor, attackDistance, precision);
         if (target instanceof SkeletonEntity) {
-            damage *= 0.1;
+            damage *= 0.6;
         }
         return damage;
     }
