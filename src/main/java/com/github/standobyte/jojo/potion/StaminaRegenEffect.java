@@ -6,7 +6,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectType;
 
-public class StaminaRegenEffect extends Effect { // FIXME effect name in en_us.json
+public class StaminaRegenEffect extends Effect {
 
     public StaminaRegenEffect(EffectType type, int liquidColor) {
         super(type, liquidColor);
@@ -15,7 +15,7 @@ public class StaminaRegenEffect extends Effect { // FIXME effect name in en_us.j
     @Override
     public void applyEffectTick(LivingEntity entity, int amplifier) {
         IStandPower.getStandPowerOptional(entity).ifPresent(power -> {
-            power.addMana(amplifier + 1);
+            power.addMana((amplifier + 1) * power.getMaxMana() / 1000F);
         });
     }
 
