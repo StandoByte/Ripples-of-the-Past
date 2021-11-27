@@ -139,6 +139,6 @@ public class AjaStoneItem extends Item {
         int time = (int) (world.getDayTime() % 24000);
         int light = world.dimension() != World.OVERWORLD || 
                 world.isRainingAt(pos) || time > 12866 && time < 23135 ? world.getBrightness(LightType.BLOCK, pos) : world.getMaxLocalRawBrightness(pos);
-                return light > 9;
+        return light > 9;
     }
 }
