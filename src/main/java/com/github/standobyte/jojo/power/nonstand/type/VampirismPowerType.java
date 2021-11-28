@@ -3,7 +3,6 @@ package com.github.standobyte.jojo.power.nonstand.type;
 import java.util.Map;
 import java.util.function.IntUnaryOperator;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
