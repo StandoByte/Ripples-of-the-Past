@@ -85,6 +85,11 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     public HamonPowerType(int color, Action[] startingAttacks, Action[] startingAbilities, float manaRegenPoints) {
         super(color, startingAttacks, startingAbilities, manaRegenPoints, HamonData::new);
     }
+    
+    @Override
+    public void onClear(INonStandPower power) {
+        power.getTypeSpecificData(this).ifPresent(hamon -> hamon.setBreathingLevel(0));
+    }
 
     @Override
     public int getExpRewardMultiplier() {

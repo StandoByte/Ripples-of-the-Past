@@ -63,6 +63,7 @@ public class NonStandPower extends PowerBaseImpl<NonStandPowerType<?>> implement
         if (super.clear()) {
             manaRegenPoints = 1F;
             manaLimitFactor = 1F;
+            type.onClear(this);
             typeSpecificData = null;
             type = null;
             serverPlayerUser.ifPresent(player -> {

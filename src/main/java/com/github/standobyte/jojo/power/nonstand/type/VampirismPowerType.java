@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.power.nonstand.type;
 import java.util.Map;
 import java.util.function.IntUnaryOperator;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
@@ -38,6 +39,17 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
 
     public VampirismPowerType(int color, Action[] startingAttacks, Action[] startingAbilities, float manaRegenPoints) {
         super(color, startingAttacks, startingAbilities, manaRegenPoints, VampirismFlags::new);
+    }
+    
+    @Override
+    public void onClear(INonStandPower power) {
+        LivingEntity user = power.getUser();
+        for (Map.Entry<Effect, IntUnaryOperator> entry : EFFECTS_AMPLIFIERS.entrySet()) {
+            EffectInstance effectInstance = user.getEffect(entry.getKey());
+            if (effectInstance != null && !effectInstance.isVisible() && !effectInstance.showIcon()) {
+                user.removeEffect(effectInstance.getEffect());
+            }
+        }
     }
 
     /* x = difficultyLevel (1 - easy, 2 - normal, 3 - hard)
