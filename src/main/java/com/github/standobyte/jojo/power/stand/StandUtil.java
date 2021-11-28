@@ -6,7 +6,6 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
@@ -33,7 +32,6 @@ public class StandUtil {
             List<StandType> filtered = tier >= 0 ? 
                     stream.filter(stand -> stand.getTier() == tier).collect(Collectors.toList())
                     : stream.collect(Collectors.toList());
-            JojoMod.LOGGER.debug(JojoModConfig.COMMON.prioritizeLeastTakenStands.get());
             if (JojoModConfig.COMMON.prioritizeLeastTakenStands.get()) {
                 filtered = SaveFileUtilCapProvider.getSaveFileCap((ServerWorld) entity.level).leastTakenStands(filtered);
             }
