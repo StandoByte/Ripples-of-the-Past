@@ -62,10 +62,10 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
             entity.setAirSupply(entity.getMaxAirSupply());
             int bloodLevel = bloodLevel(power, entity.level.getDifficulty());
             if (((INonStandPower) power).getTypeSpecificData(this).get().refreshBloodLevel(bloodLevel)) {
-                int standStaminaIncreaseLvl = bloodLevel - 3;
+                int standStaminaIncreaseLvl = bloodLevel;
                 IStandPower.getStandPowerOptional(entity).ifPresent(standPower -> {
-                    standPower.setManaRegenPoints(Math.max(standStaminaIncreaseLvl * 4, 1));
-                    standPower.setManaLimitFactor(Math.max(standStaminaIncreaseLvl * 2, 1));
+                    standPower.setManaRegenPoints(Math.max(standStaminaIncreaseLvl, 1));
+                    standPower.setManaLimitFactor(Math.max(standStaminaIncreaseLvl / 2F, 1));
                 });
                 for (Map.Entry<Effect, IntUnaryOperator> entry : EFFECTS_AMPLIFIERS.entrySet()) {
                     Effect effect = entry.getKey();
