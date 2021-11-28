@@ -1,17 +1,48 @@
 package com.github.standobyte.jojo.power.stand;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
+import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.client.StandControlHandler;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStandControlStatusPacket;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.world.server.ServerWorld;
 
 public class StandUtil {
+    
+    public static StandType randomStandByTier(int tier, LivingEntity entity, Random random) {
+        if (!entity.level.isClientSide()) {
+            Collection<StandType> stands = ModStandTypes.Registry.getRegistry().getValues();
+    
+            Stream<StandType> stream = stands.stream();
+            List<StandType> filtered = tier >= 0 ? 
+                    stream.filter(stand -> stand.getTier() == tier).collect(Collectors.toList())
+                    : stream.collect(Collectors.toList());
+            JojoMod.LOGGER.debug(JojoModConfig.COMMON.prioritizeLeastTakenStands.get());
+            if (JojoModConfig.COMMON.prioritizeLeastTakenStands.get()) {
+                filtered = SaveFileUtilCapProvider.getSaveFileCap((ServerWorld) entity.level).leastTakenStands(filtered);
+            }
+            if (!filtered.isEmpty()) {
+                return filtered.get(random.nextInt(filtered.size()));
+            }
+        }
+        return null;
+    }
     
     public static int standTierFromXp(PlayerEntity player) {
         int lvl = player.experienceLevel;
@@ -29,7 +60,8 @@ public class StandUtil {
     }
 
     public static boolean canGainStand(PlayerEntity player, int playerTier, StandType stand) {
-        return player.abilities.instabuild || standTierFromXp(player) >= stand.getTier() || playerTier >= stand.getTier();
+        return player.abilities.instabuild || !JojoModConfig.COMMON.standTiers.get()
+                || standTierFromXp(player) >= stand.getTier() || playerTier >= stand.getTier();
     }
     
     public static boolean isPlayerStandUser(PlayerEntity player) {

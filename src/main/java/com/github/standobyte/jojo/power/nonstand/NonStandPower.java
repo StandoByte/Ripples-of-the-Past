@@ -157,9 +157,9 @@ public class NonStandPower extends PowerBaseImpl<NonStandPowerType<?>> implement
     }
     
     @Override
-    public void onClone(IPower<NonStandPowerType<?>> oldPower, boolean wasDeath) {
-        super.onClone(oldPower, wasDeath);
-        if (oldPower.hasPower()) {
+    public void onClone(IPower<NonStandPowerType<?>> oldPower, boolean wasDeath, boolean keep) {
+        super.onClone(oldPower, wasDeath, keep);
+        if (keep && oldPower.hasPower()) {
             ((INonStandPower) oldPower).getTypeSpecificData(null).ifPresent(data -> {
                 setTypeSpecificData(data);
             });

@@ -7,15 +7,18 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.power.NonStandCapProvider;
 import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
+import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.command.HamonCommand;
 import com.github.standobyte.jojo.command.JojoControlsCommand;
+import com.github.standobyte.jojo.command.JojoPowerCommand;
 import com.github.standobyte.jojo.command.StandCommand;
 import com.github.standobyte.jojo.command.StandExpCommand;
 import com.github.standobyte.jojo.init.ModStructures;
@@ -33,7 +36,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.FlatChunkGenerator;
 import net.minecraft.world.gen.feature.StructureFeature;
@@ -63,11 +65,13 @@ public class ForgeBusEventSubscriber {
     private static final ResourceLocation LIVING_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "living_util");
     private static final ResourceLocation PROJECTILE_HAMON_CAP = new ResourceLocation(JojoMod.MOD_ID, "projectile_hamon");
     private static final ResourceLocation WORLD_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "world_util");
+    private static final ResourceLocation SAVE_FILE_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "save_file_util");
     
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSource> dispatcher = event.getDispatcher();
         StandCommand.register(dispatcher);
+        JojoPowerCommand.register(dispatcher);
         StandExpCommand.register(dispatcher);
         JojoControlsCommand.register(dispatcher);
         HamonCommand.register(dispatcher);
@@ -75,7 +79,11 @@ public class ForgeBusEventSubscriber {
     
     @SubscribeEvent
     public static void onAttachCapabilitiesWorld(AttachCapabilitiesEvent<World> event) {
-        event.addCapability(WORLD_UTIL_CAP, new WorldUtilCapProvider(event.getObject()));
+        World world = event.getObject();
+        event.addCapability(WORLD_UTIL_CAP, new WorldUtilCapProvider(world));
+        if (!world.isClientSide() && world.dimension() == World.OVERWORLD) {
+            event.addCapability(SAVE_FILE_UTIL_CAP, new SaveFileUtilCapProvider());
+        }
     }
     
     @SubscribeEvent
@@ -120,10 +128,10 @@ public class ForgeBusEventSubscriber {
     public static void onPlayerClone(PlayerEvent.Clone event) {
         PlayerEntity original = event.getOriginal();
         PlayerEntity player = event.getPlayer();
-        if (!event.isWasDeath() || player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
-            IStandPower.getPlayerStandPower(player).onClone(IStandPower.getPlayerStandPower(original), event.isWasDeath());
-            INonStandPower.getPlayerNonStandPower(player).onClone(INonStandPower.getPlayerNonStandPower(original), event.isWasDeath());
-        }
+        IStandPower.getPlayerStandPower(player).onClone(IStandPower.getPlayerStandPower(original), 
+                event.isWasDeath(), !event.isWasDeath() || JojoModConfig.COMMON.keepStandOnDeath.get());
+        INonStandPower.getPlayerNonStandPower(player).onClone(INonStandPower.getPlayerNonStandPower(original), 
+                event.isWasDeath(), !event.isWasDeath() || JojoModConfig.COMMON.keepNonStandOnDeath.get());
         
         original.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(oldCap -> {
             player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(newCap -> {

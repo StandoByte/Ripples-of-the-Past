@@ -10,6 +10,8 @@ import com.github.standobyte.jojo.capability.entity.ProjectileHamonChargeCap;
 import com.github.standobyte.jojo.capability.entity.ProjectileHamonChargeCapStorage;
 import com.github.standobyte.jojo.capability.entity.power.NonStandCapStorage;
 import com.github.standobyte.jojo.capability.entity.power.StandCapStorage;
+import com.github.standobyte.jojo.capability.world.SaveFileUtilCap;
+import com.github.standobyte.jojo.capability.world.SaveFileUtilCapStorage;
 import com.github.standobyte.jojo.capability.world.WorldUtilCap;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapStorage;
 import com.github.standobyte.jojo.command.StandArgument;
@@ -52,6 +54,7 @@ public class CommonSetup {
             CapabilityManager.INSTANCE.register(ProjectileHamonChargeCap.class, new ProjectileHamonChargeCapStorage(), () -> new ProjectileHamonChargeCap(null));
             
             CapabilityManager.INSTANCE.register(WorldUtilCap.class, new WorldUtilCapStorage(), () -> new WorldUtilCap(null));
+            CapabilityManager.INSTANCE.register(SaveFileUtilCap.class, new SaveFileUtilCapStorage(), () -> new SaveFileUtilCap());
             
             ArgumentTypes.register("stand", StandArgument.class, new ArgumentSerializer<>(StandArgument::new));
             

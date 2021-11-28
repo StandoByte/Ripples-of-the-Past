@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
@@ -83,8 +84,9 @@ public class StandDiscItem extends Item {
             StandType stand = ModStandTypes.Registry.getRegistry().getValue(new ResourceLocation(standRegistryName));
             tooltip.add(new TranslationTextComponent(stand.getTranslationKey()));
             tooltip.add(stand.getPartName());
-            tooltip.add(new TranslationTextComponent("jojo.disc.tier", stand.getTier())
-                    .withStyle(TextFormatting.GRAY));
+            if (JojoModConfig.COMMON.standTiers.get()) {
+                tooltip.add(new TranslationTextComponent("jojo.disc.tier", stand.getTier()).withStyle(TextFormatting.GRAY));
+            }
         }
     }
     
