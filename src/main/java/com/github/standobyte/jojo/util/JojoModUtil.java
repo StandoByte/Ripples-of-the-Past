@@ -6,6 +6,7 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -14,6 +15,7 @@ import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.client.network.play.IClientPlayNetHandler;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.AgeableEntity;
@@ -123,6 +125,13 @@ public class JojoModUtil {
         entity.yRot = yRot % 360.0F;
         entity.xRot = xRot % 360.0F;
         entity.setYHeadRot(yRot);
+    }
+    
+    
+    
+    public static boolean canEntityDestroy(World world, BlockPos pos, LivingEntity entity) {
+        BlockState state = world.getBlockState(pos);
+        return JojoModConfig.COMMON.abilitiesBreakBlocks.get() && state.canEntityDestroy(world, pos, entity) && ForgeEventFactory.onEntityDestroyBlock(entity, pos, state);
     }
     
     

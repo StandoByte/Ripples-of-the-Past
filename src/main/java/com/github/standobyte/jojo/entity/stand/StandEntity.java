@@ -955,7 +955,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
 
     protected boolean breakBlock(BlockPos blockPos) {
-        if (!ForgeHooks.canEntityDestroy(level, blockPos, this)) {
+        if (!JojoModUtil.canEntityDestroy(level, blockPos, this)) {
             return false;
         }
         BlockState blockState = level.getBlockState(blockPos);
