@@ -535,7 +535,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     @Override
     public boolean isInvulnerableTo(DamageSource damageSrc) {
-        return damageSrc != DamageSource.OUT_OF_WORLD && (isInvulnerable() 
+        return this.is(damageSrc.getEntity()) || damageSrc != DamageSource.OUT_OF_WORLD && (isInvulnerable() 
                 || !(damageSrc instanceof IStandDamageSource) && damageSrc != DamageSource.ON_FIRE 
                 || damageSrc.isFire() && !level.getGameRules().getBoolean(GameRules.RULE_FIRE_DAMAGE));
     }
@@ -1166,7 +1166,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             if (distanceSqr > rangeSq) {
                 super.move(MoverType.SELF, user.position().subtract(position()).scale(1 - rangeSq / distanceSqr));
             }
-            if (!level.isClientSide() && distanceSqr > 728 && user instanceof PlayerEntity) {
+            if (!level.isClientSide() && isManuallyControlled() && distanceSqr > 728 && user instanceof PlayerEntity) {
                 double horizontalDistSqr = distanceSqr - Math.pow(getY() - user.getY(), 2);
                 int warningDistance = ((ServerWorld) level).getServer().getPlayerList().getViewDistance() * 16 - 4;
                 if (horizontalDistSqr > warningDistance * warningDistance) {
