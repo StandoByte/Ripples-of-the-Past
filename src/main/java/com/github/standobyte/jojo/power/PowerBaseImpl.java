@@ -580,13 +580,13 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
     }
 
     @Override
-    public void onClone(IPower<T> oldPower, boolean wasDeath) {
-        if (oldPower.hasPower()) {
+    public void onClone(IPower<T> oldPower, boolean wasDeath, boolean keep) {
+        if (keep && oldPower.hasPower()) {
             onTypeInit(oldPower.getType());
-            if (!wasDeath) {
+//            if (!wasDeath) {
                 mana = oldPower.getMana();
                 leapCooldown = oldPower.getLeapCooldown();
-            }
+//            }
             manaRegenPoints = oldPower.getManaRegenPoints();
             manaLimitFactor = oldPower.getManaLimitFactor();
             cooldowns = ((PowerBaseImpl<T>) oldPower).cooldowns;

@@ -1,53 +1,49 @@
 package com.github.standobyte.jojo.entity.itemprojectile;
 
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.item.StandArrowItem;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.RayTraceResult.Type;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.World;
 
-public class StandArrowEntity extends ItemNbtProjectileEntity {
+public class StandArrowEntity extends AbstractArrowEntity {
+    private ItemStack arrowItem = new ItemStack(ModItems.STAND_ARROW.get());
     
-    public StandArrowEntity(World world, LivingEntity thrower, ItemStack thrownStack) {
-        super(ModEntityTypes.STAND_ARROW.get(), world, thrower, thrownStack);
+    public StandArrowEntity(World world, LivingEntity thrower, ItemStack arrowItem) {
+        super(ModEntityTypes.STAND_ARROW.get(), thrower, world);
+        this.arrowItem = arrowItem;
     }
     
-    public StandArrowEntity(EntityType<? extends ItemNbtProjectileEntity> type, World world) {
+    public StandArrowEntity(EntityType<? extends AbstractArrowEntity> type, World world) {
         super(type, world);
     }
 
     @Override
-    protected boolean hurtTarget(Entity target, Entity thrower) {
-        if (super.hurtTarget(target, thrower)) {
-            StandArrowItem.onPiercedByArrow(target, getPickupItem(), level);
-            return true;
-        }
-        return false;
+    protected void doPostHurtEffects(LivingEntity target) {
+        StandArrowItem.onPiercedByArrow(target, arrowItem, level);
     }
 
     @Override
-    protected boolean throwerCanCatch() {
-        return false;
-    }
-    
-    @Override
-    protected SoundEvent getActualHitGroundSound(BlockState blockState, BlockPos blockPos) {
-        return getDefaultHitGroundSoundEvent();
+    protected ItemStack getPickupItem() {
+        return arrowItem.copy();
     }
 
     @Override
-    protected void onHit(RayTraceResult rayTraceResult) {
-        super.onHit(rayTraceResult);
-        if (rayTraceResult.getType() == Type.BLOCK) {
-            shakeTime = 7;
+    public void readAdditionalSaveData(CompoundNBT compound) {
+        super.readAdditionalSaveData(compound);
+        if (compound.contains("Arrow", 10)) {
+            arrowItem = ItemStack.of(compound.getCompound("Trident"));
         }
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundNBT arrow) {
+        super.addAdditionalSaveData(arrow);
+        arrow.put("Arrow", arrowItem.save(new CompoundNBT()));
     }
 }

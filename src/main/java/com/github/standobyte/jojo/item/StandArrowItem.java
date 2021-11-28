@@ -1,15 +1,12 @@
 package com.github.standobyte.jojo.item;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.itemprojectile.StandArrowEntity;
-import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.type.StandType;
@@ -65,20 +62,23 @@ public class StandArrowItem extends ArrowItem {
         IStandPower power = IStandPower.getPlayerStandPower(player);
         if (!world.isClientSide()) {
             if (!power.hasPower()) {
-                if (dealVirusDamage) {
-                    player.hurt(ModDamageSources.STAND_VIRUS, Math.min(player.getMaxHealth(), 20F) - 1F);
-                }
                 int tier = StandUtil.standTierFromXp(player);
-                StandType stand = randomStandByTier(tier, player, random);
+                StandType stand = StandUtil.randomStandByTier(JojoModConfig.COMMON.standTiers.get() ? tier : -1, player, random);
                 if (stand != null) {
                     tier = stand.getTier();
                     if (power.givePower(stand)) {
                         if (!player.abilities.instabuild) {
-                            player.giveExperienceLevels(-StandUtil.tierLowerBorder(tier));
+                            if (dealVirusDamage) {
+                                player.hurt(ModDamageSources.STAND_VIRUS, Math.min(player.getHealth(), 11F) - 1F);
+                            }
+                            if (JojoModConfig.COMMON.standTiers.get()) {
+                                player.giveExperienceLevels(-StandUtil.tierLowerBorder(tier));
+                            }
                             stack.hurtAndBreak(1, player, pl -> {});
                         }
                         return true;
                     }
+                    return false;
                 }
                 player.sendMessage(new TranslationTextComponent("chat.message.tmp_not_enough_xp", tier), Util.NIL_UUID); // TODO remove the message after adding stands for each tier
                 return false;
@@ -95,32 +95,12 @@ public class StandArrowItem extends ArrowItem {
     
     @Override
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
-        PlayerEntity player = ClientUtil.getClientPlayer();
-        if (player != null) {
-            int tier = StandUtil.standTierFromXp(player);
-            tooltip.add(new TranslationTextComponent("jojo.arrow.tier", tier, StandUtil.tierLowerBorder(tier))
-                    .withStyle(TextFormatting.ITALIC, TextFormatting.GRAY));
-        }
-    }
-    
-    public static StandType randomStandByTier(int tier, LivingEntity entity, Random random) {
-        Collection<StandType> stands = ModStandTypes.Registry.getRegistry().getValues();
-
-        List<StandType> filtered = stands.stream()
-                .filter(stand -> stand.prioritizedCondition(entity) && stand.getTier() <= tier)
-                .collect(Collectors.toList());
-        if (!filtered.isEmpty()) {
-            return filtered.get(random.nextInt(filtered.size()));
-        }
-        else {
-            filtered = stands.stream()
-                    .filter(stand -> stand.getTier() == tier)
-                    .collect(Collectors.toList());
-            if (!filtered.isEmpty()) {
-                return filtered.get(random.nextInt(filtered.size()));
-            }
-            else {
-                return null;
+        if (JojoModConfig.COMMON.standTiers.get()) {
+            PlayerEntity player = ClientUtil.getClientPlayer();
+            if (player != null) {
+                int tier = StandUtil.standTierFromXp(player);
+                tooltip.add(new TranslationTextComponent("jojo.arrow.tier", tier, StandUtil.tierLowerBorder(tier))
+                        .withStyle(TextFormatting.ITALIC, TextFormatting.GRAY));
             }
         }
     }

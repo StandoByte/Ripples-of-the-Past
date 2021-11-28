@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.actions.StandAction;
+import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -35,6 +36,34 @@ public class StandPower extends PowerBaseImpl<StandType> implements IStandPower 
     
     public StandPower(LivingEntity user) {
         super(user);
+    }
+
+    @Override
+    public boolean givePower(StandType type) {
+        if (super.givePower(type)) {
+            serverPlayerUser.ifPresent(player -> {
+                SaveFileUtilCapProvider.getSaveFileCap(player).addPlayerStand(type);
+            });
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean clear() {
+        StandType type = getType();
+        if (super.clear()) {
+            if (isActive()) {
+                standType.forceUnsummon(user, this);
+            }
+            exp = 0;
+            standType = null;
+            serverPlayerUser.ifPresent(player -> {
+                SaveFileUtilCapProvider.getSaveFileCap(player).removePlayerStand(type);
+            });
+            return true;
+        }
+        return false;
     }
     
     @Override
@@ -66,19 +95,6 @@ public class StandPower extends PowerBaseImpl<StandType> implements IStandPower 
     @Override
     public StandType getType() {
         return standType;
-    }
-    
-    @Override
-    public boolean clear() {
-        if (super.clear()) {
-            if (isActive()) {
-                standType.forceUnsummon(user, this);
-            }
-            exp = 0;
-            standType = null;
-            return true;
-        }
-        return false;
     }
     
     @Override
@@ -190,8 +206,8 @@ public class StandPower extends PowerBaseImpl<StandType> implements IStandPower 
     }
     
     @Override
-    public void onClone(IPower<StandType> oldPower, boolean wasDeath) {
-        super.onClone(oldPower, wasDeath);
+    public void onClone(IPower<StandType> oldPower, boolean wasDeath, boolean keep) {
+        super.onClone(oldPower, wasDeath, keep);
         if (oldPower.hasPower()) {
             exp = ((IStandPower) oldPower).getExp();
         }
