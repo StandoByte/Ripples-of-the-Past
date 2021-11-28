@@ -179,6 +179,30 @@ public class ModActions {
                     .expRequirement(950).ignoresPerformerStun().shiftVariationOf(STAR_PLATINUM_TIME_STOP)));
     
 
+    public static final RegistryObject<StandEntityAction> THE_WORLD_PUNCH = ACTIONS.register("the_world_punch", 
+            () -> new StandEntityMeleeAttack(new StandEntityAction.Builder().manaCost(45).cooldown(5)));
+    
+    public static final RegistryObject<StandEntityAction> THE_WORLD_BARRAGE = ACTIONS.register("the_world_barrage", 
+            () -> new StandEntityMeleeBarrage(new StandEntityMeleeBarrage.Builder().holdType(2.2F, 100).shiftVariationOf(THE_WORLD_PUNCH)));
+    
+    public static final RegistryObject<StandEntityAction> THE_WORLD_BLOCK = ACTIONS.register("the_world_block", 
+            () -> new StandEntityBlock());
+    
+    public static final RegistryObject<StandEntityAction> THE_WORLD_TIME_STOP = ACTIONS.register("the_world_time_stop", 
+            () -> new TimeStop(new StandEntityAction.Builder().manaCost(800).expRequirement(500).holdToFire(30, false, 0)
+                    .ignoresPerformerStun().doNotAutoSummonStand().shout(ModSounds.DIO_THE_WORLD))
+            .voiceLineWithStandSummoned(ModSounds.DIO_TIME_STOP).timeStopSound(ModSounds.THE_WORLD_TIME_STOP)
+            .timeResumeVoiceLine(ModSounds.DIO_TIME_RESUMES).timeResumeSound(ModSounds.THE_WORLD_TIME_RESUME));
+    
+    public static final RegistryObject<StandEntityAction> THE_WORLD_TIME_STOP_BLINK = ACTIONS.register("the_world_ts_blink", 
+            () -> new TimeStopInstant(new StandEntityAction.Builder().manaCost(800).expRequirement(500)
+                    .ignoresPerformerStun().shiftVariationOf(THE_WORLD_TIME_STOP)));
+    
+    public static final RegistryObject<StandEntityAction> THE_WORLD_ROAD_ROLLER = ACTIONS.register("the_world_road_roller", 
+            () -> new TheWorldRoadRoller(new StandEntityAction.Builder().cooldown(12000).expRequirement(1000)
+                    .doNotAutoSummonStand().shout(ModSounds.DIO_ROAD_ROLLER)));
+    
+
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_STRING_ATTACK = ACTIONS.register("hierophant_green_attack", 
             () -> new HierophantGreenStringAttack(new StandEntityAction.Builder().manaCost(60).cooldown(10)));
     
@@ -205,30 +229,6 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_BARRIER = ACTIONS.register("hierophant_green_barrier", 
             () -> new HierophantGreenBarrier(new StandEntityAction.Builder().needsBlockTarget().expRequirement(700)));
-    
-
-    public static final RegistryObject<StandEntityAction> THE_WORLD_PUNCH = ACTIONS.register("the_world_punch", 
-            () -> new StandEntityMeleeAttack(new StandEntityAction.Builder().manaCost(45).cooldown(5)));
-    
-    public static final RegistryObject<StandEntityAction> THE_WORLD_BARRAGE = ACTIONS.register("the_world_barrage", 
-            () -> new StandEntityMeleeBarrage(new StandEntityMeleeBarrage.Builder().holdType(2.2F, 100).shiftVariationOf(THE_WORLD_PUNCH)));
-    
-    public static final RegistryObject<StandEntityAction> THE_WORLD_BLOCK = ACTIONS.register("the_world_block", 
-            () -> new StandEntityBlock());
-    
-    public static final RegistryObject<StandEntityAction> THE_WORLD_TIME_STOP = ACTIONS.register("the_world_time_stop", 
-            () -> new TimeStop(new StandEntityAction.Builder().manaCost(800).expRequirement(500).holdToFire(30, false, 0)
-                    .ignoresPerformerStun().doNotAutoSummonStand().shout(ModSounds.DIO_THE_WORLD))
-            .voiceLineWithStandSummoned(ModSounds.DIO_TIME_STOP).timeStopSound(ModSounds.THE_WORLD_TIME_STOP)
-            .timeResumeVoiceLine(ModSounds.DIO_TIME_RESUMES).timeResumeSound(ModSounds.THE_WORLD_TIME_RESUME));
-    
-    public static final RegistryObject<StandEntityAction> THE_WORLD_TIME_STOP_BLINK = ACTIONS.register("the_world_ts_blink", 
-            () -> new TimeStopInstant(new StandEntityAction.Builder().manaCost(800).expRequirement(500)
-                    .ignoresPerformerStun().shiftVariationOf(THE_WORLD_TIME_STOP)));
-    
-    public static final RegistryObject<StandEntityAction> THE_WORLD_ROAD_ROLLER = ACTIONS.register("the_world_road_roller", 
-            () -> new TheWorldRoadRoller(new StandEntityAction.Builder().cooldown(12000).expRequirement(1000)
-                    .doNotAutoSummonStand().shout(ModSounds.DIO_ROAD_ROLLER)));
 
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_ATTACK = ACTIONS.register("silver_chariot_attack", 
