@@ -401,7 +401,7 @@ public class InputHandler {
         input.jumping = false;
         player.setOnGround(false);
         player.hasImpulse = true;
-        Vector3d leap = Vector3d.directionFromRotation(player.xRot, player.yRot).scale(strength);
+        Vector3d leap = Vector3d.directionFromRotation(Math.min(player.xRot, -30F), player.yRot).scale(strength);
         player.setDeltaMovement(leap.x, leap.y * 0.5, leap.z);
     }
     
