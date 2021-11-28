@@ -532,7 +532,7 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
     
     @Override
     public boolean canLeap() {
-        return hasPower() && user.isOnGround() && user.xRot < 0 && hasMana(getLeapManaCost()) && getLeapCooldown() == 0 && isLeapUnlocked() && leapStrength() > 0;
+        return hasPower() && user.isOnGround() && hasMana(getLeapManaCost()) && getLeapCooldown() == 0 && isLeapUnlocked() && leapStrength() > 0;
     }
     
     @Override
