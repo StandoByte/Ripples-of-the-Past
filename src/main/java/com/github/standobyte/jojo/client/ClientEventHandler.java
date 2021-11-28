@@ -23,6 +23,8 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Timer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
@@ -69,12 +71,16 @@ public class ClientEventHandler {
     
     
     
-    private boolean isTimeStopped() {
-        return mc.level != null && TimeHandler.isTimeStopped(mc.level);
+    private boolean isTimeStopped(BlockPos blockPos) {
+        return isTimeStopped(new ChunkPos(blockPos));
     }
     
-    public void setTimeStopClientState(boolean timeStopped, boolean canSee, boolean canMove) {
-        if (timeStopped) {
+    private boolean isTimeStopped(ChunkPos chunkPos) {
+        return mc.level != null && TimeHandler.isTimeStopped(mc.level, chunkPos);
+    }
+    
+    public void setTimeStopClientState(int ticks, ChunkPos chunkPos, boolean canSee, boolean canMove) {
+        if (ticks > 0) {
             canSeeInStoppedTime = canSee;
             canMoveInStoppedTime = canSee && canMove;
             partialTickStoppedAt = canMove ? mc.getFrameTime() : 0.0F;
@@ -86,15 +92,15 @@ public class ClientEventHandler {
         }
     }
     
-    public void updateCanMoveInStoppedTime(boolean canMove) {
-        if (isTimeStopped()) {
+    public void updateCanMoveInStoppedTime(boolean canMove, ChunkPos chunkPos) {
+        if (isTimeStopped(chunkPos)) {
             this.canMoveInStoppedTime = canMove;
         }
     }
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public <T extends LivingEntity, M extends EntityModel<T>> void onRenderLiving(RenderLivingEvent.Pre<T, M> event) {
-        if (isTimeStopped()) {
+        if (isTimeStopped(event.getEntity().blockPosition())) {
             T entity = (T) event.getEntity();
             if (!entity.canUpdate() && event.getPartialRenderTick() != partialTickStoppedAt) {
                 event.getRenderer().render(entity, MathHelper.lerp(partialTickStoppedAt, entity.yRotO, entity.yRot), partialTickStoppedAt, event.getMatrixStack(), event.getBuffers(), event.getLight());
@@ -105,7 +111,7 @@ public class ClientEventHandler {
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onRenderTick(RenderTickEvent event) {
-        if (mc.level != null && mc.player.isAlive() && isTimeStopped() && event.phase == TickEvent.Phase.START) {
+        if (mc.level != null && mc.player.isAlive() && isTimeStopped(mc.player.blockPosition()) && event.phase == TickEvent.Phase.START) {
             if (!canSeeInStoppedTime) {
                 clientTimer.partialTick = 0.0F;
             }
@@ -114,7 +120,7 @@ public class ClientEventHandler {
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onClientTick(ClientTickEvent event) {
-        if (mc.level != null && isTimeStopped()) {
+        if (mc.level != null && isTimeStopped(mc.player.blockPosition())) {
             if (event.phase == TickEvent.Phase.START) {
                 if (!canSeeInStoppedTime) {
                     ClientReflection.pauseClient(mc);

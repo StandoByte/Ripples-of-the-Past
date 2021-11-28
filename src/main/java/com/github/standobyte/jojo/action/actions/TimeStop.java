@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.ModEffects;
@@ -18,6 +19,8 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 
 public class TimeStop extends StandEntityAction {
@@ -52,7 +55,7 @@ public class TimeStop extends StandEntityAction {
     
     @Override
     protected SoundEvent getShout(LivingEntity user, IPower<?> power, ActionTarget target, boolean wasActive) {
-        if (TimeHandler.isTimeStopped(user.level)) {
+        if (TimeHandler.isTimeStopped(user.level, user.blockPosition())) {
             return null;
         }
         if (wasActive && voiceLineWithStandSummoned != null) {
@@ -75,12 +78,14 @@ public class TimeStop extends StandEntityAction {
         int timeStopTicks = TimeHandler.getTimeStopTicks(getExpRequirement(), (IStandPower) power, user, INonStandPower.getNonStandPowerOptional(user));
         if (!world.isClientSide()) {
             standPower.setExp(standPower.getExp() + 4);
-            TimeHandler.setTimeResumeSounds(world, timeStopTicks, this, user);
-            if (TimeHandler.stopTime(world, timeStopTicks)) {
-                if (timeStopTicks >= 40 && timeStopSound.get() != null) {
-                        PacketManager.sendGloballyWithCondition(new PlaySoundAtClientPacket(timeStopSound.get(), SoundCategory.AMBIENT, user.blockPosition(), 5.0F, 1.0F), 
-                                world.dimension(), TimeHandler::canPlayerSeeInStoppedTime);
-                }
+            BlockPos blockPos = user.blockPosition();
+            ChunkPos chunkPos = new ChunkPos(blockPos);
+            TimeHandler.setTimeResumeSounds(world, chunkPos, timeStopTicks, this, user);
+            TimeHandler.stopTime(world, timeStopTicks, chunkPos);
+            if (timeStopTicks >= 40 && timeStopSound != null && timeStopSound.get() != null) {
+                PacketManager.sendGloballyWithCondition(new PlaySoundAtClientPacket(timeStopSound.get(), SoundCategory.AMBIENT, blockPos, 5.0F, 1.0F), 
+                        world.dimension(), player -> (JojoModConfig.COMMON.inTimeStopRange(
+                                chunkPos, new ChunkPos(player.blockPosition()))) && TimeHandler.canPlayerSeeInStoppedTime(player));
             }
             user.addEffect(new EffectInstance(ModEffects.TIME_STOP.get(), timeStopTicks, 0, false, false, true));
         }
@@ -88,7 +93,7 @@ public class TimeStop extends StandEntityAction {
     
     @Override
     public int getHoldDurationToFire(IPower<?> power) { 
-        return TimeHandler.isTimeStopped(power.getUser().level) ? 0 : super.getHoldDurationToFire(power);
+        return TimeHandler.isTimeStopped(power.getUser().level, power.getUser().blockPosition()) ? 0 : super.getHoldDurationToFire(power);
     }
     
     @Nullable
