@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.client.ui.screen;
 
 import java.util.List;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonStartMeditationPacket;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
@@ -15,6 +16,7 @@ import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.IReorderingProcessor;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -43,7 +45,10 @@ public class HamonStatsTabGui extends HamonTabGui {
         int textWidth = HamonScreen.WINDOW_WIDTH - 30;
         strengthDescLines = minecraft.font.split(new TranslationTextComponent("hamon.strength_stat.desc"), textWidth);
         controlDescLines = minecraft.font.split(new TranslationTextComponent("hamon.control_stat.desc"), textWidth);
-        breathingDescLines = minecraft.font.split(new TranslationTextComponent("hamon.breathing_stat.desc"), textWidth);
+        ITextComponent desc = JojoModConfig.COMMON.breathingTechniqueDeterioration.get() ? 
+                new TranslationTextComponent("hamon.breathing_stat.desc", new TranslationTextComponent("hamon.breathing_stat.notice"))
+                : new TranslationTextComponent("hamon.breathing_stat.desc");
+        breathingDescLines = minecraft.font.split(desc, textWidth);
         exercisesDescLines = minecraft.font.split(new TranslationTextComponent("hamon.exercises_average"), textWidth);
         statLimitTooltip = minecraft.font.split(new TranslationTextComponent("hamon.stat_limited"), 150);
         meditationButtonTooltip = minecraft.font.split(new TranslationTextComponent("hamon.meditation_button", 
