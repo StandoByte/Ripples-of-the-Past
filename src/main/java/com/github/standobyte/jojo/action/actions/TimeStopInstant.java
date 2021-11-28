@@ -29,7 +29,7 @@ public class TimeStopInstant extends StandEntityAction {
     
     @Override
     public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IPower<?> power, ActionTarget target) {
-        if (TimeHandler.isTimeStopped(user.level)) {
+        if (TimeHandler.isTimeStopped(user.level, user.blockPosition())) {
             return ActionConditionResult.NEGATIVE;
         }
         return ActionConditionResult.POSITIVE;

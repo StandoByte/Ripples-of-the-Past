@@ -1,78 +1,81 @@
 package com.github.standobyte.jojo.capability.world;
 
-import java.lang.ref.WeakReference;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
-import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
-import com.github.standobyte.jojo.util.JojoModUtil;
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.util.TimeHandler;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 
 public class WorldUtilCap {
     private final World world;
-    int timeStopTicks;
+    Map<ChunkPos, Integer> timeStopTicks = new HashMap<>();
+    Map<ChunkPos, LastToResumeTime> timeResumption = new HashMap<>();
     public boolean gameruleDayLightCycle;
     public boolean gameruleWeatherCycle;
-    
-    private WeakReference<LivingEntity> entityToResumeTime;
-    private SoundEvent timeResumeVoiceLine;
-    private SoundEvent timeResumeSound;
     
     public WorldUtilCap(World world) {
         this.world = world;
     }
     
-    public boolean setTimeStopTicks(int ticks) {
-        boolean timeWasStoppedAlready = timeStopTicks > 0;
-        this.timeStopTicks = Math.max(timeStopTicks, ticks);
-        return !timeWasStoppedAlready && ticks > 0;
+    public void setTimeStopTicks(int ticks, ChunkPos chunkPos) {
+        timeStopTicks.put(chunkPos, Math.max(timeStopTicks.getOrDefault(chunkPos, 0), ticks));
     }
     
-    public void resetTimeStopTicks() {
-        timeStopTicks = 0;
+    public void setLastToResumeTime(LivingEntity entity, ChunkPos chunkPos, SoundEvent sound, SoundEvent voiceLine) {
+        timeResumption.put(chunkPos, new LastToResumeTime(entity, sound, voiceLine));
     }
     
-    public boolean isTimeStopped() {
-        return timeStopTicks > 0;
+    public void resetTimeStopTicks(ChunkPos chunkPos) {
+        timeStopTicks.remove(chunkPos);
+        timeResumption.remove(chunkPos);
     }
     
-    public void decTimeStopTicks() {
-        if (timeStopTicks > 0) {
-            handleTimeResumeSounds();
-            timeStopTicks--;
+    public boolean isTimeStopped(ChunkPos chunkPos) {
+        for (Map.Entry<ChunkPos, Integer> entry : timeStopTicks.entrySet()) {
+            if (entry.getValue() > 0 && JojoModConfig.COMMON.inTimeStopRange(entry.getKey(), chunkPos)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public void tickStoppedTime() {
+        for (Iterator<Map.Entry<ChunkPos, Integer>> it = timeStopTicks.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<ChunkPos, Integer> entry = it.next();
+            if (entry.getValue() > 0) {
+                handleTimeResumeSounds(entry);
+                entry.setValue(entry.getValue() - 1);
+            }
+            if (entry.getValue() <= 0) {
+                ChunkPos chunkPos = entry.getKey();
+                TimeHandler.resumeTime(world, chunkPos, false);
+                it.remove();
+                timeResumption.remove(chunkPos);
+            }
         }
     }
     
-    public int getTimeStopTicks() {
-        return timeStopTicks;
+    public int getTimeStopTicks(ChunkPos chunkPos) {
+        return timeStopTicks.entrySet()
+                .stream()
+                .filter(center -> JojoModConfig.COMMON.inTimeStopRange(center.getKey(), chunkPos))
+                .max(Comparator.comparingInt(Map.Entry::getValue))
+                .map(Map.Entry::getValue)
+                .orElse(0);
     }
     
-    public void setLastToResumeTime(LivingEntity entity, SoundEvent sound, SoundEvent voiceLine) {
-        this.entityToResumeTime = new WeakReference<>(entity);
-        this.timeResumeSound = sound;
-        this.timeResumeVoiceLine = voiceLine;
-    }
-    
-    private static final int TIME_RESUME_SOUND_TICKS = 10;
-    private static final int TIME_RESUME_VOICELINE_TICKS = 30;
-    private void handleTimeResumeSounds() {
-        if (!world.isClientSide() && (timeStopTicks == TIME_RESUME_SOUND_TICKS || timeStopTicks == TIME_RESUME_VOICELINE_TICKS)) {
-            if (entityToResumeTime != null) {
-                LivingEntity entity = entityToResumeTime.get();
-                if (entity != null) {
-                    if (timeStopTicks == TIME_RESUME_SOUND_TICKS && timeResumeSound != null) {
-                        PacketManager.sendGloballyWithCondition(new PlaySoundAtClientPacket(timeResumeSound, SoundCategory.AMBIENT, entity.blockPosition(), 5.0F, 1.0F), 
-                                world.dimension(), TimeHandler::canPlayerSeeInStoppedTime);
-                    }
-                    else if (timeResumeVoiceLine != null) {
-                        JojoModUtil.sayVoiceLine(entity, timeResumeVoiceLine);
-                    }
-                }
-            }
+    private void handleTimeResumeSounds(Map.Entry<ChunkPos, Integer> timeStop) {
+        ChunkPos chunkPos = timeStop.getKey();
+        LastToResumeTime soundsHandler = timeResumption.get(chunkPos);
+        if (soundsHandler != null) {
+            soundsHandler.playSounds(timeStop.getValue(), chunkPos, world);
         }
     }
 }

@@ -11,7 +11,7 @@ public class WorldUtilCapStorage implements IStorage<WorldUtilCap> {
     @Override
     public INBT writeNBT(Capability<WorldUtilCap> capability, WorldUtilCap instance, Direction side) {
         CompoundNBT cnbt = new CompoundNBT();
-        cnbt.putInt("TimeStopTicks", instance.timeStopTicks);
+        // TODO time stop ticks storage
         cnbt.putBoolean("GameruleDayLightCycle", instance.gameruleDayLightCycle);
         cnbt.putBoolean("GameruleWeatherCycle", instance.gameruleWeatherCycle);
         return cnbt;
@@ -20,7 +20,7 @@ public class WorldUtilCapStorage implements IStorage<WorldUtilCap> {
     @Override
     public void readNBT(Capability<WorldUtilCap> capability, WorldUtilCap instance, Direction side, INBT nbt) {
         CompoundNBT cnbt = (CompoundNBT) nbt;
-        instance.timeStopTicks = cnbt.getInt("TimeStopTicks");
+        // TODO time stop ticks storage
         instance.gameruleDayLightCycle = cnbt.getBoolean("GameruleDayLightCycle");
         instance.gameruleWeatherCycle = cnbt.getBoolean("GameruleWeatherCycle");
     }
