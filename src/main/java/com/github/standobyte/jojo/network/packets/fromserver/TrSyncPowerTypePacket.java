@@ -53,7 +53,8 @@ public class TrSyncPowerTypePacket<T extends IPowerType<T>> {
                     if (msg.powerType == null) {
                         if (entity == ClientUtil.getClientPlayer()) {
                             ActionsOverlayGui overlay = ActionsOverlayGui.getInstance();
-                            if (overlay.getMode() == UiMode.STAND) {
+                            if (msg.classification == PowerClassification.STAND && overlay.getMode() == UiMode.STAND 
+                                    || msg.classification == PowerClassification.NON_STAND && overlay.getMode() == UiMode.NON_STAND) {
                                 overlay.setMode(UiMode.NONE);
                             }
                         }
