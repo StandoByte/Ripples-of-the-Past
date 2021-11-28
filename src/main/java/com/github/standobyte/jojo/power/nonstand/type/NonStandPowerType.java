@@ -37,6 +37,8 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
         return color;
     }
     
+    public void onClear(INonStandPower power) {}
+    
     @Override
     public boolean canTickMana(LivingEntity user, IPower<?> power) {
         return true;
