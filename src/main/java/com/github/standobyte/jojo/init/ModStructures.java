@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.util.ForgeBusEventSubscriber;
 import com.github.standobyte.jojo.util.reflection.CommonReflection;
 import com.github.standobyte.jojo.world.gen.ConfiguredStructureSupplier;
@@ -70,13 +71,16 @@ public class ModStructures {
 
         registerConfiguredStructure(registry, CONFIGURED_HAMON_TEMPLE.get(), 
                 new ResourceLocation(JojoMod.MOD_ID, "configured_hamon_temple"), HAMON_TEMPLE.get(), 
-                biome -> biome.getCategory() == Biome.Category.EXTREME_HILLS);
+                biome -> JojoModConfig.COMMON.hamonTempleSpawn.get()
+                && biome.getCategory() == Biome.Category.EXTREME_HILLS);
         registerConfiguredStructure(registry, CONFIGURED_METEORITE.get(), 
                 new ResourceLocation(JojoMod.MOD_ID, "configured_meteorite"), METEORITE.get(), 
-                biome -> biome.getClimate().precipitation == Biome.RainType.SNOW && biome.getCategory() != Biome.Category.OCEAN);
+                biome -> JojoModConfig.COMMON.meteoriteSpawn.get()
+                && biome.getClimate().precipitation == Biome.RainType.SNOW && biome.getCategory() != Biome.Category.OCEAN);
         registerConfiguredStructure(registry, CONFIGURED_PILLARMAN_TEMPLE.get(), 
                 new ResourceLocation(JojoMod.MOD_ID, "configured_pillarman_temple"), PILLARMAN_TEMPLE.get(), 
-                biome -> biome.getCategory() == Biome.Category.JUNGLE);
+                biome -> JojoModConfig.COMMON.pillarmanTempleSpawn.get()
+                && biome.getCategory() == Biome.Category.JUNGLE);
     }
     
     private static <F extends Structure<?>> void setupMapSpacingAndLand(
