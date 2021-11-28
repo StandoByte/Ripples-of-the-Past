@@ -119,9 +119,10 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingTick(LivingUpdateEvent event) {
         LivingEntity entity = event.getEntityLiving();
-        if (!entity.level.isClientSide()) {
-            if (isInDaylight(entity)) {
-                ModDamageSources.dealUltravioletDamage(entity, 20, null, null, true);
+        if (!entity.level.isClientSide() && entity.invulnerableTime <= 10) {
+            float sunDamage = getSunDamage(entity);
+            if (sunDamage > 0) {
+                ModDamageSources.dealUltravioletDamage(entity, sunDamage, null, null, true);
             }
         }
         entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
@@ -157,21 +158,43 @@ public class GameplayEventHandler {
             power.tick();
         }); 
     }
-    
-    private static boolean isInDaylight(LivingEntity entity) {
-        if (entity.level.isDay()) {
+
+    private static final float MAX_SUN_DAMAGE = 10;
+    private static final float MIN_SUN_DAMAGE = 2;
+    private static float getSunDamage(LivingEntity entity) {
+        World world = entity.level;
+        if (world.isDay()) {
             float brightness = entity.getBrightness();
-            BlockPos blockPos = entity.getVehicle() instanceof BoatEntity ? (new BlockPos(entity.getX(), (double)Math.round(entity.getY(1.0)), entity.getZ())).above() : new BlockPos(entity.getX(), (double)Math.round(entity.getY(1.0)), entity.getZ());
-            if (brightness > 0.5F && entity.level.canSeeSky(blockPos)) {
-                return true;
+            BlockPos blockPos = entity.getVehicle() instanceof BoatEntity ? 
+                    (new BlockPos(entity.getX(), (double)Math.round(entity.getY(1.0)), entity.getZ())).above()
+                    : new BlockPos(entity.getX(), (double)Math.round(entity.getY(1.0)), entity.getZ());
+            if (brightness > 0.5F && world.canSeeSky(blockPos)) {
+                int time = (int) (world.getDayTime() % 24000L);
+                float damage = MAX_SUN_DAMAGE;
+                float diff = MAX_SUN_DAMAGE - MIN_SUN_DAMAGE;
+                
+                // sunrise
+                if (time > 23460) { 
+                    time -= 24000;
+                }
+                if (time <= 60) {
+                    damage -= diff * (1F - (float) (time + 540) / 600F);
+                }
+                
+                // sunset
+                else if (time > 11940 && time <= 12540) {
+                    damage -= diff * (float) (time - 11940) / 600F;
+                }
+                
+                return damage;
             }
         }
-        return false;
+        return 0;
     }
     
     @SubscribeEvent
     public static void onWorldTick(WorldTickEvent event) {
-        if (event.side == LogicalSide.SERVER && event.phase == TickEvent.Phase.END && !TimeHandler.isTimeStopped(event.world)) {
+        if (event.side == LogicalSide.SERVER && event.phase == TickEvent.Phase.END) {
             ((ServerWorld) event.world).getAllEntities().forEach(entity -> {
                 entity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> {
                     if (cap.hamonBaseDmg > 0 && entity.canUpdate()) {
@@ -639,17 +662,19 @@ public class GameplayEventHandler {
     public static void onExplosionDetonate(ExplosionEvent.Detonate event) {
         Explosion explosion = event.getExplosion();
         if (explosion.getExploder() instanceof MRCrossfireHurricaneEntity) {
+            LivingEntity magiciansRed = explosion.getSourceMob();
             for (Entity entity : event.getAffectedEntities()) {
-                int seconds = 6;
-                if (entity instanceof StandEntity) {
-                    ((StandEntity) entity).setFireFromStand(seconds);
-                }
-                else {
-                    entity.setSecondsOnFire(seconds);
+                if (!entity.is(magiciansRed)) {
+                    int seconds = 6;
+                    if (entity instanceof StandEntity) {
+                        ((StandEntity) entity).setFireFromStand(seconds);
+                    }
+                    else {
+                        entity.setSecondsOnFire(seconds);
+                    }
                 }
             }
             World world = event.getWorld();
-            LivingEntity magiciansRed = explosion.getSourceMob();
             if (magiciansRed != null && ForgeEventFactory.getMobGriefingEvent(world, magiciansRed)) {
                 for (BlockPos pos : event.getAffectedBlocks()) {
                     if (world.isEmptyBlock(pos)) {
