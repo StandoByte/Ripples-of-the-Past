@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
@@ -229,6 +230,7 @@ public class HamonData extends TypeSpecificData {
         if (isSkillLearned(HamonSkill.NATURAL_TALENT)) {
             manaCost *= 2;
         }
+        manaCost *= JojoModConfig.COMMON.hamonPointsMultiplier.get().floatValue();
         int points = (int) (manaCost / MANA_PER_POINT);
         if (random.nextFloat() < (manaCost % MANA_PER_POINT) / MANA_PER_POINT) points++;
         setHamonStatPoints(stat, getStatPoints(stat) + points, false, false);
@@ -335,12 +337,19 @@ public class HamonData extends TypeSpecificData {
             return;
         }
         float lvlInc = (2 * MathHelper.clamp(getAverageExercisePoints(), 0F, 1F)) - 1F;
-//        lvlInc *= MathHelper.abs(lvlInc);
         if (lvlInc < 0) {
-            lvlInc *= 0.25F;
+            if (!JojoModConfig.COMMON.breathingTechniqueDeterioration.get()) {
+                lvlInc = 0;
+            }
+            else {
+                lvlInc *= 0.25F;
+            }
         }
-        else if (isSkillLearned(HamonSkill.NATURAL_TALENT)) {
-            lvlInc *= 2;
+        else {
+            lvlInc *= JojoModConfig.COMMON.breathingTechniqueMultiplier.get().floatValue();
+            if (isSkillLearned(HamonSkill.NATURAL_TALENT)) {
+                lvlInc *= 2;
+            }
         }
         setBreathingLevel(getBreathingLevel() + lvlInc);
         avgExercisePoints = 0;
