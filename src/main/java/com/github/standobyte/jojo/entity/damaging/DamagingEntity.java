@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.util.JojoModUtil;
 import com.github.standobyte.jojo.util.MathUtil;
 import com.github.standobyte.jojo.util.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.damage.IndirectStandEntityDamageSource;
@@ -29,7 +30,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
@@ -174,7 +174,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
         if (!level.isClientSide()) {
             BlockPos blockPos = blockRayTraceResult.getBlockPos();
             LivingEntity owner = getOwner();
-            boolean brokenBlock = owner != null && !(owner instanceof PlayerEntity) && !ForgeHooks.canEntityDestroy(level, blockPos, owner) ? 
+            boolean brokenBlock = owner != null && !JojoModUtil.canEntityDestroy(level, blockPos, owner) ? 
                     false
                     : destroyBlock(blockRayTraceResult);
             afterBlockHit(blockRayTraceResult, brokenBlock);

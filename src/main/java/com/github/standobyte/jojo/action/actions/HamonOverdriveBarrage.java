@@ -6,6 +6,7 @@ import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
+import com.github.standobyte.jojo.util.JojoModUtil;
 import com.github.standobyte.jojo.util.damage.ModDamageSources;
 
 import net.minecraft.block.BlockState;
@@ -38,8 +39,8 @@ public class HamonOverdriveBarrage extends HamonAction {
         if (requirementsFulfilled) {
             switch (target.getType()) {
             case BLOCK:
-                if (!world.isClientSide()) {
-                    BlockPos pos = target.getBlockPos();
+                BlockPos pos = target.getBlockPos();
+                if (!world.isClientSide() && JojoModUtil.canEntityDestroy(world, pos, user)) {
                     if (!world.isEmptyBlock(pos)) {
                         BlockState blockState = world.getBlockState(pos);
                         float digDuration = blockState.getDestroySpeed(world, pos);
