@@ -17,7 +17,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class ActionToast implements IToast {
-    private static final ITextComponent NAME = new TranslationTextComponent("action.toast.title");
+    private static final ITextComponent NAME = new TranslationTextComponent("jojo.action.toast.title");
     private final ITextComponent description;
     private final Type type;
     private final List<Action> actions = Lists.newArrayList();
@@ -27,7 +27,7 @@ public class ActionToast implements IToast {
 
     private ActionToast(Type type, Action action, IPowerType<?> powerType) {
         this.type = type;
-        this.description = new TranslationTextComponent("action.toast." + type.powerType + type.actionType + "description");
+        this.description = new TranslationTextComponent("jojo.action.toast." + type.powerType + type.actionType + "description");
         this.powerType = powerType;
         this.actions.add(action);
     }

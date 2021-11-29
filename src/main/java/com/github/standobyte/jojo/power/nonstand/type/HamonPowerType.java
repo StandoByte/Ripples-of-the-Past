@@ -451,14 +451,14 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                             hamon.setHamonStatPoints(HamonSkill.HamonStat.STRENGTH, HamonData.MAX_HAMON_POINTS, true, true);
                             hamon.setHamonStatPoints(HamonSkill.HamonStat.CONTROL, HamonData.MAX_HAMON_POINTS, true, true);
                         }
-                        player.sendMessage(new TranslationTextComponent("chat.message.learnt_hamon"), Util.NIL_UUID);
+                        player.sendMessage(new TranslationTextComponent("jojo.chat.message.learnt_hamon"), Util.NIL_UUID);
                         PlayerUtilCap utilCap = player.getCapability(PlayerUtilCapProvider.CAPABILITY).orElseThrow(() -> new IllegalStateException());
                         utilCap.sendNotification(OneTimeNotification.HAMON_WINDOW, 
-                                new TranslationTextComponent("chat.message.hamon_window_hint", new KeybindTextComponent("jojo.key.hamon_skills_window")));
+                                new TranslationTextComponent("jojo.chat.message.hamon_window_hint", new KeybindTextComponent("jojo.key.hamon_skills_window")));
                     });
                 }
                 else {
-                    player.sendMessage(new TranslationTextComponent("chat.message.cant_learn_hamon"), Util.NIL_UUID);
+                    player.sendMessage(new TranslationTextComponent("jojo.chat.message.cant_learn_hamon"), Util.NIL_UUID);
                 }
                 return;
             }

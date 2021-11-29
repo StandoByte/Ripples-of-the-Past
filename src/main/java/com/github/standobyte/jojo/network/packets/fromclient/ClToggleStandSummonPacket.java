@@ -26,7 +26,7 @@ public class ClToggleStandSummonPacket {
                     power.toggleSummon();
                 }
                 else {
-                    player.sendMessage(new TranslationTextComponent("chat.message.no_stand"), Util.NIL_UUID);
+                    player.sendMessage(new TranslationTextComponent("jojo.chat.message.no_stand"), Util.NIL_UUID);
                 }
             });
         });

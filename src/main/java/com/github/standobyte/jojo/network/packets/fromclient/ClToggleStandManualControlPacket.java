@@ -32,11 +32,11 @@ public class ClToggleStandManualControlPacket {
                         }
                     }
                     else {
-                        player.sendMessage(new TranslationTextComponent("chat.message.no_entity_stand"), Util.NIL_UUID);
+                        player.sendMessage(new TranslationTextComponent("jojo.chat.message.no_entity_stand"), Util.NIL_UUID);
                     }
                 }
                 else {
-                    player.sendMessage(new TranslationTextComponent("chat.message.no_stand"), Util.NIL_UUID);
+                    player.sendMessage(new TranslationTextComponent("jojo.chat.message.no_stand"), Util.NIL_UUID);
                 }
             });
         });

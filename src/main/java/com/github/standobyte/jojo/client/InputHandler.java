@@ -195,8 +195,8 @@ public class InputHandler {
                     mc.player.sendMessage(new TranslationTextComponent(
                             nonStandPower.getTypeSpecificData(ModNonStandPowers.VAMPIRISM.get())
                             .map(vampirism -> vampirism.isVampireHamonUser()).orElse(false) ? 
-                                    "chat.message.no_hamon_vampire"
-                                    : "chat.message.no_hamon"), Util.NIL_UUID);
+                                    "jojo.chat.message.no_hamon_vampire"
+                                    : "jojo.chat.message.no_hamon"), Util.NIL_UUID);
                 }
             }
             
