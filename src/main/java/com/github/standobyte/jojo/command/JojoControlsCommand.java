@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.command;
 
+import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.JojoModConfig;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -29,7 +31,12 @@ public class JojoControlsCommand {
                     new KeybindTextComponent("key.use").withStyle(TextFormatting.ITALIC)).withStyle(TextFormatting.GRAY),
             new TranslationTextComponent("chat.command.controls.stand", 
                     new KeybindTextComponent("jojo.key.toggle_stand").withStyle(TextFormatting.ITALIC),
-                    new KeybindTextComponent("jojo.key.stand_remote_control").withStyle(TextFormatting.ITALIC)).withStyle(TextFormatting.GRAY),
+                    new KeybindTextComponent("jojo.key.stand_remote_control").withStyle(TextFormatting.ITALIC)).withStyle(TextFormatting.GRAY)
+    };
+    private static final ITextComponent[] LAST_PAGE_VARIANTS = {
+            new TranslationTextComponent("chat.command.controls.changeable", new TranslationTextComponent("chat.command.controls.keep_off")).withStyle(TextFormatting.GRAY),
+            new TranslationTextComponent("chat.command.controls.changeable", new TranslationTextComponent("chat.command.controls.keep_stand_off")).withStyle(TextFormatting.GRAY),
+            new TranslationTextComponent("chat.command.controls.changeable", new TranslationTextComponent("chat.command.controls.keep_non_stand_off")).withStyle(TextFormatting.GRAY),
             new TranslationTextComponent("chat.command.controls.changeable").withStyle(TextFormatting.GRAY)
     };
 
@@ -42,10 +49,10 @@ public class JojoControlsCommand {
     }
 
     private static int writePage(int page, CommandContext<CommandSource> ctx) {
-        page = MathHelper.clamp(page, 1, TEXT_PAGES.length);
-        IFormattableTextComponent text = new TranslationTextComponent("chat.command.controls.page", String.valueOf(page), TEXT_PAGES.length).withStyle(TextFormatting.DARK_GRAY);
-        text.append(TEXT_PAGES[page - 1]);
-        if (page < TEXT_PAGES.length) {
+        page = MathHelper.clamp(page, 1, TEXT_PAGES.length + 1);
+        IFormattableTextComponent text = new TranslationTextComponent("chat.command.controls.page", String.valueOf(page), TEXT_PAGES.length + 1).withStyle(TextFormatting.DARK_GRAY);
+        text.append(getPage(page - 1));
+        if (page <= TEXT_PAGES.length) {
             final int pageNext = page + 1;
             text.append(new TranslationTextComponent("chat.command.controls.next_page").withStyle((style) -> {
                 return style.withColor(TextFormatting.GREEN)
@@ -55,5 +62,20 @@ public class JojoControlsCommand {
         }
         ctx.getSource().sendSuccess(text, false);
         return 0;
+    }
+    
+    private static final ITextComponent getPage(int pageNum) {
+        if (pageNum >= TEXT_PAGES.length) {
+            byte i = 0;
+            if (JojoModConfig.COMMON.keepNonStandOnDeath.get()) {
+                i |= 1;
+            }
+            if (JojoModConfig.COMMON.keepStandOnDeath.get()) {
+                i |= 2;
+            }
+            JojoMod.LOGGER.debug(i);
+            return LAST_PAGE_VARIANTS[i];
+        }
+        return TEXT_PAGES[pageNum];
     }
 }
