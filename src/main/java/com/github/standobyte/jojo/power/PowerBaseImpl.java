@@ -81,12 +81,12 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
             PacketManager.sendToClientsTrackingAndSelf(new TrSyncPowerTypePacket<T>(player.getId(), getPowerClassification(), getType()), player);
             player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                 cap.sendNotification(OneTimeNotification.POWER_CONTROLS, 
-                        new TranslationTextComponent("chat.controls.message", 
+                        new TranslationTextComponent("jojo.chat.controls.message", 
                                 new StringTextComponent("/" + JojoControlsCommand.LITERAL)
                                 .withStyle((style) -> style
                                         .withColor(TextFormatting.GREEN)
                                         .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + JojoControlsCommand.LITERAL))
-                                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslationTextComponent("chat.controls.tooltip"))))));
+                                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslationTextComponent("jojo.chat.controls.tooltip"))))));
             });
         });
         return true;
@@ -331,13 +331,13 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
                 serverPlayerUser.ifPresent(player -> {
                     PacketManager.sendToClient(new SyncManaPacket(getPowerClassification(), getMana()), player);
                 });
-                ITextComponent message = new TranslationTextComponent("chat.message.no_mana_" + getType().getManaString());
+                ITextComponent message = new TranslationTextComponent("jojo.chat.message.no_mana_" + getType().getManaString());
                 return ActionConditionResult.createNegative(message);
             }
         }
 
         if (!action.ignoresPerformerStun() && performer != null && performer.getEffect(ModEffects.STUN.get()) != null) {
-            return ActionConditionResult.createNegative(new TranslationTextComponent("chat.message.stun"));
+            return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.chat.message.stun"));
         }
 
         if (checkTargetType) {
@@ -353,7 +353,7 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
         }
 
         if (!isActionUnlocked(action)) {
-            return ActionConditionResult.createNegative(new TranslationTextComponent("chat.message.not_unlocked"));
+            return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.chat.message.not_unlocked"));
         }
         return ActionConditionResult.POSITIVE;
     }
@@ -400,7 +400,7 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
 
         if (!action.appropriateTarget(target.getType())) {
             if (targetTooFar) {
-                return ActionConditionResult.createNegativeContinueHold(new TranslationTextComponent("chat.message.target_too_far"));
+                return ActionConditionResult.createNegativeContinueHold(new TranslationTextComponent("jojo.chat.message.target_too_far"));
             }
             return ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
         }

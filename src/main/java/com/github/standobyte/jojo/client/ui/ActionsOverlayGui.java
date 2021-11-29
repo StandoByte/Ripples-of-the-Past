@@ -537,7 +537,7 @@ public class ActionsOverlayGui extends AbstractGui { // TODO config to move it t
     }
     
     private ITextComponent actionNameLine(Action action, @Nullable Action shiftVariation, String actionTypeKey) {
-        String tlKey = "overlay.actions." + actionTypeKey;
+        String tlKey = "jojo.overlay.actions." + actionTypeKey;
         if (action.getHoldDurationMax() > 0) {
             tlKey = tlKey + ".hold";
         }

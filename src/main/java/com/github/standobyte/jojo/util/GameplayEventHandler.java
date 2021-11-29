@@ -643,7 +643,7 @@ public class GameplayEventHandler {
                 hamon.getTechnique() == Technique.JOSEPH).orElse(false)).orElse(false));
         for (ServerPlayerEntity joseph : josephTechniqueUsers) {
             if (joseph.getChatVisibility() != ChatVisibility.HIDDEN && joseph.getRandom().nextFloat() < 0.05F) {
-                String tlKey = "chat.joseph.next_line." + (joseph.getRandom().nextInt(3) + 1);
+                String tlKey = "jojo.chat.joseph.next_line." + (joseph.getRandom().nextInt(3) + 1);
                 ITextComponent message = new TranslationTextComponent("chat.type.text", joseph.getDisplayName(), 
                         new TranslationTextComponent(tlKey, event.getMessage()));
                 LanguageMap map = LanguageMap.getInstance();

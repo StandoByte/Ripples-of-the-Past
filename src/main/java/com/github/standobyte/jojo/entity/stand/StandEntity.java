@@ -1171,7 +1171,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 int warningDistance = ((ServerWorld) level).getServer().getPlayerList().getViewDistance() * 16 - 4;
                 if (horizontalDistSqr > warningDistance * warningDistance) {
                     ((PlayerEntity) user).getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                        cap.sendNotification(OneTimeNotification.HIGH_STAND_RANGE, new TranslationTextComponent("chat.message.view_distance_stand"));
+                        cap.sendNotification(OneTimeNotification.HIGH_STAND_RANGE, new TranslationTextComponent("jojo.chat.message.view_distance_stand"));
                     });
                 }
             }

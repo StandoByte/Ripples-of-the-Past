@@ -80,10 +80,10 @@ public class StandArrowItem extends ArrowItem {
                     }
                     return false;
                 }
-                player.sendMessage(new TranslationTextComponent("chat.message.tmp_not_enough_xp", tier), Util.NIL_UUID); // TODO remove the message after adding stands for each tier
+                player.sendMessage(new TranslationTextComponent("jojo.chat.message.tmp_not_enough_xp", tier), Util.NIL_UUID); // TODO remove the message after adding stands for each tier
                 return false;
             } else {
-                player.sendMessage(new TranslationTextComponent("chat.message.already_have_stand"), Util.NIL_UUID);
+                player.sendMessage(new TranslationTextComponent("jojo.chat.message.already_have_stand"), Util.NIL_UUID);
                 return false;
             }
         }

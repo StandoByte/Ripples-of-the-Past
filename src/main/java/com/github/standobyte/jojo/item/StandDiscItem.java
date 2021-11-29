@@ -41,7 +41,7 @@ public class StandDiscItem extends Item {
             if (validStandDisc(stack)) {
                 StandType stand = getStandFromStack(stack);
                 if (!StandUtil.canGainStand(player, power.getTier(), stand)) {
-                    player.sendMessage(new TranslationTextComponent("chat.message.low_tier"), Util.NIL_UUID);
+                    player.sendMessage(new TranslationTextComponent("jojo.chat.message.low_tier"), Util.NIL_UUID);
                     return ActionResult.fail(stack);
                 }
                 if (power.givePower(stand)) {
@@ -51,7 +51,7 @@ public class StandDiscItem extends Item {
                     return ActionResult.success(stack);
                 }
                 else {
-                    player.sendMessage(new TranslationTextComponent("chat.message.already_have_stand"), Util.NIL_UUID);
+                    player.sendMessage(new TranslationTextComponent("jojo.chat.message.already_have_stand"), Util.NIL_UUID);
                     return ActionResult.fail(stack);
                 }
             } 
