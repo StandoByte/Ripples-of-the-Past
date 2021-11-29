@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
@@ -494,7 +495,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
 
     public static void hamonPerksOnDeath(LivingDeathEvent event) {
         LivingEntity dead = event.getEntityLiving();
-        if (dead.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) return;
+        if (JojoModConfig.COMMON.keepNonStandOnDeath.get()) return;
         INonStandPower.getNonStandPowerOptional(dead).ifPresent(power -> {
             power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
                 if (hamon.getTechnique() != null) {
