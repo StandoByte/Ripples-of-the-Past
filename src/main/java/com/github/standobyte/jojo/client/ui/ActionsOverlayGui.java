@@ -7,8 +7,8 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.Action.TargetRequirement;
+import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.ui.sprites.SpriteUploaders;
@@ -70,6 +70,9 @@ public class ActionsOverlayGui extends AbstractGui { // TODO config to move it t
     private ActionsHotbarData attackData = new ActionsHotbarData();
     private ActionsHotbarData abilityData = new ActionsHotbarData();
     
+    private ITextComponent unfulfilledCondition;
+    private int conditionMessageTicks;
+    
     private static final ImmutableMap<ResourceLocation, BarTexture> NON_STAND_BAR_TEX = ImmutableMap.<ResourceLocation, BarTexture>builder()
             .put(new ResourceLocation(JojoMod.MOD_ID, "hamon"), BarTexture.HAMON)
             .put(new ResourceLocation(JojoMod.MOD_ID, "vampirism"), BarTexture.BLOOD)
@@ -89,6 +92,10 @@ public class ActionsOverlayGui extends AbstractGui { // TODO config to move it t
     
     public static ActionsOverlayGui getInstance() {
         return instance;
+    }
+    
+    public void tick() {
+        tickCondition();
     }
     
     @SubscribeEvent(priority = EventPriority.LOW)
@@ -192,6 +199,9 @@ public class ActionsOverlayGui extends AbstractGui { // TODO config to move it t
 
             y += mc.font.lineHeight + 1 + HOTBAR_SQUARE_HEIGHT + 1;
             renderHotbarText(matrixStack, x, y, currentPower, ActionType.ABILITY);
+
+            y += mc.font.lineHeight + 1 + HOTBAR_SQUARE_HEIGHT + 1;
+            renderConditionText(matrixStack, x + 10, y);
         }
     }
 
@@ -338,7 +348,28 @@ public class ActionsOverlayGui extends AbstractGui { // TODO config to move it t
             }
         }
     }
-
+    
+    private void renderConditionText(MatrixStack matrixStack, int x, int y) {
+        if (unfulfilledCondition != null) {
+            int brightness = 75 + (int) ((255 - 75) * Math.min((float) conditionMessageTicks / 100F * 2F, 1F));
+            drawString(matrixStack, mc.font, unfulfilledCondition, x, y, brightness << 16 | brightness << 8 | brightness);
+        }
+    }
+    
+    public void setUnfulfilledConditionText(ITextComponent message) {
+        this.unfulfilledCondition = message;
+        this.conditionMessageTicks = 100;
+    }
+    
+    private void tickCondition() {
+        if (conditionMessageTicks > 0) {
+            conditionMessageTicks--;
+            if (conditionMessageTicks == 0) {
+                unfulfilledCondition = null;
+            }
+        }
+    }
+    
     public void scrollMode() {
         switch (mode) {
         case NONE:

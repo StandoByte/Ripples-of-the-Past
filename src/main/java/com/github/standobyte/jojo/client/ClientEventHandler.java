@@ -120,6 +120,9 @@ public class ClientEventHandler {
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onClientTick(ClientTickEvent event) {
+        if (event.phase == TickEvent.Phase.START) {
+            ActionsOverlayGui.getInstance().tick();
+        }
         if (mc.level != null && isTimeStopped(mc.player.blockPosition())) {
             if (event.phase == TickEvent.Phase.START) {
                 if (!canSeeInStoppedTime) {

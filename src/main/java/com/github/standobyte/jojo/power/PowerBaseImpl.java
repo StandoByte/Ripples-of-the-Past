@@ -10,8 +10,8 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.HeldActionData;
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.command.JojoControlsCommand;
 import com.github.standobyte.jojo.init.ModEffects;
@@ -23,6 +23,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.SyncManaRegenPoints
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncHeldActionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncPowerTypePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.UnfulfilledActionConditionPacket;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -31,7 +32,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
@@ -310,8 +310,11 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
     private void sendMessage(ActionConditionResult result) {
         if (!user.level.isClientSide()) {
             ITextComponent message = result.getWarning();
+            
             if (message != null) {
-                user.sendMessage(message, Util.NIL_UUID);
+                serverPlayerUser.ifPresent(player -> {
+                    PacketManager.sendToClient(new UnfulfilledActionConditionPacket(message), player);
+                });
             }
         }
     }
@@ -331,13 +334,13 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
                 serverPlayerUser.ifPresent(player -> {
                     PacketManager.sendToClient(new SyncManaPacket(getPowerClassification(), getMana()), player);
                 });
-                ITextComponent message = new TranslationTextComponent("jojo.chat.message.no_mana_" + getType().getManaString());
+                ITextComponent message = new TranslationTextComponent("jojo.message.action_condition.no_mana_" + getType().getManaString());
                 return ActionConditionResult.createNegative(message);
             }
         }
 
         if (!action.ignoresPerformerStun() && performer != null && performer.getEffect(ModEffects.STUN.get()) != null) {
-            return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.chat.message.stun"));
+            return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition.stun"));
         }
 
         if (checkTargetType) {
@@ -353,7 +356,7 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
         }
 
         if (!isActionUnlocked(action)) {
-            return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.chat.message.not_unlocked"));
+            return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition.not_unlocked"));
         }
         return ActionConditionResult.POSITIVE;
     }
@@ -400,7 +403,7 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
 
         if (!action.appropriateTarget(target.getType())) {
             if (targetTooFar) {
-                return ActionConditionResult.createNegativeContinueHold(new TranslationTextComponent("jojo.chat.message.target_too_far"));
+                return ActionConditionResult.createNegativeContinueHold(new TranslationTextComponent("jojo.message.action_condition.target_too_far"));
             }
             return ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
         }

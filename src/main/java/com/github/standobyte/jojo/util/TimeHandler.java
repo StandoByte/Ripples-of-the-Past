@@ -29,6 +29,7 @@ import net.minecraft.network.play.server.SPlayEntityEffectPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -305,7 +306,7 @@ public class TimeHandler {
         float ticks = (float) (standPower.getExp() - minStandExp) / (float) (IStandPower.MAX_EXP - minStandExp) * 95F + 5;
         ticks *= otherPower.map(power -> {
            if (power.getType() == ModNonStandPowers.VAMPIRISM.get()) {
-               return (float) MathHelper.clamp(VampirismPowerType.bloodLevel(power, user.level.getDifficulty()), 3, 6) / 3F;
+               return 1F + (float) ((VampirismPowerType.bloodLevel(power, Difficulty.EASY) - 1) * 4) / 15F;
            }
            return 1F;
         }).orElse(1F);
