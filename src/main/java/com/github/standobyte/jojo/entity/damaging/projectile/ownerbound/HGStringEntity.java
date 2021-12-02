@@ -81,7 +81,7 @@ public class HGStringEntity extends OwnerBoundProjectileEntity {
     
     @Override
     protected float getMaxHardnessBreakable() {
-        return isBinding ? 0.0F : 1.0F;
+        return 0.0F;
     }
 
     @Override

@@ -29,7 +29,7 @@ public class HGEmeraldEntity extends ModdedProjectileEntity {
     
     @Override
     protected float getMaxHardnessBreakable() {
-        return 1.5F;
+        return 1.0F;
     }
     
     @Override
