@@ -84,7 +84,7 @@ public abstract class Action extends ForgeRegistryEntry<Action> {
     }
     
     protected static ActionConditionResult conditionMessage(String postfix) {
-        return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.chat.message.action_condition." + postfix));
+        return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition." + postfix));
     }
     
     public Action getShiftVariationIfPresent() {

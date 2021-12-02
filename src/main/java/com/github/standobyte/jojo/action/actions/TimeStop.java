@@ -21,6 +21,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
 public class TimeStop extends StandEntityAction {
@@ -104,5 +105,12 @@ public class TimeStop extends StandEntityAction {
     @Nullable
     public SoundEvent getTimeResumeVoiceLine() {
         return timeResumeVoiceLine.get();
+    }
+    
+    @Override
+    public TranslationTextComponent getTranslatedName(IPower<?> power, String key) {
+        LivingEntity user = power.getUser();
+        int timeStopTicks = TimeHandler.getTimeStopTicks(getExpRequirement(), (IStandPower) power, user, INonStandPower.getNonStandPowerOptional(user));
+        return new TranslationTextComponent(key, String.format("%.2f", (float) timeStopTicks / 20F));
     }
 }

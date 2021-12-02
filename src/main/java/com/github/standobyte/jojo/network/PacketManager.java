@@ -43,6 +43,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrSyncHeldActionPac
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncKnivesCountPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncNonStandFlagPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncPowerTypePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.UnfulfilledActionConditionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCachePacket;
 
 import net.minecraft.entity.Entity;
@@ -92,6 +93,7 @@ public class PacketManager {
         channel.registerMessage(index++, SyncManaRegenPointsPacket.class, SyncManaRegenPointsPacket::encode, SyncManaRegenPointsPacket::decode, SyncManaRegenPointsPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, SyncManaLimitFactorPacket.class, SyncManaLimitFactorPacket::encode, SyncManaLimitFactorPacket::decode, SyncManaLimitFactorPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, TrSyncCooldownPacket.class, TrSyncCooldownPacket::encode, TrSyncCooldownPacket::decode, TrSyncCooldownPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        channel.registerMessage(index++, UnfulfilledActionConditionPacket.class, UnfulfilledActionConditionPacket::encode, UnfulfilledActionConditionPacket::decode, UnfulfilledActionConditionPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, TrSyncHamonStatsPacket.class, TrSyncHamonStatsPacket::encode, TrSyncHamonStatsPacket::decode, TrSyncHamonStatsPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, SyncHamonExercisesPacket.class, SyncHamonExercisesPacket::encode, SyncHamonExercisesPacket::decode, SyncHamonExercisesPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, HamonTeachersSkillsPacket.class, HamonTeachersSkillsPacket::encode, HamonTeachersSkillsPacket::decode, HamonTeachersSkillsPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
