@@ -48,6 +48,11 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser 
     }
 
     @Override
+    public boolean isPersistenceRequired() { // if he somehow despawns again, i swear...
+        return true;
+    }
+
+    @Override
     public ActionResultType mobInteract(PlayerEntity player, Hand hand) {
         ItemStack itemStack = player.getItemInHand(hand);
         if (itemStack.getItem() == Items.NAME_TAG) {
