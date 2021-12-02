@@ -47,7 +47,8 @@ public class MeteoriteVirusParticle extends SpriteTexturedParticle {
             this.spriteSet = sprite;
         }
 
-        public Particle createParticle(BasicParticleType typeIn, ClientWorld world, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+        @Override
+        public Particle createParticle(BasicParticleType type, ClientWorld world, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
             MeteoriteVirusParticle particle = new MeteoriteVirusParticle(world, x, y, z, xSpeed, ySpeed, zSpeed);
             particle.pickSprite(spriteSet);
             return particle;
