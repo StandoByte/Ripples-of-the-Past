@@ -44,7 +44,7 @@ public class OneTickFlameParticle extends SpriteTexturedParticle {
         }
 
         @Override
-        public Particle createParticle(BasicParticleType p_199234_1_, ClientWorld world, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+        public Particle createParticle(BasicParticleType type, ClientWorld world, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
             OneTickFlameParticle particle = new OneTickFlameParticle(world, x, y, z, xSpeed, ySpeed, zSpeed);
             particle.pickSprite(this.sprite);
             return particle;

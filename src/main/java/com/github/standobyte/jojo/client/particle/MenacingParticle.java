@@ -64,6 +64,7 @@ public class MenacingParticle extends SpriteTexturedParticle {
             this.spriteSet = sprite;
         }
 
+        @Override
         public Particle createParticle(BasicParticleType type, ClientWorld world, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
             MenacingParticle particle = new MenacingParticle(world, x, y, z, xSpeed, ySpeed, zSpeed);
             particle.pickSprite(spriteSet);

@@ -2,7 +2,7 @@
   "conditions": [
     {
       "condition": "block_state_property",
-      "block":"minecraft:redstone_ore"
+      "block": "minecraft:redstone_ore"
     },
     {
       "condition": "minecraft:table_bonus",
