@@ -367,7 +367,7 @@
   "hamonSkill.zoom_punch.name": "Zoom Punch",
   "hamonSkill.zoom_punch.desc": "Extends the user's arm, allowing them to punch an enemy from longer distance, additionally dealing Hamon damage.",
   "hamonSkill.jump.name": "Leap",
-  "hamonSkill.jump.desc": "Allows the user to leap forward by jumping while sneaking. Sneaking reduces fall damage.",
+  "hamonSkill.jump.desc": "Allows the user to leap forward by jumping while sneaking.",
   "hamonSkill.speed_boost.name": "Speed Boost",
   "hamonSkill.speed_boost.desc": "Gives the user Speed and Haste effects for a short amount of time.",
   "hamonSkill.afterimages.name": "Body Control Mastery",

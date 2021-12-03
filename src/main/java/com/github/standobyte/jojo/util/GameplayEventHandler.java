@@ -621,9 +621,6 @@ public class GameplayEventHandler {
     public static void onLivingFall(LivingFallEvent event) {
         if (event.getDistance() > 4) {
             LivingEntity entity = event.getEntityLiving();
-            if (entity.getType() == EntityType.PLAYER && !entity.isShiftKeyDown()) {
-                return;
-            }
             float leapStrength = Math.max(
                     IStandPower.getStandPowerOptional(entity).map(power -> 
                     power.hasPower() && power.isLeapUnlocked() ? power.leapStrength() : 0).orElse(0F), 
