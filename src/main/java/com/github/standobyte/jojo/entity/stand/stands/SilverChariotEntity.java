@@ -1,10 +1,12 @@
 package com.github.standobyte.jojo.entity.stand.stands;
 
+import java.util.List;
 import java.util.UUID;
 
 import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
+import com.github.standobyte.jojo.init.ModEntityTypes;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
@@ -68,7 +70,7 @@ public class SilverChariotEntity extends StandEntity {
             super.swing(hand);
         }
     }
-
+    
     public boolean hasRapier() {
         return entityData.get(HAS_RAPIER);
     }
@@ -126,6 +128,12 @@ public class SilverChariotEntity extends StandEntity {
             else {
                 ticksAfterArmorRemoval = 0;
             }
+            List<Entity> entities = level.getEntities(this, getBoundingBox());
+            for (Entity entity : entities) {
+                if (entity.isAlive() && entity.getType() == ModEntityTypes.SC_RAPIER.get()) {
+                    ((SCRapierEntity) entity).takeRapier(this);
+                }
+            }
         }
     }
     
@@ -139,7 +147,10 @@ public class SilverChariotEntity extends StandEntity {
     
     @Override
     protected boolean canBreakBlock(float blockHardness, int blockHarvestLevel) {
-        return blockHardness <= 1 && blockHarvestLevel <= 0;
+        if (hasRapier()) {
+            return blockHardness <= 1 && blockHarvestLevel <= 0;
+        }
+        return super.canBreakBlock(blockHardness, blockHarvestLevel);
     }
 
     @Override
@@ -157,18 +168,9 @@ public class SilverChariotEntity extends StandEntity {
     @Override
     protected double getAttackDamage(Entity target, boolean strongAttack, double rangeFactor, double attackDistance, double precision) {
         double damage = super.getAttackDamage(target, strongAttack, rangeFactor, attackDistance, precision);
-        if (target instanceof SkeletonEntity) {
+        if (hasRapier() && target instanceof SkeletonEntity) {
             damage *= 0.6;
         }
         return damage;
-    }
-    
-    @Override
-    protected double getMaxRange() {
-        double range = super.getMaxRange();
-        if (!hasArmor()) {
-            range *= 2;
-        }
-        return range;
     }
 }
