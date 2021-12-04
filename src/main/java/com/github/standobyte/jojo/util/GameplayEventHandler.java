@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.action.actions.VampirismFreeze;
 import com.github.standobyte.jojo.block.StoneMaskBlock;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
@@ -264,6 +265,9 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onLivingHurtStart(LivingAttackEvent event) {
         HamonPowerType.cancelCactusDamage(event);
+        if (VampirismFreeze.onUserAttacked(event)) {
+            event.setCanceled(true);
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
