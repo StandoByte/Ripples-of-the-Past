@@ -183,6 +183,8 @@ public class ActionsOverlayGui extends AbstractGui { // TODO config to move it t
             mc.getTextureManager().bind(OVERLAY_TEX_PATH);
             renderTargetIcon(matrixStack, ActionType.ATTACK, x, y);
             renderTargetIcon(matrixStack, ActionType.ABILITY, x, y + BARS_Y_GAP);
+         // condition message icon
+            renderConditionMessageIcon(matrixStack, x, y + HOTBAR_SQUARE_HEIGHT * 2 + mc.font.lineHeight);
             
             RenderSystem.disableRescaleNormal();
             RenderSystem.disableBlend();
@@ -201,7 +203,7 @@ public class ActionsOverlayGui extends AbstractGui { // TODO config to move it t
             renderHotbarText(matrixStack, x, y, currentPower, ActionType.ABILITY);
 
             y += mc.font.lineHeight + 1 + HOTBAR_SQUARE_HEIGHT + 1;
-            renderConditionText(matrixStack, x + 10, y);
+            renderConditionText(matrixStack, x + 16, y + 2);
         }
     }
 
@@ -349,16 +351,30 @@ public class ActionsOverlayGui extends AbstractGui { // TODO config to move it t
         }
     }
     
+    private static final float MESSAGE_DURATION = 100;
+    private void renderConditionMessageIcon(MatrixStack matrixStack, int x, int y) {
+        if (unfulfilledCondition != null) {
+            float alpha = Math.min((float) conditionMessageTicks / MESSAGE_DURATION * 2F, 1F);
+            if (alpha < 1) {
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
+            }
+            blit(matrixStack, x, y, 132, 240, 16, 16);
+            if (alpha < 1) {
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            }
+        }
+    }
+    
     private void renderConditionText(MatrixStack matrixStack, int x, int y) {
         if (unfulfilledCondition != null) {
-            int brightness = 75 + (int) ((255 - 75) * Math.min((float) conditionMessageTicks / 100F * 2F, 1F));
+            int brightness = 75 + (int) ((255 - 75) * Math.min((float) conditionMessageTicks / MESSAGE_DURATION * 2F, 1F));
             drawString(matrixStack, mc.font, unfulfilledCondition, x, y, brightness << 16 | brightness << 8 | brightness);
         }
     }
     
     public void setUnfulfilledConditionText(ITextComponent message) {
         this.unfulfilledCondition = message;
-        this.conditionMessageTicks = 100;
+        this.conditionMessageTicks = (int) MESSAGE_DURATION;
     }
     
     private void tickCondition() {
