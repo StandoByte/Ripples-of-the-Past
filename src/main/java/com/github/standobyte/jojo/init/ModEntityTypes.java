@@ -244,6 +244,7 @@ public class ModEntityTypes {
                     .damage(10.5)
                     .attackSpeed(100)
                     .summonTicks(0)
+                    .maxRange(10)
                     .armor(20)
                     .knockbackResistance(0.2)
                     .precision(0.6)
@@ -268,6 +269,7 @@ public class ModEntityTypes {
                     .attackKnockback(0.1)
                     .attackSpeed(75)
                     .summonTicks(3)
+                    .maxRange(10)
                     .armor(15)
                     .armorToughness(8)
                     .precision(1.0)
@@ -280,6 +282,7 @@ public class ModEntityTypes {
             () -> new StandEntityType<MagiciansRedEntity>(MagiciansRedEntity::new, false, 0.6F, 1.8F,
                     new StandEntityStats.Builder()
                     .damage(7)
+                    .maxRange(8)
                     .armor(7)
                     .build())
             .addStandSound(StandSoundType.SUMMON, ModSounds.MAGICIANS_RED_SUMMON));
