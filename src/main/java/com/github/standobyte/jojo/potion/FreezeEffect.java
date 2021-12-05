@@ -3,9 +3,10 @@ package com.github.standobyte.jojo.potion;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectType;
 
-public class FreezeEffect extends UncurableEffect {
+public class FreezeEffect extends Effect {
     
     public FreezeEffect(EffectType type, int liquidColor) {
         super(type, liquidColor);
