@@ -27,6 +27,7 @@ public class HamonStatsTabGui extends HamonTabGui {
     private final List<IReorderingProcessor> breathingDescLines;
     private final List<IReorderingProcessor> exercisesDescLines;
     private final List<IReorderingProcessor> statLimitTooltip;
+    private final List<IReorderingProcessor> trainingBonusTooltip;
     private final List<IReorderingProcessor> meditationButtonTooltip;
 
     private Button meditationButton;
@@ -53,6 +54,7 @@ public class HamonStatsTabGui extends HamonTabGui {
         statLimitTooltip = minecraft.font.split(new TranslationTextComponent("hamon.stat_limited"), 150);
         meditationButtonTooltip = minecraft.font.split(new TranslationTextComponent("hamon.meditation_button", 
                 new KeybindTextComponent("key.sneak"), new KeybindTextComponent("jojo.key.hamon_skills_window")), 100);
+        trainingBonusTooltip = minecraft.font.split(new TranslationTextComponent("hamon.training_bonus", screen.hamon.getTrainingBonus()), 100);
     }
 
     @Override
@@ -113,6 +115,10 @@ public class HamonStatsTabGui extends HamonTabGui {
         pts = breathingTechnique == HamonData.MAX_BREATHING_LEVEL ? 1.0F : breathingTechnique - (int)breathingTechnique;
         blit(matrixStack, intScrollX + 154, breathingStatY + 1, 200, 240, (int) (50 * pts), 5);
         blit(matrixStack, intScrollX + 153, breathingStatY, 0, 242, 52, 7);
+        // bonus icon
+        if (screen.hamon.getTrainingBonus() > 0) {
+            blit(matrixStack, intScrollX + 200, breathingStatY - 9, 230, 216, 8, 8);
+        }
 
         // exercise bars
         Exercise exercise = Exercise.MINING;
@@ -247,6 +253,11 @@ public class HamonStatsTabGui extends HamonTabGui {
                     }
                 }
             }
+        }
+        if (screen.hamon.getTrainingBonus() > 0 && 
+                mouseX >= 200 && mouseX <= 207 && 
+                mouseY >= breathingStatY - 9 && mouseY <= breathingStatY - 2) {
+            screen.renderTooltip(matrixStack, trainingBonusTooltip, mouseX, mouseY);
         }
         if (meditationButton.isMouseOver(mouseX + screen.windowPosX() + HamonScreen.WINDOW_THIN_BORDER, mouseY + screen.windowPosY() + HamonScreen.WINDOW_UPPER_BORDER)) {
             screen.renderTooltip(matrixStack, meditationButtonTooltip, mouseX, mouseY);

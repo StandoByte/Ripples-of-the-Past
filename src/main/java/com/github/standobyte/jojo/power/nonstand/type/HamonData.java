@@ -57,6 +57,7 @@ public class HamonData extends TypeSpecificData {
     private int hamonControlPoints;
     private int hamonControlLevel;
     private float breathingTechniqueLevel;
+    private float breathingTrainingBonus;
     private float hamonDamageFactor = 1F;
     private HamonSkillSet hamonSkills;
     private EnumMap<Exercise, Integer> exerciseTicks = new EnumMap<Exercise, Integer>(Exercise.class);
@@ -212,9 +213,9 @@ public class HamonData extends TypeSpecificData {
         return hamonDamageFactor * reducingFactor;
     }
 
-    public static final float MAX_HAMON_DAMAGE = (float) (Math.pow(1.04, MAX_STAT_LEVEL) * (1 + 0.03 * MAX_BREATHING_LEVEL)); // 42.07851
+    public static final float MAX_HAMON_DAMAGE = (float) (Math.pow(1.03, MAX_STAT_LEVEL) * (1 + 0.05 * MAX_BREATHING_LEVEL)); // 35.34962
     private void recalcHamonDamage() {
-        hamonDamageFactor = (float) (Math.pow(1.04, hamonStrengthLevel) * (1 + 0.03 * breathingTechniqueLevel));
+        hamonDamageFactor = (float) (Math.pow(1.03, hamonStrengthLevel) * (1 + 0.05 * breathingTechniqueLevel));
     }
 
     public float calcManaLimitFactor() {
@@ -282,6 +283,7 @@ public class HamonData extends TypeSpecificData {
     }
 
     public void incExerciseTicks(Exercise exercise, float multiplier) {
+        multiplier = 10000; // FIXME delet
         int ticks = exerciseTicks.get(exercise);
         if (ticks < exercise.maxTicks) {
             int inc = 1;
@@ -328,6 +330,14 @@ public class HamonData extends TypeSpecificData {
         }
         return isMeditating;
     }
+    
+    public float getTrainingBonus() {
+        return breathingTrainingBonus;
+    }
+    
+    public void setTrainingBonus(float trainingBonus) {
+        this.breathingTrainingBonus = trainingBonus;
+    }
 
     public void newDayCheck(World world) {
         long day = world.getDayTime() / 24000;
@@ -344,8 +354,12 @@ public class HamonData extends TypeSpecificData {
             else {
                 lvlInc *= 0.25F;
             }
+            breathingTrainingBonus = 0;
         }
         else {
+            float bonus = breathingTrainingBonus;
+            breathingTrainingBonus += lvlInc * 0.25F;
+            lvlInc += bonus;
             lvlInc *= JojoModConfig.COMMON.breathingTechniqueMultiplier.get().floatValue();
             if (isSkillLearned(HamonSkill.NATURAL_TALENT)) {
                 lvlInc *= 2;
@@ -556,6 +570,7 @@ public class HamonData extends TypeSpecificData {
         }
         nbt.put("Exercises", exercises);
         nbt.putLong("LastDay", lastTickedDay);
+        nbt.putFloat("TrainingBonus", breathingTrainingBonus);
         return nbt;
     }
 
@@ -575,6 +590,7 @@ public class HamonData extends TypeSpecificData {
         }
         setExerciseTicks(exercisesNbt[0], exercisesNbt[1], exercisesNbt[2], exercisesNbt[3]);
         lastTickedDay = nbt.getLong("LastDay");
+        breathingTrainingBonus = nbt.getFloat("TrainingBonus");
     }
 
     private void fillSkillsFromNbt(CompoundNBT nbt) {
