@@ -35,7 +35,8 @@ public class ClHamonWindowOpenedPacket {
                             hamon.getExerciseTicks(Exercise.MINING), 
                             hamon.getExerciseTicks(Exercise.RUNNING), 
                             hamon.getExerciseTicks(Exercise.SWIMMING), 
-                            hamon.getExerciseTicks(Exercise.MEDITATION)), player);
+                            hamon.getExerciseTicks(Exercise.MEDITATION), 
+                            hamon.getTrainingBonus()), player);
                     EnumSet<HamonSkill> skills = HamonPowerType.nearbyTeachersSkills(player);
                     PacketManager.sendToClient(skills.isEmpty() ? new HamonTeachersSkillsPacket() : new HamonTeachersSkillsPacket(HamonTeachersSkillsPacket.encodeSkills(skills)), player);
                 });
