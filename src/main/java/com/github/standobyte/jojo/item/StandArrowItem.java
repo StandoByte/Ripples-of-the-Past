@@ -113,7 +113,7 @@ public class StandArrowItem extends ArrowItem {
                         text = new TranslationTextComponent("jojo.arrow.no_tier", StandUtil.tierLowerBorder(nextTier), nextTier);
                     }
                     else {
-                        text = new TranslationTextComponent("jojo.arrow.no_stands");
+                        text = new TranslationTextComponent("jojo.arrow.no_stands").withStyle(TextFormatting.OBFUSCATED);
                     }
                 }
                 tooltip.add(text.withStyle(TextFormatting.ITALIC, TextFormatting.GRAY));
@@ -125,7 +125,7 @@ public class StandArrowItem extends ArrowItem {
                     return;
                 }
             }
-            tooltip.add(new TranslationTextComponent("jojo.arrow.no_stands").withStyle(TextFormatting.ITALIC, TextFormatting.GRAY));
+            tooltip.add(new TranslationTextComponent("jojo.arrow.no_stands").withStyle(TextFormatting.ITALIC, TextFormatting.GRAY).withStyle(TextFormatting.OBFUSCATED));
         }
     }
 }
