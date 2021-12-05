@@ -40,7 +40,7 @@ public class StandDiscItem extends Item {
         if (!world.isClientSide()) {
             if (validStandDisc(stack)) {
                 StandType stand = getStandFromStack(stack);
-                if (!StandUtil.canGainStand(player, power.getTier(), stand)) {
+                if (!canGainStand(player, power.getTier(), stand)) {
                     player.sendMessage(new TranslationTextComponent("jojo.chat.message.low_tier"), Util.NIL_UUID);
                     return ActionResult.fail(stack);
                 }
@@ -60,6 +60,11 @@ public class StandDiscItem extends Item {
             return ActionResult.success(stack);
         }
         return ActionResult.fail(stack);
+    }
+
+    private boolean canGainStand(PlayerEntity player, int playerTier, StandType stand) {
+        return player.abilities.instabuild || !JojoModConfig.COMMON.standTiers.get()
+                || StandUtil.standTierFromXp(player.experienceLevel, false) >= stand.getTier() || playerTier >= stand.getTier();
     }
     
     @Override

@@ -1,12 +1,25 @@
 package com.github.standobyte.jojo;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
+import com.github.standobyte.jojo.power.stand.type.StandType;
 
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.config.ModConfig.ModConfigEvent;
+import net.minecraftforge.registries.IForgeRegistry;
 
+@EventBusSubscriber(modid = JojoMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public class JojoModConfig {
 
     public static class Common {
@@ -19,6 +32,9 @@ public class JojoModConfig {
 
         public final ForgeConfigSpec.BooleanValue prioritizeLeastTakenStands;
         public final ForgeConfigSpec.BooleanValue standTiers;
+        public final ForgeConfigSpec.ConfigValue<List<? extends String>> bannedStands;
+        private List<ResourceLocation> bannedStandsResLocs;
+        private boolean[] tiersAvaliable = new boolean[7];
 
         public final ForgeConfigSpec.DoubleValue hamonPointsMultiplier;
         public final ForgeConfigSpec.DoubleValue breathingTechniqueMultiplier;
@@ -51,15 +67,21 @@ public class JojoModConfig {
                     .translation("jojo.config.timeStopChunkRange")
                     .defineInRange("timeStopChunkRange", 12, 0, Integer.MAX_VALUE);
             
-            prioritizeLeastTakenStands = builder
-                    .comment(" Whether or not random Stand gain effects (Stand Arrow, /stand random) give Stands that less players already have.")
-                    .translation("jojo.config.prioritizeLeastTakenStands")
-                    .define("prioritizeLeastTakenStands", false);
-            
-            standTiers = builder
-                    .comment(" Set this to false to disable the Stand tiers mechanic.")
-                    .translation("jojo.config.standTiers")
-                    .define("standTiers", true);
+//            builder.push("Stand Arrow");
+                prioritizeLeastTakenStands = builder
+                        .comment(" Whether or not random Stand gain effects (Stand Arrow, /stand random) give Stands that less players already have.")
+                        .translation("jojo.config.prioritizeLeastTakenStands")
+                        .define("prioritizeLeastTakenStands", false);
+                bannedStands = builder
+                        .comment(" List of Stands excluded from Stand Arrow and /stand random pool.", 
+                                "  The format is the same as for /stand give command (e.g., \"jojo:star_platinum\").")
+                        .translation("jojo.config.bannedStands")
+                        .defineList("bannedStands", Arrays.asList("jojo:example_1", "jojo:example_2"), s -> s instanceof String && ResourceLocation.tryParse((String) s) != null);
+                standTiers = builder
+                        .comment(" Set this to false to disable the Stand tiers mechanic.")
+                        .translation("jojo.config.standTiers")
+                        .define("standTiers", true);
+//            builder.pop();
             
             builder.comment(" Settings which affect the speed of Hamon training.").push("Hamon training");
                 hamonPointsMultiplier = builder
@@ -98,6 +120,36 @@ public class JojoModConfig {
             }
             return Math.abs(center.x - pos.x) < range && Math.abs(center.z - pos.z) < range;
         }
+        
+        private void initBannedStands() {
+            IForgeRegistry<StandType> registry = ModStandTypes.Registry.getRegistry();
+            bannedStandsResLocs = bannedStands.get()
+                    .stream()
+                    .map(s -> {
+                        ResourceLocation resLoc = new ResourceLocation(s);
+                        if ("minecraft".equals(resLoc.getNamespace())) {
+                            resLoc = new ResourceLocation(JojoMod.MOD_ID, resLoc.getPath());
+                        }
+                        return resLoc;
+                    })
+                    .filter(resLoc -> registry.containsKey(resLoc))
+                    .collect(Collectors.toList());
+            
+            registry.getValues()
+            .stream()
+            .filter(stand -> !bannedStandsResLocs.contains(stand.getRegistryName()))
+            .map(StandType::getTier)
+            .distinct()
+            .forEach(tier -> tiersAvaliable[tier] = true);
+        }
+        
+        public boolean isStandBanned(StandType stand) {
+            return bannedStandsResLocs.contains(stand.getRegistryName());
+        }
+        
+        public boolean tierHasUnbannedStands(int tier) {
+            return tiersAvaliable[tier];
+        }
     }
 
 
@@ -107,5 +159,13 @@ public class JojoModConfig {
         final Pair<Common, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(Common::new);
         commonSpec = specPair.getRight();
         COMMON = specPair.getLeft();
+    }
+    
+    @SubscribeEvent
+    public static void onConfigLoad(ModConfigEvent event) {
+        ModConfig config = event.getConfig();
+        if (config.getType() == ModConfig.Type.COMMON && JojoMod.MOD_ID.equals(config.getModId())) {
+            COMMON.initBannedStands();
+        }
     }
 }
