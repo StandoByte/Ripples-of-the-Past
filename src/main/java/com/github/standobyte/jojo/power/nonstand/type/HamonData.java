@@ -283,7 +283,6 @@ public class HamonData extends TypeSpecificData {
     }
 
     public void incExerciseTicks(Exercise exercise, float multiplier) {
-        multiplier = 10000; // FIXME delet
         int ticks = exerciseTicks.get(exercise);
         if (ticks < exercise.maxTicks) {
             int inc = 1;
