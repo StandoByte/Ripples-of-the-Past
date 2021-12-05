@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
@@ -48,7 +47,6 @@ public class StandUtil {
             }
             
             if (!filtered.isEmpty()) {
-                filtered.forEach(stand -> JojoMod.LOGGER.debug(stand.getRegistryName())); // FIXME delet
                 return filtered.get(random.nextInt(filtered.size()));
             }
         }

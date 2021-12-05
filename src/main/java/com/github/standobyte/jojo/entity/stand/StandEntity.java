@@ -507,7 +507,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
 
     protected boolean canBlockOrParryFromAngle(DamageSource damageSrc) {
-        if (TimeHandler.isTimeStopped(level, blockPosition()) && !hasEffect(ModEffects.TIME_STOP.get())) {
+        if (!canUpdate()) {
             return false;
         }
         Vector3d dmgPosition = damageSrc.getSourcePosition();

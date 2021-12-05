@@ -51,18 +51,19 @@ public class VampirismFreeze extends Action {
                 if (entityTarget instanceof LivingEntity && !entityTarget.isOnFire()) {
                     int difficulty = world.getDifficulty().getId();
                     LivingEntity targetLiving = (LivingEntity) entityTarget;
-                    EffectInstance freezeInstance = targetLiving.getEffect(ModEffects.FREEZE.get());
-                    if (freezeInstance == null) {
-                        world.playSound(null, targetLiving, ModSounds.VAMPIRE_FREEZE.get(), targetLiving.getSoundSource(), 1.0F, 1.0F);
-                        targetLiving.addEffect(new EffectInstance(ModEffects.FREEZE.get(), difficulty * 30, 0));
+                    if (ModDamageSources.dealColdDamage(targetLiving, 1.5F * difficulty, user, null)) {
+                        EffectInstance freezeInstance = targetLiving.getEffect(ModEffects.FREEZE.get());
+                        if (freezeInstance == null) {
+                            world.playSound(null, targetLiving, ModSounds.VAMPIRE_FREEZE.get(), targetLiving.getSoundSource(), 1.0F, 1.0F);
+                            targetLiving.addEffect(new EffectInstance(ModEffects.FREEZE.get(), difficulty * 30, 0));
+                        }
+                        else {
+                            int additionalDuration = 1 << difficulty;
+                            int duration = freezeInstance.getDuration() + additionalDuration;
+                            int lvl = duration / 120;
+                            targetLiving.addEffect(new EffectInstance(ModEffects.FREEZE.get(), duration, lvl));
+                        }
                     }
-                    else {
-                        int additionalDuration = 1 << difficulty;
-                        int duration = freezeInstance.getDuration() + additionalDuration;
-                        int lvl = duration / 120;
-                        targetLiving.addEffect(new EffectInstance(ModEffects.FREEZE.get(), duration, lvl));
-                    }
-                    ModDamageSources.dealColdDamage(targetLiving, 1.5F * difficulty, user, null);
                 }
             }
         }
@@ -70,7 +71,7 @@ public class VampirismFreeze extends Action {
     
     public static boolean onUserAttacked(LivingAttackEvent event) {
         Entity attacker = event.getSource().getDirectEntity();
-        if (attacker instanceof LivingEntity && !attacker.isOnFire()) {
+        if (attacker instanceof LivingEntity && !attacker.isOnFire() && !ModDamageSources.isImmuneToCold(attacker)) {
             LivingEntity targetLiving = event.getEntityLiving();
             return INonStandPower.getNonStandPowerOptional(targetLiving).map(power -> {
                 if (power.getHeldAction(true) == ModActions.VAMPIRISM_FREEZE.get()) {

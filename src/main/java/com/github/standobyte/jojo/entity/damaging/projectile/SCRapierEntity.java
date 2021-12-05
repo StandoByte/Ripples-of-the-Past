@@ -112,7 +112,7 @@ public class SCRapierEntity extends ModdedProjectileEntity {
         if (!level.isClientSide()) {
             if (getOwner() instanceof SilverChariotEntity) {
                 SilverChariotEntity stand = (SilverChariotEntity) getOwner();
-                if (player.is(stand.getUser())) {
+                if (stand.isFollowingUser() && player.is(stand.getUser())) {
                     takeRapier(stand);
                 }
             }

@@ -239,7 +239,7 @@ public class ModActions {
                     .cooldown(6).shout(ModSounds.POLNAREFF_HORA_HORA_HORA).shiftVariationOf(SILVER_CHARIOT_ATTACK)));
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_RAPIER_LAUNCH = ACTIONS.register("silver_chariot_rapier_launch", 
-            () -> new SilverChariotRapierLaunch(new StandEntityAction.Builder().manaCost(0).cooldown(400).expRequirement(200)));
+            () -> new SilverChariotRapierLaunch(new StandEntityAction.Builder().manaCost(0).cooldown(100).expRequirement(200)));
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_BLOCK = ACTIONS.register("silver_chariot_block", 
             () -> new StandEntityBlock());

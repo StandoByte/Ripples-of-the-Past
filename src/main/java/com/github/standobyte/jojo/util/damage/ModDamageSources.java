@@ -66,12 +66,20 @@ public class ModDamageSources {
         return false;
     }
     
+    public static boolean isImmuneToCold(Entity target) {
+        if (target.isInvulnerableTo(COLD)) {
+            return true;
+        }
+        EntityType<?> type = target.getType();
+        return type == EntityType.SNOW_GOLEM || type == EntityType.STRAY || type == EntityType.POLAR_BEAR;
+    }
+    
     public static boolean dealColdDamage(Entity target, float amount, @Nullable Entity srcDirect, @Nullable Entity srcIndirect) { // TODO use vanilla mechanic in 1.18 version
         if (target instanceof LivingEntity) {
-            EntityType<?> type = target.getType();
-            if (type == EntityType.SNOW_GOLEM || type == EntityType.STRAY || type == EntityType.POLAR_BEAR) {
+            if (isImmuneToCold(target)) {
                 return false;
             }
+            EntityType<?> type = target.getType();
             if (type == EntityType.BLAZE || type == EntityType.MAGMA_CUBE || type == EntityType.STRIDER) {
                 amount *= 5F;
             }

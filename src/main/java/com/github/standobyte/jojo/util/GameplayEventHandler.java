@@ -372,6 +372,9 @@ public class GameplayEventHandler {
         else if (effect == ModEffects.UNDEAD_REGENERATION.get() || effect == ModEffects.HAMON_SPREAD.get()) {
             event.setResult(Result.DENY);
         }
+        if (effect == ModEffects.FREEZE.get() && ModDamageSources.isImmuneToCold(entity)) {
+            event.setResult(Result.DENY);
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
