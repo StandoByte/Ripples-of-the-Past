@@ -24,12 +24,14 @@ public class SyncHamonExercisesPacket {
     private final int runningTicks;
     private final int swimmingTicks;
     private final int meditationTicks;
+    private final float trainingBonus;
 
-    public SyncHamonExercisesPacket(int miningTicks, int runningTicks, int swimmingTicks, int meditationTicks) {
+    public SyncHamonExercisesPacket(int miningTicks, int runningTicks, int swimmingTicks, int meditationTicks, float trainingBonus) {
         this.miningTicks = miningTicks;
         this.runningTicks = runningTicks;
         this.swimmingTicks = swimmingTicks;
         this.meditationTicks = meditationTicks;
+        this.trainingBonus = trainingBonus;
     }
 
     public static void encode(SyncHamonExercisesPacket msg, PacketBuffer buf) {
@@ -41,6 +43,7 @@ public class SyncHamonExercisesPacket {
         l <<= BITS_MEDITATION;
         l |= msg.meditationTicks;
         buf.writeLong(l);
+        buf.writeFloat(msg.trainingBonus);
     }
 
     public static SyncHamonExercisesPacket decode(PacketBuffer buf) {
@@ -52,7 +55,7 @@ public class SyncHamonExercisesPacket {
         int running = (int) (l & MASK_RUNNING);
         l >>= BITS_RUNNING;
         int mining = (int) (l & MASK_MINING);
-        return new SyncHamonExercisesPacket(mining, running, swimming, meditation);
+        return new SyncHamonExercisesPacket(mining, running, swimming, meditation, buf.readFloat());
     }
 
     public static void handle(SyncHamonExercisesPacket msg, Supplier<NetworkEvent.Context> ctx) {
@@ -60,6 +63,7 @@ public class SyncHamonExercisesPacket {
             INonStandPower.getNonStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
                 power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
                     hamon.setExerciseTicks(msg.miningTicks, msg.runningTicks, msg.swimmingTicks, msg.meditationTicks);
+                    hamon.setTrainingBonus(msg.trainingBonus);
                 });
             });
         });
