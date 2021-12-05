@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.capability.world;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -30,9 +31,9 @@ public class SaveFileUtilCap {
         }
     }
     
-    public List<StandType> leastTakenStands(List<StandType> fromStands) {
+    public List<StandType> leastTakenStands(Collection<StandType> fromStands) {
         if (fromStands.isEmpty()) {
-            return fromStands;
+            return Collections.emptyList();
         }
         Set<Map.Entry<StandType, Integer>> entriesRequested = timesStandsTaken
                 .entrySet()

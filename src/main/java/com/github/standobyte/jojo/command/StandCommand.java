@@ -16,10 +16,14 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class StandCommand {
-    private static final DynamicCommandExceptionType GIVE_SINGLE_EXCEPTION = new DynamicCommandExceptionType(
-            player -> new TranslationTextComponent("commands.stand.give.failed.single", player));
-    private static final DynamicCommandExceptionType GIVE_MULTIPLE_EXCEPTION = new DynamicCommandExceptionType(
-            count -> new TranslationTextComponent("commands.stand.give.failed.multiple", count));
+    private static final DynamicCommandExceptionType GIVE_SINGLE_EXCEPTION_ALREADY_HAS = new DynamicCommandExceptionType(
+            player -> new TranslationTextComponent("commands.stand.give.failed.single.has", player));
+    private static final DynamicCommandExceptionType GIVE_MULTIPLE_EXCEPTION_ALREADY_HAVE = new DynamicCommandExceptionType(
+            count -> new TranslationTextComponent("commands.stand.give.failed.multiple.have", count));
+    private static final DynamicCommandExceptionType GIVE_SINGLE_EXCEPTION_RANDOM = new DynamicCommandExceptionType(
+            player -> new TranslationTextComponent("commands.stand.give.failed.single.random", player));
+    private static final DynamicCommandExceptionType GIVE_MULTIPLE_EXCEPTION_RANDOM = new DynamicCommandExceptionType(
+            count -> new TranslationTextComponent("commands.stand.give.failed.multiple.random", count));
     private static final DynamicCommandExceptionType QUERY_SINGLE_FAILED_EXCEPTION = new DynamicCommandExceptionType(
             player -> new TranslationTextComponent("commands.stand.query.failed.single", player));
     private static final DynamicCommandExceptionType QUERY_MULTIPLE_FAILED_EXCEPTION = new DynamicCommandExceptionType(
@@ -47,15 +51,15 @@ public class StandCommand {
                     i++;
                 }
                 else if (targets.size() == 1) {
-                    throw GIVE_SINGLE_EXCEPTION.create(targets.iterator().next().getName());
+                    throw GIVE_SINGLE_EXCEPTION_ALREADY_HAS.create(targets.iterator().next().getName());
                 }
             }
         }
         if (i == 0) {
             if (targets.size() == 1) {
-                throw GIVE_SINGLE_EXCEPTION.create(targets.iterator().next().getName());
+                throw GIVE_SINGLE_EXCEPTION_ALREADY_HAS.create(targets.iterator().next().getName());
             } else {
-                throw GIVE_MULTIPLE_EXCEPTION.create(targets.size());
+                throw GIVE_MULTIPLE_EXCEPTION_ALREADY_HAVE.create(targets.size());
             }
         }
         else {
@@ -81,20 +85,28 @@ public class StandCommand {
                 IStandPower power = IStandPower.getStandPowerOptional(player).orElse(null);
                 if (power != null) {
                     stand = StandUtil.randomStandByTier(-1, player, player.getRandom());
+                    if (stand == null) {
+                        if (targets.size() == 1) {
+                            throw GIVE_SINGLE_EXCEPTION_RANDOM.create(targets.iterator().next().getName());
+                        }
+                        else {
+                            throw GIVE_MULTIPLE_EXCEPTION_RANDOM.create(targets.size() - i);
+                        }
+                    }
                     if (power.givePower(stand)) {
                         i++;
                     }
                     else if (targets.size() == 1) {
-                        throw GIVE_SINGLE_EXCEPTION.create(targets.iterator().next().getName());
+                        throw GIVE_SINGLE_EXCEPTION_ALREADY_HAS.create(targets.iterator().next().getName());
                     }
                 }
             }
         }
         if (i == 0) {
             if (targets.size() == 1) {
-                throw GIVE_SINGLE_EXCEPTION.create(targets.iterator().next().getName());
+                throw GIVE_SINGLE_EXCEPTION_ALREADY_HAS.create(targets.iterator().next().getName());
             } else {
-                throw GIVE_MULTIPLE_EXCEPTION.create(targets.size());
+                throw GIVE_MULTIPLE_EXCEPTION_ALREADY_HAVE.create(targets.size());
             }
         }
         else {

@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
@@ -20,46 +20,61 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.Util;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
 
 public class StandUtil {
+    public static final int MAX_TIER = 6;
+    public static final int[] TIER_XP_LEVELS = {0, 1, 10, 20, 30, 40, 55};
     
     public static StandType randomStandByTier(int tier, LivingEntity entity, Random random) {
         if (!entity.level.isClientSide()) {
             Collection<StandType> stands = ModStandTypes.Registry.getRegistry().getValues();
-    
-            Stream<StandType> stream = stands.stream();
-            List<StandType> filtered = tier >= 0 ? 
-                    stream.filter(stand -> stand.getTier() == tier).collect(Collectors.toList())
-                    : stream.collect(Collectors.toList());
+            List<StandType> filtered = 
+                    stands.stream()
+                    .filter(stand -> (tier < 0 || stand.getTier() == tier) && !JojoModConfig.COMMON.isStandBanned(stand))
+                    .collect(Collectors.toList());
+            
+            if (filtered.isEmpty()) {
+                if (tier > -1 && StandUtil.arrowPoolNextTier(tier) > -1) {
+                    entity.sendMessage(new TranslationTextComponent("jojo.chat.message.tmp_not_enough_xp"), Util.NIL_UUID); // TODO remove the message after adding stands for each tier
+                }
+                return null;
+            }
+            
             if (JojoModConfig.COMMON.prioritizeLeastTakenStands.get()) {
                 filtered = SaveFileUtilCapProvider.getSaveFileCap((ServerWorld) entity.level).leastTakenStands(filtered);
             }
+            
             if (!filtered.isEmpty()) {
+                filtered.forEach(stand -> JojoMod.LOGGER.debug(stand.getRegistryName())); // FIXME delet
                 return filtered.get(random.nextInt(filtered.size()));
             }
         }
         return null;
     }
     
-    public static int standTierFromXp(PlayerEntity player) {
-        int lvl = player.experienceLevel;
-        for (int i = 0; i < 6; i++) {
-            if (lvl < tierLowerBorder(i + 1)) {
+    public static int standTierFromXp(int xpLvl, boolean withConfigBans) {
+        for (int i = MAX_TIER; i >= 0; i--) {
+            if (xpLvl >= tierLowerBorder(i) && (!withConfigBans || JojoModConfig.COMMON.tierHasUnbannedStands(i))) {
                 return i;
             }
         }
-        return 6;
+        return -1;
     }
     
-    public static final int[] TIER_XP_LEVELS = {0, 1, 10, 20, 30, 40, 55};
+    public static int arrowPoolNextTier(int startingTier) {
+        for (int i = startingTier + 1; i <= MAX_TIER; i++) {
+            if (JojoModConfig.COMMON.tierHasUnbannedStands(i)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    
     public static int tierLowerBorder(int tier) {
         return TIER_XP_LEVELS[tier];
-    }
-
-    public static boolean canGainStand(PlayerEntity player, int playerTier, StandType stand) {
-        return player.abilities.instabuild || !JojoModConfig.COMMON.standTiers.get()
-                || standTierFromXp(player) >= stand.getTier() || playerTier >= stand.getTier();
     }
     
     public static boolean isPlayerStandUser(PlayerEntity player) {
