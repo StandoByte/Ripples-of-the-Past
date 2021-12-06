@@ -217,14 +217,16 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
     
 
     public void renderFirstPersonArm(HandSide handSide, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, T entity, float partialTick) {
-        renderSeparateLayerArm(getModel(), handSide, matrixStack, 
-                buffer.getBuffer(this.getRenderType(entity, getTextureLocation(entity))), packedLight, entity, partialTick);
-        for (LayerRenderer<?, ?> layer : layers) {
-            if (layer instanceof StandModelLayerRenderer) {
-                StandModelLayerRenderer<T, M> standLayer = (StandModelLayerRenderer<T, M>) layer;
-                if (standLayer.shouldRender(entity)) {
-                    renderSeparateLayerArm(standLayer.getLayerModel(), handSide, matrixStack, 
-                            standLayer.getBuffer(buffer, entity), standLayer.getPackedLight(packedLight), entity, partialTick);
+        RenderType renderType = getRenderType(entity, getTextureLocation(entity));
+        if (renderType != null) {
+            renderSeparateLayerArm(getModel(), handSide, matrixStack, buffer.getBuffer(renderType), packedLight, entity, partialTick);
+            for (LayerRenderer<?, ?> layer : layers) {
+                if (layer instanceof StandModelLayerRenderer) {
+                    StandModelLayerRenderer<T, M> standLayer = (StandModelLayerRenderer<T, M>) layer;
+                    if (standLayer.shouldRender(entity)) {
+                        renderSeparateLayerArm(standLayer.getLayerModel(), handSide, matrixStack, 
+                                standLayer.getBuffer(buffer, entity), standLayer.getPackedLight(packedLight), entity, partialTick);
+                    }
                 }
             }
         }
