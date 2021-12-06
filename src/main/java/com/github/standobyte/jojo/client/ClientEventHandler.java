@@ -17,20 +17,26 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.FirstPersonRenderer;
+import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.EntityModel;
+import net.minecraft.client.renderer.entity.model.PlayerModel;
+import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Hand;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Timer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
+import net.minecraftforge.client.event.RenderNameplateEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
@@ -100,12 +106,44 @@ public class ClientEventHandler {
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public <T extends LivingEntity, M extends EntityModel<T>> void onRenderLiving(RenderLivingEvent.Pre<T, M> event) {
-        if (isTimeStopped(event.getEntity().blockPosition())) {
-            T entity = (T) event.getEntity();
-            if (!entity.canUpdate() && event.getPartialRenderTick() != partialTickStoppedAt) {
-                event.getRenderer().render(entity, MathHelper.lerp(partialTickStoppedAt, entity.yRotO, entity.yRot), partialTickStoppedAt, event.getMatrixStack(), event.getBuffers(), event.getLight());
-                event.setCanceled(true);
+        LivingEntity entity = event.getEntity();
+        if (isTimeStopped(entity.blockPosition())) {
+            if (!entity.canUpdate()) {
+                if (event.getPartialRenderTick() != partialTickStoppedAt) {
+                    event.getRenderer().render((T) entity, MathHelper.lerp(partialTickStoppedAt, entity.yRotO, entity.yRot), 
+                            partialTickStoppedAt, event.getMatrixStack(), event.getBuffers(), event.getLight());
+                    event.setCanceled(true);
+                }
+                return;
             }
+        }
+        INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
+            if (power.getHeldAction(true) == ModActions.ZEPPELI_TORNADO_OVERDRIVE.get()) {
+                event.getMatrixStack().mulPose(Vector3f.YP.rotation((power.getHeldActionTicks() + event.getPartialRenderTick()) * 2F % 360F));
+            }
+            if (power.isActionOnCooldown(ModActions.HAMON_ZOOM_PUNCH.get())) {
+                M model = event.getRenderer().getModel();
+                if (model instanceof BipedModel) {
+                    ModelRenderer arm = entity.getMainArm() == HandSide.LEFT ? ((BipedModel<?>) model).leftArm : ((BipedModel<?>) model).rightArm;
+                    arm.visible = false;
+                    if (model instanceof PlayerModel) {
+                        arm = entity.getMainArm() == HandSide.LEFT ? ((PlayerModel<?>) model).leftArm : ((PlayerModel<?>) model).rightArm;
+                        arm.visible = false;
+                    }
+                }
+            }
+        });
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public <T extends LivingEntity, M extends EntityModel<T>> void onRenderNameplate(RenderNameplateEvent event) {
+        Entity entity = event.getEntity();
+        if (entity instanceof LivingEntity) {
+            INonStandPower.getNonStandPowerOptional((LivingEntity) entity).ifPresent(power -> {
+                if (power.getHeldAction(true) == ModActions.ZEPPELI_TORNADO_OVERDRIVE.get()) {
+                    event.getMatrixStack().mulPose(Vector3f.YP.rotation((power.getHeldActionTicks() + event.getPartialTicks()) * -2F % 360F));
+                }
+            });
         }
     }
     
