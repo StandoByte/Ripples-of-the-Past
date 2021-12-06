@@ -142,6 +142,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
         float breathing = hamon.getBreathingLevel();
         World world = user.level;
         if (!world.isClientSide()) {
+            hamon.tick();
             int air = user.getAirSupply();
             if (air < user.getMaxAirSupply() && user.tickCount % 200 < (int) breathing * 2 - 1) {
                 user.setAirSupply(air + 1);
@@ -428,39 +429,16 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
         return skills;
     }
     
-    public static void interactWithHamonTeacher(World world, PlayerEntity player, LivingEntity teacher, Technique teacherTechnique) {
+    public static void interactWithHamonTeacher(World world, PlayerEntity player, LivingEntity teacher, HamonData teacherHamon) {
         INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
             Optional<HamonData> hamonOptional = power.getTypeSpecificData(ModNonStandPowers.HAMON.get());
             if (!hamonOptional.isPresent() && !world.isClientSide()) {
-                if (teacherTechnique == Technique.ZEPPELI) {
-                    JojoModUtil.sayVoiceLine(teacher, ModSounds.ZEPPELI_FORCE_BREATH.get());
-                    teacher.swing(Hand.MAIN_HAND, true);
-                    if (player.getRandom().nextFloat() <= 0.01F) {
-                        player.hurt(DamageSource.GENERIC, 4.0F);
-                        player.setAirSupply(0);
-                        return;
-                    }
-                    else {
-                        player.hurt(DamageSource.GENERIC, 0.1F);
-                    }
-                }
-                if (power.givePower(ModNonStandPowers.HAMON.get())) {
-                    power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
-                        if (player.abilities.instabuild) {
-                            hamon.setBreathingLevel(HamonData.MAX_BREATHING_LEVEL);
-                            hamon.setHamonStatPoints(HamonSkill.HamonStat.STRENGTH, HamonData.MAX_HAMON_POINTS, true, true);
-                            hamon.setHamonStatPoints(HamonSkill.HamonStat.CONTROL, HamonData.MAX_HAMON_POINTS, true, true);
-                        }
-                        player.sendMessage(new TranslationTextComponent("jojo.chat.message.learnt_hamon"), Util.NIL_UUID);
-                        PlayerUtilCap utilCap = player.getCapability(PlayerUtilCapProvider.CAPABILITY).orElseThrow(() -> new IllegalStateException());
-                        utilCap.sendNotification(OneTimeNotification.HAMON_WINDOW, 
-                                new TranslationTextComponent("jojo.chat.message.hamon_window_hint", new KeybindTextComponent("jojo.key.hamon_skills_window")));
-                    });
+                if (teacher instanceof PlayerEntity) {
+                    teacherHamon.addNewPlayerLearner(player);
                 }
                 else {
-                    player.sendMessage(new TranslationTextComponent("jojo.chat.message.cant_learn_hamon"), Util.NIL_UUID);
+                    startLearningHamon(world, player, power, teacher, teacherHamon);
                 }
-                return;
             }
             hamonOptional.ifPresent(hamon -> {
                 if (world.isClientSide()) {
@@ -475,6 +453,38 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                 }
             });
         });
+    }
+    
+    public static void startLearningHamon(World world, PlayerEntity player, INonStandPower playerPower, LivingEntity teacher, HamonData teacherHamon) {
+        if (playerPower.givePower(ModNonStandPowers.HAMON.get())) {
+            if (teacherHamon.getTechnique() == Technique.ZEPPELI) {
+                JojoModUtil.sayVoiceLine(teacher, ModSounds.ZEPPELI_FORCE_BREATH.get());
+                teacher.swing(Hand.MAIN_HAND, true);
+                if (player.getRandom().nextFloat() <= 0.01F) {
+                    player.hurt(DamageSource.GENERIC, 4.0F);
+                    player.setAirSupply(0);
+                    return;
+                }
+                else {
+                    player.hurt(DamageSource.GENERIC, 0.1F);
+                }
+            }
+            playerPower.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
+                if (player.abilities.instabuild) {
+                    hamon.setBreathingLevel(HamonData.MAX_BREATHING_LEVEL);
+                    hamon.setHamonStatPoints(HamonSkill.HamonStat.STRENGTH, HamonData.MAX_HAMON_POINTS, true, true);
+                    hamon.setHamonStatPoints(HamonSkill.HamonStat.CONTROL, HamonData.MAX_HAMON_POINTS, true, true);
+                }
+                player.sendMessage(new TranslationTextComponent("jojo.chat.message.learnt_hamon"), Util.NIL_UUID);
+                PlayerUtilCap utilCap = player.getCapability(PlayerUtilCapProvider.CAPABILITY).orElseThrow(() -> new IllegalStateException());
+                utilCap.sendNotification(OneTimeNotification.HAMON_WINDOW, 
+                        new TranslationTextComponent("jojo.chat.message.hamon_window_hint", new KeybindTextComponent("jojo.key.hamon_skills_window")));
+            });
+        }
+        else {
+            player.sendMessage(new TranslationTextComponent("jojo.chat.message.cant_learn_hamon"), Util.NIL_UUID);
+        }
+        return;
     }
     
 
