@@ -52,6 +52,7 @@ public class StandArrowItem extends ArrowItem {
         if (entity instanceof LivingEntity) {
             LivingEntity livingEntity = (LivingEntity) entity;
             livingEntity.hurt(ModDamageSources.STAND_VIRUS, Math.min(livingEntity.getMaxHealth(), 20F) - 1F);
+            stack.hurtAndBreak(1, livingEntity, pl -> {});
             if (livingEntity instanceof PlayerEntity) {
                 return playerPiercedByArrow((PlayerEntity) livingEntity, stack, world, false);
             }
@@ -94,10 +95,10 @@ public class StandArrowItem extends ArrowItem {
     
     @Override
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
+        IFormattableTextComponent text = null;
         if (JojoModConfig.COMMON.standTiers.get()) {
             PlayerEntity player = ClientUtil.getClientPlayer();
             if (player != null) {
-                IFormattableTextComponent text;
                 int currentTier = StandUtil.standTierFromXp(player.experienceLevel, true);
                 int nextTier = StandUtil.arrowPoolNextTier(currentTier);
                 if (currentTier > -1) {
@@ -116,7 +117,6 @@ public class StandArrowItem extends ArrowItem {
                         text = new TranslationTextComponent("jojo.arrow.no_stands").withStyle(TextFormatting.OBFUSCATED);
                     }
                 }
-                tooltip.add(text.withStyle(TextFormatting.ITALIC, TextFormatting.GRAY));
             }
         }
         else {
@@ -125,7 +125,10 @@ public class StandArrowItem extends ArrowItem {
                     return;
                 }
             }
-            tooltip.add(new TranslationTextComponent("jojo.arrow.no_stands").withStyle(TextFormatting.ITALIC, TextFormatting.GRAY).withStyle(TextFormatting.OBFUSCATED));
+            text = new TranslationTextComponent("jojo.arrow.no_stands").withStyle(TextFormatting.OBFUSCATED);
+        }
+        if (text != null) {
+            tooltip.add(text.withStyle(TextFormatting.ITALIC, TextFormatting.GRAY));
         }
     }
 }
