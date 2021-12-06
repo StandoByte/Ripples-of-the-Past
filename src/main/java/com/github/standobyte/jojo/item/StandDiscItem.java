@@ -71,9 +71,11 @@ public class StandDiscItem extends Item {
     public void fillItemCategory(ItemGroup group, NonNullList<ItemStack> items) {
         if (this.allowdedIn(group)) {
             for (StandType standType : ModStandTypes.Registry.getRegistry()) {
-                ItemStack item = new ItemStack(this);
-                setStandType(item, standType);
-                items.add(item);
+                if (!JojoModConfig.COMMON.isConfigLoaded() || !JojoModConfig.COMMON.isStandBanned(standType)) {
+                    ItemStack item = new ItemStack(this);
+                    setStandType(item, standType);
+                    items.add(item);
+                }
             }
         }
     }

@@ -23,6 +23,8 @@ import net.minecraftforge.registries.IForgeRegistry;
 public class JojoModConfig {
 
     public static class Common {
+        private boolean loaded = false;
+        
         public final ForgeConfigSpec.BooleanValue keepStandOnDeath;
         public final ForgeConfigSpec.BooleanValue keepNonStandOnDeath;
 
@@ -73,7 +75,9 @@ public class JojoModConfig {
                         .translation("jojo.config.prioritizeLeastTakenStands")
                         .define("prioritizeLeastTakenStands", false);
                 bannedStands = builder
-                        .comment(" List of Stands excluded from Stand Arrow and /stand random pool.", 
+                        .comment(" List of Stands excluded from Stand Arrow and /stand random pool.",
+                                "  These stands will still be avaliable via /stand give command",
+                                "  Their Discs won't be added to the mod's Creative tab, but they can still be found in the Search tab.\"",
                                 "  The format is the same as for /stand give command (e.g., \"jojo:star_platinum\").")
                         .translation("jojo.config.bannedStands")
                         .defineList("bannedStands", Arrays.asList("jojo:example_1", "jojo:example_2"), s -> s instanceof String && ResourceLocation.tryParse((String) s) != null);
@@ -111,6 +115,10 @@ public class JojoModConfig {
                         .translation("jojo.config.pillarmanTempleSpawn")
                         .define("pillarmanTempleSpawn", true);
             builder.pop();
+        }
+        
+        public boolean isConfigLoaded() {
+            return loaded;
         }
         
         public boolean inTimeStopRange(ChunkPos center, ChunkPos pos) {
@@ -166,6 +174,7 @@ public class JojoModConfig {
     public static void onConfigLoad(ModConfigEvent event) {
         ModConfig config = event.getConfig();
         if (config.getType() == ModConfig.Type.COMMON && JojoMod.MOD_ID.equals(config.getModId())) {
+            COMMON.loaded = true;
             COMMON.initBannedStands();
         }
     }
