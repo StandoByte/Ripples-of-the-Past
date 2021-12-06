@@ -409,9 +409,17 @@ public class GameplayEventHandler {
                 INonStandPower targetPower = INonStandPower.getPlayerNonStandPower(targetPlayer);
                 if (targetPower.getType() == ModNonStandPowers.HAMON.get()) {
                     HamonPowerType.interactWithHamonTeacher(target.level, event.getPlayer(), targetPlayer, 
-                            targetPower.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get().getTechnique());
+                            targetPower.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get());
                     event.setCanceled(true);
                     event.setCancellationResult(ActionResultType.sidedSuccess(target.level.isClientSide));
+                }
+                else {
+                    INonStandPower.getPlayerNonStandPower(event.getPlayer())
+                    .getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
+                        hamon.interactWithNewLearner(targetPlayer);
+                        event.setCanceled(true);
+                        event.setCancellationResult(ActionResultType.sidedSuccess(target.level.isClientSide));
+                    });
                 }
             }
         }

@@ -59,7 +59,8 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser 
             itemStack.interactLivingEntity(player, this, hand);
         }
         if (hand == Hand.MAIN_HAND) {
-            HamonPowerType.interactWithHamonTeacher(level, player, this, null);
+            HamonPowerType.interactWithHamonTeacher(level, player, this, 
+                    getPower().getTypeSpecificData(ModNonStandPowers.HAMON.get()).get());
         }
         return super.mobInteract(player, hand);
     }

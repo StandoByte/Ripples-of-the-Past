@@ -2,6 +2,8 @@ package com.github.standobyte.jojo.power.nonstand.type;
 
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -19,6 +21,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillLearnPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillsResetPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncHamonStatsPacket;
+import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.nonstand.TypeSpecificData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonSkillType;
@@ -31,6 +34,7 @@ import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -38,6 +42,7 @@ import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeMod;
 
@@ -67,12 +72,17 @@ public class HamonData extends TypeSpecificData {
     private float meditationYRot;
     private float meditationXRot;
     private float avgExercisePoints;
+    private Set<PlayerEntity> newLearners = new HashSet<>();
 
     public HamonData() {
         hamonSkills = new HamonSkillSet();
         for (Exercise exercise : Exercise.values()) {
             exerciseTicks.put(exercise, 0);
         }
+    }
+    
+    public void tick() {
+        tickNewPlayerLearners(power.getUser());
     }
 
     @Override
@@ -549,6 +559,30 @@ public class HamonData extends TypeSpecificData {
             return ModSounds.BREATH_LISA_LISA.get();
         default:
             return ModSounds.BREATH_DEFAULT.get();
+        }
+    }
+    
+    public void addNewPlayerLearner(PlayerEntity player) {
+        newLearners.add(player);
+        LivingEntity user = power.getUser();
+        if (user instanceof PlayerEntity) {
+            ((PlayerEntity) user).displayClientMessage(new TranslationTextComponent("jojo.chat.message.new_hamon_learner", player.getDisplayName()), true);
+        }
+    }
+    
+    private void tickNewPlayerLearners(LivingEntity user) {
+        for (Iterator<PlayerEntity> it = newLearners.iterator(); it.hasNext(); ) {
+            PlayerEntity player = it.next();
+            if (user.distanceToSqr(player) > 64) {
+                it.remove();
+            }
+        }
+    }
+    
+    public void interactWithNewLearner(PlayerEntity player) {
+        if (newLearners.contains(player)) {
+            HamonPowerType.startLearningHamon(player.level, player, INonStandPower.getPlayerNonStandPower(player), power.getUser(), this);
+            newLearners.remove(player);
         }
     }
 
