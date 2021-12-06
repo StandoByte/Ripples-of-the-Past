@@ -13,6 +13,8 @@ import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.github.standobyte.jojo.util.damage.ModDamageSources;
 
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -130,5 +132,10 @@ public class StandArrowItem extends ArrowItem {
         if (text != null) {
             tooltip.add(text.withStyle(TextFormatting.ITALIC, TextFormatting.GRAY));
         }
+    }
+    
+    @Override
+    public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
+        return super.canApplyAtEnchantingTable(stack, enchantment) || enchantment.equals(Enchantments.LOYALTY);
     }
 }

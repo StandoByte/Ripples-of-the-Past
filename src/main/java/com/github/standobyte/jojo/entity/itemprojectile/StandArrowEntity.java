@@ -17,23 +17,37 @@ import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.server.SChangeGameStatePacket;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 public class StandArrowEntity extends AbstractArrowEntity {
+    private static final DataParameter<Byte> LOYALTY = EntityDataManager.defineId(StandArrowEntity.class, DataSerializers.BYTE);
+    
     private ItemStack arrowItem = new ItemStack(ModItems.STAND_ARROW.get());
+    private boolean dealtDamage;
     
     public StandArrowEntity(World world, LivingEntity thrower, ItemStack arrowItem) {
         super(ModEntityTypes.STAND_ARROW.get(), thrower, world);
         this.arrowItem = arrowItem.copy();
+        this.entityData.set(LOYALTY, (byte) EnchantmentHelper.getLoyalty(arrowItem));
     }
     
     public StandArrowEntity(EntityType<? extends AbstractArrowEntity> type, World world) {
         super(type, world);
+    }
+
+    @Override
+    protected void defineSynchedData() {
+       super.defineSynchedData();
+       entityData.define(LOYALTY, (byte)0);
     }
 
     @Override
@@ -66,7 +80,8 @@ public class StandArrowEntity extends AbstractArrowEntity {
                 ((LivingEntity) shooter).setLastHurtMob(target);
             }
         }
-
+        dealtDamage = true;
+        
         boolean dodge = target.getType() == EntityType.ENDERMAN;
         int prevTargetFireTimer = target.getRemainingFireTicks();
         if (isOnFire() && !dodge) {
@@ -111,17 +126,61 @@ public class StandArrowEntity extends AbstractArrowEntity {
     }
 
     @Override
+    protected EntityRayTraceResult findHitEntity(Vector3d pos, Vector3d nextPos) {
+        return dealtDamage ? null : super.findHitEntity(pos, nextPos);
+    }
+
+    @Override
+    public void tick() {
+        if (inGroundTime > 4) {
+            dealtDamage = true;
+        }
+        Entity owner = getOwner();
+        if ((dealtDamage || isNoPhysics()) && owner != null) {
+            int loyalty = entityData.get(LOYALTY);
+            if (loyalty > 0) {
+                if (!owner.isAlive() || owner.isSpectator()) {
+                    if (!level.isClientSide && pickup == AbstractArrowEntity.PickupStatus.ALLOWED) {
+                        spawnAtLocation(getPickupItem(), 0.1F);
+                    }
+                    remove();
+                }
+                else {
+                    setNoPhysics(true);
+                    Vector3d posDiffToOwner = new Vector3d(owner.getX() - getX(), owner.getEyeY() - getY(), owner.getZ() - getZ());
+                    setPosRaw(getX(), getY() + posDiffToOwner.y * 0.015D * (double) loyalty, getZ());
+                    if (level.isClientSide) {
+                        yOld = getY();
+                    }
+                    setDeltaMovement(getDeltaMovement().scale(0.95D).add(posDiffToOwner.normalize().scale(0.05D * (double) loyalty)));
+                }
+            }
+        }
+        super.tick();
+    }
+
+    @Override
+    public void tickDespawn() {
+        if (pickup != AbstractArrowEntity.PickupStatus.ALLOWED || entityData.get(LOYALTY) <= 0) {
+            super.tickDespawn();
+        }
+    }
+
+    @Override
     public void readAdditionalSaveData(CompoundNBT compound) {
         super.readAdditionalSaveData(compound);
         if (compound.contains("Arrow", 10)) {
             arrowItem = ItemStack.of(compound.getCompound("Trident"));
         }
+        entityData.set(LOYALTY, (byte) EnchantmentHelper.getLoyalty(arrowItem));
+        dealtDamage = compound.getBoolean("DealtDamage");
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundNBT arrow) {
-        super.addAdditionalSaveData(arrow);
-        arrow.put("Arrow", arrowItem.save(new CompoundNBT()));
+    public void addAdditionalSaveData(CompoundNBT compound) {
+        super.addAdditionalSaveData(compound);
+        compound.put("Arrow", arrowItem.save(new CompoundNBT()));
+        compound.putBoolean("DealtDamage", dealtDamage);
     }
 
     @Override

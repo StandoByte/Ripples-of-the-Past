@@ -118,10 +118,10 @@ public abstract class ItemProjectileEntity extends AbstractArrowEntity {
             yRot += 180.0F;
             yRotO += 180.0F;
             if (!level.isClientSide() && getDeltaMovement().lengthSqr() < 1.0E-7D) {
-                if (pickup == AbstractArrowEntity.PickupStatus.ALLOWED) {
-                    spawnAtLocation(getPickupItem(), 0.1F);
-                }
                 if (isRemovedOnEntityHit()) {
+                    if (pickup == AbstractArrowEntity.PickupStatus.ALLOWED) {
+                        spawnAtLocation(getPickupItem(), 0.1F);
+                    }
                     remove();
                 }
                 else {
