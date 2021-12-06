@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.client.renderer.player.layer;
 
+import com.github.standobyte.jojo.init.ModActions;
+import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
@@ -17,7 +19,6 @@ import net.minecraft.util.math.vector.Vector3f;
 public class TornadoOverdriveEffectLayer<T extends LivingEntity> extends LayerRenderer<T, PlayerModel<T>> {
     public static final ResourceLocation TEXTURE = new ResourceLocation("textures/entity/trident_riptide.png");
     private final ModelRenderer box = new ModelRenderer(64, 64, 0, 0);
-    private boolean shouldRender;
 
     public TornadoOverdriveEffectLayer(IEntityRenderer<T, PlayerModel<T>> renderer) {
         super(renderer);
@@ -27,7 +28,9 @@ public class TornadoOverdriveEffectLayer<T extends LivingEntity> extends LayerRe
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, 
             T entity, float walkAnimPos, float walkAnimSpeed, float partialTick, 
             float ticks, float headYRotation, float headXRotation) {
-        if (shouldRender) {
+        if (INonStandPower.getNonStandPowerOptional(entity)
+                .map(power -> power.getHeldAction(true) == ModActions.ZEPPELI_TORNADO_OVERDRIVE.get())
+                .orElse(false)) {
             IVertexBuilder ivertexbuilder = buffer.getBuffer(RenderType.entityCutoutNoCull(TEXTURE));
             for (int i = 0; i < 3; ++i) {
                 matrixStack.pushPose();
@@ -40,9 +43,5 @@ public class TornadoOverdriveEffectLayer<T extends LivingEntity> extends LayerRe
                 matrixStack.popPose();
             }
         }
-    }
-    
-    public void setShouldRender(boolean shouldRender) {
-        this.shouldRender = shouldRender;
     }
 }

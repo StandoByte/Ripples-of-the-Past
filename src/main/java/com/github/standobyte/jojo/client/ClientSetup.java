@@ -51,8 +51,8 @@ import com.github.standobyte.jojo.client.renderer.entity.stand.MagiciansRedRende
 import com.github.standobyte.jojo.client.renderer.entity.stand.SilverChariotRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.stand.StarPlatinumRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.stand.TheWorldRenderer;
-import com.github.standobyte.jojo.client.renderer.player.PlayerRenderHandler;
 import com.github.standobyte.jojo.client.renderer.player.layer.KnifeLayer;
+import com.github.standobyte.jojo.client.renderer.player.layer.TornadoOverdriveEffectLayer;
 import com.github.standobyte.jojo.client.ui.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.sprites.SpriteUploaders;
 import com.github.standobyte.jojo.init.ModBlocks;
@@ -165,7 +165,6 @@ public class ClientSetup {
             StandControlHandler.init(mc);
             InputHandler.init(mc);
             InputHandler.getInstance().setActionsOverlay(ActionsOverlayGui.getInstance());
-            PlayerRenderHandler.init(mc);
 
             Map<String, PlayerRenderer> skinMap = mc.getEntityRenderDispatcher().getSkinMap();
             addLayers(skinMap.get("default"));
@@ -182,6 +181,7 @@ public class ClientSetup {
 
     private static void addLayers(PlayerRenderer renderer) {
         renderer.addLayer(new KnifeLayer<>(renderer));
+        renderer.addLayer(new TornadoOverdriveEffectLayer<>(renderer));
     }
 
     @SubscribeEvent
