@@ -184,7 +184,7 @@ public class ActionsOverlayGui extends AbstractGui { // TODO config to move it t
             renderTargetIcon(matrixStack, ActionType.ATTACK, x, y);
             renderTargetIcon(matrixStack, ActionType.ABILITY, x, y + BARS_Y_GAP);
          // condition message icon
-            renderConditionMessageIcon(matrixStack, x, y + HOTBAR_SQUARE_HEIGHT * 2 + mc.font.lineHeight);
+            renderConditionMessageIcon(matrixStack, x, y + HOTBAR_SQUARE_HEIGHT * 2 + mc.font.lineHeight, event.getPartialTicks());
             
             RenderSystem.disableRescaleNormal();
             RenderSystem.disableBlend();
@@ -203,7 +203,7 @@ public class ActionsOverlayGui extends AbstractGui { // TODO config to move it t
             renderHotbarText(matrixStack, x, y, currentPower, ActionType.ABILITY);
 
             y += mc.font.lineHeight + 1 + HOTBAR_SQUARE_HEIGHT + 1;
-            renderConditionText(matrixStack, x + 16, y + 2);
+            renderConditionText(matrixStack, x + 16, y + 2, event.getPartialTicks());
         }
     }
 
@@ -351,10 +351,10 @@ public class ActionsOverlayGui extends AbstractGui { // TODO config to move it t
         }
     }
     
-    private static final float MESSAGE_DURATION = 100;
-    private void renderConditionMessageIcon(MatrixStack matrixStack, int x, int y) {
+    private static final float MESSAGE_DURATION = 60;
+    private void renderConditionMessageIcon(MatrixStack matrixStack, int x, int y, float partialTick) {
         if (unfulfilledCondition != null) {
-            float alpha = Math.min((float) conditionMessageTicks / MESSAGE_DURATION * 2F, 1F);
+            float alpha = getConditionMessageAlpha(partialTick);
             if (alpha < 1) {
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
             }
@@ -365,11 +365,17 @@ public class ActionsOverlayGui extends AbstractGui { // TODO config to move it t
         }
     }
     
-    private void renderConditionText(MatrixStack matrixStack, int x, int y) {
+    private void renderConditionText(MatrixStack matrixStack, int x, int y, float partialTick) {
         if (unfulfilledCondition != null) {
-            int brightness = 75 + (int) ((255 - 75) * Math.min((float) conditionMessageTicks / MESSAGE_DURATION * 2F, 1F));
-            drawString(matrixStack, mc.font, unfulfilledCondition, x, y, brightness << 16 | brightness << 8 | brightness);
+            int alpha = (int) (getConditionMessageAlpha(partialTick) * 255F);
+            if (alpha > 8) {
+                drawString(matrixStack, mc.font, unfulfilledCondition, x, y, 0xFFFFFF | alpha << 24 & -0x1000000);
+            }
         }
+    }
+    
+    private float getConditionMessageAlpha(float partialTick) {
+        return Math.min((conditionMessageTicks - partialTick) / MESSAGE_DURATION * 3F, 1F);
     }
     
     public void setUnfulfilledConditionText(ITextComponent message) {
