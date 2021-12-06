@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.command;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -73,7 +72,6 @@ public class JojoControlsCommand {
             if (JojoModConfig.COMMON.keepStandOnDeath.get()) {
                 i |= 2;
             }
-            JojoMod.LOGGER.debug(i);
             return LAST_PAGE_VARIANTS[i];
         }
         return TEXT_PAGES[pageNum];

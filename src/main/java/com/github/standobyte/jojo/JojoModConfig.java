@@ -135,6 +135,7 @@ public class JojoModConfig {
                     .filter(resLoc -> registry.containsKey(resLoc))
                     .collect(Collectors.toList());
             
+            tiersAvaliable = new boolean[7];
             registry.getValues()
             .stream()
             .filter(stand -> !bannedStandsResLocs.contains(stand.getRegistryName()))
