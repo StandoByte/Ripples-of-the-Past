@@ -48,7 +48,7 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser 
     }
 
     @Override
-    public boolean isPersistenceRequired() { // if he somehow despawns again, i swear...
+    public boolean requiresCustomPersistence() { // if he somehow despawns again, i swear...
         return true;
     }
 
