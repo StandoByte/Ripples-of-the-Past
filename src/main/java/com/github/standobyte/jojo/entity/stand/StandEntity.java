@@ -34,7 +34,6 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.util.EntityDistanceRayTraceResult;
 import com.github.standobyte.jojo.util.JojoModUtil;
-import com.github.standobyte.jojo.util.TimeHandler;
 import com.github.standobyte.jojo.util.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.damage.ModDamageSources;
 import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
