@@ -77,7 +77,7 @@ public class ClackersEntity extends ItemProjectileEntity {
 
     @Override
     protected boolean canHitEntity(Entity entity) {
-        return !entity.is(getOwner()) && entity.getType() != ModEntityTypes.CLACKERS.get() || super.canHitEntity(entity);
+        return !entity.is(getOwner()) && (entity.getType() != ModEntityTypes.CLACKERS.get() || super.canHitEntity(entity));
     }
     
     @Override
