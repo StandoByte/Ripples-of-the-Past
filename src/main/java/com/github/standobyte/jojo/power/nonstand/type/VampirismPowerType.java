@@ -172,7 +172,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
     }
     
     public static float healCost(Difficulty difficulty) {
-        return 6.0F / difficulty.getId();
+        return 4.0F / difficulty.getId();
     }
     
     // TODO smite enchantment damage
