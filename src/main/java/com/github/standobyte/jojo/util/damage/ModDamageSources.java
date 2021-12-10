@@ -97,8 +97,13 @@ public class ModDamageSources {
     public static boolean dealHamonDamage(Entity target, float amount, @Nullable Entity srcDirect, @Nullable Entity srcIndirect) {
         if (target instanceof LivingEntity) {
             LivingEntity livingTarget = (LivingEntity) target;
-            if (livingTarget.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.SATIPOROJA_SCARF.get()) {
-                return false;
+            boolean scarf = livingTarget.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.SATIPOROJA_SCARF.get();
+            if (scarf) {
+                if (INonStandPower.getNonStandPowerOptional(livingTarget)
+                        .map(power -> power.getType() == ModNonStandPowers.HAMON.get()).orElse(false)) {
+                    return false;
+                }
+                amount *= 0.5F;
             }
             DamageSource dmgSource = srcDirect == null ? HAMON : 
                     srcIndirect == null ? new EntityDamageSource(HAMON.getMsgId() + ".entity", srcDirect).bypassArmor() : 
@@ -112,7 +117,7 @@ public class ModDamageSources {
                 LivingEntity sourceLiving = (LivingEntity) dmgSource.getEntity();
                 float hamonMultiplier = INonStandPower.getNonStandPowerOptional(sourceLiving).map(power -> 
                 power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(hamon -> {
-                    if (undeadTarget && hamon.isSkillLearned(HamonSkill.HAMON_SPREAD)) {
+                    if (undeadTarget && !scarf && hamon.isSkillLearned(HamonSkill.HAMON_SPREAD)) {
                         float effectStr = (hamon.getHamonDamageMultiplier() - 1) / (HamonData.MAX_HAMON_DAMAGE - 1);
                         int effectDuration = 25 + MathHelper.floor(125F * effectStr);
                         int effectLvl = Math.max(MathHelper.floor(1.5F * effectStr * dmgAmount), 3);
