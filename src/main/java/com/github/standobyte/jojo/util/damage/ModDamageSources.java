@@ -118,7 +118,8 @@ public class ModDamageSources {
                 float hamonMultiplier = INonStandPower.getNonStandPowerOptional(sourceLiving).map(power -> 
                 power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(hamon -> {
                     if (undeadTarget && !scarf && hamon.isSkillLearned(HamonSkill.HAMON_SPREAD)) {
-                        float effectStr = (hamon.getHamonDamageMultiplier() - 1) / (HamonData.MAX_HAMON_DAMAGE - 1);
+                        float effectStr = (hamon.getHamonDamageMultiplier() - 1) / (HamonData.MAX_HAMON_DAMAGE - 1)
+                                * MathHelper.clamp(dmgAmount, 0.1F, 1.0F);
                         int effectDuration = 25 + MathHelper.floor(125F * effectStr);
                         int effectLvl = Math.max(MathHelper.floor(1.5F * effectStr * dmgAmount), 3);
                         livingTarget.addEffect(new EffectInstance(ModEffects.HAMON_SPREAD.get(), effectDuration, effectLvl));
