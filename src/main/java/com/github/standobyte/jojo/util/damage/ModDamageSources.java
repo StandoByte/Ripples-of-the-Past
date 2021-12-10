@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.util.damage;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
@@ -118,10 +119,9 @@ public class ModDamageSources {
                 float hamonMultiplier = INonStandPower.getNonStandPowerOptional(sourceLiving).map(power -> 
                 power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(hamon -> {
                     if (undeadTarget && !scarf && hamon.isSkillLearned(HamonSkill.HAMON_SPREAD)) {
-                        float effectStr = (hamon.getHamonDamageMultiplier() - 1) / (HamonData.MAX_HAMON_DAMAGE - 1)
-                                * MathHelper.clamp(dmgAmount, 0.1F, 1.0F);
+                        float effectStr = (hamon.getHamonDamageMultiplier() - 1) / (HamonData.MAX_HAMON_DAMAGE - 1);
                         int effectDuration = 25 + MathHelper.floor(125F * effectStr);
-                        int effectLvl = Math.max(MathHelper.floor(1.5F * effectStr * dmgAmount), 3);
+                        int effectLvl = MathHelper.clamp(MathHelper.floor(1.5F * effectStr * dmgAmount), 0, 3);
                         livingTarget.addEffect(new EffectInstance(ModEffects.HAMON_SPREAD.get(), effectDuration, effectLvl));
                     }
                     return hamon.getHamonDamageMultiplier();
