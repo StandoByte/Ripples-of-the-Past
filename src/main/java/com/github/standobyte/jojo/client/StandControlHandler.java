@@ -105,7 +105,7 @@ public class StandControlHandler {
             PacketManager.sendToServer(new ClStandManualMovementPacket(stand.getX(), stand.getY(), stand.getZ()));
         }
         else {
-            if ((mc.cameraEntity == mc.player || mc.cameraEntity == null) && mc.player.hasEffect(ModEffects.STUN.get())) {
+            if ((mc.getCameraEntity() == mc.player || mc.getCameraEntity() == null) && mc.player.hasEffect(ModEffects.STUN.get())) {
                 MovementInput input = event.getMovementInput();
                 input.forwardImpulse = 0;
                 input.leftImpulse = 0;
