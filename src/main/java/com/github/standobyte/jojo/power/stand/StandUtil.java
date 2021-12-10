@@ -90,7 +90,7 @@ public class StandUtil {
                     PacketManager.sendToClient(new SyncStandControlStatusPacket(manualControl, keepPosition), (ServerPlayerEntity) player);
                 }
                 else {
-                    Minecraft.getInstance().setCameraEntity(manualControl ? standEntity : null);
+                    Minecraft.getInstance().setCameraEntity(manualControl ? standEntity : player);
                     if (manualControl) {
                         StandControlHandler.setStartedControllingStand();
                     }
