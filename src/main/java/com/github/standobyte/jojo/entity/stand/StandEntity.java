@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
@@ -1155,7 +1156,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
 
     @Override
-    public void move(MoverType type, Vector3d vec) { // TODO allow stand to only phase through 1-block wide walls
+    public void move(MoverType type, Vector3d vec) {
         super.move(type, vec);
         LivingEntity user = getUser();
         if (user != null) {
@@ -1163,7 +1164,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             double rangeSq = getMaxRange();
             rangeSq *= rangeSq;
             if (distanceSqr > rangeSq) {
-                super.move(MoverType.SELF, user.position().subtract(position()).scale(1 - rangeSq / distanceSqr));
+                setBoundingBox(getBoundingBox().move(user.position().subtract(position()).scale(1 - rangeSq / distanceSqr)));
+                setLocationFromBoundingbox();
             }
             if (!level.isClientSide() && isManuallyControlled() && distanceSqr > 728 && user instanceof PlayerEntity) {
                 double horizontalDistSqr = distanceSqr - Math.pow(getY() - user.getY(), 2);
@@ -1256,6 +1258,14 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
 
 
+    @Override
+    public void startSeenByPlayer(ServerPlayerEntity player) {
+        super.startSeenByPlayer(player);
+        if (player.is(getUser())) {
+            StandUtil.setManualControl(player, false, false);
+        }
+    }
+    
     @Override
     public IPacket<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
