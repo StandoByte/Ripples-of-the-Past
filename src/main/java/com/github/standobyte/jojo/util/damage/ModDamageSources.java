@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.util.damage;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;

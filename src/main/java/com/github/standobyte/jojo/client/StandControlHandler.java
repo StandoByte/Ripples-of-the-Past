@@ -1,7 +1,5 @@
 package com.github.standobyte.jojo.client;
 
-import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.ARMOR;
-import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.HEALTH;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.POTION_ICONS;
 import static net.minecraftforge.event.TickEvent.Phase.END;
 import static net.minecraftforge.fml.LogicalSide.CLIENT;
@@ -164,7 +162,7 @@ public class StandControlHandler {
     
     
 
-    @SubscribeEvent(priority = EventPriority.HIGH)
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public void renderStandEffectsGui(RenderGameOverlayEvent.Pre event) {
         if (!isControllingStand()) {
             return;
@@ -179,7 +177,7 @@ public class StandControlHandler {
         }
     }
     
-    @SubscribeEvent(priority = EventPriority.LOW)
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public void renderStandGui(RenderGameOverlayEvent.Pre event) {
         if (!isControllingStand()) {
             return;
@@ -214,7 +212,6 @@ public class StandControlHandler {
 
     private void renderCameraStandHealth(MatrixStack matrixStack, IngameGui gui, RenderGameOverlayEvent event, int width, int height) {
         mc.getTextureManager().bind(AbstractGui.GUI_ICONS_LOCATION);
-        if (MinecraftForge.EVENT_BUS.post(new RenderGameOverlayEvent.Pre(matrixStack, event, HEALTH))) return;
         mc.getProfiler().push("health");
         RenderSystem.enableBlend();
 
@@ -314,11 +311,9 @@ public class StandControlHandler {
 
         RenderSystem.disableBlend();
         mc.getProfiler().pop();
-        MinecraftForge.EVENT_BUS.post(new RenderGameOverlayEvent.Post(matrixStack, event, HEALTH));
     }
 
     private void renderCameraStandArmor(MatrixStack matrixStack, IngameGui gui, RenderGameOverlayEvent event, int width, int height) {
-        if (MinecraftForge.EVENT_BUS.post(new RenderGameOverlayEvent.Pre(matrixStack, event, ARMOR))) return;
         mc.getProfiler().push("armor");
 
         RenderSystem.enableBlend();
@@ -346,7 +341,6 @@ public class StandControlHandler {
 
         RenderSystem.disableBlend();
         mc.getProfiler().pop();
-        MinecraftForge.EVENT_BUS.post(new RenderGameOverlayEvent.Post(matrixStack, event, ARMOR));
     }
 
     private void renderStandPotionEffects(MatrixStack matrixStack, IngameGui gui, RenderGameOverlayEvent event, int width, int height) {
@@ -407,6 +401,5 @@ public class StandControlHandler {
 
             list.forEach(Runnable::run);
         }
-        MinecraftForge.EVENT_BUS.post(new RenderGameOverlayEvent.Post(matrixStack, event, POTION_ICONS));
     }
 }
