@@ -142,7 +142,7 @@ public class ModActions {
                     .maxRangeEntityTarget(1.0D).holdToFire(60, false, 10).heldSlowDownFactor(0.3F)));
     
     public static final RegistryObject<Action> VAMPIRISM_ZOMBIE_SUMMON = ACTIONS.register("vampirism_zombie_summon", 
-            () -> new VampirismZombieSummon(new Action.Builder().manaCost(100)));
+            () -> new VampirismZombieSummon(new Action.Builder().manaCost(100).cooldown(200)));
     
     public static final RegistryObject<Action> VAMPIRISM_DARK_AURA = ACTIONS.register("vampirism_dark_aura", 
             () -> new VampirismDarkAura(new Action.Builder().ignoresPerformerStun().manaCost(50).cooldown(100)));

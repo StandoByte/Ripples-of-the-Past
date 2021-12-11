@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
 import com.github.standobyte.jojo.power.IPower;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.World;
 
@@ -18,8 +19,17 @@ public class VampirismZombieSummon extends Action {
     
     @Override
     public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IPower<?> power, ActionTarget target) {
-        if (user.level.getDifficulty() == Difficulty.PEACEFUL) {
+        World world = user.level;
+        if (world.getDifficulty() == Difficulty.PEACEFUL) {
             return conditionMessage("peaceful");
+        }
+        int zombiesMaxInArea = world.getDifficulty().getId() * 10;
+        if (world.getEntitiesOfClass(HungryZombieEntity.class, new AxisAlignedBB(
+                user.getX(), 0, user.getZ(), 
+                user.getX(), 256, user.getZ())
+                .inflate(16, 0, 16))
+                .size() > zombiesMaxInArea) {
+            return conditionMessage("zombies_limit");
         }
         return ActionConditionResult.POSITIVE;
     }
@@ -27,8 +37,8 @@ public class VampirismZombieSummon extends Action {
     @Override
     public void perform(World world, LivingEntity user, IPower<?> power, ActionTarget target) {
         if (!world.isClientSide()) {
-            int difficulty = world.getDifficulty().getId();
-            for (int i = 0; i < difficulty; i++) {
+            int zombiesToSummon = world.getDifficulty().getId();
+            for (int i = 0; i < zombiesToSummon; i++) {
                 HungryZombieEntity zombie = new HungryZombieEntity(world);
                 zombie.copyPosition(user);
                 zombie.setOwner(user);

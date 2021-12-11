@@ -209,6 +209,7 @@
   "jojo.message.action_condition.blood": "You can't satisfy your thirst with this creature",
   "jojo.message.action_condition.fire": "You can't do it while on fire",
   "jojo.message.action_condition.ultrawarm": "It's too hot in this place",
+  "jojo.message.action_condition.zombies_limit": "Too many zombies in the area",
   "jojo.message.action_condition.cant_become_vampire": "The target can't become a vampire",
   "jojo.message.action_condition.user_too_low_health": "Your health is too low",
   "jojo.message.action_condition.target_too_many_health": "The target has too many health",
