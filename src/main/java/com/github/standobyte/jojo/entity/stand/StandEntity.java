@@ -11,7 +11,6 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
@@ -71,6 +70,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -1315,9 +1315,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         super.addAdditionalSaveData(nbt);
     }
 
-    private static final List<ItemStack> EMPTY_EQUIPMENT = Collections.emptyList();
+    private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
     @Override
-    public Iterable<ItemStack> getArmorSlots() { return EMPTY_EQUIPMENT; }
+    public Iterable<ItemStack> getArmorSlots() { return armorItems; }
 
     @Override
     public boolean isAffectedByPotions() { return false; }
