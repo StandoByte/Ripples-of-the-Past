@@ -10,7 +10,9 @@ import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
 import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandPower;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -74,10 +76,23 @@ public class EntityStandType extends StandType {
     }
 
     @Override
+    public void tickUser(LivingEntity user, IPower<?> power) {
+        super.tickUser(user, power);
+        IStandManifestation stand = ((StandPower) power).getStandManifestation();
+        if (stand instanceof StandEntity) {
+            StandEntity standEntity = (StandEntity) stand;
+            if (standEntity.level != user.level) {
+                forceUnsummon(user, (IStandPower) power);
+            }
+        }
+    }
+
+    @Override
     public void forceUnsummon(LivingEntity user, IStandPower standPower) {
         if (!user.level.isClientSide()) {
-            StandEntity standEntity = ((StandEntity) standPower.getStandManifestation());
-            if (standEntity != null) {
+            IStandManifestation stand = standPower.getStandManifestation();
+            if (stand instanceof StandEntity) {
+                StandEntity standEntity = (StandEntity) stand;
                 standPower.setStandManifestation(null);
                 PacketManager.sendToClientsTrackingAndSelf(new TrSetStandEntityPacket(user.getId(), -1), user);
                 standEntity.remove();
