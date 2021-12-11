@@ -40,6 +40,7 @@ import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
 import com.github.standobyte.jojo.util.damage.StandLinkDamageSource;
 import com.google.common.collect.ImmutableList;
 
+import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.entity.Entity;
@@ -600,6 +601,14 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         else {
             alphaOld = alpha;
             alpha = entityData.get(ALPHA);
+            
+            if (user != null && isManuallyControlled() && !noPhysics && isInsideViewBlockingBlock()) {
+                Vector3d vecToUser = user.position().subtract(position());
+                if (vecToUser.lengthSqr() > 1) {
+                    vecToUser = vecToUser.normalize();
+                }
+                moveWithoutCollision(vecToUser);
+            }
         }
     }
 
@@ -633,6 +642,21 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     public void setRelativeY(double y) {
         relativePos.y = y;
+    }
+
+    private boolean isInsideViewBlockingBlock() {
+        BlockPos.Mutable blockPos$mutable = new BlockPos.Mutable();
+        for (int i = 0; i < 8; ++i) {
+            double x = getX() + (double)(((float)((i >> 0) % 2) - 0.5F) * getBbWidth() * 0.8F);
+            double y = getEyeY() + (double)(((float)((i >> 1) % 2) - 0.5F) * 0.1F);
+            double z = getZ() + (double)(((float)((i >> 2) % 2) - 0.5F) * getBbWidth() * 0.8F);
+            blockPos$mutable.set(x, y, z);
+            BlockState blockState = level.getBlockState(blockPos$mutable);
+            if (blockState.getRenderShape() != BlockRenderType.INVISIBLE && blockState.isViewBlocking(level, blockPos$mutable)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
@@ -1159,13 +1183,12 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public void move(MoverType type, Vector3d vec) {
         super.move(type, vec);
         LivingEntity user = getUser();
-        if (user != null) {
+        if (user != null && user.level == this.level) {
             double distanceSqr = distanceToSqr(user);
             double rangeSq = getMaxRange();
             rangeSq *= rangeSq;
             if (distanceSqr > rangeSq) {
-                setBoundingBox(getBoundingBox().move(user.position().subtract(position()).scale(1 - rangeSq / distanceSqr)));
-                setLocationFromBoundingbox();
+                moveWithoutCollision(user.position().subtract(position()).scale(1 - rangeSq / distanceSqr));
             }
             if (!level.isClientSide() && isManuallyControlled() && distanceSqr > 728 && user instanceof PlayerEntity) {
                 double horizontalDistSqr = distanceSqr - Math.pow(getY() - user.getY(), 2);
@@ -1177,6 +1200,16 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 }
             }
         }
+    }
+    
+    private void moveWithoutCollision(Vector3d vec) {
+        setBoundingBox(getBoundingBox().move(vec));
+        setLocationFromBoundingbox();
+    }
+
+    @Override
+    public boolean canChangeDimensions() {
+        return false;
     }
 
 
