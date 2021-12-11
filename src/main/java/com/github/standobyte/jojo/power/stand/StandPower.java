@@ -134,7 +134,7 @@ public class StandPower extends PowerBaseImpl<StandType> implements IStandPower 
     
     @Override
     public void toggleSummon() {
-        if (!isActive()) {
+        if (!isActive() && !user.isSpectator()) {
             getType().summon(user, this, false);
         }
         else {
