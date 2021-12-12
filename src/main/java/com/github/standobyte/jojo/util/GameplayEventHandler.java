@@ -163,6 +163,9 @@ public class GameplayEventHandler {
     private static final float MAX_SUN_DAMAGE = 10;
     private static final float MIN_SUN_DAMAGE = 2;
     private static float getSunDamage(LivingEntity entity) {
+        if (entity.hasEffect(ModEffects.SUN_RESISTANCE.get())) {
+            return 0;
+        }
         World world = entity.level;
         if (world.isDay()) {
             float brightness = entity.getBrightness();

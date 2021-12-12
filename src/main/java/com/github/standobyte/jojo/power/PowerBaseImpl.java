@@ -321,7 +321,7 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
 
     @Override
     public ActionConditionResult checkRequirements(Action action, LivingEntity performer, ActionTarget target, boolean checkTargetType) {
-        if (user.isSpectator() || heldActionData != null && heldActionData.action != action) {
+        if (!canUsePower() || heldActionData != null && heldActionData.action != action) {
             return ActionConditionResult.NEGATIVE;
         }
 
@@ -410,6 +410,11 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
         return ActionConditionResult.POSITIVE;
     }
     
+    @Override
+    public boolean canUsePower() {
+        return !user.isSpectator();
+    }
+    
     protected void performAction(Action action, ActionTarget target) {
         if (!action.holdOnly()) {
             World world = user.level;
@@ -454,7 +459,7 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
                 heldAction.onHoldTickClientEffect(user, this, heldActionData.getTicks(), heldActionData.lastTickWentOff(), false);
             }
             if (!world.isClientSide() || user.is(ClientUtil.getClientPlayer())) {
-                if (user.isSpectator()) {
+                if (!canUsePower()) {
                     stopHeldAction(false);
                     return;
                 }
