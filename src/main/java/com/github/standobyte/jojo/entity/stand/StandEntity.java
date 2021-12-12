@@ -1188,7 +1188,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             double rangeSq = getMaxRange();
             rangeSq *= rangeSq;
             if (distanceSqr > rangeSq) {
-                moveWithoutCollision(user.position().subtract(position()).scale(1 - rangeSq / distanceSqr));
+                Vector3d vecToUser = user.position().subtract(position()).scale(1 - rangeSq / distanceSqr);
+                moveWithoutCollision(vecToUser);
             }
             if (!level.isClientSide() && isManuallyControlled() && distanceSqr > 728 && user instanceof PlayerEntity) {
                 double horizontalDistSqr = distanceSqr - Math.pow(getY() - user.getY(), 2);
