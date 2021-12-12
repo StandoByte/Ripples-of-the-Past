@@ -18,6 +18,6 @@ issueTrackerURL="https://github.com/StandoByte/Ripples-of-the-Past/issues"
 [[dependencies.jojo]]
     modId="forge"
     mandatory=true
-    versionRange="[36.2.0,)"
+    versionRange="[36.2.20,)"
     ordering="NONE"
     side="BOTH"
