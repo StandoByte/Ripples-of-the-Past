@@ -41,12 +41,14 @@ public class EntityStandType extends StandType {
     }
 
     @Override
-    public void summon(LivingEntity user, IStandPower standPower, boolean withoutNameVoiceLine) {
-        summon(user, standPower, entity -> {}, withoutNameVoiceLine);
+    public boolean summon(LivingEntity user, IStandPower standPower, boolean withoutNameVoiceLine) {
+        return summon(user, standPower, entity -> {}, withoutNameVoiceLine);
     }
 
-    public void summon(LivingEntity user, IStandPower standPower, Consumer<StandEntity> beforeTheSummon, boolean withoutNameVoiceLine) {
-        super.summon(user, standPower, withoutNameVoiceLine);
+    public boolean summon(LivingEntity user, IStandPower standPower, Consumer<StandEntity> beforeTheSummon, boolean withoutNameVoiceLine) {
+        if (!super.summon(user, standPower, withoutNameVoiceLine)) {
+            return false;
+        }
         if (!user.level.isClientSide()) {
             StandEntity standEntity = getEntityType().create(user.level);
             standEntity.copyPosition(user);
@@ -63,6 +65,7 @@ public class EntityStandType extends StandType {
             }
             PacketManager.sendToClientsTrackingAndSelf(new TrSetStandEntityPacket(user.getId(), standEntity.getId()), user);
         }
+        return true;
     }
 
     @Override

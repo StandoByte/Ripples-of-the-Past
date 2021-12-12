@@ -3,10 +3,11 @@
   "1.16.5": {
     "0.1.0": "First publicly released version!",
     "0.1.1": "Config file, shootable Stand Arrow",
-    "0.1.2": "Config option to remove some Stands from Arrow pool, vampire's Freeze buff, Hamon training bonus for consecutive training days"
+    "0.1.2": "Config option to remove some Stands from Arrow pool, vampire's Freeze buff, Hamon training bonus for consecutive training days",
+    "0.1.2.1": "Critical bug fixes, slight balance changes to vampirismm"
   },
   "promos": {
-    "1.16.5-latest": "0.1.2",
-    "1.16.5-recommended": "0.1.1.1"
+    "1.16.5-latest": "0.1.2.1",
+    "1.16.5-recommended": "0.1.2"
   }
 }

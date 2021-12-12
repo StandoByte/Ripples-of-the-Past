@@ -134,7 +134,7 @@ public class StandPower extends PowerBaseImpl<StandType> implements IStandPower 
     
     @Override
     public void toggleSummon() {
-        if (!isActive() && !user.isSpectator()) {
+        if (!isActive()) {
             getType().summon(user, this, false);
         }
         else {
@@ -151,6 +151,11 @@ public class StandPower extends PowerBaseImpl<StandType> implements IStandPower 
     public boolean isActionUnlocked(Action action) {
         return getExp() >= ((StandAction) action).getExpRequirement();
     }
+    
+//    @Override // TODO Stand Sealing effect
+//    public boolean canUsePower() {
+//        return super.canUsePower() && !user.hasEffect(ModEffects.STAND_SEALING.get());
+//    }
     
     @Override
     public ActionConditionResult checkRequirements(Action action, LivingEntity performer, ActionTarget target, boolean checkTargetType) {
