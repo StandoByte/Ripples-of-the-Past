@@ -5,6 +5,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.potion.FreezeEffect;
 import com.github.standobyte.jojo.potion.HamonSpreadEffect;
 import com.github.standobyte.jojo.potion.StaminaRegenEffect;
+import com.github.standobyte.jojo.potion.StatusEffect;
 import com.github.standobyte.jojo.potion.StunEffect;
 import com.github.standobyte.jojo.potion.UncurableEffect;
 import com.github.standobyte.jojo.potion.UndeadRegenerationEffect;
@@ -32,7 +33,7 @@ public class ModEffects {
             () -> new UndeadRegenerationEffect(EffectType.BENEFICIAL, Effects.REGENERATION.getColor()));
     
     public static final RegistryObject<HamonSpreadEffect> HAMON_SPREAD = EFFECTS.register("hamon_spread", 
-            () -> new HamonSpreadEffect(EffectType.HARMFUL, 0xFDF34B));
+            () -> new HamonSpreadEffect(EffectType.HARMFUL, 0xFFC10A));
     
     public static final RegistryObject<StunEffect> STUN = EFFECTS.register("stun", 
             () -> new StunEffect(EffectType.HARMFUL, 0x404040));
@@ -48,6 +49,12 @@ public class ModEffects {
     
     public static final RegistryObject<UncurableEffect> TIME_STOP = EFFECTS.register("time_stop", 
             () -> new UncurableEffect(EffectType.BENEFICIAL, 0x707070));
+    
+    public static final RegistryObject<Effect> SUN_RESISTANCE = EFFECTS.register("sun_resistance", 
+            () -> new StatusEffect(EffectType.BENEFICIAL, 0xFFD54A));
+    
+//    public static final RegistryObject<Effect> STAND_SEALING = EFFECTS.register("stand_sealing", 
+//            () -> new StatusEffect(EffectType.HARMFUL, 0xCACAD8)); // TODO Stand Sealing effect
     
     @SubscribeEvent(priority = EventPriority.LOW)
     public static final void afterEffectsRegister(RegistryEvent.Register<Effect> event) {

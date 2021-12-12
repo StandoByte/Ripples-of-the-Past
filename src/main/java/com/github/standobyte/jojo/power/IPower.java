@@ -54,6 +54,7 @@ public interface IPower<T extends IPowerType<T>> {
     boolean onClickAction(ActionType type, int index, boolean shift, ActionTarget target);
     ActionConditionResult checkRequirements(Action action, LivingEntity performer, ActionTarget target, boolean checkTargetType);
     ActionConditionResult checkTargetType(Action action, LivingEntity performer, ActionTarget target);
+    boolean canUsePower();
 
     void setHeldAction(Action action);
     default Action getHeldAction() {

@@ -70,7 +70,7 @@ public abstract class StandType extends ForgeRegistryEntry<StandType> implements
 
     @Override
     public void tickUser(LivingEntity user, IPower<?> power) {
-        if (user.isSpectator()) {
+        if (!power.canUsePower()) {
             forceUnsummon(user, (IStandPower) power);
         }
     }
@@ -123,13 +123,17 @@ public abstract class StandType extends ForgeRegistryEntry<StandType> implements
         return prioritizedCondition == null ? false : prioritizedCondition.test(entity);
     }
 
-    public void summon(LivingEntity user, IStandPower standPower, boolean withoutNameVoiceLine) {
+    public boolean summon(LivingEntity user, IStandPower standPower, boolean withoutNameVoiceLine) {
+        if (!standPower.canUsePower()) {
+            return false;
+        }
         if (!withoutNameVoiceLine && !user.isShiftKeyDown()) {
             SoundEvent shout = summonShoutSupplier.get();
             if (shout != null) {
                 JojoModUtil.sayVoiceLine(user, shout);
             }
         }
+        return true;
     }
     
     public abstract void unsummon(LivingEntity user, IStandPower standPower);
