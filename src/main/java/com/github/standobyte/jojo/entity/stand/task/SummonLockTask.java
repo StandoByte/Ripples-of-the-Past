@@ -6,7 +6,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 public class SummonLockTask extends StandEntityTask {
 
     public SummonLockTask(StandEntity standEntity) {
-        super(standEntity.getType().getStats().getSummonTicks(), false, standEntity);
+        super(standEntity.getStats().getSummonTicks(), false, standEntity);
     }
     
     @Override

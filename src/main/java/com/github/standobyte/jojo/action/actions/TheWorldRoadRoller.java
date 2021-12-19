@@ -5,7 +5,6 @@ import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.power.IPower;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
 
 public class TheWorldRoadRoller extends StandEntityAction {
@@ -26,8 +25,7 @@ public class TheWorldRoadRoller extends StandEntityAction {
     
     @Override
     public int getCooldown(IPower<?> power, int ticksHeld) {
-        LivingEntity user = power.getUser();
-        if (user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild) {
+        if (power.infiniteMana()) {
             return 0;
         }
         return super.getCooldown(power, ticksHeld);
