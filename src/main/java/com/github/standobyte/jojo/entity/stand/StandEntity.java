@@ -203,10 +203,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(stats.getArmorToughness());
         getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(stats.getKnockbackResistance());
     }
-
-    @Override
-    public StandEntityType<?> getType() {
-        return type;
+    
+    public StandEntityStats getStats() {
+        return type.getStats();
     }
 
 
@@ -414,7 +413,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
         else {
             soundsToStop.remove(soundType);
-            SoundEvent sound = getType().getSound(soundType);
+            SoundEvent sound = type.getSound(soundType);
             if (sound != null) {
                 ClientTickingSoundsHelper.playStandEntitySound(this, sound, soundType, 1.0F, 1.0F);
             }
@@ -910,7 +909,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         double precision = getPrecision();
         double damage = getAttackDamage(target, strongAttack, rangeFactor, attackDistance, precision);
         double additionalKnockback = getAttributeValue(Attributes.ATTACK_KNOCKBACK) * rangeFactor;
-        StandEntityDamageSource dmgSource = new StandEntityDamageSource("player", this, getUserPower());
+        StandEntityDamageSource dmgSource = new StandEntityDamageSource("stand", this, getUserPower());
         if (strongAttack) {
             additionalKnockback *= 1 + damage / 5;
         }

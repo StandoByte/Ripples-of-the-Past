@@ -174,7 +174,7 @@ public class StandPower extends PowerBaseImpl<StandType> implements IStandPower 
     public float leapStrength() {
         StandEntity standEntity = (StandEntity) standManifestation;
         if (standEntity.isFollowingUser()) {
-            return (float) standEntity.getType().getStats().getDamage() / 3F;
+            return (float) standEntity.getStats().getDamage() / 3F;
         }
         return 0;
     }
