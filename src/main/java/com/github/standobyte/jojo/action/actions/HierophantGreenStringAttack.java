@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.action.actions;
 
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGStringEntity;
-import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.MathUtil;
 
 import net.minecraft.entity.LivingEntity;
@@ -16,7 +16,7 @@ public class HierophantGreenStringAttack extends StandEntityAction {
     }
     
     @Override
-    public void perform(World world, LivingEntity user, IPower<?> power, ActionTarget target) {
+    public void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             LivingEntity stand = getPerformer(user, power);
             boolean shift = isShiftVariation();

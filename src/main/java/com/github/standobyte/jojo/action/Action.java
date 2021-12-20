@@ -19,7 +19,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
-public abstract class Action extends ForgeRegistryEntry<Action> {
+public abstract class Action <P extends IPower<?>> extends ForgeRegistryEntry<Action<?>> {
     private static Map<Supplier<? extends Action>, Supplier<? extends Action>> SHIFT_VARIATIONS = new HashMap<>();
     
     private final float manaCost;
@@ -79,7 +79,7 @@ public abstract class Action extends ForgeRegistryEntry<Action> {
         }
     }
     
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IPower<?> power, ActionTarget target) {
+    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, P power, ActionTarget target) {
         return ActionConditionResult.POSITIVE;
     }
     
@@ -104,32 +104,32 @@ public abstract class Action extends ForgeRegistryEntry<Action> {
         return baseVariation != null;
     }
     
-    public void perform(World world, LivingEntity user, IPower<?> power, ActionTarget target) {}
+    public void perform(World world, LivingEntity user, P power, ActionTarget target) {}
     
-    public void onStartedHolding(World world, LivingEntity user, IPower<?> power, ActionTarget target, boolean requirementsFulfilled) {}
+    public void onStartedHolding(World world, LivingEntity user, P power, ActionTarget target, boolean requirementsFulfilled) {}
     
-    public void onHoldTickUser(World world, LivingEntity user, IPower<?> power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {}
+    public void onHoldTickUser(World world, LivingEntity user, P power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {}
     
-    public void onStoppedHolding(World world, LivingEntity user, IPower<?> power, int ticksHeld) {}
+    public void onStoppedHolding(World world, LivingEntity user, P power, int ticksHeld) {}
     
     public boolean isHeldSentToTracking() {
         return false;
     }
     
-    public void onHoldTickClientEffect(LivingEntity user, IPower<?> power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {}
+    public void onHoldTickClientEffect(LivingEntity user, P power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {}
     
-    public LivingEntity getPerformer(LivingEntity user, IPower<?> power) {
+    public LivingEntity getPerformer(LivingEntity user, P power) { // FIXME 
         return user;
     }
 
-    public void updatePerformer(World world, LivingEntity user, IPower<?> power) {}
+    public void updatePerformer(World world, LivingEntity user, P power) {}
     
-    protected ActionTarget aim(World world, LivingEntity user, IPower<?> power, double range) {
+    protected ActionTarget aim(World world, LivingEntity user, P power, double range) {
         return ActionTarget.fromRayTraceResult(JojoModUtil.rayTrace(user, range, entity -> 
         entity instanceof LivingEntity && user.canAttack((LivingEntity) entity)));
     }
     
-    public float getManaNeeded(int ticksHeld, IPower<?> power) {
+    public float getManaNeeded(int ticksHeld, P power) {
         if (getHoldDurationMax() > 0) {
             return getManaCost() + getHeldTickManaCost() * Math.max((getHoldDurationToFire(power) - ticksHeld), 1);
         }
@@ -144,7 +144,7 @@ public abstract class Action extends ForgeRegistryEntry<Action> {
         return cooldown;
     }
     
-    public int getCooldown(IPower<?> power, int ticksHeld) {
+    public int getCooldown(P power, int ticksHeld) {
         return getCooldownValue();
     }
     
@@ -188,11 +188,11 @@ public abstract class Action extends ForgeRegistryEntry<Action> {
     }
     
     @Nullable
-    protected SoundEvent getShout(LivingEntity user, IPower<?> power, ActionTarget target, boolean wasActive) {
+    protected SoundEvent getShout(LivingEntity user, P power, ActionTarget target, boolean wasActive) {
         return shoutSupplier.get();
     }
     
-    public void playVoiceLine(LivingEntity user, IPower<?> power, ActionTarget target, boolean wasActive, boolean shift) {
+    public void playVoiceLine(LivingEntity user, P power, ActionTarget target, boolean wasActive, boolean shift) {
         if (!shift || isShiftVariation()) {
             SoundEvent shout = getShout(user, power, target, wasActive);
             if (shout != null) {
@@ -209,7 +209,7 @@ public abstract class Action extends ForgeRegistryEntry<Action> {
         return heldSlowDownFactor;
     }
     
-    public int getHoldDurationToFire(IPower<?> power) { 
+    public int getHoldDurationToFire(P power) { 
         return holdDurationToFire;
     }
     
@@ -228,17 +228,17 @@ public abstract class Action extends ForgeRegistryEntry<Action> {
         return this.translationKey;
     }
     
-    public ITextComponent getName(IPower<?> power) {
+    public ITextComponent getName(P power) {
         return getTranslatedName(power, getTranslationKey());
     }
     
-    public ITextComponent getNameShortened(IPower<?> power) {
+    public ITextComponent getNameShortened(P power) {
         return ClientUtil.shortenedTranslationExists(getTranslationKey()) ? 
                 getTranslatedName(power, ClientUtil.getShortenedTranslationKey(getTranslationKey()))
                 : getName(power);
     }
     
-    protected TranslationTextComponent getTranslatedName(IPower<?> power, String key) {
+    protected TranslationTextComponent getTranslatedName(P power, String key) {
         return new TranslationTextComponent(key);
     }
     

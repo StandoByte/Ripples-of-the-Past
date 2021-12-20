@@ -1,23 +1,22 @@
 package com.github.standobyte.jojo.action.actions;
 
-import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.ModEffects;
-import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.util.damage.ModDamageSources;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.world.World;
 
-public class VampirismHamonSuicide extends Action {
+public class VampirismHamonSuicide extends VampirismAction {
 
     public VampirismHamonSuicide(Builder builder) {
         super(builder); 
     }
     
     @Override
-    public void onHoldTickUser(World world, LivingEntity user, IPower<?> power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
+    public void onHoldTickUser(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (!world.isClientSide()) {
             if (ticksHeld % 10 == 5) {
                 ModDamageSources.dealHamonDamage(user, 4, user, null);
@@ -29,7 +28,7 @@ public class VampirismHamonSuicide extends Action {
     }
     
     @Override
-    public void perform(World world, LivingEntity user, IPower<?> power, ActionTarget target) {
+    public void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             ModDamageSources.dealHamonDamage(user, Float.MAX_VALUE, user, null);
         }

@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.action.actions;
 
-import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
@@ -8,7 +7,6 @@ import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.VampirismPowerType;
 import com.github.standobyte.jojo.util.JojoModUtil;
@@ -27,14 +25,14 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
-public class VampirismBloodDrain extends Action {
+public class VampirismBloodDrain extends VampirismAction {
 
     public VampirismBloodDrain(AbstractBuilder<?> builder) {
         super(builder);
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IPower<?> power, ActionTarget target) {
+    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
         if (user.level.getDifficulty() == Difficulty.PEACEFUL) {
             return conditionMessage("peaceful");
         }
@@ -55,7 +53,7 @@ public class VampirismBloodDrain extends Action {
     }
     
     @Override
-    public void onHoldTickUser(World world, LivingEntity user, IPower<?> power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
+    public void onHoldTickUser(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
             if (!world.isClientSide() && target.getEntity(world) instanceof LivingEntity) {
                 LivingEntity targetEntity = (LivingEntity) target.getEntity(world);
@@ -125,7 +123,7 @@ public class VampirismBloodDrain extends Action {
     }
     
     @Override
-    public void onHoldTickClientEffect(LivingEntity user, IPower<?> power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {
+    public void onHoldTickClientEffect(LivingEntity user, INonStandPower power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {
         if (stateRefreshed && requirementsFulfilled) {
             ClientTickingSoundsHelper.playHeldActionSound(ModSounds.VAMPIRE_BLOOD_DRAIN.get(), 1.0F, 1.0F, true, getPerformer(user, power), power, this);
         }

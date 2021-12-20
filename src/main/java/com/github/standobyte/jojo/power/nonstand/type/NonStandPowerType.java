@@ -4,7 +4,6 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.TypeSpecificData;
@@ -15,16 +14,16 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
-public abstract class NonStandPowerType<T extends TypeSpecificData> extends ForgeRegistryEntry<NonStandPowerType<?>> implements IPowerType<NonStandPowerType<?>> {
+public abstract class NonStandPowerType<T extends TypeSpecificData> extends ForgeRegistryEntry<NonStandPowerType<?>> implements IPowerType<INonStandPower, NonStandPowerType<?>> {
     private final int color;
-    protected final Action[] attacks;
-    protected final Action[] abilities;
+    protected final Action<INonStandPower>[] attacks;
+    protected final Action<INonStandPower>[] abilities;
     private final Supplier<T> dataFactory;
     private String translationKey;
     private final float manaRegenPoints;
     private ResourceLocation iconTexture;
     
-    public NonStandPowerType(int color, Action[] startingAttacks, Action[] startingAbilities, float manaRegenPoints, Supplier<T> dataFactory) {
+    public NonStandPowerType(int color, Action<INonStandPower>[] startingAttacks, Action<INonStandPower>[] startingAbilities, float manaRegenPoints, Supplier<T> dataFactory) {
         this.color = color;
         this.attacks = startingAttacks;
         this.abilities = startingAbilities;
@@ -40,7 +39,7 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
     public void onClear(INonStandPower power) {}
     
     @Override
-    public boolean canTickMana(LivingEntity user, IPower<?> power) {
+    public boolean canTickMana(LivingEntity user, INonStandPower power) {
         return true;
     }
     
@@ -66,12 +65,12 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
     }
     
     @Override
-    public Action[] getAttacks() {
+    public Action<INonStandPower>[] getAttacks() {
         return attacks;
     }
 
     @Override
-    public Action[] getAbilities() {
+    public Action<INonStandPower>[] getAbilities() {
         return abilities;
     }
 

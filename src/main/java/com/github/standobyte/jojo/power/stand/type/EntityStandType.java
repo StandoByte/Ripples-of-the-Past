@@ -9,7 +9,6 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandPower;
@@ -36,7 +35,7 @@ public class EntityStandType extends StandType {
     }
 
     @Override
-    public boolean canTickMana(LivingEntity user, IPower<?> power) {
+    public boolean canTickMana(LivingEntity user, IStandPower power) {
         return !power.isActive() || user.tickCount % 20 == 0 && user instanceof PlayerEntity && ((PlayerEntity) user).getFoodData().getFoodLevel() > 17;
     }
 
@@ -79,13 +78,13 @@ public class EntityStandType extends StandType {
     }
 
     @Override
-    public void tickUser(LivingEntity user, IPower<?> power) {
+    public void tickUser(LivingEntity user, IStandPower power) {
         super.tickUser(user, power);
         IStandManifestation stand = ((StandPower) power).getStandManifestation();
         if (stand instanceof StandEntity) {
             StandEntity standEntity = (StandEntity) stand;
             if (standEntity.level != user.level) {
-                forceUnsummon(user, (IStandPower) power);
+                forceUnsummon(user, power);
             }
         }
     }

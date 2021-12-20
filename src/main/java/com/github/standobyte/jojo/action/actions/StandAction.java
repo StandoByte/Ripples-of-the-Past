@@ -1,8 +1,9 @@
 package com.github.standobyte.jojo.action.actions;
 
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.power.stand.IStandPower;
 
-public abstract class StandAction extends Action {
+public abstract class StandAction extends Action<IStandPower> {
     protected final int expRequirement;
     
     public StandAction(StandAction.AbstractBuilder<?> builder) {

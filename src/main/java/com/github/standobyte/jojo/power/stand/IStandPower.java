@@ -19,7 +19,7 @@ public interface IStandPower extends IPower<StandType> {
     
     void setStandManifestation(@Nullable IStandManifestation standManifestation);
     @Nullable
-    IStandManifestation getStandManifestation();
+    IStandManifestation getStandManifestation(); // FIXME
     void toggleSummon();
     
     int getTier();

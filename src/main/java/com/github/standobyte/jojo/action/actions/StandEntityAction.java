@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.action.actions;
 
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
@@ -18,23 +17,22 @@ public abstract class StandEntityAction extends StandAction {
     }
     
     @Override
-    public LivingEntity getPerformer(LivingEntity user, IPower<?> power) {
-        return power.isActive() ? (StandEntity) ((IStandPower) power).getStandManifestation() : user;
+    public LivingEntity getPerformer(LivingEntity user, IStandPower power) {
+        return power.isActive() ? (StandEntity) power.getStandManifestation() : user;
     }
 
     @Override
-    public void updatePerformer(World world, LivingEntity user, IPower<?> power) {
+    public void updatePerformer(World world, LivingEntity user, IStandPower power) {
         if (!world.isClientSide() && !doNotAutoSummonStand && !power.isActive()) {
-            IStandPower standPower = (IStandPower) power;
-            standPower.getType().summon(user, standPower, true);
+            power.getType().summon(user, power, true);
         }
     }
     
     @Override
-    protected ActionTarget aim(World world, LivingEntity user, IPower<?> power, double range) {
+    protected ActionTarget aim(World world, LivingEntity user, IStandPower power, double range) {
         LivingEntity aimingEntity = user;
         if (power.isActive()) {
-            IStandManifestation stand = ((IStandPower) power).getStandManifestation();
+            IStandManifestation stand = power.getStandManifestation();
             if (stand instanceof StandEntity) {
                 StandEntity standEntity = (StandEntity) stand;
                 if (standEntity.isManuallyControlled()) {

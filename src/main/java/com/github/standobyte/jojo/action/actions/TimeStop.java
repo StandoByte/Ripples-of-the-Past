@@ -10,7 +10,6 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.TimeHandler;
@@ -55,7 +54,7 @@ public class TimeStop extends StandEntityAction {
     }
     
     @Override
-    protected SoundEvent getShout(LivingEntity user, IPower<?> power, ActionTarget target, boolean wasActive) {
+    protected SoundEvent getShout(LivingEntity user, IStandPower power, ActionTarget target, boolean wasActive) {
         if (TimeHandler.isTimeStopped(user.level, user.blockPosition())) {
             return null;
         }
@@ -66,7 +65,7 @@ public class TimeStop extends StandEntityAction {
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IPower<?> power, ActionTarget target) {
+    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
         if (user.hasEffect(ModEffects.TIME_STOP.get())) {
             return ActionConditionResult.NEGATIVE;
         }
@@ -74,11 +73,10 @@ public class TimeStop extends StandEntityAction {
     }
     
     @Override
-    public void perform(World world, LivingEntity user, IPower<?> power, ActionTarget target) {
-        IStandPower standPower = ((IStandPower) power);
-        int timeStopTicks = TimeHandler.getTimeStopTicks(getExpRequirement(), (IStandPower) power, user, INonStandPower.getNonStandPowerOptional(user));
+    public void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
+        int timeStopTicks = TimeHandler.getTimeStopTicks(getExpRequirement(), power, user, INonStandPower.getNonStandPowerOptional(user));
         if (!world.isClientSide()) {
-            standPower.setExp(standPower.getExp() + 4);
+            power.setExp(power.getExp() + 4);
             BlockPos blockPos = user.blockPosition();
             ChunkPos chunkPos = new ChunkPos(blockPos);
             TimeHandler.setTimeResumeSounds(world, chunkPos, timeStopTicks, this, user);
@@ -93,7 +91,7 @@ public class TimeStop extends StandEntityAction {
     }
     
     @Override
-    public int getHoldDurationToFire(IPower<?> power) { 
+    public int getHoldDurationToFire(IStandPower power) { 
         return TimeHandler.isTimeStopped(power.getUser().level, power.getUser().blockPosition()) ? 0 : super.getHoldDurationToFire(power);
     }
     
@@ -108,9 +106,9 @@ public class TimeStop extends StandEntityAction {
     }
     
     @Override
-    public TranslationTextComponent getTranslatedName(IPower<?> power, String key) {
+    public TranslationTextComponent getTranslatedName(IStandPower power, String key) {
         LivingEntity user = power.getUser();
-        int timeStopTicks = TimeHandler.getTimeStopTicks(getExpRequirement(), (IStandPower) power, user, INonStandPower.getNonStandPowerOptional(user));
+        int timeStopTicks = TimeHandler.getTimeStopTicks(getExpRequirement(), power, user, INonStandPower.getNonStandPowerOptional(user));
         return new TranslationTextComponent(key, String.format("%.2f", (float) timeStopTicks / 20F));
     }
 }

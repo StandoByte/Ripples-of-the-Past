@@ -4,7 +4,6 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.task.RangedAttackTask;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
@@ -17,12 +16,14 @@ public class StandEntityHeldRangedAttack extends StandEntityAction {
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IPower<?> power, ActionTarget target) {
-        return performer instanceof StandEntity && !((StandEntity) performer).canAttackRanged() ? ActionConditionResult.NEGATIVE : super.checkConditions(user, performer, power, target);
+    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
+        return performer instanceof StandEntity && !((StandEntity) performer).canAttackRanged() ? 
+                ActionConditionResult.NEGATIVE
+                : super.checkConditions(user, performer, power, target);
     }
 
     @Override
-    public void onStartedHolding(World world, LivingEntity user, IPower<?> power, ActionTarget target, boolean requirementsFulfilled) {
+    public void onStartedHolding(World world, LivingEntity user, IStandPower power, ActionTarget target, boolean requirementsFulfilled) {
         if (!world.isClientSide() && requirementsFulfilled) {
             LivingEntity entity = getPerformer(user, power);
             if (entity instanceof StandEntity) {
@@ -33,9 +34,9 @@ public class StandEntityHeldRangedAttack extends StandEntityAction {
     }
     
     @Override
-    public void onStoppedHolding(World world, LivingEntity user, IPower<?> power, int ticksHeld) {
+    public void onStoppedHolding(World world, LivingEntity user, IStandPower power, int ticksHeld) {
         if (!world.isClientSide() && power.isActive()) {
-            ((StandEntity) ((IStandPower) power).getStandManifestation()).clearTask();
+            ((StandEntity) power.getStandManifestation()).clearTask();
         }
     }
 }

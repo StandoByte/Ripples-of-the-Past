@@ -4,7 +4,6 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
@@ -17,7 +16,7 @@ public class SilverChariotMeleeBarrage extends StandEntityMeleeBarrage {
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IPower<?> power, ActionTarget target) {
+    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
         if (performer instanceof SilverChariotEntity && !((SilverChariotEntity) performer).hasRapier()) {
             return conditionMessage("chariot_rapier");
         }
@@ -25,9 +24,9 @@ public class SilverChariotMeleeBarrage extends StandEntityMeleeBarrage {
     }
     
     @Override
-    protected SoundEvent getShout(LivingEntity user, IPower<?> power, ActionTarget target, boolean wasActive) {
+    protected SoundEvent getShout(LivingEntity user, IStandPower power, ActionTarget target, boolean wasActive) {
         if (power.isActive()) {
-            SilverChariotEntity chariot = (SilverChariotEntity) ((IStandPower) power).getStandManifestation();
+            SilverChariotEntity chariot = (SilverChariotEntity) power.getStandManifestation();
             if (!chariot.hasRapier()) {
                 return null;
             }

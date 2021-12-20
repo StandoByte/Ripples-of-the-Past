@@ -3,7 +3,6 @@ package com.github.standobyte.jojo.action.actions;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
@@ -22,7 +21,7 @@ public class HamonWallClimbing extends HamonAction {
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IPower<?> power, ActionTarget target) {
+    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
         ItemStack heldItemStack = performer.getMainHandItem();
         if (!user.horizontalCollision) {
             if (user.level.isClientSide()) {
@@ -41,9 +40,9 @@ public class HamonWallClimbing extends HamonAction {
     }
     
     @Override
-    public void onHoldTickUser(World world, LivingEntity user, IPower<?> power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
+    public void onHoldTickUser(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
-            HamonData hamon = ((INonStandPower) power).getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
+            HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
             Vector3d movement = user.getDeltaMovement();
             user.setDeltaMovement(movement.x, 0.1D + hamon.getBreathingLevel() * 0.0015 + hamon.getHamonControlLevel() * 0.0025, movement.z);
             hamon.hamonPointsFromAction(HamonStat.CONTROL, getHeldTickManaCost());
