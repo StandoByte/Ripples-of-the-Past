@@ -3,7 +3,6 @@ package com.github.standobyte.jojo.action.actions;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
@@ -19,10 +18,10 @@ public class HierophantGreenBarrier extends StandEntityAction {
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IPower<?> power, ActionTarget target) {
+    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
         if (performer instanceof HierophantGreenEntity) {
             HierophantGreenEntity stand = (HierophantGreenEntity) performer;
-            if (stand.getPlacedBarriersCount() >= getMaxBarriersPlaceable((IStandPower) power)) {
+            if (stand.getPlacedBarriersCount() >= getMaxBarriersPlaceable(power)) {
                 return conditionMessage("barrier");
             }
         }
@@ -30,7 +29,7 @@ public class HierophantGreenBarrier extends StandEntityAction {
     }
     
     @Override
-    public void perform(World world, LivingEntity user, IPower<?> power, ActionTarget target) {
+    public void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             HierophantGreenEntity stand = (HierophantGreenEntity) getPerformer(user, power);
             stand.attachBarrier(target.getBlockPos());
@@ -42,11 +41,10 @@ public class HierophantGreenBarrier extends StandEntityAction {
     }
     
     @Override
-    public TranslationTextComponent getTranslatedName(IPower<?> power, String key) {
-        IStandPower standPower = (IStandPower) power;
-        IStandManifestation stand = standPower.getStandManifestation();
+    public TranslationTextComponent getTranslatedName(IStandPower power, String key) {
+        IStandManifestation stand = power.getStandManifestation();
         int barriers = stand instanceof HierophantGreenEntity ? ((HierophantGreenEntity) stand).getPlacedBarriersCount() : 0;
-        return new TranslationTextComponent(key, barriers, getMaxBarriersPlaceable(standPower));
+        return new TranslationTextComponent(key, barriers, getMaxBarriersPlaceable(power));
     }
 
 }

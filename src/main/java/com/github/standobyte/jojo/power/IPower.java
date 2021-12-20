@@ -50,7 +50,7 @@ public interface IPower<T extends IPowerType<T>> {
     float getCooldownRatio(Action action, float partialTick);
     void setCooldownTimer(Action action, int value, int totalCooldown);
 
-    boolean isActionUnlocked(Action action);
+    boolean isActionUnlocked(Action action); // FIXME generalize
     boolean onClickAction(ActionType type, int index, boolean shift, ActionTarget target);
     ActionConditionResult checkRequirements(Action action, LivingEntity performer, ActionTarget target, boolean checkTargetType);
     ActionConditionResult checkTargetType(Action action, LivingEntity performer, ActionTarget target);
@@ -76,7 +76,7 @@ public interface IPower<T extends IPowerType<T>> {
 
     INBT writeNBT();
     void readNBT(CompoundNBT nbt);
-    void onClone(IPower<T> oldPower, boolean wasDeath, boolean keep);
+    void onClone(IPower<T> oldPower, boolean wasDeath, boolean keep); // FIXME generalize
     void syncWithUserOnly();
     void syncWithTrackingOrUser(ServerPlayerEntity player);
 

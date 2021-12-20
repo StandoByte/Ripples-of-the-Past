@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.action.actions;
 
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.damaging.projectile.HamonBubbleCutterEntity;
-import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.World;
@@ -14,7 +14,7 @@ public class HamonBubbleCutter extends HamonAction {
     }
     
     @Override
-    public void perform(World world, LivingEntity user, IPower<?> power, ActionTarget target) {
+    public void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             boolean shift = isShiftVariation();
             int bubbles = shift ? 6 : 12;

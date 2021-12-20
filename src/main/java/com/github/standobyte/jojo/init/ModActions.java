@@ -42,6 +42,7 @@ import com.github.standobyte.jojo.action.actions.StarPlatinumZoom;
 import com.github.standobyte.jojo.action.actions.TheWorldRoadRoller;
 import com.github.standobyte.jojo.action.actions.TimeStop;
 import com.github.standobyte.jojo.action.actions.TimeStopInstant;
+import com.github.standobyte.jojo.action.actions.VampirismAction;
 import com.github.standobyte.jojo.action.actions.VampirismBloodDrain;
 import com.github.standobyte.jojo.action.actions.VampirismBloodGift;
 import com.github.standobyte.jojo.action.actions.VampirismDarkAura;
@@ -63,7 +64,8 @@ import net.minecraftforge.registries.RegistryBuilder;
 
 @EventBusSubscriber(modid = JojoMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public class ModActions {
-    public static final DeferredRegister<Action> ACTIONS = DeferredRegister.create(Action.class, JojoMod.MOD_ID);
+    public static final DeferredRegister<Action<?>> ACTIONS = DeferredRegister.create(
+            (Class<Action<?>>) ((Class<?>) Action.class), JojoMod.MOD_ID);
     
     public static final RegistryObject<HamonAction> HAMON_SENDO_OVERDRIVE = ACTIONS.register("hamon_sendo_overdrive", 
             () -> new HamonSendoOverdrive(new HamonAction.Builder().manaCost(1000).swingHand().needsBlockTarget()
@@ -128,26 +130,26 @@ public class ModActions {
                     .shout(ModSounds.CAESAR_BUBBLE_CUTTER_GLIDING).shiftVariationOf(CAESAR_BUBBLE_CUTTER)));
     
 
-    public static final RegistryObject<Action> VAMPIRISM_BLOOD_DRAIN = ACTIONS.register("vampirism_blood_drain", 
+    public static final RegistryObject<VampirismAction> VAMPIRISM_BLOOD_DRAIN = ACTIONS.register("vampirism_blood_drain", 
             () -> new VampirismBloodDrain(new Action.Builder().needsEntityTarget().maxRangeEntityTarget(2.0D).holdType(0).heldSlowDownFactor(0.5F)));
     
-    public static final RegistryObject<Action> VAMPIRISM_FREEZE = ACTIONS.register("vampirism_freeze", 
+    public static final RegistryObject<VampirismAction> VAMPIRISM_FREEZE = ACTIONS.register("vampirism_freeze", 
             () -> new VampirismFreeze(new Action.Builder().maxRangeEntityTarget(2.0D).holdType(1).heldSlowDownFactor(0.3F)));
     
-    public static final RegistryObject<Action> VAMPIRISM_SPACE_RIPPER_STINGY_EYES = ACTIONS.register("vampirism_space_ripper_stingy_eyes", 
+    public static final RegistryObject<VampirismAction> VAMPIRISM_SPACE_RIPPER_STINGY_EYES = ACTIONS.register("vampirism_space_ripper_stingy_eyes", 
             () -> new VampirismSpaceRipperStingyEyes(new Action.Builder().ignoresPerformerStun().holdType(20, 40).heldSlowDownFactor(0.3F)));
     
-    public static final RegistryObject<Action> VAMPIRISM_BLOOD_GIFT = ACTIONS.register("vampirism_blood_gift", 
+    public static final RegistryObject<VampirismAction> VAMPIRISM_BLOOD_GIFT = ACTIONS.register("vampirism_blood_gift", 
             () -> new VampirismBloodGift(new Action.Builder().needsEntityTarget()
                     .maxRangeEntityTarget(1.0D).holdToFire(60, false, 10).heldSlowDownFactor(0.3F)));
     
-    public static final RegistryObject<Action> VAMPIRISM_ZOMBIE_SUMMON = ACTIONS.register("vampirism_zombie_summon", 
+    public static final RegistryObject<VampirismAction> VAMPIRISM_ZOMBIE_SUMMON = ACTIONS.register("vampirism_zombie_summon", 
             () -> new VampirismZombieSummon(new Action.Builder().manaCost(100).cooldown(200)));
     
-    public static final RegistryObject<Action> VAMPIRISM_DARK_AURA = ACTIONS.register("vampirism_dark_aura", 
+    public static final RegistryObject<VampirismAction> VAMPIRISM_DARK_AURA = ACTIONS.register("vampirism_dark_aura", 
             () -> new VampirismDarkAura(new Action.Builder().ignoresPerformerStun().manaCost(50).cooldown(100)));
     
-    public static final RegistryObject<Action> VAMPIRISM_HAMON_SUICIDE = ACTIONS.register("vampirism_hamon_suicide", 
+    public static final RegistryObject<VampirismAction> VAMPIRISM_HAMON_SUICIDE = ACTIONS.register("vampirism_hamon_suicide", 
             () -> new VampirismHamonSuicide(new Action.Builder().ignoresPerformerStun().holdToFire(100, false, 0)));
 
     
@@ -278,25 +280,25 @@ public class ModActions {
     
 
     @SubscribeEvent(priority = EventPriority.LOW)
-    public static void afterActionsInit(RegistryEvent.Register<Action> event) {
+    public static void afterActionsInit(RegistryEvent.Register<Action<?>> event) {
         Action.initShiftVariations();
         addTimeStopAbilities(event);
     }
     
-    public static void addTimeStopAbilities(RegistryEvent.Register<Action> event) {
+    public static void addTimeStopAbilities(RegistryEvent.Register<Action<?>> event) {
         TimeHandler.addAllowMovingInStoppedTime(THE_WORLD_TIME_STOP.get());
         TimeHandler.addAllowMovingInStoppedTime(STAR_PLATINUM_TIME_STOP.get());
     }
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void initTimeManipulatingActions(RegistryEvent.Register<Action> event) {
+    public static void initTimeManipulatingActions(RegistryEvent.Register<Action<?>> event) {
         TimeHandler.initTimeManipulatingActions();
     }
     
     
     
     public static class Registry {
-        private static Supplier<IForgeRegistry<Action>> REGISTRY_SUPPLIER = null;
+        private static Supplier<IForgeRegistry<Action<?>>> REGISTRY_SUPPLIER = null;
         
         public static void initRegistry() {
             if (REGISTRY_SUPPLIER == null) {
@@ -304,7 +306,7 @@ public class ModActions {
             }
         }
         
-        public static IForgeRegistry<Action> getRegistry() {
+        public static IForgeRegistry<Action<?>> getRegistry() {
             return REGISTRY_SUPPLIER.get();
         }
     }

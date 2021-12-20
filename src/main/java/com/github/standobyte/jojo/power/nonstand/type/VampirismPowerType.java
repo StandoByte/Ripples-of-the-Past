@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.power.nonstand.type;
 import java.util.Map;
 import java.util.function.IntUnaryOperator;
 
-import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.actions.VampirismAction;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.IPower;
@@ -36,7 +36,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
                 .build();
     }
 
-    public VampirismPowerType(int color, Action[] startingAttacks, Action[] startingAbilities, float manaRegenPoints) {
+    public VampirismPowerType(int color, VampirismAction[] startingAttacks, VampirismAction[] startingAbilities, float manaRegenPoints) {
         super(color, startingAttacks, startingAbilities, manaRegenPoints, VampirismFlags::new);
     }
     
@@ -65,14 +65,14 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
     }
 
     @Override
-    public void tickUser(LivingEntity entity, IPower<?> power) {
+    public void tickUser(LivingEntity entity, INonStandPower power) {
         if (!entity.level.isClientSide()) {
             if (entity instanceof PlayerEntity) {
                 ((PlayerEntity) entity).getFoodData().setFoodLevel(17);
             }
             entity.setAirSupply(entity.getMaxAirSupply());
             int bloodLevel = bloodLevel(power, entity.level.getDifficulty());
-            if (((INonStandPower) power).getTypeSpecificData(this).get().refreshBloodLevel(bloodLevel)) {
+            if (power.getTypeSpecificData(this).get().refreshBloodLevel(bloodLevel)) {
                 int standStaminaIncreaseLvl = bloodLevel;
                 IStandPower.getStandPowerOptional(entity).ifPresent(standPower -> {
                     standPower.setManaRegenPoints(Math.max(standStaminaIncreaseLvl, 1));

@@ -12,11 +12,11 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
-import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.actions.HamonAction;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.CrimsonBubbleEntity;
@@ -83,7 +83,7 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 
 public class HamonPowerType extends NonStandPowerType<HamonData> {
 
-    public HamonPowerType(int color, Action[] startingAttacks, Action[] startingAbilities, float manaRegenPoints) {
+    public HamonPowerType(int color, HamonAction[] startingAttacks, HamonAction[] startingAbilities, float manaRegenPoints) {
         super(color, startingAttacks, startingAbilities, manaRegenPoints, HamonData::new);
     }
     
@@ -131,14 +131,14 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     }
     
     @Override
-    public boolean canTickMana(LivingEntity user, IPower<?> power) {
+    public boolean canTickMana(LivingEntity user, INonStandPower power) {
         return user.getAirSupply() == user.getMaxAirSupply() && !user.hasEffect(ModEffects.FREEZE.get()) &&
                 !(user.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.BREATH_CONTROL_MASK.get() && user.tickCount % 3 == 0);
     }
 
     @Override
-    public void tickUser(LivingEntity user, IPower<?> power) {
-        HamonData hamon = ((INonStandPower) power).getTypeSpecificData(this).get();
+    public void tickUser(LivingEntity user, INonStandPower power) {
+        HamonData hamon = power.getTypeSpecificData(this).get();
         float breathing = hamon.getBreathingLevel();
         World world = user.level;
         if (!world.isClientSide()) {

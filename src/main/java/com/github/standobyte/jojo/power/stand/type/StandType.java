@@ -6,7 +6,6 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.action.actions.StandAction;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.init.ModStandTypes;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
@@ -28,7 +27,7 @@ import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
-public abstract class StandType extends ForgeRegistryEntry<StandType> implements IPowerType<StandType> {
+public abstract class StandType extends ForgeRegistryEntry<StandType> implements IPowerType<IStandPower, StandType> {
     private final int tier;
     private final int color;
     private final ITextComponent partName;
@@ -59,7 +58,7 @@ public abstract class StandType extends ForgeRegistryEntry<StandType> implements
     }
     
     @Override
-    public boolean canTickMana(LivingEntity user, IPower<?> power) {
+    public boolean canTickMana(LivingEntity user, IStandPower power) {
         return true;
     }
 
@@ -69,9 +68,9 @@ public abstract class StandType extends ForgeRegistryEntry<StandType> implements
     }
 
     @Override
-    public void tickUser(LivingEntity user, IPower<?> power) {
+    public void tickUser(LivingEntity user, IStandPower power) {
         if (!power.canUsePower()) {
-            forceUnsummon(user, (IStandPower) power);
+            forceUnsummon(user, power);
         }
     }
     
