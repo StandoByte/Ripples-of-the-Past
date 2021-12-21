@@ -29,7 +29,7 @@ public class SatiporojaScarfBindingEntity extends OwnerBoundProjectileEntity {
             if (ensnaredEntity == null || !ensnaredEntity.isAlive()) {
                 Entity owner = getOwner();
                 if (owner instanceof PlayerEntity) {
-                    ((PlayerEntity) owner).getCooldowns().removeCooldown(ModItems.SATIPOROJA_SCARF.get());
+                    ((PlayerEntity) owner).getCooldowns().addCooldown(ModItems.SATIPOROJA_SCARF.get(), 0);
                 }
                 remove();
             }
