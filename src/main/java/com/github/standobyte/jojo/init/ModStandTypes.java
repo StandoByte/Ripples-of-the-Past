@@ -32,13 +32,13 @@ public class ModStandTypes {
     
     public static final RegistryObject<EntityStandType> STAR_PLATINUM = STANDS.register("star_platinum", 
             () -> new EntityStandType(6, 0xB000B0, PART_3_NAME,
-                    new StandAction[] {ModActions.STAR_PLATINUM_PUNCH.get(), ModActions.STAR_PLATINUM_STAR_FINGER.get()},
+                    new StandAction[] {ModActions.STAR_PLATINUM_PUNCH.get(), ModActions.STAR_PLATINUM_BARRAGE.get(), ModActions.STAR_PLATINUM_STAR_FINGER.get()},
                     new StandAction[] {ModActions.STAR_PLATINUM_BLOCK.get(), ModActions.STAR_PLATINUM_ZOOM.get(), ModActions.STAR_PLATINUM_TIME_STOP.get()},
                     ModSounds.JOTARO_STAR_PLATINUM, ModEntityTypes.STAR_PLATINUM));
     
     public static final RegistryObject<EntityStandType> THE_WORLD = STANDS.register("the_world", 
             () -> new EntityStandType(6, 0xFFD000, PART_3_NAME,
-                    new StandAction[] {ModActions.THE_WORLD_PUNCH.get()},
+                    new StandAction[] {ModActions.THE_WORLD_PUNCH.get(), ModActions.THE_WORLD_BARRAGE.get()},
                     new StandAction[] {ModActions.THE_WORLD_BLOCK.get(), ModActions.THE_WORLD_TIME_STOP.get(), ModActions.THE_WORLD_ROAD_ROLLER.get()},
                     ModSounds.DIO_THE_WORLD, ModEntityTypes.THE_WORLD));
     
@@ -50,13 +50,13 @@ public class ModStandTypes {
     
     public static final RegistryObject<EntityStandType> SILVER_CHARIOT = STANDS.register("silver_chariot", 
             () -> new EntityStandType(5, 0xBEC8D6, PART_3_NAME,
-                    new StandAction[] {ModActions.SILVER_CHARIOT_ATTACK.get(), ModActions.SILVER_CHARIOT_RAPIER_LAUNCH.get()},
+                    new StandAction[] {ModActions.SILVER_CHARIOT_ATTACK.get(), ModActions.SILVER_CHARIOT_BARRAGE.get(), ModActions.SILVER_CHARIOT_RAPIER_LAUNCH.get()},
                     new StandAction[] {ModActions.SILVER_CHARIOT_BLOCK.get(), ModActions.SILVER_CHARIOT_TAKE_OFF_ARMOR.get()},
                     ModSounds.POLNAREFF_SILVER_CHARIOT, ModEntityTypes.SILVER_CHARIOT));
     
     public static final RegistryObject<EntityStandType> MAGICIANS_RED = STANDS.register("magicians_red", 
             () -> new EntityStandType(5, 0xFF6A00, PART_3_NAME,
-                    new StandAction[] {ModActions.MAGICIANS_RED_PUNCH.get(), ModActions.MAGICIANS_RED_FIREBALL.get(), ModActions.MAGICIANS_RED_CROSSFIRE_HURRICANE.get()},
+                    new StandAction[] {ModActions.MAGICIANS_RED_PUNCH.get(), ModActions.MAGICIANS_RED_FLAME_BURST.get(), ModActions.MAGICIANS_RED_FIREBALL.get(), ModActions.MAGICIANS_RED_CROSSFIRE_HURRICANE.get()},
                     new StandAction[] {ModActions.MAGICIANS_RED_BLOCK.get(), ModActions.MAGICIANS_RED_RED_BIND.get(), ModActions.MAGICIANS_RED_DETECTOR.get()},
                     ModSounds.AVDOL_MAGICIANS_RED, ModEntityTypes.MAGICIANS_RED));
     

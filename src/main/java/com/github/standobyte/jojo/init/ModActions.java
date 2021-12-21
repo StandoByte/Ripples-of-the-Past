@@ -156,7 +156,7 @@ public class ModActions {
             () -> new StandEntityMeleeAttack(new StandEntityAction.Builder().manaCost(50).cooldown(5)));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_BARRAGE = ACTIONS.register("star_platinum_barrage", 
-            () -> new StandEntityMeleeBarrage(new StandEntityMeleeBarrage.Builder().holdType(2, 100).cooldown(5).shiftVariationOf(STAR_PLATINUM_PUNCH)));
+            () -> new StandEntityMeleeBarrage(new StandEntityMeleeBarrage.Builder().holdType(2, 100).cooldown(5)));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_STAR_FINGER = ACTIONS.register("star_platinum_star_finger", 
             () -> new StandEntityRangedAttack(new StandEntityAction.Builder().manaCost(300)
@@ -183,7 +183,7 @@ public class ModActions {
             () -> new StandEntityMeleeAttack(new StandEntityAction.Builder().manaCost(45).cooldown(5)));
     
     public static final RegistryObject<StandEntityAction> THE_WORLD_BARRAGE = ACTIONS.register("the_world_barrage", 
-            () -> new StandEntityMeleeBarrage(new StandEntityMeleeBarrage.Builder().holdType(2.2F, 100).shiftVariationOf(THE_WORLD_PUNCH)));
+            () -> new StandEntityMeleeBarrage(new StandEntityMeleeBarrage.Builder().holdType(2.2F, 100)));
     
     public static final RegistryObject<StandEntityAction> THE_WORLD_BLOCK = ACTIONS.register("the_world_block", 
             () -> new StandEntityBlock());
@@ -236,7 +236,7 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_BARRAGE = ACTIONS.register("silver_chariot_barrage", 
             () -> new SilverChariotMeleeBarrage(new StandEntityMeleeBarrage.Builder().holdType(1.5F, 80)
-                    .cooldown(6).shout(ModSounds.POLNAREFF_HORA_HORA_HORA).shiftVariationOf(SILVER_CHARIOT_ATTACK)));
+                    .cooldown(6).shout(ModSounds.POLNAREFF_HORA_HORA_HORA)));
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_RAPIER_LAUNCH = ACTIONS.register("silver_chariot_rapier_launch", 
             () -> new SilverChariotRapierLaunch(new StandEntityAction.Builder().manaCost(0).cooldown(100).expRequirement(200)));
@@ -252,7 +252,7 @@ public class ModActions {
             () -> new StandEntityMeleeAttack(new StandEntityAction.Builder().manaCost(70).cooldown(5)));
     
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_FLAME_BURST = ACTIONS.register("magicians_red_flame_burst", 
-            () -> new StandEntityHeldRangedAttack(new StandEntityHeldRangedAttack.Builder().holdType(2).expRequirement(50).shiftVariationOf(MAGICIANS_RED_PUNCH)));
+            () -> new StandEntityHeldRangedAttack(new StandEntityHeldRangedAttack.Builder().holdType(2).expRequirement(50)));
     
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_FIREBALL = ACTIONS.register("magicians_red_fireball", 
             () -> new MagiciansRedFireball(new StandEntityAction.Builder().manaCost(50).expRequirement(150)));
