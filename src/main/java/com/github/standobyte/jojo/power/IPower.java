@@ -24,6 +24,7 @@ public interface IPower<T extends IPowerType<? extends IPower<T>, T>> {
     boolean clear();
     T getType();
     LivingEntity getUser();
+    boolean isUserCreative();
     void tick();
     boolean isActive();
 
@@ -33,18 +34,6 @@ public interface IPower<T extends IPowerType<? extends IPower<T>, T>> {
     default List<Action> getActions(ActionType type) {
         return type == ActionType.ATTACK ? getAttacks() : getAbilities();
     }
-
-    float getMana();
-    float getMaxMana();
-    boolean hasMana(float mana);
-    void addMana(float amount);
-    boolean consumeMana(float amount);
-    boolean infiniteMana();
-    void setMana(float amount);
-    float getManaRegenPoints();
-    void setManaRegenPoints(float points);
-    float getManaLimitFactor();
-    void setManaLimitFactor(float factor);
 
     boolean isActionOnCooldown(Action action);
     float getCooldownRatio(Action action, float partialTick);

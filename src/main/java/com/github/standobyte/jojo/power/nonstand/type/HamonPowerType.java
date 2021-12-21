@@ -31,11 +31,11 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRunAwayPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonParticlesPacket;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData.Exercise;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
+import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.JojoModUtil;
 import com.github.standobyte.jojo.util.damage.ModDamageSources;
 import com.google.common.collect.ImmutableMap;
@@ -83,8 +83,8 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 
 public class HamonPowerType extends NonStandPowerType<HamonData> {
 
-    public HamonPowerType(int color, HamonAction[] startingAttacks, HamonAction[] startingAbilities, float manaRegenPoints) {
-        super(color, startingAttacks, startingAbilities, manaRegenPoints, HamonData::new);
+    public HamonPowerType(int color, HamonAction[] startingAttacks, HamonAction[] startingAbilities) {
+        super(color, startingAttacks, startingAbilities, HamonData::new);
     }
     
     @Override
@@ -98,8 +98,8 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     }
     
     @Override
-    public float reduceManaConsumed(float amount, INonStandPower power, LivingEntity user) {
-        return user.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.SATIPOROJA_SCARF.get() ? amount * 0.6F : super.reduceManaConsumed(amount, power, user);
+    public float reduceEnergyConsumed(float amount, INonStandPower power, LivingEntity user) {
+        return user.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.SATIPOROJA_SCARF.get() ? amount * 0.6F : super.reduceEnergyConsumed(amount, power, user);
     }
     
     @Override
@@ -131,9 +131,29 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     }
     
     @Override
-    public boolean canTickMana(LivingEntity user, INonStandPower power) {
-        return user.getAirSupply() == user.getMaxAirSupply() && !user.hasEffect(ModEffects.FREEZE.get()) &&
-                !(user.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.BREATH_CONTROL_MASK.get() && user.tickCount % 3 == 0);
+    public float getMaxEnergyFactor(INonStandPower power) {
+        return power.getTypeSpecificData(this).get().calcManaLimitFactor();
+    }
+
+    @Override
+    public float getEnergyTickInc(INonStandPower power) {
+        LivingEntity user = power.getUser();
+        if (user.getAirSupply() < user.getMaxAirSupply() && !user.hasEffect(ModEffects.FREEZE.get())) {
+            return 0;
+        }
+        float amount = power.getTypeSpecificData(this).get().calcManaRegenPoints();
+        if (user.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.BREATH_CONTROL_MASK.get()) {
+            amount *= 2F / 3F;
+        }
+        if (user.hasEffect(ModEffects.MEDITATION.get())) {
+            amount *= 2F;
+        }
+        return amount;
+    }
+
+    @Override
+    public float getStaminaRegenFactor(INonStandPower power, IStandPower standPower) {
+        return 1F + power.getTypeSpecificData(this).get().getBreathingLevel() * 0.01F;
     }
 
     @Override
@@ -166,9 +186,6 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                         }
                         player.addEffect(new EffectInstance(ModEffects.MEDITATION.get(), Math.max(Exercise.MEDITATION.maxTicks - hamon.getExerciseTicks(Exercise.MEDITATION), 210)));
                         hamon.incExerciseTicks(Exercise.MEDITATION, multiplier);
-                        if (power.getType().canTickMana(user, power)) {
-                            power.addMana(power.getManaRegenPoints());
-                        }
                         player.getFoodData().addExhaustion(-0.001F);
                         if (player.tickCount % 200 == 0 && player.isHurt() && player.level.getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION)) {
                             player.heal(1.0F);
@@ -202,10 +219,10 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
 //                        if (mainHandItem.getItem() instanceof FishingRodItem) {
 //                            Entity hooked = player.fishing.getHookedIn();
 //                            if (hooked != null) {
-//                                float manaCost = 30;
-//                                if (power.consumeMana(manaCost)) {
+//                                float energyCost = 30;
+//                                if (power.consumeMana(energyCost)) {
 //                                    ModDamageSources.dealHamonDamage(hooked, 0.0125F, player.fishing, player);
-//                                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, manaCost);
+//                                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, energyCost);
 //                                }
 //                                else {
 //                                    player.fishing.retrieve(mainHandItem);
@@ -269,7 +286,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     private static final float STRING_CHARGE_COST = 10;
     private static void createChargedCobweb(LivingEntity user, BlockPos pos, BlockState blockState, World world, 
             int range, @Nullable Direction from, INonStandPower power, int chargeTicks, float charge, HamonData hamon) {
-        if (range > 0 && blockState.getBlock() == Blocks.TRIPWIRE && power.consumeMana(STRING_CHARGE_COST)) {
+        if (range > 0 && blockState.getBlock() == Blocks.TRIPWIRE && power.consumeEnergy(STRING_CHARGE_COST)) {
             hamon.hamonPointsFromAction(HamonStat.CONTROL, STRING_CHARGE_COST / 2);
             Map<Property<?>, Comparable<?>> values = blockState.getValues();
             List<Direction> directions = new ArrayList<Direction>();
@@ -305,7 +322,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
             Technique technique = hamon.getTechnique();
             
             float damage = OVERDRIVE_DAMAGE;
-            float manaCost = OVERDRIVE_COST;
+            float energyCost = OVERDRIVE_COST;
             float knockback = 0;
             
             ItemStack heldItemStack = user.getMainHandItem();
@@ -313,7 +330,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                 if (hamon.isSkillLearned(HamonSkill.METAL_SILVER_OVERDRIVE) && heldItemStack.getItem() instanceof TieredItem) {
                     TieredItem item = (TieredItem) heldItemStack.getItem();
                     damage *= 0.5F;
-                    manaCost += 250;
+                    energyCost += 250;
                     if (!user.isShiftKeyDown() && item instanceof SwordItem && heldItemStack.hasCustomHoverName() && "pluck".equals(heldItemStack.getHoverName().getString().toLowerCase())) {
                         overdriveVoiceLine = ModSounds.JONATHAN_PLUCK_SWORD.get();
                     }
@@ -329,8 +346,8 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
             else {
                 boolean sunlightYellowOverdrive = canPerformSunlightYellowOverdrive(user, power, hamon, target);
                 if (sunlightYellowOverdrive) {
-                    float SYOFactor = power.getMana() / manaCost;
-                    manaCost = power.getMana();
+                    float SYOFactor = power.getEnergy() / energyCost;
+                    energyCost = power.getEnergy();
                     damage *= SYOFactor * 1.2F;
                 }
                 if (sunlightYellowOverdrive && technique != null) {
@@ -341,7 +358,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                 }
             }
             
-            if (!power.consumeMana(manaCost)) {
+            if (!power.consumeEnergy(energyCost)) {
                 return;
             }
             float dmgScale = 1;
@@ -351,7 +368,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                 damage *= dmgScale;
             }
             if (ModDamageSources.dealHamonDamage(target, damage, user, null)) {
-                hamon.hamonPointsFromAction(HamonStat.STRENGTH, manaCost * dmgScale);
+                hamon.hamonPointsFromAction(HamonStat.STRENGTH, energyCost * dmgScale);
                 if (knockback > 0) {
                     target.knockback(knockback, 
                             (double) MathHelper.sin(user.yRot * ((float) Math.PI / 180F)), 
@@ -364,8 +381,8 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
         }
     }
     
-    public static boolean canPerformSunlightYellowOverdrive(LivingEntity user, IPower<?> power, HamonData hamon, @Nullable LivingEntity target) {
-        if (user.isShiftKeyDown() && power.hasMana(OVERDRIVE_COST * 2) && hamon.isSkillLearned(HamonSkill.SUNLIGHT_YELLOW_OVERDRIVE)) {
+    public static boolean canPerformSunlightYellowOverdrive(LivingEntity user, INonStandPower power, HamonData hamon, @Nullable LivingEntity target) {
+        if (user.isShiftKeyDown() && power.hasEnergy(OVERDRIVE_COST * 2) && hamon.isSkillLearned(HamonSkill.SUNLIGHT_YELLOW_OVERDRIVE)) {
             if (target == null && user.level.isClientSide()) {
                 Entity crosshairEntity = ClientUtil.getCrosshairPickEntity();
                 target = crosshairEntity instanceof LivingEntity ? (LivingEntity) crosshairEntity : null;
@@ -392,13 +409,13 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                 PlayerEntity playerTarget = (PlayerEntity) target;
                 if (!playerTarget.getCooldowns().isOnCooldown(ModItems.SATIPOROJA_SCARF.get())) {
                     INonStandPower power = INonStandPower.getPlayerNonStandPower(playerTarget);
-                    float manaCost = 500F;
-                    if (power.hasMana(manaCost)) {
+                    float energyCost = 500F;
+                    if (power.hasEnergy(energyCost)) {
                         power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
                             if (hamon.isSkillLearned(HamonSkill.SNAKE_MUFFLER)) {
                                 JojoModUtil.sayVoiceLine(target, ModSounds.LISA_LISA_SNAKE_MUFFLER.get());
                                 ModDamageSources.dealHamonDamage(attacker, 0.75F, target, null);
-                                power.consumeMana(manaCost);
+                                power.consumeEnergy(energyCost);
                                 livingAttacker.addEffect(new EffectInstance(Effects.GLOWING, 200));
                                 event.setCanceled(true);
                                 SnakeMufflerEntity snakeMuffler = new SnakeMufflerEntity(target.level, target);
@@ -494,7 +511,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
             LivingEntity entity = event.getEntityLiving();
             INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
                 power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
-                    if (hamon.isSkillLearned(HamonSkill.WATER_WALKING) && power.consumeMana(event.getAmount() * 0.5F)) {
+                    if (hamon.isSkillLearned(HamonSkill.WATER_WALKING) && power.consumeEnergy(event.getAmount() * 0.5F)) {
                         HamonPowerType.createHamonSparkParticles(entity.level, null, entity.getX(), entity.getY(0.5), entity.getZ(), 0.1F);
                         event.setCanceled(true);
                     }

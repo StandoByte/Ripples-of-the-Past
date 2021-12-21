@@ -16,10 +16,8 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.command.JojoControlsCommand;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.SyncEnergyPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncLeapCooldownPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncManaLimitFactorPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncManaPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncManaRegenPointsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncHeldActionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncPowerTypePacket;
@@ -33,7 +31,6 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -48,9 +45,6 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
     protected final Optional<ServerPlayerEntity> serverPlayerUser;
     protected List<Action> attacks = new ArrayList<Action>();
     protected List<Action> abilities = new ArrayList<Action>();
-    private float mana = 0;
-    protected float manaRegenPoints = 1;
-    protected float manaLimitFactor = 1;
     private ActionCooldownTracker cooldowns = new ActionCooldownTracker();
     private int leapCooldown;
     protected HeldActionData heldActionData;
@@ -70,11 +64,7 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
         if (type == null || hasPower() && !getType().isReplaceableWith(type)) {
             return false;
         }
-        mana = 0;
         onTypeInit(type);
-        if (user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild) {
-            mana = getMaxMana();
-        }
         leapCooldown = getLeapCooldownPeriod();
 
         serverPlayerUser.ifPresent(player -> {
@@ -99,7 +89,6 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
         if (!hasPower()) {
             return false;
         }
-        mana = 0;
         attacks = new ArrayList<Action>();
         abilities = new ArrayList<Action>();
         serverPlayerUser.ifPresent(player -> {
@@ -114,21 +103,19 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
     }
 
     @Override
-    public final void tick() {
+    public boolean isUserCreative() {
+        return user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild;
+    }
+
+    @Override
+    public void tick() {
         if (hasPower()) {
-            tickMana();
             tickHeldAction();
             tickCooldown();
             if (leapCooldown > 0) {
                 leapCooldown--;
             }
             getType().tickUser(getUser(), (P) this);
-        }
-    }
-    
-    protected void tickMana() {
-        if (getType().canTickMana(getUser(), (P) this)) {
-            mana = MathHelper.clamp(mana + manaRegenPoints, 0, getMaxMana());
         }
     }
     
@@ -140,92 +127,6 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
     @Override
     public List<Action> getAbilities() {
         return abilities;
-    }
-
-    @Override
-    public final float getMana() {
-        return mana;
-    }
-
-    @Override
-    public float getMaxMana() {
-        return 1000 * manaLimitFactor;
-    }
-    
-    @Override
-    public final boolean hasMana(float mana) {
-        return getMana() >= mana || infiniteMana();
-    }
-
-    @Override
-    public final void addMana(float amount) {
-        setMana(MathHelper.clamp(mana + amount, 0, getMaxMana()));
-    }
-
-    @Override
-    public final boolean consumeMana(float amount) {
-        if (infiniteMana()) {
-            return true;
-        }
-        if (mana >= amount) {
-            amount = reduceManaConsumed(amount);
-            setMana(mana - amount);
-            return true;
-        }
-        return false;
-    }
-    
-    protected float reduceManaConsumed(float amount) {
-        return amount;
-    }
-
-    @Override
-    public boolean infiniteMana() {
-        return user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild;
-    }
-
-    @Override
-    public final void setMana(float amount) {
-        amount = MathHelper.clamp(amount, 0, getMaxMana());
-        boolean send = mana != amount;
-        mana = amount;
-        if (send) {
-            serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new SyncManaPacket(getPowerClassification(), getMana()), player);
-            });
-        }
-    }
-
-    @Override
-    public final float getManaRegenPoints() {
-        return manaRegenPoints;
-    }
-
-    @Override
-    public final void setManaRegenPoints(float points) {
-        boolean send = points != manaRegenPoints;
-        manaRegenPoints = points;
-        if (send) {
-            serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new SyncManaRegenPointsPacket(getPowerClassification(), getManaRegenPoints()), player);
-            });
-        }
-    }
-
-    @Override
-    public final float getManaLimitFactor() {
-        return manaLimitFactor;
-    }
-
-    @Override
-    public final void setManaLimitFactor(float factor) {
-        boolean send = factor != manaLimitFactor;
-        manaLimitFactor = Math.max(factor, 1);
-        if (send) {
-            serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new SyncManaLimitFactorPacket(getPowerClassification(), getManaLimitFactor()), player);
-            });
-        }
     }
     
     @Override
@@ -329,10 +230,10 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
             return ActionConditionResult.NEGATIVE;
         }
 
-        if (!infiniteMana()) {
+        if (!isUserCreative()) {
             if (getMana() < action.getManaNeeded(getHeldActionTicks(), this)) {
                 serverPlayerUser.ifPresent(player -> {
-                    PacketManager.sendToClient(new SyncManaPacket(getPowerClassification(), getMana()), player);
+                    PacketManager.sendToClient(new SyncEnergyPacket(getPowerClassification(), getMana()), player);
                 });
                 ITextComponent message = new TranslationTextComponent("jojo.message.action_condition.no_mana_" + getType().getManaString());
                 return ActionConditionResult.createNegative(message);
@@ -570,9 +471,6 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
     @Override
     public CompoundNBT writeNBT() {
         CompoundNBT cnbt = new CompoundNBT();
-        cnbt.putFloat("Mana", getMana());
-        cnbt.putFloat("ManaRegen", getManaRegenPoints());
-        cnbt.putFloat("ManaLimitFactor", getManaLimitFactor());
         cnbt.put("Cooldowns", cooldowns.writeNBT());
         cnbt.putInt("LeapCd", leapCooldown);
         return cnbt;
@@ -580,9 +478,6 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
 
     @Override
     public void readNBT(CompoundNBT nbt) {
-        mana = nbt.getFloat("Mana");
-        manaRegenPoints = nbt.getFloat("ManaRegen");
-        manaLimitFactor = nbt.getFloat("ManaLimitFactor");
         cooldowns = new ActionCooldownTracker(nbt.getCompound("Cooldowns"));
         leapCooldown = nbt.getInt("LeapCd");
     }
@@ -591,12 +486,7 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
     public void onClone(IPower<T> oldPower, boolean wasDeath, boolean keep) {
         if (keep && oldPower.hasPower()) {
             onTypeInit(oldPower.getType());
-//            if (!wasDeath) {
-                mana = oldPower.getMana();
-                leapCooldown = oldPower.getLeapCooldown();
-//            }
-            manaRegenPoints = oldPower.getManaRegenPoints();
-            manaLimitFactor = oldPower.getManaLimitFactor();
+            leapCooldown = oldPower.getLeapCooldown();
             cooldowns = ((PowerBaseImpl<P, T>) oldPower).cooldowns;
         }      
     }
@@ -605,10 +495,8 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
     public void syncWithUserOnly() {
         serverPlayerUser.ifPresent(player -> {
             if (hasPower()) {
+                PacketManager.sendToClient(new SyncLeapCooldownPacket(getPowerClassification(), leapCooldown), player);
                 syncWithTrackingOrUser(player);
-                PacketManager.sendToClient(new SyncManaPacket(getPowerClassification(), getMana()), player);
-                PacketManager.sendToClient(new SyncManaRegenPointsPacket(getPowerClassification(), getManaRegenPoints()), player);
-                PacketManager.sendToClient(new SyncManaLimitFactorPacket(getPowerClassification(), getManaLimitFactor()), player);
             }
         });
     }

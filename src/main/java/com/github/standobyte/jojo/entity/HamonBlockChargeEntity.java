@@ -45,8 +45,8 @@ public class HamonBlockChargeEntity extends Entity {
         setNoGravity(true);
     }
     
-    public void setCharge(float charge, int chargeTicks, @Nullable LivingEntity hamonUser, float manaSpent) {
-        this.hamonCharge = new HamonCharge(charge, chargeTicks, hamonUser, manaSpent);
+    public void setCharge(float charge, int chargeTicks, @Nullable LivingEntity hamonUser, float energySpent) {
+        this.hamonCharge = new HamonCharge(charge, chargeTicks, hamonUser, energySpent);
     }
     
     private static final int CACTUS_EXPLOSION_RANGE = 4;

@@ -14,8 +14,23 @@ import net.minecraftforge.common.util.LazyOptional;
 public interface IStandPower extends IPower<StandType> {
     public static final int MAX_EXP = 1000;
     
-    int getExp();
-    void setExp(int exp);
+    boolean usesStamina();
+    float getStamina();
+    float getMaxStamina();
+    void addStamina(float amount);
+    void consumeStamina(float amount);
+    void setStamina(float amount);
+
+    boolean usesResolve();
+    float getResolve();
+    float getMaxResolve();
+    void addResolve(float amount, int noDecayTicks);
+    void setResolve(float amount, int noDecayTicks);
+    
+    @Deprecated
+    int getXp();
+    @Deprecated
+    void setXp(int xp);
     
     void setStandManifestation(@Nullable IStandManifestation standManifestation);
     @Nullable

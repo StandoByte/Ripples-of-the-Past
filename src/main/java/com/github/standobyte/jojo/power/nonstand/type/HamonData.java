@@ -27,7 +27,6 @@ import com.github.standobyte.jojo.power.nonstand.TypeSpecificData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonSkillType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
-import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attribute;
@@ -141,8 +140,6 @@ public class HamonData extends TypeSpecificData {
                     recalcHamonDamage();
                     break;
                 case CONTROL:
-                    power.setManaLimitFactor(calcManaLimitFactor());
-                    power.setManaRegenPoints(calcManaRegenPoints());
                     break;
                 }
             }
@@ -237,13 +234,13 @@ public class HamonData extends TypeSpecificData {
     }
 
     private static final float MANA_PER_POINT = 500F;
-    public void hamonPointsFromAction(HamonStat stat, float manaCost) {
+    public void hamonPointsFromAction(HamonStat stat, float energyCost) {
         if (isSkillLearned(HamonSkill.NATURAL_TALENT)) {
-            manaCost *= 2;
+            energyCost *= 2;
         }
-        manaCost *= JojoModConfig.COMMON.hamonPointsMultiplier.get().floatValue();
-        int points = (int) (manaCost / MANA_PER_POINT);
-        if (random.nextFloat() < (manaCost % MANA_PER_POINT) / MANA_PER_POINT) points++;
+        energyCost *= JojoModConfig.COMMON.hamonPointsMultiplier.get().floatValue();
+        int points = (int) (energyCost / MANA_PER_POINT);
+        if (random.nextFloat() < (energyCost % MANA_PER_POINT) / MANA_PER_POINT) points++;
         setHamonStatPoints(stat, getStatPoints(stat) + points, false, false);
     }
 
@@ -256,12 +253,8 @@ public class HamonData extends TypeSpecificData {
         breathingTechniqueLevel = MathHelper.clamp(level, 0, MAX_BREATHING_LEVEL);
         if (oldLevel != breathingTechniqueLevel) {
             recalcHamonDamage();
-            power.setManaRegenPoints(calcManaRegenPoints());
             serverPlayer.ifPresent(player -> {
                 PacketManager.sendToClientsTrackingAndSelf(new TrSyncHamonStatsPacket(player.getId(), true, getBreathingLevel()), player);
-            });
-            IStandPower.getStandPowerOptional(power.getUser()).ifPresent(standPower -> {
-                standPower.setManaRegenPoints(1 + getBreathingLevel() * 0.01F);
             });
         }
         giveBreathingTechniqueBuffs(power.getUser());

@@ -37,7 +37,7 @@ public class TimeStopInstant extends StandEntityAction {
     @Override
     public void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
         StandEntity stand = power.isActive() ? (StandEntity) getPerformer(user, power) : null;
-        int timeStopTicks = TimeHandler.getTimeStopTicks(getExpRequirement(), power, user, INonStandPower.getNonStandPowerOptional(user));
+        int timeStopTicks = TimeHandler.getTimeStopTicks(getXpRequirement(), power, user, INonStandPower.getNonStandPowerOptional(user));
         JojoModUtil.playSound(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, user.getX(), user.getY(), user.getZ(), 
                 ModSounds.TIME_STOP_BLINK.get(), SoundCategory.AMBIENT, 5.0F, 1.0F, TimeHandler::canPlayerSeeInStoppedTime);
         if (!world.isClientSide()) {

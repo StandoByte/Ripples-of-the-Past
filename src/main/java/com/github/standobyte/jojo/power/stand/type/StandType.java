@@ -56,11 +56,6 @@ public abstract class StandType extends ForgeRegistryEntry<StandType> implements
     public int getColor() {
         return color;
     }
-    
-    @Override
-    public boolean canTickMana(LivingEntity user, IStandPower power) {
-        return true;
-    }
 
     @Override
     public boolean isReplaceableWith(StandType newType) {
@@ -82,6 +77,14 @@ public abstract class StandType extends ForgeRegistryEntry<StandType> implements
     @Override
     public StandAction[] getAbilities() {
         return abilities;
+    }
+    
+    public boolean usesStamina() {
+        return false;
+    }
+    
+    public boolean usesResolve() {
+        return false;
     }
     
     @Override
@@ -180,7 +183,7 @@ public abstract class StandType extends ForgeRegistryEntry<StandType> implements
                     return type != null ? type.getExpRewardMultiplier() : 1;
                 }).orElse(1);
                 expToAdd = (int) ((float) expToAdd * dead.getMaxHealth() / 20F);
-                stand.setExp(stand.getExp() + expToAdd);
+                stand.setXp(stand.getXp() + expToAdd);
             }
         });
     }

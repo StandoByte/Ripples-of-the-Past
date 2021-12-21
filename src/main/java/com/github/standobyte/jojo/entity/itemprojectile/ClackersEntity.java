@@ -33,8 +33,8 @@ public class ClackersEntity extends ItemProjectileEntity {
         super(ModEntityTypes.CLACKERS.get(), thrower, world);
     }
     
-    public void setHamonEnergySpent(float mana) {
-        this.hamonEnergySpent = mana;
+    public void setHamonEnergySpent(float energy) {
+        this.hamonEnergySpent = energy;
     }
     
     @Override
