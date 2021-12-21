@@ -27,7 +27,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 
-public class StandPower extends PowerBaseImpl<StandType> implements IStandPower {
+public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements IStandPower {
     private StandType standType = null;
     private int tier = 0;
     @Nullable

@@ -42,7 +42,7 @@ import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.World;
 
-public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T> {
+public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P, T>> implements IPower<T> {
     @Nonnull
     protected final LivingEntity user;
     protected final Optional<ServerPlayerEntity> serverPlayerUser;
@@ -78,7 +78,7 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
         leapCooldown = getLeapCooldownPeriod();
 
         serverPlayerUser.ifPresent(player -> {
-            PacketManager.sendToClientsTrackingAndSelf(new TrSyncPowerTypePacket<T>(player.getId(), getPowerClassification(), getType()), player);
+            PacketManager.sendToClientsTrackingAndSelf(new TrSyncPowerTypePacket<P, T>(player.getId(), getPowerClassification(), getType()), player);
             player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                 cap.sendNotification(OneTimeNotification.POWER_CONTROLS, 
                         new TranslationTextComponent("jojo.chat.controls.message", 
@@ -122,16 +122,16 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
             if (leapCooldown > 0) {
                 leapCooldown--;
             }
-            getType().tickUser(getUser(), this);
+            getType().tickUser(getUser(), (P) this);
         }
     }
     
     protected void tickMana() {
-        if (getType().canTickMana(getUser(), this)) {
+        if (getType().canTickMana(getUser(), (P) this)) {
             mana = MathHelper.clamp(mana + manaRegenPoints, 0, getMaxMana());
         }
     }
-
+    
     @Override
     public List<Action> getAttacks() {
         return attacks;
@@ -597,7 +597,7 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
 //            }
             manaRegenPoints = oldPower.getManaRegenPoints();
             manaLimitFactor = oldPower.getManaLimitFactor();
-            cooldowns = ((PowerBaseImpl<T>) oldPower).cooldowns;
+            cooldowns = ((PowerBaseImpl<P, T>) oldPower).cooldowns;
         }      
     }
 
@@ -618,7 +618,7 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
         if (hasPower()) {
             LivingEntity user = getUser();
             if (user != null) {
-                PacketManager.sendToClient(new TrSyncPowerTypePacket<T>(user.getId(), getPowerClassification(), getType()), player);
+                PacketManager.sendToClient(new TrSyncPowerTypePacket<P, T>(user.getId(), getPowerClassification(), getType()), player);
                 cooldowns.syncWithTrackingOrUser(user.getId(), getPowerClassification(), player);
             }
         }

@@ -17,7 +17,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraftforge.common.util.LazyOptional;
 
-public interface IPower<T extends IPowerType<T>> {
+public interface IPower<T extends IPowerType<? extends IPower<T>, T>> {
     PowerClassification getPowerClassification();
     boolean hasPower();
     boolean givePower(T type);
@@ -89,7 +89,7 @@ public interface IPower<T extends IPowerType<T>> {
         return classification == PowerClassification.STAND ? IStandPower.getPlayerStandPower(player) : INonStandPower.getPlayerNonStandPower(player);
     }
     
-    public static void castAndGivePower(IPower<?> power, IPowerType<?> powerType, PowerClassification classification) { // TODO get rid of this shit
+    public static void castAndGivePower(IPower<?> power, IPowerType<?, ?> powerType, PowerClassification classification) { // FIXME get rid of this shit
         switch (classification) {
         case STAND:
             if (power instanceof IStandPower && powerType instanceof StandType) {
