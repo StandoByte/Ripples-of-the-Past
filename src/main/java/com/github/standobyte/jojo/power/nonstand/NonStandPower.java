@@ -19,7 +19,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 
-public class NonStandPower extends PowerBaseImpl<NonStandPowerType<?>> implements INonStandPower {
+public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerType<?>> implements INonStandPower {
     private NonStandPowerType<?> type;
     private TypeSpecificData typeSpecificData;
     

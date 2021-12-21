@@ -20,12 +20,12 @@ public class ActionToast implements IToast {
     private static final ITextComponent NAME = new TranslationTextComponent("jojo.action.toast.title");
     private final ITextComponent description;
     private final Type type;
-    private final List<Action> actions = Lists.newArrayList();
-    private IPowerType<?> powerType;
+    private final List<Action<?>> actions = Lists.newArrayList();
+    private IPowerType<?, ?> powerType;
     private long lastChanged;
     private boolean changed;
 
-    private ActionToast(Type type, Action action, IPowerType<?> powerType) {
+    private ActionToast(Type type, Action<?> action, IPowerType<?, ?> powerType) {
         this.type = type;
         this.description = new TranslationTextComponent("jojo.action.toast." + type.powerType + type.actionType + "description");
         this.powerType = powerType;
@@ -48,7 +48,7 @@ public class ActionToast implements IToast {
             toastGui.blit(matrixStack, 0, 0, 0, 32, 160, 32);
             mc.font.draw(matrixStack, NAME, 30.0F, 7.0F, -11534256);
             mc.font.draw(matrixStack, description, 30.0F, 18.0F, -16777216);
-            Action action = actions.get((int)(delta / Math.max(1L, 5000L / (long)actions.size()) % (long)actions.size()));
+            Action<?> action = actions.get((int)(delta / Math.max(1L, 5000L / (long)actions.size()) % (long)actions.size()));
             RenderSystem.pushMatrix();
             RenderSystem.scalef(0.6F, 0.6F, 1.0F);
             matrixStack.pushPose();
@@ -64,14 +64,14 @@ public class ActionToast implements IToast {
         }
     }
 
-    protected void addAction(Action action, IPowerType<?> powerType) {
+    protected void addAction(Action<?> action, IPowerType<?, ?> powerType) {
         if (actions.add(action)) {
             this.powerType = powerType;
             changed = true;
         }
     }
 
-    public static void addOrUpdate(ToastGui toastGui, Type type, Action action, IPowerType<?> powerType) {
+    public static void addOrUpdate(ToastGui toastGui, Type type, Action<?> action, IPowerType<?, ?> powerType) {
         ActionToast toast = toastGui.getToast(ActionToast.class, type);
         if (toast == null) {
             toastGui.addToast(new ActionToast(type, action, powerType));
