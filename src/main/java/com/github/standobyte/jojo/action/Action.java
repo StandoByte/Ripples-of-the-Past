@@ -19,7 +19,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
-public abstract class Action <P extends IPower<?>> extends ForgeRegistryEntry<Action<?>> {
+public abstract class Action<P extends IPower<?>> extends ForgeRegistryEntry<Action<?>> {
     private static Map<Supplier<? extends Action>, Supplier<? extends Action>> SHIFT_VARIATIONS = new HashMap<>();
     
     private final float manaCost;

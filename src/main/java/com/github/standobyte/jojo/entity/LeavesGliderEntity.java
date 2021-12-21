@@ -104,7 +104,7 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
                 if (power.getType() != ModNonStandPowers.HAMON.get()) {
                     iter.remove();
                 }
-                else if (!infiniteMana && power.infiniteMana()) {
+                else if (!infiniteMana && power.isUserCreative()) {
                     infiniteMana = true;
                 }
             }
@@ -150,9 +150,9 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
     }
     
     private float consumeEnergy(INonStandPower power, float energy) {
-        energy = Math.min(energy, power.getMana());
+        energy = Math.min(energy, power.getEnergy());
         power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get().hamonPointsFromAction(HamonStat.CONTROL, energy);
-        power.consumeMana(energy);
+        power.consumeEnergy(energy);
         return energy;
     }
 

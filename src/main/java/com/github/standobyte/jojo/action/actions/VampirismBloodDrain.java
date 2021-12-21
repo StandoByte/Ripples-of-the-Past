@@ -59,29 +59,29 @@ public class VampirismBloodDrain extends VampirismAction {
                 LivingEntity targetEntity = (LivingEntity) target.getEntity(world);
                 if (!targetEntity.isDeadOrDying()) {
                     int difficulty = world.getDifficulty().getId();
-                    float manaAndHealModifier = 0.25F + difficulty * 0.75F;
+                    float bloodAndHealModifier = 0.25F + difficulty * 0.75F;
                     if (targetEntity instanceof PlayerEntity) {
-                        manaAndHealModifier *= 3F;
+                        bloodAndHealModifier *= 3F;
                     }
                     else if (targetEntity instanceof INPC || targetEntity instanceof AbstractIllagerEntity) {
-                        manaAndHealModifier *= 2F;
+                        bloodAndHealModifier *= 2F;
                     }
                     if (INonStandPower.getNonStandPowerOptional(targetEntity).map(
                             p -> p.getType() == ModNonStandPowers.HAMON.get()).orElse(false)) {
-                        manaAndHealModifier *= 6.667F;
+                        bloodAndHealModifier *= 6.667F;
                     }
                     float damage = 0.5F * difficulty;
                     EffectInstance freeze = targetEntity.getEffect(ModEffects.FREEZE.get());
                     if (freeze != null) {
                         damage *= 1 - Math.min((freeze.getAmplifier() + 1) * 0.2F, 1);
                     }
-                    power.addMana(damage * manaAndHealModifier);
+                    power.addEnergy(damage * bloodAndHealModifier);
                     damage *= 5;
                     float healed = user.getHealth();
-                    if (drainBlood(user, targetEntity, damage, damage * 0.1F * manaAndHealModifier)) {
+                    if (drainBlood(user, targetEntity, damage, damage * 0.1F * bloodAndHealModifier)) {
                         healed = user.getHealth() - healed;
                         if (healed > 0) {
-                            power.addMana(healed * VampirismPowerType.healCost(world.getDifficulty()));
+                            power.addEnergy(healed * VampirismPowerType.healCost(world.getDifficulty()));
                         }
                         if (targetEntity.isDeadOrDying()) {
                             HungryZombieEntity.createZombie((ServerWorld) world, user, targetEntity, false);

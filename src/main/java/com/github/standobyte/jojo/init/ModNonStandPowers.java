@@ -26,16 +26,16 @@ public class ModNonStandPowers {
             () -> new VampirismPowerType(
                     0xFF0000, 
                     new VampirismAction[] {ModActions.VAMPIRISM_BLOOD_DRAIN.get(), ModActions.VAMPIRISM_FREEZE.get(), ModActions.VAMPIRISM_SPACE_RIPPER_STINGY_EYES.get()}, 
-                    new VampirismAction[] {ModActions.VAMPIRISM_BLOOD_GIFT.get(), ModActions.VAMPIRISM_ZOMBIE_SUMMON.get(), ModActions.VAMPIRISM_DARK_AURA.get()},
-                    -0.0139F));
+                    new VampirismAction[] {ModActions.VAMPIRISM_BLOOD_GIFT.get(), ModActions.VAMPIRISM_ZOMBIE_SUMMON.get(), ModActions.VAMPIRISM_DARK_AURA.get()}
+                    ));
     
     public static final RegistryObject<HamonPowerType> HAMON = POWERS.register("hamon", 
             () -> new HamonPowerType(
                     0xFFFF00, 
                     new HamonAction[] {ModActions.HAMON_SENDO_OVERDRIVE.get(), ModActions.HAMON_PLANT_INFUSION.get(), ModActions.HAMON_ZOOM_PUNCH.get()}, 
                     new HamonAction[] {ModActions.HAMON_HEALING.get(), ModActions.HAMON_SPEED_BOOST.get(), ModActions.HAMON_WALL_CLIMBING.get(), 
-                            ModActions.HAMON_DETECTOR.get(), ModActions.HAMON_LIFE_MAGNETISM.get(), ModActions.HAMON_PROJECTILE_SHIELD.get(), ModActions.HAMON_REPELLING_OVERDRIVE.get()},
-                    1));
+                            ModActions.HAMON_DETECTOR.get(), ModActions.HAMON_LIFE_MAGNETISM.get(), ModActions.HAMON_PROJECTILE_SHIELD.get(), ModActions.HAMON_REPELLING_OVERDRIVE.get()}
+                    ));
     
     
     

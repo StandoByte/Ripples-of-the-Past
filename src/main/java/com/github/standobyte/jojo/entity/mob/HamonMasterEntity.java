@@ -43,7 +43,7 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser 
                 hamon.learnHamonSkill(skill, false);
             }
         }
-        hamonPower.setMana(hamonPower.getMaxMana());
+        hamonPower.setEnergy(hamonPower.getMaxEnergy());
         setPersistenceRequired();
     }
 

@@ -6,7 +6,6 @@ import java.util.function.IntUnaryOperator;
 import com.github.standobyte.jojo.action.actions.VampirismAction;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.google.common.collect.ImmutableMap;
@@ -36,8 +35,8 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
                 .build();
     }
 
-    public VampirismPowerType(int color, VampirismAction[] startingAttacks, VampirismAction[] startingAbilities, float manaRegenPoints) {
-        super(color, startingAttacks, startingAbilities, manaRegenPoints, VampirismFlags::new);
+    public VampirismPowerType(int color, VampirismAction[] startingAttacks, VampirismAction[] startingAbilities) {
+        super(color, startingAttacks, startingAbilities, VampirismFlags::new);
     }
     
     @Override
@@ -51,17 +50,32 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
         }
     }
 
+    @Override
+    public float getEnergyTickInc(INonStandPower power) {
+        return -0.0139F;
+    }
+    
+    @Override
+    public float getMaxStaminaFactor(INonStandPower power, IStandPower standPower) {
+        return Math.max((bloodLevel(power, power.getUser().level.getDifficulty()) - 3) * 2, 1);
+    }
+
+    @Override
+    public float getStaminaRegenFactor(INonStandPower power, IStandPower standPower) {
+        return Math.max((bloodLevel(power, power.getUser().level.getDifficulty()) - 3) * 4, 1);
+    }
+
     /* x = difficultyLevel (1 - easy, 2 - normal, 3 - hard)
-     * x:     0 <= mana < 150
-     * x + 1: 150 <= mana < 450
-     * x + 2: 450 <= mana < 750
-     * x + 3: 750 <= mana <= 1000
+     * x:     0 <= energy < 150
+     * x + 1: 150 <= energy < 450
+     * x + 2: 450 <= energy < 750
+     * x + 3: 750 <= energy <= 1000
      */
-    public static int bloodLevel(IPower<?> power, Difficulty difficulty) {
+    public static int bloodLevel(INonStandPower power, Difficulty difficulty) {
         if (difficulty == Difficulty.PEACEFUL) {
             return -1;
         }
-        return (int) ((power.getMana() + 150F) * 10F / (power.getMaxMana() * 3F)) + difficulty.getId();
+        return (int) ((power.getEnergy() + 150F) * 10F / (power.getMaxEnergy() * 3F)) + difficulty.getId();
     }
 
     @Override
@@ -73,11 +87,6 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
             entity.setAirSupply(entity.getMaxAirSupply());
             int bloodLevel = bloodLevel(power, entity.level.getDifficulty());
             if (power.getTypeSpecificData(this).get().refreshBloodLevel(bloodLevel)) {
-                int standStaminaIncreaseLvl = bloodLevel;
-                IStandPower.getStandPowerOptional(entity).ifPresent(standPower -> {
-                    standPower.setManaRegenPoints(Math.max(standStaminaIncreaseLvl, 1));
-                    standPower.setManaLimitFactor(Math.max(standStaminaIncreaseLvl / 2F, 1));
-                });
                 for (Map.Entry<Effect, IntUnaryOperator> entry : EFFECTS_AMPLIFIERS.entrySet()) {
                     Effect effect = entry.getKey();
                     int amplifier = entry.getValue().applyAsInt(bloodLevel);
@@ -157,10 +166,10 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
             INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
                 if (power.getType() == ModNonStandPowers.VAMPIRISM.get()) {
                     float healCost = healCost(entity.level.getDifficulty());
-                    float actualHeal = Math.min(event.getAmount(), power.getMana() / healCost);
+                    float actualHeal = Math.min(event.getAmount(), power.getEnergy() / healCost);
                     actualHeal = Math.min(actualHeal, entity.getMaxHealth() - entity.getHealth());
                     if (actualHeal > 0) {
-                        power.consumeMana(Math.min(actualHeal, entity.getMaxHealth() - entity.getHealth()) * healCost);
+                        power.consumeEnergy(Math.min(actualHeal, entity.getMaxHealth() - entity.getHealth()) * healCost);
                         event.setAmount(actualHeal);
                     }
                     else {

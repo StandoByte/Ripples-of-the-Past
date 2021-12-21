@@ -4,15 +4,15 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 public abstract class StandAction extends Action<IStandPower> {
-    protected final int expRequirement;
+    protected final int xpRequirement;
     
     public StandAction(StandAction.AbstractBuilder<?> builder) {
         super(builder);
-        this.expRequirement = builder.expRequirement;
+        this.xpRequirement = builder.xpRequirement;
     }
     
-    public int getExpRequirement() {
-        return expRequirement;
+    public int getXpRequirement() {
+        return xpRequirement;
     }
     
     
@@ -26,10 +26,10 @@ public abstract class StandAction extends Action<IStandPower> {
     }
     
     protected abstract static class AbstractBuilder<T extends StandAction.AbstractBuilder<T>> extends Action.AbstractBuilder<T> {
-        protected int expRequirement;
+        protected int xpRequirement;
         
-        public T expRequirement(int expRequirement) {
-            this.expRequirement = expRequirement;
+        public T xpRequirement(int xpRequirement) {
+            this.xpRequirement = xpRequirement;
             return getThis();
         }
     }

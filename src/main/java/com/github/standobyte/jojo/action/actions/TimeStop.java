@@ -74,7 +74,7 @@ public class TimeStop extends StandEntityAction {
     
     @Override
     public void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
-        int timeStopTicks = TimeHandler.getTimeStopTicks(getExpRequirement(), power, user, INonStandPower.getNonStandPowerOptional(user));
+        int timeStopTicks = TimeHandler.getTimeStopTicks(getXpRequirement(), power, user, INonStandPower.getNonStandPowerOptional(user));
         if (!world.isClientSide()) {
             power.setExp(power.getExp() + 4);
             BlockPos blockPos = user.blockPosition();
@@ -108,7 +108,7 @@ public class TimeStop extends StandEntityAction {
     @Override
     public TranslationTextComponent getTranslatedName(IStandPower power, String key) {
         LivingEntity user = power.getUser();
-        int timeStopTicks = TimeHandler.getTimeStopTicks(getExpRequirement(), power, user, INonStandPower.getNonStandPowerOptional(user));
+        int timeStopTicks = TimeHandler.getTimeStopTicks(getXpRequirement(), power, user, INonStandPower.getNonStandPowerOptional(user));
         return new TranslationTextComponent(key, String.format("%.2f", (float) timeStopTicks / 20F));
     }
 }

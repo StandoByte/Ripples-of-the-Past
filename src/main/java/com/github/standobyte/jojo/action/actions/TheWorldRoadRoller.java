@@ -25,7 +25,7 @@ public class TheWorldRoadRoller extends StandEntityAction {
     
     @Override
     public int getCooldown(IStandPower power, int ticksHeld) {
-        if (power.infiniteMana()) {
+        if (power.isUserCreative()) {
             return 0;
         }
         return super.getCooldown(power, ticksHeld);

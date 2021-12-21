@@ -23,15 +23,15 @@ public class HamonCharge {
     private int chargeTicks;
     private UUID hamonUserId;
     private boolean gavePoints;
-    private float manaSpent;
+    private float energySpent;
     
-    public HamonCharge(float charge, int chargeTicks, @Nullable LivingEntity hamonUser, float manaSpent) {
+    public HamonCharge(float charge, int chargeTicks, @Nullable LivingEntity hamonUser, float energySpent) {
         this.charge = charge;
         this.chargeTicks = chargeTicks;
         if (hamonUser != null) {
             this.hamonUserId = hamonUser.getUUID();
         }
-        this.manaSpent = manaSpent;
+        this.energySpent = energySpent;
     }
     
     public HamonCharge(CompoundNBT nbt) {
@@ -41,7 +41,7 @@ public class HamonCharge {
             this.hamonUserId = nbt.getUUID("HamonUser");
         }
         this.gavePoints = nbt.getBoolean("GavePoints");
-        this.manaSpent = nbt.getFloat("ManaSpent");
+        this.energySpent = nbt.getFloat("EnergySpent");
     }
     
     public CompoundNBT writeNBT() {
@@ -52,7 +52,7 @@ public class HamonCharge {
             chargeNbt.putUUID("HamonUser", hamonUserId);
         }
         chargeNbt.putBoolean("GavePoints", gavePoints);
-        chargeNbt.putFloat("ManaSpent", manaSpent);
+        chargeNbt.putFloat("EnergySpent", energySpent);
         return chargeNbt;
     }
     
@@ -71,7 +71,7 @@ public class HamonCharge {
                             if (user instanceof LivingEntity) {
                                 INonStandPower.getNonStandPowerOptional((LivingEntity) user).ifPresent(power -> {
                                     power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
-                                        hamon.hamonPointsFromAction(HamonStat.STRENGTH, manaSpent);
+                                        hamon.hamonPointsFromAction(HamonStat.STRENGTH, energySpent);
                                     });
                                 });
                             }

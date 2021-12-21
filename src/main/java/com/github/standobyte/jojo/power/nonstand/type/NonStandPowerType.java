@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.TypeSpecificData;
+import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.JojoModUtil;
 
 import net.minecraft.entity.LivingEntity;
@@ -20,14 +21,12 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
     protected final Action<INonStandPower>[] abilities;
     private final Supplier<T> dataFactory;
     private String translationKey;
-    private final float manaRegenPoints;
     private ResourceLocation iconTexture;
     
-    public NonStandPowerType(int color, Action<INonStandPower>[] startingAttacks, Action<INonStandPower>[] startingAbilities, float manaRegenPoints, Supplier<T> dataFactory) {
+    public NonStandPowerType(int color, Action<INonStandPower>[] startingAttacks, Action<INonStandPower>[] startingAbilities, Supplier<T> dataFactory) {
         this.color = color;
         this.attacks = startingAttacks;
         this.abilities = startingAbilities;
-        this.manaRegenPoints = manaRegenPoints;
         this.dataFactory = dataFactory;
     }
     
@@ -37,11 +36,6 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
     }
     
     public void onClear(INonStandPower power) {}
-    
-    @Override
-    public boolean canTickMana(LivingEntity user, INonStandPower power) {
-        return true;
-    }
     
     @Override
     public String getTranslationKey() {
@@ -74,12 +68,22 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
         return abilities;
     }
 
-    public float getStartingManaRegenPoints() {
-        return manaRegenPoints;
+    public float getMaxEnergyFactor(INonStandPower power) {
+        return 1;
     }
     
-    public float reduceManaConsumed(float amount, INonStandPower power, LivingEntity user) {
+    public abstract float getEnergyTickInc(INonStandPower power);
+    
+    public float reduceEnergyConsumed(float amount, INonStandPower power, LivingEntity user) {
         return amount;
+    }
+    
+    public float getMaxStaminaFactor(INonStandPower power, IStandPower standPower) {
+        return 1;
+    }
+    
+    public float getStaminaRegenFactor(INonStandPower power, IStandPower standPower) {
+        return 1;
     }
     
     public boolean isLeapUnlocked(INonStandPower power) {

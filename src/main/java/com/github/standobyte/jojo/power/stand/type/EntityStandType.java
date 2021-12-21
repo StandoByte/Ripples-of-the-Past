@@ -14,7 +14,6 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandPower;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.SoundEvent;
@@ -33,10 +32,15 @@ public class EntityStandType extends StandType {
     public StandEntityType<? extends StandEntity> getEntityType() {
         return entityTypeSupplier.get();
     }
+    
+    @Override
+    public boolean usesStamina() {
+        return false;
+    }
 
     @Override
-    public boolean canTickMana(LivingEntity user, IStandPower power) {
-        return !power.isActive() || user.tickCount % 20 == 0 && user instanceof PlayerEntity && ((PlayerEntity) user).getFoodData().getFoodLevel() > 17;
+    public boolean usesResolve() {
+        return false;
     }
 
     @Override
