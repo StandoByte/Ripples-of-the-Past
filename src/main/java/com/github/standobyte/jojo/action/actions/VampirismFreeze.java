@@ -20,12 +20,12 @@ import net.minecraftforge.event.entity.living.LivingAttackEvent;
 
 public class VampirismFreeze extends VampirismAction {
 
-    public VampirismFreeze(AbstractBuilder<?> builder) {
+    public VampirismFreeze(EnergyConsumingAction.Builder builder) {
         super(builder);
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
         if (user.level.getDifficulty() == Difficulty.PEACEFUL) {
             return conditionMessage("peaceful");
         }

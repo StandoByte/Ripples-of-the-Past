@@ -33,7 +33,7 @@ public class HamonDetector extends HamonAction {
                 List<LivingEntity> entitiesAround = JojoModUtil.entitiesAround(LivingEntity.class, user, Math.min(radius, maxRadius), false, null);
                 entitiesAround.forEach(entity -> entity.addEffect(new EffectInstance(Effects.GLOWING, 80)));
                 if (!entitiesAround.isEmpty()) {
-                    hamon.hamonPointsFromAction(HamonStat.CONTROL, getHeldTickManaCost()); 
+                    hamon.hamonPointsFromAction(HamonStat.CONTROL, getHeldTickEnergyCost()); 
                 }
             }
             if (ticksHeld % 3 == 0) {

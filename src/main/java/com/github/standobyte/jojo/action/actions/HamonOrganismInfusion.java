@@ -33,7 +33,7 @@ public class HamonOrganismInfusion extends HamonAction {
     }
 
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
         ItemStack heldItemStack = performer.getMainHandItem();
         if (!heldItemStack.isEmpty()) {
             return conditionMessage("hand");
@@ -67,20 +67,20 @@ public class HamonOrganismInfusion extends HamonAction {
     }
 
     @Override
-    public void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
+    protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
             int chargeTicks = 100 + MathHelper.floor((float) (1100 * hamon.getHamonStrengthLevel()) / (float) HamonData.MAX_STAT_LEVEL);
             switch(target.getType()) {
             case BLOCK:
                 HamonBlockChargeEntity charge = new HamonBlockChargeEntity(world, target.getBlockPos());
-                charge.setCharge(0.02F * hamon.getHamonDamageMultiplier(), chargeTicks, user, getManaCost());
+                charge.setCharge(0.02F * hamon.getHamonDamageMultiplier(), chargeTicks, user, getEnergyCost());
                 world.addFreshEntity(charge);
                 break;
             case ENTITY:
                 LivingEntity entity = (LivingEntity) target.getEntity(world);
                 entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> 
-                cap.setHamonCharge(0.2F * hamon.getHamonDamageMultiplier(), chargeTicks, user, getManaCost()));
+                cap.setHamonCharge(0.2F * hamon.getHamonDamageMultiplier(), chargeTicks, user, getEnergyCost()));
                 break;
             default:
                 break;

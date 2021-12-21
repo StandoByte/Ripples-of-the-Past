@@ -45,7 +45,7 @@ public class HamonTornadoOverdrive extends HamonAction {
                     }
                 }
                 if (points) {
-                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, getHeldTickManaCost());
+                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, getHeldTickEnergyCost());
                 }
             }
             if (user.isShiftKeyDown()) {

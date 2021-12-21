@@ -32,7 +32,7 @@ public class HamonHealing extends HamonAction {
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
         if (!performer.getMainHandItem().isEmpty()) {
             return conditionMessage("hand");
         }
@@ -40,7 +40,7 @@ public class HamonHealing extends HamonAction {
     }
     
     @Override
-    public void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
+    protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
         float effectStr = (float) hamon.getHamonControlLevel() / (float) HamonData.MAX_STAT_LEVEL;
         if (!world.isClientSide()) {
@@ -50,7 +50,7 @@ public class HamonHealing extends HamonAction {
             int regenDuration = 80 + MathHelper.floor(220F * effectStr);
             int regenLvl = MathHelper.floor(3.5F * effectStr);
 //            if (entityToHeal.getHealth() < entityToHeal.getMaxHealth()) {
-                hamon.hamonPointsFromAction(HamonStat.CONTROL, getManaCost());
+                hamon.hamonPointsFromAction(HamonStat.CONTROL, getEnergyCost());
 //            }
             entityToHeal.addEffect(new EffectInstance(Effects.REGENERATION, regenDuration, regenLvl));
             if (hamon.isSkillLearned(HamonSkill.EXPEL_VENOM)) {

@@ -19,7 +19,7 @@ public class HamonCutter extends HamonAction {
     }
 
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
         if (!(user.getMainHandItem().getItem() instanceof PotionItem || user.getOffhandItem().getItem() instanceof PotionItem)) {
             return conditionMessage("potion");
         }
@@ -27,7 +27,7 @@ public class HamonCutter extends HamonAction {
     }
 
     @Override
-    public void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
+    protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             ItemStack potionItem = user.getMainHandItem();
             if (!(potionItem.getItem() instanceof PotionItem)) {

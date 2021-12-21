@@ -27,12 +27,12 @@ import net.minecraft.world.server.ServerWorld;
 
 public class VampirismBloodDrain extends VampirismAction {
 
-    public VampirismBloodDrain(AbstractBuilder<?> builder) {
+    public VampirismBloodDrain(EnergyConsumingAction.Builder builder) {
         super(builder);
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
         if (user.level.getDifficulty() == Difficulty.PEACEFUL) {
             return conditionMessage("peaceful");
         }

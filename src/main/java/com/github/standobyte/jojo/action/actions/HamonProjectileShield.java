@@ -16,7 +16,7 @@ public class HamonProjectileShield extends HamonAction {
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
         ItemStack heldItemStack = performer.getMainHandItem();
         if (!heldItemStack.isEmpty()) {
             return conditionMessage("hand");

@@ -230,16 +230,6 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
             return ActionConditionResult.NEGATIVE;
         }
 
-        if (!isUserCreative()) {
-            if (getMana() < action.getManaNeeded(getHeldActionTicks(), this)) {
-                serverPlayerUser.ifPresent(player -> {
-                    PacketManager.sendToClient(new SyncEnergyPacket(getPowerClassification(), getMana()), player);
-                });
-                ITextComponent message = new TranslationTextComponent("jojo.message.action_condition.no_mana_" + getType().getManaString());
-                return ActionConditionResult.createNegative(message);
-            }
-        }
-
         if (!action.ignoresPerformerStun() && performer != null && performer.getEffect(ModEffects.STUN.get()) != null) {
             return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition.stun"));
         }

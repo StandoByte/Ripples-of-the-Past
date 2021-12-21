@@ -27,7 +27,7 @@ public class TimeStopInstant extends StandEntityAction {
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
         if (TimeHandler.isTimeStopped(user.level, user.blockPosition())) {
             return ActionConditionResult.NEGATIVE;
         }
@@ -35,7 +35,7 @@ public class TimeStopInstant extends StandEntityAction {
     }
     
     @Override
-    public void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
+    protected void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
         StandEntity stand = power.isActive() ? (StandEntity) getPerformer(user, power) : null;
         int timeStopTicks = TimeHandler.getTimeStopTicks(getXpRequirement(), power, user, INonStandPower.getNonStandPowerOptional(user));
         JojoModUtil.playSound(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, user.getX(), user.getY(), user.getZ(), 
@@ -69,7 +69,7 @@ public class TimeStopInstant extends StandEntityAction {
             }
             
             user.teleportTo(blinkPos.x, blinkPos.y, blinkPos.z);
-            power.setExp(power.getExp() + 4);
+            power.setXp(power.getXp() + 4);
             if (stand != null) {
                 stand.setStandPose(StandPose.NONE);
                 stand.setAlpha(1.0F);

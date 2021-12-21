@@ -16,11 +16,11 @@ public class SilverChariotMeleeBarrage extends StandEntityMeleeBarrage {
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
         if (performer instanceof SilverChariotEntity && !((SilverChariotEntity) performer).hasRapier()) {
             return conditionMessage("chariot_rapier");
         }
-        return super.checkConditions(user, performer, power, target);
+        return super.checkSpecificConditions(user, performer, power, target);
     }
     
     @Override

@@ -14,12 +14,12 @@ import net.minecraft.world.World;
 
 public class VampirismBloodGift extends VampirismAction {
 
-    public VampirismBloodGift(AbstractBuilder<?> builder) {
+    public VampirismBloodGift(EnergyConsumingAction.Builder builder) {
         super(builder);
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
         if (user.level.getDifficulty() == Difficulty.PEACEFUL) {
             return conditionMessage("peaceful");
         }
@@ -44,7 +44,7 @@ public class VampirismBloodGift extends VampirismAction {
     }
 
     @Override
-    public void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
+    protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             PlayerEntity targetPlayer = (PlayerEntity) target.getEntity(world);
             if (INonStandPower.getNonStandPowerOptional(targetPlayer).map(

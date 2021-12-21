@@ -20,13 +20,13 @@ public class HamonRepellingOverdrive extends HamonAction {
     }
     
     @Override
-    public void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
+    protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
             float effectStr = (float) hamon.getHamonControlLevel() / (float) HamonData.MAX_STAT_LEVEL;
             int resistDuration = 100 + MathHelper.floor(400F * effectStr);
             int resistLvl = MathHelper.floor(2.5F * effectStr);
-            hamon.hamonPointsFromAction(HamonStat.CONTROL, getManaCost());
+            hamon.hamonPointsFromAction(HamonStat.CONTROL, getEnergyCost());
             user.addEffect(new EffectInstance(Effects.DAMAGE_RESISTANCE, resistDuration, resistLvl));
             HamonPowerType.createHamonSparkParticlesEmitter(user, effectStr / 2F);
         }

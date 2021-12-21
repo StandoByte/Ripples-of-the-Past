@@ -17,7 +17,7 @@ public class StandEntityBlock extends StandEntityAction {
     }
 
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
         if (!(performer instanceof StandEntity)) {
             return ActionConditionResult.POSITIVE;
         }

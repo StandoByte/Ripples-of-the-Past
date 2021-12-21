@@ -41,7 +41,7 @@ import net.minecraftforge.fml.network.NetworkHooks;
 
 public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawnData {
     private static final double GRAVITY = -0.05D;
-    private static final float MAX_ENERGY = ModActions.HAMON_LIFE_MAGNETISM.get().getManaNeeded(0, null);
+    private static final float MAX_ENERGY = ModActions.HAMON_LIFE_MAGNETISM.get().getEnergyNeeded(0, null);
     private static final float MAX_HEALTH = 4F;
 
     private static final DataParameter<Boolean> IS_FLYING = EntityDataManager.defineId(LeavesGliderEntity.class, DataSerializers.BOOLEAN);

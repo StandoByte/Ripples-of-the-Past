@@ -21,7 +21,7 @@ public class HamonWallClimbing extends HamonAction {
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
         ItemStack heldItemStack = performer.getMainHandItem();
         if (!user.horizontalCollision) {
             if (user.level.isClientSide()) {
@@ -45,7 +45,7 @@ public class HamonWallClimbing extends HamonAction {
             HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
             Vector3d movement = user.getDeltaMovement();
             user.setDeltaMovement(movement.x, 0.1D + hamon.getBreathingLevel() * 0.0015 + hamon.getHamonControlLevel() * 0.0025, movement.z);
-            hamon.hamonPointsFromAction(HamonStat.CONTROL, getHeldTickManaCost());
+            hamon.hamonPointsFromAction(HamonStat.CONTROL, getHeldTickEnergyCost());
         }
         if (ticksHeld % 4 == 0) {
             Vector3d sparkVec = user.getLookAngle().scale(0.25).add(user.getX(), user.getY(1.0), user.getZ());
