@@ -14,7 +14,7 @@ public class HamonBubbleCutter extends HamonAction {
     }
     
     @Override
-    public void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
+    protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             boolean shift = isShiftVariation();
             int bubbles = shift ? 6 : 12;

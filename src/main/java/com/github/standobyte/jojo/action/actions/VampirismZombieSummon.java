@@ -12,12 +12,12 @@ import net.minecraft.world.World;
 
 public class VampirismZombieSummon extends VampirismAction {
 
-    public VampirismZombieSummon(AbstractBuilder<?> builder) {
+    public VampirismZombieSummon(EnergyConsumingAction.Builder builder) {
         super(builder);
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
         World world = user.level;
         if (world.getDifficulty() == Difficulty.PEACEFUL) {
             return conditionMessage("peaceful");
@@ -34,7 +34,7 @@ public class VampirismZombieSummon extends VampirismAction {
     }
     
     @Override
-    public void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
+    protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             int zombiesToSummon = world.getDifficulty().getId();
             for (int i = 0; i < zombiesToSummon; i++) {

@@ -94,7 +94,7 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
             if (owner != null) {
                 INonStandPower.getNonStandPowerOptional(owner).ifPresent(power -> {
                     power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
-                        hamon.hamonPointsFromAction(HamonStat.STRENGTH, ModActions.CAESAR_BUBBLE_BARRIER.get().getHeldTickManaCost() / 4F);
+                        hamon.hamonPointsFromAction(HamonStat.STRENGTH, ModActions.CAESAR_BUBBLE_BARRIER.get().getHeldTickEnergyCost() / 4F);
                     });
                 });
             }

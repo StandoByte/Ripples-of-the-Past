@@ -26,7 +26,7 @@ public class HamonOverdriveBarrage extends HamonAction {
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
         if (!performer.getMainHandItem().isEmpty() || !performer.getOffhandItem().isEmpty()) {
             return conditionMessage("hands");
         }
@@ -58,7 +58,7 @@ public class HamonOverdriveBarrage extends HamonAction {
                         }
                         if (digDuration >= 0 && digDuration <= 3F) {
                             world.destroyBlock(pos, dropItem);
-                            power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get().hamonPointsFromAction(HamonStat.STRENGTH, getHeldTickManaCost());
+                            power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get().hamonPointsFromAction(HamonStat.STRENGTH, getHeldTickEnergyCost());
                         }
                         else {
                             SoundType soundType = blockState.getSoundType(world, pos, user);

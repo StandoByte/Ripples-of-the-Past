@@ -19,10 +19,10 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
         return performer instanceof StandEntity && !((StandEntity) performer).canAttackMelee() ? 
                 ActionConditionResult.NEGATIVE
-                : super.checkConditions(user, performer, power, target);
+                : super.checkSpecificConditions(user, performer, power, target);
     }
     
     @Override

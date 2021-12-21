@@ -14,7 +14,7 @@ public class TheWorldRoadRoller extends StandEntityAction {
     }
     
     @Override
-    public void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
+    protected void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             RoadRollerEntity roadRoller = new RoadRollerEntity(world);
             roadRoller.copyPosition(user);

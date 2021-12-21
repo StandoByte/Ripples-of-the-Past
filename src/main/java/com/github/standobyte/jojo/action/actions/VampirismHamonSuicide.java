@@ -11,7 +11,7 @@ import net.minecraft.world.World;
 
 public class VampirismHamonSuicide extends VampirismAction {
 
-    public VampirismHamonSuicide(Builder builder) {
+    public VampirismHamonSuicide(EnergyConsumingAction.Builder builder) {
         super(builder); 
     }
     
@@ -28,7 +28,7 @@ public class VampirismHamonSuicide extends VampirismAction {
     }
     
     @Override
-    public void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
+    protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             ModDamageSources.dealHamonDamage(user, Float.MAX_VALUE, user, null);
         }

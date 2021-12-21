@@ -18,7 +18,7 @@ public class HierophantGreenBarrier extends StandEntityAction {
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
         if (performer instanceof HierophantGreenEntity) {
             HierophantGreenEntity stand = (HierophantGreenEntity) performer;
             if (stand.getPlacedBarriersCount() >= getMaxBarriersPlaceable(power)) {
@@ -29,7 +29,7 @@ public class HierophantGreenBarrier extends StandEntityAction {
     }
     
     @Override
-    public void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
+    protected void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             HierophantGreenEntity stand = (HierophantGreenEntity) getPerformer(user, power);
             stand.attachBarrier(target.getBlockPos());

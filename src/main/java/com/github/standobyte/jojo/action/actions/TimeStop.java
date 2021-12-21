@@ -65,7 +65,7 @@ public class TimeStop extends StandEntityAction {
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
         if (user.hasEffect(ModEffects.TIME_STOP.get())) {
             return ActionConditionResult.NEGATIVE;
         }
@@ -73,10 +73,10 @@ public class TimeStop extends StandEntityAction {
     }
     
     @Override
-    public void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
+    protected void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
         int timeStopTicks = TimeHandler.getTimeStopTicks(getXpRequirement(), power, user, INonStandPower.getNonStandPowerOptional(user));
         if (!world.isClientSide()) {
-            power.setExp(power.getExp() + 4);
+            power.setXp(power.getXp() + 4);
             BlockPos blockPos = user.blockPosition();
             ChunkPos chunkPos = new ChunkPos(blockPos);
             TimeHandler.setTimeResumeSounds(world, chunkPos, timeStopTicks, this, user);
