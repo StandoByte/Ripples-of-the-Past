@@ -50,7 +50,7 @@ public class JojoModConfig {
             keepStandOnDeath = builder
                     .comment(" Keep Stand after death.")
                     .translation("jojo.config.keepStandOnDeath") 
-                    .define("keepStandOnDeath", false);
+                    .define("keepStandOnDeath", true);
             
             keepNonStandOnDeath = builder
                     .comment(" Keep powers (Vampirism/Hamon) after death.")
