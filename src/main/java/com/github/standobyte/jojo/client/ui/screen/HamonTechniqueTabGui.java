@@ -27,14 +27,14 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
             .put(Technique.LISA_LISA, new HamonSkill[] {HamonSkill.AJA_STONE_KEEPER, HamonSkill.SATIPOROJA_SCARF, HamonSkill.SNAKE_MUFFLER})
         .build();
     private ITextComponent[] skillLineNames;
-    private final List<IReorderingProcessor> avaliableTechniqueSkillLines;
+    private final List<IReorderingProcessor> availableTechniqueSkillLines;
     private final List<IReorderingProcessor> tabLockedLines;
     
     HamonTechniqueTabGui(Minecraft minecraft, HamonScreen screen, int index, String title) {
         super(minecraft, screen, index, title, -1, screen.hamon.getTechnique() == null && screen.hamon.haveTechniqueLevel() ? 247 : -1);
         this.technique = screen.hamon.getTechnique();
         fillSkillLines();
-        avaliableTechniqueSkillLines = minecraft.font.split(new TranslationTextComponent("hamon.technique_avaliable"), 100);
+        availableTechniqueSkillLines = minecraft.font.split(new TranslationTextComponent("hamon.technique_available"), 100);
         tabLockedLines = minecraft.font.split(new TranslationTextComponent("hamon.techniques_locked", HamonSkillSet.TECHNIQUE_MINIMAL_STAT_LVL), 200);
     }
     
@@ -103,7 +103,7 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
     
     @Override
     List<IReorderingProcessor> additionalTabNameTooltipInfo() {
-        return screen.hamon.haveTechniqueLevel() ? avaliableTechniqueSkillLines : super.additionalTabNameTooltipInfo();
+        return screen.hamon.haveTechniqueLevel() ? availableTechniqueSkillLines : super.additionalTabNameTooltipInfo();
     }
     
     @Override

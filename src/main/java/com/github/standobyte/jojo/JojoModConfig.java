@@ -76,7 +76,7 @@ public class JojoModConfig {
                         .define("prioritizeLeastTakenStands", false);
                 bannedStands = builder
                         .comment(" List of Stands excluded from Stand Arrow and /stand random pool.",
-                                "  These stands will still be avaliable via /stand give command",
+                                "  These stands will still be available via /stand give command",
                                 "  Their Discs won't be added to the mod's Creative tab, but they can still be found in the Search tab.\"",
                                 "  The format is the same as for /stand give command (e.g., \"jojo:star_platinum\").")
                         .translation("jojo.config.bannedStands")

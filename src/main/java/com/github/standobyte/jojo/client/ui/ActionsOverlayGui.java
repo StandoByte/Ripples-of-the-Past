@@ -1,20 +1,24 @@
 package com.github.standobyte.jojo.client.ui;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.function.IntBinaryOperator;
+import java.util.Map;
+import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.action.Action.TargetRequirement;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.ui.sprites.SpriteUploaders;
+import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.IPower;
-import com.github.standobyte.jojo.power.IPower.ActionType;
+import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -27,11 +31,15 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.settings.AttackIndicatorStatus;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.util.ColorHelper;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Util;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.KeybindTextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.GameType;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -39,48 +47,41 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-public class ActionsOverlayGui extends AbstractGui { // TODO config to move it to another corner
+@SuppressWarnings("deprecation") // FIXME delete
+public class ActionsOverlayGui extends AbstractGui {
+    private static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");
+    private static final ResourceLocation OVERLAY_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/overlay.png");
+    
     private static ActionsOverlayGui instance = null;
+    private final Minecraft mc;
     
-    private static final StringTextComponent EMPTY_STRING_COMPONENT = new StringTextComponent("");
-    private static final ResourceLocation OVERLAY_TEX_PATH = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/overlay.png");
-    private static final ResourceLocation VANILLA_WIDGETS_TEX_PATH = new ResourceLocation("textures/gui/widgets.png");
-    private static final int Y_OFFSET = 3;
-    private static final int BAR_HEIGHT = 8;
-    private static final int BAR_LENGTH = 202;
-    private static final int ICON_HEIGHT = 16;
-    private static final int ICON_LENGTH = 16;
-    private static final int HOTBAR_SQUARE_HEIGHT = 24;
-    private final int BARS_Y_GAP;
-    private static final ITextComponent SHIFT_KEY = new KeybindTextComponent("key.sneak");
-    
-    private Minecraft mc;
-    private ActionTarget mouseTarget;
-    private int screenWidth;
-    private int screenHeight;
-    
-    private UiMode mode = UiMode.NONE;
-    private ITextComponent powerName;
-    private ResourceLocation powerIconPath;
-    private IStandPower standPower;
-    private INonStandPower nonStandPower;
+    private final ActionsHotbarConfig<INonStandPower> nonStandUiConfig = new ActionsHotbarConfig<>(PowerClassification.NON_STAND);
+    private final ActionsHotbarConfig<IStandPower> standUiConfig = new ActionsHotbarConfig<>(PowerClassification.STAND);
     @Nullable
-    private IPower<?> currentPower;
+    private ActionsHotbarConfig<?> currentMode = null;
     
-    private ActionsHotbarData attackData = new ActionsHotbarData();
-    private ActionsHotbarData abilityData = new ActionsHotbarData();
+    private Action.TargetRequirement selectedTargetType;
+    private boolean selectedRightTarget;
+    private Action.TargetRequirement rmbTargetType;
+    private boolean rmbRightTarget;
     
-    private ITextComponent unfulfilledCondition;
-    private int conditionMessageTicks;
+    private final ElementTransparency actionNameTransparency = new ElementTransparency(40, 10);
+    private final ElementTransparency rmbActionNameTransparency = new ElementTransparency(40, 10);
+    private final ElementTransparency modeSelectorTransparency = new ElementTransparency(40, 10);
+    private final ElementTransparency energyBarTransparency = new ElementTransparency(40, 10);
+    private final ElementTransparency staminaBarTransparency = new ElementTransparency(40, 10);
+    private final ElementTransparency resolveBarTransparency = new ElementTransparency(40, 10);
+    private ElementTransparency[] tickingTransparencies = new ElementTransparency[] {
+            actionNameTransparency,
+            rmbActionNameTransparency,
+            modeSelectorTransparency,
+            energyBarTransparency,
+            staminaBarTransparency,
+            resolveBarTransparency
+    };
     
-    private static final ImmutableMap<ResourceLocation, BarTexture> NON_STAND_BAR_TEX = ImmutableMap.<ResourceLocation, BarTexture>builder()
-            .put(new ResourceLocation(JojoMod.MOD_ID, "hamon"), BarTexture.HAMON)
-            .put(new ResourceLocation(JojoMod.MOD_ID, "vampirism"), BarTexture.BLOOD)
-        .build();
-    
-    public ActionsOverlayGui(Minecraft mc) {
+    private ActionsOverlayGui(Minecraft mc) {
         this.mc = mc;
-        BARS_Y_GAP = HOTBAR_SQUARE_HEIGHT + mc.font.lineHeight + 2;
     }
 
     public static void init(Minecraft mc) {
@@ -95,211 +96,221 @@ public class ActionsOverlayGui extends AbstractGui { // TODO config to move it t
     }
     
     public void tick() {
-        tickCondition();
+        for (ElementTransparency element : tickingTransparencies) {
+            element.tick();
+        }
+        INonStandPower power = nonStandUiConfig.getPower();
+        if (power != null) {
+            if (power.getMana() < power.getMaxMana()) {
+                energyBarTransparency.reset();
+            }
+        }
+        IStandPower standPower = standUiConfig.getPower();
+        if (standPower != null) {
+            if (standPower.getMana() < standPower.getMaxMana()) {
+                staminaBarTransparency.reset();
+            }
+//            if (standPower.getResolve() > 0) { // TODO hud
+//                resolveBarTransparency.reset();
+//            }
+        }
     }
     
-    @SubscribeEvent(priority = EventPriority.LOW)
+    public boolean isActive() {
+        return currentMode != null;
+    }
+    
+    @Nullable
+    public PowerClassification getCurrentPower() {
+        if (currentMode == null) {
+            return null;
+        }
+        return currentMode.powerClassification;
+    }
+    
+    /*
+     * input:
+     * FIXME hold LAlt(?) to move the selected action around on hotbar
+     * FIXME navigating between pages
+     * 
+     * FIXME sync to the server to save the configs between sessions
+     */
+    @SubscribeEvent(priority = EventPriority.HIGH)
     public void render(RenderGameOverlayEvent.Pre event) {
-        MatrixStack matrixStack = event.getMatrixStack();
-        if (mc.gameMode.getPlayerMode() == GameType.SPECTATOR || mc.options.hideGui || mode == UiMode.NONE) {
+        if (mc.gameMode.getPlayerMode() == GameType.SPECTATOR || mc.options.hideGui) {
             return;
         }
+
         
-        screenWidth = mc.getWindow().getGuiScaledWidth();
-        screenHeight = mc.getWindow().getGuiScaledHeight();
-        mouseTarget = ActionTarget.fromRayTraceResult(mc.hitResult);
-        
-        int x = 2;
-        
+        MatrixStack matrixStack = event.getMatrixStack();
+        float partialTick = event.getPartialTicks();
+        int screenWidth = mc.getWindow().getGuiScaledWidth();
+        int screenHeight = mc.getWindow().getGuiScaledHeight();
+        int barsX = screenWidth - 36;
+        int barsY = (screenHeight- BAR_HEIGHT) / 2;
+        int modeHotbarX = screenWidth - 62;
+        int modeHotbarY = screenHeight / 2 - (modes.size() * 10);
+        int powerIconX = 3; // FIXME power name & icon position (preferrably somewhere near the hotbar)
+        int powerIconY = 3;
+
+        if (currentMode != null) {
+            if (currentMode.getPower() == null || currentMode.getUnlockedActions() == null) {
+                JojoMod.LOGGER.debug("Failed rendering {} hotbar", currentMode.powerClassification);
+                currentMode = null;
+                return;
+            }
+            int hotbarX = screenWidth / 2 - 91;
+            int hotbarY = screenHeight - 22;
+            HandSide offHandSide = mc.player.getMainArm().getOpposite();
+            if (event.getType() == RenderGameOverlayEvent.ElementType.HOTBAR) {
+                event.setCanceled(true);
+                RenderSystem.enableRescaleNormal();
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+                
+                renderActionsHotbar(matrixStack, hotbarX, hotbarY, offHandSide);
+                
+                renderActionIcons(matrixStack, hotbarX + 3, hotbarY + 3, partialTick, offHandSide);
+                
+                renderHotbarIcons(matrixStack, hotbarX, hotbarY, offHandSide);
+                
+                RenderSystem.disableRescaleNormal();
+                RenderSystem.disableBlend();
+                // FIXME pages for when there are > 9 actions (hamon)
+            }
+            else if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
+                RenderSystem.enableRescaleNormal();
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+                renderPowerIcon(matrixStack, powerIconX, powerIconY);
+                RenderSystem.disableRescaleNormal();
+                RenderSystem.disableBlend();
+            }
+            else if (event.getType() == RenderGameOverlayEvent.ElementType.TEXT) {
+                drawActionName(matrixStack, screenWidth / 2F, screenHeight - 59, partialTick, 
+                        currentMode.getSelectedAction(), actionNameTransparency);
+                drawActionName(matrixStack, hotbarX + getRmbSlotXOffset(offHandSide), screenHeight - 59, partialTick, 
+                        currentMode.getRmbAction(), rmbActionNameTransparency); // FIXME rmb action name (should i even care about it?)
+                drawPowerName(matrixStack, powerIconX, powerIconY);
+                drawModeSelectorNames(matrixStack, modeHotbarX - 5, modeHotbarY, partialTick);
+                drawHoldDuration(matrixStack, hotbarX, hotbarY);
+                // FIXME remote stand distance & strength
+            }
+        }
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
             RenderSystem.enableRescaleNormal();
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-            int y = Y_OFFSET;
-
-            mc.getTextureManager().bind(OVERLAY_TEX_PATH);
-         // leap icon
-            if (currentPower.isLeapUnlocked()) {
-                float iconFill = currentPower.getLeapCooldownPeriod() != 0 ? 
-                        1F - (float) currentPower.getLeapCooldown() / (float) currentPower.getLeapCooldownPeriod() : 1;
-                boolean rightSide = mc.player.getMainArm() == HandSide.RIGHT;
-                int iconX = rightSide ? screenWidth / 2 + 91 + 6 : screenWidth / 2 - 91 - 22;
-                if (mc.options.attackIndicator == AttackIndicatorStatus.HOTBAR) {
-                    if (rightSide) {
-                        iconX += 20;
-                    }
-                    else {
-                        iconX -= 20;
-                    }
-                }
-                int iconY = screenHeight - 20;
-                boolean translucent = !currentPower.canLeap();
-                blit(matrixStack, iconX, iconY, 96, 238, 18, 18);
-                if (translucent) {
-                    RenderSystem.color4f(0.5F, 0.5F, 0.5F, 0.75F);
-                }
-                int px = (int) (19F * iconFill);
-                blit(matrixStack, iconX, iconY + 18 - px, 96 + 18, 238 + 18 - px, 18, px);
-                if (translucent) {
-                    RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                }
-            }
-//         // mana bar
-//            BarTexture barTexture;
-//            if (mode == UiMode.STAND) {
-//                barTexture = BarTexture.STAMINA;
-//            }
-//            else {
-//                barTexture = NON_STAND_BAR_TEX.get(nonStandPower.getType().getRegistryName());
-//            }
-//            renderBar(matrixStack, x + 3, y, barTexture, (int) ((BAR_LENGTH - 2) * currentPower.getMana() / currentPower.getMaxMana()));
-//         // exp bar
-//            if (mode == UiMode.STAND) {
-//                renderBar(matrixStack, screenWidth - BAR_LENGTH - 1, y, BarTexture.EXP, (BAR_LENGTH - 2) * standPower.getExp() / IStandPower.MAX_EXP);
-//            }
-         // power icon
-            if (currentPower.isActive()) {
-                mc.getTextureManager().bind(powerIconPath);
-                blit(matrixStack, x, BAR_HEIGHT + Y_OFFSET + 3, 0, 0, 16, 16, 16, 16);
-            }
-         // attacks hotbar
-            float attacksHotbarAlpha = hotbarAlpha(ActionType.ATTACK);
-            float abilitiesHotbarAlpha = hotbarAlpha(ActionType.ABILITY);
-            mc.getTextureManager().bind(VANILLA_WIDGETS_TEX_PATH);
-            y += BAR_HEIGHT + ICON_HEIGHT + mc.font.lineHeight + 7;
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, attacksHotbarAlpha);
-            renderHotbar(matrixStack, x, y, ActionType.ATTACK);
-         // abilities hotbar
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, abilitiesHotbarAlpha);
-            renderHotbar(matrixStack, x, y + BARS_Y_GAP, ActionType.ABILITY);
-         // attack icons
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, attacksHotbarAlpha);
-            renderIcons(matrixStack, x + 3, y + 3, ActionType.ATTACK, attacksHotbarAlpha, event.getPartialTicks());
-         // ability icons
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, abilitiesHotbarAlpha);
-            renderIcons(matrixStack, x + 3, y + 3 + BARS_Y_GAP, ActionType.ABILITY, abilitiesHotbarAlpha, event.getPartialTicks());
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-            mc.getTextureManager().bind(OVERLAY_TEX_PATH);
-            renderTargetIcon(matrixStack, ActionType.ATTACK, x, y);
-            renderTargetIcon(matrixStack, ActionType.ABILITY, x, y + BARS_Y_GAP);
-         // condition message icon
-            renderConditionMessageIcon(matrixStack, x, y + HOTBAR_SQUARE_HEIGHT * 2 + mc.font.lineHeight, event.getPartialTicks());
+            
+            renderModeSelector(matrixStack, modeHotbarX, modeHotbarY, partialTick);
+            renderBars(matrixStack, barsX, barsY, partialTick);
             
             RenderSystem.disableRescaleNormal();
             RenderSystem.disableBlend();
         }
-        
-        else if (event.getType() == RenderGameOverlayEvent.ElementType.TEXT) {
-            int y = Y_OFFSET + BAR_HEIGHT + 1;
-         // power name
-            drawString(matrixStack, mc.font, powerName, 
-                    4 + ICON_LENGTH, y + (ICON_HEIGHT + 2 - mc.font.lineHeight) / 2, currentPower.getType().getColor());
-            
-            y += ICON_HEIGHT + 5;
-            renderHotbarText(matrixStack, x, y, currentPower, ActionType.ATTACK);
-
-            y += mc.font.lineHeight + 1 + HOTBAR_SQUARE_HEIGHT + 1;
-            renderHotbarText(matrixStack, x, y, currentPower, ActionType.ABILITY);
-
-            y += mc.font.lineHeight + 1 + HOTBAR_SQUARE_HEIGHT + 1;
-            renderConditionText(matrixStack, x + 16, y + 2, event.getPartialTicks());
-            
-            if (currentPower == standPower) {
-                if (standPower.usesStamina()) {
-                    drawString(matrixStack, mc.font, standPower.getStamina() + "//" + standPower.getMaxStamina(), x, y + 12, 0x00B000);
-                }
-                if (standPower.usesResolve()) {
-                    drawString(matrixStack, mc.font, standPower.getResolve() + "//" + standPower.getMaxResolve(), x, y + 22, currentPower.getType().getColor());
-                }
+    }
+    
+    
+    
+    private void renderActionsHotbar(MatrixStack matrixStack, int x, int y, HandSide rmbSlotSide) {
+        mc.getTextureManager().bind(WIDGETS_LOCATION);
+        int blitOffset = getBlitOffset();
+        setBlitOffset(-90);
+        int slots = currentMode.getAllActionsCount();
+        // hotbar
+        renderHotbar(matrixStack, x, y, slots);
+        // selection
+        if (currentMode.getSelectedSlot() >= 0) {
+           blit(matrixStack, x - 1 + currentMode.getSelectedSlot() * 20, y - 1, 0, 22, 24, 22);
+        }
+        // rmb slot
+        if (currentMode.getRmbAction() != null) {
+            int slotTex = rmbSlotSide == HandSide.LEFT ? 24 : 53;
+            int xOffset = getRmbSlotXOffset(rmbSlotSide);
+            if (rmbSlotSide == HandSide.RIGHT) {
+                xOffset -= 7;
             }
-            else if (currentPower == nonStandPower) {
-                drawString(matrixStack, mc.font, nonStandPower.getEnergy() + "//" + nonStandPower.getMaxEnergy(), x, y + 12, currentPower.getType().getColor());
-            }
+            blit(matrixStack, x + xOffset, y - 1, slotTex, 22, 29, 24);
         }
-    }
-
-    private void renderBar(MatrixStack matrixStack, int x, int y, BarTexture barTexture, int value) {
-        blit(matrixStack, x + 1, y, 1, BAR_HEIGHT * barTexture.ordinal(), value, BAR_HEIGHT);
-        blit(matrixStack, x, y, 0, 0, BAR_LENGTH, BAR_HEIGHT);
-        blit(matrixStack, x - 4, y - 3, BAR_LENGTH, 15 * barTexture.ordinal(), 10, 14);
+        setBlitOffset(blitOffset);
     }
     
-    public boolean noActionSelected(ActionType type) {
-        if (currentPower == null) {
-            return true;
-        }
-        return getHotbarData(type).noActionSelected();
+    private int getRmbSlotXOffset(HandSide side) {
+        return side == HandSide.LEFT ? -29 : 20 * currentMode.getAllActionsCount() + 9;
     }
     
-    private float hotbarAlpha(ActionType type) {
-        return getHotbarData(type).noActionSelected() ? 0.5F : 1.0F;
-    }
-    
-    private void renderHotbar(MatrixStack matrixStack, int x, int y, ActionType type) {
-        List<Action> actions = currentPower.getActions(type);
-        if (actions.size() == 0) {
-            return;
-        }
-        ActionsHotbarData hotbarData = getHotbarData(type);
-        int hotbarLength = 1 + 20 * actions.size();
+    private void renderHotbar(MatrixStack matrixStack, int x, int y, int slots) {
+        int hotbarLength = 20 * slots + 1;
         blit(matrixStack, x, y, 0, 0, hotbarLength, 22);
         blit(matrixStack, x + hotbarLength, y, 181, 0, 1, 22);
-        if (!hotbarData.noActionSelected()) {
-            blit(matrixStack, x - 1 + hotbarData.getSelectedIndex() * 20, y - 1, 0, 22, 24, 24);
+    }
+    
+    
+    
+    private void renderActionIcons(MatrixStack matrixStack, int x, int y, float partialTick, HandSide rmbSlotSide) {
+        List<Action> actions = currentMode.getUnlockedActions();
+        IPower<?> power = currentMode.getPower();
+        for (int i = 0; i < actions.size(); i++) {
+            renderActionIcon(matrixStack, actions.get(i), power, x + 20 * i, y, partialTick, i == currentMode.getSelectedSlot(), false);
+        }
+        if (currentMode.getRmbAction() != null) {
+            renderActionIcon(matrixStack, currentMode.getRmbAction(), power, x + getRmbSlotXOffset(rmbSlotSide), y, partialTick, false, true);
         }
     }
     
-    private void renderIcons(MatrixStack matrixStack, int x, int y, ActionType type, float hotbarAlpha, float partialTick) {
-        List<Action> actions = currentPower.getActions(type);
-        for (int i = 0; i < actions.size(); i++) {
-            Action action = actions.get(i);
-            if (currentPower.getHeldAction() != null) {
-                if (currentPower.getHeldAction() == action.getShiftVariationIfPresent()) {
-                    action = action.getShiftVariationIfPresent();
-                }
-            }
-            if (shiftVarSelected(action, mc.player.isShiftKeyDown())) {
+    private void renderActionIcon(MatrixStack matrixStack, Action action, IPower<?> power, int x, int y, float partialTick, boolean isSelected, boolean isRmbSlot) {
+        if (power.getHeldAction() != null) {
+            if (power.getHeldAction() == action.getShiftVariationIfPresent()) {
                 action = action.getShiftVariationIfPresent();
             }
-            ActionsHotbarData hotbarData = getHotbarData(type);
+        }
+        if (shiftVarSelected(power, action, mc.player.isShiftKeyDown())) {
+            action = action.getShiftVariationIfPresent();
+        }
+        
+        TextureAtlasSprite textureAtlasSprite = SpriteUploaders.getActionSprites().getSprite(action);
+        mc.getTextureManager().bind(textureAtlasSprite.atlas().location());
+        
+        if (!isActionAvaliable(power, action, ActionTarget.fromRayTraceResult(mc.hitResult), isSelected, isRmbSlot)) {
+            RenderSystem.color4f(0.2F, 0.2F, 0.2F, 0.5F);
+            blit(matrixStack, x, y, 0, 16, 16, textureAtlasSprite);
             
-            if (currentPower.isActionUnlocked(action)) {
-                TextureAtlasSprite textureAtlasSprite = SpriteUploaders.getActionSprites().getSprite(action);
-                mc.getTextureManager().bind(textureAtlasSprite.atlas().location());
-                boolean isSelected = i == hotbarData.getSelectedIndex();
-                boolean rightTarget = false;
-                if (isSelected) {
-                    rightTarget = currentPower.checkTargetType(action, action.getPerformer(mc.player, currentPower), mouseTarget).isPositive();
-                    hotbarData.isRightTarget = rightTarget;
-                    hotbarData.isAvaliable = rightTarget && currentPower.checkRequirements(action, action.getPerformer(mc.player, currentPower), mouseTarget, false).isPositive();
-                }
-                if (isSelected && !hotbarData.isAvaliable || !currentPower.checkRequirements(action, action.getPerformer(mc.player, currentPower), mouseTarget, true).isPositive()) {
-                    RenderSystem.color4f(0.2F, 0.2F, 0.2F, 0.5F * hotbarAlpha);
-                    blit(matrixStack, x + 20 * i, y, 0, 16, 16, textureAtlasSprite);
-                    float ratio = currentPower.getCooldownRatio(action, partialTick);
-                    if (ratio > 0) {
-                        RenderSystem.disableDepthTest();
-                        RenderSystem.disableTexture();
-                        Tessellator tessellator = Tessellator.getInstance();
-                        BufferBuilder bufferBuilder = tessellator.getBuilder();
-                        this.fillRect(bufferBuilder, x + 20 * i, y + 16.0F * (1.0F - ratio), 16, 16.0F * ratio, 255, 255, 255, (int) (127F * hotbarAlpha));
-                        RenderSystem.enableTexture();
-                        RenderSystem.enableDepthTest();
-                    }
-                    RenderSystem.color4f(1.0F, 1.0F, 1.0F, hotbarAlpha);
-                } else {
-                    blit(matrixStack, x + 20 * i, y, 0, 16, 16, textureAtlasSprite);
-                }
+            float ratio = power.getCooldownRatio(action, partialTick);
+            if (ratio > 0) {
+                RenderSystem.disableDepthTest();
+                RenderSystem.disableTexture();
+                Tessellator tessellator = Tessellator.getInstance();
+                BufferBuilder bufferBuilder = tessellator.getBuilder();
+                fillRect(bufferBuilder, x, y + 16.0F * (1.0F - ratio), 16, 16.0F * ratio, 255, 255, 255, 127);
+                RenderSystem.enableTexture();
+                RenderSystem.enableDepthTest();
             }
+            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        } else {
+            blit(matrixStack, x, y, 0, 16, 16, textureAtlasSprite);
         }
     }
     
-    public boolean shiftVarSelected(Action action, boolean shift) {
-        return currentPower.getHeldAction() != action && shift && currentPower.isActionUnlocked(action.getShiftVariationIfPresent()) 
-                || currentPower.getHeldAction() == action.getShiftVariationIfPresent();
+    private boolean isActionAvaliable(IPower<?> power, Action action, ActionTarget mouseTarget, boolean isSelected, boolean isRmbSlot) {
+        if (isSelected || isRmbSlot) {
+            boolean rightTarget = power.checkTargetType(action, action.getPerformer(mc.player, power), mouseTarget).isPositive();
+            Action.TargetRequirement targetType = action.getTargetRequirement();
+            if (isSelected) {
+                selectedTargetType = targetType;
+                selectedRightTarget = rightTarget;
+            }
+            else {
+                rmbTargetType = targetType;
+                rmbRightTarget = rightTarget;
+            }
+            return rightTarget && power.checkRequirements(action, action.getPerformer(mc.player, power), mouseTarget, false).isPositive();
+        }
+        else {
+            return power.checkRequirements(action, action.getPerformer(mc.player, power), mouseTarget, true).isPositive();
+        }
     }
-
+    
     private void fillRect(BufferBuilder bufferBuilder, int x, double y, int width, double height, int red, int green, int blue, int alpha) {
         bufferBuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
         bufferBuilder.vertex(x + 0 , y + 0, 0.0D).color(red, green, blue, alpha).endVertex();
@@ -309,322 +320,489 @@ public class ActionsOverlayGui extends AbstractGui { // TODO config to move it t
         Tessellator.getInstance().end();
     }
     
-    private void renderTargetIcon(MatrixStack matrixStack, ActionType type, int x, int y) {
-        Action action = getSelectedAction(type);
-        if (action != null) {
-            TargetRequirement iconType = action.getTargetRequirement();
-            if (iconType != TargetRequirement.NONE) {
-                ActionsHotbarData hotbarData = getHotbarData(type);
-                x += 13 + hotbarData.getSelectedIndex() * 20;
-                y -= 1;
-                int iconX = iconType == TargetRequirement.BLOCK ? 0 : iconType == TargetRequirement.ENTITY ? 32 : 64;
-                int iconY = hotbarData.isRightTarget ? 192 : 224;
-                matrixStack.pushPose();
-                matrixStack.scale(0.5F, 0.5F, 0F);
-                matrixStack.translate(x, y, 0);
-                blit(matrixStack, x, y, iconX, iconY, 32, 32);
-                matrixStack.popPose();
-            }
-        }
+    public static boolean shiftVarSelected(IPower<?> power, Action action, boolean shift) {
+        return power.getHeldAction() != action && shift && power.isActionUnlocked(action.getShiftVariationIfPresent()) 
+                || power.getHeldAction() == action.getShiftVariationIfPresent();
     }
     
-    private void renderHotbarText(MatrixStack matrixStack, int x, int y, IPower<?> power, ActionType type) {
-        ActionsHotbarData hotbarData = getHotbarData(type);
-        if (!hotbarData.noActionSelected()) {
-            ITextComponent curAttackName = 
-                    !shiftVarSelected(getSelectedAction(type, false), mc.player.isShiftKeyDown()) ? 
-                    hotbarData.name
-                    : hotbarData.nameShift;
-            drawString(matrixStack, mc.font, curAttackName, x, y, currentPower.getType().getColor());
-        }
-        y += mc.font.lineHeight + 1;
-        if (!hotbarData.noActionSelected()) {
-            drawHoldDuration(matrixStack, x, y, type);
-        }
-    }
     
-    private void drawHoldDuration(MatrixStack matrixStack, int hotbarX, int hotbarY, ActionType type) {
-        Action action = getSelectedAction(type);
-        if (action != null) {
-            int ticksHeld = 0;
-            if (InputHandler.getInstance().getHeldActionType() == type && currentPower.getHeldAction() != null) {
-                action = currentPower.getHeldAction();
-                ticksHeld = currentPower.getHeldActionTicks();
-            }
-            int ticksToFire = action.getHoldDurationToFire(currentPower);
-            if (ticksToFire > 0) {
-                ActionsHotbarData hotbarData = getHotbarData(type);
-                int index = hotbarData.getSelectedIndex();
-                ticksToFire = Math.max(ticksToFire - ticksHeld, 0);
-                int seconds = ticksToFire == 0 ? 0 : (ticksToFire - 1) / 20 + 1;
-                int color = ticksToFire == 0 ? 0x00FF00 : ticksHeld == 0 ? 0x808080 : 0xFFFFFF;
-                ClientUtil.drawRightAlignedString(matrixStack, mc.font, String.valueOf(seconds), hotbarX + 20 * index + 20, hotbarY + 13, color);
+
+    private void renderHotbarIcons(MatrixStack matrixStack, int hotbarX, int hotbarY, HandSide offHandSide) {
+        // vanilla attack strength scale (since the hotbar event was cancelled)
+        int leapIconX = offHandSide == HandSide.LEFT ? hotbarX + 182 + 6 : hotbarX - 22;
+        int iconsY = hotbarY + 2;
+        if (mc.options.attackIndicator == AttackIndicatorStatus.HOTBAR) {
+            float iconFill = mc.player.getAttackStrengthScale(0.0F);
+            if (iconFill < 1.0F) {
+                mc.getTextureManager().bind(AbstractGui.GUI_ICONS_LOCATION);
+                int attackIndicatorX = offHandSide == HandSide.LEFT ? hotbarX + 182 + 6 : hotbarX - 22;
+                int px = (int) (iconFill * 19.0F);
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                blit(matrixStack, attackIndicatorX, iconsY, 0, 94, 18, 18);
+                blit(matrixStack, attackIndicatorX, iconsY + 18 - px, 18, 112 - px, 18, px);
+                leapIconX += offHandSide == HandSide.LEFT ? 20 : -20;
             }
         }
-    }
-    
-    private static final float MESSAGE_DURATION = 60;
-    private void renderConditionMessageIcon(MatrixStack matrixStack, int x, int y, float partialTick) {
-        if (unfulfilledCondition != null) {
-            float alpha = getConditionMessageAlpha(partialTick);
-            if (alpha < 1) {
-                RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
+        mc.getTextureManager().bind(OVERLAY_LOCATION);
+        
+        // leap icon
+        IPower<?> power = currentMode.getPower();
+        if (power.isLeapUnlocked()) {
+            float iconFill = power.getLeapCooldownPeriod() != 0 ? 
+                    1F - (float) power.getLeapCooldown() / (float) power.getLeapCooldownPeriod() : 1;
+            boolean translucent = !power.canLeap();
+            blit(matrixStack, leapIconX, iconsY, 96, 238, 18, 18);
+            if (translucent) {
+                RenderSystem.color4f(0.5F, 0.5F, 0.5F, 0.75F);
             }
-            blit(matrixStack, x, y, 132, 240, 16, 16);
-            if (alpha < 1) {
+            int px = (int) (19F * iconFill);
+            blit(matrixStack, leapIconX, iconsY + 18 - px, 96 + 18, 238 + 18 - px, 18, px);
+            if (translucent) {
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             }
         }
+        
+        // target type icons
+        renderTargetIcon(matrixStack, hotbarX + currentMode.getSelectedSlot() * 20 + 13, hotbarY - 1, selectedTargetType, selectedRightTarget);
+        renderTargetIcon(matrixStack, hotbarX + getRmbSlotXOffset(offHandSide) + 13, hotbarY - 1, rmbTargetType, rmbRightTarget);
     }
     
-    private void renderConditionText(MatrixStack matrixStack, int x, int y, float partialTick) {
-        if (unfulfilledCondition != null) {
-            int alpha = (int) (getConditionMessageAlpha(partialTick) * 255F);
-            if (alpha > 8) {
-                drawString(matrixStack, mc.font, unfulfilledCondition, x, y, 0xFFFFFF | alpha << 24 & -0x1000000);
+    private void renderTargetIcon(MatrixStack matrixStack, int x, int y, 
+            Action.TargetRequirement iconType, boolean rightTarget) {
+        if (iconType != null) {
+            int iconTexX;
+            switch (iconType) {
+            case BLOCK:
+                iconTexX = 0;
+                break;
+            case ENTITY:
+                iconTexX = 32;
+                break;
+            case ANY:
+                iconTexX = 64;
+                break;
+            default:
+                return;
             }
+            int iconTexY = rightTarget ? 192 : 224;
+            matrixStack.pushPose();
+            matrixStack.scale(0.5F, 0.5F, 0F);
+            matrixStack.translate(x, y, 0);
+            blit(matrixStack, x, y, iconTexX, iconTexY, 32, 32);
+            matrixStack.popPose();
         }
     }
     
-    private float getConditionMessageAlpha(float partialTick) {
-        return Math.min((conditionMessageTicks - partialTick) / MESSAGE_DURATION * 3F, 1F);
-    }
     
-    public void setUnfulfilledConditionText(ITextComponent message) {
-        this.unfulfilledCondition = message;
-        this.conditionMessageTicks = (int) MESSAGE_DURATION;
-    }
-    
-    private void tickCondition() {
-        if (conditionMessageTicks > 0) {
-            conditionMessageTicks--;
-            if (conditionMessageTicks == 0) {
-                unfulfilledCondition = null;
-            }
+
+    private void renderBars(MatrixStack matrixStack, int barsX, int barsY, float partialTick) {
+        mc.getTextureManager().bind(OVERLAY_LOCATION);
+        INonStandPower power = nonStandUiConfig.getPower();
+        boolean prevBarThin = false;
+        if (power.hasPower()) {
+            renderBar(matrixStack, barsX, barsY, 
+                    32, 0, 240, getBarIconTexY(power.getType()), 
+                    // FIXME get cost value
+                    power.getMana(), power.getMaxMana(), 500f, 
+                    currentMode == nonStandUiConfig, energyBarTransparency, partialTick, power.getType().getColor()); // FIXME vampirism blood levels
+            prevBarThin = currentMode != nonStandUiConfig;
         }
-    }
-    
-    public void scrollMode() {
-        switch (mode) {
-        case NONE:
-            if (nonStandPower.hasPower()) {
-                setMode(UiMode.NON_STAND);
-            }
-            else if (standPower.hasPower()) {
-                setMode(UiMode.STAND);
-            }
-            break;
-        case NON_STAND:
-            if (standPower.hasPower()) {
-                setMode(UiMode.STAND);
-            }
-            else {
-                setMode(UiMode.NONE);
-            }
-            break;
-        case STAND:
-            setMode(UiMode.NONE);
-            break;
+        IStandPower standPower = standUiConfig.getPower();
+        if (standPower.hasPower()) {
+//            if (standPower.usesStamina()) { // TODO hud
+                barsX += prevBarThin ? 8 : 13;
+                renderBar(matrixStack, barsX, barsY, 
+                        48, 0, 240, 0, 
+                        // FIXME get cost value
+                        standPower.getMana(), standPower.getMaxMana(), 300f, 
+                        currentMode == standUiConfig, staminaBarTransparency, partialTick, 0xFFFFFF);
+                prevBarThin = currentMode != standUiConfig;
+//            }
+//            if (standPower.usesResolve()) { // TODO hud
+                barsX += prevBarThin ? 8 : 13;
+                renderBar(matrixStack, barsX, barsY, 
+                        32, 0, 240, 15, 
+                        standPower.getExp(), IStandPower.MAX_EXP, 0, 
+                        currentMode == standUiConfig, resolveBarTransparency, partialTick, standPower.getType().getColor());
+//            }
         }
-    }
-    
-    public void scrollActiveAttack(boolean backwards) {
-        scrollHotbar(ActionType.ATTACK, backwards);
-    }
-    
-    public void scrollActiveAbility(boolean backwards) {
-        scrollHotbar(ActionType.ABILITY, backwards);
     }
 
-    private static final IntBinaryOperator INC = (i, n) -> (i + 2) % (n + 1) - 1;
-    private static final IntBinaryOperator DEC = (i, n) -> (i + n + 1) % (n + 1) - 1;
-    private void scrollHotbar(ActionType type, boolean backwards) {
-        if (mode == UiMode.NONE) {
-            return;
+    private long counter = 0;
+    private static final int BAR_HEIGHT = 100;
+    private static final int BAR_HEIGHT_SHORTENED = 75;
+    private void renderBar(MatrixStack matrixStack, int barX, int barY, 
+            int texX, int texY, int iconTexX, int iconTexY, 
+            float amount, float max, float cost, 
+            boolean highlight, ElementTransparency transparency, float partialTick, int color) {
+        int value = (int) ((float) BAR_HEIGHT * (amount / max));
+        int costValue = (int) ((float) BAR_HEIGHT * (cost / max));
+        float[] rgb = ClientUtil.rgb(color);
+        if (highlight) {
+            RenderSystem.color4f(rgb[0], rgb[1], rgb[2], 1.0F);
+            // bar fill
+            blit(matrixStack, barX + 1, barY + BAR_HEIGHT - value + 1, 
+                    texX + 1, texY + BAR_HEIGHT - value + 1, 6, value);
+            // border
+            blit(matrixStack, barX, barY, 16, 0, 8, BAR_HEIGHT + 2);
+            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            // cost
+            if (costValue > 0) {
+                counter += Util.getMillis();
+                float alpha = Math.max(Math.abs(MathHelper.sin(counter / 10000000F)), 0.25F) + 0.25F;
+                boolean notEnough = cost > amount;
+                fill(matrixStack, 
+                        barX + 1, notEnough ? barY + BAR_HEIGHT - costValue + 1 : barY + 1, 
+                        barX + 7, notEnough ? barY + BAR_HEIGHT + 1 : barY + costValue + 1, 
+                        ElementTransparency.addAlpha(0xFFFFFF, alpha * 0.5F));
+                RenderSystem.enableBlend();
+            }
+            // scale
+            blit(matrixStack, barX + 1, barY + 1, 1, 1, 6, BAR_HEIGHT);
+            // icon
+            blit(matrixStack, barX - 1, barY - 12, iconTexX, iconTexY, 10, 14);
         }
-        List<Action> actions = currentPower.getActions(type);
-        if (actions.size() == 0) {
-            return;
+        else if (transparency.shouldRender()) {
+            barY += (BAR_HEIGHT - BAR_HEIGHT_SHORTENED);
+            texX += 8;
+            RenderSystem.color4f(rgb[0], rgb[1], rgb[2], transparency.getAlpha(partialTick));
+            // bar fill
+            blit(matrixStack, barX + 1, barY + BAR_HEIGHT - value + 1, 
+                    texX + 1, texY + BAR_HEIGHT - value + 1, 6, value);
+            // border
+            blit(matrixStack, barX, barY, 24, 0, 8, BAR_HEIGHT + 2);
+            // scale
+            blit(matrixStack, barX + 1, barY + 1, 9, 1, 6, BAR_HEIGHT);
+            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         }
-        ActionsHotbarData hotbarData = getHotbarData(type);
-        int startingIndex = hotbarData.getSelectedIndex();
-        IntBinaryOperator operator = backwards ? DEC : INC;
-        int i;
-        for (i = operator.applyAsInt(startingIndex, actions.size()); 
-             i > -1 && i % actions.size() != startingIndex && !currentPower.isActionUnlocked(actions.get(i));
-             i = operator.applyAsInt(i, actions.size())) {
-        }
-        hotbarData.setSelectedIndex(getMode(), i);
-        updateActionName(type);
     }
     
-    public UiMode getMode() {
-        return mode;
+    private int getBarIconTexY(NonStandPowerType<?> type) {
+        if (type == ModNonStandPowers.VAMPIRISM.get()) {
+            return 30;
+        }
+        if (type == ModNonStandPowers.HAMON.get()) {
+            return 45;
+        }
+        return 165;
     }
     
-    public IPower<?> getCurrentPower() {
-        return currentPower;
+    
+    
+    private final List<ActionsHotbarConfig<?>> modes = Collections.unmodifiableList(Arrays.asList(
+            null,
+            nonStandUiConfig,
+            standUiConfig
+            ));
+    private void renderModeSelector(MatrixStack matrixStack, int x, int y, float partialTick) {
+        if (modeSelectorTransparency.shouldRender()) {
+            mc.getTextureManager().bind(WIDGETS_LOCATION);
+            RenderSystem.color4f(1.0F, 1.0F, 1.0F, modeSelectorTransparency.getAlpha(partialTick));
+            matrixStack.pushPose();
+            matrixStack.translate(x, y, 0);
+            matrixStack.mulPose(Vector3f.ZP.rotationDegrees(90));
+            matrixStack.translate(-x, -y - 22, 0);
+            renderHotbar(matrixStack, x, y, modes.size());
+            int selectedMode = modes.indexOf(currentMode);
+            if (selectedMode > -1) {
+                blit(matrixStack, x + selectedMode * 20 - 1, y - 1, 0, 22, 24, 24);
+            }
+            matrixStack.popPose();
+            renderModeSelectorIcons(matrixStack, x + 3, y + 3, partialTick);
+            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        }
     }
     
-    public int getIndex(ActionType type) {
-        return getHotbarData(type).getSelectedIndex();
+    
+    
+    private void renderModeSelectorIcons(MatrixStack matrixStack, int x, int y, float partialTick) {
+        for (ActionsHotbarConfig<?> mode : modes) {
+            if (mode != null) {
+                IPower<?> power = mode.getPower();
+                if (power.hasPower()) {
+                    mc.getTextureManager().bind(power.getType().getIconTexture());
+                    blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
+                }
+            }
+            y += 20;
+        }
+    }
+    
+    
+
+    private void renderPowerIcon(MatrixStack matrixStack, int iconX, int iconY) {
+        IPower<?> power = currentMode.getPower();
+        if (power.isActive()) {
+            mc.getTextureManager().bind(power.getType().getIconTexture());
+            blit(matrixStack, iconX, iconY, 0, 0, 16, 16, 16, 16);
+        }
+    }
+    
+    
+    
+    private void drawActionName(MatrixStack matrixStack, float x, int y, float partialTick, 
+            Action action, ElementTransparency transparency) {
+        if (action != null && transparency.shouldRender()) {
+            ITextComponent actionName = action.getName(currentMode.getPower());
+            if (action.getHoldDurationMax() > 0) {
+                actionName = new TranslationTextComponent("jojo.overlayv2.hold", actionName);
+            }
+            if (action.hasShiftVariation()) {
+                actionName = new TranslationTextComponent("jojo.overlayv2.shift", actionName, 
+                        new KeybindTextComponent(mc.options.keyShift.getName()), action.getShiftVariationIfPresent().getName(currentMode.getPower()));
+            }
+            int width = mc.font.width(actionName);
+            x -= width / 2F;
+            if (!mc.gameMode.canHurtPlayer()) {
+                y += 14;
+            }
+            RenderSystem.pushMatrix();
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            drawBackdrop(matrixStack, (int) x, y, width, transparency, partialTick);
+            mc.font.drawShadow(matrixStack, actionName, x, (float) y, 
+                    transparency.makeTextColorTranclucent(currentMode.getPower().getType().getColor(), partialTick));
+            RenderSystem.disableBlend();
+            RenderSystem.popMatrix();
+        }
+    }
+    
+    private void drawBackdrop(MatrixStack matrixStack, int x, int y, int width, 
+            @Nullable ElementTransparency transparency, float partialTick) {
+        int backdropColor = mc.options.getBackgroundColor(0.0F);
+        if (backdropColor != 0) {
+            fill(matrixStack, x - 2, y - 2, x + width + 2, y + mc.font.lineHeight + 2, ColorHelper.PackedColor.multiply(backdropColor, 
+                            transparency != null ? transparency.makeTextColorTranclucent(0xFFFFFF, partialTick) : 0xFFFFFFFF));
+        }
+    }
+    
+    
+    
+    private void drawPowerName(MatrixStack matrixStack, int x, int y) {
+        x += 19;
+        IPower<?> power = currentMode.getPower();
+        ITextComponent name = new TranslationTextComponent(power.getType().getTranslationKey());
+        drawBackdrop(matrixStack, x, y, mc.font.width(name), null, 1.0F);
+        drawString(matrixStack, mc.font, name, x, y, power.getType().getColor());
+    }
+    
+    
+    
+    private void drawModeSelectorNames(MatrixStack matrixStack, int x, int y, float partialTick) {
+        if (modeSelectorTransparency.shouldRender()) {
+            y += (22 - mc.font.lineHeight) / 2;
+            for (ActionsHotbarConfig<?> mode : modes) {
+                ITextComponent name = getModeNameForSelector(mode);
+                if (name != null) {
+                    int color = getModeColor(mode);
+                    int width = mc.font.width(name);
+                    drawBackdrop(matrixStack, x - width, y, width, modeSelectorTransparency, partialTick);
+                    mc.font.drawShadow(matrixStack, name, x - width, y, 
+                            modeSelectorTransparency.makeTextColorTranclucent(color, partialTick));
+                }
+                y += 22;
+            }
+        }
     }
 
     @Nullable
-    public Action getSelectedAction(ActionType type) {
-        return getSelectedAction(type, true);
-    }
-
-    @Nullable
-    public Action getSelectedAction(ActionType type, boolean checkShift) {
-        if (currentPower == null) {
-            return null;
-        }
-        List<Action> actions = currentPower.getActions(type);
-        int index = getIndex(type);
-        if (index > -1) {
-            if (index >= actions.size()) {
-                selectAction(type, -1);
+    private ITextComponent getModeNameForSelector(ActionsHotbarConfig<?> mode) {
+        ITextComponent name;
+        if (mode == null) {
+            if (currentMode == null) {
                 return null;
             }
-            Action action = actions.get(getIndex(type));
-            if (checkShift && shiftVarSelected(action, mc.player.isShiftKeyDown())) {
-                action = action.getShiftVariationIfPresent();
-            }
-            return action;
-        }
-        return null;
-    }
-    
-    private ActionsHotbarData getHotbarData(ActionType type) {
-        switch (type) {
-        case ATTACK:
-            return attackData;
-        case ABILITY:
-            return abilityData;
-        }
-        return null;
-    }
-
-    public void updatePowersCache() {
-        setMode(UiMode.NONE);
-        standPower = IStandPower.getPlayerStandPower(mc.player);
-        nonStandPower = INonStandPower.getPlayerNonStandPower(mc.player);
-    }
-    
-    public void setMode(UiMode mode) {
-        if (mode == UiMode.STAND && !standPower.hasPower() || mode == UiMode.NON_STAND && !nonStandPower.hasPower() || this.mode == mode) {
-            return;
-        }
-        this.mode = mode;
-        switch(mode) {
-        case NONE:
-            setCurrentPower(null);
-            break;
-        case NON_STAND:
-            setCurrentPower(nonStandPower);
-            break;
-        case STAND:
-            setCurrentPower(standPower);
-            break;
-        }
-    }
-    
-    private void setCurrentPower(@Nullable IPower<?> power) {
-        currentPower = power;
-        if (power == null) {
-            return;
-        }
-        powerName = new TranslationTextComponent(currentPower.getType().getTranslationKey());
-        powerIconPath = currentPower.getType().getIconTexture();
-        selectAction(ActionType.ATTACK, attackData.getSavedSelectedIndex(getMode()));
-        selectAction(ActionType.ABILITY, abilityData.getSavedSelectedIndex(getMode()));
-    }
-    
-    public void selectAction(ActionType type, int index) {
-        if (mode == UiMode.NONE) {
-            return;
-        }
-        List<Action> actions = currentPower.getActions(type);
-        ActionsHotbarData hotbarData = getHotbarData(type);
-        if (index < 0 || actions.size() < index + 1 || !currentPower.isActionUnlocked(actions.get(index))) {
-            hotbarData.setSelectedIndex(getMode(), -1);
+            name = new TranslationTextComponent("jojo.overlayv2.mode_deselect");
         }
         else {
-            hotbarData.setSelectedIndex(getMode(), index);
+            IPower<?> power = mode.getPower();
+            if (!power.hasPower()) {
+                return null;
+            }
+            name = new TranslationTextComponent(power.getType().getTranslationKey());
         }
-        updateActionName(type);
+        ITextComponent keyName = getKeyName(mode);
+        if (keyName != null) {
+            name = new TranslationTextComponent("jojo.overlayv2.mode_key", keyName, name);
+        }
+        return name;
+    }
+
+    private Map<ActionsHotbarConfig<?>, Supplier<KeyBinding>> modeKeys = ImmutableMap.of(
+            nonStandUiConfig, () -> InputHandler.getInstance().nonStandHotbar,
+            standUiConfig, () -> InputHandler.getInstance().standHotbar);
+    @Nullable
+    private ITextComponent getKeyName(ActionsHotbarConfig<?> mode) {
+        if (mode == currentMode) {
+            return null;
+        }
+        if (mode == null) {
+            mode = currentMode;
+        }
+        Supplier<KeyBinding> keySupplier = modeKeys.get(mode);
+        if (keySupplier == null || keySupplier.get() == null) {
+            return null;
+        }
+        return new KeybindTextComponent(keySupplier.get().getName());
     }
     
-    public void updateActionName(Action action) {
-        if (!updateActionName(action, ActionType.ATTACK)) {
-            updateActionName(action, ActionType.ABILITY);
+    private int getModeColor(ActionsHotbarConfig<?> mode) {
+        if (mode == null) {
+            return 0xFFFFFF;
+        }
+        return mode.getPower().getType().getColor();
+    }
+    
+    
+    
+    // FIXME hold duration
+    private void drawHoldDuration(MatrixStack matrixStack, int hotbarX, int hotbarY) {
+        
+    }
+    
+    
+    
+    public void setMode(@Nullable PowerClassification power) {
+        if (power == null) {
+            setMode(null, true);
+        }
+        else {
+            ActionsHotbarConfig<?> chosenMode = null;
+            switch (power) {
+            case NON_STAND:
+                chosenMode = nonStandUiConfig;
+                break;
+            case STAND:
+                chosenMode = standUiConfig;
+                break;
+            }
+            setMode(chosenMode, true);
         }
     }
     
-    public boolean updateActionName(Action action, ActionType type) {
-        if (action != null && getSelectedAction(type) == action) {
-            updateActionName(type);
+    private void setMode(@Nullable ActionsHotbarConfig<?> mode, boolean chosenManually) {
+        if (mode != null && currentMode != mode) {
+            if (mode.getPower().hasPower()) {
+                mode.chosenManually = chosenManually;
+                modeSelectorTransparency.reset();
+                if (currentMode != null) {
+                    if (mode != nonStandUiConfig) {
+                        energyBarTransparency.reset();
+                    }
+                    else if (mode != standUiConfig) {
+                        staminaBarTransparency.reset();
+                        resolveBarTransparency.reset();
+                    }
+                }
+                currentMode = mode;
+                actionNameTransparency.reset();
+                rmbActionNameTransparency.reset();
+            }
+        }
+        else {
+            modeSelectorTransparency.reset();
+            if (currentMode == nonStandUiConfig) {
+                energyBarTransparency.reset();
+            }
+            else if (currentMode == standUiConfig) {
+                staminaBarTransparency.reset();
+                resolveBarTransparency.reset();
+            }
+            currentMode = null;
+        }
+    }
+
+    public void onStandSummon() {
+        if (currentMode != standUiConfig) {
+            setMode(standUiConfig, false);
+        }
+    }
+
+    public void onStandUnsummon() {
+        if (currentMode == standUiConfig && !standUiConfig.chosenManually) {
+            setMode(null, false);
+        }
+    }
+    
+    public boolean scrollAction(boolean backwards) {
+        if (currentMode != null) {
+            currentMode.scrollSelectedSlot(backwards);
+            actionNameTransparency.reset();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean selectAction(int slot) {
+        if (currentMode != null) {
+            currentMode.selectSlot(slot);
+            actionNameTransparency.reset();
             return true;
         }
         return false;
     }
     
-    public void updateActionName(ActionType type) {
-        if (currentPower != null) {
-            ITextComponent actionName;
-            ITextComponent actionNameShift;
-            
-            List<Action> actions = currentPower.getActions(type);
-            ActionsHotbarData hotbarData = getHotbarData(type);
-            int selectedAction = hotbarData.getSelectedIndex();
-            if (actions.size() > 0 && selectedAction > -1) {
-                Action action = actions.get(selectedAction);
-                String key = type.toString().toLowerCase();
-                if (action.hasShiftVariation() && currentPower.isActionUnlocked(action.getShiftVariationIfPresent())) {
-                    Action shiftAction = action.getShiftVariationIfPresent();
-                    actionName = actionNameLine(action, shiftAction, key);
-                    actionNameShift = actionNameLine(shiftAction, null, key);
-                }
-                else {
-                    actionName = actionNameLine(action, null, key);
-                    actionNameShift = actionName;
-                }
+    public void swapRmbAction(boolean shift) {
+        if (shift) {
+            if (currentMode.moveRmbActionToList()) {
+                actionNameTransparency.reset();
             }
-            else {
-                actionName = EMPTY_STRING_COMPONENT;
-                actionNameShift = EMPTY_STRING_COMPONENT;
-            }
-            
-            hotbarData.name = actionName;
-            hotbarData.nameShift = actionNameShift;
+        }
+        else {
+            currentMode.swapRmbAndCurrentActions();
+            actionNameTransparency.reset();
+            rmbActionNameTransparency.reset();
         }
     }
+
     
-    private ITextComponent actionNameLine(Action action, @Nullable Action shiftVariation, String actionTypeKey) {
-        String tlKey = "jojo.overlay.actions." + actionTypeKey;
-        if (action.getHoldDurationMax() > 0) {
-            tlKey = tlKey + ".hold";
-        }
-        if (shiftVariation != null) {
-            return new TranslationTextComponent(tlKey + ".shift", action.getName(currentPower), 
-                    SHIFT_KEY, shiftVariation.getNameShortened(currentPower));
-        }
-        return new TranslationTextComponent(tlKey, action.getName(currentPower));
+    
+    public void updatePowersCache() { // FIXME actions aren't updated in-game
+        setMode(null, true);
+        standUiConfig.setPower(IStandPower.getPlayerStandPower(mc.player));
+        nonStandUiConfig.setPower(INonStandPower.getPlayerNonStandPower(mc.player));
     }
     
-    public enum UiMode {
-        NONE,
-        NON_STAND,
-        STAND
-    };
     
-    private enum BarTexture {
-        NONE,
-        STAMINA,
-        EXP,
-        BLOOD,
-        HAMON,
-        ENERGY
+    
+    private static class ElementTransparency {
+        private final int ticksMax;
+        private final int ticksStartFadeAway;
+        private int ticks;
+        
+        private ElementTransparency(int ticksMax, int ticksStartFadeAway) {
+            this.ticksMax = ticksMax;
+            this.ticksStartFadeAway = ticksStartFadeAway;
+        }
+        
+        private void reset() {
+            ticks = ticksMax;
+        }
+        
+        private boolean shouldRender() {
+            return ticks > 0;
+        }
+        
+        private int makeTextColorTranclucent(int color, float partialTick) {
+            return addAlpha(color, getAlpha(partialTick));
+        }
+        
+        private static final float MIN_ALPHA = 1F / 63F;
+        private float getAlpha(float partialTick) {
+            if (ticks >= ticksStartFadeAway) {
+                return 1F;
+            }
+            return Math.max((ticks - partialTick) / (float) ticksStartFadeAway, MIN_ALPHA);
+        }
+        
+        private void tick() {
+            if (ticks > 0) {
+                ticks--;
+            }
+        }
+        
+        private static int addAlpha(int color, float alpha) {
+            return color | ((int) (255F * alpha)) << 24 & -0x1000000;
+        }
     }
 }

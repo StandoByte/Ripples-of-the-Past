@@ -106,6 +106,17 @@ public class ClientUtil {
         Minecraft.getInstance().particleEngine.createTrackingEmitter(entity, ModParticles.HAMON_SPARK.get(), ticks);
     }
     
+    public static float[] rgb(int color) {
+        int red = (color & 0xFF0000) >> 16;
+        int green = (color & 0x00FF00) >> 8;
+        int blue = color & 0x0000FF;
+        return new float[] {
+                (float) red / 255F,
+                (float) green / 255F,
+                (float) blue / 255F
+        };
+    }
+    
     public static void vertex(MatrixStack.Entry matrixEntry, IVertexBuilder vertexBuilder, 
             int packedLight, int packedOverlay, float red, float green, float blue, float alpha, 
             float x, float y, float z, float texU, float texV) {

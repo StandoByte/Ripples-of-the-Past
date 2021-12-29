@@ -4,10 +4,9 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.ActionsOverlayGui;
-import com.github.standobyte.jojo.client.ui.ActionsOverlayGui.UiMode;
 import com.github.standobyte.jojo.power.IPower;
-import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
+import com.github.standobyte.jojo.power.IPowerType;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -53,9 +52,8 @@ public class TrSyncPowerTypePacket<P extends IPower<T>, T extends IPowerType<P, 
                     if (msg.powerType == null) {
                         if (entity == ClientUtil.getClientPlayer()) {
                             ActionsOverlayGui overlay = ActionsOverlayGui.getInstance();
-                            if (msg.classification == PowerClassification.STAND && overlay.getMode() == UiMode.STAND 
-                                    || msg.classification == PowerClassification.NON_STAND && overlay.getMode() == UiMode.NON_STAND) {
-                                overlay.setMode(UiMode.NONE);
+                            if (msg.classification == overlay.getCurrentPower()) {
+                                overlay.setMode(null);
                             }
                         }
                         power.clear();

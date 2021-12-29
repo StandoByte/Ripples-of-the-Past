@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.client.renderer.entity.damaging.projectile;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.model.entity.projectile.HamonCutterModel;
 import com.github.standobyte.jojo.client.renderer.entity.SimpleEntityRenderer;
 import com.github.standobyte.jojo.entity.damaging.projectile.HamonCutterEntity;
@@ -20,11 +21,8 @@ public class HamonCutterRenderer extends SimpleEntityRenderer<HamonCutterEntity,
     @Override
     protected void renderModel(HamonCutterEntity entity, HamonCutterModel model, float partialTick, 
             MatrixStack matrixStack, IVertexBuilder vertexBuilder, int packedLight) {
-        int color = entity.getColor();
-        int red = (color & 0xFF0000) >> 16;
-        int green = (color & 0x00FF00) >> 8;
-        int blue = color & 0x0000FF;
+        float[] rgb = ClientUtil.rgb(entity.getColor());
         model.renderToBuffer(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, 
-                (float) red / 255F, (float) green / 255F, (float) blue / 255F, 1.0F);
+                rgb[0], rgb[1], rgb[2], 1.0F);
     }
 }
