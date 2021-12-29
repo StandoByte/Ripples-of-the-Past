@@ -7,19 +7,26 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.ActionConditionResult;
+import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.SyncEnergyPacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.PowerBaseImpl;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
-import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 
-public class NonStandPower extends PowerBaseImpl<NonStandPowerType<?>> implements INonStandPower {
+public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerType<?>> implements INonStandPower {
+    public static final float BASE_MAX_ENERGY = 1000;
+    
+    private float energy = 0;
     private NonStandPowerType<?> type;
     private TypeSpecificData typeSpecificData;
     
@@ -36,8 +43,6 @@ public class NonStandPower extends PowerBaseImpl<NonStandPowerType<?>> implement
     public boolean givePower(NonStandPowerType<?> type) {
         NonStandPowerType<?> oldType = this.getType();
         if (super.givePower(type)) {
-            manaRegenPoints = type.getStartingManaRegenPoints();
-            manaLimitFactor = 1F;
             typeSpecificData.onPowerGiven(oldType);
             return true;
         }
@@ -49,7 +54,11 @@ public class NonStandPower extends PowerBaseImpl<NonStandPowerType<?>> implement
         attacks = new ArrayList<Action>(Arrays.asList(powerType.getAttacks()));
         abilities = new ArrayList<Action>(Arrays.asList(powerType.getAbilities()));
         TypeSpecificData data = powerType.newSpecificDataInstance();
+        energy = 0;
         setTypeSpecificData(data);
+        if (isUserCreative()) {
+            energy = getMaxEnergy();
+        }
         this.type = powerType;
     }
 
@@ -61,19 +70,21 @@ public class NonStandPower extends PowerBaseImpl<NonStandPowerType<?>> implement
     @Override
     public boolean clear() {
         if (super.clear()) {
-            manaRegenPoints = 1F;
-            manaLimitFactor = 1F;
             type.onClear(this);
             typeSpecificData = null;
             type = null;
-            serverPlayerUser.ifPresent(player -> {
-                IStandPower standPower = IStandPower.getPlayerStandPower(player);
-                standPower.setManaRegenPoints(1);
-                standPower.setManaLimitFactor(1);
-            });
+            energy = 0;
             return true;
         }
         return false;
+    }
+    
+    @Override
+    public void tick() {
+        super.tick();
+        if (hasPower()) {
+            tickEnergy();
+        }
     }
     
     @Override
@@ -82,13 +93,75 @@ public class NonStandPower extends PowerBaseImpl<NonStandPowerType<?>> implement
     }
     
     @Override
-    protected float reduceManaConsumed(float amount) {
-        return getType() == null ? super.reduceManaConsumed(amount) : getType().reduceManaConsumed(amount, this, user);
+    public boolean isActionUnlocked(Action action) {
+        return typeSpecificData == null ? false : typeSpecificData.isActionUnlocked(action, this);
+    }
+
+    @Override
+    public ActionConditionResult checkRequirements(Action action, LivingEntity performer, ActionTarget target, boolean checkTargetType) {
+        ActionConditionResult result = super.checkRequirements(action, performer, target, checkTargetType);
+        if (!result.isPositive()) {
+            serverPlayerUser.ifPresent(player -> {
+                PacketManager.sendToClient(new SyncEnergyPacket(getEnergy()), player);
+            });
+        }
+        return result;
+    }
+
+    @Override
+    public float getEnergy() {
+        return energy;
+    }
+
+    @Override
+    public float getMaxEnergy() {
+        float maxAmount = BASE_MAX_ENERGY;
+        if (type != null) {
+            maxAmount *= Math.max(type.getMaxEnergyFactor(this), 0.001F);
+        }
+        return maxAmount;
     }
     
     @Override
-    public boolean isActionUnlocked(Action action) {
-        return typeSpecificData == null ? false : typeSpecificData.isActionUnlocked(action, this);
+    public boolean hasEnergy(float amount) {
+        return getEnergy() >= reduceEnergyConsumed(amount) || isUserCreative();
+    }
+
+    @Override
+    public void addEnergy(float amount) {
+        setEnergy(MathHelper.clamp(this.energy + amount, 0, getMaxEnergy()));
+    }
+
+    @Override
+    public boolean consumeEnergy(float amount) {
+        if (isUserCreative()) {
+            return true;
+        }
+        if (hasEnergy(amount)) {
+            setEnergy(this.energy - reduceEnergyConsumed(amount));
+            return true;
+        }
+        return false;
+    }
+    
+    protected float reduceEnergyConsumed(float amount) {
+        return getType() == null ? amount : getType().reduceEnergyConsumed(amount, this, user);
+    }
+
+    @Override
+    public void setEnergy(float amount) {
+        amount = MathHelper.clamp(amount, 0, getMaxEnergy());
+        boolean send = this.energy != amount;
+        this.energy = amount;
+        if (send) {
+            serverPlayerUser.ifPresent(player -> {
+                PacketManager.sendToClient(new SyncEnergyPacket(getEnergy()), player);
+            });
+        }
+    }
+    
+    private void tickEnergy() {
+        energy = MathHelper.clamp(energy + type.getEnergyTickInc(this), 0, getMaxEnergy());
     }
     
     @Override
@@ -97,8 +170,14 @@ public class NonStandPower extends PowerBaseImpl<NonStandPowerType<?>> implement
     }
     
     @Override
+    public boolean canLeap() {
+        return super.canLeap() && hasEnergy(type.getLeapEnergyCost());
+    }
+    
+    @Override
     public void onLeap() {
         super.onLeap();
+        consumeEnergy(type.getLeapEnergyCost());
         type.onLeap(this);
     }
     
@@ -110,11 +189,6 @@ public class NonStandPower extends PowerBaseImpl<NonStandPowerType<?>> implement
     @Override
     public int getLeapCooldownPeriod() {
         return type.getLeapCooldownPeriod();
-    }
-    
-    @Override
-    protected float getLeapManaCost() {
-        return type.getLeapManaCost();
     }
     
     @Override
@@ -133,6 +207,7 @@ public class NonStandPower extends PowerBaseImpl<NonStandPowerType<?>> implement
     @Override
     public CompoundNBT writeNBT() {
         CompoundNBT cnbt = super.writeNBT();
+        cnbt.putFloat("Energy", energy);
         cnbt.putString("Type", ModNonStandPowers.Registry.getKeyAsString(getType()));
         getTypeSpecificData(null).ifPresent(data -> {
             cnbt.put("AdditionalData", data.writeNBT());
@@ -142,6 +217,9 @@ public class NonStandPower extends PowerBaseImpl<NonStandPowerType<?>> implement
 
     @Override
     public void readNBT(CompoundNBT nbt) {
+        energy = nbt.contains("Mana", 5) ? // TODO remove in a later version
+                nbt.getFloat("Mana")
+                : nbt.getFloat("Energy");
         String powerName = nbt.getString("Type");
         if (powerName != IPowerType.NO_POWER_NAME) {
             NonStandPowerType<?> type = ModNonStandPowers.Registry.getRegistry().getValue(new ResourceLocation(powerName));
@@ -161,6 +239,7 @@ public class NonStandPower extends PowerBaseImpl<NonStandPowerType<?>> implement
     public void onClone(IPower<NonStandPowerType<?>> oldPower, boolean wasDeath, boolean keep) {
         super.onClone(oldPower, wasDeath, keep);
         if (keep && oldPower.hasPower()) {
+            energy = ((INonStandPower) oldPower).getEnergy();
             ((INonStandPower) oldPower).getTypeSpecificData(null).ifPresent(data -> {
                 setTypeSpecificData(data);
             });
@@ -172,6 +251,7 @@ public class NonStandPower extends PowerBaseImpl<NonStandPowerType<?>> implement
         super.syncWithUserOnly();
         serverPlayerUser.ifPresent(player -> {
             if (hasPower()) {
+                PacketManager.sendToClient(new SyncEnergyPacket(energy), player);
                 getTypeSpecificData(null).ifPresent(data -> {
                     data.syncWithUserOnly(player);
                 });

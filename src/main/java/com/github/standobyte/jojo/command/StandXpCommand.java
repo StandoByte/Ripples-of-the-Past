@@ -14,10 +14,10 @@ import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.TranslationTextComponent;
 
-public class StandExpCommand {
+public class StandXpCommand {
 
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
-        dispatcher.register(Commands.literal("standexp").requires(ctx -> ctx.hasPermission(2))
+        dispatcher.register(Commands.literal("standxp").requires(ctx -> ctx.hasPermission(2))
                 .then(Commands.literal("add").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("amount", IntegerArgumentType.integer(-MAX_EXP, MAX_EXP)).executes(
                         ctx -> addExperience(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), IntegerArgumentType.getInteger(ctx, "amount"))))))
                 .then(Commands.literal("set").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("amount", IntegerArgumentType.integer(0, MAX_EXP)).executes(
@@ -29,22 +29,22 @@ public class StandExpCommand {
 
     private static int queryExperience(CommandSource source, ServerPlayerEntity player) {
         return IStandPower.getStandPowerOptional(player).map(power -> {
-            int exp = power.getExp();
-            source.sendSuccess(new TranslationTextComponent("commands.standexp.query", player.getDisplayName(), exp, MAX_EXP), false);
-            return exp;
+            int xp = power.getXp();
+            source.sendSuccess(new TranslationTextComponent("commands.standxp.query", player.getDisplayName(), xp, MAX_EXP), false);
+            return xp;
         }).orElse(-1);
     }
 
     private static int addExperience(CommandSource source, Collection<? extends ServerPlayerEntity> targets, int amount) {
         for(ServerPlayerEntity player : targets) {
             IStandPower.getStandPowerOptional(player).ifPresent(power -> {
-                power.setExp(power.getExp() + amount);
+                power.setXp(power.getXp() + amount);
             });
         }
         if (targets.size() == 1) {
-            source.sendSuccess(new TranslationTextComponent("commands.standexp.add.success.single", amount, targets.iterator().next().getDisplayName()), true);
+            source.sendSuccess(new TranslationTextComponent("commands.standxp.add.success.single", amount, targets.iterator().next().getDisplayName()), true);
         } else {
-            source.sendSuccess(new TranslationTextComponent("commands.standexp.add.success.multiple", amount, targets.size()), true);
+            source.sendSuccess(new TranslationTextComponent("commands.standxp.add.success.multiple", amount, targets.size()), true);
         }
         return targets.size();
     }
@@ -52,13 +52,13 @@ public class StandExpCommand {
     private static int setExperience(CommandSource source, Collection<? extends ServerPlayerEntity> targets, int amount) {
         for(ServerPlayerEntity player : targets) {
             IStandPower.getStandPowerOptional(player).ifPresent(power -> {
-                power.setExp(amount);
+                power.setXp(amount);
             });
         }
         if (targets.size() == 1) {
-            source.sendSuccess(new TranslationTextComponent("commands.standexp.set.success.single", amount, targets.iterator().next().getDisplayName()), true);
+            source.sendSuccess(new TranslationTextComponent("commands.standxp.set.success.single", amount, targets.iterator().next().getDisplayName()), true);
         } else {
-            source.sendSuccess(new TranslationTextComponent("commands.standexp.set.success.multiple", amount, targets.size()), true);
+            source.sendSuccess(new TranslationTextComponent("commands.standxp.set.success.multiple", amount, targets.size()), true);
         }
         return targets.size();
     }

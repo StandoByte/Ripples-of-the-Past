@@ -7,7 +7,6 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.entity.HamonBlockChargeEntity;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
@@ -34,7 +33,7 @@ public class HamonOrganismInfusion extends HamonAction {
     }
 
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IPower<?> power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
         ItemStack heldItemStack = performer.getMainHandItem();
         if (!heldItemStack.isEmpty()) {
             return conditionMessage("hand");
@@ -45,7 +44,7 @@ public class HamonOrganismInfusion extends HamonAction {
             if (!(entity instanceof AnimalEntity || entity instanceof AmbientEntity)) {
                 return conditionMessage("animal");
             }
-            if (!((INonStandPower) power).getTypeSpecificData(ModNonStandPowers.HAMON.get()).get().isSkillLearned(HamonSkill.ANIMAL_INFUSION)) {
+            if (!power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get().isSkillLearned(HamonSkill.ANIMAL_INFUSION)) {
                 return conditionMessage("animal_infusion");
             }
             break;
@@ -53,7 +52,7 @@ public class HamonOrganismInfusion extends HamonAction {
             BlockPos blockPos = target.getBlockPos();
             BlockState blockState = user.level.getBlockState(blockPos);
             if (blockState.getMaterial() == Material.EGG && 
-                    !((INonStandPower) power).getTypeSpecificData(ModNonStandPowers.HAMON.get()).get().isSkillLearned(HamonSkill.ANIMAL_INFUSION)) {
+                    !power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get().isSkillLearned(HamonSkill.ANIMAL_INFUSION)) {
                 return conditionMessage("animal_infusion");
             }
             Block block = blockState.getBlock();
@@ -68,20 +67,20 @@ public class HamonOrganismInfusion extends HamonAction {
     }
 
     @Override
-    public void perform(World world, LivingEntity user, IPower<?> power, ActionTarget target) {
+    protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
-            HamonData hamon = ((INonStandPower) power).getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
+            HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
             int chargeTicks = 100 + MathHelper.floor((float) (1100 * hamon.getHamonStrengthLevel()) / (float) HamonData.MAX_STAT_LEVEL);
             switch(target.getType()) {
             case BLOCK:
                 HamonBlockChargeEntity charge = new HamonBlockChargeEntity(world, target.getBlockPos());
-                charge.setCharge(0.02F * hamon.getHamonDamageMultiplier(), chargeTicks, user, getManaCost());
+                charge.setCharge(0.02F * hamon.getHamonDamageMultiplier(), chargeTicks, user, getEnergyCost());
                 world.addFreshEntity(charge);
                 break;
             case ENTITY:
                 LivingEntity entity = (LivingEntity) target.getEntity(world);
                 entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> 
-                cap.setHamonCharge(0.2F * hamon.getHamonDamageMultiplier(), chargeTicks, user, getManaCost()));
+                cap.setHamonCharge(0.2F * hamon.getHamonDamageMultiplier(), chargeTicks, user, getEnergyCost()));
                 break;
             default:
                 break;

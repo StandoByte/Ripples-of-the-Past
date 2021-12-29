@@ -9,13 +9,11 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandPower;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.SoundEvent;
@@ -34,10 +32,15 @@ public class EntityStandType extends StandType {
     public StandEntityType<? extends StandEntity> getEntityType() {
         return entityTypeSupplier.get();
     }
+    
+    @Override
+    public boolean usesStamina() {
+        return true;
+    }
 
     @Override
-    public boolean canTickMana(LivingEntity user, IPower<?> power) {
-        return !power.isActive() || user.tickCount % 20 == 0 && user instanceof PlayerEntity && ((PlayerEntity) user).getFoodData().getFoodLevel() > 17;
+    public boolean usesResolve() {
+        return true;
     }
 
     @Override
@@ -79,13 +82,13 @@ public class EntityStandType extends StandType {
     }
 
     @Override
-    public void tickUser(LivingEntity user, IPower<?> power) {
+    public void tickUser(LivingEntity user, IStandPower power) {
         super.tickUser(user, power);
         IStandManifestation stand = ((StandPower) power).getStandManifestation();
         if (stand instanceof StandEntity) {
             StandEntity standEntity = (StandEntity) stand;
             if (standEntity.level != user.level) {
-                forceUnsummon(user, (IStandPower) power);
+                forceUnsummon(user, power);
             }
         }
     }

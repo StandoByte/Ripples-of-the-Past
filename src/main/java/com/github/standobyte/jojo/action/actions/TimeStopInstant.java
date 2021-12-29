@@ -6,7 +6,6 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.JojoModUtil;
@@ -28,7 +27,7 @@ public class TimeStopInstant extends StandEntityAction {
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IPower<?> power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
         if (TimeHandler.isTimeStopped(user.level, user.blockPosition())) {
             return ActionConditionResult.NEGATIVE;
         }
@@ -36,10 +35,9 @@ public class TimeStopInstant extends StandEntityAction {
     }
     
     @Override
-    public void perform(World world, LivingEntity user, IPower<?> power, ActionTarget target) {
-        IStandPower standPower = (IStandPower) power;
+    protected void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
         StandEntity stand = power.isActive() ? (StandEntity) getPerformer(user, power) : null;
-        int timeStopTicks = TimeHandler.getTimeStopTicks(getExpRequirement(), standPower, user, INonStandPower.getNonStandPowerOptional(user));
+        int timeStopTicks = TimeHandler.getTimeStopTicks(getXpRequirement(), power, user, INonStandPower.getNonStandPowerOptional(user));
         JojoModUtil.playSound(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, user.getX(), user.getY(), user.getZ(), 
                 ModSounds.TIME_STOP_BLINK.get(), SoundCategory.AMBIENT, 5.0F, 1.0F, TimeHandler::canPlayerSeeInStoppedTime);
         if (!world.isClientSide()) {
@@ -71,7 +69,7 @@ public class TimeStopInstant extends StandEntityAction {
             }
             
             user.teleportTo(blinkPos.x, blinkPos.y, blinkPos.z);
-            standPower.setExp(standPower.getExp() + 4);
+            power.setXp(power.getXp() + 4);
             if (stand != null) {
                 stand.setStandPose(StandPose.NONE);
                 stand.setAlpha(1.0F);

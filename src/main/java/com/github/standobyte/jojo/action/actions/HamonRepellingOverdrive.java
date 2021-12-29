@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.action.actions;
 
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
@@ -21,13 +20,13 @@ public class HamonRepellingOverdrive extends HamonAction {
     }
     
     @Override
-    public void perform(World world, LivingEntity user, IPower<?> power, ActionTarget target) {
+    protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
-            HamonData hamon = ((INonStandPower) power).getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
+            HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
             float effectStr = (float) hamon.getHamonControlLevel() / (float) HamonData.MAX_STAT_LEVEL;
             int resistDuration = 100 + MathHelper.floor(400F * effectStr);
             int resistLvl = MathHelper.floor(2.5F * effectStr);
-            hamon.hamonPointsFromAction(HamonStat.CONTROL, getManaCost());
+            hamon.hamonPointsFromAction(HamonStat.CONTROL, getEnergyCost());
             user.addEffect(new EffectInstance(Effects.DAMAGE_RESISTANCE, resistDuration, resistLvl));
             HamonPowerType.createHamonSparkParticlesEmitter(user, effectStr / 2F);
         }

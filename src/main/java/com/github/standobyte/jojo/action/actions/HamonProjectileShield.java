@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.action.actions;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.HamonProjectileShieldEntity;
-import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
@@ -16,7 +16,7 @@ public class HamonProjectileShield extends HamonAction {
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IPower<?> power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
         ItemStack heldItemStack = performer.getMainHandItem();
         if (!heldItemStack.isEmpty()) {
             return conditionMessage("hand");
@@ -25,7 +25,7 @@ public class HamonProjectileShield extends HamonAction {
     }
     
     @Override
-    public void onStartedHolding(World world, LivingEntity user, IPower<?> power, ActionTarget target, boolean requirementsFulfilled) {
+    public void startedHolding(World world, LivingEntity user, INonStandPower power, ActionTarget target, boolean requirementsFulfilled) {
         if (!world.isClientSide() && requirementsFulfilled) {
             world.addFreshEntity(new HamonProjectileShieldEntity(world, user));
         }

@@ -6,7 +6,6 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.action.actions.StandAction;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.init.ModStandTypes;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
@@ -28,7 +27,7 @@ import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
-public abstract class StandType extends ForgeRegistryEntry<StandType> implements IPowerType<StandType> {
+public abstract class StandType extends ForgeRegistryEntry<StandType> implements IPowerType<IStandPower, StandType> {
     private final int tier;
     private final int color;
     private final ITextComponent partName;
@@ -57,11 +56,6 @@ public abstract class StandType extends ForgeRegistryEntry<StandType> implements
     public int getColor() {
         return color;
     }
-    
-    @Override
-    public boolean canTickMana(LivingEntity user, IPower<?> power) {
-        return true;
-    }
 
     @Override
     public boolean isReplaceableWith(StandType newType) {
@@ -69,9 +63,9 @@ public abstract class StandType extends ForgeRegistryEntry<StandType> implements
     }
 
     @Override
-    public void tickUser(LivingEntity user, IPower<?> power) {
+    public void tickUser(LivingEntity user, IStandPower power) {
         if (!power.canUsePower()) {
-            forceUnsummon(user, (IStandPower) power);
+            forceUnsummon(user, power);
         }
     }
     
@@ -83,6 +77,24 @@ public abstract class StandType extends ForgeRegistryEntry<StandType> implements
     @Override
     public StandAction[] getAbilities() {
         return abilities;
+    }
+    
+    public boolean usesStamina() {
+        return false;
+    }
+    
+    public float getMaxStamina(IStandPower power) {
+        return 1000;
+    }
+    
+    public float getStaminaRegen(IStandPower power) {
+        return 1;
+    }
+    
+    public static final float MAX_RESOLVE = 1000;
+    public static final float RESOLVE_DECAY = 1;
+    public boolean usesResolve() {
+        return false;
     }
     
     @Override
@@ -107,7 +119,7 @@ public abstract class StandType extends ForgeRegistryEntry<StandType> implements
     }
     
     @Override
-    public String getManaString() {
+    public String getEnergyString() {
         return "stand";
     }
     
@@ -181,7 +193,7 @@ public abstract class StandType extends ForgeRegistryEntry<StandType> implements
                     return type != null ? type.getExpRewardMultiplier() : 1;
                 }).orElse(1);
                 expToAdd = (int) ((float) expToAdd * dead.getMaxHealth() / 20F);
-                stand.setExp(stand.getExp() + expToAdd);
+                stand.setXp(stand.getXp() + expToAdd);
             }
         });
     }

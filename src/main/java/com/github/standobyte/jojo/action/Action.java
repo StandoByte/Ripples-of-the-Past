@@ -19,11 +19,9 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
-public abstract class Action extends ForgeRegistryEntry<Action> {
+public abstract class Action<P extends IPower<?>> extends ForgeRegistryEntry<Action<?>> {
     private static Map<Supplier<? extends Action>, Supplier<? extends Action>> SHIFT_VARIATIONS = new HashMap<>();
     
-    private final float manaCost;
-    private final float heldTickManaCost;
     private final int holdDurationToFire;
     private final int holdDurationMax;
     private final float heldSlowDownFactor;
@@ -40,8 +38,6 @@ public abstract class Action extends ForgeRegistryEntry<Action> {
     private Action baseVariation;
     
     public Action(Action.AbstractBuilder<?> builder) {
-        this.manaCost = builder.manaCost;
-        this.heldTickManaCost = builder.heldTickManaCost;
         this.holdDurationMax = builder.holdDurationMax;
         this.holdDurationToFire = builder.holdDurationToFire;
         this.heldSlowDownFactor = builder.heldSlowDownFactor;
@@ -79,7 +75,11 @@ public abstract class Action extends ForgeRegistryEntry<Action> {
         }
     }
     
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IPower<?> power, ActionTarget target) {
+    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, P power, ActionTarget target) {
+        return checkSpecificConditions(user, performer, power, target);
+    }
+    
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, P power, ActionTarget target) {
         return ActionConditionResult.POSITIVE;
     }
     
@@ -104,47 +104,44 @@ public abstract class Action extends ForgeRegistryEntry<Action> {
         return baseVariation != null;
     }
     
-    public void perform(World world, LivingEntity user, IPower<?> power, ActionTarget target) {}
+    public void onPerform(World world, LivingEntity user, P power, ActionTarget target) {
+        perform(world, user, power, target);
+    }
     
-    public void onStartedHolding(World world, LivingEntity user, IPower<?> power, ActionTarget target, boolean requirementsFulfilled) {}
+    protected void perform(World world, LivingEntity user, P power, ActionTarget target) {}
     
-    public void onHoldTickUser(World world, LivingEntity user, IPower<?> power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {}
+    public void startedHolding(World world, LivingEntity user, P power, ActionTarget target, boolean requirementsFulfilled) {}
     
-    public void onStoppedHolding(World world, LivingEntity user, IPower<?> power, int ticksHeld) {}
+    public void onHoldTick(World world, LivingEntity user, P power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
+        holdTick(world, user, power, ticksHeld, target, requirementsFulfilled);
+    }
+    
+    protected void holdTick(World world, LivingEntity user, P power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {}
+    
+    public void stoppedHolding(World world, LivingEntity user, P power, int ticksHeld) {}
     
     public boolean isHeldSentToTracking() {
         return false;
     }
     
-    public void onHoldTickClientEffect(LivingEntity user, IPower<?> power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {}
+    public void onHoldTickClientEffect(LivingEntity user, P power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {}
     
-    public LivingEntity getPerformer(LivingEntity user, IPower<?> power) {
+    public LivingEntity getPerformer(LivingEntity user, P power) { // FIXME 
         return user;
     }
 
-    public void updatePerformer(World world, LivingEntity user, IPower<?> power) {}
+    public void updatePerformer(World world, LivingEntity user, P power) {}
     
-    protected ActionTarget aim(World world, LivingEntity user, IPower<?> power, double range) {
+    protected ActionTarget aim(World world, LivingEntity user, P power, double range) {
         return ActionTarget.fromRayTraceResult(JojoModUtil.rayTrace(user, range, entity -> 
         entity instanceof LivingEntity && user.canAttack((LivingEntity) entity)));
-    }
-    
-    public float getManaNeeded(int ticksHeld, IPower<?> power) {
-        if (getHoldDurationMax() > 0) {
-            return getManaCost() + getHeldTickManaCost() * Math.max((getHoldDurationToFire(power) - ticksHeld), 1);
-        }
-        return getManaCost();
-    }
-    
-    public float getManaCost() {
-        return manaCost;
     }
     
     public int getCooldownValue() {
         return cooldown;
     }
     
-    public int getCooldown(IPower<?> power, int ticksHeld) {
+    public int getCooldown(P power, int ticksHeld) {
         return getCooldownValue();
     }
     
@@ -188,11 +185,11 @@ public abstract class Action extends ForgeRegistryEntry<Action> {
     }
     
     @Nullable
-    protected SoundEvent getShout(LivingEntity user, IPower<?> power, ActionTarget target, boolean wasActive) {
+    protected SoundEvent getShout(LivingEntity user, P power, ActionTarget target, boolean wasActive) {
         return shoutSupplier.get();
     }
     
-    public void playVoiceLine(LivingEntity user, IPower<?> power, ActionTarget target, boolean wasActive, boolean shift) {
+    public void playVoiceLine(LivingEntity user, P power, ActionTarget target, boolean wasActive, boolean shift) {
         if (!shift || isShiftVariation()) {
             SoundEvent shout = getShout(user, power, target, wasActive);
             if (shout != null) {
@@ -201,15 +198,11 @@ public abstract class Action extends ForgeRegistryEntry<Action> {
         }
     }
     
-    public float getHeldTickManaCost() {
-        return heldTickManaCost;
-    }
-    
     public float getHeldSlowDownFactor() {
         return heldSlowDownFactor;
     }
     
-    public int getHoldDurationToFire(IPower<?> power) { 
+    public int getHoldDurationToFire(P power) { 
         return holdDurationToFire;
     }
     
@@ -228,17 +221,17 @@ public abstract class Action extends ForgeRegistryEntry<Action> {
         return this.translationKey;
     }
     
-    public ITextComponent getName(IPower<?> power) {
+    public ITextComponent getName(P power) {
         return getTranslatedName(power, getTranslationKey());
     }
     
-    public ITextComponent getNameShortened(IPower<?> power) {
+    public ITextComponent getNameShortened(P power) {
         return ClientUtil.shortenedTranslationExists(getTranslationKey()) ? 
                 getTranslatedName(power, ClientUtil.getShortenedTranslationKey(getTranslationKey()))
                 : getName(power);
     }
     
-    protected TranslationTextComponent getTranslatedName(IPower<?> power, String key) {
+    protected TranslationTextComponent getTranslatedName(P power, String key) {
         return new TranslationTextComponent(key);
     }
     
@@ -271,8 +264,6 @@ public abstract class Action extends ForgeRegistryEntry<Action> {
     }
     
     protected abstract static class AbstractBuilder<T extends Action.AbstractBuilder<T>> {
-        private float manaCost = 0;
-        private float heldTickManaCost = 0;
         private int holdDurationToFire = 0;
         private int holdDurationMax = 0;
         private float heldSlowDownFactor = 1.0F;
@@ -288,11 +279,6 @@ public abstract class Action extends ForgeRegistryEntry<Action> {
         private boolean cancelsVanillaClick = true;
         private Supplier<SoundEvent> shoutSupplier = () -> null;
         protected Supplier<? extends Action> shiftVariationOf = null;
-        
-        public T manaCost(float manaCost) {
-            this.manaCost = manaCost;
-            return getThis();
-        }
         
         public T cooldown(int cooldown) {
             this.cooldown = cooldown;
@@ -346,21 +332,19 @@ public abstract class Action extends ForgeRegistryEntry<Action> {
             return getThis();
         }
         
-        public T holdType(float tickManaCost, int maxHoldTicks) {
+        public T holdType(int maxHoldTicks) {
             this.holdDurationToFire = 0;
             this.holdDurationMax = maxHoldTicks;
-            this.heldTickManaCost = tickManaCost;
             return getThis();
         }
         
-        public T holdType(float tickManaCost) {
-            return holdType(tickManaCost, Integer.MAX_VALUE);
+        public T holdType() {
+            return holdType(Integer.MAX_VALUE);
         }
         
-        public T holdToFire(int ticksToFire, boolean continueHolding, float tickManaCost) {
+        public T holdToFire(int ticksToFire, boolean continueHolding) {
             this.holdDurationToFire = ticksToFire;
             this.holdDurationMax = continueHolding ? Integer.MAX_VALUE : ticksToFire;
-            this.heldTickManaCost = tickManaCost;
             return getThis();
         }
         

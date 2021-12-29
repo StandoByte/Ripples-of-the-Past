@@ -3,7 +3,6 @@ package com.github.standobyte.jojo.action.actions;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.AfterimageEntity;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
@@ -24,8 +23,8 @@ public class HamonSpeedBoost extends HamonAction {
     }
     
     @Override
-    public void perform(World world, LivingEntity user, IPower<?> power, ActionTarget target) {
-        HamonData hamon = ((INonStandPower) power).getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
+    protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
+        HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
         float effectStr = (float) hamon.getHamonControlLevel() / (float) HamonData.MAX_STAT_LEVEL;
         int speedLvl = MathHelper.floor(1.5F * effectStr);
         int hasteLvl = 0;
@@ -43,12 +42,12 @@ public class HamonSpeedBoost extends HamonAction {
                 }
             }
             if (!user.hasEffect(Effects.MOVEMENT_SPEED)) {
-                hamon.hamonPointsFromAction(HamonStat.CONTROL, getManaCost());
+                hamon.hamonPointsFromAction(HamonStat.CONTROL, getEnergyCost());
             }
             user.addEffect(new EffectInstance(Effects.MOVEMENT_SPEED, duration, speedLvl));
             user.addEffect(new EffectInstance(Effects.DIG_SPEED, duration, hasteLvl));
         }
-        HamonPowerType.createHamonSparkParticles(power.getUser().level, 
-                user instanceof PlayerEntity ? (PlayerEntity) user : null, power.getUser().position(), (speedLvl + 1) * 0.25F);
+        // FIXME test particles here (was written weird)
+        HamonPowerType.createHamonSparkParticles(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, user.position(), (speedLvl + 1) * 0.25F);
     }
 }

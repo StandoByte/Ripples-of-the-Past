@@ -26,7 +26,7 @@ public class VampirismFlags extends TypeSpecificData {
             if (oldType == ModNonStandPowers.HAMON.get()) {
                 setVampireHamonUser(true);
             }
-            power.addMana(300);
+            power.addEnergy(300);
         }
     }
 

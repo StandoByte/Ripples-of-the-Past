@@ -76,7 +76,7 @@ public class ClackersItem extends Item {
         }
         if (!world.isClientSide()) {
             if (!INonStandPower.getNonStandPowerOptional(entity).map(power -> 
-            power.consumeMana(ticksUsed <= ticksMaxPower ? CHARGE_TICK_COST : UPKEEP_TICK_COST)).orElse(false)) {
+            power.consumeEnergy(ticksUsed <= ticksMaxPower ? CHARGE_TICK_COST : UPKEEP_TICK_COST)).orElse(false)) {
                 entity.releaseUsingItem();
                 return;
             }
@@ -139,7 +139,7 @@ public class ClackersItem extends Item {
         power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(hamon -> {
             if (hamon.isSkillLearned(HamonSkill.CLACKER_VOLLEY)) {
                 if (!user.level.isClientSide()) {
-                    if (power.consumeMana(200) && ModDamageSources.dealHamonDamage(target, 0.15F, user, null)) {
+                    if (power.consumeEnergy(200) && ModDamageSources.dealHamonDamage(target, 0.15F, user, null)) {
                         target.invulnerableTime = 0;
                         hamon.hamonPointsFromAction(HamonStat.STRENGTH, 200);
                         return true;
