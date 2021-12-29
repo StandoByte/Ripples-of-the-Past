@@ -48,8 +48,9 @@ public class SyncStandExpPacket {
                         updateToasts(ActionType.ATTACK, power, oldAttacks, toastGui);
                         updateToasts(ActionType.ABILITY, power, oldAbilities, toastGui);
                     }
-                    ActionsOverlayGui.getInstance().updateActionName(ActionType.ATTACK);
-                    ActionsOverlayGui.getInstance().updateActionName(ActionType.ABILITY);
+                    // FIXME action learning progress
+//                    ActionsOverlayGui.getInstance().updateActionName(ActionType.ATTACK);
+//                    ActionsOverlayGui.getInstance().updateActionName(ActionType.ABILITY);
                 }
                 else {
                     power.setExp(msg.exp);

@@ -23,7 +23,6 @@ import com.github.standobyte.jojo.network.packets.fromserver.SyncManaRegenPoints
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncHeldActionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncPowerTypePacket;
-import com.github.standobyte.jojo.network.packets.fromserver.UnfulfilledActionConditionPacket;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -313,7 +312,8 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
             
             if (message != null) {
                 serverPlayerUser.ifPresent(player -> {
-                    PacketManager.sendToClient(new UnfulfilledActionConditionPacket(message), player);
+                    player.displayClientMessage(message, true);
+//                    PacketManager.sendToClient(new UnfulfilledActionConditionPacket(message), player);
                 });
             }
         }
