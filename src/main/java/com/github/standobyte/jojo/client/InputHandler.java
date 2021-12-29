@@ -1,33 +1,26 @@
 package com.github.standobyte.jojo.client;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_B;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_G;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_H;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_M;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_O;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_UNKNOWN;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_V;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.ui.ActionsOverlayGui;
-import com.github.standobyte.jojo.client.ui.ActionsOverlayGui.UiMode;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.ItemProjectileEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromclient.ClClickActionPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonStartMeditationPacket;
-import com.github.standobyte.jojo.network.packets.fromclient.ClHeldActionTargetPacket;
-import com.github.standobyte.jojo.network.packets.fromclient.ClOnLeapPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClStopHeldActionPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandManualControlPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandSummonPacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.ActionType;
+import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -41,7 +34,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.MovementInput;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.EntityRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.RayTraceResult.Type;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -63,11 +55,8 @@ public class InputHandler {
     private ActionsOverlayGui actionsOverlay;
     private IStandPower standPower;
     private INonStandPower nonStandPower;
-    private KeyBinding switchMode;
-    private KeyBinding scrollAttack;
-    private KeyBinding scrollAbility;
-    private KeyBinding attackHotbar;
-    private KeyBinding abilityHotbar;
+    public KeyBinding nonStandHotbar;
+    public KeyBinding standHotbar;
     private KeyBinding toggleStand;
     private KeyBinding standRemoteControl;
     public KeyBinding hamonSkillsWindow;
@@ -96,11 +85,8 @@ public class InputHandler {
     }
     
     public void registerKeyBindings() {
-        ClientRegistry.registerKeyBinding(switchMode = new KeyBinding(JojoMod.MOD_ID + ".key.switch_mode", GLFW_KEY_G, KEY_CATEGORY));
-        ClientRegistry.registerKeyBinding(scrollAttack = new KeyBinding(JojoMod.MOD_ID + ".key.scroll_attack", GLFW_KEY_V, KEY_CATEGORY));
-        ClientRegistry.registerKeyBinding(scrollAbility = new KeyBinding(JojoMod.MOD_ID + ".key.scroll_ability", GLFW_KEY_B, KEY_CATEGORY));
-        ClientRegistry.registerKeyBinding(attackHotbar = new KeyBinding(JojoMod.MOD_ID + ".key.attack_hotbar", GLFW_KEY_UNKNOWN, KEY_CATEGORY));
-        ClientRegistry.registerKeyBinding(abilityHotbar = new KeyBinding(JojoMod.MOD_ID + ".key.ability_hotbar", GLFW_KEY_UNKNOWN, KEY_CATEGORY));
+        ClientRegistry.registerKeyBinding(nonStandHotbar = new KeyBinding(JojoMod.MOD_ID + ".key.non_stand_hotbar", GLFW_KEY_V, KEY_CATEGORY));
+        ClientRegistry.registerKeyBinding(standHotbar = new KeyBinding(JojoMod.MOD_ID + ".key.stand_hotbar", GLFW_KEY_B, KEY_CATEGORY));
         ClientRegistry.registerKeyBinding(toggleStand = new KeyBinding(JojoMod.MOD_ID + ".key.toggle_stand", GLFW_KEY_M, KEY_CATEGORY));
         ClientRegistry.registerKeyBinding(standRemoteControl = new KeyBinding(JojoMod.MOD_ID + ".key.stand_remote_control", GLFW_KEY_O, KEY_CATEGORY));
         ClientRegistry.registerKeyBinding(hamonSkillsWindow = new KeyBinding(JojoMod.MOD_ID + ".key.hamon_skills_window", GLFW_KEY_H, KEY_CATEGORY));
@@ -111,19 +97,8 @@ public class InputHandler {
         if (standPower == null || nonStandPower == null || actionsOverlay == null) {
             return;
         }
-
-        if (actionsOverlay.getMode() != UiMode.NONE && !mc.player.isSpectator()) {
-            boolean scrollAttack = attackHotbar.isDown();
-            boolean scrollAbility = abilityHotbar.isDown();
-            if (scrollAttack || scrollAbility) {
-                if (scrollAttack) {
-                    actionsOverlay.scrollActiveAttack(event.getScrollDelta() > 0.0D);
-                }
-                if (scrollAbility) {
-                    actionsOverlay.scrollActiveAbility(event.getScrollDelta() > 0.0D);
-                }
-                event.setCanceled(true);
-            }
+        if (actionsOverlay.scrollAction(event.getScrollDelta() > 0)) {
+            event.setCanceled(true);
         }
     }
     
@@ -134,20 +109,14 @@ public class InputHandler {
         }
         
         if (event.phase == TickEvent.Phase.START) {
-            if (actionsOverlay.getMode() != UiMode.NONE && !mc.player.isSpectator()) {
-                boolean chooseAttack = attackHotbar.isDown();
-                boolean chooseAbility = abilityHotbar.isDown();
-                if (chooseAttack || chooseAbility) {
-                    for (int i = 0; i < 9; i++) {
-                        if (mc.options.keyHotbarSlots[i].consumeClick()) {
-                            if (chooseAttack) {
-                                actionsOverlay.selectAction(ActionType.ATTACK, i);
-                            }
-                            if (chooseAbility) {
-                                actionsOverlay.selectAction(ActionType.ABILITY, i);
-                            }
-                        }
+            if (actionsOverlay.isActive() && !mc.player.isSpectator()) {
+                for (int i = 0; i < 9; i++) {
+                    if (mc.options.keyHotbarSlots[i].consumeClick()) {
+                        actionsOverlay.selectAction(i);
                     }
+                }
+                if (mc.options.keySwapOffhand.consumeClick()) {
+                    actionsOverlay.swapRmbAction(mc.player.isShiftKeyDown());
                 }
             }
         }
@@ -156,29 +125,26 @@ public class InputHandler {
                 leftClickBlockDelay--;
             }
             
-            if (switchMode.consumeClick()) {
-                actionsOverlay.scrollMode();
+            if (standHotbar.consumeClick()) {
+                actionsOverlay.setMode(PowerClassification.STAND);
             }
             
-            if (scrollAttack.consumeClick()) {
-                actionsOverlay.scrollActiveAttack(mc.player.isShiftKeyDown());
+            if (nonStandHotbar.consumeClick()) {
+                actionsOverlay.setMode(PowerClassification.NON_STAND);
             }
             
-            if (scrollAbility.consumeClick()) {
-                actionsOverlay.scrollActiveAbility(mc.player.isShiftKeyDown());
-            }
 
             if (toggleStand.consumeClick()) {
                 if (!standPower.isActive()) {
-                    actionsOverlay.setMode(UiMode.STAND);
+                    actionsOverlay.onStandSummon();
+                }
+                else {
+                    actionsOverlay.onStandUnsummon();
                 }
                 PacketManager.sendToServer(new ClToggleStandSummonPacket());
             }
             
             if (standRemoteControl.consumeClick()) {
-                if (!standPower.isActive()) {
-                    actionsOverlay.setMode(UiMode.STAND);
-                }
                 PacketManager.sendToServer(new ClToggleStandManualControlPacket());
             }
             
@@ -199,59 +165,59 @@ public class InputHandler {
                                     : "jojo.chat.message.no_hamon"), Util.NIL_UUID);
                 }
             }
-            
-            if (!mc.options.keyAttack.isDown()) {
-                leftClickBlockDelay = 0;
-            }
-            
-            switch (actionsOverlay.getMode()) {
-            case STAND:
-                updateHeldAction(standPower);
-                clearHeldAction(nonStandPower, false);
-                break;
-            case NON_STAND:
-                clearHeldAction(standPower, false);
-                updateHeldAction(nonStandPower);
-                break;
-            default:
-                clearHeldAction(standPower, false);
-                clearHeldAction(nonStandPower, false);
-                break;
-            }
+            // FIXME hold
+//            if (!mc.options.keyAttack.isDown()) {
+//                leftClickBlockDelay = 0;
+//            }
+//            
+//            switch (actionsOverlay.getMode()) {
+//            case STAND:
+//                updateHeldAction(standPower);
+//                clearHeldAction(nonStandPower, false);
+//                break;
+//            case NON_STAND:
+//                clearHeldAction(standPower, false);
+//                updateHeldAction(nonStandPower);
+//                break;
+//            default:
+//                clearHeldAction(standPower, false);
+//                clearHeldAction(nonStandPower, false);
+//                break;
+//            }
         }
     }
-    
-    private void updateHeldAction(IPower<?> power) {
-        if (heldActionType != null) {
-            Action heldAction = power.getHeldAction();
-            if (heldAction != null) {
-                KeyBinding key;
-                switch (heldActionType) {
-                case ATTACK:
-                    key = mc.options.keyAttack;
-                    break;
-                case ABILITY:
-                    key = mc.options.keyUse;
-                    break;
-                default:
-                    return;
-                }
-                Action selectedAction = actionsOverlay.getSelectedAction(heldActionType, false);
-                if (selectedAction != null && heldShiftVariation) {
-                    selectedAction = selectedAction.getShiftVariationIfPresent();
-                }
-                if (heldAction != selectedAction) {
-                    clearHeldAction(power, false);
-                }
-                else if (!key.isDown()) {
-                    clearHeldAction(power, true);
-                }
-                else {
-                    PacketManager.sendToServer(ClHeldActionTargetPacket.withRayTraceResult(power.getPowerClassification(), mc.hitResult));
-                }
-            }
-        }
-    }
+//    
+//    private void updateHeldAction(IPower<?> power) {
+//        if (heldActionType != null) {
+//            Action heldAction = power.getHeldAction();
+//            if (heldAction != null) {
+//                KeyBinding key;
+//                switch (heldActionType) {
+//                case ATTACK:
+//                    key = mc.options.keyAttack;
+//                    break;
+//                case ABILITY:
+//                    key = mc.options.keyUse;
+//                    break;
+//                default:
+//                    return;
+//                }
+//                Action selectedAction = actionsOverlay.getSelectedAction(heldActionType, false);
+//                if (selectedAction != null && heldShiftVariation) {
+//                    selectedAction = selectedAction.getShiftVariationIfPresent();
+//                }
+//                if (heldAction != selectedAction) {
+//                    clearHeldAction(power, false);
+//                }
+//                else if (!key.isDown()) {
+//                    clearHeldAction(power, true);
+//                }
+//                else {
+//                    PacketManager.sendToServer(ClHeldActionTargetPacket.withRayTraceResult(power.getPowerClassification(), mc.hitResult));
+//                }
+//            }
+//        }
+//    }
     
     public void clearHeldAction(IPower<?> power, boolean shouldFire) {
         if (power.getHeldAction() != null) {
@@ -288,43 +254,44 @@ public class InputHandler {
         }
         
         // handling stun effect
-        if (actionsOverlay.noActionSelected(actionType)) {
-            if (mc.player.hasEffect(ModEffects.STUN.get())) {
-                event.setCanceled(true);
-            }
-            return;
-        }
-
-        // mod powers stuff
-        IPower<?> power = actionsOverlay.getCurrentPower();;
-        if (power != null) {
-            if (event.isAttack() && mc.hitResult.getType() == Type.BLOCK && leftClickBlockDelay > 0 || 
-                    power.getHeldAction() != null) {
-                event.setSwingHand(false);
-                event.setCanceled(true);
-                return;
-            }
-            
-            int index = actionsOverlay.getIndex(actionType);
-            boolean shift = mc.player.isShiftKeyDown();
-            RayTraceResult target = mc.hitResult;
-            PacketManager.sendToServer(ClClickActionPacket.withRayTraceResult(power.getPowerClassification(), actionType, shift, index, target));
-            Action action = actionsOverlay.getSelectedAction(actionType);
-            ActionTarget actionTarget = ActionTarget.fromRayTraceResult(target);
-            boolean actionWentOff = power.onClickAction(actionType, index, shift, actionTarget);
-            if (actionWentOff && action.getHoldDurationMax() > 0) {
-                heldActionType = actionType;
-                heldShiftVariation = actionsOverlay.shiftVarSelected(action, shift);
-            }
-            if (event.isAttack() && target.getType() == RayTraceResult.Type.BLOCK) {
-                leftClickBlockDelay = 4;
-            }
-            if (actionWentOff) {
-                event.setSwingHand(action.swingHand());
-                event.setCanceled(action.cancelsVanillaClick());
-            }
-        }
-        
+        // FIXME stun
+//        if (actionsOverlay.noActionSelected(actionType)) {
+//            if (mc.player.hasEffect(ModEffects.STUN.get())) {
+//                event.setCanceled(true);
+//            }
+//            return;
+//        }
+//
+//        // FIXME click
+//        // mod powers stuff
+//        IPower<?> power = actionsOverlay.getCurrentPower();
+//        if (power != null) {
+//            if (event.isAttack() && mc.hitResult.getType() == Type.BLOCK && leftClickBlockDelay > 0 || 
+//                    power.getHeldAction() != null) {
+//                event.setSwingHand(false);
+//                event.setCanceled(true);
+//                return;
+//            }
+//            
+//            int index = actionsOverlay.getIndex(actionType);
+//            boolean shift = mc.player.isShiftKeyDown();
+//            RayTraceResult target = mc.hitResult;
+//            PacketManager.sendToServer(ClClickActionPacket.withRayTraceResult(power.getPowerClassification(), actionType, shift, index, target));
+//            Action action = actionsOverlay.getSelectedAction(actionType);
+//            ActionTarget actionTarget = ActionTarget.fromRayTraceResult(target);
+//            boolean actionWentOff = power.onClickAction(actionType, index, shift, actionTarget);
+//            if (actionWentOff && action.getHoldDurationMax() > 0) {
+//                heldActionType = actionType;
+//                heldShiftVariation = actionsOverlay.shiftVarSelected(power, action, shift);
+//            }
+//            if (event.isAttack() && target.getType() == RayTraceResult.Type.BLOCK) {
+//                leftClickBlockDelay = 4;
+//            }
+//            if (actionWentOff) {
+//                event.setSwingHand(action.swingHand());
+//                event.setCanceled(action.cancelsVanillaClick());
+//            }
+//        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -346,18 +313,19 @@ public class InputHandler {
             boolean standSlowedDown = slowDownFromStandEntity(mc.player, input);
             
             if (!mc.player.isPassenger()) {
-                IPower<?> power = actionsOverlay.getCurrentPower();
-                if (power != null) {
-                    if (power.canLeap() && !actionSlowedDown && !standSlowedDown && input.shiftKeyDown && input.jumping) {
-                        float leapStrength = power.leapStrength();
-                        if (leapStrength > 0) {
-                            input.shiftKeyDown = false;
-                            input.jumping = false;
-                            PacketManager.sendToServer(new ClOnLeapPacket(power.getPowerClassification()));
-                            leap(mc.player, input, leapStrength);
-                        }
-                    }
-                }
+                // FIXME leap
+//                IPower<?> power = actionsOverlay.getCurrentPower();
+//                if (power != null) {
+//                    if (power.canLeap() && !actionSlowedDown && !standSlowedDown && input.shiftKeyDown && input.jumping) {
+//                        float leapStrength = power.leapStrength();
+//                        if (leapStrength > 0) {
+//                            input.shiftKeyDown = false;
+//                            input.jumping = false;
+//                            PacketManager.sendToServer(new ClOnLeapPacket(power.getPowerClassification()));
+//                            leap(mc.player, input, leapStrength);
+//                        }
+//                    }
+//                }
                 return;
             }
         }

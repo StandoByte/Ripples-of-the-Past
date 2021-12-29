@@ -161,7 +161,8 @@ public class HierophantGreenEntity extends StandEntity {
     public void onSyncedDataUpdated(DataParameter<?> parameter) {
         super.onSyncedDataUpdated(parameter);
         if (level.isClientSide() && PLACED_BARRIERS.equals(parameter)) {
-            ActionsOverlayGui.getInstance().updateActionName(ModActions.HIEROPHANT_GREEN_BARRIER.get(), ActionType.ABILITY);
+            // FIXME action learning progress
+//            ActionsOverlayGui.getInstance().updateActionName(ModActions.HIEROPHANT_GREEN_BARRIER.get(), ActionType.ABILITY);
         }
     }
     
@@ -169,7 +170,8 @@ public class HierophantGreenEntity extends StandEntity {
     public void remove() {
         super.remove();
         if (level.isClientSide()) {
-            ActionsOverlayGui.getInstance().updateActionName(ModActions.HIEROPHANT_GREEN_BARRIER.get(), ActionType.ABILITY);
+            // FIXME action learning progress
+//            ActionsOverlayGui.getInstance().updateActionName(ModActions.HIEROPHANT_GREEN_BARRIER.get(), ActionType.ABILITY);
         }
     }
 

@@ -7,23 +7,17 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ui.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
-import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.util.TimeHandler;
 import com.github.standobyte.jojo.util.reflection.ClientReflection;
-import com.google.common.base.MoreObjects;
-import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.client.renderer.FirstPersonRenderer;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Timer;
@@ -158,18 +152,20 @@ public class ClientEventHandler {
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onClientTick(ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.START) {
-            ActionsOverlayGui.getInstance().tick();
-        }
-        if (mc.level != null && isTimeStopped(mc.player.blockPosition())) {
+        if (mc.level != null) {
             if (event.phase == TickEvent.Phase.START) {
-                if (!canSeeInStoppedTime) {
-                    ClientReflection.pauseClient(mc);
-                }
+                ActionsOverlayGui.getInstance().tick();
             }
-            else {
-                if (canSeeInStoppedTime && mc.gameRenderer.currentEffect() == null) {
-                    mc.gameRenderer.loadEffect(new ResourceLocation("shaders/post/desaturate.json"));
+            if (isTimeStopped(mc.player.blockPosition())) {
+                if (event.phase == TickEvent.Phase.START) {
+                    if (!canSeeInStoppedTime) {
+                        ClientReflection.pauseClient(mc);
+                    }
+                }
+                else {
+                    if (canSeeInStoppedTime && mc.gameRenderer.currentEffect() == null) {
+                        mc.gameRenderer.loadEffect(new ResourceLocation("shaders/post/desaturate.json"));
+                    }
                 }
             }
         }
@@ -209,18 +205,19 @@ public class ClientEventHandler {
                 if (power.isActionOnCooldown(ModActions.HAMON_ZOOM_PUNCH.get())) {
                     event.setCanceled(true);
                 }
-                else if (ActionsOverlayGui.getInstance().getSelectedAction(ActionType.ATTACK) == ModActions.JONATHAN_OVERDRIVE_BARRAGE.get()) {
-                    FirstPersonRenderer renderer = mc.getItemInHandRenderer();
-                    ClientPlayerEntity player = mc.player;
-                    Hand swingingArm = MoreObjects.firstNonNull(player.swingingArm, Hand.MAIN_HAND);
-                    float f6 = swingingArm == Hand.OFF_HAND ? player.getAttackAnim(event.getPartialTicks()) : 0.0F;
-                    float f7 = 1.0F - MathHelper.lerp(event.getPartialTicks(), ClientReflection.getOffHandHeightPrev(renderer), ClientReflection.getOffHandHeight(renderer));
-                    MatrixStack matrixStack = event.getMatrixStack();
-                    matrixStack.pushPose();
-                    ClientReflection.renderPlayerArm(matrixStack, event.getBuffers(), event.getLight(), f7, f6, player.getMainArm().getOpposite(), renderer);
-                    matrixStack.popPose();
-                    // i've won... but at what cost?
-                }
+                // FIXME two arms
+//                else if (ActionsOverlayGui.getInstance().getSelectedAction(ActionType.ATTACK) == ModActions.JONATHAN_OVERDRIVE_BARRAGE.get()) {
+//                    FirstPersonRenderer renderer = mc.getItemInHandRenderer();
+//                    ClientPlayerEntity player = mc.player;
+//                    Hand swingingArm = MoreObjects.firstNonNull(player.swingingArm, Hand.MAIN_HAND);
+//                    float f6 = swingingArm == Hand.OFF_HAND ? player.getAttackAnim(event.getPartialTicks()) : 0.0F;
+//                    float f7 = 1.0F - MathHelper.lerp(event.getPartialTicks(), ClientReflection.getOffHandHeightPrev(renderer), ClientReflection.getOffHandHeight(renderer));
+//                    MatrixStack matrixStack = event.getMatrixStack();
+//                    matrixStack.pushPose();
+//                    ClientReflection.renderPlayerArm(matrixStack, event.getBuffers(), event.getLight(), f7, f6, player.getMainArm().getOpposite(), renderer);
+//                    matrixStack.popPose();
+//                    // i've won... but at what cost?
+//                }
             });
         }
     }
