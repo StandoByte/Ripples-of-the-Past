@@ -83,6 +83,16 @@ public abstract class StandType extends ForgeRegistryEntry<StandType> implements
         return false;
     }
     
+    public float getMaxStamina(IStandPower power) {
+        return 1000;
+    }
+    
+    public float getStaminaRegen(IStandPower power) {
+        return 1;
+    }
+    
+    public static final float MAX_RESOLVE = 1000;
+    public static final float RESOLVE_DECAY = 1;
     public boolean usesResolve() {
         return false;
     }
@@ -109,7 +119,7 @@ public abstract class StandType extends ForgeRegistryEntry<StandType> implements
     }
     
     @Override
-    public String getManaString() {
+    public String getEnergyString() {
         return "stand";
     }
     

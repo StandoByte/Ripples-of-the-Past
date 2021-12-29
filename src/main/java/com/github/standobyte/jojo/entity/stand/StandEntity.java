@@ -501,7 +501,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     protected float onBlockedAttack(float initialDamageAmount) {
         boolean reduceDamage = true;
         if (userPower != null) {
-            reduceDamage = userPower.consumeMana(initialDamageAmount * type.getStats().getBlockStaminaCostForDmgPoint());
+            reduceDamage = true;//userPower.consumeMana(initialDamageAmount * type.getStats().getBlockStaminaCostForDmgPoint()); // FIXME stamina usage, stand crash
         }
         return reduceDamage ? initialDamageAmount * type.getStats().getBlockDmgFactor() : initialDamageAmount;
     }

@@ -7,6 +7,8 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.ActionConditionResult;
+import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncEnergyPacket;
@@ -96,6 +98,17 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     }
 
     @Override
+    public ActionConditionResult checkRequirements(Action action, LivingEntity performer, ActionTarget target, boolean checkTargetType) {
+        ActionConditionResult result = super.checkRequirements(action, performer, target, checkTargetType);
+        if (!result.isPositive()) {
+            serverPlayerUser.ifPresent(player -> {
+                PacketManager.sendToClient(new SyncEnergyPacket(getEnergy()), player);
+            });
+        }
+        return result;
+    }
+
+    @Override
     public float getEnergy() {
         return energy;
     }
@@ -157,8 +170,14 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     }
     
     @Override
+    public boolean canLeap() {
+        return super.canLeap() && hasEnergy(type.getLeapEnergyCost());
+    }
+    
+    @Override
     public void onLeap() {
         super.onLeap();
+        consumeEnergy(type.getLeapEnergyCost());
         type.onLeap(this);
     }
     
@@ -170,11 +189,6 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     @Override
     public int getLeapCooldownPeriod() {
         return type.getLeapCooldownPeriod();
-    }
-    
-    @Override
-    protected float getLeapManaCost() {
-        return type.getLeapManaCost();
     }
     
     @Override

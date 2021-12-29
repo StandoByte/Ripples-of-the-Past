@@ -104,13 +104,21 @@ public abstract class Action<P extends IPower<?>> extends ForgeRegistryEntry<Act
         return baseVariation != null;
     }
     
+    public void onPerform(World world, LivingEntity user, P power, ActionTarget target) {
+        perform(world, user, power, target);
+    }
+    
     protected void perform(World world, LivingEntity user, P power, ActionTarget target) {}
     
-    public void onStartedHolding(World world, LivingEntity user, P power, ActionTarget target, boolean requirementsFulfilled) {}
+    public void startedHolding(World world, LivingEntity user, P power, ActionTarget target, boolean requirementsFulfilled) {}
     
-    public void onHoldTickUser(World world, LivingEntity user, P power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {}
+    public void onHoldTick(World world, LivingEntity user, P power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
+        holdTick(world, user, power, ticksHeld, target, requirementsFulfilled);
+    }
     
-    public void onStoppedHolding(World world, LivingEntity user, P power, int ticksHeld) {}
+    protected void holdTick(World world, LivingEntity user, P power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {}
+    
+    public void stoppedHolding(World world, LivingEntity user, P power, int ticksHeld) {}
     
     public boolean isHeldSentToTracking() {
         return false;

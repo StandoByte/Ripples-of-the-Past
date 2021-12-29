@@ -16,7 +16,7 @@ public class VampirismHamonSuicide extends VampirismAction {
     }
     
     @Override
-    public void onHoldTickUser(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
+    protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (!world.isClientSide()) {
             if (ticksHeld % 10 == 5) {
                 ModDamageSources.dealHamonDamage(user, 4, user, null);

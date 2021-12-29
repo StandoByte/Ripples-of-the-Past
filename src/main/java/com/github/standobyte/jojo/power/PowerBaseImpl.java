@@ -177,7 +177,7 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
                 player.resetLastActionTime();
             });
             if (action.getHoldDurationMax() > 0) {
-                action.onStartedHolding(user.level, user, this, target, result.isPositive());
+                action.startedHolding(user.level, user, this, target, result.isPositive());
                 if (result.isPositive() || !result.shouldStopHeldAction()) {
                     if (!user.level.isClientSide()) {
                         action.playVoiceLine(user, this, target, wasActive, shift);
@@ -309,9 +309,8 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
     protected void performAction(Action action, ActionTarget target) {
         if (!action.holdOnly()) {
             World world = user.level;
-            action.perform(world, user, this, target);
+            action.onPerform(world, user, this, target);
             if (!world.isClientSide()) {
-                consumeMana(action.getManaCost());
                 setCooldownTimer(action, action.getCooldown(this, -1));
             }
         }
@@ -365,10 +364,7 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
                     sendMessage(result);
                     return;
                 }
-                if (result.isPositive()) {
-                    consumeMana(heldAction.getHeldTickManaCost());
-                }
-                heldAction.onHoldTickUser(world, user, this, heldActionData.getTicks(), target, result.isPositive());
+                heldAction.onHoldTick(world, user, this, heldActionData.getTicks(), target, result.isPositive());
                 if (!world.isClientSide()) {
                     refreshHeldActionTickState(result.isPositive());
                 }
@@ -415,7 +411,7 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
             else {
                 setCooldownTimer(heldAction, heldAction.getCooldown(this, ticksHeld));
             }
-            heldAction.onStoppedHolding(user.level, user, this, ticksHeld);
+            heldAction.stoppedHolding(user.level, user, this, ticksHeld);
             heldActionData = null;
             if (!user.level.isClientSide()) {
                 TrSyncHeldActionPacket packet = TrSyncHeldActionPacket.actionStopped(user.getId(), getPowerClassification());
@@ -431,12 +427,11 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
     
     @Override
     public boolean canLeap() {
-        return hasPower() && user.isOnGround() && hasMana(getLeapManaCost()) && getLeapCooldown() == 0 && isLeapUnlocked() && leapStrength() > 0;
+        return hasPower() && user.isOnGround() && getLeapCooldown() == 0 && isLeapUnlocked() && leapStrength() > 0;
     }
     
     @Override
     public void onLeap() {
-        consumeMana(getLeapManaCost());
         setLeapCooldown(getLeapCooldownPeriod());
     }
     
@@ -455,8 +450,6 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
             });
         }
     }
-    
-    abstract protected float getLeapManaCost();
     
     @Override
     public CompoundNBT writeNBT() {

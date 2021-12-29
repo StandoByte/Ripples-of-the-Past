@@ -29,7 +29,7 @@ public class StandEntityBlock extends StandEntityAction {
     }
     
     @Override
-    public void onStartedHolding(World world, LivingEntity user, IStandPower power, ActionTarget target, boolean requirementsFulfilled) {
+    public void startedHolding(World world, LivingEntity user, IStandPower power, ActionTarget target, boolean requirementsFulfilled) {
         if (!world.isClientSide() && requirementsFulfilled) {
             StandEntity stand;
             if (power.isActive()) {
@@ -46,7 +46,7 @@ public class StandEntityBlock extends StandEntityAction {
     }
     
     @Override
-    public void onStoppedHolding(World world, LivingEntity user, IStandPower power, int ticksHeld) {
+    public void stoppedHolding(World world, LivingEntity user, IStandPower power, int ticksHeld) {
         if (!world.isClientSide() && power.isActive()) {
             ((StandEntity) power.getStandManifestation()).clearTask();
         }

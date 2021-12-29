@@ -16,5 +16,5 @@ public interface IPowerType<P extends IPower<T>, T extends IPowerType<P, T>> ext
     int getExpRewardMultiplier();
     String getTranslationKey();
     ResourceLocation getIconTexture();
-    String getManaString();
+    String getEnergyString();
 }

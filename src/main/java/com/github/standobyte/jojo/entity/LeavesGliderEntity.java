@@ -98,29 +98,29 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
         
         if (!level.isClientSide()) {
             Iterator<INonStandPower> iter = passengerPowers.iterator();
-            boolean infiniteMana = false;
+            boolean infiniteEnergy = false;
             while (iter.hasNext()) {
                 INonStandPower power = iter.next();
                 if (power.getType() != ModNonStandPowers.HAMON.get()) {
                     iter.remove();
                 }
-                else if (!infiniteMana && power.isUserCreative()) {
-                    infiniteMana = true;
+                else if (!infiniteEnergy && power.isUserCreative()) {
+                    infiniteEnergy = true;
                 }
             }
-            if (infiniteMana) {
+            if (infiniteEnergy) {
                 setEnergy(MAX_ENERGY);
             }
             else {
                 setEnergy(Math.max(getEnergy() - 2, 0));
                 float energyToReplenish = MAX_ENERGY - getEnergy();
-                int hamonUsersWithMana = passengerPowers.size();
-                while (energyToReplenish > 0 && hamonUsersWithMana > 0) {
-                    float energyFromEach = energyToReplenish / hamonUsersWithMana;
+                int hamonUsersWithEnergy = passengerPowers.size();
+                while (energyToReplenish > 0 && hamonUsersWithEnergy > 0) {
+                    float energyFromEach = energyToReplenish / hamonUsersWithEnergy;
                     for (INonStandPower power : passengerPowers) {
                         float energyConsumed = consumeEnergy(power, energyFromEach);
                         if (energyConsumed < energyFromEach) {
-                            hamonUsersWithMana--;
+                            hamonUsersWithEnergy--;
                         }
                         energyToReplenish -= energyConsumed;
                     }

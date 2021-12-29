@@ -20,7 +20,7 @@ public class MagiciansRedCrossfireHurricane extends StandEntityAction {
     }
     
     @Override
-    public void onStartedHolding(World world, LivingEntity user, IStandPower power, ActionTarget target, boolean requirementsFulfilled) {
+    public void startedHolding(World world, LivingEntity user, IStandPower power, ActionTarget target, boolean requirementsFulfilled) {
         if (!world.isClientSide() && requirementsFulfilled) {
             LivingEntity entity = getPerformer(user, power);
             if (entity instanceof StandEntity) {
@@ -56,7 +56,7 @@ public class MagiciansRedCrossfireHurricane extends StandEntityAction {
     }
     
     @Override
-    public void onStoppedHolding(World world, LivingEntity user, IStandPower power, int ticksHeld) {
+    public void stoppedHolding(World world, LivingEntity user, IStandPower power, int ticksHeld) {
         if (!world.isClientSide()) {
             LivingEntity entity = getPerformer(user, power);
             if (entity instanceof StandEntity) {

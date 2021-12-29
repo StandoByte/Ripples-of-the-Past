@@ -25,7 +25,7 @@ public class HamonTornadoOverdrive extends HamonAction {
     }
      
     @Override
-    public void onHoldTickUser(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
+    protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
             user.fallDistance = 0;
             Vector3d movement = user.getDeltaMovement();

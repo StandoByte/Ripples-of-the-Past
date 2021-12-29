@@ -109,7 +109,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     
     @Override
     public void onLeap(INonStandPower power) {
-        power.getTypeSpecificData(this).get().hamonPointsFromAction(HamonStat.CONTROL, getLeapManaCost());
+        power.getTypeSpecificData(this).get().hamonPointsFromAction(HamonStat.CONTROL, getLeapEnergyCost());
 //        createHamonSparkParticles(power.getUser().level, null, power.getUser().position(), getLeapStrength(power) * 0.15F);
     }
     
@@ -126,13 +126,13 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     }
     
     @Override
-    public float getLeapManaCost() {
+    public float getLeapEnergyCost() {
         return 100;
     }
     
     @Override
     public float getMaxEnergyFactor(INonStandPower power) {
-        return power.getTypeSpecificData(this).get().calcManaLimitFactor();
+        return power.getTypeSpecificData(this).get().getEnergyLimitFactor();
     }
 
     @Override
@@ -141,7 +141,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
         if (user.getAirSupply() < user.getMaxAirSupply() && !user.hasEffect(ModEffects.FREEZE.get())) {
             return 0;
         }
-        float amount = power.getTypeSpecificData(this).get().calcManaRegenPoints();
+        float amount = power.getTypeSpecificData(this).get().getEnergyRegenPoints();
         if (user.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.BREATH_CONTROL_MASK.get()) {
             amount *= 2F / 3F;
         }
@@ -220,7 +220,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
 //                            Entity hooked = player.fishing.getHookedIn();
 //                            if (hooked != null) {
 //                                float energyCost = 30;
-//                                if (power.consumeMana(energyCost)) {
+//                                if (power.consumeEnergy(energyCost)) {
 //                                    ModDamageSources.dealHamonDamage(hooked, 0.0125F, player.fishing, player);
 //                                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, energyCost);
 //                                }

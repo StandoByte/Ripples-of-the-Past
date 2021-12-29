@@ -225,22 +225,22 @@ public class HamonData extends TypeSpecificData {
         hamonDamageFactor = (float) (Math.pow(1.03, hamonStrengthLevel) * (1 + 0.05 * breathingTechniqueLevel));
     }
 
-    public float calcManaLimitFactor() {
+    public float getEnergyLimitFactor() {
         return 1F + getHamonControlLevel() * 0.033F;
     }
 
-    public float calcManaRegenPoints() {
+    public float getEnergyRegenPoints() {
         return (1F + getHamonControlLevel() * 0.033F) * (1F + (int) getBreathingLevel() * 0.08F);
     }
 
-    private static final float MANA_PER_POINT = 500F;
+    private static final float ENERGY_PER_POINT = 500F;
     public void hamonPointsFromAction(HamonStat stat, float energyCost) {
         if (isSkillLearned(HamonSkill.NATURAL_TALENT)) {
             energyCost *= 2;
         }
         energyCost *= JojoModConfig.COMMON.hamonPointsMultiplier.get().floatValue();
-        int points = (int) (energyCost / MANA_PER_POINT);
-        if (random.nextFloat() < (energyCost % MANA_PER_POINT) / MANA_PER_POINT) points++;
+        int points = (int) (energyCost / ENERGY_PER_POINT);
+        if (random.nextFloat() < (energyCost % ENERGY_PER_POINT) / ENERGY_PER_POINT) points++;
         setHamonStatPoints(stat, getStatPoints(stat) + points, false, false);
     }
 
