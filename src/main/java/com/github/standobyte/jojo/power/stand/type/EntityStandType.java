@@ -35,12 +35,12 @@ public class EntityStandType extends StandType {
     
     @Override
     public boolean usesStamina() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean usesResolve() {
-        return false;
+        return true;
     }
 
     @Override

@@ -181,7 +181,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
                 }
                 return 1F;
             }).orElse(1F);
-            stamina += staminaRegen;
+            stamina = Math.min(stamina + staminaRegen, getMaxStamina());
         }
     }
     
@@ -228,7 +228,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
             noResolveDecayTicks--;
         }
         else {
-            resolve -= StandType.RESOLVE_DECAY;
+            resolve = Math.max(resolve - StandType.RESOLVE_DECAY, 0);
         }
     }
     
