@@ -66,8 +66,8 @@ public class LivingUtilCap {
     
     
     
-    public void setHamonCharge(float hamonCharge, int chargeTicks, LivingEntity hamonUser, float manaSpent) {
-        this.hamonCharge = new HamonCharge(hamonCharge, chargeTicks, hamonUser, manaSpent);
+    public void setHamonCharge(float hamonCharge, int chargeTicks, LivingEntity hamonUser, float energySpent) {
+        this.hamonCharge = new HamonCharge(hamonCharge, chargeTicks, hamonUser, energySpent);
     }
     
     private void hamonChargeTick() {

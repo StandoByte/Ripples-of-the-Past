@@ -146,7 +146,7 @@ public class ModDamageSources {
                     return true;
                 }
                 NonStandPowerType<?> powerType = power.getType();
-                if (powerType == ModNonStandPowers.HAMON.get() && power.consumeMana(2F)) {
+                if (powerType == ModNonStandPowers.HAMON.get() && power.consumeEnergy(2F)) {
                     HamonPowerType.createHamonSparkParticles(target.level, null, target.getX(), target.getY(0.5), target.getZ(), 0.1F);
                     return false;
                 }

@@ -145,19 +145,19 @@ public class ActionsOverlayGui extends AbstractGui { // TODO config to move it t
                     RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 }
             }
-         // mana bar
-            BarTexture barTexture;
-            if (mode == UiMode.STAND) {
-                barTexture = BarTexture.STAMINA;
-            }
-            else {
-                barTexture = NON_STAND_BAR_TEX.get(nonStandPower.getType().getRegistryName());
-            }
-            renderBar(matrixStack, x + 3, y, barTexture, (int) ((BAR_LENGTH - 2) * currentPower.getMana() / currentPower.getMaxMana()));
-         // exp bar
-            if (mode == UiMode.STAND) {
-                renderBar(matrixStack, screenWidth - BAR_LENGTH - 1, y, BarTexture.EXP, (BAR_LENGTH - 2) * standPower.getExp() / IStandPower.MAX_EXP);
-            }
+//         // mana bar
+//            BarTexture barTexture;
+//            if (mode == UiMode.STAND) {
+//                barTexture = BarTexture.STAMINA;
+//            }
+//            else {
+//                barTexture = NON_STAND_BAR_TEX.get(nonStandPower.getType().getRegistryName());
+//            }
+//            renderBar(matrixStack, x + 3, y, barTexture, (int) ((BAR_LENGTH - 2) * currentPower.getMana() / currentPower.getMaxMana()));
+//         // exp bar
+//            if (mode == UiMode.STAND) {
+//                renderBar(matrixStack, screenWidth - BAR_LENGTH - 1, y, BarTexture.EXP, (BAR_LENGTH - 2) * standPower.getExp() / IStandPower.MAX_EXP);
+//            }
          // power icon
             if (currentPower.isActive()) {
                 mc.getTextureManager().bind(powerIconPath);
@@ -204,6 +204,18 @@ public class ActionsOverlayGui extends AbstractGui { // TODO config to move it t
 
             y += mc.font.lineHeight + 1 + HOTBAR_SQUARE_HEIGHT + 1;
             renderConditionText(matrixStack, x + 16, y + 2, event.getPartialTicks());
+            
+            if (currentPower == standPower) {
+                if (standPower.usesStamina()) {
+                    drawString(matrixStack, mc.font, standPower.getStamina() + "//" + standPower.getMaxStamina(), x, y + 12, 0x00B000);
+                }
+                if (standPower.usesResolve()) {
+                    drawString(matrixStack, mc.font, standPower.getResolve() + "//" + standPower.getMaxResolve(), x, y + 22, currentPower.getType().getColor());
+                }
+            }
+            else if (currentPower == nonStandPower) {
+                drawString(matrixStack, mc.font, nonStandPower.getEnergy() + "//" + nonStandPower.getMaxEnergy(), x, y + 12, currentPower.getType().getColor());
+            }
         }
     }
 

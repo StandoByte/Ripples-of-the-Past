@@ -347,7 +347,7 @@ public class InputHandler {
             
             if (!mc.player.isPassenger()) {
                 IPower<?> power = actionsOverlay.getCurrentPower();
-                if (power != null) {
+                if (power != null && power.hasPower()) {
                     if (power.canLeap() && !actionSlowedDown && !standSlowedDown && input.shiftKeyDown && input.jumping) {
                         float leapStrength = power.leapStrength();
                         if (leapStrength > 0) {

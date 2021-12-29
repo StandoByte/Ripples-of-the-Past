@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.action.actions;
 
-import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
@@ -8,7 +7,6 @@ import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.VampirismPowerType;
 import com.github.standobyte.jojo.util.JojoModUtil;
@@ -27,14 +25,14 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
-public class VampirismBloodDrain extends Action {
+public class VampirismBloodDrain extends VampirismAction {
 
-    public VampirismBloodDrain(AbstractBuilder<?> builder) {
+    public VampirismBloodDrain(EnergyConsumingAction.Builder builder) {
         super(builder);
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IPower<?> power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
         if (user.level.getDifficulty() == Difficulty.PEACEFUL) {
             return conditionMessage("peaceful");
         }
@@ -55,35 +53,35 @@ public class VampirismBloodDrain extends Action {
     }
     
     @Override
-    public void onHoldTickUser(World world, LivingEntity user, IPower<?> power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
+    protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
             if (!world.isClientSide() && target.getEntity(world) instanceof LivingEntity) {
                 LivingEntity targetEntity = (LivingEntity) target.getEntity(world);
                 if (!targetEntity.isDeadOrDying()) {
                     int difficulty = world.getDifficulty().getId();
-                    float manaAndHealModifier = 0.25F + difficulty * 0.75F;
+                    float bloodAndHealModifier = 0.25F + difficulty * 0.75F;
                     if (targetEntity instanceof PlayerEntity) {
-                        manaAndHealModifier *= 3F;
+                        bloodAndHealModifier *= 3F;
                     }
                     else if (targetEntity instanceof INPC || targetEntity instanceof AbstractIllagerEntity) {
-                        manaAndHealModifier *= 2F;
+                        bloodAndHealModifier *= 2F;
                     }
                     if (INonStandPower.getNonStandPowerOptional(targetEntity).map(
                             p -> p.getType() == ModNonStandPowers.HAMON.get()).orElse(false)) {
-                        manaAndHealModifier *= 6.667F;
+                        bloodAndHealModifier *= 6.667F;
                     }
                     float damage = 0.5F * difficulty;
                     EffectInstance freeze = targetEntity.getEffect(ModEffects.FREEZE.get());
                     if (freeze != null) {
                         damage *= 1 - Math.min((freeze.getAmplifier() + 1) * 0.2F, 1);
                     }
-                    power.addMana(damage * manaAndHealModifier);
+                    power.addEnergy(damage * bloodAndHealModifier);
                     damage *= 5;
                     float healed = user.getHealth();
-                    if (drainBlood(user, targetEntity, damage, damage * 0.1F * manaAndHealModifier)) {
+                    if (drainBlood(user, targetEntity, damage, damage * 0.1F * bloodAndHealModifier)) {
                         healed = user.getHealth() - healed;
                         if (healed > 0) {
-                            power.addMana(healed * VampirismPowerType.healCost(world.getDifficulty()));
+                            power.addEnergy(healed * VampirismPowerType.healCost(world.getDifficulty()));
                         }
                         if (targetEntity.isDeadOrDying()) {
                             HungryZombieEntity.createZombie((ServerWorld) world, user, targetEntity, false);
@@ -125,7 +123,7 @@ public class VampirismBloodDrain extends Action {
     }
     
     @Override
-    public void onHoldTickClientEffect(LivingEntity user, IPower<?> power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {
+    public void onHoldTickClientEffect(LivingEntity user, INonStandPower power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {
         if (stateRefreshed && requirementsFulfilled) {
             ClientTickingSoundsHelper.playHeldActionSound(ModSounds.VAMPIRE_BLOOD_DRAIN.get(), 1.0F, 1.0F, true, getPerformer(user, power), power, this);
         }

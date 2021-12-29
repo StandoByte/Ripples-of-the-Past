@@ -40,11 +40,11 @@ public class AjaStoneItem extends Item {
         ItemStack stack = player.getItemInHand(hand);
         if (player.isShiftKeyDown()) {
             INonStandPower power = INonStandPower.getPlayerNonStandPower(player);
-            if (power.hasMana(getHamonChargeCost())) {
+            if (power.hasEnergy(getHamonChargeCost())) {
                 Optional<HamonData> hamonOptional = power.getTypeSpecificData(ModNonStandPowers.HAMON.get());
                 if (hamonOptional.isPresent()) {
                     HamonData hamon = hamonOptional.get();
-                    if (hamon.isSkillLearned(HamonSkill.AJA_STONE_KEEPER) && power.consumeMana(getHamonChargeCost())) {
+                    if (hamon.isSkillLearned(HamonSkill.AJA_STONE_KEEPER) && power.consumeEnergy(getHamonChargeCost())) {
                         if (!world.isClientSide()) {
                             useStone(world, player, stack, 0.75F * hamon.getHamonDamageMultiplier(), true, false);
                             hamon.hamonPointsFromAction(HamonStat.STRENGTH, getHamonChargeCost());

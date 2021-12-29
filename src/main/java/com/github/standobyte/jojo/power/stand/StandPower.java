@@ -12,12 +12,12 @@ import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncManaLimitFactorPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncManaRegenPointsPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncStandExpPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.SyncStaminaPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrSyncResolvePacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.PowerBaseImpl;
+import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 
 import net.minecraft.entity.LivingEntity;
@@ -27,12 +27,16 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 
-public class StandPower extends PowerBaseImpl<StandType> implements IStandPower {
+public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements IStandPower {
     private StandType standType = null;
     private int tier = 0;
     @Nullable
     private IStandManifestation standManifestation = null;
-    private int exp = 0;
+    private float stamina;
+    private float resolve;
+    private int noResolveDecayTicks;
+    @Deprecated
+    private int xp = 0;
     
     public StandPower(LivingEntity user) {
         super(user);
@@ -56,7 +60,9 @@ public class StandPower extends PowerBaseImpl<StandType> implements IStandPower 
             if (isActive()) {
                 standType.forceUnsummon(user, this);
             }
-            exp = 0;
+            stamina = 0;
+            resolve = 0;
+            xp = 0;
             standType = null;
             serverPlayerUser.ifPresent(player -> {
                 SaveFileUtilCapProvider.getSaveFileCap(player).removePlayerStand(type);
@@ -67,18 +73,17 @@ public class StandPower extends PowerBaseImpl<StandType> implements IStandPower 
     }
     
     @Override
-    public PowerClassification getPowerClassification() {
-        return PowerClassification.STAND;
+    public void tick() {
+        super.tick();
+        if (hasPower()) {
+            tickStamina();
+            tickResolve();
+        }
     }
     
     @Override
-    protected void tickMana() {
-        serverPlayerUser.ifPresent(player -> {
-            if (getMana() < getMaxMana()) {
-                player.causeFoodExhaustion(0.005F);
-            }
-        });
-        super.tickMana();
+    public PowerClassification getPowerClassification() {
+        return PowerClassification.STAND;
     }
     
     @Override
@@ -87,7 +92,13 @@ public class StandPower extends PowerBaseImpl<StandType> implements IStandPower 
         attacks = Arrays.asList(standType.getAttacks());
         abilities = Arrays.asList(standType.getAbilities());
         if (user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild) {
-            exp = StandPower.MAX_EXP;
+            xp = StandPower.MAX_EXP;
+        }
+        if (usesStamina()) {
+            stamina = isUserCreative() ? getMaxStamina() : 0;
+        }
+        if (usesResolve()) {
+            resolve = 0;
         }
         tier = Math.max(tier, standType.getTier());
     }
@@ -101,21 +112,136 @@ public class StandPower extends PowerBaseImpl<StandType> implements IStandPower 
     public boolean isActive() {
         return hasPower() && getType().isStandSummoned(user, this);
     }
-    
-    
-    public int getExp() {
-        return exp;
+
+
+    @Override
+    public boolean usesStamina() {
+        return hasPower() && getType().usesStamina();
     }
     
-    public void setExp(int exp) {
-        exp = MathHelper.clamp(exp, 0, MAX_EXP);
-        boolean send = this.exp != exp;
-        this.exp = exp;
+    @Override
+    public float getStamina() {
+        return stamina;
+    }
+
+    @Override
+    public float getMaxStamina() {
+        if (!usesStamina()) {
+            return 0;
+        }
+        float maxAmount = getType().getMaxStamina(this);
+        maxAmount *= INonStandPower.getNonStandPowerOptional(getUser()).map(power -> {
+            if (power.hasPower()) {
+                return power.getType().getMaxStaminaFactor(power, this);
+            }
+            return 1F;
+        }).orElse(1F);
+        return maxAmount;
+    }
+    
+    @Override
+    public void addStamina(float amount) {
+        setStamina(MathHelper.clamp(this.stamina + amount, 0, getMaxStamina()));
+    }
+
+    @Override
+    public void consumeStamina(float amount) {
+        if (!isUserCreative()) {
+            setStamina(this.stamina - amount);
+        }
+    }
+
+    @Override
+    public void setStamina(float amount) {
+        amount = MathHelper.clamp(amount, 0, getMaxStamina());
+        boolean send = this.stamina != amount;
+        this.stamina = amount;
         if (send) {
             serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new SyncStandExpPacket(getExp(), true), player);
+                PacketManager.sendToClient(new SyncStaminaPacket(getStamina()), player);
             });
         }
+    }
+    
+    private void tickStamina() {
+        if (usesStamina()) {
+            float staminaRegen = getType().getStaminaRegen(this);
+            staminaRegen *= INonStandPower.getNonStandPowerOptional(getUser()).map(power -> {
+                if (power.hasPower()) {
+                    return power.getType().getStaminaRegenFactor(power, this);
+                }
+                return 1F;
+            }).orElse(1F);
+            staminaRegen *= serverPlayerUser.map(player -> {
+                if (getStamina() < getMaxStamina()) {
+                    player.causeFoodExhaustion(0.005F);
+                }
+                if (player.getFoodData().getFoodLevel() > 17) {
+                    return 1.5F;
+                }
+                return 1F;
+            }).orElse(1F);
+            stamina = Math.min(stamina + staminaRegen, getMaxStamina());
+        }
+    }
+    
+
+    @Override
+    public boolean usesResolve() {
+        return hasPower() && getType().usesResolve();
+    }
+    
+    @Override
+    public float getResolve() {
+        return resolve;
+    }
+
+    @Override
+    public float getMaxResolve() {
+        if (!usesResolve()) {
+            return 0;
+        }
+        return StandType.MAX_RESOLVE;
+    }
+    
+    @Override
+    public void addResolve(float amount, int noDecayTicks) {
+        setResolve(MathHelper.clamp(this.resolve + amount, 0, getMaxResolve()), noDecayTicks);
+    }
+
+    @Override
+    public void setResolve(float amount, int noDecayTicks) {
+        amount = MathHelper.clamp(amount, 0, getMaxResolve());
+        boolean send = this.resolve != amount || this.noResolveDecayTicks != noDecayTicks;
+        this.resolve = amount;
+        this.noResolveDecayTicks = Math.max(this.noResolveDecayTicks, noDecayTicks);
+        if (send) {
+            serverPlayerUser.ifPresent(player -> {
+                PacketManager.sendToClientsTracking(new TrSyncResolvePacket(
+                        player.getId(), getResolve(), this.noResolveDecayTicks), player);
+            });
+        }
+    }
+    
+    private void tickResolve() {
+        if (noResolveDecayTicks > 0) {
+            noResolveDecayTicks--;
+        }
+        else {
+            resolve = Math.max(resolve - StandType.RESOLVE_DECAY, 0);
+        }
+    }
+    
+    
+    @Override
+    public int getXp() {
+        return xp;
+    }
+
+    @Override
+    public void setXp(int xp) {
+        xp = MathHelper.clamp(xp, 0, MAX_EXP);
+        this.xp = xp;
     }
     
     @Override
@@ -149,7 +275,7 @@ public class StandPower extends PowerBaseImpl<StandType> implements IStandPower 
     
     @Override
     public boolean isActionUnlocked(Action action) {
-        return getExp() >= ((StandAction) action).getExpRequirement();
+        return getXp() >= ((StandAction) action).getXpRequirement();
     }
     
 //    @Override // TODO Stand Sealing effect
@@ -159,9 +285,6 @@ public class StandPower extends PowerBaseImpl<StandType> implements IStandPower 
     
     @Override
     public ActionConditionResult checkRequirements(Action action, LivingEntity performer, ActionTarget target, boolean checkTargetType) {
-        serverPlayerUser.ifPresent(player -> {
-            PacketManager.sendToClient(new SyncStandExpPacket(getExp(), false), player);
-        });
         return super.checkRequirements(action, performer, target, checkTargetType);
     }
     
@@ -185,15 +308,23 @@ public class StandPower extends PowerBaseImpl<StandType> implements IStandPower 
     }
     
     @Override
-    protected float getLeapManaCost() {
-        return 200;
+    public void onLeap() {
+        super.onLeap();
+        consumeStamina(200);
     }
 
     @Override
     public CompoundNBT writeNBT() {
         CompoundNBT cnbt = super.writeNBT();
         cnbt.putString("StandType", ModStandTypes.Registry.getKeyAsString(getType()));
-        cnbt.putInt("Exp", getExp());
+        if (usesStamina()) {
+            cnbt.putFloat("Stamina", stamina);
+        }
+        if (usesResolve()) {
+            cnbt.putFloat("Resolve", resolve);
+            cnbt.putInt("ResolveTicks", noResolveDecayTicks);
+        }
+        cnbt.putInt("Exp", getXp());
         return cnbt;
     }
 
@@ -204,8 +335,15 @@ public class StandPower extends PowerBaseImpl<StandType> implements IStandPower 
             StandType stand = ModStandTypes.Registry.getRegistry().getValue(new ResourceLocation(standName));
             if (stand != null) {
                 onTypeInit(stand);
-                exp = nbt.getInt("Exp");
+                xp = nbt.getInt("Exp");
             }
+        }
+        if (usesStamina()) {
+            stamina = nbt.getFloat("Stamina");
+        }
+        if (usesResolve()) {
+            resolve = nbt.getFloat("Resolve");
+            noResolveDecayTicks = nbt.getInt("ResolveTicks");
         }
         super.readNBT(nbt);
     }
@@ -213,12 +351,13 @@ public class StandPower extends PowerBaseImpl<StandType> implements IStandPower 
     @Override
     public void onClone(IPower<StandType> oldPower, boolean wasDeath, boolean keep) {
         super.onClone(oldPower, wasDeath, keep);
-        if (oldPower.hasPower()) {
-            exp = ((IStandPower) oldPower).getExp();
-        }
-        else {
-            manaRegenPoints = oldPower.getManaRegenPoints();
-            manaLimitFactor = oldPower.getManaLimitFactor();
+        if (keep && oldPower.hasPower()) {
+            xp = ((IStandPower) oldPower).getXp();
+            stamina = ((IStandPower) oldPower).getStamina();
+            if (!wasDeath) {
+                resolve = ((IStandPower) oldPower).getResolve();
+                noResolveDecayTicks = ((StandPower) oldPower).noResolveDecayTicks;
+            }
         }
     }
     
@@ -226,12 +365,8 @@ public class StandPower extends PowerBaseImpl<StandType> implements IStandPower 
     public void syncWithUserOnly() {
         super.syncWithUserOnly();
         serverPlayerUser.ifPresent(player -> {
-            if (hasPower()) {
-                PacketManager.sendToClient(new SyncStandExpPacket(getExp(), false), player);
-            }
-            else {
-                PacketManager.sendToClient(new SyncManaRegenPointsPacket(getPowerClassification(), getManaRegenPoints()), player);
-                PacketManager.sendToClient(new SyncManaLimitFactorPacket(getPowerClassification(), getManaLimitFactor()), player);
+            if (hasPower() && usesStamina()) {
+                PacketManager.sendToClient(new SyncStaminaPacket(stamina), player);
             }
         });
     }
@@ -239,8 +374,13 @@ public class StandPower extends PowerBaseImpl<StandType> implements IStandPower 
     @Override
     public void syncWithTrackingOrUser(ServerPlayerEntity player) {
         super.syncWithTrackingOrUser(player);
-        if (hasPower() && standManifestation != null) {
-            standManifestation.syncWithTrackingOrUser(player);
+        if (hasPower()) {
+            if (usesResolve()) {
+                PacketManager.sendToClient(new TrSyncResolvePacket(getUser().getId(), resolve, noResolveDecayTicks), player);
+            }
+            if (standManifestation != null) {
+                standManifestation.syncWithTrackingOrUser(player);
+            }
         }
     }
 }

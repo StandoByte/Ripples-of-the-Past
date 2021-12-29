@@ -77,7 +77,7 @@ public class SatiporojaScarfEntity extends OwnerBoundProjectileEntity {
             INonStandPower.getNonStandPowerOptional(getOwner()).ifPresent(power -> {
                 power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
                     gaveHamonPoints = true;
-                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, SatiporojaScarfItem.SCARF_SWING_MANA_COST);
+                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, SatiporojaScarfItem.SCARF_SWING_ENERGY_COST);
                 });
             });
         }

@@ -303,7 +303,7 @@ public class TimeHandler {
     }
     
     public static int getTimeStopTicks(int minStandExp, IStandPower standPower, LivingEntity user, LazyOptional<INonStandPower> otherPower) {
-        float ticks = (float) (standPower.getExp() - minStandExp) / (float) (IStandPower.MAX_EXP - minStandExp) * 95F + 5;
+        float ticks = (float) (standPower.getXp() - minStandExp) / (float) (IStandPower.MAX_EXP - minStandExp) * 95F + 5;
         ticks *= otherPower.map(power -> {
            if (power.getType() == ModNonStandPowers.VAMPIRISM.get()) {
                return 1F + (float) ((VampirismPowerType.bloodLevel(power, Difficulty.EASY) - 1) * 4) / 15F;

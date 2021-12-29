@@ -6,7 +6,6 @@ import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
@@ -28,9 +27,9 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
     private int barrierTicks;
     private boolean barrier;
     private boolean shot;
-    private IPower<?> power;
+    private INonStandPower power;
     
-    public HamonBubbleBarrierEntity(World world, LivingEntity shooter, IPower<?> power) {
+    public HamonBubbleBarrierEntity(World world, LivingEntity shooter, INonStandPower power) {
         super(ModEntityTypes.HAMON_BUBBLE_BARRIER.get(), shooter, world);
         this.power = power;
     }
@@ -95,7 +94,7 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
             if (owner != null) {
                 INonStandPower.getNonStandPowerOptional(owner).ifPresent(power -> {
                     power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
-                        hamon.hamonPointsFromAction(HamonStat.STRENGTH, ModActions.CAESAR_BUBBLE_BARRIER.get().getHeldTickManaCost() / 4F);
+                        hamon.hamonPointsFromAction(HamonStat.STRENGTH, ModActions.CAESAR_BUBBLE_BARRIER.get().getHeldTickEnergyCost() / 4F);
                     });
                 });
             }

@@ -25,13 +25,11 @@ import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPa
 import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.RefreshMovementInTimeStopPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandCancelManualMovementPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.SyncEnergyPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncHamonExercisesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncLeapCooldownPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncManaLimitFactorPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncManaPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncManaRegenPointsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.SyncStaminaPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStandControlStatusPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncStandExpPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncWorldTimeStopPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
@@ -43,6 +41,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrSyncHeldActionPac
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncKnivesCountPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncNonStandFlagPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncPowerTypePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrSyncResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.UnfulfilledActionConditionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCachePacket;
 
@@ -89,9 +88,7 @@ public class PacketManager {
 
         channel.registerMessage(index++, TrSyncPowerTypePacket.class, TrSyncPowerTypePacket::encode, TrSyncPowerTypePacket::decode, TrSyncPowerTypePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, TrSyncHeldActionPacket.class, TrSyncHeldActionPacket::encode, TrSyncHeldActionPacket::decode, TrSyncHeldActionPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, SyncManaPacket.class, SyncManaPacket::encode, SyncManaPacket::decode, SyncManaPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, SyncManaRegenPointsPacket.class, SyncManaRegenPointsPacket::encode, SyncManaRegenPointsPacket::decode, SyncManaRegenPointsPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, SyncManaLimitFactorPacket.class, SyncManaLimitFactorPacket::encode, SyncManaLimitFactorPacket::decode, SyncManaLimitFactorPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        channel.registerMessage(index++, SyncEnergyPacket.class, SyncEnergyPacket::encode, SyncEnergyPacket::decode, SyncEnergyPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, TrSyncCooldownPacket.class, TrSyncCooldownPacket::encode, TrSyncCooldownPacket::decode, TrSyncCooldownPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, UnfulfilledActionConditionPacket.class, UnfulfilledActionConditionPacket::encode, UnfulfilledActionConditionPacket::decode, UnfulfilledActionConditionPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, TrSyncHamonStatsPacket.class, TrSyncHamonStatsPacket::encode, TrSyncHamonStatsPacket::decode, TrSyncHamonStatsPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
@@ -101,7 +98,8 @@ public class PacketManager {
         channel.registerMessage(index++, HamonSkillsResetPacket.class, HamonSkillsResetPacket::encode, HamonSkillsResetPacket::decode, HamonSkillsResetPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, TrHamonParticlesPacket.class, TrHamonParticlesPacket::encode, TrHamonParticlesPacket::decode, TrHamonParticlesPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, TrSyncNonStandFlagPacket.class, TrSyncNonStandFlagPacket::encode, TrSyncNonStandFlagPacket::decode, TrSyncNonStandFlagPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, SyncStandExpPacket.class, SyncStandExpPacket::encode, SyncStandExpPacket::decode, SyncStandExpPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        channel.registerMessage(index++, SyncStaminaPacket.class, SyncStaminaPacket::encode, SyncStaminaPacket::decode, SyncStaminaPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        channel.registerMessage(index++, TrSyncResolvePacket.class, TrSyncResolvePacket::encode, TrSyncResolvePacket::decode, TrSyncResolvePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, TrSetStandEntityPacket.class, TrSetStandEntityPacket::encode, TrSetStandEntityPacket::decode, TrSetStandEntityPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, SyncStandControlStatusPacket.class, SyncStandControlStatusPacket::encode, SyncStandControlStatusPacket::decode, SyncStandControlStatusPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, StandCancelManualMovementPacket.class, StandCancelManualMovementPacket::encode, StandCancelManualMovementPacket::decode, StandCancelManualMovementPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));

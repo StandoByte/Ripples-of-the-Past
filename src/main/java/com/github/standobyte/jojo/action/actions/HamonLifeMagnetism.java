@@ -5,7 +5,6 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
@@ -22,7 +21,7 @@ public class HamonLifeMagnetism extends HamonAction {
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IPower<?> power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
         ItemStack heldItemStack = performer.getMainHandItem();
         if (!heldItemStack.isEmpty()) {
             return conditionMessage("hand");
@@ -35,14 +34,14 @@ public class HamonLifeMagnetism extends HamonAction {
     }
     
     @Override
-    public void perform(World world, LivingEntity user, IPower<?> power, ActionTarget target) {
+    protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             world.destroyBlock(target.getBlockPos(), false);
             LeavesGliderEntity glider = new LeavesGliderEntity(world);
             glider.moveTo(target.getBlockPos(), user.xRot, user.yRot);
             world.addFreshEntity(glider);
-            HamonData hamon = ((INonStandPower) power).getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
-            hamon.hamonPointsFromAction(HamonStat.CONTROL, getManaCost());
+            HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
+            hamon.hamonPointsFromAction(HamonStat.CONTROL, getEnergyCost());
         }
     }
 

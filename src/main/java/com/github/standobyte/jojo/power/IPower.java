@@ -17,13 +17,14 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraftforge.common.util.LazyOptional;
 
-public interface IPower<T extends IPowerType<T>> {
+public interface IPower<T extends IPowerType<? extends IPower<T>, T>> {
     PowerClassification getPowerClassification();
     boolean hasPower();
     boolean givePower(T type);
     boolean clear();
     T getType();
     LivingEntity getUser();
+    boolean isUserCreative();
     void tick();
     boolean isActive();
 
@@ -34,23 +35,11 @@ public interface IPower<T extends IPowerType<T>> {
         return type == ActionType.ATTACK ? getAttacks() : getAbilities();
     }
 
-    float getMana();
-    float getMaxMana();
-    boolean hasMana(float mana);
-    void addMana(float amount);
-    boolean consumeMana(float amount);
-    boolean infiniteMana();
-    void setMana(float amount);
-    float getManaRegenPoints();
-    void setManaRegenPoints(float points);
-    float getManaLimitFactor();
-    void setManaLimitFactor(float factor);
-
     boolean isActionOnCooldown(Action action);
     float getCooldownRatio(Action action, float partialTick);
     void setCooldownTimer(Action action, int value, int totalCooldown);
 
-    boolean isActionUnlocked(Action action);
+    boolean isActionUnlocked(Action action); // FIXME generalize
     boolean onClickAction(ActionType type, int index, boolean shift, ActionTarget target);
     ActionConditionResult checkRequirements(Action action, LivingEntity performer, ActionTarget target, boolean checkTargetType);
     ActionConditionResult checkTargetType(Action action, LivingEntity performer, ActionTarget target);
@@ -76,7 +65,7 @@ public interface IPower<T extends IPowerType<T>> {
 
     INBT writeNBT();
     void readNBT(CompoundNBT nbt);
-    void onClone(IPower<T> oldPower, boolean wasDeath, boolean keep);
+    void onClone(IPower<T> oldPower, boolean wasDeath, boolean keep); // FIXME generalize
     void syncWithUserOnly();
     void syncWithTrackingOrUser(ServerPlayerEntity player);
 
@@ -89,7 +78,7 @@ public interface IPower<T extends IPowerType<T>> {
         return classification == PowerClassification.STAND ? IStandPower.getPlayerStandPower(player) : INonStandPower.getPlayerNonStandPower(player);
     }
     
-    public static void castAndGivePower(IPower<?> power, IPowerType<?> powerType, PowerClassification classification) { // TODO get rid of this shit
+    public static void castAndGivePower(IPower<?> power, IPowerType<?, ?> powerType, PowerClassification classification) { // FIXME get rid of this shit
         switch (classification) {
         case STAND:
             if (power instanceof IStandPower && powerType instanceof StandType) {

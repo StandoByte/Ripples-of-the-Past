@@ -75,8 +75,8 @@ public class HamonProjectileShieldEntity extends Entity implements IEntityAdditi
         if (projectile instanceof ProjectileEntity) {
             if (!level.isClientSide()) {
                 if (power != null && hamon != null) {
-                    float manaCost = amount * 30;
-                    if (power.consumeMana(manaCost)) {
+                    float energyCost = amount * 30;
+                    if (power.consumeEnergy(energyCost)) {
                         if (projectile != null) {
                             ModDamageSources.dealHamonDamage(projectile, 0.1F, this, user);
                             if (!(projectile instanceof AbstractArrowEntity)) {
@@ -84,10 +84,10 @@ public class HamonProjectileShieldEntity extends Entity implements IEntityAdditi
                                 projectile.move(MoverType.SELF, projectile.getDeltaMovement());
                             }
                         }
-                        hamon.hamonPointsFromAction(HamonStat.CONTROL, manaCost);
+                        hamon.hamonPointsFromAction(HamonStat.CONTROL, energyCost);
                     }
                     else {
-                        power.setMana(0);
+                        power.setEnergy(0);
                         remove();
                     }
                 }
