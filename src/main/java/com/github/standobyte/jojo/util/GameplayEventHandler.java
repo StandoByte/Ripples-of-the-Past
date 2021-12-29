@@ -262,7 +262,7 @@ public class GameplayEventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingHeal(LivingHealEvent event) {
-        VampirismPowerType.consumeManaOnHeal(event);
+        VampirismPowerType.consumeEnergyOnHeal(event);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -584,7 +584,7 @@ public class GameplayEventHandler {
                                     projCap.hamonBaseDmg = hamonBaseDmg;
                                     projCap.maxChargeTicks = maxChargeTicks;
                                     projCap.water = water;
-                                    projCap.spentMana = energyCost;
+                                    projCap.spentEnergy = energyCost;
                                 }
                             });
                         });
@@ -612,14 +612,14 @@ public class GameplayEventHandler {
                 if (cap.hamonBaseDmg > 0 && entity instanceof ProjectileEntity) {
                     ProjectileEntity projectile = (ProjectileEntity) entity;
                     addHamonDamageToProjectile((EntityRayTraceResult) rayTrace, 
-                            projectile.getOwner(), projectile, cap.getHamonDamage(), cap.water, cap.spentMana);
+                            projectile.getOwner(), projectile, cap.getHamonDamage(), cap.water, cap.spentEnergy);
                 }
             });
         }
     }
     
     private static void addHamonDamageToProjectile(EntityRayTraceResult rayTrace, Entity thrower, Entity thrown, 
-            float damage, boolean waterProjectile, float spentMana) {
+            float damage, boolean waterProjectile, float spentEnergy) {
         if (thrown.level.isClientSide() || damage <= 0 || !(thrower instanceof LivingEntity)) {
             return;
         }
@@ -630,7 +630,7 @@ public class GameplayEventHandler {
                     dmgCheckWater *= 1.25;
                 }
                 ModDamageSources.dealHamonDamage(rayTrace.getEntity(), dmgCheckWater, thrown, thrower);
-                hamon.hamonPointsFromAction(HamonStat.STRENGTH, spentMana);
+                hamon.hamonPointsFromAction(HamonStat.STRENGTH, spentEnergy);
             });
         });
     }

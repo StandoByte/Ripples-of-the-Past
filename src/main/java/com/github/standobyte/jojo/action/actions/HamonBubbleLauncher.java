@@ -14,7 +14,7 @@ public class HamonBubbleLauncher extends HamonAction {
     }
     
     @Override
-    public void onHoldTickUser(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
+    protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled && !world.isClientSide()) {
             for (int i = 0; i < 4; i++) {
                 HamonBubbleEntity bubbleEntity = new HamonBubbleEntity(user, world);

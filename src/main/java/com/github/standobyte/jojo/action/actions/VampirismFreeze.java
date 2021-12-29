@@ -42,7 +42,7 @@ public class VampirismFreeze extends VampirismAction {
     }
     
     @Override
-    public void onHoldTickUser(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
+    protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (!world.isClientSide() && requirementsFulfilled) {
             if (target.getType() == TargetType.ENTITY) {
                 Entity entityTarget = target.getEntity(world);

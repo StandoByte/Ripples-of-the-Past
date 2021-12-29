@@ -54,7 +54,7 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
     }
     
     @Override
-    public String getManaString() {
+    public String getEnergyString() {
         return getRegistryName().getPath();
     }
     
@@ -100,7 +100,7 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
         return 0;
     }
     
-    public float getLeapManaCost() {
+    public float getLeapEnergyCost() {
         return 0;
     }
 

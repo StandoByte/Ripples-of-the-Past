@@ -26,7 +26,7 @@ public class SatiporojaScarfItem extends CustomModelArmorItem {
         super(material, slot, builder);
     }
 
-    public static final float SCARF_SWING_MANA_COST = 600;
+    public static final float SCARF_SWING_ENERGY_COST = 600;
     @Override
     public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         ItemStack stack = player.getItemInHand(hand);
@@ -34,7 +34,7 @@ public class SatiporojaScarfItem extends CustomModelArmorItem {
         if (power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(hamon -> {
             if (hamon.isSkillLearned(HamonSkill.SATIPOROJA_SCARF)) {
                 if (!world.isClientSide()) {
-                    if (power.consumeEnergy(SCARF_SWING_MANA_COST)) {
+                    if (power.consumeEnergy(SCARF_SWING_ENERGY_COST)) {
                         SatiporojaScarfEntity scarf = new SatiporojaScarfEntity(world, player, 
                                 hand == Hand.MAIN_HAND ? player.getMainArm() : player.getMainArm() == HandSide.RIGHT ? HandSide.LEFT : HandSide.RIGHT);
                         world.addFreshEntity(scarf);
@@ -43,7 +43,7 @@ public class SatiporojaScarfItem extends CustomModelArmorItem {
                     }
                     return false;
                 }
-                return power.hasEnergy(SCARF_SWING_MANA_COST);
+                return power.hasEnergy(SCARF_SWING_ENERGY_COST);
             }
             return false;
         }).orElse(false)) {

@@ -17,7 +17,7 @@ public class StarPlatinumZoom extends StandEntityAction {
     }
     
     @Override
-    public void onStartedHolding(World world, LivingEntity user, IStandPower power, ActionTarget target, boolean requirementsFulfilled) {
+    public void startedHolding(World world, LivingEntity user, IStandPower power, ActionTarget target, boolean requirementsFulfilled) {
         if (world.isClientSide) {
             ClientEventHandler.getInstance().isZooming = true;
         }
@@ -31,7 +31,7 @@ public class StarPlatinumZoom extends StandEntityAction {
     }
     
     @Override
-    public void onHoldTickUser(World world, LivingEntity user, IStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
+    protected void holdTick(World world, LivingEntity user, IStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (world.isClientSide) {
             if (ticksHeld % 16 == 3 && ticksHeld > 32 && ticksHeld < 80) {
                 LivingEntity stand = getPerformer(user, power);
@@ -42,7 +42,7 @@ public class StarPlatinumZoom extends StandEntityAction {
     }
     
     @Override
-    public void onStoppedHolding(World world, LivingEntity user, IStandPower power, int ticksHeld) {
+    public void stoppedHolding(World world, LivingEntity user, IStandPower power, int ticksHeld) {
         if (world.isClientSide) {
             ClientEventHandler.getInstance().isZooming = false;
         }

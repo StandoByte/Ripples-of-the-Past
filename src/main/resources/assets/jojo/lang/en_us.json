@@ -199,10 +199,10 @@
   
   "jojo.chat.message.tmp_not_enough_xp": "You don't have enough xp to gain a Stand",
   
-  "jojo.message.action_condition.no_mana_stand": "You don't have enough stamina",
-  "jojo.message.action_condition.no_mana_hamon": "Your breath has not yet stabilized",
-  "jojo.message.action_condition.no_mana_vampirism": "You are too hungry",
-  "jojo.message.action_condition.no_mana_cyborg": "You are low on energy",
+  "jojo.message.action_condition.no_stamina": "You don't have enough stamina",
+  "jojo.message.action_condition.no_energy_hamon": "Your breath has not yet stabilized",
+  "jojo.message.action_condition.no_energy_vampirism": "You are too hungry",
+  "jojo.message.action_condition.no_energy_cyborg": "You are low on energy",
   "jojo.message.action_condition.not_unlocked": "You haven't unlocked this",
   "jojo.message.action_condition.target_too_far": "The target is too far",
   "jojo.message.action_condition.stun": "You are stunned",

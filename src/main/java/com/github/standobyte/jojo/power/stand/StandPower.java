@@ -129,7 +129,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
         if (!usesStamina()) {
             return 0;
         }
-        float maxAmount = getType().getMaxStamina();
+        float maxAmount = getType().getMaxStamina(this);
         maxAmount *= INonStandPower.getNonStandPowerOptional(getUser()).map(power -> {
             if (power.hasPower()) {
                 return power.getType().getMaxStaminaFactor(power, this);
@@ -172,14 +172,15 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
                 }
                 return 1F;
             }).orElse(1F);
-            serverPlayerUser.ifPresent(player -> {
-                if (player.getFoodData().getFoodLevel() > 17) {
-                    staminaRegen *= 1.5F;
-                }
+            staminaRegen *= serverPlayerUser.map(player -> {
                 if (getStamina() < getMaxStamina()) {
                     player.causeFoodExhaustion(0.005F);
                 }
-            });
+                if (player.getFoodData().getFoodLevel() > 17) {
+                    return 1.5F;
+                }
+                return 1F;
+            }).orElse(1F);
             stamina += staminaRegen;
         }
     }
@@ -200,7 +201,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
         if (!usesResolve()) {
             return 0;
         }
-        return MAX_RESOLVE;
+        return StandType.MAX_RESOLVE;
     }
     
     @Override
@@ -227,7 +228,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
             noResolveDecayTicks--;
         }
         else {
-            resolve -= RESOLVE_DECAY;
+            resolve -= StandType.RESOLVE_DECAY;
         }
     }
     
@@ -307,8 +308,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
     }
     
     @Override
-    protected float getLeapManaCost() {
-        return 200;
+    public void onLeap() {
+        super.onLeap();
+        consumeStamina(200);
     }
 
     @Override

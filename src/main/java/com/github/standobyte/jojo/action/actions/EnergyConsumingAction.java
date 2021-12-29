@@ -3,13 +3,12 @@ package com.github.standobyte.jojo.action.actions;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncEnergyPacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.World;
 
 public abstract class EnergyConsumingAction extends Action<INonStandPower> {
     private final float energyCost;
@@ -40,14 +39,27 @@ public abstract class EnergyConsumingAction extends Action<INonStandPower> {
     public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
         if (!power.isUserCreative()) {
             if (power.getEnergy() < getEnergyNeeded(power.getHeldActionTicks(), power)) {
-                serverPlayerUser.ifPresent(player -> {
-                    PacketManager.sendToClient(new SyncEnergyPacket(getPowerClassification(), getMana()), player);
-                });
-                ITextComponent message = new TranslationTextComponent("jojo.message.action_condition.no_mana_" + getType().getManaString());
+                ITextComponent message = new TranslationTextComponent("jojo.message.action_condition.no_energy_" + power.getType().getEnergyString());
                 return ActionConditionResult.createNegative(message);
             }
         }
         return super.checkConditions(user, performer, power, target);
+    }
+    
+    @Override
+    public void onPerform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
+        if (!world.isClientSide()) {
+            power.consumeEnergy(getEnergyCost());
+        }
+        super.onPerform(world, user, power, target);
+    }
+    
+    @Override
+    public void onHoldTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
+        if (requirementsFulfilled) {
+            power.consumeEnergy(getHeldTickEnergyCost());
+        }
+        super.onHoldTick(world, user, power, ticksHeld, target, requirementsFulfilled);
     }
     
     

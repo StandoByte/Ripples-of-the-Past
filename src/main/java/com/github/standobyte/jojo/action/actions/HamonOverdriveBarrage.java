@@ -34,7 +34,7 @@ public class HamonOverdriveBarrage extends HamonAction {
     }
     
     @Override
-    public void onHoldTickUser(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
+    protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
             switch (target.getType()) {
             case BLOCK:

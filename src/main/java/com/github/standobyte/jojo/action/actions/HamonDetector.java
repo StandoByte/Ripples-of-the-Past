@@ -23,7 +23,7 @@ public class HamonDetector extends HamonAction {
     }
 
     @Override
-    public void onHoldTickUser(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
+    protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
             if (!world.isClientSide() && ticksHeld < 160 || ticksHeld % 20 == 0) {
                 HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();

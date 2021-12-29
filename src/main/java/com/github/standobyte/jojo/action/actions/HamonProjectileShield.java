@@ -25,7 +25,7 @@ public class HamonProjectileShield extends HamonAction {
     }
     
     @Override
-    public void onStartedHolding(World world, LivingEntity user, INonStandPower power, ActionTarget target, boolean requirementsFulfilled) {
+    public void startedHolding(World world, LivingEntity user, INonStandPower power, ActionTarget target, boolean requirementsFulfilled) {
         if (!world.isClientSide() && requirementsFulfilled) {
             world.addFreshEntity(new HamonProjectileShieldEntity(world, user));
         }

@@ -40,7 +40,7 @@ public class HamonWallClimbing extends HamonAction {
     }
     
     @Override
-    public void onHoldTickUser(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
+    protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
             HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
             Vector3d movement = user.getDeltaMovement();

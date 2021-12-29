@@ -53,7 +53,7 @@ public class VampirismBloodDrain extends VampirismAction {
     }
     
     @Override
-    public void onHoldTickUser(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
+    protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
             if (!world.isClientSide() && target.getEntity(world) instanceof LivingEntity) {
                 LivingEntity targetEntity = (LivingEntity) target.getEntity(world);

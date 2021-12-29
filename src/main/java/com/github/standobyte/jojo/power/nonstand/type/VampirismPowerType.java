@@ -137,7 +137,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
     }
     
     @Override
-    public float getLeapManaCost() {
+    public float getLeapEnergyCost() {
         return 0;
     }
 
@@ -160,7 +160,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
         }
     }
     
-    public static void consumeManaOnHeal(LivingHealEvent event) {
+    public static void consumeEnergyOnHeal(LivingHealEvent event) {
         LivingEntity entity = event.getEntityLiving();
         if (entity.isAlive()) {
             INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
