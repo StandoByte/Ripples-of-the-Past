@@ -47,7 +47,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-@SuppressWarnings("deprecation") // FIXME delete
 public class ActionsOverlayGui extends AbstractGui {
     private static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");
     private static final ResourceLocation OVERLAY_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/overlay.png");
@@ -101,18 +100,18 @@ public class ActionsOverlayGui extends AbstractGui {
         }
         INonStandPower power = nonStandUiConfig.getPower();
         if (power != null) {
-            if (power.getMana() < power.getMaxMana()) {
+            if (power.getEnergy() < power.getMaxEnergy()) {
                 energyBarTransparency.reset();
             }
         }
         IStandPower standPower = standUiConfig.getPower();
         if (standPower != null) {
-            if (standPower.getMana() < standPower.getMaxMana()) {
+            if (standPower.getStamina() < standPower.getMaxStamina()) {
                 staminaBarTransparency.reset();
             }
-//            if (standPower.getResolve() > 0) { // TODO hud
-//                resolveBarTransparency.reset();
-//            }
+            if (standPower.getResolve() > 0) {
+                resolveBarTransparency.reset();
+            }
         }
     }
     
@@ -403,28 +402,28 @@ public class ActionsOverlayGui extends AbstractGui {
             renderBar(matrixStack, barsX, barsY, 
                     32, 0, 240, getBarIconTexY(power.getType()), 
                     // FIXME get cost value
-                    power.getMana(), power.getMaxMana(), 500f, 
+                    power.getEnergy(), power.getMaxEnergy(), 500f, 
                     currentMode == nonStandUiConfig, energyBarTransparency, partialTick, power.getType().getColor()); // FIXME vampirism blood levels
             prevBarThin = currentMode != nonStandUiConfig;
         }
         IStandPower standPower = standUiConfig.getPower();
         if (standPower.hasPower()) {
-//            if (standPower.usesStamina()) { // TODO hud
+            if (standPower.usesStamina()) {
                 barsX += prevBarThin ? 8 : 13;
                 renderBar(matrixStack, barsX, barsY, 
                         48, 0, 240, 0, 
                         // FIXME get cost value
-                        standPower.getMana(), standPower.getMaxMana(), 300f, 
+                        standPower.getStamina(), standPower.getMaxStamina(), 300f, 
                         currentMode == standUiConfig, staminaBarTransparency, partialTick, 0xFFFFFF);
                 prevBarThin = currentMode != standUiConfig;
-//            }
-//            if (standPower.usesResolve()) { // TODO hud
+            }
+            if (standPower.usesResolve()) {
                 barsX += prevBarThin ? 8 : 13;
                 renderBar(matrixStack, barsX, barsY, 
                         32, 0, 240, 15, 
-                        standPower.getExp(), IStandPower.MAX_EXP, 0, 
+                        standPower.getResolve(), IStandPower.MAX_EXP, 0, 
                         currentMode == standUiConfig, resolveBarTransparency, partialTick, standPower.getType().getColor());
-//            }
+            }
         }
     }
 
