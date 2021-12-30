@@ -189,6 +189,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
     
     @Override
     public float getResolve() {
+        if (!usesResolve()) {
+            return 0;
+        }
         return resolve;
     }
 
@@ -206,8 +209,10 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
     }
     
     @Override
-    public void addResolve(float amount, int noDecayTicks) {
-        setResolve(MathHelper.clamp(this.resolve + amount, 0, getMaxResolve()), noDecayTicks);
+    public void addResolve(float amount) {
+        if (usesResolve()) {
+            setResolve(MathHelper.clamp(this.resolve + amount, 0, getMaxResolve()), TestServerConfig.SERVER_CONFIG.noResolveDecayTicks.get());
+        }
     }
 
     @Override

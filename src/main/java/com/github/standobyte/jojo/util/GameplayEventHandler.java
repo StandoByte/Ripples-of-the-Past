@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.TestServerConfig;
 import com.github.standobyte.jojo.action.actions.VampirismFreeze;
 import com.github.standobyte.jojo.block.StoneMaskBlock;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
@@ -276,6 +277,20 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onLivingAttack(LivingAttackEvent event) {
         HamonPowerType.snakeMuffler(event);
+    }
+
+    @SubscribeEvent(priority = EventPriority.NORMAL)
+    public static void reduceDamageFromResolve(LivingDamageEvent event) {
+        if (event.getSource() == DamageSource.OUT_OF_WORLD) {
+            return;
+        }
+        IStandPower.getStandPowerOptional(event.getEntityLiving()).ifPresent(stand -> {
+            if (stand.usesResolve()) {
+                float resolveRatio = stand.getResolve() / stand.getMaxResolve();
+                event.setAmount(event.getAmount() * (1 - 
+                        resolveRatio * TestServerConfig.SERVER_CONFIG.maxResolveDmgReduction.get().floatValue()));
+            }
+        });
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
