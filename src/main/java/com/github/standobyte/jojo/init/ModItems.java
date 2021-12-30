@@ -21,6 +21,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemTier;
 import net.minecraft.item.Rarity;
 import net.minecraft.item.SpawnEggItem;
+import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -42,10 +43,10 @@ public class ModItems {
             () -> new CustomModelArmorItem(ModArmorMaterials.BREATH_CONTROL_MASK, EquipmentSlotType.HEAD, new Item.Properties().tab(JojoMod.MAIN_TAB)));
 
     public static final RegistryObject<SpawnEggItem> HAMON_MASTER_SPAWN_EGG = ITEMS.register("hamon_master_spawn_egg", 
-            () -> new SpawnEggItem(ModEntityTypes.SPAWN_EGG_INIT_HAMON_MASTER.get(), 0xF8D100, 0x542722, new Item.Properties().tab(JojoMod.MAIN_TAB)));
+            () -> new ForgeSpawnEggItem(ModEntityTypes.HAMON_MASTER, 0xF8D100, 0x542722, new Item.Properties().tab(JojoMod.MAIN_TAB)));
 
     public static final RegistryObject<SpawnEggItem> HUNGRY_ZOMBIE_SPAWN_EGG = ITEMS.register("hungry_zombie_spawn_egg", 
-            () -> new SpawnEggItem(ModEntityTypes.SPAWN_EGG_INIT_HUNGRY_ZOMBIE.get(), 0x00AFAF, 0x9B9B9B, new Item.Properties().tab(JojoMod.MAIN_TAB)));
+            () -> new ForgeSpawnEggItem(ModEntityTypes.HUNGRY_ZOMBIE, 0x00AFAF, 0x9B9B9B, new Item.Properties().tab(JojoMod.MAIN_TAB)));
 
     public static final RegistryObject<AjaStoneItem> AJA_STONE = ITEMS.register("aja_stone", 
             () -> new AjaStoneItem(new Item.Properties().tab(JojoMod.MAIN_TAB).rarity(Rarity.UNCOMMON).stacksTo(16)));
