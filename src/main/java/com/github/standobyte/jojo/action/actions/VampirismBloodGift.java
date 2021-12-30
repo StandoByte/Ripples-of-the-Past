@@ -14,7 +14,7 @@ import net.minecraft.world.World;
 
 public class VampirismBloodGift extends VampirismAction {
 
-    public VampirismBloodGift(EnergyConsumingAction.Builder builder) {
+    public VampirismBloodGift(NonStandAction.Builder builder) {
         super(builder);
     }
     

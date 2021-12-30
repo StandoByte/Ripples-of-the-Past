@@ -164,15 +164,20 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
 
     @Override
     public final boolean onClickAction(ActionType type, int index, boolean shift, ActionTarget target) {
+        List<Action<P>> actions = getActions(type);
+        if (index >= actions.size()) {
+            return false;
+        }
+        Action<P> action = actions.get(index);
+        if (shift && action.getShiftVariationIfPresent().isUnlocked(getThis())) {
+            action = action.getShiftVariationIfPresent();
+        }
+        return onClickAction(action, shift, target);
+    }
+    
+    @Override
+    public final boolean onClickAction(Action<P> action, boolean shift, ActionTarget target) {
         if (heldActionData == null) {
-            List<Action<P>> actions = getActions(type);
-            if (index >= actions.size()) {
-                return false;
-            }
-            Action<P> action = actions.get(index);
-            if (shift && isActionUnlocked(action.getShiftVariationIfPresent())) {
-                action = action.getShiftVariationIfPresent();
-            }
             boolean wasActive = isActive();
             action.updatePerformer(user.level, user, getThis());
             ActionConditionResult result = checkRequirements(action, target, true);
@@ -251,7 +256,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             return condition;
         }
 
-        if (!isActionUnlocked(action)) {
+        if (!action.isUnlocked(getThis())) {
             return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition.not_unlocked"));
         }
         return ActionConditionResult.POSITIVE;

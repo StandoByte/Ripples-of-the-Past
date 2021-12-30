@@ -84,7 +84,7 @@ public class HamonCutterEntity extends ModdedProjectileEntity {
             if (owner != null) {
                 INonStandPower.getNonStandPowerOptional(owner).ifPresent(power -> {
                     power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
-                        hamon.hamonPointsFromAction(HamonStat.STRENGTH, ModActions.ZEPPELI_HAMON_CUTTER.get().getEnergyCost() / 6F);
+                        hamon.hamonPointsFromAction(HamonStat.STRENGTH, ModActions.ZEPPELI_HAMON_CUTTER.get().getEnergyCost(null) / 6F);
                     });
                 });
             }

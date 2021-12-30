@@ -15,7 +15,7 @@ import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.SoundEvent;
 
-public abstract class HamonAction extends EnergyConsumingAction {
+public abstract class HamonAction extends NonStandAction {
     private final Map<HamonSkill.Technique, Supplier<SoundEvent>> voiceLines;
     
     public HamonAction(HamonAction.Builder builder) {
@@ -41,7 +41,7 @@ public abstract class HamonAction extends EnergyConsumingAction {
     
     
     
-    public static class Builder extends EnergyConsumingAction.AbstractBuilder<HamonAction.Builder> {
+    public static class Builder extends NonStandAction.AbstractBuilder<HamonAction.Builder> {
         private Map<HamonSkill.Technique, Supplier<SoundEvent>> voiceLines = new EnumMap<>(HamonSkill.Technique.class);
 
         @Override

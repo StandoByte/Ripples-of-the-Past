@@ -27,7 +27,7 @@ import net.minecraft.world.server.ServerWorld;
 
 public class VampirismBloodDrain extends VampirismAction {
 
-    public VampirismBloodDrain(EnergyConsumingAction.Builder builder) {
+    public VampirismBloodDrain(NonStandAction.Builder builder) {
         super(builder);
     }
     

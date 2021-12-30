@@ -11,7 +11,7 @@ import net.minecraft.world.World;
 
 public class VampirismHamonSuicide extends VampirismAction {
 
-    public VampirismHamonSuicide(EnergyConsumingAction.Builder builder) {
+    public VampirismHamonSuicide(NonStandAction.Builder builder) {
         super(builder); 
     }
     

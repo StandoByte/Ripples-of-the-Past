@@ -42,7 +42,7 @@ public class HamonSpeedBoost extends HamonAction {
                 }
             }
             if (!user.hasEffect(Effects.MOVEMENT_SPEED)) {
-                hamon.hamonPointsFromAction(HamonStat.CONTROL, getEnergyCost());
+                hamon.hamonPointsFromAction(HamonStat.CONTROL, getEnergyCost(power));
             }
             user.addEffect(new EffectInstance(Effects.MOVEMENT_SPEED, duration, speedLvl));
             user.addEffect(new EffectInstance(Effects.DIG_SPEED, duration, hasteLvl));

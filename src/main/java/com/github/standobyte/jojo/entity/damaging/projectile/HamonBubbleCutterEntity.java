@@ -58,7 +58,8 @@ public class HamonBubbleCutterEntity extends ModdedProjectileEntity { // TODO bu
                 INonStandPower.getNonStandPowerOptional(owner).ifPresent(power -> {
                     power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
                         hamon.hamonPointsFromAction(HamonStat.STRENGTH, 
-                                gliding ? ModActions.CAESAR_BUBBLE_CUTTER_GLIDING.get().getEnergyCost() / 10F : ModActions.CAESAR_BUBBLE_CUTTER.get().getEnergyCost() / 10F);
+                                gliding ? ModActions.CAESAR_BUBBLE_CUTTER_GLIDING.get().getEnergyCost(null) / 10F
+                                        : ModActions.CAESAR_BUBBLE_CUTTER.get().getEnergyCost(null) / 10F);
                     });
                 });
             }

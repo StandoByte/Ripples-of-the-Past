@@ -92,11 +92,6 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     }
     
     @Override
-    public boolean isActionUnlocked(Action<INonStandPower> action) {
-        return typeSpecificData == null ? false : typeSpecificData.isActionUnlocked(action, this);
-    }
-
-    @Override
     public ActionConditionResult checkRequirements(Action<INonStandPower> action, ActionTarget target, boolean checkTargetType) {
         ActionConditionResult result = super.checkRequirements(action, target, checkTargetType);
         if (!result.isPositive()) {
@@ -216,9 +211,6 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
 
     @Override
     public void readNBT(CompoundNBT nbt) {
-        energy = nbt.contains("Mana", 5) ? // TODO remove in a later version
-                nbt.getFloat("Mana")
-                : nbt.getFloat("Energy");
         String powerName = nbt.getString("Type");
         if (powerName != IPowerType.NO_POWER_NAME) {
             NonStandPowerType<?> type = ModNonStandPowers.Registry.getRegistry().getValue(new ResourceLocation(powerName));
@@ -231,6 +223,9 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
                 }
             }
         }
+        energy = nbt.contains("Mana", 5) ? // TODO remove in a later version
+                nbt.getFloat("Mana")
+                : nbt.getFloat("Energy");
         super.readNBT(nbt);
     }
     

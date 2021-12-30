@@ -84,6 +84,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return ActionConditionResult.POSITIVE;
     }
     
+    public abstract boolean isUnlocked(P power);
+    
     protected static ActionConditionResult conditionMessage(String postfix) {
         return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition." + postfix));
     }

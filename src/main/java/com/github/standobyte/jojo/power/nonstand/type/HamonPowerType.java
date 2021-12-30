@@ -6,12 +6,13 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.actions.HamonAction;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
@@ -23,6 +24,7 @@ import com.github.standobyte.jojo.entity.CrimsonBubbleEntity;
 import com.github.standobyte.jojo.entity.HamonBlockChargeEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.SnakeMufflerEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
@@ -54,8 +56,6 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.SwordItem;
-import net.minecraft.item.TieredItem;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.state.BooleanProperty;
@@ -64,12 +64,10 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -236,7 +234,9 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
         else {
             user.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                 boolean prevTickSound = cap.syoSound;
-                cap.syoSound = canPerformSunlightYellowOverdrive(user, power, hamon, null);
+                HamonAction SYOverdrive = ModActions.HAMON_SUNLIGHT_YELLOW_OVERDRIVE.get();
+                cap.syoSound = user.isShiftKeyDown() && SYOverdrive.checkConditions(user, SYOverdrive.getPerformer(user, power), power, 
+                        new ActionTarget(ClientUtil.getCrosshairPickEntity())).isPositive();
                 if (!prevTickSound && cap.syoSound) {
                     ClientTickingSoundsHelper.playHamonConcentrationSound(user, entity -> !cap.syoSound);
                 }
@@ -307,92 +307,102 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
         }
     }
     
-    private static final Map<Technique, Supplier<SoundEvent>> SYO_VOICE_LINES = new ImmutableMap.Builder<Technique, Supplier<SoundEvent>>()
-            .put(Technique.JONATHAN, ModSounds.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE)
-            .put(Technique.ZEPPELI, ModSounds.ZEPPELI_SUNLIGHT_YELLOW_OVERDRIVE)
-            .put(Technique.JOSEPH, ModSounds.JOSEPH_SUNLIGHT_YELLOW_OVERDRIVE)
-            .put(Technique.CAESAR, ModSounds.CAESAR_SUNLIGHT_YELLOW_OVERDRIVE)
-//            .put(Technique.LISA_LISA, ModSounds.LISA_LISA_SUNLIGHT_YELLOW_OVERDRIVE)
-            .build();
-    public static final float OVERDRIVE_DAMAGE = 0.5F;
-    public static final float OVERDRIVE_COST = 750F;
-    public static void overdriveAttack(LivingEntity user, LivingEntity target, INonStandPower power, HamonData hamon) {
-        if (!user.level.isClientSide()) {
-            SoundEvent overdriveVoiceLine = null;
-            Technique technique = hamon.getTechnique();
-            
-            float damage = OVERDRIVE_DAMAGE;
-            float energyCost = OVERDRIVE_COST;
-            float knockback = 0;
-            
-            ItemStack heldItemStack = user.getMainHandItem();
-            if (!heldItemStack.isEmpty()) {
-                if (hamon.isSkillLearned(HamonSkill.METAL_SILVER_OVERDRIVE) && heldItemStack.getItem() instanceof TieredItem) {
-                    TieredItem item = (TieredItem) heldItemStack.getItem();
-                    damage *= 0.5F;
-                    energyCost += 250;
-                    if (!user.isShiftKeyDown() && item instanceof SwordItem && heldItemStack.hasCustomHoverName() && "pluck".equals(heldItemStack.getHoverName().getString().toLowerCase())) {
-                        overdriveVoiceLine = ModSounds.JONATHAN_PLUCK_SWORD.get();
-                    }
-                }
-                else {
-                    return;
-                }
-            }
-            else if (hamon.isSkillLearned(HamonSkill.TURQUOISE_BLUE_OVERDRIVE) && user.isInWater() && target.isInWater()) {
-                damage *= 2F;
-                knockback = 1F;
-            }
-            else {
-                boolean sunlightYellowOverdrive = canPerformSunlightYellowOverdrive(user, power, hamon, target);
-                if (sunlightYellowOverdrive) {
-                    float SYOFactor = power.getEnergy() / energyCost;
-                    energyCost = power.getEnergy();
-                    damage *= SYOFactor * 1.2F;
-                }
-                if (sunlightYellowOverdrive && technique != null) {
-                    Supplier<SoundEvent> syoVoiceLine =  SYO_VOICE_LINES.get(technique);
-                    if (syoVoiceLine != null) {
-                        overdriveVoiceLine = syoVoiceLine.get();
-                    }
-                }
-            }
-            
-            if (!power.consumeEnergy(energyCost)) {
-                return;
-            }
-            float dmgScale = 1;
-            if (user instanceof PlayerEntity) {
-                float swingStrengthScale = ((PlayerEntity) user).getAttackStrengthScale(0.5F);
-                dmgScale = (0.2F + swingStrengthScale * swingStrengthScale * 0.8F);
-                damage *= dmgScale;
-            }
-            if (ModDamageSources.dealHamonDamage(target, damage, user, null)) {
-                hamon.hamonPointsFromAction(HamonStat.STRENGTH, energyCost * dmgScale);
-                if (knockback > 0) {
-                    target.knockback(knockback, 
-                            (double) MathHelper.sin(user.yRot * ((float) Math.PI / 180F)), 
-                            (double) (-MathHelper.cos(user.yRot * ((float) Math.PI / 180F))));
-                }
-                if (overdriveVoiceLine != null) {
-                    JojoModUtil.sayVoiceLine(user, overdriveVoiceLine);
-                }
-            }
+    public static void overdriveAttack(LivingEntity user, LivingEntity targetEntity, INonStandPower power, HamonData hamon) {
+        ActionTarget target = new ActionTarget(targetEntity);
+        boolean shift = user.isShiftKeyDown();
+        if (!(shift && power.onClickAction(ModActions.HAMON_SUNLIGHT_YELLOW_OVERDRIVE.get(), true, target))) {
+            power.onClickAction(ModActions.HAMON_OVERDRIVE.get(), shift, target);
         }
     }
     
-    public static boolean canPerformSunlightYellowOverdrive(LivingEntity user, INonStandPower power, HamonData hamon, @Nullable LivingEntity target) {
-        if (user.isShiftKeyDown() && power.hasEnergy(OVERDRIVE_COST * 2) && hamon.isSkillLearned(HamonSkill.SUNLIGHT_YELLOW_OVERDRIVE)) {
-            if (target == null && user.level.isClientSide()) {
-                Entity crosshairEntity = ClientUtil.getCrosshairPickEntity();
-                target = crosshairEntity instanceof LivingEntity ? (LivingEntity) crosshairEntity : null;
-            }
-            if (target != null) {
-                return !target.isInvulnerableTo(ModDamageSources.HAMON) && target.getBoundingBox().inflate(user.getBbWidth() + 0.1F).contains(user.getEyePosition(1.0F));
-            }
-        }
-        return false;
-    }
+    
+    // FIXME !! overdrive
+//    private static final Map<Technique, Supplier<SoundEvent>> SYO_VOICE_LINES = new ImmutableMap.Builder<Technique, Supplier<SoundEvent>>()
+//            .put(Technique.JONATHAN, ModSounds.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE)
+//            .put(Technique.ZEPPELI, ModSounds.ZEPPELI_SUNLIGHT_YELLOW_OVERDRIVE)
+//            .put(Technique.JOSEPH, ModSounds.JOSEPH_SUNLIGHT_YELLOW_OVERDRIVE)
+//            .put(Technique.CAESAR, ModSounds.CAESAR_SUNLIGHT_YELLOW_OVERDRIVE)
+////            .put(Technique.LISA_LISA, ModSounds.LISA_LISA_SUNLIGHT_YELLOW_OVERDRIVE)
+//            .build();
+//    public static final float OVERDRIVE_DAMAGE = 0.5F;
+//    public static final float OVERDRIVE_COST = 750F;
+//    public static void overdriveAttack(LivingEntity user, LivingEntity target, INonStandPower power, HamonData hamon) {
+//        if (!user.level.isClientSide()) {
+//            SoundEvent overdriveVoiceLine = null;
+//            Technique technique = hamon.getTechnique();
+//            
+//            float damage = OVERDRIVE_DAMAGE;
+//            float energyCost = OVERDRIVE_COST;
+//            float knockback = 0;
+//            
+//            ItemStack heldItemStack = user.getMainHandItem();
+//            if (!heldItemStack.isEmpty()) {
+//                if (hamon.isSkillLearned(HamonSkill.METAL_SILVER_OVERDRIVE) && heldItemStack.getItem() instanceof TieredItem) {
+//                    TieredItem item = (TieredItem) heldItemStack.getItem();
+//                    damage *= 0.5F;
+//                    energyCost += 250;
+//                    if (!user.isShiftKeyDown() && item instanceof SwordItem && heldItemStack.hasCustomHoverName() && "pluck".equals(heldItemStack.getHoverName().getString().toLowerCase())) {
+//                        overdriveVoiceLine = ModSounds.JONATHAN_PLUCK_SWORD.get();
+//                    }
+//                }
+//                else {
+//                    return;
+//                }
+//            }
+//            else if (hamon.isSkillLearned(HamonSkill.TURQUOISE_BLUE_OVERDRIVE) && user.isInWater() && target.isInWater()) {
+//                damage *= 2F;
+//                knockback = 1F;
+//            }
+//            else {
+//                boolean sunlightYellowOverdrive = canPerformSunlightYellowOverdrive(user, power, hamon, target);
+//                if (sunlightYellowOverdrive) {
+//                    float SYOFactor = power.getEnergy() / energyCost;
+//                    energyCost = power.getEnergy();
+//                    damage *= SYOFactor * 1.2F;
+//                }
+//                if (sunlightYellowOverdrive && technique != null) {
+//                    Supplier<SoundEvent> syoVoiceLine =  SYO_VOICE_LINES.get(technique);
+//                    if (syoVoiceLine != null) {
+//                        overdriveVoiceLine = syoVoiceLine.get();
+//                    }
+//                }
+//            }
+//            
+//            if (!power.consumeEnergy(energyCost)) {
+//                return;
+//            }
+//            float dmgScale = 1;
+//            if (user instanceof PlayerEntity) {
+//                float swingStrengthScale = ((PlayerEntity) user).getAttackStrengthScale(0.5F);
+//                dmgScale = (0.2F + swingStrengthScale * swingStrengthScale * 0.8F);
+//                damage *= dmgScale;
+//            }
+//            if (ModDamageSources.dealHamonDamage(target, damage, user, null)) {
+//                hamon.hamonPointsFromAction(HamonStat.STRENGTH, energyCost * dmgScale);
+//                if (knockback > 0) {
+//                    target.knockback(knockback, 
+//                            (double) MathHelper.sin(user.yRot * ((float) Math.PI / 180F)), 
+//                            (double) (-MathHelper.cos(user.yRot * ((float) Math.PI / 180F))));
+//                }
+//                if (overdriveVoiceLine != null) {
+//                    JojoModUtil.sayVoiceLine(user, overdriveVoiceLine);
+//                }
+//            }
+//        }
+//    }
+//    
+//    public static boolean canPerformSunlightYellowOverdrive(LivingEntity user, INonStandPower power, HamonData hamon, @Nullable LivingEntity target) {
+//        if (user.isShiftKeyDown() && power.hasEnergy(OVERDRIVE_COST * 2) && hamon.isSkillLearned(HamonSkill.SUNLIGHT_YELLOW_OVERDRIVE)) {
+//            if (target == null && user.level.isClientSide()) {
+//                Entity crosshairEntity = ClientUtil.getCrosshairPickEntity();
+//                target = crosshairEntity instanceof LivingEntity ? (LivingEntity) crosshairEntity : null;
+//            }
+//            if (target != null) {
+//                return !target.isInvulnerableTo(ModDamageSources.HAMON) && target.getBoundingBox().inflate(user.getBbWidth() + 0.1F).contains(user.getEyePosition(1.0F));
+//            }
+//        }
+//        return false;
+//    }
     
     public static void updateCheatDeathEffect(LivingEntity user) {
         user.addEffect(new EffectInstance(ModEffects.CHEAT_DEATH.get(), 120000, 0, false, false, true));

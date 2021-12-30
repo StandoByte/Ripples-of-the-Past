@@ -1,8 +1,8 @@
 package com.github.standobyte.jojo.action.actions;
 
-public abstract class VampirismAction extends EnergyConsumingAction {
+public abstract class VampirismAction extends NonStandAction {
     
-    public VampirismAction(EnergyConsumingAction.Builder builder) {
+    public VampirismAction(NonStandAction.Builder builder) {
         super(builder);
     }
 }

@@ -5,8 +5,6 @@ import java.util.Arrays;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.action.ActionConditionResult;
-import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.actions.StandAction;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -272,20 +270,10 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
         return tier;
     }
     
-    @Override
-    public boolean isActionUnlocked(Action<IStandPower> action) {
-        return getXp() >= ((StandAction) action).getXpRequirement();
-    }
-    
 //    @Override // TODO Stand Sealing effect
 //    public boolean canUsePower() {
 //        return super.canUsePower() && !user.hasEffect(ModEffects.STAND_SEALING.get());
 //    }
-    
-    @Override
-    public ActionConditionResult checkRequirements(Action<IStandPower> action, ActionTarget target, boolean checkTargetType) {
-        return super.checkRequirements(action, target, checkTargetType);
-    }
     
     @Override
     public boolean isLeapUnlocked() {

@@ -12,7 +12,7 @@ import net.minecraft.world.World;
 
 public class VampirismZombieSummon extends VampirismAction {
 
-    public VampirismZombieSummon(EnergyConsumingAction.Builder builder) {
+    public VampirismZombieSummon(NonStandAction.Builder builder) {
         super(builder);
     }
     

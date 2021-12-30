@@ -48,7 +48,7 @@ public class ActionsHotbarConfig<P extends IPower<P, ?>> {
     
     List<Action<P>> getUnlockedActions() {
         return actions.stream()
-                .filter(action -> power.isActionUnlocked(action))
+                .filter(action -> action.isUnlocked(power))
                 .collect(Collectors.toList());
     }
     

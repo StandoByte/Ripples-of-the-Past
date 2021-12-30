@@ -4,7 +4,7 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.action.actions.EnergyConsumingAction;
+import com.github.standobyte.jojo.action.actions.NonStandAction;
 import com.github.standobyte.jojo.action.actions.HamonAction;
 import com.github.standobyte.jojo.action.actions.HamonBubbleBarrier;
 import com.github.standobyte.jojo.action.actions.HamonBubbleCutter;
@@ -14,12 +14,14 @@ import com.github.standobyte.jojo.action.actions.HamonDetector;
 import com.github.standobyte.jojo.action.actions.HamonHealing;
 import com.github.standobyte.jojo.action.actions.HamonLifeMagnetism;
 import com.github.standobyte.jojo.action.actions.HamonOrganismInfusion;
+import com.github.standobyte.jojo.action.actions.HamonOverdrive;
 import com.github.standobyte.jojo.action.actions.HamonOverdriveBarrage;
 import com.github.standobyte.jojo.action.actions.HamonProjectileShield;
 import com.github.standobyte.jojo.action.actions.HamonRepellingOverdrive;
 import com.github.standobyte.jojo.action.actions.HamonScarletOverdrive;
 import com.github.standobyte.jojo.action.actions.HamonSendoOverdrive;
 import com.github.standobyte.jojo.action.actions.HamonSpeedBoost;
+import com.github.standobyte.jojo.action.actions.HamonSunlightYellowOverdrive;
 import com.github.standobyte.jojo.action.actions.HamonTornadoOverdrive;
 import com.github.standobyte.jojo.action.actions.HamonWallClimbing;
 import com.github.standobyte.jojo.action.actions.HamonZoomPunch;
@@ -67,6 +69,17 @@ import net.minecraftforge.registries.RegistryBuilder;
 public class ModActions {
     public static final DeferredRegister<Action<?>> ACTIONS = DeferredRegister.create(
             (Class<Action<?>>) ((Class<?>) Action.class), JojoMod.MOD_ID);
+    
+    public static final RegistryObject<HamonAction> HAMON_OVERDRIVE = ACTIONS.register("hamon_overdrive", 
+            () -> new HamonOverdrive(new HamonAction.Builder().energyCost(750)));
+    
+    public static final RegistryObject<HamonAction> HAMON_SUNLIGHT_YELLOW_OVERDRIVE = ACTIONS.register("hamon_sunlight_yellow_overdrive", 
+            () -> new HamonSunlightYellowOverdrive(new HamonAction.Builder().energyCost(1500)
+                    .shout(Technique.JONATHAN, ModSounds.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE)
+                    .shout(Technique.ZEPPELI, ModSounds.ZEPPELI_SUNLIGHT_YELLOW_OVERDRIVE)
+                    .shout(Technique.JOSEPH, ModSounds.JOSEPH_SUNLIGHT_YELLOW_OVERDRIVE)
+                    .shout(Technique.CAESAR, ModSounds.CAESAR_SUNLIGHT_YELLOW_OVERDRIVE)
+                    .shiftVariationOf(HAMON_OVERDRIVE)));
     
     public static final RegistryObject<HamonAction> HAMON_SENDO_OVERDRIVE = ACTIONS.register("hamon_sendo_overdrive", 
             () -> new HamonSendoOverdrive(new HamonAction.Builder().energyCost(1000).swingHand().needsBlockTarget()
@@ -132,26 +145,26 @@ public class ModActions {
     
 
     public static final RegistryObject<VampirismAction> VAMPIRISM_BLOOD_DRAIN = ACTIONS.register("vampirism_blood_drain", 
-            () -> new VampirismBloodDrain(new EnergyConsumingAction.Builder().needsEntityTarget().maxRangeEntityTarget(2.0D).holdType().heldSlowDownFactor(0.5F)));
+            () -> new VampirismBloodDrain(new NonStandAction.Builder().needsEntityTarget().maxRangeEntityTarget(2.0D).holdType().heldSlowDownFactor(0.5F)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_FREEZE = ACTIONS.register("vampirism_freeze", 
-            () -> new VampirismFreeze(new EnergyConsumingAction.Builder().maxRangeEntityTarget(2.0D).holdType().holdEnergyCost(1).heldSlowDownFactor(0.3F)));
+            () -> new VampirismFreeze(new NonStandAction.Builder().maxRangeEntityTarget(2.0D).holdType().holdEnergyCost(1).heldSlowDownFactor(0.3F)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_SPACE_RIPPER_STINGY_EYES = ACTIONS.register("vampirism_space_ripper_stingy_eyes", 
-            () -> new VampirismSpaceRipperStingyEyes(new EnergyConsumingAction.Builder().ignoresPerformerStun().holdType(20).holdEnergyCost(40).heldSlowDownFactor(0.3F)));
+            () -> new VampirismSpaceRipperStingyEyes(new NonStandAction.Builder().ignoresPerformerStun().holdType(20).holdEnergyCost(40).heldSlowDownFactor(0.3F)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_BLOOD_GIFT = ACTIONS.register("vampirism_blood_gift", 
-            () -> new VampirismBloodGift(new EnergyConsumingAction.Builder().needsEntityTarget()
+            () -> new VampirismBloodGift(new NonStandAction.Builder().needsEntityTarget()
                     .maxRangeEntityTarget(1.0D).holdToFire(60, false).holdEnergyCost(10).heldSlowDownFactor(0.3F)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_ZOMBIE_SUMMON = ACTIONS.register("vampirism_zombie_summon", 
-            () -> new VampirismZombieSummon(new EnergyConsumingAction.Builder().energyCost(100).cooldown(200)));
+            () -> new VampirismZombieSummon(new NonStandAction.Builder().energyCost(100).cooldown(200)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_DARK_AURA = ACTIONS.register("vampirism_dark_aura", 
-            () -> new VampirismDarkAura(new EnergyConsumingAction.Builder().ignoresPerformerStun().energyCost(50).cooldown(100)));
+            () -> new VampirismDarkAura(new NonStandAction.Builder().ignoresPerformerStun().energyCost(50).cooldown(100)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_HAMON_SUICIDE = ACTIONS.register("vampirism_hamon_suicide", 
-            () -> new VampirismHamonSuicide(new EnergyConsumingAction.Builder().ignoresPerformerStun().holdToFire(100, false)));
+            () -> new VampirismHamonSuicide(new NonStandAction.Builder().ignoresPerformerStun().holdToFire(100, false)));
 
     
     
