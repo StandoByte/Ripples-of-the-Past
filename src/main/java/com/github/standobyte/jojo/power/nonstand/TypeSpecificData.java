@@ -19,7 +19,7 @@ public abstract class TypeSpecificData {
         this.serverPlayer = user instanceof ServerPlayerEntity ? Optional.of((ServerPlayerEntity) user) : Optional.empty();
     }
     
-    public boolean isActionUnlocked(Action<INonStandPower> action, NonStandPower powerData) {
+    public boolean isActionUnlocked(Action<INonStandPower> action, INonStandPower powerData) {
         return true;
     }
     

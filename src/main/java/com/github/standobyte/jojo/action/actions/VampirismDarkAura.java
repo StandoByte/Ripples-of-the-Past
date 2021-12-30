@@ -17,7 +17,7 @@ import net.minecraft.world.World;
 
 public class VampirismDarkAura extends VampirismAction {
 
-    public VampirismDarkAura(EnergyConsumingAction.Builder builder) {
+    public VampirismDarkAura(NonStandAction.Builder builder) {
         super(builder);
     }
     

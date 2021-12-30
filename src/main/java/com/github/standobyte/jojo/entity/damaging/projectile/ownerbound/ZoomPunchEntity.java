@@ -141,7 +141,7 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
             INonStandPower.getNonStandPowerOptional(getOwner()).ifPresent(power -> {
                 power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
                     gaveHamonPoints = true;
-                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, ModActions.HAMON_ZOOM_PUNCH.get().getEnergyCost());
+                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, ModActions.HAMON_ZOOM_PUNCH.get().getEnergyCost(power));
                 });
             });
         }

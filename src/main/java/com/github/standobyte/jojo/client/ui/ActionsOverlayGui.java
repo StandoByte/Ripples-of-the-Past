@@ -324,7 +324,7 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     public <P extends IPower<P, ?>> boolean shiftVarSelected(P power, Action<P> action, boolean shift) {
-        return power.getHeldAction() != action && shift && power.isActionUnlocked(action.getShiftVariationIfPresent()) 
+        return power.getHeldAction() != action && shift && action.getShiftVariationIfPresent().isUnlocked(power) 
                 || power.getHeldAction() == action.getShiftVariationIfPresent();
     }
     
@@ -406,7 +406,7 @@ public class ActionsOverlayGui extends AbstractGui {
             renderBar(matrixStack, barsX, barsY, 
                     32, 0, 240, getBarIconTexY(power.getType()), 
                     // FIXME get cost value
-                    power.getEnergy(), power.getMaxEnergy(), 500f, 
+                    power.getEnergy(), power.getMaxEnergy(), 750f, 
                     currentMode == nonStandUiConfig, energyBarTransparency, partialTick, power.getType().getColor()); // FIXME vampirism blood levels
             prevBarThin = currentMode != nonStandUiConfig;
         }
@@ -438,16 +438,17 @@ public class ActionsOverlayGui extends AbstractGui {
             int texX, int texY, int iconTexX, int iconTexY, 
             float amount, float max, float cost, 
             boolean highlight, ElementTransparency transparency, float partialTick, int color) {
-        int value = (int) ((float) BAR_HEIGHT * (amount / max));
-        int costValue = (int) ((float) BAR_HEIGHT * (cost / max));
+        int barHeight = highlight ? BAR_HEIGHT : BAR_HEIGHT_SHORTENED;
+        int value = (int) ((float) barHeight * (amount / max));
+        int costValue = (int) ((float) barHeight * (cost / max));
         float[] rgb = ClientUtil.rgb(color);
         if (highlight) {
             RenderSystem.color4f(rgb[0], rgb[1], rgb[2], 1.0F);
             // bar fill
-            blit(matrixStack, barX + 1, barY + BAR_HEIGHT - value + 1, 
-                    texX + 1, texY + BAR_HEIGHT - value + 1, 6, value);
+            blit(matrixStack, barX + 1, barY + barHeight - value + 1, 
+                    texX + 1, texY + barHeight - value + 1, 6, value);
             // border
-            blit(matrixStack, barX, barY, 16, 0, 8, BAR_HEIGHT + 2);
+            blit(matrixStack, barX, barY, 16, 0, 8, barHeight + 2);
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             // cost
             if (costValue > 0) {
@@ -455,13 +456,13 @@ public class ActionsOverlayGui extends AbstractGui {
                 float alpha = Math.max(Math.abs(MathHelper.sin(counter / 10000000F)), 0.25F) + 0.25F;
                 boolean notEnough = cost > amount;
                 fill(matrixStack, 
-                        barX + 1, notEnough ? barY + BAR_HEIGHT - costValue + 1 : barY + 1, 
-                        barX + 7, notEnough ? barY + BAR_HEIGHT + 1 : barY + costValue + 1, 
+                        barX + 1, notEnough ? barY + barHeight - costValue + 1 : barY - value + barHeight + 1, 
+                        barX + 7, notEnough ? barY + barHeight + 1 : barY - value + barHeight + costValue + 1, 
                         ElementTransparency.addAlpha(0xFFFFFF, alpha * 0.5F));
                 RenderSystem.enableBlend();
             }
             // scale
-            blit(matrixStack, barX + 1, barY + 1, 1, 1, 6, BAR_HEIGHT);
+            blit(matrixStack, barX + 1, barY + 1, 1, 1, 6, barHeight);
             // icon
             blit(matrixStack, barX - 1, barY - 12, iconTexX, iconTexY, 10, 14);
         }
@@ -470,12 +471,12 @@ public class ActionsOverlayGui extends AbstractGui {
             texX += 8;
             RenderSystem.color4f(rgb[0], rgb[1], rgb[2], transparency.getAlpha(partialTick));
             // bar fill
-            blit(matrixStack, barX + 1, barY + BAR_HEIGHT - value + 1, 
-                    texX + 1, texY + BAR_HEIGHT - value + 1, 6, value);
+            blit(matrixStack, barX + 1, barY + barHeight - value + 1, 
+                    texX + 1, texY + barHeight - value + 1, 6, value);
             // border
-            blit(matrixStack, barX, barY, 24, 0, 8, BAR_HEIGHT + 2);
+            blit(matrixStack, barX, barY, 24, 0, 8, barHeight + 2);
             // scale
-            blit(matrixStack, barX + 1, barY + 1, 9, 1, 6, BAR_HEIGHT);
+            blit(matrixStack, barX + 1, barY + 1, 9, 1, 6, barHeight);
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         }
     }

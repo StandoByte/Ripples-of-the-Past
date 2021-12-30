@@ -131,12 +131,12 @@ public class TimeHandler {
     private static boolean hasTimeStopAbility(LivingEntity entity) {
         return IStandPower.getStandPowerOptional(entity).map(stand -> {
             for (Action<IStandPower> ability : stand.getAbilities()) {
-                if (stand.isActionUnlocked(ability) && ALLOW_MOVING_IN_STOPPED_TIME.contains(ability)) {
+                if (ability.isUnlocked(stand) && ALLOW_MOVING_IN_STOPPED_TIME.contains(ability)) {
                     return true;
                 }
             }
             for (Action<IStandPower> attack : stand.getAttacks()) {
-                if (stand.isActionUnlocked(attack) && ALLOW_MOVING_IN_STOPPED_TIME.contains(attack)) {
+                if (attack.isUnlocked(stand) && ALLOW_MOVING_IN_STOPPED_TIME.contains(attack)) {
                     return true;
                 }
             }

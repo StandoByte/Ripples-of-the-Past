@@ -62,7 +62,7 @@ public class HamonSendoOverdrive extends HamonAction {
                 }
             }
             if (givePoints) {
-                hamon.hamonPointsFromAction(HamonStat.STRENGTH, getEnergyCost());
+                hamon.hamonPointsFromAction(HamonStat.STRENGTH, getEnergyCost(power));
             }
         }
     }

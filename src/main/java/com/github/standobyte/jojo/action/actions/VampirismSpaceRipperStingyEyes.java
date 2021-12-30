@@ -9,7 +9,7 @@ import net.minecraft.world.World;
 
 public class VampirismSpaceRipperStingyEyes extends VampirismAction {
 
-    public VampirismSpaceRipperStingyEyes(EnergyConsumingAction.Builder builder) {
+    public VampirismSpaceRipperStingyEyes(NonStandAction.Builder builder) {
         super(builder);
     }
     

@@ -40,8 +40,8 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     void setCooldownTimer(Action<?> action, int value, int totalCooldown);
     ActionCooldownTracker getCooldowns();
 
-    boolean isActionUnlocked(Action<P> action); // FIXME generalize
     boolean onClickAction(ActionType type, int index, boolean shift, ActionTarget target);
+    boolean onClickAction(Action<P> action, boolean shift, ActionTarget target);
     ActionConditionResult checkRequirements(Action<P> action, ActionTarget target, boolean checkTargetType);
     ActionConditionResult checkTargetType(Action<P> action, ActionTarget target);
     boolean canUsePower();

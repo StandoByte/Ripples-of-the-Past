@@ -22,7 +22,6 @@ import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillLearnPack
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillsResetPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncHamonStatsPacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.nonstand.TypeSpecificData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonSkillType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
@@ -85,8 +84,11 @@ public class HamonData extends TypeSpecificData {
     }
 
     @Override
-    public boolean isActionUnlocked(Action<INonStandPower> action, NonStandPower powerData) {
-        return action == ModActions.HAMON_HEALING.get() || hamonSkills.unlockedActions.contains(action);
+    public boolean isActionUnlocked(Action<INonStandPower> action, INonStandPower powerData) {
+        if (action == ModActions.HAMON_SUNLIGHT_YELLOW_OVERDRIVE.get()) {
+            return hamonSkills.isSkillLearned(HamonSkill.SUNLIGHT_YELLOW_OVERDRIVE);
+        }
+        return action == ModActions.HAMON_OVERDRIVE.get() || action == ModActions.HAMON_HEALING.get() || hamonSkills.unlockedActions.contains(action);
     }
 
     @Override

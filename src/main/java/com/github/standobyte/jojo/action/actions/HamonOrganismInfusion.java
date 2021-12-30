@@ -74,13 +74,13 @@ public class HamonOrganismInfusion extends HamonAction {
             switch(target.getType()) {
             case BLOCK:
                 HamonBlockChargeEntity charge = new HamonBlockChargeEntity(world, target.getBlockPos());
-                charge.setCharge(0.02F * hamon.getHamonDamageMultiplier(), chargeTicks, user, getEnergyCost());
+                charge.setCharge(0.02F * hamon.getHamonDamageMultiplier(), chargeTicks, user, getEnergyCost(power));
                 world.addFreshEntity(charge);
                 break;
             case ENTITY:
                 LivingEntity entity = (LivingEntity) target.getEntity(world);
                 entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> 
-                cap.setHamonCharge(0.2F * hamon.getHamonDamageMultiplier(), chargeTicks, user, getEnergyCost()));
+                cap.setHamonCharge(0.2F * hamon.getHamonDamageMultiplier(), chargeTicks, user, getEnergyCost(power)));
                 break;
             default:
                 break;

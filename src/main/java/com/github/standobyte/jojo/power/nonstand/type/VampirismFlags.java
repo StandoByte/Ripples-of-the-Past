@@ -10,7 +10,6 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncNonStandFlagPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncNonStandFlagPacket.Flag;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.nonstand.TypeSpecificData;
 
 import net.minecraft.entity.LivingEntity;
@@ -33,7 +32,7 @@ public class VampirismFlags extends TypeSpecificData {
     }
 
     @Override
-    public boolean isActionUnlocked(Action<INonStandPower> action, NonStandPower power) {
+    public boolean isActionUnlocked(Action<INonStandPower> action, INonStandPower power) {
         return vampireFullPower || 
                 action == ModActions.VAMPIRISM_BLOOD_DRAIN.get() || 
                 action == ModActions.VAMPIRISM_BLOOD_GIFT.get() || 

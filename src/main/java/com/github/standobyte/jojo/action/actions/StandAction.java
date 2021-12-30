@@ -15,6 +15,11 @@ public abstract class StandAction extends Action<IStandPower> {
         return xpRequirement;
     }
     
+    @Override
+    public boolean isUnlocked(IStandPower power) {
+        return power.getXp() >= getXpRequirement();
+    }
+    
     
     
     public static class Builder extends StandAction.AbstractBuilder<StandAction.Builder> {

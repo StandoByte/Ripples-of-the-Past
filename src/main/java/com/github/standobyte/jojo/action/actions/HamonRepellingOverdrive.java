@@ -26,7 +26,7 @@ public class HamonRepellingOverdrive extends HamonAction {
             float effectStr = (float) hamon.getHamonControlLevel() / (float) HamonData.MAX_STAT_LEVEL;
             int resistDuration = 100 + MathHelper.floor(400F * effectStr);
             int resistLvl = MathHelper.floor(2.5F * effectStr);
-            hamon.hamonPointsFromAction(HamonStat.CONTROL, getEnergyCost());
+            hamon.hamonPointsFromAction(HamonStat.CONTROL, getEnergyCost(power));
             user.addEffect(new EffectInstance(Effects.DAMAGE_RESISTANCE, resistDuration, resistLvl));
             HamonPowerType.createHamonSparkParticlesEmitter(user, effectStr / 2F);
         }

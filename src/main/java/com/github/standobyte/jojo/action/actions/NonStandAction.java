@@ -1,20 +1,23 @@
 package com.github.standobyte.jojo.action.actions;
 
+import java.util.Optional;
+
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.nonstand.TypeSpecificData;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
-public abstract class EnergyConsumingAction extends Action<INonStandPower> {
+public abstract class NonStandAction extends Action<INonStandPower> {
     private final float energyCost;
     private final float heldTickEnergyCost;
     
-    public EnergyConsumingAction(EnergyConsumingAction.AbstractBuilder<?> builder) {
+    public NonStandAction(NonStandAction.AbstractBuilder<?> builder) {
         super(builder);
         this.energyCost = builder.energyCost;
         this.heldTickEnergyCost = builder.heldTickEnergyCost;
@@ -22,12 +25,12 @@ public abstract class EnergyConsumingAction extends Action<INonStandPower> {
     
     public float getEnergyNeeded(int ticksHeld, INonStandPower power) {
         if (getHoldDurationMax() > 0) {
-            return getEnergyCost() + getHeldTickEnergyCost() * Math.max((getHoldDurationToFire(power) - ticksHeld), 1);
+            return getEnergyCost(power) + getHeldTickEnergyCost() * Math.max((getHoldDurationToFire(power) - ticksHeld), 1);
         }
-        return getEnergyCost();
+        return getEnergyCost(power);
     }
     
-    public float getEnergyCost() {
+    public float getEnergyCost(INonStandPower power) {
         return energyCost;
     }
     
@@ -47,11 +50,17 @@ public abstract class EnergyConsumingAction extends Action<INonStandPower> {
     }
     
     @Override
+    public boolean isUnlocked(INonStandPower power) {
+        Optional<TypeSpecificData> dataOptional = power.getTypeSpecificData(null);
+        return dataOptional.map(data -> data.isActionUnlocked(this, power)).orElse(false);
+    }
+    
+    @Override
     public void onPerform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
-        if (!world.isClientSide()) {
-            power.consumeEnergy(getEnergyCost());
-        }
         super.onPerform(world, user, power, target);
+        if (!world.isClientSide()) {
+            power.consumeEnergy(getEnergyCost(power));
+        }
     }
     
     @Override
@@ -64,10 +73,10 @@ public abstract class EnergyConsumingAction extends Action<INonStandPower> {
     
     
     
-    public static class Builder extends EnergyConsumingAction.AbstractBuilder<EnergyConsumingAction.Builder> {
+    public static class Builder extends NonStandAction.AbstractBuilder<NonStandAction.Builder> {
 
         @Override
-        protected EnergyConsumingAction.Builder getThis() {
+        protected NonStandAction.Builder getThis() {
             return this;
         }
     }
