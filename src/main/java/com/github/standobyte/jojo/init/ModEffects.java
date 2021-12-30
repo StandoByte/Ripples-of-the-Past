@@ -50,6 +50,9 @@ public class ModEffects {
     public static final RegistryObject<UncurableEffect> TIME_STOP = EFFECTS.register("time_stop", 
             () -> new UncurableEffect(EffectType.BENEFICIAL, 0x707070));
     
+    public static final RegistryObject<UncurableEffect> RESOLVE = EFFECTS.register("resolve", 
+            () -> new UncurableEffect(EffectType.BENEFICIAL, 0xC6151F));
+    
     public static final RegistryObject<Effect> SUN_RESISTANCE = EFFECTS.register("sun_resistance", 
             () -> new StatusEffect(EffectType.BENEFICIAL, 0xFFD54A));
     
