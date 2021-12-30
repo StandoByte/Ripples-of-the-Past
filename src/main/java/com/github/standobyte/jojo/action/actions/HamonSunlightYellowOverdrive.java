@@ -15,7 +15,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
-public class HamonSunlightYellowOverdrive extends HamonAction { // FIXME "You haven't unlocked this" (also don't send messages)
+public class HamonSunlightYellowOverdrive extends HamonAction { // FIXME don't send messages
 
     public HamonSunlightYellowOverdrive(Builder builder) {
         super(builder);
