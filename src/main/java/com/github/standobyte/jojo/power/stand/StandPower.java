@@ -4,8 +4,6 @@ import java.util.Arrays;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.action.actions.StandAction;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModStandTypes;
@@ -202,6 +200,11 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
     }
     
     @Override
+    public int getNoResolveDecayTicks() {
+        return noResolveDecayTicks;
+    }
+    
+    @Override
     public void addResolve(float amount, int noDecayTicks) {
         setResolve(MathHelper.clamp(this.resolve + amount, 0, getMaxResolve()), noDecayTicks);
     }
@@ -343,7 +346,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
             stamina = oldPower.getStamina();
             if (!wasDeath) {
                 resolve = oldPower.getResolve();
-                noResolveDecayTicks = ((StandPower) oldPower).noResolveDecayTicks;
+                noResolveDecayTicks = oldPower.getNoResolveDecayTicks();
             }
         }
     }

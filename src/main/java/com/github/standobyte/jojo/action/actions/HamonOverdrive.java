@@ -22,7 +22,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
-public class HamonOverdrive extends HamonAction { // FIXME "You haven't unlocked this" (also don't send messages)
+public class HamonOverdrive extends HamonAction { // FIXME also don't send messages
 
     public HamonOverdrive(Builder builder) {
         super(builder);

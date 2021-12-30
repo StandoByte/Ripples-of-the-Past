@@ -11,7 +11,6 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.power.stand.StandPower;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.Effect;
@@ -84,7 +83,7 @@ public class EntityStandType extends StandType {
     @Override
     public void tickUser(LivingEntity user, IStandPower power) {
         super.tickUser(user, power);
-        IStandManifestation stand = ((StandPower) power).getStandManifestation();
+        IStandManifestation stand = power.getStandManifestation();
         if (stand instanceof StandEntity) {
             StandEntity standEntity = (StandEntity) stand;
             if (standEntity.level != user.level) {
