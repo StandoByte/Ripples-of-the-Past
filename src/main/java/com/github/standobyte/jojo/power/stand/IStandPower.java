@@ -27,6 +27,7 @@ public interface IStandPower extends IPower<IStandPower, StandType> {
     int getNoResolveDecayTicks();
     void addResolve(float amount, int noDecayTicks);
     void setResolve(float amount, int noDecayTicks);
+    boolean isInResolveMode();
     
     @Deprecated
     int getXp();

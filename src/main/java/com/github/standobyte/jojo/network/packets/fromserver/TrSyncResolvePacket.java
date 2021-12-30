@@ -36,6 +36,9 @@ public class TrSyncResolvePacket {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity instanceof LivingEntity) {
                 IStandPower.getStandPowerOptional((LivingEntity) entity).ifPresent(power -> {
+                    if (power.isInResolveMode() && power.getNoResolveDecayTicks() < msg.noDecayTicks) {
+                        // 
+                    }
                     power.setResolve(msg.resolve, msg.noDecayTicks);
                 });
             }

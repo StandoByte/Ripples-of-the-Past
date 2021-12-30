@@ -91,8 +91,6 @@ public abstract class StandType extends ForgeRegistryEntry<StandType> implements
         return 1;
     }
     
-    public static final float MAX_RESOLVE = 1000;
-    public static final float RESOLVE_DECAY = 1;
     public boolean usesResolve() {
         return false;
     }
