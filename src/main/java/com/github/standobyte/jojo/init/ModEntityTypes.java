@@ -1,7 +1,5 @@
 package com.github.standobyte.jojo.init;
 
-import java.util.function.Supplier;
-
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.AfterimageEntity;
 import com.github.standobyte.jojo.entity.CrimsonBubbleEntity;
@@ -60,19 +58,13 @@ public class ModEntityTypes {
 //          () -> EntityType.Builder.<___Entity>of(___Entity::new, EntityClassification.MISC).sized(, )//.noSummon().noSave()
 //          .build(new ResourceLocation(JojoMod.MOD_ID, "___").toString()));
 
-    public static final Supplier<EntityType<HamonMasterEntity>> SPAWN_EGG_INIT_HAMON_MASTER = () -> 
-        EntityType.Builder.<HamonMasterEntity>of(HamonMasterEntity::new, EntityClassification.MISC).sized(0.6F, 1.95F)
-        .build(new ResourceLocation(JojoMod.MOD_ID, "hamon_teacher").toString());
-        
-    public static final Supplier<EntityType<HungryZombieEntity>> SPAWN_EGG_INIT_HUNGRY_ZOMBIE = () -> 
-        EntityType.Builder.<HungryZombieEntity>of(HungryZombieEntity::new, EntityClassification.MONSTER).sized(0.6F, 1.95F)
-        .build(new ResourceLocation(JojoMod.MOD_ID, "hungry_zombie").toString());
-    
     public static final RegistryObject<EntityType<HungryZombieEntity>> HUNGRY_ZOMBIE = ENTITIES.register("hungry_zombie", 
-            () -> (EntityType<HungryZombieEntity>) ModItems.HUNGRY_ZOMBIE_SPAWN_EGG.get().getType(null));
+            () -> EntityType.Builder.<HungryZombieEntity>of(HungryZombieEntity::new, EntityClassification.MONSTER).sized(0.6F, 1.95F)
+            .build(new ResourceLocation(JojoMod.MOD_ID, "hungry_zombie").toString()));
     
     public static final RegistryObject<EntityType<HamonMasterEntity>> HAMON_MASTER = ENTITIES.register("hamon_master", 
-            () -> (EntityType<HamonMasterEntity>) ModItems.HAMON_MASTER_SPAWN_EGG.get().getType(null));
+            () -> EntityType.Builder.<HamonMasterEntity>of(HamonMasterEntity::new, EntityClassification.MISC).sized(0.6F, 1.95F)
+            .build(new ResourceLocation(JojoMod.MOD_ID, "hamon_teacher").toString()));
 
     public static final RegistryObject<EntityType<BladeHatEntity>> BLADE_HAT = ENTITIES.register("blade_hat", 
             () -> EntityType.Builder.<BladeHatEntity>of(BladeHatEntity::new, EntityClassification.MISC).sized(0.6F, 0.375F).setUpdateInterval(20)
