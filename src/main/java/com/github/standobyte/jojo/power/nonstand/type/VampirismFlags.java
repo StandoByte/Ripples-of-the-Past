@@ -3,11 +3,13 @@ package com.github.standobyte.jojo.power.nonstand.type;
 import java.util.List;
 
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.actions.VampirismAction;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncNonStandFlagPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncNonStandFlagPacket.Flag;
+import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.nonstand.TypeSpecificData;
 
@@ -31,7 +33,7 @@ public class VampirismFlags extends TypeSpecificData {
     }
 
     @Override
-    public boolean isActionUnlocked(Action action, NonStandPower power) {
+    public boolean isActionUnlocked(Action<INonStandPower> action, NonStandPower power) {
         return vampireFullPower || 
                 action == ModActions.VAMPIRISM_BLOOD_DRAIN.get() || 
                 action == ModActions.VAMPIRISM_BLOOD_GIFT.get() || 
@@ -56,8 +58,8 @@ public class VampirismFlags extends TypeSpecificData {
     }
     
     private void addHamonSuicideAbility() {
-        Action hamonAbility = ModActions.VAMPIRISM_HAMON_SUICIDE.get();
-        List<Action> abilities = power.getAbilities();
+        VampirismAction hamonAbility = ModActions.VAMPIRISM_HAMON_SUICIDE.get();
+        List<Action<INonStandPower>> abilities = power.getAbilities();
         if (vampireHamonUser && !abilities.contains(hamonAbility)) {
             abilities.add(hamonAbility);
         }

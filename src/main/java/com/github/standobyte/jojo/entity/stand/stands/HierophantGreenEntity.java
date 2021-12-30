@@ -5,13 +5,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-import com.github.standobyte.jojo.client.ui.ActionsOverlayGui;
 import com.github.standobyte.jojo.entity.damaging.projectile.HGEmeraldEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGBarrierEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.init.ModActions;
-import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.util.JojoModUtil;
 
 import net.minecraft.entity.LivingEntity;

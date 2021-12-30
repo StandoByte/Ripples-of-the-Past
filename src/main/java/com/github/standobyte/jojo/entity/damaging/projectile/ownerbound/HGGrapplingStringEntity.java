@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -14,11 +14,11 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
-    private IPower<?> userStandPower;
+    private IStandPower userStandPower;
     private boolean bindEntities;
     private StandEntity stand;
 
-    public HGGrapplingStringEntity(World world, StandEntity entity, IPower<?> userStand) {
+    public HGGrapplingStringEntity(World world, StandEntity entity, IStandPower userStand) {
         super(ModEntityTypes.HG_GRAPPLING_STRING.get(), entity, world);
         this.userStandPower = userStand;
     }

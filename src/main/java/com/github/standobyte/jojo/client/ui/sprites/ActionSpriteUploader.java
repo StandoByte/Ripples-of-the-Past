@@ -20,7 +20,7 @@ public class ActionSpriteUploader extends SpriteUploader {
         return ModActions.Registry.getRegistry().getKeys().stream();
     }
 
-    public TextureAtlasSprite getSprite(Action action) {
+    public TextureAtlasSprite getSprite(Action<?> action) {
         return getSprite(ModActions.Registry.getRegistry().getKey(action));
     }
 }

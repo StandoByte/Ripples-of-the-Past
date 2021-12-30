@@ -12,7 +12,6 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncEnergyPacket;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.PowerBaseImpl;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
@@ -51,8 +50,8 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
 
     @Override
     protected void onTypeInit(NonStandPowerType<?> powerType) {
-        attacks = new ArrayList<Action>(Arrays.asList(powerType.getAttacks()));
-        abilities = new ArrayList<Action>(Arrays.asList(powerType.getAbilities()));
+        attacks = new ArrayList<>(Arrays.asList(powerType.getAttacks()));
+        abilities = new ArrayList<>(Arrays.asList(powerType.getAbilities()));
         TypeSpecificData data = powerType.newSpecificDataInstance();
         energy = 0;
         setTypeSpecificData(data);
@@ -93,13 +92,13 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     }
     
     @Override
-    public boolean isActionUnlocked(Action action) {
+    public boolean isActionUnlocked(Action<INonStandPower> action) {
         return typeSpecificData == null ? false : typeSpecificData.isActionUnlocked(action, this);
     }
 
     @Override
-    public ActionConditionResult checkRequirements(Action action, LivingEntity performer, ActionTarget target, boolean checkTargetType) {
-        ActionConditionResult result = super.checkRequirements(action, performer, target, checkTargetType);
+    public ActionConditionResult checkRequirements(Action<INonStandPower> action, ActionTarget target, boolean checkTargetType) {
+        ActionConditionResult result = super.checkRequirements(action, target, checkTargetType);
         if (!result.isPositive()) {
             serverPlayerUser.ifPresent(player -> {
                 PacketManager.sendToClient(new SyncEnergyPacket(getEnergy()), player);
@@ -236,11 +235,11 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     }
     
     @Override
-    public void onClone(IPower<NonStandPowerType<?>> oldPower, boolean wasDeath, boolean keep) {
+    public void onClone(INonStandPower oldPower, boolean wasDeath, boolean keep) {
         super.onClone(oldPower, wasDeath, keep);
         if (keep && oldPower.hasPower()) {
-            energy = ((INonStandPower) oldPower).getEnergy();
-            ((INonStandPower) oldPower).getTypeSpecificData(null).ifPresent(data -> {
+            energy = oldPower.getEnergy();
+            oldPower.getTypeSpecificData(null).ifPresent(data -> {
                 setTypeSpecificData(data);
             });
         }

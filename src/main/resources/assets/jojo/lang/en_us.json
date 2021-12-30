@@ -154,8 +154,8 @@
   "death.attack.roadRoller.player": "%s was smashed flat as a pancake whilst fighting %s",
   
   "key.categories.jojo": "Jojo",
-  "jojo.key.stand_hotbar": "stand hud",
-  "jojo.key.non_stand_hotbar": "spec hud",
+  "jojo.key.stand_hotbar": "Stand HUD",
+  "jojo.key.non_stand_hotbar": "Non-Stand Power HUD",
   "jojo.key.toggle_stand": "Summon Stand",
   "jojo.key.stand_remote_control": "Stand Remote Control",
   "jojo.key.hamon_skills_window": "Hamon Skills",

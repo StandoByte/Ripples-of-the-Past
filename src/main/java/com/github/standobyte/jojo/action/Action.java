@@ -19,8 +19,8 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
-public abstract class Action<P extends IPower<?>> extends ForgeRegistryEntry<Action<?>> {
-    private static Map<Supplier<? extends Action>, Supplier<? extends Action>> SHIFT_VARIATIONS = new HashMap<>();
+public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<Action<?>> {
+    private static Map<Supplier<? extends Action<?>>, Supplier<? extends Action<?>>> SHIFT_VARIATIONS = new HashMap<>(); 
     
     private final int holdDurationToFire;
     private final int holdDurationMax;
@@ -34,8 +34,8 @@ public abstract class Action<P extends IPower<?>> extends ForgeRegistryEntry<Act
     private final boolean cancelsVanillaClick;
     private final Supplier<SoundEvent> shoutSupplier;
     private String translationKey;
-    private Action shiftVariation;
-    private Action baseVariation;
+    private Action<P> shiftVariation;
+    private Action<P> baseVariation;
     
     public Action(Action.AbstractBuilder<?> builder) {
         this.holdDurationMax = builder.holdDurationMax;
@@ -54,7 +54,8 @@ public abstract class Action<P extends IPower<?>> extends ForgeRegistryEntry<Act
         }
     }
     
-    protected void setShiftVariation(Action newShiftVariation) {
+    void setShiftVariation(Action<?> action) {
+        Action<P> newShiftVariation = (Action<P>) action; // FIXME shift variations shit
         if (newShiftVariation != this) {
             if (newShiftVariation.shiftVariation != null) {
                 newShiftVariation.shiftVariation.baseVariation = null;
@@ -87,12 +88,12 @@ public abstract class Action<P extends IPower<?>> extends ForgeRegistryEntry<Act
         return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition." + postfix));
     }
     
-    public Action getShiftVariationIfPresent() {
+    public Action<P> getShiftVariationIfPresent() {
         return hasShiftVariation() ? shiftVariation : this;
     }
     
     @Nullable
-    protected Action getBaseVariation() {
+    protected Action<P> getBaseVariation() {
         return baseVariation;
     }
     
@@ -126,7 +127,7 @@ public abstract class Action<P extends IPower<?>> extends ForgeRegistryEntry<Act
     
     public void onHoldTickClientEffect(LivingEntity user, P power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {}
     
-    public LivingEntity getPerformer(LivingEntity user, P power) { // FIXME 
+    public LivingEntity getPerformer(LivingEntity user, P power) { // FIXME performer shit 
         return user;
     }
 
@@ -239,7 +240,7 @@ public abstract class Action<P extends IPower<?>> extends ForgeRegistryEntry<Act
     
     public static void initShiftVariations() {
         if (SHIFT_VARIATIONS != null) {
-            for (Map.Entry<Supplier<? extends Action>, Supplier<? extends Action>> entry : SHIFT_VARIATIONS.entrySet()) {
+            for (Map.Entry<Supplier<? extends Action<?>>, Supplier<? extends Action<?>>> entry : SHIFT_VARIATIONS.entrySet()) {
                 entry.getKey().get().setShiftVariation(entry.getValue().get());
             }
             SHIFT_VARIATIONS = null;
@@ -278,7 +279,7 @@ public abstract class Action<P extends IPower<?>> extends ForgeRegistryEntry<Act
         private boolean swingHand = false;
         private boolean cancelsVanillaClick = true;
         private Supplier<SoundEvent> shoutSupplier = () -> null;
-        protected Supplier<? extends Action> shiftVariationOf = null;
+        protected Supplier<? extends Action<?>> shiftVariationOf = null;
         
         public T cooldown(int cooldown) {
             this.cooldown = cooldown;
@@ -348,7 +349,7 @@ public abstract class Action<P extends IPower<?>> extends ForgeRegistryEntry<Act
             return getThis();
         }
         
-        public T shiftVariationOf(Supplier<? extends Action> action) {
+        public T shiftVariationOf(Supplier<? extends Action<?>> action) {
             this.shiftVariationOf = action;
             return getThis();
         }

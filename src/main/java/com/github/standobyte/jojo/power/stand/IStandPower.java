@@ -11,7 +11,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.common.util.LazyOptional;
 
-public interface IStandPower extends IPower<StandType> {
+public interface IStandPower extends IPower<IStandPower, StandType> {
     public static final int MAX_EXP = 1000;
     
     boolean usesStamina();
@@ -34,7 +34,7 @@ public interface IStandPower extends IPower<StandType> {
     
     void setStandManifestation(@Nullable IStandManifestation standManifestation);
     @Nullable
-    IStandManifestation getStandManifestation(); // FIXME
+    IStandManifestation getStandManifestation(); // FIXME stand manifestation shit
     void toggleSummon();
     
     int getTier();

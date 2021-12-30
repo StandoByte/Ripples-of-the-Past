@@ -65,14 +65,12 @@ public class ActionsOverlayGui extends AbstractGui {
     private boolean rmbRightTarget;
     
     private final ElementTransparency actionNameTransparency = new ElementTransparency(40, 10);
-    private final ElementTransparency rmbActionNameTransparency = new ElementTransparency(40, 10);
     private final ElementTransparency modeSelectorTransparency = new ElementTransparency(40, 10);
     private final ElementTransparency energyBarTransparency = new ElementTransparency(40, 10);
     private final ElementTransparency staminaBarTransparency = new ElementTransparency(40, 10);
     private final ElementTransparency resolveBarTransparency = new ElementTransparency(40, 10);
     private ElementTransparency[] tickingTransparencies = new ElementTransparency[] {
             actionNameTransparency,
-            rmbActionNameTransparency,
             modeSelectorTransparency,
             energyBarTransparency,
             staminaBarTransparency,
@@ -120,7 +118,15 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     @Nullable
-    public PowerClassification getCurrentPower() {
+    public IPower<?, ?> getCurrentPower() {
+        if (currentMode == null) {
+            return null;
+        }
+        return currentMode.getPower();
+    }
+    
+    @Nullable
+    public PowerClassification getCurrentMode() {
         if (currentMode == null) {
             return null;
         }
@@ -169,7 +175,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 
                 renderActionsHotbar(matrixStack, hotbarX, hotbarY, offHandSide);
                 
-                renderActionIcons(matrixStack, hotbarX + 3, hotbarY + 3, partialTick, offHandSide);
+                renderActionIcons(matrixStack, hotbarX + 3, hotbarY + 3, partialTick, offHandSide, currentMode);
                 
                 renderHotbarIcons(matrixStack, hotbarX, hotbarY, offHandSide);
                 
@@ -186,10 +192,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 RenderSystem.disableBlend();
             }
             else if (event.getType() == RenderGameOverlayEvent.ElementType.TEXT) {
-                drawActionName(matrixStack, screenWidth / 2F, screenHeight - 59, partialTick, 
-                        currentMode.getSelectedAction(), actionNameTransparency);
-                drawActionName(matrixStack, hotbarX + getRmbSlotXOffset(offHandSide), screenHeight - 59, partialTick, 
-                        currentMode.getRmbAction(), rmbActionNameTransparency); // FIXME rmb action name (should i even care about it?)
+                drawSelectedActionName(matrixStack, screenWidth / 2F, screenHeight - 59, partialTick);
                 drawPowerName(matrixStack, powerIconX, powerIconY);
                 drawModeSelectorNames(matrixStack, modeHotbarX - 5, modeHotbarY, partialTick);
                 drawHoldDuration(matrixStack, hotbarX, hotbarY);
@@ -247,18 +250,18 @@ public class ActionsOverlayGui extends AbstractGui {
     
     
     
-    private void renderActionIcons(MatrixStack matrixStack, int x, int y, float partialTick, HandSide rmbSlotSide) {
-        List<Action> actions = currentMode.getUnlockedActions();
-        IPower<?> power = currentMode.getPower();
+    private <P extends IPower<P, ?>> void renderActionIcons(MatrixStack matrixStack, int x, int y, float partialTick, HandSide rmbSlotSide, ActionsHotbarConfig<P> curMode) {
+        List<Action<P>> actions = curMode.getUnlockedActions();
         for (int i = 0; i < actions.size(); i++) {
-            renderActionIcon(matrixStack, actions.get(i), power, x + 20 * i, y, partialTick, i == currentMode.getSelectedSlot(), false);
+            renderActionIcon(matrixStack, actions.get(i), curMode.getPower(), x + 20 * i, y, partialTick, i == curMode.getSelectedSlot(), false);
         }
-        if (currentMode.getRmbAction() != null) {
-            renderActionIcon(matrixStack, currentMode.getRmbAction(), power, x + getRmbSlotXOffset(rmbSlotSide), y, partialTick, false, true);
+        if (curMode.getRmbAction() != null) {
+            renderActionIcon(matrixStack, curMode.getRmbAction(), curMode.getPower(), x + getRmbSlotXOffset(rmbSlotSide), y, partialTick, false, true);
         }
     }
     
-    private void renderActionIcon(MatrixStack matrixStack, Action action, IPower<?> power, int x, int y, float partialTick, boolean isSelected, boolean isRmbSlot) {
+    private <P extends IPower<P, ?>> void renderActionIcon(
+            MatrixStack matrixStack, Action<P> action, P power, int x, int y, float partialTick, boolean isSelected, boolean isRmbSlot) {
         if (power.getHeldAction() != null) {
             if (power.getHeldAction() == action.getShiftVariationIfPresent()) {
                 action = action.getShiftVariationIfPresent();
@@ -291,9 +294,10 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private boolean isActionAvaliable(IPower<?> power, Action action, ActionTarget mouseTarget, boolean isSelected, boolean isRmbSlot) {
+    private <P extends IPower<P, ?>> boolean isActionAvaliable(
+            P power, Action<P> action, ActionTarget mouseTarget, boolean isSelected, boolean isRmbSlot) {
         if (isSelected || isRmbSlot) {
-            boolean rightTarget = power.checkTargetType(action, action.getPerformer(mc.player, power), mouseTarget).isPositive();
+            boolean rightTarget = power.checkTargetType(action, mouseTarget).isPositive();
             Action.TargetRequirement targetType = action.getTargetRequirement();
             if (isSelected) {
                 selectedTargetType = targetType;
@@ -303,10 +307,10 @@ public class ActionsOverlayGui extends AbstractGui {
                 rmbTargetType = targetType;
                 rmbRightTarget = rightTarget;
             }
-            return rightTarget && power.checkRequirements(action, action.getPerformer(mc.player, power), mouseTarget, false).isPositive();
+            return rightTarget && power.checkRequirements(action, mouseTarget, false).isPositive();
         }
         else {
-            return power.checkRequirements(action, action.getPerformer(mc.player, power), mouseTarget, true).isPositive();
+            return power.checkRequirements(action, mouseTarget, true).isPositive();
         }
     }
     
@@ -319,7 +323,7 @@ public class ActionsOverlayGui extends AbstractGui {
         Tessellator.getInstance().end();
     }
     
-    public static boolean shiftVarSelected(IPower<?> power, Action action, boolean shift) {
+    public <P extends IPower<P, ?>> boolean shiftVarSelected(P power, Action<P> action, boolean shift) {
         return power.getHeldAction() != action && shift && power.isActionUnlocked(action.getShiftVariationIfPresent()) 
                 || power.getHeldAction() == action.getShiftVariationIfPresent();
     }
@@ -345,7 +349,7 @@ public class ActionsOverlayGui extends AbstractGui {
         mc.getTextureManager().bind(OVERLAY_LOCATION);
         
         // leap icon
-        IPower<?> power = currentMode.getPower();
+        IPower<?, ?> power = currentMode.getPower();
         if (power.isLeapUnlocked()) {
             float iconFill = power.getLeapCooldownPeriod() != 0 ? 
                     1F - (float) power.getLeapCooldown() / (float) power.getLeapCooldownPeriod() : 1;
@@ -517,7 +521,7 @@ public class ActionsOverlayGui extends AbstractGui {
     private void renderModeSelectorIcons(MatrixStack matrixStack, int x, int y, float partialTick) {
         for (ActionsHotbarConfig<?> mode : modes) {
             if (mode != null) {
-                IPower<?> power = mode.getPower();
+                IPower<?, ?> power = mode.getPower();
                 if (power.hasPower()) {
                     mc.getTextureManager().bind(power.getType().getIconTexture());
                     blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
@@ -530,7 +534,7 @@ public class ActionsOverlayGui extends AbstractGui {
     
 
     private void renderPowerIcon(MatrixStack matrixStack, int iconX, int iconY) {
-        IPower<?> power = currentMode.getPower();
+        IPower<?, ?> power = currentMode.getPower();
         if (power.isActive()) {
             mc.getTextureManager().bind(power.getType().getIconTexture());
             blit(matrixStack, iconX, iconY, 0, 0, 16, 16, 16, 16);
@@ -539,17 +543,9 @@ public class ActionsOverlayGui extends AbstractGui {
     
     
     
-    private void drawActionName(MatrixStack matrixStack, float x, int y, float partialTick, 
-            Action action, ElementTransparency transparency) {
-        if (action != null && transparency.shouldRender()) {
-            ITextComponent actionName = action.getName(currentMode.getPower());
-            if (action.getHoldDurationMax() > 0) {
-                actionName = new TranslationTextComponent("jojo.overlayv2.hold", actionName);
-            }
-            if (action.hasShiftVariation()) {
-                actionName = new TranslationTextComponent("jojo.overlayv2.shift", actionName, 
-                        new KeybindTextComponent(mc.options.keyShift.getName()), action.getShiftVariationIfPresent().getName(currentMode.getPower()));
-            }
+    private void drawSelectedActionName(MatrixStack matrixStack, float x, int y, float partialTick) {
+        if (actionNameTransparency.shouldRender()) {
+            ITextComponent actionName = currentMode.getSelectedActionName(mc.options);
             int width = mc.font.width(actionName);
             x -= width / 2F;
             if (!mc.gameMode.canHurtPlayer()) {
@@ -558,9 +554,9 @@ public class ActionsOverlayGui extends AbstractGui {
             RenderSystem.pushMatrix();
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
-            drawBackdrop(matrixStack, (int) x, y, width, transparency, partialTick);
+            drawBackdrop(matrixStack, (int) x, y, width, actionNameTransparency, partialTick);
             mc.font.drawShadow(matrixStack, actionName, x, (float) y, 
-                    transparency.makeTextColorTranclucent(currentMode.getPower().getType().getColor(), partialTick));
+                    actionNameTransparency.makeTextColorTranclucent(currentMode.getPower().getType().getColor(), partialTick));
             RenderSystem.disableBlend();
             RenderSystem.popMatrix();
         }
@@ -579,7 +575,7 @@ public class ActionsOverlayGui extends AbstractGui {
     
     private void drawPowerName(MatrixStack matrixStack, int x, int y) {
         x += 19;
-        IPower<?> power = currentMode.getPower();
+        IPower<?, ?> power = currentMode.getPower();
         ITextComponent name = new TranslationTextComponent(power.getType().getTranslationKey());
         drawBackdrop(matrixStack, x, y, mc.font.width(name), null, 1.0F);
         drawString(matrixStack, mc.font, name, x, y, power.getType().getColor());
@@ -614,7 +610,7 @@ public class ActionsOverlayGui extends AbstractGui {
             name = new TranslationTextComponent("jojo.overlayv2.mode_deselect");
         }
         else {
-            IPower<?> power = mode.getPower();
+            IPower<?, ?> power = mode.getPower();
             if (!power.hasPower()) {
                 return null;
             }
@@ -695,7 +691,6 @@ public class ActionsOverlayGui extends AbstractGui {
                 }
                 currentMode = mode;
                 actionNameTransparency.reset();
-                rmbActionNameTransparency.reset();
             }
         }
         else {
@@ -750,7 +745,6 @@ public class ActionsOverlayGui extends AbstractGui {
         else {
             currentMode.swapRmbAndCurrentActions();
             actionNameTransparency.reset();
-            rmbActionNameTransparency.reset();
         }
     }
 

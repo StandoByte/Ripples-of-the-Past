@@ -1,12 +1,14 @@
 package com.github.standobyte.jojo.action;
 
-public class HeldActionData {
-    public final Action action;
+import com.github.standobyte.jojo.power.IPower;
+
+public class HeldActionData<P extends IPower<P, ?>> {
+    public final Action<P> action;
     private int ticks = 0;
     private ActionTarget target = ActionTarget.EMPTY;
     private boolean tickWentOff = false;
 
-    public HeldActionData(Action action) {
+    public HeldActionData(Action<P> action) {
         this.action = action;
     }
     

@@ -14,7 +14,6 @@ import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStaminaPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncResolvePacket;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.PowerBaseImpl;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
@@ -274,7 +273,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
     }
     
     @Override
-    public boolean isActionUnlocked(Action action) {
+    public boolean isActionUnlocked(Action<IStandPower> action) {
         return getXp() >= ((StandAction) action).getXpRequirement();
     }
     
@@ -284,8 +283,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
 //    }
     
     @Override
-    public ActionConditionResult checkRequirements(Action action, LivingEntity performer, ActionTarget target, boolean checkTargetType) {
-        return super.checkRequirements(action, performer, target, checkTargetType);
+    public ActionConditionResult checkRequirements(Action<IStandPower> action, ActionTarget target, boolean checkTargetType) {
+        return super.checkRequirements(action, target, checkTargetType);
     }
     
     @Override
@@ -349,13 +348,13 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
     }
     
     @Override
-    public void onClone(IPower<StandType> oldPower, boolean wasDeath, boolean keep) {
+    public void onClone(IStandPower oldPower, boolean wasDeath, boolean keep) {
         super.onClone(oldPower, wasDeath, keep);
         if (keep && oldPower.hasPower()) {
-            xp = ((IStandPower) oldPower).getXp();
-            stamina = ((IStandPower) oldPower).getStamina();
+            xp = oldPower.getXp();
+            stamina = oldPower.getStamina();
             if (!wasDeath) {
-                resolve = ((IStandPower) oldPower).getResolve();
+                resolve = oldPower.getResolve();
                 noResolveDecayTicks = ((StandPower) oldPower).noResolveDecayTicks;
             }
         }
