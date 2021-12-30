@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.TestServerConfig;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModStandTypes;
@@ -196,7 +197,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
         if (!usesResolve()) {
             return 0;
         }
-        return StandType.MAX_RESOLVE;
+        return TestServerConfig.SERVER_CONFIG.maxResolve.get().floatValue();
     }
     
     @Override
@@ -214,6 +215,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
         amount = MathHelper.clamp(amount, 0, getMaxResolve());
         boolean send = this.resolve != amount || this.noResolveDecayTicks != noDecayTicks;
         this.resolve = amount;
+        if (isInResolveMode()) {
+            noDecayTicks = Math.max(noDecayTicks, TestServerConfig.SERVER_CONFIG.resolveModeTicks.get());
+        }
         this.noResolveDecayTicks = Math.max(this.noResolveDecayTicks, noDecayTicks);
         if (send) {
             serverPlayerUser.ifPresent(player -> {
@@ -223,12 +227,17 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
         }
     }
     
+    @Override
+    public boolean isInResolveMode() {
+        return resolve >= getMaxResolve();
+    }
+    
     private void tickResolve() {
         if (noResolveDecayTicks > 0) {
             noResolveDecayTicks--;
         }
         else {
-            resolve = Math.max(resolve - StandType.RESOLVE_DECAY, 0);
+            resolve = Math.max(resolve - TestServerConfig.SERVER_CONFIG.resolveDecay.get().floatValue(), 0);
         }
     }
     

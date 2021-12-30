@@ -299,13 +299,13 @@ public class ActionsOverlayGui extends AbstractGui {
         if (isSelected || isRmbSlot) {
             boolean rightTarget = power.checkTargetType(action, mouseTarget).isPositive();
             Action.TargetRequirement targetType = action.getTargetRequirement();
-            if (isSelected) {
-                selectedTargetType = targetType;
-                selectedRightTarget = rightTarget;
-            }
-            else {
+            if (isRmbSlot) {
                 rmbTargetType = targetType;
                 rmbRightTarget = rightTarget;
+            }
+            else {
+                selectedTargetType = targetType;
+                selectedRightTarget = rightTarget;
             }
             return rightTarget && power.checkRequirements(action, mouseTarget, false).isPositive();
         }

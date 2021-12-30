@@ -19,7 +19,6 @@ import net.minecraft.util.text.TranslationTextComponent;
 public class ActionsHotbarConfig<P extends IPower<P, ?>> {
     final PowerClassification powerClassification;
     private P power;
-    private List<Action<P>> actions;
     private Action<P> rmbAction;
     private int selectedSlot;
     boolean chosenManually;
@@ -30,24 +29,27 @@ public class ActionsHotbarConfig<P extends IPower<P, ?>> {
     
     void setPower(P power) {
         this.power = power;
-        this.actions = Stream
-                .concat(power.getAttacks().stream(), power.getAbilities().stream())
-                .collect(Collectors.toList());
     }
     
     P getPower() {
         return power;
     }
     
+    private List<Action<P>> getActions() {
+        return Stream
+                .concat(power.getAttacks().stream(), power.getAbilities().stream())
+                .collect(Collectors.toList());
+    }
+    
     int getAllActionsCount() {
-        return actions.size();
+        return getActions().size();
     }
     
     // FIXME add new ones to the right
     // FIXME plants infusion doesn't upgrade
     
     List<Action<P>> getUnlockedActions() {
-        return actions.stream()
+        return getActions().stream()
                 .filter(action -> action.isUnlocked(power))
                 .collect(Collectors.toList());
     }
@@ -57,7 +59,7 @@ public class ActionsHotbarConfig<P extends IPower<P, ?>> {
         return rmbAction;
     }
 
-    @Nullable // FIXME handle the fact it's nullable
+    @Nullable
     Action<P> getSelectedAction() {
         List<Action<P>> unlocked = getUnlockedActions();
         if (unlocked.size() > selectedSlot) {
@@ -103,20 +105,20 @@ public class ActionsHotbarConfig<P extends IPower<P, ?>> {
     void swapRmbAndCurrentActions() {
         Action<P> selected = getSelectedAction();
         if (rmbAction != null) {
-            int i = actions.indexOf(getSelectedAction());
+            int i = getActions().indexOf(selected);
             if (i > -1) {
-                actions.add(i, rmbAction);
+                getActions().add(i, rmbAction);
             }
         }
         rmbAction = selected;
-        actions.remove(selected);
+        getActions().remove(selected);
     }
     
     boolean moveRmbActionToList() {
         if (rmbAction != null) {
-            int i = actions.indexOf(getSelectedAction());
+            int i = getActions().indexOf(getSelectedAction());
             if (i > -1) {
-                actions.add(i, rmbAction);
+                getActions().add(i, rmbAction);
                 rmbAction = null;
                 return true;
             }
