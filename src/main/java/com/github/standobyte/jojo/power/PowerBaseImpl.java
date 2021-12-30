@@ -16,7 +16,6 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.command.JojoControlsCommand;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncEnergyPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncLeapCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncHeldActionPacket;
@@ -38,15 +37,15 @@ import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.World;
 
-public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P, T>> implements IPower<T> {
+public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType<P, T>> implements IPower<P, T> {
     @Nonnull
     protected final LivingEntity user;
     protected final Optional<ServerPlayerEntity> serverPlayerUser;
-    protected List<Action> attacks = new ArrayList<Action>();
-    protected List<Action> abilities = new ArrayList<Action>();
+    protected List<Action<P>> attacks = new ArrayList<>();
+    protected List<Action<P>> abilities = new ArrayList<>();
     private ActionCooldownTracker cooldowns = new ActionCooldownTracker();
     private int leapCooldown;
-    protected HeldActionData heldActionData;
+    protected HeldActionData<P> heldActionData;
 
     public PowerBaseImpl(LivingEntity user) {
         this.user = user;
@@ -88,8 +87,8 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
         if (!hasPower()) {
             return false;
         }
-        attacks = new ArrayList<Action>();
-        abilities = new ArrayList<Action>();
+        attacks = new ArrayList<>();
+        abilities = new ArrayList<>();
         serverPlayerUser.ifPresent(player -> {
             PacketManager.sendToClientsTrackingAndSelf(TrSyncPowerTypePacket.noPowerType(player.getId(), getPowerClassification()), player);
         });
@@ -114,31 +113,31 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
             if (leapCooldown > 0) {
                 leapCooldown--;
             }
-            getType().tickUser(getUser(), (P) this);
+            getType().tickUser(getUser(), getThis());
         }
     }
     
     @Override
-    public List<Action> getAttacks() {
+    public List<Action<P>> getAttacks() {
         return attacks;
     }
 
     @Override
-    public List<Action> getAbilities() {
+    public List<Action<P>> getAbilities() {
         return abilities;
     }
     
     @Override
-    public final boolean isActionOnCooldown(Action action) {
+    public final boolean isActionOnCooldown(Action<?> action) {
         return cooldowns.isOnCooldown(action);
     }
 
     @Override
-    public final float getCooldownRatio(Action action, float partialTick) {
+    public final float getCooldownRatio(Action<?> action, float partialTick) {
         return cooldowns.getCooldownPercent(action, partialTick);
     }
 
-    private void setCooldownTimer(Action action, int value) {
+    private void setCooldownTimer(Action<?> action, int value) {
         if (value > 0) {
             setCooldownTimer(action, value, value);
             if (!user.level.isClientSide()) {
@@ -148,8 +147,13 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
     }
 
     @Override
-    public final void setCooldownTimer(Action action, int value, int totalCooldown) {
+    public final void setCooldownTimer(Action<?> action, int value, int totalCooldown) {
         cooldowns.addCooldown(action, value, totalCooldown);
+    }
+    
+    @Override
+    public ActionCooldownTracker getCooldowns() {
+        return cooldowns;
     }
 
     private void tickCooldown() {
@@ -161,25 +165,25 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
     @Override
     public final boolean onClickAction(ActionType type, int index, boolean shift, ActionTarget target) {
         if (heldActionData == null) {
-            List<Action> actions = getActions(type);
+            List<Action<P>> actions = getActions(type);
             if (index >= actions.size()) {
                 return false;
             }
-            Action action = actions.get(index);
+            Action<P> action = actions.get(index);
             if (shift && isActionUnlocked(action.getShiftVariationIfPresent())) {
                 action = action.getShiftVariationIfPresent();
             }
             boolean wasActive = isActive();
-            action.updatePerformer(user.level, user, this);
-            ActionConditionResult result = checkRequirements(action, action.getPerformer(user, this), target, true);
+            action.updatePerformer(user.level, user, getThis());
+            ActionConditionResult result = checkRequirements(action, target, true);
             serverPlayerUser.ifPresent(player -> {
                 player.resetLastActionTime();
             });
             if (action.getHoldDurationMax() > 0) {
-                action.startedHolding(user.level, user, this, target, result.isPositive());
+                action.startedHolding(user.level, user, getThis(), target, result.isPositive());
                 if (result.isPositive() || !result.shouldStopHeldAction()) {
                     if (!user.level.isClientSide()) {
-                        action.playVoiceLine(user, this, target, wasActive, shift);
+                        action.playVoiceLine(user, getThis(), target, wasActive, shift);
                     }
                     setHeldAction(action);
                     setHeldActionTarget(target);
@@ -193,7 +197,7 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
             else {
                 if (result.isPositive()) {
                     if (!user.level.isClientSide()) {
-                        action.playVoiceLine(user, this, target, wasActive, shift);
+                        action.playVoiceLine(user, getThis(), target, wasActive, shift);
                     }
                     performAction(action, target);
                     return true;
@@ -221,7 +225,7 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
     }
 
     @Override
-    public ActionConditionResult checkRequirements(Action action, LivingEntity performer, ActionTarget target, boolean checkTargetType) {
+    public ActionConditionResult checkRequirements(Action<P> action, ActionTarget target, boolean checkTargetType) {
         if (!canUsePower() || heldActionData != null && heldActionData.action != action) {
             return ActionConditionResult.NEGATIVE;
         }
@@ -230,18 +234,19 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
             return ActionConditionResult.NEGATIVE;
         }
 
+        LivingEntity performer = action.getPerformer(user, getThis());
         if (!action.ignoresPerformerStun() && performer != null && performer.getEffect(ModEffects.STUN.get()) != null) {
             return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition.stun"));
         }
 
         if (checkTargetType) {
-            ActionConditionResult targetCheckResult = checkTargetType(action, performer, target);
+            ActionConditionResult targetCheckResult = checkTargetType(action, target);
             if (!targetCheckResult.isPositive()) {
                 return targetCheckResult;
             }
         }
 
-        ActionConditionResult condition = action.checkConditions(user, performer, this, target);
+        ActionConditionResult condition = action.checkConditions(user, performer, getThis(), target);
         if (!condition.isPositive()) {
             return condition;
         }
@@ -253,7 +258,8 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
     }
 
     @Override
-    public ActionConditionResult checkTargetType(Action action, LivingEntity performer, ActionTarget target) {
+    public ActionConditionResult checkTargetType(Action<P> action, ActionTarget target) {
+        LivingEntity performer = action.getPerformer(user, getThis());
         boolean targetTooFar = false;
         switch (target.getType()) {
         case ENTITY:
@@ -306,26 +312,26 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
         return !user.isSpectator();
     }
     
-    protected void performAction(Action action, ActionTarget target) {
+    protected void performAction(Action<P> action, ActionTarget target) {
         if (!action.holdOnly()) {
             World world = user.level;
-            action.onPerform(world, user, this, target);
+            action.onPerform(world, user, getThis(), target);
             if (!world.isClientSide()) {
-                setCooldownTimer(action, action.getCooldown(this, -1));
+                setCooldownTimer(action, action.getCooldown(getThis(), -1));
             }
         }
     }
 
     @Override
-    public void setHeldAction(Action action) {
-        heldActionData = new HeldActionData(action);
+    public void setHeldAction(Action<?> action) {
+        heldActionData = new HeldActionData<P>((Action<P>) action);
         if (!user.level.isClientSide() && action.isHeldSentToTracking()) {
             PacketManager.sendToClientsTracking(new TrSyncHeldActionPacket(user.getId(), getPowerClassification(), action, false), user);
         }
     }
 
     @Override
-    public Action getHeldAction(boolean checkRequirements) {
+    public Action<P> getHeldAction(boolean checkRequirements) {
         if (heldActionData == null || checkRequirements && !heldActionData.lastTickWentOff()) {
             return null;
         }
@@ -342,11 +348,11 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
 
     private void tickHeldAction() {
         if (heldActionData != null) {
-            Action heldAction = heldActionData.action;
+            Action<P> heldAction = heldActionData.action;
             World world = user.level;
             heldActionData.incTicks();
             if (user.level.isClientSide()) {
-                heldAction.onHoldTickClientEffect(user, this, heldActionData.getTicks(), heldActionData.lastTickWentOff(), false);
+                heldAction.onHoldTickClientEffect(user, getThis(), heldActionData.getTicks(), heldActionData.lastTickWentOff(), false);
             }
             if (!world.isClientSide() || user.is(ClientUtil.getClientPlayer())) {
                 if (!canUsePower()) {
@@ -358,13 +364,13 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
                     return;
                 }
                 ActionTarget target = heldActionData.getActionTarget();
-                ActionConditionResult result = checkRequirements(heldActionData.action, heldAction.getPerformer(user, this), target, true);
+                ActionConditionResult result = checkRequirements(heldActionData.action, target, true);
                 if (!result.isPositive() && result.shouldStopHeldAction()) {
                     stopHeldAction(false);
                     sendMessage(result);
                     return;
                 }
-                heldAction.onHoldTick(world, user, this, heldActionData.getTicks(), target, result.isPositive());
+                heldAction.onHoldTick(world, user, getThis(), heldActionData.getTicks(), target, result.isPositive());
                 if (!world.isClientSide()) {
                     refreshHeldActionTickState(result.isPositive());
                 }
@@ -375,9 +381,9 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
     @Override
     public void refreshHeldActionTickState(boolean requirementsFulfilled) {
         if (heldActionData != null && heldActionData.refreshConditionCheckTick(requirementsFulfilled)) {
-            Action heldAction = heldActionData.action;
+            Action<P> heldAction = heldActionData.action;
             if (user.level.isClientSide()) {
-                heldAction.onHoldTickClientEffect(user, this, heldActionData.getTicks(), requirementsFulfilled, true);
+                heldAction.onHoldTickClientEffect(user, getThis(), heldActionData.getTicks(), requirementsFulfilled, true);
             }
             else {
                 TrSyncHeldActionPacket packet = new TrSyncHeldActionPacket(user.getId(), getPowerClassification(), heldAction, requirementsFulfilled);
@@ -399,19 +405,19 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
     @Override
     public void stopHeldAction(boolean shouldFire) {
         if (heldActionData != null) {
-            Action heldAction = heldActionData.action;
+            Action<P> heldAction = heldActionData.action;
             ActionTarget target = heldActionData.getActionTarget();
             int ticksHeld = getHeldActionTicks();
             if (!heldAction.holdOnly()) {
-                if (shouldFire && heldActionData.getTicks() >= heldAction.getHoldDurationToFire(this) && 
-                        checkRequirements(heldAction, heldAction.getPerformer(user, this), target, true).isPositive()) {
+                if (shouldFire && heldActionData.getTicks() >= heldAction.getHoldDurationToFire(getThis()) && 
+                        checkRequirements(heldAction, target, true).isPositive()) {
                     performAction(heldAction, target);
                 }
             }
             else {
-                setCooldownTimer(heldAction, heldAction.getCooldown(this, ticksHeld));
+                setCooldownTimer(heldAction, heldAction.getCooldown(getThis(), ticksHeld));
             }
-            heldAction.stoppedHolding(user.level, user, this, ticksHeld);
+            heldAction.stoppedHolding(user.level, user, getThis(), ticksHeld);
             heldActionData = null;
             if (!user.level.isClientSide()) {
                 TrSyncHeldActionPacket packet = TrSyncHeldActionPacket.actionStopped(user.getId(), getPowerClassification());
@@ -466,11 +472,11 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
     }
 
     @Override
-    public void onClone(IPower<T> oldPower, boolean wasDeath, boolean keep) {
+    public void onClone(P oldPower, boolean wasDeath, boolean keep) {
         if (keep && oldPower.hasPower()) {
             onTypeInit(oldPower.getType());
             leapCooldown = oldPower.getLeapCooldown();
-            cooldowns = ((PowerBaseImpl<P, T>) oldPower).cooldowns;
+            cooldowns = oldPower.getCooldowns();
         }      
     }
 
@@ -493,5 +499,9 @@ public abstract class PowerBaseImpl<P extends IPower<T>, T extends IPowerType<P,
                 cooldowns.syncWithTrackingOrUser(user.getId(), getPowerClassification(), player);
             }
         }
+    }
+    
+    private P getThis() {
+        return (P) this;
     }
 }

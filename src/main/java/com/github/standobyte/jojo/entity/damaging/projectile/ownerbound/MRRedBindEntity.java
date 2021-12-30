@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.JojoModUtil;
 
 import net.minecraft.entity.Entity;
@@ -16,9 +16,9 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
 public class MRRedBindEntity extends OwnerBoundProjectileEntity {
-    private IPower<?> userStandPower;
+    private IStandPower userStandPower;
 
-    public MRRedBindEntity(World world, LivingEntity entity, IPower<?> userStand) {
+    public MRRedBindEntity(World world, LivingEntity entity, IStandPower userStand) {
         super(ModEntityTypes.MR_RED_BIND.get(), entity, world);
         this.userStandPower = userStand;
     }

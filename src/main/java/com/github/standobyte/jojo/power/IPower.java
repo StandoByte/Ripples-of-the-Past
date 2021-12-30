@@ -17,7 +17,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraftforge.common.util.LazyOptional;
 
-public interface IPower<T extends IPowerType<? extends IPower<T>, T>> {
+public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     PowerClassification getPowerClassification();
     boolean hasPower();
     boolean givePower(T type);
@@ -28,28 +28,29 @@ public interface IPower<T extends IPowerType<? extends IPower<T>, T>> {
     void tick();
     boolean isActive();
 
-    List<Action> getAttacks();
-    List<Action> getAbilities();
+    List<Action<P>> getAttacks();
+    List<Action<P>> getAbilities();
     
-    default List<Action> getActions(ActionType type) {
+    default List<Action<P>> getActions(ActionType type) {
         return type == ActionType.ATTACK ? getAttacks() : getAbilities();
     }
 
-    boolean isActionOnCooldown(Action action);
-    float getCooldownRatio(Action action, float partialTick);
-    void setCooldownTimer(Action action, int value, int totalCooldown);
+    boolean isActionOnCooldown(Action<?> action);
+    float getCooldownRatio(Action<?> action, float partialTick);
+    void setCooldownTimer(Action<?> action, int value, int totalCooldown);
+    ActionCooldownTracker getCooldowns();
 
-    boolean isActionUnlocked(Action action); // FIXME generalize
+    boolean isActionUnlocked(Action<P> action); // FIXME generalize
     boolean onClickAction(ActionType type, int index, boolean shift, ActionTarget target);
-    ActionConditionResult checkRequirements(Action action, LivingEntity performer, ActionTarget target, boolean checkTargetType);
-    ActionConditionResult checkTargetType(Action action, LivingEntity performer, ActionTarget target);
+    ActionConditionResult checkRequirements(Action<P> action, ActionTarget target, boolean checkTargetType);
+    ActionConditionResult checkTargetType(Action<P> action, ActionTarget target);
     boolean canUsePower();
 
-    void setHeldAction(Action action);
-    default Action getHeldAction() {
+    void setHeldAction(Action<?> action);
+    default Action<P> getHeldAction() {
         return getHeldAction(false);
     }
-    Action getHeldAction(boolean checkRequirements);
+    Action<P> getHeldAction(boolean checkRequirements);
     void refreshHeldActionTickState(boolean requirementsFulfilled);
     int getHeldActionTicks();
     void setHeldActionTarget(ActionTarget target);
@@ -65,20 +66,20 @@ public interface IPower<T extends IPowerType<? extends IPower<T>, T>> {
 
     INBT writeNBT();
     void readNBT(CompoundNBT nbt);
-    void onClone(IPower<T> oldPower, boolean wasDeath, boolean keep); // FIXME generalize
+    void onClone(P oldPower, boolean wasDeath, boolean keep); // FIXME generalize
     void syncWithUserOnly();
     void syncWithTrackingOrUser(ServerPlayerEntity player);
 
 
-    public static LazyOptional<? extends IPower<?>> getPowerOptional(LivingEntity entity, PowerClassification classification) {
+    public static LazyOptional<? extends IPower<?, ?>> getPowerOptional(LivingEntity entity, PowerClassification classification) {
         return classification == PowerClassification.STAND ? IStandPower.getStandPowerOptional(entity) : INonStandPower.getNonStandPowerOptional(entity);
     }
 
-    public static IPower<?> getPlayerPower(PlayerEntity player, PowerClassification classification) {
+    public static IPower<?, ?> getPlayerPower(PlayerEntity player, PowerClassification classification) {
         return classification == PowerClassification.STAND ? IStandPower.getPlayerStandPower(player) : INonStandPower.getPlayerNonStandPower(player);
     }
     
-    public static void castAndGivePower(IPower<?> power, IPowerType<?, ?> powerType, PowerClassification classification) { // FIXME get rid of this shit
+    public static void castAndGivePower(IPower<?, ?> power, IPowerType<?, ?> powerType, PowerClassification classification) { // FIXME get rid of this shit
         switch (classification) {
         case STAND:
             if (power instanceof IStandPower && powerType instanceof StandType) {

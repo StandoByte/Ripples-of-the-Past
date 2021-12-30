@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonStartMeditationPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClOnLeapPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClStopHeldActionPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandManualControlPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandSummonPacket;
@@ -219,7 +220,7 @@ public class InputHandler {
 //        }
 //    }
     
-    public void clearHeldAction(IPower<?> power, boolean shouldFire) {
+    public void clearHeldAction(IPower<?, ?> power, boolean shouldFire) {
         if (power.getHeldAction() != null) {
             power.stopHeldAction(shouldFire);
             heldActionType = null;
@@ -313,19 +314,18 @@ public class InputHandler {
             boolean standSlowedDown = slowDownFromStandEntity(mc.player, input);
             
             if (!mc.player.isPassenger()) {
-                // FIXME leap
-//                IPower<?> power = actionsOverlay.getCurrentPower();
-//                if (power != null) {
-//                    if (power.canLeap() && !actionSlowedDown && !standSlowedDown && input.shiftKeyDown && input.jumping) {
-//                        float leapStrength = power.leapStrength();
-//                        if (leapStrength > 0) {
-//                            input.shiftKeyDown = false;
-//                            input.jumping = false;
-//                            PacketManager.sendToServer(new ClOnLeapPacket(power.getPowerClassification()));
-//                            leap(mc.player, input, leapStrength);
-//                        }
-//                    }
-//                }
+                IPower<?, ?> power = actionsOverlay.getCurrentPower();
+                if (power != null) {
+                    if (power.canLeap() && !actionSlowedDown && !standSlowedDown && input.shiftKeyDown && input.jumping) {
+                        float leapStrength = power.leapStrength();
+                        if (leapStrength > 0) {
+                            input.shiftKeyDown = false;
+                            input.jumping = false;
+                            PacketManager.sendToServer(new ClOnLeapPacket(power.getPowerClassification()));
+                            leap(mc.player, input, leapStrength);
+                        }
+                    }
+                }
                 return;
             }
         }
@@ -352,8 +352,8 @@ public class InputHandler {
         return false;
     }
     
-    private boolean slowDownFromHeldAction(PlayerEntity player, MovementInput input, IPower<?> power) {
-        Action heldAction = power.getHeldAction();
+    private boolean slowDownFromHeldAction(PlayerEntity player, MovementInput input, IPower<?, ?> power) {
+        Action<?> heldAction = power.getHeldAction();
         if (heldAction != null && heldAction.getHeldSlowDownFactor() < 1.0F) {
             input.leftImpulse *= heldAction.getHeldSlowDownFactor();
             input.forwardImpulse *= heldAction.getHeldSlowDownFactor();

@@ -85,7 +85,7 @@ public class HamonData extends TypeSpecificData {
     }
 
     @Override
-    public boolean isActionUnlocked(Action action, NonStandPower powerData) {
+    public boolean isActionUnlocked(Action<INonStandPower> action, NonStandPower powerData) {
         return action == ModActions.HAMON_HEALING.get() || hamonSkills.unlockedActions.contains(action);
     }
 
@@ -489,7 +489,7 @@ public class HamonData extends TypeSpecificData {
                 }
             }
             else if (skill == HamonSkill.ANIMAL_INFUSION) {
-                List<Action> attacks = power.getAttacks();
+                List<Action<INonStandPower>> attacks = power.getAttacks();
                 int index = attacks.indexOf(HamonSkill.PLANT_INFUSION.getRewardAction());
                 if (index > -1) {
                     attacks.set(index, HamonSkill.ANIMAL_INFUSION.getRewardAction());
@@ -525,7 +525,7 @@ public class HamonData extends TypeSpecificData {
                 }
             }
             else if (skill == HamonSkill.ANIMAL_INFUSION) {
-                List<Action> attacks = power.getAttacks();
+                List<Action<INonStandPower>> attacks = power.getAttacks();
                 int index = attacks.indexOf(HamonSkill.ANIMAL_INFUSION.getRewardAction());
                 if (index > -1) {
                     attacks.set(index, HamonSkill.PLANT_INFUSION.getRewardAction());

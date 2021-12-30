@@ -19,10 +19,10 @@ import net.minecraftforge.fml.network.NetworkEvent;
 public class TrSyncHeldActionPacket {
     private final int userId;
     private final PowerClassification classification;
-    @Nullable private final Action action;
+    @Nullable private final Action<?> action;
     private final boolean requirementsFulfilled;
     
-    public TrSyncHeldActionPacket(int userId, PowerClassification classification, Action action, boolean requirementsFulfilled) {
+    public TrSyncHeldActionPacket(int userId, PowerClassification classification, Action<?> action, boolean requirementsFulfilled) {
         this.userId = userId;
         this.classification = classification;
         this.action = action;

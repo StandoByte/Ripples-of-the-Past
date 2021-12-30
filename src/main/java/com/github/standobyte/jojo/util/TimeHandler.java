@@ -56,8 +56,8 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 @EventBusSubscriber(modid = JojoMod.MOD_ID)
 public class TimeHandler {
-    private static final ImmutableSet.Builder<Action> TIME_STOP_ACTIONS_BUILDER = ImmutableSet.builder(); 
-    private static Set<Action> ALLOW_MOVING_IN_STOPPED_TIME = null;
+    private static final ImmutableSet.Builder<Action<?>> TIME_STOP_ACTIONS_BUILDER = ImmutableSet.builder(); 
+    private static Set<Action<?>> ALLOW_MOVING_IN_STOPPED_TIME = null;
     
     public static void setTimeResumeSounds(World world, ChunkPos chunkPos, int timeStopTicks, TimeStop timeStop, LivingEntity timeStopUser) {
         WorldUtilCap cap = world.getCapability(WorldUtilCapProvider.CAPABILITY).resolve().get();
@@ -130,12 +130,12 @@ public class TimeHandler {
     
     private static boolean hasTimeStopAbility(LivingEntity entity) {
         return IStandPower.getStandPowerOptional(entity).map(stand -> {
-            for (Action ability : stand.getAbilities()) {
+            for (Action<IStandPower> ability : stand.getAbilities()) {
                 if (stand.isActionUnlocked(ability) && ALLOW_MOVING_IN_STOPPED_TIME.contains(ability)) {
                     return true;
                 }
             }
-            for (Action attack : stand.getAttacks()) {
+            for (Action<IStandPower> attack : stand.getAttacks()) {
                 if (stand.isActionUnlocked(attack) && ALLOW_MOVING_IN_STOPPED_TIME.contains(attack)) {
                     return true;
                 }
@@ -315,7 +315,7 @@ public class TimeHandler {
     
     
     
-    public static void addAllowMovingInStoppedTime(Action action) {
+    public static void addAllowMovingInStoppedTime(Action<?> action) {
         if (ALLOW_MOVING_IN_STOPPED_TIME == null) {
             TIME_STOP_ACTIONS_BUILDER.add(action);
         }

@@ -13,7 +13,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.common.util.LazyOptional;
 
-public interface INonStandPower extends IPower<NonStandPowerType<?>> {
+public interface INonStandPower extends IPower<INonStandPower, NonStandPowerType<?>> {
     float getEnergy();
     float getMaxEnergy();
     boolean hasEnergy(float amount);

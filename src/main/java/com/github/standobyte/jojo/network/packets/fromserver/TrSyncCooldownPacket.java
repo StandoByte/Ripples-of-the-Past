@@ -16,15 +16,15 @@ import net.minecraftforge.fml.network.NetworkEvent;
 public class TrSyncCooldownPacket {
     private final int entityId;
     private final PowerClassification classification;
-    private final Action action;
+    private final Action<?> action;
     private final int value;
     private final int totalCooldown;
 
-    public TrSyncCooldownPacket(int entityId, PowerClassification classification, Action action, int value) {
+    public TrSyncCooldownPacket(int entityId, PowerClassification classification, Action<?> action, int value) {
         this(entityId, classification, action, value, value);
     }
 
-    public TrSyncCooldownPacket(int entityId, PowerClassification classification, Action action, int value, int totalCooldown) {
+    public TrSyncCooldownPacket(int entityId, PowerClassification classification, Action<?> action, int value, int totalCooldown) {
         this.entityId = entityId;
         this.classification = classification;
         this.action = action;
@@ -49,7 +49,8 @@ public class TrSyncCooldownPacket {
         ctx.get().enqueueWork(() -> {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity instanceof LivingEntity) {
-                IPower.getPowerOptional((LivingEntity) entity, msg.classification).ifPresent(power -> power.setCooldownTimer(msg.action, msg.value, msg.totalCooldown));
+                IPower.getPowerOptional((LivingEntity) entity, msg.classification).ifPresent(power -> 
+                power.setCooldownTimer(msg.action, msg.value, msg.totalCooldown));
             }
         });
         ctx.get().setPacketHandled(true);
