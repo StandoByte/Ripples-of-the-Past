@@ -425,7 +425,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 barsX += prevBarThin ? 8 : 13;
                 renderBar(matrixStack, barsX, barsY, 
                         32, 0, 240, 15, 
-                        standPower.getResolve(), IStandPower.MAX_EXP, 0, 
+                        standPower.getResolve(), standPower.getMaxResolve(), 0, 
                         currentMode == standUiConfig, resolveBarTransparency, partialTick, standPower.getType().getColor());
             }
         }

@@ -13,6 +13,7 @@ public class TestServerConfig {
         public final ForgeConfigSpec.DoubleValue resolveDecay;
         public final ForgeConfigSpec.IntValue noResolveDecayTicks;
         public final ForgeConfigSpec.IntValue resolveModeTicks;
+        public final ForgeConfigSpec.DoubleValue maxResolveDmgReduction;
         
         ServerConfig(ForgeConfigSpec.Builder builder) {
             maxResolve = builder
@@ -34,6 +35,11 @@ public class TestServerConfig {
                     .comment(" Resolve Mode length in ticks.")
                     .translation("jojo.config.resolveModeTicks") 
                     .defineInRange("resolveModeTicks", 800, 0, Integer.MAX_VALUE);
+            
+            maxResolveDmgReduction = builder
+                    .comment(" Max damage reduction from resolve (in linear relationship with resolve).")
+                    .translation("jojo.config.maxResolveDmgReduction") 
+                    .defineInRange("maxResolveDmgReduction", 0.8, 0, 1);
         }
     }
     
