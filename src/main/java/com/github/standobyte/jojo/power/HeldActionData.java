@@ -1,6 +1,7 @@
-package com.github.standobyte.jojo.action;
+package com.github.standobyte.jojo.power;
 
-import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.ActionTarget;
 
 public class HeldActionData<P extends IPower<P, ?>> {
     public final Action<P> action;
