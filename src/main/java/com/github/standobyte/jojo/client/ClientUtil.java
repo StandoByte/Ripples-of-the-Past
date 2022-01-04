@@ -117,6 +117,10 @@ public class ClientUtil {
         };
     }
     
+    public static int discColor(int color) {
+        return (((0xFFFFFF - color) & 0xFEFEFE) >> 1) + color;
+    }
+    
     public static void vertex(MatrixStack.Entry matrixEntry, IVertexBuilder vertexBuilder, 
             int packedLight, int packedOverlay, float red, float green, float blue, float alpha, 
             float x, float y, float z, float texU, float texV) {

@@ -66,7 +66,7 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
 
     INBT writeNBT();
     void readNBT(CompoundNBT nbt);
-    void onClone(P oldPower, boolean wasDeath, boolean keep); // FIXME generalize
+    void onClone(P oldPower, boolean wasDeath, boolean keep);
     void syncWithUserOnly();
     void syncWithTrackingOrUser(ServerPlayerEntity player);
 

@@ -4,7 +4,7 @@ import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.FOOD;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.client.ui.ActionsOverlayGui;
+import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Timer;
@@ -197,28 +198,37 @@ public class ClientEventHandler {
         }
     }
 
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public void cancelHandRender(RenderHandEvent event) {
+        if (false) { // FIXME don't render hand/held items both mouse buttons have a working action
+            event.setCanceled(true);
+        }
+    }
+
     @SubscribeEvent(priority = EventPriority.LOW)
     public void onRenderHand(RenderHandEvent event) {
-        Entity entity = Minecraft.getInstance().getCameraEntity();
-        if (entity instanceof LivingEntity) {
-            INonStandPower.getNonStandPowerOptional((LivingEntity) entity).ifPresent(power -> {
-                if (power.isActionOnCooldown(ModActions.HAMON_ZOOM_PUNCH.get())) {
-                    event.setCanceled(true);
-                }
-                // FIXME two arms
-//                else if (ActionsOverlayGui.getInstance().getSelectedAction(ActionType.ATTACK) == ModActions.JONATHAN_OVERDRIVE_BARRAGE.get()) {
-//                    FirstPersonRenderer renderer = mc.getItemInHandRenderer();
-//                    ClientPlayerEntity player = mc.player;
-//                    Hand swingingArm = MoreObjects.firstNonNull(player.swingingArm, Hand.MAIN_HAND);
-//                    float f6 = swingingArm == Hand.OFF_HAND ? player.getAttackAnim(event.getPartialTicks()) : 0.0F;
-//                    float f7 = 1.0F - MathHelper.lerp(event.getPartialTicks(), ClientReflection.getOffHandHeightPrev(renderer), ClientReflection.getOffHandHeight(renderer));
-//                    MatrixStack matrixStack = event.getMatrixStack();
-//                    matrixStack.pushPose();
-//                    ClientReflection.renderPlayerArm(matrixStack, event.getBuffers(), event.getLight(), f7, f6, player.getMainArm().getOpposite(), renderer);
-//                    matrixStack.popPose();
-//                    // i've won... but at what cost?
-//                }
-            });
+        if (true || event.getHand() == Hand.MAIN_HAND) {
+            Entity entity = Minecraft.getInstance().getCameraEntity();
+            if (entity instanceof LivingEntity) {
+                INonStandPower.getNonStandPowerOptional((LivingEntity) entity).ifPresent(power -> {
+                    if (power.isActionOnCooldown(ModActions.HAMON_ZOOM_PUNCH.get())) {
+                        event.setCanceled(true);
+                    }
+                    // FIXME two arms
+//                    else if (ActionsOverlayGui.getInstance().getSelectedAction(ActionType.ATTACK) == ModActions.JONATHAN_OVERDRIVE_BARRAGE.get()) {
+//                        FirstPersonRenderer renderer = mc.getItemInHandRenderer();
+//                        ClientPlayerEntity player = mc.player;
+//                        Hand swingingArm = MoreObjects.firstNonNull(player.swingingArm, Hand.MAIN_HAND);
+//                        float f6 = swingingArm == Hand.OFF_HAND ? player.getAttackAnim(event.getPartialTicks()) : 0.0F;
+//                        float f7 = 1.0F - MathHelper.lerp(event.getPartialTicks(), ClientReflection.getOffHandHeightPrev(renderer), ClientReflection.getOffHandHeight(renderer));
+//                        MatrixStack matrixStack = event.getMatrixStack();
+//                        matrixStack.pushPose();
+//                        ClientReflection.renderPlayerArm(matrixStack, event.getBuffers(), event.getLight(), f7, f6, player.getMainArm().getOpposite(), renderer);
+//                        matrixStack.popPose();
+//                        // i've won... but at what cost?
+//                    }
+                });
+            }
         }
     }
 }

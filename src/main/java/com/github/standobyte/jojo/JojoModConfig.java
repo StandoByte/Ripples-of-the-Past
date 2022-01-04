@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.stand.type.StandType;
@@ -160,6 +161,38 @@ public class JojoModConfig {
             return tiersAvaliable[tier];
         }
     }
+    
+    public static class Client {
+        
+        public final ForgeConfigSpec.EnumValue<ActionsOverlayGui.PositionConfig> barsPosition;
+        public final ForgeConfigSpec.EnumValue<ActionsOverlayGui.PositionConfig> hotbarsPosition;
+        public final ForgeConfigSpec.BooleanValue showModeSelector;
+        
+        public final ForgeConfigSpec.BooleanValue slotHotkeys;
+        
+        Client(ForgeConfigSpec.Builder builder) {
+            barsPosition = builder
+                    .comment(" Position of Energy, Stamina and Resolve bars in the HUD.")
+                    .translation("jojo.config.client.barsPosition") 
+                    .defineEnum("barsPosition", ActionsOverlayGui.PositionConfig.TOP_LEFT);
+            
+            hotbarsPosition = builder
+                    .comment(" Position of Power name, Attack and Ability hotbars in the HUD.")
+                    .translation("jojo.config.client.hotbarsPosition")
+                    .defineEnum("hotbarsPosition", ActionsOverlayGui.PositionConfig.TOP_LEFT);
+            
+            showModeSelector = builder
+                    .comment(" Whether or not a list of available Powers shows up when switching a HUD mode.")
+                    .translation("jojo.config.client.showModeSelector")
+                    .define("showModeSelector", true);
+            
+            slotHotkeys = builder
+                    .comment(" Enable hotkey settings for each individual attack and ability from 1 to 9.", 
+                            "  If your client is launched, changing the setting requires restarting the game.")
+                    .translation("jojo.config.client.slotHotkeys")
+                    .define("slotHotkeys", false);
+        }
+    }
 
 
     static final ForgeConfigSpec commonSpec;
@@ -169,11 +202,19 @@ public class JojoModConfig {
         commonSpec = specPair.getRight();
         COMMON = specPair.getLeft();
     }
+
+    static final ForgeConfigSpec clientSpec;
+    public static final Client CLIENT;
+    static {
+        final Pair<Client, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(Client::new);
+        clientSpec = specPair.getRight();
+        CLIENT = specPair.getLeft();
+    }
     
     @SubscribeEvent
     public static void onConfigLoad(ModConfigEvent event) {
         ModConfig config = event.getConfig();
-        if (config.getType() == ModConfig.Type.COMMON && JojoMod.MOD_ID.equals(config.getModId())) {
+        if (JojoMod.MOD_ID.equals(config.getModId()) && config.getType() == ModConfig.Type.COMMON) {
             COMMON.loaded = true;
             COMMON.initBannedStands();
         }

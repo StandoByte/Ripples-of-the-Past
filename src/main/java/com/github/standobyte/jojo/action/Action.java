@@ -55,7 +55,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     void setShiftVariation(Action<?> action) {
-        Action<P> newShiftVariation = (Action<P>) action; // FIXME shift variations shit
+        Action<P> newShiftVariation = (Action<P>) action;
         if (newShiftVariation != this) {
             if (newShiftVariation.shiftVariation != null) {
                 newShiftVariation.shiftVariation.baseVariation = null;

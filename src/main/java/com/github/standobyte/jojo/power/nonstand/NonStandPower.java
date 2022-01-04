@@ -26,7 +26,6 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     public static final float BASE_MAX_ENERGY = 1000;
     
     private float energy = 0;
-    private NonStandPowerType<?> type;
     private TypeSpecificData typeSpecificData;
     
     public NonStandPower(LivingEntity user) {
@@ -58,20 +57,14 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
         if (isUserCreative()) {
             energy = getMaxEnergy();
         }
-        this.type = powerType;
-    }
-
-    @Override
-    public NonStandPowerType<?> getType() {
-        return type;
     }
     
     @Override
     public boolean clear() {
         if (super.clear()) {
             type.onClear(this);
-            typeSpecificData = null;
             type = null;
+            typeSpecificData = null;
             energy = 0;
             return true;
         }
@@ -215,7 +208,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
         if (powerName != IPowerType.NO_POWER_NAME) {
             NonStandPowerType<?> type = ModNonStandPowers.Registry.getRegistry().getValue(new ResourceLocation(powerName));
             if (type != null) {
-                onTypeInit(type);
+                setType(type);
                 TypeSpecificData data = type.newSpecificDataInstance();
                 if (data != null) {
                     setTypeSpecificData(data);

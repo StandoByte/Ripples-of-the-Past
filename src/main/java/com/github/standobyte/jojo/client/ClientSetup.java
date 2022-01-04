@@ -53,7 +53,7 @@ import com.github.standobyte.jojo.client.renderer.entity.stand.StarPlatinumRende
 import com.github.standobyte.jojo.client.renderer.entity.stand.TheWorldRenderer;
 import com.github.standobyte.jojo.client.renderer.player.layer.KnifeLayer;
 import com.github.standobyte.jojo.client.renderer.player.layer.TornadoOverdriveEffectLayer;
-import com.github.standobyte.jojo.client.ui.ActionsOverlayGui;
+import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.sprites.SpriteUploaders;
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEntityTypes;
@@ -187,7 +187,7 @@ public class ClientSetup {
     @SubscribeEvent
     public static void registerItemColoring(ColorHandlerEvent.Item event) {
         ItemColors itemColors = event.getItemColors();
-        itemColors.register((stack, tintIndex) -> StandDiscItem.brightenColor(StandDiscItem.getColor(stack)), 
+        itemColors.register((stack, tintIndex) -> ClientUtil.discColor(StandDiscItem.getColor(stack)), 
                 ModItems.STAND_DISC.get());
     }
 

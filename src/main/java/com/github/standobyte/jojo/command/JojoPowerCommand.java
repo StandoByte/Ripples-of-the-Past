@@ -40,7 +40,7 @@ public class JojoPowerCommand {
         for (ServerPlayerEntity player : targets) {
             INonStandPower power = INonStandPower.getNonStandPowerOptional(player).orElse(null);
             if (power != null) {
-                if (power.givePower(powerType)) {
+                if (!power.hasPower() && power.givePower(powerType)) {
                     i++;
                 }
                 else if (targets.size() == 1) {
