@@ -108,16 +108,12 @@ public class StandDiscItem extends Item {
         }
         return false;
     }
-    
+
     public static int getColor(ItemStack itemStack) {
         if (!validStandDisc(itemStack)) {
             return 0xFFFFFF;
         } else {
             return getStandFromStack(itemStack).getColor();
         }
-     }
-    
-    public static int brightenColor(int color) {
-        return (((0xFFFFFF - color) & 0xFEFEFE) >> 1) + color;
     }
 }

@@ -17,7 +17,7 @@ public abstract class StandAction extends Action<IStandPower> {
     
     @Override
     public boolean isUnlocked(IStandPower power) {
-        return power.getXp() >= getXpRequirement();
+        return true || power.getXp() >= getXpRequirement(); // FIXME
     }
     
     

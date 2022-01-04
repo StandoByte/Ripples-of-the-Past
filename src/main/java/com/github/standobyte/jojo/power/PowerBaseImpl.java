@@ -9,7 +9,6 @@ import javax.annotation.Nonnull;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.action.HeldActionData;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -41,6 +40,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     @Nonnull
     protected final LivingEntity user;
     protected final Optional<ServerPlayerEntity> serverPlayerUser;
+    protected T type;
     protected List<Action<P>> attacks = new ArrayList<>();
     protected List<Action<P>> abilities = new ArrayList<>();
     private ActionCooldownTracker cooldowns = new ActionCooldownTracker();
@@ -62,7 +62,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         if (type == null || hasPower() && !getType().isReplaceableWith(type)) {
             return false;
         }
-        onTypeInit(type);
+        setType(type);
         leapCooldown = getLeapCooldownPeriod();
 
         serverPlayerUser.ifPresent(player -> {
@@ -81,6 +81,11 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
 
     protected abstract void onTypeInit(T type);
+    
+    protected final void setType(T type) {
+        this.type = type;
+        onTypeInit(type);
+    }
 
     @Override
     public boolean clear() {
@@ -93,6 +98,11 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             PacketManager.sendToClientsTrackingAndSelf(TrSyncPowerTypePacket.noPowerType(player.getId(), getPowerClassification()), player);
         });
         return true;
+    }
+
+    @Override
+    public T getType() {
+        return type;
     }
 
     @Override

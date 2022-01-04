@@ -24,7 +24,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 
 public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements IStandPower {
-    private StandType standType = null;
     private int tier = 0;
     @Nullable
     private IStandManifestation standManifestation = null;
@@ -39,10 +38,10 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
     }
 
     @Override
-    public boolean givePower(StandType type) {
-        if (super.givePower(type)) {
+    public boolean givePower(StandType standType) {
+        if (super.givePower(standType)) {
             serverPlayerUser.ifPresent(player -> {
-                SaveFileUtilCapProvider.getSaveFileCap(player).addPlayerStand(type);
+                SaveFileUtilCapProvider.getSaveFileCap(player).addPlayerStand(standType);
             });
             return true;
         }
@@ -51,17 +50,17 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
 
     @Override
     public boolean clear() {
-        StandType type = getType();
+        StandType standType = getType();
         if (super.clear()) {
             if (isActive()) {
                 standType.forceUnsummon(user, this);
             }
+            type = null;
             stamina = 0;
             resolve = 0;
             xp = 0;
-            standType = null;
             serverPlayerUser.ifPresent(player -> {
-                SaveFileUtilCapProvider.getSaveFileCap(player).removePlayerStand(type);
+                SaveFileUtilCapProvider.getSaveFileCap(player).removePlayerStand(standType);
             });
             return true;
         }
@@ -84,7 +83,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
     
     @Override
     protected void onTypeInit(StandType standType) {
-        this.standType = standType;
         attacks = Arrays.asList(standType.getAttacks());
         abilities = Arrays.asList(standType.getAbilities());
         if (user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild) {
@@ -97,11 +95,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
             resolve = 0;
         }
         tier = Math.max(tier, standType.getTier());
-    }
-
-    @Override
-    public StandType getType() {
-        return standType;
     }
     
     @Override
@@ -117,7 +110,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
     
     @Override
     public float getStamina() {
-        return stamina;
+//        return stamina;
+        return 500; // FIXME
     }
 
     @Override
@@ -338,7 +332,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
         if (standName != IPowerType.NO_POWER_NAME) {
             StandType stand = ModStandTypes.Registry.getRegistry().getValue(new ResourceLocation(standName));
             if (stand != null) {
-                onTypeInit(stand);
+                setType(stand);
                 xp = nbt.getInt("Exp");
             }
         }
