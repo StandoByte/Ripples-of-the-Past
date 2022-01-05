@@ -110,8 +110,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
     
     @Override
     public float getStamina() {
-//        return stamina;
-        return 500; // FIXME
+        return stamina;
     }
 
     @Override
