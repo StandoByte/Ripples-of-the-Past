@@ -178,6 +178,7 @@
   "jojo.key.attack_7": "Attack 7",
   "jojo.key.attack_8": "Attack 8",
   "jojo.key.attack_9": "Attack 9",
+  "jojo.key.deselect_attack": "Deselect Attack",
   "jojo.key.ability_1": "Ability 1",
   "jojo.key.ability_2": "Ability 2",
   "jojo.key.ability_3": "Ability 3",
@@ -187,6 +188,7 @@
   "jojo.key.ability_7": "Ability 7",
   "jojo.key.ability_8": "Ability 8",
   "jojo.key.ability_9": "Ability 9",
+  "jojo.key.deselect_ability": "Deselect Ability",
   
   "jojo.overlay.mode_deselect": "Deselect",
   "jojo.overlay.mode_key": "[%s] %s",

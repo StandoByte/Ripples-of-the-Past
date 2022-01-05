@@ -82,7 +82,11 @@ public class InputHandler {
     @Nullable
     private KeyBinding[] attackSlots;
     @Nullable
+    private KeyBinding deselectAttack;
+    @Nullable
     private KeyBinding[] abilitySlots;
+    @Nullable
+    private KeyBinding deselectAbility;
     
     private int leftClickBlockDelay;
     private ActionType heldActionType;
@@ -128,6 +132,8 @@ public class InputHandler {
                 ClientRegistry.registerKeyBinding(attackSlots[i] = new KeyBinding(JojoMod.MOD_ID + ".key.attack_" + (i + 1), GLFW_KEY_UNKNOWN, HUD_SLOTS_CATEGORY));
                 ClientRegistry.registerKeyBinding(abilitySlots[i] = new KeyBinding(JojoMod.MOD_ID + ".key.ability_" + (i + 1), GLFW_KEY_UNKNOWN, HUD_SLOTS_CATEGORY));
             }
+            ClientRegistry.registerKeyBinding(deselectAttack = new KeyBinding(JojoMod.MOD_ID + ".key.deselect_attack", GLFW_KEY_UNKNOWN, HUD_SLOTS_CATEGORY));
+            ClientRegistry.registerKeyBinding(deselectAbility = new KeyBinding(JojoMod.MOD_ID + ".key.deselect_ability", GLFW_KEY_UNKNOWN, HUD_SLOTS_CATEGORY));
         }
     }
     
