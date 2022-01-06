@@ -40,7 +40,7 @@ public class VerticalBarsRenderer extends BarsRenderer {
                     0, 0, 17, 1, 
                     (int) (attackCostValue / maxValue), (int) (attackCostValue / maxValue), this.getHighlightAlpha(ticks + partialTick));
             int[] iconTex = getIconTex(barType, powerType, BarsOrientation.VERTICAL);
-            renderIcon(matrixStack, x - 1, y - iconTex[3] - 1, 
+            renderIcon(matrixStack, x - 2, y - iconTex[3] - 1, 
             iconTex[0], iconTex[1], iconTex[2], iconTex[3], iconTex[4]);
             x += 12;
         }
