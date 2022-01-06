@@ -6,7 +6,7 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 @EventBusSubscriber(modid = JojoMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
-public class TestServerConfig {
+public class BalanceTestServerConfig {
     
     public static class ServerConfig {
         public final ForgeConfigSpec.DoubleValue maxResolve;

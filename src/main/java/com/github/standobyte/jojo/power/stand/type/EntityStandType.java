@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.stats.StandStatsV2;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.Effect;
@@ -19,12 +20,13 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent;
 
-public class EntityStandType extends StandType {
+public class EntityStandType<T extends StandStatsV2> extends StandType<T> {
     private final Supplier<? extends StandEntityType<? extends StandEntity>> entityTypeSupplier;
 
     public EntityStandType(int tier, int color, ITextComponent partName, StandAction[] attacks, StandAction[] abilities, 
-            Supplier<SoundEvent> summonShoutSupplier, Supplier<? extends StandEntityType<? extends StandEntity>> entityTypeSupplier) {
-        super(tier, color, partName, attacks, abilities, summonShoutSupplier);
+            Supplier<SoundEvent> summonShoutSupplier, Class<T> statsClass, T defaultStats, 
+            Supplier<? extends StandEntityType<? extends StandEntity>> entityTypeSupplier) {
+        super(tier, color, partName, attacks, abilities, summonShoutSupplier, statsClass, defaultStats);
         this.entityTypeSupplier = entityTypeSupplier;
     }
 

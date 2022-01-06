@@ -33,7 +33,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
                 stand = (StandEntity) getPerformer(user, power);
             }
             else {
-                ((EntityStandType) power.getType()).summon(user, power, entity -> {
+                ((EntityStandType<?>) power.getType()).summon(user, power, entity -> {
                     entity.setArmsOnlyMode();
                 }, true);
                 stand = (StandEntity) power.getStandManifestation();

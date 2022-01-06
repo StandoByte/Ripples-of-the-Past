@@ -10,6 +10,8 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandSoundPacket.StandSoundType;
+import com.github.standobyte.jojo.power.stand.stats.StandStatsV2;
+import com.github.standobyte.jojo.power.stand.type.StandType;
 
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntitySize;
@@ -20,17 +22,20 @@ import net.minecraftforge.fml.network.FMLPlayMessages.SpawnEntity;
 
 public class StandEntityType<T extends StandEntity> extends EntityType<T> {
     private final StandEntityType.IStandFactory<T> factory;
+    private final Supplier<? extends StandType<?>> standTypeSupplier;
     private final StandEntityStats stats;
     private final EnumMap<StandSoundType, Supplier<SoundEvent>> sounds = new EnumMap<>(StandSoundType.class);
 
-    public StandEntityType(IStandFactory<T> factory, boolean immuneToFire, float width, float height, 
+    public StandEntityType(IStandFactory<T> factory, Supplier<? extends StandType<?>> standType, 
+            boolean immuneToFire, float width, float height, 
             StandEntityStats stats) {
-        this(factory, immuneToFire, width, height, 
+        this(factory, standType, immuneToFire, width, height, 
                 t -> true, t -> 8, t -> 2, null, 
                 stats);
     }
 
-    protected StandEntityType(IStandFactory<T> factory, boolean immuneToFire, float width, float height,
+    protected StandEntityType(IStandFactory<T> factory, Supplier<? extends StandType<?>> standType, 
+            boolean immuneToFire, float width, float height,
             Predicate<EntityType<?>> velocityUpdateSupplier, ToIntFunction<EntityType<?>> trackingRangeSupplier,
             ToIntFunction<EntityType<?>> updateIntervalSupplier, BiFunction<SpawnEntity, World, T> customClientFactory, 
             StandEntityStats stats) {
@@ -38,6 +43,7 @@ public class StandEntityType<T extends StandEntity> extends EntityType<T> {
                 -1, -1, velocityUpdateSupplier, trackingRangeSupplier, updateIntervalSupplier, customClientFactory);
         this.factory = factory;
         this.stats = stats;
+        this.standTypeSupplier = standType;
         this.sounds.put(StandSoundType.SUMMON, ModSounds.STAND_SUMMON_DEFAULT);
         this.sounds.put(StandSoundType.UNSUMMON, ModSounds.STAND_UNSUMMON_DEFAULT);
     }
@@ -51,6 +57,10 @@ public class StandEntityType<T extends StandEntity> extends EntityType<T> {
 
     public StandEntityStats getStats() {
         return stats;
+    }
+    
+    public StandStatsV2 getStatsV2() {
+        return standTypeSupplier.get().getStats();
     }
     
     @Nullable

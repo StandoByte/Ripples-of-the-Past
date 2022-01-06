@@ -27,10 +27,10 @@ public class StandUtil {
     public static final int MAX_TIER = 6;
     public static final int[] TIER_XP_LEVELS = {0, 1, 10, 20, 30, 40, 55};
     
-    public static StandType randomStandByTier(int tier, LivingEntity entity, Random random) {
+    public static StandType<?> randomStandByTier(int tier, LivingEntity entity, Random random) {
         if (!entity.level.isClientSide()) {
-            Collection<StandType> stands = ModStandTypes.Registry.getRegistry().getValues();
-            List<StandType> filtered = 
+            Collection<StandType<?>> stands = ModStandTypes.Registry.getRegistry().getValues();
+            List<StandType<?>> filtered = 
                     stands.stream()
                     .filter(stand -> (tier < 0 || stand.getTier() == tier) && !JojoModConfig.COMMON.isStandBanned(stand))
                     .collect(Collectors.toList());

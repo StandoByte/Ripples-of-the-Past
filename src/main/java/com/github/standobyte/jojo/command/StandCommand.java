@@ -42,7 +42,7 @@ public class StandCommand {
                 );
     }
 
-    private static int giveStands(CommandSource source, Collection<ServerPlayerEntity> targets, StandType standType) throws CommandSyntaxException {
+    private static int giveStands(CommandSource source, Collection<ServerPlayerEntity> targets, StandType<?> standType) throws CommandSyntaxException {
         int i = 0;
         for (ServerPlayerEntity player : targets) {
             IStandPower power = IStandPower.getStandPowerOptional(player).orElse(null);
@@ -79,7 +79,7 @@ public class StandCommand {
     
     private static int giveRandomStands(CommandSource source, Collection<ServerPlayerEntity> targets) throws CommandSyntaxException {
         int i = 0;
-        StandType stand = null;
+        StandType<?> stand = null;
         if (!targets.isEmpty()) {
             for (ServerPlayerEntity player : targets) {
                 IStandPower power = IStandPower.getStandPowerOptional(player).orElse(null);
@@ -125,11 +125,11 @@ public class StandCommand {
 
     private static int removeStands(CommandSource source, Collection<ServerPlayerEntity> targets) throws CommandSyntaxException {
         int i = 0;
-        StandType removedStand = null;
+        StandType<?> removedStand = null;
         for (ServerPlayerEntity player : targets) {
             IStandPower power = IStandPower.getStandPowerOptional(player).orElse(null);
             if (power != null) {
-                StandType toBeRemoved = power.getType();
+                StandType<?> toBeRemoved = power.getType();
                 if (power.clear()) {
                     i++;
                     removedStand = toBeRemoved;
