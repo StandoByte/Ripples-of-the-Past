@@ -82,7 +82,7 @@ public abstract class BarsRenderer {
         return Math.min(alpha, MAX_ALPHA) + 0.25F;
     }
     
-    protected static final int ICON_WIDTH = 10;
+    protected static final int ICON_WIDTH = 12;
     protected static final int ICON_HEIGHT = 16;
     protected int[] getIconTex(BarType type, NonStandPowerType<?> powerType, BarsOrientation orientation) {
         switch (type) {
