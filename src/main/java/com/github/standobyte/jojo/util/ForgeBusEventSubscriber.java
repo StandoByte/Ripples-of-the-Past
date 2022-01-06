@@ -18,6 +18,7 @@ import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.command.HamonCommand;
 import com.github.standobyte.jojo.command.JojoControlsCommand;
+import com.github.standobyte.jojo.command.TestBuildCommand;
 import com.github.standobyte.jojo.command.JojoPowerCommand;
 import com.github.standobyte.jojo.command.StandCommand;
 import com.github.standobyte.jojo.init.ModStructures;
@@ -74,6 +75,7 @@ public class ForgeBusEventSubscriber {
 //        StandXpCommand.register(dispatcher);
         JojoControlsCommand.register(dispatcher);
         HamonCommand.register(dispatcher);
+        TestBuildCommand.register(dispatcher);
     }
     
     @SubscribeEvent
