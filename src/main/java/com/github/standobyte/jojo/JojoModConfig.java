@@ -131,7 +131,7 @@ public class JojoModConfig {
         }
         
         private void initBannedStands() {
-            IForgeRegistry<StandType> registry = ModStandTypes.Registry.getRegistry();
+            IForgeRegistry<StandType<?>> registry = ModStandTypes.Registry.getRegistry();
             bannedStandsResLocs = bannedStands.get()
                     .stream()
                     .map(s -> {
@@ -153,7 +153,7 @@ public class JojoModConfig {
             .forEach(tier -> tiersAvaliable[tier] = true);
         }
         
-        public boolean isStandBanned(StandType stand) {
+        public boolean isStandBanned(StandType<?> stand) {
             return bannedStandsResLocs.contains(stand.getRegistryName());
         }
         

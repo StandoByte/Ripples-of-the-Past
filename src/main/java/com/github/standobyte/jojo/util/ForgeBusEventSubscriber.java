@@ -25,6 +25,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCachePacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.util.data.StandStatsManager;
 import com.github.standobyte.jojo.util.reflection.CommonReflection;
 import com.mojang.brigadier.CommandDispatcher;
 
@@ -42,6 +43,7 @@ import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.gen.settings.DimensionStructuresSettings;
 import net.minecraft.world.gen.settings.StructureSeparationSettings;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -195,5 +197,13 @@ public class ForgeBusEventSubscriber {
                 structureStarts.add(entry.getKey());
             }
         }
+    }
+    
+    
+    
+    @SubscribeEvent
+    public static void onResourcePackLoad(AddReloadListenerEvent event) {
+        StandStatsManager.init();
+        event.addListener(StandStatsManager.getInstance());
     }
 }

@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.TestServerConfig;
+import com.github.standobyte.jojo.BalanceTestServerConfig;
 import com.github.standobyte.jojo.action.actions.VampirismFreeze;
 import com.github.standobyte.jojo.block.StoneMaskBlock;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
@@ -288,7 +288,7 @@ public class GameplayEventHandler {
             if (stand.usesResolve()) {
                 float resolveRatio = stand.getResolve() / stand.getMaxResolve();
                 event.setAmount(event.getAmount() * (1 - 
-                        resolveRatio * TestServerConfig.SERVER_CONFIG.maxResolveDmgReduction.get().floatValue()));
+                        resolveRatio * BalanceTestServerConfig.SERVER_CONFIG.maxResolveDmgReduction.get().floatValue()));
             }
         });
     }

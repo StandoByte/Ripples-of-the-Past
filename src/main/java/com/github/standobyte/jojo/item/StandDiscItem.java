@@ -39,7 +39,7 @@ public class StandDiscItem extends Item {
         IStandPower power = IStandPower.getPlayerStandPower(player);
         if (!world.isClientSide()) {
             if (validStandDisc(stack)) {
-                StandType stand = getStandFromStack(stack);
+                StandType<?> stand = getStandFromStack(stack);
                 if (!canGainStand(player, power.getTier(), stand)) {
                     player.sendMessage(new TranslationTextComponent("jojo.chat.message.low_tier"), Util.NIL_UUID);
                     return ActionResult.fail(stack);
@@ -62,7 +62,7 @@ public class StandDiscItem extends Item {
         return ActionResult.fail(stack);
     }
 
-    private boolean canGainStand(PlayerEntity player, int playerTier, StandType stand) {
+    private boolean canGainStand(PlayerEntity player, int playerTier, StandType<?> stand) {
         return player.abilities.instabuild || !JojoModConfig.COMMON.standTiers.get()
                 || StandUtil.standTierFromXp(player.experienceLevel, false) >= stand.getTier() || playerTier >= stand.getTier();
     }
@@ -70,7 +70,7 @@ public class StandDiscItem extends Item {
     @Override
     public void fillItemCategory(ItemGroup group, NonNullList<ItemStack> items) {
         if (this.allowdedIn(group)) {
-            for (StandType standType : ModStandTypes.Registry.getRegistry()) {
+            for (StandType<?> standType : ModStandTypes.Registry.getRegistry()) {
                 if (!JojoModConfig.COMMON.isConfigLoaded() || !JojoModConfig.COMMON.isStandBanned(standType)) {
                     ItemStack item = new ItemStack(this);
                     setStandType(item, standType);
@@ -80,7 +80,7 @@ public class StandDiscItem extends Item {
         }
     }
     
-    public static void setStandType(ItemStack discStack, StandType standType) {
+    public static void setStandType(ItemStack discStack, StandType<?> standType) {
         discStack.getOrCreateTag().putString(STAND_TAG, ModStandTypes.Registry.getKeyAsString(standType));
     }
     
@@ -88,7 +88,7 @@ public class StandDiscItem extends Item {
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
         if (validStandDisc(stack)) {
             String standRegistryName = stack.getTag().getString(STAND_TAG);
-            StandType stand = ModStandTypes.Registry.getRegistry().getValue(new ResourceLocation(standRegistryName));
+            StandType<?> stand = ModStandTypes.Registry.getRegistry().getValue(new ResourceLocation(standRegistryName));
             tooltip.add(new TranslationTextComponent(stand.getTranslationKey()));
             tooltip.add(stand.getPartName());
             if (JojoModConfig.COMMON.standTiers.get()) {
@@ -97,7 +97,7 @@ public class StandDiscItem extends Item {
         }
     }
     
-    private static StandType getStandFromStack(ItemStack stack) {
+    private static StandType<?> getStandFromStack(ItemStack stack) {
         return ModStandTypes.Registry.getRegistry().getValue(new ResourceLocation(stack.getTag().getString(STAND_TAG)));
     }
     

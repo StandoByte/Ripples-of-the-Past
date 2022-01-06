@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.TestServerConfig;
+import com.github.standobyte.jojo.BalanceTestServerConfig;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModStandTypes;
@@ -23,7 +23,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 
-public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements IStandPower {
+public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> implements IStandPower {
     private int tier = 0;
     @Nullable
     private IStandManifestation standManifestation = null;
@@ -38,7 +38,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
     }
 
     @Override
-    public boolean givePower(StandType standType) {
+    public boolean givePower(StandType<?> standType) {
         if (super.givePower(standType)) {
             serverPlayerUser.ifPresent(player -> {
                 SaveFileUtilCapProvider.getSaveFileCap(player).addPlayerStand(standType);
@@ -50,7 +50,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
 
     @Override
     public boolean clear() {
-        StandType standType = getType();
+        StandType<?> standType = getType();
         if (super.clear()) {
             if (isActive()) {
                 standType.forceUnsummon(user, this);
@@ -82,7 +82,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
     }
     
     @Override
-    protected void onTypeInit(StandType standType) {
+    protected void onTypeInit(StandType<?> standType) {
         attacks = Arrays.asList(standType.getAttacks());
         abilities = Arrays.asList(standType.getAbilities());
         if (user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild) {
@@ -193,7 +193,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
         if (!usesResolve()) {
             return 0;
         }
-        return TestServerConfig.SERVER_CONFIG.maxResolve.get().floatValue();
+        return BalanceTestServerConfig.SERVER_CONFIG.maxResolve.get().floatValue();
     }
     
     @Override
@@ -204,7 +204,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
     @Override
     public void addResolve(float amount) {
         if (usesResolve()) {
-            setResolve(MathHelper.clamp(this.resolve + amount, 0, getMaxResolve()), TestServerConfig.SERVER_CONFIG.noResolveDecayTicks.get());
+            setResolve(MathHelper.clamp(this.resolve + amount, 0, getMaxResolve()), BalanceTestServerConfig.SERVER_CONFIG.noResolveDecayTicks.get());
         }
     }
 
@@ -214,7 +214,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
         boolean send = this.resolve != amount || this.noResolveDecayTicks != noDecayTicks;
         this.resolve = amount;
         if (isInResolveMode()) {
-            noDecayTicks = Math.max(noDecayTicks, TestServerConfig.SERVER_CONFIG.resolveModeTicks.get());
+            noDecayTicks = Math.max(noDecayTicks, BalanceTestServerConfig.SERVER_CONFIG.resolveModeTicks.get());
         }
         this.noResolveDecayTicks = Math.max(this.noResolveDecayTicks, noDecayTicks);
         if (send) {
@@ -235,7 +235,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
             noResolveDecayTicks--;
         }
         else {
-            resolve = Math.max(resolve - TestServerConfig.SERVER_CONFIG.resolveDecay.get().floatValue(), 0);
+            resolve = Math.max(resolve - BalanceTestServerConfig.SERVER_CONFIG.resolveDecay.get().floatValue(), 0);
         }
     }
     
@@ -329,7 +329,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType> implements
     public void readNBT(CompoundNBT nbt) {
         String standName = nbt.getString("StandType");
         if (standName != IPowerType.NO_POWER_NAME) {
-            StandType stand = ModStandTypes.Registry.getRegistry().getValue(new ResourceLocation(standName));
+            StandType<?> stand = ModStandTypes.Registry.getRegistry().getValue(new ResourceLocation(standName));
             if (stand != null) {
                 setType(stand);
                 xp = nbt.getInt("Exp");

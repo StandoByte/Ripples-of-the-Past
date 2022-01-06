@@ -49,6 +49,9 @@ import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 
 public class JojoModUtil {
     
+    public static void debug(World world, PlayerEntity player) { // FIXME
+    }
+    
     public static RayTraceResult rayTrace(Entity entity, double reachDistance, @Nullable Predicate<Entity> entityFilter) {
         return rayTrace(entity, reachDistance, entityFilter, 0);
     }

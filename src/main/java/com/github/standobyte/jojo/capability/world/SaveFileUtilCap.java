@@ -12,14 +12,14 @@ import java.util.stream.Collectors;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 
 public class SaveFileUtilCap {
-    Map<StandType, Integer> timesStandsTaken = new HashMap<>();
+    Map<StandType<?>, Integer> timesStandsTaken = new HashMap<>();
     
-    public void addPlayerStand(StandType type) {
+    public void addPlayerStand(StandType<?> type) {
         int prevValue = timesStandsTaken.containsKey(type) ? timesStandsTaken.get(type) : 0;
         timesStandsTaken.put(type, ++prevValue);
     }
     
-    public void removePlayerStand(StandType type) {
+    public void removePlayerStand(StandType<?> type) {
         if (timesStandsTaken.containsKey(type)) {
             int prevValue = timesStandsTaken.get(type);
             if (prevValue <= 1) {
@@ -31,11 +31,11 @@ public class SaveFileUtilCap {
         }
     }
     
-    public List<StandType> leastTakenStands(Collection<StandType> fromStands) {
+    public List<StandType<?>> leastTakenStands(Collection<StandType<?>> fromStands) {
         if (fromStands.isEmpty()) {
             return Collections.emptyList();
         }
-        Set<Map.Entry<StandType, Integer>> entriesRequested = timesStandsTaken
+        Set<Map.Entry<StandType<?>, Integer>> entriesRequested = timesStandsTaken
                 .entrySet()
                 .stream()
                 .filter(entry -> fromStands.contains(entry.getKey()))
@@ -49,7 +49,7 @@ public class SaveFileUtilCap {
                     .collect(Collectors.toList());
         }
         else {
-            List<StandType> st = entriesRequested.stream().map(Map.Entry::getKey).collect(Collectors.toList());
+            List<StandType<?>> st = entriesRequested.stream().map(Map.Entry::getKey).collect(Collectors.toList());
             return fromStands
                     .stream()
                     .filter(stand -> !st.contains(stand))
