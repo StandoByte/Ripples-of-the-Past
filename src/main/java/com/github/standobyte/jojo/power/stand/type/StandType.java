@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
+import com.github.standobyte.jojo.power.stand.stats.StandStatsV2;
 import com.github.standobyte.jojo.util.JojoModUtil;
 import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
 
@@ -27,30 +28,53 @@ import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
-public abstract class StandType extends ForgeRegistryEntry<StandType> implements IPowerType<IStandPower, StandType> {
+public abstract class StandType<T extends StandStatsV2> extends ForgeRegistryEntry<StandType<?>> implements IPowerType<IStandPower, StandType<?>> {
     private final int tier;
     private final int color;
     private final ITextComponent partName;
     private final StandAction[] attacks;
     private final StandAction[] abilities;
     private Predicate<LivingEntity> prioritizedCondition = null;
+    private final T defaultStats;
+    private T stats;
+    private final Class<T> statsClass;
     private String translationKey;
     private final Supplier<SoundEvent> summonShoutSupplier;
     private ResourceLocation iconTexture;
     
-    public StandType(int tier, int color, ITextComponent partName, StandAction[] attacks, StandAction[] abilities, Supplier<SoundEvent> summonShoutSupplier) {
+    public StandType(int tier, int color, ITextComponent partName, StandAction[] attacks, StandAction[] abilities, 
+            Supplier<SoundEvent> summonShoutSupplier, Class<T> statsClass, T defaultStats) {
         this.tier = MathHelper.clamp(tier, 0, StandUtil.TIER_XP_LEVELS.length - 1);
         this.color = color;
         this.partName = partName;
         this.attacks = attacks;
         this.abilities = abilities;
         this.summonShoutSupplier = summonShoutSupplier;
+        this.statsClass = statsClass;
+        this.defaultStats = defaultStats;
+        this.stats = defaultStats;
     }
     
-    public StandType addPrioritizedCondition(Predicate<LivingEntity> condition) {
+    public StandType<T> addPrioritizedCondition(Predicate<LivingEntity> condition) { // FIXME sort this thing out
         this.prioritizedCondition = condition;
         return this;
     }
+    
+    public T getStats() {
+        return stats;
+    }
+    
+    public T getDefaultStats() {
+        return defaultStats;
+    }
+    
+    public Class<T> getStatsClass() {
+        return statsClass;
+    }
+    
+//    public void setStats(T stats) {
+//        this.stats = stats;
+//    }
     
     @Override
     public int getColor() {
@@ -58,7 +82,7 @@ public abstract class StandType extends ForgeRegistryEntry<StandType> implements
     }
 
     @Override
-    public boolean isReplaceableWith(StandType newType) {
+    public boolean isReplaceableWith(StandType<?> newType) {
         return false;
     }
 
@@ -183,7 +207,7 @@ public abstract class StandType extends ForgeRegistryEntry<StandType> implements
                 }
                 
                 expToAdd *= IStandPower.getStandPowerOptional(dead).map(deadPower -> {
-                    StandType type = deadPower.getType();
+                    StandType<?> type = deadPower.getType();
                     return type != null ? type.getExpRewardMultiplier() : 1;
                 }).orElse(1);
                 expToAdd *= INonStandPower.getNonStandPowerOptional(dead).map(deadPower -> {

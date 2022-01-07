@@ -83,7 +83,7 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
         switch (classification) {
         case STAND:
             if (power instanceof IStandPower && powerType instanceof StandType) {
-                ((IStandPower) power).givePower((StandType) powerType);
+                ((IStandPower) power).givePower((StandType<?>) powerType);
             }
             break;
         case NON_STAND:

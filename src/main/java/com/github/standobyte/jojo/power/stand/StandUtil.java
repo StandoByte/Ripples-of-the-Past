@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import com.github.standobyte.jojo.BalanceTestServerConfig;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
@@ -27,10 +28,10 @@ public class StandUtil {
     public static final int MAX_TIER = 6;
     public static final int[] TIER_XP_LEVELS = {0, 1, 10, 20, 30, 40, 55};
     
-    public static StandType randomStandByTier(int tier, LivingEntity entity, Random random) {
+    public static StandType<?> randomStandByTier(int tier, LivingEntity entity, Random random) {
         if (!entity.level.isClientSide()) {
-            Collection<StandType> stands = ModStandTypes.Registry.getRegistry().getValues();
-            List<StandType> filtered = 
+            Collection<StandType<?>> stands = ModStandTypes.Registry.getRegistry().getValues();
+            List<StandType<?>> filtered = 
                     stands.stream()
                     .filter(stand -> (tier < 0 || stand.getTier() == tier) && !JojoModConfig.COMMON.isStandBanned(stand))
                     .collect(Collectors.toList());
@@ -97,5 +98,15 @@ public class StandUtil {
                 }
             }
         }
+    }
+    
+    public static void addResolve(LivingEntity standUser, float amount) {
+        IStandPower.getStandPowerOptional(standUser).ifPresent(stand -> {
+            float healthRatio = standUser.getHealth() / standUser.getMaxHealth();
+            float modifierLimit = BalanceTestServerConfig.SERVER_CONFIG.resolveModifierHp.get().floatValue();
+            
+            float modifier = -(modifierLimit - 1) * healthRatio + modifierLimit;
+            stand.addResolve(amount * modifier);
+        });
     }
 }

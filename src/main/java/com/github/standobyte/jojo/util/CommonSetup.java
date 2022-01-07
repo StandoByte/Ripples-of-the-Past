@@ -15,10 +15,6 @@ import com.github.standobyte.jojo.capability.world.SaveFileUtilCapStorage;
 import com.github.standobyte.jojo.capability.world.WorldUtilCap;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapStorage;
 import com.github.standobyte.jojo.command.StandArgument;
-import com.github.standobyte.jojo.entity.mob.HamonMasterEntity;
-import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
-import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.NonStandPower;
@@ -32,7 +28,6 @@ import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.Capability.IStorage;
 import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -60,17 +55,5 @@ public class CommonSetup {
             
             PacketManager.init();
         });
-    }
-
-    @SubscribeEvent
-    public static void onEntityAttributeCreation(EntityAttributeCreationEvent event) {
-        event.put(ModEntityTypes.HAMON_MASTER.get(), HamonMasterEntity.createAttributes().build());
-        event.put(ModEntityTypes.HUNGRY_ZOMBIE.get(), HungryZombieEntity.createAttributes().build());
-        
-        event.put(ModEntityTypes.STAR_PLATINUM.get(), StandEntity.createAttributes().build());
-        event.put(ModEntityTypes.THE_WORLD.get(), StandEntity.createAttributes().build());
-        event.put(ModEntityTypes.HIEROPHANT_GREEN.get(), StandEntity.createAttributes().build());
-        event.put(ModEntityTypes.SILVER_CHARIOT.get(), StandEntity.createAttributes().build());
-        event.put(ModEntityTypes.MAGICIANS_RED.get(), StandEntity.createAttributes().build());
     }
 }

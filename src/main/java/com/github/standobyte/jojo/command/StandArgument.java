@@ -23,14 +23,14 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.ResourceLocationException;
 import net.minecraft.util.text.TranslationTextComponent;
 
-public class StandArgument implements ArgumentType<StandType> {
+public class StandArgument implements ArgumentType<StandType<?>> {
     private static final Collection<String> EXAMPLES = Arrays.asList("star_platinum", "jojo:hierophant_green");
     public static final DynamicCommandExceptionType STAND_UNKNOWN = new DynamicCommandExceptionType((key) -> new TranslationTextComponent("stand.unknown", key));
 
     @Override
-    public StandType parse(StringReader reader) throws CommandSyntaxException {
+    public StandType<?> parse(StringReader reader) throws CommandSyntaxException {
         ResourceLocation resourceLocation = read(reader);
-        StandType standType = ModStandTypes.Registry.getRegistry().getValue(resourceLocation);
+        StandType<?> standType = ModStandTypes.Registry.getRegistry().getValue(resourceLocation);
         if (standType == null) {
             throw STAND_UNKNOWN.create(resourceLocation);
         }
@@ -61,7 +61,7 @@ public class StandArgument implements ArgumentType<StandType> {
 
     private static final SimpleCommandExceptionType INVALID_EXCEPTION = new SimpleCommandExceptionType(new TranslationTextComponent("argument.id.invalid"));
 
-    public static <S> StandType getStandType(CommandContext<S> context, String name) {
+    public static <S> StandType<?> getStandType(CommandContext<S> context, String name) {
         return context.getArgument(name, StandType.class);
     }
 

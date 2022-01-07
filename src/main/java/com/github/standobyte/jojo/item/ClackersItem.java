@@ -54,6 +54,7 @@ public class ClackersItem extends Item {
             return ActionResult.pass(stack);
         }
         else {
+            JojoModUtil.debug(world, player);
             playClackSound(world, player);
             return ActionResult.fail(stack);
         }

@@ -66,7 +66,7 @@ public class StandArrowItem extends ArrowItem {
         IStandPower power = IStandPower.getPlayerStandPower(player);
         if (!world.isClientSide()) {
             if (!power.hasPower()) {
-                StandType stand = null;
+                StandType<?> stand = null;
                 boolean checkTier = JojoModConfig.COMMON.standTiers.get();
                 int tier = checkTier ? StandUtil.standTierFromXp(player.experienceLevel, true) : -1;
                 if (!checkTier || tier > -1) {

@@ -175,7 +175,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     @Override
     public final boolean onClickAction(ActionType type, int index, boolean shift, ActionTarget target) {
         List<Action<P>> actions = getActions(type);
-        if (index >= actions.size()) {
+        if (index < 0 || index >= actions.size()) {
             return false;
         }
         Action<P> action = actions.get(index);

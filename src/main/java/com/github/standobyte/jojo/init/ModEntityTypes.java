@@ -35,6 +35,7 @@ import com.github.standobyte.jojo.entity.itemprojectile.KnifeEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.StandArrowEntity;
 import com.github.standobyte.jojo.entity.mob.HamonMasterEntity;
 import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityStats;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
@@ -47,10 +48,14 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrStandSoundPacket.
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
+@EventBusSubscriber(modid = JojoMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public class ModEntityTypes {
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITIES, JojoMod.MOD_ID);
     
@@ -215,7 +220,7 @@ public class ModEntityTypes {
      */
     
     public static final RegistryObject<StandEntityType<StarPlatinumEntity>> STAR_PLATINUM = ENTITIES.register("star_platinum", 
-            () -> new StandEntityType<StarPlatinumEntity>(StarPlatinumEntity::new, false, 0.7F, 2.1F, 
+            () -> new StandEntityType<StarPlatinumEntity>(StarPlatinumEntity::new, ModStandTypes.STAR_PLATINUM, false, 0.7F, 2.1F, 
                     new StandEntityStats.Builder()
                     .damage(10)
                     .attackSpeed(100)
@@ -231,7 +236,7 @@ public class ModEntityTypes {
             .addStandSound(StandSoundType.RANGED_ATTACK, ModSounds.STAR_PLATINUM_STAR_FINGER));
     
     public static final RegistryObject<StandEntityType<TheWorldEntity>> THE_WORLD = ENTITIES.register("the_world", 
-            () -> new StandEntityType<TheWorldEntity>(TheWorldEntity::new, false, 0.7F, 2.1F,
+            () -> new StandEntityType<TheWorldEntity>(TheWorldEntity::new, ModStandTypes.THE_WORLD, false, 0.7F, 2.1F,
                     new StandEntityStats.Builder()
                     .damage(10.5)
                     .attackSpeed(100)
@@ -246,7 +251,7 @@ public class ModEntityTypes {
             .addStandSound(StandSoundType.MELEE_BARRAGE, ModSounds.THE_WORLD_MUDA_MUDA_MUDA));
     
     public static final RegistryObject<StandEntityType<HierophantGreenEntity>> HIEROPHANT_GREEN = ENTITIES.register("hierophant_green", 
-            () -> new StandEntityType<HierophantGreenEntity>(HierophantGreenEntity::new, false, 0.55F, 1.75F, 
+            () -> new StandEntityType<HierophantGreenEntity>(HierophantGreenEntity::new, ModStandTypes.HIEROPHANT_GREEN, false, 0.55F, 1.75F, 
                     new StandEntityStats.Builder()
                     .damage(1.25)
                     .maxRange(100)
@@ -255,7 +260,7 @@ public class ModEntityTypes {
             .addStandSound(StandSoundType.RANGED_ATTACK, ModSounds.HIEROPHANT_GREEN_EMERALD_SPLASH));
     
     public static final RegistryObject<StandEntityType<SilverChariotEntity>> SILVER_CHARIOT = ENTITIES.register("silver_chariot", 
-            () -> new StandEntityType<SilverChariotEntity>(SilverChariotEntity::new, false, 0.6F, 1.8F, 
+            () -> new StandEntityType<SilverChariotEntity>(SilverChariotEntity::new, ModStandTypes.SILVER_CHARIOT, false, 0.6F, 1.8F, 
                     new StandEntityStats.Builder()
                     .damage(8)
                     .attackKnockback(0.1)
@@ -271,11 +276,25 @@ public class ModEntityTypes {
             .addStandSound(StandSoundType.RANGED_ATTACK, ModSounds.SILVER_CHARIOT_RAPIER_SHOT));
     
     public static final RegistryObject<StandEntityType<MagiciansRedEntity>> MAGICIANS_RED = ENTITIES.register("magicians_red", 
-            () -> new StandEntityType<MagiciansRedEntity>(MagiciansRedEntity::new, false, 0.6F, 1.8F,
+            () -> new StandEntityType<MagiciansRedEntity>(MagiciansRedEntity::new, ModStandTypes.MAGICIANS_RED, false, 0.6F, 1.8F,
                     new StandEntityStats.Builder()
                     .damage(7)
                     .maxRange(8)
                     .armor(7)
                     .build())
             .addStandSound(StandSoundType.SUMMON, ModSounds.MAGICIANS_RED_SUMMON));
+
+    
+    
+    @SubscribeEvent
+    public static void onEntityAttributeCreation(EntityAttributeCreationEvent event) {
+        event.put(ModEntityTypes.HAMON_MASTER.get(), HamonMasterEntity.createAttributes().build());
+        event.put(ModEntityTypes.HUNGRY_ZOMBIE.get(), HungryZombieEntity.createAttributes().build());
+        
+        event.put(ModEntityTypes.STAR_PLATINUM.get(), StandEntity.createAttributes().build());
+        event.put(ModEntityTypes.THE_WORLD.get(), StandEntity.createAttributes().build());
+        event.put(ModEntityTypes.HIEROPHANT_GREEN.get(), StandEntity.createAttributes().build());
+        event.put(ModEntityTypes.SILVER_CHARIOT.get(), StandEntity.createAttributes().build());
+        event.put(ModEntityTypes.MAGICIANS_RED.get(), StandEntity.createAttributes().build());
+    }
 }

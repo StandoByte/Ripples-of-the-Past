@@ -42,24 +42,24 @@ public abstract class BarsRenderer {
         align(alignment);
         if (nonStandPower != null && nonStandPower.hasPower()) {
             // FIXME get energy costs
-            renderBar(matrixStack, BarType.ENERGY, nonStandPower.getType(), 
+            renderBarWithIcon(matrixStack, BarType.ENERGY, nonStandPower.getType(), 
                     currentMode == PowerClassification.NON_STAND, nonStandPower.getType().getColor(), 
-                    nonStandPower.getEnergy(), nonStandPower.getMaxEnergy(), 250f, 450f, 
+                    nonStandPower.getEnergy(), nonStandPower.getMaxEnergy(), 250f, 450f, 0, 
                     tickCounter, partialTick); 
         }
         if (standPower != null && standPower.hasPower()) {
             if (standPower.usesStamina()) {
                 // FIXME get stamina costs
-                renderBar(matrixStack, BarType.STAMINA, null, 
+                renderBarWithIcon(matrixStack, BarType.STAMINA, null, 
                         currentMode == PowerClassification.STAND, 0xFFFFFF, 
-                        standPower.getStamina(), standPower.getMaxStamina(), 750f, 350f, 
+                        standPower.getStamina(), standPower.getMaxStamina(), 750f, 350f, 0, 
                         tickCounter, partialTick);
             }
             if (standPower.usesResolve()) {
                 int color = standPower.getType().getColor();
-                renderBar(matrixStack, BarType.RESOLVE, null, 
+                renderBarWithIcon(matrixStack, BarType.RESOLVE, null, 
                         currentMode == PowerClassification.STAND, color, 
-                        standPower.getResolve(), standPower.getMaxResolve(), 0, 0, 
+                        standPower.getResolve(), standPower.getMaxResolve(), 0, 0, standPower.getAchievedResolve(), 
                         tickCounter, partialTick);
             }
         }
@@ -67,9 +67,9 @@ public abstract class BarsRenderer {
     
     protected abstract void align(Alignment alignment);
     
-    protected abstract void renderBar(MatrixStack matrixStack, BarType barType, NonStandPowerType<?> powerType, 
+    protected abstract void renderBarWithIcon(MatrixStack matrixStack, BarType barType, NonStandPowerType<?> powerType, 
             boolean highlight, int color, 
-            float value, float maxValue, float attackCostValue, float abilityCostValue, 
+            float value, float maxValue, float attackCostValue, float abilityCostValue, float tranclucentBarValue, 
             int ticks, float partialTick);
     
     private static final float CYCLE_TICKS = 80;
