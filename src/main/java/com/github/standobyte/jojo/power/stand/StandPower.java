@@ -5,12 +5,14 @@ import java.util.Arrays;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.BalanceTestServerConfig;
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.SyncResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStaminaPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncResolvePacket;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.PowerBaseImpl;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
@@ -20,6 +22,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 
@@ -28,7 +31,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Nullable
     private IStandManifestation standManifestation = null;
     private float stamina;
+    
     private float resolve;
+    private float achievedResolve;
     private int noResolveDecayTicks;
     @Deprecated
     private int xp = 0;
@@ -189,6 +194,14 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
 
     @Override
+    public float getAchievedResolve() {
+        if (!usesResolve()) {
+            return 0;
+        }
+        return achievedResolve;
+    }
+
+    @Override
     public float getMaxResolve() {
         if (!usesResolve()) {
             return 0;
@@ -204,23 +217,30 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public void addResolve(float amount) {
         if (usesResolve()) {
-            setResolve(MathHelper.clamp(this.resolve + amount, 0, getMaxResolve()), BalanceTestServerConfig.SERVER_CONFIG.noResolveDecayTicks.get());
+            float modifierForAchieved = BalanceTestServerConfig.SERVER_CONFIG.resolveModifierAchieved.get().floatValue();
+            float boostedAmount = Math.min(Math.max(achievedResolve - resolve, 0), amount * modifierForAchieved);
+            amount += boostedAmount * (modifierForAchieved - 1) / modifierForAchieved;
+            setResolve(MathHelper.clamp(this.resolve + amount, 0, getMaxResolve()), -999, BalanceTestServerConfig.SERVER_CONFIG.noResolveDecayTicks.get());
         }
     }
 
     @Override
-    public void setResolve(float amount, int noDecayTicks) {
+    public void setResolve(float amount, float achievedResolve, int noDecayTicks) {
         amount = MathHelper.clamp(amount, 0, getMaxResolve());
         boolean send = this.resolve != amount || this.noResolveDecayTicks != noDecayTicks;
+        boolean resolveModeWasOff = !isInResolveMode();
         this.resolve = amount;
-        if (isInResolveMode()) {
-            noDecayTicks = Math.max(noDecayTicks, BalanceTestServerConfig.SERVER_CONFIG.resolveModeTicks.get());
-        }
+        this.achievedResolve = Math.max(Math.max(this.resolve, achievedResolve), this.achievedResolve);
         this.noResolveDecayTicks = Math.max(this.noResolveDecayTicks, noDecayTicks);
+        if (isInResolveMode()) {
+            if (resolveModeWasOff) {
+                this.noResolveDecayTicks = Math.max(this.noResolveDecayTicks, BalanceTestServerConfig.SERVER_CONFIG.resolveModeTicks.get());
+            }
+            this.getUser().addEffect(new EffectInstance(ModEffects.RESOLVE.get(), noDecayTicks));
+        }
         if (send) {
             serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClientsTracking(new TrSyncResolvePacket(
-                        player.getId(), getResolve(), this.noResolveDecayTicks), player);
+                PacketManager.sendToClient(new SyncResolvePacket(getResolve(), this.achievedResolve, this.noResolveDecayTicks), player);
             });
         }
     }
@@ -249,6 +269,30 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     public void setXp(int xp) {
         xp = MathHelper.clamp(xp, 0, MAX_EXP);
         this.xp = xp;
+    }
+
+    @Override
+    public boolean unlockAction(Action<IStandPower> action) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public float getLearningProgress(Action<IStandPower> action) {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public void setLearningProgress(Action<IStandPower> action, float progress) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void addLearningProgress(Action<IStandPower> action, float progress) {
+        // TODO Auto-generated method stub
+        
     }
     
     @Override
@@ -319,6 +363,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
         if (usesResolve()) {
             cnbt.putFloat("Resolve", resolve);
+            cnbt.putFloat("AchievedResolve", achievedResolve);
             cnbt.putInt("ResolveTicks", noResolveDecayTicks);
         }
         cnbt.putInt("Exp", getXp());
@@ -340,6 +385,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
         if (usesResolve()) {
             resolve = nbt.getFloat("Resolve");
+            achievedResolve = nbt.getFloat("AchievedResolve");
             noResolveDecayTicks = nbt.getInt("ResolveTicks");
         }
         super.readNBT(nbt);
@@ -355,6 +401,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 resolve = oldPower.getResolve();
                 noResolveDecayTicks = oldPower.getNoResolveDecayTicks();
             }
+            achievedResolve = oldPower.getAchievedResolve();
         }
     }
     
@@ -362,8 +409,13 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     public void syncWithUserOnly() {
         super.syncWithUserOnly();
         serverPlayerUser.ifPresent(player -> {
-            if (hasPower() && usesStamina()) {
-                PacketManager.sendToClient(new SyncStaminaPacket(stamina), player);
+            if (hasPower()) {
+                if (usesStamina()) {
+                    PacketManager.sendToClient(new SyncStaminaPacket(stamina), player);
+                }
+                if (usesResolve()) {
+                    PacketManager.sendToClient(new SyncResolvePacket(resolve, achievedResolve, noResolveDecayTicks), player);
+                }
             }
         });
     }
@@ -372,9 +424,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     public void syncWithTrackingOrUser(ServerPlayerEntity player) {
         super.syncWithTrackingOrUser(player);
         if (hasPower()) {
-            if (usesResolve()) {
-                PacketManager.sendToClient(new TrSyncResolvePacket(getUser().getId(), resolve, noResolveDecayTicks), player);
-            }
             if (standManifestation != null) {
                 standManifestation.syncWithTrackingOrUser(player);
             }

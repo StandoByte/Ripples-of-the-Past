@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.power.stand.stats;
 
+import com.github.standobyte.jojo.power.stand.IStandPower;
+
 public class StandStatsV2 {
     private final UpgradeableStats statsBase;
     private final UpgradeableStats statsMax;
@@ -38,6 +40,22 @@ public class StandStatsV2 {
     // projectileAccuracy
     
     // parry?
+    
+    private double getPower(IStandPower stand) {
+        return statsBase.power + (statsMax.power - statsBase.power) * stand.getAchievedResolveRatio();
+    }
+    
+    private double getSpeed(IStandPower stand) {
+        return statsBase.speed + (statsMax.speed - statsBase.speed) * stand.getAchievedResolveRatio();
+    }
+    
+    private double getDurability(IStandPower stand) {
+        return statsBase.durability + (statsMax.durability - statsBase.durability) * stand.getAchievedResolveRatio();
+    }
+    
+    private double getPrecision(IStandPower stand) {
+        return statsBase.precision + (statsMax.precision - statsBase.precision) * stand.getAchievedResolveRatio();
+    }
 
     public static class Builder extends AbstractBuilder<Builder> {
 
