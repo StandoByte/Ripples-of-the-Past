@@ -10,7 +10,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.World;
 
 public class StandEntityBlock extends StandEntityAction {
-    private static final StandEntityAction.Builder BUILDER = new StandEntityAction.Builder().doNotAutoSummonStand().holdType(0);
+    private static final StandEntityAction.Builder BUILDER = new StandEntityAction.Builder().doNotAutoSummonStand().holdType();
 
     public StandEntityBlock() {
         super(BUILDER);
