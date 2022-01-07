@@ -392,17 +392,15 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
     
     @Override
-    public void onClone(IStandPower oldPower, boolean wasDeath, boolean keep) {
-        super.onClone(oldPower, wasDeath, keep);
-        if (keep && oldPower.hasPower()) {
-            xp = oldPower.getXp();
-            stamina = oldPower.getStamina();
-            if (!wasDeath) {
-                resolve = oldPower.getResolve();
-                noResolveDecayTicks = oldPower.getNoResolveDecayTicks();
-            }
-            achievedResolve = oldPower.getAchievedResolve();
+    protected void keepPower(IStandPower oldPower, boolean wasDeath) {
+        super.keepPower(oldPower, wasDeath);
+        xp = oldPower.getXp();
+        stamina = oldPower.getStamina();
+        if (!wasDeath) {
+            resolve = oldPower.getResolve();
+            noResolveDecayTicks = oldPower.getNoResolveDecayTicks();
         }
+        achievedResolve = oldPower.getAchievedResolve();
     }
     
     @Override
