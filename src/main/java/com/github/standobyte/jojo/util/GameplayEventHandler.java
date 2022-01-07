@@ -366,9 +366,10 @@ public class GameplayEventHandler {
         if (entity instanceof PlayerEntity) {
             PlayerEntity player = (PlayerEntity) entity;
             INonStandPower power = INonStandPower.getPlayerNonStandPower(player);
-            if (power.givePower(ModNonStandPowers.VAMPIRISM.get())) {
+            VampirismPowerType vampirism = ModNonStandPowers.VAMPIRISM.get();
+            if (power.getTypeSpecificData(vampirism).map(vamp -> !vamp.isVampireAtFullPower()).orElse(false) || power.givePower(vampirism)) {
                 entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.STONE_MASK_ACTIVATION_ENTITY.get(), entity.getSoundSource(), 1.0F, 1.0F);
-                power.getTypeSpecificData(ModNonStandPowers.VAMPIRISM.get()).get().setVampireFullPower(true);
+                power.getTypeSpecificData(vampirism).get().setVampireFullPower(true);
                 StoneMaskItem.setActivatedArmorTexture(headStack); // TODO light beams on stone mask activation
                 headStack.hurtAndBreak(1, entity, stack -> {});
                 return true;

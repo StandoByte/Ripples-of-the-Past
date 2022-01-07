@@ -64,6 +64,11 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
     public float getStaminaRegenFactor(INonStandPower power, IStandPower standPower) {
         return Math.max((bloodLevel(power, power.getUser().level.getDifficulty()) - 3) * 4, 1);
     }
+    
+    @Override
+    public boolean isAlwaysLostOnDeath(INonStandPower power) {
+        return !power.getTypeSpecificData(this).get().isVampireAtFullPower();
+    }
 
     /* x = difficultyLevel (1 - easy, 2 - normal, 3 - hard)
      * x:     0 <= energy < 150

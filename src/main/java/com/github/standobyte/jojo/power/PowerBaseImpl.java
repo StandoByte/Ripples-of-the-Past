@@ -487,12 +487,16 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
 
     @Override
-    public void onClone(P oldPower, boolean wasDeath, boolean keep) {
-        if (keep && oldPower.hasPower()) {
-            onTypeInit(oldPower.getType());
-            leapCooldown = oldPower.getLeapCooldown();
-            cooldowns = oldPower.getCooldowns();
-        }      
+    public void onClone(P oldPower, boolean wasDeath, boolean configToKeep) {
+        if ((!wasDeath || configToKeep) && oldPower.hasPower() && !getType().isAlwaysLostOnDeath(getThis())) {
+            keepPower(oldPower, wasDeath);
+        }
+    }
+    
+    protected void keepPower(P oldPower, boolean wasDeath) {
+        onTypeInit(oldPower.getType());
+        leapCooldown = oldPower.getLeapCooldown();
+        cooldowns = oldPower.getCooldowns();
     }
 
     @Override

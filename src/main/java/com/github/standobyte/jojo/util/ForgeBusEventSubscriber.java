@@ -132,9 +132,9 @@ public class ForgeBusEventSubscriber {
         PlayerEntity original = event.getOriginal();
         PlayerEntity player = event.getPlayer();
         IStandPower.getPlayerStandPower(player).onClone(IStandPower.getPlayerStandPower(original), 
-                event.isWasDeath(), !event.isWasDeath() || JojoModConfig.COMMON.keepStandOnDeath.get());
+                event.isWasDeath(), JojoModConfig.COMMON.keepStandOnDeath.get());
         INonStandPower.getPlayerNonStandPower(player).onClone(INonStandPower.getPlayerNonStandPower(original), 
-                event.isWasDeath(), !event.isWasDeath() || JojoModConfig.COMMON.keepNonStandOnDeath.get());
+                event.isWasDeath(), JojoModConfig.COMMON.keepNonStandOnDeath.get());
         
         original.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(oldCap -> {
             player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(newCap -> {

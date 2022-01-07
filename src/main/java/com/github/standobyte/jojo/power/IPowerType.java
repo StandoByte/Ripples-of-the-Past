@@ -10,6 +10,9 @@ public interface IPowerType<P extends IPower<P, T>, T extends IPowerType<P, T>> 
     static final String NO_POWER_NAME = "";
     int getColor();
     boolean isReplaceableWith(T newType);
+    default boolean isAlwaysLostOnDeath(P power) {
+        return false;
+    }
     void tickUser(LivingEntity entity, P power);
     Action<P>[] getAttacks();
     Action<P>[] getAbilities();
