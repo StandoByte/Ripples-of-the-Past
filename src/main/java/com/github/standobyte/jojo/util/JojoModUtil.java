@@ -13,7 +13,10 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
+import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.client.network.play.IClientPlayNetHandler;
@@ -37,11 +40,13 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.ForgeEventFactory;
@@ -50,6 +55,13 @@ import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 public class JojoModUtil {
     
     public static void debug(World world, PlayerEntity player) { // FIXME
+        IStandPower.getStandPowerOptional(player).ifPresent(stand -> {
+            if (stand.hasPower()) {
+                Gson gson = new GsonBuilder().create();
+                String json = gson.toJson(stand.getType().getStats());
+                player.sendMessage(new StringTextComponent(json), Util.NIL_UUID);
+            }
+        });
     }
     
     public static RayTraceResult rayTrace(Entity entity, double reachDistance, @Nullable Predicate<Entity> entityFilter) {

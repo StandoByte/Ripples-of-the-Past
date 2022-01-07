@@ -286,9 +286,10 @@ public class GameplayEventHandler {
         }
         IStandPower.getStandPowerOptional(event.getEntityLiving()).ifPresent(stand -> {
             if (stand.usesResolve()) {
-                float resolveRatio = stand.getResolve() / stand.getMaxResolve();
-                event.setAmount(event.getAmount() * (1 - 
-                        resolveRatio * BalanceTestServerConfig.SERVER_CONFIG.maxResolveDmgReduction.get().floatValue()));
+                float dmgReduction = stand.isInResolveMode() ?
+                        dmgReduction = BalanceTestServerConfig.SERVER_CONFIG.resolveModeDmgReduction.get().floatValue()
+                        : stand.getResolveRatio() * BalanceTestServerConfig.SERVER_CONFIG.maxResolveDmgReduction.get().floatValue();
+                event.setAmount(event.getAmount() * (1 - dmgReduction));
             }
         });
     }
