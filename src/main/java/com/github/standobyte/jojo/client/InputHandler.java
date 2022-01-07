@@ -171,7 +171,9 @@ public class InputHandler {
                 if (chooseAttack || chooseAbility) {
                     for (int i = 0; i < 9; i++) {
                         if (mc.options.keyHotbarSlots[i].consumeClick()) {
+                            JojoMod.LOGGER.debug(i);
                             if (chooseAttack) {
+                                // FIXME doesn't seem to work for key 2 while walking (???)
                                 actionsOverlay.selectAction(ActionType.ATTACK, i);
                             }
                             if (chooseAbility) {

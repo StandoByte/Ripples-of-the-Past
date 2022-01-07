@@ -26,9 +26,9 @@ public class VerticalBarsRenderer extends BarsRenderer {
     }
 
     @Override
-    protected void renderBar(MatrixStack matrixStack, BarType barType, NonStandPowerType<?> powerType, 
+    protected void renderBarWithIcon(MatrixStack matrixStack, BarType barType, NonStandPowerType<?> powerType, 
             boolean highlight, int color, 
-            float value, float maxValue, float attackCostValue, float abilityCostValue, 
+            float value, float maxValue, float attackCostValue, float abilityCostValue, float tranclucentBarValue, 
             int ticks, float partialTick) {
         int barHeight = highlight ? BAR_HEIGHT : BAR_HEIGHT_SHORTENED;
         int fill = (int) ((float) barHeight * (value / maxValue));
@@ -38,6 +38,7 @@ public class VerticalBarsRenderer extends BarsRenderer {
             renderBar(matrixStack, x, y, 
                     texX, 0, 8, barHeight, fill, color, 1.0F, 
                     0, 0, 17, 1, 
+                    (int) ((float) barHeight * (tranclucentBarValue / maxValue)), 
                     (int) (attackCostValue / maxValue), (int) (attackCostValue / maxValue), this.getHighlightAlpha(ticks + partialTick));
             int[] iconTex = getIconTex(barType, powerType, BarsOrientation.VERTICAL);
             renderIcon(matrixStack, x - 2, y - iconTex[3] - 1, 
@@ -50,7 +51,7 @@ public class VerticalBarsRenderer extends BarsRenderer {
                 renderBar(matrixStack, x, y + BAR_HEIGHT - BAR_HEIGHT_SHORTENED, 
                         texX + 8, 0, 5, barHeight, fill, color, transparency.getAlpha(partialTick), 
                         8, 0, 25, 1, 
-                        0, 0, 0);
+                        0, 0, 0, 0);
             }
             x += 9;
         }
@@ -59,13 +60,17 @@ public class VerticalBarsRenderer extends BarsRenderer {
     private void renderBar(MatrixStack matrixStack, int x, int y, 
             int texX, int texY, int width, int length, int fill, int barColor, float barAlpha, 
             int borderTexX, int borderTexY, int scaleTexX, int scaleTexY, 
-            int cost1Fill, int cost2Fill, float costAlpha) {
+            int tranclucentFill, int cost1Fill, int cost2Fill, float costAlpha) {
         if (barAlpha > 0) {
             float[] rgb = ClientUtil.rgb(barColor);
+            if (tranclucentFill > 0) {
+                RenderSystem.color4f(rgb[0], rgb[1], rgb[2], barAlpha / 0.5F);
+                barFill(matrixStack, x, y, texX, texY, width, length, tranclucentFill);
+            }
             RenderSystem.color4f(rgb[0], rgb[1], rgb[2], barAlpha);
-            // bar fill
-            gui.blit(matrixStack, x + 1, y + length - fill + 1, 
-                    texX + 1, texY + length - fill + 1, width - 2, fill);
+            if (fill > 0) {
+                barFill(matrixStack, x, y, texX, texY, width, length, fill);
+            }
             // border
             gui.blit(matrixStack, x, y, borderTexX, borderTexY, width, length + 2);
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, barAlpha);
@@ -80,6 +85,12 @@ public class VerticalBarsRenderer extends BarsRenderer {
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             }
         }
+    }
+    
+    private void barFill(MatrixStack matrixStack, int x, int y, 
+            int texX, int texY, int width, int length, int fill) {
+        gui.blit(matrixStack, x + 1, y + length - fill + 1, 
+                texX + 1, texY + length - fill + 1, width - 2, fill);
     }
     
     private void renderCost(MatrixStack matrixStack, int barX, int barY, 

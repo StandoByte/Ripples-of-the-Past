@@ -4,7 +4,6 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.action.actions.NonStandAction;
 import com.github.standobyte.jojo.action.actions.HamonAction;
 import com.github.standobyte.jojo.action.actions.HamonBubbleBarrier;
 import com.github.standobyte.jojo.action.actions.HamonBubbleCutter;
@@ -32,6 +31,7 @@ import com.github.standobyte.jojo.action.actions.MagiciansRedCrossfireHurricane;
 import com.github.standobyte.jojo.action.actions.MagiciansRedDetector;
 import com.github.standobyte.jojo.action.actions.MagiciansRedFireball;
 import com.github.standobyte.jojo.action.actions.MagiciansRedRedBind;
+import com.github.standobyte.jojo.action.actions.NonStandAction;
 import com.github.standobyte.jojo.action.actions.SilverChariotMeleeBarrage;
 import com.github.standobyte.jojo.action.actions.SilverChariotRapierLaunch;
 import com.github.standobyte.jojo.action.actions.SilverChariotTakeOffArmor;
