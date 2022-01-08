@@ -1,6 +1,8 @@
 package com.github.standobyte.jojo.power.stand;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -37,6 +39,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     private int noResolveDecayTicks;
     @Deprecated
     private int xp = 0;
+    
+    private Map<Action<IStandPower>, Float> actionLearningProgressMap = new HashMap<>();
+    
     
     public StandPower(LivingEntity user) {
         super(user);
@@ -273,26 +278,25 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
 
     @Override
     public boolean unlockAction(Action<IStandPower> action) {
-        // TODO Auto-generated method stub
+        // FIXME Auto-generated method stub
         return false;
     }
 
     @Override
     public float getLearningProgress(Action<IStandPower> action) {
-        // TODO Auto-generated method stub
-        return 0;
+        return actionLearningProgressMap.getOrDefault(action, 0F);
     }
 
     @Override
     public void setLearningProgress(Action<IStandPower> action, float progress) {
-        // TODO Auto-generated method stub
-        
+        progress = MathHelper.clamp(progress, 0F, 1F);
+        actionLearningProgressMap.put(action, progress);
+        // FIXME sync to client
     }
 
     @Override
     public void addLearningProgress(Action<IStandPower> action, float progress) {
-        // TODO Auto-generated method stub
-        
+        setLearningProgress(action, getLearningProgress(action) + progress);
     }
     
     @Override
@@ -401,6 +405,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             noResolveDecayTicks = oldPower.getNoResolveDecayTicks();
         }
         achievedResolve = oldPower.getAchievedResolve();
+        this.actionLearningProgressMap = ((StandPower) oldPower).actionLearningProgressMap; // FIXME can i remove this cast?
     }
     
     @Override
