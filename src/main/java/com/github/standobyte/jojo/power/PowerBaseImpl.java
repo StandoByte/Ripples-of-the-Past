@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
@@ -488,13 +489,16 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
 
     @Override
     public void onClone(P oldPower, boolean wasDeath, boolean configToKeep) {
+        JojoMod.LOGGER.debug(configToKeep + ", " + oldPower.hasPower());
         if ((!wasDeath || configToKeep) && oldPower.hasPower() && !oldPower.getType().isAlwaysLostOnDeath(oldPower)) {
+            JojoMod.LOGGER.debug("!");
             keepPower(oldPower, wasDeath);
         }
     }
     
     protected void keepPower(P oldPower, boolean wasDeath) {
-        onTypeInit(oldPower.getType());
+        setType(oldPower.getType());
+//        onTypeInit(oldPower.getType());
         leapCooldown = oldPower.getLeapCooldown();
         cooldowns = oldPower.getCooldowns();
     }
