@@ -224,6 +224,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     
     @Override
     protected void keepPower(INonStandPower oldPower, boolean wasDeath) {
+        super.keepPower(oldPower, wasDeath);
         energy = oldPower.getEnergy();
         oldPower.getTypeSpecificData(null).ifPresent(data -> {
             setTypeSpecificData(data);
