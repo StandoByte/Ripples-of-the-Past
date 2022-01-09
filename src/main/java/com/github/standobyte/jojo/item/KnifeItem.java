@@ -65,7 +65,7 @@ public class KnifeItem extends Item {
             world.playSound(null, player.getX(), player.getY(), player.getZ(), 
                     knivesToThrow == 1 ? ModSounds.KNIFE_THROW.get() : ModSounds.KNIVES_THROW.get(), 
                             SoundCategory.PLAYERS, 0.5F, 0.4F / (random.nextFloat() * 0.4F + 0.8F));
-            player.getCooldowns().addCooldown(this, knivesToThrow * 4);
+            player.getCooldowns().addCooldown(this, knivesToThrow * 3);
             if (!player.abilities.instabuild) {
                 handStack.shrink(knivesToThrow);
             }
