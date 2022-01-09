@@ -14,32 +14,40 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.StringTextComponent;
 
 public class TestBuildCommand {
     
-    public static final boolean ENABLED = false;
+    public static final boolean ENABLED = true;
 
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         if (ENABLED) {
             dispatcher.register(Commands.literal("donottouch").requires(ctx -> ctx.hasPermission(4))
                     .then(Commands.argument("password", StringArgumentType.word()).then(Commands.argument("operation", IntegerArgumentType.integer(0)).executes(
                             ctx -> test(ctx.getSource(), StringArgumentType.getString(ctx, "password"), IntegerArgumentType.getInteger(ctx, "operation"), null))
-                    .then(Commands.argument("target", EntityArgument.player()).executes(
-                            ctx -> test(ctx.getSource(), StringArgumentType.getString(ctx, "password"), IntegerArgumentType.getInteger(ctx, "operation"), EntityArgument.getPlayer(ctx, "target"))))))
+                    .then(Commands.argument("target", EntityArgument.entity()).executes(
+                            ctx -> test(ctx.getSource(), StringArgumentType.getString(ctx, "password"), IntegerArgumentType.getInteger(ctx, "operation"), EntityArgument.getEntity(ctx, "target"))))))
                     );
         }
     }
     
-    private static int test(CommandSource source, String redgitProtection, int operation, @Nullable ServerPlayerEntity guineaPig) {
+    public static final DamageSource SOUL_TEST = new DamageSource("soul_test").bypassArmor().bypassMagic().bypassInvul();
+    private static int test(CommandSource source, String redgitProtection, int operation, @Nullable Entity guineaPig) {
         switch (operation) {
         // 
         }
         if (passwordCheck(redgitProtection, source.getEntity())) {
             switch (operation) {
             // 
+            case 1:
+                if (guineaPig instanceof LivingEntity) {
+                    guineaPig.hurt(SOUL_TEST, Float.MAX_VALUE);
+                }
+                break;
             }
         }
         return 0;

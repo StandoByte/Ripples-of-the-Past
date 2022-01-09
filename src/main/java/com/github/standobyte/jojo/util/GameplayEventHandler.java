@@ -8,11 +8,14 @@ import java.util.function.Predicate;
 
 import com.github.standobyte.jojo.BalanceTestServerConfig;
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.actions.VampirismFreeze;
 import com.github.standobyte.jojo.block.StoneMaskBlock;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.ProjectileHamonChargeCapProvider;
+import com.github.standobyte.jojo.command.TestBuildCommand;
+import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRCrossfireHurricaneEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModBlocks;
@@ -504,7 +507,43 @@ public class GameplayEventHandler {
         if (!event.getEntity().level.isClientSide()) {
             StandType.giveStandExp(event);
             HamonPowerType.hamonPerksOnDeath(event);
+            summonSoul(event);
         }
+    }
+    
+    private static void summonSoul(LivingDeathEvent event) {
+        if (!JojoModConfig.COMMON.soulAscension.get()) {
+            return;
+        }
+        
+        LivingEntity entity = event.getEntityLiving();
+        if (JojoModUtil.isUndead(entity)) {
+            return;
+        }
+        
+        float resolveRatio = IStandPower.getStandPowerOptional(entity).map(stand -> {
+            if (!stand.usesResolve()) {
+                return 0F;
+            }
+            return stand.getResolveRatio();
+        }).orElse(0F);
+        if (event.getSource() == TestBuildCommand.SOUL_TEST) {
+            resolveRatio = 1;
+        }
+        if (resolveRatio <= 0) {
+            return;
+        }
+        
+        PlayerEntity player = entity instanceof PlayerEntity ? (PlayerEntity) entity : null;
+        if (player != null && JojoModConfig.COMMON.keepStandOnDeath.get() && !entity.level.getLevelData().isHardcore()) {
+            return;
+        }
+        
+        SoulEntity soulEntity = new SoulEntity(entity.level, entity, 60 + (int) (240 * resolveRatio));
+        if (player != null) {
+            // FIXME (soul) controlled by player
+        }
+        entity.level.addFreshEntity(soulEntity);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)

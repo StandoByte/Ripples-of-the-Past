@@ -9,7 +9,7 @@ import com.github.standobyte.jojo.BalanceTestServerConfig;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
-import com.github.standobyte.jojo.client.StandControlHandler;
+import com.github.standobyte.jojo.client.StandController;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -88,7 +88,7 @@ public class StandUtil {
                 else {
                     Minecraft.getInstance().setCameraEntity(manualControl ? standEntity : player);
                     if (manualControl) {
-                        StandControlHandler.setStartedControllingStand();
+                        StandController.setStartedControllingStand();
                     }
                 }
             }

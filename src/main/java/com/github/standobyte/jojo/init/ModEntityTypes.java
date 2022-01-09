@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.entity.MRDetectorEntity;
 import com.github.standobyte.jojo.entity.PillarmanTempleEngravingEntity;
 import com.github.standobyte.jojo.entity.RoadRollerEntity;
+import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.damaging.LightBeamEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.HGEmeraldEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.HamonBubbleBarrierEntity;
@@ -144,6 +145,12 @@ public class ModEntityTypes {
     public static final RegistryObject<EntityType<StandArrowEntity>> STAND_ARROW = ENTITIES.register("stand_arrow", 
             () -> EntityType.Builder.<StandArrowEntity>of(StandArrowEntity::new, EntityClassification.MISC).sized(0.75F, 0.75F).clientTrackingRange(4).updateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "stand_arrow").toString()));
+    
+    public static final RegistryObject<EntityType<SoulEntity>> SOUL = ENTITIES.register("soul", 
+            () -> EntityType.Builder.<SoulEntity>of(SoulEntity::new, EntityClassification.MISC).sized(0.6F, 1.8F)//.noSummon() // FIXME
+            .build(new ResourceLocation(JojoMod.MOD_ID, "soul").toString()));
+    
+    
     
     public static final RegistryObject<EntityType<PillarmanTempleEngravingEntity>> PILLARMAN_TEMPLE_ENGRAVING = ENTITIES.register("pillarman_temple_engraving", 
             () -> EntityType.Builder.<PillarmanTempleEngravingEntity>of(PillarmanTempleEngravingEntity::new, EntityClassification.MISC).sized(0.5F, 0.5F).noSummon().setUpdateInterval(Integer.MAX_VALUE).setShouldReceiveVelocityUpdates(false)
