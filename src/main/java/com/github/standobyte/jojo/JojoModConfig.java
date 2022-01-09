@@ -47,6 +47,8 @@ public class JojoModConfig {
         public final ForgeConfigSpec.BooleanValue meteoriteSpawn;
         public final ForgeConfigSpec.BooleanValue pillarmanTempleSpawn;
         
+        public final ForgeConfigSpec.BooleanValue soulAscension;
+        
         Common(ForgeConfigSpec.Builder builder) {
             keepStandOnDeath = builder
                     .comment(" Keep Stand after death.")
@@ -116,6 +118,11 @@ public class JojoModConfig {
                         .translation("jojo.config.pillarmanTempleSpawn")
                         .define("pillarmanTempleSpawn", true);
             builder.pop();
+            
+            soulAscension = builder
+                    .comment(" Whether or not a Stand User's death will briefly summon their soul.")
+                    .translation("jojo.config.soulAscension")
+                    .define("soulAscension", true);
         }
         
         public boolean isConfigLoaded() {

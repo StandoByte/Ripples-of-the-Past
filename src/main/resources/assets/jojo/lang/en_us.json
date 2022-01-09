@@ -42,6 +42,7 @@
   "entity.jojo.snake_muffler": "Snake Muffler",
   "entity.jojo.knife": "Knife",
   "entity.jojo.stand_arrow": "Stand Arrow",
+  "entity.jojo.soul": "Soul",
   
   "effect.jojo.freeze": "Freeze",
   "item.minecraft.potion.effect.freeze": "Potion of Freeze",
@@ -224,6 +225,8 @@
   
   "jojo.chat.message.tmp_not_enough_xp": "You are not strong enough to gain a Stand",
   
+  "jojo.message.skip_soul_ascension": "Press %s to skip the soul ascension",
+  
   "jojo.message.action_condition.no_stamina": "You don't have enough stamina",
   "jojo.message.action_condition.no_energy_hamon": "Your breath has not yet stabilized",
   "jojo.message.action_condition.no_energy_vampirism": "You are too hungry",
@@ -278,6 +281,8 @@
   "jojo.config.meteoriteSpawn.tooltip": "Whether or not Meteorite Temple spawn in newly loaded chunks.",
   "jojo.config.pillarmanTempleSpawn": "Pillar Man Temple spawn",
   "jojo.config.pillarmanTempleSpawn.tooltip": "Whether or not Pillar Man Temple spawn in newly loaded chunks.",
+  "jojo.config.soulAscension": "Soul Ascension",
+  "jojo.config.soulAscension.tooltip": "Whether or not a Stand User's death will briefly summon their soul.",
   
   "jojo.config.client.barsPosition": "Bars position",
   "jojo.config.client.barsPosition.tooltip": "Position of Energy, Stamina and Resolve bars in the HUD.",

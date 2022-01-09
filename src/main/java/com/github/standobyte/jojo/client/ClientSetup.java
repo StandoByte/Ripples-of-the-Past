@@ -19,6 +19,7 @@ import com.github.standobyte.jojo.client.renderer.entity.LeavesGliderRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.MRDetectorRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.PillarmanTempleEngravingRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.RoadRollerRenderer;
+import com.github.standobyte.jojo.client.renderer.entity.SoulRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.MRFlameRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.beam.LightBeamRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.beam.SpaceRipperStingyEyesRenderer;
@@ -64,14 +65,19 @@ import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.CloudParticle;
 import net.minecraft.client.particle.CritParticle;
+import net.minecraft.client.particle.IAnimatedSprite;
+import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.CrossbowItem;
 import net.minecraft.item.ItemModelsProperties;
 import net.minecraft.item.Items;
+import net.minecraft.particles.BasicParticleType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ColorHandlerEvent;
@@ -106,6 +112,7 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SNAKE_MUFFLER.get(), SnakeMufflerRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.KNIFE.get(), KnifeRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STAND_ARROW.get(), StandArrowRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SOUL.get(), SoulRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.PILLARMAN_TEMPLE_ENGRAVING.get(), PillarmanTempleEngravingRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SP_STAR_FINGER.get(), SPStarFingerRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HG_STRING.get(), HGStringRenderer::new);
@@ -162,7 +169,7 @@ public class ClientSetup {
 
             ClientEventHandler.init(mc);
             ActionsOverlayGui.init(mc);
-            StandControlHandler.init(mc);
+            StandController.init(mc);
             InputHandler.init(mc);
             InputHandler.getInstance().setActionsOverlay(ActionsOverlayGui.getInstance());
 
@@ -198,8 +205,23 @@ public class ClientSetup {
         mc.particleEngine.register(ModParticles.METEORITE_VIRUS.get(), MeteoriteVirusParticle.Factory::new);
         mc.particleEngine.register(ModParticles.MENACING.get(), OnomatopoeiaParticle.GoFactory::new);
         mc.particleEngine.register(ModParticles.RESOLVE.get(), OnomatopoeiaParticle.DoFactory::new);
+        mc.particleEngine.register(ModParticles.SOUL_CLOUD.get(), SoulCloudParticleFactory::new);
         mc.particleEngine.register(ModParticles.FLAME_ONE_TICK.get(), OneTickFlameParticle.Factory::new);
         // yep...
         SpriteUploaders.initSpriteUploaders(mc);
+    }
+
+    private static class SoulCloudParticleFactory extends CloudParticle.Factory {
+
+        public SoulCloudParticleFactory(IAnimatedSprite sprite) {
+            super(sprite);
+        }
+
+        @Override
+        public Particle createParticle(BasicParticleType type, ClientWorld world, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+           Particle particle = super.createParticle(type, world, x, y, z, xSpeed, ySpeed, zSpeed);
+           particle.setColor(1.0F, 1.0F, 0.25F);
+           return particle;
+        }
     }
 }
