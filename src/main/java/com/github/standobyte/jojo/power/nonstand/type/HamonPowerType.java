@@ -409,7 +409,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     
     public static void snakeMuffler(LivingAttackEvent event) {
         LivingEntity target = event.getEntityLiving();
-        if (!target.level.isClientSide()) {
+        if (!target.level.isClientSide() && target.canUpdate()) {
             DamageSource dmgSource = event.getSource();
             Entity attacker = dmgSource.getEntity();
             if (attacker != null && dmgSource.getDirectEntity() == attacker && attacker instanceof LivingEntity

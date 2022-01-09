@@ -71,9 +71,9 @@ public class HamonCutterEntity extends ModdedProjectileEntity {
                     for (EffectInstance effectInstance : effects) {
                         Effect effect = effectInstance.getEffect();
                         if (effect.isInstantenous()) {
-                            effect.applyInstantenousEffect(this, getOwner(), target, effectInstance.getAmplifier(), getEffectDurationFactor());
+                            effect.applyInstantenousEffect(this, getOwner(), target, effectInstance.getAmplifier(), 0.25);
                         } else {
-                            target.addEffect(new EffectInstance(effect, MathHelper.floor(effectInstance.getDuration() * getEffectDurationFactor()), 
+                            target.addEffect(new EffectInstance(effect, MathHelper.floor(effectInstance.getDuration()), 
                                     effectInstance.getAmplifier(), effectInstance.isAmbient(), effectInstance.isVisible()));
                         }
                     }
@@ -89,10 +89,6 @@ public class HamonCutterEntity extends ModdedProjectileEntity {
                 });
             }
         }
-    }
-
-    private float getEffectDurationFactor() {
-        return 0.75F;
     }
 
     @Override
