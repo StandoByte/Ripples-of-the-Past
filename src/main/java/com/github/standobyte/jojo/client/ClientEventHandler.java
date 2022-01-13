@@ -12,6 +12,8 @@ import com.github.standobyte.jojo.util.TimeHandler;
 import com.github.standobyte.jojo.util.reflection.ClientReflection;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
@@ -26,8 +28,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
+import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
@@ -53,6 +58,8 @@ public class ClientEventHandler {
     
     private double zoomModifier;
     public boolean isZooming;
+    
+    private int deathScreenTick;
 
     private ClientEventHandler(Minecraft mc) {
         this.mc = mc;
@@ -169,6 +176,13 @@ public class ClientEventHandler {
                     }
                 }
             }
+            
+            if (mc.screen instanceof DeathScreen) {
+                deathScreenTick++;
+            }
+            else {
+                deathScreenTick = 0;
+            }
         }
     }
 
@@ -229,6 +243,25 @@ public class ClientEventHandler {
 //                    }
                 });
             }
+        }
+    }
+    
+    
+    
+    private static final ResourceLocation ADDITIONAL_UI = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/additional.png");
+    @SubscribeEvent
+    public void afterScreenRender(DrawScreenEvent.Post event) {
+        if (event.getGui() instanceof DeathScreen) {
+            ITextComponent title = event.getGui().getTitle();
+            if (title instanceof TranslationTextComponent && ((TranslationTextComponent) title).getKey().endsWith(".hardcore")) {
+                return;
+            }
+            int x = event.getGui().width - 5 - 
+                    (int) ((event.getGui().width - 10) * Math.min(deathScreenTick + event.getRenderPartialTicks(), 20F) / 20F);
+            int y = event.getGui().height - 29;
+            mc.textureManager.bind(ADDITIONAL_UI);
+            event.getGui().blit(event.getMatrixStack(), x, y, 0, 0, 130, 25);
+            AbstractGui.drawCenteredString(event.getMatrixStack(), mc.font, new TranslationTextComponent("jojo.to_be_continued"), x + 61, y + 8, 0x525544);
         }
     }
 }

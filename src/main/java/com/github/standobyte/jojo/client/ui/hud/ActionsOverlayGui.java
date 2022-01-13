@@ -180,7 +180,7 @@ public class ActionsOverlayGui extends AbstractGui {
         
         if (currentMode != null) {
             if (currentMode.getPower() == null || !currentMode.getPower().hasPower()) {
-                JojoMod.LOGGER.debug("Failed rendering {} HUD", currentMode.powerClassification);
+                JojoMod.LOGGER.warn("Failed rendering {} HUD", currentMode.powerClassification);
                 currentMode = null;
                 return;
             }
