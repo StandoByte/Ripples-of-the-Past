@@ -20,6 +20,9 @@ public class ModParticles {
     public static final RegistryObject<BasicParticleType> MENACING = PARTICLES.register("menacing", 
             () -> new BasicParticleType(false));
     
+    public static final RegistryObject<BasicParticleType> RESOLVE = PARTICLES.register("resolve", 
+            () -> new BasicParticleType(false));
+    
     public static final RegistryObject<BasicParticleType> FLAME_ONE_TICK = PARTICLES.register("flame", 
             () -> new BasicParticleType(false));
 }
