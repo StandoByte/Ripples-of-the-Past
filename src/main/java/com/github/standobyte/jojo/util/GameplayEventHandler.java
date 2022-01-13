@@ -1,12 +1,13 @@
 package com.github.standobyte.jojo.util;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.BalanceTestServerConfig;
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.actions.VampirismFreeze;
 import com.github.standobyte.jojo.block.StoneMaskBlock;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
@@ -58,6 +59,7 @@ import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.play.server.SPlayEntityEffectPacket;
 import net.minecraft.network.play.server.SPlaySoundEffectPacket;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.Effect;
@@ -83,6 +85,7 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.ForgeEventFactory;
@@ -105,6 +108,7 @@ import net.minecraftforge.event.entity.living.PotionEvent.PotionApplicableEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerWakeUpEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
@@ -400,11 +404,30 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onPotionAdded(PotionAddedEvent event) {
         EntityStandType.giveSharedEffectsFromUser(event);
+        
+        Entity entity = event.getEntity();
+        if (!entity.level.isClientSide() && ModEffects.isEffectTracked(event.getPotionEffect().getEffect())) {
+            ((ServerChunkProvider) entity.getCommandSenderWorld().getChunkSource()).broadcast(entity, 
+                    new SPlayEntityEffectPacket(entity.getId(), event.getPotionEffect()));
+        }
     }
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onPotionRemoved(PotionRemoveEvent event) {
         VampirismPowerType.cancelVampiricEffectRemoval(event);
+    }
+    
+    @SubscribeEvent
+    public static void syncTrackedEffects(PlayerEvent.StartTracking event) {
+        if (event.getTarget() instanceof LivingEntity) {
+            ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
+            LivingEntity tracked = (LivingEntity) event.getTarget();
+            for (Map.Entry<Effect, EffectInstance> effectEntry : tracked.getActiveEffectsMap().entrySet()) {
+                if (ModEffects.isEffectTracked(effectEntry.getKey())) {
+                    player.connection.send(new SPlayEntityEffectPacket(tracked.getId(), effectEntry.getValue()));
+                }
+            }
+        }
     }
     
     @SubscribeEvent(priority = EventPriority.LOWEST)

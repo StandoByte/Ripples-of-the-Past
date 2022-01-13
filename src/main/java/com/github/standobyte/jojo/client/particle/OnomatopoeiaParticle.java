@@ -9,29 +9,28 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.particles.BasicParticleType;
 import net.minecraft.util.math.MathHelper;
 
-public class MenacingParticle extends SpriteTexturedParticle {
+public class OnomatopoeiaParticle extends SpriteTexturedParticle {
     private double offsetX;
     private double offsetY;
     private double offsetZ;
 
-    protected MenacingParticle(ClientWorld world, double posX, double posY, double posZ) {
+    protected OnomatopoeiaParticle(ClientWorld world, double posX, double posY, double posZ) {
         this(world, posX, posY, posZ, 0.0D, 0.0D, 0.0D);
     }
 
-    public MenacingParticle(BasicParticleType type, ClientWorld world, double xCoord, double yCoord, double zCoord, double xSpeed, double ySpeed, double zSpeed) {
+    public OnomatopoeiaParticle(BasicParticleType type, ClientWorld world, double xCoord, double yCoord, double zCoord, double xSpeed, double ySpeed, double zSpeed) {
         this(world, xCoord, yCoord, zCoord, xSpeed, ySpeed, zSpeed);
     }
 
-    protected MenacingParticle(ClientWorld world, double xCoord, double yCoord, double zCoord, double xSpeed, double ySpeed, double zSpeed) {
+    protected OnomatopoeiaParticle(ClientWorld world, double xCoord, double yCoord, double zCoord, double xSpeed, double ySpeed, double zSpeed) {
         super(world, xCoord, yCoord, zCoord, xSpeed, ySpeed, zSpeed);
-        lifetime = 400;
-        quadSize = 0.15F;
+        quadSize = 0.12F + random.nextFloat() * 0.06F;
         hasPhysics = false;
         xd = xSpeed;
         yd = ySpeed;
         zd = zSpeed;
     }
-
+    
     @Override
     public IParticleRenderType getRenderType() {
         return IParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
@@ -57,17 +56,35 @@ public class MenacingParticle extends SpriteTexturedParticle {
         alpha = MathHelper.clamp((float) lifetime / (float) age * 3F - 3F, 0F, 1F);
     }
 
-    public static class Factory implements IParticleFactory<BasicParticleType> {
+    public static class GoFactory implements IParticleFactory<BasicParticleType> {
         private final IAnimatedSprite spriteSet;
 
-        public Factory(IAnimatedSprite sprite) {
+        public GoFactory(IAnimatedSprite sprite) {
             this.spriteSet = sprite;
         }
 
         @Override
         public Particle createParticle(BasicParticleType type, ClientWorld world, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-            MenacingParticle particle = new MenacingParticle(world, x, y, z, xSpeed, ySpeed, zSpeed);
+            OnomatopoeiaParticle particle = new OnomatopoeiaParticle(world, x, y, z, xSpeed, ySpeed, zSpeed);
             particle.pickSprite(spriteSet);
+            particle.lifetime = 400;
+            return particle;
+        }
+    }
+
+    public static class DoFactory implements IParticleFactory<BasicParticleType> {
+        private final IAnimatedSprite spriteSet;
+
+        public DoFactory(IAnimatedSprite sprite) {
+            this.spriteSet = sprite;
+        }
+
+        @Override
+        public Particle createParticle(BasicParticleType type, ClientWorld world, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+            OnomatopoeiaParticle particle = new OnomatopoeiaParticle(world, x, y, z, xSpeed, ySpeed, zSpeed);
+            particle.pickSprite(spriteSet);
+            particle.lifetime = 40;
+            particle.scale(2F);
             return particle;
         }
     }

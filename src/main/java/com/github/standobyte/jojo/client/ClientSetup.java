@@ -8,7 +8,7 @@ import com.github.standobyte.jojo.client.model.armor.BladeHatArmorModel;
 import com.github.standobyte.jojo.client.model.armor.BreathControlMaskModel;
 import com.github.standobyte.jojo.client.model.armor.SatiporojaScarfArmorModel;
 import com.github.standobyte.jojo.client.model.armor.StoneMaskModel;
-import com.github.standobyte.jojo.client.particle.MenacingParticle;
+import com.github.standobyte.jojo.client.particle.OnomatopoeiaParticle;
 import com.github.standobyte.jojo.client.particle.MeteoriteVirusParticle;
 import com.github.standobyte.jojo.client.particle.OneTickFlameParticle;
 import com.github.standobyte.jojo.client.renderer.entity.AfterimageRenderer;
@@ -196,7 +196,8 @@ public class ClientSetup {
         Minecraft mc = Minecraft.getInstance();
         mc.particleEngine.register(ModParticles.HAMON_SPARK.get(), CritParticle.Factory::new);
         mc.particleEngine.register(ModParticles.METEORITE_VIRUS.get(), MeteoriteVirusParticle.Factory::new);
-        mc.particleEngine.register(ModParticles.MENACING.get(), MenacingParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.MENACING.get(), OnomatopoeiaParticle.GoFactory::new);
+        mc.particleEngine.register(ModParticles.RESOLVE.get(), OnomatopoeiaParticle.DoFactory::new);
         mc.particleEngine.register(ModParticles.FLAME_ONE_TICK.get(), OneTickFlameParticle.Factory::new);
         // yep...
         SpriteUploaders.initSpriteUploaders(mc);
