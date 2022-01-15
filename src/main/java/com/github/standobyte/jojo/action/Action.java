@@ -133,7 +133,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return user;
     }
 
-    public void updatePerformer(World world, LivingEntity user, P power) {}
+    public void onClick(World world, LivingEntity user, P power) {}
     
     protected ActionTarget aim(World world, LivingEntity user, P power, double range) {
         return ActionTarget.fromRayTraceResult(JojoModUtil.rayTrace(user, range, entity -> 
@@ -209,7 +209,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return holdDurationToFire;
     }
     
-    public int getHoldDurationMax() {
+    public int getHoldDurationMax(P power) {
         return holdDurationMax;
     }
     

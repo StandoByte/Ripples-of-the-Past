@@ -15,7 +15,7 @@ import net.minecraft.world.World;
 
 public class HamonRepellingOverdrive extends HamonAction {
 
-    public HamonRepellingOverdrive(Builder builder) {
+    public HamonRepellingOverdrive(HamonAction.Builder builder) {
         super(builder);
     }
     

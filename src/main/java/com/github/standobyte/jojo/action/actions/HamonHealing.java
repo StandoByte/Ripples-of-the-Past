@@ -27,7 +27,7 @@ import net.minecraft.world.World;
 
 public class HamonHealing extends HamonAction {
 
-    public HamonHealing(Builder builder) {
+    public HamonHealing(HamonAction.Builder builder) {
         super(builder);
     }
     

@@ -156,6 +156,15 @@ public abstract class StandType<T extends StandStatsV2> extends ForgeRegistryEnt
     public boolean prioritizedCondition(LivingEntity entity) {
         return prioritizedCondition == null ? false : prioritizedCondition.test(entity);
     }
+    
+    public void toggleSummon(IStandPower standPower) {
+        if (!standPower.isActive()) {
+            summon(standPower.getUser(), standPower, false);
+        }
+        else {
+            unsummon(standPower.getUser(), standPower);
+        }
+    }
 
     public boolean summon(LivingEntity user, IStandPower standPower, boolean withoutNameVoiceLine) {
         if (!standPower.canUsePower()) {

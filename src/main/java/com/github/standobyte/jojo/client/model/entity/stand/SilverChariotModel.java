@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.client.model.entity.stand;
 
+import com.github.standobyte.jojo.action.actions.StandEntityAction.Phase;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.util.MathUtil;
 
@@ -251,7 +252,7 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
     }
     
     @Override
-    protected void rangedAttackPose(SilverChariotEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
+    protected void rangedAttackPose(SilverChariotEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
         entity.setYBodyRot(entity.yRot);
         setRotationAngle(body, 0.0F, -0.7854F, 0.0F);
         setRotationAngle(upperPart, 0.0F, -0.7854F, 0.0F);

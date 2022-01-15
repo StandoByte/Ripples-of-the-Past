@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.actions;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -13,7 +14,7 @@ import net.minecraft.world.World;
 
 public class HierophantGreenBarrier extends StandEntityAction {
 
-    public HierophantGreenBarrier(Builder builder) {
+    public HierophantGreenBarrier(StandEntityAction.Builder builder) {
         super(builder);
     }
     
@@ -29,10 +30,10 @@ public class HierophantGreenBarrier extends StandEntityAction {
     }
     
     @Override
-    protected void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
+    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {
         if (!world.isClientSide()) {
-            HierophantGreenEntity stand = (HierophantGreenEntity) getPerformer(user, power);
-            stand.attachBarrier(target.getBlockPos());
+            HierophantGreenEntity hierophant = (HierophantGreenEntity) standEntity;
+            hierophant.attachBarrier(target.getBlockPos());
         }
     }
     

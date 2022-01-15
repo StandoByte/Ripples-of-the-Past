@@ -47,16 +47,6 @@ public class SilverChariotEntity extends StandEntity {
     }
 
     @Override
-    public void rangedAttackTick(int ticks, boolean shift) {
-        if (!level.isClientSide() && hasRapier()) {
-            SCRapierEntity rapierEntity = new SCRapierEntity(this, level);
-            rapierEntity.shootFromRotation(this, 1F, 0.0F);
-            level.addFreshEntity(rapierEntity);
-            setRapier(false);
-        }
-    }
-
-    @Override
     public double getMeleeAttackRange() {
         return hasRapier() ? super.getMeleeAttackRange() + 1 : super.getMeleeAttackRange();
     }
@@ -90,11 +80,6 @@ public class SilverChariotEntity extends StandEntity {
             attackDamage.addPermanentModifier(NO_RAPIER_DAMAGE_DECREASE);
             attackSpeed.addPermanentModifier(NO_RAPIER_ATTACK_SPEED_DECREASE);
         }
-    }
-    
-    @Override
-    public boolean canAttackRanged() {
-        return hasRapier();
     }
 
     public boolean hasArmor() {

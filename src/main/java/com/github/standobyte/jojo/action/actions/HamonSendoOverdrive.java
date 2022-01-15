@@ -24,7 +24,7 @@ import net.minecraft.world.World;
 
 public class HamonSendoOverdrive extends HamonAction {
 
-    public HamonSendoOverdrive(Builder builder) {
+    public HamonSendoOverdrive(HamonAction.Builder builder) {
         super(builder);
     }
     

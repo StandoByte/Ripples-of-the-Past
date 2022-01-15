@@ -178,7 +178,7 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     }
     
     protected void checkRetract() {
-        if (tickCount >= (double) ticksLifespan() * retractSpeed() / (movementSpeed() + retractSpeed())) {
+        if (tickCount >= (int) ((float) ticksLifespan() * retractSpeed() / (movementSpeed() + retractSpeed()))) {
             setIsRetracting(true);
         }
     }

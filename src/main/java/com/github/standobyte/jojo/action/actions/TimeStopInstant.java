@@ -19,11 +19,10 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
-public class TimeStopInstant extends StandEntityAction {
+public class TimeStopInstant extends StandAction {
 
-    public TimeStopInstant(Builder builder) {
+    public TimeStopInstant(StandAction.Builder builder) {
         super(builder);
-        this.doNotAutoSummonStand = true;
     }
     
     @Override
@@ -72,7 +71,8 @@ public class TimeStopInstant extends StandEntityAction {
             power.setXp(power.getXp() + 4);
             if (stand != null) {
                 stand.setStandPose(StandPose.NONE);
-                stand.setAlpha(1.0F);
+                stand.summonLockTicks = Math.min(stand.summonLockTicks - timeStopTicks, 0);
+                stand.gradualSummonWeaknessTicks = Math.min(stand.gradualSummonWeaknessTicks - timeStopTicks, 0);
             }
         }
     }

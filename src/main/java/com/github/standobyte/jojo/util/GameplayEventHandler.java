@@ -288,14 +288,21 @@ public class GameplayEventHandler {
         if (event.getSource() == DamageSource.OUT_OF_WORLD) {
             return;
         }
-        IStandPower.getStandPowerOptional(event.getEntityLiving()).ifPresent(stand -> {
-            if (stand.usesResolve()) {
-                float dmgReduction = stand.isInResolveMode() ?
-                        dmgReduction = BalanceTestServerConfig.SERVER_CONFIG.resolveModeDmgReduction.get().floatValue()
-                        : stand.getResolveRatio() * BalanceTestServerConfig.SERVER_CONFIG.maxResolveDmgReduction.get().floatValue();
-                event.setAmount(event.getAmount() * (1 - dmgReduction));
-            }
-        });
+        float dmgReduction;
+        if (event.getEntityLiving().hasEffect(ModEffects.RESOLVE.get())) {
+            dmgReduction = BalanceTestServerConfig.SERVER_CONFIG.resolveEffectDmgReduction.get().floatValue();
+        }
+        else {
+            dmgReduction = IStandPower.getStandPowerOptional(event.getEntityLiving()).map(stand -> {
+                if (stand.usesResolve()) {
+                    return stand.getResolveRatio() * BalanceTestServerConfig.SERVER_CONFIG.maxResolveDmgReduction.get().floatValue();
+                }
+                return 0F;
+            }).orElse(0F);
+        }
+        if (dmgReduction > 0F) {
+            event.setAmount(event.getAmount() * (1 - dmgReduction));
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)

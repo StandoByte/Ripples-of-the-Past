@@ -10,9 +10,10 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
 
-public class StarPlatinumZoom extends StandEntityAction {
+// FIXME auto-summon stand
+public class StarPlatinumZoom extends StandAction {
 
-    public StarPlatinumZoom(Builder builder) {
+    public StarPlatinumZoom(StandAction.Builder builder) {
         super(builder);
     }
     

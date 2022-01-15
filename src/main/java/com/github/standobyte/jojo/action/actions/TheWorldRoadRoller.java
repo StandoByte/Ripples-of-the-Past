@@ -7,9 +7,9 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.World;
 
-public class TheWorldRoadRoller extends StandEntityAction {
+public class TheWorldRoadRoller extends StandAction {
 
-    public TheWorldRoadRoller(Builder builder) {
+    public TheWorldRoadRoller(StandAction.Builder builder) {
         super(builder);
     }
     

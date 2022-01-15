@@ -23,13 +23,14 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
-public class TimeStop extends StandEntityAction {
+//FIXME for SP: auto-summon stand
+public class TimeStop extends StandAction {
     private Supplier<SoundEvent> voiceLineWithStandSummoned = () -> null;
     private Supplier<SoundEvent> timeStopSound = () -> null;
     private Supplier<SoundEvent> timeResumeVoiceLine = () -> null;
     private Supplier<SoundEvent> timeResumeSound = () -> null;
 
-    public TimeStop(Builder builder) {
+    public TimeStop(StandAction.Builder builder) {
         super(builder);
     }
     

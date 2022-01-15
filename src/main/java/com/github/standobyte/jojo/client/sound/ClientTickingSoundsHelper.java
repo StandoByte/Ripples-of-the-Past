@@ -4,13 +4,13 @@ import java.util.Random;
 import java.util.function.Predicate;
 
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.entity.MRDetectorEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.BladeHatEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.network.packets.fromserver.TrStandSoundPacket.StandSoundType;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 
@@ -50,7 +50,7 @@ public abstract class ClientTickingSoundsHelper {
         mc.getSoundManager().play(sound);
     }
     
-    public static void playStandEntitySound(StandEntity stand, SoundEvent sound, StandSoundType soundType, float volume, float pitch) {
+    public static void playStandEntityCancelableActionSound(StandEntity stand, SoundEvent sound, StandEntityAction action, float volume, float pitch) {
         Minecraft mc = Minecraft.getInstance();
         if (!stand.isVisibleForAll() && !StandUtil.isPlayerStandUser(mc.player)) {
             return;
@@ -64,22 +64,29 @@ public abstract class ClientTickingSoundsHelper {
         volume = event.getVolume();
         pitch = event.getPitch();
         
-        switch (soundType) {
-        case UNSUMMON:
-            if (stand.tickCount > 20) {
-                LivingEntity user = stand.getUser();
-                if (user != null) {
-                    mc.getSoundManager().play(new StandUnsummonTickableSound(sound, category, volume, pitch, user, stand));
+        mc.getSoundManager().play(new StoppableEntityTickableSound<StandEntity>(sound, category, 
+                volume, pitch, false, stand, e -> e.getCurrentTaskAction() != action));
+    }
+    
+    public static void playStandEntityUnsummonSound(StandEntity stand, SoundEvent sound, float volume, float pitch) {
+        if (stand.tickCount > 20) {
+            LivingEntity user = stand.getUser();
+            if (user != null) {
+                Minecraft mc = Minecraft.getInstance();
+                if (!stand.isVisibleForAll() && !StandUtil.isPlayerStandUser(mc.player)) {
+                    return;
                 }
+
+                SoundCategory category = stand.getSoundSource();
+                PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(stand, sound, category, pitch, volume);
+                if (event.isCanceled() || event.getSound() == null) return;
+                sound = event.getSound();
+                category = event.getCategory();
+                volume = event.getVolume();
+                pitch = event.getPitch();
+                
+                mc.getSoundManager().play(new StandUnsummonTickableSound(sound, category, volume, pitch, user, stand));
             }
-            break;
-        case MELEE_BARRAGE:
-            mc.getSoundManager().play(new StoppableEntityTickableSound<StandEntity>(sound, category, 
-                    volume, pitch, false, stand, e -> e.checkSoundStop(soundType)));
-               break;
-        default:
-            stand.level.playLocalSound(stand.getX(), stand.getY(), stand.getZ(), sound, category, volume, pitch, false);
-            break;
         }
     }
     

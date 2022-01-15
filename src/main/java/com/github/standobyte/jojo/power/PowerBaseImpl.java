@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
@@ -190,12 +189,12 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     public final boolean onClickAction(Action<P> action, boolean shift, ActionTarget target) {
         if (heldActionData == null) {
             boolean wasActive = isActive();
-            action.updatePerformer(user.level, user, getThis());
+            action.onClick(user.level, user, getThis());
             ActionConditionResult result = checkRequirements(action, target, true);
             serverPlayerUser.ifPresent(player -> {
                 player.resetLastActionTime();
             });
-            if (action.getHoldDurationMax() > 0) {
+            if (action.getHoldDurationMax(getThis()) > 0) {
                 action.startedHolding(user.level, user, getThis(), target, result.isPositive());
                 if (result.isPositive() || !result.shouldStopHeldAction()) {
                     if (!user.level.isClientSide()) {
@@ -375,7 +374,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                     stopHeldAction(false);
                     return;
                 }
-                if (heldActionData.getTicks() >= heldAction.getHoldDurationMax()) {
+                if (heldActionData.getTicks() >= heldAction.getHoldDurationMax(getThis())) {
                     stopHeldAction(true);
                     return;
                 }
@@ -489,16 +488,13 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
 
     @Override
     public void onClone(P oldPower, boolean wasDeath, boolean configToKeep) {
-        JojoMod.LOGGER.debug(configToKeep + ", " + oldPower.hasPower());
         if ((!wasDeath || configToKeep) && oldPower.hasPower() && !oldPower.getType().isAlwaysLostOnDeath(oldPower)) {
-            JojoMod.LOGGER.debug("!");
             keepPower(oldPower, wasDeath);
         }
     }
     
     protected void keepPower(P oldPower, boolean wasDeath) {
         setType(oldPower.getType());
-//        onTypeInit(oldPower.getType());
         leapCooldown = oldPower.getLeapCooldown();
         cooldowns = oldPower.getCooldowns();
     }

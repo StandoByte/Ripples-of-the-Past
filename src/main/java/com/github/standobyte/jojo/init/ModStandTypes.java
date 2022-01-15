@@ -40,12 +40,12 @@ public class ModStandTypes {
                     new StandAction[] {ModActions.STAR_PLATINUM_BLOCK.get(), ModActions.STAR_PLATINUM_ZOOM.get(), ModActions.STAR_PLATINUM_TIME_STOP.get()},
                     ModSounds.JOTARO_STAR_PLATINUM, 
                     TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
-                    .power(2)
-                    .speed(3)
-                    .range(4)
-                    .durability(5)
-                    .precision(6)
-                    .maxTimeStopTicks(3, 4)
+                    .power(16.0)
+                    .speed(16.0)
+                    .range(2.0, 10.0)
+                    .durability(6.0)
+                    .precision(1.0)
+                    .maxTimeStopTicks(100, 180)
                     .build(), 
                     ModEntityTypes.STAR_PLATINUM));
     
@@ -55,12 +55,12 @@ public class ModStandTypes {
                     new StandAction[] {ModActions.THE_WORLD_BLOCK.get(), ModActions.THE_WORLD_TIME_STOP.get(), ModActions.THE_WORLD_ROAD_ROLLER.get()},
                     ModSounds.DIO_THE_WORLD, 
                     TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
-                    .power(-1)
-                    .speed(-2)
-                    .range(-3)
-                    .durability(-4)
-                    .precision(-5)
-                    .maxTimeStopTicks(5, 6)
+                    .power(16.0)
+                    .speed(16.0)
+                    .range(2.0, 10.0)
+                    .durability(6.0)
+                    .precision(1.0)
+                    .maxTimeStopTicks(100, 180)
                     .build(), 
                     ModEntityTypes.THE_WORLD));
     
@@ -70,11 +70,11 @@ public class ModStandTypes {
                     new StandAction[] {ModActions.HIEROPHANT_GREEN_BLOCK.get(), ModActions.HIEROPHANT_GREEN_GRAPPLE.get(), ModActions.HIEROPHANT_GREEN_BARRIER.get()},
                     ModSounds.KAKYOIN_HIEROPHANT_GREEN, 
                     StandStatsV2.class, new StandStatsV2.Builder()
-                    .power(12)
-                    .speed(13)
-                    .range(14)
-                    .durability(15)
-                    .precision(16)
+                    .power(6.0)
+                    .speed(10.0)
+                    .range(50.0)
+                    .durability(3.0)
+                    .precision(0.4)
                     .build(), 
                     ModEntityTypes.HIEROPHANT_GREEN));
     
@@ -84,11 +84,11 @@ public class ModStandTypes {
                     new StandAction[] {ModActions.SILVER_CHARIOT_BLOCK.get(), ModActions.SILVER_CHARIOT_TAKE_OFF_ARMOR.get()},
                     ModSounds.POLNAREFF_SILVER_CHARIOT, 
                     StandStatsV2.class, new StandStatsV2.Builder()
-                    .power(22)
-                    .speed(32)
-                    .range(42)
-                    .durability(52)
-                    .precision(62)
+                    .power(7.0)
+                    .speed(14.0)
+                    .range(10.0, 10.0)
+                    .durability(4.0)
+                    .precision(1.0)
                     .build(), 
                     ModEntityTypes.SILVER_CHARIOT));
     
@@ -98,11 +98,11 @@ public class ModStandTypes {
                     new StandAction[] {ModActions.MAGICIANS_RED_BLOCK.get(), ModActions.MAGICIANS_RED_RED_BIND.get(), ModActions.MAGICIANS_RED_DETECTOR.get()},
                     ModSounds.AVDOL_MAGICIANS_RED, 
                     StandStatsV2.class, new StandStatsV2.Builder()
-                    .power(200)
-                    .speed(300)
-                    .range(400)
-                    .durability(500)
-                    .precision(600)
+                    .power(8.0)
+                    .speed(8.0)
+                    .range(5.0)
+                    .durability(5.0)
+                    .precision(0.2)
                     .build(), 
                     ModEntityTypes.MAGICIANS_RED));
     

@@ -322,6 +322,10 @@
     "subtitle": "jojo.subtitle.ora",
     "sounds": [ "jojo:stand/star_platinum_ora", "jojo:stand/star_platinum_ora_2", "jojo:stand/star_platinum_ora_3", "jojo:stand/star_platinum_ora_4" ]
   },
+  "star_platinum_ora_long": {
+    "subtitle": "jojo.subtitle.ora",
+    "sounds": [ "jojo:stand/star_platinum_ora_long", "jojo:stand/star_platinum_ora_long_2" ]
+  },
   "star_platinum_ora_ora_ora": {
     "subtitle": "jojo.subtitle.ora_ora_ora",
     "sounds": [ "jojo:stand/star_platinum_ora_ora_ora", "jojo:stand/star_platinum_ora_ora_ora_2", "jojo:stand/star_platinum_ora_ora_ora_3", "jojo:stand/star_platinum_ora_ora_ora_4" ]
@@ -378,7 +382,11 @@
   },
   "the_world_muda": {
     "subtitle": "jojo.subtitle.muda",
-    "sounds": [ "jojo:stand/the_world_muda", "jojo:stand/the_world_muda_2", "jojo:stand/the_world_muda_3", "jojo:stand/the_world_muda_4" ]
+    "sounds": [ "jojo:stand/the_world_muda", "jojo:stand/the_world_muda_2", "jojo:stand/the_world_muda_3" ]
+  },
+  "the_world_muda_long": {
+    "subtitle": "jojo.subtitle.muda",
+    "sounds": [ "jojo:stand/the_world_muda_long" ]
   },
   "the_world_muda_muda_muda": {
     "subtitle": "jojo.subtitle.muda_muda_muda",

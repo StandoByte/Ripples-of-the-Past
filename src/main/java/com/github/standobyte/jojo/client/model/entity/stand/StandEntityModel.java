@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.client.model.entity.stand;
 import java.util.List;
 import java.util.function.Function;
 
+import com.github.standobyte.jojo.action.actions.StandEntityAction.Phase;
 import com.github.standobyte.jojo.client.renderer.entity.stand.AdditionalArmSwing;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
@@ -95,8 +96,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
             swingArm(entity, xRotation, entity.swingingArm == Hand.MAIN_HAND ? entity.getMainArm() : entity.getMainArm().getOpposite());
         }
         else {
-            switch (poseType) {
-            case SUMMON:
+            if (poseType == StandPose.SUMMON) {
                 if (ticks > SUMMON_ANIMATION_LENGTH || entity.isArmsOnlyMode()) {
                     entity.setStandPose(StandPose.NONE);
                 }
@@ -104,19 +104,21 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
                     entity.setYBodyRot(entity.yRot);
                     summonAnimation(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
                 }
-                break;
-            case NONE:
+            }
+            else if (poseType == StandPose.NONE) {
                 resetPose();
-                break;
-            case BLOCK:
+            }
+            else if (poseType == StandPose.BLOCK) {
                 blockingPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
-                break;
-            case RANGED_ATTACK:
-                rangedAttackPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
-                break;
-            case ABILITY:
-                specialAbilityPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
-                break;
+            }
+            else if (poseType == StandPose.RANGED_ATTACK) {
+                rangedAttackPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, entity.getCurrentTaskPhase());
+            }
+            else if (poseType == StandPose.ABILITY) {
+                specialAbilityPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, entity.getCurrentTaskPhase());
+            }
+            else {
+                customPose(poseType, entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, entity.getCurrentTaskPhase());
             }
         }
         this.xRotation = xRotation;
@@ -139,10 +141,13 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         return 1;
     }
     protected abstract void blockingPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation);
-    protected void rangedAttackPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
+    protected void rangedAttackPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
         resetPose();
     }
-    protected void specialAbilityPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
+    protected void specialAbilityPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
+        resetPose();
+    }
+    protected void customPose(StandPose pose, T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
         resetPose();
     }
     protected abstract void swingArm(T entity, float xRotation, HandSide swingingHand);

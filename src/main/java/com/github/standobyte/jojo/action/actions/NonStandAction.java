@@ -24,7 +24,7 @@ public abstract class NonStandAction extends Action<INonStandPower> {
     }
     
     public float getEnergyNeeded(int ticksHeld, INonStandPower power) {
-        if (getHoldDurationMax() > 0) {
+        if (getHoldDurationMax(power) > 0) {
             return getEnergyCost(power) + getHeldTickEnergyCost() * Math.max((getHoldDurationToFire(power) - ticksHeld), 1);
         }
         return getEnergyCost(power);

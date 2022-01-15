@@ -24,7 +24,7 @@ import net.minecraft.world.World;
 
 public class HamonOverdrive extends HamonAction { // FIXME also don't send messages
 
-    public HamonOverdrive(Builder builder) {
+    public HamonOverdrive(HamonAction.Builder builder) {
         super(builder);
     }
     

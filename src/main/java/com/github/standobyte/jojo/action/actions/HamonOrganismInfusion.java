@@ -28,7 +28,7 @@ import net.minecraft.world.World;
 
 public class HamonOrganismInfusion extends HamonAction {
 
-    public HamonOrganismInfusion(Builder builder) {
+    public HamonOrganismInfusion(HamonAction.Builder builder) {
         super(builder);
     }
 

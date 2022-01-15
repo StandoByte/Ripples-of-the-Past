@@ -19,6 +19,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Pose;
 import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
@@ -97,8 +98,8 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
     private static final float OVERLAY_TICKS = 10.0F;
     @Override
     protected float getWhiteOverlayProgress(StandEntity entity, float partialTick) {
-        return entity.isArmsOnlyMode() || entity.tickCount > OVERLAY_TICKS ? 0 : 
-            (OVERLAY_TICKS - MathHelper.clamp(entity.tickCount + partialTick, 0.0F, OVERLAY_TICKS)) / OVERLAY_TICKS;
+        return entity.isArmsOnlyMode() || entity.overlayTickCount > OVERLAY_TICKS ? 0 : 
+            (OVERLAY_TICKS - MathHelper.clamp(entity.overlayTickCount + partialTick, 0.0F, OVERLAY_TICKS)) / OVERLAY_TICKS;
     }
 
     @Override
@@ -203,10 +204,12 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
         if (!entity.isArmsOnlyMode()) {
             return VisibilityMode.ALL;
         }
-        if (entity.showMainArm && entity.showOffArm) {
+        boolean mainArm = entity.showArm(Hand.MAIN_HAND);
+        boolean offArm = entity.showArm(Hand.OFF_HAND);
+        if (mainArm && offArm) {
             return VisibilityMode.ARMS_ONLY;
         }
-        HandSide hand = entity.showOffArm ? entity.getMainArm().getOpposite() : entity.getMainArm();
+        HandSide hand = offArm ? entity.getMainArm().getOpposite() : entity.getMainArm();
         switch (hand) {
         case RIGHT:
             return VisibilityMode.RIGHT_ARM_ONLY;

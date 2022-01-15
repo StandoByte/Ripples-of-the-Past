@@ -28,20 +28,19 @@ import com.github.standobyte.jojo.network.packets.fromserver.StandCancelManualMo
 import com.github.standobyte.jojo.network.packets.fromserver.SyncEnergyPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncHamonExercisesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncLeapCooldownPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.SyncResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStaminaPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStandControlStatusPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncWorldTimeStopPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntitySwingsPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrStandSoundPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncHamonStatsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncHeldActionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncKnivesCountPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncNonStandFlagPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncPowerTypePacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCachePacket;
 
 import net.minecraft.entity.Entity;
@@ -102,7 +101,6 @@ public class PacketManager {
         channel.registerMessage(index++, SyncStandControlStatusPacket.class, SyncStandControlStatusPacket::encode, SyncStandControlStatusPacket::decode, SyncStandControlStatusPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, StandCancelManualMovementPacket.class, StandCancelManualMovementPacket::encode, StandCancelManualMovementPacket::decode, StandCancelManualMovementPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, TrStandEntitySwingsPacket.class, TrStandEntitySwingsPacket::encode, TrStandEntitySwingsPacket::decode, TrStandEntitySwingsPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, TrStandSoundPacket.class, TrStandSoundPacket::encode, TrStandSoundPacket::decode, TrStandSoundPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, UpdateClientCapCachePacket.class, UpdateClientCapCachePacket::encode, UpdateClientCapCachePacket::decode, UpdateClientCapCachePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, TrSyncKnivesCountPacket.class, TrSyncKnivesCountPacket::encode, TrSyncKnivesCountPacket::decode, TrSyncKnivesCountPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, SyncLeapCooldownPacket.class, SyncLeapCooldownPacket::encode, SyncLeapCooldownPacket::decode, SyncLeapCooldownPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));

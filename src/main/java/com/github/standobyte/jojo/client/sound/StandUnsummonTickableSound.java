@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.client.sound;
 
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.network.packets.fromserver.TrStandSoundPacket.StandSoundType;
+import com.github.standobyte.jojo.init.ModActions;
 
 import net.minecraft.client.audio.EntityTickableSound;
 import net.minecraft.entity.LivingEntity;
@@ -22,7 +22,7 @@ public class StandUnsummonTickableSound extends EntityTickableSound {
         if (stand != null && !stand.isAlive()) {
             stand = null;
         }
-        if (stand != null && stand.checkSoundStop(StandSoundType.UNSUMMON)) {
+        if (stand != null && stand.getCurrentTaskAction() != ModActions.STAND_ENTITY_UNSUMMON.get()) {
             stop();
         }
         else {

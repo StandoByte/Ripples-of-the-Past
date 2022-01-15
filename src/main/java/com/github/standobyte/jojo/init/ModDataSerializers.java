@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.init;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
-import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
+import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.IDataSerializer;
@@ -15,15 +15,8 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 public class ModDataSerializers {
     public static final DeferredRegister<DataSerializerEntry> DATA_SERIALIZERS = DeferredRegister.create(ForgeRegistries.DATA_SERIALIZERS, JojoMod.MOD_ID);
-
-    public static final RegistryObject<DataSerializerEntry> STAND_POSE = DATA_SERIALIZERS.register("stand_pose", () -> new DataSerializerEntry(new IDataSerializer<StandPose>() {
-        @Override
-        public void write(PacketBuffer buf, StandPose value) { buf.writeEnum(value); }
-        @Override
-        public StandPose read(PacketBuffer buf) { return buf.readEnum(StandPose.class); }
-        @Override
-        public StandPose copy(StandPose value) { return value; }
-    }));
+    
+    public static final RegistryObject<DataSerializerEntry> STAND_ENTITY_TASK = DATA_SERIALIZERS.register("stand_action", StandEntityTask.SERIALIZER);
 
     public static final RegistryObject<DataSerializerEntry> TASK_TARGET = DATA_SERIALIZERS.register("task_target", () -> new DataSerializerEntry(new IDataSerializer<ActionTarget>() {
         @Override

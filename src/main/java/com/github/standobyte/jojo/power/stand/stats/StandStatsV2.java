@@ -4,13 +4,13 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 
 public class StandStatsV2 {
     private final UpgradeableStats statsBase;
-    private final UpgradeableStats statsMax;
+    private final UpgradeableStats statsDevPotential;
     private final double rangeEffective;
     private final double rangeMax;
 
     protected StandStatsV2(AbstractBuilder<?> builder) {
         this.statsBase = new UpgradeableStats(builder.powerBase, builder.speedBase, builder.durabilityBase, builder.precisionBase);
-        this.statsMax = new UpgradeableStats(builder.powerMax, builder.speedMax, builder.durabilityMax, builder.precisionMax);
+        this.statsDevPotential = new UpgradeableStats(builder.powerMax, builder.speedMax, builder.durabilityMax, builder.precisionMax);
         this.rangeEffective = builder.rangeEffective;
         this.rangeMax = builder.rangeMax;
     }
@@ -42,19 +42,19 @@ public class StandStatsV2 {
     // parry?
     
     private double getPower(IStandPower stand) {
-        return statsBase.power + (statsMax.power - statsBase.power) * stand.getAchievedResolveRatio();
+        return statsBase.power + (statsDevPotential.power - statsBase.power) * stand.getAchievedResolveRatio();
     }
     
     private double getSpeed(IStandPower stand) {
-        return statsBase.speed + (statsMax.speed - statsBase.speed) * stand.getAchievedResolveRatio();
+        return statsBase.speed + (statsDevPotential.speed - statsBase.speed) * stand.getAchievedResolveRatio();
     }
     
     private double getDurability(IStandPower stand) {
-        return statsBase.durability + (statsMax.durability - statsBase.durability) * stand.getAchievedResolveRatio();
+        return statsBase.durability + (statsDevPotential.durability - statsBase.durability) * stand.getAchievedResolveRatio();
     }
     
     private double getPrecision(IStandPower stand) {
-        return statsBase.precision + (statsMax.precision - statsBase.precision) * stand.getAchievedResolveRatio();
+        return statsBase.precision + (statsDevPotential.precision - statsBase.precision) * stand.getAchievedResolveRatio();
     }
 
     public static class Builder extends AbstractBuilder<Builder> {

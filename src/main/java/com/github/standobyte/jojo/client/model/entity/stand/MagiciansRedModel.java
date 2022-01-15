@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.client.model.entity.stand;
 
+import com.github.standobyte.jojo.action.actions.StandEntityAction.Phase;
 import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
 import com.github.standobyte.jojo.util.MathUtil;
 
@@ -169,7 +170,7 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
     }
     
     @Override
-    protected void rangedAttackPose(MagiciansRedEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
+    protected void rangedAttackPose(MagiciansRedEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
         entity.setYBodyRot(entity.yRot);
         leftArm.setPos(4.0F, -10.0F, 0.0F);
         rightArm.setPos(-4.0F, -10.0F, 0.0F);
@@ -208,8 +209,8 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
     }
     
     @Override
-    protected void specialAbilityPose(MagiciansRedEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
-        super.specialAbilityPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
+    protected void specialAbilityPose(MagiciansRedEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
+        super.specialAbilityPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, phase);
         entity.setYBodyRot(entity.yRot);
         leftArm.xRot = -1.4708F;
         rightArm.xRot = -1.6708F;

@@ -9,7 +9,7 @@ import net.minecraft.world.World;
 
 public class HamonBubbleCutter extends HamonAction {
 
-    public HamonBubbleCutter(Builder builder) {
+    public HamonBubbleCutter(HamonAction.Builder builder) {
         super(builder);
     }
     
