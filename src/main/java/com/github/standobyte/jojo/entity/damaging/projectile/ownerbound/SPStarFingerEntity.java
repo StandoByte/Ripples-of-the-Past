@@ -38,7 +38,7 @@ public class SPStarFingerEntity extends OwnerBoundProjectileEntity {
 
     @Override
     protected int ticksLifespan() {
-        return ModActions.STAR_PLATINUM_STAR_FINGER.get().getCooldownValue();
+        return ModActions.STAR_PLATINUM_STAR_FINGER.get().getStandActionTicks(null, null);
     }
     
     @Override

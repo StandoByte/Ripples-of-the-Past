@@ -17,7 +17,7 @@ import net.minecraft.world.World;
 
 public class HamonSunlightYellowOverdrive extends HamonAction { // FIXME don't send messages
 
-    public HamonSunlightYellowOverdrive(Builder builder) {
+    public HamonSunlightYellowOverdrive(HamonAction.Builder builder) {
         super(builder);
     }
     

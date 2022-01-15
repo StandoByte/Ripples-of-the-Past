@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.client.model.entity.stand;
 
+import com.github.standobyte.jojo.action.actions.StandEntityAction.Phase;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -92,7 +93,7 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
     }
     
     @Override
-    protected void rangedAttackPose(HierophantGreenEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
+    protected void rangedAttackPose(HierophantGreenEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
         entity.setYBodyRot(entity.yRot);
         setRotationAngle(leftArm, -1.5708F, 0.0F, -1.309F);
         setRotationAngle(leftForeArm, -0.9163F, 0.0F, 0.0F);
@@ -104,8 +105,8 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
     }
     
     @Override
-    protected void specialAbilityPose(HierophantGreenEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
-        super.specialAbilityPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
+    protected void specialAbilityPose(HierophantGreenEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
+        super.specialAbilityPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, phase);
         entity.setYBodyRot(entity.yRot);
         ModelRenderer arm = getArm(entity.getMainArm());
         arm.xRot = -1.5708F;

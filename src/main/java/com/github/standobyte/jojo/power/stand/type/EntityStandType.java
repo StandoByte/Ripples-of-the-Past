@@ -43,6 +43,22 @@ public class EntityStandType<T extends StandStatsV2> extends StandType<T> {
     public boolean usesResolve() {
         return true;
     }
+    
+    @Override
+    public void toggleSummon(IStandPower standPower) {
+        if (!standPower.isActive()) {
+            summon(standPower.getUser(), standPower, false);
+        }
+        else {
+            StandEntity standEntity = (StandEntity) standPower.getStandManifestation();
+            if (standEntity.isArmsOnlyMode()) {
+                standEntity.fullSummonFromArms();
+            }
+            else {
+                unsummon(standPower.getUser(), standPower);
+            }
+        }
+    }
 
     @Override
     public boolean summon(LivingEntity user, IStandPower standPower, boolean withoutNameVoiceLine) {
@@ -67,6 +83,9 @@ public class EntityStandType<T extends StandStatsV2> extends StandType<T> {
                     standEntity.addEffect(new EffectInstance(userEffectInstance));
                 }
             }
+            
+            standEntity.playStandSummonSound();
+            
             PacketManager.sendToClientsTrackingAndSelf(new TrSetStandEntityPacket(user.getId(), standEntity.getId()), user);
         }
         return true;

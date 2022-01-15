@@ -222,6 +222,9 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> STAR_PLATINUM_ORA = SOUNDS.register("star_platinum_ora", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "star_platinum_ora")));
     
+    public static final RegistryObject<SoundEvent> STAR_PLATINUM_ORA_LONG = SOUNDS.register("star_platinum_ora_long", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "star_platinum_ora_long")));
+    
     public static final RegistryObject<SoundEvent> STAR_PLATINUM_ORA_ORA_ORA = SOUNDS.register("star_platinum_ora_ora_ora", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "star_platinum_ora_ora_ora")));
     
@@ -278,6 +281,9 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> THE_WORLD_MUDA = SOUNDS.register("the_world_muda", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "the_world_muda")));
+    
+    public static final RegistryObject<SoundEvent> THE_WORLD_MUDA_LONG = SOUNDS.register("the_world_muda_long", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "the_world_muda_long")));
     
     public static final RegistryObject<SoundEvent> THE_WORLD_MUDA_MUDA_MUDA = SOUNDS.register("the_world_muda_muda_muda", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "the_world_muda_muda_muda")));

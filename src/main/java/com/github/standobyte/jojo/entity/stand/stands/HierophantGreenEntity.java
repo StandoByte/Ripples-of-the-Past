@@ -5,14 +5,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-import com.github.standobyte.jojo.entity.damaging.projectile.HGEmeraldEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGBarrierEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
-import com.github.standobyte.jojo.init.ModActions;
-import com.github.standobyte.jojo.util.JojoModUtil;
 
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
@@ -20,7 +16,6 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
@@ -39,11 +34,8 @@ public class HierophantGreenEntity extends StandEntity {
     }
     
     @Override
-    public void punch(boolean singlePunch) {}
-    
-    @Override
-    public int rangedAttackDuration(boolean shift) {
-        return (shift ? ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED : ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH).get().getCooldownValue();
+    public boolean punch(boolean singlePunch) {
+        return false;
     }
     
     @Override
@@ -59,28 +51,6 @@ public class HierophantGreenEntity extends StandEntity {
             }
             setPlacedBarriersCount(placedBarriers.size());
             canBarriersShoot = true;
-        }
-    }
-    
-    @Override
-    public void rangedAttackTick(int ticks, boolean shift) {
-        if (!level.isClientSide()) {
-            float damageReduction = rangeEfficiencyFactor();
-            int emeralds = shift ? 2 : 1;
-            for (int i = 0; i < emeralds; i++) {
-                HGEmeraldEntity emeraldEntity = new HGEmeraldEntity(this, level);
-                emeraldEntity.setDamageFactor(damageReduction);
-                emeraldEntity.shootFromRotation(this, shift ? 1.25F : 0.75F, shift ? 2.0F : 8.0F);
-                level.addFreshEntity(emeraldEntity);
-            }
-            int barriers = getPlacedBarriersCount();
-            if (barriers > 0) {
-                RayTraceResult rayTrace = JojoModUtil.rayTrace(isManuallyControlled() ? this : getUser(), 
-                        getMaxRange(), entity -> entity instanceof LivingEntity && canAttack((LivingEntity) entity));
-                if (rayTrace.getType() != RayTraceResult.Type.MISS) {
-                    shootEmeraldsFromBarriers(rayTrace.getLocation(), shift, 1);
-                }
-            }
         }
     }
     

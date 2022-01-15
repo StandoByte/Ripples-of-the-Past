@@ -21,7 +21,7 @@ import net.minecraftforge.common.ForgeHooks;
 
 public class HamonOverdriveBarrage extends HamonAction {
 
-    public HamonOverdriveBarrage(Builder builder) {
+    public HamonOverdriveBarrage(HamonAction.Builder builder) {
         super(builder);
     }
     

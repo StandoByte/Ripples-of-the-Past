@@ -14,7 +14,7 @@ import net.minecraft.world.World;
 
 public class HamonCutter extends HamonAction {
 
-    public HamonCutter(Builder builder) {
+    public HamonCutter(HamonAction.Builder builder) {
         super(builder);
     }
 

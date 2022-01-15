@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.action.actions;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.AfterimageEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -12,7 +13,7 @@ import net.minecraft.world.World;
 
 public class SilverChariotTakeOffArmor extends StandEntityAction {
 
-    public SilverChariotTakeOffArmor(Builder builder) {
+    public SilverChariotTakeOffArmor(StandEntityAction.Builder builder) {
         super(builder);
     }
     
@@ -20,7 +21,7 @@ public class SilverChariotTakeOffArmor extends StandEntityAction {
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
         if (performer instanceof SilverChariotEntity) {
             SilverChariotEntity chariot = (SilverChariotEntity) performer;
-            if (chariot.isArmsOnlyMode()) {
+            if (chariot.lowerStatsFromArmsOnly()) {
                 return ActionConditionResult.NEGATIVE;
             }
             if (!chariot.hasArmor()) {
@@ -31,18 +32,17 @@ public class SilverChariotTakeOffArmor extends StandEntityAction {
     }
     
     @Override
-    protected void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
+    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {
         if (!world.isClientSide()) {
-            LivingEntity performer = this.getPerformer(user, power);
-            if (performer instanceof SilverChariotEntity) {
-                SilverChariotEntity scEntity = (SilverChariotEntity) performer;
-                scEntity.setArmor(!scEntity.hasArmor());
+            if (standEntity instanceof SilverChariotEntity) {
+                SilverChariotEntity chariot = (SilverChariotEntity) standEntity;
+                chariot.setArmor(!chariot.hasArmor());
                 for (int i = 1; i <= 10; i++) {
-                    AfterimageEntity afterimage = new AfterimageEntity(world, scEntity, i);
+                    AfterimageEntity afterimage = new AfterimageEntity(world, chariot, i);
                     afterimage.setLifeSpan(Integer.MAX_VALUE);
                     world.addFreshEntity(afterimage);
                 }
-                scEntity.playSound(ModSounds.SILVER_CHARIOT_ARMOR_OFF.get(), 1.0F, 1.0F);
+                chariot.playSound(ModSounds.SILVER_CHARIOT_ARMOR_OFF.get(), 1.0F, 1.0F);
             }
         }
     }

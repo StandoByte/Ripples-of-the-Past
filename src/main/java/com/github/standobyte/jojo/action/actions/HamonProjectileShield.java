@@ -11,7 +11,7 @@ import net.minecraft.world.World;
 
 public class HamonProjectileShield extends HamonAction {
 
-    public HamonProjectileShield(Builder builder) {
+    public HamonProjectileShield(HamonAction.Builder builder) {
         super(builder);
     }
     

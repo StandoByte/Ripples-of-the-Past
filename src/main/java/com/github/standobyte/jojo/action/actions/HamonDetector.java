@@ -18,7 +18,7 @@ import net.minecraft.world.World;
 
 public class HamonDetector extends HamonAction {
 
-    public HamonDetector(Builder builder) {
+    public HamonDetector(HamonAction.Builder builder) {
         super(builder);
     }
 

@@ -20,7 +20,7 @@ import net.minecraftforge.common.ForgeMod;
 
 public class HamonTornadoOverdrive extends HamonAction {
 
-    public HamonTornadoOverdrive(Builder builder) {
+    public HamonTornadoOverdrive(HamonAction.Builder builder) {
         super(builder);
     }
      

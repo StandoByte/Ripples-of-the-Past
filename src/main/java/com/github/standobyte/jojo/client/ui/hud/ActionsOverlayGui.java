@@ -117,6 +117,10 @@ public class ActionsOverlayGui extends AbstractGui {
         return currentMode != null;
     }
     
+    public boolean noActionSelected(ActionType actionType) {
+        return !isActive() || currentMode.getSelectedSlot(actionType) < 0;
+    }
+    
     @Nullable
     public IPower<?, ?> getCurrentPower() {
         if (currentMode == null) {
@@ -413,7 +417,7 @@ public class ActionsOverlayGui extends AbstractGui {
             action = handleShift(action, power);
             // action name
             ITextComponent actionName = action.getName(power);
-            if (action.getHoldDurationMax() > 0) {
+            if (action.getHoldDurationMax(power) > 0) {
                 actionName = new TranslationTextComponent("jojo.overlay.hold", actionName);
             }
             if (action.hasShiftVariation()) {
@@ -440,6 +444,18 @@ public class ActionsOverlayGui extends AbstractGui {
             RenderSystem.popMatrix();
             // FIXME hold duration
         }
+    }
+    
+    public boolean isSelectedActionHeld(ActionType actionType) {
+        return getSelectedActionHoldDuration(actionType, currentMode) > 0;
+    }
+    
+    private <P extends IPower<P, ?>> int getSelectedActionHoldDuration(ActionType actionType, @Nonnull ActionsModeConfig<P> mode) {
+        Action<P> action = mode.getSelectedAction(actionType);
+        if (action != null) {
+            return action.getHoldDurationMax(mode.getPower());
+        }
+        return 0;
     }
     
     

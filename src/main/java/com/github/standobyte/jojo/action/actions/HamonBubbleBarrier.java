@@ -9,7 +9,7 @@ import net.minecraft.world.World;
 
 public class HamonBubbleBarrier extends HamonAction {
 
-    public HamonBubbleBarrier(Builder builder) {
+    public HamonBubbleBarrier(HamonAction.Builder builder) {
         super(builder);
     }
     

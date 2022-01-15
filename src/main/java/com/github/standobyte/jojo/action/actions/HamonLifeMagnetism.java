@@ -16,7 +16,7 @@ import net.minecraft.world.World;
 
 public class HamonLifeMagnetism extends HamonAction {
 
-    public HamonLifeMagnetism(Builder builder) {
+    public HamonLifeMagnetism(HamonAction.Builder builder) {
         super(builder);
     }
     

@@ -233,15 +233,13 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     public void setResolve(float amount, float achievedResolve, int noDecayTicks) {
         amount = MathHelper.clamp(amount, 0, getMaxResolve());
         boolean send = this.resolve != amount || this.noResolveDecayTicks != noDecayTicks;
-        boolean resolveModeWasOff = !isInResolveMode();
         this.resolve = amount;
         this.achievedResolve = Math.max(Math.max(this.resolve, achievedResolve), this.achievedResolve);
         this.noResolveDecayTicks = Math.max(this.noResolveDecayTicks, noDecayTicks);
-        if (isInResolveMode()) {
-            if (resolveModeWasOff) {
-                this.noResolveDecayTicks = Math.max(this.noResolveDecayTicks, BalanceTestServerConfig.SERVER_CONFIG.resolveModeTicks.get());
-            }
-            this.getUser().addEffect(new EffectInstance(ModEffects.RESOLVE.get(), noDecayTicks));
+        if (this.resolve == getMaxResolve()) {
+            getUser().addEffect(new EffectInstance(ModEffects.RESOLVE.get(), 
+                    Math.max(this.noResolveDecayTicks, BalanceTestServerConfig.SERVER_CONFIG.resolveModeTicks.get()), 0, false, 
+                    false, true));
         }
         if (send) {
             serverPlayerUser.ifPresent(player -> {
@@ -250,16 +248,11 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
     }
     
-    @Override
-    public boolean isInResolveMode() {
-        return resolve >= getMaxResolve();
-    }
-    
     private void tickResolve() {
         if (noResolveDecayTicks > 0) {
             noResolveDecayTicks--;
         }
-        else {
+        else if (!user.hasEffect(ModEffects.RESOLVE.get())){
             resolve = Math.max(resolve - BalanceTestServerConfig.SERVER_CONFIG.resolveDecay.get().floatValue(), 0);
         }
     }
@@ -267,7 +260,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     @Override
     public int getXp() {
-        return xp;
+        return MAX_EXP; // FIXME stand progression
     }
 
     @Override
@@ -315,11 +308,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     @Override
     public void toggleSummon() {
-        if (!isActive()) {
-            getType().summon(user, this, false);
-        }
-        else {
-            getType().unsummon(user, this);
+        if (hasPower()) {
+            getType().toggleSummon(this);
         }
     }
     
@@ -335,7 +325,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     @Override
     public boolean isLeapUnlocked() {
-        return standManifestation instanceof StandEntity && !((StandEntity) standManifestation).isArmsOnlyMode();
+        return standManifestation instanceof StandEntity && !((StandEntity) standManifestation).lowerStatsFromArmsOnly();
     }
     
     @Override

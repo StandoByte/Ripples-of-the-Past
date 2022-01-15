@@ -13,7 +13,7 @@ import net.minecraft.world.World;
 
 public class HamonZoomPunch extends HamonAction {
 
-    public HamonZoomPunch(Builder builder) {
+    public HamonZoomPunch(HamonAction.Builder builder) {
         super(builder);
     }
     

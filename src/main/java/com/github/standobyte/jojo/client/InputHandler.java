@@ -18,6 +18,7 @@ import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.ItemProjectileEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonStartMeditationPacket;
@@ -171,7 +172,6 @@ public class InputHandler {
                 if (chooseAttack || chooseAbility) {
                     for (int i = 0; i < 9; i++) {
                         if (mc.options.keyHotbarSlots[i].consumeClick()) {
-                            JojoMod.LOGGER.debug(i);
                             if (chooseAttack) {
                                 // FIXME doesn't seem to work for key 2 while walking (???)
                                 actionsOverlay.selectAction(ActionType.ATTACK, i);
@@ -334,7 +334,6 @@ public class InputHandler {
             return;
         }
         
-        // determining the mouse button
         ActionType actionType;
         if (event.isAttack()) {
             actionType = ActionType.ATTACK;
@@ -346,36 +345,32 @@ public class InputHandler {
             return;
         }
         
-        // handling stun effect
-        // FIXME stun
-//        if (actionsOverlay.noActionSelected(actionType)) {
-//            if (mc.player.hasEffect(ModEffects.STUN.get())) {
-//                event.setCanceled(true);
-//            }
-//            return;
-//        }
-
-        // mod powers stuff
-        if (actionsOverlay.isActive()) {
-            IPower<?, ?> power = actionsOverlay.getCurrentPower();
-            final boolean leftClickedBlock = actionType == ActionType.ATTACK && mc.hitResult.getType() == Type.BLOCK;
-            if (leftClickedBlock && leftClickBlockDelay > 0 || power.getHeldAction() != null) {
-                event.setSwingHand(false);
+        if (actionsOverlay.noActionSelected(actionType)) {
+            if (mc.player.hasEffect(ModEffects.STUN.get())) {
                 event.setCanceled(true);
-                return;
             }
-            boolean shift = mc.player.isShiftKeyDown();
-            if (actionsOverlay.onClick(actionType, shift)) {
-                Action<?> action = actionsOverlay.getSelectedAction(actionType);
-                event.setSwingHand(action.swingHand());
-                event.setCanceled(action.cancelsVanillaClick());
-                if (action.getHoldDurationMax() > 0) {
-                    heldActionType = actionType;
-                }
+            return;
+        }
+
+        IPower<?, ?> power = actionsOverlay.getCurrentPower();
+        boolean leftClickedBlock = actionType == ActionType.ATTACK && mc.hitResult.getType() == Type.BLOCK;
+        if (leftClickedBlock && leftClickBlockDelay > 0 || power.getHeldAction() != null) {
+            event.setSwingHand(false);
+            event.setCanceled(true);
+            return;
+        }
+        boolean shift = mc.player.isShiftKeyDown();
+        if (actionsOverlay.onClick(actionType, shift)) {
+            Action<?> action = actionsOverlay.getSelectedAction(actionType);
+            event.setSwingHand(action.swingHand());
+            event.setCanceled(action.cancelsVanillaClick());
+            // FIXME held actions sometimes break
+            if (actionsOverlay.isSelectedActionHeld(actionType)) {
+                heldActionType = actionType;
             }
-            if (leftClickedBlock) {
-                leftClickBlockDelay = 4;
-            }
+        }
+        if (leftClickedBlock) {
+            leftClickBlockDelay = 4;
         }
     }
 
@@ -448,7 +443,7 @@ public class InputHandler {
         return false;
     }
     
-    public static void leap(ClientPlayerEntity player, MovementInput input, float strength) {
+    private void leap(ClientPlayerEntity player, MovementInput input, float strength) {
         input.shiftKeyDown = false;
         input.jumping = false;
         player.setOnGround(false);
@@ -456,9 +451,62 @@ public class InputHandler {
         Vector3d leap = Vector3d.directionFromRotation(Math.min(player.xRot, -30F), player.yRot).scale(strength);
         player.setDeltaMovement(leap.x, leap.y * 0.5, leap.z);
     }
+
+    private final DashTrigger leftDash = new DashTrigger(-90F);
+    private final DashTrigger rightDash = new DashTrigger(90F);
+    private final DashTrigger backDash = new DashTrigger(180F);
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void dash(InputUpdateEvent event) {
+        if (mc.player.isOnGround()) {
+            // FIXME (dash) more dash checks (summoned stand, stand is following player, stand task, leap cd, stun, on ground, maybe some sprint checks, etc.)
+            MovementInput input = event.getMovementInput();
+            leftDash.tick(input.left, mc.player);
+            rightDash.tick(input.right, mc.player);
+            backDash.tick(input.down, mc.player);
+        }
+    }
+    
+    private void dash(ClientPlayerEntity player, float yRot) {
+        // FIXME (dash) set leap cd
+        player.setOnGround(false);
+        player.hasImpulse = true;
+        Vector3d dash = Vector3d.directionFromRotation(0, player.yRot + yRot).scale(0.5).add(0, 0.2, 0);
+        // FIXME (dash) different speeds with the same distance
+        player.setDeltaMovement(player.getDeltaMovement().add(dash));
+    }
+    
+    
     
     public void updatePowersCache() {
         standPower = IStandPower.getPlayerStandPower(mc.player);
         nonStandPower = INonStandPower.getPlayerNonStandPower(mc.player);
+    }
+    
+    
+    
+    private class DashTrigger {
+        private final float yRot;
+        private int triggerTime;
+        private boolean triggerGap;
+        
+        private DashTrigger(float yRot) {
+            this.yRot = yRot;
+        }
+        
+        private void tick(boolean input, ClientPlayerEntity player) {
+            if (triggerTime > 0) {
+                triggerTime--;
+            }
+            if (input) {
+                if (triggerTime <= 0) {
+                    triggerTime = 7;
+                }
+                else if (triggerGap) {
+                    dash(player, yRot);
+                    triggerTime = 0;
+                }
+            }
+            triggerGap = !input;
+        }
     }
 }

@@ -16,7 +16,7 @@ public class BalanceTestServerConfig {
         public final ForgeConfigSpec.IntValue noResolveDecayTicks;
         public final ForgeConfigSpec.IntValue resolveModeTicks;
         public final ForgeConfigSpec.DoubleValue maxResolveDmgReduction;
-        public final ForgeConfigSpec.DoubleValue resolveModeDmgReduction;
+        public final ForgeConfigSpec.DoubleValue resolveEffectDmgReduction;
         
         ServerConfig(ForgeConfigSpec.Builder builder) {
             maxResolve = builder
@@ -54,10 +54,10 @@ public class BalanceTestServerConfig {
                     .translation("jojo.config.maxResolveDmgReduction") 
                     .defineInRange("maxResolveDmgReduction", 0.5, 0, 1);
             
-            resolveModeDmgReduction = builder
-                    .comment(" Damage reduction during resolve mode.")
-                    .translation("jojo.config.resolveModeDmgReduction") 
-                    .defineInRange("resolveModeDmgReduction", 0.8, 0, 1);
+            resolveEffectDmgReduction = builder
+                    .comment(" Damage reduction in Resolve effect.")
+                    .translation("jojo.config.resolveEffectDmgReduction") 
+                    .defineInRange("resolveEffectDmgReduction", 0.8, 0, 1);
         }
     }
     

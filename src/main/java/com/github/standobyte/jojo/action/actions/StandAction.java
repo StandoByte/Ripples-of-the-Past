@@ -25,7 +25,7 @@ public abstract class StandAction extends Action<IStandPower> {
     
     @Override
     public boolean isUnlocked(IStandPower power) {
-        return unlockedByDefault || power.getLearningProgress(this) >= 0;
+        return true || unlockedByDefault || power.getLearningProgress(this) >= 0; // FIXME stand progression
     }
     
     

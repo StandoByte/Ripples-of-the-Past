@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.github.standobyte.jojo.action.actions.StandEntityAction.Phase;
 import com.github.standobyte.jojo.entity.stand.stands.StarPlatinumEntity;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -485,7 +486,7 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
     }
 
     @Override
-    protected void rangedAttackPose(StarPlatinumEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
+    protected void rangedAttackPose(StarPlatinumEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
         entity.setYBodyRot(entity.yRot);
         setRotationAngle(body, 0.0F, -0.48F, 0.0F);
         setRotationAngle(leftArm, 0.0F, 0.0F, -0.7854F);

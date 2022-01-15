@@ -3,19 +3,23 @@ package com.github.standobyte.jojo.action.actions;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.entity.stand.task.MeleeAttackTask;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.power.stand.type.EntityStandType;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
+/* FIXME (stats)
+ *   hold ticks: durability
+ *   damage: strength, precision
+ *   speed: speed
+ *   
+ *   replace cd with recovery ticks
+ */
 public class StandEntityMeleeBarrage extends StandEntityAction {
 
     public StandEntityMeleeBarrage(StandEntityAction.Builder builder) {
-        super(builder);
-        this.doNotAutoSummonStand = true;
+        super(builder.autoSummonMode(AutoSummonMode.ARMS).holdType().userMovementFactor(0.3F).defaultStandOffsetFromUser());
     }
     
     @Override
@@ -24,33 +28,45 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
                 ActionConditionResult.NEGATIVE
                 : super.checkSpecificConditions(user, performer, power, target);
     }
-    
-    @Override
-    public void startedHolding(World world, LivingEntity user, IStandPower power, ActionTarget target, boolean requirementsFulfilled) {
-        if (!world.isClientSide() && requirementsFulfilled) {
-            StandEntity stand;
-            if (power.isActive()) {
-                stand = (StandEntity) getPerformer(user, power);
-            }
-            else {
-                ((EntityStandType<?>) power.getType()).summon(user, power, entity -> {
-                    entity.setArmsOnlyMode();
-                }, true);
-                stand = (StandEntity) power.getStandManifestation();
-            }
-            stand.setTask(new MeleeAttackTask(stand, true));
-        }
-    }
-    
-    @Override
-    public void stoppedHolding(World world, LivingEntity user, IStandPower power, int ticksHeld) {
-        if (!world.isClientSide() && power.isActive()) {
-            ((StandEntity) power.getStandManifestation()).clearTask();
-        }
-    }
 
     @Override
     public int getCooldown(IStandPower power, int ticksHeld) {
-        return MathHelper.floor((float) (getCooldownValue() * ticksHeld) / (float) getHoldDurationMax() + 0.5F);
+        return MathHelper.floor((float) (getCooldownValue() * ticksHeld) / (float) getHoldDurationMax(power) + 0.5F);
+    }
+
+    @Override
+    public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
+        if (!world.isClientSide()) {
+            double attackSpeed = standEntity.getAttackSpeed();
+            int extraTickSwings = (int) (attackSpeed / 20D);
+            for (int i = 0; i < extraTickSwings; i++) {
+                standEntity.swingAlternateHands();
+                standEntity.punch(false);
+            }
+            
+            if (standEntity.barragePunchDelayed) {
+                standEntity.barragePunchDelayed = false;
+                standEntity.swingAlternateHands();
+                standEntity.punch(false);
+            }
+            else {
+                double sp2 = attackSpeed % 20D;
+                if (sp2 > 0) {
+                    double ticksInterval = 20 / sp2;
+                    int intTicksInterval = (int) ticksInterval;
+                    if ((getStandActionTicks(userPower, standEntity) - ticks + standEntity.barrageDelayedPunches) % intTicksInterval == 0) {
+                        double delayProb = ticksInterval - intTicksInterval;
+                        if (standEntity.getRandom().nextDouble() < delayProb) {
+                            standEntity.barragePunchDelayed = true;
+                            standEntity.barrageDelayedPunches++;
+                        }
+                        else {
+                            standEntity.swingAlternateHands();
+                            standEntity.punch(false);
+                        }
+                    }
+                }
+            }
+        }
     }
 }

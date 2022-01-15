@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.entity.stand;
 
-import java.util.EnumMap;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -9,7 +8,6 @@ import java.util.function.ToIntFunction;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.network.packets.fromserver.TrStandSoundPacket.StandSoundType;
 import com.github.standobyte.jojo.power.stand.stats.StandStatsV2;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 
@@ -24,7 +22,8 @@ public class StandEntityType<T extends StandEntity> extends EntityType<T> {
     private final StandEntityType.IStandFactory<T> factory;
     private final Supplier<? extends StandType<?>> standTypeSupplier;
     private final StandEntityStats stats;
-    private final EnumMap<StandSoundType, Supplier<SoundEvent>> sounds = new EnumMap<>(StandSoundType.class);
+    private Supplier<SoundEvent> summonSound = ModSounds.STAND_SUMMON_DEFAULT;
+    private Supplier<SoundEvent> unsummonSound = ModSounds.STAND_UNSUMMON_DEFAULT;
 
     public StandEntityType(IStandFactory<T> factory, Supplier<? extends StandType<?>> standType, 
             boolean immuneToFire, float width, float height, 
@@ -44,14 +43,15 @@ public class StandEntityType<T extends StandEntity> extends EntityType<T> {
         this.factory = factory;
         this.stats = stats;
         this.standTypeSupplier = standType;
-        this.sounds.put(StandSoundType.SUMMON, ModSounds.STAND_SUMMON_DEFAULT);
-        this.sounds.put(StandSoundType.UNSUMMON, ModSounds.STAND_UNSUMMON_DEFAULT);
     }
     
-    public StandEntityType<T> addStandSound(StandSoundType soundType, Supplier<SoundEvent> soundSupplier) {
-        if (soundType != null) {
-            sounds.put(soundType, soundSupplier);
-        }
+    public StandEntityType<T> summonSound(Supplier<SoundEvent> soundSupplier) {
+        this.summonSound = soundSupplier;
+        return this;
+    }
+    
+    public StandEntityType<T> unsummonSound(Supplier<SoundEvent> soundSupplier) {
+        this.unsummonSound = soundSupplier;
         return this;
     }
 
@@ -64,9 +64,13 @@ public class StandEntityType<T extends StandEntity> extends EntityType<T> {
     }
     
     @Nullable
-    public SoundEvent getSound(StandSoundType soundType) {
-        Supplier<SoundEvent> soundSupplier = sounds.get(soundType);
-        return soundSupplier != null ? sounds.get(soundType).get() : null;
+    public SoundEvent getSummonSound() {
+        return summonSound != null ? summonSound.get() : null;
+    }
+    
+    @Nullable
+    public SoundEvent getUnsummonSound() {
+        return unsummonSound != null ? unsummonSound.get() : null;
     }
 
     @Nullable

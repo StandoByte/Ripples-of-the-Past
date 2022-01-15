@@ -86,7 +86,8 @@ public class HGStringEntity extends OwnerBoundProjectileEntity {
 
     @Override
     protected int ticksLifespan() {
-        return isBinding ? ModActions.HIEROPHANT_GREEN_STRING_BIND.get().getCooldownValue() : ModActions.HIEROPHANT_GREEN_STRING_ATTACK.get().getCooldownValue();
+        return isBinding ? ModActions.HIEROPHANT_GREEN_STRING_BIND.get().getStandActionTicks(null, null)
+                : ModActions.HIEROPHANT_GREEN_STRING_ATTACK.get().getStandActionTicks(null, null);
     }
     
     @Override
