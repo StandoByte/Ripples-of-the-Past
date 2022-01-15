@@ -52,7 +52,8 @@ public abstract class StandEntityAction extends StandAction {
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
         if (power.isActive()) {
             StandEntity stand = (StandEntity) power.getStandManifestation();
-            if (!stand.getCurrentTaskAction().isCancelable(power, stand)) {
+            StandEntityAction currentAction = stand.getCurrentTaskAction();
+            if (currentAction != null && !currentAction.isCancelable(power, stand)) {
                 return ActionConditionResult.NEGATIVE;
             }
         }
@@ -64,14 +65,14 @@ public abstract class StandEntityAction extends StandAction {
         return power.isActive() ? (StandEntity) power.getStandManifestation() : user;
     }
     
-    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {}
-    
     public void standTickButtonHold(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {}
     
     public void standTickWindup(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {}
     
     public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {}
-
+    
+    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {}
+    
     @Override
     public void onClick(World world, LivingEntity user, IStandPower power) {
         if (!world.isClientSide() && !power.isActive()) {
@@ -240,7 +241,7 @@ public abstract class StandEntityAction extends StandAction {
         protected final UserOffset userOffsetArmsOnly = new UserOffset();
         private Supplier<SoundEvent> standSoundSupplier = () -> null;
         
-        public T autoSummonMode(AutoSummonMode mode) {
+        public T standAutoSummonMode(AutoSummonMode mode) {
             if (mode != null) {
                 this.autoSummonMode = mode;
             }
@@ -276,7 +277,7 @@ public abstract class StandEntityAction extends StandAction {
             return getThis();
         }
         
-        public T userMovementFactor(float factor) {
+        public T standUserSlowDownFactor(float factor) {
             this.userMovementFactor = MathHelper.clamp(factor, 0F, 1F);
             return getThis();
         }

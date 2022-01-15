@@ -18,7 +18,7 @@ import net.minecraft.world.World;
 public class StandEntityLightAttack extends StandEntityAction {
 
     public StandEntityLightAttack(StandEntityAction.Builder builder) {
-        super(builder.autoSummonMode(AutoSummonMode.ONE_ARM).standTakesCrosshairTarget());
+        super(builder.standAutoSummonMode(AutoSummonMode.ONE_ARM).standTakesCrosshairTarget());
     }
 
     @Override

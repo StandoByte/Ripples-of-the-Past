@@ -25,8 +25,8 @@ public class SilverChariotRapierLaunch extends StandEntityAction {
     }
     
     @Override
-    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {
-        if (!world.isClientSide()) {
+    public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
+        if (!world.isClientSide() && ticks == 0) {
             SCRapierEntity rapierEntity = new SCRapierEntity(standEntity, world);
             rapierEntity.shootFromRotation(standEntity, 1F, 0.0F);
             world.addFreshEntity(rapierEntity);

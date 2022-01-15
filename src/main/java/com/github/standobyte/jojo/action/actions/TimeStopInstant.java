@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.JojoModUtil;
 import com.github.standobyte.jojo.util.TimeHandler;
@@ -35,7 +36,6 @@ public class TimeStopInstant extends StandAction {
     
     @Override
     protected void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
-        StandEntity stand = power.isActive() ? (StandEntity) getPerformer(user, power) : null;
         int timeStopTicks = TimeHandler.getTimeStopTicks(getXpRequirement(), power, user, INonStandPower.getNonStandPowerOptional(user));
         JojoModUtil.playSound(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, user.getX(), user.getY(), user.getZ(), 
                 ModSounds.TIME_STOP_BLINK.get(), SoundCategory.AMBIENT, 5.0F, 1.0F, TimeHandler::canPlayerSeeInStoppedTime);
@@ -69,10 +69,14 @@ public class TimeStopInstant extends StandAction {
             
             user.teleportTo(blinkPos.x, blinkPos.y, blinkPos.z);
             power.setXp(power.getXp() + 4);
-            if (stand != null) {
-                stand.setStandPose(StandPose.NONE);
-                stand.summonLockTicks = Math.min(stand.summonLockTicks - timeStopTicks, 0);
-                stand.gradualSummonWeaknessTicks = Math.min(stand.gradualSummonWeaknessTicks - timeStopTicks, 0);
+            if (power.isActive()) {
+                IStandManifestation stand = power.getStandManifestation();
+                if (stand instanceof StandEntity) {
+                    StandEntity standEntity = (StandEntity) stand;
+                    standEntity.setStandPose(StandPose.NONE);
+                    standEntity.summonLockTicks = Math.min(standEntity.summonLockTicks - timeStopTicks, 0);
+                    standEntity.gradualSummonWeaknessTicks = Math.min(standEntity.gradualSummonWeaknessTicks - timeStopTicks, 0);
+                }
             }
         }
     }
