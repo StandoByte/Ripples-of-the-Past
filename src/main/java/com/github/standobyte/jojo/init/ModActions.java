@@ -188,8 +188,8 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_STAR_FINGER = ACTIONS.register("star_platinum_star_finger", 
             () -> new StarPlatinumStarFinger(new StandEntityAction.Builder().standPerformDuration(20)
-                    .cooldown(60).ignoresPerformerStun().xpRequirement(300).standPose(StandPose.RANGED_ATTACK)
-                    .shout(ModSounds.JOTARO_STAR_FINGER).standSound(ModSounds.STAR_PLATINUM_STAR_FINGER)));
+                    .cooldown(60).ignoresPerformerStun().xpRequirement(300).defaultStandOffsetFromUser()
+                    .standPose(StandPose.RANGED_ATTACK).shout(ModSounds.JOTARO_STAR_FINGER).standSound(ModSounds.STAR_PLATINUM_STAR_FINGER)));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_BLOCK = ACTIONS.register("star_platinum_block", 
             () -> new StandEntityBlock());
@@ -242,11 +242,13 @@ public class ModActions {
                     .shiftVariationOf(HIEROPHANT_GREEN_STRING_ATTACK)));
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_EMERALD_SPLASH = ACTIONS.register("hierophant_green_emerald_splash", 
-            () -> new HierophantGreenEmeraldSplash(new StandEntityAction.Builder().standPerformDuration(30).cooldown(40).xpRequirement(50)
-                    .shout(ModSounds.KAKYOIN_EMERALD_SPLASH).standSound(ModSounds.HIEROPHANT_GREEN_EMERALD_SPLASH)));
+            () -> new HierophantGreenEmeraldSplash(new StandEntityAction.Builder().standUserSlowDownFactor(0.5F)
+                    .standPerformDuration(30).cooldown(40).xpRequirement(50).defaultStandOffsetFromUser()
+                    .standPose(StandPose.RANGED_ATTACK).shout(ModSounds.KAKYOIN_EMERALD_SPLASH).standSound(ModSounds.HIEROPHANT_GREEN_EMERALD_SPLASH)));
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED = ACTIONS.register("hierophant_green_es_concentrated", 
-            () -> new HierophantGreenEmeraldSplash(new StandEntityAction.Builder().standPerformDuration(5).cooldown(40).xpRequirement(400)
+            () -> new HierophantGreenEmeraldSplash(new StandEntityAction.Builder().standUserSlowDownFactor(0.5F)
+                    .standPerformDuration(5).cooldown(40).xpRequirement(400).defaultStandOffsetFromUser()
                     .standPose(StandPose.RANGED_ATTACK).shout(ModSounds.KAKYOIN_EMERALD_SPLASH).standSound(ModSounds.HIEROPHANT_GREEN_EMERALD_SPLASH)
                     .shiftVariationOf(HIEROPHANT_GREEN_EMERALD_SPLASH)));
     
@@ -273,7 +275,7 @@ public class ModActions {
             () -> new SilverChariotMeleeBarrage(new StandEntityAction.Builder().shout(ModSounds.POLNAREFF_HORA_HORA_HORA)));
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_RAPIER_LAUNCH = ACTIONS.register("silver_chariot_rapier_launch", 
-            () -> new SilverChariotRapierLaunch(new StandEntityAction.Builder().cooldown(100).xpRequirement(200)
+            () -> new SilverChariotRapierLaunch(new StandEntityAction.Builder().cooldown(100).xpRequirement(200).defaultStandOffsetFromUser()
                     .standPose(StandPose.RANGED_ATTACK).standSound(ModSounds.SILVER_CHARIOT_RAPIER_SHOT)));
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_BLOCK = ACTIONS.register("silver_chariot_block", 
@@ -290,10 +292,11 @@ public class ModActions {
             () -> new StandEntityHeavyAttack(new StandEntityAction.Builder().shiftVariationOf(MAGICIANS_RED_PUNCH)));
     
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_FLAME_BURST = ACTIONS.register("magicians_red_flame_burst", 
-            () -> new MagiciansRedFlameBurst(new StandEntityAction.Builder().holdType().xpRequirement(50).standPose(StandPose.RANGED_ATTACK)));
+            () -> new MagiciansRedFlameBurst(new StandEntityAction.Builder().holdType().standUserSlowDownFactor(0.5F)
+                    .xpRequirement(50).defaultStandOffsetFromUser().standPose(StandPose.RANGED_ATTACK)));
     
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_FIREBALL = ACTIONS.register("magicians_red_fireball", 
-            () -> new MagiciansRedFireball(new StandEntityAction.Builder().xpRequirement(150)
+            () -> new MagiciansRedFireball(new StandEntityAction.Builder().xpRequirement(150).standPerformDuration(3)
                     .standPose(StandPose.RANGED_ATTACK).standSound(ModSounds.MAGICIANS_RED_FIREBALL)));
     
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_CROSSFIRE_HURRICANE = ACTIONS.register("magicians_red_crossfire_hurricane", 

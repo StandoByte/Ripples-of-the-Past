@@ -33,31 +33,34 @@ public class StandEntityTask {
         if (startingTicks == 1 && phase == StandEntityAction.Phase.PERFORM) {
             action.standPerform(standEntity.level, standEntity, standPower, standEntity.getTaskTarget());
         }
-        else {
-            switch (phase) {
-            case BUTTON_HOLD:
-                action.standTickButtonHold(standEntity.level, standEntity, 
-                        startingTicks - ticksLeft, standPower, standEntity.getTaskTarget());
-                break;
-            case WINDUP:
-                action.standTickWindup(standEntity.level, standEntity, 
-                        startingTicks - ticksLeft, standPower, standEntity.getTaskTarget());
-                break;
-            case PERFORM:
-                action.standTickPerform(standEntity.level, standEntity, 
-                        startingTicks - ticksLeft, standPower, standEntity.getTaskTarget());
-                break;
-            }
+        switch (phase) {
+        case BUTTON_HOLD:
+            action.standTickButtonHold(standEntity.level, standEntity, 
+                    startingTicks - ticksLeft, standPower, standEntity.getTaskTarget());
+            break;
+        case WINDUP:
+            action.standTickWindup(standEntity.level, standEntity, 
+                    startingTicks - ticksLeft, standPower, standEntity.getTaskTarget());
+            break;
+        case PERFORM:
+            action.standTickPerform(standEntity.level, standEntity, 
+                    startingTicks - ticksLeft, standPower, standEntity.getTaskTarget());
+            break;
         }
+        
         ticksLeft--;
         if (ticksLeft <= 0) {
-            if (phase == StandEntityAction.Phase.WINDUP) {
+            switch (phase) {
+            case WINDUP:
                 phase = StandEntityAction.Phase.PERFORM;
                 this.startingTicks = action.getStandActionTicks(standPower, standEntity);
                 this.ticksLeft = startingTicks;
-            }
-            else {
+                break;
+            case PERFORM:
                 standEntity.stopTask();
+                break;
+            default:
+                break;
             }
         }
     }

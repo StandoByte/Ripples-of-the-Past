@@ -19,7 +19,7 @@ import net.minecraft.world.World;
 public class StandEntityMeleeBarrage extends StandEntityAction {
 
     public StandEntityMeleeBarrage(StandEntityAction.Builder builder) {
-        super(builder.autoSummonMode(AutoSummonMode.ARMS).holdType().userMovementFactor(0.3F).defaultStandOffsetFromUser());
+        super(builder.standAutoSummonMode(AutoSummonMode.ARMS).holdType().standUserSlowDownFactor(0.3F).defaultStandOffsetFromUser());
     }
     
     @Override

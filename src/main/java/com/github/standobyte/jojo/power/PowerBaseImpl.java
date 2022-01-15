@@ -423,6 +423,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             Action<P> heldAction = heldActionData.action;
             ActionTarget target = heldActionData.getActionTarget();
             int ticksHeld = getHeldActionTicks();
+            heldAction.stoppedHolding(user.level, user, getThis(), ticksHeld);
             if (!heldAction.holdOnly()) {
                 if (shouldFire && heldActionData.getTicks() >= heldAction.getHoldDurationToFire(getThis()) && 
                         checkRequirements(heldAction, target, true).isPositive()) {
@@ -432,7 +433,6 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             else {
                 setCooldownTimer(heldAction, heldAction.getCooldown(getThis(), ticksHeld));
             }
-            heldAction.stoppedHolding(user.level, user, getThis(), ticksHeld);
             heldActionData = null;
             if (!user.level.isClientSide()) {
                 TrSyncHeldActionPacket packet = TrSyncHeldActionPacket.actionStopped(user.getId(), getPowerClassification());
