@@ -14,6 +14,7 @@ import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.stats.StandStatsV2;
 import com.github.standobyte.jojo.util.JojoModUtil;
 import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
+import com.github.standobyte.jojo.util.data.StandStatsManager;
 
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.LivingEntity;
@@ -36,7 +37,6 @@ public abstract class StandType<T extends StandStatsV2> extends ForgeRegistryEnt
     private final StandAction[] abilities;
     private Predicate<LivingEntity> prioritizedCondition = null;
     private final T defaultStats;
-    private T stats;
     private final Class<T> statsClass;
     private String translationKey;
     private final Supplier<SoundEvent> summonShoutSupplier;
@@ -52,7 +52,6 @@ public abstract class StandType<T extends StandStatsV2> extends ForgeRegistryEnt
         this.summonShoutSupplier = summonShoutSupplier;
         this.statsClass = statsClass;
         this.defaultStats = defaultStats;
-        this.stats = defaultStats;
     }
     
     public StandType<T> addPrioritizedCondition(Predicate<LivingEntity> condition) { // FIXME sort this thing out
@@ -61,7 +60,7 @@ public abstract class StandType<T extends StandStatsV2> extends ForgeRegistryEnt
     }
     
     public T getStats() {
-        return stats;
+        return StandStatsManager.getInstance().getStats(this);
     }
     
     public T getDefaultStats() {
@@ -71,10 +70,6 @@ public abstract class StandType<T extends StandStatsV2> extends ForgeRegistryEnt
     public Class<T> getStatsClass() {
         return statsClass;
     }
-    
-//    public void setStats(T stats) {
-//        this.stats = stats;
-//    }
     
     @Override
     public int getColor() {

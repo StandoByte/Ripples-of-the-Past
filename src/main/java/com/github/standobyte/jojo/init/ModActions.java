@@ -39,8 +39,6 @@ import com.github.standobyte.jojo.action.actions.SilverChariotRapierLaunch;
 import com.github.standobyte.jojo.action.actions.SilverChariotTakeOffArmor;
 import com.github.standobyte.jojo.action.actions.StandAction;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
-import com.github.standobyte.jojo.action.actions.StandEntityAction.AutoSummonMode;
-import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.action.actions.StandEntityBlock;
 import com.github.standobyte.jojo.action.actions.StandEntityHeavyAttack;
 import com.github.standobyte.jojo.action.actions.StandEntityLightAttack;
@@ -59,6 +57,7 @@ import com.github.standobyte.jojo.action.actions.VampirismFreeze;
 import com.github.standobyte.jojo.action.actions.VampirismHamonSuicide;
 import com.github.standobyte.jojo.action.actions.VampirismSpaceRipperStingyEyes;
 import com.github.standobyte.jojo.action.actions.VampirismZombieSummon;
+import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
 import com.github.standobyte.jojo.util.TimeHandler;
 

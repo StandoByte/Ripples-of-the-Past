@@ -1,16 +1,28 @@
 package com.github.standobyte.jojo.util.data;
 
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.SyncStandStatsDataPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.SyncStandStatsDataPacket.StandStatsDataEntry;
 import com.github.standobyte.jojo.power.stand.stats.StandStatsV2;
 import com.github.standobyte.jojo.power.stand.type.StandType;
+import com.google.common.base.Charsets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -18,22 +30,29 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
 import net.minecraft.client.resources.JsonReloadListener;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResourceManager;
+import net.minecraft.server.management.PlayerList;
+import net.minecraft.util.FileUtil;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.ResourceLocationException;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.FolderName;
 import net.minecraftforge.registries.IForgeRegistry;
 
 public class StandStatsManager extends JsonReloadListener {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final FolderName outputDir = FolderName.GENERATED_DIR;
+    private static final String RESOURCE_NAME = "stand_stats";
     
     private static StandStatsManager instance = null;
+    
+    private Map<StandType<?>, StandStatsV2> overridenStats = new HashMap<>();
 
     private StandStatsManager() {
-        super(GSON, "stand_stats");
+        super(GSON, RESOURCE_NAME);
     }
     
     public static void init() {
@@ -48,17 +67,17 @@ public class StandStatsManager extends JsonReloadListener {
     
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> resourceList, IResourceManager resourceManager, IProfiler profiler) {
+        Map<StandType<?>, StandStatsV2> stats = new HashMap<>();
+        
         IForgeRegistry<StandType<?>> registry = ModStandTypes.Registry.getRegistry();
         resourceList.forEach((location, object) -> {
             if (registry.containsKey(location)) {
                 StandType<?> stand = registry.getValue(location);
                 if (stand != null) {
                     try {
-                        JsonObject jsonObject = JSONUtils.convertToJsonObject(object, "stand stats");
-                        // FIXME override stats
-//                        stand.setStats(StandStatsV2.changeStatsFromJson(stand.getDefaultStats(), jsonObject));
-                        // FIXME sync to client
-                        // FIXME can i also update all summoned stand entities' data parameters?
+                        JsonObject jsonObject = JSONUtils.convertToJsonObject(object, RESOURCE_NAME);
+                        stats.put(stand, GSON.fromJson(jsonObject, stand.getStatsClass()));
+                        // FIXME (stats) can i also update all summoned stand entities' data parameters?
                     }
                     catch (IllegalArgumentException | JsonParseException jsonparseexception) {
                         LOGGER.error("Parsing error loading custom stand stats {}: {}", location, jsonparseexception.getMessage());
@@ -66,17 +85,83 @@ public class StandStatsManager extends JsonReloadListener {
                 }
             }
         });
-        registry.getEntries().forEach(entry -> {
-            outputJsonFile(entry.getKey().location(), entry.getValue().getStats());
-        });
-        // FIXME readme.txt
+        
+        this.overridenStats = stats;
+    }
+
+    private static final FolderName OUTPUT_DIR = new FolderName("standstats");
+    private final Set<Path> savedStatsWorlds = new HashSet<>();
+    public void writeDefaultStandStats(ServerWorld world) {
+        Path folderPath = world.getServer().getWorldPath(OUTPUT_DIR);
+        if (!savedStatsWorlds.contains(folderPath)) {
+            Path dataFolderPath = folderPath.resolve("data");
+            IForgeRegistry<StandType<?>> registry = ModStandTypes.Registry.getRegistry();
+            registry.getEntries().forEach(entry -> {
+                Path jsonFilePath = getJsonPath(dataFolderPath, entry.getKey().location());
+                File jsonFile = jsonFilePath.toFile();
+                if (jsonFile.getParentFile() != null) {
+                    jsonFile.getParentFile().mkdirs();
+                }
+                try (
+                        OutputStream outputStream = new FileOutputStream(jsonFile);
+                        Writer writer = new OutputStreamWriter(outputStream, Charsets.UTF_8.newEncoder());
+                        ) {
+                    GSON.toJson(entry.getValue().getDefaultStats(), writer);
+                } catch (IOException e) {
+                    LOGGER.error("Couldn't save default stand stats to {}", jsonFile, e);
+                }
+            });
+            savedStatsWorlds.add(folderPath);
+            // FIXME (stats) readme.txt, pack.mcmeta
+        }
     }
     
-    private void outputJsonFile(ResourceLocation standLocation, StandStatsV2 stats) {
-        // FIXME output as full /<world>/generated/<namespace>/<path>.json files
-//        Path saveFileDir = _.getLevelPath(outputDir).normalize();
-//        if (saveFileDir.toFile().isDirectory()) {
-//            Files.write(GSON.toJson(stats), outputPath.crea, StandardCharsets.UTF_8);
-//        }
+    private Path getJsonPath(Path mainFolder, ResourceLocation standLocation) {
+        String standNamespace = standLocation.getNamespace();
+        String standPath = standLocation.getPath();
+        if (standPath.contains("//")) {
+            throw new ResourceLocationException("Invalid resource path: " + standLocation);
+        }
+        Path jsonFile;
+        try {
+            Path modIdStatsPath = mainFolder.resolve(standNamespace).resolve(RESOURCE_NAME);
+            jsonFile = FileUtil.createPathToResource(modIdStatsPath, standPath, ".json");
+        }
+        catch (InvalidPathException e) {
+            throw new ResourceLocationException("Invalid resource path: " + standLocation, e);
+        }
+        if (jsonFile.startsWith(mainFolder)) {
+            return jsonFile;
+        }
+        else {
+            throw new ResourceLocationException("Invalid resource path: " + jsonFile);
+        }
+    }
+
+    public void syncToClients(PlayerList playerList) {
+        playerList.getPlayers().forEach(this::syncToClient);
+    }
+    
+    public void syncToClient(ServerPlayerEntity player) {
+        PacketManager.sendToClient(new SyncStandStatsDataPacket(overridenStats), player);
+    }
+    
+    public void clSetStats(Iterable<StandStatsDataEntry> stats) {
+        IForgeRegistry<StandType<?>> registry = ModStandTypes.Registry.getRegistry();
+        Map<StandType<?>, StandStatsV2> map = new HashMap<>();
+        stats.forEach(entry -> {
+            StandType<?> stand = registry.getValue(entry.getStandTypeLocation());
+            if (stand != null) {
+                map.put(stand, entry.getStats());
+            }
+        });
+        this.overridenStats = map;
+    }
+    
+    public <T extends StandStatsV2> T getStats(StandType<T> stand) {
+        if (overridenStats.containsKey(stand)) {
+            return (T) overridenStats.get(stand);
+        }
+        return stand.getDefaultStats();
     }
 }

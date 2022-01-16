@@ -1,6 +1,12 @@
 package com.github.standobyte.jojo.power.stand.stats;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.github.standobyte.jojo.power.stand.IStandPower;
+
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.math.MathHelper;
 
 public class StandStatsV2 {
     private final UpgradeableStats statsBase;
@@ -14,6 +20,50 @@ public class StandStatsV2 {
         this.rangeEffective = builder.rangeEffective;
         this.rangeMax = builder.rangeMax;
     }
+    
+    protected StandStatsV2(PacketBuffer buf) {
+        this.statsBase = new UpgradeableStats(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble());
+        this.statsDevPotential = new UpgradeableStats(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble());
+        this.rangeEffective = buf.readDouble();
+        this.rangeMax = buf.readDouble();
+    }
+    
+    public void write(PacketBuffer buf) {
+        buf.writeDouble(statsBase.power);
+        buf.writeDouble(statsBase.speed);
+        buf.writeDouble(statsBase.durability);
+        buf.writeDouble(statsBase.precision);
+        
+        buf.writeDouble(statsDevPotential.power);
+        buf.writeDouble(statsDevPotential.speed);
+        buf.writeDouble(statsDevPotential.durability);
+        buf.writeDouble(statsDevPotential.precision);
+        
+        buf.writeDouble(rangeEffective);
+        buf.writeDouble(rangeMax);
+    }
+    
+    
+    
+    private static final Map<Class<? extends StandStatsV2>, Factory<? extends StandStatsV2>> FROM_BUFFER = new HashMap<>();
+    
+    protected static interface Factory<T extends StandStatsV2> {
+        T read(PacketBuffer buf);
+    }
+    
+    static {
+        registerFactory(StandStatsV2.class, StandStatsV2::new);
+    }
+    
+    protected static final <T extends StandStatsV2> void registerFactory(Class<T> clazz, Factory<T> factory) {
+        FROM_BUFFER.put(clazz, factory);
+    }
+    
+    public static StandStatsV2 fromBuffer(Class<? extends StandStatsV2> clazz, PacketBuffer buf) {
+        return FROM_BUFFER.get(clazz).read(buf);
+    }
+    
+    
     
     // quickAttackDamage
     // strongAttackDamage
@@ -42,21 +92,23 @@ public class StandStatsV2 {
     // parry?
     
     private double getPower(IStandPower stand) {
-        return statsBase.power + (statsDevPotential.power - statsBase.power) * stand.getAchievedResolveRatio();
+        return MathHelper.lerp(stand.getAchievedResolveRatio(), statsBase.power, statsDevPotential.power);
     }
     
     private double getSpeed(IStandPower stand) {
-        return statsBase.speed + (statsDevPotential.speed - statsBase.speed) * stand.getAchievedResolveRatio();
+        return MathHelper.lerp(stand.getAchievedResolveRatio(), statsBase.speed, statsDevPotential.speed);
     }
     
     private double getDurability(IStandPower stand) {
-        return statsBase.durability + (statsDevPotential.durability - statsBase.durability) * stand.getAchievedResolveRatio();
+        return MathHelper.lerp(stand.getAchievedResolveRatio(), statsBase.durability, statsDevPotential.durability);
     }
     
     private double getPrecision(IStandPower stand) {
-        return statsBase.precision + (statsDevPotential.precision - statsBase.precision) * stand.getAchievedResolveRatio();
+        return MathHelper.lerp(stand.getAchievedResolveRatio(), statsBase.precision, statsDevPotential.precision);
     }
-
+    
+    
+    
     public static class Builder extends AbstractBuilder<Builder> {
 
         @Override
@@ -65,13 +117,13 @@ public class StandStatsV2 {
         }
     }
     
-    protected abstract static class AbstractBuilder<T extends AbstractBuilder<T>> { // FIXME default C-level values
+    protected abstract static class AbstractBuilder<T extends AbstractBuilder<T>> { // FIXME (stats) default C-level values
         private double powerBase = 0;
         private double powerMax = 0;
         private double speedBase = 0;
         private double speedMax = 0;
-        private double rangeEffective = 1;
-        private double rangeMax = 2;
+        private double rangeEffective = 2;
+        private double rangeMax = 5;
         private double durabilityBase = 0;
         private double durabilityMax = 0;
         private double precisionBase = 0;

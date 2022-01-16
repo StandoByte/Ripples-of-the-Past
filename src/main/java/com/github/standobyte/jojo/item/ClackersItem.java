@@ -7,11 +7,14 @@ import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.stats.StandStatsV2;
 import com.github.standobyte.jojo.util.JojoModUtil;
 import com.github.standobyte.jojo.util.damage.ModDamageSources;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableMultimap.Builder;
 import com.google.common.collect.Multimap;
+import com.google.gson.GsonBuilder;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attribute;
@@ -25,7 +28,9 @@ import net.minecraft.item.UseAction;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 
 public class ClackersItem extends Item {
@@ -54,7 +59,17 @@ public class ClackersItem extends Item {
             return ActionResult.pass(stack);
         }
         else {
-            JojoModUtil.debug(world, player);
+            // FIXME (stats)
+            IStandPower.getStandPowerOptional(player).ifPresent(stand -> {
+                if (stand.hasPower()) {
+                    StandStatsV2 stats = stand.getType().getStats();
+                    player.sendMessage(new StringTextComponent((world.isClientSide ? "client: " : "server: ") +
+                            new GsonBuilder().setPrettyPrinting().create().toJson(stats)), 
+                            Util.NIL_UUID);
+                }
+            });
+            
+            
             playClackSound(world, player);
             return ActionResult.fail(stack);
         }

@@ -271,7 +271,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
 
     @Override
     public boolean unlockAction(Action<IStandPower> action) {
-        // FIXME Auto-generated method stub
+        // FIXME stand progression
         return false;
     }
 
@@ -388,13 +388,13 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     protected void keepPower(IStandPower oldPower, boolean wasDeath) {
         super.keepPower(oldPower, wasDeath);
-        xp = oldPower.getXp();
-        stamina = oldPower.getStamina();
+        this.xp = oldPower.getXp();
+        this.stamina = oldPower.getStamina();
         if (!wasDeath) {
-            resolve = oldPower.getResolve();
-            noResolveDecayTicks = oldPower.getNoResolveDecayTicks();
+            this.resolve = oldPower.getResolve();
+            this.noResolveDecayTicks = oldPower.getNoResolveDecayTicks();
         }
-        achievedResolve = oldPower.getAchievedResolve();
+        this.achievedResolve = oldPower.getAchievedResolve();
         this.actionLearningProgressMap = ((StandPower) oldPower).actionLearningProgressMap; // FIXME can i remove this cast?
     }
     
