@@ -495,8 +495,8 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     
     protected void keepPower(P oldPower, boolean wasDeath) {
         setType(oldPower.getType());
-        leapCooldown = oldPower.getLeapCooldown();
-        cooldowns = oldPower.getCooldowns();
+        this.leapCooldown = oldPower.getLeapCooldown();
+        this.cooldowns = oldPower.getCooldowns();
     }
 
     @Override

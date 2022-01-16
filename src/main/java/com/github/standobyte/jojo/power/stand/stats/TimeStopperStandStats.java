@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.power.stand.stats;
 
+import net.minecraft.network.PacketBuffer;
+
 public class TimeStopperStandStats extends StandStatsV2 {
     public static final int MIN_TIME_STOP_TICKS = 5;
     private final int maxTimeStopTicks;
@@ -10,6 +12,25 @@ public class TimeStopperStandStats extends StandStatsV2 {
         this.maxTimeStopTicks = builder.maxTimeStopTicks;
         this.maxTimeStopTicksVampire = builder.maxTimeStopTicksVampire;
     }
+    
+    protected TimeStopperStandStats(PacketBuffer buf) {
+        super(buf);
+        this.maxTimeStopTicks = buf.readInt();
+        this.maxTimeStopTicksVampire = buf.readInt();
+    }
+    
+    @Override
+    public void write(PacketBuffer buf) {
+        super.write(buf);
+        buf.writeInt(maxTimeStopTicks);
+        buf.writeInt(maxTimeStopTicksVampire);
+    }
+    
+    static {
+        registerFactory(TimeStopperStandStats.class, TimeStopperStandStats::new);
+    }
+    
+    
 
     public static class Builder extends AbstractBuilder<Builder> {
         private int maxTimeStopTicks = 100;

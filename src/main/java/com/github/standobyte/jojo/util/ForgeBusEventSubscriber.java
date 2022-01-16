@@ -18,9 +18,9 @@ import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.command.HamonCommand;
 import com.github.standobyte.jojo.command.JojoControlsCommand;
-import com.github.standobyte.jojo.command.TestBuildCommand;
 import com.github.standobyte.jojo.command.JojoPowerCommand;
 import com.github.standobyte.jojo.command.StandCommand;
+import com.github.standobyte.jojo.command.TestBuildCommand;
 import com.github.standobyte.jojo.init.ModStructures;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCachePacket;
@@ -46,6 +46,7 @@ import net.minecraft.world.gen.settings.StructureSeparationSettings;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerChangedDimensionEvent;
@@ -170,23 +171,27 @@ public class ForgeBusEventSubscriber {
     public static void onWorldLoad(WorldEvent.Load event) {
         if (event.getWorld() instanceof ServerWorld) {
             ServerWorld serverWorld = (ServerWorld) event.getWorld();
-            
-            ResourceLocation cgRL = Registry.CHUNK_GENERATOR.getKey(CommonReflection.getCodec(serverWorld.getChunkSource().getGenerator()));
-            if (cgRL != null && cgRL.getNamespace().equals("terraforged")) {
-                return;
-            }
-            
-            if (serverWorld.getChunkSource().getGenerator() instanceof FlatChunkGenerator && serverWorld.dimension().equals(World.OVERWORLD)) {
-                return;
-            }
-
-            Map<Structure<?>, StructureSeparationSettings> tempMap = new HashMap<>(
-                    serverWorld.getChunkSource().getGenerator().getSettings().structureConfig());
-            for (RegistryObject<Structure<?>> structure : ModStructures.STRUCTURES.getEntries()) {
-                tempMap.putIfAbsent(structure.get(), DimensionStructuresSettings.DEFAULTS.get(structure.get()));
-            }
-            serverWorld.getChunkSource().getGenerator().getSettings().structureConfig = tempMap;
+            addDimensionalSpacing(serverWorld);
+            StandStatsManager.getInstance().writeDefaultStandStats(serverWorld);
         }
+    }
+    
+    private static void addDimensionalSpacing(ServerWorld serverWorld) {
+        ResourceLocation cgRL = Registry.CHUNK_GENERATOR.getKey(CommonReflection.getCodec(serverWorld.getChunkSource().getGenerator()));
+        if (cgRL != null && cgRL.getNamespace().equals("terraforged")) {
+            return;
+        }
+        
+        if (serverWorld.getChunkSource().getGenerator() instanceof FlatChunkGenerator && serverWorld.dimension().equals(World.OVERWORLD)) {
+            return;
+        }
+
+        Map<Structure<?>, StructureSeparationSettings> tempMap = new HashMap<>(
+                serverWorld.getChunkSource().getGenerator().getSettings().structureConfig());
+        for (RegistryObject<Structure<?>> structure : ModStructures.STRUCTURES.getEntries()) {
+            tempMap.putIfAbsent(structure.get(), DimensionStructuresSettings.DEFAULTS.get(structure.get()));
+        }
+        serverWorld.getChunkSource().getGenerator().getSettings().structureConfig = tempMap;
     }
 
     public static final Map<Supplier<StructureFeature<?, ?>>, Predicate<BiomeLoadingEvent>> structureBiomes = new HashMap<>();
@@ -205,7 +210,16 @@ public class ForgeBusEventSubscriber {
     
     @SubscribeEvent
     public static void onResourcePackLoad(AddReloadListenerEvent event) {
-        StandStatsManager.init();
         event.addListener(StandStatsManager.getInstance());
+    }
+    
+    @SubscribeEvent
+    public static void syncCustomData(OnDatapackSyncEvent event) {
+        if (event.getPlayer() != null) {
+            StandStatsManager.getInstance().syncToClient(event.getPlayer());
+        }
+        else {
+            StandStatsManager.getInstance().syncToClients(event.getPlayerList());
+        }
     }
 }

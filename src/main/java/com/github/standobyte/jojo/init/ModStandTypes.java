@@ -33,7 +33,6 @@ public class ModStandTypes {
     public static final DeferredRegister<StandType<?>> STANDS = DeferredRegister.create(
             (Class<StandType<?>>) ((Class<?>) StandType.class), JojoMod.MOD_ID);
     
-    // FIXME actual default stat values
     public static final RegistryObject<EntityStandType<TimeStopperStandStats>> STAR_PLATINUM = STANDS.register("star_platinum", 
             () -> new EntityStandType<>(6, 0xB000B0, PART_3_NAME,
                     new StandAction[] {ModActions.STAR_PLATINUM_PUNCH.get(), ModActions.STAR_PLATINUM_BARRAGE.get(), ModActions.STAR_PLATINUM_STAR_FINGER.get()},
@@ -98,7 +97,7 @@ public class ModStandTypes {
                     new StandAction[] {ModActions.MAGICIANS_RED_BLOCK.get(), ModActions.MAGICIANS_RED_RED_BIND.get(), ModActions.MAGICIANS_RED_DETECTOR.get()},
                     ModSounds.AVDOL_MAGICIANS_RED, 
                     StandStatsV2.class, new StandStatsV2.Builder()
-                    .power(8.0)
+                    .power(118.0)
                     .speed(8.0)
                     .range(5.0)
                     .durability(5.0)
