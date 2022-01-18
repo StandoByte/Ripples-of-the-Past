@@ -103,7 +103,7 @@ public class StandStatFormulas {
         if (distance <= rangeEffective) {
             return 1F;
         }
-        float f = (float) ((rangeMax - distance) / (distance - rangeMax + 2 * rangeEffective));
+        float f = (float) ((rangeMax - rangeEffective) / (2 * rangeEffective - rangeMax - distance));
         return f * f;
     }
     
