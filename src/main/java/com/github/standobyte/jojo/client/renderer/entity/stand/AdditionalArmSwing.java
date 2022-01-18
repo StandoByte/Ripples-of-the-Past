@@ -12,12 +12,12 @@ public class AdditionalArmSwing {
     private final HandSide side;
     public final Vector3d offset;
     
-    public AdditionalArmSwing(float anim, HandSide side, StandEntity stand) {
+    public AdditionalArmSwing(float anim, HandSide side, StandEntity stand, double maxOffset) {
         this.anim = anim;
         this.side = side;
-        Random random = stand.getRandom(); // FIXME (!!!) precision
-        double upOffset = (random.nextDouble() - 0.5) * 0.4D;
-        double leftOffset = (random.nextDouble() - 0.0) * 0.2D;
+        Random random = stand.getRandom();
+        double upOffset = (random.nextDouble() - 0.5) * maxOffset;
+        double leftOffset = random.nextDouble() * maxOffset / 2;
         if (side == HandSide.RIGHT) {
             leftOffset *= -1;
         }

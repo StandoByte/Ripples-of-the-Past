@@ -11,12 +11,6 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.World;
 
-/* FIXME (stats)
- *   damage: strength
- *   speed: speed
- *   
- *   replace cd with recovery ticks
- */
 public class StandEntityHeavyAttack extends StandEntityAction {
 
     public StandEntityHeavyAttack(StandEntityAction.Builder builder) {

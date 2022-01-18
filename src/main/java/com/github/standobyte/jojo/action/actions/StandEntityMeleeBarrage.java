@@ -12,13 +12,6 @@ import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
-/* FIXME (stats)
- *   hold ticks: durability
- *   damage: strength, precision
- *   speed: speed
- *   
- *   replace cd with recovery ticks
- */
 public class StandEntityMeleeBarrage extends StandEntityAction {
 
     public StandEntityMeleeBarrage(StandEntityAction.Builder builder) {

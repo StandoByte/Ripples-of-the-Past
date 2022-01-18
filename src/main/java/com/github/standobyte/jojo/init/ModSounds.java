@@ -264,6 +264,9 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> DIO_THE_WORLD = SOUNDS.register("dio_the_world", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "dio_the_world")));
 
+    public static final RegistryObject<SoundEvent> DIO_DIE = SOUNDS.register("dio_die", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "dio_die")));
+
     public static final RegistryObject<SoundEvent> DIO_TIME_STOP = SOUNDS.register("dio_time_stop", 
             () -> new MultiSoundEvent(new ResourceLocation(JojoMod.MOD_ID, "dio_toki_yo_tomare"), new ResourceLocation(JojoMod.MOD_ID, "dio_tomare_toki_yo")));
 
@@ -281,9 +284,6 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> THE_WORLD_MUDA = SOUNDS.register("the_world_muda", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "the_world_muda")));
-    
-    public static final RegistryObject<SoundEvent> THE_WORLD_MUDA_LONG = SOUNDS.register("the_world_muda_long", 
-            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "the_world_muda_long")));
     
     public static final RegistryObject<SoundEvent> THE_WORLD_MUDA_MUDA_MUDA = SOUNDS.register("the_world_muda_muda_muda", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "the_world_muda_muda_muda")));

@@ -13,7 +13,7 @@ import net.minecraft.world.World;
 public final class StandEntityUnsummon extends StandEntityAction {
 
     public StandEntityUnsummon() {
-        super(new StandEntityAction.Builder().standPerformDuration(Integer.MAX_VALUE));
+        super(new StandEntityAction.Builder().standPerformDuration(Integer.MAX_VALUE).standUserSlowDownFactor(1.0F));
     }
 
     @Override

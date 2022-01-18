@@ -211,7 +211,7 @@ public class ModActions {
             () -> new StandEntityLightAttack(new StandEntityAction.Builder().standSound(ModSounds.THE_WORLD_MUDA)));
     
     public static final RegistryObject<StandEntityAction> THE_WORLD_HEAVY_PUNCH = ACTIONS.register("the_world_heavy_punch", 
-            () -> new StandEntityHeavyAttack(new StandEntityAction.Builder().standSound(ModSounds.THE_WORLD_MUDA_LONG).shiftVariationOf(THE_WORLD_PUNCH)));
+            () -> new StandEntityHeavyAttack(new StandEntityAction.Builder().shout(ModSounds.DIO_DIE).shiftVariationOf(THE_WORLD_PUNCH)));
     
     public static final RegistryObject<StandEntityAction> THE_WORLD_BARRAGE = ACTIONS.register("the_world_barrage", 
             () -> new StandEntityMeleeBarrage(new StandEntityAction.Builder().standSound(ModSounds.THE_WORLD_MUDA_MUDA_MUDA)));
