@@ -23,7 +23,6 @@ import net.minecraft.item.ArrowItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.Util;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -86,7 +85,7 @@ public class StandArrowItem extends ArrowItem {
                 }
             }
             else {
-                player.sendMessage(new TranslationTextComponent("jojo.chat.message.already_have_stand"), Util.NIL_UUID);
+                player.displayClientMessage(new TranslationTextComponent("jojo.chat.message.already_have_stand"), true);
             }
         }
         else if (!power.hasPower()) {

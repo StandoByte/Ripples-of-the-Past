@@ -419,7 +419,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
             });
         }
         else {
-            player.sendMessage(new TranslationTextComponent("jojo.chat.message.cant_learn_hamon"), Util.NIL_UUID);
+            player.displayClientMessage(new TranslationTextComponent("jojo.chat.message.cant_learn_hamon"), true);
         }
         return;
     }

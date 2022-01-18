@@ -190,7 +190,7 @@ public class JojoModConfig {
                     .comment(" Enable hotkey settings for each individual attack and ability from 1 to 9.", 
                             "  If your client is launched, changing the setting requires restarting the game.")
                     .translation("jojo.config.client.slotHotkeys")
-                    .define("slotHotkeys", false);
+                    .define("slotHotkeys", true);
         }
     }
 

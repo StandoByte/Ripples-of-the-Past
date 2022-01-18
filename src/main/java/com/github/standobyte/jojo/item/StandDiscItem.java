@@ -20,7 +20,6 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -41,7 +40,7 @@ public class StandDiscItem extends Item {
             if (validStandDisc(stack)) {
                 StandType<?> stand = getStandFromStack(stack);
                 if (!canGainStand(player, power.getTier(), stand)) {
-                    player.sendMessage(new TranslationTextComponent("jojo.chat.message.low_tier"), Util.NIL_UUID);
+                    player.displayClientMessage(new TranslationTextComponent("jojo.chat.message.low_tier"), true);
                     return ActionResult.fail(stack);
                 }
                 if (power.givePower(stand)) {
@@ -51,7 +50,7 @@ public class StandDiscItem extends Item {
                     return ActionResult.success(stack);
                 }
                 else {
-                    player.sendMessage(new TranslationTextComponent("jojo.chat.message.already_have_stand"), Util.NIL_UUID);
+                    player.displayClientMessage(new TranslationTextComponent("jojo.chat.message.already_have_stand"), true);
                     return ActionResult.fail(stack);
                 }
             } 
