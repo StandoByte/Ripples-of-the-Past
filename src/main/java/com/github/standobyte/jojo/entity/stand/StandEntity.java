@@ -11,7 +11,6 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
@@ -189,7 +188,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 action.onTaskSet(level, this, userPower, phase);
             }
             if (level.isClientSide()) {
-                if (action == null) JojoMod.LOGGER.debug("qqq");
                 if (action != null || getStandPose() != StandPose.SUMMON) {
                     setStandPose(action != null ? action.standPose : StandPose.NONE);
                 }
@@ -720,9 +718,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         target = getTaskTarget();
         if (target.getType() != TargetType.EMPTY && !isManuallyControlled()) {
             JojoModUtil.rotateTowards(this, target.getTargetPos());
-            if (target.getType() == TargetType.BLOCK) {
-                setTaskTarget(ActionTarget.EMPTY);
-            }
+//            if (target.getType() == TargetType.BLOCK) {
+//                setTaskTarget(ActionTarget.EMPTY);
+//            }
         }
         else if (user != null && !isRemotePositionFixed()) {
             float yRotSet = user.yRot;
@@ -1139,7 +1137,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         case HEAVY:
             damage = StandStatFormulas.getHeavyAttackDamage(strength, livingTarget);
 
-            double targetProximityRatio = attackDistance / attackRange;
+            double targetProximityRatio = 1 - attackDistance / attackRange;
             if (targetProximityRatio > 0.75) {
                 damage *= targetProximityRatio * 2 - 0.5;
             }
@@ -1147,7 +1145,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 damage *= targetProximityRatio * 2 + 0.5;
             }
             
-            knockback *= 1 + damage / 4;
+            knockback += damage / 4;
             break;
         case LIGHT:
             damage = StandStatFormulas.getLightAttackDamage(strength);

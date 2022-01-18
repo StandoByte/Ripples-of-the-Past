@@ -5,7 +5,6 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
@@ -46,18 +45,6 @@ public abstract class StandEntityAction extends StandAction {
         this.userOffset = builder.userOffset;
         this.userOffsetArmsOnly = builder.userOffsetArmsOnly;
         this.standSoundSupplier = builder.standSoundSupplier;
-    }
-    
-    @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
-        if (power.isActive()) {
-            StandEntity stand = (StandEntity) power.getStandManifestation();
-            StandEntityAction currentAction = stand.getCurrentTaskAction();
-            if (currentAction != null/* && !currentAction.isCancelable(power, stand, stand.getCurrentTaskPhase(), this)*/) { // FIXME (!!!!) scheduling tasks
-                return ActionConditionResult.NEGATIVE;
-            }
-        }
-        return ActionConditionResult.POSITIVE;
     }
     
     @Override
@@ -246,7 +233,7 @@ public abstract class StandEntityAction extends StandAction {
         protected AutoSummonMode autoSummonMode = AutoSummonMode.FULL;
         protected boolean standTakesCrosshairTarget = false;
         protected boolean isCancelable = false;
-        protected float userMovementFactor = 1.0F;
+        protected float userMovementFactor = 0.5F;
         protected StandPose standPose = StandPose.NONE;
         protected final UserOffset userOffset = new UserOffset();
         protected final UserOffset userOffsetArmsOnly = new UserOffset();

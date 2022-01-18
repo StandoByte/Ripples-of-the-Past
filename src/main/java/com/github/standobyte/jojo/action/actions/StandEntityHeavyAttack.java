@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.action.actions;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.entity.stand.StandEntity.PunchType;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -19,7 +20,7 @@ import net.minecraft.world.World;
 public class StandEntityHeavyAttack extends StandEntityAction {
 
     public StandEntityHeavyAttack(StandEntityAction.Builder builder) {
-        super(builder.standPose(StandPose.HEAVY_ATTACK).standUserSlowDownFactor(0.5F));
+        super(builder.standPose(StandPose.HEAVY_ATTACK));
     }
 
     @Override
@@ -43,12 +44,12 @@ public class StandEntityHeavyAttack extends StandEntityAction {
     
     @Override
     public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
-        return 10;
+        return StandStatFormulas.getHeavyAttackWindup(standEntity.getAttackSpeed(), 0);
     }
     
     @Override
     public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
-        return 5;
+        return StandStatFormulas.getHeavyAttackRecovery(standEntity.getAttackSpeed());
     }
     
     @Override
