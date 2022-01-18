@@ -348,6 +348,10 @@
   "time_stop_blink": {
     "sounds": [ "jojo:stand/time_stop_blink" ]
   },
+  "dio_die": {
+    "subtitle": "jojo.subtitle.die",
+    "sounds": [ "jojo:stand_user/dio_die" ] 
+  },
   "dio_the_world": {
     "subtitle": "jojo.subtitle.the_world_name",
     "sounds": [ "jojo:stand_user/dio_the_world", "jojo:stand_user/dio_the_world_2", "jojo:stand_user/dio_the_world_3" ] 
@@ -382,11 +386,7 @@
   },
   "the_world_muda": {
     "subtitle": "jojo.subtitle.muda",
-    "sounds": [ "jojo:stand/the_world_muda", "jojo:stand/the_world_muda_2", "jojo:stand/the_world_muda_3" ]
-  },
-  "the_world_muda_long": {
-    "subtitle": "jojo.subtitle.muda",
-    "sounds": [ "jojo:stand/the_world_muda_long" ]
+    "sounds": [ "jojo:stand/the_world_muda", "jojo:stand/the_world_muda_2", "jojo:stand/the_world_muda_3", "jojo:stand/the_world_muda_4" ]
   },
   "the_world_muda_muda_muda": {
     "subtitle": "jojo.subtitle.muda_muda_muda",

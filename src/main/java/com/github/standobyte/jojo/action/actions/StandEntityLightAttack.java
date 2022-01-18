@@ -14,13 +14,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
-/* FIXME (stats)
- *   damage: strength
- *   speed: speed
- *   tracking: precision
- *   
- *   replace cd with recovery ticks
- */
 // FIXME smth like the voice line system for stands
 public class StandEntityLightAttack extends StandEntityAction {
 
