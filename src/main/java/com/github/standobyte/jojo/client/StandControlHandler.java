@@ -199,9 +199,9 @@ public class StandControlHandler {
             case TEXT:
                 float distance = stand.distanceTo(mc.player);
                 mc.gui.drawString(matrixStack, mc.font, String.format("%.2f m", distance), 3, 102, 0XFFFFFF);
-                float damageFactor = stand.rangeEfficiencyFactor();
+                double damageFactor = stand.getRangeEfficiency();
                 if (damageFactor < 1) {
-                    mc.gui.drawString(matrixStack, mc.font, I18n.get("jojo.overlay.stand_strength", String.format("%.2f%%", damageFactor * 100F)), 3, 114, 0XFF4040);
+                    mc.gui.drawString(matrixStack, mc.font, I18n.get("jojo.overlay.stand_strength", String.format("%.2f%%", damageFactor * 100)), 3, 114, 0XFF4040);
                 }
                 break;
             default:

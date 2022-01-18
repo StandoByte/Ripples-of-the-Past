@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeMod;
 
 public class MagiciansRedFlameBurst extends StandEntityAction {
 
@@ -22,10 +23,10 @@ public class MagiciansRedFlameBurst extends StandEntityAction {
         Random random = standEntity.getRandom();
         if (!world.isClientSide()) {
             MRFlameEntity flame = new MRFlameEntity(standEntity, world);
-            flame.setDamageFactor(standEntity.rangeEfficiencyFactor());
+            flame.setDamageFactor((float) standEntity.getRangeEfficiency());
             flame.shootFromRotation(standEntity, standEntity.xRot + (random.nextFloat() - 0.5F) * 10F, 
                     standEntity.yRot + (random.nextFloat() - 0.5F) * 10F, 
-                    0, (float) standEntity.getMeleeAttackRange() / 4F, 0.0F);
+                    0, (float) standEntity.getAttributeValue(ForgeMod.REACH_DISTANCE.get()) / 4F, 0.0F);
             world.addFreshEntity(flame);
         }
         else {

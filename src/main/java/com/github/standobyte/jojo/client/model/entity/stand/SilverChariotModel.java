@@ -130,9 +130,9 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
     }
     
     @Override
-    protected void swingArm(SilverChariotEntity entity, float xRotation, HandSide swingingHand) {
+    protected void swingArm(SilverChariotEntity entity, float swingAmount, float xRotation, HandSide swingingHand) {
         if (!entity.hasRapier()) {
-            super.swingArm(entity, xRotation, swingingHand);
+            super.swingArm(entity, swingAmount, xRotation, swingingHand);
         }
         else {
             if (swingingHand != entity.getMainArm()) {
@@ -153,7 +153,7 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
                 otherArm = this.leftArm;
             }    
             
-            float f1 = 1.0F - this.attackTime;
+            float f1 = 1.0F - swingAmount;
             f1 = f1 * f1;
             f1 = f1 * f1;
             f1 = 1.0F - f1;

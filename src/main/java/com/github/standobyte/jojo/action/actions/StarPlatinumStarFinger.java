@@ -17,7 +17,7 @@ public class StarPlatinumStarFinger extends StandEntityAction {
     public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
         if (ticks == 0 && !world.isClientSide()) {
             SPStarFingerEntity starFinger = new SPStarFingerEntity(world, standEntity);
-            starFinger.setDamageFactor(standEntity.rangeEfficiencyFactor());
+            starFinger.setDamageFactor((float) standEntity.getRangeEfficiency());
             world.addFreshEntity(starFinger);
         }
     }

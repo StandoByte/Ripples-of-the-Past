@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.github.standobyte.jojo.init.ModStandTypes;
-import com.github.standobyte.jojo.power.stand.stats.StandStatsV2;
+import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.github.standobyte.jojo.util.data.StandStatsManager;
 
@@ -18,7 +18,7 @@ import net.minecraftforge.fml.network.NetworkEvent;
 public class SyncStandStatsDataPacket {
     private final List<StandStatsDataEntry> stats;
     
-    public SyncStandStatsDataPacket(Map<StandType<?>, StandStatsV2> statsMap) {
+    public SyncStandStatsDataPacket(Map<StandType<?>, StandStats> statsMap) {
         this(statsMap.entrySet()
                 .stream()
                 .map(entry -> new StandStatsDataEntry(entry.getKey().getRegistryName(), entry.getValue()))
@@ -54,9 +54,9 @@ public class SyncStandStatsDataPacket {
     
     public static class StandStatsDataEntry {
         private final ResourceLocation location;
-        private final StandStatsV2 stats;
+        private final StandStats stats;
         
-        private StandStatsDataEntry(ResourceLocation location, StandStatsV2 stats) {
+        private StandStatsDataEntry(ResourceLocation location, StandStats stats) {
             this.location = location;
             this.stats = stats;
         }
@@ -67,7 +67,7 @@ public class SyncStandStatsDataPacket {
             if (stand == null) {
                 throw new IllegalStateException("Stand stats synchronization error: " + location + " not registered");
             }
-            return new StandStatsDataEntry(location, StandStatsV2.fromBuffer(stand.getStatsClass(), buf));
+            return new StandStatsDataEntry(location, StandStats.fromBuffer(stand.getStatsClass(), buf));
         }
         
         private void write(PacketBuffer buf) {
@@ -79,7 +79,7 @@ public class SyncStandStatsDataPacket {
             return location;
         }
 
-        public StandStatsV2 getStats() {
+        public StandStats getStats() {
             return stats;
         }
     }

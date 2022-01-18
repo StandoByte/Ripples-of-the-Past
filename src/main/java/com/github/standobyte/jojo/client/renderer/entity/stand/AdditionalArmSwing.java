@@ -15,7 +15,7 @@ public class AdditionalArmSwing {
     public AdditionalArmSwing(float anim, HandSide side, StandEntity stand) {
         this.anim = anim;
         this.side = side;
-        Random random = stand.getRandom();
+        Random random = stand.getRandom(); // FIXME (!!!) precision
         double upOffset = (random.nextDouble() - 0.5) * 0.4D;
         double leftOffset = (random.nextDouble() - 0.0) * 0.2D;
         if (side == HandSide.RIGHT) {

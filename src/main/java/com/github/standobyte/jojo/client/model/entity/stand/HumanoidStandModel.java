@@ -1,10 +1,12 @@
 package com.github.standobyte.jojo.client.model.entity.stand;
 
+import com.github.standobyte.jojo.action.actions.StandEntityAction.Phase;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.util.MathUtil;
 import com.google.common.collect.ImmutableList;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.math.MathHelper;
 
@@ -203,7 +205,8 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
     }
 
     @Override
-    protected void swingArm(T entity, float xRotation, HandSide swingingHand) { // TODO distinct animation for strong attack swing
+    protected void swingArm(T entity, float swingAmount, float xRotation, HandSide swingingHand) {
+        entity.setYBodyRot(entity.yRot);
         ModelRenderer punchingArm = getArm(swingingHand);
         ModelRenderer punchingForeArm = getForeArm(swingingHand);
         ModelRenderer otherArm = getArm(swingingHand.getOpposite());
@@ -221,10 +224,7 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
             otherForeArm = this.leftForeArm;
         }    
         
-        float swing = 1.0F - this.attackTime;
-        swing = swing * swing;
-        swing = swing * swing;
-        swing = 1.0F - swing;
+        float swing = swingAmount * swingAmount * swingAmount;
         
         upperPart.yRot = 0.5236F - 1.0472F * swing;
         if (swingingHand == HandSide.LEFT) {
@@ -289,6 +289,20 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         
         rightForeArm.zRot = -1.0472F;
         leftForeArm.zRot = -rightForeArm.zRot;
+    }
+
+    @Override
+    protected void lightAttackPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
+        float swing = phase == Phase.WINDUP ? entity.getCurrentTaskCompletion(ticks - entity.tickCount) : 1F;
+        swingArm(entity, swing, xRotation,
+                entity.swingingArm == Hand.MAIN_HAND ? entity.getMainArm() : entity.getMainArm().getOpposite());
+    }
+
+    @Override
+    protected void heavyAttackPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
+        float swing = phase == Phase.WINDUP ? entity.getCurrentTaskCompletion(ticks - entity.tickCount) : 1F;
+        swingArm(entity, swing, xRotation,
+                entity.swingingArm == Hand.MAIN_HAND ? entity.getMainArm() : entity.getMainArm().getOpposite());
     }
     
     @Override

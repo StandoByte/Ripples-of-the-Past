@@ -20,7 +20,7 @@ public class ArmSwings {
         }
     }
     
-    void broadcastSwings(StandEntity entity) {
+    void broadcastSwings(StandEntity entity) { // FIXME btw now it all can be done client-side since the barrage action is now synced instead
         PacketManager.sendToClientsTracking(new TrStandEntitySwingsPacket(entity.getId(), swings, handSideBits), entity);
         reset();
     }

@@ -3,9 +3,12 @@ package com.github.standobyte.jojo.action.actions;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntity.PunchType;
+import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
@@ -37,22 +40,20 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
     @Override
     public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
         if (!world.isClientSide()) {
-            double attackSpeed = standEntity.getAttackSpeed();
-            int extraTickSwings = (int) (attackSpeed / 20D);
+            int hits = StandStatFormulas.getBarrageHitsPerSecond(standEntity.getAttributeValue(Attributes.ATTACK_SPEED));
+            int extraTickSwings = hits / 20;
             for (int i = 0; i < extraTickSwings; i++) {
-                standEntity.swingAlternateHands();
-                standEntity.punch(false);
+                swingAndPunch(standEntity);
             }
             
             if (standEntity.barragePunchDelayed) {
                 standEntity.barragePunchDelayed = false;
-                standEntity.swingAlternateHands();
-                standEntity.punch(false);
+                swingAndPunch(standEntity);
             }
             else {
-                double sp2 = attackSpeed % 20D;
+                double sp2 = hits % 20;
                 if (sp2 > 0) {
-                    double ticksInterval = 20 / sp2;
+                    double ticksInterval = 20D / sp2;
                     int intTicksInterval = (int) ticksInterval;
                     if ((getStandActionTicks(userPower, standEntity) - ticks + standEntity.barrageDelayedPunches) % intTicksInterval == 0) {
                         double delayProb = ticksInterval - intTicksInterval;
@@ -61,12 +62,21 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
                             standEntity.barrageDelayedPunches++;
                         }
                         else {
-                            standEntity.swingAlternateHands();
-                            standEntity.punch(false);
+                            swingAndPunch(standEntity);
                         }
                     }
                 }
             }
         }
+    }
+    
+    private void swingAndPunch(StandEntity standEntity) {
+        standEntity.swing(standEntity.alternateHands());
+        standEntity.punch(PunchType.BARRAGE);
+    }
+    
+    @Override
+    protected boolean isCombatAction() {
+        return true;
     }
 }

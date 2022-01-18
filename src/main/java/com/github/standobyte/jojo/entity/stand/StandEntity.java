@@ -7,9 +7,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
@@ -21,12 +23,13 @@ import com.github.standobyte.jojo.entity.mob.IMobStandUser;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModDataSerializers;
 import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModEntityAttributes;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
-import com.github.standobyte.jojo.power.stand.stats.StandStatsV2;
+import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.util.EntityDistanceRayTraceResult;
 import com.github.standobyte.jojo.util.JojoModUtil;
 import com.github.standobyte.jojo.util.damage.IStandDamageSource;
@@ -42,8 +45,12 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MoverType;
+import net.minecraft.entity.ai.attributes.Attribute;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.AttributeModifier.Operation;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.effect.LightningBoltEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -80,23 +87,20 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 
-/* FIXME (!!!) attributes
- *   use statsV2
- *   2 range attributes, precision attribute
- *   achieved resolve upgrading as attribute modifiers
- */
-//FIXME (!!!) stand recovery
 abstract public class StandEntity extends LivingEntity implements IStandManifestation, IEntityAdditionalSpawnData {
     private static final List<Effect> SHARED_EFFECTS = new ArrayList<>();
 
     protected static final DataParameter<Byte> STAND_FLAGS = EntityDataManager.defineId(StandEntity.class, DataSerializers.BYTE);
 
     private final StandEntityType<?> type;
-    private final double maxRange;
-    private double basePrecision;
+    private final double rangeEffective;
+    private final double rangeMax;
+    private double rangeEfficiency = 1;
+    private double staminaCondition = 1;
 
     private int summonPoseRandomByte;
     private static final DataParameter<Byte> ARMS_ONLY_MODE = EntityDataManager.defineId(StandEntity.class, DataSerializers.BYTE);
@@ -106,7 +110,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     private IStandPower userPower;
     protected StandRelativeOffset relativePos = new StandRelativeOffset(-0.5, -0.2, 0.2);
 
-    private boolean alternateSwing;
+    private static final DataParameter<Boolean> SWING_OFF_HAND = EntityDataManager.defineId(StandEntity.class, DataSerializers.BOOLEAN);
     private boolean alternateAdditionalSwing;
     private int lastSwingTick = -2;
     private final ArmSwings swings = new ArmSwings();
@@ -135,12 +139,11 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         this.type = type;
         setNoGravity(standHasNoGravity());
         setNoPhysics(standCanHaveNoPhysics());
-        StandEntityStats stats = type.getStats();
-        StandStatsV2 statsV2 = type.getStatsV2();
+        StandStats stats = type.getStats();
         initStandAttributes(stats);
-        this.maxRange = stats.getMaxRange();
-        this.basePrecision = stats.getPrecision();
-        this.summonLockTicks = stats.getSummonTicks();
+        this.rangeEffective = stats.getEffectiveRange();
+        this.rangeMax = stats.getMaxRange();
+        this.summonLockTicks = StandStatFormulas.getSummonLockTicks(getAttributeValue(Attributes.MOVEMENT_SPEED));
         if (level.isClientSide()) {
             this.alphaTicks = this.summonLockTicks;
         }
@@ -155,6 +158,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         entityData.define(USER_ID, -1);
         entityData.define(STAND_FLAGS, (byte) 0);
         entityData.define(ARMS_ONLY_MODE, (byte) 0);
+        entityData.define(SWING_OFF_HAND, false);
         entityData.define(TASK_TARGET, ActionTarget.EMPTY);
         entityData.define(CURRENT_TASK, Optional.empty());
     }
@@ -180,13 +184,19 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         else if (CURRENT_TASK.equals(dataParameter)) {
             StandEntityAction action = getCurrentTaskAction();
             if (action != null) {
-                action.playSound(this, userPower);
+                StandEntityAction.Phase phase = getCurrentTaskPhase();
+                action.playSound(this, userPower, phase);
+                action.onTaskSet(level, this, userPower, phase);
             }
             if (level.isClientSide()) {
+                if (action == null) JojoMod.LOGGER.debug("qqq");
                 if (action != null || getStandPose() != StandPose.SUMMON) {
                     setStandPose(action != null ? action.standPose : StandPose.NONE);
                 }
             }
+        }
+        else if (SWING_OFF_HAND.equals(dataParameter)) {
+            swingingArm = entityData.get(SWING_OFF_HAND) ? Hand.OFF_HAND : Hand.MAIN_HAND;
         }
         else if (ARMS_ONLY_MODE.equals(dataParameter)) {
             onArmsOnlyModeUpdated();
@@ -217,28 +227,122 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return LivingEntity.createLivingAttributes()
                 .add(Attributes.ATTACK_DAMAGE)
                 .add(Attributes.ATTACK_KNOCKBACK)
-                .add(Attributes.ATTACK_SPEED);
+                .add(Attributes.ATTACK_SPEED)
+                .add(ForgeMod.REACH_DISTANCE.get())
+                .add(ModEntityAttributes.STAND_DURABILITY.get())
+                .add(ModEntityAttributes.STAND_PRECISION.get());
     }
 
-    private void initStandAttributes(StandEntityStats stats) {
-        getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(stats.getDamage());
-        getAttribute(Attributes.ATTACK_KNOCKBACK).setBaseValue(stats.getAttackKnockback());
-        getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(stats.getMovementSpeed());
-        getAttribute(Attributes.ATTACK_SPEED).setBaseValue(stats.getAttackSpeed());
-        getAttribute(Attributes.ARMOR).setBaseValue(stats.getArmor());
-        getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(stats.getArmorToughness());
-        getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(stats.getKnockbackResistance());
+    private void initStandAttributes(StandStats stats) {
+        getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(stats.getBasePower());
+        getAttribute(Attributes.ATTACK_SPEED).setBaseValue(stats.getBaseAttackSpeed());
+        getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(stats.getBaseMovementSpeed());
+        getAttribute(ForgeMod.REACH_DISTANCE.get()).setBaseValue(getDefaultMeleeAttackRange());
+        getAttribute(ModEntityAttributes.STAND_DURABILITY.get()).setBaseValue(stats.getBaseDurability());
+        getAttribute(ModEntityAttributes.STAND_PRECISION.get()).setBaseValue(stats.getBasePrecision());
+    }
+
+    protected double getDefaultMeleeAttackRange() {
+        return 3.0D;
     }
     
-    public StandEntityStats getStats() {
-        return type.getStats();
+    public void modifiersFromResolveDev(float ratio) {
+        if (!level.isClientSide()) {
+            StandStats stats = type.getStats();
+            applyAttributeModifier(Attributes.ATTACK_DAMAGE, UUID.fromString("532a6cb6-0df0-44ea-a769-dba2db506545"), 
+                    "Stand attack damage from experience", stats.getDevPower(ratio), Operation.ADDITION);
+            
+            applyAttributeModifier(Attributes.ATTACK_SPEED, UUID.fromString("51f253cd-b440-48b1-aa60-89913963df51"), 
+                    "Stand attack speed from experience", stats.getDevAttackSpeed(ratio), Operation.ADDITION);
+            
+            applyAttributeModifier(Attributes.MOVEMENT_SPEED, UUID.fromString("cbb892a6-3390-4e75-b0a3-04cd253033e3"), 
+                    "Stand movement speed from experience", stats.getDevMovementSpeed(ratio), Operation.ADDITION);
+            
+            applyAttributeModifier(ModEntityAttributes.STAND_DURABILITY.get(), UUID.fromString("d6979cd9-1481-49a0-bd5d-6922049448b4"), 
+                    "Stand durability from experience", stats.getDevDurability(ratio), Operation.ADDITION);
+            
+            applyAttributeModifier(ModEntityAttributes.STAND_PRECISION.get(), UUID.fromString("1dcdb98e-00fa-42d0-8867-242165e49832"), 
+                    "Stand precision from experience", stats.getDevPrecision(ratio), Operation.ADDITION);
+        }
     }
     
-    protected StandStatsV2 getStatsV2() {
-        return type.getStatsV2();
+    private void applyAttributeModifier(Attribute attribute, UUID modifierId, String name, double value, Operation operation) {
+        ModifiableAttributeInstance attributeInstance = getAttribute(attribute);
+        if (attributeInstance != null) {
+            attributeInstance.removeModifier(modifierId);
+            if (value > 0) {
+                attributeInstance.addTransientModifier(new AttributeModifier(modifierId, name, value, operation));
+            }
+        }
     }
+    
+    private static final AttributeModifier ATTACK_DAMAGE_ARMS_ONLY = new AttributeModifier(
+            UUID.fromString("aaa82f0e-f1a7-47d1-9066-e1a025be02df"), "Stand attack damage with only arms", -0.5, Operation.MULTIPLY_TOTAL);
+    private static final AttributeModifier ATTACK_SPEED_ARMS_ONLY = new AttributeModifier(
+            UUID.fromString("5b26b3d1-405c-402b-aee6-d5a0657386fe"), "Stand attack speed with only arms", -0.5, Operation.MULTIPLY_TOTAL);
+    private static final AttributeModifier DURABILITY_ARMS_ONLY = new AttributeModifier(
+            UUID.fromString("244dd41c-aa40-4604-91f9-a788a40227ca"), "Stand durability with only arms", -0.5, Operation.MULTIPLY_TOTAL);
+    private static final AttributeModifier PRECISION_ARMS_ONLY = new AttributeModifier(
+            UUID.fromString("f2d493e2-830a-4891-b756-65cc2be6f14f"), "Stand precision with only arms", -1, Operation.MULTIPLY_TOTAL);
+    
+    private void addArmsOnlyModifiers() {
+        addModifier(getAttribute(Attributes.ATTACK_DAMAGE), ATTACK_DAMAGE_ARMS_ONLY);
+        addModifier(getAttribute(Attributes.ATTACK_SPEED), ATTACK_SPEED_ARMS_ONLY);
+        addModifier(getAttribute(ModEntityAttributes.STAND_DURABILITY.get()), DURABILITY_ARMS_ONLY);
+        addModifier(getAttribute(ModEntityAttributes.STAND_PRECISION.get()), PRECISION_ARMS_ONLY);
+    }
+    
+    private void removeArmsOnlyModifiers() {
+        updateModifier(getAttribute(Attributes.ATTACK_DAMAGE), ATTACK_DAMAGE_ARMS_ONLY, false);
+        updateModifier(getAttribute(Attributes.ATTACK_SPEED), ATTACK_SPEED_ARMS_ONLY, false);
+        updateModifier(getAttribute(ModEntityAttributes.STAND_DURABILITY.get()), DURABILITY_ARMS_ONLY, false);
+        updateModifier(getAttribute(ModEntityAttributes.STAND_PRECISION.get()), PRECISION_ARMS_ONLY, false);
+    }
+    
+    protected final void addModifier(ModifiableAttributeInstance attribute, AttributeModifier modifier) {
+        if (!attribute.hasModifier(modifier)) {
+            attribute.addPermanentModifier(modifier);
+        }
+    }
+    
+    protected final void updateModifier(ModifiableAttributeInstance attribute, AttributeModifier modifier, boolean setModifier) {
+        if (attribute.hasModifier(modifier)) {
+            attribute.removeModifier(modifier);
+        }
+        if (setModifier) {
+            attribute.addPermanentModifier(modifier);
+        }
+    }
+    
+    
+    
+    public double getAttackDamage(@Nullable LivingEntity target) {
+        double damage = getAttributeValue(Attributes.ATTACK_DAMAGE);
+        return damage * rangeEfficiency * staminaCondition;
+    }
+    
+    public double getAttackSpeed() {
+        double speed = getAttributeValue(Attributes.ATTACK_SPEED);
+        return speed * rangeEfficiency * staminaCondition;
+    }
+    
+    public double getAttackKnockback(@Nullable LivingEntity target) {
+        double damage = getAttributeValue(Attributes.ATTACK_KNOCKBACK);
+        return damage * rangeEfficiency * staminaCondition;
+    }
+    
+    public double getDurability() {
+        double durability = getAttributeValue(ModEntityAttributes.STAND_DURABILITY.get());
+        return durability * rangeEfficiency;
+    }
+    
+    public double getPrecision() {
+        double precision = getAttributeValue(ModEntityAttributes.STAND_PRECISION.get());
+        return precision * rangeEfficiency * staminaCondition;
+    }
+    
 
-
+    
     public void setArmsOnlyMode() {
         setArmsOnlyMode(true, true);
     }
@@ -254,19 +358,12 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             }
             entityData.set(ARMS_ONLY_MODE, b);
             
-            StandEntityAction unsummon = ModActions.STAND_ENTITY_UNSUMMON.get();
-            
-            scheduledTask = new StandEntityTask(unsummon, unsummon.getStandActionTicks(userPower, this), 
-                    StandEntityAction.Phase.PERFORM);
+            addArmsOnlyModifiers();
         }
     }
 
     public boolean isArmsOnlyMode() {
         return (entityData.get(ARMS_ONLY_MODE) & 1) > 0;
-    }
-    
-    public boolean lowerStatsFromArmsOnly() {
-        return isArmsOnlyMode() || gradualSummonWeaknessTicks > 0;
     }
     
     public boolean showArm(Hand hand) {
@@ -284,7 +381,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return (entityData.get(ARMS_ONLY_MODE) & 2) > 0;
     }
     
-    public void fullSummonFromArms() { // FIXME arms will be transparent too
+    public void fullSummonFromArms() {
         if (!level.isClientSide() && isArmsOnlyMode()) {
             entityData.set(ARMS_ONLY_MODE, (byte) 2);
             scheduledTask = null;
@@ -304,7 +401,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 addSummonParticles();
             }
             if ((entityData.get(ARMS_ONLY_MODE) & 2) > 0) {
-                gradualSummonWeaknessTicks = getStats().getSummonTicks() * 2;
+                gradualSummonWeaknessTicks = StandStatFormulas.getSummonLockTicks(getAttackSpeed());
                 if (level.isClientSide()) {
                     alphaTicks = gradualSummonWeaknessTicks;
                 }
@@ -330,6 +427,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     @Override
     public void setUserPower(IStandPower power) {
         this.userPower = power;
+        if (power != null) {
+            modifiersFromResolveDev(power.getAchievedResolveRatio());
+        }
     }
     
     @Nullable
@@ -407,8 +507,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         public static final StandPose NONE = new StandPose();
         public static final StandPose SUMMON = new StandPose();
         public static final StandPose BLOCK = new StandPose();
+        public static final StandPose LIGHT_ATTACK = new StandPose();
+        public static final StandPose HEAVY_ATTACK = new StandPose();
         public static final StandPose RANGED_ATTACK = new StandPose();
-        public static final StandPose ABILITY = new StandPose(); // FIXME delete this, use named poses for individual stands
     }
 
 
@@ -483,13 +584,14 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     @Override
     protected void actuallyHurt(DamageSource damageSrc, float damageAmount) {
-        if (!damageSrc.isBypassArmor() && canBlockOrParryFromAngle(damageSrc)) {
+        boolean blockableAngle = canBlockOrParryFromAngle(damageSrc);
+        if (!damageSrc.isBypassArmor() && blockableAngle) {
             if (barrageParryCount > 0) {
                 barrageParryCount--;
                 return;
             }
             if (getCurrentTask() == null) {
-                // FIXME auto-block on getting punched
+                // FIXME ^^^ auto-block on getting punched
 //                setAction(blockAction, 5, StandEntityAction.Phase.PERFORM);
             }
         }
@@ -501,9 +603,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                     if (damageAmount <= 0) return;
                     damageAmount = getDamageAfterArmorAbsorb(damageSrc, damageAmount);
                     damageAmount = getDamageAfterMagicAbsorb(damageSrc, damageAmount);
-                    if (isStandBlocking()) {
-                        damageAmount = onBlockedAttack(damageAmount);
-                    }
+                    damageAmount = damageResistance(damageSrc, damageAmount, blockableAngle);
                     float damageAfterAbsorption = Math.max(damageAmount - getAbsorptionAmount(), 0.0F);
                     setAbsorptionAmount(getAbsorptionAmount() - (damageAmount - damageAfterAbsorption));
                     float absorbedDamage = damageAmount - damageAfterAbsorption;
@@ -535,19 +635,22 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     public boolean canStartBlocking() {
         StandEntityTask currentTask = getCurrentTask();
-        return currentTask == null || currentTask.getAction().isCancelable(userPower, this);
+        return currentTask == null || currentTask.getAction().isCancelable(userPower, this, currentTask.getPhase(), null);
     }
 
     public boolean isStandBlocking() {
         return StandPose.BLOCK.equals(getStandPose());
     }
-
-    protected float onBlockedAttack(float initialDamageAmount) {
-        boolean reduceDamage = true;
-        if (userPower != null) {
-            reduceDamage = true;//userPower.consumeMana(initialDamageAmount * type.getStats().getBlockStaminaCostForDmgPoint()); // FIXME stamina usage, stand crash
+    
+    protected float damageResistance(DamageSource damageSrc, float damageAmount, boolean blockableAngle) {
+        if (!damageSrc.isBypassArmor()) {
+            boolean block = blockableAngle && isBlocking();
+            if (userPower != null) {
+                block = block && userPower.consumeStamina(damageAmount); // FIXME ^^^^^^ stamina usage value, stand crash
+            }
+            return damageAmount * StandStatFormulas.getPhysicalResistance(getDurability(), getAttackDamage(null), block);
         }
-        return reduceDamage ? initialDamageAmount * type.getStats().getBlockDmgFactor() : initialDamageAmount;
+        return damageAmount;
     }
 
     protected boolean canBlockOrParryFromAngle(DamageSource damageSrc) {
@@ -627,6 +730,15 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             setYHeadRot(yRotSet);
         }
         
+        rangeEfficiency = user != null ? 
+                StandStatFormulas.rangeStrengthFactor(rangeEffective, getMaxRange(), distanceTo(user))
+                : 1;
+        staminaCondition = user != null ? 
+                user.hasEffect(ModEffects.RESOLVE.get()) ? 
+                        1
+                        : 0.1 + Math.min((double) (userPower.getStamina() / userPower.getMaxStamina()) * 1.8, 0.9)
+                : 1;
+
         if (summonLockTicks > 0) {
             summonLockTicks--;
         }
@@ -637,6 +749,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             }
             if (gradualSummonWeaknessTicks > 0) {
                 gradualSummonWeaknessTicks--;
+                
+                if (gradualSummonWeaknessTicks == 0 && !level.isClientSide()) {
+                    removeArmsOnlyModifiers();
+                }
             }
         }
 
@@ -724,7 +840,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     protected boolean setTask(StandEntityTask task) {
         if (!level.isClientSide()) {
-            if (stopTask(false) && getCurrentTask() == null) {
+            if (stopTask(false, task.getAction()) && getCurrentTask() == null) {
                 entityData.set(CURRENT_TASK, Optional.of(task));
                 return true;
             }
@@ -736,10 +852,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     public void stopTask() {
-        stopTask(true);
+        stopTask(true, null);
     }
     
-    private boolean stopTask(boolean resetPos) {
+    private boolean stopTask(boolean resetPos, @Nullable StandEntityAction newAction) {
         if (!level.isClientSide()) {
             StandEntityTask currentTask = getCurrentTask();
             if (currentTask == null) {
@@ -749,7 +865,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 clearTask(currentTask, resetPos);
                 return true;
             }
-            if (currentTask.getAction().isCancelable(userPower, this)) {
+            if (currentTask.getAction().isCancelable(userPower, this, currentTask.getPhase(), newAction)) {
                 clearTask(currentTask, resetPos);
                 return true;
             }
@@ -771,6 +887,11 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             StandEntityTask nextTask = scheduledTask;
             scheduledTask = null;
             setTask(nextTask);
+        }
+        else if (isArmsOnlyMode()) {
+            StandEntityAction unsummon = ModActions.STAND_ENTITY_UNSUMMON.get();
+            setTask(new StandEntityTask(unsummon, unsummon.getStandActionTicks(userPower, this), 
+                    StandEntityAction.Phase.PERFORM));
         }
     }
     
@@ -796,8 +917,14 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
         return null;
     }
-
-
+    
+    public float getCurrentTaskCompletion(float partialTick) {
+        StandEntityTask task = getCurrentTask();
+        if (task != null) {
+            return task.getTaskCompletion(partialTick);
+        }
+        return 0;
+    }
 
     public void setTaskTarget(ActionTarget target) {
         if (target.getType() != TargetType.ENTITY || target.getEntity(level) != this) {
@@ -818,16 +945,12 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
 
 
-    // FIXME (!!!) melee attacks stuff
+    
     public boolean canAttackMelee() {
-        return getAttackSpeed() > 0 && getMeleeAttackRange() > 0;
+        return getAttackSpeed() > 0 && getAttributeValue(ForgeMod.REACH_DISTANCE.get()) > 0 ;
     }
 
-    public double getTicksForSinglePunch() {
-        return 20D / getAttackSpeed();
-    }
-
-    public boolean punch(boolean singlePunch) {
+    public boolean punch(PunchType punch) {
         if (!accumulateBarrageTickParry) {
             accumulateBarrageTickParry = true;
             barrageParryCount = 1;
@@ -835,16 +958,24 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         else {
             barrageParryCount++;
         }
-        RayTraceResult target = JojoModUtil.rayTrace(this, getMeleeAttackRange(), entity -> !(entity instanceof LivingEntity) || canAttack((LivingEntity) entity), getPrecision() * 0.5);
+        // FIXME (!!!) precision: expand the hitbox of smaller entities more
+        RayTraceResult target = JojoModUtil.rayTrace(this, getAttributeValue(ForgeMod.REACH_DISTANCE.get()), 
+                entity -> !(entity instanceof LivingEntity) || canAttack((LivingEntity) entity), getAttributeValue(ModEntityAttributes.STAND_PRECISION.get()) * 0.5);
         switch (target.getType()) {
         case BLOCK:
             return breakBlock(((BlockRayTraceResult) target).getBlockPos());
         case ENTITY:
             EntityDistanceRayTraceResult result = (EntityDistanceRayTraceResult) target;
-            return attackEntity(result.getEntity(), singlePunch, result.getTargetAABBDistance());
+            return attackEntity(result.getEntity(), punch, result.getTargetAABBDistance());
         default:
             return false;
         }
+    }
+    
+    public enum PunchType {
+        HEAVY,
+        LIGHT,
+        BARRAGE
     }
     
     @Override
@@ -865,18 +996,15 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
         return true;
     }
-
-    public double getMeleeAttackRange() {
-        return 3.0D;
-    }
     
-    public void swingAlternateHands() {
+    public Hand alternateHands() {
         Hand hand = Hand.MAIN_HAND;
         if (tickCount - lastSwingTick > 1) {
-            if (alternateSwing) {
+            boolean offHand = entityData.get(SWING_OFF_HAND);
+            if (offHand) {
                 hand = Hand.OFF_HAND;
             }
-            alternateSwing = !alternateSwing;
+            entityData.set(SWING_OFF_HAND, !offHand);
         }
         else {
             if (alternateAdditionalSwing) {
@@ -884,7 +1012,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             }
             alternateAdditionalSwing = !alternateAdditionalSwing;
         }
-        swing(hand);
+        return hand;
     }
 
     @Override
@@ -960,7 +1088,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
     }
 
-    // FIXME swing time (light attack, barrage)
     @Override
     protected void updateSwingTime() {
         int i = getCurrentSwingDuration() + 1;
@@ -991,32 +1118,56 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return attackSpeed < 10D ? (int) (20D / attackSpeed) : 2;
     }
 
-    // FIXME stats
-    public boolean attackEntity(Entity target, boolean strongAttack, double attackDistance) {
+    public boolean attackEntity(Entity target, PunchType punch, double attackDistance) {
         if (!canHarm(target)) {
             return false;
         }
-        float rangeFactor = rangeEfficiencyFactor();
-        double precision = getPrecision();
-        double damage = getAttackDamage(target, strongAttack, rangeFactor, attackDistance, precision);
-        double additionalKnockback = getAttributeValue(Attributes.ATTACK_KNOCKBACK) * rangeFactor;
         StandEntityDamageSource dmgSource = new StandEntityDamageSource("stand", this, getUserPower());
-        if (strongAttack) {
-            additionalKnockback *= 1 + damage / 5;
+        
+        LivingEntity livingTarget = null;
+        if (target instanceof LivingEntity) {
+            livingTarget = (LivingEntity) target;
         }
-        else {
-            additionalKnockback = 0;
+        
+        double strength = getAttackDamage(livingTarget);
+        double precision = getPrecision();
+        double attackRange = getAttributeValue(ForgeMod.REACH_DISTANCE.get());
+        double knockback = getAttackKnockback(livingTarget);
+        
+        float damage;
+        switch (punch) {
+        case HEAVY:
+            damage = StandStatFormulas.getHeavyAttackDamage(strength, livingTarget);
+
+            double targetProximityRatio = attackDistance / attackRange;
+            if (targetProximityRatio > 0.75) {
+                damage *= targetProximityRatio * 2 - 0.5;
+            }
+            else if (targetProximityRatio < 0.25) {
+                damage *= targetProximityRatio * 2 + 0.5;
+            }
+            
+            knockback *= 1 + damage / 4;
+            break;
+        case LIGHT:
+            damage = StandStatFormulas.getLightAttackDamage(strength);
+            break;
+        case BARRAGE:
+            damage = StandStatFormulas.getBarrageHitDamage(strength, precision, getRandom());
             dmgSource.setKnockbackReduction(0.1F);
+            break;
+        default:
+            damage = 0;
         }
-        boolean attacked = hurtTarget(target, dmgSource, (float) damage);
+        
+        boolean attacked = hurtTarget(target, dmgSource, damage);
         if (attacked) {
-            if (target instanceof LivingEntity) {
-                LivingEntity livingTarget = (LivingEntity) target;
-                if (additionalKnockback > 0.0F) {
-                    livingTarget.knockback((float) additionalKnockback * 0.5F, (double) MathHelper.sin(yRot * ((float)Math.PI / 180F)), (double) (-MathHelper.cos(yRot * ((float)Math.PI / 180F))));
+            if (livingTarget != null) {
+                if (knockback > 0.0F) {
+                    livingTarget.knockback((float) knockback * 0.5F, (double) MathHelper.sin(yRot * ((float)Math.PI / 180F)), (double) (-MathHelper.cos(yRot * ((float)Math.PI / 180F))));
                 }
-                if (strongAttack && livingTarget.getUseItem().isShield(livingTarget) && target instanceof PlayerEntity) {
-                    ((PlayerEntity) livingTarget).disableShield(precision > 0.5 && attackDistance < getMeleeAttackRange() * 0.4);
+                if (punch == PunchType.HEAVY && livingTarget.getUseItem().isShield(livingTarget) && target instanceof PlayerEntity) {
+                    ((PlayerEntity) livingTarget).disableShield(precision > 0.5 && attackDistance < attackRange * 0.4);
                 }
                 LivingEntity user = getUser();
                 if (user != null) {
@@ -1034,36 +1185,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
         return attacked;
     }
-    
-    protected double getAttackDamage(Entity target, boolean strongAttack, double rangeFactor, double attackDistance, double precision) {
-        double damage = getAttributeValue(Attributes.ATTACK_DAMAGE);
-        if (strongAttack) {
-            double targetProximityRatio = Math.max(attackDistance / getMeleeAttackRange(), 0.2);
-            if (targetProximityRatio < 0.4) {
-                if (!lowerStatsFromArmsOnly()) {
-                    damage *= 0.4 / targetProximityRatio;
-                }
-            }
-            else if (targetProximityRatio > 0.6) {
-                damage *= 0.6 / targetProximityRatio;
-            }
-        }
-        else {
-            damage *= 0.04;
-            if (random.nextDouble() > precision) {
-                damage *= 1 - (random.nextDouble() * (1 - precision));
-            }
-        }
-        return damage * rangeFactor;
-    }
-    
-    public double getPrecision() {
-        if (lowerStatsFromArmsOnly()) {
-            return 0;
-        }
-        return basePrecision * rangeEfficiencyFactor();
-    }
-    
+
     protected boolean hurtTarget(Entity target, DamageSource dmgSource, float damage) {
         return ModDamageSources.hurtThroughInvulTicks(target, dmgSource, (float) damage);
     }
@@ -1089,51 +1211,17 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         float blockHardness = blockState.getDestroySpeed(level, blockPos);
         return blockHardness >= 0 && canBreakBlock(blockHardness, blockState.getHarvestLevel());
     }
-    
+
     protected boolean canBreakBlock(float blockHardness, int blockHarvestLevel) {
-        double blockBreakTier = getAttributeValue(Attributes.ATTACK_DAMAGE) / 2; // Star Platinum has 10 Attack Damage
-        /* damage:
-         * 2                                4                                   6                                   8                       10
-         * 
-         * hardness:
-         * e^0 = 1                          e^1 ~ 2.718                         e^2 ~ 7.389                         e^3 ~ 20.086            e^4 ~ 54.598
-         * 
-         * 0.3:  glass, glowstone           1.25: terracota, basalt             2.8:  blue ice                      10:   hardened glass    22.5: ender chest
-         * 0.4:  netherrack                 1.5:  stone                         3.5:  furnace                                               30:   ancient debris
-         * 0.5:  dirt, ice, sand, hay       1.8:  concrete                      3:    ores, gold/lapis block                                50:   obsidian, netherite
-         * 0.6:  clay, gravel               2:    bricks, cobblestone, wood     4.5:  deepslate ores
-         * 0.8:  quartz, sandstone, wool    2.5:  chest                         5:    diamond/iron/redstone block
-         * 1:    melon, mob head
-         * 
-         * harvest level:
-         * -1: leaves/grass                 0: dirt/wood/stone                  1: iron                             2: diamond/gold         3: obsidian/netherite
-         */
-        return blockHardness <= Math.exp(blockBreakTier * rangeEfficiencyFactor() - 1) && blockHarvestLevel + 2 <= blockBreakTier;
-    }
-    
-    public double getAttackSpeed() {
-        double speed = getAttributeValue(Attributes.ATTACK_SPEED);
-        if (lowerStatsFromArmsOnly()) {
-            return speed * 0.5F;
-        }
-        return speed * rangeEfficiencyFactor();
+        return StandStatFormulas.isBlockBreakable(getAttackDamage(null), blockHardness, blockHarvestLevel);
     }
 
-    public float rangeEfficiencyFactor() {
-        LivingEntity user = getUser();
-        if (user != null) {
-            double distanceSq = distanceToSqr(user);
-            double rangeSq = getMaxRange();
-            rangeSq *= rangeSq;
-            if (distanceSq > rangeSq / 4) {
-                return (float) (rangeSq / distanceSq / 4);
-            }
-        }
-        return 1.0F;
+    public double getMaxRange() {
+        return rangeMax;
     }
     
-    public double getMaxRange() {
-        return maxRange;
+    public double getRangeEfficiency() {
+        return rangeEfficiency;
     }
 
 
@@ -1325,7 +1413,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             }
         }
         if (!isFollowingUser()) {
-            alpha *= rangeEfficiencyFactor(); 
+            alpha *= rangeEfficiency; 
         }
         return MathHelper.clamp(alpha, 0F, 1F);
     }

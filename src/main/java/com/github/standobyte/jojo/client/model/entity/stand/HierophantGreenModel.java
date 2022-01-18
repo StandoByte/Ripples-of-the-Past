@@ -1,6 +1,8 @@
 package com.github.standobyte.jojo.client.model.entity.stand;
 
+import com.github.standobyte.jojo.action.actions.HierophantGreenGrapple;
 import com.github.standobyte.jojo.action.actions.StandEntityAction.Phase;
+import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -105,10 +107,12 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
     }
     
     @Override
-    protected void specialAbilityPose(HierophantGreenEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
-        super.specialAbilityPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, phase);
-        entity.setYBodyRot(entity.yRot);
-        ModelRenderer arm = getArm(entity.getMainArm());
-        arm.xRot = -1.5708F;
+    protected void customPose(HierophantGreenEntity entity, StandPose pose, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
+        super.customPose(entity, pose, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, phase);
+        if (pose == HierophantGreenGrapple.GRAPPLE_POSE) {
+            entity.setYBodyRot(entity.yRot);
+            ModelRenderer arm = getArm(entity.getMainArm());
+            arm.xRot = -1.5708F;
+        }
     }
 }

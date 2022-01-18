@@ -30,7 +30,7 @@ public class StandEntityTask {
     }
     
     void tick(IStandPower standPower, StandEntity standEntity) {
-        if (startingTicks == 1 && phase == StandEntityAction.Phase.PERFORM) {
+        if (ticksLeft == 1 && phase == StandEntityAction.Phase.PERFORM) {
             action.standPerform(standEntity.level, standEntity, standPower, standEntity.getTaskTarget());
         }
         switch (phase) {
@@ -46,17 +46,30 @@ public class StandEntityTask {
             action.standTickPerform(standEntity.level, standEntity, 
                     startingTicks - ticksLeft, standPower, standEntity.getTaskTarget());
             break;
+        case RECOVERY:
+            break;
         }
         
         ticksLeft--;
         if (ticksLeft <= 0) {
             switch (phase) {
             case WINDUP:
-                phase = StandEntityAction.Phase.PERFORM;
+                this.phase = StandEntityAction.Phase.PERFORM;
                 this.startingTicks = action.getStandActionTicks(standPower, standEntity);
                 this.ticksLeft = startingTicks;
                 break;
             case PERFORM:
+                int recoveryTicks = action.getStandRecoveryTicks(standPower, standEntity);
+                if (recoveryTicks > 0) {
+                    this.phase = StandEntityAction.Phase.RECOVERY;
+                    this.startingTicks = recoveryTicks;
+                    this.ticksLeft = startingTicks;
+                }
+                else {
+                    standEntity.stopTask();
+                }
+                break;
+            case RECOVERY:
                 standEntity.stopTask();
                 break;
             default:
@@ -71,10 +84,6 @@ public class StandEntityTask {
     
     public int getTicksLeft() {
         return ticksLeft;
-    }
-    
-    public float getTaskCompletion() {
-        return getTaskCompletion(0);
     }
     
     public float getTaskCompletion(float partialTick) {
@@ -114,7 +123,7 @@ public class StandEntityTask {
                 return Optional.empty();
             }
             
-            int ticks = buf.readInt();
+            int ticks = buf.readVarInt();
             StandEntityAction.Phase phase = buf.readEnum(StandEntityAction.Phase.class);
 
             return Optional.of(new StandEntityTask((StandEntityAction) action, ticks, phase));

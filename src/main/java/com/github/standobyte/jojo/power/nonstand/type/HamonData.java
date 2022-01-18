@@ -262,10 +262,14 @@ public class HamonData extends TypeSpecificData {
         giveBreathingTechniqueBuffs(power.getUser());
     }
 
-    private static final AttributeModifier ATTACK_DAMAGE = new AttributeModifier(UUID.fromString("8dcb2ad7-6067-4615-b7b6-af5256537c10"), "hamon_training_attack_damage", 0.01D, AttributeModifier.Operation.ADDITION);
-    private static final AttributeModifier ATTACK_SPEED = new AttributeModifier(UUID.fromString("995b2915-9053-472c-834c-f94251e81659"), "hamon_training_attack_speed", 0.03D, AttributeModifier.Operation.ADDITION);
-    private static final AttributeModifier MOVEMENT_SPEED = new AttributeModifier(UUID.fromString("ffa9ba4e-3811-44f7-a4a9-887ffbd47390"), "hamon_training_movement_speed", 0.0005D, AttributeModifier.Operation.ADDITION);
-    private static final AttributeModifier SWIMMING_SPEED = new AttributeModifier(UUID.fromString("34dcb563-6759-4a2b-9dd8-ad2dd7e70404"), "hamon_training_swimming_speed", 0.01D, AttributeModifier.Operation.ADDITION);
+    private static final AttributeModifier ATTACK_DAMAGE = new AttributeModifier(
+            UUID.fromString("8dcb2ad7-6067-4615-b7b6-af5256537c10"), "Attack damage from Hamon Training", 0.01D, AttributeModifier.Operation.ADDITION);
+    private static final AttributeModifier ATTACK_SPEED = new AttributeModifier(
+            UUID.fromString("995b2915-9053-472c-834c-f94251e81659"), "Attack speed from Hamon Training", 0.03D, AttributeModifier.Operation.ADDITION);
+    private static final AttributeModifier MOVEMENT_SPEED = new AttributeModifier(
+            UUID.fromString("ffa9ba4e-3811-44f7-a4a9-887ffbd47390"), "Movement speed from Hamon Training", 0.0005D, AttributeModifier.Operation.ADDITION);
+    private static final AttributeModifier SWIMMING_SPEED = new AttributeModifier(
+            UUID.fromString("34dcb563-6759-4a2b-9dd8-ad2dd7e70404"), "Swimming speed from Hamon Training", 0.01D, AttributeModifier.Operation.ADDITION);
 
     private void giveBreathingTechniqueBuffs(LivingEntity entity) {
         int lvl = (int) getBreathingLevel();

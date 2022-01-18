@@ -93,7 +93,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
             part.zRot = 0;
         });
         if (this.attackTime > 0.0F) {
-            swingArm(entity, xRotation, entity.swingingArm == Hand.MAIN_HAND ? entity.getMainArm() : entity.getMainArm().getOpposite());
+            swingArm(entity, this.attackTime, xRotation, entity.swingingArm == Hand.MAIN_HAND ? entity.getMainArm() : entity.getMainArm().getOpposite());
         }
         else {
             if (poseType == StandPose.SUMMON) {
@@ -111,14 +111,17 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
             else if (poseType == StandPose.BLOCK) {
                 blockingPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
             }
+            else if (poseType == StandPose.LIGHT_ATTACK) {
+                lightAttackPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, entity.getCurrentTaskPhase());
+            }
+            else if (poseType == StandPose.HEAVY_ATTACK) {
+                heavyAttackPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, entity.getCurrentTaskPhase());
+            }
             else if (poseType == StandPose.RANGED_ATTACK) {
                 rangedAttackPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, entity.getCurrentTaskPhase());
             }
-            else if (poseType == StandPose.ABILITY) {
-                specialAbilityPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, entity.getCurrentTaskPhase());
-            }
             else {
-                customPose(poseType, entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, entity.getCurrentTaskPhase());
+                customPose(entity, poseType, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, entity.getCurrentTaskPhase());
             }
         }
         this.xRotation = xRotation;
@@ -141,16 +144,15 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         return 1;
     }
     protected abstract void blockingPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation);
+    protected abstract void lightAttackPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase);
+    protected abstract void heavyAttackPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase);
     protected void rangedAttackPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
         resetPose();
     }
-    protected void specialAbilityPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
+    protected void customPose(T entity, StandPose pose, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
         resetPose();
     }
-    protected void customPose(StandPose pose, T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
-        resetPose();
-    }
-    protected abstract void swingArm(T entity, float xRotation, HandSide swingingHand);
+    protected abstract void swingArm(T entity, float swingAmount, float xRotation, HandSide swingingHand);
 
     public void renderFirstPersonArms(HandSide handSide, MatrixStack matrixStack, 
             IVertexBuilder buffer, int packedLight, T entity, float partialTick, 
@@ -180,7 +182,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
                     attackTime = anim - 1;
                     swingingHand = swing.getSide().getOpposite();
                 }
-                swingArm(entity, xRotation, swingingHand);
+                swingArm(entity, this.attackTime, xRotation, swingingHand);
                 rotateAdditionalArmSwings();
                 renderToBuffer(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha * 0.5F);
                 matrixStack.popPose();

@@ -11,7 +11,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.power.stand.stats.StandStatsV2;
+import com.github.standobyte.jojo.power.stand.stats.StandStats;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.Effect;
@@ -20,7 +20,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent;
 
-public class EntityStandType<T extends StandStatsV2> extends StandType<T> {
+public class EntityStandType<T extends StandStats> extends StandType<T> {
     private final Supplier<? extends StandEntityType<? extends StandEntity>> entityTypeSupplier;
 
     public EntityStandType(int tier, int color, ITextComponent partName, StandAction[] attacks, StandAction[] abilities, 
@@ -42,6 +42,14 @@ public class EntityStandType<T extends StandStatsV2> extends StandType<T> {
     @Override
     public boolean usesResolve() {
         return true;
+    }
+    
+    @Override
+    public void onNewAchievedResolve(IStandPower power, float oldValue, float newValue) {
+        if (power.isActive()) {
+            StandEntity stand = (StandEntity) power.getStandManifestation();
+            stand.modifiersFromResolveDev(power.getAchievedResolveRatio());
+        }
     }
     
     @Override

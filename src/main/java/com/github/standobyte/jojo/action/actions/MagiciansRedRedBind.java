@@ -3,12 +3,14 @@ package com.github.standobyte.jojo.action.actions;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.MRRedBindEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.world.World;
 
 public class MagiciansRedRedBind extends StandEntityAction {
+    public static final StandPose RED_BIND_POSE = new StandPose();
 
     public MagiciansRedRedBind(StandEntityAction.Builder builder) {
         super(builder);

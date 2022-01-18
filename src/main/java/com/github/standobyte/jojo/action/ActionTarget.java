@@ -99,7 +99,7 @@ public class ActionTarget {
     }
     
     public Vector3d getTargetPos() {
-        return type == TargetType.ENTITY ? entity.getBoundingBox().getCenter() : targetPos;
+        return type == TargetType.ENTITY ? entity.getEyePosition(1.0F) : targetPos;
     }
 
     public static enum TargetType {

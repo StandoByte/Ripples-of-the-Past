@@ -11,7 +11,7 @@ import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
-import com.github.standobyte.jojo.power.stand.stats.StandStatsV2;
+import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.util.JojoModUtil;
 import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
 import com.github.standobyte.jojo.util.data.StandStatsManager;
@@ -29,7 +29,7 @@ import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
-public abstract class StandType<T extends StandStatsV2> extends ForgeRegistryEntry<StandType<?>> implements IPowerType<IStandPower, StandType<?>> {
+public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry<StandType<?>> implements IPowerType<IStandPower, StandType<?>> {
     private final int tier;
     private final int color;
     private final ITextComponent partName;
@@ -113,6 +113,8 @@ public abstract class StandType<T extends StandStatsV2> extends ForgeRegistryEnt
     public boolean usesResolve() {
         return false;
     }
+    
+    public void onNewAchievedResolve(IStandPower power, float oldValue, float newValue) {} // FIXME (!!) set stamina modifier
     
     @Override
     public int getExpRewardMultiplier() {

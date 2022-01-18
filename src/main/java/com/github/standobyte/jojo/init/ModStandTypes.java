@@ -7,7 +7,7 @@ import javax.annotation.Nonnull;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.actions.StandAction;
 import com.github.standobyte.jojo.power.IPowerType;
-import com.github.standobyte.jojo.power.stand.stats.StandStatsV2;
+import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.power.stand.type.EntityStandType;
 import com.github.standobyte.jojo.power.stand.type.StandType;
@@ -63,12 +63,12 @@ public class ModStandTypes {
                     .build(), 
                     ModEntityTypes.THE_WORLD));
     
-    public static final RegistryObject<EntityStandType<StandStatsV2>> HIEROPHANT_GREEN = STANDS.register("hierophant_green", 
+    public static final RegistryObject<EntityStandType<StandStats>> HIEROPHANT_GREEN = STANDS.register("hierophant_green", 
             () -> new EntityStandType<>(4, 0x00B000, PART_3_NAME,
                     new StandAction[] {ModActions.HIEROPHANT_GREEN_STRING_ATTACK.get(), ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get()},
                     new StandAction[] {ModActions.HIEROPHANT_GREEN_BLOCK.get(), ModActions.HIEROPHANT_GREEN_GRAPPLE.get(), ModActions.HIEROPHANT_GREEN_BARRIER.get()},
                     ModSounds.KAKYOIN_HIEROPHANT_GREEN, 
-                    StandStatsV2.class, new StandStatsV2.Builder()
+                    StandStats.class, new StandStats.Builder()
                     .power(6.0)
                     .speed(10.0)
                     .range(50.0)
@@ -77,12 +77,12 @@ public class ModStandTypes {
                     .build(), 
                     ModEntityTypes.HIEROPHANT_GREEN));
     
-    public static final RegistryObject<EntityStandType<StandStatsV2>> SILVER_CHARIOT = STANDS.register("silver_chariot", 
+    public static final RegistryObject<EntityStandType<StandStats>> SILVER_CHARIOT = STANDS.register("silver_chariot", 
             () -> new EntityStandType<>(5, 0xBEC8D6, PART_3_NAME,
                     new StandAction[] {ModActions.SILVER_CHARIOT_ATTACK.get(), ModActions.SILVER_CHARIOT_BARRAGE.get(), ModActions.SILVER_CHARIOT_RAPIER_LAUNCH.get()},
                     new StandAction[] {ModActions.SILVER_CHARIOT_BLOCK.get(), ModActions.SILVER_CHARIOT_TAKE_OFF_ARMOR.get()},
                     ModSounds.POLNAREFF_SILVER_CHARIOT, 
-                    StandStatsV2.class, new StandStatsV2.Builder()
+                    StandStats.class, new StandStats.Builder()
                     .power(7.0)
                     .speed(14.0)
                     .range(10.0, 10.0)
@@ -91,12 +91,12 @@ public class ModStandTypes {
                     .build(), 
                     ModEntityTypes.SILVER_CHARIOT));
     
-    public static final RegistryObject<EntityStandType<StandStatsV2>> MAGICIANS_RED = STANDS.register("magicians_red", 
+    public static final RegistryObject<EntityStandType<StandStats>> MAGICIANS_RED = STANDS.register("magicians_red", 
             () -> new EntityStandType<>(5, 0xFF6A00, PART_3_NAME,
                     new StandAction[] {ModActions.MAGICIANS_RED_PUNCH.get(), ModActions.MAGICIANS_RED_FLAME_BURST.get(), ModActions.MAGICIANS_RED_FIREBALL.get(), ModActions.MAGICIANS_RED_CROSSFIRE_HURRICANE.get()},
                     new StandAction[] {ModActions.MAGICIANS_RED_BLOCK.get(), ModActions.MAGICIANS_RED_RED_BIND.get(), ModActions.MAGICIANS_RED_DETECTOR.get()},
                     ModSounds.AVDOL_MAGICIANS_RED, 
-                    StandStatsV2.class, new StandStatsV2.Builder()
+                    StandStats.class, new StandStats.Builder()
                     .power(118.0)
                     .speed(8.0)
                     .range(5.0)

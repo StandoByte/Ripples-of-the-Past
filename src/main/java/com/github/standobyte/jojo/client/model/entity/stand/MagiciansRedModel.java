@@ -1,6 +1,8 @@
 package com.github.standobyte.jojo.client.model.entity.stand;
 
+import com.github.standobyte.jojo.action.actions.MagiciansRedRedBind;
 import com.github.standobyte.jojo.action.actions.StandEntityAction.Phase;
+import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
 import com.github.standobyte.jojo.util.MathUtil;
 
@@ -209,12 +211,14 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
     }
     
     @Override
-    protected void specialAbilityPose(MagiciansRedEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
-        super.specialAbilityPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, phase);
-        entity.setYBodyRot(entity.yRot);
-        leftArm.xRot = -1.4708F;
-        rightArm.xRot = -1.6708F;
-        leftArm.yRot = 0.4712F;
-        rightArm.yRot = -leftArm.yRot;
+    protected void customPose(MagiciansRedEntity entity, StandPose pose, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
+        super.customPose(entity, pose, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, phase);
+        if (pose == MagiciansRedRedBind.RED_BIND_POSE) {
+            entity.setYBodyRot(entity.yRot);
+            leftArm.xRot = -1.4708F;
+            rightArm.xRot = -1.6708F;
+            leftArm.yRot = 0.4712F;
+            rightArm.yRot = -leftArm.yRot;
+        }
     }
 }

@@ -3,6 +3,8 @@ package com.github.standobyte.jojo.action.actions;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntity.PunchType;
+import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
@@ -17,7 +19,7 @@ import net.minecraft.world.World;
 public class StandEntityHeavyAttack extends StandEntityAction {
 
     public StandEntityHeavyAttack(StandEntityAction.Builder builder) {
-        super(builder);
+        super(builder.standPose(StandPose.HEAVY_ATTACK).standUserSlowDownFactor(0.5F));
     }
 
     @Override
@@ -26,21 +28,31 @@ public class StandEntityHeavyAttack extends StandEntityAction {
                 ActionConditionResult.NEGATIVE
                 : super.checkSpecificConditions(user, performer, power, target);
     }
-
+    
     @Override
-    public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
+    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase) {
+        standEntity.alternateHands();
+    }
+    
+    @Override
+    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {
         if (!world.isClientSide()) {
-            if (ticks == getStandActionTicks(userPower, standEntity)) {
-                standEntity.swingAlternateHands();
-            }
-            if (ticks == 1) {
-                standEntity.punch(true);
-            }
+            standEntity.punch(PunchType.HEAVY);
         }
     }
     
     @Override
-    public int getStandActionTicks(IStandPower standPower, StandEntity standEntity) {
-        return Math.max((int) (standEntity.getTicksForSinglePunch()), 1);
+    public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
+        return 10;
+    }
+    
+    @Override
+    public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
+        return 5;
+    }
+    
+    @Override
+    protected boolean isCombatAction() {
+        return true;
     }
 }

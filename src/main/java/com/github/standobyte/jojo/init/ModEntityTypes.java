@@ -36,7 +36,6 @@ import com.github.standobyte.jojo.entity.itemprojectile.StandArrowEntity;
 import com.github.standobyte.jojo.entity.mob.HamonMasterEntity;
 import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.entity.stand.StandEntityStats;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
@@ -219,61 +218,25 @@ public class ModEntityTypes {
      */
     
     public static final RegistryObject<StandEntityType<StarPlatinumEntity>> STAR_PLATINUM = ENTITIES.register("star_platinum", 
-            () -> new StandEntityType<StarPlatinumEntity>(StarPlatinumEntity::new, ModStandTypes.STAR_PLATINUM, false, 0.7F, 2.1F, 
-                    new StandEntityStats.Builder()
-                    .damage(10)
-                    .attackSpeed(100)
-                    .summonTicks(0)
-                    .armor(20)
-                    .knockbackResistance(0.2)
-                    .precision(1.0)
-                    .build())
+            () -> new StandEntityType<StarPlatinumEntity>(StarPlatinumEntity::new, ModStandTypes.STAR_PLATINUM, false, 0.7F, 2.1F)
             .summonSound(ModSounds.STAR_PLATINUM_SUMMON)
             .unsummonSound(ModSounds.STAR_PLATINUM_UNSUMMON));
     
     public static final RegistryObject<StandEntityType<TheWorldEntity>> THE_WORLD = ENTITIES.register("the_world", 
-            () -> new StandEntityType<TheWorldEntity>(TheWorldEntity::new, ModStandTypes.THE_WORLD, false, 0.7F, 2.1F,
-                    new StandEntityStats.Builder()
-                    .damage(10.5)
-                    .attackSpeed(100)
-                    .summonTicks(100)
-                    .maxRange(10)
-                    .armor(20)
-                    .knockbackResistance(0.2)
-                    .precision(0.6)
-                    .build())
+            () -> new StandEntityType<TheWorldEntity>(TheWorldEntity::new, ModStandTypes.THE_WORLD, false, 0.7F, 2.1F)
             .summonSound(ModSounds.THE_WORLD_SUMMON));
     
     public static final RegistryObject<StandEntityType<HierophantGreenEntity>> HIEROPHANT_GREEN = ENTITIES.register("hierophant_green", 
-            () -> new StandEntityType<HierophantGreenEntity>(HierophantGreenEntity::new, ModStandTypes.HIEROPHANT_GREEN, false, 0.55F, 1.75F, 
-                    new StandEntityStats.Builder()
-                    .damage(1.25)
-                    .maxRange(100)
-                    .build())
+            () -> new StandEntityType<HierophantGreenEntity>(HierophantGreenEntity::new, ModStandTypes.HIEROPHANT_GREEN, false, 0.55F, 1.75F)
             .summonSound(ModSounds.HIEROPHANT_GREEN_SUMMON));
     
     public static final RegistryObject<StandEntityType<SilverChariotEntity>> SILVER_CHARIOT = ENTITIES.register("silver_chariot", 
-            () -> new StandEntityType<SilverChariotEntity>(SilverChariotEntity::new, ModStandTypes.SILVER_CHARIOT, false, 0.6F, 1.8F, 
-                    new StandEntityStats.Builder()
-                    .damage(8)
-                    .attackKnockback(0.1)
-                    .attackSpeed(75)
-                    .summonTicks(3)
-                    .maxRange(10)
-                    .armor(15)
-                    .armorToughness(8)
-                    .precision(1.0)
-                    .build())
+            () -> new StandEntityType<SilverChariotEntity>(SilverChariotEntity::new, ModStandTypes.SILVER_CHARIOT, false, 0.6F, 1.8F)
             .summonSound(ModSounds.SILVER_CHARIOT_SUMMON)
             .unsummonSound(ModSounds.SILVER_CHARIOT_UNSUMMON));
     
     public static final RegistryObject<StandEntityType<MagiciansRedEntity>> MAGICIANS_RED = ENTITIES.register("magicians_red", 
-            () -> new StandEntityType<MagiciansRedEntity>(MagiciansRedEntity::new, ModStandTypes.MAGICIANS_RED, false, 0.6F, 1.8F,
-                    new StandEntityStats.Builder()
-                    .damage(7)
-                    .maxRange(8)
-                    .armor(7)
-                    .build())
+            () -> new StandEntityType<MagiciansRedEntity>(MagiciansRedEntity::new, ModStandTypes.MAGICIANS_RED, false, 0.6F, 1.8F)
             .summonSound(ModSounds.MAGICIANS_RED_SUMMON));
 
     
