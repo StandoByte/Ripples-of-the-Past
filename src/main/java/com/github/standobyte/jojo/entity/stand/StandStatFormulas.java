@@ -4,8 +4,6 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
-
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.util.CombatRules;
@@ -15,7 +13,6 @@ public class StandStatFormulas {
 
     public static final float getHeavyAttackDamage(double strength, @Nullable LivingEntity armoredTarget) {
         float damage = Math.max((float) strength, 1F);
-        JojoMod.LOGGER.debug(damage);
         if (armoredTarget != null) {
             float armor = (float) armoredTarget.getArmorValue();
             float toughness = (float) armoredTarget.getAttributeValue(Attributes.ARMOR_TOUGHNESS);
@@ -26,7 +23,6 @@ public class StandStatFormulas {
                 damage++;
             }
         }
-        JojoMod.LOGGER.debug(damage);
         return damage;
     }
     
@@ -112,7 +108,7 @@ public class StandStatFormulas {
     }
     
     public static final float getLeapStrength(double strength) {
-        return (float) strength / 5F;
+        return (float) Math.min(strength, 40) / 5F;
     }
     
     public static final double getMovementSpeed(double speed) {

@@ -5,11 +5,13 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.entity.stand.StandEntity.PunchType;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
 /* FIXME (stats)
@@ -23,7 +25,7 @@ import net.minecraft.world.World;
 public class StandEntityLightAttack extends StandEntityAction {
 
     public StandEntityLightAttack(StandEntityAction.Builder builder) {
-        super(builder.standAutoSummonMode(AutoSummonMode.ONE_ARM)
+        super(builder.standAutoSummonMode(AutoSummonMode.ONE_ARM).standUserSlowDownFactor(1.0F)
                 .standOffsetFromUser(0, 0.15, true).yOffsetFromUser(0, true)
                 .standTakesCrosshairTarget().standPose(StandPose.LIGHT_ATTACK));
     }
@@ -37,6 +39,9 @@ public class StandEntityLightAttack extends StandEntityAction {
     
     @Override
     public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase) {
+        if (standEntity.isArmsOnlyMode() && standEntity.swingingArm == Hand.OFF_HAND) {
+            standEntity.setArmsOnlyMode(true, true);
+        }
         standEntity.alternateHands();
     }
     
@@ -49,17 +54,17 @@ public class StandEntityLightAttack extends StandEntityAction {
     
     @Override
     public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
-        return 1;
+        return StandStatFormulas.getLightAttackWindup(standEntity.getAttackSpeed());
     }
     
     @Override
     public int getStandActionTicks(IStandPower standPower, StandEntity standEntity) {
-        return 3;
+        return StandStatFormulas.getLightAttackComboDelay(standEntity.getAttackSpeed());
     }
     
     @Override
     public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
-        return 3;
+        return StandStatFormulas.getLightAttackRecovery(standEntity.getAttackSpeed());
     }
     
     @Override

@@ -97,7 +97,7 @@ public class ModStandTypes {
                     new StandAction[] {ModActions.MAGICIANS_RED_BLOCK.get(), ModActions.MAGICIANS_RED_RED_BIND.get(), ModActions.MAGICIANS_RED_DETECTOR.get()},
                     ModSounds.AVDOL_MAGICIANS_RED, 
                     StandStats.class, new StandStats.Builder()
-                    .power(118.0)
+                    .power(8.0)
                     .speed(8.0)
                     .range(5.0)
                     .durability(5.0)

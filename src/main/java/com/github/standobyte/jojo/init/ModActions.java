@@ -241,12 +241,12 @@ public class ModActions {
                     .shiftVariationOf(HIEROPHANT_GREEN_STRING_ATTACK)));
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_EMERALD_SPLASH = ACTIONS.register("hierophant_green_emerald_splash", 
-            () -> new HierophantGreenEmeraldSplash(new StandEntityAction.Builder().standUserSlowDownFactor(0.5F)
+            () -> new HierophantGreenEmeraldSplash(new StandEntityAction.Builder()
                     .standPerformDuration(30).cooldown(40).xpRequirement(50).defaultStandOffsetFromUser()
                     .standPose(StandPose.RANGED_ATTACK).shout(ModSounds.KAKYOIN_EMERALD_SPLASH).standSound(ModSounds.HIEROPHANT_GREEN_EMERALD_SPLASH)));
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED = ACTIONS.register("hierophant_green_es_concentrated", 
-            () -> new HierophantGreenEmeraldSplash(new StandEntityAction.Builder().standUserSlowDownFactor(0.5F)
+            () -> new HierophantGreenEmeraldSplash(new StandEntityAction.Builder()
                     .standPerformDuration(5).cooldown(40).xpRequirement(400).defaultStandOffsetFromUser()
                     .standPose(StandPose.RANGED_ATTACK).shout(ModSounds.KAKYOIN_EMERALD_SPLASH).standSound(ModSounds.HIEROPHANT_GREEN_EMERALD_SPLASH)
                     .shiftVariationOf(HIEROPHANT_GREEN_EMERALD_SPLASH)));
@@ -292,7 +292,7 @@ public class ModActions {
             () -> new StandEntityHeavyAttack(new StandEntityAction.Builder().shiftVariationOf(MAGICIANS_RED_PUNCH)));
     
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_FLAME_BURST = ACTIONS.register("magicians_red_flame_burst", 
-            () -> new MagiciansRedFlameBurst(new StandEntityAction.Builder().holdType().standUserSlowDownFactor(0.5F)
+            () -> new MagiciansRedFlameBurst(new StandEntityAction.Builder().holdType()
                     .xpRequirement(50).defaultStandOffsetFromUser().standPose(StandPose.RANGED_ATTACK)));
     
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_FIREBALL = ACTIONS.register("magicians_red_fireball", 

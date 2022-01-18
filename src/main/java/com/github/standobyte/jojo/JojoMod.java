@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModDataSerializers;
 import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModEntityAttributes;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModLootModifierSerializers;
@@ -54,6 +55,7 @@ public class JojoMod {
         ModStandTypes.Registry.initRegistry();
         ModStandTypes.STANDS.register(modEventBus);
         
+        ModEntityAttributes.ATTRIBUTES.register(modEventBus);
         ModDataSerializers.DATA_SERIALIZERS.register(modEventBus);
         ModEffects.EFFECTS.register(modEventBus);
         ModEntityTypes.ENTITIES.register(modEventBus);

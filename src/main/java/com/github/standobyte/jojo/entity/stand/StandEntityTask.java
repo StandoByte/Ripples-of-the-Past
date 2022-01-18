@@ -30,7 +30,7 @@ public class StandEntityTask {
     }
     
     void tick(IStandPower standPower, StandEntity standEntity) {
-        if (ticksLeft == 1 && phase == StandEntityAction.Phase.PERFORM) {
+        if (ticksLeft == startingTicks && phase == StandEntityAction.Phase.PERFORM) {
             action.standPerform(standEntity.level, standEntity, standPower, standEntity.getTaskTarget());
         }
         switch (phase) {
