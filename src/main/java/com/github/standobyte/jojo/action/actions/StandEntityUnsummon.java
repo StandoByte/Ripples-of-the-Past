@@ -19,7 +19,7 @@ public final class StandEntityUnsummon extends StandEntityAction {
     @Override
     public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
         LivingEntity user = standEntity.getUser();
-        if (standEntity.isCloseToEntity(user) && !standEntity.hasEffect(ModEffects.STUN.get())) {
+        if (user != null && standEntity.isCloseToEntity(user) && !standEntity.hasEffect(ModEffects.STUN.get())) {
             int maxTicks = getUnsummonDuration(standEntity);
             if (standEntity.unsummonTicks == maxTicks) {
                 if (!world.isClientSide()) {
@@ -41,7 +41,7 @@ public final class StandEntityUnsummon extends StandEntityAction {
     }
     
     @Override
-    public boolean isCancelable(IStandPower standPower, StandEntity standEntity) {
+    public boolean isCancelable(IStandPower standPower, StandEntity standEntity, Phase phase, StandEntityAction newAction) {
         return !standEntity.isArmsOnlyMode();
     }
     
@@ -66,7 +66,7 @@ public final class StandEntityUnsummon extends StandEntityAction {
     }
     
     @Override
-    protected void playSoundAtStand(World world, StandEntity standEntity, SoundEvent sound, IStandPower standPower) {
+    protected void playSoundAtStand(World world, StandEntity standEntity, SoundEvent sound, IStandPower standPower, Phase phase) {
         if (world.isClientSide()) {
             ClientTickingSoundsHelper.playStandEntityUnsummonSound(standEntity, sound, 1.0F, 1.0F);
         }

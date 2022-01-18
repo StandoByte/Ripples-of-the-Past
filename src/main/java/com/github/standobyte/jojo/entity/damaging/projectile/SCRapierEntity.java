@@ -2,12 +2,16 @@ package com.github.standobyte.jojo.entity.damaging.projectile;
 
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.ModStandTypes;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.monster.SkeletonEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -38,8 +42,23 @@ public class SCRapierEntity extends ModdedProjectileEntity {
     
     @Override
     public float getBaseDamage() {
-        float standDamage = (float) ModEntityTypes.SILVER_CHARIOT.get().getStats().getDamage();
-        return standDamage + ricochet;
+        LivingEntity owner = getOwner();
+        float damage;
+        if (owner != null) {
+            ModifiableAttributeInstance attackDamage = owner.getAttribute(Attributes.ATTACK_DAMAGE);
+            AttributeModifier modifier = SilverChariotEntity.NO_RAPIER_DAMAGE_DECREASE;
+            if (modifier != null) {
+                attackDamage.removeModifier(modifier);
+            }
+            damage = (float) attackDamage.getValue();
+            if (modifier != null) {
+                attackDamage.addPermanentModifier(modifier);
+            }
+        }
+        else {
+            damage = (float) ModStandTypes.SILVER_CHARIOT.get().getStats().getBasePower();
+        }
+        return damage + (float) ricochet * 1F;
     }
 
     @Override

@@ -255,10 +255,11 @@ public class ModActions {
             () -> new StandEntityBlock());
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_GRAPPLE = ACTIONS.register("hierophant_green_grapple", 
-            () -> new HierophantGreenGrapple(new StandEntityAction.Builder().xpRequirement(100).holdType()));
+            () -> new HierophantGreenGrapple(new StandEntityAction.Builder().xpRequirement(100).holdType().standPose(HierophantGreenGrapple.GRAPPLE_POSE)));
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_GRAPPLE_ENTITY = ACTIONS.register("hierophant_green_grapple_entity", 
-            () -> new HierophantGreenGrapple(new StandEntityAction.Builder().xpRequirement(100).holdType().shiftVariationOf(HIEROPHANT_GREEN_GRAPPLE)));
+            () -> new HierophantGreenGrapple(new StandEntityAction.Builder().xpRequirement(100).holdType().standPose(HierophantGreenGrapple.GRAPPLE_POSE)
+                    .shiftVariationOf(HIEROPHANT_GREEN_GRAPPLE)));
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_BARRIER = ACTIONS.register("hierophant_green_barrier", 
             () -> new HierophantGreenBarrier(new StandEntityAction.Builder().needsBlockTarget().xpRequirement(700)));
@@ -313,8 +314,8 @@ public class ModActions {
             () -> new StandEntityBlock());
     
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_RED_BIND = ACTIONS.register("magicians_red_red_bind", 
-            () -> new MagiciansRedRedBind(new StandEntityAction.Builder().xpRequirement(450).holdType()
-                    .heldSlowDownFactor(0.3F).shout(ModSounds.AVDOL_RED_BIND).standSound(ModSounds.MAGICIANS_RED_FIRE_BLAST)));
+            () -> new MagiciansRedRedBind(new StandEntityAction.Builder().xpRequirement(450).holdType().heldSlowDownFactor(0.3F)
+                    .standPose(MagiciansRedRedBind.RED_BIND_POSE).shout(ModSounds.AVDOL_RED_BIND).standSound(ModSounds.MAGICIANS_RED_FIRE_BLAST)));
     
     public static final RegistryObject<StandAction> MAGICIANS_RED_DETECTOR = ACTIONS.register("magicians_red_detector", 
             () -> new MagiciansRedDetector(new StandAction.Builder().xpRequirement(500)));

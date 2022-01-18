@@ -3,25 +3,24 @@ package com.github.standobyte.jojo.power.stand.stats;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.MathHelper;
 
-public class StandStatsV2 {
+public class StandStats {
     private final UpgradeableStats statsBase;
     private final UpgradeableStats statsDevPotential;
     private final double rangeEffective;
     private final double rangeMax;
 
-    protected StandStatsV2(AbstractBuilder<?> builder) {
+    protected StandStats(AbstractBuilder<?> builder) {
         this.statsBase = new UpgradeableStats(builder.powerBase, builder.speedBase, builder.durabilityBase, builder.precisionBase);
         this.statsDevPotential = new UpgradeableStats(builder.powerMax, builder.speedMax, builder.durabilityMax, builder.precisionMax);
         this.rangeEffective = builder.rangeEffective;
         this.rangeMax = builder.rangeMax;
     }
     
-    protected StandStatsV2(PacketBuffer buf) {
+    protected StandStats(PacketBuffer buf) {
         this.statsBase = new UpgradeableStats(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble());
         this.statsDevPotential = new UpgradeableStats(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble());
         this.rangeEffective = buf.readDouble();
@@ -45,66 +44,73 @@ public class StandStatsV2 {
     
     
     
-    private static final Map<Class<? extends StandStatsV2>, Factory<? extends StandStatsV2>> FROM_BUFFER = new HashMap<>();
+    private static final Map<Class<? extends StandStats>, Factory<? extends StandStats>> FROM_BUFFER = new HashMap<>();
     
-    protected static interface Factory<T extends StandStatsV2> {
+    protected static interface Factory<T extends StandStats> {
         T read(PacketBuffer buf);
     }
     
     static {
-        registerFactory(StandStatsV2.class, StandStatsV2::new);
+        registerFactory(StandStats.class, StandStats::new);
     }
     
-    protected static final <T extends StandStatsV2> void registerFactory(Class<T> clazz, Factory<T> factory) {
+    protected static final <T extends StandStats> void registerFactory(Class<T> clazz, Factory<T> factory) {
         FROM_BUFFER.put(clazz, factory);
     }
     
-    public static StandStatsV2 fromBuffer(Class<? extends StandStatsV2> clazz, PacketBuffer buf) {
+    public static StandStats fromBuffer(Class<? extends StandStats> clazz, PacketBuffer buf) {
         return FROM_BUFFER.get(clazz).read(buf);
     }
     
     
     
-    // quickAttackDamage
-    // strongAttackDamage
-    // barrageHitDamage
-    // strongAttackArmorPenetration
-    // leapStrength
-    
-    // quickAttackSpeed
-    // strongAttackSpeed
-    // barrageSpeed
-    // summonSpeed
-    // unsummonedAttackDeflectSpeed
-    
-    // effectiveRange
-    // maxRange
-    // rangeStrengthFactor
-    
-    // resistance
-    // staminaCostModifier
-    // blockDamageReduction
-    
-    // hitboxExpansion
-    // barrageHitMultiplier
-    // projectileAccuracy
-    
-    // parry?
-    
-    private double getPower(IStandPower stand) {
-        return MathHelper.lerp(stand.getAchievedResolveRatio(), statsBase.power, statsDevPotential.power);
+    public double getBasePower() {
+        return statsBase.power;
     }
     
-    private double getSpeed(IStandPower stand) {
-        return MathHelper.lerp(stand.getAchievedResolveRatio(), statsBase.speed, statsDevPotential.speed);
+    public double getBaseAttackSpeed() {
+        return statsBase.speed;
     }
     
-    private double getDurability(IStandPower stand) {
-        return MathHelper.lerp(stand.getAchievedResolveRatio(), statsBase.durability, statsDevPotential.durability);
+    public double getBaseMovementSpeed() {
+        return StandStatFormulas.getMovementSpeed(statsBase.speed);
     }
     
-    private double getPrecision(IStandPower stand) {
-        return MathHelper.lerp(stand.getAchievedResolveRatio(), statsBase.precision, statsDevPotential.precision);
+    public double getBaseDurability() {
+        return statsBase.durability;
+    }
+    
+    public double getBasePrecision() {
+        return statsBase.precision;
+    }
+    
+    public double getDevPower(float devProgress) {
+        return devProgress * (statsDevPotential.power - statsBase.power);
+    }
+    
+    public double getDevAttackSpeed(float devProgress) {
+        return devProgress * (statsDevPotential.speed - statsBase.speed);
+    }
+    
+    public double getDevMovementSpeed(float devProgress) {
+        return devProgress * (StandStatFormulas.getMovementSpeed(statsDevPotential.speed)
+                - StandStatFormulas.getMovementSpeed(statsBase.speed));
+    }
+    
+    public double getDevDurability(float devProgress) {
+        return devProgress * (statsDevPotential.durability - statsBase.durability);
+    }
+    
+    public double getDevPrecision(float devProgress) {
+        return devProgress * (statsDevPotential.precision - statsBase.precision);
+    }
+    
+    public double getEffectiveRange() {
+        return rangeEffective;
+    }
+    
+    public double getMaxRange() {
+        return rangeMax;
     }
     
     
@@ -186,8 +192,8 @@ public class StandStatsV2 {
         
         protected abstract T getThis();
         
-        public StandStatsV2 build() {
-            return new StandStatsV2(this);
+        public StandStats build() {
+            return new StandStats(this);
         }
     }
     

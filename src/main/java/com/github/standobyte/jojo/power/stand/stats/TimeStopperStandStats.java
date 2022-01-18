@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.power.stand.stats;
 
 import net.minecraft.network.PacketBuffer;
 
-public class TimeStopperStandStats extends StandStatsV2 {
+public class TimeStopperStandStats extends StandStats {
     public static final int MIN_TIME_STOP_TICKS = 5;
     private final int maxTimeStopTicks;
     private final int maxTimeStopTicksVampire;

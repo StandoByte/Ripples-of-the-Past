@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.BalanceTestServerConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -21,6 +22,7 @@ import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -144,10 +146,16 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
 
     @Override
-    public void consumeStamina(float amount) {
-        if (!isUserCreative()) {
-            setStamina(this.stamina - amount);
+    public boolean consumeStamina(float amount) {
+        if (isUserCreative()) {
+            return true;
         }
+        if (getStamina() >= amount) {
+            setStamina(this.stamina - amount);
+            return true;
+        }
+        setStamina(0);
+        return false;
     }
 
     @Override
@@ -234,7 +242,11 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         amount = MathHelper.clamp(amount, 0, getMaxResolve());
         boolean send = this.resolve != amount || this.noResolveDecayTicks != noDecayTicks;
         this.resolve = amount;
-        this.achievedResolve = Math.max(Math.max(this.resolve, achievedResolve), this.achievedResolve);
+        achievedResolve = Math.max(this.resolve, achievedResolve);
+        if (achievedResolve > this.achievedResolve) {
+            getType().onNewAchievedResolve(this, this.achievedResolve, achievedResolve);
+            this.achievedResolve = achievedResolve;
+        }
         this.noResolveDecayTicks = Math.max(this.noResolveDecayTicks, noDecayTicks);
         if (this.resolve == getMaxResolve()) {
             getUser().addEffect(new EffectInstance(ModEffects.RESOLVE.get(), 
@@ -325,14 +337,14 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     @Override
     public boolean isLeapUnlocked() {
-        return standManifestation instanceof StandEntity && !((StandEntity) standManifestation).lowerStatsFromArmsOnly();
+        return standManifestation instanceof StandEntity && !((StandEntity) standManifestation).isArmsOnlyMode();
     }
     
     @Override
     public float leapStrength() {
         StandEntity standEntity = (StandEntity) standManifestation;
         if (standEntity.isFollowingUser()) {
-            return (float) standEntity.getStats().getDamage() / 3F;
+            return StandStatFormulas.getLeapStrength(standEntity.getAttackDamage(null));
         }
         return 0;
     }

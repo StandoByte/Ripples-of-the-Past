@@ -516,6 +516,9 @@
   "jojo.subtitle.stand_summon": "Stand summoned",
   "jojo.subtitle.stand_unsummon": "Stand unsummoned",
   
+  "jojo.attribute.name.stand_resistance": "Stand Resistance",
+  "jojo.attribute.name.stand_precision": "Stand Precision",
+  
   "jojo.disc.stand": "Stand: %s",
   "jojo.disc.tier": "Tier: %s",
   "jojo.arrow.tier": "Stand tier: %s (next tier at %s xp lvl)",

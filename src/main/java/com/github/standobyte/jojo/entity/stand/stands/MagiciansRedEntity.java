@@ -22,8 +22,8 @@ public class MagiciansRedEntity extends StandEntity {
     }
     
     @Override
-    public boolean attackEntity(Entity target, boolean strongAttack, double attackDistance) {
-        if (super.attackEntity(target, strongAttack, attackDistance)) {
+    public boolean attackEntity(Entity target, PunchType punch, double attackDistance) {
+        if (super.attackEntity(target, punch, attackDistance)) {
             int seconds = 10;
             if (target instanceof StandEntity) {
                 ((StandEntity) target).setFireFromStand(seconds);

@@ -53,7 +53,7 @@ public abstract class StandEntityAction extends StandAction {
         if (power.isActive()) {
             StandEntity stand = (StandEntity) power.getStandManifestation();
             StandEntityAction currentAction = stand.getCurrentTaskAction();
-            if (currentAction != null && !currentAction.isCancelable(power, stand)) {
+            if (currentAction != null/* && !currentAction.isCancelable(power, stand, stand.getCurrentTaskPhase(), this)*/) { // FIXME (!!!!) scheduling tasks
                 return ActionConditionResult.NEGATIVE;
             }
         }
@@ -72,6 +72,18 @@ public abstract class StandEntityAction extends StandAction {
     public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {}
     
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {}
+    
+    public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
+        return standWindupDuration;
+    }
+    
+    public int getStandActionTicks(IStandPower standPower, StandEntity standEntity) {
+        return standPerformDuration;
+    }
+    
+    public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
+        return standRecoveryDuration;
+    }
     
     @Override
     public void onClick(World world, LivingEntity user, IStandPower power) {
@@ -116,7 +128,7 @@ public abstract class StandEntityAction extends StandAction {
     protected final void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             invokeForStand(power, stand -> {
-                int windupTicks = getStandWindupTicks(power, stand, stand.getAttackSpeed());
+                int windupTicks = getStandWindupTicks(power, stand);
                 int ticks = windupTicks > 0 ? windupTicks : getStandActionTicks(power, stand);
                 Phase phase = windupTicks > 0 ? Phase.WINDUP : Phase.PERFORM;
                 setAction(power, stand, ticks, phase, target);
@@ -126,17 +138,19 @@ public abstract class StandEntityAction extends StandAction {
     
     private void setAction(IStandPower standPower, StandEntity standEntity, int ticks, Phase phase, ActionTarget target) {
         if (standEntity.setTask(this, ticks, phase)) {
-            if (standTakesCrosshairTarget) {
+            if (standTakesCrosshairTarget()) {
                 standEntity.setTaskTarget(target);
             }
             setRelativePos(standEntity);
         }
     }
     
-    public void playSound(StandEntity standEntity, IStandPower standPower) {
+    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase) {}
+    
+    public void playSound(StandEntity standEntity, IStandPower standPower, Phase phase) {
         SoundEvent sound = getSound(standEntity, standPower);
         if (sound != null) {
-            playSoundAtStand(standEntity.level, standEntity, sound, standPower);
+            playSoundAtStand(standEntity.level, standEntity, sound, standPower, phase);
         }
     }
     
@@ -148,15 +162,19 @@ public abstract class StandEntityAction extends StandAction {
         return standSoundSupplier.get();
     }
     
-    protected void playSoundAtStand(World world, StandEntity standEntity, SoundEvent sound, IStandPower standPower) {
+    protected void playSoundAtStand(World world, StandEntity standEntity, SoundEvent sound, IStandPower standPower, Phase phase) {
         if (world.isClientSide()) {
-            if (isCancelable(standPower, standEntity)) {
+            if (isCancelable(standPower, standEntity, phase, null)) {
                 ClientTickingSoundsHelper.playStandEntityCancelableActionSound(standEntity, sound, this, 1.0F, 1.0F);
             }
             else {
                 standEntity.playSound(sound, 1.0F, 1.0F, ClientUtil.getClientPlayer());
             }
         }
+    }
+    
+    protected boolean standTakesCrosshairTarget() {
+        return getTargetRequirement() != TargetRequirement.NONE || standTakesCrosshairTarget;
     }
     
     private void setRelativePos(StandEntity stand) {
@@ -175,20 +193,12 @@ public abstract class StandEntityAction extends StandAction {
         }
     }
     
-    public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity, double attackSpeed) {
-        return standWindupDuration;
+    public boolean isCancelable(IStandPower standPower, StandEntity standEntity, Phase phase, @Nullable StandEntityAction newAction) {
+        return phase != Phase.RECOVERY && (isCancelable || getHoldDurationMax(standPower) > 0);
     }
     
-    public int getStandActionTicks(IStandPower standPower, StandEntity standEntity) {
-        return standPerformDuration;
-    }
-    
-    protected int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity, double attackSpeed) {
-        return standRecoveryDuration;
-    }
-    
-    public boolean isCancelable(IStandPower standPower, StandEntity standEntity) {
-        return isCancelable || getHoldDurationMax(standPower) > 0;
+    protected boolean isCombatAction() {
+        return false;
     }
     
     public void onClear(IStandPower standPower, StandEntity standEntity) {}
@@ -198,7 +208,7 @@ public abstract class StandEntityAction extends StandAction {
     }
     
     @Override
-    protected ActionTarget aim(World world, LivingEntity user, IStandPower power, double range) { // FIXME (!!!) only used in Magician's Red's fireball shoot, so not a big deal if it needs to be moved
+    protected ActionTarget aim(World world, LivingEntity user, IStandPower power, double range) {
         LivingEntity aimingEntity = user;
         if (power.isActive()) {
             IStandManifestation stand = power.getStandManifestation();
@@ -215,7 +225,8 @@ public abstract class StandEntityAction extends StandAction {
     public enum Phase {
         BUTTON_HOLD,
         WINDUP,
-        PERFORM
+        PERFORM,
+        RECOVERY
     }
     
     
@@ -302,6 +313,12 @@ public abstract class StandEntityAction extends StandAction {
         public T standOffsetFromUser(double left, double forward, boolean armsOnlyMode) {
             UserOffset offset = armsOnlyMode ? userOffsetArmsOnly : userOffset;
             offset.offsetXZ(left, forward);
+            return getThis();
+        }
+        
+        public T yOffsetFromUser(double y, boolean armsOnlyMode) {
+            UserOffset offset = armsOnlyMode ? userOffsetArmsOnly : userOffset;
+            offset.offsetY(y);
             return getThis();
         }
         

@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.ModStandTypes;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -44,10 +45,8 @@ public class HGStringEntity extends OwnerBoundProjectileEntity {
     public float getBaseDamage() {
         LivingEntity owner = getOwner();
         float dmg = owner != null ? (float) owner.getAttributeValue(Attributes.ATTACK_DAMAGE) : 
-            (float) ModEntityTypes.HIEROPHANT_GREEN.get().getStats().getDamage();
-        if (isBinding) {
-            dmg *= 0.4F;
-        }
+            (float) ModStandTypes.HIEROPHANT_GREEN.get().getStats().getBasePower();
+        dmg /= isBinding ? 10 : 7;
         return dmg;
     }
     

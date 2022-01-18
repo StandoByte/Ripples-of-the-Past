@@ -21,7 +21,7 @@ public class SilverChariotTakeOffArmor extends StandEntityAction {
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
         if (performer instanceof SilverChariotEntity) {
             SilverChariotEntity chariot = (SilverChariotEntity) performer;
-            if (chariot.lowerStatsFromArmsOnly()) {
+            if (chariot.isArmsOnlyMode()) {
                 return ActionConditionResult.NEGATIVE;
             }
             if (!chariot.hasArmor()) {

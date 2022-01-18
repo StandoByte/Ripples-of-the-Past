@@ -7,7 +7,6 @@ import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.world.World;
 
 public class StandEntityBlock extends StandEntityAction {
     
@@ -33,5 +32,7 @@ public class StandEntityBlock extends StandEntityAction {
     }
 
     @Override
-    public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {}
+    protected boolean isCombatAction() {
+        return true;
+    }
 }

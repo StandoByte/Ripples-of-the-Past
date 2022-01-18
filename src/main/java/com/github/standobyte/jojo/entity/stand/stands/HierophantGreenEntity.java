@@ -34,11 +34,6 @@ public class HierophantGreenEntity extends StandEntity {
     }
     
     @Override
-    public boolean punch(boolean singlePunch) {
-        return false;
-    }
-    
-    @Override
     public void tick() {
         super.tick();
         if (!level.isClientSide()) {
@@ -59,9 +54,8 @@ public class HierophantGreenEntity extends StandEntity {
 //            float manaCost = (shift ? ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get() : ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED.get())
 //                    .getManaCost() / rangedAttackDuration(shift) * 0.5F;
             int barrierEmeralds = Math.max(getPlacedBarriersCount() * multiplier / 10, 1);
-            float damageReduction = rangeEfficiencyFactor();
             for (int i = 0; i < barrierEmeralds/* && getUserPower().consumeMana(manaCost)*/; i++) {
-                placedBarriers.get(random.nextInt(placedBarriers.size())).shootEmeralds(pos, 1, shift, damageReduction);
+                placedBarriers.get(random.nextInt(placedBarriers.size())).shootEmeralds(pos, 1, shift, (float) getRangeEfficiency());
             }
             canBarriersShoot = false;
         }

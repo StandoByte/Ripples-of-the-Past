@@ -20,7 +20,7 @@ import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStandStatsDataPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStandStatsDataPacket.StandStatsDataEntry;
-import com.github.standobyte.jojo.power.stand.stats.StandStatsV2;
+import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.google.common.base.Charsets;
 import com.google.gson.Gson;
@@ -49,7 +49,7 @@ public class StandStatsManager extends JsonReloadListener {
     
     private static StandStatsManager instance = null;
     
-    private Map<StandType<?>, StandStatsV2> overridenStats = new HashMap<>();
+    private Map<StandType<?>, StandStats> overridenStats = new HashMap<>();
 
     private StandStatsManager() {
         super(GSON, RESOURCE_NAME);
@@ -67,7 +67,7 @@ public class StandStatsManager extends JsonReloadListener {
     
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> resourceList, IResourceManager resourceManager, IProfiler profiler) {
-        Map<StandType<?>, StandStatsV2> stats = new HashMap<>();
+        Map<StandType<?>, StandStats> stats = new HashMap<>();
         
         IForgeRegistry<StandType<?>> registry = ModStandTypes.Registry.getRegistry();
         resourceList.forEach((location, object) -> {
@@ -148,7 +148,7 @@ public class StandStatsManager extends JsonReloadListener {
     
     public void clSetStats(Iterable<StandStatsDataEntry> stats) {
         IForgeRegistry<StandType<?>> registry = ModStandTypes.Registry.getRegistry();
-        Map<StandType<?>, StandStatsV2> map = new HashMap<>();
+        Map<StandType<?>, StandStats> map = new HashMap<>();
         stats.forEach(entry -> {
             StandType<?> stand = registry.getValue(entry.getStandTypeLocation());
             if (stand != null) {
@@ -158,7 +158,7 @@ public class StandStatsManager extends JsonReloadListener {
         this.overridenStats = map;
     }
     
-    public <T extends StandStatsV2> T getStats(StandType<T> stand) {
+    public <T extends StandStats> T getStats(StandType<T> stand) {
         if (overridenStats.containsKey(stand)) {
             return (T) overridenStats.get(stand);
         }

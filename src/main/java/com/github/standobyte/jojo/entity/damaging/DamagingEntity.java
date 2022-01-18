@@ -36,7 +36,7 @@ import net.minecraftforge.fml.network.NetworkHooks;
 
 public abstract class DamagingEntity extends ProjectileEntity implements IEntityAdditionalSpawnData {
     protected static final Vector3d DEFAULT_POS_OFFSET = new Vector3d(0.0D, -0.3D, 0.0D);
-    protected float damageFactor = 1.0F;
+    protected float damageFactor = 1.0F; // FIXME set it automatically
     private LivingEntity livingEntityOwner = null;
 
     public DamagingEntity(EntityType<? extends DamagingEntity> entityType, @Nullable LivingEntity owner, World world) {

@@ -8,7 +8,7 @@ import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.power.stand.stats.StandStatsV2;
+import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.util.JojoModUtil;
 import com.github.standobyte.jojo.util.damage.ModDamageSources;
 import com.google.common.collect.ImmutableMultimap;
@@ -62,7 +62,7 @@ public class ClackersItem extends Item {
             // FIXME (stats)
             IStandPower.getStandPowerOptional(player).ifPresent(stand -> {
                 if (stand.hasPower()) {
-                    StandStatsV2 stats = stand.getType().getStats();
+                    StandStats stats = stand.getType().getStats();
                     player.sendMessage(new StringTextComponent((world.isClientSide ? "client: " : "server: ") +
                             new GsonBuilder().setPrettyPrinting().create().toJson(stats)), 
                             Util.NIL_UUID);
