@@ -20,7 +20,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.Util;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.server.ServerWorld;
 
@@ -37,8 +36,12 @@ public class StandUtil {
                     .collect(Collectors.toList());
             
             if (filtered.isEmpty()) {
+                // FIXME does the message work?
                 if (tier > -1 && StandUtil.arrowPoolNextTier(tier) > -1) {
-                    entity.sendMessage(new TranslationTextComponent("jojo.chat.message.tmp_not_enough_xp"), Util.NIL_UUID); // TODO remove the message after adding stands for each tier
+                    if (entity instanceof PlayerEntity) {
+                        ((PlayerEntity) entity).displayClientMessage(
+                                new TranslationTextComponent("jojo.chat.message.tmp_not_enough_xp"), true); // TODO remove the message after adding stands for each tier
+                    }
                 }
                 return null;
             }

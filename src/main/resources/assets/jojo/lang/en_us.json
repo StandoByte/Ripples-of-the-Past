@@ -222,7 +222,7 @@
   "jojo.chat.message.hamon_window_hint": "(Press %s or interact with a Hamon user to open Hamon skill window)",
   "jojo.chat.message.cant_learn_hamon": "You already have a power incompatible with Hamon",
   
-  "jojo.chat.message.tmp_not_enough_xp": "You don't have enough xp to gain a Stand",
+  "jojo.chat.message.tmp_not_enough_xp": "You are not strong enough to gain a Stand",
   
   "jojo.message.action_condition.no_stamina": "You don't have enough stamina",
   "jojo.message.action_condition.no_energy_hamon": "Your breath has not yet stabilized",
