@@ -7,13 +7,18 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.util.TimeHandler;
 import com.github.standobyte.jojo.util.reflection.ClientReflection;
+import com.google.common.base.MoreObjects;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.DeathScreen;
+import net.minecraft.client.renderer.FirstPersonRenderer;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
@@ -214,7 +219,7 @@ public class ClientEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void cancelHandRender(RenderHandEvent event) {
-        if (false) { // FIXME don't render hand/held items both mouse buttons have a working action
+        if (ActionsOverlayGui.getInstance().areBothClicksIntercepted()) {
             event.setCanceled(true);
         }
     }
@@ -229,18 +234,18 @@ public class ClientEventHandler {
                         event.setCanceled(true);
                     }
                     // FIXME two arms
-//                    else if (ActionsOverlayGui.getInstance().getSelectedAction(ActionType.ATTACK) == ModActions.JONATHAN_OVERDRIVE_BARRAGE.get()) {
-//                        FirstPersonRenderer renderer = mc.getItemInHandRenderer();
-//                        ClientPlayerEntity player = mc.player;
-//                        Hand swingingArm = MoreObjects.firstNonNull(player.swingingArm, Hand.MAIN_HAND);
-//                        float f6 = swingingArm == Hand.OFF_HAND ? player.getAttackAnim(event.getPartialTicks()) : 0.0F;
-//                        float f7 = 1.0F - MathHelper.lerp(event.getPartialTicks(), ClientReflection.getOffHandHeightPrev(renderer), ClientReflection.getOffHandHeight(renderer));
-//                        MatrixStack matrixStack = event.getMatrixStack();
-//                        matrixStack.pushPose();
-//                        ClientReflection.renderPlayerArm(matrixStack, event.getBuffers(), event.getLight(), f7, f6, player.getMainArm().getOpposite(), renderer);
-//                        matrixStack.popPose();
-//                        // i've won... but at what cost?
-//                    }
+                    else if (ActionsOverlayGui.getInstance().getSelectedAction(ActionType.ATTACK) == ModActions.JONATHAN_OVERDRIVE_BARRAGE.get()) {
+                        FirstPersonRenderer renderer = mc.getItemInHandRenderer();
+                        ClientPlayerEntity player = mc.player;
+                        Hand swingingArm = MoreObjects.firstNonNull(player.swingingArm, Hand.MAIN_HAND);
+                        float f6 = swingingArm == Hand.OFF_HAND ? player.getAttackAnim(event.getPartialTicks()) : 0.0F;
+                        float f7 = 1.0F - MathHelper.lerp(event.getPartialTicks(), ClientReflection.getOffHandHeightPrev(renderer), ClientReflection.getOffHandHeight(renderer));
+                        MatrixStack matrixStack = event.getMatrixStack();
+                        matrixStack.pushPose();
+                        ClientReflection.renderPlayerArm(matrixStack, event.getBuffers(), event.getLight(), f7, f6, player.getMainArm().getOpposite(), renderer);
+                        matrixStack.popPose();
+                        // i've won... but at what cost?
+                    }
                 });
             }
         }

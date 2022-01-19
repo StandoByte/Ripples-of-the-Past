@@ -72,16 +72,6 @@ public abstract class BarsRenderer {
             float value, float maxValue, float attackCostValue, float abilityCostValue, float tranclucentBarValue, 
             int ticks, float partialTick);
     
-    private static final float CYCLE_TICKS = 80;
-    private static final float MAX_ALPHA_TICKS = 30;
-    private static final float MAX_ALPHA = 1.0F;
-    private static final float COEFF = MAX_ALPHA / MAX_ALPHA_TICKS;
-    protected final float getHighlightAlpha(float ticks) {
-        ticks %= CYCLE_TICKS;
-        float alpha = ticks <= CYCLE_TICKS / 2 ? ticks * COEFF : ticks * -COEFF + COEFF * CYCLE_TICKS;
-        return Math.min(alpha, MAX_ALPHA) + 0.25F;
-    }
-    
     protected static final int ICON_WIDTH = 12;
     protected static final int ICON_HEIGHT = 16;
     protected int[] getIconTex(BarType type, NonStandPowerType<?> powerType, BarsOrientation orientation) {

@@ -13,6 +13,7 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.hud.ActionsModeConfig.SelectedTargetIcon;
 import com.github.standobyte.jojo.client.ui.sprites.SpriteUploaders;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -74,6 +75,12 @@ public class ActionsOverlayGui extends AbstractGui {
             staminaBarTransparency,
             resolveBarTransparency
     };
+    
+    private boolean attackSelection;
+    private boolean abilitySelection;
+    
+    private boolean attackAvailable;
+    private boolean abilityAvailable;
     
     private ActionsOverlayGui(Minecraft mc) {
         this.mc = mc;
@@ -155,6 +162,9 @@ public class ActionsOverlayGui extends AbstractGui {
         updateElementPositions(barsPosConfig, hotbarsPosConfig, screenWidth, screenHeight);
 
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
+            attackAvailable = false;
+            abilityAvailable = false;
+            
             RenderSystem.enableRescaleNormal();
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
@@ -280,32 +290,52 @@ public class ActionsOverlayGui extends AbstractGui {
             ElementPosition position, ActionType actionType, ActionsModeConfig<P> mode, float partialTick) {
         P power = mode.getPower();
         if (power.hasPower()) {
-            mc.getTextureManager().bind(WIDGETS_LOCATION);
-            int x = position.x;
-            int y = position.y + 16 + 2 * 2 + mc.font.lineHeight;
-            if (actionType == ActionType.ABILITY) {
-                y += getHotbarsYDiff();
-            }
             List<Action<P>> actions = power.getActions(actionType);
-            if (position.alignment == Alignment.RIGHT) {
-                x -= actions.size() * 20 + 2;
-            }
-            int selected = mode.getSelectedSlot(actionType);
-            float alpha = selected < 0 ? 0.5F : 1.0F;
-            // hotbar
-            renderHotbar(matrixStack, x, y, actions.size(), alpha);
-            // selected slot
-            if (selected >= 0) {
-                blit(matrixStack, x - 1 + selected * 20, y - 1, 0, 22, 24, 22);
-            }
-            // action icons
-            x += 3;
-            y += 3;
-            for (int i = 0; i < actions.size(); i++) {
-                renderActionIcon(matrixStack, actionType, mode, actions.get(i), x + 20 * i, y, partialTick, i == selected, alpha);
-            }
-            if (alpha != 1.0F) {
-                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            if (actions.size() > 0) {
+                mc.getTextureManager().bind(WIDGETS_LOCATION);
+                int x = position.x;
+                int y = position.y + 16 + 2 * 2 + mc.font.lineHeight;
+                if (actionType == ActionType.ABILITY) {
+                    y += getHotbarsYDiff();
+                }
+                if (position.alignment == Alignment.RIGHT) {
+                    x -= actions.size() * 20 + 2;
+                }
+                int selected = mode.getSelectedSlot(actionType);
+                float alpha = selected < 0 ? 0.5F : 1.0F;
+                // hotbar
+                renderHotbar(matrixStack, x, y, actions.size(), alpha);
+                // selected slot
+                if (selected >= 0) {
+                    blit(matrixStack, x - 1 + selected * 20, y - 1, 0, 22, 24, 22);
+                }
+                // action icons
+                x += 3;
+                y += 3;
+                for (int i = 0; i < actions.size(); i++) {
+                    renderActionIcon(matrixStack, actionType, mode, actions.get(i), x + 20 * i, y, partialTick, i == selected, alpha);
+                }
+                // highlight when hotbar key is pressed
+                boolean highlightSelection = actionType == ActionType.ATTACK ? attackSelection : abilitySelection;
+                if (highlightSelection) {
+                    int highlightAlpha = (int) (ClientUtil.getHighlightAlpha(tickCount + partialTick, 50F, 25F, 0.25F, 0.5F) * 255F);
+                    RenderSystem.disableDepthTest();
+                    RenderSystem.disableTexture();
+                    Tessellator tessellator = Tessellator.getInstance();
+                    BufferBuilder bufferBuilder = tessellator.getBuilder();
+                    if (selected >= 0) {
+                        fillRect(bufferBuilder, x + selected * 20 - 4, y - 4, 24, 23, 255, 255, 255, highlightAlpha);
+                    }
+                    else {
+                        fillRect(bufferBuilder, x - 3, y - 3, actions.size() * 20 + 2, 22, 255, 255, 255, highlightAlpha);
+                    }
+                    RenderSystem.enableTexture();
+                    RenderSystem.enableDepthTest();
+                }
+                
+                if (alpha != 1.0F) {
+                    RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                }
             }
         }
     }
@@ -393,11 +423,24 @@ public class ActionsOverlayGui extends AbstractGui {
         if (isSelected) {
             boolean rightTarget = power.checkTargetType(action, mouseTarget).isPositive();
             mode.getTargetIcon(hotbar).update(action.getTargetRequirement(), rightTarget);
-            return rightTarget && power.checkRequirements(action, mouseTarget, false).isPositive();
+            boolean available = rightTarget && power.checkRequirements(action, mouseTarget, false).isPositive();
+            switch (hotbar) {
+            case ATTACK:
+                attackAvailable = available;
+                break;
+            case ABILITY:
+                abilityAvailable = available;
+                break;
+            }
+            return available;
         }
         else {
             return power.checkRequirements(action, mouseTarget, true).isPositive();
         }
+    }
+    
+    public boolean areBothClicksIntercepted() {
+        return attackAvailable && abilityAvailable;
     }
     
     private void fillRect(BufferBuilder bufferBuilder, int x, double y, int width, double height, int red, int green, int blue, int alpha) {
@@ -407,6 +450,11 @@ public class ActionsOverlayGui extends AbstractGui {
         bufferBuilder.vertex(x + width , y + height, 0.0D).color(red, green, blue, alpha).endVertex();
         bufferBuilder.vertex(x + width , y + 0, 0.0D).color(red, green, blue, alpha).endVertex();
         Tessellator.getInstance().end();
+    }
+    
+    public void setHotbarButtonsDows(boolean attack, boolean ability) {
+        this.attackSelection = attack;
+        this.abilitySelection = ability;
     }
     
     private <P extends IPower<P, ?>> void drawHotbarText(MatrixStack matrixStack, ElementPosition position, ActionType actionType, @Nonnull ActionsModeConfig<P> mode) {

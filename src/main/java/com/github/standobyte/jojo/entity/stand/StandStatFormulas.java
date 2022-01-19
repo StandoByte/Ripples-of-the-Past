@@ -96,7 +96,7 @@ public class StandStatFormulas {
     }
     
     public static final int getSummonLockTicks(double speed) {
-        return 20 - (int) (speed * 1.25);
+        return Math.max(20 - (int) (speed * 1.25), 0);
     }
     
     public static final float rangeStrengthFactor(double rangeEffective, double rangeMax, double distance) {
