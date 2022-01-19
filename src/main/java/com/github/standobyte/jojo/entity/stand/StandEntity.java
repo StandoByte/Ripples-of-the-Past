@@ -403,6 +403,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 if (level.isClientSide()) {
                     alphaTicks = gradualSummonWeaknessTicks;
                 }
+                else if (gradualSummonWeaknessTicks == 0) {
+                    removeArmsOnlyModifiers();
+                }
             }
         }
     }

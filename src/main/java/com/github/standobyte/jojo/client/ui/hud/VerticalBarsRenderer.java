@@ -39,7 +39,8 @@ public class VerticalBarsRenderer extends BarsRenderer {
                     texX, 0, 8, barHeight, fill, color, 1.0F, 
                     0, 0, 17, 1, 
                     (int) ((float) barHeight * (tranclucentBarValue / maxValue)), 
-                    (int) (attackCostValue / maxValue), (int) (attackCostValue / maxValue), this.getHighlightAlpha(ticks + partialTick));
+                    (int) (attackCostValue / maxValue), (int) (attackCostValue / maxValue), 
+                    ClientUtil.getHighlightAlpha(ticks + partialTick, 80F, 30F, 1.25F, 0.25F));
             int[] iconTex = getIconTex(barType, powerType, BarsOrientation.VERTICAL);
             renderIcon(matrixStack, x - 2, y - iconTex[3] - 1, 
             iconTex[0], iconTex[1], iconTex[2], iconTex[3], iconTex[4]);

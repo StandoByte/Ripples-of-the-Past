@@ -47,7 +47,8 @@ public class HorizontalBarsRenderer extends BarsRenderer {
                     0, texY, 8, barLength, fill, color, 1.0F, 
                     0, 128, 1, 145, 
                     (int) ((float) barLength * (tranclucentBarValue / maxValue)), 
-                    (int) (attackCostValue / maxValue), (int) (attackCostValue / maxValue), this.getHighlightAlpha(ticks + partialTick));
+                    (int) (attackCostValue / maxValue), (int) (attackCostValue / maxValue), 
+                    ClientUtil.getHighlightAlpha(ticks + partialTick, 80F, 30F, 1.25F, 0.25F));
             int[] iconTex = getIconTex(barType, powerType, BarsOrientation.HORIZONTAL);
             int iconX = x;
             if (alignment == Alignment.RIGHT) {

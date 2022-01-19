@@ -148,4 +148,11 @@ public class ClientUtil {
         .normal(normals, normalX, normalZ, normalY)
         .endVertex();
     }
+
+    public static float getHighlightAlpha(float ticks, float cycleTicks, float maxAlphaTicks, float minAlpha, float maxAlpha) {
+        ticks %= cycleTicks;
+        float coeff = maxAlpha / maxAlphaTicks;
+        float alpha = ticks <= cycleTicks / 2 ? ticks * coeff : ticks * -coeff + coeff * cycleTicks;
+        return Math.min(alpha, maxAlpha - minAlpha) + minAlpha;
+    }
 }

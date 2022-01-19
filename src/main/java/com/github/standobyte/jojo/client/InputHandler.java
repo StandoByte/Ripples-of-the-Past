@@ -169,6 +169,7 @@ public class InputHandler {
             if (actionsOverlay.isActive()) {
                 boolean chooseAttack = attackHotbar.isDown();
                 boolean chooseAbility = abilityHotbar.isDown();
+                actionsOverlay.setHotbarButtonsDows(chooseAttack, chooseAbility);
                 if (chooseAttack || chooseAbility) {
                     for (int i = 0; i < 9; i++) {
                         if (mc.options.keyHotbarSlots[i].consumeClick()) {
