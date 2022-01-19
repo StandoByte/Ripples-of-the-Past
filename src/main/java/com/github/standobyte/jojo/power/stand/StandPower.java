@@ -178,15 +178,15 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 }
                 return 1F;
             }).orElse(1F);
-            staminaRegen *= serverPlayerUser.map(player -> {
+            if (getUser() instanceof PlayerEntity) {
+                PlayerEntity player = (PlayerEntity) getUser();
                 if (getStamina() < getMaxStamina()) {
                     player.causeFoodExhaustion(0.005F);
                 }
                 if (player.getFoodData().getFoodLevel() > 17) {
-                    return 1.5F;
+                    staminaRegen *= 1.5F;
                 }
-                return 1F;
-            }).orElse(1F);
+            }
             stamina = Math.min(stamina + staminaRegen, getMaxStamina());
         }
     }
