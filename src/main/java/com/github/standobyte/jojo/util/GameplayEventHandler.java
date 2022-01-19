@@ -538,7 +538,7 @@ public class GameplayEventHandler {
         boolean hardcore = user.level.getLevelData().isHardcore();
         if (user instanceof PlayerEntity && (
                 JojoModConfig.COMMON.keepStandOnDeath.get() && !hardcore
-                || false /*FIXME check skipped progression*/)) {
+                || true /*FIXME check skipped progression*/)) {
             return 0;
         }
         

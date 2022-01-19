@@ -22,13 +22,13 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 
 public class ModStandTypes {
-    private static final ITextComponent PART_3_NAME = new TranslationTextComponent("jojo.part.sc").withStyle(TextFormatting.DARK_PURPLE);
-//    private static final ITextComponent PART_4_NAME = new TranslationTextComponent("jojo.part.diu").withStyle(TextFormatting.RED);
-//    private static final ITextComponent PART_5_NAME = new TranslationTextComponent("jojo.part.gw").withStyle(TextFormatting.GOLD);
-//    private static final ITextComponent PART_6_NAME = new TranslationTextComponent("jojo.part.so").withStyle(TextFormatting.AQUA);
+    private static final ITextComponent PART_3_NAME = new TranslationTextComponent("jojo.story_part.3").withStyle(TextFormatting.DARK_PURPLE);
+//    private static final ITextComponent PART_4_NAME = new TranslationTextComponent("jojo.story_part.4").withStyle(TextFormatting.RED);
+//    private static final ITextComponent PART_5_NAME = new TranslationTextComponent("jojo.story_part.5").withStyle(TextFormatting.GOLD);
+//    private static final ITextComponent PART_6_NAME = new TranslationTextComponent("jojo.story_part.6").withStyle(TextFormatting.AQUA);
 //    
-//    private static final ITextComponent PART_7_NAME = new TranslationTextComponent("jojo.part.sbr").withStyle(TextFormatting.LIGHT_PURPLE);
-//    private static final ITextComponent PART_8_NAME = new TranslationTextComponent("jojo.part.jjl").withStyle(TextFormatting.WHITE);
+//    private static final ITextComponent PART_7_NAME = new TranslationTextComponent("jojo.story_part.7").withStyle(TextFormatting.LIGHT_PURPLE);
+//    private static final ITextComponent PART_8_NAME = new TranslationTextComponent("jojo.story_part.8").withStyle(TextFormatting.WHITE);
     
     public static final DeferredRegister<StandType<?>> STANDS = DeferredRegister.create(
             (Class<StandType<?>>) ((Class<?>) StandType.class), JojoMod.MOD_ID);
