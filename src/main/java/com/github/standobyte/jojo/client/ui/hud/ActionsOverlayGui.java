@@ -197,6 +197,9 @@ public class ActionsOverlayGui extends AbstractGui {
                 currentMode = null;
                 return;
             }
+            
+            ActionTarget target = ActionTarget.fromRayTraceResult(mc.hitResult);
+            
             if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
                 RenderSystem.enableRescaleNormal();
                 RenderSystem.enableBlend();
@@ -204,8 +207,8 @@ public class ActionsOverlayGui extends AbstractGui {
 
                 renderPowerIcon(matrixStack, hotbarsPosition, currentMode);
                 
-                renderActionsHotbar(matrixStack, hotbarsPosition, ActionType.ATTACK, currentMode, partialTick);
-                renderActionsHotbar(matrixStack, hotbarsPosition, ActionType.ABILITY, currentMode, partialTick);
+                renderActionsHotbar(matrixStack, hotbarsPosition, ActionType.ATTACK, currentMode, target, partialTick);
+                renderActionsHotbar(matrixStack, hotbarsPosition, ActionType.ABILITY, currentMode, target, partialTick);
                 
                 renderLeapIcon(matrixStack, currentMode, screenWidth, screenHeight);
                 
@@ -215,8 +218,8 @@ public class ActionsOverlayGui extends AbstractGui {
             else if (event.getType() == RenderGameOverlayEvent.ElementType.TEXT) {
                 drawPowerName(matrixStack, hotbarsPosition, currentMode);
                 
-                drawHotbarText(matrixStack, hotbarsPosition, ActionType.ATTACK, currentMode);
-                drawHotbarText(matrixStack, hotbarsPosition, ActionType.ABILITY, currentMode);
+                drawHotbarText(matrixStack, hotbarsPosition, ActionType.ATTACK, target, currentMode);
+                drawHotbarText(matrixStack, hotbarsPosition, ActionType.ABILITY, target, currentMode);
                 
                 // FIXME remote stand distance & strength (under hotbars)
             }
@@ -287,7 +290,7 @@ public class ActionsOverlayGui extends AbstractGui {
     
     
     private <P extends IPower<P, ?>> void renderActionsHotbar(MatrixStack matrixStack, 
-            ElementPosition position, ActionType actionType, ActionsModeConfig<P> mode, float partialTick) {
+            ElementPosition position, ActionType actionType, ActionsModeConfig<P> mode, ActionTarget target, float partialTick) {
         P power = mode.getPower();
         if (power.hasPower()) {
             List<Action<P>> actions = power.getActions(actionType);
@@ -313,7 +316,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 x += 3;
                 y += 3;
                 for (int i = 0; i < actions.size(); i++) {
-                    renderActionIcon(matrixStack, actionType, mode, actions.get(i), x + 20 * i, y, partialTick, i == selected, alpha);
+                    renderActionIcon(matrixStack, actionType, mode, actions.get(i), target, x + 20 * i, y, partialTick, i == selected, alpha);
                 }
                 // highlight when hotbar key is pressed
                 boolean highlightSelection = actionType == ActionType.ATTACK ? attackSelection : abilitySelection;
@@ -352,7 +355,7 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     private <P extends IPower<P, ?>> void renderActionIcon(MatrixStack matrixStack, ActionType actionType, ActionsModeConfig<P> mode, 
-            Action<P> action, int x, int y, float partialTick, boolean isSelected, float hotbarAlpha) {
+            Action<P> action, ActionTarget target, int x, int y, float partialTick, boolean isSelected, float hotbarAlpha) {
         P power = mode.getPower();
         action = handleShift(action, power);
         
@@ -360,7 +363,7 @@ public class ActionsOverlayGui extends AbstractGui {
             TextureAtlasSprite textureAtlasSprite = SpriteUploaders.getActionSprites().getSprite(action);
             mc.getTextureManager().bind(textureAtlasSprite.atlas().location());
             
-            if (!isActionAvaliable(action, mode, actionType, ActionTarget.fromRayTraceResult(mc.hitResult), isSelected)) {
+            if (!isActionAvaliable(action, mode, actionType, target, isSelected)) {
                 RenderSystem.color4f(0.2F, 0.2F, 0.2F, 0.5F * hotbarAlpha);
                 blit(matrixStack, x, y, 0, 16, 16, textureAtlasSprite);
                 // cooldown
@@ -457,19 +460,19 @@ public class ActionsOverlayGui extends AbstractGui {
         this.abilitySelection = ability;
     }
     
-    private <P extends IPower<P, ?>> void drawHotbarText(MatrixStack matrixStack, ElementPosition position, ActionType actionType, @Nonnull ActionsModeConfig<P> mode) {
+    private <P extends IPower<P, ?>> void drawHotbarText(MatrixStack matrixStack, ElementPosition position, ActionType actionType, ActionTarget target, @Nonnull ActionsModeConfig<P> mode) {
         Action<P> action = mode.getSelectedAction(actionType);
         if (action != null) {
             P power = mode.getPower();
             action = handleShift(action, power);
             // action name
-            ITextComponent actionName = action.getName(power);
+            ITextComponent actionName = action.getName(power, target);
             if (action.getHoldDurationMax(power) > 0) {
                 actionName = new TranslationTextComponent("jojo.overlay.hold", actionName);
             }
             if (action.hasShiftVariation()) {
                 actionName = new TranslationTextComponent("jojo.overlay.shift", actionName, 
-                        new KeybindTextComponent(mc.options.keyShift.getName()), action.getShiftVariationIfPresent().getName(power));
+                        new KeybindTextComponent(mc.options.keyShift.getName()), action.getShiftVariationIfPresent().getName(power, target));
             }
             actionName = new TranslationTextComponent(
                     actionType == ActionType.ATTACK ? "jojo.overlay.action.attack" : "jojo.overlay.action.ability", actionName);
