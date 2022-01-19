@@ -32,14 +32,14 @@ public class VampirismBloodDrain extends VampirismAction {
     }
     
     @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
         if (user.level.getDifficulty() == Difficulty.PEACEFUL) {
             return conditionMessage("peaceful");
         }
-        if (!performer.getMainHandItem().isEmpty()) {
+        if (!user.getMainHandItem().isEmpty()) {
             return conditionMessage("hand");
         }
-        Entity entityTarget = target.getEntity(performer.level);
+        Entity entityTarget = target.getEntity(user.level);
         if (entityTarget instanceof LivingEntity) {
             LivingEntity livingTarget = (LivingEntity) entityTarget;
             if (!JojoModUtil.canBleed(livingTarget) || JojoModUtil.isUndead(livingTarget)) {
@@ -125,7 +125,7 @@ public class VampirismBloodDrain extends VampirismAction {
     @Override
     public void onHoldTickClientEffect(LivingEntity user, INonStandPower power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {
         if (stateRefreshed && requirementsFulfilled) {
-            ClientTickingSoundsHelper.playHeldActionSound(ModSounds.VAMPIRE_BLOOD_DRAIN.get(), 1.0F, 1.0F, true, getPerformer(user, power), power, this);
+            ClientTickingSoundsHelper.playHeldActionSound(ModSounds.VAMPIRE_BLOOD_DRAIN.get(), 1.0F, 1.0F, true, user, power, this);
         }
     }
 }

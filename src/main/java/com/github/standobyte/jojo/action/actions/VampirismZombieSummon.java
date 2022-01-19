@@ -17,7 +17,7 @@ public class VampirismZombieSummon extends VampirismAction {
     }
     
     @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
         World world = user.level;
         if (world.getDifficulty() == Difficulty.PEACEFUL) {
             return conditionMessage("peaceful");

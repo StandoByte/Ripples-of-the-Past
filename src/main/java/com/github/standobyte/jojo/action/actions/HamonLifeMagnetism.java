@@ -21,8 +21,8 @@ public class HamonLifeMagnetism extends HamonAction {
     }
     
     @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
-        ItemStack heldItemStack = performer.getMainHandItem();
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
+        ItemStack heldItemStack = user.getMainHandItem();
         if (!heldItemStack.isEmpty()) {
             return conditionMessage("hand");
         }

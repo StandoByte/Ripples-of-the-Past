@@ -107,7 +107,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     private static final DataParameter<Integer> USER_ID = EntityDataManager.defineId(StandEntity.class, DataSerializers.INT);
     private WeakReference<LivingEntity> userRef = new WeakReference<LivingEntity>(null);
     private IStandPower userPower;
-    protected StandRelativeOffset relativePos = new StandRelativeOffset(-0.5, -0.2, 0.2);
+    protected StandRelativeOffset relativePos = new StandRelativeOffset(-0.75, -0.5, 0.2);
 
     private static final DataParameter<Boolean> SWING_OFF_HAND = EntityDataManager.defineId(StandEntity.class, DataSerializers.BOOLEAN);
     private boolean alternateAdditionalSwing;

@@ -76,11 +76,11 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         }
     }
     
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, P power, ActionTarget target) {
-        return checkSpecificConditions(user, performer, power, target);
+    public ActionConditionResult checkConditions(LivingEntity user, P power, ActionTarget target) {
+        return checkSpecificConditions(user, power, target);
     }
     
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, P power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, P power, ActionTarget target) {
         return ActionConditionResult.POSITIVE;
     }
     
@@ -128,11 +128,11 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     public void onHoldTickClientEffect(LivingEntity user, P power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {}
-    
-    public LivingEntity getPerformer(LivingEntity user, P power) { // FIXME performer shit 
+
+    public LivingEntity getPerformer(LivingEntity user, P power) {
         return user;
     }
-
+    
     public void onClick(World world, LivingEntity user, P power) {}
     
     protected ActionTarget aim(World world, LivingEntity user, P power, double range) {

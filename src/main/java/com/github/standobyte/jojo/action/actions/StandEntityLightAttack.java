@@ -5,12 +5,11 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.entity.stand.StandEntity.PunchType;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
+import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
@@ -19,15 +18,13 @@ public class StandEntityLightAttack extends StandEntityAction {
 
     public StandEntityLightAttack(StandEntityAction.Builder builder) {
         super(builder.standAutoSummonMode(AutoSummonMode.ONE_ARM).standUserSlowDownFactor(1.0F)
-                .standOffsetFromUser(0, 0.15, true).yOffsetFromUser(0, true)
+                .standOffsetFromUser(-0.75, 0.75).standOffsetFromUser(0, 0.15, true).yOffsetFromUser(0, true)
                 .standTakesCrosshairTarget().standPose(StandPose.LIGHT_ATTACK));
     }
 
     @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
-        return performer instanceof StandEntity && !((StandEntity) performer).canAttackMelee() ? 
-                ActionConditionResult.NEGATIVE
-                : super.checkSpecificConditions(user, performer, power, target);
+    protected ActionConditionResult checkStandConditions(StandEntity stand, IStandPower power, ActionTarget target) {
+        return !stand.canAttackMelee() ? ActionConditionResult.NEGATIVE : super.checkStandConditions(stand, power, target);
     }
     
     @Override

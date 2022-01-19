@@ -234,8 +234,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
             user.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                 boolean prevTickSound = cap.syoSound;
                 HamonAction SYOverdrive = ModActions.HAMON_SUNLIGHT_YELLOW_OVERDRIVE.get();
-                cap.syoSound = user.isShiftKeyDown() && SYOverdrive.checkConditions(user, SYOverdrive.getPerformer(user, power), power, 
-                        new ActionTarget(ClientUtil.getCrosshairPickEntity())).isPositive();
+                cap.syoSound = user.isShiftKeyDown() && SYOverdrive.checkConditions(user, power, new ActionTarget(ClientUtil.getCrosshairPickEntity())).isPositive();
                 if (!prevTickSound && cap.syoSound) {
                     ClientTickingSoundsHelper.playHamonConcentrationSound(user, entity -> !cap.syoSound);
                 }

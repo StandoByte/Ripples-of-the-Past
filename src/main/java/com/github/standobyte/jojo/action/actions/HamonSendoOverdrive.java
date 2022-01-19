@@ -29,8 +29,8 @@ public class HamonSendoOverdrive extends HamonAction {
     }
     
     @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
-        if (!performer.getMainHandItem().isEmpty()) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
+        if (!user.getMainHandItem().isEmpty()) {
             return conditionMessage("hand");
         }
         return ActionConditionResult.POSITIVE;

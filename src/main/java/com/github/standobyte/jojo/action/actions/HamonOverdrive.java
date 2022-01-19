@@ -29,8 +29,8 @@ public class HamonOverdrive extends HamonAction { // FIXME also don't send messa
     }
     
     @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
-        ItemStack heldItemStack = performer.getMainHandItem();
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
+        ItemStack heldItemStack = user.getMainHandItem();
         if (!heldItemStack.isEmpty() && !metalSilverOverdrive(power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get(), heldItemStack)) {
             return ActionConditionResult.NEGATIVE;
         }

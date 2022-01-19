@@ -6,8 +6,6 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
-import net.minecraft.entity.LivingEntity;
-
 public class StandEntityBlock extends StandEntityAction {
     
     public StandEntityBlock() {
@@ -20,15 +18,8 @@ public class StandEntityBlock extends StandEntityAction {
     }
 
     @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
-        if (!(performer instanceof StandEntity)) {
-            return ActionConditionResult.POSITIVE;
-        }
-        StandEntity stand = (StandEntity) performer;
-        if (stand.canStartBlocking() || stand.isStandBlocking()) {
-            return ActionConditionResult.POSITIVE;
-        }
-        return ActionConditionResult.NEGATIVE;
+    protected ActionConditionResult checkStandConditions(StandEntity stand, IStandPower power, ActionTarget target) {
+        return stand.canStartBlocking() || stand.isStandBlocking() ? ActionConditionResult.POSITIVE : ActionConditionResult.NEGATIVE;
     }
 
     @Override
