@@ -5,6 +5,7 @@ import static com.github.standobyte.jojo.client.ui.hud.BarsRenderer.BARS_WIDTH_P
 import java.util.List;
 import java.util.function.IntBinaryOperator;
 import java.util.function.IntUnaryOperator;
+import java.util.function.UnaryOperator;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -16,6 +17,7 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.hud.ActionsModeConfig.SelectedTargetIcon;
 import com.github.standobyte.jojo.client.ui.sprites.SpriteUploaders;
+import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClClickActionPacket;
 import com.github.standobyte.jojo.power.IPower;
@@ -628,7 +630,8 @@ public class ActionsOverlayGui extends AbstractGui {
             if (ticks >= ticksStartFadeAway) {
                 return 1F;
             }
-            return Math.max((ticks - partialTick) / (float) ticksStartFadeAway, MIN_ALPHA);
+            float alpha = Math.max((ticks - partialTick) / (float) ticksStartFadeAway, MIN_ALPHA);
+            return alpha;
         }
         
         private void tick() {
