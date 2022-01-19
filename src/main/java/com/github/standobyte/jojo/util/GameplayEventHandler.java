@@ -520,30 +520,39 @@ public class GameplayEventHandler {
         if (JojoModUtil.isUndead(entity)) {
             return;
         }
+        int ticks = IStandPower.getStandPowerOptional(entity)
+                .map(power -> getSoulAscensionTicks(entity, power)).orElse(0);
         
-        float resolveRatio = IStandPower.getStandPowerOptional(entity).map(stand -> {
-            if (!stand.usesResolve()) {
-                return 0F;
-            }
-            return stand.getResolveRatio();
-        }).orElse(0F);
-        if (event.getSource() == TestBuildCommand.SOUL_TEST) {
-            resolveRatio = 1;
+        if (event.getSource() == TestBuildCommand.SOUL_TEST) ticks = 300;
+        
+        if (ticks > 0) {
+            SoulEntity soulEntity = new SoulEntity(entity.level, entity, ticks);
+            entity.level.addFreshEntity(soulEntity);
         }
-        if (resolveRatio <= 0) {
-            return;
+    }
+    
+    private static int getSoulAscensionTicks(LivingEntity user, IStandPower stand) {
+        if (!stand.usesResolve()) {
+            return 0;
+        }
+        boolean hardcore = user.level.getLevelData().isHardcore();
+        if (user instanceof PlayerEntity && (
+                JojoModConfig.COMMON.keepStandOnDeath.get() && !hardcore
+                || false /*FIXME check skipped progression*/)) {
+            return 0;
         }
         
-        PlayerEntity player = entity instanceof PlayerEntity ? (PlayerEntity) entity : null;
-        if (player != null && JojoModConfig.COMMON.keepStandOnDeath.get() && !entity.level.getLevelData().isHardcore()) {
-            return;
+        float xpRatio = stand.getAchievedResolveRatio();
+        if (xpRatio < 0.5F) {
+            return 0;
         }
+        float resolveRatio = stand.getResolveRatio();
         
-        SoulEntity soulEntity = new SoulEntity(entity.level, entity, 60 + (int) (240 * resolveRatio));
-        if (player != null) {
-            // FIXME (soul) controlled by player
+        int ticks = -60 + (int) (240F * xpRatio) + (int) (120F * resolveRatio);
+        if (hardcore) {
+            ticks += ticks / 2;
         }
-        entity.level.addFreshEntity(soulEntity);
+        return ticks;
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)

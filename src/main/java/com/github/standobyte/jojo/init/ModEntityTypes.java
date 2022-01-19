@@ -147,7 +147,7 @@ public class ModEntityTypes {
             .build(new ResourceLocation(JojoMod.MOD_ID, "stand_arrow").toString()));
     
     public static final RegistryObject<EntityType<SoulEntity>> SOUL = ENTITIES.register("soul", 
-            () -> EntityType.Builder.<SoulEntity>of(SoulEntity::new, EntityClassification.MISC).sized(0.6F, 1.8F)//.noSummon() // FIXME
+            () -> EntityType.Builder.<SoulEntity>of(SoulEntity::new, EntityClassification.MISC).sized(0.6F, 1.8F).noSummon()
             .build(new ResourceLocation(JojoMod.MOD_ID, "soul").toString()));
     
     
