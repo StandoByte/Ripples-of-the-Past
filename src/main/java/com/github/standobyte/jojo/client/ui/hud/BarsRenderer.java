@@ -158,7 +158,7 @@ public abstract class BarsRenderer {
         }
     }
     
-    protected final float alphaMultiplier(BarType barType) { // FIXME use this
+    protected final float alphaMultiplier(BarType barType) {
         if (barType == BarType.STAMINA && Minecraft.getInstance().player.hasEffect(ModEffects.RESOLVE.get())) {
             return 0.3F;
         }

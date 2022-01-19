@@ -145,8 +145,8 @@ public class InputHandler {
         }
 
         if (actionsOverlay.isActive() && !mc.player.isSpectator()) {
-            boolean scrollAttack = attackHotbar.isDown(); // FIXME show in hud
-            boolean scrollAbility = abilityHotbar.isDown(); // FIXME show in hud
+            boolean scrollAttack = attackHotbar.isDown();
+            boolean scrollAbility = abilityHotbar.isDown();
             if (scrollAttack || scrollAbility) {
                 if (scrollAttack) {
                     actionsOverlay.scrollAction(ActionType.ATTACK, event.getScrollDelta() > 0.0D);
