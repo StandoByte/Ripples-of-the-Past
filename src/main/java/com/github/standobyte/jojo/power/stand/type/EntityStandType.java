@@ -41,7 +41,7 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
     
     @Override
     public float getStaminaRegen(IStandPower power) {
-        return power.isActive() ? 1F : 4F;
+        return power.isActive() ? 1F : 2.5F;
     }
 
     @Override

@@ -14,6 +14,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
+import com.github.standobyte.jojo.action.actions.StandEntityHeavyAttack;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -23,6 +24,7 @@ import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModDataSerializers;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityAttributes;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
@@ -1162,6 +1164,16 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             damage = 0;
         }
         
+        if (punch == PunchType.LIGHT && livingTarget instanceof StandEntity) {
+            StandEntity standTarget = (StandEntity) livingTarget;
+            if (standTarget.getCurrentTaskAction() instanceof StandEntityHeavyAttack
+                    && standTarget.getCurrentTaskPhase() == StandEntityAction.Phase.WINDUP
+                    && standTarget.canBlockOrParryFromAngle(dmgSource)
+                    && 1F - standTarget.getCurrentTaskCompletion(0) < StandStatFormulas.getParryTiming(precision)) {
+                standTarget.parryHeavyAttack();
+                return true;
+            }
+        }
         boolean attacked = hurtTarget(target, dmgSource, damage);
         if (attacked) {
             if (livingTarget != null) {
@@ -1190,6 +1202,11 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     protected boolean hurtTarget(Entity target, DamageSource dmgSource, float damage) {
         return ModDamageSources.hurtThroughInvulTicks(target, dmgSource, (float) damage);
+    }
+    
+    protected void parryHeavyAttack() {
+        addEffect(new EffectInstance(ModEffects.STUN.get(), 40));
+        this.playSound(ModSounds.PARRY.get(), 1.0F, 1.0F);
     }
 
     protected boolean breakBlock(BlockPos blockPos) {
@@ -1440,6 +1457,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             }
             if (effectInstance.getEffect() == ModEffects.STUN.get()) {
                 user.addEffect(new EffectInstance(effectInstance));
+                stopTask();
             }
         }
     }

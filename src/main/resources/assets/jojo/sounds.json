@@ -285,6 +285,9 @@
     "subtitle": "jojo.subtitle.stand_unsummon",
     "sounds": [ "jojo:stand/stand_unsummon" ]
   },
+  "parry": {
+    "sounds": [ "jojo:parry" ]
+  },
   
   "jotaro_star_platinum": {
     "subtitle": "jojo.subtitle.star_platinum_name",

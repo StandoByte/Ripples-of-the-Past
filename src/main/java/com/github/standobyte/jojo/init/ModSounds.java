@@ -198,6 +198,10 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> STAND_UNSUMMON_DEFAULT = SOUNDS.register("stand_unsummon_default", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_unsummon_default")));
     
+    public static final RegistryObject<SoundEvent> PARRY = SOUNDS.register("parry", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "parry")));
+    
+    
     public static final RegistryObject<SoundEvent> JOTARO_STAR_PLATINUM = SOUNDS.register("jotaro_star_platinum", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "jotaro_star_platinum")));
 

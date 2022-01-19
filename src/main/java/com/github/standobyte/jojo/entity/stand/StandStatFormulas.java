@@ -59,6 +59,10 @@ public class StandStatFormulas {
         return MathHelper.floor((40.0 - speed * 1.25) / 6.0);
     }
     
+    public static final float getParryTiming(double precision) {
+        return Math.min(0.05F + (float) precision * 0.4F, 1F);
+    }
+    
     
     
     public static final float getBarrageHitDamage(double strength, double precision, Random random) {
