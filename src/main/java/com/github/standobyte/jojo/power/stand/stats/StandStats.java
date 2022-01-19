@@ -123,17 +123,17 @@ public class StandStats {
         }
     }
     
-    protected abstract static class AbstractBuilder<T extends AbstractBuilder<T>> { // FIXME (stats) default C-level values
-        private double powerBase = 0;
-        private double powerMax = 0;
-        private double speedBase = 0;
-        private double speedMax = 0;
-        private double rangeEffective = 2;
-        private double rangeMax = 5;
-        private double durabilityBase = 0;
-        private double durabilityMax = 0;
-        private double precisionBase = 0;
-        private double precisionMax = 0;
+    protected abstract static class AbstractBuilder<T extends AbstractBuilder<T>> {
+        private double powerBase = 8.0;
+        private double powerMax = 8.0;
+        private double speedBase = 8.0;
+        private double speedMax = 8.0;
+        private double rangeEffective = 2.0;
+        private double rangeMax = 5.0;
+        private double durabilityBase = 8.0;
+        private double durabilityMax = 8.0;
+        private double precisionBase = 0.5;
+        private double precisionMax = 0.5;
         
         public T power(double power) {
             return power(power, power);

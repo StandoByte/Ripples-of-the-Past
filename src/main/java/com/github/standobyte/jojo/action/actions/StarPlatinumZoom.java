@@ -12,7 +12,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
 
-// FIXME test
 public class StarPlatinumZoom extends StandEntityAction {
 
     public StarPlatinumZoom(StandEntityAction.Builder builder) {
