@@ -226,14 +226,13 @@ public class ClientEventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public void onRenderHand(RenderHandEvent event) {
-        if (true || event.getHand() == Hand.MAIN_HAND) {
+        if (event.getHand() == Hand.MAIN_HAND) {
             Entity entity = Minecraft.getInstance().getCameraEntity();
             if (entity instanceof LivingEntity) {
                 INonStandPower.getNonStandPowerOptional((LivingEntity) entity).ifPresent(power -> {
                     if (power.isActionOnCooldown(ModActions.HAMON_ZOOM_PUNCH.get())) {
                         event.setCanceled(true);
                     }
-                    // FIXME two arms
                     else if (ActionsOverlayGui.getInstance().getSelectedAction(ActionType.ATTACK) == ModActions.JONATHAN_OVERDRIVE_BARRAGE.get()) {
                         FirstPersonRenderer renderer = mc.getItemInHandRenderer();
                         ClientPlayerEntity player = mc.player;

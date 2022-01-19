@@ -24,13 +24,14 @@ public abstract class StandEntityAction extends StandAction {
     protected final int standWindupDuration;
     protected final int standPerformDuration;
     protected final int standRecoveryDuration;
-    protected final AutoSummonMode autoSummonMode;
-    protected final boolean standTakesCrosshairTarget;
+    private final AutoSummonMode autoSummonMode;
+    private final boolean standTakesCrosshairTarget;
     private final boolean isCancelable;
     public final float userMovementFactor;
     public final StandPose standPose;
     protected final UserOffset userOffset;
     protected final UserOffset userOffsetArmsOnly;
+    private final boolean enablePhysics;
     private final Supplier<SoundEvent> standSoundSupplier;
     
     public StandEntityAction(StandEntityAction.AbstractBuilder<?> builder) {
@@ -45,6 +46,7 @@ public abstract class StandEntityAction extends StandAction {
         this.standPose = builder.standPose;
         this.userOffset = builder.userOffset;
         this.userOffsetArmsOnly = builder.userOffsetArmsOnly;
+        this.enablePhysics = builder.enablePhysics;
         this.standSoundSupplier = builder.standSoundSupplier;
     }
     
@@ -146,6 +148,9 @@ public abstract class StandEntityAction extends StandAction {
                 standEntity.setTaskTarget(target);
             }
             setRelativePos(standEntity);
+            if (enablePhysics) {
+                standEntity.setNoPhysics(false);
+            }
         }
     }
     
@@ -244,16 +249,17 @@ public abstract class StandEntityAction extends StandAction {
     }
     
     protected abstract static class AbstractBuilder<T extends StandEntityAction.AbstractBuilder<T>> extends StandAction.AbstractBuilder<T> {
-        protected int standWindupDuration = 0;
-        protected int standPerformDuration = 1;
-        protected int standRecoveryDuration = 0;
-        protected AutoSummonMode autoSummonMode = AutoSummonMode.FULL;
-        protected boolean standTakesCrosshairTarget = false;
-        protected boolean isCancelable = false;
-        protected float userMovementFactor = 0.5F;
-        protected StandPose standPose = StandPose.NONE;
-        protected final UserOffset userOffset = new UserOffset();
-        protected final UserOffset userOffsetArmsOnly = new UserOffset();
+        private int standWindupDuration = 0;
+        private int standPerformDuration = 1;
+        private int standRecoveryDuration = 0;
+        private AutoSummonMode autoSummonMode = AutoSummonMode.FULL;
+        private boolean standTakesCrosshairTarget = false;
+        private boolean isCancelable = false;
+        private float userMovementFactor = 0.5F;
+        private StandPose standPose = StandPose.NONE;
+        private final UserOffset userOffset = new UserOffset();
+        private final UserOffset userOffsetArmsOnly = new UserOffset();
+        private boolean enablePhysics = true;
         private Supplier<SoundEvent> standSoundSupplier = () -> null;
         
         public T standAutoSummonMode(AutoSummonMode mode) {
@@ -323,6 +329,11 @@ public abstract class StandEntityAction extends StandAction {
         public T yOffsetFromUser(double y, boolean armsOnlyMode) {
             UserOffset offset = armsOnlyMode ? userOffsetArmsOnly : userOffset;
             offset.offsetY(y);
+            return getThis();
+        }
+        
+        public T stayInNoPhysics() {
+            this.enablePhysics = false;
             return getThis();
         }
         
