@@ -29,13 +29,10 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 
-// FIXME (soul) player-controlled rotation
 public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
     private LivingEntity originEntity;
     private UUID originUuid;
     private int lifeSpan;
-    private float xRotDead;
-    private float yRotDead;
     
     public SoulEntity(World world, LivingEntity originEntity, int lifeSpan) {
         this(ModEntityTypes.SOUL.get(), world);
@@ -52,8 +49,6 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
         this.originEntity = entity;
         if (entity != null) {
             copyPosition(entity);
-            xRotDead = entity.xRot;
-            yRotDead = entity.yRot;
             if (!level.isClientSide() && entity instanceof ServerPlayerEntity) {
                 ((ServerPlayerEntity) entity).displayClientMessage(
                         new TranslationTextComponent("jojo.message.skip_soul_ascension", new KeybindTextComponent("key.jump")), true);
@@ -89,16 +84,22 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
                         random.nextGaussian() * 0.02D, 
                         random.nextGaussian() * 0.02D);
             }
-            if (tickCount == 0 || tickCount == lifeSpan) {
-                addCloudParticles();
-            }
         }
-//        this.xRot = originEntity.xRot;
-//        this.yRot = originEntity.yRot;
-        originEntity.xRot = xRotDead;
-        originEntity.yRot = yRotDead;
+        if (level.isClientSide() && isControlledByLocalInstance()) {
+            // FIXME (soul) sync rotation
+            this.xRot = originEntity.xRot;
+            this.yRot = originEntity.yRot % 360F;
+        }
         originEntity.deathTime = Math.min(originEntity.deathTime, 18);
         move(MoverType.SELF, getDeltaMovement());
+    }
+
+    @Override
+    public boolean isControlledByLocalInstance() {
+        if (super.isControlledByLocalInstance()) {
+            return true;
+        }
+        return level.isClientSide() && originEntity instanceof PlayerEntity && ((PlayerEntity) originEntity).isLocalPlayer();
     }
     
     private void addCloudParticles() {
@@ -111,6 +112,14 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
                         random.nextGaussian() * 0.02D);
             }
         }
+    }
+    
+    @Override
+    public void remove() {
+        if (level.isClientSide()) {
+            addCloudParticles();
+        }
+        super.remove();
     }
     
     public void skipAscension() {
@@ -195,6 +204,7 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
         if (entity instanceof LivingEntity) {
             setOriginEntity((LivingEntity) entity);
             SoulController.onSoulSpawn(this);
+            addCloudParticles();
         }
         else {
             remove();

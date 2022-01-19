@@ -38,7 +38,6 @@ public class SoulRenderer<T extends SoulEntity> extends EntityRenderer<T> {
                 LivingRenderer renderer = (LivingRenderer) entityRenderDispatcher.getRenderer(originEntity);
                 renderLiving(originEntity, renderer, renderer.getModel(), soulEntity, 
                         yRotation, partialTick, matrixStack, buffer, packedLight);
-//                renderer.render(originEntity, yRotation, partialTick, matrixStack, buffer, packedLight);
             }
             super.render(soulEntity, yRotation, partialTick, matrixStack, buffer, packedLight);
         }
@@ -52,9 +51,8 @@ public class SoulRenderer<T extends SoulEntity> extends EntityRenderer<T> {
 
         model.riding = false;
         model.young = entity.isBaby();
-        // FIXME (soul) soul entity rotation
+        float yHeadRotation = yRotation;
         float yBodyRotation = MathHelper.rotLerp(partialTick, entity.yBodyRotO, entity.yBodyRot);
-        float yHeadRotation = MathHelper.rotLerp(partialTick, entity.yHeadRotO, entity.yHeadRot);
         float f2 = yHeadRotation - yBodyRotation;
         
         float xRotation = MathHelper.lerp(partialTick, entity.xRotO, entity.xRot);
@@ -75,94 +73,6 @@ public class SoulRenderer<T extends SoulEntity> extends EntityRenderer<T> {
         }
 
         matrixStack.popPose();
-        // FIXME (soul) name tag
-//        super.render(entity, yRotation, partialTick, matrixStack, buffer, packedLight);
         MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Post<E, M>(entity, renderer, partialTick, matrixStack, buffer, packedLight));
     }
-
-//    private <E extends LivingEntity, M extends EntityModel<E>> void render(E entity, LivingRenderer<E, M> renderer, M model, 
-//            float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
-//        if (MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Pre<E, M>(entity, renderer, partialTick, matrixStack, buffer, packedLight))) return;
-//        matrixStack.pushPose();
-//        model.attackTime = renderer.getAttackAnim(entity, partialTick);
-//
-//        boolean shouldSit = entity.isPassenger() && (entity.getVehicle() != null && entity.getVehicle().shouldRiderSit());
-//        model.riding = shouldSit;
-//        model.young = entity.isBaby();
-//        float yBodyRotation = MathHelper.rotLerp(partialTick, entity.yBodyRotO, entity.yBodyRot);
-//        float yHeadRotation = MathHelper.rotLerp(partialTick, entity.yHeadRotO, entity.yHeadRot);
-//        float f2 = yHeadRotation - yBodyRotation;
-//        if (shouldSit && entity.getVehicle() instanceof LivingEntity) {
-//            LivingEntity livingentity = (LivingEntity)entity.getVehicle();
-//            yBodyRotation = MathHelper.rotLerp(partialTick, livingentity.yBodyRotO, livingentity.yBodyRot);
-//            f2 = yHeadRotation - yBodyRotation;
-//            float f3 = MathHelper.wrapDegrees(f2);
-//            if (f3 < -85.0F) {
-//                f3 = -85.0F;
-//            }
-//
-//            if (f3 >= 85.0F) {
-//                f3 = 85.0F;
-//            }
-//
-//            yBodyRotation = yHeadRotation - f3;
-//            if (f3 * f3 > 2500.0F) {
-//                yBodyRotation += f3 * 0.2F;
-//            }
-//
-//            f2 = yHeadRotation - yBodyRotation;
-//        }
-//
-//        float xRotation = MathHelper.lerp(partialTick, entity.xRotO, entity.xRot);
-//        if (entity.getPose() == Pose.SLEEPING) {
-//            Direction direction = entity.getBedOrientation();
-//            if (direction != null) {
-//                float f4 = entity.getEyeHeight(Pose.STANDING) - 0.1F;
-//                matrixStack.translate((double)((float)(-direction.getStepX()) * f4), 0.0D, (double)((float)(-direction.getStepZ()) * f4));
-//            }
-//        }
-//
-//        float ticks = renderer.getBob(entity, partialTick);
-//        renderer.setupRotations(entity, matrixStack, ticks, yBodyRotation, partialTick);
-//        matrixStack.scale(-1.0F, -1.0F, 1.0F);
-//        renderer.scale(entity, matrixStack, partialTick);
-//        matrixStack.translate(0.0D, (double)-1.501F, 0.0D);
-//        float walkAnimSpeed = 0.0F;
-//        float walkAnimPos = 0.0F;
-//        if (!shouldSit && entity.isAlive()) {
-//            walkAnimSpeed = MathHelper.lerp(partialTick, entity.animationSpeedOld, entity.animationSpeed);
-//            walkAnimPos = entity.animationPosition - entity.animationSpeed * (1.0F - partialTick);
-//            if (entity.isBaby()) {
-//                walkAnimPos *= 3.0F;
-//            }
-//
-//            if (walkAnimSpeed > 1.0F) {
-//                walkAnimSpeed = 1.0F;
-//            }
-//        }
-//
-//        model.prepareMobModel(entity, walkAnimPos, walkAnimSpeed, partialTick);
-//        model.setupAnim(entity, walkAnimPos, walkAnimSpeed, ticks, f2, xRotation);
-//        Minecraft minecraft = Minecraft.getInstance();
-//        boolean flag = renderer.isBodyVisible(entity);
-//        boolean flag1 = !flag && !entity.isInvisibleTo(minecraft.player);
-//        boolean flag2 = minecraft.shouldEntityAppearGlowing(entity);
-//        RenderType rendertype = renderer.getRenderType(entity, flag, flag1, flag2);
-//        if (rendertype != null) {
-//            IVertexBuilder ivertexbuilder = buffer.getBuffer(rendertype);
-//            int i = LivingRenderer.getOverlayCoords(entity, renderer.getWhiteOverlayProgress(entity, partialTick));
-//            model.renderToBuffer(matrixStack, ivertexbuilder, packedLight, i, 1.0F, 1.0F, 1.0F, 0.5F);
-//        }
-//
-//        if (!entity.isSpectator()) {
-//            for(LayerRenderer<E, M> layerrenderer : renderer.layers) {
-//                layerrenderer.render(matrixStack, buffer, packedLight, entity, walkAnimPos, walkAnimSpeed, partialTick, ticks, f2, xRotation);
-//            }
-//        }
-//
-//        matrixStack.popPose();
-//        super.render(entity, yRotation, partialTick, matrixStack, buffer, packedLight);
-//        MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Post<E, M>(entity, renderer, partialTick, matrixStack, buffer, packedLight));
-//    }
-
 }
