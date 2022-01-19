@@ -46,7 +46,7 @@ public class HamonHealing extends HamonAction {
         if (!world.isClientSide()) {
             Entity targetEntity = target.getType() == TargetType.ENTITY && hamon.isSkillLearned(HamonSkill.HEALING_TOUCH) ? target.getEntity(world) : null;
             LivingEntity targetLiving = targetEntity instanceof LivingEntity ? (LivingEntity) targetEntity : null;
-            LivingEntity entityToHeal = targetEntity != null && !JojoModUtil.isUndead(targetLiving) ? targetLiving : user;
+            LivingEntity entityToHeal = targetEntity != null && canBeHealed(targetLiving, user) ? targetLiving : user;
             int regenDuration = 80 + MathHelper.floor(220F * effectStr);
             int regenLvl = MathHelper.floor(3.5F * effectStr);
 //            if (entityToHeal.getHealth() < entityToHeal.getMaxHealth()) {
@@ -59,20 +59,17 @@ public class HamonHealing extends HamonAction {
                 entityToHeal.removeEffect(Effects.HUNGER);
                 entityToHeal.removeEffect(Effects.CONFUSION);
             }
-            if (hamon.isSkillLearned(HamonSkill.PLANTS_GROWTH) && user instanceof PlayerEntity) {
-                BlockPos pos = target.getType() == TargetType.BLOCK ? target.getBlockPos() : user.isOnGround() ? user.blockPosition().below() : null;
-                if (pos != null) {
-                    Direction face = target.getType() == TargetType.BLOCK ? target.getFace() : Direction.UP;
-                    bonemealEffect(user.level, (PlayerEntity) user, pos, face);
-                }
+            if (hamon.isSkillLearned(HamonSkill.PLANTS_GROWTH) && user instanceof PlayerEntity && target.getType() == TargetType.BLOCK) {
+                Direction face = target.getType() == TargetType.BLOCK ? target.getFace() : Direction.UP;
+                bonemealEffect(user.level, (PlayerEntity) user, target.getBlockPos(), face);
             }
+            Vector3d sparksPos = new Vector3d(entityToHeal.getX(), entityToHeal.getY(0.5), entityToHeal.getZ());
+            HamonPowerType.createHamonSparkParticles(world, null, sparksPos, Math.max(0.5F * effectStr, 0.1F));
         }
-        Vector3d pos = target.getTargetPos();
-        if (pos == null) {
-            pos = new Vector3d(user.getX(), user.getY(0.5), user.getZ());
-        }
-        HamonPowerType.createHamonSparkParticles(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, 
-                pos, Math.max(0.5F * effectStr, 0.1F));
+    }
+    
+    private boolean canBeHealed(LivingEntity targetEntity, LivingEntity user) {
+        return user.isShiftKeyDown() && !JojoModUtil.isUndead(targetEntity);
     }
 
     public static boolean bonemealEffect(World world, PlayerEntity applyingPlayer, BlockPos pos, Direction face) {
@@ -93,5 +90,19 @@ public class HamonHealing extends HamonAction {
                 return false;
             }
         }
+    }
+    
+    @Override
+    protected String getTranslationKey(INonStandPower power, ActionTarget target) {
+        String key = super.getTranslationKey(power, target);
+        if (power.getTypeSpecificData(ModNonStandPowers.HAMON.get())
+                .map(hamon -> hamon.isSkillLearned(HamonSkill.HEALING_TOUCH)).orElse(false)
+                && target.getType() == TargetType.ENTITY) {
+            Entity targetEntity = target.getEntity(null);
+            if (targetEntity instanceof LivingEntity && canBeHealed((LivingEntity) targetEntity, power.getUser())) {
+                key += "_touch";
+            }
+        }
+        return key;
     }
 }

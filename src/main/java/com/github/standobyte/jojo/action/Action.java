@@ -217,21 +217,21 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return holdDurationToFire == 0 && holdDurationMax > 0;
     }
     
-    protected String getTranslationKey() {
+    protected String getTranslationKey(P power, ActionTarget target) {
         if (translationKey == null) {
             translationKey = Util.makeDescriptionId("action", this.getRegistryName());
         }
         return this.translationKey;
     }
     
-    public ITextComponent getName(P power) {
-        return getTranslatedName(power, getTranslationKey());
+    public ITextComponent getName(P power, ActionTarget target) {
+        return getTranslatedName(power, getTranslationKey(power, target));
     }
     
-    public ITextComponent getNameShortened(P power) {
-        return ClientUtil.shortenedTranslationExists(getTranslationKey()) ? 
-                getTranslatedName(power, ClientUtil.getShortenedTranslationKey(getTranslationKey()))
-                : getName(power);
+    public ITextComponent getNameShortened(P power, ActionTarget target) {
+        return ClientUtil.shortenedTranslationExists(getTranslationKey(power, target)) ? 
+                getTranslatedName(power, ClientUtil.getShortenedTranslationKey(getTranslationKey(power, target)))
+                : getName(power, target);
     }
     
     protected TranslationTextComponent getTranslatedName(P power, String key) {
