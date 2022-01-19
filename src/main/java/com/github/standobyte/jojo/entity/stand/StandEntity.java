@@ -67,8 +67,10 @@ import net.minecraft.network.datasync.IDataSerializer;
 import net.minecraft.network.play.server.SAnimateHandPacket;
 import net.minecraft.network.play.server.SPlayEntityEffectPacket;
 import net.minecraft.network.play.server.SRemoveEntityEffectPacket;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.Effects;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.DamageSource;
@@ -584,15 +586,33 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
 
-
+    
     @Override
-    protected void actuallyHurt(DamageSource damageSrc, float damageAmount) {
-        boolean blockableAngle = canBlockOrParryFromAngle(damageSrc);
-        if (!damageSrc.isBypassArmor() && blockableAngle) {
-            if (barrageParryCount > 0) {
-                barrageParryCount--;
-                return;
+    public boolean hurt(DamageSource dmgSource, float dmgAmount) {
+        if (!level.isClientSide() && dmgAmount < 1F && !isInvulnerableTo(dmgSource) && !isDeadOrDying() 
+                && !(dmgSource.isFire() && hasEffect(Effects.FIRE_RESISTANCE))
+                && !dmgSource.isBypassArmor() && canBlockOrParryFromAngle(dmgSource)
+                && barrageParryCount > 0) {
+            barrageParryCount--;
+            Entity attacker = dmgSource.getDirectEntity();
+            Vector3d attackPos = this.getEyePosition(1.0F);
+            if (attacker != null) {
+                attackPos = attackPos.scale(0.5).add(attacker.getEyePosition(1.0F).scale(0.5));
             }
+            else {
+                attackPos = attackPos.add(this.getLookAngle().scale(1.0));
+            }
+            ((ServerWorld) level).sendParticles(ParticleTypes.CRIT, 
+                    attackPos.x, attackPos.y, attackPos.z, 1, 0.5D, 0.25D, 0.5D, 0.2D);
+            return false;
+        }
+        return super.hurt(dmgSource, dmgAmount);
+    }
+    
+    @Override
+    protected void actuallyHurt(DamageSource dmgSource, float damageAmount) {
+        boolean blockableAngle = canBlockOrParryFromAngle(dmgSource);
+        if (!dmgSource.isBypassArmor() && blockableAngle) {
             if (getCurrentTask() == null) {
                 // FIXME ^^^ auto-block on getting punched
 //                setAction(blockAction, 5, StandEntityAction.Phase.PERFORM);
@@ -601,27 +621,27 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         if (transfersDamage() && hasUser()) {
             LivingEntity user = getUser();
             if (user != null && user.isAlive()) {
-                if (!isInvulnerableTo(damageSrc)) {
-                    damageAmount = ForgeHooks.onLivingHurt(this, damageSrc, damageAmount);
+                if (!isInvulnerableTo(dmgSource)) {
+                    damageAmount = ForgeHooks.onLivingHurt(this, dmgSource, damageAmount);
                     if (damageAmount <= 0) return;
-                    damageAmount = getDamageAfterArmorAbsorb(damageSrc, damageAmount);
-                    damageAmount = getDamageAfterMagicAbsorb(damageSrc, damageAmount);
-                    damageAmount = damageResistance(damageSrc, damageAmount, blockableAngle);
+                    damageAmount = getDamageAfterArmorAbsorb(dmgSource, damageAmount);
+                    damageAmount = getDamageAfterMagicAbsorb(dmgSource, damageAmount);
+                    damageAmount = damageResistance(dmgSource, damageAmount, blockableAngle);
                     float damageAfterAbsorption = Math.max(damageAmount - getAbsorptionAmount(), 0.0F);
                     setAbsorptionAmount(getAbsorptionAmount() - (damageAmount - damageAfterAbsorption));
                     float absorbedDamage = damageAmount - damageAfterAbsorption;
-                    if (absorbedDamage > 0.0F && absorbedDamage < 3.4028235E37F && damageSrc.getEntity() instanceof ServerPlayerEntity) {
-                        ((ServerPlayerEntity) damageSrc.getEntity()).awardStat(Stats.DAMAGE_DEALT_ABSORBED, Math.round(absorbedDamage * 10.0F));
+                    if (absorbedDamage > 0.0F && absorbedDamage < 3.4028235E37F && dmgSource.getEntity() instanceof ServerPlayerEntity) {
+                        ((ServerPlayerEntity) dmgSource.getEntity()).awardStat(Stats.DAMAGE_DEALT_ABSORBED, Math.round(absorbedDamage * 10.0F));
                     }
-                    damageAfterAbsorption = ForgeHooks.onLivingDamage(this, damageSrc, damageAfterAbsorption);
+                    damageAfterAbsorption = ForgeHooks.onLivingDamage(this, dmgSource, damageAfterAbsorption);
                     if (damageAfterAbsorption != 0.0F) {
-                        ModDamageSources.hurtThroughInvulTicks(user, new StandLinkDamageSource(this, damageSrc), damageAmount);
+                        ModDamageSources.hurtThroughInvulTicks(user, new StandLinkDamageSource(this, dmgSource), damageAmount);
                     }
                 }
             }
         }
         else {
-            super.actuallyHurt(damageSrc, damageAmount);
+            super.actuallyHurt(dmgSource, damageAmount);
         }
     }
 
