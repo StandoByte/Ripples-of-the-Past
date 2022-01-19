@@ -39,14 +39,14 @@ public abstract class NonStandAction extends Action<INonStandPower> {
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
+    public ActionConditionResult checkConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!power.isUserCreative()) {
             if (power.getEnergy() < getEnergyNeeded(power.getHeldActionTicks(), power)) {
                 ITextComponent message = new TranslationTextComponent("jojo.message.action_condition.no_energy_" + power.getType().getEnergyString());
                 return ActionConditionResult.createNegative(message);
             }
         }
-        return super.checkConditions(user, performer, power, target);
+        return super.checkConditions(user, power, target);
     }
     
     @Override

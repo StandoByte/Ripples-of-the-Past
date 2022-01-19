@@ -26,8 +26,8 @@ public class HamonOverdriveBarrage extends HamonAction {
     }
     
     @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
-        if (!performer.getMainHandItem().isEmpty() || !performer.getOffhandItem().isEmpty()) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
+        if (!user.getMainHandItem().isEmpty() || !user.getOffhandItem().isEmpty()) {
             return conditionMessage("hands");
         }
         return ActionConditionResult.POSITIVE;

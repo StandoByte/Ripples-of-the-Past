@@ -7,7 +7,6 @@ import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
@@ -19,14 +18,15 @@ public class HierophantGreenBarrier extends StandEntityAction {
     }
     
     @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
-        if (performer instanceof HierophantGreenEntity) {
-            HierophantGreenEntity stand = (HierophantGreenEntity) performer;
-            if (stand.getPlacedBarriersCount() >= getMaxBarriersPlaceable(power)) {
+    protected ActionConditionResult checkStandConditions(StandEntity stand, IStandPower power, ActionTarget target) {
+        if (stand instanceof HierophantGreenEntity) {
+            HierophantGreenEntity hierophant = (HierophantGreenEntity) stand;
+            if (hierophant.getPlacedBarriersCount() >= getMaxBarriersPlaceable(power)) {
                 return conditionMessage("barrier");
             }
+            return ActionConditionResult.POSITIVE;
         }
-        return ActionConditionResult.POSITIVE;
+        return ActionConditionResult.NEGATIVE;
     }
     
     @Override

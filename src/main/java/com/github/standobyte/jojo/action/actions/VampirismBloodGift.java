@@ -19,14 +19,14 @@ public class VampirismBloodGift extends VampirismAction {
     }
     
     @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
         if (user.level.getDifficulty() == Difficulty.PEACEFUL) {
             return conditionMessage("peaceful");
         }
-        if (!performer.getMainHandItem().isEmpty()) {
+        if (!user.getMainHandItem().isEmpty()) {
             return conditionMessage("hand");
         }
-        Entity targetEntity = target.getEntity(performer.level);
+        Entity targetEntity = target.getEntity(user.level);
         if (!(targetEntity instanceof PlayerEntity)) {
             return conditionMessage("player_target");
         }
@@ -34,7 +34,7 @@ public class VampirismBloodGift extends VampirismAction {
         if (INonStandPower.getNonStandPowerOptional(targetLiving).map(targetPower -> targetPower.hasPower()).orElse(true)) {
             return conditionMessage("cant_become_vampire");
         }
-        if (performer.getHealth() <= 10.0F) {
+        if (user.getHealth() <= 10.0F) {
             return conditionMessage("user_too_low_health");
         }
         if (targetLiving.getHealth() > 6.0F) {

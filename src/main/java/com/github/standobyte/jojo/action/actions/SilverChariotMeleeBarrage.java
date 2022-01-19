@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.actions;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -14,13 +15,13 @@ public class SilverChariotMeleeBarrage extends StandEntityMeleeBarrage {
     public SilverChariotMeleeBarrage(StandEntityAction.Builder builder) {
         super(builder);
     }
-    
+
     @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
-        if (performer instanceof SilverChariotEntity && !((SilverChariotEntity) performer).hasRapier()) {
+    protected ActionConditionResult checkStandConditions(StandEntity stand, IStandPower power, ActionTarget target) {
+        if (stand instanceof SilverChariotEntity && !((SilverChariotEntity) stand).hasRapier()) {
             return conditionMessage("chariot_rapier");
         }
-        return super.checkSpecificConditions(user, performer, power, target);
+        return super.checkStandConditions(stand, power, target);
     }
     
     @Override

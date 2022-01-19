@@ -22,7 +22,7 @@ public class VampirismDarkAura extends VampirismAction {
     }
     
     @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
         if (user.level.getDifficulty() == Difficulty.PEACEFUL) {
             return conditionMessage("peaceful");
         }

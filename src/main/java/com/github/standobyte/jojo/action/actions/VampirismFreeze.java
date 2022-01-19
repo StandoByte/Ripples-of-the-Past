@@ -25,17 +25,17 @@ public class VampirismFreeze extends VampirismAction {
     }
     
     @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
         if (user.level.getDifficulty() == Difficulty.PEACEFUL) {
             return conditionMessage("peaceful");
         }
-        if (performer.isOnFire()) {
+        if (user.isOnFire()) {
             return conditionMessage("fire");
         }
         if (user.level.dimensionType().ultraWarm()) {
             return conditionMessage("ultrawarm");
         }
-        if (!performer.getMainHandItem().isEmpty()) {
+        if (!user.getMainHandItem().isEmpty()) {
             return conditionMessage("hand");
         }
         return ActionConditionResult.POSITIVE;

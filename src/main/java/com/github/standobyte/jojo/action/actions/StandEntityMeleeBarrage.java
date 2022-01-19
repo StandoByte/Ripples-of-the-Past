@@ -7,7 +7,6 @@ import com.github.standobyte.jojo.entity.stand.StandEntity.PunchType;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -17,12 +16,10 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
     public StandEntityMeleeBarrage(StandEntityAction.Builder builder) {
         super(builder.standAutoSummonMode(AutoSummonMode.ARMS).holdType().standUserSlowDownFactor(0.3F).defaultStandOffsetFromUser());
     }
-    
+
     @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
-        return performer instanceof StandEntity && !((StandEntity) performer).canAttackMelee() ? 
-                ActionConditionResult.NEGATIVE
-                : super.checkSpecificConditions(user, performer, power, target);
+    protected ActionConditionResult checkStandConditions(StandEntity stand, IStandPower power, ActionTarget target) {
+        return !stand.canAttackMelee() ? ActionConditionResult.NEGATIVE : super.checkStandConditions(stand, power, target);
     }
 
     @Override

@@ -233,7 +233,6 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             if (message != null) {
                 serverPlayerUser.ifPresent(player -> {
                     player.displayClientMessage(message, true);
-//                    PacketManager.sendToClient(new UnfulfilledActionConditionPacket(message), player);
                 });
             }
         }
@@ -249,6 +248,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             return ActionConditionResult.NEGATIVE;
         }
 
+        // FIXME !!!!!! stun (user/stand)
         LivingEntity performer = action.getPerformer(user, getThis());
         if (!action.ignoresPerformerStun() && performer != null && performer.getEffect(ModEffects.STUN.get()) != null) {
             return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition.stun"));
@@ -261,7 +261,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             }
         }
 
-        ActionConditionResult condition = action.checkConditions(user, performer, getThis(), target);
+        ActionConditionResult condition = action.checkConditions(user, getThis(), target);
         if (!condition.isPositive()) {
             return condition;
         }
@@ -274,6 +274,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
 
     @Override
     public ActionConditionResult checkTargetType(Action<P> action, ActionTarget target) {
+        // FIXME !!!!!! distance (from user/stand)
         LivingEntity performer = action.getPerformer(user, getThis());
         boolean targetTooFar = false;
         switch (target.getType()) {

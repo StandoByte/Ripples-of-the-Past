@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
@@ -52,6 +53,22 @@ public abstract class StandEntityAction extends StandAction {
         return power.isActive() ? (StandEntity) power.getStandManifestation() : user;
     }
     
+    @Override
+    public ActionConditionResult checkConditions(LivingEntity user, IStandPower power, ActionTarget target) {
+        if (power.isActive()) {
+            StandEntity stand = (StandEntity) power.getStandManifestation();
+            ActionConditionResult checkStand = checkStandConditions(stand, power, target);
+            if (!checkStand.isPositive()) {
+                return checkStand;
+            }
+        }
+        return super.checkConditions(user, power, target);
+    }
+    
+    protected ActionConditionResult checkStandConditions(StandEntity stand, IStandPower power, ActionTarget target) {
+        return ActionConditionResult.POSITIVE;
+    }
+    
     public void standTickButtonHold(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {}
     
     public void standTickWindup(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {}
@@ -92,7 +109,7 @@ public abstract class StandEntityAction extends StandAction {
     }
     
     @Override
-    public final void startedHolding(World world, LivingEntity user, IStandPower power, ActionTarget target, boolean requirementsFulfilled) {
+    public void startedHolding(World world, LivingEntity user, IStandPower power, ActionTarget target, boolean requirementsFulfilled) {
         if (!world.isClientSide() && requirementsFulfilled) {
             invokeForStand(power, stand -> setAction(power, stand, 
                     !holdOnly() ? getHoldDurationToFire(power) : getHoldDurationMax(power), 
@@ -102,10 +119,10 @@ public abstract class StandEntityAction extends StandAction {
     }
     
     @Override
-    protected final void holdTick(World world, LivingEntity user, IStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {}
+    protected void holdTick(World world, LivingEntity user, IStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {}
     
     @Override
-    public final void stoppedHolding(World world, LivingEntity user, IStandPower power, int ticksHeld) {
+    public void stoppedHolding(World world, LivingEntity user, IStandPower power, int ticksHeld) {
         if (!world.isClientSide()) {
             invokeForStand(power, stand -> stand.stopTask());
         }

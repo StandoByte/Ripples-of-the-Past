@@ -8,7 +8,6 @@ import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.World;
 
 public class SilverChariotTakeOffArmor extends StandEntityAction {
@@ -18,17 +17,18 @@ public class SilverChariotTakeOffArmor extends StandEntityAction {
     }
     
     @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
-        if (performer instanceof SilverChariotEntity) {
-            SilverChariotEntity chariot = (SilverChariotEntity) performer;
+    protected ActionConditionResult checkStandConditions(StandEntity stand, IStandPower power, ActionTarget target) {
+        if (stand instanceof SilverChariotEntity) {
+            SilverChariotEntity chariot = (SilverChariotEntity) stand;
             if (chariot.isArmsOnlyMode()) {
                 return ActionConditionResult.NEGATIVE;
             }
             if (!chariot.hasArmor()) {
                 return conditionMessage("chariot_armor");
             }
+            return ActionConditionResult.POSITIVE;
         }
-        return super.checkSpecificConditions(user, performer, power, target);
+        return ActionConditionResult.NEGATIVE;
     }
     
     @Override

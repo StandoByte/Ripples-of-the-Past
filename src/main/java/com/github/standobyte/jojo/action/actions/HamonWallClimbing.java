@@ -21,8 +21,8 @@ public class HamonWallClimbing extends HamonAction {
     }
     
     @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, INonStandPower power, ActionTarget target) {
-        ItemStack heldItemStack = performer.getMainHandItem();
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
+        ItemStack heldItemStack = user.getMainHandItem();
         if (!user.horizontalCollision) {
             if (user.level.isClientSide()) {
                 if (user instanceof PlayerEntity) {

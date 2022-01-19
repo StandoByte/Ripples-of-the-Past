@@ -66,7 +66,7 @@ public class TimeStop extends StandAction {
     }
     
     @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, LivingEntity performer, IStandPower power, ActionTarget target) {
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
         if (user.hasEffect(ModEffects.TIME_STOP.get())) {
             return ActionConditionResult.NEGATIVE;
         }
