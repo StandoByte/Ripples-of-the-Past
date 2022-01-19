@@ -38,6 +38,11 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
     public boolean usesStamina() {
         return true;
     }
+    
+    @Override
+    public float getStaminaRegen(IStandPower power) {
+        return power.isActive() ? 1F : 4F;
+    }
 
     @Override
     public boolean usesResolve() {

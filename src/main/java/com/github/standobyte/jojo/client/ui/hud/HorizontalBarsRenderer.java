@@ -44,7 +44,7 @@ public class HorizontalBarsRenderer extends BarsRenderer {
         
         if (highlight) {
             renderBar(matrixStack, barX, y, alignment, 
-                    0, texY, 8, barLength, fill, color, 1.0F, 
+                    0, texY, 8, barLength, fill, color, alphaMultiplier(barType), 
                     0, 128, 1, 145, 
                     (int) ((float) barLength * (tranclucentBarValue / maxValue)), 
                     (int) (attackCostValue / maxValue), (int) (attackCostValue / maxValue), 
@@ -67,7 +67,7 @@ public class HorizontalBarsRenderer extends BarsRenderer {
             if (transparency.shouldRender()) {
                 int xOffset = alignment == Alignment.RIGHT ? BAR_LENGTH - BAR_LENGTH_SHORTENED : 0;
                 renderBar(matrixStack, barX + xOffset, y, alignment, 
-                        0, texY + 8, 5, barLength, fill, color, transparency.getAlpha(partialTick), 
+                        0, texY + 8, 5, barLength, fill, color, transparency.getAlpha(partialTick) * alphaMultiplier(barType), 
                         0, 136, 1, 153, 
                         0, 0, 0, 0);
             }
@@ -75,39 +75,8 @@ public class HorizontalBarsRenderer extends BarsRenderer {
         }
     }
     
-    // FIXME the 2 methods are almost identical, make it protected final in BarsRenderer
-    private void renderBar(MatrixStack matrixStack, int x, int y, Alignment alignment, 
-            int texX, int texY, int width, int length, int fill, int barColor, float barAlpha, 
-            int borderTexX, int borderTexY, int scaleTexX, int scaleTexY, 
-            int tranclucentFill, int cost1Fill, int cost2Fill, float costAlpha) {
-        if (barAlpha > 0) {
-            float[] rgb = ClientUtil.rgb(barColor);
-            if (tranclucentFill > 0) {
-                RenderSystem.color4f(rgb[0], rgb[1], rgb[2], barAlpha / 2F);
-                barFill(matrixStack, x, y, alignment, texX, texY, width, length, tranclucentFill);
-            }
-            RenderSystem.color4f(rgb[0], rgb[1], rgb[2], barAlpha);
-            if (fill > 0) {
-                barFill(matrixStack, x, y, alignment, texX, texY, width, length, fill);
-            }
-            // border
-            gui.blit(matrixStack, x, y, borderTexX, borderTexY, length + 2, width);
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, barAlpha);
-            // cost
-            if (costAlpha > 0) {
-                // FIXME cost
-//              renderCost(matrixStack, attackCostValue, maxValue, fill, barHeight, 0, alpha);
-//              renderCost(matrixStack, abilityCostValue, maxValue, fill, barHeight, 3, alpha);
-            }
-            // scale
-            gui.blit(matrixStack, x + 1, y + 1, scaleTexX, scaleTexY, length, width - 2);
-            if (barAlpha != 1.0F) {
-                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-            }
-        }
-    }
-    
-    private void barFill(MatrixStack matrixStack, int x, int y, Alignment alignment, 
+    @Override
+    protected void barFill(MatrixStack matrixStack, int x, int y, Alignment alignment, 
             int texX, int texY, int width, int length, int fill) {
         if (alignment == Alignment.RIGHT) {
             // it just works
@@ -126,5 +95,10 @@ public class HorizontalBarsRenderer extends BarsRenderer {
                     texX + 1, texY + 1, 
                     fill, width - 2);
         }
+    }
+    
+    @Override
+    protected void drawBarElement(MatrixStack matrixStack, int x, int y, int texX, int texY, int width, int length) {
+        super.drawBarElement(matrixStack, x, y, texX, texY, length, width);
     }
 }

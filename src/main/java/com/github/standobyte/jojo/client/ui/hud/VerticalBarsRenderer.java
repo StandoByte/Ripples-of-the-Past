@@ -35,8 +35,8 @@ public class VerticalBarsRenderer extends BarsRenderer {
         int texX = barType == BarType.STAMINA ? 48 : 32;
         
         if (highlight) {
-            renderBar(matrixStack, x, y, 
-                    texX, 0, 8, barHeight, fill, color, 1.0F, 
+            renderBar(matrixStack, x, y, null, 
+                    texX, 0, 8, barHeight, fill, color, alphaMultiplier(barType), 
                     0, 0, 17, 1, 
                     (int) ((float) barHeight * (tranclucentBarValue / maxValue)), 
                     (int) (attackCostValue / maxValue), (int) (attackCostValue / maxValue), 
@@ -49,8 +49,8 @@ public class VerticalBarsRenderer extends BarsRenderer {
         else {
             ElementTransparency transparency = barTransparencies.get(barType);
             if (transparency.shouldRender()) {
-                renderBar(matrixStack, x, y + BAR_HEIGHT - BAR_HEIGHT_SHORTENED, 
-                        texX + 8, 0, 5, barHeight, fill, color, transparency.getAlpha(partialTick), 
+                renderBar(matrixStack, x, y + BAR_HEIGHT - BAR_HEIGHT_SHORTENED, null, 
+                        texX + 8, 0, 5, barHeight, fill, color, transparency.getAlpha(partialTick) * alphaMultiplier(barType), 
                         8, 0, 25, 1, 
                         0, 0, 0, 0);
             }
@@ -58,42 +58,15 @@ public class VerticalBarsRenderer extends BarsRenderer {
         }
     }
     
-    private void renderBar(MatrixStack matrixStack, int x, int y, 
-            int texX, int texY, int width, int length, int fill, int barColor, float barAlpha, 
-            int borderTexX, int borderTexY, int scaleTexX, int scaleTexY, 
-            int tranclucentFill, int cost1Fill, int cost2Fill, float costAlpha) {
-        if (barAlpha > 0) {
-            float[] rgb = ClientUtil.rgb(barColor);
-            if (tranclucentFill > 0) {
-                RenderSystem.color4f(rgb[0], rgb[1], rgb[2], barAlpha / 0.5F);
-                barFill(matrixStack, x, y, texX, texY, width, length, tranclucentFill);
-            }
-            RenderSystem.color4f(rgb[0], rgb[1], rgb[2], barAlpha);
-            if (fill > 0) {
-                barFill(matrixStack, x, y, texX, texY, width, length, fill);
-            }
-            // border
-            gui.blit(matrixStack, x, y, borderTexX, borderTexY, width, length + 2);
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, barAlpha);
-            // cost
-            if (costAlpha > 0) {
-                renderCost(matrixStack, x, y, cost1Fill, fill, length, 0, costAlpha);
-                renderCost(matrixStack, x, y, cost2Fill, fill, length, width / 2 - 1, costAlpha);
-            }
-            // scale
-            gui.blit(matrixStack, x + 1, y + 1, scaleTexX, scaleTexY, width - 2, length);
-            if (barAlpha != 1.0F) {
-                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-            }
-        }
-    }
-    
-    private void barFill(MatrixStack matrixStack, int x, int y, 
+    @Override
+    protected void barFill(MatrixStack matrixStack, int x, int y, Alignment alignment, 
             int texX, int texY, int width, int length, int fill) {
         gui.blit(matrixStack, x + 1, y + length - fill + 1, 
                 texX + 1, texY + length - fill + 1, width - 2, fill);
     }
-    
+
+//    renderCost(matrixStack, x, y, cost1Fill, fill, length, 0, costAlpha);
+//    renderCost(matrixStack, x, y, cost2Fill, fill, length, width / 2 - 1, costAlpha);
     private void renderCost(MatrixStack matrixStack, int barX, int barY, 
             int costFill, int barFill, int barHeight, int xOffset, float alpha) {
         if (costFill > 0) {
