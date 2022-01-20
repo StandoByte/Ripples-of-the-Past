@@ -33,8 +33,10 @@ public class StandStatFormulas {
     }
     
     public static final int getHeavyAttackWindup(double speed, float combo) {
-        // FIXME (stats) combo
-        return MathHelper.ceil((40 - speed * 1.25) * 2 / 3);
+        // FIXME (!) combo
+        int min = MathHelper.floor((40 - speed * 1.25) / 3);
+        int max = MathHelper.ceil((40 - speed * 1.25) * 4 / 3);
+        return max;
     }
     
     public static final int getHeavyAttackRecovery(double speed) {

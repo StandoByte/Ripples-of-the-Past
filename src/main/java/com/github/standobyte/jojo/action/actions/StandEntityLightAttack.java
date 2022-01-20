@@ -13,7 +13,7 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
-// FIXME smth like the voice line system for stands
+// FIXME (!) smth like the voice line system for stands
 public class StandEntityLightAttack extends StandEntityAction {
 
     public StandEntityLightAttack(StandEntityAction.Builder builder) {

@@ -205,7 +205,7 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
     }
 
     @Override
-    protected void swingArm(T entity, float swingAmount, float xRotation, HandSide swingingHand) {
+    protected void swingArm(T entity, float swingAmount, float xRotation, HandSide swingingHand, float recovery) {
         entity.setYBodyRot(entity.yRot);
         ModelRenderer punchingArm = getArm(swingingHand);
         ModelRenderer punchingForeArm = getForeArm(swingingHand);
@@ -243,6 +243,21 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         
         punchingForeArm.xRot = 2.3562F * (swing - 1);
         otherForeArm.xRot = -2.3562F * swing;
+        
+        recoveryAnim(recovery, upperPart, leftArm, leftForeArm, rightArm, rightForeArm);
+    }
+    
+    protected void recoveryAnim(float recoveryProgress, ModelRenderer... modelRenderers) {
+        if (recoveryProgress > 0) {
+            float anim = 1F - recoveryProgress;
+            for (ModelRenderer renderer : modelRenderers) {
+                if (renderer != null) {
+                    renderer.xRot *= anim;
+                    renderer.yRot *= anim;
+                    renderer.zRot *= anim;
+                }
+            }
+        }
     }
     
     protected ModelRenderer getArm(HandSide side) {
@@ -293,16 +308,20 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
 
     @Override
     protected void lightAttackPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
-        float swing = phase == Phase.WINDUP ? entity.getCurrentTaskCompletion(ticks - entity.tickCount) : 1F;
+        float progress = entity.getCurrentTaskCompletion(ticks - entity.tickCount);
+        float swing = phase == Phase.WINDUP ? progress : 1F;
         swingArm(entity, swing, xRotation,
-                entity.swingingArm == Hand.MAIN_HAND ? entity.getMainArm() : entity.getMainArm().getOpposite());
+                entity.swingingArm == Hand.MAIN_HAND ? entity.getMainArm() : entity.getMainArm().getOpposite(), 
+                        phase == Phase.RECOVERY ? Math.max(progress * 2F - 1F, 0F) : 0F);
     }
 
     @Override
     protected void heavyAttackPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
-        float swing = phase == Phase.WINDUP ? entity.getCurrentTaskCompletion(ticks - entity.tickCount) : 1F;
+        float progress = entity.getCurrentTaskCompletion(ticks - entity.tickCount);
+        float swing = phase == Phase.WINDUP ? progress : 1F;
         swingArm(entity, swing, xRotation,
-                entity.swingingArm == Hand.MAIN_HAND ? entity.getMainArm() : entity.getMainArm().getOpposite());
+                entity.swingingArm == Hand.MAIN_HAND ? entity.getMainArm() : entity.getMainArm().getOpposite(), 
+                        phase == Phase.RECOVERY ? Math.max(progress * 2F - 1F, 0F) : 0F);
     }
     
     @Override

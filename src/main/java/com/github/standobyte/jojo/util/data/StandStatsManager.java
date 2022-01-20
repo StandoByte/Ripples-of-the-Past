@@ -77,7 +77,7 @@ public class StandStatsManager extends JsonReloadListener {
                     try {
                         JsonObject jsonObject = JSONUtils.convertToJsonObject(object, RESOURCE_NAME);
                         stats.put(stand, GSON.fromJson(jsonObject, stand.getStatsClass()));
-                        // FIXME (stats) can i also update all summoned stand entities' data parameters?
+                        // FIXME can i also update all summoned stand entities' data parameters?
                     }
                     catch (IllegalArgumentException | JsonParseException jsonparseexception) {
                         LOGGER.error("Parsing error loading custom stand stats {}: {}", location, jsonparseexception.getMessage());
@@ -112,7 +112,8 @@ public class StandStatsManager extends JsonReloadListener {
                 }
             });
             savedStatsWorlds.add(folderPath);
-            // FIXME (stats) readme.txt, pack.mcmeta
+            // FIXME readme.txt
+            // FIXME (!) pack.mcmeta
         }
     }
     

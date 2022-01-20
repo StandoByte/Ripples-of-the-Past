@@ -221,7 +221,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 drawHotbarText(matrixStack, hotbarsPosition, ActionType.ATTACK, target, currentMode);
                 drawHotbarText(matrixStack, hotbarsPosition, ActionType.ABILITY, target, currentMode);
                 
-                // FIXME remote stand distance & strength (under hotbars)
+                // FIXME (!) remote stand distance & strength (under hotbars)
             }
         }
     }
@@ -492,7 +492,7 @@ public class ActionsOverlayGui extends AbstractGui {
             
             RenderSystem.disableBlend();
             RenderSystem.popMatrix();
-            // FIXME hold duration
+            // FIXME (!) hold duration
         }
     }
     
@@ -534,7 +534,7 @@ public class ActionsOverlayGui extends AbstractGui {
     
     
     
-    // FIXME mode selector (near the crosshair)
+    // FIXME (!) mode selector (near the crosshair)
     private void renderModeSelector(MatrixStack matrixStack, ElementPosition position, float partialTick) {
         if (modeSelectorTransparency.shouldRender()) {
 //            mc.getTextureManager().bind(OVERLAY_LOCATION);
