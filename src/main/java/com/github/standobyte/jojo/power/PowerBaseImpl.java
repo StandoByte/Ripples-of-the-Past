@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
@@ -170,19 +171,20 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         cooldowns.tick();
     }
 
+    
 
-
+    @Nullable   
     @Override
-    public final boolean onClickAction(ActionType type, int index, boolean shift, ActionTarget target) {
+    public final Action<P> getAction(ActionType type, int index, boolean shift) {
         List<Action<P>> actions = getActions(type);
         if (index < 0 || index >= actions.size()) {
-            return false;
+            return null;
         }
         Action<P> action = actions.get(index);
         if (shift && action.getShiftVariationIfPresent().isUnlocked(getThis())) {
             action = action.getShiftVariationIfPresent();
         }
-        return onClickAction(action, shift, target);
+        return action;
     }
     
     @Override

@@ -60,7 +60,7 @@ public class TrSyncHeldActionPacket {
                     if (msg.action == null) {
                         power.stopHeldAction(false);
                         if (user.is(ClientUtil.getClientPlayer())) {
-                            InputHandler.getInstance().resetHeldActionType();
+                            InputHandler.getInstance().stopHeldAction(power, false);
                         }
                     }
                     else {

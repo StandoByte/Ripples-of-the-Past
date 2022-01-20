@@ -31,7 +31,9 @@ public class ClStopHeldActionPacket {
         ctx.get().enqueueWork(() -> {
             PlayerEntity player = ctx.get().getSender();
             IPower.getPowerOptional(player, msg.classification).ifPresent(power -> {
-                power.stopHeldAction(msg.shouldFire);
+                if (power.getHeldAction() != null) {
+                    power.stopHeldAction(msg.shouldFire);
+                }
             });
         });
         ctx.get().setPacketHandled(true);

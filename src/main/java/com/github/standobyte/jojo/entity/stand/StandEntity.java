@@ -1200,8 +1200,14 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 if (knockback > 0.0F) {
                     livingTarget.knockback((float) knockback * 0.5F, (double) MathHelper.sin(yRot * ((float)Math.PI / 180F)), (double) (-MathHelper.cos(yRot * ((float)Math.PI / 180F))));
                 }
-                if (punch == PunchType.HEAVY && livingTarget.getUseItem().isShield(livingTarget) && target instanceof PlayerEntity) {
-                    ((PlayerEntity) livingTarget).disableShield(precision > 0.5 && attackDistance < attackRange * 0.4);
+                if (punch == PunchType.HEAVY)  {
+                    if (!level.isClientSide()) {
+                        ((ServerWorld) level).sendParticles(ParticleTypes.CRIT, 
+                                livingTarget.getX(), livingTarget.getY(0.5), livingTarget.getZ(), 15, 0.3D, 0.3D, 0.3D, 0.0D);
+                    }
+                    if (livingTarget.getUseItem().isShield(livingTarget) && target instanceof PlayerEntity) {
+                        ((PlayerEntity) livingTarget).disableShield(precision > 0.5 && attackDistance < attackRange * 0.4);
+                    }
                 }
                 LivingEntity user = getUser();
                 if (user != null) {
@@ -1225,7 +1231,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     protected void parryHeavyAttack() {
-        addEffect(new EffectInstance(ModEffects.STUN.get(), 40));
+        addEffect(new EffectInstance(ModEffects.STUN.get(), 30));
         this.playSound(ModSounds.PARRY.get(), 1.0F, 1.0F);
     }
 
