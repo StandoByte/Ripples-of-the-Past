@@ -9,6 +9,10 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_O;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_UNKNOWN;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_V;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
@@ -90,7 +94,6 @@ public class InputHandler {
     private KeyBinding deselectAbility;
     
     private int leftClickBlockDelay;
-    private ActionType heldActionType;
 
     private InputHandler(Minecraft mc) {
         this.mc = mc;
@@ -208,6 +211,10 @@ public class InputHandler {
                 if (scrollAbility.consumeClick()) {
                     actionsOverlay.scrollAction(ActionType.ABILITY, mc.player.isShiftKeyDown());
                 }
+
+                while (mc.options.keyPickItem.consumeClick()) {
+                    handleMouseClickPowerHud(null, ActionKey.STAND_BLOCK);
+                }
             }
         }
         else {
@@ -264,69 +271,54 @@ public class InputHandler {
                 leftClickBlockDelay = 0;
             }
             
-            PowerClassification mode = actionsOverlay.getCurrentMode();
-            if (mode == null) {
-                clearHeldAction(standPower, false);
-                clearHeldAction(nonStandPower, false);
+            checkHeldAction(standPower);
+            checkHeldAction(nonStandPower);
+        }
+    }
+    
+    private final Map<IPower<?, ?>, ActionKey> heldKeys = new HashMap<>();
+    
+    private enum ActionKey {
+        ATTACK(mc -> mc.options.keyAttack),
+        ABILITY(mc -> mc.options.keyUse),
+        STAND_BLOCK(mc -> mc.options.keyPickItem);
+        
+        private Function<Minecraft, KeyBinding> key;
+        
+        private ActionKey(Function<Minecraft, KeyBinding> key) {
+            this.key = key;
+        }
+        
+        private KeyBinding getKey(Minecraft mc) {
+            return key.apply(mc);
+        }
+    }
+    
+    private void checkHeldAction(IPower<?, ?> power) {
+        Action<?> heldAction = power.getHeldAction();
+        if (heldAction != null) {
+            boolean keyHeld;
+            if (heldKeys.containsKey(power)) {
+                keyHeld = heldKeys.get(power).getKey(mc).isDown();
             }
             else {
-                switch (mode) {
-                case STAND:
-                    updateHeldAction(standPower);
-                    clearHeldAction(nonStandPower, false);
-                    break;
-                case NON_STAND:
-                    clearHeldAction(standPower, false);
-                    updateHeldAction(nonStandPower);
-                    break;
-                }
+                keyHeld = mc.options.keyAttack.isDown() || mc.options.keyUse.isDown() || mc.options.keyPickItem.isDown();
+            }
+            if (!keyHeld) {
+                stopHeldAction(power, power.getPowerClassification() == actionsOverlay.getCurrentMode());
+            }
+            else {
+                PacketManager.sendToServer(ClHeldActionTargetPacket.withRayTraceResult(power.getPowerClassification(), mc.hitResult));
             }
         }
     }
     
-    private void updateHeldAction(IPower<?, ?> power) {
-        if (heldActionType != null) {
-            Action<?> heldAction = power.getHeldAction();
-            if (heldAction != null) {
-                KeyBinding key;
-                switch (heldActionType) {
-                case ATTACK:
-                    key = mc.options.keyAttack;
-                    break;
-                case ABILITY:
-                    key = mc.options.keyUse;
-                    break;
-                default:
-                    return;
-                }
-                Action<?> selectedAction = actionsOverlay.getSelectedAction(heldActionType);
-                if (heldAction != selectedAction) {
-                    clearHeldAction(power, false);
-                }
-                else if (!key.isDown()) {
-                    clearHeldAction(power, true);
-                }
-                else {
-                    PacketManager.sendToServer(ClHeldActionTargetPacket.withRayTraceResult(power.getPowerClassification(), mc.hitResult));
-                }
-            }
-        }
-    }
-    
-    public void clearHeldAction(IPower<?, ?> power, boolean shouldFire) {
+    public void stopHeldAction(IPower<?, ?> power, boolean shouldFire) {
         if (power.getHeldAction() != null) {
             power.stopHeldAction(shouldFire);
-            heldActionType = null;
+            heldKeys.remove(power);
             PacketManager.sendToServer(new ClStopHeldActionPacket(power.getPowerClassification(), shouldFire));
         }
-    }
-    
-    public void resetHeldActionType() {
-        heldActionType = null;
-    }
-    
-    public ActionType getHeldActionType() {
-        return heldActionType;
     }
     
     @SubscribeEvent(priority = EventPriority.HIGH)
@@ -334,20 +326,35 @@ public class InputHandler {
         if (mc.player.isSpectator() || event.getHand() == Hand.OFF_HAND) {
             return;
         }
-        
-        ActionType actionType;
+
+        ActionKey key;
         if (event.isAttack()) {
-            actionType = ActionType.ATTACK;
+            key = ActionKey.ATTACK;
         }
         else if (event.isUseItem()) {
-            actionType = ActionType.ABILITY;
+            key = ActionKey.ABILITY;
+        }
+        else if (event.isPickBlock()) {
+            key = ActionKey.STAND_BLOCK;
         }
         else {
             return;
         }
         
+        JojoMod.LOGGER.debug(key);
+        
+        handleMouseClickPowerHud(event, key);
+    }
+    
+    private void handleMouseClickPowerHud(@Nullable ClickInputEvent event, ActionKey key) {
+        if (mc.player.isSpectator()) {
+            return;
+        }
+        
+        ActionType actionType = key == ActionKey.ATTACK ? ActionType.ATTACK : ActionType.ABILITY;
+        
         if (actionsOverlay.noActionSelected(actionType)) {
-            if (mc.player.hasEffect(ModEffects.STUN.get())) {
+            if (mc.player.hasEffect(ModEffects.STUN.get()) && event != null) {
                 event.setCanceled(true);
             }
             return;
@@ -356,18 +363,32 @@ public class InputHandler {
         IPower<?, ?> power = actionsOverlay.getCurrentPower();
         boolean leftClickedBlock = actionType == ActionType.ATTACK && mc.hitResult.getType() == Type.BLOCK;
         if (leftClickedBlock && leftClickBlockDelay > 0 || power.getHeldAction() != null) {
-            event.setSwingHand(false);
-            event.setCanceled(true);
+            if (event != null) {
+                event.setSwingHand(false);
+                event.setCanceled(true);
+            }
             return;
         }
         boolean shift = mc.player.isShiftKeyDown();
-        if (actionsOverlay.onClick(actionType, shift)) {
-            Action<?> action = actionsOverlay.getSelectedAction(actionType);
-            event.setSwingHand(action.swingHand());
-            event.setCanceled(action.cancelsVanillaClick());
-            // FIXME held actions sometimes break
+        
+        boolean click;
+        if (key == ActionKey.STAND_BLOCK) {
+            click = actionsOverlay.onClick(actionType, shift, 0);
+        }
+        else {
+            click = actionsOverlay.onClick(actionType, shift);
+        }
+        if (click) {
+            Action<?> action = key != ActionKey.STAND_BLOCK ? actionsOverlay.getSelectedAction(actionType) : power.getAction(actionType, 0, shift);
+            if (event != null) {
+                event.setSwingHand(action.swingHand());
+                event.setCanceled(action.cancelsVanillaClick());
+            }
+            else if (action.swingHand()) {
+                mc.player.swing(Hand.MAIN_HAND);
+            }
             if (actionsOverlay.isSelectedActionHeld(actionType)) {
-                heldActionType = actionType;
+                heldKeys.put(power, key);
             }
         }
         if (leftClickedBlock) {
@@ -481,6 +502,7 @@ public class InputHandler {
     public void updatePowersCache() {
         standPower = IStandPower.getPlayerStandPower(mc.player);
         nonStandPower = INonStandPower.getPlayerNonStandPower(mc.player);
+        heldKeys.clear();
     }
     
     

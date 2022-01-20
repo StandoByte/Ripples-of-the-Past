@@ -16,7 +16,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 @EventBusSubscriber(modid = JojoMod.MOD_ID, value = Dist.CLIENT)
 public class SoulController {
     private static SoulEntity playerSoulEntity = null;
-    private static boolean showDeathScreen;
+    private static boolean showDeathScreen = true;
     
     public static void onSoulSpawn(SoulEntity soulEntity) {
         Minecraft mc = Minecraft.getInstance();

@@ -2,6 +2,8 @@ package com.github.standobyte.jojo.power;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
@@ -40,8 +42,15 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     void setCooldownTimer(Action<?> action, int value, int totalCooldown);
     ActionCooldownTracker getCooldowns();
 
-    boolean onClickAction(ActionType type, int index, boolean shift, ActionTarget target);
+    @Nullable Action<P> getAction(ActionType type, int index, boolean shift);
     boolean onClickAction(Action<P> action, boolean shift, ActionTarget target);
+    default boolean onClickAction(ActionType type, int index, boolean shift, ActionTarget target) {
+        Action<P> action = this.getAction(type, index, shift);
+        if (action != null) {
+            return onClickAction(action, shift, target);
+        }
+        return false;
+    }
     ActionConditionResult checkRequirements(Action<P> action, ActionTarget target, boolean checkTargetType);
     ActionConditionResult checkTargetType(Action<P> action, ActionTarget target);
     boolean canUsePower();

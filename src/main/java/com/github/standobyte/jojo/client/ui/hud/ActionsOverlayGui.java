@@ -756,19 +756,22 @@ public class ActionsOverlayGui extends AbstractGui {
         mode.setSelectedSlot(hotbar, i);
     }
     
-    
+
     
     public boolean onClick(ActionType mouseButton, boolean shift) {
+        return onClick(mouseButton, shift, currentMode != null ? currentMode.getSelectedSlot(mouseButton) : -1);
+    }
+    
+    public boolean onClick(ActionType mouseButton, boolean shift, int slot) {
         if (currentMode != null) {
-            return clickAction(currentMode, mouseButton, shift);
+            return clickAction(currentMode, mouseButton, shift, slot);
         }
         return false;
     }
     
-    private <P extends IPower<P, ?>> boolean clickAction(ActionsModeConfig<P> mode, ActionType actionType, boolean shift) {
+    private <P extends IPower<P, ?>> boolean clickAction(ActionsModeConfig<P> mode, ActionType actionType, boolean shift, int index) {
         P power = mode.getPower();
         if (power != null) {
-            int index = mode.getSelectedSlot(actionType);
             RayTraceResult target = mc.hitResult;
             PacketManager.sendToServer(ClClickActionPacket.withRayTraceResult(power.getPowerClassification(), actionType, shift, index, target));
             ActionTarget actionTarget = ActionTarget.fromRayTraceResult(target);

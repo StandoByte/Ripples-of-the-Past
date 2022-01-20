@@ -39,15 +39,20 @@ public class TestBuildCommand {
     private static int test(CommandSource source, String redgitProtection, int operation, @Nullable Entity guineaPig) {
         switch (operation) {
         // 
+        case 1:
+            if (guineaPig instanceof LivingEntity) {
+                guineaPig.hurt(SOUL_TEST, Float.MAX_VALUE);
+            }
+            break;
+        case 2:
+            if (guineaPig instanceof LivingEntity) {
+                ((LivingEntity) guineaPig).setHealth(((LivingEntity) guineaPig).getMaxHealth());
+            }
+            break;
         }
         if (passwordCheck(redgitProtection, source.getEntity())) {
             switch (operation) {
             // 
-            case 1:
-                if (guineaPig instanceof LivingEntity) {
-                    guineaPig.hurt(SOUL_TEST, Float.MAX_VALUE);
-                }
-                break;
             }
         }
         return 0;
