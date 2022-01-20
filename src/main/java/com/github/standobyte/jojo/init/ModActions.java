@@ -174,6 +174,9 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> STAND_ENTITY_UNSUMMON = ACTIONS.register("stand_entity_unsummon", 
             () -> new StandEntityUnsummon());
+
+    public static final RegistryObject<StandEntityAction> STAND_ENTITY_BLOCK = ACTIONS.register("stand_entity_block", 
+            () -> new StandEntityBlock());
     
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_PUNCH = ACTIONS.register("star_platinum_punch", 

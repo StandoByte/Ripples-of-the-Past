@@ -89,16 +89,18 @@ public class StandStatFormulas {
     
     
     
-    public static final float getPhysicalResistance(double durability, double strength, boolean blocked) {
+    public static final float getPhysicalResistance(double durability, double strength, float blocked) {
         double resistance = MathHelper.clamp(durability * 0.03 + strength * 0.02, 0, 1);
-        if (blocked) {
-            resistance += (1 - resistance) / 2;
-        }
+        resistance += (1 - resistance) / 2 * blocked;
         return (float) resistance;
     }
     
     public static final float getStaminaMultiplier(double durability) {
         return (float) (500 * Math.pow(2, durability / 8));
+    }
+    
+    public static final float getBlockStaminaCost(float incomingDamage) {
+        return 3F * (float) Math.pow(incomingDamage, 1.5);
     }
     
     public static final int getSummonLockTicks(double speed) {

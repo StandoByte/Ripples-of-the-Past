@@ -612,11 +612,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     @Override
     protected void actuallyHurt(DamageSource dmgSource, float damageAmount) {
         boolean blockableAngle = canBlockOrParryFromAngle(dmgSource);
-        if (!dmgSource.isBypassArmor() && blockableAngle) {
-            if (getCurrentTask() == null) {
-                // FIXME (!!) auto-block on getting punched
-//                setAction(blockAction, 5, StandEntityAction.Phase.PERFORM);
-            }
+        if (!dmgSource.isBypassArmor() && blockableAngle && getCurrentTask() == null
+                && setTask(ModActions.STAND_ENTITY_BLOCK.get(), 5, StandEntityAction.Phase.PERFORM)) {
+            setNoPhysics(false);
         }
         if (transfersDamage() && hasUser()) {
             LivingEntity user = getUser();
@@ -667,13 +665,24 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
     protected float damageResistance(DamageSource damageSrc, float damageAmount, boolean blockableAngle) {
         if (!damageSrc.isBypassArmor()) {
-            boolean block = blockableAngle && isBlocking();
-            if (userPower != null) {
-                block = block && userPower.consumeStamina(damageAmount); // FIXME (!!) stamina usage value, stand crash (btw a fraction of resistance should still apply if some stamina was used but wasn't enough)
+            float blockedRatio = 0;
+            if (blockableAngle && isBlocking() && userPower != null && userPower.usesStamina()) {
+                float staminaCost = StandStatFormulas.getBlockStaminaCost(damageAmount);
+                if (userPower.consumeStamina(staminaCost)) {
+                    blockedRatio = 1F;
+                }
+                else {
+                    blockedRatio = userPower.getStamina() / staminaCost;
+                    standCrash();
+                }
             }
-            return damageAmount * StandStatFormulas.getPhysicalResistance(getDurability(), getAttackDamage(null), block);
+            return damageAmount * StandStatFormulas.getPhysicalResistance(getDurability(), getAttackDamage(null), blockedRatio);
         }
         return damageAmount;
+    }
+    
+    protected void standCrash() {
+        // FIXME (!) a mechanic from that old JoJo fighting game i suck at
     }
 
     protected boolean canBlockOrParryFromAngle(DamageSource damageSrc) {
