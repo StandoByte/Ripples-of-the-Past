@@ -130,9 +130,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     private StandEntityTask scheduledTask;
     
     protected StandPose standPose = StandPose.SUMMON;
-    public int summonLockTicks;
-    public int unsummonTicks;
     public int gradualSummonWeaknessTicks;
+    public int unsummonTicks;
+    public int summonLockTicks;
     
     public int overlayTickCount = 0;
     private int alphaTicks;
@@ -614,7 +614,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         boolean blockableAngle = canBlockOrParryFromAngle(dmgSource);
         if (!dmgSource.isBypassArmor() && blockableAngle) {
             if (getCurrentTask() == null) {
-                // FIXME ^^^ auto-block on getting punched
+                // FIXME (!!) auto-block on getting punched
 //                setAction(blockAction, 5, StandEntityAction.Phase.PERFORM);
             }
         }
@@ -669,7 +669,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         if (!damageSrc.isBypassArmor()) {
             boolean block = blockableAngle && isBlocking();
             if (userPower != null) {
-                block = block && userPower.consumeStamina(damageAmount); // FIXME ^^^^^^ stamina usage value, stand crash
+                block = block && userPower.consumeStamina(damageAmount); // FIXME (!!) stamina usage value, stand crash (btw a fraction of resistance should still apply if some stamina was used but wasn't enough)
             }
             return damageAmount * StandStatFormulas.getPhysicalResistance(getDurability(), getAttackDamage(null), block);
         }
@@ -756,12 +756,13 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         rangeEfficiency = user != null ? 
                 StandStatFormulas.rangeStrengthFactor(rangeEffective, getMaxRange(), distanceTo(user))
                 : 1;
+        
         staminaCondition = user != null ? 
                 user.hasEffect(ModEffects.RESOLVE.get()) ? 
                         1
                         : 0.1 + Math.min((double) (userPower.getStamina() / userPower.getMaxStamina()) * 1.8, 0.9)
                 : 1;
-
+        
         if (summonLockTicks > 0) {
             summonLockTicks--;
         }
@@ -770,6 +771,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             if (currentTask != null) {
                 currentTask.tick(userPower, this);
             }
+            
             if (gradualSummonWeaknessTicks > 0) {
                 gradualSummonWeaknessTicks--;
                 

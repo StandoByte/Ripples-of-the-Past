@@ -47,18 +47,14 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     protected void setSummonPoseRotationAngle(ModelRenderer modelRenderer, float x, float y, float z, float factor, 
             float xIdle, float yIdle, float zIdle) {
         setRotationAngle(modelRenderer, 
-                isHead(modelRenderer) 
-                ? modelRenderer.xRot + xIdle + (x - xIdle) * factor
-                : xIdle + (x - xIdle) * factor, 
+                isHead(modelRenderer)  ? modelRenderer.xRot + xIdle + (x - xIdle) * factor : xIdle + (x - xIdle) * factor, 
                 yIdle + (y - yIdle) * factor, 
                 zIdle + (z - zIdle) * factor);
     }
 
     protected void setSummonPoseRotationAngle(ModelRenderer modelRenderer, float x, float y, float z, float factor) {
         setRotationAngle(modelRenderer, 
-                isHead(modelRenderer)
-                ? modelRenderer.xRot + x * factor 
-                : x * factor, 
+                isHead(modelRenderer) ? modelRenderer.xRot + x * factor : x * factor, 
                 y * factor, 
                 z * factor);
     }
@@ -93,7 +89,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
             part.zRot = 0;
         });
         if (this.attackTime > 0.0F) {
-            swingArm(entity, this.attackTime, xRotation, entity.swingingArm == Hand.MAIN_HAND ? entity.getMainArm() : entity.getMainArm().getOpposite());
+            swingArm(entity, this.attackTime, xRotation, entity.swingingArm == Hand.MAIN_HAND ? entity.getMainArm() : entity.getMainArm().getOpposite(), 0);
         }
         else {
             if (poseType == StandPose.SUMMON) {
@@ -152,7 +148,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     protected void customPose(T entity, StandPose pose, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
         resetPose();
     }
-    protected abstract void swingArm(T entity, float swingAmount, float xRotation, HandSide swingingHand);
+    protected abstract void swingArm(T entity, float swingAmount, float xRotation, HandSide swingingHand, float recovery);
 
     public void renderFirstPersonArms(HandSide handSide, MatrixStack matrixStack, 
             IVertexBuilder buffer, int packedLight, T entity, float partialTick, 
@@ -182,7 +178,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
                     attackTime = anim - 1;
                     swingingHand = swing.getSide().getOpposite();
                 }
-                swingArm(entity, this.attackTime, xRotation, swingingHand);
+                swingArm(entity, this.attackTime, xRotation, swingingHand, 0F);
                 rotateAdditionalArmSwings();
                 renderToBuffer(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha * 0.5F);
                 matrixStack.popPose();

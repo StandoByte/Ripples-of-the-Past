@@ -9,7 +9,6 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 public class BalanceTestServerConfig {
     
     public static class ServerConfig {
-        public final ForgeConfigSpec.DoubleValue maxResolve;
         public final ForgeConfigSpec.DoubleValue resolveDecay;
         public final ForgeConfigSpec.DoubleValue resolveModifierAchieved;
         public final ForgeConfigSpec.DoubleValue resolveModifierHp;
@@ -19,15 +18,10 @@ public class BalanceTestServerConfig {
         public final ForgeConfigSpec.DoubleValue resolveEffectDmgReduction;
         
         ServerConfig(ForgeConfigSpec.Builder builder) {
-            maxResolve = builder
-                    .comment(" Max Resolve value.")
-                    .translation("jojo.config.maxResolve") 
-                    .defineInRange("maxResolve", 100D, 0, Float.MAX_VALUE);
-            
             resolveDecay = builder
                     .comment(" Resolve decay value.")
                     .translation("jojo.config.resolveDecay") 
-                    .defineInRange("resolveDecay", 0.1D, 0, Float.MAX_VALUE);
+                    .defineInRange("resolveDecay", 1D, 0, Float.MAX_VALUE);
             
             resolveModifierAchieved = builder
                     .comment(" Multiplier of resolve added when lower than once achieved level.")

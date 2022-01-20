@@ -177,7 +177,7 @@ public class InputHandler {
                     for (int i = 0; i < 9; i++) {
                         if (mc.options.keyHotbarSlots[i].consumeClick()) {
                             if (chooseAttack) {
-                                // FIXME doesn't seem to work for key 2 while walking (???)
+                                // FIXME (!) doesn't seem to work for key 2 while walking (???)
                                 actionsOverlay.selectAction(ActionType.ATTACK, i);
                             }
                             if (chooseAbility) {
@@ -187,7 +187,7 @@ public class InputHandler {
                     }
                 }
                 else {
-                    // FIXME behaves weird when mapped to 1-9
+                    // FIXME (!) behaves weird when mapped to 1-9
                     if (attackSlots != null) {
                         for (int i = 0; i < 9; i++) {
                             if (attackSlots[i].consumeClick()) {
@@ -480,7 +480,7 @@ public class InputHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void dash(InputUpdateEvent event) {
         if (mc.player.isOnGround()) {
-            // FIXME (dash) more dash checks (summoned stand, stand is following player, stand task, leap cd, stun, on ground, maybe some sprint checks, etc.)
+            // FIXME (!) (dash) more dash checks (summoned stand, stand is following player, stand task, leap cd, stun, on ground, maybe some sprint checks, etc.)
             MovementInput input = event.getMovementInput();
             leftDash.tick(input.left, mc.player);
             rightDash.tick(input.right, mc.player);
@@ -489,11 +489,11 @@ public class InputHandler {
     }
     
     private void dash(ClientPlayerEntity player, float yRot) {
-        // FIXME (dash) set leap cd
+        // FIXME (!) (dash) set leap cd
         player.setOnGround(false);
         player.hasImpulse = true;
         Vector3d dash = Vector3d.directionFromRotation(0, player.yRot + yRot).scale(0.5).add(0, 0.2, 0);
-        // FIXME (dash) different speeds with the same distance
+        // FIXME (!) (dash) different speeds with the same distance
         player.setDeltaMovement(player.getDeltaMovement().add(dash));
     }
     

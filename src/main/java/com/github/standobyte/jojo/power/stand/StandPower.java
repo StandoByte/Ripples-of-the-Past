@@ -218,7 +218,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (!usesResolve()) {
             return 0;
         }
-        return BalanceTestServerConfig.SERVER_CONFIG.maxResolve.get().floatValue();
+        return MAX_RESOLVE;
     }
     
     @Override

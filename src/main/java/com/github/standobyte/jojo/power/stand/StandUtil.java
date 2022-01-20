@@ -95,7 +95,7 @@ public class StandUtil {
         }
     }
 
-    // FIXME
+    // FIXME resolve formula (not from here tho)
     public static void addResolve(LivingEntity standUser, float amount) {
         IStandPower.getStandPowerOptional(standUser).ifPresent(stand -> {
             float healthRatio = standUser.getHealth() / standUser.getMaxHealth();
