@@ -44,6 +44,22 @@
       } 
     ]
   },
+  "clackers": {
+    "subtitle": "jojo.subtitle.run_away",
+    "sounds": [ "jojo:hamon_user/joseph_run_away" ]
+  },
+  "clackers": {
+    "subtitle": "jojo.subtitle.run_away",
+    "sounds": [ "jojo:hamon_user/joseph_run_away" ]
+  },
+  "clackers": {
+    "subtitle": "jojo.subtitle.run_away",
+    "sounds": [ "jojo:hamon_user/joseph_run_away" ]
+  },
+  "clackers": {
+    "subtitle": "jojo.subtitle.run_away",
+    "sounds": [ "jojo:hamon_user/joseph_run_away" ]
+  },
   "knife_throw": {
     "subtitle": "jojo.subtitle.knife_throw",
     "sounds": [ "jojo:knife_throw" ]
@@ -231,6 +247,18 @@
   "joseph_run_away": {
     "subtitle": "jojo.subtitle.run_away",
     "sounds": [ "jojo:hamon_user/joseph_run_away", "jojo:hamon_user/joseph_run_away_2" ]
+  },
+  "joseph_run_away": {
+    "subtitle": "jojo.subtitle.run_away",
+    "sounds": [ "jojo:hamon_user/joseph_run_away" ]
+  },
+  "joseph_run_away": {
+    "subtitle": "jojo.subtitle.run_away",
+    "sounds": [ "jojo:hamon_user/joseph_run_away" ]
+  },
+  "joseph_run_away": {
+    "subtitle": "jojo.subtitle.run_away",
+    "sounds": [ "jojo:hamon_user/joseph_run_away" ]
   },
   "caesar_bubble_launcher": {
     "subtitle": "jojo.subtitle.bubble_launcher",
