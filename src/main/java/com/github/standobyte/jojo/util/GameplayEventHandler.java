@@ -22,8 +22,10 @@ import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.ModPaintings;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.item.StoneMaskItem;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
@@ -53,6 +55,8 @@ import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
 import net.minecraft.entity.ai.goal.PrioritizedGoal;
 import net.minecraft.entity.item.BoatEntity;
+import net.minecraft.entity.item.PaintingEntity;
+import net.minecraft.entity.item.PaintingType;
 import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.entity.player.ChatVisibility;
 import net.minecraft.entity.player.PlayerEntity;
@@ -246,6 +250,9 @@ public class GameplayEventHandler {
                         target -> target instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) target)));
             }
         }
+        else if (entity.getType() == EntityType.PAINTING) {
+            cutOutHands((PaintingEntity) event.getEntity());
+        }
     }
 
     private static void makeMobNeutralToVampirePlayers(MobEntity mob) {
@@ -263,6 +270,37 @@ public class GameplayEventHandler {
                         CommonReflection.setTargetConditions(targetGoal, new EntityPredicate().range(CommonReflection.getTargetDistance(targetGoal)).selector(
                                 oldPredicate != null ? oldPredicate.and(undeadPredicate) : undeadPredicate));
                     }
+                }
+            }
+        }
+    }
+    
+    private static void cutOutHands(PaintingEntity painting) {
+        if (!painting.level.isClientSide()) {
+            boolean monaLisaFull = painting.motive == ModPaintings.MONA_LISA.get();
+            boolean monaLisaHands = painting.motive == ModPaintings.MONA_LISA_HANDS.get();
+            if (monaLisaFull || monaLisaHands) {
+                List<LivingEntity> KQUsers = painting.level.getEntitiesOfClass(
+                        LivingEntity.class, painting.getBoundingBox().expandTowards(painting.getLookAngle().scale(3)).inflate(1), 
+                            entity -> IStandPower.getStandPowerOptional(entity).map(
+                                    stand -> stand.hasPower() && stand.getType() == ModStandTypes.KILLER_QUEEN.get())
+                            .orElse(false));
+                if (!KQUsers.isEmpty()) {
+                    if (monaLisaFull) {
+                        painting.motive = ModPaintings.MONA_LISA_HANDS.get();
+                        double x = painting.getX();
+                        double z = painting.getZ();
+                        if (x - (int) x != 0 && (int) (x + 0.04) != (int) x) {
+                            z -= 1;
+                        }
+                        if (z - (int) z != 0 && (int) (z - 0.04) != (int) z) {
+                            x -= 1;
+                        }
+                        painting.setPos(x, painting.getY(), z);
+                    }
+                }
+                else if (monaLisaHands) {
+                    painting.motive = PaintingType.KEBAB;
                 }
             }
         }

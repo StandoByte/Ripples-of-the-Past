@@ -105,6 +105,8 @@ public class ModStandTypes {
                     .build(), 
                     ModEntityTypes.MAGICIANS_RED));
     
+    public static final Supplier<EntityStandType<StandStats>> KILLER_QUEEN = () -> null;
+    
     
     
     public static class Registry {
