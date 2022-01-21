@@ -45,6 +45,18 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> CLACKERS = SOUNDS.register("clackers", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "clackers")));
     
+    public static final RegistryObject<SoundEvent> GUN_SHOT = SOUNDS.register("gun_shot", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "gun_shot")));
+    
+    public static final RegistryObject<SoundEvent> BULLET_HIT = SOUNDS.register("bullet_hit", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "bullet_hit")));
+    
+    public static final RegistryObject<SoundEvent> NO_GUN_AMMO = SOUNDS.register("no_gun_ammo", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "no_gun_ammo")));
+    
+    public static final RegistryObject<SoundEvent> SHELL_FALLING = SOUNDS.register("shell_falling", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "shell_falling")));
+    
     public static final RegistryObject<SoundEvent> KNIFE_THROW = SOUNDS.register("knife_throw",
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "knife_throw")));
     
@@ -163,6 +175,15 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> JOSEPH_RUN_AWAY = SOUNDS.register("joseph_run_away", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "joseph_run_away")));
+    
+    public static final RegistryObject<SoundEvent> JOSEPH_SCREAM_SHOOTING = SOUNDS.register("joseph_scream", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "joseph_scream")));
+    
+    public static final RegistryObject<SoundEvent> JOSEPH_SHOOT = SOUNDS.register("joseph_shoot", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "joseph_shoot")));
+    
+    public static final RegistryObject<SoundEvent> JOSEPH_WAR_DECLARATION = SOUNDS.register("joseph_war_declaration", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "joseph_war_declaration")));
     
     public static final RegistryObject<SoundEvent> CAESAR_BUBBLE_LAUNCHER = SOUNDS.register("caesar_bubble_launcher", 
             () -> new MultiSoundEvent(new ResourceLocation(JojoMod.MOD_ID, "caesar_bubble_launcher"), new ResourceLocation(JojoMod.MOD_ID, "caesar_secret_hamon_bubble_launcher")));
