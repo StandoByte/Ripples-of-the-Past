@@ -146,7 +146,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         initStandAttributes(stats);
         this.rangeEffective = stats.getEffectiveRange();
         this.rangeMax = stats.getMaxRange();
-        this.summonLockTicks = StandStatFormulas.getSummonLockTicks(getAttributeValue(Attributes.MOVEMENT_SPEED));
+        this.summonLockTicks = StandStatFormulas.getSummonLockTicks(stats.getBaseAttackSpeed());
         if (level.isClientSide()) {
             this.alphaTicks = this.summonLockTicks;
         }
@@ -248,7 +248,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return 3.0D;
     }
     
-    public void modifiersFromResolveDev(float ratio) {
+    public void modifiersFromResolveLevel(float ratio) {
         if (!level.isClientSide()) {
             StandStats stats = type.getStats();
             applyAttributeModifier(Attributes.ATTACK_DAMAGE, UUID.fromString("532a6cb6-0df0-44ea-a769-dba2db506545"), 
@@ -433,8 +433,12 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public void setUserPower(IStandPower power) {
         this.userPower = power;
         if (power != null) {
-            modifiersFromResolveDev(power.getAchievedResolveRatio());
+            modifiersFromResolveLevel(getStandStatsDev(power));
         }
+    }
+    
+    public static float getStandStatsDev(IStandPower stand) {
+        return stand.usesResolve() ? stand.getResolveLevel() / stand.getMaxResolveLevel() : 0;
     }
     
     @Nullable
@@ -992,7 +996,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         else {
             barrageParryCount++;
         }
-        // FIXME (!!!) precision: expand the hitbox of smaller entities more
+        // FIXME (!) precision: expand the hitbox of smaller entities more
         RayTraceResult target = JojoModUtil.rayTrace(this, getAttributeValue(ForgeMod.REACH_DISTANCE.get()), 
                 entity -> !(entity instanceof LivingEntity) || canAttack((LivingEntity) entity), getAttributeValue(ModEntityAttributes.STAND_PRECISION.get()) * 0.5);
         switch (target.getType()) {
@@ -1365,7 +1369,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
 
     public void setNoPhysics(boolean noPhysics) {
-        setStandFlag(StandFlag.NO_PHYSICS, noPhysics);
+        if (noPhysics == true || standCanHaveNoPhysics()) {
+            setStandFlag(StandFlag.NO_PHYSICS, noPhysics);
+        }
     }
 
 

@@ -341,8 +341,6 @@ public class InputHandler {
             return;
         }
         
-        JojoMod.LOGGER.debug(key);
-        
         handleMouseClickPowerHud(event, key);
     }
     
