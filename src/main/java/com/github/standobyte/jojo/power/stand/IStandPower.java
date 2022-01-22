@@ -33,7 +33,7 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     int getMaxResolveLevel();
     int getNoResolveDecayTicks();
     float getMaxPassiveResolve();
-    void addResolve(float amount); // FIXME (!!) give resolve in game
+    void addResolve(float amount); // FIXME (!) give resolve in game
     void setResolve(float amount, int noDecayTicks);
     void setResolveLevel(int level);
     

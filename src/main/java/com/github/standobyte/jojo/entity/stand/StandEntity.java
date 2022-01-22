@@ -278,6 +278,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
     }
     
+    // FIXME (!) is it nerfed too heavily?
     private static final AttributeModifier ATTACK_DAMAGE_ARMS_ONLY = new AttributeModifier(
             UUID.fromString("aaa82f0e-f1a7-47d1-9066-e1a025be02df"), "Stand attack damage with only arms", -0.5, Operation.MULTIPLY_TOTAL);
     private static final AttributeModifier ATTACK_SPEED_ARMS_ONLY = new AttributeModifier(
