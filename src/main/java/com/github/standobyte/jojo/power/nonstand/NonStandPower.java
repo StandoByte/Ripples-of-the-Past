@@ -48,7 +48,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     }
 
     @Override
-    protected void onTypeInit(NonStandPowerType<?> powerType) {
+    protected void afterTypeInit(NonStandPowerType<?> powerType) {
         attacks = new ArrayList<>(Arrays.asList(powerType.getAttacks()));
         abilities = new ArrayList<>(Arrays.asList(powerType.getAbilities()));
         TypeSpecificData data = powerType.newSpecificDataInstance();

@@ -28,6 +28,7 @@ public class StandEntityDamageSource extends EntityDamageSource implements IStan
         this.stand = stand;
     }
     
+    @Override
     public IStandPower getStandPower() {
         return stand;
     }

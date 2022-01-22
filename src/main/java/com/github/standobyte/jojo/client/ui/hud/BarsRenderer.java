@@ -47,23 +47,26 @@ public abstract class BarsRenderer {
         if (nonStandPower != null && nonStandPower.hasPower()) {
             // FIXME get energy costs
             renderBarWithIcon(matrixStack, BarType.ENERGY, nonStandPower.getType(), 
-                    currentMode == PowerClassification.NON_STAND, nonStandPower.getType().getColor(), 
-                    nonStandPower.getEnergy(), nonStandPower.getMaxEnergy(), 250f, 450f, 0, 
+                    currentMode == PowerClassification.NON_STAND, nonStandPower.getType().getColor(), 1, 
+                    nonStandPower.getEnergy(), nonStandPower.getMaxEnergy(), 
+                    250f, 450f, 0, 
                     tickCounter, partialTick); 
         }
         if (standPower != null && standPower.hasPower()) {
             if (standPower.usesStamina()) {
                 // FIXME get stamina costs
                 renderBarWithIcon(matrixStack, BarType.STAMINA, null, 
-                        currentMode == PowerClassification.STAND, 0xFFFFFF, 
-                        standPower.getStamina(), standPower.getMaxStamina(), 750f, 350f, 0, 
+                        currentMode == PowerClassification.STAND, 0xFFFFFF, 1, 
+                        standPower.getStamina(), standPower.getMaxStamina(), 
+                        750f, 350f, 0, 
                         tickCounter, partialTick);
             }
             if (standPower.usesResolve()) {
                 int color = standPower.getType().getColor();
                 renderBarWithIcon(matrixStack, BarType.RESOLVE, null, 
-                        currentMode == PowerClassification.STAND, color, 
-                        standPower.getResolve(), standPower.getMaxResolve(), 0, 0, standPower.getAchievedResolve(), 
+                        currentMode == PowerClassification.STAND, color, (float) standPower.getResolveLevel() / (float) standPower.getMaxResolveLevel(), 
+                        standPower.getResolve(), standPower.getMaxResolve(), 
+                        0, 0, standPower.getMaxPassiveResolve(), 
                         tickCounter, partialTick);
             }
         }
@@ -73,7 +76,8 @@ public abstract class BarsRenderer {
     
     protected abstract void renderBarWithIcon(MatrixStack matrixStack, BarType barType, NonStandPowerType<?> powerType, 
             boolean highlight, int color, 
-            float value, float maxValue, float attackCostValue, float abilityCostValue, float tranclucentBarValue, 
+            float value, float maxValue, float iconFill, 
+            float attackCostValue, float abilityCostValue, float tranclucentBarValue, 
             int ticks, float partialTick);
     
     protected final void renderBar(MatrixStack matrixStack, int x, int y, Alignment alignment, 

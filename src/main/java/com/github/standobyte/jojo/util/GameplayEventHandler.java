@@ -349,7 +349,7 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingDamage(LivingDamageEvent event) {
         activateStoneMasks(event);
-        StandType.setLastHurtByStand(event);
+        StandType.onHurtByStand(event);
     }
 
 
@@ -543,7 +543,6 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingDeath(LivingDeathEvent event) {
         if (!event.getEntity().level.isClientSide()) {
-            StandType.giveStandExp(event);
             HamonPowerType.hamonPerksOnDeath(event);
             summonSoul(event);
         }
@@ -576,17 +575,11 @@ public class GameplayEventHandler {
         boolean hardcore = user.level.getLevelData().isHardcore();
         if (user instanceof PlayerEntity && (
                 JojoModConfig.COMMON.keepStandOnDeath.get() && !hardcore
-                || true /*FIXME check skipped progression*/)) {
+                || stand.wasProgressionSkipped())) {
             return 0;
         }
         
-        float xpRatio = stand.getAchievedResolveRatio();
-        if (xpRatio < 0.5F) {
-            return 0;
-        }
-        float resolveRatio = stand.getResolveRatio();
-        
-        int ticks = -60 + (int) (240F * xpRatio) + (int) (120F * resolveRatio);
+        int ticks = (int) (60 * stand.getResolveLevel() * (stand.getResolveRatio() + 1));
         if (hardcore) {
             ticks += ticks / 2;
         }

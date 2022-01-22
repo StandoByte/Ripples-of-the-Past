@@ -81,11 +81,11 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         return true;
     }
 
-    protected abstract void onTypeInit(T type);
+    protected abstract void afterTypeInit(T type);
     
     protected final void setType(T type) {
         this.type = type;
-        onTypeInit(type);
+        afterTypeInit(type);
     }
 
     @Override

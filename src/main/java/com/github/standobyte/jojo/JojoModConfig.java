@@ -35,6 +35,7 @@ public class JojoModConfig {
 
         public final ForgeConfigSpec.BooleanValue prioritizeLeastTakenStands;
         public final ForgeConfigSpec.BooleanValue standTiers;
+        public final ForgeConfigSpec.BooleanValue skipStandProgression;
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> bannedStands;
         private List<ResourceLocation> bannedStandsResLocs;
         private boolean[] tiersAvaliable = new boolean[7];
@@ -85,10 +86,14 @@ public class JojoModConfig {
                         .translation("jojo.config.bannedStands")
                         .defineList("bannedStands", Arrays.asList("jojo:example_1", "jojo:example_2"), s -> s instanceof String && ResourceLocation.tryParse((String) s) != null);
                 standTiers = builder
-                        .comment(" Set this to false to disable the Stand tiers mechanic.")
+                        .comment(" Whether or not the Stand tiers mechanic is enabled.")
                         .translation("jojo.config.standTiers")
                         .define("standTiers", true);
 //            builder.pop();
+            skipStandProgression = builder
+                    .comment(" Whether or not all of the abilities are unlocked after gaining a Stand in Survival.")
+                    .translation("jojo.config.skipStandProgression")
+                    .define("skipStandProgression", false);
             
             builder.comment(" Settings which affect the speed of Hamon training.").push("Hamon training");
                 hamonPointsMultiplier = builder

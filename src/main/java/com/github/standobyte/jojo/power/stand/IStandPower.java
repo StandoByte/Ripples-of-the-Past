@@ -25,17 +25,20 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
 
     boolean usesResolve();
     float getResolve();
-    float getAchievedResolve();
     float getMaxResolve();
     default float getResolveRatio() {
         return getResolve() / getMaxResolve();
     }
-    default float getAchievedResolveRatio() {
-        return getAchievedResolve() / getMaxResolve();
-    }
+    int getResolveLevel();
+    int getMaxResolveLevel();
     int getNoResolveDecayTicks();
-    void addResolve(float amount);
-    void setResolve(float amount, float achievedResolve, int noDecayTicks);
+    float getMaxPassiveResolve();
+    void addResolve(float amount); // FIXME (!!) give resolve in game
+    void setResolve(float amount, int noDecayTicks);
+    void setResolveLevel(int level);
+    
+    void skipProgression();
+    boolean wasProgressionSkipped();
     
     @Deprecated
     int getXp();

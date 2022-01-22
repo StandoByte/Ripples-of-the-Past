@@ -7,18 +7,14 @@ import com.github.standobyte.jojo.action.actions.StandAction;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.power.IPowerType;
-import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.util.JojoModUtil;
-import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
+import com.github.standobyte.jojo.util.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.data.StandStatsManager;
 
-import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
@@ -26,7 +22,6 @@ import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
 public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry<StandType<?>> implements IPowerType<IStandPower, StandType<?>> {
@@ -114,7 +109,11 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         return false;
     }
     
-    public void onNewAchievedResolve(IStandPower power, float oldValue, float newValue) {} // FIXME (!!) set stamina modifier
+    public int getResolveLevels() {
+        return 4;
+    }
+    
+    public void onNewResolveLevel(IStandPower power) {}
     
     @Override
     public int getExpRewardMultiplier() {
@@ -184,45 +183,43 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         return standPower.getStandManifestation() != null;
     }
     
-    
-    
-    public static void setLastHurtByStand(LivingDamageEvent event) {
+    public static void onHurtByStand(LivingDamageEvent event) {
         event.getEntityLiving().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
             DamageSource damageSrc = event.getSource();
-            if (damageSrc instanceof StandEntityDamageSource) {
-                IStandPower attackerStand = ((StandEntityDamageSource)damageSrc).getStandPower();
+            if (damageSrc instanceof IStandDamageSource) {
+                IStandPower attackerStand = ((IStandDamageSource) damageSrc).getStandPower();
                 cap.setLastHurtByStand(attackerStand);
             }
         });
     }
 
-    public static void giveStandExp(LivingDeathEvent event) {
-        LivingEntity dead = event.getEntityLiving();
-        dead.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-            IStandPower stand = cap.getLastHurtByStand();
-            if (stand != null) {
-                int expToAdd = 0;
-                if (dead.getType().getCategory() == EntityClassification.MONSTER) {
-                    expToAdd = 4;
-                }
-                else if (dead instanceof PlayerEntity) {
-                    expToAdd = 20;
-                }
-                else {
-                    return;
-                }
-                
-                expToAdd *= IStandPower.getStandPowerOptional(dead).map(deadPower -> {
-                    StandType<?> type = deadPower.getType();
-                    return type != null ? type.getExpRewardMultiplier() : 1;
-                }).orElse(1);
-                expToAdd *= INonStandPower.getNonStandPowerOptional(dead).map(deadPower -> {
-                    NonStandPowerType<?> type = deadPower.getType();
-                    return type != null ? type.getExpRewardMultiplier() : 1;
-                }).orElse(1);
-                expToAdd = (int) ((float) expToAdd * dead.getMaxHealth() / 20F);
-                stand.setXp(stand.getXp() + expToAdd);
-            }
-        });
-    }
+//    public static void giveStandExp(LivingDeathEvent event) {
+//        LivingEntity dead = event.getEntityLiving();
+//        dead.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+//            IStandPower stand = cap.getLastHurtByStand();
+//            if (stand != null) {
+//                int expToAdd = 0;
+//                if (dead.getType().getCategory() == EntityClassification.MONSTER) {
+//                    expToAdd = 4;
+//                }
+//                else if (dead instanceof PlayerEntity) {
+//                    expToAdd = 20;
+//                }
+//                else {
+//                    return;
+//                }
+//                
+//                expToAdd *= IStandPower.getStandPowerOptional(dead).map(deadPower -> {
+//                    StandType<?> type = deadPower.getType();
+//                    return type != null ? type.getExpRewardMultiplier() : 1;
+//                }).orElse(1);
+//                expToAdd *= INonStandPower.getNonStandPowerOptional(dead).map(deadPower -> {
+//                    NonStandPowerType<?> type = deadPower.getType();
+//                    return type != null ? type.getExpRewardMultiplier() : 1;
+//                }).orElse(1);
+//                expToAdd = (int) ((float) expToAdd * dead.getMaxHealth() / 20F);
+//                stand.setXp(stand.getXp() + expToAdd);
+//            }
+//        });
+//    }
 }

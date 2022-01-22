@@ -1,9 +1,13 @@
 package com.github.standobyte.jojo.util.damage;
 
+import com.github.standobyte.jojo.power.stand.IStandPower;
+
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 
 public interface IStandDamageSource {
+    
+    IStandPower getStandPower();
     
     public static void copyDamageSourceProperties(DamageSource src, DamageSource dest) {
         if (src.isBypassArmor()) {

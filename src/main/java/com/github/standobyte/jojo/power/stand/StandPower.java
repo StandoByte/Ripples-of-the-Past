@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.BalanceTestServerConfig;
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -36,10 +37,11 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     private float stamina;
     
     private float resolve;
-    private float achievedResolve;
+    private int resolveLevel;
     private int noResolveDecayTicks;
     @Deprecated
     private int xp = 0;
+    private boolean skippedProgression;
     
     private Map<Action<IStandPower>, Float> actionLearningProgressMap = new HashMap<>();
     
@@ -69,6 +71,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             type = null;
             stamina = 0;
             resolve = 0;
+            resolveLevel = 0;
             xp = 0;
             serverPlayerUser.ifPresent(player -> {
                 SaveFileUtilCapProvider.getSaveFileCap(player).removePlayerStand(standType);
@@ -93,11 +96,12 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
     
     @Override
-    protected void onTypeInit(StandType<?> standType) {
+    protected void afterTypeInit(StandType<?> standType) {
         attacks = Arrays.asList(standType.getAttacks());
         abilities = Arrays.asList(standType.getAbilities());
-        if (user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild) {
-            xp = StandPower.MAX_EXP;
+        if (JojoModConfig.COMMON.skipStandProgression.get()
+                || user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild) {
+            skipProgression();
         }
         if (usesStamina()) {
             stamina = isUserCreative() ? getMaxStamina() : 0;
@@ -206,14 +210,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
 
     @Override
-    public float getAchievedResolve() {
-        if (!usesResolve()) {
-            return 0;
-        }
-        return achievedResolve;
-    }
-
-    @Override
     public float getMaxResolve() {
         if (!usesResolve()) {
             return 0;
@@ -222,52 +218,110 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
     
     @Override
+    public int getResolveLevel() {
+        return usesResolve() ? resolveLevel : 0;
+    }
+    
+    @Override
+    public int getMaxResolveLevel() {
+        if (!usesResolve() && !hasPower()) {
+            return 0;
+        }
+        return getType().getResolveLevels();
+    }
+    
+    @Override
     public int getNoResolveDecayTicks() {
         return noResolveDecayTicks;
     }
     
     @Override
+    public float getMaxPassiveResolve() {
+        return getMaxResolve()
+                * BalanceTestServerConfig.SERVER_CONFIG.resolvePassive.get().floatValue()
+                * (float) resolveLevel / (float) getMaxResolveLevel();
+    }
+    
+    @Override
     public void addResolve(float amount) {
         if (usesResolve()) {
-            float modifierForAchieved = BalanceTestServerConfig.SERVER_CONFIG.resolveModifierAchieved.get().floatValue();
-            float boostedAmount = Math.min(Math.max(achievedResolve - resolve, 0), amount * modifierForAchieved);
-            amount += boostedAmount * (modifierForAchieved - 1) / modifierForAchieved;
-            setResolve(MathHelper.clamp(this.resolve + amount, 0, getMaxResolve()), -999, BalanceTestServerConfig.SERVER_CONFIG.noResolveDecayTicks.get());
+            setResolve(this.resolve + amount, BalanceTestServerConfig.SERVER_CONFIG.noResolveDecayTicks.get());
         }
     }
 
     @Override
-    public void setResolve(float amount, float achievedResolve, int noDecayTicks) {
+    public void setResolve(float amount, int noDecayTicks) {
         amount = MathHelper.clamp(amount, 0, getMaxResolve());
         boolean send = this.resolve != amount || this.noResolveDecayTicks != noDecayTicks;
         this.resolve = amount;
-        achievedResolve = Math.max(this.resolve, achievedResolve);
-        if (achievedResolve > this.achievedResolve) {
-            getType().onNewAchievedResolve(this, this.achievedResolve, achievedResolve);
-            this.achievedResolve = achievedResolve;
-        }
         this.noResolveDecayTicks = Math.max(this.noResolveDecayTicks, noDecayTicks);
-        if (this.resolve == getMaxResolve()) {
-            getUser().addEffect(new EffectInstance(ModEffects.RESOLVE.get(), 
-                    Math.max(this.noResolveDecayTicks, BalanceTestServerConfig.SERVER_CONFIG.resolveModeTicks.get()), 0, false, 
+        
+        if (!user.hasEffect(ModEffects.RESOLVE.get()) && this.resolve == getMaxResolve()) {
+            setResolveLevel(Math.min(resolveLevel + 1, getMaxResolveLevel()));
+            user.addEffect(new EffectInstance(ModEffects.RESOLVE.get(), 
+                    Math.max(this.noResolveDecayTicks, BalanceTestServerConfig.SERVER_CONFIG.resolveModeTicksCap.get()), resolveLevel - 1, false, 
                     false, true));
         }
+        
         if (send) {
             serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new SyncResolvePacket(getResolve(), this.achievedResolve, this.noResolveDecayTicks), player);
+                PacketManager.sendToClient(new SyncResolvePacket(getResolve(), resolveLevel, getNoResolveDecayTicks()), player);
             });
         }
     }
     
-    private void tickResolve() {
-        if (noResolveDecayTicks > 0) {
-            noResolveDecayTicks--;
-        }
-        else if (!user.hasEffect(ModEffects.RESOLVE.get())){
-            resolve = Math.max(resolve - BalanceTestServerConfig.SERVER_CONFIG.resolveDecay.get().floatValue(), 0);
+    @Override
+    public void setResolveLevel(int level) {
+        if (usesResolve()) {
+            this.resolveLevel = level;
+            if (!user.level.isClientSide() && hasPower()) {
+                // FIXME (!!) unlock new actions
+                getType().onNewResolveLevel(this);
+            }
         }
     }
     
+    private void tickResolve() {
+        float decay = 0;
+        
+        EffectInstance resolveEffect = user.getEffect(ModEffects.RESOLVE.get());
+        if (resolveEffect != null) {
+            decay = getMaxResolve() / BalanceTestServerConfig.SERVER_CONFIG.resolveModeTicks.get();
+            decay *= (getMaxResolveLevel() - Math.min(resolveEffect.getAmplifier(), getMaxResolveLevel()));
+            if (decay >= resolve) {
+                user.removeEffect(ModEffects.RESOLVE.get());
+            }
+        }
+        else {
+            float maxPassive = getMaxPassiveResolve();
+            boolean noDecay = noResolveDecayTicks > 0;
+            if (noDecay) {
+                noResolveDecayTicks--;
+            }
+            if (isActive() && resolve < maxPassive) {
+                resolve = Math.min(resolve + BalanceTestServerConfig.SERVER_CONFIG.resolvePassiveSpeed.get().floatValue(), maxPassive);
+            }
+            else if (!noDecay) {
+                decay = BalanceTestServerConfig.SERVER_CONFIG.resolveDecay.get().floatValue();
+                if (isActive() && resolve >= maxPassive) {
+                    decay = Math.min(decay, resolve - maxPassive);
+                }
+            }
+        }
+        resolve = Math.max(resolve - decay, 0);
+    }
+    
+    
+    @Override
+    public void skipProgression() {
+        this.skippedProgression = true;
+        setResolveLevel(getMaxResolveLevel());
+    }
+    
+    @Override
+    public boolean wasProgressionSkipped() {
+        return skippedProgression;
+    }
     
     @Override
     public int getXp() {
@@ -368,10 +422,11 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
         if (usesResolve()) {
             cnbt.putFloat("Resolve", resolve);
-            cnbt.putFloat("AchievedResolve", achievedResolve);
+            cnbt.putByte("ResolveLevel", (byte) resolveLevel);
             cnbt.putInt("ResolveTicks", noResolveDecayTicks);
         }
         cnbt.putInt("Exp", getXp());
+        cnbt.putBoolean("Skipped", skippedProgression);
         return cnbt;
     }
 
@@ -390,9 +445,10 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
         if (usesResolve()) {
             resolve = nbt.getFloat("Resolve");
-            achievedResolve = nbt.getFloat("AchievedResolve");
+            resolveLevel = nbt.getByte("ResolveLevel");
             noResolveDecayTicks = nbt.getInt("ResolveTicks");
         }
+        skippedProgression = nbt.getBoolean("Skipped");
         super.readNBT(nbt);
     }
     
@@ -405,7 +461,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             this.resolve = oldPower.getResolve();
             this.noResolveDecayTicks = oldPower.getNoResolveDecayTicks();
         }
-        this.achievedResolve = oldPower.getAchievedResolve();
+        this.resolveLevel = oldPower.getResolveLevel();
+        this.skippedProgression = oldPower.wasProgressionSkipped();
         this.actionLearningProgressMap = ((StandPower) oldPower).actionLearningProgressMap; // FIXME can i remove this cast?
     }
     
@@ -418,7 +475,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                     PacketManager.sendToClient(new SyncStaminaPacket(stamina), player);
                 }
                 if (usesResolve()) {
-                    PacketManager.sendToClient(new SyncResolvePacket(resolve, achievedResolve, noResolveDecayTicks), player);
+                    PacketManager.sendToClient(new SyncResolvePacket(resolve, resolveLevel, noResolveDecayTicks), player);
                 }
             }
         });

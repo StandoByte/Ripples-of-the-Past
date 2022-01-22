@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import com.github.standobyte.jojo.BalanceTestServerConfig;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
@@ -93,16 +92,5 @@ public class StandUtil {
                 }
             }
         }
-    }
-
-    // FIXME resolve formula (not from here tho)
-    public static void addResolve(LivingEntity standUser, float amount) {
-        IStandPower.getStandPowerOptional(standUser).ifPresent(stand -> {
-            float healthRatio = standUser.getHealth() / standUser.getMaxHealth();
-            float modifierLimit = BalanceTestServerConfig.SERVER_CONFIG.resolveModifierHp.get().floatValue();
-            
-            float modifier = -(modifierLimit - 1) * healthRatio + modifierLimit;
-            stand.addResolve(amount * modifier);
-        });
     }
 }

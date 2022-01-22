@@ -30,7 +30,7 @@ public class HorizontalBarsRenderer extends BarsRenderer {
 
     @Override
     protected void renderBarWithIcon(MatrixStack matrixStack, BarType barType, NonStandPowerType<?> powerType, 
-            boolean highlight, int color, 
+            boolean highlight, int color, float iconFill, 
             float value, float maxValue, float attackCostValue, float abilityCostValue, float tranclucentBarValue, 
             int ticks, float partialTick) {
         int barLength = highlight ? BAR_LENGTH : BAR_LENGTH_SHORTENED;
@@ -59,6 +59,10 @@ public class HorizontalBarsRenderer extends BarsRenderer {
             }
             renderIcon(matrixStack, iconX, y + iconTex[6], 
                     iconTex[0], iconTex[1], iconTex[2], iconTex[3], iconTex[4]);
+            if (barType == BarType.RESOLVE && iconFill > 0) {
+                renderIcon(matrixStack, iconX, y + iconTex[6], 
+                        iconTex[0] + 40, iconTex[1], (int) ((float) iconTex[2] * iconFill), iconTex[3], iconTex[4]);
+            }
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             y += 12;
         }

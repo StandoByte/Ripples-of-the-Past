@@ -27,7 +27,7 @@ public class VerticalBarsRenderer extends BarsRenderer {
 
     @Override
     protected void renderBarWithIcon(MatrixStack matrixStack, BarType barType, NonStandPowerType<?> powerType, 
-            boolean highlight, int color, 
+            boolean highlight, int color, float iconFill, 
             float value, float maxValue, float attackCostValue, float abilityCostValue, float tranclucentBarValue, 
             int ticks, float partialTick) {
         int barHeight = highlight ? BAR_HEIGHT : BAR_HEIGHT_SHORTENED;
@@ -43,7 +43,11 @@ public class VerticalBarsRenderer extends BarsRenderer {
                     ClientUtil.getHighlightAlpha(ticks + partialTick, 80F, 30F, 1.25F, 0.25F));
             int[] iconTex = getIconTex(barType, powerType, BarsOrientation.VERTICAL);
             renderIcon(matrixStack, x - 2, y - iconTex[3] - 1, 
-            iconTex[0], iconTex[1], iconTex[2], iconTex[3], iconTex[4]);
+                    iconTex[0], iconTex[1], iconTex[2], iconTex[3], iconTex[4]);
+            if (barType == BarType.RESOLVE && iconFill > 0) {
+                renderIcon(matrixStack, x - 2, y - iconTex[3] - 1, 
+                        iconTex[0] + 40, iconTex[1], iconTex[2], (int) ((float) iconTex[3] * iconFill), iconTex[4]);
+            }
             x += 12;
         }
         else {
