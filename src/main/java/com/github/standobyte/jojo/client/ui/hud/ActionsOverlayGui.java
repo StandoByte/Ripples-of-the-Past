@@ -221,7 +221,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 drawHotbarText(matrixStack, hotbarsPosition, ActionType.ATTACK, target, currentMode);
                 drawHotbarText(matrixStack, hotbarsPosition, ActionType.ABILITY, target, currentMode);
                 
-                // FIXME (!) remote stand distance & strength (under hotbars)
+                // FIXME (!!) remote stand distance & strength (under hotbars)
             }
         }
     }
@@ -461,9 +461,14 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     private <P extends IPower<P, ?>> void drawHotbarText(MatrixStack matrixStack, ElementPosition position, ActionType actionType, ActionTarget target, @Nonnull ActionsModeConfig<P> mode) {
+        P power = mode.getPower();
         Action<P> action = mode.getSelectedAction(actionType);
+        int x = position.x;
+        int y = position.y + 16 + 3;
+        if (actionType == ActionType.ABILITY) {
+            y += getHotbarsYDiff();
+        }
         if (action != null) {
-            P power = mode.getPower();
             action = handleShift(action, power);
             // action name
             ITextComponent actionName = action.getName(power, target);
@@ -477,11 +482,6 @@ public class ActionsOverlayGui extends AbstractGui {
             actionName = new TranslationTextComponent(
                     actionType == ActionType.ATTACK ? "jojo.overlay.action.attack" : "jojo.overlay.action.ability", actionName);
             
-            int x = position.x;
-            int y = position.y + 16 + 3;
-            if (actionType == ActionType.ABILITY) {
-                y += getHotbarsYDiff();
-            }
             int width = mc.font.width(actionName);
             RenderSystem.pushMatrix();
             RenderSystem.enableBlend();
@@ -492,9 +492,38 @@ public class ActionsOverlayGui extends AbstractGui {
             
             RenderSystem.disableBlend();
             RenderSystem.popMatrix();
-            // FIXME (!) hold duration
+        }
+
+        y += 10;
+        Action<P> heldAction = power.getHeldAction();
+        int slot = -1;
+        if (heldAction != null) {
+            slot = power.getActions(actionType).indexOf(
+                    heldAction.isShiftVariation() ? heldAction.getBaseVariation() : heldAction);
+            if (slot > -1) {
+                drawHoldDuration(matrixStack, x, y, slot, heldAction, power, power.getHeldActionTicks());
+            }
+        }
+        else if (action != null) {
+            slot = mode.getSelectedSlot(actionType);
+            if (slot > -1) {
+                drawHoldDuration(matrixStack, x, y, slot, action, power, 0);
+            }
         }
     }
+    
+    private <P extends IPower<P, ?>> void drawHoldDuration(MatrixStack matrixStack, int x, int y, int slot, Action<P> action, P power, int ticksHeld) {
+        int ticksToFire = action.getHoldDurationToFire(power);
+        if (ticksToFire > 0) {
+            x += slot * 20;
+            ticksToFire = Math.max(ticksToFire - ticksHeld, 0);
+            int seconds = ticksToFire == 0 ? 0 : (ticksToFire - 1) / 20 + 1;
+            int color = ticksToFire == 0 ? 0x00FF00 : ticksHeld == 0 ? 0x808080 : 0xFFFFFF;
+            ClientUtil.drawRightAlignedString(matrixStack, mc.font, String.valueOf(seconds), x + 20, y + 13, color);
+        }
+    }
+    
+    
     
     public boolean isSelectedActionHeld(ActionType actionType) {
         return getSelectedActionHoldDuration(actionType, currentMode) > 0;
@@ -534,7 +563,7 @@ public class ActionsOverlayGui extends AbstractGui {
     
     
     
-    // FIXME (!) mode selector (near the crosshair)
+    // FIXME (!!) mode selector (near the crosshair)
     private void renderModeSelector(MatrixStack matrixStack, ElementPosition position, float partialTick) {
         if (modeSelectorTransparency.shouldRender()) {
 //            mc.getTextureManager().bind(OVERLAY_LOCATION);

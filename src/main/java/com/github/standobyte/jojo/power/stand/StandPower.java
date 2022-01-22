@@ -275,7 +275,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (usesResolve()) {
             this.resolveLevel = level;
             if (!user.level.isClientSide() && hasPower()) {
-                // FIXME (!!) unlock new actions
+                // FIXME (!) unlock new actions
                 getType().onNewResolveLevel(this);
             }
         }

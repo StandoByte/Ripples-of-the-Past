@@ -95,7 +95,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     @Nullable
-    protected Action<P> getBaseVariation() {
+    public Action<P> getBaseVariation() {
         return baseVariation;
     }
     
@@ -103,7 +103,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return shiftVariation != null;
     }
     
-    protected boolean isShiftVariation() {
+    public boolean isShiftVariation() {
         return baseVariation != null;
     }
     
