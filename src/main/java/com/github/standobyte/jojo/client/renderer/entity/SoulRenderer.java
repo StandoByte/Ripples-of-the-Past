@@ -52,10 +52,10 @@ public class SoulRenderer<T extends SoulEntity> extends EntityRenderer<T> {
         model.riding = false;
         model.young = entity.isBaby();
         float yHeadRotation = yRotation;
-        float yBodyRotation = MathHelper.rotLerp(partialTick, entity.yBodyRotO, entity.yBodyRot);
+        float yBodyRotation = MathHelper.rotLerp(partialTick, soulEntity.yBodyRotO, soulEntity.yBodyRot);
         float f2 = yHeadRotation - yBodyRotation;
         
-        float xRotation = MathHelper.lerp(partialTick, entity.xRotO, entity.xRot);
+        float xRotation = MathHelper.lerp(partialTick, soulEntity.xRotO, soulEntity.xRot);
         matrixStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - yBodyRotation));
 
         float ticks = entity.tickCount + partialTick;

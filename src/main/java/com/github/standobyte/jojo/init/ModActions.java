@@ -202,7 +202,7 @@ public class ModActions {
     
     public static final RegistryObject<StandAction> STAR_PLATINUM_TIME_STOP = ACTIONS.register("star_platinum_time_stop", 
             () -> new TimeStop(new StandAction.Builder().holdToFire(30, false)
-                    .xpRequirement(950).ignoresPerformerStun().shout(ModSounds.JOTARO_STAR_PLATINUM_THE_WORLD))
+                    .xpRequirement(950).ignoresPerformerStun().autoSummonStand().shout(ModSounds.JOTARO_STAR_PLATINUM_THE_WORLD))
             .voiceLineWithStandSummoned(ModSounds.JOTARO_THE_WORLD).timeStopSound(ModSounds.STAR_PLATINUM_TIME_STOP)
             .timeResumeVoiceLine(ModSounds.JOTARO_TIME_RESUMES).timeResumeSound(ModSounds.STAR_PLATINUM_TIME_RESUME));
     
@@ -322,7 +322,7 @@ public class ModActions {
                     .standPose(MagiciansRedRedBind.RED_BIND_POSE).shout(ModSounds.AVDOL_RED_BIND).standSound(ModSounds.MAGICIANS_RED_FIRE_BLAST)));
     
     public static final RegistryObject<StandAction> MAGICIANS_RED_DETECTOR = ACTIONS.register("magicians_red_detector", 
-            () -> new MagiciansRedDetector(new StandAction.Builder().xpRequirement(500)));
+            () -> new MagiciansRedDetector(new StandAction.Builder().xpRequirement(500).autoSummonStand()));
     
     
 

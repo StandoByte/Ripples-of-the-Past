@@ -261,6 +261,12 @@ public abstract class StandEntityAction extends StandAction {
         private final UserOffset userOffsetArmsOnly = new UserOffset();
         private boolean enablePhysics = true;
         private Supplier<SoundEvent> standSoundSupplier = () -> null;
+
+        @Deprecated
+        @Override
+        public T autoSummonStand() {
+            return standAutoSummonMode(AutoSummonMode.FULL);
+        }
         
         public T standAutoSummonMode(AutoSummonMode mode) {
             if (mode != null) {
