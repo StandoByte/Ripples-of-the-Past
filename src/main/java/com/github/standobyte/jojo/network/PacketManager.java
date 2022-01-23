@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClHeldActionTargetP
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnLeapPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRemovePlayerSoulEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRunAwayPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClSoulRotationPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClStandManualMovementPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClStopHeldActionPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandManualControlPacket;
@@ -85,6 +86,7 @@ public class PacketManager {
         channel.registerMessage(index++, ClRunAwayPacket.class, ClRunAwayPacket::encode, ClRunAwayPacket::decode, ClRunAwayPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
         channel.registerMessage(index++, ClStandManualMovementPacket.class, ClStandManualMovementPacket::encode, ClStandManualMovementPacket::decode, ClStandManualMovementPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
         channel.registerMessage(index++, ClOnLeapPacket.class, ClOnLeapPacket::encode, ClOnLeapPacket::decode, ClOnLeapPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        channel.registerMessage(index++, ClSoulRotationPacket.class, ClSoulRotationPacket::encode, ClSoulRotationPacket::decode, ClSoulRotationPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
         channel.registerMessage(index++, ClRemovePlayerSoulEntityPacket.class, ClRemovePlayerSoulEntityPacket::encode, ClRemovePlayerSoulEntityPacket::decode, ClRemovePlayerSoulEntityPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
 
         channel.registerMessage(index++, TrSyncPowerTypePacket.class, TrSyncPowerTypePacket::encode, TrSyncPowerTypePacket::decode, TrSyncPowerTypePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));

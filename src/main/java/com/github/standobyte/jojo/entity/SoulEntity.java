@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRemovePlayerSoulEntityPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClSoulRotationPacket;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntitySize;
@@ -21,6 +22,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.particles.ParticleTypes;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -33,6 +35,13 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
     private LivingEntity originEntity;
     private UUID originUuid;
     private int lifeSpan;
+    
+    public float yBodyRot;
+    public float yBodyRotO;
+    
+    protected int lerpSteps;
+    protected double lerpYRot;
+    protected double lerpXRot;
     
     public SoulEntity(World world, LivingEntity originEntity, int lifeSpan) {
         this(ModEntityTypes.SOUL.get(), world);
@@ -71,6 +80,7 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
     @Override
     public void tick() {
         super.tick();
+        
         if (originEntity == null || originEntity.removed
                 || tickCount > 1 && !originEntity.isDeadOrDying() || tickCount > lifeSpan) {
             remove();
@@ -85,14 +95,58 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
                         random.nextGaussian() * 0.02D);
             }
         }
-        if (level.isClientSide() && isControlledByLocalInstance()) {
-            // FIXME (!!) sync rotation
-            this.xRot = originEntity.xRot;
-            this.yRot = originEntity.yRot % 360F;
+        if (level.isClientSide()) {
+            if (isControlledByLocalInstance()) {
+                // FIXME (!!) (soul) sync body rotation
+                this.yRot = originEntity.yRot % 360F;
+                this.xRot = originEntity.xRot;
+                yBodyRotO = yBodyRot;
+                this.yBodyRot = originEntity.yBodyRot;
+                PacketManager.sendToServer(new ClSoulRotationPacket(getId(), yRot, xRot, yBodyRot));
+            }
+            else {
+                lerp();
+            }
         }
         originEntity.deathTime = Math.min(originEntity.deathTime, 18);
         move(MoverType.SELF, getDeltaMovement());
     }
+    
+    
+
+    public void lerp() {
+        if (lerpSteps > 0) {
+            yRot = (float)((double) yRot + MathHelper.wrapDegrees(lerpYRot - (double) yRot) / (double) lerpSteps);
+            xRot = (float)((double) xRot + (lerpXRot - (double)xRot) / (double) lerpSteps);
+            --lerpSteps;
+            setRot(yRot, xRot);
+        }
+        //
+    }
+
+    @Override
+    public void lerpTo(double x, double y, double z, float yRot, float xRot, int steps, boolean p_180426_10_) {
+        setPos(x, y, z);
+        this.lerpYRot = (double)yRot;
+        this.lerpXRot = (double)xRot;
+        this.lerpSteps = steps;
+    }
+
+//    @Override
+//    public void lerpHeadTo(float yHeadRot, int steps) {
+//    }
+
+    @Override
+    public float getYHeadRot() {
+        return yBodyRot;
+    }
+
+    @Override
+    public void setYHeadRot(float rot) {
+        this.yBodyRot = rot;
+    }
+    
+    
 
     @Override
     public boolean isControlledByLocalInstance() {
@@ -101,7 +155,7 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
         }
         return level.isClientSide() && originEntity instanceof PlayerEntity && ((PlayerEntity) originEntity).isLocalPlayer();
     }
-    
+
     private void addCloudParticles() {
         if (!isInvisibleTo(ClientUtil.getClientPlayer())) {
             for (int i = 0; i < 20; ++i) {

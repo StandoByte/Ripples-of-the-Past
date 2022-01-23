@@ -3,19 +3,23 @@ package com.github.standobyte.jojo.action.actions;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 
 public abstract class StandAction extends Action<IStandPower> {
     @Deprecated
     protected final int xpRequirement;
     private final float resolveRatioToUnlock;
     private final boolean unlockedByDefault;
+    private final boolean autoSummonStand;
     
     public StandAction(StandAction.AbstractBuilder<?> builder) {
         super(builder);
         this.xpRequirement = builder.xpRequirement;
         this.resolveRatioToUnlock = builder.resolveRatioToUnlock;
         this.unlockedByDefault = this.resolveRatioToUnlock == 0;
+        this.autoSummonStand = builder.autoSummonStand;
     }
 
     @Deprecated
@@ -26,6 +30,13 @@ public abstract class StandAction extends Action<IStandPower> {
     @Override
     public boolean isUnlocked(IStandPower power) {
         return true || unlockedByDefault || power.getLearningProgress(this) >= 0; // FIXME stand progression
+    }
+    
+    @Override
+    public void onClick(World world, LivingEntity user, IStandPower power) {
+        if (!world.isClientSide() && !power.isActive() && autoSummonStand) {
+            power.getType().summon(user, power, true);
+        }
     }
     
     
@@ -42,6 +53,7 @@ public abstract class StandAction extends Action<IStandPower> {
         @Deprecated
         private int xpRequirement;
         private float resolveRatioToUnlock = 0;
+        private boolean autoSummonStand = false;
 
         @Deprecated
         public T xpRequirement(int xpRequirement) {
@@ -49,8 +61,14 @@ public abstract class StandAction extends Action<IStandPower> {
             return getThis();
         }
         
+        // FIXME (!) resolve level
         public T resolveToUnlock(float resolveRatio) {
             this.resolveRatioToUnlock = MathHelper.clamp(resolveRatio, 0, 1);
+            return getThis();
+        }
+        
+        public T autoSummonStand() {
+            this.autoSummonStand = true;
             return getThis();
         }
     }

@@ -7,7 +7,6 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.World;
 
-// FIXME (!!) auto-summon stand
 public class MagiciansRedDetector extends StandAction {
 
     public MagiciansRedDetector(StandAction.Builder builder) {

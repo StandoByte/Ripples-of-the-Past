@@ -177,7 +177,7 @@ public class InputHandler {
                     for (int i = 0; i < 9; i++) {
                         if (mc.options.keyHotbarSlots[i].consumeClick()) {
                             if (chooseAttack) {
-                                // FIXME (!!) doesn't seem to work for key 2 while walking (???)
+                                // FIXME (!!) (controls) doesn't seem to work for key 2 while walking (???)
                                 actionsOverlay.selectAction(ActionType.ATTACK, i);
                             }
                             if (chooseAbility) {
@@ -187,7 +187,7 @@ public class InputHandler {
                     }
                 }
                 else {
-                    // FIXME (!!) behaves weird when mapped to 1-9
+                    // FIXME (!!) (controls) behaves weird when mapped to 1-9
                     if (attackSlots != null) {
                         for (int i = 0; i < 9; i++) {
                             if (attackSlots[i].consumeClick()) {

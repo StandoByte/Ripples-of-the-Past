@@ -40,6 +40,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.KeybindTextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.GameType;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -220,8 +221,6 @@ public class ActionsOverlayGui extends AbstractGui {
                 
                 drawHotbarText(matrixStack, hotbarsPosition, ActionType.ATTACK, target, currentMode);
                 drawHotbarText(matrixStack, hotbarsPosition, ActionType.ABILITY, target, currentMode);
-                
-                // FIXME (!!) remote stand distance & strength (under hotbars)
             }
         }
     }
@@ -233,6 +232,7 @@ public class ActionsOverlayGui extends AbstractGui {
     private final ElementPosition barsPosition = new ElementPosition();
     private BarsRenderer barsRenderer;
     private final ElementPosition hotbarsPosition = new ElementPosition();
+    private final ElementPosition standStrengthPosition = new ElementPosition();
     private final ElementPosition modeSelectorPosition = new ElementPosition();
     
     private void updateElementPositions(PositionConfig barsConfig, PositionConfig hotbarsConfig, int screenWidth, int screenHeight) {
@@ -268,6 +268,16 @@ public class ActionsOverlayGui extends AbstractGui {
             }
         }
         hotbarsPosition.alignment = hotbarsConfig.aligment;
+        
+        standStrengthPosition.x = hotbarsPosition.x;
+        standStrengthPosition.y = hotbarsPosition.y + 92;
+        standStrengthPosition.alignment = hotbarsPosition.alignment;
+        if (hotbarsConfig == PositionConfig.TOP_LEFT && barsConfig == PositionConfig.LEFT) {
+            standStrengthPosition.x += 32;
+        }
+        else if (hotbarsConfig == PositionConfig.TOP_RIGHT && barsConfig == PositionConfig.RIGHT) {
+            standStrengthPosition.x -= 22;
+        }
         
         modeSelectorPosition.x = hotbarsConfig.aligment == Alignment.LEFT ? halfWidth + 6 : halfWidth - 6;
         modeSelectorPosition.y = halfHeight - 41;
@@ -563,6 +573,23 @@ public class ActionsOverlayGui extends AbstractGui {
     
     
     
+    public void drawStandRemoteRange(MatrixStack matrixStack, float distance, float damageFactor) {
+        int x = standStrengthPosition.x;
+        int y = standStrengthPosition.y;
+        Alignment alignment = standStrengthPosition.alignment;
+        ITextComponent distanceString = new StringTextComponent(String.format("%.2f m", distance));
+        drawBackdrop(matrixStack, x, y, mc.font.width(distanceString), alignment, null, 0);
+        drawString(matrixStack, mc.font, distanceString, x, y, alignment, 0xFFFFFF);
+        if (damageFactor < 1) {
+            y += 12;
+            ITextComponent strength = new TranslationTextComponent("jojo.overlay.stand_strength", String.format("%.2f%%", damageFactor * 100F));
+            drawBackdrop(matrixStack, x, y, mc.font.width(strength), alignment, null, 0);
+            drawString(matrixStack, mc.font, strength, x, y, alignment, 0xFF4040);
+        }
+    }
+    
+    
+    
     // FIXME (!!) mode selector (near the crosshair)
     private void renderModeSelector(MatrixStack matrixStack, ElementPosition position, float partialTick) {
         if (modeSelectorTransparency.shouldRender()) {
@@ -612,14 +639,14 @@ public class ActionsOverlayGui extends AbstractGui {
     
     
     
-    private void drawString(MatrixStack matrixStack, FontRenderer font, ITextComponent text, int x, int y, Alignment alignment, int color) {
+    public void drawString(MatrixStack matrixStack, FontRenderer font, ITextComponent text, int x, int y, Alignment alignment, int color) {
         if (alignment == Alignment.RIGHT) {
             x -= font.width(text);
         }
         drawString(matrixStack, font, text, x, y, color);
     }
     
-    private void drawBackdrop(MatrixStack matrixStack, int x, int y, int width, Alignment alignment, 
+    public void drawBackdrop(MatrixStack matrixStack, int x, int y, int width, Alignment alignment, 
             @Nullable ElementTransparency transparency, float partialTick) {
         int backdropColor = mc.options.getBackgroundColor(0.0F);
         if (backdropColor != 0) {
