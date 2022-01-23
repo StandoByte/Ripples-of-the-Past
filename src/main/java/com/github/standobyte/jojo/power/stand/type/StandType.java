@@ -115,6 +115,10 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     
     public void onNewResolveLevel(IStandPower power) {}
     
+    public boolean usesStandComboMechanic() {
+        return false;
+    }
+    
     @Override
     public int getExpRewardMultiplier() {
         return tier + 1;

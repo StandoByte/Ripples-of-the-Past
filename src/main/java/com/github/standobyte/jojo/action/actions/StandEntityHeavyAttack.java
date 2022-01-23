@@ -35,7 +35,7 @@ public class StandEntityHeavyAttack extends StandEntityAction {
     
     @Override
     public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
-        return StandStatFormulas.getHeavyAttackWindup(standEntity.getAttackSpeed(), 0);
+        return StandStatFormulas.getHeavyAttackWindup(standEntity.getAttackSpeed(), standEntity.getComboMeter());
     }
     
     @Override
@@ -44,7 +44,7 @@ public class StandEntityHeavyAttack extends StandEntityAction {
     }
     
     @Override
-    protected boolean isCombatAction() {
+    public boolean isCombatAction() {
         return true;
     }
 }

@@ -1,10 +1,14 @@
 package com.github.standobyte.jojo.power.stand.type;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.action.actions.StandAction;
+import com.github.standobyte.jojo.action.actions.StandEntityHeavyAttack;
+import com.github.standobyte.jojo.action.actions.StandEntityLightAttack;
+import com.github.standobyte.jojo.action.actions.StandEntityMeleeBarrage;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -22,12 +26,17 @@ import net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent;
 
 public class EntityStandType<T extends StandStats> extends StandType<T> {
     private final Supplier<? extends StandEntityType<? extends StandEntity>> entityTypeSupplier;
+    private final boolean hasHeavyAttack;
+    private final boolean hasFastAttack;
 
     public EntityStandType(int tier, int color, ITextComponent partName, StandAction[] attacks, StandAction[] abilities, 
             Supplier<SoundEvent> summonShoutSupplier, Class<T> statsClass, T defaultStats, 
             Supplier<? extends StandEntityType<? extends StandEntity>> entityTypeSupplier) {
         super(tier, color, partName, attacks, abilities, summonShoutSupplier, statsClass, defaultStats);
         this.entityTypeSupplier = entityTypeSupplier;
+        
+        hasHeavyAttack = Arrays.stream(attacks).anyMatch(attack -> attack instanceof StandEntityHeavyAttack);
+        hasFastAttack = Arrays.stream(attacks).anyMatch(attack -> attack instanceof StandEntityLightAttack || attack instanceof StandEntityMeleeBarrage);
     }
 
     public StandEntityType<? extends StandEntity> getEntityType() {
@@ -55,6 +64,11 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
             StandEntity stand = (StandEntity) power.getStandManifestation();
             stand.modifiersFromResolveLevel(StandEntity.getStandStatsDev(power));
         }
+    }
+    
+    @Override
+    public boolean usesStandComboMechanic() {
+        return hasHeavyAttack && hasFastAttack;
     }
     
     @Override

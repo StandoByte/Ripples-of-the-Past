@@ -206,7 +206,7 @@ public abstract class StandEntityAction extends StandAction {
         return phase != Phase.RECOVERY && (isCancelable || getHoldDurationMax(standPower) > 0);
     }
     
-    protected boolean isCombatAction() {
+    public boolean isCombatAction() {
         return false;
     }
     

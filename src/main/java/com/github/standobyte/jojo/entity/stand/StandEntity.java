@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
@@ -121,6 +122,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public int barrageDelayedPunches = 0;
     private boolean accumulateBarrageTickParry;
     private int barrageParryCount;
+    private static final DataParameter<Float> PUNCHES_COMBO = EntityDataManager.defineId(StandEntity.class, DataSerializers.FLOAT);
+    private int noComboDecayTicks;
+    private static final int COMBO_TICKS = 40;
+    private static final float COMBO_DECAY = 0.025F;
     
     private static final DataParameter<ActionTarget> TASK_TARGET = (DataParameter<ActionTarget>) EntityDataManager.defineId(StandEntity.class, 
             (IDataSerializer<ActionTarget>) ModDataSerializers.TASK_TARGET.get().getSerializer());
@@ -162,6 +167,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         entityData.define(STAND_FLAGS, (byte) 0);
         entityData.define(ARMS_ONLY_MODE, (byte) 0);
         entityData.define(SWING_OFF_HAND, false);
+        entityData.define(PUNCHES_COMBO, 0F);
         entityData.define(TASK_TARGET, ActionTarget.EMPTY);
         entityData.define(CURRENT_TASK, Optional.empty());
     }
@@ -805,6 +811,16 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             
             updatePosition(user);
             swings.broadcastSwings(this);
+            
+            if (noComboDecayTicks > 0) {
+                noComboDecayTicks--;
+            }
+            else {
+                StandEntityAction currentAction = getCurrentTaskAction();
+                if (currentAction == null || !currentAction.isCombatAction()) {
+                    setComboMeter(Math.max(getComboMeter() - COMBO_DECAY, 0));
+                }
+            }
         }
         else {
             if (user != null && isManuallyControlled() && !noPhysics && isInsideViewBlockingBlock()) {
@@ -1157,6 +1173,21 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         double attackSpeed = getAttackSpeed();
         return attackSpeed < 10D ? (int) (20D / attackSpeed) : 2;
     }
+    
+    public float getComboMeter() {
+        return entityData.get(PUNCHES_COMBO);
+    }
+    
+    protected void addComboMeter(float combo) {
+        if (combo > 0) {
+            setComboMeter(getComboMeter() + combo);
+            noComboDecayTicks = COMBO_TICKS;
+        }
+    }
+    
+    protected void setComboMeter(float combo) {
+        entityData.set(PUNCHES_COMBO, MathHelper.clamp(combo, 0F, 1F));
+    }
 
     public boolean attackEntity(Entity target, PunchType punch, double attackDistance) {
         if (!canHarm(target)) {
@@ -1175,6 +1206,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         double knockback = getAttackKnockback(livingTarget);
         
         float damage;
+        float addCombo = 0;
         switch (punch) {
         case HEAVY:
             damage = StandStatFormulas.getHeavyAttackDamage(strength, livingTarget);
@@ -1187,10 +1219,11 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 damage *= targetProximityRatio * 2 + 0.5;
             }
             
-            knockback += damage / 4;
+            knockback += damage / 4 * getComboMeter();
             break;
         case LIGHT:
             damage = StandStatFormulas.getLightAttackDamage(strength);
+            addCombo = 0.1F;
             break;
         case BARRAGE:
             damage = StandStatFormulas.getBarrageHitDamage(strength, precision, getRandom());
@@ -1216,14 +1249,22 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 if (knockback > 0.0F) {
                     livingTarget.knockback((float) knockback * 0.5F, (double) MathHelper.sin(yRot * ((float)Math.PI / 180F)), (double) (-MathHelper.cos(yRot * ((float)Math.PI / 180F))));
                 }
-                if (punch == PunchType.HEAVY)  {
+                switch (punch) {
+                case HEAVY:
                     if (!level.isClientSide()) {
                         ((ServerWorld) level).sendParticles(ParticleTypes.CRIT, 
                                 livingTarget.getX(), livingTarget.getY(0.5), livingTarget.getZ(), 15, 0.3D, 0.3D, 0.3D, 0.0D);
+                        if (livingTarget.getUseItem().isShield(livingTarget) && target instanceof PlayerEntity) {
+                            ((PlayerEntity) livingTarget).disableShield(precision > 0.5 && attackDistance < attackRange * 0.4);
+                        }
                     }
-                    if (livingTarget.getUseItem().isShield(livingTarget) && target instanceof PlayerEntity) {
-                        ((PlayerEntity) livingTarget).disableShield(precision > 0.5 && attackDistance < attackRange * 0.4);
-                    }
+                    break;
+                case LIGHT:
+                    addCombo *= 2.5F;
+                    break;
+                case BARRAGE:
+                    addCombo += 0.25F / StandStatFormulas.getBarrageHitsPerSecond(getAttackSpeed());
+                    break;
                 }
                 LivingEntity user = getUser();
                 if (user != null) {
@@ -1239,6 +1280,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             doEnchantDamageEffects(this, target);
             setLastHurtMob(target);
         }
+        JojoMod.LOGGER.debug(addCombo);
+        addComboMeter(addCombo);
         return attacked;
     }
 
