@@ -2,10 +2,12 @@ package com.github.standobyte.jojo.action;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.util.JojoModUtil;
@@ -153,18 +155,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     public boolean appropriateTarget(ActionTarget.TargetType targetType) {
-        if (targetRequirement == TargetRequirement.NONE) {
-            return true;
-        }
-        switch (targetType) {
-        case EMPTY:
-            return false;
-        case BLOCK:
-            return targetRequirement == TargetRequirement.ANY || targetRequirement == TargetRequirement.BLOCK;
-        case ENTITY:
-            return targetRequirement == TargetRequirement.ANY || targetRequirement == TargetRequirement.ENTITY;
-        }
-        return false;
+        return targetRequirement.checkTargetType(targetType);
     }
     
     public double getMaxRangeSqEntityTarget() {
@@ -250,10 +241,20 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     public static enum TargetRequirement {
-        NONE,
-        BLOCK,
-        ENTITY,
-        ANY
+        NONE(target -> true),
+        BLOCK(target -> target == TargetType.BLOCK),
+        ENTITY(target -> target == TargetType.ENTITY),
+        ANY(target -> target != TargetType.EMPTY);
+        
+        private final Predicate<TargetType> targetTypePredicate;
+        
+        private TargetRequirement(Predicate<TargetType> targetTypePredicate) {
+            this.targetTypePredicate = targetTypePredicate;
+        }
+        
+        public boolean checkTargetType(TargetType targetType) {
+            return targetTypePredicate.test(targetType);
+        }
     }
     
     

@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.actions;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.PunchType;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
@@ -13,7 +14,7 @@ import net.minecraft.world.World;
 public class StandEntityHeavyAttack extends StandEntityAction {
 
     public StandEntityHeavyAttack(StandEntityAction.Builder builder) {
-        super(builder.standPose(StandPose.HEAVY_ATTACK).standOffsetFromUser(-0.75, 0.75));
+        super(builder.standPose(StandPose.HEAVY_ATTACK).standOffsetFromUser(-0.75, 0.75).standTakesCrosshairTarget(TargetType.ENTITY));
     }
 
     @Override

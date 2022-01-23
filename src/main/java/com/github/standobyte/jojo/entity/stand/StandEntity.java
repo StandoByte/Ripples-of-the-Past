@@ -1015,7 +1015,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
         
         if (punch == PunchType.LIGHT) {
-            addComboMeter(0.025F);
+            addComboMeter(0.007F);
         }
 
         // FIXME (!) precision: expand the hitbox of smaller entities more
@@ -1264,10 +1264,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                     }
                     break;
                 case LIGHT:
-                    addCombo = 0.225F;
+                    addCombo = 0.16F;
                     break;
                 case BARRAGE:
-                    addCombo = 0.25F / StandStatFormulas.getBarrageHitsPerSecond(getAttackSpeed());
+                    addCombo = 0.005F;
                     break;
                 }
                 LivingEntity user = getUser();
