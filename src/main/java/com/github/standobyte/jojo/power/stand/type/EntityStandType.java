@@ -35,8 +35,10 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
         super(tier, color, partName, attacks, abilities, summonShoutSupplier, statsClass, defaultStats);
         this.entityTypeSupplier = entityTypeSupplier;
         
-        hasHeavyAttack = Arrays.stream(attacks).anyMatch(attack -> attack instanceof StandEntityHeavyAttack);
-        hasFastAttack = Arrays.stream(attacks).anyMatch(attack -> attack instanceof StandEntityLightAttack || attack instanceof StandEntityMeleeBarrage);
+        hasHeavyAttack = Arrays.stream(attacks).anyMatch(
+                attack -> attack instanceof StandEntityHeavyAttack || attack.getShiftVariationIfPresent() instanceof StandEntityHeavyAttack);
+        hasFastAttack = Arrays.stream(attacks).anyMatch(
+                attack -> attack instanceof StandEntityLightAttack || attack instanceof StandEntityMeleeBarrage);
     }
 
     public StandEntityType<? extends StandEntity> getEntityType() {

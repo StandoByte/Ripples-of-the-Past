@@ -1013,6 +1013,11 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         else {
             barrageParryCount++;
         }
+        
+        if (punch == PunchType.LIGHT) {
+            addComboMeter(0.025F);
+        }
+
         // FIXME (!) precision: expand the hitbox of smaller entities more
         RayTraceResult target = JojoModUtil.rayTrace(this, getAttributeValue(ForgeMod.REACH_DISTANCE.get()), 
                 entity -> !(entity instanceof LivingEntity) || canAttack((LivingEntity) entity), getAttributeValue(ModEntityAttributes.STAND_PRECISION.get()) * 0.5);
@@ -1223,7 +1228,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             break;
         case LIGHT:
             damage = StandStatFormulas.getLightAttackDamage(strength);
-            addCombo = 0.1F;
             break;
         case BARRAGE:
             damage = StandStatFormulas.getBarrageHitDamage(strength, precision, getRandom());
@@ -1260,10 +1264,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                     }
                     break;
                 case LIGHT:
-                    addCombo *= 2.5F;
+                    addCombo = 0.225F;
                     break;
                 case BARRAGE:
-                    addCombo += 0.25F / StandStatFormulas.getBarrageHitsPerSecond(getAttackSpeed());
+                    addCombo = 0.25F / StandStatFormulas.getBarrageHitsPerSecond(getAttackSpeed());
                     break;
                 }
                 LivingEntity user = getUser();
@@ -1280,7 +1284,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             doEnchantDamageEffects(this, target);
             setLastHurtMob(target);
         }
-        JojoMod.LOGGER.debug(addCombo);
         addComboMeter(addCombo);
         return attacked;
     }
