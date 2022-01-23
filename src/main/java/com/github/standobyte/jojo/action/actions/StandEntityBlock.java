@@ -21,9 +21,4 @@ public class StandEntityBlock extends StandEntityAction {
     protected ActionConditionResult checkStandConditions(StandEntity stand, IStandPower power, ActionTarget target) {
         return stand.canStartBlocking() || stand.isStandBlocking() ? ActionConditionResult.POSITIVE : ActionConditionResult.NEGATIVE;
     }
-
-    @Override
-    protected boolean isCombatAction() {
-        return true;
-    }
 }

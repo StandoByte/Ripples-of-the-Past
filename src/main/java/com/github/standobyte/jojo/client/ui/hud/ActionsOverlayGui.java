@@ -16,12 +16,14 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.hud.ActionsModeConfig.SelectedTargetIcon;
 import com.github.standobyte.jojo.client.ui.sprites.SpriteUploaders;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClClickActionPacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -212,6 +214,9 @@ public class ActionsOverlayGui extends AbstractGui {
                 renderActionsHotbar(matrixStack, hotbarsPosition, ActionType.ABILITY, currentMode, target, partialTick);
                 
                 renderLeapIcon(matrixStack, currentMode, screenWidth, screenHeight);
+                if (currentMode == standUiMode) {
+                    renderStandComboIcon(matrixStack, standUiMode.getPower());
+                }
                 
                 RenderSystem.disableRescaleNormal();
                 RenderSystem.disableBlend();
@@ -224,9 +229,9 @@ public class ActionsOverlayGui extends AbstractGui {
             }
         }
     }
-    
-    
-    
+
+
+
     private static final int HOTBARS_ELEMENT_HEIGHT_PX = 86;
     
     private final ElementPosition barsPosition = new ElementPosition();
@@ -346,9 +351,7 @@ public class ActionsOverlayGui extends AbstractGui {
                     RenderSystem.enableDepthTest();
                 }
                 
-                if (alpha != 1.0F) {
-                    RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                }
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             }
         }
     }
@@ -625,15 +628,31 @@ public class ActionsOverlayGui extends AbstractGui {
             float iconFill = power.getLeapCooldownPeriod() != 0 ? 
                     1F - (float) power.getLeapCooldown() / (float) power.getLeapCooldownPeriod() : 1;
             boolean translucent = !power.canLeap();
-            blit(matrixStack, iconX, iconY, 96, 238, 18, 18);
-            if (translucent) {
-                RenderSystem.color4f(0.5F, 0.5F, 0.5F, 0.75F);
+            
+            renderFilledIcon(matrixStack, iconX, iconY, translucent, iconFill, 96, 238, 18, 18);
+        }
+    }
+    
+    private void renderStandComboIcon(MatrixStack matrixStack, IStandPower standPower) {
+        if (standPower.isActive() && standPower.getType().usesStandComboMechanic()) {
+            IStandManifestation stand = standPower.getStandManifestation();
+            if (stand instanceof StandEntity) {
+                float combo = ((StandEntity) stand).getComboMeter();
+                renderFilledIcon(matrixStack, 250, 50, false, combo, 96, 216, 18, 18); // FIXME (!!) stand combo icon position
             }
-            int px = (int) (19F * iconFill);
-            blit(matrixStack, iconX, iconY + 18 - px, 96 + 18, 238 + 18 - px, 18, px);
-            if (translucent) {
-                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-            }
+        }
+    }
+    
+    private void renderFilledIcon(MatrixStack matrixStack, int x, int y, boolean translucent, float fill, 
+            int texX, int texY, int texWidth, int texHeight) {
+        blit(matrixStack, x, y, texX, texY, texWidth, texHeight);
+        if (translucent) {
+            RenderSystem.color4f(0.5F, 0.5F, 0.5F, 0.75F);
+        }
+        int px = (int) (19F * fill);
+        blit(matrixStack, x, y + texHeight - px, texX + texWidth, texY + texHeight - px, texWidth, px);
+        if (translucent) {
+            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
     

@@ -66,7 +66,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
     }
     
     @Override
-    protected boolean isCombatAction() {
+    public boolean isCombatAction() {
         return true;
     }
 }
