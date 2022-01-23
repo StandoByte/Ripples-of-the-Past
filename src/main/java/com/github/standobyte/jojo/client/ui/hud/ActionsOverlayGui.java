@@ -635,6 +635,7 @@ public class ActionsOverlayGui extends AbstractGui {
     
     private void renderStandComboIcon(MatrixStack matrixStack, IStandPower standPower) {
         if (standPower.isActive() && standPower.getType().usesStandComboMechanic()) {
+            mc.getTextureManager().bind(OVERLAY_LOCATION);
             IStandManifestation stand = standPower.getStandManifestation();
             if (stand instanceof StandEntity) {
                 float combo = ((StandEntity) stand).getComboMeter();
