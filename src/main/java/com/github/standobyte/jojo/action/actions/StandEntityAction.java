@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -25,7 +26,7 @@ public abstract class StandEntityAction extends StandAction {
     protected final int standPerformDuration;
     protected final int standRecoveryDuration;
     private final AutoSummonMode autoSummonMode;
-    private final boolean standTakesCrosshairTarget;
+    private final TargetRequirement crosshairTargetForStand;
     private final boolean isCancelable;
     public final float userMovementFactor;
     public final StandPose standPose;
@@ -40,7 +41,7 @@ public abstract class StandEntityAction extends StandAction {
         this.standPerformDuration = builder.standPerformDuration;
         this.standRecoveryDuration = builder.standRecoveryDuration;
         this.autoSummonMode = builder.autoSummonMode;
-        this.standTakesCrosshairTarget = builder.standTakesCrosshairTarget;
+        this.crosshairTargetForStand = builder.crosshairTargetForStand;
         this.isCancelable = builder.isCancelable;
         this.userMovementFactor = builder.userMovementFactor;
         this.standPose = builder.standPose;
@@ -144,7 +145,7 @@ public abstract class StandEntityAction extends StandAction {
     
     private void setAction(IStandPower standPower, StandEntity standEntity, int ticks, Phase phase, ActionTarget target) {
         if (standEntity.setTask(this, ticks, phase)) {
-            if (standTakesCrosshairTarget()) {
+            if (standTakesCrosshairTarget(target)) {
                 standEntity.setTaskTarget(target);
             }
             setRelativePos(standEntity);
@@ -182,8 +183,14 @@ public abstract class StandEntityAction extends StandAction {
         }
     }
     
-    protected boolean standTakesCrosshairTarget() {
-        return getTargetRequirement() != TargetRequirement.NONE || standTakesCrosshairTarget;
+    protected boolean standTakesCrosshairTarget(ActionTarget target) {
+        if (getTargetRequirement() != null && getTargetRequirement().checkTargetType(target.getType())) {
+            return true;
+        }
+        if (crosshairTargetForStand != null) {
+            return crosshairTargetForStand.checkTargetType(target.getType());
+        }
+        return false;
     }
     
     private void setRelativePos(StandEntity stand) {
@@ -253,7 +260,7 @@ public abstract class StandEntityAction extends StandAction {
         private int standPerformDuration = 1;
         private int standRecoveryDuration = 0;
         private AutoSummonMode autoSummonMode = AutoSummonMode.FULL;
-        private boolean standTakesCrosshairTarget = false;
+        private TargetRequirement crosshairTargetForStand = null;
         private boolean isCancelable = false;
         private float userMovementFactor = 0.5F;
         private StandPose standPose = StandPose.NONE;
@@ -295,7 +302,22 @@ public abstract class StandEntityAction extends StandAction {
         }
         
         public T standTakesCrosshairTarget() {
-            this.standTakesCrosshairTarget = true;
+            this.crosshairTargetForStand = TargetRequirement.ANY;
+            return getThis();
+        }
+        
+        public T standTakesCrosshairTarget(TargetType targetType) {
+            switch (targetType) {
+            case BLOCK:
+                this.crosshairTargetForStand = TargetRequirement.BLOCK;
+                break;
+            case ENTITY:
+                this.crosshairTargetForStand = TargetRequirement.ENTITY;
+                break;
+            default:
+                this.crosshairTargetForStand = null;
+                break;
+            }
             return getThis();
         }
         
