@@ -350,15 +350,15 @@ public class InputHandler {
         }
         
         ActionType actionType = key == ActionKey.ATTACK ? ActionType.ATTACK : ActionType.ABILITY;
-        
-        if (actionsOverlay.noActionSelected(actionType)) {
+
+        IPower<?, ?> power = actionsOverlay.getCurrentPower();
+        if (key == ActionKey.STAND_BLOCK && power.getAbilities().isEmpty() || actionsOverlay.noActionSelected(actionType)) {
             if (mc.player.hasEffect(ModEffects.STUN.get()) && event != null) {
                 event.setCanceled(true);
             }
             return;
         }
 
-        IPower<?, ?> power = actionsOverlay.getCurrentPower();
         boolean leftClickedBlock = actionType == ActionType.ATTACK && mc.hitResult.getType() == Type.BLOCK;
         if (leftClickedBlock && leftClickBlockDelay > 0 || power.getHeldAction() != null) {
             if (event != null) {
