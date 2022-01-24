@@ -3,6 +3,8 @@ package com.github.standobyte.jojo.client;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.AIR;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.FOOD;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.ModActions;
@@ -60,6 +62,20 @@ public class ClientEventHandler {
     private boolean canSeeInStoppedTime = true;
     private boolean canMoveInStoppedTime = true;
     private float partialTickStoppedAt;
+    @Nullable
+    private ResourceLocation currentShader;
+    private static final ResourceLocation SHADER_TIME_STOP = new ResourceLocation("shaders/post/desaturate.json");
+    private static final ResourceLocation[] SHADERS_HUE_SHIFT = {
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift10.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift20.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift30.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift40.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift50.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift60.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift70.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift80.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift90.json")
+    };
     
     private double zoomModifier;
     public boolean isZooming;
@@ -177,7 +193,7 @@ public class ClientEventHandler {
                 }
                 else {
                     if (canSeeInStoppedTime && mc.gameRenderer.currentEffect() == null) {
-                        mc.gameRenderer.loadEffect(new ResourceLocation("shaders/post/desaturate.json"));
+                        mc.gameRenderer.loadEffect(SHADER_TIME_STOP);
                     }
                 }
             }
