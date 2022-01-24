@@ -5,35 +5,37 @@ import com.github.standobyte.jojo.util.MathUtil;
 import net.minecraft.util.math.vector.Vector3d;
 
 public class StandRelativeOffset {
-    private final double leftDefault;
-    private final double forwardDefault;
-    private final double yDefault;
-    double left;
-    double forward;
-    double y;
-    float yRotOffset;
+    private double left;
+    private double forward;
+    private boolean doYOffset;
+    private double y;
+//    private float yRotOffset;
     
-    public StandRelativeOffset(double leftDefault, double forwardDefault, double yDefault) {
-        this.leftDefault = leftDefault;
-        left = leftDefault;
-        this.forwardDefault = forwardDefault;
-        forward = forwardDefault;
-        this.yDefault = yDefault;
-        y = yDefault;
+    public StandRelativeOffset(double left, double forward) {
+        this(left, forward, false, 0);
     }
     
-    Vector3d getAbsoluteVec(float yRot) {
-        return MathUtil.relativeCoordsToAbsolute(left, y, forward, yRot);
+    public StandRelativeOffset(double left, double forward, double y) {
+        this(left, forward, true, y);
     }
     
-    void reset() {
-        left = leftDefault;
-        forward = forwardDefault;
-        y = yDefault;
-        yRotOffset = 0;
+    private StandRelativeOffset(double left, double forward, boolean doYOffset, double y) {
+        this.left = left;
+        this.forward = forward;
+        this.doYOffset = doYOffset;
+        this.y = y;
     }
     
-    boolean isDefault() {
-        return left == leftDefault && forward == forwardDefault && y == yDefault;
+    public void addHorizontalOffset(double left, double forward) {
+        setHorizontalOffset(this.left + left, this.forward + forward);
+    }
+    
+    public void setHorizontalOffset(double left, double forward) {
+        this.left = left;
+        this.forward = forward;
+    }
+    
+    Vector3d getAbsoluteVec(StandRelativeOffset offsetDefault, float yRot) {
+        return MathUtil.relativeCoordsToAbsolute(left, doYOffset ? y : offsetDefault.y, forward, yRot);
     }
 }

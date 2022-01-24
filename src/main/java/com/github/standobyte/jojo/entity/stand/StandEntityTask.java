@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
@@ -20,13 +21,16 @@ public class StandEntityTask {
     private int startingTicks;
     private int ticksLeft;
     @Nonnull
-    StandEntityAction.Phase phase;
+    private StandEntityAction.Phase phase;
+    @Nullable
+    private StandRelativeOffset offsetFromUser; // isn't synced to clients
     
-    StandEntityTask(StandEntityAction action, int ticks, StandEntityAction.Phase phase) {
+    StandEntityTask(StandEntityAction action, int ticks, StandEntityAction.Phase phase, boolean armsOnlyMode) {
         this.action = action;
         this.startingTicks = Math.max(ticks, 1);
         this.ticksLeft = this.startingTicks;
         this.phase = phase;
+        this.offsetFromUser = action.getOffsetFromUser(armsOnlyMode);
     }
     
     void tick(IStandPower standPower, StandEntity standEntity) {
@@ -94,6 +98,15 @@ public class StandEntityTask {
         return phase;
     }
     
+    void setOffsetFromUser(StandRelativeOffset offset) {
+        this.offsetFromUser = offset;
+    }
+    
+    @Nullable
+    StandRelativeOffset getOffsetFromUser() {
+        return offsetFromUser;
+    }
+    
 
     public static final Supplier<DataSerializerEntry> SERIALIZER = () -> new DataSerializerEntry(
             new IDataSerializer<Optional<StandEntityTask>>() {
@@ -126,14 +139,14 @@ public class StandEntityTask {
             int ticks = buf.readVarInt();
             StandEntityAction.Phase phase = buf.readEnum(StandEntityAction.Phase.class);
 
-            return Optional.of(new StandEntityTask((StandEntityAction) action, ticks, phase));
+            return Optional.of(new StandEntityTask((StandEntityAction) action, ticks, phase, false));
         }
 
         @Override
         public Optional<StandEntityTask> copy(Optional<StandEntityTask> value) {
             if (value.isPresent()) {
                 StandEntityTask task = value.get();
-                StandEntityTask taskNew = new StandEntityTask(task.action, task.startingTicks, task.phase);
+                StandEntityTask taskNew = new StandEntityTask(task.action, task.startingTicks, task.phase, false);
                 taskNew.ticksLeft = task.ticksLeft;
                 return Optional.of(taskNew);
             }
