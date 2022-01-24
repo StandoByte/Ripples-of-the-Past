@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.BalanceTestServerConfig;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
@@ -209,8 +210,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
 
     private static final float RESOLVE_DECAY = 4F;
     private static final int RESOLVE_NO_DECAY_TICKS = 300;
-    private static final int RESOLVE_EFFECT_BASE = 1200;
-    private static final int RESOLVE_EFFECT_CAP = 1200;
     private static final float RESOLVE_DMG_REDUCTION = 0.5F;
     private static final float RESOLVE_EFFECT_DMG_REDUCTION = 0.9F;
     private static final float RESOLVE_FOR_DMG_POINT = 1F;
@@ -257,7 +256,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (!user.hasEffect(ModEffects.RESOLVE.get()) && this.resolve == getMaxResolve()) {
             setResolveLevel(Math.min(resolveLevel + 1, getMaxResolveLevel()));
             user.addEffect(new EffectInstance(ModEffects.RESOLVE.get(), 
-                    Math.max(this.noResolveDecayTicks, RESOLVE_EFFECT_CAP), resolveLevel - 1, false, 
+                    BalanceTestServerConfig.TEST_CONFIG.resolveEffectCapDuration.get(), resolveLevel - 1, false, 
                     false, true));
         }
         
@@ -357,7 +356,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         float decay = 0;
         EffectInstance resolveEffect = user.getEffect(ModEffects.RESOLVE.get());
         if (resolveEffect != null) {
-            decay = getMaxResolve() / RESOLVE_EFFECT_BASE;
+            decay = getMaxResolve() / BalanceTestServerConfig.TEST_CONFIG.resolveEffectBaseDuration.get();
             decay *= (getMaxResolveLevel() - Math.min(resolveEffect.getAmplifier(), getMaxResolveLevel()));
             if (decay >= resolve) {
                 user.removeEffect(ModEffects.RESOLVE.get());
