@@ -792,7 +792,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         if (summonLockTicks > 0) {
             summonLockTicks--;
         }
-        else {
+        else if (!hasEffect(ModEffects.STUN.get())) {
             StandEntityTask currentTask = getCurrentTask();
             if (currentTask != null) {
                 currentTask.tick(userPower, this);
@@ -918,7 +918,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     protected boolean setTask(StandEntityTask task) {
         if (!level.isClientSide()) {
-            if (stopTask(task.getAction()) && getCurrentTask() == null) {
+            if (stopTask(task.getAction(), false) && getCurrentTask() == null) {
                 entityData.set(CURRENT_TASK, Optional.of(task));
                 return true;
             }
@@ -930,20 +930,21 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     public void stopTask() {
-        stopTask(null);
+        stopTask(null, false);
     }
     
-    private boolean stopTask(@Nullable StandEntityAction newAction) {
+    protected void stopTask(boolean stopNonCancelable) {
+        stopTask(null, stopNonCancelable);
+    }
+    
+    private boolean stopTask(@Nullable StandEntityAction newAction, boolean stopNonCancelable) {
         if (!level.isClientSide()) {
             StandEntityTask currentTask = getCurrentTask();
             if (currentTask == null) {
                 return true;
             }
-            if (currentTask.getTicksLeft() <= 0) {
-                clearTask(currentTask);
-                return true;
-            }
-            if (currentTask.getAction().isCancelable(userPower, this, currentTask.getPhase(), newAction)) {
+            if (currentTask.getTicksLeft() <= 0 || stopNonCancelable
+                    || currentTask.getAction().isCancelable(userPower, this, currentTask.getPhase(), newAction)) {
                 clearTask(currentTask);
                 return true;
             }
@@ -1310,8 +1311,11 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     protected void parryHeavyAttack() {
-        addEffect(new EffectInstance(ModEffects.STUN.get(), 30));
-        this.playSound(ModSounds.PARRY.get(), 1.0F, 1.0F);
+        if (!level.isClientSide()) {
+            stopTask(true);
+            addEffect(new EffectInstance(ModEffects.STUN.get(), 30));
+            playSound(ModSounds.PARRY.get(), 1.0F, 1.0F);
+        }
     }
 
     protected boolean breakBlock(BlockPos blockPos) {
