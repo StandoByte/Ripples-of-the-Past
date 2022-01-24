@@ -17,8 +17,19 @@ public class ResolveEffect extends UncurableEffect {
     public void addAttributeModifiers(LivingEntity entity, AttributeModifierManager attributes, int amplifier) {
         super.addAttributeModifiers(entity, attributes, amplifier);
         IStandPower.getStandPowerOptional(entity).ifPresent(stand -> {
-            if (stand.getResolve() < stand.getMaxResolve()) {
+            if (stand.usesResolve() && stand.getResolve() < stand.getMaxResolve()) {
+                stand.setResolveLevel(amplifier + 1);
                 stand.setResolve(stand.getMaxResolve(), -999);
+            }
+        });
+    }
+
+    @Override
+    public void removeAttributeModifiers(LivingEntity entity, AttributeModifierManager attributes, int amplifier) {
+        super.addAttributeModifiers(entity, attributes, amplifier);
+        IStandPower.getStandPowerOptional(entity).ifPresent(stand -> {
+            if (stand.usesResolve()) {
+                stand.setResolve(0, 0);
             }
         });
     }

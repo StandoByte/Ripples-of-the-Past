@@ -11,7 +11,6 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
@@ -286,11 +285,11 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
     // FIXME (!) is it nerfed too heavily?
     private static final AttributeModifier ATTACK_DAMAGE_ARMS_ONLY = new AttributeModifier(
-            UUID.fromString("aaa82f0e-f1a7-47d1-9066-e1a025be02df"), "Stand attack damage with only arms", -0.5, Operation.MULTIPLY_TOTAL);
+            UUID.fromString("aaa82f0e-f1a7-47d1-9066-e1a025be02df"), "Stand attack damage with only arms", -0.25, Operation.MULTIPLY_TOTAL);
     private static final AttributeModifier ATTACK_SPEED_ARMS_ONLY = new AttributeModifier(
-            UUID.fromString("5b26b3d1-405c-402b-aee6-d5a0657386fe"), "Stand attack speed with only arms", -0.5, Operation.MULTIPLY_TOTAL);
+            UUID.fromString("5b26b3d1-405c-402b-aee6-d5a0657386fe"), "Stand attack speed with only arms", -0.25, Operation.MULTIPLY_TOTAL);
     private static final AttributeModifier DURABILITY_ARMS_ONLY = new AttributeModifier(
-            UUID.fromString("244dd41c-aa40-4604-91f9-a788a40227ca"), "Stand durability with only arms", -0.5, Operation.MULTIPLY_TOTAL);
+            UUID.fromString("244dd41c-aa40-4604-91f9-a788a40227ca"), "Stand durability with only arms", -0.25, Operation.MULTIPLY_TOTAL);
     private static final AttributeModifier PRECISION_ARMS_ONLY = new AttributeModifier(
             UUID.fromString("f2d493e2-830a-4891-b756-65cc2be6f14f"), "Stand precision with only arms", -1, Operation.MULTIPLY_TOTAL);
     
@@ -1015,7 +1014,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
         
         if (punch == PunchType.LIGHT) {
-            addComboMeter(0.007F);
+            addComboMeter(0.007F, COMBO_TICKS);
         }
 
         // FIXME (!) precision: expand the hitbox of smaller entities more
@@ -1183,10 +1182,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return entityData.get(PUNCHES_COMBO);
     }
     
-    protected void addComboMeter(float combo) {
+    protected void addComboMeter(float combo, int noDecayTicks) {
         if (combo > 0) {
             setComboMeter(getComboMeter() + combo);
-            noComboDecayTicks = COMBO_TICKS;
+            this.noComboDecayTicks = Math.max(this.noComboDecayTicks, noDecayTicks);
         }
     }
     
@@ -1211,7 +1210,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         double knockback = getAttackKnockback(livingTarget);
         
         float damage;
-        float addCombo = 0;
         switch (punch) {
         case HEAVY:
             damage = StandStatFormulas.getHeavyAttackDamage(strength, livingTarget);
@@ -1264,10 +1262,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                     }
                     break;
                 case LIGHT:
-                    addCombo = 0.16F;
+                    addComboMeter(0.16F, COMBO_TICKS);
                     break;
                 case BARRAGE:
-                    addCombo = 0.005F;
+                    addComboMeter(0.005F, COMBO_TICKS * 2);
                     break;
                 }
                 LivingEntity user = getUser();
@@ -1284,7 +1282,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             doEnchantDamageEffects(this, target);
             setLastHurtMob(target);
         }
-        addComboMeter(addCombo);
         return attacked;
     }
 

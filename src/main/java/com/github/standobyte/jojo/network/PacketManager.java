@@ -30,6 +30,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.StandCancelManualMo
 import com.github.standobyte.jojo.network.packets.fromserver.SyncEnergyPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncHamonExercisesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncLeapCooldownPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.SyncResolveLimitPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStaminaPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStandControlStatusPacket;
@@ -102,6 +103,7 @@ public class PacketManager {
         channel.registerMessage(index++, TrSyncNonStandFlagPacket.class, TrSyncNonStandFlagPacket::encode, TrSyncNonStandFlagPacket::decode, TrSyncNonStandFlagPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, SyncStaminaPacket.class, SyncStaminaPacket::encode, SyncStaminaPacket::decode, SyncStaminaPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, SyncResolvePacket.class, SyncResolvePacket::encode, SyncResolvePacket::decode, SyncResolvePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        channel.registerMessage(index++, SyncResolveLimitPacket.class, SyncResolveLimitPacket::encode, SyncResolveLimitPacket::decode, SyncResolveLimitPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, TrSetStandEntityPacket.class, TrSetStandEntityPacket::encode, TrSetStandEntityPacket::decode, TrSetStandEntityPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, SyncStandStatsDataPacket.class, SyncStandStatsDataPacket::encode, SyncStandStatsDataPacket::decode, SyncStandStatsDataPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, SyncStandControlStatusPacket.class, SyncStandControlStatusPacket::encode, SyncStandControlStatusPacket::decode, SyncStandControlStatusPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));

@@ -188,13 +188,14 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     public static void onHurtByStand(LivingDamageEvent event) {
-        event.getEntityLiving().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-            DamageSource damageSrc = event.getSource();
-            if (damageSrc instanceof IStandDamageSource) {
-                IStandPower attackerStand = ((IStandDamageSource) damageSrc).getStandPower();
+        DamageSource damageSrc = event.getSource();
+        if (damageSrc instanceof IStandDamageSource) {
+            IStandPower attackerStand = ((IStandDamageSource) damageSrc).getStandPower();
+            event.getEntityLiving().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                 cap.setLastHurtByStand(attackerStand);
-            }
-        });
+            });
+            attackerStand.addResolveOnAttack(event.getEntityLiving(), event.getAmount());
+        }
     }
 
 //    public static void giveStandExp(LivingDeathEvent event) {

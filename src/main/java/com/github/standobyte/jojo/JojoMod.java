@@ -43,7 +43,6 @@ public class JojoMod {
     public JojoMod() {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, JojoModConfig.commonSpec);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, JojoModConfig.clientSpec);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, BalanceTestServerConfig.serverSpec);
         
         final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         ModBlocks.BLOCKS.register(modEventBus);

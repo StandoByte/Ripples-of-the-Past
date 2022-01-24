@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.power.stand.type.StandType;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.DamageSource;
 import net.minecraftforge.common.util.LazyOptional;
 
 public interface IStandPower extends IPower<IStandPower, StandType<?>> {
@@ -29,13 +30,18 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     default float getResolveRatio() {
         return getResolve() / getMaxResolve();
     }
+    void addResolve(float amount);
+    void setResolve(float amount, int noDecayTicks);
+    int getNoResolveDecayTicks();
     int getResolveLevel();
     int getMaxResolveLevel();
-    int getNoResolveDecayTicks();
-    float getMaxPassiveResolve();
-    void addResolve(float amount); // FIXME (!) give resolve in game
-    void setResolve(float amount, int noDecayTicks);
     void setResolveLevel(int level);
+    float getResolveLimit();
+    void addResolveLimit(float amount);
+    void setResolveLimit(float amount, int noDecayTicks);
+    float getResolveDmgReduction();
+    void addResolveOnAttack(LivingEntity target, float damageAmount);
+    void addResolveOnTakingDamage(DamageSource damageSource, float damageAmount);
     
     void skipProgression();
     boolean wasProgressionSkipped();
