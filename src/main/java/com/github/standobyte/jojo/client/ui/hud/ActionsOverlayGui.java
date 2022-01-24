@@ -215,7 +215,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 
                 renderLeapIcon(matrixStack, currentMode, screenWidth, screenHeight);
                 if (currentMode == standUiMode) {
-                    renderStandComboIcon(matrixStack, standUiMode.getPower());
+                    renderStandComboIcon(matrixStack, standUiMode.getPower(), screenWidth, screenHeight);
                 }
                 
                 RenderSystem.disableRescaleNormal();
@@ -633,13 +633,15 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private void renderStandComboIcon(MatrixStack matrixStack, IStandPower standPower) {
+    private void renderStandComboIcon(MatrixStack matrixStack, IStandPower standPower, int screenWidth, int screenHeight) {
         if (standPower.isActive() && standPower.getType().usesStandComboMechanic()) {
             mc.getTextureManager().bind(OVERLAY_LOCATION);
             IStandManifestation stand = standPower.getStandManifestation();
             if (stand instanceof StandEntity) {
+                int x = screenWidth / 2 + (modeSelectorPosition.alignment == Alignment.LEFT ? 12 : -12);
+                int y = screenHeight / 2 - 9;
                 float combo = ((StandEntity) stand).getComboMeter();
-                renderFilledIcon(matrixStack, 250, 50, false, combo, 96, 216, 18, 18); // FIXME (!!) stand combo icon position
+                renderFilledIcon(matrixStack, x, y, false, combo, 96, 216, 18, 18);
             }
         }
     }

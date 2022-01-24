@@ -6,7 +6,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import com.github.standobyte.jojo.BalanceTestServerConfig;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.actions.VampirismFreeze;
@@ -325,22 +324,20 @@ public class GameplayEventHandler {
     }
 
     @SubscribeEvent(priority = EventPriority.NORMAL)
+    public static void resolveOnTakingDamage(LivingDamageEvent event) {
+        IStandPower.getStandPowerOptional(event.getEntityLiving()).ifPresent(stand -> {
+            stand.addResolveOnTakingDamage(event.getSource(), event.getAmount());
+        });
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOW)
     public static void reduceDamageFromResolve(LivingDamageEvent event) {
         if (event.getSource() == DamageSource.OUT_OF_WORLD) {
             return;
         }
-        float dmgReduction;
-        if (event.getEntityLiving().hasEffect(ModEffects.RESOLVE.get())) {
-            dmgReduction = BalanceTestServerConfig.SERVER_CONFIG.resolveEffectDmgReduction.get().floatValue();
-        }
-        else {
-            dmgReduction = IStandPower.getStandPowerOptional(event.getEntityLiving()).map(stand -> {
-                if (stand.usesResolve()) {
-                    return stand.getResolveRatio() * BalanceTestServerConfig.SERVER_CONFIG.maxResolveDmgReduction.get().floatValue();
-                }
-                return 0F;
-            }).orElse(0F);
-        }
+        float dmgReduction = IStandPower.getStandPowerOptional(event.getEntityLiving()).map(stand -> {
+            return stand.getResolveDmgReduction();
+        }).orElse(0F);
         if (dmgReduction > 0F) {
             event.setAmount(event.getAmount() * (1 - dmgReduction));
         }

@@ -61,7 +61,7 @@ public abstract class StandAction extends Action<IStandPower> {
             return getThis();
         }
         
-        // FIXME (!) resolve level
+        // FIXME (!) (resolve) actions and resolve level
         public T resolveToUnlock(float resolveRatio) {
             this.resolveRatioToUnlock = MathHelper.clamp(resolveRatio, 0, 1);
             return getThis();
