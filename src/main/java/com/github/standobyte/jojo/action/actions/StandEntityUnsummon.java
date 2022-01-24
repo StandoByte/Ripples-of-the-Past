@@ -28,8 +28,7 @@ public final class StandEntityUnsummon extends StandEntityAction {
             }
             else {
                 if (!world.isClientSide()) {
-                    standEntity.setRelativePos(0, 0);
-                    standEntity.setRelativeY(0);
+                    standEntity.setTaskPosOffset(0, 0, 0);
                     standEntity.setPos(user.getX(), user.getY(), user.getZ());
                 }
                 standEntity.unsummonTicks++;

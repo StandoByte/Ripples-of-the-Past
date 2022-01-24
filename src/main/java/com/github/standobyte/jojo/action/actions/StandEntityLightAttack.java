@@ -18,7 +18,7 @@ public class StandEntityLightAttack extends StandEntityAction {
 
     public StandEntityLightAttack(StandEntityAction.Builder builder) {
         super(builder.standAutoSummonMode(AutoSummonMode.ONE_ARM).standUserSlowDownFactor(1.0F)
-                .standOffsetFromUser(-0.75, 0.75).standOffsetFromUser(0, 0.15, true).yOffsetFromUser(0, true)
+                .defaultStandOffsetFromUser().standOffsetFromUser(-0.75, 0.75)
                 .standTakesCrosshairTarget().standPose(StandPose.LIGHT_ATTACK));
     }
 

@@ -12,6 +12,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
+import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.type.EntityStandType;
@@ -30,8 +31,10 @@ public abstract class StandEntityAction extends StandAction {
     private final boolean isCancelable;
     public final float userMovementFactor;
     public final StandPose standPose;
-    protected final UserOffset userOffset;
-    protected final UserOffset userOffsetArmsOnly;
+    @Nullable
+    protected final StandRelativeOffset userOffset;
+    @Nullable
+    protected final StandRelativeOffset userOffsetArmsOnly;
     private final boolean enablePhysics;
     private final Supplier<SoundEvent> standSoundSupplier;
     
@@ -148,7 +151,6 @@ public abstract class StandEntityAction extends StandAction {
             if (standTakesCrosshairTarget(target)) {
                 standEntity.setTaskTarget(target);
             }
-            setRelativePos(standEntity);
             if (enablePhysics) {
                 standEntity.setNoPhysics(false);
             }
@@ -183,6 +185,11 @@ public abstract class StandEntityAction extends StandAction {
         }
     }
     
+    @Nullable
+    public StandRelativeOffset getOffsetFromUser(boolean armsOnlyMode) {
+        return armsOnlyMode ? userOffsetArmsOnly : userOffset;
+    }
+    
     protected boolean standTakesCrosshairTarget(ActionTarget target) {
         if (getTargetRequirement() != null && getTargetRequirement().checkTargetType(target.getType())) {
             return true;
@@ -191,16 +198,6 @@ public abstract class StandEntityAction extends StandAction {
             return crosshairTargetForStand.checkTargetType(target.getType());
         }
         return false;
-    }
-    
-    private void setRelativePos(StandEntity stand) {
-        UserOffset offset = stand.isArmsOnlyMode() ? userOffsetArmsOnly : userOffset;
-        if (offset.offsetXZ) {
-            stand.setRelativePos(offset.left, offset.forward);
-        }
-        if (offset.offsetY) {
-            stand.setRelativeY(offset.y);
-        }
     }
     
     protected final void invokeForStand(IStandPower power, Consumer<StandEntity> consumer) {
@@ -264,8 +261,10 @@ public abstract class StandEntityAction extends StandAction {
         private boolean isCancelable = false;
         private float userMovementFactor = 0.5F;
         private StandPose standPose = StandPose.NONE;
-        private final UserOffset userOffset = new UserOffset();
-        private final UserOffset userOffsetArmsOnly = new UserOffset();
+        @Nullable
+        private StandRelativeOffset userOffset = null;
+        @Nullable
+        private StandRelativeOffset userOffsetArmsOnly = null;
         private boolean enablePhysics = true;
         private Supplier<SoundEvent> standSoundSupplier = () -> null;
 
@@ -339,8 +338,7 @@ public abstract class StandEntityAction extends StandAction {
         }
         
         public T defaultStandOffsetFromUser() {
-            userOffset.offsetXZ(0, 0.5);
-            userOffsetArmsOnly.offsetXZ(0, 0.15).offsetY(0);
+            this.userOffset = new StandRelativeOffset(0, 0.5);
             return getThis();
         }
         
@@ -348,16 +346,27 @@ public abstract class StandEntityAction extends StandAction {
             return standOffsetFromUser(left, forward, false);
         }
         
+        public T standOffsetFromUser(double left, double forward, double y) {
+            return standOffsetFromUser(left, forward, y, false);
+        }
+        
         public T standOffsetFromUser(double left, double forward, boolean armsOnlyMode) {
-            UserOffset offset = armsOnlyMode ? userOffsetArmsOnly : userOffset;
-            offset.offsetXZ(left, forward);
+            setStandOffset(new StandRelativeOffset(left, forward), armsOnlyMode);
             return getThis();
         }
         
-        public T yOffsetFromUser(double y, boolean armsOnlyMode) {
-            UserOffset offset = armsOnlyMode ? userOffsetArmsOnly : userOffset;
-            offset.offsetY(y);
+        public T standOffsetFromUser(double left, double forward, double y, boolean armsOnlyMode) {
+            setStandOffset(new StandRelativeOffset(left, forward, y), armsOnlyMode);
             return getThis();
+        }
+        
+        private void setStandOffset(StandRelativeOffset offset, boolean armsOnlyMode) {
+            if (armsOnlyMode) {
+                userOffsetArmsOnly = offset;
+            }
+            else {
+                userOffset = offset;
+            }
         }
         
         public T stayInNoPhysics() {
@@ -376,26 +385,5 @@ public abstract class StandEntityAction extends StandAction {
         ARMS,
         ONE_ARM,
         DISABLED
-    }
-    
-    private static class UserOffset {
-        private boolean offsetXZ = false;
-        private double left;
-        private double forward;
-        private boolean offsetY = false;
-        private double y;
-        
-        private UserOffset offsetXZ(double left, double forward) {
-            this.offsetXZ = true;
-            this.left = left;
-            this.forward = forward;
-            return this;
-        }
-        
-        private UserOffset offsetY(double y) {
-            this.offsetY = true;
-            this.y = y;
-            return this;
-        }
     }
 }

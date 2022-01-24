@@ -111,7 +111,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     private static final DataParameter<Integer> USER_ID = EntityDataManager.defineId(StandEntity.class, DataSerializers.INT);
     private WeakReference<LivingEntity> userRef = new WeakReference<LivingEntity>(null);
     private IStandPower userPower;
-    protected StandRelativeOffset relativePos = new StandRelativeOffset(-0.75, -0.5, 0.2);
+    private StandRelativeOffset offsetDefault = new StandRelativeOffset(-0.75, -0.5, 0.2);
+    private StandRelativeOffset offsetDefaultArmsOnly = new StandRelativeOffset(0, 0.15, 0);
+//    protected StandRelativeOffset relativePos = new StandRelativeOffset(-0.75, -0.5, 0.2);
 
     private static final DataParameter<Boolean> SWING_OFF_HAND = EntityDataManager.defineId(StandEntity.class, DataSerializers.BOOLEAN);
     private boolean alternateAdditionalSwing;
@@ -393,8 +395,15 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         if (!level.isClientSide() && isArmsOnlyMode()) {
             entityData.set(ARMS_ONLY_MODE, (byte) 2);
             scheduledTask = null;
-            if (getCurrentTaskAction() == ModActions.STAND_ENTITY_UNSUMMON.get()) {
-                stopTask();
+            StandEntityTask currentTask = getCurrentTask();
+            if (currentTask != null) {
+                StandEntityAction action = currentTask.getAction();
+                if (action == ModActions.STAND_ENTITY_UNSUMMON.get()) {
+                    stopTask();
+                }
+                else {
+                    currentTask.setOffsetFromUser(action.getOffsetFromUser(false));
+                }
             }
         }
     }
@@ -840,7 +849,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public void updatePosition(LivingEntity user) {
         if (user != null) {
             if (isFollowingUser()) {
-                Vector3d offset = relativePos.getAbsoluteVec(yRot);
+                Vector3d offset = getOffsetFromUser().getAbsoluteVec(getDefaultOffsetFromUser(), yRot);
                 setPos(user.getX() + offset.x, 
                         user.getY() + (user.isShiftKeyDown() ? 0 : offset.y), 
                         user.getZ() + offset.z);
@@ -857,18 +866,35 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
     }
     
-    public void setRelativePos(double left, double forward) {
-        relativePos.left = left;
-        relativePos.forward = forward;
+    protected StandRelativeOffset getOffsetFromUser() {
+        StandRelativeOffset offset = getDefaultOffsetFromUser();
+        StandEntityTask currentTask = getCurrentTask();
+        if (currentTask != null) {
+            StandRelativeOffset taskOffset = currentTask.getOffsetFromUser();
+            if (taskOffset != null) {
+                offset = taskOffset;
+            }
+        }
+        return offset;
     }
     
-    public void addRelativePos(double left, double forward) {
-        relativePos.left += left;
-        relativePos.forward += forward;
+    protected StandRelativeOffset getDefaultOffsetFromUser() {
+        return isArmsOnlyMode() ? offsetDefaultArmsOnly : offsetDefault;
     }
-
-    public void setRelativeY(double y) {
-        relativePos.y = y;
+    
+    public void setTaskPosOffset(double left, double forward) {
+        setTaskPosOffset(new StandRelativeOffset(left, forward));
+    }
+    
+    public void setTaskPosOffset(double left, double forward, double y) {
+        setTaskPosOffset(new StandRelativeOffset(left, forward, y));
+    }
+    
+    private void setTaskPosOffset(StandRelativeOffset offset) {
+        StandEntityTask currentTask = getCurrentTask();
+        if (currentTask != null) {
+            currentTask.setOffsetFromUser(offset);
+        }
     }
 
     private boolean isInsideViewBlockingBlock() {
@@ -889,12 +915,12 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
 
     public boolean setTask(StandEntityAction action, int ticks, StandEntityAction.Phase phase) {
-        return setTask(new StandEntityTask(action, ticks, phase));
+        return setTask(new StandEntityTask(action, ticks, phase, isArmsOnlyMode()));
     }
 
     protected boolean setTask(StandEntityTask task) {
         if (!level.isClientSide()) {
-            if (stopTask(false, task.getAction()) && getCurrentTask() == null) {
+            if (stopTask(task.getAction()) && getCurrentTask() == null) {
                 entityData.set(CURRENT_TASK, Optional.of(task));
                 return true;
             }
@@ -906,35 +932,32 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     public void stopTask() {
-        stopTask(true, null);
+        stopTask(null);
     }
     
-    private boolean stopTask(boolean resetPos, @Nullable StandEntityAction newAction) {
+    private boolean stopTask(@Nullable StandEntityAction newAction) {
         if (!level.isClientSide()) {
             StandEntityTask currentTask = getCurrentTask();
             if (currentTask == null) {
                 return true;
             }
             if (currentTask.getTicksLeft() <= 0) {
-                clearTask(currentTask, resetPos);
+                clearTask(currentTask);
                 return true;
             }
             if (currentTask.getAction().isCancelable(userPower, this, currentTask.getPhase(), newAction)) {
-                clearTask(currentTask, resetPos);
+                clearTask(currentTask);
                 return true;
             }
         }
         return false;
     }
     
-    protected void clearTask(StandEntityTask clearedTask, boolean resetPos) {
+    protected void clearTask(StandEntityTask clearedTask) {
         barrageParryCount = 0;
         setTaskTarget(ActionTarget.EMPTY);
         updateNoPhysics();
         setStandPose(StandPose.NONE);
-        if (resetPos && !isArmsOnlyMode()) {
-            relativePos.reset();
-        }
         clearedTask.getAction().onClear(userPower, this);
         entityData.set(CURRENT_TASK, Optional.empty());
         if (scheduledTask != null) {
@@ -945,7 +968,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         else if (isArmsOnlyMode()) {
             StandEntityAction unsummon = ModActions.STAND_ENTITY_UNSUMMON.get();
             setTask(new StandEntityTask(unsummon, unsummon.getStandActionTicks(userPower, this), 
-                    StandEntityAction.Phase.PERFORM));
+                    StandEntityAction.Phase.PERFORM, isArmsOnlyMode()));
         }
     }
     
