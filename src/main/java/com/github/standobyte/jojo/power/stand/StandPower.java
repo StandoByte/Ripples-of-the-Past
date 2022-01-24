@@ -32,6 +32,9 @@ import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.GameRules;
+import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 
 public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> implements IStandPower {
     private int tier = 0;
@@ -330,7 +333,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     @Override
     public void addResolveOnAttack(LivingEntity target, float damageAmount) {
-        if (target.getClassification(false) == EntityClassification.MONSTER || target.getType() == EntityType.PLAYER) {
+        if (usesResolve() && target.getClassification(false) == EntityClassification.MONSTER || target.getType() == EntityType.PLAYER) {
             float resolveBase = damageAmount * RESOLVE_FOR_DMG_POINT;
             float resolveHasMultiplier = MathHelper.clamp(getResolveLimit() - getResolve(), 0, resolveBase) / RESOLVE_UNDER_LIMIT_MULTIPLIER;
             float resolveNoMultiplier = Math.max(resolveBase - resolveHasMultiplier, 0);
@@ -341,8 +344,12 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     @Override
     public void addResolveOnTakingDamage(DamageSource damageSource, float damageAmount) {
-        if (damageSource.getEntity() != null) {
-            addResolveLimit(damageAmount * RESOLVE_LIMIT_FOR_DMG_POINT_TAKEN);
+        if (usesResolve() && damageSource.getEntity() != null) {
+            World world = damageSource.getEntity().level;
+            if (!world.isClientSide()) {
+                boolean noNaturalRegen = ((ServerWorld) world).getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION);
+                addResolveLimit(damageAmount * RESOLVE_LIMIT_FOR_DMG_POINT_TAKEN * (noNaturalRegen ? 2F : 1F));
+            }
         }
     }
     

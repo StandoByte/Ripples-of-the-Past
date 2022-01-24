@@ -113,7 +113,7 @@ public class StandStatsManager extends JsonReloadListener {
             });
             savedStatsWorlds.add(folderPath);
             // FIXME readme.txt
-            // FIXME (!) pack.mcmeta
+            // FIXME (!!) pack.mcmeta
         }
     }
     
