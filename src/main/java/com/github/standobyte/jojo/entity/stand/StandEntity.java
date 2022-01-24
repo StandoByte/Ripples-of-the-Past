@@ -198,10 +198,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 action.playSound(this, userPower, phase);
                 action.onTaskSet(level, this, userPower, phase);
             }
-            if (level.isClientSide()) {
-                if (action != null || getStandPose() != StandPose.SUMMON) {
-                    setStandPose(action != null ? action.standPose : StandPose.NONE);
-                }
+            if (action != null || getStandPose() != StandPose.SUMMON) {
+                setStandPose(action != null ? action.standPose : StandPose.NONE);
             }
         }
         else if (SWING_OFF_HAND.equals(dataParameter)) {
@@ -685,7 +683,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     protected float damageResistance(DamageSource damageSrc, float damageAmount, boolean blockableAngle) {
         if (!damageSrc.isBypassArmor()) {
             float blockedRatio = 0;
-            if (blockableAngle && isBlocking() && userPower != null && userPower.usesStamina()) {
+            if (blockableAngle && isStandBlocking() && userPower != null && userPower.usesStamina()) {
                 float staminaCost = StandStatFormulas.getBlockStaminaCost(damageAmount);
                 if (userPower.consumeStamina(staminaCost)) {
                     blockedRatio = 1F;
@@ -695,7 +693,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                     standCrash();
                 }
             }
-            return damageAmount * StandStatFormulas.getPhysicalResistance(getDurability(), getAttackDamage(null), blockedRatio);
+            return damageAmount * (1 - StandStatFormulas.getPhysicalResistance(getDurability(), getAttackDamage(null), blockedRatio));
         }
         return damageAmount;
     }
@@ -714,7 +712,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
         Vector3d viewVec = getViewVector(1.0F);
         Vector3d diffVec = dmgPosition.subtract(position()).normalize();
-        return diffVec.dot(viewVec) > 0.866D;
+        return diffVec.dot(viewVec) > 0.707D;
     }
 
 
@@ -1125,7 +1123,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             }
         }
         int count = swings.getSwingsCount();
-        int bits = swings.getHandSideBits();
+        long bits = swings.getHandSideBits();
         swings.reset();
         for (int i = 0; i < count; i++) {
             double maxOffset = 0.9 / (getPrecision() + 1) - 0.9 / 11;
@@ -1235,15 +1233,14 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         float damage;
         switch (punch) {
         case HEAVY:
-            damage = StandStatFormulas.getHeavyAttackDamage(strength, livingTarget);
-
             double targetProximityRatio = 1 - attackDistance / attackRange;
             if (targetProximityRatio > 0.75) {
-                damage *= targetProximityRatio * 2 - 0.5;
+                strength *= targetProximityRatio * 2 - 0.5;
             }
             else if (targetProximityRatio < 0.25) {
-                damage *= targetProximityRatio * 2 + 0.5;
+                strength *= targetProximityRatio * 2 + 0.5;
             }
+            damage = StandStatFormulas.getHeavyAttackDamage(strength, livingTarget);
             
             knockback += damage / 4 * getComboMeter();
             break;

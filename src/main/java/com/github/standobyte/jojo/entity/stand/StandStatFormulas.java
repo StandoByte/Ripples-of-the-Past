@@ -20,7 +20,7 @@ public class StandStatFormulas {
             float damagePierced = MathHelper.lerp(armorPiercing, CombatRules.getDamageAfterAbsorb(damage, armor, toughness), damage);
             // i'm too dumb to figure out the formula there
             while (CombatRules.getDamageAfterAbsorb(damage, armor, toughness) < damagePierced) {
-                damage++;
+                damage += 0.5F;
             }
         }
         return damage;
@@ -29,7 +29,7 @@ public class StandStatFormulas {
     
     
     private static final float getHeavyAttackArmorPiercing(double strength) {
-        return (float) strength * 0.03125F;
+        return (float) strength * 0.025F * 0;
     }
     
     public static final int getHeavyAttackWindup(double speed, float combo) {
@@ -89,7 +89,7 @@ public class StandStatFormulas {
     
     
     public static final float getPhysicalResistance(double durability, double strength, float blocked) {
-        double resistance = MathHelper.clamp(durability * 0.03 + strength * 0.02, 0, 1);
+        double resistance = MathHelper.clamp(durability * 0.01875 + strength * 0.0125, 0, 1);
         resistance += (1 - resistance) / 2 * blocked;
         return (float) resistance;
     }

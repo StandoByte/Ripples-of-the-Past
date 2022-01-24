@@ -42,7 +42,7 @@ public class ModStandTypes {
                     .power(16.0)
                     .speed(16.0)
                     .range(2.0, 10.0)
-                    .durability(6.0)
+                    .durability(16.0)
                     .precision(1.0)
                     .maxTimeStopTicks(100, 180)
                     .build(), 
@@ -57,7 +57,7 @@ public class ModStandTypes {
                     .power(16.0)
                     .speed(16.0)
                     .range(2.0, 10.0)
-                    .durability(6.0)
+                    .durability(16.0)
                     .precision(1.0)
                     .maxTimeStopTicks(100, 180)
                     .build(), 
