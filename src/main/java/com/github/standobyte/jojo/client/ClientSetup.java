@@ -170,6 +170,7 @@ public class ClientSetup {
             ClientEventHandler.init(mc);
             ActionsOverlayGui.init(mc);
             StandController.init(mc);
+            SoulController.init(mc);
             InputHandler.init(mc);
             InputHandler.getInstance().setActionsOverlay(ActionsOverlayGui.getInstance());
 

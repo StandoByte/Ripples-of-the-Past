@@ -257,7 +257,7 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
         Entity entity = level.getEntity(additionalData.readInt());
         if (entity instanceof LivingEntity) {
             setOriginEntity((LivingEntity) entity);
-            SoulController.onSoulSpawn(this);
+            SoulController.getInstance().onSoulSpawn(this);
             addCloudParticles();
         }
         else {

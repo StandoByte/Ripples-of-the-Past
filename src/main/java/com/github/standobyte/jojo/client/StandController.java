@@ -27,7 +27,6 @@ import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.texture.PotionSpriteUploader;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.network.play.client.CPlayerPacket;
@@ -51,7 +50,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 public class StandController {
     private static StandController instance = null;
     
-    private Minecraft mc;
+    private final Minecraft mc;
     private Random rand;
     private boolean isProbablyControllingStand;
     private StandEntity stand;
