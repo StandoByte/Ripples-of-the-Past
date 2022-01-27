@@ -26,16 +26,14 @@ public class StandStatFormulas {
         return damage;
     }
     
-    
-    
     private static final float getHeavyAttackArmorPiercing(double strength) {
         return (float) strength * 0.025F * 0;
     }
     
     public static final int getHeavyAttackWindup(double speed, float combo) {
-        int min = MathHelper.floor((40 - speed * 1.25) / 3);
-        int max = MathHelper.ceil((40 - speed * 1.25) * 4 / 3);
-        return (int) MathHelper.lerp(combo, max, min);
+        double min = (40 - speed * 1.25) / 3;
+        double max = (40 - speed * 1.25) * 4 / 3;
+        return MathHelper.ceil(MathHelper.lerp((double) combo, max, min));
     }
     
     public static final int getHeavyAttackRecovery(double speed) {
