@@ -352,7 +352,9 @@ public class InputHandler {
         ActionType actionType = key == ActionKey.ATTACK ? ActionType.ATTACK : ActionType.ABILITY;
 
         IPower<?, ?> power = actionsOverlay.getCurrentPower();
-        if (key == ActionKey.STAND_BLOCK && power.getAbilities().isEmpty() || actionsOverlay.noActionSelected(actionType)) {
+        boolean actionClick = !actionsOverlay.noActionSelected(actionType)
+                || key == ActionKey.STAND_BLOCK && power != null && !power.getAbilities().isEmpty();
+        if (!actionClick) {
             if (mc.player.hasEffect(ModEffects.STUN.get()) && event != null) {
                 event.setCanceled(true);
             }
