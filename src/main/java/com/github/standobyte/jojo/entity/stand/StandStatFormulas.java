@@ -93,7 +93,7 @@ public class StandStatFormulas {
     }
     
     public static final float getStaminaMultiplier(double durability) {
-        return (float) (500 * Math.pow(2, durability / 8));
+        return (float) Math.pow(2, durability / 8 - 1);
     }
     
     public static final float getBlockStaminaCost(float incomingDamage) {
@@ -120,7 +120,7 @@ public class StandStatFormulas {
         return 0.1 + speed * 0.05;
     }
     
-    public static final boolean isBlockBreakable(double strength, float blockHardness, int blockHarvestLevel) { // FIXME block breaking progress (B-statted stand can break obsidian, but it's slow)
+    public static final boolean isBlockBreakable(double strength, float blockHardness, int blockHarvestLevel) { // TODO block breaking progress (B-statted stand can break obsidian, but it's slow)
         /* damage:
          * 2                                4                                   8                                   12                                      16
          * 

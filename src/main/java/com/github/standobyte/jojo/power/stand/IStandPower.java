@@ -45,6 +45,7 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     
     void skipProgression();
     boolean wasProgressionSkipped();
+    float getStatsDevelopment();
     
     @Deprecated
     int getXp();

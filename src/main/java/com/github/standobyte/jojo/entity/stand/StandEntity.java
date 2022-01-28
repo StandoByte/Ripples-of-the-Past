@@ -445,12 +445,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public void setUserPower(IStandPower power) {
         this.userPower = power;
         if (power != null) {
-            modifiersFromResolveLevel(getStandStatsDev(power));
+            modifiersFromResolveLevel(power.getStatsDevelopment());
         }
-    }
-    
-    public static float getStandStatsDev(IStandPower stand) {
-        return stand.usesResolve() ? stand.getResolveLevel() / stand.getMaxResolveLevel() : 0;
     }
     
     @Nullable
