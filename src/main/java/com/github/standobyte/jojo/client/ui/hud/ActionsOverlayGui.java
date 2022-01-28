@@ -2,9 +2,13 @@ package com.github.standobyte.jojo.client.ui.hud;
 
 import static com.github.standobyte.jojo.client.ui.hud.BarsRenderer.BARS_WIDTH_PX;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.IntBinaryOperator;
 import java.util.function.IntUnaryOperator;
+import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -14,6 +18,7 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.ui.hud.ActionsModeConfig.SelectedTargetIcon;
 import com.github.standobyte.jojo.client.ui.sprites.SpriteUploaders;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -25,6 +30,7 @@ import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -36,10 +42,12 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.settings.AttackIndicatorStatus;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.ColorHelper;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -284,8 +292,8 @@ public class ActionsOverlayGui extends AbstractGui {
             standStrengthPosition.x -= 22;
         }
         
-        modeSelectorPosition.x = hotbarsConfig.aligment == Alignment.LEFT ? halfWidth + 6 : halfWidth - 6;
-        modeSelectorPosition.y = halfHeight - 41;
+        modeSelectorPosition.x = hotbarsConfig.aligment == Alignment.LEFT ? halfWidth + 9 : halfWidth - 29;
+        modeSelectorPosition.y = halfHeight - 31;
         modeSelectorPosition.alignment = hotbarsConfig.aligment;
     }
     
@@ -593,18 +601,108 @@ public class ActionsOverlayGui extends AbstractGui {
     
     
     
-    // FIXME (!!) mode selector (near the crosshair)
+    private final List<ActionsModeConfig<?>> modes = Collections.unmodifiableList(Arrays.asList(
+            null,
+            nonStandUiMode,
+            standUiMode
+            ));
     private void renderModeSelector(MatrixStack matrixStack, ElementPosition position, float partialTick) {
         if (modeSelectorTransparency.shouldRender()) {
-//            mc.getTextureManager().bind(OVERLAY_LOCATION);
-            
+            mc.getTextureManager().bind(WIDGETS_LOCATION);
+            int x = position.x;
+            int y = position.y;
+            matrixStack.pushPose();
+            matrixStack.translate(x, y, 0);
+            matrixStack.mulPose(Vector3f.ZP.rotationDegrees(90));
+            matrixStack.translate(-x, -y - 22, 0);
+            renderHotbar(matrixStack, x, y, modes.size(), modeSelectorTransparency.getAlpha(partialTick));
+            int selectedMode = modes.indexOf(currentMode);
+            if (selectedMode > -1) {
+                blit(matrixStack, x + selectedMode * 20 - 1, y - 1, 0, 22, 24, 24);
+            }
+            matrixStack.popPose();
+            renderModeSelectorIcons(matrixStack, x + 3, y + 3, partialTick);
+            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        }
+    }
+    
+    
+    
+    private void renderModeSelectorIcons(MatrixStack matrixStack, int x, int y, float partialTick) {
+        for (ActionsModeConfig<?> mode : modes) {
+            if (mode != null) {
+                IPower<?, ?> power = mode.getPower();
+                if (power.hasPower()) {
+                    mc.getTextureManager().bind(power.getType().getIconTexture());
+                    blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
+                }
+            }
+            y += 20;
         }
     }
     
     private void drawModeSelectorNames(MatrixStack matrixStack, ElementPosition position, float partialTick) {
         if (modeSelectorTransparency.shouldRender()) {
-            
+            int x = position.x + (position.alignment == Alignment.LEFT ? 26 : -4);
+            int y = position.y + (22 - mc.font.lineHeight) / 2;
+            for (ActionsModeConfig<?> mode : modes) {
+                ITextComponent name = getModeNameForSelector(mode);
+                if (name != null) {
+                    int color = getModeColor(mode);
+                    drawBackdrop(matrixStack, x, y, mc.font.width(name), position.alignment, modeSelectorTransparency, partialTick);
+                    drawString(matrixStack, mc.font, name, x, y, position.alignment, modeSelectorTransparency.makeTextColorTranclucent(color, partialTick));
+                }
+                y += 22;
+            }
         }
+    }
+    
+    @Nullable
+    private ITextComponent getModeNameForSelector(ActionsModeConfig<?> mode) {
+        ITextComponent name;
+        if (mode == null) {
+            if (currentMode == null) {
+                return null;
+            }
+            name = new TranslationTextComponent("jojo.overlay.mode_deselect");
+        }
+        else {
+            IPower<?, ?> power = mode.getPower();
+            if (!power.hasPower()) {
+                return null;
+            }
+            name = new TranslationTextComponent(power.getType().getTranslationKey());
+        }
+        ITextComponent keyName = getKeyName(mode);
+        if (keyName != null) {
+            name = new TranslationTextComponent("jojo.overlay.mode_key", keyName, name);
+        }
+        return name;
+    }
+
+    private Map<ActionsModeConfig<?>, Supplier<KeyBinding>> modeKeys = ImmutableMap.of(
+            nonStandUiMode, () -> InputHandler.getInstance().nonStandMode,
+            standUiMode, () -> InputHandler.getInstance().standMode);
+    @Nullable
+    private ITextComponent getKeyName(ActionsModeConfig<?> mode) {
+        if (mode == currentMode) {
+            return null;
+        }
+        if (mode == null) {
+            mode = currentMode;
+        }
+        Supplier<KeyBinding> keySupplier = modeKeys.get(mode);
+        if (keySupplier == null || keySupplier.get() == null) {
+            return null;
+        }
+        return new KeybindTextComponent(keySupplier.get().getName());
+    }
+    
+    private int getModeColor(ActionsModeConfig<?> mode) {
+        if (mode == null) {
+            return 0xFFFFFF;
+        }
+        return mode.getPower().getType().getColor();
     }
     
     
@@ -638,7 +736,7 @@ public class ActionsOverlayGui extends AbstractGui {
             mc.getTextureManager().bind(OVERLAY_LOCATION);
             IStandManifestation stand = standPower.getStandManifestation();
             if (stand instanceof StandEntity) {
-                int x = screenWidth / 2 + (modeSelectorPosition.alignment == Alignment.LEFT ? 12 : -12);
+                int x = screenWidth / 2 + (modeSelectorPosition.alignment == Alignment.LEFT ? -24 : 6);
                 int y = screenHeight / 2 - 9;
                 float combo = ((StandEntity) stand).getComboMeter();
                 renderFilledIcon(matrixStack, x, y, false, combo, 96, 216, 18, 18);
@@ -661,14 +759,14 @@ public class ActionsOverlayGui extends AbstractGui {
     
     
     
-    public void drawString(MatrixStack matrixStack, FontRenderer font, ITextComponent text, int x, int y, Alignment alignment, int color) {
+    private void drawString(MatrixStack matrixStack, FontRenderer font, ITextComponent text, int x, int y, Alignment alignment, int color) {
         if (alignment == Alignment.RIGHT) {
             x -= font.width(text);
         }
         drawString(matrixStack, font, text, x, y, color);
     }
     
-    public void drawBackdrop(MatrixStack matrixStack, int x, int y, int width, Alignment alignment, 
+    private void drawBackdrop(MatrixStack matrixStack, int x, int y, int width, Alignment alignment, 
             @Nullable ElementTransparency transparency, float partialTick) {
         int backdropColor = mc.options.getBackgroundColor(0.0F);
         if (backdropColor != 0) {
