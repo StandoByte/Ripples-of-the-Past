@@ -592,7 +592,7 @@ public class GameplayEventHandler {
 
     private static void cheatDeath(LivingDeathEvent event) {
         LivingEntity dead = event.getEntityLiving();
-        if (event.getSource().getEntity() != null && dead.hasEffect(ModEffects.CHEAT_DEATH.get())) {
+        if (event.getSource().getEntity() != null && event.getSource().getEntity() != dead && dead.hasEffect(ModEffects.CHEAT_DEATH.get())) {
             event.setCanceled(true);
             dead.setHealth(dead.getMaxHealth() / 2F);
             dead.removeEffect(ModEffects.CHEAT_DEATH.get());
