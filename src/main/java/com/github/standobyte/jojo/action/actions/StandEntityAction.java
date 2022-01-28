@@ -191,7 +191,8 @@ public abstract class StandEntityAction extends StandAction {
     }
     
     protected boolean standTakesCrosshairTarget(ActionTarget target) {
-        if (getTargetRequirement() != null && getTargetRequirement().checkTargetType(target.getType())) {
+        if (getTargetRequirement() != null && !getTargetRequirement().checkTargetType(TargetType.EMPTY)
+                && getTargetRequirement().checkTargetType(target.getType())) {
             return true;
         }
         if (crosshairTargetForStand != null) {

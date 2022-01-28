@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -23,6 +24,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.SyncStandStatsDataP
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -113,7 +115,18 @@ public class StandStatsManager extends JsonReloadListener {
             });
             savedStatsWorlds.add(folderPath);
             // FIXME readme.txt
-            // FIXME (!!) pack.mcmeta
+            try {
+                Files.write(
+                        "{\n" + 
+                        "  \"pack\": {\n" + 
+                        "    \"pack_format\": 7,\n" + 
+                        "    \"description\": \"Stand stats for Ripples of the Past mod\"\n" + 
+                        "  }\n" + 
+                        "}", 
+                        folderPath.resolve("pack.mcmeta").toFile(), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                LOGGER.error("Couldn't write pack.mcmeta file for Stand stats", e);
+            }
         }
     }
     
