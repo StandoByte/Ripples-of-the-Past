@@ -21,6 +21,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.SyncStaminaPacket;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.PowerBaseImpl;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 
 import net.minecraft.entity.EntityClassification;
@@ -152,7 +153,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             }
             return 1F;
         }).orElse(1F);
-        return maxAmount;
+        return maxAmount * getStaminaDurabilityModifier();
     }
     
     @Override
@@ -203,8 +204,16 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                     staminaRegen *= 1.5F;
                 }
             }
-            stamina = Math.min(stamina + staminaRegen, getMaxStamina());
+            stamina = Math.min(stamina + staminaRegen * getStaminaDurabilityModifier(), getMaxStamina());
         }
+    }
+    
+    private float getStaminaDurabilityModifier() {
+        if (hasPower()) {
+            StandStats stats = getType().getStats();
+            return StandStatFormulas.getStaminaMultiplier(stats.getBaseDurability() + stats.getDevDurability(getStatsDevelopment()));
+        }
+        return 1F;
     }
     
 
@@ -401,6 +410,11 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
     
     @Override
+    public float getStatsDevelopment() {
+        return usesResolve() ? (float) getResolveLevel() / (float) getMaxResolveLevel() : 0;
+    }
+    
+    @Override
     public int getXp() {
         return MAX_EXP; // FIXME stand progression
     }
@@ -426,7 +440,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     public void setLearningProgress(Action<IStandPower> action, float progress) {
         progress = MathHelper.clamp(progress, 0F, 1F);
         actionLearningProgressMap.put(action, progress);
-        // FIXME sync to client
+        // FIXME sync learning progress to client
     }
 
     @Override
@@ -490,7 +504,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         consumeStamina(200);
     }
 
-    // FIXME (!) (resolve) save, copy & clear new resolve values
+    // FIXME (!!) (resolve) save, copy & clear new resolve values
     @Override
     public CompoundNBT writeNBT() {
         CompoundNBT cnbt = super.writeNBT();

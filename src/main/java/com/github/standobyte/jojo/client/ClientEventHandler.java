@@ -235,7 +235,7 @@ public class ClientEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void cancelHandRender(RenderHandEvent event) {
-        if (ActionsOverlayGui.getInstance().areBothClicksIntercepted()) {
+        if (ActionsOverlayGui.getInstance().shouldCancelHandRender(event.getHand())) {
             event.setCanceled(true);
         }
     }

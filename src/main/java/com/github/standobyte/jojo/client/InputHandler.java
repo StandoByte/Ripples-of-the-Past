@@ -355,7 +355,7 @@ public class InputHandler {
         boolean actionClick = !actionsOverlay.noActionSelected(actionType)
                 || key == ActionKey.STAND_BLOCK && power != null && !power.getAbilities().isEmpty();
         if (!actionClick) {
-            if (mc.player.hasEffect(ModEffects.STUN.get()) && event != null) {
+            if (event != null && mc.player.hasEffect(ModEffects.STUN.get())) {
                 event.setCanceled(true);
             }
             return;
@@ -389,6 +389,11 @@ public class InputHandler {
             }
             if (actionsOverlay.isSelectedActionHeld(actionType)) {
                 heldKeys.put(power, key);
+            }
+        }
+        else {
+            if (event != null && mc.player.hasEffect(ModEffects.STUN.get())) {
+                event.setCanceled(true);
             }
         }
         if (leftClickedBlock) {
@@ -482,9 +487,9 @@ public class InputHandler {
         if (mc.player.isOnGround()) {
             // FIXME (!!) (dash) more dash checks (summoned stand, stand is following player, stand task, leap cd, stun, on ground, maybe some sprint checks, etc.)
             MovementInput input = event.getMovementInput();
-            leftDash.tick(input.left, mc.player);
-            rightDash.tick(input.right, mc.player);
-            backDash.tick(input.down, mc.player);
+            leftDash.inputUpdate(input.left, mc.player);
+            rightDash.inputUpdate(input.right, mc.player);
+            backDash.inputUpdate(input.down, mc.player);
         }
     }
     
@@ -516,11 +521,11 @@ public class InputHandler {
             this.yRot = yRot;
         }
         
-        private void tick(boolean input, ClientPlayerEntity player) {
+        private void inputUpdate(boolean keyPress, ClientPlayerEntity player) {
             if (triggerTime > 0) {
                 triggerTime--;
             }
-            if (input) {
+            if (keyPress) {
                 if (triggerTime <= 0) {
                     triggerTime = 7;
                 }
@@ -529,7 +534,7 @@ public class InputHandler {
                     triggerTime = 0;
                 }
             }
-            triggerGap = !input;
+            triggerGap = !keyPress;
         }
     }
 }

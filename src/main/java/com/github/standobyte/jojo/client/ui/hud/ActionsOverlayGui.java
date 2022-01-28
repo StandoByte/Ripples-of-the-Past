@@ -44,6 +44,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.settings.AttackIndicatorStatus;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.ColorHelper;
+import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.RayTraceResult;
@@ -90,8 +91,8 @@ public class ActionsOverlayGui extends AbstractGui {
     private boolean attackSelection;
     private boolean abilitySelection;
     
-    private boolean attackAvailable;
-    private boolean abilityAvailable;
+    private boolean attackNoHand;
+    private boolean abilityNoHand;
     
     private ActionsOverlayGui(Minecraft mc) {
         this.mc = mc;
@@ -173,8 +174,8 @@ public class ActionsOverlayGui extends AbstractGui {
         updateElementPositions(barsPosConfig, hotbarsPosConfig, screenWidth, screenHeight);
 
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
-            attackAvailable = false;
-            abilityAvailable = false;
+            attackNoHand = false;
+            abilityNoHand = false;
             
             RenderSystem.enableRescaleNormal();
             RenderSystem.enableBlend();
@@ -448,12 +449,13 @@ public class ActionsOverlayGui extends AbstractGui {
             boolean rightTarget = power.checkTargetType(action, mouseTarget).isPositive();
             mode.getTargetIcon(hotbar).update(action.getTargetRequirement(), rightTarget);
             boolean available = rightTarget && power.checkRequirements(action, mouseTarget, false).isPositive();
+            boolean noHand = available; // FIXME (!!) item predicate
             switch (hotbar) {
             case ATTACK:
-                attackAvailable = available;
+                attackNoHand = noHand;
                 break;
             case ABILITY:
-                abilityAvailable = available;
+                abilityNoHand = noHand;
                 break;
             }
             return available;
@@ -463,8 +465,14 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    public boolean areBothClicksIntercepted() {
-        return attackAvailable && abilityAvailable;
+    public boolean shouldCancelHandRender(Hand hand) {
+        switch (hand) {
+        case OFF_HAND:
+            return abilityNoHand;
+        case MAIN_HAND:
+            return attackNoHand && abilityNoHand;
+        }
+        return false;
     }
     
     private void fillRect(BufferBuilder bufferBuilder, int x, double y, int width, double height, int red, int green, int blue, int alpha) {
