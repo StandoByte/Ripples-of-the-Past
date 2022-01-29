@@ -66,15 +66,29 @@ public class ClientEventHandler {
     private ResourceLocation currentShader;
     private static final ResourceLocation SHADER_TIME_STOP = new ResourceLocation("shaders/post/desaturate.json");
     private static final ResourceLocation[] SHADERS_HUE_SHIFT = {
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift1.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift2.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift3.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift4.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift5.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift6.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift7.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift8.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift9.json"),
             new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift10.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift20.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift30.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift40.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift50.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift60.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift70.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift80.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift90.json")
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift11.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip0.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip1.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip2.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip3.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip4.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip5.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip6.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip7.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip8.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip9.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip10.json"),
+            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip11.json")
     };
     
     private double zoomModifier;
@@ -96,6 +110,15 @@ public class ClientEventHandler {
     
     public static ClientEventHandler getInstance() {
         return instance;
+    }
+    
+    
+    
+    // FIXME detete this
+    private static int i = 0;
+    public static void tmpHueShader() {
+        ResourceLocation shader = SHADERS_HUE_SHIFT[i++ % SHADERS_HUE_SHIFT.length];
+        Minecraft.getInstance().gameRenderer.loadEffect(shader);
     }
     
     
