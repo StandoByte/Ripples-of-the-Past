@@ -57,6 +57,8 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
                     }
                 }
             }
+            // FIXME tick stamina cost in builder (for highlighting)
+            userPower.consumeStamina(2.5F);
         }
     }
     

@@ -1,6 +1,8 @@
 package com.github.standobyte.jojo.action.actions;
 
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
@@ -32,6 +34,10 @@ public abstract class StandAction extends Action<IStandPower> {
         return true || unlockedByDefault || power.getLearningProgress(this) >= 0; // FIXME stand progression
     }
     
+    public float getStaminaCost(IStandPower stand) {
+        return 0;
+    }
+    
     @Override
     public void onClick(World world, LivingEntity user, IStandPower power) {
         if (!world.isClientSide() && !power.isActive() && autoSummonStand) {
@@ -61,7 +67,7 @@ public abstract class StandAction extends Action<IStandPower> {
             return getThis();
         }
         
-        // FIXME (!) (resolve) actions and resolve level
+        // FIXME (resolve) actions and resolve level
         public T resolveToUnlock(float resolveRatio) {
             this.resolveRatioToUnlock = MathHelper.clamp(resolveRatio, 0, 1);
             return getThis();

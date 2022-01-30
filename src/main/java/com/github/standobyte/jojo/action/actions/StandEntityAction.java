@@ -23,6 +23,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public abstract class StandEntityAction extends StandAction {
+    private final float staminaCost;
     protected final int standWindupDuration;
     protected final int standPerformDuration;
     protected final int standRecoveryDuration;
@@ -40,6 +41,7 @@ public abstract class StandEntityAction extends StandAction {
     
     public StandEntityAction(StandEntityAction.AbstractBuilder<?> builder) {
         super(builder);
+        this.staminaCost = builder.staminaCost;
         this.standWindupDuration = builder.standWindupDuration;
         this.standPerformDuration = builder.standPerformDuration;
         this.standRecoveryDuration = builder.standRecoveryDuration;
@@ -64,6 +66,9 @@ public abstract class StandEntityAction extends StandAction {
         if (power.isActive()) {
             StandEntity stand = (StandEntity) power.getStandManifestation();
             ActionConditionResult checkStand = checkStandConditions(stand, power, target);
+            if (stand.isArmsOnlyMode() && !allowArmsOnly()) {
+                return ActionConditionResult.NEGATIVE;
+            }
             if (!checkStand.isPositive()) {
                 return checkStand;
             }
@@ -115,6 +120,11 @@ public abstract class StandEntityAction extends StandAction {
     }
     
     @Override
+    public float getStaminaCost(IStandPower stand) {
+        return staminaCost;
+    }
+    
+    @Override
     public void startedHolding(World world, LivingEntity user, IStandPower power, ActionTarget target, boolean requirementsFulfilled) {
         if (!world.isClientSide() && requirementsFulfilled) {
             invokeForStand(power, stand -> setAction(power, stand, 
@@ -138,12 +148,10 @@ public abstract class StandEntityAction extends StandAction {
     protected final void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             invokeForStand(power, stand -> {
-                if (!stand.isArmsOnlyMode() || allowArmsOnly()) {
-                    int windupTicks = getStandWindupTicks(power, stand);
-                    int ticks = windupTicks > 0 ? windupTicks : getStandActionTicks(power, stand);
-                    Phase phase = windupTicks > 0 ? Phase.WINDUP : Phase.PERFORM;
-                    setAction(power, stand, ticks, phase, target);
-                }
+                int windupTicks = getStandWindupTicks(power, stand);
+                int ticks = windupTicks > 0 ? windupTicks : getStandActionTicks(power, stand);
+                Phase phase = windupTicks > 0 ? Phase.WINDUP : Phase.PERFORM;
+                setAction(power, stand, ticks, phase, target);
             });
         }
     }
@@ -260,6 +268,7 @@ public abstract class StandEntityAction extends StandAction {
     }
     
     protected abstract static class AbstractBuilder<T extends StandEntityAction.AbstractBuilder<T>> extends StandAction.AbstractBuilder<T> {
+        private float staminaCost;
         private int standWindupDuration = 0;
         private int standPerformDuration = 1;
         private int standRecoveryDuration = 0;
@@ -274,6 +283,11 @@ public abstract class StandEntityAction extends StandAction {
         private StandRelativeOffset userOffsetArmsOnly = null;
         private boolean enablePhysics = true;
         private Supplier<SoundEvent> standSoundSupplier = () -> null;
+
+        public T staminaCost(float staminaCost) {
+            this.staminaCost = staminaCost;
+            return getThis();
+        }
 
         @Deprecated
         @Override

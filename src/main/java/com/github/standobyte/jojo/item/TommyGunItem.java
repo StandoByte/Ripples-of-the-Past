@@ -3,7 +3,6 @@ package com.github.standobyte.jojo.item;
 import java.util.Random;
 import java.util.UUID;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.damaging.projectile.TommyGunBulletEntity;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -41,7 +40,6 @@ public class TommyGunItem extends Item {
 
     @Override
     public void onUseTick(World world, LivingEntity entity, ItemStack stack, int remainingTicks) {
-        JojoMod.LOGGER.debug(remainingTicks);
         int ammo = getAmmo(stack);
         int t = remainingTicks % 12;
         boolean shotTick = t == 0 || t == 2 || t == 4 || t == 5 || t == 7 || t == 9 || t == 11;
@@ -50,23 +48,21 @@ public class TommyGunItem extends Item {
             return;
         }
         if (!world.isClientSide()) {
-            JojoMod.LOGGER.debug(remainingTicks + ", " + getUseDuration(stack) + ", " + ammo + ", " + josephVoiceLine(entity));
             if (remainingTicks == getUseDuration(stack) && ammo == MAX_AMMO && josephVoiceLine(entity)) {
                 JojoModUtil.sayVoiceLine(entity, ModSounds.JOSEPH_SCREAM_SHOOTING.get());
             }
             if (ammo > 0) {
                 if (shotTick) {
                     TommyGunBulletEntity bullet = new TommyGunBulletEntity(entity, world);
-                    bullet.shootFromRotation(entity, 20F, 0); // FIXME (!!!!) bullets seem to fly to another direction on such high velocity
+                    bullet.shootFromRotation(entity, 20F, 0);
                     world.addFreshEntity(bullet);
                     consumeAmmo(stack);
-                    JojoMod.LOGGER.debug("pew");
                     entity.playSound(ModSounds.TOMMY_GUN_SHOT.get(), 1.0F, 1.0F);
-                    // FIXME (!!) some sort of particle
+                    // FIXME (!!!) sound file FIXME some sort of particle
                 }
             }
             else {
-                JojoMod.LOGGER.debug("no ammo");
+             // FIXME (!!!) sound file
                 entity.playSound(ModSounds.TOMMY_GUN_NO_AMMO.get(), 1.0F, 1.0F);
                 entity.releaseUsingItem();
             }

@@ -13,11 +13,11 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
-// FIXME (!) smth like the voice line system for stands
+// FIXME smth like the voice line system for stands
 public class StandEntityLightAttack extends StandEntityAction {
 
     public StandEntityLightAttack(StandEntityAction.Builder builder) {
-        super(builder.standAutoSummonMode(AutoSummonMode.ONE_ARM).standUserSlowDownFactor(1.0F)
+        super(builder.standAutoSummonMode(AutoSummonMode.ONE_ARM).staminaCost(20F).standUserSlowDownFactor(1.0F)
                 .defaultStandOffsetFromUser().standOffsetFromUser(-0.75, 0.75)
                 .standTakesCrosshairTarget().standPose(StandPose.LIGHT_ATTACK));
     }

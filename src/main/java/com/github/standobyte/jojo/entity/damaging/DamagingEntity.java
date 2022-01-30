@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.entity.damaging;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.util.JojoModUtil;
@@ -141,7 +140,6 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     }
     
     protected boolean hurtTarget(Entity target, DamageSource dmgSource, float dmgAmount) {
-        if (target instanceof LivingEntity) JojoMod.LOGGER.debug(((LivingEntity) target).getHealth());
         return ModDamageSources.hurtThroughInvulTicks(target, dmgSource, dmgAmount);
     }
     
