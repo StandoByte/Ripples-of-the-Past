@@ -16,8 +16,8 @@ public class HierophantGreenGrapple extends StandEntityAction {
     }
 
     @Override
-    public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
-        if (!world.isClientSide() && ticks == 0) {
+    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {
+        if (!world.isClientSide()) {
             HGGrapplingStringEntity string = new HGGrapplingStringEntity(world, standEntity, userPower);
             if (isShiftVariation()) {
                 string.setBindEntities(true);

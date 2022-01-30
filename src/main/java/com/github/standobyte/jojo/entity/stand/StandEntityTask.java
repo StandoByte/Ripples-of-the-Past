@@ -34,7 +34,7 @@ public class StandEntityTask {
     }
     
     void tick(IStandPower standPower, StandEntity standEntity) {
-        if (ticksLeft == startingTicks && phase == StandEntityAction.Phase.PERFORM) {
+        if (ticksLeft == 1 && phase == StandEntityAction.Phase.PERFORM) {
             action.standPerform(standEntity.level, standEntity, standPower, standEntity.getTaskTarget());
         }
         switch (phase) {
@@ -102,6 +102,7 @@ public class StandEntityTask {
         this.offsetFromUser = offset;
     }
     
+    // FIXME (!!!!) isn't updated quickly enough FIXME (!!!!) glitches when the target is too close
     @Nullable
     StandRelativeOffset getOffsetFromUser() {
         return offsetFromUser;

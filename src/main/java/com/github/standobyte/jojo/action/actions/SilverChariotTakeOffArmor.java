@@ -32,8 +32,8 @@ public class SilverChariotTakeOffArmor extends StandEntityAction {
     }
     
     @Override
-    public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
-        if (!world.isClientSide() && ticks == 0) {
+    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {
+        if (!world.isClientSide()) {
             if (standEntity instanceof SilverChariotEntity) {
                 SilverChariotEntity chariot = (SilverChariotEntity) standEntity;
                 chariot.setArmor(!chariot.hasArmor());

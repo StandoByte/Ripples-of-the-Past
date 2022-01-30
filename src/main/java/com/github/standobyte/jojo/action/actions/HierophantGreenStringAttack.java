@@ -16,8 +16,8 @@ public class HierophantGreenStringAttack extends StandEntityAction {
     }
     
     @Override
-    public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
-        if (!world.isClientSide() && ticks == 0) {
+    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {
+        if (!world.isClientSide()) {
             boolean shift = isShiftVariation();
             int n = shift ? 4 : 7;
             for (int i = 0; i < n; i++) {
