@@ -14,7 +14,8 @@ import net.minecraft.world.World;
 public class StandEntityHeavyAttack extends StandEntityAction {
 
     public StandEntityHeavyAttack(StandEntityAction.Builder builder) {
-        super(builder.standPose(StandPose.HEAVY_ATTACK).standOffsetFromUser(-0.75, 0.75).standTakesCrosshairTarget(TargetType.ENTITY));
+        super(builder.standPose(StandPose.HEAVY_ATTACK).staminaCost(75F)
+                .standOffsetFromUser(-0.75, 0.75).standTakesCrosshairTarget(TargetType.ENTITY));
     }
 
     @Override

@@ -222,7 +222,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     private static final float RESOLVE_DMG_REDUCTION = 0.5F;
     private static final float RESOLVE_EFFECT_DMG_REDUCTION = 0.9F;
     private static final float RESOLVE_FOR_DMG_POINT = 1F;
-    private static final float RESOLVE_LIMIT_FOR_DMG_POINT_TAKEN = 20F; // FIXME (!) (resolve) increase from resolve level
+    private static final float RESOLVE_LIMIT_FOR_DMG_POINT_TAKEN = 20F; // FIXME (resolve) increase from resolve level?
     private static final float RESOLVE_UNDER_LIMIT_MULTIPLIER = 20F;
     private static final float RESOLVE_LIMIT_DECAY = 4F;
     private static final int RESOLVE_LIMIT_NO_DECAY_TICKS = 100;
@@ -299,7 +299,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (usesResolve()) {
             this.resolveLevel = level;
             if (!user.level.isClientSide() && hasPower()) {
-                // FIXME (!) unlock new actions
+                // FIXME unlock new actions
                 getType().onNewResolveLevel(this);
             }
         }

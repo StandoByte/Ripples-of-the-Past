@@ -11,7 +11,6 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
@@ -80,7 +79,6 @@ import net.minecraft.util.HandSide;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.MathHelper;
@@ -923,6 +921,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         if (!level.isClientSide()) {
             if (stopTask(task.getAction(), false) && getCurrentTask() == null) {
                 entityData.set(CURRENT_TASK, Optional.of(task));
+                userPower.consumeStamina(task.getAction().getStaminaCost(userPower));
                 return true;
             }
             else {
@@ -1046,7 +1045,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             addComboMeter(0.007F, COMBO_TICKS);
         }
 
-        // FIXME (!) precision: expand the hitbox of smaller entities more
+        // FIXME precision: expand the hitbox of smaller entities more
         RayTraceResult target = JojoModUtil.rayTrace(this, getAttributeValue(ForgeMod.REACH_DISTANCE.get()), 
                 entity -> !(entity instanceof LivingEntity) || canAttack((LivingEntity) entity));
         switch (target.getType()) {
@@ -1273,7 +1272,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 return true;
             }
         }
-        JojoMod.LOGGER.debug(Util.getMillis() + ", " + damage);
         boolean attacked = hurtTarget(target, dmgSource, damage);
         if (attacked) {
             if (livingTarget != null) {

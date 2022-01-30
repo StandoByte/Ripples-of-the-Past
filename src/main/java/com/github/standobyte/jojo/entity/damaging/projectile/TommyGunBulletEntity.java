@@ -57,14 +57,16 @@ public class TommyGunBulletEntity extends ModdedProjectileEntity {
     
     @Override
     protected void afterBlockHit(BlockRayTraceResult blockRayTraceResult, boolean blockDestroyed) {
-        if (!blockDestroyed) {
+        if (blockDestroyed) {
+            if (!level.isClientSide()) {
+                setDeltaMovement(getDeltaMovement().scale(0.9));
+                checkHit();
+            }
+        }
+        else {
             BlockPos blockPos = blockRayTraceResult.getBlockPos();
             BlockState blockState = level.getBlockState(blockPos);
             blockSound(blockPos, blockState);
-            
-            if (!level.isClientSide()) {
-                checkHit();
-            }
         }
     }
     
