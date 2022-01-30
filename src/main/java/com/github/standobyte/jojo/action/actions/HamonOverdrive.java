@@ -22,7 +22,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
-public class HamonOverdrive extends HamonAction { // FIXME also don't send messages
+public class HamonOverdrive extends HamonAction {
 
     public HamonOverdrive(HamonAction.Builder builder) {
         super(builder);
@@ -35,6 +35,11 @@ public class HamonOverdrive extends HamonAction { // FIXME also don't send messa
             return ActionConditionResult.NEGATIVE;
         }
         return ActionConditionResult.POSITIVE;
+    }
+    
+    @Override
+    public boolean sendsConditionMessage() {
+        return false;
     }
 
     @Override

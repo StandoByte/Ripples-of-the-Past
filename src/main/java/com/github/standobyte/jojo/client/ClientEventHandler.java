@@ -272,17 +272,20 @@ public class ClientEventHandler {
                     if (power.isActionOnCooldown(ModActions.HAMON_ZOOM_PUNCH.get())) {
                         event.setCanceled(true);
                     }
-                    else if (ActionsOverlayGui.getInstance().getSelectedAction(ActionType.ATTACK) == ModActions.JONATHAN_OVERDRIVE_BARRAGE.get()) {
-                        FirstPersonRenderer renderer = mc.getItemInHandRenderer();
-                        ClientPlayerEntity player = mc.player;
-                        Hand swingingArm = MoreObjects.firstNonNull(player.swingingArm, Hand.MAIN_HAND);
-                        float f6 = swingingArm == Hand.OFF_HAND ? player.getAttackAnim(event.getPartialTicks()) : 0.0F;
-                        float f7 = 1.0F - MathHelper.lerp(event.getPartialTicks(), ClientReflection.getOffHandHeightPrev(renderer), ClientReflection.getOffHandHeight(renderer));
-                        MatrixStack matrixStack = event.getMatrixStack();
-                        matrixStack.pushPose();
-                        ClientReflection.renderPlayerArm(matrixStack, event.getBuffers(), event.getLight(), f7, f6, player.getMainArm().getOpposite(), renderer);
-                        matrixStack.popPose();
-                        // i've won... but at what cost?
+                    else {
+                        ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
+                        if (hud.getSelectedAction(ActionType.ATTACK) == ModActions.JONATHAN_OVERDRIVE_BARRAGE.get() /* FIXME (!!) && can use it*/) {
+                            FirstPersonRenderer renderer = mc.getItemInHandRenderer();
+                            ClientPlayerEntity player = mc.player;
+                            Hand swingingArm = MoreObjects.firstNonNull(player.swingingArm, Hand.MAIN_HAND);
+                            float f6 = swingingArm == Hand.OFF_HAND ? player.getAttackAnim(event.getPartialTicks()) : 0.0F;
+                            float f7 = 1.0F - MathHelper.lerp(event.getPartialTicks(), ClientReflection.getOffHandHeightPrev(renderer), ClientReflection.getOffHandHeight(renderer));
+                            MatrixStack matrixStack = event.getMatrixStack();
+                            matrixStack.pushPose();
+                            ClientReflection.renderPlayerArm(matrixStack, event.getBuffers(), event.getLight(), f7, f6, player.getMainArm().getOpposite(), renderer);
+                            matrixStack.popPose();
+                            // i've won... but at what cost?
+                        }
                     }
                 });
             }

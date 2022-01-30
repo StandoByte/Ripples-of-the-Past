@@ -1,7 +1,9 @@
 package com.github.standobyte.jojo.action;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -13,6 +15,8 @@ import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.util.JojoModUtil;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
@@ -31,6 +35,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     private final TargetRequirement targetRequirement;
     private final double maxRangeSqEntityTarget;
     private final double maxRangeSqBlockTarget;
+    private final Map<Hand, Function<ItemStack, String>> itemChecks;
     private final boolean ignoresPerformerStun;
     private final boolean swingHand;
     private final boolean cancelsVanillaClick;
@@ -47,6 +52,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         this.targetRequirement = builder.needsBlockTarget ? builder.needsEntityTarget ? TargetRequirement.ANY : TargetRequirement.BLOCK : builder.needsEntityTarget ? TargetRequirement.ENTITY : TargetRequirement.NONE;
         this.maxRangeSqEntityTarget = builder.maxRangeSqEntityTarget;
         this.maxRangeSqBlockTarget = builder.maxRangeSqBlockTarget;
+        this.itemChecks = builder.itemChecks;
         this.ignoresPerformerStun = builder.ignoresPerformerStun;
         this.swingHand = builder.swingHand;
         this.cancelsVanillaClick = builder.cancelsVanillaClick;
@@ -79,7 +85,49 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     public ActionConditionResult checkConditions(LivingEntity user, P power, ActionTarget target) {
+        ActionConditionResult itemCheck = checkHeldItems(user);
+        if (!itemCheck.isPositive()) {
+            return itemCheck;
+        }
         return checkSpecificConditions(user, power, target);
+    }
+    
+    public boolean sendsConditionMessage() {
+        return true;
+    }
+    
+    public TargetRequirement getTargetRequirement() {
+        return targetRequirement;
+    }
+    
+    public boolean appropriateTarget(ActionTarget.TargetType targetType) {
+        return targetRequirement.checkTargetType(targetType);
+    }
+    
+    public double getMaxRangeSqEntityTarget() {
+        return maxRangeSqEntityTarget;
+    }
+    
+    public double getMaxRangeSqBlockTarget() {
+        return maxRangeSqBlockTarget;
+    }
+    
+    protected ActionConditionResult checkHeldItems(LivingEntity user) {
+        for (Map.Entry<Hand, Function<ItemStack, String>> check : itemChecks.entrySet()) {
+            String message = check.getValue().apply(user.getItemInHand(check.getKey()));
+            if (message != null) {
+                return conditionMessage(message);
+            }
+        }
+        return ActionConditionResult.POSITIVE;
+    }
+    
+    public boolean ignoresPerformerStun() {
+        return ignoresPerformerStun;
+    }
+    
+    public boolean cancelHandRender(LivingEntity user, Hand hand) {
+        return !itemChecks.containsKey(hand) || itemChecks.get(hand).apply(user.getItemInHand(hand)) != null;
     }
     
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, P power, ActionTarget target) {
@@ -148,26 +196,6 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     public int getCooldown(P power, int ticksHeld) {
         return getCooldownValue();
-    }
-    
-    public TargetRequirement getTargetRequirement() {
-        return targetRequirement;
-    }
-    
-    public boolean appropriateTarget(ActionTarget.TargetType targetType) {
-        return targetRequirement.checkTargetType(targetType);
-    }
-    
-    public double getMaxRangeSqEntityTarget() {
-        return maxRangeSqEntityTarget;
-    }
-    
-    public double getMaxRangeSqBlockTarget() {
-        return maxRangeSqBlockTarget;
-    }
-
-    public boolean ignoresPerformerStun() {
-        return ignoresPerformerStun;
     }
 
     public boolean swingHand() {
@@ -278,6 +306,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         private static final double MAX_RANGE_BLOCK_TARGET = 8.0D;
         private double maxRangeSqEntityTarget = MAX_RANGE_ENTITY_TARGET * MAX_RANGE_ENTITY_TARGET;
         private double maxRangeSqBlockTarget = MAX_RANGE_BLOCK_TARGET * MAX_RANGE_BLOCK_TARGET;
+        private Map<Hand, Function<ItemStack, String>> itemChecks = new EnumMap<>(Hand.class);
         private boolean ignoresPerformerStun = false;
         private boolean swingHand = false;
         private boolean cancelsVanillaClick = true;
@@ -309,6 +338,15 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
             maxRangeBlockTarget = MathHelper.clamp(maxRangeBlockTarget, 0, MAX_RANGE_BLOCK_TARGET);
             this.maxRangeSqBlockTarget = maxRangeBlockTarget * maxRangeBlockTarget;
             return getThis();
+        }
+        
+        public T itemCheck(Hand hand, Predicate<ItemStack> itemCheck, String message) {
+            itemChecks.put(hand, itemStack -> itemCheck.test(itemStack) ? null : message);
+            return getThis();
+        }
+        
+        public T emptyMainHand() {
+            return itemCheck(Hand.MAIN_HAND, ItemStack::isEmpty, "hand");
         }
         
         public T ignoresPerformerStun() {

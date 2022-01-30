@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.action.actions;
 
-import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
@@ -29,14 +28,6 @@ public class HamonHealing extends HamonAction {
 
     public HamonHealing(HamonAction.Builder builder) {
         super(builder);
-    }
-    
-    @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
-        if (!user.getMainHandItem().isEmpty()) {
-            return conditionMessage("hand");
-        }
-        return ActionConditionResult.POSITIVE;
     }
     
     @Override

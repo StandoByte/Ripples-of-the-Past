@@ -91,8 +91,10 @@ public class ActionsOverlayGui extends AbstractGui {
     private boolean attackSelection;
     private boolean abilitySelection;
     
-    private boolean attackNoHand;
-    private boolean abilityNoHand;
+    private boolean attackNoMainHand;
+    private boolean attackNoOffHand;
+    private boolean abilityNoMainHand;
+    private boolean abilityNoOffHand;
     
     private ActionsOverlayGui(Minecraft mc) {
         this.mc = mc;
@@ -174,8 +176,10 @@ public class ActionsOverlayGui extends AbstractGui {
         updateElementPositions(barsPosConfig, hotbarsPosConfig, screenWidth, screenHeight);
 
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
-            attackNoHand = false;
-            abilityNoHand = false;
+            attackNoMainHand = false;
+            attackNoOffHand = true;
+            abilityNoMainHand = false;
+            abilityNoOffHand = false;
             
             RenderSystem.enableRescaleNormal();
             RenderSystem.enableBlend();
@@ -345,7 +349,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 // highlight when hotbar key is pressed
                 boolean highlightSelection = actionType == ActionType.ATTACK ? attackSelection : abilitySelection;
                 if (highlightSelection) {
-                    int highlightAlpha = (int) (ClientUtil.getHighlightAlpha(tickCount + partialTick, 50F, 25F, 0.25F, 0.5F) * 255F);
+                    int highlightAlpha = (int) (ClientUtil.getHighlightAlpha(tickCount + partialTick, 40F, 40F, 0.25F, 0.5F) * 255F);
                     RenderSystem.disableDepthTest();
                     RenderSystem.disableTexture();
                     Tessellator tessellator = Tessellator.getInstance();
@@ -449,13 +453,17 @@ public class ActionsOverlayGui extends AbstractGui {
             boolean rightTarget = power.checkTargetType(action, mouseTarget).isPositive();
             mode.getTargetIcon(hotbar).update(action.getTargetRequirement(), rightTarget);
             boolean available = rightTarget && power.checkRequirements(action, mouseTarget, false).isPositive();
-            boolean noHand = available; // FIXME (!!) item predicate
+            boolean noHand = available && action.cancelsVanillaClick();
+            boolean noMainHand = noHand && action.cancelHandRender(power.getUser(), Hand.MAIN_HAND);
+            boolean noOffHand = noHand && action.cancelHandRender(power.getUser(), Hand.OFF_HAND);
             switch (hotbar) {
             case ATTACK:
-                attackNoHand = noHand;
+                attackNoMainHand = noMainHand;
+                attackNoOffHand = noHand ? action.cancelHandRender(power.getUser(), Hand.OFF_HAND) : true;
                 break;
             case ABILITY:
-                abilityNoHand = noHand;
+                abilityNoMainHand = noMainHand;
+                abilityNoOffHand = noOffHand;
                 break;
             }
             return available;
@@ -468,9 +476,9 @@ public class ActionsOverlayGui extends AbstractGui {
     public boolean shouldCancelHandRender(Hand hand) {
         switch (hand) {
         case OFF_HAND:
-            return abilityNoHand;
+            return attackNoOffHand && abilityNoOffHand;
         case MAIN_HAND:
-            return attackNoHand && abilityNoHand;
+            return attackNoMainHand && abilityNoMainHand;
         }
         return false;
     }

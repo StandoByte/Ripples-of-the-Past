@@ -11,7 +11,6 @@ import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
 
 import net.minecraft.block.LeavesBlock;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
 public class HamonLifeMagnetism extends HamonAction {
@@ -22,10 +21,6 @@ public class HamonLifeMagnetism extends HamonAction {
     
     @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
-        ItemStack heldItemStack = user.getMainHandItem();
-        if (!heldItemStack.isEmpty()) {
-            return conditionMessage("hand");
-        }
         if (target.getType() != TargetType.BLOCK
                 || !(user.level.getBlockState(target.getBlockPos()).getBlock() instanceof LeavesBlock)) {
             return conditionMessage("leaves");

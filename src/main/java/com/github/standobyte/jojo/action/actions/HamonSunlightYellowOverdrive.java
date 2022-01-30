@@ -12,10 +12,9 @@ import com.github.standobyte.jojo.util.damage.ModDamageSources;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
-public class HamonSunlightYellowOverdrive extends HamonAction { // FIXME don't send messages
+public class HamonSunlightYellowOverdrive extends HamonAction {
 
     public HamonSunlightYellowOverdrive(HamonAction.Builder builder) {
         super(builder);
@@ -23,10 +22,6 @@ public class HamonSunlightYellowOverdrive extends HamonAction { // FIXME don't s
     
     @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
-        ItemStack heldItemStack = user.getMainHandItem();
-        if (!heldItemStack.isEmpty()) {
-            return ActionConditionResult.NEGATIVE;
-        }
         HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
         if (!hamon.isSkillLearned(HamonSkill.SUNLIGHT_YELLOW_OVERDRIVE)) {
             return ActionConditionResult.NEGATIVE;
@@ -39,6 +34,11 @@ public class HamonSunlightYellowOverdrive extends HamonAction { // FIXME don't s
             }
         }
         return ActionConditionResult.NEGATIVE;
+    }
+    
+    @Override
+    public boolean sendsConditionMessage() {
+        return false;
     }
 
     @Override
