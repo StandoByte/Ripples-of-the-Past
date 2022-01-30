@@ -40,6 +40,7 @@ import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.MRC
 import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.MRCrossfireHurricaneSpecialRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.MRFireballRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.SCRapierRenderer;
+import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.TommyGunBulletRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.stretching.ZoomPunchRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.itemprojectile.BladeHatRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.itemprojectile.ClackersRenderer;
@@ -110,6 +111,7 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SATIPOROJA_SCARF.get(), SatiporojaScarfRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SATIPOROJA_SCARF_BINDING.get(), SatiporojaScarfBindingRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SNAKE_MUFFLER.get(), SnakeMufflerRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.TOMMY_GUN_BULLET.get(), TommyGunBulletRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.KNIFE.get(), KnifeRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STAND_ARROW.get(), StandArrowRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SOUL.get(), SoulRenderer::new);
