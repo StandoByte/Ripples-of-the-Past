@@ -10,7 +10,6 @@ import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
@@ -22,7 +21,6 @@ public class HamonWallClimbing extends HamonAction {
     
     @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
-        ItemStack heldItemStack = user.getMainHandItem();
         if (!user.horizontalCollision) {
             if (user.level.isClientSide()) {
                 if (user instanceof PlayerEntity) {
@@ -32,9 +30,6 @@ public class HamonWallClimbing extends HamonAction {
             else if (!(user instanceof PlayerEntity)) {
                 return ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
             }
-        }
-        if (!heldItemStack.isEmpty()) {
-            return conditionMessage("hand");
         }
         return ActionConditionResult.POSITIVE;
     }

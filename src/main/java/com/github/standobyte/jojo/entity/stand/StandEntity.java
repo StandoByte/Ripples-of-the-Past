@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
@@ -79,6 +80,7 @@ import net.minecraft.util.HandSide;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.MathHelper;
@@ -783,6 +785,21 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                         1
                         : 0.1 + Math.min((double) (userPower.getStamina() / userPower.getMaxStamina()) * 1.8, 0.9)
                 : 1;
+
+        if (!level.isClientSide()) {
+            updatePosition(user);
+            swings.broadcastSwings(this);
+            
+            if (noComboDecayTicks > 0) {
+                noComboDecayTicks--;
+            }
+            else {
+                StandEntityAction currentAction = getCurrentTaskAction();
+                if (currentAction == null || !currentAction.isCombatAction()) {
+                    setComboMeter(Math.max(getComboMeter() - COMBO_DECAY, 0));
+                }
+            }
+        }
         
         if (summonLockTicks > 0) {
             summonLockTicks--;
@@ -802,25 +819,13 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             }
         }
 
+
         if (!level.isClientSide()) {
             if (user != null) {
                 setHealth(user.isAlive() ? user.getHealth() : 0);
             }
             else if (requiresUser()) {
                 setHealth(0);
-            }
-            
-            updatePosition(user);
-            swings.broadcastSwings(this);
-            
-            if (noComboDecayTicks > 0) {
-                noComboDecayTicks--;
-            }
-            else {
-                StandEntityAction currentAction = getCurrentTaskAction();
-                if (currentAction == null || !currentAction.isCombatAction()) {
-                    setComboMeter(Math.max(getComboMeter() - COMBO_DECAY, 0));
-                }
             }
         }
         else {
@@ -839,7 +844,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
 
 
-    public void updatePosition(LivingEntity user) {
+    private void updatePosition(LivingEntity user) {
         if (user != null) {
             if (isFollowingUser()) {
                 Vector3d offset = getOffsetFromUser().getAbsoluteVec(getDefaultOffsetFromUser(), yRot);
@@ -1265,6 +1270,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 return true;
             }
         }
+        JojoMod.LOGGER.debug(Util.getMillis() + ", " + damage);
         boolean attacked = hurtTarget(target, dmgSource, damage);
         if (attacked) {
             if (livingTarget != null) {

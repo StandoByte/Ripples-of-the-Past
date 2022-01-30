@@ -61,6 +61,8 @@ import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
 import com.github.standobyte.jojo.util.TimeHandler;
 
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.Hand;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -76,10 +78,10 @@ public class ModActions {
             (Class<Action<?>>) ((Class<?>) Action.class), JojoMod.MOD_ID);
     
     public static final RegistryObject<HamonAction> HAMON_OVERDRIVE = ACTIONS.register("hamon_overdrive", 
-            () -> new HamonOverdrive(new HamonAction.Builder().energyCost(750F)));
-    
+            () -> new HamonOverdrive(new HamonAction.Builder().energyCost(750F))); // FIXME (!!!!!!) itemstack condition (empty hand or sword with MSO)
+     
     public static final RegistryObject<HamonAction> HAMON_SUNLIGHT_YELLOW_OVERDRIVE = ACTIONS.register("hamon_sunlight_yellow_overdrive", 
-            () -> new HamonSunlightYellowOverdrive(new HamonAction.Builder().energyCost(1500F)
+            () -> new HamonSunlightYellowOverdrive(new HamonAction.Builder().energyCost(1500F).emptyMainHand()
                     .shout(Technique.JONATHAN, ModSounds.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE)
                     .shout(Technique.ZEPPELI, ModSounds.ZEPPELI_SUNLIGHT_YELLOW_OVERDRIVE)
                     .shout(Technique.JOSEPH, ModSounds.JOSEPH_SUNLIGHT_YELLOW_OVERDRIVE)
@@ -87,33 +89,33 @@ public class ModActions {
                     .shiftVariationOf(HAMON_OVERDRIVE)));
     
     public static final RegistryObject<HamonAction> HAMON_SENDO_OVERDRIVE = ACTIONS.register("hamon_sendo_overdrive", 
-            () -> new HamonSendoOverdrive(new HamonAction.Builder().energyCost(1000F).swingHand().needsBlockTarget()
+            () -> new HamonSendoOverdrive(new HamonAction.Builder().energyCost(1000F).emptyMainHand().swingHand().needsBlockTarget()
                     .shout(Technique.JONATHAN, ModSounds.JONATHAN_SENDO_OVERDRIVE)));
     
     public static final RegistryObject<HamonAction> HAMON_ZOOM_PUNCH = ACTIONS.register("hamon_zoom_punch", 
-            () -> new HamonZoomPunch(new HamonAction.Builder().energyCost(800F).cooldown(14).shout(Technique.JONATHAN, ModSounds.JONATHAN_ZOOM_PUNCH)
-                    .shout(Technique.ZEPPELI, ModSounds.ZEPPELI_ZOOM_PUNCH).shout(Technique.JOSEPH, ModSounds.JOSEPH_ZOOM_PUNCH)));
+            () -> new HamonZoomPunch(new HamonAction.Builder().energyCost(800F).cooldown(14).emptyMainHand()
+                    .shout(Technique.JONATHAN, ModSounds.JONATHAN_ZOOM_PUNCH).shout(Technique.ZEPPELI, ModSounds.ZEPPELI_ZOOM_PUNCH).shout(Technique.JOSEPH, ModSounds.JOSEPH_ZOOM_PUNCH)));
 
     public static final RegistryObject<HamonAction> HAMON_SPEED_BOOST = ACTIONS.register("hamon_speed_boost", 
             () -> new HamonSpeedBoost(new HamonAction.Builder().energyCost(600F)));
     
     public static final RegistryObject<HamonAction> HAMON_PLANT_INFUSION = ACTIONS.register("hamon_plant_infusion", 
-            () -> new HamonOrganismInfusion(new HamonAction.Builder().energyCost(200F).swingHand().needsBlockTarget()));
+            () -> new HamonOrganismInfusion(new HamonAction.Builder().energyCost(200F).emptyMainHand().swingHand().needsBlockTarget()));
     
     public static final RegistryObject<HamonAction> HAMON_ORGANISM_INFUSION = ACTIONS.register("hamon_organism_infusion", 
-            () -> new HamonOrganismInfusion(new HamonAction.Builder().energyCost(200F).swingHand().needsBlockTarget().needsEntityTarget()));
+            () -> new HamonOrganismInfusion(new HamonAction.Builder().energyCost(200F).emptyMainHand().swingHand().needsBlockTarget().needsEntityTarget()));
     
     public static final RegistryObject<HamonAction> HAMON_HEALING = ACTIONS.register("hamon_healing", 
-            () -> new HamonHealing(new HamonAction.Builder().energyCost(670F).swingHand()));
+            () -> new HamonHealing(new HamonAction.Builder().energyCost(670F).emptyMainHand().swingHand()));
     
     public static final RegistryObject<HamonAction> HAMON_WALL_CLIMBING = ACTIONS.register("hamon_wall_climbing", 
-            () -> new HamonWallClimbing(new HamonAction.Builder().holdType().holdEnergyCost(15F)));
+            () -> new HamonWallClimbing(new HamonAction.Builder().holdType().holdEnergyCost(15F).emptyMainHand()));
     
     public static final RegistryObject<HamonAction> HAMON_DETECTOR = ACTIONS.register("hamon_detector", 
             () -> new HamonDetector(new HamonAction.Builder().holdType().holdEnergyCost(7.5F).heldSlowDownFactor(0.5F)));
     
     public static final RegistryObject<HamonAction> HAMON_LIFE_MAGNETISM = ACTIONS.register("hamon_life_magnetism", 
-            () -> new HamonLifeMagnetism(new HamonAction.Builder().energyCost(200F).shout(Technique.ZEPPELI, ModSounds.ZEPPELI_LIFE_MAGNETISM_OVERDRIVE)));
+            () -> new HamonLifeMagnetism(new HamonAction.Builder().energyCost(200F).emptyMainHand().shout(Technique.ZEPPELI, ModSounds.ZEPPELI_LIFE_MAGNETISM_OVERDRIVE)));
     
     public static final RegistryObject<HamonAction> HAMON_PROJECTILE_SHIELD = ACTIONS.register("hamon_projectile_shield", 
             () -> new HamonProjectileShield(new HamonAction.Builder().holdType().holdEnergyCost(30F).heldSlowDownFactor(0.5F).shout(Technique.JOSEPH, ModSounds.JOSEPH_BARRIER)));
@@ -122,14 +124,15 @@ public class ModActions {
             () -> new HamonRepellingOverdrive(new HamonAction.Builder().energyCost(1000F)));
 
     public static final RegistryObject<HamonAction> JONATHAN_OVERDRIVE_BARRAGE = ACTIONS.register("jonathan_overdrive_barrage", 
-            () -> new HamonOverdriveBarrage(new HamonAction.Builder().holdType().holdEnergyCost(70F).heldSlowDownFactor(0.5F).shout(ModSounds.JONATHAN_OVERDRIVE_BARRAGE)));
+            () -> new HamonOverdriveBarrage(new HamonAction.Builder().holdType().holdEnergyCost(70F).heldSlowDownFactor(0.5F)
+                    .itemCheck(Hand.MAIN_HAND, ItemStack::isEmpty, "hands").itemCheck(Hand.OFF_HAND, ItemStack::isEmpty, "hands").shout(ModSounds.JONATHAN_OVERDRIVE_BARRAGE)));
 
     public static final RegistryObject<HamonAction> JONATHAN_SCARLET_OVERDRIVE = ACTIONS.register("jonathan_scarlet_overdrive", 
-            () -> new HamonScarletOverdrive(new HamonAction.Builder().energyCost(150F)
+            () -> new HamonScarletOverdrive(new HamonAction.Builder().energyCost(150F).emptyMainHand()
                     .shout(ModSounds.JONATHAN_SCARLET_OVERDRIVE).swingHand().doNotCancelClick()));
     
     public static final RegistryObject<HamonAction> ZEPPELI_HAMON_CUTTER = ACTIONS.register("zeppeli_hamon_cutter", 
-            () -> new HamonCutter(new HamonAction.Builder().energyCost(400F).shout(ModSounds.ZEPPELI_HAMON_CUTTER)));
+            () -> new HamonCutter(new HamonAction.Builder().energyCost(400F).shout(ModSounds.ZEPPELI_HAMON_CUTTER))); // FIXME (!!!!!!) itemstack condition (either main or off hand has a potion)
     
     public static final RegistryObject<HamonAction> ZEPPELI_TORNADO_OVERDRIVE = ACTIONS.register("zeppeli_tornado_overdrive", 
             () -> new HamonTornadoOverdrive(new HamonAction.Builder().shout(ModSounds.ZEPPELI_TORNADO_OVERDRIVE).holdType().holdEnergyCost(75F)));
@@ -150,17 +153,19 @@ public class ModActions {
     
 
     public static final RegistryObject<VampirismAction> VAMPIRISM_BLOOD_DRAIN = ACTIONS.register("vampirism_blood_drain", 
-            () -> new VampirismBloodDrain(new NonStandAction.Builder().needsEntityTarget().maxRangeEntityTarget(2.0D).holdType().heldSlowDownFactor(0.5F)));
+            () -> new VampirismBloodDrain(new NonStandAction.Builder().needsEntityTarget()
+                    .maxRangeEntityTarget(2.0D).emptyMainHand().holdType().heldSlowDownFactor(0.5F)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_FREEZE = ACTIONS.register("vampirism_freeze", 
-            () -> new VampirismFreeze(new NonStandAction.Builder().maxRangeEntityTarget(2.0D).holdType().holdEnergyCost(1F).heldSlowDownFactor(0.3F)));
+            () -> new VampirismFreeze(new NonStandAction.Builder().maxRangeEntityTarget(2.0D).emptyMainHand()
+                    .holdType().holdEnergyCost(1F).heldSlowDownFactor(0.3F)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_SPACE_RIPPER_STINGY_EYES = ACTIONS.register("vampirism_space_ripper_stingy_eyes", 
             () -> new VampirismSpaceRipperStingyEyes(new NonStandAction.Builder().ignoresPerformerStun().holdType(20).holdEnergyCost(40F).heldSlowDownFactor(0.3F)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_BLOOD_GIFT = ACTIONS.register("vampirism_blood_gift", 
-            () -> new VampirismBloodGift(new NonStandAction.Builder().needsEntityTarget()
-                    .maxRangeEntityTarget(1.0D).holdToFire(60, false).holdEnergyCost(10F).heldSlowDownFactor(0.3F)));
+            () -> new VampirismBloodGift(new NonStandAction.Builder().needsEntityTarget().maxRangeEntityTarget(1.0D).emptyMainHand()
+                    .holdToFire(60, false).holdEnergyCost(10F).heldSlowDownFactor(0.3F)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_ZOMBIE_SUMMON = ACTIONS.register("vampirism_zombie_summon", 
             () -> new VampirismZombieSummon(new NonStandAction.Builder().energyCost(100F).cooldown(200)));

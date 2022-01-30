@@ -21,7 +21,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.AmbientEntity;
 import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -34,10 +33,6 @@ public class HamonOrganismInfusion extends HamonAction {
 
     @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
-        ItemStack heldItemStack = user.getMainHandItem();
-        if (!heldItemStack.isEmpty()) {
-            return conditionMessage("hand");
-        }
         switch (target.getType()) {
         case ENTITY:
             Entity entity = target.getEntity(user.level);

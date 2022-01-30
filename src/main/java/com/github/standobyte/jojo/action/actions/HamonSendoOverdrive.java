@@ -3,7 +3,6 @@ package com.github.standobyte.jojo.action.actions;
 import java.util.List;
 import java.util.Random;
 
-import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
@@ -26,14 +25,6 @@ public class HamonSendoOverdrive extends HamonAction {
 
     public HamonSendoOverdrive(HamonAction.Builder builder) {
         super(builder);
-    }
-    
-    @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
-        if (!user.getMainHandItem().isEmpty()) {
-            return conditionMessage("hand");
-        }
-        return ActionConditionResult.POSITIVE;
     }
     
     @Override

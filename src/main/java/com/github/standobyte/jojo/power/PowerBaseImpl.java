@@ -207,7 +207,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                     return true;
                 }
                 else {
-                    sendMessage(result);
+                    sendMessage(action, result);
                     return false;
                 }
             }
@@ -220,7 +220,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                     return true;
                 }
                 else {
-                    sendMessage(result);
+                    sendMessage(action, result);
                     return false;
                 }
             }
@@ -228,8 +228,8 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         return false;
     }
 
-    private void sendMessage(ActionConditionResult result) {
-        if (!user.level.isClientSide()) {
+    private void sendMessage(Action<P> action, ActionConditionResult result) {
+        if (!user.level.isClientSide() && action.sendsConditionMessage()) {
             ITextComponent message = result.getWarning();
             
             if (message != null) {
@@ -383,7 +383,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                 ActionConditionResult result = checkRequirements(heldActionData.action, target, true);
                 if (!result.isPositive() && result.shouldStopHeldAction()) {
                     stopHeldAction(false);
-                    sendMessage(result);
+                    sendMessage(heldAction, result);
                     return;
                 }
                 heldAction.onHoldTick(world, user, getThis(), heldActionData.getTicks(), target, result.isPositive());
