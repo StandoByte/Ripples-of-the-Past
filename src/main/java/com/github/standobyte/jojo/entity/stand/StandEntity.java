@@ -966,6 +966,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
     }
     
+    public boolean hasTask() {
+        return getCurrentTask() != null;
+    }
+    
     @Nullable
     protected StandEntityTask getCurrentTask() {
         return entityData.get(CURRENT_TASK).orElse(null);
