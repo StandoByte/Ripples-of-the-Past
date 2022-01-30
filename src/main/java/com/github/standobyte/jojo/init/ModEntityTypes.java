@@ -20,6 +20,7 @@ import com.github.standobyte.jojo.entity.damaging.projectile.MRCrossfireHurrican
 import com.github.standobyte.jojo.entity.damaging.projectile.MRFireballEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRFlameEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.TommyGunBulletEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGBarrierEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGGrapplingStringEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGStringEntity;
@@ -137,6 +138,10 @@ public class ModEntityTypes {
     public static final RegistryObject<EntityType<SnakeMufflerEntity>> SNAKE_MUFFLER = ENTITIES.register("snake_muffler", 
             () -> EntityType.Builder.<SnakeMufflerEntity>of(SnakeMufflerEntity::new, EntityClassification.MISC).sized(0.5F, 0.5F).noSummon()
             .build(new ResourceLocation(JojoMod.MOD_ID, "snake_muffler").toString()));
+    
+    public static final RegistryObject<EntityType<TommyGunBulletEntity>> TOMMY_GUN_BULLET = ENTITIES.register("tommy_gun_bullet", 
+            () -> EntityType.Builder.<TommyGunBulletEntity>of(TommyGunBulletEntity::new, EntityClassification.MISC).sized(0.0625F, 0.0625F).clientTrackingRange(4).setUpdateInterval(20)
+            .build(new ResourceLocation(JojoMod.MOD_ID, "tommy_gun_bullet").toString()));
     
     public static final RegistryObject<EntityType<KnifeEntity>> KNIFE = ENTITIES.register("knife", 
             () -> EntityType.Builder.<KnifeEntity>of(KnifeEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).setUpdateInterval(20)

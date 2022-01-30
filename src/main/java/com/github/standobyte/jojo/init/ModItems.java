@@ -14,6 +14,7 @@ import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StandRemoverItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
 import com.github.standobyte.jojo.item.SuperAjaStoneItem;
+import com.github.standobyte.jojo.item.TommyGunItem;
 
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.BlockItem;
@@ -59,6 +60,9 @@ public class ModItems {
 
     public static final RegistryObject<ClackersItem> CLACKERS = ITEMS.register("clackers",
             () -> new ClackersItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1)));
+
+    public static final RegistryObject<TommyGunItem> TOMMY_GUN = ITEMS.register("tommy_gun",
+            () -> new TommyGunItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1)));
 
     public static final RegistryObject<BlockItem> SLUMBERING_PILLARMAN = ITEMS.register("slumbering_pillarman", 
             () -> new BlockItem(ModBlocks.SLUMBERING_PILLARMAN.get(), new Item.Properties().rarity(Rarity.EPIC)));

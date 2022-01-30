@@ -414,11 +414,14 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         return usesResolve() ? (float) getResolveLevel() / (float) getMaxResolveLevel() : 0;
     }
     
+
+    @Deprecated
     @Override
     public int getXp() {
-        return MAX_EXP; // FIXME stand progression
+        return xp;
     }
 
+    @Deprecated
     @Override
     public void setXp(int xp) {
         xp = MathHelper.clamp(xp, 0, MAX_EXP);
