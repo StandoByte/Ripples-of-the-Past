@@ -44,21 +44,13 @@
       } 
     ]
   },
-  "clackers": {
-    "subtitle": "jojo.subtitle.run_away",
-    "sounds": [ "jojo:hamon_user/joseph_run_away" ]
+  "tommy_gun_shot": {
+    "subtitle": "jojo.subtitle.bullet_shot",
+    "sounds": [ "jojo:tommy_gun_shot" ]
   },
-  "clackers": {
-    "subtitle": "jojo.subtitle.run_away",
-    "sounds": [ "jojo:hamon_user/joseph_run_away" ]
-  },
-  "clackers": {
-    "subtitle": "jojo.subtitle.run_away",
-    "sounds": [ "jojo:hamon_user/joseph_run_away" ]
-  },
-  "clackers": {
-    "subtitle": "jojo.subtitle.run_away",
-    "sounds": [ "jojo:hamon_user/joseph_run_away" ]
+  "tommy_gun_no_ammo": {
+    "subtitle": "jojo.subtitle.tommy_gun_trigger",
+    "sounds": [ "jojo:tommy_gun_trigger" ]
   },
   "knife_throw": {
     "subtitle": "jojo.subtitle.knife_throw",
@@ -248,17 +240,17 @@
     "subtitle": "jojo.subtitle.run_away",
     "sounds": [ "jojo:hamon_user/joseph_run_away", "jojo:hamon_user/joseph_run_away_2" ]
   },
-  "joseph_run_away": {
-    "subtitle": "jojo.subtitle.run_away",
-    "sounds": [ "jojo:hamon_user/joseph_run_away" ]
+  "joseph_scream": {
+    "subtitle": "jojo.subtitle.joseph_scream",
+    "sounds": [ "jojo:hamon_user/joseph_scream" ]
   },
-  "joseph_run_away": {
-    "subtitle": "jojo.subtitle.run_away",
-    "sounds": [ "jojo:hamon_user/joseph_run_away" ]
+  "joseph_war_declaration": {
+    "subtitle": "jojo.subtitle.war_declaration",
+    "sounds": [ "jojo:hamon_user/joseph_war_declaration" ]
   },
-  "joseph_run_away": {
-    "subtitle": "jojo.subtitle.run_away",
-    "sounds": [ "jojo:hamon_user/joseph_run_away" ]
+  "joseph_shoot": {
+    "subtitle": "jojo.subtitle.shoot",
+    "sounds": [ "jojo:hamon_user/joseph_shoot" ]
   },
   "caesar_bubble_launcher": {
     "subtitle": "jojo.subtitle.bubble_launcher",
