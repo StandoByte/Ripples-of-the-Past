@@ -40,6 +40,11 @@ public final class StandEntityUnsummon extends StandEntityAction {
     }
     
     @Override
+    protected boolean allowArmsOnly() {
+        return true;
+    }
+    
+    @Override
     public boolean isCancelable(IStandPower standPower, StandEntity standEntity, Phase phase, StandEntityAction newAction) {
         return !standEntity.isArmsOnlyMode();
     }
