@@ -59,15 +59,15 @@ public class StandStatFormulas {
     }
     
     public static final float getParryTiming(double precision) {
-        return Math.min(0.05F + (float) precision * 0.4F, 1F);
+        return Math.min(0.05F + (float) precision * 0.025F, 1F);
     }
     
     
     
     public static final float getBarrageHitDamage(double strength, double precision, Random random) {
         float damage = 0.04F + (float) strength * 0.01F;
-        if (precision > 0 && random.nextDouble() < Math.min(precision, 0.5)) {
-            damage *= 1 + (float) precision * 0.5F;
+        if (precision > 0 && random.nextDouble() < Math.min(precision / 16, 0.5)) {
+            damage *= Math.min(1 + (float) precision / 32, 2);
         }
         return damage;
     }
@@ -88,7 +88,7 @@ public class StandStatFormulas {
     
     public static final float getPhysicalResistance(double durability, double strength, float blocked) {
         double resistance = MathHelper.clamp(durability * 0.01875 + strength * 0.0125, 0, 1);
-        resistance += (1 - resistance) / 2 * blocked;
+        resistance += (1 - resistance) * blocked * 0.8;
         return (float) resistance;
     }
     

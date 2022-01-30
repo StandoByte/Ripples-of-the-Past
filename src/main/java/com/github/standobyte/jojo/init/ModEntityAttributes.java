@@ -15,5 +15,5 @@ public class ModEntityAttributes {
             () -> new RangedAttribute("attribute.name.generic.max_health", 0.0, 0.0, 1024.0).setSyncable(true));
 
     public static final RegistryObject<Attribute> STAND_PRECISION = ATTRIBUTES.register("stand_precision", 
-            () -> new RangedAttribute("attribute.name.generic.max_health", 0.0, 0.0, 10.0).setSyncable(true));
+            () -> new RangedAttribute("attribute.name.generic.max_health", 0.0, 0.0, 160.0).setSyncable(true));
 }
