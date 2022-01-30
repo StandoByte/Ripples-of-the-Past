@@ -422,13 +422,20 @@ public class InputHandler {
             if (!mc.player.isPassenger()) {
                 IPower<?, ?> power = actionsOverlay.getCurrentPower();
                 if (power != null) {
-                    if (power.canLeap() && !actionSlowedDown && !standSlowedDown && input.shiftKeyDown && input.jumping) {
-                        float leapStrength = power.leapStrength();
-                        if (leapStrength > 0) {
-                            input.shiftKeyDown = false;
-                            input.jumping = false;
-                            PacketManager.sendToServer(new ClOnLeapPacket(power.getPowerClassification()));
-                            leap(mc.player, input, leapStrength);
+                    if (power.canLeap() && !actionSlowedDown && !standSlowedDown) {
+                        if (input.shiftKeyDown && input.jumping) {
+                            float leapStrength = power.leapStrength();
+                            if (leapStrength > 0) {
+                                input.shiftKeyDown = false;
+                                input.jumping = false;
+                                PacketManager.sendToServer(new ClOnLeapPacket(power.getPowerClassification()));
+                                leap(mc.player, input, leapStrength);
+                            }
+                        }
+                        if (power.getPowerClassification() == PowerClassification.STAND) {
+                            leftDash.inputUpdate(input.left, mc.player);
+                            rightDash.inputUpdate(input.right, mc.player);
+                            backDash.inputUpdate(input.down, mc.player);
                         }
                     }
                 }
@@ -482,16 +489,6 @@ public class InputHandler {
     private final DashTrigger leftDash = new DashTrigger(-90F);
     private final DashTrigger rightDash = new DashTrigger(90F);
     private final DashTrigger backDash = new DashTrigger(180F);
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void dash(InputUpdateEvent event) {
-        if (mc.player.isOnGround()) {
-            // FIXME (!!) (dash) more dash checks (summoned stand, stand is following player, stand task, leap cd, stun, on ground, maybe some sprint checks, etc.)
-            MovementInput input = event.getMovementInput();
-            leftDash.inputUpdate(input.left, mc.player);
-            rightDash.inputUpdate(input.right, mc.player);
-            backDash.inputUpdate(input.down, mc.player);
-        }
-    }
     
     private void dash(ClientPlayerEntity player, float yRot) {
         // FIXME (dash) set leap cd
