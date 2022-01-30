@@ -37,7 +37,7 @@ public class ClackersItem extends Item {
     public ClackersItem(Properties properties) {
         super(properties);
         Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
-        builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", 6.0D, AttributeModifier.Operation.ADDITION));
+        builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", 6.0, AttributeModifier.Operation.ADDITION));
         this.attributeModifiers = builder.build();
     }
 
@@ -66,8 +66,8 @@ public class ClackersItem extends Item {
     private static final float CHARGE_TICK_COST = 5;
     private static final float UPKEEP_TICK_COST = CHARGE_TICK_COST / 5;
     @Override
-    public void onUseTick(World world, LivingEntity entity, ItemStack stack, int count) {
-        int ticksUsed = getUseDuration(stack) - count;
+    public void onUseTick(World world, LivingEntity entity, ItemStack stack, int remainingTicks) {
+        int ticksUsed = getUseDuration(stack) - remainingTicks;
         int ticksMaxPower = TICKS_MAX_POWER;
         if (clackersTexVariant(ticksUsed, ticksMaxPower) > 0) {
             playClackSound(world, entity);

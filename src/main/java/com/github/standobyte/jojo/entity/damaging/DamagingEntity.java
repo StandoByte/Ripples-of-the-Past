@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.entity.damaging;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.util.JojoModUtil;
@@ -85,6 +86,10 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     public void tick() {
         super.tick();
         checkInsideBlocks();
+        checkHit();
+    }
+    
+    protected final void checkHit() {
         RayTraceResult rayTraceResult = rayTrace();
         if (rayTraceResult.getType() != RayTraceResult.Type.MISS && !ForgeEventFactory.onProjectileImpact(this, rayTraceResult)) {
             onHit(rayTraceResult);
@@ -124,6 +129,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
             }
             afterEntityHit(entityRayTraceResult, entityHurt);
         }
+        super.onHitEntity(entityRayTraceResult);
     }
     
     protected boolean checkPvpRules() {
@@ -135,6 +141,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     }
     
     protected boolean hurtTarget(Entity target, DamageSource dmgSource, float dmgAmount) {
+        if (target instanceof LivingEntity) JojoMod.LOGGER.debug(((LivingEntity) target).getHealth());
         return ModDamageSources.hurtThroughInvulTicks(target, dmgSource, dmgAmount);
     }
     
@@ -179,6 +186,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
                     : destroyBlock(blockRayTraceResult);
             afterBlockHit(blockRayTraceResult, brokenBlock);
         }
+        super.onHitBlock(blockRayTraceResult);
     }
     
     protected boolean destroyBlock(BlockRayTraceResult blockRayTraceResult) {

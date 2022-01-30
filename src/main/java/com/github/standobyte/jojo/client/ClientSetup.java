@@ -8,9 +8,9 @@ import com.github.standobyte.jojo.client.model.armor.BladeHatArmorModel;
 import com.github.standobyte.jojo.client.model.armor.BreathControlMaskModel;
 import com.github.standobyte.jojo.client.model.armor.SatiporojaScarfArmorModel;
 import com.github.standobyte.jojo.client.model.armor.StoneMaskModel;
-import com.github.standobyte.jojo.client.particle.OnomatopoeiaParticle;
 import com.github.standobyte.jojo.client.particle.MeteoriteVirusParticle;
 import com.github.standobyte.jojo.client.particle.OneTickFlameParticle;
+import com.github.standobyte.jojo.client.particle.OnomatopoeiaParticle;
 import com.github.standobyte.jojo.client.renderer.entity.AfterimageRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.CrimsonBubbleRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.HamonBlockChargeRenderer;
@@ -40,6 +40,7 @@ import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.MRC
 import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.MRCrossfireHurricaneSpecialRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.MRFireballRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.SCRapierRenderer;
+import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.TommyGunBulletRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.stretching.ZoomPunchRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.itemprojectile.BladeHatRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.itemprojectile.ClackersRenderer;
@@ -110,6 +111,7 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SATIPOROJA_SCARF.get(), SatiporojaScarfRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SATIPOROJA_SCARF_BINDING.get(), SatiporojaScarfBindingRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SNAKE_MUFFLER.get(), SnakeMufflerRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.TOMMY_GUN_BULLET.get(), TommyGunBulletRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.KNIFE.get(), KnifeRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STAND_ARROW.get(), StandArrowRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SOUL.get(), SoulRenderer::new);
@@ -153,6 +155,9 @@ public class ClientSetup {
                     return ClackersItem.clackersTexVariant(ticksUsed, ClackersItem.TICKS_MAX_POWER);
                 }
                 return 0;
+            });
+            ItemModelsProperties.register(ModItems.TOMMY_GUN.get(), new ResourceLocation(JojoMod.MOD_ID, "swing"), (itemStack, clientWorld, livingEntity) -> {
+                return livingEntity != null && livingEntity.swinging && livingEntity.getItemInHand(livingEntity.swingingArm) == itemStack ? 1 : 0;
             });
             ItemModelsProperties.register(Items.BOW, new ResourceLocation("stand_arrow"), (itemStack, clientWorld, livingEntity) -> {
                 return livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack
