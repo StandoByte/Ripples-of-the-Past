@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.entity.stand.stands;
 import java.util.List;
 import java.util.UUID;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
@@ -77,7 +78,7 @@ public class SilverChariotEntity extends StandEntity {
 
     public void setRapier(boolean rapier) {
         entityData.set(HAS_RAPIER, rapier);
-        
+        JojoMod.LOGGER.debug(entityData.get(HAS_RAPIER));
         updateModifier(getAttribute(Attributes.ATTACK_DAMAGE), NO_RAPIER_DAMAGE_DECREASE, !rapier);
         updateModifier(getAttribute(Attributes.ATTACK_SPEED), NO_RAPIER_ATTACK_SPEED_DECREASE, !rapier);
         updateModifier(getAttribute(ForgeMod.REACH_DISTANCE.get()), NO_RAPIER_ATTACK_RANGE_DECREASE, !rapier);

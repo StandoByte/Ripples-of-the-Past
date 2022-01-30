@@ -15,8 +15,8 @@ public class MagiciansRedFireball extends StandEntityAction {
     }
     
     @Override
-    public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
-        if (!world.isClientSide() && ticks == 0) {
+    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {
+        if (!world.isClientSide()) {
             MRFireballEntity fireball = new MRFireballEntity(standEntity, world);
             fireball.shootFromRotation(standEntity, 1.5F, 4.0F);
             world.addFreshEntity(fireball);
