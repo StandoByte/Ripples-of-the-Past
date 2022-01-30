@@ -43,7 +43,7 @@ public class ModStandTypes {
                     .speed(16.0)
                     .range(2.0, 10.0)
                     .durability(16.0)
-                    .precision(1.0)
+                    .precision(16.0)
                     .maxTimeStopTicks(100, 180)
                     .build(), 
                     ModEntityTypes.STAR_PLATINUM));
@@ -54,11 +54,11 @@ public class ModStandTypes {
                     new StandAction[] {ModActions.THE_WORLD_BLOCK.get(), ModActions.THE_WORLD_TIME_STOP.get(), ModActions.THE_WORLD_ROAD_ROLLER.get()},
                     ModSounds.DIO_THE_WORLD, 
                     TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
-                    .power(16.0)
+                    .power(17.0)
                     .speed(16.0)
                     .range(2.0, 10.0)
                     .durability(16.0)
-                    .precision(1.0)
+                    .precision(12.0)
                     .maxTimeStopTicks(100, 180)
                     .build(), 
                     ModEntityTypes.THE_WORLD));
@@ -73,7 +73,7 @@ public class ModStandTypes {
                     .speed(10.0)
                     .range(50.0)
                     .durability(3.0)
-                    .precision(0.4)
+                    .precision(6)
                     .build(), 
                     ModEntityTypes.HIEROPHANT_GREEN));
     
@@ -87,7 +87,7 @@ public class ModStandTypes {
                     .speed(14.0)
                     .range(10.0, 10.0)
                     .durability(4.0)
-                    .precision(1.0)
+                    .precision(16.0)
                     .build(), 
                     ModEntityTypes.SILVER_CHARIOT));
     
@@ -101,7 +101,7 @@ public class ModStandTypes {
                     .speed(8.0)
                     .range(5.0)
                     .durability(5.0)
-                    .precision(0.2)
+                    .precision(4)
                     .build(), 
                     ModEntityTypes.MAGICIANS_RED));
     

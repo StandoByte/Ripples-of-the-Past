@@ -1036,7 +1036,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
         // FIXME (!) precision: expand the hitbox of smaller entities more
         RayTraceResult target = JojoModUtil.rayTrace(this, getAttributeValue(ForgeMod.REACH_DISTANCE.get()), 
-                entity -> !(entity instanceof LivingEntity) || canAttack((LivingEntity) entity), getAttributeValue(ModEntityAttributes.STAND_PRECISION.get()) * 0.5);
+                entity -> !(entity instanceof LivingEntity) || canAttack((LivingEntity) entity));
         switch (target.getType()) {
         case BLOCK:
             return breakBlock(((BlockRayTraceResult) target).getBlockPos());
@@ -1122,7 +1122,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         long bits = swings.getHandSideBits();
         swings.reset();
         for (int i = 0; i < count; i++) {
-            double maxOffset = 0.9 / (getPrecision() + 1) - 0.9 / 11;
+            double maxOffset = 0.9 / (getPrecision() / 16 + 1) - 0.9 / 11;
             swingsWithOffsets.add(new AdditionalArmSwing((float) i / (float) count, (bits & 1) == 1 ? HandSide.RIGHT : HandSide.LEFT, this, maxOffset));
             bits >>= 1;
         }
@@ -1273,7 +1273,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                         ((ServerWorld) level).sendParticles(ParticleTypes.CRIT, 
                                 livingTarget.getX(), livingTarget.getY(0.5), livingTarget.getZ(), 15, 0.3D, 0.3D, 0.3D, 0.0D);
                         if (livingTarget.getUseItem().isShield(livingTarget) && target instanceof PlayerEntity) {
-                            ((PlayerEntity) livingTarget).disableShield(precision > 0.5 && attackDistance < attackRange * 0.4);
+                            ((PlayerEntity) livingTarget).disableShield(precision > 8 && attackDistance < attackRange * 0.4);
                         }
                     }
                     break;
