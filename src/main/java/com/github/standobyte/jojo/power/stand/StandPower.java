@@ -484,7 +484,11 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     @Override
     public boolean isLeapUnlocked() {
-        return standManifestation instanceof StandEntity && !((StandEntity) standManifestation).isArmsOnlyMode();
+        if (standManifestation instanceof StandEntity) {
+            StandEntity standEntity = (StandEntity) standManifestation;
+            return !standEntity.isArmsOnlyMode() && standEntity.isFollowingUser();
+        }
+        return false;
     }
     
     @Override
