@@ -138,12 +138,18 @@ public abstract class StandEntityAction extends StandAction {
     protected final void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             invokeForStand(power, stand -> {
-                int windupTicks = getStandWindupTicks(power, stand);
-                int ticks = windupTicks > 0 ? windupTicks : getStandActionTicks(power, stand);
-                Phase phase = windupTicks > 0 ? Phase.WINDUP : Phase.PERFORM;
-                setAction(power, stand, ticks, phase, target);
+                if (!stand.isArmsOnlyMode() || allowArmsOnly()) {
+                    int windupTicks = getStandWindupTicks(power, stand);
+                    int ticks = windupTicks > 0 ? windupTicks : getStandActionTicks(power, stand);
+                    Phase phase = windupTicks > 0 ? Phase.WINDUP : Phase.PERFORM;
+                    setAction(power, stand, ticks, phase, target);
+                }
             });
         }
+    }
+    
+    protected boolean allowArmsOnly() {
+        return autoSummonMode == AutoSummonMode.ARMS || autoSummonMode == AutoSummonMode.ONE_ARM;
     }
     
     private void setAction(IStandPower standPower, StandEntity standEntity, int ticks, Phase phase, ActionTarget target) {

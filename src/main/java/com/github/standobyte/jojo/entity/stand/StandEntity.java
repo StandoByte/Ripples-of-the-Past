@@ -696,7 +696,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     protected void standCrash() {
-        // FIXME (!) a mechanic from that old JoJo fighting game i suck at
+        if (!level.isClientSide()) {
+            stopTask(true);
+            addEffect(new EffectInstance(ModEffects.STUN.get(), 30));
+        }
     }
 
     protected boolean canBlockOrParryFromAngle(DamageSource damageSrc) {
