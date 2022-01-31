@@ -29,7 +29,7 @@ public class TommyGunBulletEntity extends ModdedProjectileEntity {
 
     @Override
     public float getBaseDamage() {
-        return 1F;
+        return 2F;
     }
 
     @Override

@@ -23,10 +23,12 @@ import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.UseAction;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeMod;
 
@@ -48,7 +50,7 @@ public class TommyGunItem extends Item {
             return;
         }
         if (!world.isClientSide()) {
-            if (remainingTicks == getUseDuration(stack) && ammo == MAX_AMMO && josephVoiceLine(entity)) {
+            if (remainingTicks == getUseDuration(stack) - 12 && ammo == MAX_AMMO - 7 && josephVoiceLine(entity)) {
                 JojoModUtil.sayVoiceLine(entity, ModSounds.JOSEPH_SCREAM_SHOOTING.get());
             }
             if (ammo > 0) {
@@ -57,35 +59,85 @@ public class TommyGunItem extends Item {
                     bullet.shootFromRotation(entity, 20F, 0);
                     world.addFreshEntity(bullet);
                     consumeAmmo(stack);
-                    entity.playSound(ModSounds.TOMMY_GUN_SHOT.get(), 1.0F, 1.0F);
-                    // FIXME (!!!) sound file FIXME some sort of particle
+                    // FIXME gun shot visual effect
                 }
             }
             else {
-             // FIXME (!!!) sound file
-                entity.playSound(ModSounds.TOMMY_GUN_NO_AMMO.get(), 1.0F, 1.0F);
                 entity.releaseUsingItem();
             }
         }
-        if (ammo > 0 && shotTick) {
-            boolean rightSide = entity.getType() == EntityType.PLAYER ? world.isClientSide() : !world.isClientSide();
-            if (rightSide) {
-                float recoil = 1F + Math.min((1F - (float) remainingTicks / (float) getUseDuration(stack)) * 6F, 3F);
+        if (ammo > 0) {
+            if (shotTick) {
                 Random random = entity.getRandom();
-                entity.yRot += (random.nextFloat() - 0.5F) * 0.5F * recoil;
-                entity.xRot += -random.nextFloat() * 1F * recoil;
+                entity.playSound(ModSounds.TOMMY_GUN_SHOT.get(), 1.0F, 1.0F + (random.nextFloat() - 0.5F) * 0.3F);
+                if (entity.getType() == EntityType.PLAYER ? world.isClientSide() : !world.isClientSide()) {
+                    float recoil = 1F + Math.min((1F - (float) remainingTicks / (float) getUseDuration(stack)) * 6F, 3F);
+                    entity.yRot += (random.nextFloat() - 0.5F) * 0.3F * recoil;
+                    entity.xRot += -random.nextFloat() * 0.75F * recoil;
+                }
             }
+        }
+        else {
+            entity.playSound(ModSounds.TOMMY_GUN_NO_AMMO.get(), 1.0F, 1.0F);
         }
     }
     
     private static final int MAX_AMMO = 50;
     private int getAmmo(ItemStack gun) {
-        // FIXME (!!!) nbt ammo tag
-        return 50;
+        return gun.getOrCreateTag().getInt("Ammo");
     }
     
-    private void consumeAmmo(ItemStack gun) {
-        // FIXME (!!!) nbt ammo tag
+    private boolean consumeAmmo(ItemStack gun) {
+        int ammo = getAmmo(gun);
+        if (ammo < 0) {
+            gun.getTag().putInt("Ammo", 0);
+            return false;
+        }
+        if (ammo > 0) {
+            gun.getTag().putInt("Ammo", --ammo);
+            return true;
+        }
+        return false;
+    }
+    
+    private boolean reload(ItemStack stack, LivingEntity entity, World world) {
+        int ammoToLoad = MAX_AMMO - getAmmo(stack);
+        if (ammoToLoad > 0) {
+            if (entity instanceof PlayerEntity) {
+                PlayerEntity player = (PlayerEntity) entity;
+                // FIXME tommy gun ammo
+//                if (!player.abilities.instabuild) {
+//                    for (int i = 0; i < player.inventory.getContainerSize(); ++i) {
+//                        ItemStack ammoStack = player.inventory.getItem(i);
+//                    }
+//                }
+                player.getCooldowns().addCooldown(this, (int) (ammoToLoad * 1.5F));
+            }
+            if (ammoToLoad > 0) {
+                stack.getTag().putInt("Ammo", getAmmo(stack) + ammoToLoad);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean showDurabilityBar(ItemStack stack) {
+        return getAmmo(stack) < MAX_AMMO;
+    }
+
+    @Override
+    public double getDurabilityForDisplay(ItemStack stack) {
+        return 1 - ((double) getAmmo(stack) / (double) MAX_AMMO);
+    }
+
+    @Override
+    public void fillItemCategory(ItemGroup group, NonNullList<ItemStack> items) {
+        if (this.allowdedIn(group)) {
+            ItemStack stack = new ItemStack(this);
+            stack.getOrCreateTag().putInt("Ammo", MAX_AMMO);
+            items.add(stack);
+        }
     }
 
     @Override
@@ -99,18 +151,12 @@ public class TommyGunItem extends Item {
     public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         ItemStack stack = player.getItemInHand(hand);
         if (player.isShiftKeyDown()) {
-            return reload(stack, player, world) ? ActionResult.success(stack) : ActionResult.fail(stack);
+            return reload(stack, player, world) ? ActionResult.consume(stack) : ActionResult.fail(stack);
         }
         else {
             player.startUsingItem(hand);
             return ActionResult.consume(stack);
         }
-    }
-    
-    private boolean reload(ItemStack stack, LivingEntity entity, World world) {
-        // FIXME (!!!) reload (consume ammo, set cooldown (2 ticks per round))
-        // FIXME (!!!) nbt ammo tag
-        return false;
     }
 
     @Override
@@ -156,7 +202,7 @@ public class TommyGunItem extends Item {
         builder.put(ForgeMod.REACH_DISTANCE.get(), new AttributeModifier(UUID.fromString("9b14156e-7ba3-446a-b18b-4c81a7d47a8b"), 
                 "Weapon modifier", 0.5, AttributeModifier.Operation.ADDITION));
         builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, 
-                "Weapon modifier", -3.2, AttributeModifier.Operation.ADDITION));
+                "Weapon modifier", -2, AttributeModifier.Operation.ADDITION));
         this.attributeModifiers = builder.build();
     }
 
