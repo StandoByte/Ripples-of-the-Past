@@ -49,7 +49,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     private int resolveLevel;
     private float resolveLimit;
     private int noResolveLimitDecayTicks;
-    private float resolveLimitFromManualControl;
     @Deprecated
     private int xp = 0;
     private boolean skippedProgression;
@@ -218,17 +217,16 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
     
 
-    private static final float RESOLVE_DECAY = 4F;
-    private static final int RESOLVE_NO_DECAY_TICKS = 300;
+    private static final float RESOLVE_DECAY = 5F;
+    private static final int RESOLVE_NO_DECAY_TICKS = 400;
     private static final float RESOLVE_DMG_REDUCTION = 0.5F;
-    private static final float RESOLVE_EFFECT_DMG_REDUCTION = 0.9F;
-    private static final float RESOLVE_FOR_DMG_POINT = 1F;
-    private static final float RESOLVE_LIMIT_FOR_DMG_POINT_TAKEN = 10F;
-    private static final float RESOLVE_LIMIT_MANUAL_CONTROL_TICK = 1F;
-    private static final float RESOLVE_LIMIT_MANUAL_CONTROL_DECAY = 7.5F;
+    private static final float RESOLVE_EFFECT_DMG_REDUCTION = 0.8F;
+    private static final float RESOLVE_FOR_DMG_POINT = 0.5F;
+    private static final float RESOLVE_LIMIT_FOR_DMG_POINT_TAKEN = 15F;
+    private static final float RESOLVE_LIMIT_MANUAL_CONTROL_TICK = 0.1F;
     private static final float RESOLVE_UNDER_LIMIT_MULTIPLIER = 20F;
     private static final float RESOLVE_LIMIT_DECAY = 4F;
-    private static final int RESOLVE_LIMIT_NO_DECAY_TICKS = 100;
+    private static final int RESOLVE_LIMIT_NO_DECAY_TICKS = 40;
     @Override
     public boolean usesResolve() {
         return hasPower() && getType().usesResolve();
@@ -276,6 +274,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 PacketManager.sendToClient(new SyncResolvePacket(getResolve(), resolveLevel, noResolveDecayTicks), player);
             });
         }
+        
+        setResolveLimit(Math.max(resolveLimit, getResolve()), noDecayTicks);
     }
     
     @Override
@@ -309,12 +309,13 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     @Override
     public float getResolveLimit() {
-        return MathHelper.clamp(resolveLimit + resolveLimitFromManualControl, getResolve(), getMaxResolve());
+        return MathHelper.clamp(resolveLimit, getResolve(), getMaxResolve());
     }
     
     @Override
     public void addResolveLimit(float amount) {
-        setResolveLimit(resolveLimit + amount, RESOLVE_LIMIT_NO_DECAY_TICKS);
+        float hpRatio = user.getHealth() / user.getMaxHealth();
+        setResolveLimit(getResolveLimit() + amount, (int) ((float) RESOLVE_LIMIT_NO_DECAY_TICKS * (10F - hpRatio * 9F)));
     }
     
     @Override
@@ -358,7 +359,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             World world = damageSource.getEntity().level;
             if (!world.isClientSide()) {
                 boolean noNaturalRegen = ((ServerWorld) world).getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION);
-                addResolveLimit(damageAmount * RESOLVE_LIMIT_FOR_DMG_POINT_TAKEN * (noNaturalRegen ? 1F : 4F));
+                addResolveLimit(damageAmount * RESOLVE_LIMIT_FOR_DMG_POINT_TAKEN * (noNaturalRegen ? 1F : 2F));
+                setResolve(getResolve(), RESOLVE_NO_DECAY_TICKS);
             }
         }
     }
@@ -373,8 +375,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 user.removeEffect(ModEffects.RESOLVE.get());
             }
             
-            resolveLimit = 0;
-            resolveLimitFromManualControl = 0;
+            resolveLimit = getMaxResolve();
         }
         else {
             boolean noDecay = noResolveDecayTicks > 0;
@@ -385,7 +386,13 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 decay = RESOLVE_DECAY;
             }
             if (isActive()) {
-                decay /= 4F;
+                if (getStandManifestation() instanceof StandEntity && ((StandEntity) getStandManifestation()).isManuallyControlled()) {
+                    resolveLimit = Math.min(resolveLimit + RESOLVE_LIMIT_MANUAL_CONTROL_TICK, getMaxResolve());
+                    noResolveLimitDecayTicks = 1;
+                }
+                else {
+                    decay /= 4F;
+                }
             }
             
             if (noResolveLimitDecayTicks > 0) {
@@ -396,17 +403,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 resolveLimit = Math.max(resolveLimit - RESOLVE_LIMIT_DECAY * hpRatio * hpRatio, 0);
             }
         }
-        resolve = Math.max(resolve - decay, 0);
         
-        if (isActive()) {
-            if (getStandManifestation() instanceof StandEntity && ((StandEntity) getStandManifestation()).isManuallyControlled()) {
-                resolveLimitFromManualControl = Math.min(resolveLimitFromManualControl + RESOLVE_LIMIT_MANUAL_CONTROL_TICK + RESOLVE_LIMIT_MANUAL_CONTROL_DECAY, getMaxResolve());
-            }
-            resolveLimitFromManualControl = Math.max(resolveLimitFromManualControl - RESOLVE_LIMIT_MANUAL_CONTROL_DECAY, 0);
-        }
-        else {
-            resolveLimitFromManualControl = 0;
-        }
+        resolve = Math.max(resolve - decay, 0);
     }
     
     
@@ -537,7 +535,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             cnbt.putInt("ResolveTicks", noResolveDecayTicks);
             cnbt.putFloat("ResolveLimit", resolveLimit);
             cnbt.putInt("ResolveLimitTicks", noResolveLimitDecayTicks);
-            cnbt.putFloat("ResolveLimitMC", resolveLimitFromManualControl);
         }
         cnbt.putInt("Exp", getXp());
         cnbt.putBoolean("Skipped", skippedProgression);
@@ -563,7 +560,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             noResolveDecayTicks = nbt.getInt("ResolveTicks");
             resolveLimit = nbt.getFloat("ResolveLimit");
             noResolveLimitDecayTicks = nbt.getInt("ResolveLimitTicks");
-            resolveLimitFromManualControl = nbt.getFloat("ResolveLimitMC");
         }
         skippedProgression = nbt.getBoolean("Skipped");
         super.readNBT(nbt);
@@ -580,7 +576,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             StandPower cast = (StandPower) oldPower;
             this.resolveLimit = cast.resolveLimit;
             this.noResolveLimitDecayTicks = cast.noResolveLimitDecayTicks;
-            this.resolveLimitFromManualControl = cast.resolveLimitFromManualControl;
         }
         this.resolveLevel = oldPower.getResolveLevel();
         this.skippedProgression = oldPower.wasProgressionSkipped();
