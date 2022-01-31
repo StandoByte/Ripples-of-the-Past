@@ -1040,8 +1040,15 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             barrageParryCount++;
         }
         
-        if (punch == PunchType.LIGHT) {
-            addComboMeter(0.007F, COMBO_TICKS);
+        switch (punch) {
+        case LIGHT:
+            addComboMeter(0.0015F, COMBO_TICKS);
+            break;
+        case HEAVY:
+            addComboMeter(-0.5F, 0);
+            break;
+        default:
+            break;
         }
 
         double distance = getAttributeValue(ForgeMod.REACH_DISTANCE.get());
@@ -1225,11 +1232,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return entityData.get(PUNCHES_COMBO);
     }
     
-    protected void addComboMeter(float combo, int noDecayTicks) {
-        if (combo > 0) {
-            setComboMeter(getComboMeter() + combo);
-            this.noComboDecayTicks = Math.max(this.noComboDecayTicks, noDecayTicks);
-        }
+    public void addComboMeter(float combo, int noDecayTicks) {
+        setComboMeter(getComboMeter() + combo);
+        this.noComboDecayTicks = Math.max(this.noComboDecayTicks, noDecayTicks);
     }
     
     protected void setComboMeter(float combo) {
@@ -1259,9 +1264,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             if (targetProximityRatio > 0.75) {
                 strength *= targetProximityRatio * 2 - 0.5;
             }
-            else if (targetProximityRatio < 0.25) {
-                strength *= targetProximityRatio * 2 + 0.5;
-            }
+//            else if (targetProximityRatio < 0.25) {
+//                strength *= targetProximityRatio * 2 + 0.5;
+//            }
             damage = StandStatFormulas.getHeavyAttackDamage(strength, livingTarget);
             
             knockback += damage / 4 * getComboMeter();
@@ -1304,7 +1309,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                     }
                     break;
                 case LIGHT:
-                    addComboMeter(0.16F, COMBO_TICKS);
+                    addComboMeter(0.32F, COMBO_TICKS);
                     break;
                 case BARRAGE:
                     addComboMeter(0.005F, COMBO_TICKS * 2);

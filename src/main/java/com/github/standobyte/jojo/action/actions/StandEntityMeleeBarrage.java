@@ -14,7 +14,7 @@ import net.minecraft.world.World;
 public class StandEntityMeleeBarrage extends StandEntityAction {
 
     public StandEntityMeleeBarrage(StandEntityAction.Builder builder) {
-        super(builder.standAutoSummonMode(AutoSummonMode.ARMS).holdType().standUserSlowDownFactor(0.3F).defaultStandOffsetFromUser());
+        super(builder.standAutoSummonMode(AutoSummonMode.ARMS).holdType().standUserSlowDownFactor(0.3F).defaultStandOffsetFromUser().standRecoveryTicks(5));
     }
 
     @Override
@@ -70,5 +70,13 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
     @Override
     public boolean isCombatAction() {
         return true;
+    }
+    
+    @Override
+    public int getHoldDurationMax(IStandPower standPower) {
+        if (standPower.getStandManifestation() instanceof StandEntity) {
+            return StandStatFormulas.getBarrageMaxDuration(((StandEntity) standPower.getStandManifestation()).getDurability());
+        }
+        return 0;
     }
 }

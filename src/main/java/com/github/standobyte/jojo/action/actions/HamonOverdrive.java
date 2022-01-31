@@ -29,7 +29,7 @@ public class HamonOverdrive extends HamonAction {
     }
     
     @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
+    protected ActionConditionResult checkHeldItems(LivingEntity user, INonStandPower power) {
         ItemStack heldItemStack = user.getMainHandItem();
         if (!heldItemStack.isEmpty() && !metalSilverOverdrive(power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get(), heldItemStack)) {
             return ActionConditionResult.NEGATIVE;

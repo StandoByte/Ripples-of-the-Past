@@ -30,7 +30,6 @@ public class ResolveEffect extends UncurableEffect {
         IStandPower.getStandPowerOptional(entity).ifPresent(stand -> {
             if (stand.usesResolve()) {
                 stand.setResolve(0, 0);
-                stand.resetResolveLimit();
             }
         });
     }
