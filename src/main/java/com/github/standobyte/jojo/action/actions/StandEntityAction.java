@@ -5,7 +5,6 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
@@ -152,7 +151,6 @@ public abstract class StandEntityAction extends StandAction {
                 int windupTicks = getStandWindupTicks(power, stand);
                 int ticks = windupTicks > 0 ? windupTicks : getStandActionTicks(power, stand);
                 Phase phase = windupTicks > 0 ? Phase.WINDUP : Phase.PERFORM;
-                JojoMod.LOGGER.debug(ticks);
                 setAction(power, stand, ticks, phase, target);
             });
         }

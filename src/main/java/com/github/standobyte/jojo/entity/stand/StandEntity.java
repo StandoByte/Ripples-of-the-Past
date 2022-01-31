@@ -759,7 +759,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         ActionTarget target = getTaskTarget();
         if (target.getType() == TargetType.ENTITY) {
             Entity targetEntity = target.getEntity(level);
-            if (targetEntity == null || !targetEntity.isAlive()) {
+            if (targetEntity == null || !targetEntity.isAlive() || targetEntity == this) {
                 setTaskTarget(ActionTarget.EMPTY);
             }
         }
@@ -1312,7 +1312,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                     addComboMeter(0.32F, COMBO_TICKS);
                     break;
                 case BARRAGE:
-                    addComboMeter(0.005F, COMBO_TICKS * 2);
+                    addComboMeter(0.0015F, COMBO_TICKS * 2);
                     break;
                 }
                 LivingEntity user = getUser();

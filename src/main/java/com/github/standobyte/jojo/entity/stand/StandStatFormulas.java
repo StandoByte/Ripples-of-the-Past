@@ -73,7 +73,7 @@ public class StandStatFormulas {
     }
     
     public static final int getBarrageHitsPerSecond(double speed) {
-        return Math.max((int) (speed * 7.5 - 20.0), 0);
+        return Math.max((int) (speed * 8.0 - 20.0), 0);
     }
     
     public static final int getBarrageRecovery(double speed) {

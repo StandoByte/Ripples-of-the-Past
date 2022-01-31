@@ -29,7 +29,7 @@ public class HamonCutter extends HamonAction {
 
     @Override
     public boolean cancelHandRender(LivingEntity user, Hand hand) {
-        return false;
+        return hand == Hand.OFF_HAND ? !(user.getOffhandItem().getItem() instanceof PotionItem) : false;
     }
 
     @Override
