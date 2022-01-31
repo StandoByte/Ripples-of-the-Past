@@ -80,7 +80,6 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
@@ -1045,15 +1044,31 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             addComboMeter(0.007F, COMBO_TICKS);
         }
 
-        // FIXME precision: expand the hitbox of smaller entities more
-        RayTraceResult target = JojoModUtil.rayTrace(this, getAttributeValue(ForgeMod.REACH_DISTANCE.get()), 
-                entity -> !(entity instanceof LivingEntity) || canAttack((LivingEntity) entity));
+        double distance = getAttributeValue(ForgeMod.REACH_DISTANCE.get());
+        ActionTarget target = getTaskTarget();
+        switch (target.getType()) {
+        case EMPTY:
+            // FIXME precision: expand the hitbox of smaller entities more
+            RayTraceResult rayTrace = JojoModUtil.rayTrace(this, getAttributeValue(ForgeMod.REACH_DISTANCE.get()), 
+                    entity -> !(entity instanceof LivingEntity) || canAttack((LivingEntity) entity));
+            if (rayTrace.getType() == RayTraceResult.Type.ENTITY) {
+                distance = ((EntityDistanceRayTraceResult) rayTrace).getTargetAABBDistance();
+            }
+            target = ActionTarget.fromRayTraceResult(rayTrace);
+            break;
+        case ENTITY:
+            // FIXME wrong distance calculation (not to aabb)
+            distance = getEyePosition(1.0F).distanceTo(target.getEntity(level).getEyePosition(1.0F));
+            break;
+        default:
+            break;
+        }
+        
         switch (target.getType()) {
         case BLOCK:
-            return breakBlock(((BlockRayTraceResult) target).getBlockPos());
+            return breakBlock(target.getBlockPos());
         case ENTITY:
-            EntityDistanceRayTraceResult result = (EntityDistanceRayTraceResult) target;
-            return attackEntity(result.getEntity(), punch, result.getTargetAABBDistance());
+            return attackEntity(target.getEntity(level), punch, distance);
         default:
             return false;
         }

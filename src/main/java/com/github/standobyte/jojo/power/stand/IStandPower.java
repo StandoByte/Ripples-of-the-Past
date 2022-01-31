@@ -39,6 +39,7 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     float getResolveLimit();
     void addResolveLimit(float amount);
     void setResolveLimit(float amount, int noDecayTicks);
+    void resetResolveLimit();
     float getResolveDmgReduction();
     void addResolveOnAttack(LivingEntity target, float damageAmount);
     void addResolveOnTakingDamage(DamageSource damageSource, float damageAmount);
