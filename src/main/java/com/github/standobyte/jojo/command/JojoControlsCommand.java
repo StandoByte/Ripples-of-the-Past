@@ -20,11 +20,11 @@ public class JojoControlsCommand {
     public static final String LITERAL = "jojocontrols";
     private static final ITextComponent[] TEXT_PAGES = { 
             new TranslationTextComponent("jojo.chat.command.controls.overlay", 
-                    new KeybindTextComponent("jojo.key.switch_mode").withStyle(TextFormatting.ITALIC)).withStyle(TextFormatting.GRAY),
+                    new KeybindTextComponent("jojo.key.stand_mode").withStyle(TextFormatting.ITALIC),
+                    new KeybindTextComponent("jojo.key.non_stand_mode").withStyle(TextFormatting.ITALIC)).withStyle(TextFormatting.GRAY),
             new TranslationTextComponent("jojo.chat.command.controls.overlay.scroll", 
-                    new KeybindTextComponent("jojo.key.scroll_attack").withStyle(TextFormatting.ITALIC),
-                    new KeybindTextComponent("jojo.key.scroll_ability").withStyle(TextFormatting.ITALIC),
-                    new KeybindTextComponent("key.sneak").withStyle(TextFormatting.ITALIC)).withStyle(TextFormatting.GRAY),
+                    new KeybindTextComponent("jojo.key.attack_hotbar").withStyle(TextFormatting.ITALIC),
+                    new KeybindTextComponent("jojo.key.ability_hotbar").withStyle(TextFormatting.ITALIC)).withStyle(TextFormatting.GRAY),
             new TranslationTextComponent("jojo.chat.command.controls.overlay.use", 
                     new KeybindTextComponent("key.attack").withStyle(TextFormatting.ITALIC),
                     new KeybindTextComponent("key.use").withStyle(TextFormatting.ITALIC)).withStyle(TextFormatting.GRAY),
