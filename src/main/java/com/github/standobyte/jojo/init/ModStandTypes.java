@@ -69,10 +69,10 @@ public class ModStandTypes {
                     new StandAction[] {ModActions.HIEROPHANT_GREEN_BLOCK.get(), ModActions.HIEROPHANT_GREEN_GRAPPLE.get(), ModActions.HIEROPHANT_GREEN_BARRIER.get()},
                     ModSounds.KAKYOIN_HIEROPHANT_GREEN, 
                     StandStats.class, new StandStats.Builder()
-                    .power(6.0)
+                    .power(8.0)
                     .speed(10.0)
                     .range(50.0)
-                    .durability(3.0)
+                    .durability(8.0)
                     .precision(6)
                     .build(), 
                     ModEntityTypes.HIEROPHANT_GREEN));
@@ -83,10 +83,10 @@ public class ModStandTypes {
                     new StandAction[] {ModActions.SILVER_CHARIOT_BLOCK.get(), ModActions.SILVER_CHARIOT_TAKE_OFF_ARMOR.get()},
                     ModSounds.POLNAREFF_SILVER_CHARIOT, 
                     StandStats.class, new StandStats.Builder()
-                    .power(7.0)
+                    .power(10.0)
                     .speed(14.0)
                     .range(10.0, 10.0)
-                    .durability(4.0)
+                    .durability(10.0)
                     .precision(16.0)
                     .build(), 
                     ModEntityTypes.SILVER_CHARIOT));
@@ -97,11 +97,11 @@ public class ModStandTypes {
                     new StandAction[] {ModActions.MAGICIANS_RED_BLOCK.get(), ModActions.MAGICIANS_RED_RED_BIND.get(), ModActions.MAGICIANS_RED_DETECTOR.get()},
                     ModSounds.AVDOL_MAGICIANS_RED, 
                     StandStats.class, new StandStats.Builder()
-                    .power(8.0)
+                    .power(12.0)
                     .speed(8.0)
                     .range(5.0)
-                    .durability(5.0)
-                    .precision(4)
+                    .durability(12.0)
+                    .precision(4.0)
                     .build(), 
                     ModEntityTypes.MAGICIANS_RED));
     

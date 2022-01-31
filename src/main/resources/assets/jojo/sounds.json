@@ -45,8 +45,8 @@
     ]
   },
   "tommy_gun_shot": {
-    "subtitle": "jojo.subtitle.bullet_shot",
-    "sounds": [ "jojo:tommy_gun_shot" ]
+    "subtitle": "jojo.subtitle.tommy_gun_shot",
+    "sounds": [ "jojo:bullet_shot" ]
   },
   "tommy_gun_no_ammo": {
     "subtitle": "jojo.subtitle.tommy_gun_trigger",
