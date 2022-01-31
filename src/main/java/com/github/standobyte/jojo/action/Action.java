@@ -85,7 +85,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     public ActionConditionResult checkConditions(LivingEntity user, P power, ActionTarget target) {
-        ActionConditionResult itemCheck = checkHeldItems(user);
+        ActionConditionResult itemCheck = checkHeldItems(user, power);
         if (!itemCheck.isPositive()) {
             return itemCheck;
         }
@@ -112,7 +112,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return maxRangeSqBlockTarget;
     }
     
-    protected ActionConditionResult checkHeldItems(LivingEntity user) {
+    protected ActionConditionResult checkHeldItems(LivingEntity user, P power) {
         for (Map.Entry<Hand, Function<ItemStack, String>> check : itemChecks.entrySet()) {
             String message = check.getValue().apply(user.getItemInHand(check.getKey()));
             if (message != null) {
@@ -122,12 +122,12 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return ActionConditionResult.POSITIVE;
     }
     
-    public boolean ignoresPerformerStun() {
-        return ignoresPerformerStun;
+    public boolean cancelHandRender(LivingEntity user, Hand hand) {
+        return !itemChecks.containsKey(hand);
     }
     
-    public boolean cancelHandRender(LivingEntity user, Hand hand) {
-        return !itemChecks.containsKey(hand) || itemChecks.get(hand).apply(user.getItemInHand(hand)) != null;
+    public boolean ignoresPerformerStun() {
+        return ignoresPerformerStun;
     }
     
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, P power, ActionTarget target) {

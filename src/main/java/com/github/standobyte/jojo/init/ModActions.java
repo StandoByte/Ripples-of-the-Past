@@ -78,7 +78,7 @@ public class ModActions {
             (Class<Action<?>>) ((Class<?>) Action.class), JojoMod.MOD_ID);
     
     public static final RegistryObject<HamonAction> HAMON_OVERDRIVE = ACTIONS.register("hamon_overdrive", 
-            () -> new HamonOverdrive(new HamonAction.Builder().energyCost(750F))); // FIXME (!!!!!!) itemstack condition (empty hand or sword with MSO)
+            () -> new HamonOverdrive(new HamonAction.Builder().energyCost(750F)));
      
     public static final RegistryObject<HamonAction> HAMON_SUNLIGHT_YELLOW_OVERDRIVE = ACTIONS.register("hamon_sunlight_yellow_overdrive", 
             () -> new HamonSunlightYellowOverdrive(new HamonAction.Builder().energyCost(1500F).emptyMainHand()
@@ -132,7 +132,7 @@ public class ModActions {
                     .shout(ModSounds.JONATHAN_SCARLET_OVERDRIVE).swingHand().doNotCancelClick()));
     
     public static final RegistryObject<HamonAction> ZEPPELI_HAMON_CUTTER = ACTIONS.register("zeppeli_hamon_cutter", 
-            () -> new HamonCutter(new HamonAction.Builder().energyCost(400F).shout(ModSounds.ZEPPELI_HAMON_CUTTER))); // FIXME (!!!!!!) itemstack condition (either main or off hand has a potion)
+            () -> new HamonCutter(new HamonAction.Builder().energyCost(400F).shout(ModSounds.ZEPPELI_HAMON_CUTTER)));
     
     public static final RegistryObject<HamonAction> ZEPPELI_TORNADO_OVERDRIVE = ACTIONS.register("zeppeli_tornado_overdrive", 
             () -> new HamonTornadoOverdrive(new HamonAction.Builder().shout(ModSounds.ZEPPELI_TORNADO_OVERDRIVE).holdType().holdEnergyCost(75F)));
