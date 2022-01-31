@@ -331,12 +331,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
     
     @Override
-    public void resetResolveLimit() {
-        resolveLimit = 0;
-        resolveLimitFromManualControl = 0;
-    }
-    
-    @Override
     public float getResolveDmgReduction() {
         if (user.hasEffect(ModEffects.RESOLVE.get())) {
             return RESOLVE_EFFECT_DMG_REDUCTION;
@@ -379,7 +373,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 user.removeEffect(ModEffects.RESOLVE.get());
             }
             
-            resolveLimit = getMaxResolve();
+            resolveLimit = 0;
+            resolveLimitFromManualControl = 0;
         }
         else {
             boolean noDecay = noResolveDecayTicks > 0;
@@ -529,7 +524,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         consumeStamina(200);
     }
 
-    // FIXME (!!) (resolve) save, copy & clear new resolve values
     @Override
     public CompoundNBT writeNBT() {
         CompoundNBT cnbt = super.writeNBT();
