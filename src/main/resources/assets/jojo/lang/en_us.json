@@ -278,6 +278,8 @@
   "jojo.config.standTiers.tooltip": "Whether or not the Stand tiers mechanic is enabled.",
   "jojo.config.skipStandProgression": "Skip Stand progression",
   "jojo.config.skipStandProgression.tooltip": "Whether or not all of the abilities are unlocked after gaining a Stand in Survival.",
+  "jojo.config.standPowerMultiplier": "Stand Power Multiplier",
+  "jojo.config.standPowerMultiplier.tooltip": "Damage multiplier apllied to all Stands.",
   "jojo.config.hamonPointsMultiplier": "Hamon points multiplier",
   "jojo.config.hamonPointsMultiplier.tooltip": "Hamon Strength and Control levels growth multiplier.",
   "jojo.config.breathingTechniqueMultiplier": "Breathing technique multiplier",
