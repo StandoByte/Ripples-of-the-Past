@@ -39,6 +39,8 @@ public class JojoModConfig {
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> bannedStands;
         private List<ResourceLocation> bannedStandsResLocs;
         private boolean[] tiersAvaliable = new boolean[7];
+        
+        public final ForgeConfigSpec.DoubleValue standPowerMultiplier;
 
         public final ForgeConfigSpec.DoubleValue hamonPointsMultiplier;
         public final ForgeConfigSpec.DoubleValue breathingTechniqueMultiplier;
@@ -94,6 +96,11 @@ public class JojoModConfig {
                     .comment(" Whether or not all of the abilities are unlocked after gaining a Stand in Survival.")
                     .translation("jojo.config.skipStandProgression")
                     .define("skipStandProgression", false);
+
+            standPowerMultiplier = builder
+                    .comment(" Damage multiplier apllied to all Stands.")
+                    .translation("jojo.config.standPowerMultiplier")
+                    .defineInRange("standPowerMultiplier", 1.0, 0.0, 128.0);
             
             builder.comment(" Settings which affect the speed of Hamon training.").push("Hamon training");
                 hamonPointsMultiplier = builder
@@ -125,7 +132,7 @@ public class JojoModConfig {
             builder.pop();
             
             soulAscension = builder
-                    .comment(" Whether or not a Stand User's death will briefly summon their soul.")
+                    .comment(" Whether or not a Stand User's death will briefly summon their soul when certain conditions are met.")
                     .translation("jojo.config.soulAscension")
                     .define("soulAscension", true);
         }

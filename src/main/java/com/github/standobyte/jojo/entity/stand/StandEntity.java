@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
@@ -112,7 +113,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     private IStandPower userPower;
     private StandRelativeOffset offsetDefault = new StandRelativeOffset(-0.75, -0.5, 0.2);
     private StandRelativeOffset offsetDefaultArmsOnly = new StandRelativeOffset(0, 0.15, 0);
-//    protected StandRelativeOffset relativePos = new StandRelativeOffset(-0.75, -0.5, 0.2);
 
     private static final DataParameter<Boolean> SWING_OFF_HAND = EntityDataManager.defineId(StandEntity.class, DataSerializers.BOOLEAN);
     private boolean alternateAdditionalSwing;
@@ -241,6 +241,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     private void initStandAttributes(StandStats stats) {
         getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(stats.getBasePower());
+        applyAttributeModifier(Attributes.ATTACK_DAMAGE, UUID.fromString("636784fd-7dfc-4ad9-a2be-8b7f88d868a2"), 
+                "Stand attack damage from config", JojoModConfig.COMMON.standPowerMultiplier.get(), Operation.MULTIPLY_TOTAL);
         getAttribute(Attributes.ATTACK_SPEED).setBaseValue(stats.getBaseAttackSpeed());
         getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(stats.getBaseMovementSpeed());
         getAttribute(ForgeMod.REACH_DISTANCE.get()).setBaseValue(getDefaultMeleeAttackRange());
