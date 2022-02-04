@@ -679,14 +679,15 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     protected float damageResistance(DamageSource damageSrc, float damageAmount, boolean blockableAngle) {
         if (!damageSrc.isBypassArmor()) {
             float blockedRatio = 0;
-            if (blockableAngle && isStandBlocking() && userPower != null && userPower.usesStamina()) {
-                float staminaCost = StandStatFormulas.getBlockStaminaCost(damageAmount);
-                if (userPower.consumeStamina(staminaCost)) {
-                    blockedRatio = 1F;
-                }
-                else {
-                    blockedRatio = userPower.getStamina() / staminaCost;
-                    standCrash();
+            if (blockableAngle && isStandBlocking() && userPower != null) {
+                blockedRatio = 1F;
+                if (userPower.usesStamina()) {
+                    float staminaCost = StandStatFormulas.getBlockStaminaCost(damageAmount);
+                    float stamina = userPower.getStamina();
+                    if (!userPower.consumeStamina(staminaCost)) {
+                        blockedRatio = stamina / staminaCost;
+                        standCrash();
+                    }
                 }
             }
             return damageAmount * (1 - StandStatFormulas.getPhysicalResistance(getDurability(), getAttackDamage(null), blockedRatio));

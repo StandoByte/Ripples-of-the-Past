@@ -66,7 +66,6 @@ public class ClientEventHandler {
     private ResourceLocation currentShader;
     private static final ResourceLocation SHADER_TIME_STOP = new ResourceLocation("shaders/post/desaturate.json");
     private static final ResourceLocation[] SHADERS_HUE_SHIFT = {
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift1.json"),
             new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift2.json"),
             new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift3.json"),
             new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift4.json"),
@@ -76,7 +75,6 @@ public class ClientEventHandler {
             new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift8.json"),
             new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift9.json"),
             new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift10.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift11.json"),
             new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip0.json"),
             new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip1.json"),
             new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip2.json"),

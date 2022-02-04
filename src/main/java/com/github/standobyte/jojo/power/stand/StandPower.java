@@ -138,7 +138,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     @Override
     public float getStamina() {
-        return stamina;
+        return JojoModConfig.COMMON.standStamina.get() ? stamina : getMaxStamina();
     }
 
     @Override

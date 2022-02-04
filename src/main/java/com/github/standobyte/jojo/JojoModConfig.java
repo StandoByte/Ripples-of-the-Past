@@ -35,11 +35,12 @@ public class JojoModConfig {
 
         public final ForgeConfigSpec.BooleanValue prioritizeLeastTakenStands;
         public final ForgeConfigSpec.BooleanValue standTiers;
-        public final ForgeConfigSpec.BooleanValue skipStandProgression;
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> bannedStands;
         private List<ResourceLocation> bannedStandsResLocs;
         private boolean[] tiersAvaliable = new boolean[7];
-        
+
+        public final ForgeConfigSpec.BooleanValue skipStandProgression;
+        public final ForgeConfigSpec.BooleanValue standStamina;
         public final ForgeConfigSpec.DoubleValue standPowerMultiplier;
 
         public final ForgeConfigSpec.DoubleValue hamonPointsMultiplier;
@@ -96,6 +97,11 @@ public class JojoModConfig {
                     .comment(" Whether or not all of the abilities are unlocked after gaining a Stand in Survival.")
                     .translation("jojo.config.skipStandProgression")
                     .define("skipStandProgression", false);
+
+            standStamina = builder
+                    .comment(" Whether or not Stand stamina mechanic is enabled.")
+                    .translation("jojo.config.standStamina")
+                    .define("standStamina", true);
 
             standPowerMultiplier = builder
                     .comment(" Damage multiplier apllied to all Stands.")
