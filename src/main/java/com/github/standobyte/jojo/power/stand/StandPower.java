@@ -138,7 +138,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     @Override
     public float getStamina() {
-        return JojoModConfig.COMMON.standStamina.get() ? stamina : getMaxStamina();
+        return isStaminaInfinite() ? getMaxStamina() : stamina;
     }
 
     @Override
@@ -163,7 +163,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
 
     @Override
     public boolean consumeStamina(float amount) {
-        if (isUserCreative()) {
+        if (isStaminaInfinite()) {
             return true;
         }
         if (getStamina() >= amount) {
@@ -172,6 +172,11 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
         setStamina(0);
         return false;
+    }
+    
+    @Override
+    public boolean isStaminaInfinite() {
+        return isUserCreative() || !JojoModConfig.COMMON.standStamina.get();
     }
 
     @Override

@@ -54,7 +54,7 @@ public abstract class BarsRenderer {
                     tickCounter, partialTick); 
         }
         if (standPower != null && standPower.hasPower()) {
-            if (JojoModConfig.COMMON.standStamina.get() && standPower.usesStamina()) {
+            if (!standPower.isStaminaInfinite() && standPower.usesStamina()) {
                 // FIXME get stamina costs
                 renderBarWithIcon(matrixStack, BarType.STAMINA, null, 
                         currentMode == PowerClassification.STAND, 0xFFFFFF, 1, 
