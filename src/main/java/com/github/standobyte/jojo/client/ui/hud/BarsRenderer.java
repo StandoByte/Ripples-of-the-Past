@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui.Alignment;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui.BarsOrientation;
@@ -53,7 +54,7 @@ public abstract class BarsRenderer {
                     tickCounter, partialTick); 
         }
         if (standPower != null && standPower.hasPower()) {
-            if (standPower.usesStamina()) {
+            if (JojoModConfig.COMMON.standStamina.get() && standPower.usesStamina()) {
                 // FIXME get stamina costs
                 renderBarWithIcon(matrixStack, BarType.STAMINA, null, 
                         currentMode == PowerClassification.STAND, 0xFFFFFF, 1, 
