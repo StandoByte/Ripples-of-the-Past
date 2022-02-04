@@ -30,10 +30,10 @@ public class StandStatFormulas {
         return (float) strength * 0.025F * 0;
     }
     
-    public static final int getHeavyAttackWindup(double speed, float combo) {
+    public static final int getHeavyAttackWindup(double speed, float comboMeter) {
         double min = (40 - speed * 1.25) / 3;
-        double max = (40 - speed * 1.25) * 4 / 3;
-        return MathHelper.ceil(MathHelper.lerp((double) combo, max, min));
+        double max = (40 - speed * 1.25) * 5 / 6;
+        return MathHelper.ceil(MathHelper.lerp((double) (Math.min(comboMeter, 0.5F) * 2F), max, min));
     }
     
     public static final int getHeavyAttackRecovery(double speed) {

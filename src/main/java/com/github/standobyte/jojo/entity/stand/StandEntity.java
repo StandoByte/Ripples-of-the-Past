@@ -242,7 +242,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     private void initStandAttributes(StandStats stats) {
         getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(stats.getBasePower());
         applyAttributeModifier(Attributes.ATTACK_DAMAGE, UUID.fromString("636784fd-7dfc-4ad9-a2be-8b7f88d868a2"), 
-                "Stand attack damage from config", JojoModConfig.COMMON.standPowerMultiplier.get(), Operation.MULTIPLY_TOTAL);
+                "Stand attack damage from config", JojoModConfig.COMMON.standPowerMultiplier.get() - 1, Operation.MULTIPLY_TOTAL);
         getAttribute(Attributes.ATTACK_SPEED).setBaseValue(stats.getBaseAttackSpeed());
         getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(stats.getBaseMovementSpeed());
         getAttribute(ForgeMod.REACH_DISTANCE.get()).setBaseValue(getDefaultMeleeAttackRange());
@@ -1042,17 +1042,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         else {
             barrageParryCount++;
         }
-        
-        switch (punch) {
-        case LIGHT:
-            addComboMeter(0.0015F, COMBO_TICKS);
-            break;
-        case HEAVY:
-            addComboMeter(-0.5F, 0);
-            break;
-        default:
-            break;
-        }
 
         double distance = getAttributeValue(ForgeMod.REACH_DISTANCE.get());
         ActionTarget target = getTaskTarget();
@@ -1074,14 +1063,20 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             break;
         }
         
+        boolean punched;
         switch (target.getType()) {
         case BLOCK:
-            return breakBlock(target.getBlockPos());
+            punched = breakBlock(target.getBlockPos());
         case ENTITY:
-            return attackEntity(target.getEntity(level), punch, distance);
+            punched = attackEntity(target.getEntity(level), punch, distance);
         default:
-            return false;
+            punched = false;
         }
+
+        if (punch == PunchType.HEAVY) {
+            addComboMeter(-0.5F, 0);
+        }
+        return punched;
     }
     
     public enum PunchType {
