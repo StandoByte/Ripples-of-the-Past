@@ -15,7 +15,7 @@ public class StaminaRegenEffect extends Effect {
     @Override
     public void applyEffectTick(LivingEntity entity, int amplifier) {
         IStandPower.getStandPowerOptional(entity).ifPresent(power -> {
-            power.addStamina((amplifier + 1) * power.getMaxStamina() / 1000F);
+            power.addStamina((amplifier + 1) * power.getMaxStamina() / 1000F, false);
         });
     }
 

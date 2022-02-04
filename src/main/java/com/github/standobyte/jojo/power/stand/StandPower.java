@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.SyncResolveLevelPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncResolveLimitPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStaminaPacket;
@@ -157,8 +158,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
     
     @Override
-    public void addStamina(float amount) {
-        setStamina(MathHelper.clamp(this.stamina + amount, 0, getMaxStamina()));
+    public void addStamina(float amount, boolean sendToClient) {
+        setStamina(MathHelper.clamp(this.stamina + amount, 0, getMaxStamina()), sendToClient);
     }
 
     @Override
@@ -176,8 +177,12 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
 
     @Override
     public void setStamina(float amount) {
+        setStamina(amount, true);
+    }
+    
+    private void setStamina(float amount, boolean sendToClient) {
         amount = MathHelper.clamp(amount, 0, getMaxStamina());
-        boolean send = this.stamina != amount;
+        boolean send = sendToClient && this.stamina != amount;
         this.stamina = amount;
         if (send) {
             serverPlayerUser.ifPresent(player -> {
@@ -204,7 +209,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                     staminaRegen *= 1.5F;
                 }
             }
-            stamina = Math.min(stamina + staminaRegen * getStaminaDurabilityModifier(), getMaxStamina());
+            addStamina(staminaRegen, false);
         }
     }
     
@@ -299,7 +304,13 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public void setResolveLevel(int level) {
         if (usesResolve()) {
+            boolean send = this.resolveLevel != level;
             this.resolveLevel = level;
+            if (send) {
+                serverPlayerUser.ifPresent(player -> {
+                    PacketManager.sendToClient(new SyncResolveLevelPacket(this.resolveLevel), player);
+                });
+            }
             if (!user.level.isClientSide() && hasPower()) {
                 // FIXME unlock new actions
                 getType().onNewResolveLevel(this);
@@ -592,6 +603,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 }
                 if (usesResolve()) {
                     PacketManager.sendToClient(new SyncResolvePacket(resolve, resolveLevel, noResolveDecayTicks), player);
+                    PacketManager.sendToClient(new SyncResolveLimitPacket(resolveLimit, noResolveLimitDecayTicks), player);
                 }
             }
         });
