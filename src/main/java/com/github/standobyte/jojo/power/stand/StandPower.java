@@ -15,7 +15,6 @@ import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncResolveLevelPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncResolveLimitPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStaminaPacket;
@@ -304,13 +303,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public void setResolveLevel(int level) {
         if (usesResolve()) {
-            boolean send = this.resolveLevel != level;
             this.resolveLevel = level;
-            if (send) {
-                serverPlayerUser.ifPresent(player -> {
-                    PacketManager.sendToClient(new SyncResolveLevelPacket(this.resolveLevel), player);
-                });
-            }
             if (!user.level.isClientSide() && hasPower()) {
                 // FIXME unlock new actions
                 getType().onNewResolveLevel(this);

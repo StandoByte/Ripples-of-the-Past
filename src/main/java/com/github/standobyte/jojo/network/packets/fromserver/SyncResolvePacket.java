@@ -32,8 +32,8 @@ public class SyncResolvePacket {
     public static void handle(SyncResolvePacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
-                power.setResolve(msg.resolve, msg.noDecayTicks);
                 power.setResolveLevel(msg.resolveLevel);
+                power.setResolve(msg.resolve, msg.noDecayTicks);
             });
         });
         ctx.get().setPacketHandled(true);
