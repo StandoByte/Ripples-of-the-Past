@@ -20,7 +20,7 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     boolean usesStamina();
     float getStamina();
     float getMaxStamina();
-    void addStamina(float amount);
+    void addStamina(float amount, boolean sendToClient);
     boolean consumeStamina(float amount);
     void setStamina(float amount);
 
