@@ -3,6 +3,8 @@ package com.github.standobyte.jojo.client;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.AIR;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.FOOD;
 
+import java.util.Random;
+
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
@@ -31,11 +33,13 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Timer;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
@@ -65,29 +69,6 @@ public class ClientEventHandler {
     @Nullable
     private ResourceLocation currentShader;
     private static final ResourceLocation SHADER_TIME_STOP = new ResourceLocation("shaders/post/desaturate.json");
-    private static final ResourceLocation[] SHADERS_HUE_SHIFT = {
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift2.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift3.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift4.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift5.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift6.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift7.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift8.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift9.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift10.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip0.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip1.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip2.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip3.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip4.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip5.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip6.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip7.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip8.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip9.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip10.json"),
-            new ResourceLocation(JojoMod.MOD_ID, "shaders/post/hue_shift_flip11.json")
-    };
     
     private double zoomModifier;
     public boolean isZooming;
@@ -112,10 +93,13 @@ public class ClientEventHandler {
     
     
     
-    // FIXME detete this
+    // FIXME (!) tmp, delete (shaders)
     private static int i = 0;
-    public static void tmpHueShader() {
-        ResourceLocation shader = SHADERS_HUE_SHIFT[i++ % SHADERS_HUE_SHIFT.length];
+    public static void tmpHueShader(boolean random) {
+        int count = HueShiftShaders.SHADERS_HUE_SHIFT.length;
+        int index = random ? new Random().nextInt(count) : i++ % count;
+        ResourceLocation shader = HueShiftShaders.SHADERS_HUE_SHIFT[index];
+        Minecraft.getInstance().player.sendMessage(new StringTextComponent(String.valueOf(index) + ": " + shader.toString()), Util.NIL_UUID);
         Minecraft.getInstance().gameRenderer.loadEffect(shader);
     }
     
@@ -272,7 +256,7 @@ public class ClientEventHandler {
                     }
                     else {
                         ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-                        if (hud.getSelectedAction(ActionType.ATTACK) == ModActions.JONATHAN_OVERDRIVE_BARRAGE.get() /* FIXME && can use it*/) {
+                        if (hud.getSelectedAction(ActionType.ATTACK) == ModActions.JONATHAN_OVERDRIVE_BARRAGE.get() /* FIXME (!) && can use it*/) {
                             FirstPersonRenderer renderer = mc.getItemInHandRenderer();
                             ClientPlayerEntity player = mc.player;
                             Hand swingingArm = MoreObjects.firstNonNull(player.swingingArm, Hand.MAIN_HAND);

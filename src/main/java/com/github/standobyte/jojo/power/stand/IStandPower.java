@@ -33,6 +33,7 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     }
     void addResolve(float amount);
     void setResolve(float amount, int noDecayTicks);
+    void setResolve(float amount, int noDecayTicks, float maxAchievedResolve);
     int getNoResolveDecayTicks();
     int getResolveLevel();
     int getMaxResolveLevel();
@@ -53,8 +54,7 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     @Deprecated
     void setXp(int xp);
     
-    boolean unlockAction(Action<IStandPower> action);
-    float getLearningProgress(Action<IStandPower> action);
+    boolean unlockAction(Action<IStandPower> action, boolean fullyTrained);
     void setLearningProgress(Action<IStandPower> action, float progress);
     void addLearningProgress(Action<IStandPower> action, float progress);
     

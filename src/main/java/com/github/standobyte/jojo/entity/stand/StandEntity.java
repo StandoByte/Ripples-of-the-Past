@@ -1047,7 +1047,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         ActionTarget target = getTaskTarget();
         switch (target.getType()) {
         case EMPTY:
-            // FIXME precision: expand the hitbox of smaller entities more
+            // FIXME (!) precision: expand the hitbox of smaller entities more
             RayTraceResult rayTrace = JojoModUtil.rayTrace(this, getAttributeValue(ForgeMod.REACH_DISTANCE.get()), 
                     entity -> !(entity instanceof LivingEntity) || canAttack((LivingEntity) entity));
             if (rayTrace.getType() == RayTraceResult.Type.ENTITY) {

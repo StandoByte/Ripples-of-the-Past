@@ -55,7 +55,9 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     ActionConditionResult checkTargetType(Action<P> action, ActionTarget target);
     boolean canUsePower();
 
-    void setHeldAction(Action<?> action);
+    float getLearningProgress(Action<P> action);
+
+    void setHeldAction(Action<P> action);
     default Action<P> getHeldAction() {
         return getHeldAction(false);
     }

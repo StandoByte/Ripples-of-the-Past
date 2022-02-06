@@ -51,9 +51,6 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> TOMMY_GUN_NO_AMMO = SOUNDS.register("tommy_gun_no_ammo", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "tommy_gun_no_ammo")));
     
-    public static final RegistryObject<SoundEvent> SHELL_FALLING = SOUNDS.register("shell_falling", 
-            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "shell_falling")));
-    
     public static final RegistryObject<SoundEvent> KNIFE_THROW = SOUNDS.register("knife_throw",
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "knife_throw")));
     

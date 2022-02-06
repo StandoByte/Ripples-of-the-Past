@@ -102,7 +102,7 @@ public class StandEntityTask {
         this.offsetFromUser = offset;
     }
     
-    // FIXME glitches when too close to the task target
+    // FIXME (!) glitches when too close to the task target
     @Nullable
     StandRelativeOffset getOffsetFromUser() {
         return offsetFromUser;

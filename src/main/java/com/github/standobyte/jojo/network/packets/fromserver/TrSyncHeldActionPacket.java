@@ -65,7 +65,7 @@ public class TrSyncHeldActionPacket {
                     }
                     else {
                         if (power.getHeldAction() != msg.action) {
-                            power.setHeldAction(msg.action);
+                            setHeldAction(power, msg.action);
                         }
                         power.refreshHeldActionTickState(msg.requirementsFulfilled);
                     }
@@ -73,5 +73,9 @@ public class TrSyncHeldActionPacket {
             }
         });
         ctx.get().setPacketHandled(true);
+    }
+    
+    private static <P extends IPower<P, ?>> void setHeldAction(IPower<?, ?> power, Action<?> action) {
+        ((P) power).setHeldAction((Action<P>) action);
     }
 }

@@ -327,6 +327,11 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     public boolean canUsePower() {
         return !user.isSpectator();
     }
+
+    @Override
+    public float getLearningProgress(Action<P> action) {
+        return action.isUnlocked(getThis()) ? 1 : 0;
+    }
     
     protected void performAction(Action<P> action, ActionTarget target) {
         if (!action.holdOnly()) {
@@ -339,8 +344,8 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
 
     @Override
-    public void setHeldAction(Action<?> action) {
-        heldActionData = new HeldActionData<P>((Action<P>) action);
+    public void setHeldAction(Action<P> action) {
+        heldActionData = new HeldActionData<P>(action);
         if (!user.level.isClientSide() && action.isHeldSentToTracking()) {
             PacketManager.sendToClientsTracking(new TrSyncHeldActionPacket(user.getId(), getPowerClassification(), action, false), user);
         }

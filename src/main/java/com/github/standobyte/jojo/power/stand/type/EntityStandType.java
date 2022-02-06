@@ -66,6 +66,7 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
     
     @Override
     public void onNewResolveLevel(IStandPower power) {
+        super.onNewResolveLevel(power);
         if (power.isActive()) {
             StandEntity stand = (StandEntity) power.getStandManifestation();
             stand.modifiersFromResolveLevel(power.getStatsDevelopment());

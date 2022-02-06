@@ -346,6 +346,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 for (int i = 0; i < actions.size(); i++) {
                     renderActionIcon(matrixStack, actionType, mode, actions.get(i), target, x + 20 * i, y, partialTick, i == selected, alpha);
                 }
+                // FIXME (progression) render the learning bar (item durability bar)
                 // highlight when hotbar key is pressed
                 boolean highlightSelection = actionType == ActionType.ATTACK ? attackSelection : abilitySelection;
                 if (highlightSelection) {
