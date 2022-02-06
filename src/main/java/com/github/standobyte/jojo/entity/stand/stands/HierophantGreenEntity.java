@@ -118,24 +118,6 @@ public class HierophantGreenEntity extends StandEntity {
     private void setPlacedBarriersCount(int value) {
         entityData.set(PLACED_BARRIERS, value);
     }
-    
-    @Override
-    public void onSyncedDataUpdated(DataParameter<?> parameter) {
-        super.onSyncedDataUpdated(parameter);
-        if (level.isClientSide() && PLACED_BARRIERS.equals(parameter)) {
-            // FIXME action learning progress
-//            ActionsOverlayGui.getInstance().updateActionName(ModActions.HIEROPHANT_GREEN_BARRIER.get(), ActionType.ABILITY);
-        }
-    }
-    
-    @Override
-    public void remove() {
-        super.remove();
-        if (level.isClientSide()) {
-            // FIXME action learning progress
-//            ActionsOverlayGui.getInstance().updateActionName(ModActions.HIEROPHANT_GREEN_BARRIER.get(), ActionType.ABILITY);
-        }
-    }
 
     @Override
     protected void defineSynchedData() {

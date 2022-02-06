@@ -305,6 +305,8 @@
   "jojo.config.client.showModeSelector.tooltip": "Whether or not a list of available Powers shows up when switching a HUD mode.",
   "jojo.config.client.slotHotkeys": "Attack & Ability slot hotkeys",
   "jojo.config.client.slotHotkeys.tooltip": "Enable hotkey settings for each individual attack and ability from 1 to 9. Changing the setting requires restarting the game.",
+  "jojo.config.client.resolveShaders": "Resolve shaders",
+  "jojo.config.client.resolveShaders.tooltip": "Enable shaders during Resolve effect.",
   
   "stand.unknown": "Unknown stand: %s",
   "commands.stand.give.success.single": "Gave %s to %s",

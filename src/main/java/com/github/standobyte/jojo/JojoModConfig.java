@@ -195,6 +195,8 @@ public class JojoModConfig {
         
         public final ForgeConfigSpec.BooleanValue slotHotkeys;
         
+        public final ForgeConfigSpec.BooleanValue resolveShaders; // FIXME (!) check the shader setting
+        
         Client(ForgeConfigSpec.Builder builder) {
             barsPosition = builder
                     .comment(" Position of Energy, Stamina and Resolve bars in the HUD.")
@@ -216,6 +218,11 @@ public class JojoModConfig {
                             "  If your client is launched, changing the setting requires restarting the game.")
                     .translation("jojo.config.client.slotHotkeys")
                     .define("slotHotkeys", true);
+            
+            resolveShaders = builder
+                    .comment(" Enable shaders during Resolve effect.")
+                    .translation("jojo.config.client.resolveShaders")
+                    .define("resolveShaders", true);
         }
     }
 

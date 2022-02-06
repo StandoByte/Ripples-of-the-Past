@@ -1,7 +1,9 @@
 package com.github.standobyte.jojo.power.stand.type;
 
+import java.util.Arrays;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import com.github.standobyte.jojo.action.actions.StandAction;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
@@ -113,7 +115,18 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         return 4;
     }
     
-    public void onNewResolveLevel(IStandPower power) {}
+    public void onNewResolveLevel(IStandPower power) {
+        unlockNewActions(power);
+    }
+    
+    public void unlockNewActions(IStandPower power) {
+        Stream.concat(Arrays.stream(attacks), Arrays.stream(abilities))
+        .forEach(action -> {
+            if (!action.isUnlocked(power) && action.canBeUnlocked(power)) {
+                power.unlockAction(action, power.isUserCreative() ? true : !action.isTrained());
+            }
+        });
+    }
     
     public boolean usesStandComboMechanic() {
         return false;

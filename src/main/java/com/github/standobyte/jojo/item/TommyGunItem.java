@@ -59,7 +59,7 @@ public class TommyGunItem extends Item {
                     bullet.shootFromRotation(entity, 20F, 0);
                     world.addFreshEntity(bullet);
                     consumeAmmo(stack);
-                    // FIXME gun shot visual effect
+                    // FIXME (!) gun shot visual effect
                 }
             }
             else {
@@ -105,7 +105,7 @@ public class TommyGunItem extends Item {
         if (ammoToLoad > 0) {
             if (entity instanceof PlayerEntity) {
                 PlayerEntity player = (PlayerEntity) entity;
-                // FIXME tommy gun ammo
+                // FIXME (!) tommy gun ammo
 //                if (!player.abilities.instabuild) {
 //                    for (int i = 0; i < player.inventory.getContainerSize(); ++i) {
 //                        ItemStack ammoStack = player.inventory.getItem(i);

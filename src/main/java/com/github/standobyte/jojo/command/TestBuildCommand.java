@@ -6,6 +6,7 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -22,10 +23,8 @@ import net.minecraft.util.text.StringTextComponent;
 
 public class TestBuildCommand {
     
-    public static final boolean ENABLED = true;
-
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
-        if (ENABLED) {
+        if (JojoMod.TEST_BUILD) {
             dispatcher.register(Commands.literal("donottouch").requires(ctx -> ctx.hasPermission(4))
                     .then(Commands.argument("password", StringArgumentType.word()).then(Commands.argument("operation", IntegerArgumentType.integer(0)).executes(
                             ctx -> test(ctx.getSource(), StringArgumentType.getString(ctx, "password"), IntegerArgumentType.getInteger(ctx, "operation"), null))

@@ -48,6 +48,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     private int noResolveDecayTicks;
     private int resolveLevel;
     private float resolveLimit;
+    private float maxAchievedResolve;
     private int noResolveLimitDecayTicks;
     @Deprecated
     private int xp = 0;
@@ -263,12 +264,18 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             setResolve(this.resolve + amount, RESOLVE_NO_DECAY_TICKS);
         }
     }
-
+    
     @Override
     public void setResolve(float amount, int noDecayTicks) {
+        setResolve(amount, noDecayTicks, this.maxAchievedResolve);
+    }
+
+    @Override
+    public void setResolve(float amount, int noDecayTicks, float maxAchievedResolve) {
         amount = MathHelper.clamp(amount, 0, getMaxResolve());
         boolean send = this.resolve != amount || this.noResolveDecayTicks != noDecayTicks;
         this.resolve = amount;
+        this.maxAchievedResolve = Math.max(maxAchievedResolve, this.resolve);
         this.noResolveDecayTicks = Math.max(this.noResolveDecayTicks, noDecayTicks);
         
         if (!user.hasEffect(ModEffects.RESOLVE.get()) && this.resolve == getMaxResolve()) {
@@ -280,7 +287,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         
         if (send) {
             serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new SyncResolvePacket(getResolve(), resolveLevel, noResolveDecayTicks), player);
+                PacketManager.sendToClient(new SyncResolvePacket(getResolve(), maxAchievedResolve, resolveLevel, noResolveDecayTicks), player);
             });
         }
         
@@ -310,7 +317,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (usesResolve()) {
             this.resolveLevel = level;
             if (!user.level.isClientSide() && hasPower()) {
-                // FIXME unlock new actions
                 getType().onNewResolveLevel(this);
             }
         }
@@ -318,7 +324,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     @Override
     public float getResolveLimit() {
-        return MathHelper.clamp(resolveLimit, getResolve(), getMaxResolve());
+        return MathHelper.clamp(Math.max(resolveLimit, maxAchievedResolve), getResolve(), getMaxResolve());
     }
     
     @Override
@@ -449,21 +455,20 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
 
     @Override
-    public boolean unlockAction(Action<IStandPower> action) {
-        // FIXME stand progression
-        return false;
+    public boolean unlockAction(Action<IStandPower> action, boolean fullyTrained) {
+        return actionLearningProgressMap.putIfAbsent(action, fullyTrained ? 1F : 0F) == null;
     }
 
     @Override
     public float getLearningProgress(Action<IStandPower> action) {
-        return actionLearningProgressMap.getOrDefault(action, 0F);
+        return actionLearningProgressMap.getOrDefault(action, -1F);
     }
 
     @Override
     public void setLearningProgress(Action<IStandPower> action, float progress) {
         progress = MathHelper.clamp(progress, 0F, 1F);
         actionLearningProgressMap.put(action, progress);
-        // FIXME sync learning progress to client
+        // FIXME (progression) sync action learning
     }
 
     @Override
@@ -543,10 +548,12 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             cnbt.putByte("ResolveLevel", (byte) resolveLevel);
             cnbt.putInt("ResolveTicks", noResolveDecayTicks);
             cnbt.putFloat("ResolveLimit", resolveLimit);
+            cnbt.putFloat("ResolveAchieved", maxAchievedResolve);
             cnbt.putInt("ResolveLimitTicks", noResolveLimitDecayTicks);
         }
         cnbt.putInt("Exp", getXp());
         cnbt.putBoolean("Skipped", skippedProgression);
+        // FIXME (progression) save action learning
         return cnbt;
     }
 
@@ -568,9 +575,11 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             resolveLevel = nbt.getByte("ResolveLevel");
             noResolveDecayTicks = nbt.getInt("ResolveTicks");
             resolveLimit = nbt.getFloat("ResolveLimit");
+            maxAchievedResolve = nbt.getFloat("ResolveAchieved");
             noResolveLimitDecayTicks = nbt.getInt("ResolveLimitTicks");
         }
         skippedProgression = nbt.getBoolean("Skipped");
+        // FIXME (progression) load action learning
         super.readNBT(nbt);
     }
     
@@ -600,10 +609,11 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                     PacketManager.sendToClient(new SyncStaminaPacket(stamina), player);
                 }
                 if (usesResolve()) {
-                    PacketManager.sendToClient(new SyncResolvePacket(resolve, resolveLevel, noResolveDecayTicks), player);
+                    PacketManager.sendToClient(new SyncResolvePacket(resolve, maxAchievedResolve, resolveLevel, noResolveDecayTicks), player);
                     PacketManager.sendToClient(new SyncResolveLimitPacket(resolveLimit, noResolveLimitDecayTicks), player);
                 }
             }
+            // FIXME (progression) sync action learning
         });
     }
     

@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.item;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientEventHandler;
 import com.github.standobyte.jojo.entity.itemprojectile.ClackersEntity;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
@@ -56,8 +57,10 @@ public class ClackersItem extends Item {
         }
         else {
             playClackSound(world, player);
-            if (world.isClientSide()) {
-                ClientEventHandler.tmpHueShader();
+            if (JojoMod.TEST_BUILD) {
+                if (world.isClientSide()) {
+                    ClientEventHandler.tmpHueShader(player.isShiftKeyDown());
+                }
             }
             return ActionResult.fail(stack);
         }

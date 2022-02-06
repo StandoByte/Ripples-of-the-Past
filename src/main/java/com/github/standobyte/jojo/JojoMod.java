@@ -33,6 +33,8 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 public class JojoMod {
 	public static final String MOD_ID = "jojo";
 	public static final Logger LOGGER = LogManager.getLogger();
+    public static final boolean TEST_BUILD = true;
+    
 	public static final ItemGroup MAIN_TAB = new ItemGroup("jojo_tab") {
 	    @Override
         public ItemStack makeIcon() {

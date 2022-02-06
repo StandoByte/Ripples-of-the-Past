@@ -1,26 +1,23 @@
 package com.github.standobyte.jojo.action.actions;
 
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public abstract class StandAction extends Action<IStandPower> {
     @Deprecated
     protected final int xpRequirement;
-    private final float resolveRatioToUnlock;
-    private final boolean unlockedByDefault;
+    private final float resolveLevelToUnlock;
+    private final boolean isTrained;
     private final boolean autoSummonStand;
     
     public StandAction(StandAction.AbstractBuilder<?> builder) {
         super(builder);
         this.xpRequirement = builder.xpRequirement;
-        this.resolveRatioToUnlock = builder.resolveRatioToUnlock;
-        this.unlockedByDefault = this.resolveRatioToUnlock == 0;
+        this.resolveLevelToUnlock = builder.resolveLevelToUnlock;
+        this.isTrained = builder.isTrained;
         this.autoSummonStand = builder.autoSummonStand;
     }
 
@@ -31,7 +28,19 @@ public abstract class StandAction extends Action<IStandPower> {
     
     @Override
     public boolean isUnlocked(IStandPower power) {
-        return true || unlockedByDefault || power.getLearningProgress(this) >= 0; // FIXME stand progression
+        return true || power.getLearningProgress(this) >= 0;
+    }
+    
+    public boolean canBeUnlocked(IStandPower power) {
+        return isUnlockedByDefault() || power.getResolveLevel() >= resolveLevelToUnlock;
+    }
+    
+    private boolean isUnlockedByDefault() {
+        return resolveLevelToUnlock == 0;
+    }
+    
+    public boolean isTrained() {
+        return isTrained;
     }
     
     public float getStaminaCost(IStandPower stand) {
@@ -58,7 +67,8 @@ public abstract class StandAction extends Action<IStandPower> {
     protected abstract static class AbstractBuilder<T extends StandAction.AbstractBuilder<T>> extends Action.AbstractBuilder<T> {
         @Deprecated
         private int xpRequirement;
-        private float resolveRatioToUnlock = 0;
+        private int resolveLevelToUnlock = 0;
+        private boolean isTrained = false;
         private boolean autoSummonStand = false;
 
         @Deprecated
@@ -67,9 +77,13 @@ public abstract class StandAction extends Action<IStandPower> {
             return getThis();
         }
         
-        // FIXME (resolve) actions and resolve level
-        public T resolveToUnlock(float resolveRatio) {
-            this.resolveRatioToUnlock = MathHelper.clamp(resolveRatio, 0, 1);
+        public T resolveLevelToUnlock(int level) {
+            this.resolveLevelToUnlock = Math.max(0, level);
+            return getThis();
+        }
+        
+        public T isTrained() {
+            this.isTrained = true;
             return getThis();
         }
         
