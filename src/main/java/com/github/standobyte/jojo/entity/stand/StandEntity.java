@@ -1062,15 +1062,18 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         default:
             break;
         }
-        
+
         boolean punched;
         switch (target.getType()) {
         case BLOCK:
             punched = breakBlock(target.getBlockPos());
+            break;
         case ENTITY:
             punched = attackEntity(target.getEntity(level), punch, distance);
+            break;
         default:
             punched = false;
+            break;
         }
 
         if (punch == PunchType.HEAVY) {
