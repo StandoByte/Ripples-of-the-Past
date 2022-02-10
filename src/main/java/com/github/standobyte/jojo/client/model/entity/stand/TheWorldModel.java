@@ -9,8 +9,12 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 
 public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
     private final ModelRenderer slope;
-    private final ModelRenderer bone1;
-    private final ModelRenderer bone2;
+    private final ModelRenderer slopeBack;
+    private final ModelRenderer slopeBackLeft;
+    private final ModelRenderer slopeBackRight;
+    private final ModelRenderer faceRight;
+    private final ModelRenderer faceLeft;
+    private final ModelRenderer slopeFrontLow;
     private final ModelRenderer leftCable;
     private final ModelRenderer rightCable;
     private final ModelRenderer heartSmallHead;
@@ -49,6 +53,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         super(textureWidth, textureHeight);
 
 //        head.texOffs(48, 0).addBox(-2.5F, -2.75F, -5.5F, 5.0F, 5.0F, 3.0F, -1.75F, false);
+        head.texOffs(34, 24).addBox(-4.0F, -8.3F, -4.0F, 8.0F, 6.0F, 1.0F, 0.2F, false);
 
 
         heartSmallHead = new ModelRenderer(this);
@@ -72,25 +77,50 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         heartSmallHead.addChild(smallHeartCube6);
         setRotationAngle(smallHeartCube6, 0.0F, 0.0F, -0.7854F);
         smallHeartCube6.texOffs(60, 8).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
-        
+
         
         slope = new ModelRenderer(this);
-        slope.setPos(0.0F, -6.3F, -0.5F);
+        slope.setPos(0.0F, -8.5F, -4.2F);
         head.addChild(slope);
         setRotationAngle(slope, 0.2618F, 0.0F, 0.0F);
-        slope.texOffs(0, 16).addBox(-4.0F, -3.0F, -4.5F, 8.0F, 6.0F, 9.0F, 0.1F, false);
+        slope.texOffs(0, 16).addBox(-4.0F, 0.2F, 0.2F, 8.0F, 6.0F, 8.0F, 0.2F, false);
 
-        bone1 = new ModelRenderer(this);
-        bone1.setPos(-4.1F, -3.1F, -4.6F);
-        slope.addChild(bone1);
-        setRotationAngle(bone1, 0.0F, 0.219F, 0.0F);
-        bone1.texOffs(25, 16).addBox(0.1F, 0.1F, 0.1F, 4.0F, 6.0F, 1.0F, 0.1F, false);
+        slopeBack = new ModelRenderer(this);
+        slopeBack.setPos(0.0F, 0.0F, 8.4F);
+        slope.addChild(slopeBack);
+        setRotationAngle(slopeBack, -0.2618F, 0.0F, 0.0F);
+        slopeBack.texOffs(35, 17).addBox(-4.0F, 0.2F, 0.2F, 8.0F, 6.0F, 0.0F, 0.2F, false);
+        slopeBack.texOffs(34, 17).addBox(-4.0F, 1.3F, -1.2F, 8.0F, 5.0F, 1.0F, 0.2F, false);
 
-        bone2 = new ModelRenderer(this);
-        bone2.setPos(4.1F, -3.1F, -4.6F);
-        slope.addChild(bone2);
-        setRotationAngle(bone2, 0.0F, -0.219F, 0.0F);
-        bone2.texOffs(35, 16).addBox(-4.1F, 0.1F, 0.1F, 4.0F, 6.0F, 1.0F, 0.1F, false);
+        slopeBackLeft = new ModelRenderer(this);
+        slopeBackLeft.setPos(0.0F, 6.4F, 6.3F);
+        slope.addChild(slopeBackLeft);
+        setRotationAngle(slopeBackLeft, 0.1371F, 0.0F, 0.0F);
+        slopeBackLeft.texOffs(34, 20).addBox(-0.718F, -0.918F, -0.082F, 5.0F, 1.0F, 1.0F, -0.082F, false);
+
+        slopeBackRight = new ModelRenderer(this);
+        slopeBackRight.setPos(-0.5F, 6.4F, 6.3F);
+        slope.addChild(slopeBackRight);
+        setRotationAngle(slopeBackRight, 0.1371F, 0.0F, 0.0F);
+        slopeBackRight.texOffs(34, 20).addBox(-3.782F, -0.918F, -0.082F, 5.0F, 1.0F, 1.0F, -0.082F, false);
+
+        faceRight = new ModelRenderer(this);
+        faceRight.setPos(-4.2F, -8.5F, -4.2F);
+        head.addChild(faceRight);
+        setRotationAngle(faceRight, 0.0F, 0.3023F, 0.0F);
+        faceRight.texOffs(24, 16).addBox(0.2F, 0.2F, 0.2F, 4.0F, 6.0F, 1.0F, 0.2F, false);
+
+        faceLeft = new ModelRenderer(this);
+        faceLeft.setPos(4.2F, -8.5F, -4.2F);
+        head.addChild(faceLeft);
+        setRotationAngle(faceLeft, 0.0F, -0.3023F, 0.0F);
+        faceLeft.texOffs(24, 16).addBox(-4.2F, 0.2F, 0.2F, 4.0F, 6.0F, 1.0F, 0.2F, false);
+
+        slopeFrontLow = new ModelRenderer(this);
+        slopeFrontLow.setPos(0.0F, -2.1F, -2.8F);
+        head.addChild(slopeFrontLow);
+        setRotationAngle(slopeFrontLow, 0.3665F, 0.0F, 0.0F);
+        slopeFrontLow.texOffs(34, 24).addBox(-4.0F, -1.2F, 0.2F, 8.0F, 1.0F, 1.0F, 0.2F, false);
         
         
         leftCable = new ModelRenderer(this);
@@ -154,8 +184,8 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         setRotationAngle(smallHeartCube3, 0.0F, 0.0F, -0.7854F);
         smallHeartCube3.texOffs(60, 8).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
 
-        
-        leftArm.texOffs(34, 25).addBox(0.0F, -2.0F, -2.0F, 2.0F, 4.0F, 4.0F, 0.25F, true);
+
+        leftArm.texOffs(48, 0).addBox(0.0F, -2.0F, -2.0F, 2.0F, 4.0F, 4.0F, 0.25F, true);
         
 //        leftArmJoint.texOffs(48, 0).addBox(-2.5F, -3.5F, 0.7F, 5.0F, 5.0F, 3.0F, -1.25F, false);
 
@@ -184,10 +214,11 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         
 
         leftForeArm.texOffs(36, 35).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 5.0F, 4.0F, -0.251F, true);
-        leftForeArm.texOffs(0, 19).addBox(1.6F, 2.5F, -1.5F, 1.0F, 3.0F, 3.0F, -0.4F, true);
-        leftForeArm.texOffs(12, 33).addBox(1.5F, 5.1F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, true);
+        leftForeArm.texOffs(12, 42).addBox(1.6F, 2.5F, -1.5F, 1.0F, 3.0F, 3.0F, -0.4F, true);
+        leftForeArm.texOffs(26, 39).addBox(1.5F, 5.1F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, true);
+        
 
-        rightArm.texOffs(34, 25).addBox(-2.0F, -2.0F, -2.0F, 2.0F, 4.0F, 4.0F, 0.25F, false);
+        rightArm.texOffs(48, 0).addBox(-2.0F, -2.0F, -2.0F, 2.0F, 4.0F, 4.0F, 0.25F, false);
 
 //        rightArmJoint.texOffs(48, 0).addBox(-2.5F, -3.5F, 0.7F, 5.0F, 5.0F, 3.0F, -1.25F, false);
 
@@ -216,8 +247,8 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         
 
         rightForeArm.texOffs(36, 35).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 5.0F, 4.0F, -0.251F, false);
-        rightForeArm.texOffs(0, 19).addBox(-2.6F, 2.5F, -1.5F, 1.0F, 3.0F, 3.0F, -0.4F, false);
-        rightForeArm.texOffs(12, 33).addBox(-2.5F, 5.1F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, false);
+        rightForeArm.texOffs(12, 42).addBox(-2.6F, 2.5F, -1.5F, 1.0F, 3.0F, 3.0F, -0.4F, false);
+        rightForeArm.texOffs(26, 39).addBox(-2.5F, 5.1F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, false);
 
         leftLeg.texOffs(12, 54).addBox(1.6F, -1.0F, -1.0F, 1.0F, 2.0F, 2.0F, 0.0F, true);
         
