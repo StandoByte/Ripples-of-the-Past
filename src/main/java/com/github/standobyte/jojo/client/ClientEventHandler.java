@@ -238,13 +238,6 @@ public class ClientEventHandler {
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGH)
-    public void cancelHandRender(RenderHandEvent event) {
-        if (ActionsOverlayGui.getInstance().shouldCancelHandRender(event.getHand())) {
-            event.setCanceled(true);
-        }
-    }
-
     @SubscribeEvent(priority = EventPriority.LOW)
     public void onRenderHand(RenderHandEvent event) {
         if (event.getHand() == Hand.MAIN_HAND) {

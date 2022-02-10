@@ -44,7 +44,6 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.settings.AttackIndicatorStatus;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.ColorHelper;
-import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.RayTraceResult;
@@ -90,11 +89,6 @@ public class ActionsOverlayGui extends AbstractGui {
     
     private boolean attackSelection;
     private boolean abilitySelection;
-    
-    private boolean attackNoMainHand;
-    private boolean attackNoOffHand;
-    private boolean abilityNoMainHand;
-    private boolean abilityNoOffHand;
     
     private ActionsOverlayGui(Minecraft mc) {
         this.mc = mc;
@@ -176,11 +170,6 @@ public class ActionsOverlayGui extends AbstractGui {
         updateElementPositions(barsPosConfig, hotbarsPosConfig, screenWidth, screenHeight);
 
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
-            attackNoMainHand = false;
-            attackNoOffHand = true;
-            abilityNoMainHand = false;
-            abilityNoOffHand = false;
-            
             RenderSystem.enableRescaleNormal();
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
@@ -454,34 +443,11 @@ public class ActionsOverlayGui extends AbstractGui {
             boolean rightTarget = power.checkTargetType(action, mouseTarget).isPositive();
             mode.getTargetIcon(hotbar).update(action.getTargetRequirement(), rightTarget);
             boolean available = rightTarget && power.checkRequirements(action, mouseTarget, false).isPositive();
-            boolean noHand = available && action.cancelsVanillaClick();
-            boolean noMainHand = noHand && action.cancelHandRender(power.getUser(), Hand.MAIN_HAND);
-            boolean noOffHand = noHand && action.cancelHandRender(power.getUser(), Hand.OFF_HAND);
-            switch (hotbar) {
-            case ATTACK:
-                attackNoMainHand = noMainHand;
-                attackNoOffHand = noHand ? action.cancelHandRender(power.getUser(), Hand.OFF_HAND) : true;
-                break;
-            case ABILITY:
-                abilityNoMainHand = noMainHand;
-                abilityNoOffHand = noOffHand;
-                break;
-            }
             return available;
         }
         else {
             return power.checkRequirements(action, mouseTarget, true).isPositive();
         }
-    }
-    
-    public boolean shouldCancelHandRender(Hand hand) {
-        switch (hand) {
-        case OFF_HAND:
-            return attackNoOffHand && abilityNoOffHand;
-        case MAIN_HAND:
-            return attackNoMainHand && abilityNoMainHand;
-        }
-        return false;
     }
     
     private void fillRect(BufferBuilder bufferBuilder, int x, double y, int width, double height, int red, int green, int blue, int alpha) {
