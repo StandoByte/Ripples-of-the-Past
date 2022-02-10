@@ -10,7 +10,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.PotionItem;
-import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
 public class HamonCutter extends HamonAction {
@@ -27,10 +26,10 @@ public class HamonCutter extends HamonAction {
         return ActionConditionResult.POSITIVE;
     }
 
-    @Override
-    public boolean cancelHandRender(LivingEntity user, Hand hand) {
-        return hand == Hand.OFF_HAND ? !(user.getOffhandItem().getItem() instanceof PotionItem) : false;
-    }
+//    @Override
+//    public boolean cancelHandRender(LivingEntity user, Hand hand) {
+//        return hand == Hand.OFF_HAND ? !(user.getOffhandItem().getItem() instanceof PotionItem) : false;
+//    }
 
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {

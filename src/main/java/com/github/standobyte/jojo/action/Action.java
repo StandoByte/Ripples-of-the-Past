@@ -122,9 +122,9 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return ActionConditionResult.POSITIVE;
     }
     
-    public boolean cancelHandRender(LivingEntity user, Hand hand) {
-        return !itemChecks.containsKey(hand);
-    }
+//    public boolean cancelHandRender(LivingEntity user, Hand hand) {
+//        return !itemChecks.containsKey(hand);
+//    }
     
     public boolean ignoresPerformerStun() {
         return ignoresPerformerStun;

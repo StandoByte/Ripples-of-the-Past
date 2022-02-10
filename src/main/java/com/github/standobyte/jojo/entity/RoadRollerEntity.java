@@ -27,7 +27,7 @@ import net.minecraftforge.fml.network.NetworkHooks;
 
 public class RoadRollerEntity extends Entity {
     private static final DataParameter<Float> HEALTH = EntityDataManager.defineId(RoadRollerEntity.class, DataSerializers.FLOAT);
-    private static final float MAX_HEALTH = 100;
+    private static final float MAX_HEALTH = 50;
     private int explosionTimeStamp = -1;
     private int ticksInAir = 0;
 
@@ -75,7 +75,7 @@ public class RoadRollerEntity extends Entity {
         }
         Vector3d movement = getDeltaMovement();
         if (!isNoGravity()) {
-            setDeltaMovement(movement.add(-movement.x, -0.04D, -movement.z));
+            setDeltaMovement(movement.add(-movement.x, -0.0467D, -movement.z));
         }
         boolean wasOnGround = onGround;
         move(MoverType.SELF, getDeltaMovement());

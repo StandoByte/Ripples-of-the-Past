@@ -1073,6 +1073,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             break;
         default:
             punched = false;
+            if (punch == PunchType.LIGHT) {
+                addComboMeter(-0.05F, 0);
+            }
             break;
         }
 
@@ -1310,10 +1313,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                     }
                     break;
                 case LIGHT:
-                    addComboMeter(0.32F, COMBO_TICKS);
+                    addComboMeter(0.3F, COMBO_TICKS);
                     break;
                 case BARRAGE:
-                    addComboMeter(0.0015F, COMBO_TICKS * 2);
+                    addComboMeter(0.0015F, COMBO_TICKS);
                     break;
                 }
                 LivingEntity user = getUser();
