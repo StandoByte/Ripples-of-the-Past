@@ -4,6 +4,8 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.util.MathUtil;
+
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.util.CombatRules;
@@ -11,23 +13,22 @@ import net.minecraft.util.math.MathHelper;
 
 public class StandStatFormulas {
 
-    public static final float getHeavyAttackDamage(double strength, @Nullable LivingEntity armoredTarget) {
+    public static final float getHeavyAttackDamage(double strength, float armorPiercing, @Nullable LivingEntity armoredTarget) {
         float damage = Math.max((float) strength, 1F);
         if (armoredTarget != null) {
             float armor = (float) armoredTarget.getArmorValue();
             float toughness = (float) armoredTarget.getAttributeValue(Attributes.ARMOR_TOUGHNESS);
-            float armorPiercing = MathHelper.clamp(getHeavyAttackArmorPiercing(strength), 0, 1);
-            float damagePierced = MathHelper.lerp(armorPiercing, CombatRules.getDamageAfterAbsorb(damage, armor, toughness), damage);
-            // i'm too dumb to figure out the formula there
-            while (CombatRules.getDamageAfterAbsorb(damage, armor, toughness) < damagePierced) {
-                damage += 0.5F;
+            if (armor > 0 && toughness > 0 && armorPiercing > 0) {
+                armorPiercing = MathHelper.clamp(armorPiercing, 0, 1);
+                float damagePierced = MathHelper.lerp(armorPiercing, CombatRules.getDamageAfterAbsorb(damage, armor, toughness), damage);
+                damage = MathUtil.inverseArmorProtectionDamage(damagePierced, armor, toughness);
             }
         }
         return damage;
     }
-    
-    private static final float getHeavyAttackArmorPiercing(double strength) {
-        return (float) strength * 0.025F * 0;
+
+    public static final float getHeavyAttackArmorPiercing(double strength) {
+        return (float) strength * 0.0125F;
     }
     
     public static final int getHeavyAttackWindup(double speed, float comboMeter) {
@@ -46,16 +47,21 @@ public class StandStatFormulas {
         return 0.5F + (float) strength * 0.25F;
     }
     
-    public static final int getLightAttackWindup(double speed) {
-        return Math.max(5 - MathHelper.log2((int) speed), 1);
-    }
-    
-    public static final int getLightAttackComboDelay(double speed) {
-        return MathHelper.floor((40.0 - speed * 1.25) / 6.0);
+    public static final int getLightAttackWindup(double speed, float recovery) {
+        int ticks = Math.max(5 - MathHelper.log2((int) speed), 1);
+        float earlyStartMultiplier = 2F * (0.5F - recovery);
+        if (earlyStartMultiplier > 0) {
+            ticks += (int) (lightAttackRecovery(speed) * earlyStartMultiplier);
+        }
+        return ticks;
     }
     
     public static final int getLightAttackRecovery(double speed) {
-        return MathHelper.floor((40.0 - speed * 1.25) / 6.0);
+        return Math.round(lightAttackRecovery(speed));
+    }
+    
+    private static final float lightAttackRecovery(double speed) {
+        return Math.max((40.0F - (float) speed * 1.25F) / 3.0F, 0);
     }
     
     public static final float getParryTiming(double precision) {
@@ -66,8 +72,9 @@ public class StandStatFormulas {
     
     public static final float getBarrageHitDamage(double strength, double precision, Random random) {
         float damage = 0.04F + (float) strength * 0.01F;
-        if (precision > 0 && random.nextDouble() < Math.min(precision / 16, 0.5)) {
-            damage *= Math.min(1 + (float) precision / 32, 2);
+        if (precision > 0) {
+            double pr = precision / 16;
+            damage *= 1 + pr * 0.5 * Math.min(pr, 0.5);
         }
         return damage;
     }
@@ -77,7 +84,7 @@ public class StandStatFormulas {
     }
     
     public static final int getBarrageRecovery(double speed) {
-        return MathHelper.floor((40.0 - speed * 1.25) / 6.0);
+        return MathHelper.floor((40.0 - speed * 1.25) / 5.0);
     }
     
     public static final int getBarrageMaxDuration(double durability) {

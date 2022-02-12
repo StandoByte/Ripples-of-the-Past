@@ -36,7 +36,7 @@ public abstract class StandEntityAction extends StandAction {
     protected final StandRelativeOffset userOffset;
     @Nullable
     protected final StandRelativeOffset userOffsetArmsOnly;
-    private final boolean enablePhysics;
+    public final boolean enablePhysics;
     private final Supplier<SoundEvent> standSoundSupplier;
     
     public StandEntityAction(StandEntityAction.AbstractBuilder<?> builder) {
@@ -165,10 +165,11 @@ public abstract class StandEntityAction extends StandAction {
             if (standTakesCrosshairTarget(target)) {
                 standEntity.setTaskTarget(target);
             }
-            if (enablePhysics) {
-                standEntity.setNoPhysics(false);
-            }
         }
+    }
+    
+    public boolean canBeScheduled(IStandPower standPower, StandEntity standEntity) {
+        return true;
     }
     
     public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase) {}

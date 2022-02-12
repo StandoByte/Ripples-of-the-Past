@@ -10,4 +10,9 @@ public class TheWorldEntity extends StandEntity {
     public TheWorldEntity(StandEntityType<TheWorldEntity> type, World world) {
         super(type, world);
     }
+    
+    @Override
+    protected float getHeavyAttackArmorPiercing(double strength) {
+        return super.getHeavyAttackArmorPiercing(strength) * 2F;
+    }
 }

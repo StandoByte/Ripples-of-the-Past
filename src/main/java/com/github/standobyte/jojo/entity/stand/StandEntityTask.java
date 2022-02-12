@@ -91,7 +91,7 @@ public class StandEntityTask {
     }
     
     public float getTaskCompletion(float partialTick) {
-        return 1F - ((float) ticksLeft - partialTick) / (float) startingTicks;
+        return Math.min(1F - ((float) ticksLeft - partialTick) / (float) startingTicks, 1F);
     }
     
     public StandEntityAction.Phase getPhase() {
