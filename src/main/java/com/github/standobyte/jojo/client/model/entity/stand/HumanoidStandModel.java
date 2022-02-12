@@ -231,6 +231,8 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
             this.upperPart.yRot *= -1.0F;
         }
 
+        swing = MathHelper.clamp(swing, 0, 1);
+        
         punchingArm.zRot = 1.0472F + swing * 0.5236F;
         otherArm.zRot = 1.5708F - swing * 0.5236F;
         leftArm.zRot *= -1.0F;
@@ -312,16 +314,29 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         float swing = phase == Phase.WINDUP ? progress : 1F;
         swingArm(entity, swing, xRotation,
                 entity.swingingArm == Hand.MAIN_HAND ? entity.getMainArm() : entity.getMainArm().getOpposite(), 
-                        phase == Phase.RECOVERY ? Math.max(progress * 2F - 1F, 0F) : 0F);
+                        phase == Phase.RECOVERY ? Math.max(4F * (progress - 1) + 1, 0F) : 0F);
     }
 
     @Override
     protected void heavyAttackPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
         float progress = entity.getCurrentTaskCompletion(ticks - entity.tickCount);
-        float swing = phase == Phase.WINDUP ? progress : 1F;
+        float swing = 0F;
+        switch (phase) {
+        case WINDUP:
+            swing = -progress * 0.75F;
+            break;
+        case PERFORM:
+            swing = 1.75F * progress - 0.75F;
+            break;
+        case RECOVERY:
+            swing = 1F;
+            break;
+        default:
+            break;
+        }
         swingArm(entity, swing, xRotation,
                 entity.swingingArm == Hand.MAIN_HAND ? entity.getMainArm() : entity.getMainArm().getOpposite(), 
-                        phase == Phase.RECOVERY ? Math.max(progress * 2F - 1F, 0F) : 0F);
+                        phase == Phase.RECOVERY ? Math.max(2F * (progress - 1) + 1, 0F) : 0F);
     }
     
     @Override

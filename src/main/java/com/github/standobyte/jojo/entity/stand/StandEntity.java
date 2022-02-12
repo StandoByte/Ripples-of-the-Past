@@ -626,9 +626,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     protected void actuallyHurt(DamageSource dmgSource, float damageAmount) {
         boolean blockableAngle = canBlockOrParryFromAngle(dmgSource);
         if (!dmgSource.isBypassArmor() && blockableAngle && getCurrentTask() == null
-                && setTask(ModActions.STAND_ENTITY_BLOCK.get(), 5, StandEntityAction.Phase.PERFORM)) {
-            setNoPhysics(false);
-        }
+                && setTask(ModActions.STAND_ENTITY_BLOCK.get(), 5, StandEntityAction.Phase.PERFORM)) {}
         if (transfersDamage() && hasUser()) {
             LivingEntity user = getUser();
             if (user != null && user.isAlive()) {
@@ -923,10 +921,13 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         if (!level.isClientSide()) {
             if (stopTask(task.getAction(), false) && getCurrentTask() == null) {
                 entityData.set(CURRENT_TASK, Optional.of(task));
+                if (task.getAction().enablePhysics) {
+                    setNoPhysics(false);
+                }
                 userPower.consumeStamina(task.getAction().getStaminaCost(userPower));
                 return true;
             }
-            else {
+            else if (task.getAction().canBeScheduled(userPower, this)) {
                 this.scheduledTask = task;
             }
         }
@@ -936,6 +937,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public void stopTask() {
         stopTask(null, false);
     }
+    
+    // FIXME (!) 'doRecovery' parameter FIXME (!) stopTask in arms only mode unsummons the stand, making it unable to combo punch
     
     protected void stopTask(boolean stopNonCancelable) {
         stopTask(null, stopNonCancelable);
@@ -1074,13 +1077,13 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         default:
             punched = false;
             if (punch == PunchType.LIGHT) {
-                addComboMeter(-0.05F, 0);
+                addComboMeter(-0.1F, COMBO_TICKS);
             }
             break;
         }
 
         if (punch == PunchType.HEAVY) {
-            addComboMeter(-0.5F, 0);
+            addComboMeter(-0.5F, COMBO_TICKS);
         }
         return punched;
     }
@@ -1271,7 +1274,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 //            else if (targetProximityRatio < 0.25) {
 //                strength *= targetProximityRatio * 2 + 0.5;
 //            }
-            damage = StandStatFormulas.getHeavyAttackDamage(strength, livingTarget);
+            damage = StandStatFormulas.getHeavyAttackDamage(strength, getHeavyAttackArmorPiercing(strength), livingTarget);
             
             knockback += damage / 4 * getComboMeter();
             break;
@@ -1316,7 +1319,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                     addComboMeter(0.3F, COMBO_TICKS);
                     break;
                 case BARRAGE:
-                    addComboMeter(0.0015F, COMBO_TICKS);
+                    addComboMeter(0.007F, COMBO_TICKS);
                     break;
                 }
                 LivingEntity user = getUser();
@@ -1334,6 +1337,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             setLastHurtMob(target);
         }
         return attacked;
+    }
+    
+    protected float getHeavyAttackArmorPiercing(double strength) {
+        return StandStatFormulas.getHeavyAttackArmorPiercing(strength);
     }
 
     protected boolean hurtTarget(Entity target, DamageSource dmgSource, float damage) {

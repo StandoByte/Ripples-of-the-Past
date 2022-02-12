@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.actions;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -44,12 +45,12 @@ public class StandEntityLightAttack extends StandEntityAction {
     
     @Override
     public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
-        return StandStatFormulas.getLightAttackWindup(standEntity.getAttackSpeed());
-    }
-    
-    @Override
-    public int getStandActionTicks(IStandPower standPower, StandEntity standEntity) {
-        return StandStatFormulas.getLightAttackComboDelay(standEntity.getAttackSpeed());
+        float recovery = 1F;
+        if (standEntity.getCurrentTaskAction() == this && standEntity.getCurrentTaskPhase() == Phase.RECOVERY) {
+            recovery = standEntity.getCurrentTaskCompletion(0);
+        }
+        int ticks = StandStatFormulas.getLightAttackWindup(standEntity.getAttackSpeed(), recovery);
+        return ticks;
     }
     
     @Override
@@ -63,6 +64,11 @@ public class StandEntityLightAttack extends StandEntityAction {
             return newAction != null && newAction.isCombatAction();
         }
         return super.isCancelable(standPower, standEntity, phase, newAction);
+    }
+    
+    @Override
+    public boolean canBeScheduled(IStandPower standPower, StandEntity standEntity) {
+        return standEntity.getCurrentTaskAction() != this;
     }
     
     @Override

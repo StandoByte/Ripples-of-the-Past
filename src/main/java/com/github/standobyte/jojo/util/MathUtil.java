@@ -44,4 +44,13 @@ public class MathUtil {
         }
         return new Vector2f((float) Math.toDegrees(angleYZ), (float) Math.toDegrees(angleXZ));
     }
+    
+    public static float inverseArmorProtectionDamage(float damageAfterAbsorb, float armor, float toughness) {
+        float f = armor / 25 - 1;
+        float f2 = 25 * (1 + toughness / 8);
+        return MathHelper.clamp(
+                f2 * (f + (float) Math.sqrt(f * f + 2 * damageAfterAbsorb / f2)), 
+                damageAfterAbsorb / (1 - armor / 125), 
+                5 * damageAfterAbsorb);
+    }
 }

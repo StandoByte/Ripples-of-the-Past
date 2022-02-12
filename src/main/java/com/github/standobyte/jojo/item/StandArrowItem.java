@@ -65,6 +65,9 @@ public class StandArrowItem extends ArrowItem {
         IStandPower power = IStandPower.getPlayerStandPower(player);
         if (!world.isClientSide()) {
             if (!power.hasPower()) {
+                if (dealVirusDamage) {
+                    player.hurt(ModDamageSources.STAND_VIRUS, Math.min(player.getHealth(), 11F) - 1F);
+                }
                 StandType<?> stand = null;
                 boolean checkTier = JojoModConfig.COMMON.standTiers.get();
                 int tier = checkTier ? StandUtil.standTierFromXp(player.experienceLevel, true) : -1;
@@ -76,9 +79,6 @@ public class StandArrowItem extends ArrowItem {
                 }
                 if (stand != null && power.givePower(stand)) {
                     if (!player.abilities.instabuild) {
-                        if (dealVirusDamage) {
-                            player.hurt(ModDamageSources.STAND_VIRUS, Math.min(player.getHealth(), 11F) - 1F);
-                        }
                         if (JojoModConfig.COMMON.standTiers.get()) {
                             player.giveExperienceLevels(-StandUtil.tierLowerBorder(stand.getTier()));
                         }
