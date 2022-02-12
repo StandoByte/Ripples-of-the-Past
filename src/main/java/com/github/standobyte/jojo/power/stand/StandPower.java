@@ -1,8 +1,6 @@
 package com.github.standobyte.jojo.power.stand;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -18,6 +16,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncResolveLimitPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStaminaPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.SyncStandActionLearningPacket;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.PowerBaseImpl;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
@@ -54,7 +53,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     private int xp = 0;
     private boolean skippedProgression;
     
-    private Map<Action<IStandPower>, Float> actionLearningProgressMap = new HashMap<>();
+    private ActionLearningProgressMap actionLearningProgressMap = new ActionLearningProgressMap();
     
     
     public StandPower(LivingEntity user) {
@@ -67,6 +66,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             serverPlayerUser.ifPresent(player -> {
                 SaveFileUtilCapProvider.getSaveFileCap(player).addPlayerStand(standType);
             });
+            standType.unlockNewActions(this);
             return true;
         }
         return false;
@@ -214,7 +214,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                     staminaRegen *= 1.5F;
                 }
             }
-            addStamina(staminaRegen, false);
+            addStamina(staminaRegen * getStaminaDurabilityModifier(), false);
         }
     }
     
@@ -455,20 +455,26 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
 
     @Override
-    public boolean unlockAction(Action<IStandPower> action, boolean fullyTrained) {
-        return actionLearningProgressMap.putIfAbsent(action, fullyTrained ? 1F : 0F) == null;
+    public boolean unlockAction(Action<IStandPower> action) {
+        if (!action.isUnlocked(this)) {
+            setLearningProgress(action, isUserCreative() || !action.isTrained() ? 1F : 0F);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public float getLearningProgress(Action<IStandPower> action) {
-        return actionLearningProgressMap.getOrDefault(action, -1F);
+        return actionLearningProgressMap.getLearningProgress(action);
     }
 
     @Override
     public void setLearningProgress(Action<IStandPower> action, float progress) {
-        progress = MathHelper.clamp(progress, 0F, 1F);
-        actionLearningProgressMap.put(action, progress);
-        // FIXME (progression) sync action learning
+        if (actionLearningProgressMap.setLearningProgress(action, MathHelper.clamp(progress, 0F, 1F))) {
+            serverPlayerUser.ifPresent(player -> {
+                PacketManager.sendToClient(new SyncStandActionLearningPacket(action, progress, false), player);
+            });
+        }
     }
 
     @Override
@@ -553,7 +559,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
         cnbt.putInt("Exp", getXp());
         cnbt.putBoolean("Skipped", skippedProgression);
-        // FIXME (progression) save action learning
+        actionLearningProgressMap.writeToNbt(cnbt);
         return cnbt;
     }
 
@@ -579,7 +585,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             noResolveLimitDecayTicks = nbt.getInt("ResolveLimitTicks");
         }
         skippedProgression = nbt.getBoolean("Skipped");
-        // FIXME (progression) load action learning
+        actionLearningProgressMap.readFromNbt(nbt);
         super.readNBT(nbt);
     }
     
@@ -613,7 +619,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                     PacketManager.sendToClient(new SyncResolveLimitPacket(resolveLimit, noResolveLimitDecayTicks), player);
                 }
             }
-            // FIXME (progression) sync action learning
+            actionLearningProgressMap.forEach((action, progress) -> {
+                PacketManager.sendToClient(new SyncStandActionLearningPacket(action, progress, false), player);
+            });
         });
     }
     

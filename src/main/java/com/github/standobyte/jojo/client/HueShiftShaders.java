@@ -27,7 +27,6 @@ public class HueShiftShaders {
         for (int j = 0; j < n; j++) {
             addShader(String.format(SHADERS_HUE_SHIFT[j].getPath().replace("shaders/post/", "").replace(".json", "") + "_split.json"));
         }
-        JojoMod.LOGGER.debug("Generated {} shader resource locations", i);
     }
     
     private static void shaderByName(int shift, String postfix) {

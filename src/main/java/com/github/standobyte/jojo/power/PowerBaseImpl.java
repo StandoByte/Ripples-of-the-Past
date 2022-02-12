@@ -83,7 +83,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
 
     protected abstract void afterTypeInit(T type);
     
-    protected final void setType(T type) {
+    protected void setType(T type) {
         this.type = type;
         afterTypeInit(type);
     }
@@ -330,7 +330,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
 
     @Override
     public float getLearningProgress(Action<P> action) {
-        return action.isUnlocked(getThis()) ? 1 : 0;
+        return action.isUnlocked(getThis()) ? 1 : -1;
     }
     
     protected void performAction(Action<P> action, ActionTarget target) {

@@ -116,16 +116,25 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     public void onNewResolveLevel(IStandPower power) {
-        unlockNewActions(power);
+        if (!power.getUser().level.isClientSide()) {
+            unlockNewActions(power);
+        }
     }
     
     public void unlockNewActions(IStandPower power) {
         Stream.concat(Arrays.stream(attacks), Arrays.stream(abilities))
         .forEach(action -> {
-            if (!action.isUnlocked(power) && action.canBeUnlocked(power)) {
-                power.unlockAction(action, power.isUserCreative() ? true : !action.isTrained());
+            tryUnlock(action, power);
+            if (action.hasShiftVariation()) {
+                tryUnlock((StandAction) action.getShiftVariationIfPresent(), power);
             }
         });
+    }
+    
+    private void tryUnlock(StandAction action, IStandPower power) {
+        if (action.canBeUnlocked(power)) {
+            power.unlockAction(action);
+        }
     }
     
     public boolean usesStandComboMechanic() {

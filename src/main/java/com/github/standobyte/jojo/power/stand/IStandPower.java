@@ -54,7 +54,7 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     @Deprecated
     void setXp(int xp);
     
-    boolean unlockAction(Action<IStandPower> action, boolean fullyTrained);
+    boolean unlockAction(Action<IStandPower> action);
     void setLearningProgress(Action<IStandPower> action, float progress);
     void addLearningProgress(Action<IStandPower> action, float progress);
     

@@ -28,11 +28,12 @@ public abstract class StandAction extends Action<IStandPower> {
     
     @Override
     public boolean isUnlocked(IStandPower power) {
-        return true || power.getLearningProgress(this) >= 0;
+        return power.getLearningProgress(this) >= 0;
     }
     
     public boolean canBeUnlocked(IStandPower power) {
-        return isUnlockedByDefault() || power.getResolveLevel() >= resolveLevelToUnlock;
+        return isUnlockedByDefault() || power.isUserCreative() || 
+                resolveLevelToUnlock > -1 && power.getResolveLevel() >= resolveLevelToUnlock;
     }
     
     private boolean isUnlockedByDefault() {
@@ -78,7 +79,7 @@ public abstract class StandAction extends Action<IStandPower> {
         }
         
         public T resolveLevelToUnlock(int level) {
-            this.resolveLevelToUnlock = Math.max(0, level);
+            this.resolveLevelToUnlock = level;
             return getThis();
         }
         
