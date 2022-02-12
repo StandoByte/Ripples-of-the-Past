@@ -257,6 +257,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return new TranslationTextComponent(key);
     }
     
+    public boolean isTrained() {
+        return false;
+    }
+    
     
     
     public static void initShiftVariations() {

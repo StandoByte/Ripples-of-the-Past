@@ -333,17 +333,16 @@ public class ActionsOverlayGui extends AbstractGui {
                 x += 3;
                 y += 3;
                 for (int i = 0; i < actions.size(); i++) {
-                    renderActionIcon(matrixStack, actionType, mode, actions.get(i), target, x + 20 * i, y, partialTick, i == selected, alpha);
+                    Action<P> action = actions.get(i);
+                    renderActionIcon(matrixStack, actionType, mode, action, target, x + 20 * i, y, partialTick, i == selected, alpha);
                 }
-                // FIXME (progression) render the learning bar (item durability bar)
                 // highlight when hotbar key is pressed
                 boolean highlightSelection = actionType == ActionType.ATTACK ? attackSelection : abilitySelection;
                 if (highlightSelection) {
                     int highlightAlpha = (int) (ClientUtil.getHighlightAlpha(tickCount + partialTick, 40F, 40F, 0.25F, 0.5F) * 255F);
                     RenderSystem.disableDepthTest();
                     RenderSystem.disableTexture();
-                    Tessellator tessellator = Tessellator.getInstance();
-                    BufferBuilder bufferBuilder = tessellator.getBuilder();
+                    BufferBuilder bufferBuilder = Tessellator.getInstance().getBuilder();
                     if (selected >= 0) {
                         fillRect(bufferBuilder, x + selected * 20 - 4, y - 4, 24, 23, 255, 255, 255, highlightAlpha);
                     }
@@ -387,8 +386,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 if (ratio > 0) {
                     RenderSystem.disableDepthTest();
                     RenderSystem.disableTexture();
-                    Tessellator tessellator = Tessellator.getInstance();
-                    BufferBuilder bufferBuilder = tessellator.getBuilder();
+                    BufferBuilder bufferBuilder = Tessellator.getInstance().getBuilder();
                     fillRect(bufferBuilder, x, y + 16.0F * (1.0F - ratio), 16, 16.0F * ratio, 255, 255, 255, 127);
                     RenderSystem.enableTexture();
                     RenderSystem.enableDepthTest();
@@ -415,6 +413,22 @@ public class ActionsOverlayGui extends AbstractGui {
                         matrixStack.popPose();
                     }
                 }
+            }
+            // learning bar
+            float learningProgress = power.getLearningProgress(action);
+            if (learningProgress >= 0 && learningProgress < 1) {
+                RenderSystem.disableDepthTest();
+                RenderSystem.disableTexture();
+                RenderSystem.disableAlphaTest();
+                RenderSystem.disableBlend();
+                int barX = x + 2;
+                int barY = y + 13;
+                fillRect(Tessellator.getInstance().getBuilder(), barX, barY, 13, 2, 0, 0, 0, 255);
+                fillRect(Tessellator.getInstance().getBuilder(), barX, barY, Math.round(learningProgress * 13.0F), 1, 0, 255, 0, 255);
+                RenderSystem.enableBlend();
+                RenderSystem.enableAlphaTest();
+                RenderSystem.enableTexture();
+                RenderSystem.enableDepthTest();
             }
         }
     }
@@ -479,7 +493,7 @@ public class ActionsOverlayGui extends AbstractGui {
             if (action.getHoldDurationMax(power) > 0) {
                 actionName = new TranslationTextComponent("jojo.overlay.hold", actionName);
             }
-            if (action.hasShiftVariation()) {
+            if (action.hasShiftVariation() && action.getShiftVariationIfPresent().isUnlocked(power)) {
                 actionName = new TranslationTextComponent("jojo.overlay.shift", actionName, 
                         new KeybindTextComponent(mc.options.keyShift.getName()), action.getShiftVariationIfPresent().getName(power, target));
             }

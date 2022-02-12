@@ -784,7 +784,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         staminaCondition = user != null ? 
                 user.hasEffect(ModEffects.RESOLVE.get()) ? 
                         1
-                        : 0.1 + Math.min((double) (userPower.getStamina() / userPower.getMaxStamina()) * 1.8, 0.9)
+                        : 0.25 + Math.min((double) (userPower.getStamina() / userPower.getMaxStamina()) * 1.5, 0.75)
                 : 1;
 
         if (!level.isClientSide()) {
