@@ -20,6 +20,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
+//FIXME (!) time stop learning progress
 public class TimeStopInstant extends StandAction {
 
     public TimeStopInstant(StandAction.Builder builder) {

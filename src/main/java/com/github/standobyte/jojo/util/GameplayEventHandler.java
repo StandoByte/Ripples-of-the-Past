@@ -810,6 +810,9 @@ public class GameplayEventHandler {
                     else {
                         entity.setSecondsOnFire(seconds);
                     }
+                    if (!magiciansRed.level.isClientSide()) {
+                        // FIXME (!) crossfire hurricane learning progress
+                    }
                 }
             }
             World world = event.getWorld();

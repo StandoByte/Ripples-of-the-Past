@@ -23,6 +23,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
+// FIXME (!) time stop learning progress
 public class TimeStop extends StandAction {
     private Supplier<SoundEvent> voiceLineWithStandSummoned = () -> null;
     private Supplier<SoundEvent> timeStopSound = () -> null;

@@ -41,4 +41,9 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
             }
         }
     }
+    
+    @Override
+    public void onMaxTraining(IStandPower power) {
+        power.unlockAction(getShiftVariationIfPresent());
+    }
 }
