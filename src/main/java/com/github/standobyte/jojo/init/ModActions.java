@@ -46,7 +46,6 @@ import com.github.standobyte.jojo.action.actions.StandEntityMeleeBarrage;
 import com.github.standobyte.jojo.action.actions.StandEntityUnsummon;
 import com.github.standobyte.jojo.action.actions.StarPlatinumStarFinger;
 import com.github.standobyte.jojo.action.actions.StarPlatinumZoom;
-import com.github.standobyte.jojo.action.actions.TheWorldRoadRoller;
 import com.github.standobyte.jojo.action.actions.TimeStop;
 import com.github.standobyte.jojo.action.actions.TimeStopInstant;
 import com.github.standobyte.jojo.action.actions.VampirismAction;
@@ -237,9 +236,6 @@ public class ModActions {
     public static final RegistryObject<StandAction> THE_WORLD_TIME_STOP_BLINK = ACTIONS.register("the_world_ts_blink", 
             () -> new TimeStopInstant(new StandAction.Builder().xpRequirement(500).resolveLevelToUnlock(1).isTrained()
                     .ignoresPerformerStun().shiftVariationOf(THE_WORLD_TIME_STOP)));
-    
-    public static final RegistryObject<StandAction> THE_WORLD_ROAD_ROLLER = ACTIONS.register("the_world_road_roller", 
-            () -> new TheWorldRoadRoller(new StandAction.Builder().cooldown(12000).xpRequirement(1000).resolveLevelToUnlock(4).shout(ModSounds.DIO_ROAD_ROLLER)));
     
 
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_STRING_ATTACK = ACTIONS.register("hierophant_green_attack", 

@@ -51,7 +51,7 @@ public class ModStandTypes {
     public static final RegistryObject<EntityStandType<TimeStopperStandStats>> THE_WORLD = STANDS.register("the_world", 
             () -> new EntityStandType<>(6, 0xFFD000, PART_3_NAME,
                     new StandAction[] {ModActions.THE_WORLD_PUNCH.get(), ModActions.THE_WORLD_BARRAGE.get()},
-                    new StandAction[] {ModActions.THE_WORLD_BLOCK.get(), ModActions.THE_WORLD_TIME_STOP.get(), ModActions.THE_WORLD_ROAD_ROLLER.get()},
+                    new StandAction[] {ModActions.THE_WORLD_BLOCK.get(), ModActions.THE_WORLD_TIME_STOP.get()},
                     ModSounds.DIO_THE_WORLD, 
                     TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
                     .power(17.0)

@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.item.ClackersItem;
 import com.github.standobyte.jojo.item.CustomModelArmorItem;
 import com.github.standobyte.jojo.item.KnifeItem;
 import com.github.standobyte.jojo.item.ModArmorMaterials;
+import com.github.standobyte.jojo.item.RoadRollerItem;
 import com.github.standobyte.jojo.item.SatiporojaScarfItem;
 import com.github.standobyte.jojo.item.SledgehammerItem;
 import com.github.standobyte.jojo.item.StandArrowItem;
@@ -69,6 +70,9 @@ public class ModItems {
 
     public static final RegistryObject<KnifeItem> KNIFE = ITEMS.register("knife", 
             () -> new KnifeItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(16)));
+
+    public static final RegistryObject<RoadRollerItem> ROAD_ROLLER = ITEMS.register("road_roller", 
+            () -> new RoadRollerItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1)));
 
     public static final RegistryObject<BlockItem> METEORIC_IRON = ITEMS.register("meteoric_iron", 
             () -> new BlockItem(ModBlocks.METEORIC_IRON.get(), new Item.Properties().tab(JojoMod.MAIN_TAB)));
