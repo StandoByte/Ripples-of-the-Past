@@ -7,7 +7,6 @@ import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
@@ -38,7 +37,14 @@ public class HierophantGreenBarrier extends StandEntityAction {
     }
     
     private int getMaxBarriersPlaceable(IStandPower power) {
-        return 10 + MathHelper.floor((float) (power.getXp() - getXpRequirement()) / (float) (IStandPower.MAX_EXP - getXpRequirement()) * 90F);
+        int level = power.getResolveLevel();
+        if (level < 3) {
+            return 0;
+        }
+        if (level == 3) {
+            return 15;
+        }
+        return 100;
     }
     
     @Override

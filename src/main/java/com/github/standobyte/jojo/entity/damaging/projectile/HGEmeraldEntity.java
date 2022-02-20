@@ -4,6 +4,7 @@ import com.github.standobyte.jojo.init.ModEntityTypes;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
@@ -35,6 +36,13 @@ public class HGEmeraldEntity extends ModdedProjectileEntity {
     @Override
     protected int ticksLifespan() {
         return 100;
+    }
+    
+    @Override
+    protected void afterEntityHit(EntityRayTraceResult entityRayTraceResult, boolean entityHurt) {
+        if (!level.isClientSide() && entityHurt) {
+            // FIXME (!) emerald splash learning progress
+        }
     }
 
     private static final Vector3d OFFSET = new Vector3d(0.0, -0.3, 0.75);

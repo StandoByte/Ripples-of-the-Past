@@ -261,6 +261,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return false;
     }
     
+    public void onMaxTraining(P power) {}
+    
     
     
     public static void initShiftVariations() {

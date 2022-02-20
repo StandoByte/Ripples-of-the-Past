@@ -42,4 +42,9 @@ public class MagiciansRedCrossfireHurricane extends StandEntityAction {
             standEntity.playSound(ModSounds.MAGICIANS_RED_CROSSFIRE_HURRICANE.get(), 1.0F, 1.0F);
         }
     }
+    
+    @Override
+    public void onMaxTraining(IStandPower power) {
+        power.unlockAction(getShiftVariationIfPresent());
+    }
 }
