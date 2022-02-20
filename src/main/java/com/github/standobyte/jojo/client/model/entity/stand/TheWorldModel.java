@@ -8,40 +8,6 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 
 
 public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
-    private final ModelRenderer slope;
-    private final ModelRenderer slope2;
-    private final ModelRenderer slopeBack;
-    private final ModelRenderer faceRight;
-    private final ModelRenderer faceLeft;
-    private final ModelRenderer leftCable;
-    private final ModelRenderer rightCable;
-    private final ModelRenderer heartSmallHead;
-    private final ModelRenderer smallHeartCube4;
-    private final ModelRenderer smallHeartCube5;
-    private final ModelRenderer smallHeartCube6;
-    private final ModelRenderer heartLargeAbdomen;
-    private final ModelRenderer largeHeartCube1;
-    private final ModelRenderer largeHeartCube2;
-    private final ModelRenderer heartSmallAbdomen;
-    private final ModelRenderer smallHeartCube1;
-    private final ModelRenderer smallHeartCube2;
-    private final ModelRenderer smallHeartCube3;
-    private final ModelRenderer heartLeftArm;
-    private final ModelRenderer heartCube4;
-    private final ModelRenderer heartCube5;
-    private final ModelRenderer heartCube6;
-    private final ModelRenderer heartRightArm;
-    private final ModelRenderer heartCube1;
-    private final ModelRenderer heartCube2;
-    private final ModelRenderer heartCube3;
-    private final ModelRenderer heartLeftLeg;
-    private final ModelRenderer heartCube10;
-    private final ModelRenderer heartCube11;
-    private final ModelRenderer heartCube12;
-    private final ModelRenderer heartRightLeg;
-    private final ModelRenderer heartCube7;
-    private final ModelRenderer heartCube8;
-    private final ModelRenderer heartCube9;
     
     public TheWorldModel() {
         this(64, 64);
@@ -49,11 +15,46 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
     
     public TheWorldModel(int textureWidth, int textureHeight) {
         super(textureWidth, textureHeight);
+        
+        ModelRenderer slope;
+        ModelRenderer slope2;
+        ModelRenderer slopeBack;
+        ModelRenderer faceRight;
+        ModelRenderer faceLeft;
+        ModelRenderer leftCable;
+        ModelRenderer rightCable;
+        ModelRenderer heartSmallHead;
+        ModelRenderer smallHeartCube4;
+        ModelRenderer smallHeartCube5;
+        ModelRenderer smallHeartCube6;
+        ModelRenderer heartLargeAbdomen;
+        ModelRenderer largeHeartCube1;
+        ModelRenderer largeHeartCube2;
+        ModelRenderer heartSmallAbdomen;
+        ModelRenderer smallHeartCube1;
+        ModelRenderer smallHeartCube2;
+        ModelRenderer smallHeartCube3;
+        ModelRenderer heartLeftArm;
+        ModelRenderer heartCube4;
+        ModelRenderer heartCube5;
+        ModelRenderer heartCube6;
+        ModelRenderer heartRightArm;
+        ModelRenderer heartCube1;
+        ModelRenderer heartCube2;
+        ModelRenderer heartCube3;
+        ModelRenderer heartLeftLeg;
+        ModelRenderer heartCube10;
+        ModelRenderer heartCube11;
+        ModelRenderer heartCube12;
+        ModelRenderer heartRightLeg;
+        ModelRenderer heartCube7;
+        ModelRenderer heartCube8;
+        ModelRenderer heartCube9;
 
 //        head.texOffs(48, 0).addBox(-2.5F, -2.75F, -5.5F, 5.0F, 5.0F, 3.0F, -1.75F, false);
-        head.texOffs(0, 27).addBox(-4.0F, -3.3F, -3.8F, 8.0F, 1.0F, 1.0F, 0.2F, false);
-        head.texOffs(0, 18).addBox(3.0F, -8.3F, -3.8F, 1.0F, 5.0F, 1.0F, 0.2F, true);
-        head.texOffs(0, 18).addBox(-4.0F, -8.3F, -3.8F, 1.0F, 5.0F, 1.0F, 0.2F, false);
+        head.texOffs(0, 28).addBox(-4.0F, -3.3F, -3.8F, 8.0F, 1.0F, 1.0F, 0.2F, false);
+        head.texOffs(22, 31).addBox(3.0F, -8.3F, -3.8F, 1.0F, 5.0F, 1.0F, 0.2F, true);
+        head.texOffs(22, 31).addBox(-4.0F, -8.3F, -3.8F, 1.0F, 5.0F, 1.0F, 0.2F, false);
 
 
         heartSmallHead = new ModelRenderer(this);
@@ -78,27 +79,29 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         setRotationAngle(smallHeartCube6, 0.0F, 0.0F, -0.7854F);
         smallHeartCube6.texOffs(48, 1).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
 
-        
+
         slope = new ModelRenderer(this);
         slope.setPos(0.0F, -8.5F, -4.0F);
         head.addChild(slope);
-        setRotationAngle(slope, 0.3927F, 0.0F, 0.0F);
-        slope.texOffs(0, 16).addBox(-4.0F, 0.2F, 0.2F, 8.0F, 3.0F, 8.0F, 0.2F, false);
+        setRotationAngle(slope, 0.3578F, 0.0F, 0.0F);
+        slope.texOffs(0, 16).addBox(-4.0F, 0.2F, 0.2F, 8.0F, 4.0F, 8.0F, 0.2F, false);
+        slope.texOffs(0, 16).addBox(-4.2F, 0.06F, 6.35F, 1.0F, 4.0F, 3.0F, -1.0F, true);
+        slope.texOffs(12, 41).addBox(-4.2F, 2.21F, 5.25F, 1.0F, 4.0F, 3.0F, -1.0F, true);
+        slope.texOffs(12, 41).addBox(3.2F, 2.21F, 5.25F, 1.0F, 4.0F, 3.0F, -1.0F, false);
+        slope.texOffs(0, 16).addBox(3.2F, 0.06F, 6.35F, 1.0F, 4.0F, 3.0F, -1.0F, false);
 
         slopeBack = new ModelRenderer(this);
         slopeBack.setPos(0.0F, 0.0F, 8.4F);
         slope.addChild(slopeBack);
-        setRotationAngle(slopeBack, -0.3927F, 0.0F, 0.0F);
+        setRotationAngle(slopeBack, -0.3578F, 0.0F, 0.0F);
         slopeBack.texOffs(25, 17).addBox(-4.0F, 0.2F, 0.2F, 8.0F, 7.0F, 0.0F, 0.2F, false);
-        slopeBack.texOffs(41, 18).addBox(3.0F, 1.4F, -2.2F, 1.0F, 4.0F, 2.0F, 0.2F, true);
-        slopeBack.texOffs(41, 18).addBox(-4.0F, 1.4F, -2.2F, 1.0F, 4.0F, 2.0F, 0.2F, false);
 
         slope2 = new ModelRenderer(this);
         slope2.setPos(0.0F, -2.1F, -2.6F);
         head.addChild(slope2);
-        setRotationAngle(slope2, 0.3355F, 0.0F, 0.0F);
-        slope2.texOffs(25, 24).addBox(-4.0F, -3.2F, 0.2F, 8.0F, 3.0F, 7.0F, 0.2F, false);
-        slope2.texOffs(0, 27).addBox(-4.0F, -1.2F, 5.95F, 8.0F, 1.0F, 1.0F, 0.2F, false);
+        setRotationAngle(slope2, 0.2755F, 0.0F, 0.0F);
+        slope2.texOffs(26, 24).addBox(-4.0F, -3.2F, 0.2F, 8.0F, 3.0F, 7.0F, 0.2F, false);
+        slope2.texOffs(0, 28).addBox(-4.0F, -1.2F, 5.9372F, 8.0F, 1.0F, 1.0F, 0.2F, false);
 
         faceRight = new ModelRenderer(this);
         faceRight.setPos(-4.2F, -8.5F, -4.0F);
@@ -127,8 +130,8 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
 
         torso.texOffs(11, 37).addBox(-3.5F, 1.1F, -2.0F, 7.0F, 3.0F, 1.0F, 0.4F, false);
         torso.texOffs(0, 31).addBox(-2.5F, 4.0F, -2.3F, 5.0F, 6.0F, 1.0F, 0.0F, false);
-        torso.texOffs(52, 11).addBox(2.0F, -0.75F, -2.75F, 1.0F, 11.0F, 5.0F, 0.0F, true);
-        torso.texOffs(52, 11).addBox(-3.0F, -0.75F, -2.75F, 1.0F, 11.0F, 5.0F, 0.0F, false);
+        torso.texOffs(52, 11).addBox(2.0F, -0.25F, -2.5F, 1.0F, 10.0F, 5.0F, 0.25F, true);
+        torso.texOffs(52, 11).addBox(-3.0F, -0.25F, -2.5F, 1.0F, 10.0F, 5.0F, 0.25F, false);
         torso.texOffs(24, 0).addBox(0.5F, 1.0F, 2.0F, 2.0F, 6.0F, 2.0F, 0.0F, true);
         torso.texOffs(24, 0).addBox(-2.5F, 1.0F, 2.0F, 2.0F, 6.0F, 2.0F, 0.0F, false);
 //        torso.texOffs(48, 0).addBox(-2.5F, 10.0F, -3.5F, 5.0F, 5.0F, 3.0F, -1.0F, false);
@@ -203,9 +206,9 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         heartCube6.texOffs(48, 1).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
         
 
-        leftForeArm.texOffs(36, 35).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 5.0F, 4.0F, -0.251F, true);
-        leftForeArm.texOffs(12, 42).addBox(1.6F, 2.5F, -1.5F, 1.0F, 3.0F, 3.0F, -0.4F, true);
-        leftForeArm.texOffs(26, 39).addBox(1.5F, 5.1F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, true);
+        leftForeArm.texOffs(36, 35).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 5.0F, 4.0F, 0.25F, true);
+        leftForeArm.texOffs(41, 18).addBox(1.0F, 2.0F, -1.5F, 2.0F, 3.0F, 3.0F, -0.4F, true);
+        leftForeArm.texOffs(27, 34).addBox(1.5F, 5.1F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, true);
         
 
         rightArm.texOffs(48, 0).addBox(-2.0F, -2.0F, -2.0F, 2.0F, 4.0F, 4.0F, 0.25F, false);
@@ -236,11 +239,11 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         heartCube3.texOffs(48, 1).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
         
 
-        rightForeArm.texOffs(36, 35).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 5.0F, 4.0F, -0.251F, false);
-        rightForeArm.texOffs(12, 42).addBox(-2.6F, 2.5F, -1.5F, 1.0F, 3.0F, 3.0F, -0.4F, false);
-        rightForeArm.texOffs(26, 39).addBox(-2.5F, 5.1F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, false);
+        rightForeArm.texOffs(36, 35).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 5.0F, 4.0F, 0.25F, false);
+        rightForeArm.texOffs(41, 18).addBox(-3.0F, 2.0F, -1.5F, 2.0F, 3.0F, 3.0F, -0.4F, false);
+        rightForeArm.texOffs(27, 34).addBox(-2.5F, 5.1F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, false);
 
-        leftLeg.texOffs(12, 54).addBox(1.6F, -1.0F, -1.0F, 1.0F, 2.0F, 2.0F, 0.0F, true);
+        leftLeg.texOffs(28, 42).addBox(1.6F, -1.75F, -1.5F, 1.0F, 3.0F, 3.0F, 0.0F, true);
         
 //        leftLegJoint.texOffs(48, 0).addBox(-2.4F, -2.5F, -3.5F, 5.0F, 5.0F, 3.0F, -1.25F, false);
 
@@ -268,7 +271,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         heartCube12.texOffs(48, 1).addBox(0.0F, -1.05F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
         
 
-        rightLeg.texOffs(12, 54).addBox(-2.6F, -1.0F, -1.0F, 1.0F, 2.0F, 2.0F, 0.0F, false);
+        rightLeg.texOffs(28, 42).addBox(-2.6F, -1.25F, -1.5F, 1.0F, 3.0F, 3.0F, 0.0F, false);
 
 //        rightLegJoint.texOffs(48, 0).addBox(-2.6F, -2.5F, -3.5F, 5.0F, 5.0F, 3.0F, -1.25F, false);
 
