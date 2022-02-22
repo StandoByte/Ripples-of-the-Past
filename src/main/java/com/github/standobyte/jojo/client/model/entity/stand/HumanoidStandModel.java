@@ -338,6 +338,11 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
                 entity.swingingArm == Hand.MAIN_HAND ? entity.getMainArm() : entity.getMainArm().getOpposite(), 
                         phase == Phase.RECOVERY ? Math.max(2F * (progress - 1) + 1, 0F) : 0F);
     }
+
+    @Override
+    protected void heavyAttackComboPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
+        heavyAttackPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, phase);
+    }
     
     @Override
     protected void resetPose() {

@@ -197,8 +197,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 action.playSound(this, userPower, phase);
                 action.onTaskSet(level, this, userPower, phase);
             }
-            if (action != null || getStandPose() != StandPose.SUMMON) {
-                setStandPose(action != null ? action.standPose : StandPose.NONE);
+            if (level.isClientSide() && (action != null || getStandPose() != StandPose.SUMMON)) {
+                setStandPose(action != null ? action.getStandPose(userPower, this) : StandPose.NONE);
             }
         }
         else if (SWING_OFF_HAND.equals(dataParameter)) {
@@ -527,6 +527,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         public static final StandPose BLOCK = new StandPose();
         public static final StandPose LIGHT_ATTACK = new StandPose();
         public static final StandPose HEAVY_ATTACK = new StandPose();
+        public static final StandPose HEAVY_ATTACK_COMBO = new StandPose();
         public static final StandPose RANGED_ATTACK = new StandPose();
     }
 
@@ -797,7 +798,11 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             else {
                 StandEntityAction currentAction = getCurrentTaskAction();
                 if (currentAction == null || !currentAction.isCombatAction()) {
-                    setComboMeter(Math.max(getComboMeter() - COMBO_DECAY, 0));
+                    float decay = COMBO_DECAY;
+                    if (getComboMeter() > 0.5F) {
+                        decay *= 0.5F;
+                    }
+                    setComboMeter(Math.max(getComboMeter() - decay, 0));
                 }
             }
         }
@@ -1028,7 +1033,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         if (currentAction == null) {
             return 1.0F;
         }
-        return currentAction.userMovementFactor;
+        return currentAction.getUserMovementFactor(userPower, this);
     }
 
 
@@ -1060,7 +1065,13 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             break;
         case ENTITY:
             // FIXME wrong distance calculation (not to aabb)
-            distance = getEyePosition(1.0F).distanceTo(target.getEntity(level).getEyePosition(1.0F));
+            double targetDistance = getEyePosition(1.0F).distanceTo(target.getEntity(level).getEyePosition(1.0F));
+            if (targetDistance > distance) {
+                target = ActionTarget.EMPTY;
+            }
+            else {
+                distance = targetDistance;
+            }
             break;
         default:
             break;
@@ -1082,14 +1093,15 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             break;
         }
 
-        if (punch == PunchType.HEAVY) {
-            addComboMeter(-0.5F, COMBO_TICKS);
+        if (punch == PunchType.HEAVY_NO_COMBO || punch == PunchType.HEAVY_COMBO) {
+            addComboMeter(-0.51F, COMBO_TICKS);
         }
         return punched;
     }
     
     public enum PunchType {
-        HEAVY,
+        HEAVY_NO_COMBO,
+        HEAVY_COMBO,
         LIGHT,
         BARRAGE
     }
@@ -1247,6 +1259,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     protected void setComboMeter(float combo) {
         entityData.set(PUNCHES_COMBO, MathHelper.clamp(combo, 0F, 1F));
     }
+    
+    public boolean isHeavyPunchInCombo() {
+        return getComboMeter() >= 0.5F;
+    }
 
     public boolean attackEntity(Entity target, PunchType punch, double attackDistance) {
         if (!canHarm(target)) {
@@ -1266,7 +1282,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         
         float damage;
         switch (punch) {
-        case HEAVY:
+        case HEAVY_NO_COMBO:
             double targetProximityRatio = 1 - attackDistance / attackRange;
             if (targetProximityRatio > 0.75) {
                 strength *= targetProximityRatio * 2 - 0.5;
@@ -1306,14 +1322,11 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                     livingTarget.knockback((float) knockback * 0.5F, (double) MathHelper.sin(yRot * ((float)Math.PI / 180F)), (double) (-MathHelper.cos(yRot * ((float)Math.PI / 180F))));
                 }
                 switch (punch) {
-                case HEAVY:
-                    if (!level.isClientSide()) {
-                        ((ServerWorld) level).sendParticles(ParticleTypes.CRIT, 
-                                livingTarget.getX(), livingTarget.getY(0.5), livingTarget.getZ(), 15, 0.3D, 0.3D, 0.3D, 0.0D);
-                        if (livingTarget.getUseItem().isShield(livingTarget) && target instanceof PlayerEntity) {
-                            ((PlayerEntity) livingTarget).disableShield(precision > 8 && attackDistance < attackRange * 0.4);
-                        }
-                    }
+                case HEAVY_NO_COMBO:
+                    heavyPunchDisableShield(livingTarget, precision, attackDistance, attackRange);
+                    break;
+                case HEAVY_COMBO:
+                    heavyPunchDisableShield(livingTarget, precision, attackDistance, attackRange);
                     break;
                 case LIGHT:
                     addComboMeter(0.3F, COMBO_TICKS);
@@ -1337,6 +1350,16 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             setLastHurtMob(target);
         }
         return attacked;
+    }
+    
+    private void heavyPunchDisableShield(LivingEntity target, double precision, double attackDistance, double attackRange) {
+        if (!level.isClientSide()) {
+            ((ServerWorld) level).sendParticles(ParticleTypes.CRIT, 
+                    target.getX(), target.getY(0.5), target.getZ(), 15, 0.3D, 0.3D, 0.3D, 0.0D);
+            if (target.getUseItem().isShield(target) && target instanceof PlayerEntity) {
+                ((PlayerEntity) target).disableShield(precision > 8 || attackDistance < attackRange * 0.4);
+            }
+        }
     }
     
     protected float getHeavyAttackArmorPiercing(double strength) {
