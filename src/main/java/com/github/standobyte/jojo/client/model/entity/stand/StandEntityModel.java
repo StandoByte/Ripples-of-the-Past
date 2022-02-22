@@ -30,7 +30,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
 
     protected StandEntityModel(boolean scaleHead, float yHeadOffset, float zHeadOffset, 
             float babyHeadScale, float babyBodyScale, float bodyYOffset) {
-        super(texture -> RenderType.entityTranslucent(texture), scaleHead, yHeadOffset, zHeadOffset, babyHeadScale, babyBodyScale, bodyYOffset);
+        super(RenderType::entityTranslucent, scaleHead, yHeadOffset, zHeadOffset, babyHeadScale, babyBodyScale, bodyYOffset);
     }
 
     protected StandEntityModel(Function<ResourceLocation, RenderType> renderType, boolean scaleHead, float yHeadOffset, float zHeadOffset, 
@@ -113,6 +113,9 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
             else if (poseType == StandPose.HEAVY_ATTACK) {
                 heavyAttackPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, entity.getCurrentTaskPhase());
             }
+            else if (poseType == StandPose.HEAVY_ATTACK_COMBO) {
+                heavyAttackComboPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, entity.getCurrentTaskPhase());
+            }
             else if (poseType == StandPose.RANGED_ATTACK) {
                 rangedAttackPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, entity.getCurrentTaskPhase());
             }
@@ -142,6 +145,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     protected abstract void blockingPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation);
     protected abstract void lightAttackPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase);
     protected abstract void heavyAttackPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase);
+    protected abstract void heavyAttackComboPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase);
     protected void rangedAttackPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
         resetPose();
     }
@@ -194,4 +198,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         LEFT_ARM_ONLY,
         RIGHT_ARM_ONLY
     }
+    
+    // FIXME (model) idle poses
+    // FIXME (model) a method to move between poses? (like with summon poses, but more global)
 }

@@ -30,8 +30,8 @@ public abstract class StandEntityAction extends StandAction {
     private final AutoSummonMode autoSummonMode;
     private final TargetRequirement crosshairTargetForStand;
     private final boolean isCancelable;
-    public final float userMovementFactor;
-    public final StandPose standPose;
+    private final float userMovementFactor;
+    private final StandPose standPose;
     @Nullable
     protected final StandRelativeOffset userOffset;
     @Nullable
@@ -249,6 +249,14 @@ public abstract class StandEntityAction extends StandAction {
             }
         }
         return super.aim(world, aimingEntity, power, range);
+    }
+    
+    public float getUserMovementFactor(IStandPower standPower, StandEntity standEntity) {
+        return userMovementFactor;
+    }
+    
+    public StandPose getStandPose(IStandPower standPower, StandEntity standEntity) {
+        return standPose;
     }
     
     public enum Phase {
