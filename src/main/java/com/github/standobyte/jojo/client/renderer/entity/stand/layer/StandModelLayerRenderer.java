@@ -13,10 +13,13 @@ import net.minecraft.util.ResourceLocation;
 
 public abstract class StandModelLayerRenderer<T extends StandEntity, M extends StandEntityModel<T>> extends LayerRenderer<T, M> {
     protected final AbstractStandRenderer<T, M> entityRenderer;
+    protected final M model;
 
-    public StandModelLayerRenderer(IEntityRenderer<T, M> entityRenderer) {
+    public StandModelLayerRenderer(IEntityRenderer<T, M> entityRenderer, M model) {
         super(entityRenderer);
         this.entityRenderer = (AbstractStandRenderer<T, M>) entityRenderer;
+        this.model = model;
+        model.afterInit();
     }
 
     public boolean shouldRender(T entity) {
@@ -31,7 +34,9 @@ public abstract class StandModelLayerRenderer<T extends StandEntity, M extends S
         return buffer.getBuffer(entityRenderer.getRenderType(entity, getLayerTexture()));
     }
 
-    public abstract M getLayerModel();
+    public M getLayerModel() {
+        return model;
+    }
 
     protected abstract ResourceLocation getLayerTexture();
     

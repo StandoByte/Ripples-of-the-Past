@@ -198,7 +198,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 action.onTaskSet(level, this, userPower, phase);
             }
             if (level.isClientSide() && (action != null || getStandPose() != StandPose.SUMMON)) {
-                setStandPose(action != null ? action.getStandPose(userPower, this) : StandPose.NONE);
+                setStandPose(action != null ? action.getStandPose(userPower, this) : StandPose.IDLE);
             }
         }
         else if (SWING_OFF_HAND.equals(dataParameter)) {
@@ -522,7 +522,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
 
     public static class StandPose {
-        public static final StandPose NONE = new StandPose();
+        public static final StandPose IDLE = new StandPose();
         public static final StandPose SUMMON = new StandPose();
         public static final StandPose BLOCK = new StandPose();
         public static final StandPose LIGHT_ATTACK = new StandPose();
@@ -968,7 +968,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         barrageParryCount = 0;
         setTaskTarget(ActionTarget.EMPTY);
         updateNoPhysics();
-        setStandPose(StandPose.NONE);
+        setStandPose(StandPose.IDLE);
         clearedTask.getAction().onClear(userPower, this);
         entityData.set(CURRENT_TASK, Optional.empty());
         if (scheduledTask != null) {

@@ -166,7 +166,7 @@ public class ActionsOverlayGui extends AbstractGui {
         
         PositionConfig hotbarsPosConfig = JojoModConfig.CLIENT.hotbarsPosition.get();
         PositionConfig barsPosConfig = JojoModConfig.CLIENT.barsPosition.get();
-        boolean showModeSelector = JojoModConfig.CLIENT.showModeSelector.get();
+        boolean showModeSelector = false;
         updateElementPositions(barsPosConfig, hotbarsPosConfig, screenWidth, screenHeight);
 
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {

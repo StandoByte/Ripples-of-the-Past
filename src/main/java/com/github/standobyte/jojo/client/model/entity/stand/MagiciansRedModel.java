@@ -1,8 +1,9 @@
 package com.github.standobyte.jojo.client.model.entity.stand;
 
-import com.github.standobyte.jojo.action.actions.MagiciansRedRedBind;
-import com.github.standobyte.jojo.action.actions.StandEntityAction.Phase;
-import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
+import com.github.standobyte.jojo.client.model.pose.IModelPose;
+import com.github.standobyte.jojo.client.model.pose.ModelPose;
+import com.github.standobyte.jojo.client.model.pose.RotationAngle;
+import com.github.standobyte.jojo.client.model.pose.RotationAnglesArray;
 import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
 import com.github.standobyte.jojo.util.MathUtil;
 
@@ -131,65 +132,38 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
     }
     
     @Override
-    protected int getSummonPosesCount() {
-        return 2;
+    protected ModelPose<MagiciansRedEntity> initPoseReset() {
+        return super.initPoseReset()
+                .putRotation(new RotationAngle(beakUpper, 0.1745F, 0.0F, 0.0F))
+                .putRotation(new RotationAngle(beakLower, 0.0F, 0.0F, 0.0F));
     }
     
     @Override
-    protected void summonPose(float animationFactor, int poseVariant) {
-        switch (poseVariant) {
-        case 0:
-            setSummonPoseRotationAngle(head, 0.0F, 0.1309F, 0.0F, animationFactor);
-            if (beakUpper != null) {
-                setSummonPoseRotationAngle(beakUpper, -0.3491F, 0.0F, 0.0F, animationFactor);
-            }
-            if (beakLower != null) {
-                setSummonPoseRotationAngle(beakLower, 0.5236F, 0.0F, 0.0F, animationFactor);
-            }
-            setSummonPoseRotationAngle(body, 0.0F, -0.3927F, 0.0F, animationFactor);
-            setSummonPoseRotationAngle(leftArm, 0.0F, 0.0F, -2.3562F, animationFactor);
-            setSummonPoseRotationAngle(rightArm, 0.0F, 0.0F, 2.3562F, animationFactor);
-            setSummonPoseRotationAngle(leftLeg, 0.1745F, -0.7854F, 0.0F, animationFactor);
-            setSummonPoseRotationAngle(rightLeg, -1.5708F, -0.7854F, 0.0F, animationFactor);
-            setSummonPoseRotationAngle(rightLowerLeg, 2.3562F, 0.0F, 0.0F, animationFactor);
-            break;
-        case 1:
-            setSummonPoseRotationAngle(head, -0.7854F, 0.0F, 0.0F, animationFactor);
-            if (beakUpper != null) {
-                setSummonPoseRotationAngle(beakUpper, -0.3491F, 0.0F, 0.0F, animationFactor);
-            }
-            if (beakLower != null) {
-                setSummonPoseRotationAngle(beakLower, 0.5236F, 0.0F, 0.0F, animationFactor);
-            }
-            setSummonPoseRotationAngle(leftArm, 0.0F, 2.3562F, -2.8798F, animationFactor);
-            setSummonPoseRotationAngle(leftForeArm, 0.0F, 0.0F, 2.3562F, animationFactor);
-            setSummonPoseRotationAngle(rightArm, 0.0F, -2.3562F, 2.8798F, animationFactor);
-            setSummonPoseRotationAngle(rightForeArm, 0.0F, 0.0F, -2.3562F, animationFactor);
-            setSummonPoseRotationAngle(leftLeg, 0.2182F, 0.0F, 0.1309F, animationFactor);
-            setSummonPoseRotationAngle(rightLeg, 0.5236F, 0.0F, -0.1309F, animationFactor);
-            break;
-        }
-    }
-    
-    @Override
-    protected void rangedAttackPose(MagiciansRedEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
-        entity.setYBodyRot(entity.yRot);
-        leftArm.setPos(4.0F, -10.0F, 0.0F);
-        rightArm.setPos(-4.0F, -10.0F, 0.0F);
-        setRotationAngle(head, -0.3927F + xRotation * MathUtil.DEG_TO_RAD, 0.0F, 0.0F);
-        if (beakUpper != null) {
-            setRotationAngle(beakUpper, -0.3491F, 0.0F, 0.0F);
-        }
-        if (beakLower != null) {
-            setRotationAngle(beakLower, 0.5236F, 0.0F, 0.0F);
-        }
-        setRotationAngle(leftArm, -1.5708F, 1.0472F, 0.2182F);
-        setRotationAngle(leftForeArm, -0.2618F, 0.0F, 0.5236F);
-        setRotationAngle(rightArm, -1.3963F, -0.9163F, -0.1745F);
-        setRotationAngle(rightForeArm, -0.5236F, 0.0F, -0.6981F);
-        setRotationAngle(leftLeg, -0.3927F, 0.0F, 0.0873F);
-        setRotationAngle(leftLowerLeg, 0.7854F, 0.0F, 0.0F);
-        setRotationAngle(rightLeg, 0.2618F, 0.0F, -0.0873F);
+    protected RotationAnglesArray[] initSummonPoseRotations() {
+        return new RotationAnglesArray[] {
+                new RotationAnglesArray(
+                        new RotationAngle(head, 0.0F, 0.1309F, 0.0F),
+                        new RotationAngle(beakUpper, -0.3491F, 0.0F, 0.0F),
+                        new RotationAngle(beakLower, 0.5236F, 0.0F, 0.0F),
+                        new RotationAngle(body, 0.0F, -0.3927F, 0.0F),
+                        new RotationAngle(leftArm, 0.0F, 0.0F, -2.3562F),
+                        new RotationAngle(rightArm, 0.0F, 0.0F, 2.3562F),
+                        new RotationAngle(leftLeg, 0.1745F, -0.7854F, 0.0F),
+                        new RotationAngle(rightLeg, -1.5708F, -0.7854F, 0.0F),
+                        new RotationAngle(rightLowerLeg, 2.3562F, 0.0F, 0.0F)
+                        ),
+                new RotationAnglesArray(
+                        new RotationAngle(head, -0.7854F, 0.0F, 0.0F),
+                        new RotationAngle(beakUpper, -0.3491F, 0.0F, 0.0F),
+                        new RotationAngle(beakLower, 0.5236F, 0.0F, 0.0F),
+                        new RotationAngle(leftArm, 0.0F, 2.3562F, -2.8798F),
+                        new RotationAngle(leftForeArm, 0.0F, 0.0F, 2.3562F),
+                        new RotationAngle(rightArm, 0.0F, -2.3562F, 2.8798F),
+                        new RotationAngle(rightForeArm, 0.0F, 0.0F, -2.3562F),
+                        new RotationAngle(leftLeg, 0.2182F, 0.0F, 0.1309F),
+                        new RotationAngle(rightLeg, 0.5236F, 0.0F, -0.1309F)
+                        )
+        };
     }
     
     @Override
@@ -200,25 +174,36 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
     }
     
     @Override
-    protected void resetPose() {
-        super.resetPose();
-        if (beakUpper != null) {
-            beakUpper.xRot = 0.1745F;
-        }
-        if (beakLower != null) {
-            beakLower.xRot = 0;
-        }
+    protected IModelPose<MagiciansRedEntity> rangedAttackPose() {
+        return new ModelPose<MagiciansRedEntity>(new RotationAnglesArray(
+                new RotationAngle(beakUpper, -0.3491F, 0.0F, 0.0F),
+                new RotationAngle(beakLower, 0.5236F, 0.0F, 0.0F),
+                new RotationAngle(leftArm, -1.5708F, 1.0472F, 0.2182F),
+                new RotationAngle(leftForeArm, -0.2618F, 0.0F, 0.5236F),
+                new RotationAngle(rightArm, -1.3963F, -0.9163F, -0.1745F),
+                new RotationAngle(rightForeArm, -0.5236F, 0.0F, -0.6981F),
+                new RotationAngle(leftLeg, -0.3927F, 0.0F, 0.0873F),
+                new RotationAngle(leftLowerLeg, 0.7854F, 0.0F, 0.0F),
+                new RotationAngle(rightLeg, 0.2618F, 0.0F, -0.0873F)
+                ))
+                .setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
+                    leftArm.setPos(4.0F, -10.0F, 0.0F);
+                    rightArm.setPos(-4.0F, -10.0F, 0.0F);
+                    setRotationAngle(head, -0.3927F + xRotation * MathUtil.DEG_TO_RAD, 0.0F, 0.0F);
+                })
+                .createRigid();
     }
-    
-    @Override
-    protected void customPose(MagiciansRedEntity entity, StandPose pose, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
-        super.customPose(entity, pose, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, phase);
-        if (pose == MagiciansRedRedBind.RED_BIND_POSE) {
-            entity.setYBodyRot(entity.yRot);
-            leftArm.xRot = -1.4708F;
-            rightArm.xRot = -1.6708F;
-            leftArm.yRot = 0.4712F;
-            rightArm.yRot = -leftArm.yRot;
-        }
-    }
+
+    // FIXME (model anim) MR red bind pose
+//    @Override
+//    protected void customPose(MagiciansRedEntity entity, StandPose pose, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
+//        super.customPose(entity, pose, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, phase);
+//        if (pose == MagiciansRedRedBind.RED_BIND_POSE) {
+//            entity.setYBodyRot(entity.yRot);
+//            leftArm.xRot = -1.4708F;
+//            rightArm.xRot = -1.6708F;
+//            leftArm.yRot = 0.4712F;
+//            rightArm.yRot = -leftArm.yRot;
+//        }
+//    }
 }

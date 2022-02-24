@@ -1,9 +1,22 @@
 package com.github.standobyte.jojo.client.model.entity.stand;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
+import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.action.actions.StandEntityAction.Phase;
+import com.github.standobyte.jojo.client.model.pose.IModelPose;
+import com.github.standobyte.jojo.client.model.pose.ModelPose;
+import com.github.standobyte.jojo.client.model.pose.ModelPoseTransition;
+import com.github.standobyte.jojo.client.model.pose.RotationAnglesArray;
+import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
 import com.github.standobyte.jojo.client.renderer.entity.stand.AdditionalArmSwing;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
@@ -18,11 +31,19 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 
 public abstract class StandEntityModel<T extends StandEntity> extends AgeableModel<T> {
     protected VisibilityMode visibilityMode = VisibilityMode.ALL;
+    protected float xRotation;
+    
     protected StandPose poseType = StandPose.SUMMON;
-    private float xRotation;
+    private float idleLoopTickStamp = 0;
+    protected ModelPose<T> poseReset;
+    protected ModelPose<T> idlePose;
+    protected IModelPose<T> idleLoop;
+    protected List<IModelPose<T>> summonPoses;
+    protected final Map<StandPose, StandActionAnimation<T>> actionAnim = new HashMap<>();
 
     protected StandEntityModel(boolean scaleHead, float yHeadOffset, float zHeadOffset) {
         this(scaleHead, yHeadOffset, zHeadOffset, 2.0F, 2.0F, 24.0F);
@@ -30,36 +51,23 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
 
     protected StandEntityModel(boolean scaleHead, float yHeadOffset, float zHeadOffset, 
             float babyHeadScale, float babyBodyScale, float bodyYOffset) {
-        super(RenderType::entityTranslucent, scaleHead, yHeadOffset, zHeadOffset, babyHeadScale, babyBodyScale, bodyYOffset);
+        this(RenderType::entityTranslucent, scaleHead, yHeadOffset, zHeadOffset, babyHeadScale, babyBodyScale, bodyYOffset);
     }
 
     protected StandEntityModel(Function<ResourceLocation, RenderType> renderType, boolean scaleHead, float yHeadOffset, float zHeadOffset, 
             float babyHeadScale, float babyBodyScale, float bodyYOffset) {
         super(renderType, scaleHead, yHeadOffset, zHeadOffset, babyHeadScale, babyBodyScale, bodyYOffset);
     }
-
+    
+    public void afterInit() {
+        initPoses();
+    }
+    
     protected final void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
         modelRenderer.xRot = x;
         modelRenderer.yRot = y;
         modelRenderer.zRot = z;
     }
-
-    protected void setSummonPoseRotationAngle(ModelRenderer modelRenderer, float x, float y, float z, float factor, 
-            float xIdle, float yIdle, float zIdle) {
-        setRotationAngle(modelRenderer, 
-                isHead(modelRenderer)  ? modelRenderer.xRot + xIdle + (x - xIdle) * factor : xIdle + (x - xIdle) * factor, 
-                yIdle + (y - yIdle) * factor, 
-                zIdle + (z - zIdle) * factor);
-    }
-
-    protected void setSummonPoseRotationAngle(ModelRenderer modelRenderer, float x, float y, float z, float factor) {
-        setRotationAngle(modelRenderer, 
-                isHead(modelRenderer) ? modelRenderer.xRot + x * factor : x * factor, 
-                y * factor, 
-                z * factor);
-    }
-    
-    protected abstract boolean isHead(ModelRenderer modelRenderer);
     
     public void setVisibilityMode(VisibilityMode mode, boolean forearmOnly) {
         this.visibilityMode = mode;
@@ -71,9 +79,9 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     @Override
     public void prepareMobModel(T entity, float walkAnimPos, float walkAnimSpeed, float partialTick) {
         StandPose currentPose = entity.getStandPose();
-        if (currentPose != poseType) {
-            resetPose();
-        }
+//        if (currentPose != poseType) {
+//            resetPose();
+//        }
         poseType = currentPose;
     }
 
@@ -83,75 +91,158 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
 
     @Override
     public void setupAnim(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
-        headParts().forEach(part -> {
-            part.yRot = yRotationOffset * MathUtil.DEG_TO_RAD;
-            part.xRot = xRotation * MathUtil.DEG_TO_RAD;
-            part.zRot = 0;
-        });
+        idlePose.poseModel(1, entity, ticks, yRotationOffset, xRotation);
+        
+        if (poseType == StandPose.SUMMON && (ticks > SUMMON_ANIMATION_LENGTH || entity.isArmsOnlyMode())) {
+            entity.setStandPose(StandPose.IDLE);
+            poseType = StandPose.IDLE;
+        }
+        
         if (this.attackTime > 0.0F) {
             swingArm(entity, this.attackTime, xRotation, entity.swingingArm == Hand.MAIN_HAND ? entity.getMainArm() : entity.getMainArm().getOpposite(), 0);
         }
         else {
-            if (poseType == StandPose.SUMMON) {
-                if (ticks > SUMMON_ANIMATION_LENGTH || entity.isArmsOnlyMode()) {
-                    entity.setStandPose(StandPose.NONE);
-                }
-                else {
-                    entity.setYBodyRot(entity.yRot);
-                    summonAnimation(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
-                }
-            }
-            else if (poseType == StandPose.NONE) {
-                resetPose();
-            }
-            else if (poseType == StandPose.BLOCK) {
-                blockingPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
-            }
-            else if (poseType == StandPose.LIGHT_ATTACK) {
-                lightAttackPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, entity.getCurrentTaskPhase());
-            }
-            else if (poseType == StandPose.HEAVY_ATTACK) {
-                heavyAttackPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, entity.getCurrentTaskPhase());
-            }
-            else if (poseType == StandPose.HEAVY_ATTACK_COMBO) {
-                heavyAttackComboPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, entity.getCurrentTaskPhase());
-            }
-            else if (poseType == StandPose.RANGED_ATTACK) {
-                rangedAttackPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, entity.getCurrentTaskPhase());
-            }
-            else {
-                customPose(entity, poseType, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, entity.getCurrentTaskPhase());
-            }
+            poseStand(entity, ticks, yRotationOffset, xRotation, 
+                    poseType, entity.getCurrentTaskPhase(), entity.getCurrentTaskCompletion(MathHelper.frac(ticks)));
+            // FIXME //
+//            if (poseType == StandPose.IDLE) {
+//                resetPose();
+//            }
+//            else if (poseType == StandPose.BLOCK) {
+//                blockingPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
+//            }
+//            else if (poseType == StandPose.LIGHT_ATTACK) {
+//                lightAttackPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, entity.getCurrentTaskPhase());
+//            }
+//            else if (poseType == StandPose.HEAVY_ATTACK) {
+//                heavyAttackPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, entity.getCurrentTaskPhase());
+//            }
+//            else if (poseType == StandPose.HEAVY_ATTACK_COMBO) {
+//                heavyAttackComboPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, entity.getCurrentTaskPhase());
+//            }
+//            else if (poseType == StandPose.RANGED_ATTACK) {
+//                rangedAttackPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, entity.getCurrentTaskPhase());
+//            }
+//            else {
+//                customPose(entity, poseType, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, entity.getCurrentTaskPhase());
+//            }
         }
         this.xRotation = xRotation;
         /*if (!Minecraft.getInstance().isPaused())*/ entity.clUpdateSwings(Minecraft.getInstance().getDeltaFrameTime());
     }
     
-    private static final float SUMMON_ANIMATION_LENGTH = 20.0F;
-    private static final float SUMMON_ANIMATION_POSE_REVERSE_POINT = 0.75F;
-    protected void summonAnimation(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
-        summonPose(ticks > SUMMON_ANIMATION_LENGTH * SUMMON_ANIMATION_POSE_REVERSE_POINT ? 
-                (SUMMON_ANIMATION_LENGTH - ticks) / (SUMMON_ANIMATION_LENGTH * (1 - SUMMON_ANIMATION_POSE_REVERSE_POINT))
-                : 1.0F, entity.getSummonPoseRandomByte() % getSummonPosesCount());
+    protected void poseStand(T entity, float ticks, float yRotationOffset, float xRotation, 
+            StandPose standPose, @Nullable Phase actionPhase, float actionCompletion) {
+        if (actionAnim.containsKey(standPose)) {
+            onPose(entity, ticks);
+            getActionAnim(entity, standPose).animate(actionPhase, actionCompletion, 
+                    entity, ticks, yRotationOffset, xRotation);
+        }
+        else if (standPose == StandPose.SUMMON && summonPoses.size() > 0) {
+            onPose(entity, ticks);
+            summonPoses.get(entity.getSummonPoseRandomByte() % summonPoses.size())
+            .poseModel(ticks, entity, ticks, yRotationOffset, xRotation);
+        }
+        else {
+            idleLoop.poseModel(ticks - idleLoopTickStamp, entity, ticks, yRotationOffset, xRotation);
+        }
+    }
+    
+    protected StandActionAnimation<T> getActionAnim(T entity, StandPose poseType) {
+        return actionAnim.get(poseType);
+    }
+        
+    private void onPose(T entity, float ticks) {
+        entity.setYBodyRot(entity.yRot);
+        idleLoopTickStamp = ticks;
     }
 
-    protected abstract void resetPose();
-    protected void summonPose(float animationFactor, int poseVariant) {
-        resetPose();
+    private static final float SUMMON_ANIMATION_LENGTH = 20.0F;
+    private static final float SUMMON_ANIMATION_POSE_REVERSE_POINT = 0.75F;
+    protected void initPoses() {
+        poseReset = initPoseReset();
+        
+        idlePose = initIdlePose();
+        idleLoop = new ModelPoseTransition<T>(idlePose, initIdlePose2Loop()).setTransitionFunction(MathHelper::sin);
+        
+        summonPoses = initSummonPoses();
+        
+        actionAnim.put(StandPose.LIGHT_ATTACK, initLightAttackAnim());
+        actionAnim.put(StandPose.HEAVY_ATTACK, initHeavyAttackAnim(false));
+        actionAnim.put(StandPose.HEAVY_ATTACK_COMBO, initHeavyAttackAnim(true));
+        actionAnim.put(StandPose.RANGED_ATTACK, initRangedAttackAnim());
+        actionAnim.put(StandPose.BLOCK, initBlockAnim());
+        // FIXME (model anim) custom poses
     }
-    protected int getSummonPosesCount() {
-        return 1;
+    
+
+
+    protected abstract ModelPose<T> initPoseReset();
+    
+    protected ModelPose<T> initIdlePose() {
+        return initPoseReset()
+        .setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
+            headParts().forEach(part -> {
+                part.yRot = yRotationOffset * MathUtil.DEG_TO_RAD;
+                part.xRot = xRotation * MathUtil.DEG_TO_RAD;
+                part.zRot = 0;
+            });
+        });
     }
-    protected abstract void blockingPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation);
-    protected abstract void lightAttackPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase);
-    protected abstract void heavyAttackPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase);
-    protected abstract void heavyAttackComboPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase);
-    protected void rangedAttackPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
-        resetPose();
+    
+    protected ModelPose<T> initIdlePose2Loop() {
+        return initIdlePose();
     }
-    protected void customPose(T entity, StandPose pose, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
-        resetPose();
+    
+    protected List<IModelPose<T>> initSummonPoses() {
+        return Arrays.stream(initSummonPoseRotations())
+                .map(rotationAngles -> new ModelPose<T>(rotationAngles).setTransitionFunction(ticks -> 
+                MathHelper.clamp(
+                        (SUMMON_ANIMATION_LENGTH - ticks) / (SUMMON_ANIMATION_LENGTH * (1 - SUMMON_ANIMATION_POSE_REVERSE_POINT)), 
+                        0F, 1F)))
+                .collect(Collectors.toCollection(ArrayList::new));
     }
+    
+    protected RotationAnglesArray[] initSummonPoseRotations() {
+        return new RotationAnglesArray[0];
+    }
+    
+    protected StandActionAnimation<T> initLightAttackAnim() {
+        return new StandActionAnimation.Builder<T>().addPose(StandEntityAction.Phase.PERFORM, initPoseReset()).build(idlePose);
+    }
+    
+    protected StandActionAnimation<T> initHeavyAttackAnim(boolean combo) {
+        return new StandActionAnimation.Builder<T>().addPose(StandEntityAction.Phase.PERFORM, initPoseReset()).build(idlePose);
+    }
+    
+    protected StandActionAnimation<T> initRangedAttackAnim() {
+        return new StandActionAnimation.Builder<T>().addPose(StandEntityAction.Phase.BUTTON_HOLD, rangedAttackPose()).build(idlePose);
+    }
+    
+    protected IModelPose<T> rangedAttackPose() {
+        return initIdlePose();
+    }
+    
+    protected StandActionAnimation<T> initBlockAnim() {
+        return new StandActionAnimation.Builder<T>().addPose(StandEntityAction.Phase.PERFORM, blockPose()).build(idlePose);
+    }
+    
+    protected IModelPose<T> blockPose() {
+        return initIdlePose();
+    }
+
+    // FIXME //
+//    protected abstract void blockingPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation);
+//    protected abstract void lightAttackPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase);
+//    protected abstract void heavyAttackPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase);
+//    protected abstract void heavyAttackComboPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase);
+//    protected void rangedAttackPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
+//        resetPose();
+//    }
+//    protected void customPose(T entity, StandPose pose, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
+//        resetPose();
+//    }
+    
     protected abstract void swingArm(T entity, float swingAmount, float xRotation, HandSide swingingHand, float recovery);
 
     public void renderFirstPersonArms(HandSide handSide, MatrixStack matrixStack, 
@@ -167,7 +258,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     public void renderArmSwings(T entity, MatrixStack matrixStack, IVertexBuilder buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
         List<AdditionalArmSwing> swings = entity.getSwingsWithOffsets();
         if (!swings.isEmpty()) {
-            resetPose();
+            resetPose(entity);
             for (AdditionalArmSwing swing : swings) {
                 matrixStack.pushPose();
                 setVisibilityMode(swing.getSide() == HandSide.LEFT ? VisibilityMode.LEFT_ARM_ONLY : VisibilityMode.RIGHT_ARM_ONLY, true);
@@ -190,6 +281,10 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         }
     }
     
+    private void resetPose(T entity) {
+        poseReset.poseModel(0, entity, 0, 0, 0);
+    }
+    
     protected abstract void rotateAdditionalArmSwings();
 
     public enum VisibilityMode {
@@ -198,7 +293,4 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         LEFT_ARM_ONLY,
         RIGHT_ARM_ONLY
     }
-    
-    // FIXME (model) idle poses
-    // FIXME (model) a method to move between poses? (like with summon poses, but more global)
 }

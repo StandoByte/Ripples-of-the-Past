@@ -546,10 +546,6 @@ public class GameplayEventHandler {
     }
     
     private static void summonSoul(LivingDeathEvent event) {
-        if (!JojoModConfig.COMMON.soulAscension.get()) {
-            return;
-        }
-        
         LivingEntity entity = event.getEntityLiving();
         if (JojoModUtil.isUndead(entity)) {
             return;
