@@ -12,20 +12,14 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.util.ResourceLocation;
 
 public class MagiciansRedFlameLayer extends StandModelLayerRenderer<MagiciansRedEntity, MagiciansRedModel> {
-    private final MagiciansRedFlameLayerModel model = new MagiciansRedFlameLayerModel();
 
     public MagiciansRedFlameLayer(MagiciansRedRenderer entityRenderer) {
-        super(entityRenderer);
+        super(entityRenderer, new MagiciansRedFlameLayerModel());
     }
     
     @Override
     public int getPackedLight(int packedLight) {
         return LightTexture.pack(15, 15);
-    }
-    
-    @Override
-    public MagiciansRedFlameLayerModel getLayerModel() {
-        return model;
     }
     
     @Override

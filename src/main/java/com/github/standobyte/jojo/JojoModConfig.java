@@ -51,8 +51,6 @@ public class JojoModConfig {
         public final ForgeConfigSpec.BooleanValue meteoriteSpawn;
         public final ForgeConfigSpec.BooleanValue pillarmanTempleSpawn;
         
-        public final ForgeConfigSpec.BooleanValue soulAscension;
-        
         Common(ForgeConfigSpec.Builder builder) {
             keepStandOnDeath = builder
                     .comment(" Keep Stand after death.")
@@ -136,11 +134,6 @@ public class JojoModConfig {
                         .translation("jojo.config.pillarmanTempleSpawn")
                         .define("pillarmanTempleSpawn", true);
             builder.pop();
-            
-            soulAscension = builder
-                    .comment(" Whether or not a Stand User's death will briefly summon their soul when certain conditions are met.")
-                    .translation("jojo.config.soulAscension")
-                    .define("soulAscension", true);
         }
         
         public boolean isConfigLoaded() {
@@ -191,11 +184,10 @@ public class JojoModConfig {
         
         public final ForgeConfigSpec.EnumValue<ActionsOverlayGui.PositionConfig> barsPosition;
         public final ForgeConfigSpec.EnumValue<ActionsOverlayGui.PositionConfig> hotbarsPosition;
-        public final ForgeConfigSpec.BooleanValue showModeSelector;
         
         public final ForgeConfigSpec.BooleanValue slotHotkeys;
         
-        public final ForgeConfigSpec.BooleanValue resolveShaders; // FIXME (!) check the shader setting
+        public final ForgeConfigSpec.BooleanValue resolveShaders; // FIXME (!) test the shader setting
         
         Client(ForgeConfigSpec.Builder builder) {
             barsPosition = builder
@@ -207,11 +199,6 @@ public class JojoModConfig {
                     .comment(" Position of Power name, Attack and Ability hotbars in the HUD.")
                     .translation("jojo.config.client.hotbarsPosition")
                     .defineEnum("hotbarsPosition", ActionsOverlayGui.PositionConfig.TOP_LEFT);
-            
-            showModeSelector = builder
-                    .comment(" Whether or not a list of available Powers shows up when switching a HUD mode.")
-                    .translation("jojo.config.client.showModeSelector")
-                    .define("showModeSelector", true);
             
             slotHotkeys = builder
                     .comment(" Enable hotkey settings for each individual attack and ability from 1 to 9.", 

@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.client.model.entity.stand;
 
+import com.github.standobyte.jojo.client.model.pose.RotationAngle;
+import com.github.standobyte.jojo.client.model.pose.RotationAnglesArray;
 import com.github.standobyte.jojo.entity.stand.stands.TheWorldEntity;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -300,55 +302,50 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
     }
     
     @Override
-    protected int getSummonPosesCount() {
-        return 4;
-    }
-    
-    @Override
-    protected void summonPose(float animationFactor, int poseVariant) {
-        switch (poseVariant) {
-        case 0:
-            setSummonPoseRotationAngle(head, 0.0F, -0.3491F, -0.0873F, animationFactor);
-            setSummonPoseRotationAngle(body, 0.2618F, 0.0F, 0.0F, animationFactor);
-            setSummonPoseRotationAngle(leftArm, -0.2618F, -0.7854F, -1.8326F, animationFactor);
-            setSummonPoseRotationAngle(leftForeArm, -0.7854F, 0.0F, 0.0F,  animationFactor);
-            setSummonPoseRotationAngle(rightArm, 0.5236F, 0.0F, 0.0F, animationFactor);
-            setSummonPoseRotationAngle(rightForeArm, 0.0F, 3.1416F, 2.1817F, animationFactor);
-            setSummonPoseRotationAngle(leftLeg, -1.5708F, 0.0F, 0.0F, animationFactor);
-            setSummonPoseRotationAngle(leftLowerLeg, 2.0944F, 0.0F, 0.0F, animationFactor);
-            setSummonPoseRotationAngle(rightLeg, -1.1345F, 0.2618F, 0.0F, animationFactor);
-            setSummonPoseRotationAngle(rightLowerLeg, 0.5236F, 0.0F, 0.0F, animationFactor);
-            break;
-        case 1:
-            setSummonPoseRotationAngle(head, -0.2618F, 0.0F, 0.0F, animationFactor);
-            setSummonPoseRotationAngle(body, 0.4363F, 0.0F, 0.0F, animationFactor);
-            setSummonPoseRotationAngle(leftArm, -0.8727F, -0.2618F, -2.0944F, animationFactor);
-            setSummonPoseRotationAngle(leftForeArm, -0.6981F, -0.8727F, 0.0873F, animationFactor);
-            setSummonPoseRotationAngle(rightArm, 0.0F, 1.309F, 1.3963F, animationFactor);
-            setSummonPoseRotationAngle(rightForeArm, -1.0472F, -0.3491F, -1.6581F, animationFactor);
-            setSummonPoseRotationAngle(leftLeg, 1.0472F, 0.0F, -0.2618F, animationFactor);
-            setSummonPoseRotationAngle(rightLeg, -0.7854F, 0.0F, 0.1745F, animationFactor);
-            setSummonPoseRotationAngle(rightLowerLeg, 0.7854F, 0.2618F, 0.0F, animationFactor);
-            break;
-        case 2:
-            setSummonPoseRotationAngle(leftArm, 0.0F, -0.5236F, -0.8727F, animationFactor);
-            setSummonPoseRotationAngle(leftForeArm, 0.0F, 1.1781F, 0.9599F, animationFactor);
-            setSummonPoseRotationAngle(rightArm, 0.0F, 0.5236F, 1.309F, animationFactor);
-            setSummonPoseRotationAngle(rightForeArm, 0.0F, -1.1781F, -0.9599F, animationFactor);
-            setSummonPoseRotationAngle(leftLeg, 0.0F, 0.0F, -0.1745F, animationFactor);
-            setSummonPoseRotationAngle(rightLeg, -0.4363F, 0.0F, 0.1745F, animationFactor);
-            setSummonPoseRotationAngle(rightLowerLeg, 1.0472F, 0.0F, 0.0F, animationFactor);
-            break;
-        case 3:
-            setSummonPoseRotationAngle(body, 0.6981F, 0.5236F, 0.0F, animationFactor);
-            setSummonPoseRotationAngle(leftArm, -0.4363F, -0.6109F, -1.1345F, animationFactor);
-            setSummonPoseRotationAngle(leftForeArm, -1.0472F, 0.0F, 0.0F, animationFactor);
-            setSummonPoseRotationAngle(rightArm, 0.0F, 1.4835F, 1.5708F, animationFactor);
-            setSummonPoseRotationAngle(rightForeArm, -0.8727F, -0.3927F, -1.5708F, animationFactor);
-            setSummonPoseRotationAngle(leftLeg, -1.5708F, 0.0F, -0.1745F, animationFactor);
-            setSummonPoseRotationAngle(leftLowerLeg, 1.3963F, 0.0F, 0.0F, animationFactor);
-            setSummonPoseRotationAngle(rightLeg, 0.0F, 0.0F, 0.1745F, animationFactor);
-            break;
-        }
+    protected RotationAnglesArray[] initSummonPoseRotations() {
+        return new RotationAnglesArray[] {
+                new RotationAnglesArray(
+                        new RotationAngle(head, 0.0F, -0.3491F, -0.0873F),
+                        new RotationAngle(body, 0.2618F, 0.0F, 0.0F),
+                        new RotationAngle(leftArm, -0.2618F, -0.7854F, -1.8326F),
+                        new RotationAngle(leftForeArm, -0.7854F, 0.0F, 0.0F),
+                        new RotationAngle(rightArm, 0.5236F, 0.0F, 0.0F),
+                        new RotationAngle(rightForeArm, 0.0F, 3.1416F, 2.1817F),
+                        new RotationAngle(leftLeg, -1.5708F, 0.0F, 0.0F),
+                        new RotationAngle(leftLowerLeg, 2.0944F, 0.0F, 0.0F),
+                        new RotationAngle(rightLeg, -1.1345F, 0.2618F, 0.0F),
+                        new RotationAngle(rightLowerLeg, 0.5236F, 0.0F, 0.0F)
+                        ),
+                new RotationAnglesArray(
+                        new RotationAngle(head, -0.2618F, 0.0F, 0.0F),
+                        new RotationAngle(body, 0.4363F, 0.0F, 0.0F),
+                        new RotationAngle(leftArm, -0.8727F, -0.2618F, -2.0944F),
+                        new RotationAngle(leftForeArm, -0.6981F, -0.8727F, 0.0873F),
+                        new RotationAngle(rightArm, 0.0F, 1.309F, 1.3963F),
+                        new RotationAngle(rightForeArm, -1.0472F, -0.3491F, -1.6581F),
+                        new RotationAngle(leftLeg, 1.0472F, 0.0F, -0.2618F),
+                        new RotationAngle(rightLeg, -0.7854F, 0.0F, 0.1745F),
+                        new RotationAngle(rightLowerLeg, 0.7854F, 0.2618F, 0.0F)
+                        ),
+                new RotationAnglesArray(
+                        new RotationAngle(leftArm, 0.0F, -0.5236F, -0.8727F),
+                        new RotationAngle(leftForeArm, 0.0F, 1.1781F, 0.9599F),
+                        new RotationAngle(rightArm, 0.0F, 0.5236F, 1.309F),
+                        new RotationAngle(rightForeArm, 0.0F, -1.1781F, -0.9599F),
+                        new RotationAngle(leftLeg, 0.0F, 0.0F, -0.1745F),
+                        new RotationAngle(rightLeg, -0.4363F, 0.0F, 0.1745F),
+                        new RotationAngle(rightLowerLeg, 1.0472F, 0.0F, 0.0F)
+                        ),
+                new RotationAnglesArray(
+                        new RotationAngle(body, 0.6981F, 0.5236F, 0.0F),
+                        new RotationAngle(leftArm, -0.4363F, -0.6109F, -1.1345F),
+                        new RotationAngle(leftForeArm, -1.0472F, 0.0F, 0.0F),
+                        new RotationAngle(rightArm, 0.0F, 1.4835F, 1.5708F),
+                        new RotationAngle(rightForeArm, -0.8727F, -0.3927F, -1.5708F),
+                        new RotationAngle(leftLeg, -1.5708F, 0.0F, -0.1745F),
+                        new RotationAngle(leftLowerLeg, 1.3963F, 0.0F, 0.0F),
+                        new RotationAngle(rightLeg, 0.0F, 0.0F, 0.1745F)
+                        )
+        };
     }
 }

@@ -1,8 +1,9 @@
 package com.github.standobyte.jojo.client.model.entity.stand;
 
-import com.github.standobyte.jojo.action.actions.HierophantGreenGrapple;
-import com.github.standobyte.jojo.action.actions.StandEntityAction.Phase;
-import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
+import com.github.standobyte.jojo.client.model.pose.IModelPose;
+import com.github.standobyte.jojo.client.model.pose.ModelPose;
+import com.github.standobyte.jojo.client.model.pose.RotationAngle;
+import com.github.standobyte.jojo.client.model.pose.RotationAnglesArray;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -72,47 +73,44 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
         setRotationAngle(bone12, 0.0F, 0.0F, 2.5307F);
         bone12.texOffs(42, 18).addBox(-0.5F, -4.5F, -2.5F, 1.0F, 5.0F, 5.0F, 0.0F, true);
     }
+    
+    @Override
+    protected RotationAnglesArray[] initSummonPoseRotations() {
+        return new RotationAnglesArray[] {
+                new RotationAnglesArray(
+                        new RotationAngle(head, -0.5236F, 0.0F, 0.0F),
+                        new RotationAngle(leftArm, 0.0F, 0.0F, -0.5236F),
+                        new RotationAngle(leftForeArm, -0.5236F, 0.0F, 1.3963F),
+                        new RotationAngle(rightArm, -1.2217F, 0.0F, 0.0F),
+                        new RotationAngle(leftLeg, -1.8326F, 0.0F, 0.2618F),
+                        new RotationAngle(leftLowerLeg, 1.8326F, 0.0F, 0.0F),
+                        new RotationAngle(rightLeg, 0.0F, 0.0F, -0.2618F),
+                        new RotationAngle(rightLowerLeg, 1.5708F, 0.0F, 0.0F)
+                        )
+        };
+    }
 
+    @Override
+    protected IModelPose<HierophantGreenEntity> rangedAttackPose() {
+        return new ModelPose<HierophantGreenEntity>(new RotationAnglesArray(
+                new RotationAngle(leftArm, -1.5708F, 0.0F, -1.309F),
+                new RotationAngle(leftForeArm, -0.9163F, 0.0F, 0.0F),
+                new RotationAngle(rightArm, -1.5708F, -0.6109F, 1.309F),
+                new RotationAngle(rightForeArm, 0.7854F, 3.1416F, 0.0F),
+                new RotationAngle(leftLeg, 0.0F, 0.0F, -0.7418F),
+                new RotationAngle(leftLowerLeg, 0.0F, 0.0F, 2.0944F),
+                new RotationAngle(rightLeg, 0.0F, 0.0F, 0.2618F)
+                ));
+    }
+
+    // FIXME (model anim) HG grapple pose
 //    @Override
-//    protected int getSummonPosesCount() {
-//        return 1;
-//    }
-    
-    @Override
-    protected void summonPose(float animationFactor, int poseVariant) {
-//        switch (poseVariant) {
-//        case 0:
-            setSummonPoseRotationAngle(head, -0.5236F, 0.0F, 0.0F, animationFactor);
-            setSummonPoseRotationAngle(leftArm, 0.0F, 0.0F, -0.5236F, animationFactor);
-            setSummonPoseRotationAngle(leftForeArm, -0.5236F, 0.0F, 1.3963F, animationFactor);
-            setSummonPoseRotationAngle(rightArm, -1.2217F, 0.0F, 0.0F, animationFactor);
-            setSummonPoseRotationAngle(leftLeg, -1.8326F, 0.0F, 0.2618F, animationFactor);
-            setSummonPoseRotationAngle(leftLowerLeg, 1.8326F, 0.0F, 0.0F, animationFactor);
-            setSummonPoseRotationAngle(rightLeg, 0.0F, 0.0F, -0.2618F, animationFactor);
-            setSummonPoseRotationAngle(rightLowerLeg, 1.5708F, 0.0F, 0.0F, animationFactor);
-//            break;
+//    protected void customPose(HierophantGreenEntity entity, StandPose pose, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
+//        super.customPose(entity, pose, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, phase);
+//        if (pose == HierophantGreenGrapple.GRAPPLE_POSE) {
+//            entity.setYBodyRot(entity.yRot);
+//            ModelRenderer arm = getArm(entity.getMainArm());
+//            arm.xRot = -1.5708F;
 //        }
-    }
-    
-    @Override
-    protected void rangedAttackPose(HierophantGreenEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
-        entity.setYBodyRot(entity.yRot);
-        setRotationAngle(leftArm, -1.5708F, 0.0F, -1.309F);
-        setRotationAngle(leftForeArm, -0.9163F, 0.0F, 0.0F);
-        setRotationAngle(rightArm, -1.5708F, -0.6109F, 1.309F);
-        setRotationAngle(rightForeArm, 0.7854F, 3.1416F, 0.0F);
-        setRotationAngle(leftLeg, 0.0F, 0.0F, -0.7418F);
-        setRotationAngle(leftLowerLeg, 0.0F, 0.0F, 2.0944F);
-        setRotationAngle(rightLeg, 0.0F, 0.0F, 0.2618F);
-    }
-    
-    @Override
-    protected void customPose(HierophantGreenEntity entity, StandPose pose, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
-        super.customPose(entity, pose, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, phase);
-        if (pose == HierophantGreenGrapple.GRAPPLE_POSE) {
-            entity.setYBodyRot(entity.yRot);
-            ModelRenderer arm = getArm(entity.getMainArm());
-            arm.xRot = -1.5708F;
-        }
-    }
+//    }
 }

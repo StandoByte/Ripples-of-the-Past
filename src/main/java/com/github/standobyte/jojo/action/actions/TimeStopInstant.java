@@ -74,7 +74,7 @@ public class TimeStopInstant extends StandAction {
                 IStandManifestation stand = power.getStandManifestation();
                 if (stand instanceof StandEntity) {
                     StandEntity standEntity = (StandEntity) stand;
-                    standEntity.setStandPose(StandPose.NONE);
+                    standEntity.setStandPose(StandPose.IDLE);
                     standEntity.summonLockTicks = Math.min(standEntity.summonLockTicks - timeStopTicks, 0);
                     standEntity.gradualSummonWeaknessTicks = Math.min(standEntity.gradualSummonWeaknessTicks - timeStopTicks, 0);
                 }

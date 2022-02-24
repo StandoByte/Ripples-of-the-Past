@@ -34,6 +34,7 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
 
     public AbstractStandRenderer(EntityRendererManager rendererManager, M entityModel, float shadowRadius) {
         super(rendererManager, entityModel, shadowRadius);
+        entityModel.afterInit();
     }
 
     @Override
@@ -153,7 +154,7 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
             }
         }
 
-        if (!entity.isVisibleForAll() && model.getPose() == StandPose.NONE && model.attackTime == 0 && 
+        if (!entity.isVisibleForAll() && model.getPose() == StandPose.IDLE && model.attackTime == 0 && 
                 entity.isFollowingUser() && !Minecraft.getInstance().player.isShiftKeyDown()) {
             float idleY = MathHelper.sin(ticks * 0.04F) * 0.04F;
             matrixStack.translate(0.0D, idleY, 0.0D);
@@ -252,7 +253,7 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
         matrixStack.translate(0, 0.75F, 0);
         model.prepareMobModel(entity, walkAnimSpeed, walkAnimPos, partialTick); 
         model.setupAnim(entity, walkAnimSpeed, walkAnimPos, ticks, yRotationOffset, 0);
-        if (model.attackTime > 0 || entity.getStandPose() != StandPose.NONE && entity.getStandPose() != StandPose.SUMMON) {
+        if (model.attackTime > 0 || entity.getStandPose() != StandPose.IDLE && entity.getStandPose() != StandPose.SUMMON) {
             matrixStack.translate(0, -entity.getEyeHeight(), -0.25D);
             matrixStack.scale(-1.0F, -1.0F, 1.0F);
             scale(entity, matrixStack, partialTick);

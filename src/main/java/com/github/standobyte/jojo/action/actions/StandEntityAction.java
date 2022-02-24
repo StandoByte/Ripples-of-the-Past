@@ -285,7 +285,7 @@ public abstract class StandEntityAction extends StandAction {
         private TargetRequirement crosshairTargetForStand = null;
         private boolean isCancelable = false;
         private float userMovementFactor = 0.5F;
-        private StandPose standPose = StandPose.NONE;
+        private StandPose standPose = StandPose.IDLE;
         @Nullable
         private StandRelativeOffset userOffset = null;
         @Nullable
