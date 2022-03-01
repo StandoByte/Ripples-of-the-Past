@@ -5,6 +5,7 @@ import java.util.Set;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.actions.StandAction;
 import com.github.standobyte.jojo.action.actions.TimeStop;
 import com.github.standobyte.jojo.capability.world.WorldUtilCap;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
@@ -18,6 +19,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.SyncWorldTimeStopPa
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.VampirismPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
 import com.google.common.collect.ImmutableSet;
 
 import net.minecraft.entity.Entity;
@@ -29,7 +31,6 @@ import net.minecraft.network.play.server.SPlayEntityEffectPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -301,16 +302,30 @@ public class TimeHandler {
     public static boolean isTimeStopped(World world, ChunkPos chunkPos) {
         return world.getCapability(WorldUtilCapProvider.CAPABILITY).map(cap -> cap.isTimeStopped(chunkPos)).orElse(false);
     }
+
+    public static final int MIN_TIME_STOP_TICKS = 5;
+    public static int getTimeStopTicks(IStandPower standPower, StandAction timeStopAction, LivingEntity user, LazyOptional<INonStandPower> otherPower) {
+//        float ticks = (float) (standPower.getXp() - minStandExp) / (float) (IStandPower.MAX_EXP - minStandExp) * 95F + 5;
+//        ticks *= otherPower.map(power -> {
+//           if (power.getType() == ModNonStandPowers.VAMPIRISM.get()) {
+//               return 1F + (float) ((VampirismPowerType.bloodLevel(power, Difficulty.EASY) - 1) * 4) / 15F;
+//           }
+//           return 1F;
+//        }).orElse(1F);
+//        return MathHelper.floor(ticks);
+//        
+
+        // FIXME (!) ts ticks
+        return MathHelper.floor(standPower.getLearningProgressPoints(timeStopAction)) + MIN_TIME_STOP_TICKS;
+    }
     
-    public static int getTimeStopTicks(int minStandExp, IStandPower standPower, LivingEntity user, LazyOptional<INonStandPower> otherPower) {
-        float ticks = (float) (standPower.getXp() - minStandExp) / (float) (IStandPower.MAX_EXP - minStandExp) * 95F + 5;
-        ticks *= otherPower.map(power -> {
-           if (power.getType() == ModNonStandPowers.VAMPIRISM.get()) {
-               return 1F + (float) ((VampirismPowerType.bloodLevel(power, Difficulty.EASY) - 1) * 4) / 15F;
-           }
-           return 1F;
-        }).orElse(1F);
-        return MathHelper.floor(ticks);
+    public static int getMaxTimeStopTicks(IStandPower standPower, LazyOptional<INonStandPower> otherPower) {
+        return ((TimeStopperStandStats) standPower.getType().getStats()).getMaxTimeStopTicks(otherPower.map(power -> {
+            if (power.getType() == ModNonStandPowers.VAMPIRISM.get()) {
+                return (float) VampirismPowerType.bloodLevel(power, 1) / 5F;
+            }
+            return 0F;
+        }).orElse(0F));
     }
     
     

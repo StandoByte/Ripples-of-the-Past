@@ -28,7 +28,7 @@ public abstract class StandAction extends Action<IStandPower> {
     
     @Override
     public boolean isUnlocked(IStandPower power) {
-        return power.getLearningProgress(this) >= 0;
+        return power.getLearningProgressPoints(this) >= 0;
     }
     
     public boolean canBeUnlocked(IStandPower power) {

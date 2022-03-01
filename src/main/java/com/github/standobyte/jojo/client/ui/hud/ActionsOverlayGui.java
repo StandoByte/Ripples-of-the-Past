@@ -415,7 +415,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 }
             }
             // learning bar
-            float learningProgress = power.getLearningProgress(action);
+            float learningProgress = power.getLearningProgressRatio(action);
             if (learningProgress >= 0 && learningProgress < 1) {
                 RenderSystem.disableDepthTest();
                 RenderSystem.disableTexture();
