@@ -30,7 +30,7 @@ public class JojoPowerCommand {
                 .then(Commands.literal("give").then(Commands.argument("targets", EntityArgument.players())
                         .then(Commands.literal("hamon").executes(ctx -> giveNonStandPowers(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), ModNonStandPowers.HAMON.get())))
                         .then(Commands.literal("vampirism").executes(ctx -> giveNonStandPowers(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), ModNonStandPowers.VAMPIRISM.get())))))
-                .then(Commands.literal("remove").then(Commands.argument("targets", EntityArgument.players())
+                .then(Commands.literal("clear").then(Commands.argument("targets", EntityArgument.players())
                         .executes(ctx -> removeNonStandPowers(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets")))))
                 );
     }

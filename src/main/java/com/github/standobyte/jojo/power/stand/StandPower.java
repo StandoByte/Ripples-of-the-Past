@@ -52,7 +52,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     private int xp = 0;
     private boolean skippedProgression;
     
-    private ActionLearningProgressMap actionLearningProgressMap = new ActionLearningProgressMap();
+    private ActionLearningProgressMap<IStandPower> actionLearningProgressMap = new ActionLearningProgressMap<>();
     
     
     public StandPower(LivingEntity user) {
@@ -430,6 +430,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     public void skipProgression() {
         this.skippedProgression = true;
         setResolveLevel(getMaxResolveLevel());
+        actionLearningProgressMap.forEach((action, points) -> {
+            actionLearningProgressMap.setLearningProgressPoints(action, action.getMaxTrainingPoints(this), this);
+        });
     }
     
     @Override
@@ -459,29 +462,41 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public boolean unlockAction(Action<IStandPower> action) {
         if (!action.isUnlocked(this)) {
-            setLearningProgress(action, isUserCreative() || !action.isTrained() ? 1F : 0F);
+            setLearningProgressPoints(action, 
+                    isUserCreative() || !action.isTrained() ? 
+                            action.getMaxTrainingPoints(this)
+                            : 0F);
             return true;
         }
         return false;
     }
 
     @Override
-    public float getLearningProgress(Action<IStandPower> action) {
-        return actionLearningProgressMap.getLearningProgress(action);
+    public float getLearningProgressPoints(Action<IStandPower> action) {
+        return actionLearningProgressMap.getLearningProgressPoints(action, this);
     }
 
     @Override
-    public void setLearningProgress(Action<IStandPower> action, float progress) {
-        if (actionLearningProgressMap.setLearningProgress(action, MathHelper.clamp(progress, 0F, 1F))) {
+    public void setLearningProgressPoints(Action<IStandPower> action, float points) {
+        setLearningProgressPoints(action, points, true);
+    }
+
+    @Override
+    public void setLearningProgressPoints(Action<IStandPower> action, float points, boolean clamp) {
+        if (clamp) {
+            points = MathHelper.clamp(points, 0, action.getMaxTrainingPoints(this));
+        }
+        float pts = points;
+        if (actionLearningProgressMap.setLearningProgressPoints(action, points, this)) {
             serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new SyncStandActionLearningPacket(action, progress, false), player);
+                PacketManager.sendToClient(new SyncStandActionLearningPacket(action, pts, false), player);
             });
         }
     }
 
     @Override
-    public void addLearningProgress(Action<IStandPower> action, float progress) {
-        setLearningProgress(action, getLearningProgress(action) + progress);
+    public void addLearningProgressPoints(Action<IStandPower> action, float points) {
+        setLearningProgressPoints(action, getLearningProgressPoints(action) + points);
     }
     
     @Override

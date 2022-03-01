@@ -37,7 +37,7 @@ public class TimeStopInstant extends StandAction {
     
     @Override
     protected void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
-        int timeStopTicks = TimeHandler.getTimeStopTicks(getXpRequirement(), power, user, INonStandPower.getNonStandPowerOptional(user));
+        int timeStopTicks = TimeHandler.getTimeStopTicks(power, this, user, INonStandPower.getNonStandPowerOptional(user));
         JojoModUtil.playSound(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, user.getX(), user.getY(), user.getZ(), 
                 ModSounds.TIME_STOP_BLINK.get(), SoundCategory.AMBIENT, 5.0F, 1.0F, TimeHandler::canPlayerSeeInStoppedTime);
         if (!world.isClientSide()) {
@@ -69,7 +69,7 @@ public class TimeStopInstant extends StandAction {
             }
             
             user.teleportTo(blinkPos.x, blinkPos.y, blinkPos.z);
-            power.setXp(power.getXp() + 4);
+            // FIXME (!) add progress points
             if (power.isActive()) {
                 IStandManifestation stand = power.getStandManifestation();
                 if (stand instanceof StandEntity) {
@@ -80,5 +80,10 @@ public class TimeStopInstant extends StandAction {
                 }
             }
         }
+    }
+
+    @Override
+    public float getMaxTrainingPoints(IStandPower power) {
+        return TimeHandler.getMaxTimeStopTicks(power, INonStandPower.getNonStandPowerOptional(power.getUser()));
     }
 }

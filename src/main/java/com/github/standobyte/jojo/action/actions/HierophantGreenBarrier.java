@@ -38,13 +38,7 @@ public class HierophantGreenBarrier extends StandEntityAction {
     
     private int getMaxBarriersPlaceable(IStandPower power) {
         int level = power.getResolveLevel();
-        if (level < 3) {
-            return 0;
-        }
-        if (level == 3) {
-            return 15;
-        }
-        return 100;
+        return level >= 3 ? 100 : 15;
     }
     
     @Override

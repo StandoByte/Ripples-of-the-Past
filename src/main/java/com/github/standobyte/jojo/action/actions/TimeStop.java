@@ -33,27 +33,27 @@ public class TimeStop extends StandAction {
     public TimeStop(StandAction.Builder builder) {
         super(builder);
     }
-    
+
     public TimeStop voiceLineWithStandSummoned(Supplier<SoundEvent> voiceLine) {
         this.voiceLineWithStandSummoned = voiceLine;
         return this;
     }
-    
+
     public TimeStop timeStopSound(Supplier<SoundEvent> sound) {
         this.timeStopSound = sound;
         return this;
     }
-    
+
     public TimeStop timeResumeVoiceLine(Supplier<SoundEvent> voiceLine) {
         this.timeResumeVoiceLine = voiceLine;
         return this;
     }
-    
+
     public TimeStop timeResumeSound(Supplier<SoundEvent> sound) {
         this.timeResumeSound = sound;
         return this;
     }
-    
+
     @Override
     protected SoundEvent getShout(LivingEntity user, IStandPower power, ActionTarget target, boolean wasActive) {
         if (TimeHandler.isTimeStopped(user.level, user.blockPosition())) {
@@ -64,7 +64,7 @@ public class TimeStop extends StandAction {
         }
         return super.getShout(user, power, target, wasActive);
     }
-    
+
     @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
         if (user.hasEffect(ModEffects.TIME_STOP.get())) {
@@ -72,12 +72,11 @@ public class TimeStop extends StandAction {
         }
         return ActionConditionResult.POSITIVE;
     }
-    
+
     @Override
     protected void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
-        int timeStopTicks = TimeHandler.getTimeStopTicks(getXpRequirement(), power, user, INonStandPower.getNonStandPowerOptional(user));
+        int timeStopTicks = TimeHandler.getTimeStopTicks(power, this, user, INonStandPower.getNonStandPowerOptional(user));
         if (!world.isClientSide()) {
-            power.setXp(power.getXp() + 4);
             BlockPos blockPos = user.blockPosition();
             ChunkPos chunkPos = new ChunkPos(blockPos);
             TimeHandler.setTimeResumeSounds(world, chunkPos, timeStopTicks, this, user);
@@ -87,29 +86,35 @@ public class TimeStop extends StandAction {
                         world.dimension(), player -> (JojoModConfig.COMMON.inTimeStopRange(
                                 chunkPos, new ChunkPos(player.blockPosition()))) && TimeHandler.canPlayerSeeInStoppedTime(player));
             }
+            // FIXME (!) add progress points
             user.addEffect(new EffectInstance(ModEffects.TIME_STOP.get(), timeStopTicks, 0, false, false, true));
         }
     }
-    
+
     @Override
     public int getHoldDurationToFire(IStandPower power) { 
         return TimeHandler.isTimeStopped(power.getUser().level, power.getUser().blockPosition()) ? 0 : super.getHoldDurationToFire(power);
     }
-    
+
     @Nullable
     public SoundEvent getTimeResumeSfx() {
         return timeResumeSound.get();
     }
-    
+
     @Nullable
     public SoundEvent getTimeResumeVoiceLine() {
         return timeResumeVoiceLine.get();
     }
-    
+
+    @Override
+    public float getMaxTrainingPoints(IStandPower power) {
+        return TimeHandler.getMaxTimeStopTicks(power, INonStandPower.getNonStandPowerOptional(power.getUser())) - TimeHandler.MIN_TIME_STOP_TICKS;
+    }
+
     @Override
     public TranslationTextComponent getTranslatedName(IStandPower power, String key) {
         LivingEntity user = power.getUser();
-        int timeStopTicks = TimeHandler.getTimeStopTicks(getXpRequirement(), power, user, INonStandPower.getNonStandPowerOptional(user));
+        int timeStopTicks = TimeHandler.getTimeStopTicks(power, this, user, INonStandPower.getNonStandPowerOptional(user));
         return new TranslationTextComponent(key, String.format("%.2f", (float) timeStopTicks / 20F));
     }
 }

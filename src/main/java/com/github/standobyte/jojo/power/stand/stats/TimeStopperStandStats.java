@@ -19,6 +19,10 @@ public class TimeStopperStandStats extends StandStats {
         this.maxTimeStopTicksVampire = buf.readInt();
     }
     
+    public int getMaxTimeStopTicks(float vampireBlood) {
+        return maxTimeStopTicks + (int) ((float) (maxTimeStopTicksVampire - maxTimeStopTicks) * vampireBlood);
+    }
+    
     @Override
     public void write(PacketBuffer buf) {
         super.write(buf);

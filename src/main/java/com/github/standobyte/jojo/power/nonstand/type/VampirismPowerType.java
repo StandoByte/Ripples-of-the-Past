@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.power.nonstand.type;
 
 import java.util.Map;
-import java.util.function.IntUnaryOperator;
+import java.util.function.IntBinaryOperator;
 
 import com.github.standobyte.jojo.action.actions.VampirismAction;
 import com.github.standobyte.jojo.init.ModEffects;
@@ -20,18 +20,19 @@ import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
 
 public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
-    private static Map<Effect, IntUnaryOperator> EFFECTS_AMPLIFIERS;
+    // FIXME effects are not removed on /jojopower remove
+    private static Map<Effect, IntBinaryOperator> EFFECTS_AMPLIFIERS;
     
     public static void initVampiricEffectsMap() {
-        EFFECTS_AMPLIFIERS = ImmutableMap.<Effect, IntUnaryOperator>builder()
-                .put(ModEffects.UNDEAD_REGENERATION.get(), (bl) -> bl - 2)
-                .put(Effects.HEALTH_BOOST, (bl) -> 3 * (bl - 3))
-                .put(Effects.DAMAGE_BOOST, (bl) -> bl - 4)
-                .put(Effects.MOVEMENT_SPEED, (bl) -> bl - 4)
-                .put(Effects.DIG_SPEED, (bl) -> bl - 4)
-                .put(Effects.JUMP, (bl) -> bl - 4)
-                .put(Effects.DAMAGE_RESISTANCE, (bl) -> bl - 5)
-                .put(Effects.NIGHT_VISION, (bl) -> 0)
+        EFFECTS_AMPLIFIERS = ImmutableMap.<Effect, IntBinaryOperator>builder()
+                .put(ModEffects.UNDEAD_REGENERATION.get(), (bl, diff) -> bl - 2)
+                .put(Effects.HEALTH_BOOST, (bl, diff) -> diff * 5 - 1)
+                .put(Effects.DAMAGE_BOOST, (bl, diff) -> bl - 4)
+                .put(Effects.MOVEMENT_SPEED, (bl, diff) -> bl - 4)
+                .put(Effects.DIG_SPEED, (bl, diff) -> bl - 4)
+                .put(Effects.JUMP, (bl, diff) -> bl - 4)
+                .put(Effects.DAMAGE_RESISTANCE, (bl, diff) -> bl - 5)
+                .put(Effects.NIGHT_VISION, (bl, diff) -> 0)
                 .build();
     }
 
@@ -42,7 +43,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
     @Override
     public void onClear(INonStandPower power) {
         LivingEntity user = power.getUser();
-        for (Map.Entry<Effect, IntUnaryOperator> entry : EFFECTS_AMPLIFIERS.entrySet()) {
+        for (Map.Entry<Effect, IntBinaryOperator> entry : EFFECTS_AMPLIFIERS.entrySet()) {
             EffectInstance effectInstance = user.getEffect(entry.getKey());
             if (effectInstance != null && !effectInstance.isVisible() && !effectInstance.showIcon()) {
                 user.removeEffect(effectInstance.getEffect());
@@ -52,17 +53,17 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
 
     @Override
     public float getEnergyTickInc(INonStandPower power) {
-        return -0.0139F;
+        return -0.00278F;
     }
     
     @Override
     public float getMaxStaminaFactor(INonStandPower power, IStandPower standPower) {
-        return Math.max((bloodLevel(power, power.getUser().level.getDifficulty()) - 3) * 2, 1);
+        return Math.max((bloodLevel(power) - 4) * 2, 1);
     }
 
     @Override
     public float getStaminaRegenFactor(INonStandPower power, IStandPower standPower) {
-        return Math.max((bloodLevel(power, power.getUser().level.getDifficulty()) - 3) * 4, 1);
+        return Math.max((bloodLevel(power) - 4) * 4, 1);
     }
     
     @Override
@@ -70,17 +71,20 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
         return !power.getTypeSpecificData(this).get().isVampireAtFullPower();
     }
 
-    /* x = difficultyLevel (1 - easy, 2 - normal, 3 - hard)
-     * x:     0 <= energy < 150
-     * x + 1: 150 <= energy < 450
-     * x + 2: 450 <= energy < 750
-     * x + 3: 750 <= energy <= 1000
-     */
-    public static int bloodLevel(INonStandPower power, Difficulty difficulty) {
-        if (difficulty == Difficulty.PEACEFUL) {
+    private static int bloodLevel(INonStandPower power) {
+        return bloodLevel(power, power.getUser().level.getDifficulty().getId());
+    }
+    
+    public static int bloodLevel(INonStandPower power, int difficulty) {
+        if (difficulty == 0) {
             return -1;
         }
-        return (int) ((power.getEnergy() + 150F) * 10F / (power.getMaxEnergy() * 3F)) + difficulty.getId();
+        int bloodLevel = Math.min((int) (power.getEnergy() / power.getMaxEnergy() * 5F), 4);
+        bloodLevel += difficulty;
+        if (!power.getTypeSpecificData(ModNonStandPowers.VAMPIRISM.get()).get().isVampireAtFullPower()) {
+            bloodLevel = Math.max(bloodLevel - 1, 1);
+        }
+        return bloodLevel;
     }
 
     @Override
@@ -90,11 +94,12 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
                 ((PlayerEntity) entity).getFoodData().setFoodLevel(17);
             }
             entity.setAirSupply(entity.getMaxAirSupply());
-            int bloodLevel = bloodLevel(power, entity.level.getDifficulty());
+            int difficulty = entity.level.getDifficulty().getId();
+            int bloodLevel = bloodLevel(power, difficulty);
             if (power.getTypeSpecificData(this).get().refreshBloodLevel(bloodLevel)) {
-                for (Map.Entry<Effect, IntUnaryOperator> entry : EFFECTS_AMPLIFIERS.entrySet()) {
+                for (Map.Entry<Effect, IntBinaryOperator> entry : EFFECTS_AMPLIFIERS.entrySet()) {
                     Effect effect = entry.getKey();
-                    int amplifier = entry.getValue().applyAsInt(bloodLevel);
+                    int amplifier = entry.getValue().applyAsInt(bloodLevel, difficulty);
                     float missingHp = effect == Effects.HEALTH_BOOST ? entity.getMaxHealth() - entity.getHealth() : -1;
                     if (amplifier >= 0) {
                         entity.removeEffectNoUpdate(effect);
@@ -129,7 +134,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
     @Override
     public float getLeapStrength(INonStandPower power) {
         VampirismFlags vampirism = power.getTypeSpecificData(this).get();
-        float leapStrength = Math.max(bloodLevel(power, power.getUser().level.getDifficulty()), 0);
+        float leapStrength = Math.max(bloodLevel(power), 0);
         if (!vampirism.isVampireAtFullPower()) {
             leapStrength *= 0.25F;
         }
@@ -154,9 +159,10 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
             LivingEntity entity = event.getEntityLiving();
             INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
                 if (power.getTypeSpecificData(ModNonStandPowers.VAMPIRISM.get()).isPresent()) {
-                    int bloodLevel = bloodLevel(power, entity.level.getDifficulty());
+                    int difficulty = entity.level.getDifficulty().getId();
+                    int bloodLevel = bloodLevel(power, difficulty);
                     Effect effect = event.getPotion();
-                    if (EFFECTS_AMPLIFIERS.containsKey(effect) && EFFECTS_AMPLIFIERS.get(effect).applyAsInt(bloodLevel) == effectInstance.getAmplifier() && 
+                    if (EFFECTS_AMPLIFIERS.containsKey(effect) && EFFECTS_AMPLIFIERS.get(effect).applyAsInt(bloodLevel, difficulty) == effectInstance.getAmplifier() && 
                             !effectInstance.isVisible() && !effectInstance.showIcon()) {
                         event.setCanceled(true);
                     }
@@ -186,7 +192,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
     }
     
     public static float healCost(Difficulty difficulty) {
-        return 4.0F / difficulty.getId();
+        return 2.0F / difficulty.getId();
     }
     
     // TODO smite enchantment damage

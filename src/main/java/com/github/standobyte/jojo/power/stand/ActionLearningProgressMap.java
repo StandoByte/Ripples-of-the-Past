@@ -7,18 +7,24 @@ import java.util.function.BiConsumer;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.actions.StandAction;
 import com.github.standobyte.jojo.init.ModActions;
+import com.github.standobyte.jojo.power.IPower;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 
-public class ActionLearningProgressMap {
-    private final Map<Action<IStandPower>, Float> wrappedMap = new HashMap<>();
+public class ActionLearningProgressMap<P extends IPower<P, ?>> {
+    private final Map<Action<P>, Float> wrappedMap = new HashMap<>();
 
-    float getLearningProgress(Action<IStandPower> action) {
-        return wrappedMap.getOrDefault(action, -1F);
+    float getLearningProgressPoints(Action<P> action, P power) {
+        if (!wrappedMap.containsKey(action)) {
+            return -1F;
+        }
+        return MathHelper.clamp(wrappedMap.get(action), 0F, action.getMaxTrainingPoints(power));
     }
     
-    boolean setLearningProgress(Action<IStandPower> action, float progress) {
+    boolean setLearningProgressPoints(Action<P> action, float progress, P power) {
+        progress = Math.max(progress, wrappedMap.getOrDefault(action, 0F));
         if (wrappedMap.containsKey(action) && wrappedMap.get(action) == progress) {
             return false;
         }
@@ -26,7 +32,7 @@ public class ActionLearningProgressMap {
         return true;
     }
     
-    void forEach(BiConsumer<Action<IStandPower>, Float> consumer) {
+    void forEach(BiConsumer<Action<P>, Float> consumer) {
         wrappedMap.forEach(consumer);
     }
     
@@ -36,7 +42,7 @@ public class ActionLearningProgressMap {
             nbt.getAllKeys().forEach(actionName -> {
                 Action<?> action = ModActions.Registry.getRegistry().getValue(new ResourceLocation(actionName));
                 if (action instanceof StandAction && nbt.contains(actionName, 5)) {
-                    wrappedMap.put((Action<IStandPower>) action, nbt.getFloat(actionName));
+                    wrappedMap.put((Action<P>) action, nbt.getFloat(actionName));
                 }
             });
         }
