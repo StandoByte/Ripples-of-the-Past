@@ -9,10 +9,10 @@ import net.minecraft.entity.Entity;
 
 public class ModelPose<T extends Entity> implements IModelPose<T> {
     private final Map<ModelRenderer, RotationAngle> rotations = new HashMap<>();
-    private UnaryOperator<Float> transitionFunc = x -> x;
+    private UnaryOperator<Float> easingFunc = x -> x;
     private ModelAnim<T> additionalAnim = null;
 
-    public ModelPose(RotationAnglesArray rotations) {
+    public ModelPose(RotationAngle[] rotations) {
         for (RotationAngle rotation : rotations) {
             putRotation(rotation);
         }
@@ -24,9 +24,10 @@ public class ModelPose<T extends Entity> implements IModelPose<T> {
         }
         return this;
     }
-    
-    public ModelPose<T> setTransitionFunction(UnaryOperator<Float> function) {
-        this.transitionFunc = function;
+
+    @Override
+    public ModelPose<T> setEasing(UnaryOperator<Float> function) {
+        this.easingFunc = function;
         return this;
     }
     
@@ -41,12 +42,12 @@ public class ModelPose<T extends Entity> implements IModelPose<T> {
     
     @Override
     public void poseModel(float rotationAmount, T entity, float ticks, float yRotationOffset, float xRotation) {
+        rotationAmount = easingFunc.apply(rotationAmount);
         applyRotations(rotationAmount);
         additionalAnim(rotationAmount, entity, ticks, yRotationOffset, xRotation);
     }
     
     protected void applyRotations(float rotationAmount) {
-        rotationAmount = transitionFunc.apply(rotationAmount);
         for (Map.Entry<ModelRenderer, RotationAngle> rotation : rotations.entrySet()) {
             rotation.getValue().applyRotation(rotationAmount);
         }

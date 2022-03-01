@@ -7,7 +7,6 @@ import java.util.List;
 import com.github.standobyte.jojo.client.model.pose.IModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
-import com.github.standobyte.jojo.client.model.pose.RotationAnglesArray;
 import com.github.standobyte.jojo.entity.stand.stands.StarPlatinumEntity;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -17,57 +16,6 @@ import net.minecraft.util.math.MathHelper;
 
 
 public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
-    // hair goes brrrrr
-    private final ModelRenderer hair;
-    private final ModelRenderer hair1;
-    private final ModelRenderer hair2;
-    private final ModelRenderer hair3;
-    private final ModelRenderer hair4;
-    private final ModelRenderer hair5;
-    private final ModelRenderer hair6;
-    private final ModelRenderer hair7;
-    private final ModelRenderer hair8;
-    private final ModelRenderer hair9;
-    private final ModelRenderer hair10;
-    private final ModelRenderer hair11;
-    private final ModelRenderer hair12;
-    private final ModelRenderer hair13;
-    private final ModelRenderer hair14;
-    private final ModelRenderer hair15;
-    private final ModelRenderer hair16;
-    private final ModelRenderer hair17;
-    private final ModelRenderer hair18;
-    private final ModelRenderer hair19;
-    private final ModelRenderer hair20;
-    private final ModelRenderer hair21;
-    private final ModelRenderer hair22;
-    private final ModelRenderer hair23;
-    private final ModelRenderer hair24;
-    private final ModelRenderer hair25;
-    private final ModelRenderer hair26;
-    private final ModelRenderer hair27;
-    private final ModelRenderer hair28;
-    private final ModelRenderer hair29;
-    private final ModelRenderer hair30;
-    private final ModelRenderer hair31;
-    private final ModelRenderer hair32;
-    private final ModelRenderer hair33;
-    private final ModelRenderer hair34;
-    private final ModelRenderer hair35;
-    private final ModelRenderer hair36;
-    private final ModelRenderer hair37;
-    private final ModelRenderer hair38;
-    private final ModelRenderer hair39;
-    private final ModelRenderer hair40;
-    private final ModelRenderer hair41;
-    private final ModelRenderer hair42;
-    private final ModelRenderer hair43;
-    private final ModelRenderer hair44;
-    private final ModelRenderer hair45;
-    private final ModelRenderer hair46;
-    private final ModelRenderer hair47;
-    private final ModelRenderer hair48;
-
     private final List<ModelRenderer> hairToAnimate;
 
     public StarPlatinumModel() {
@@ -76,11 +24,62 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
 
     public StarPlatinumModel(int textureWidth, int textureHeight) {
         super(textureWidth, textureHeight);
+        
+        // hair goes brrrrr
+        ModelRenderer hair;
+        ModelRenderer hair1;
+        ModelRenderer hair2;
+        ModelRenderer hair3;
+        ModelRenderer hair4;
+        ModelRenderer hair5;
+        ModelRenderer hair6;
+        ModelRenderer hair7;
+        ModelRenderer hair8;
+        ModelRenderer hair9;
+        ModelRenderer hair10;
+        ModelRenderer hair11;
+        ModelRenderer hair12;
+        ModelRenderer hair13;
+        ModelRenderer hair14;
+        ModelRenderer hair15;
+        ModelRenderer hair16;
+        ModelRenderer hair17;
+        ModelRenderer hair18;
+        ModelRenderer hair19;
+        ModelRenderer hair20;
+        ModelRenderer hair21;
+        ModelRenderer hair22;
+        ModelRenderer hair23;
+        ModelRenderer hair24;
+        ModelRenderer hair25;
+        ModelRenderer hair26;
+        ModelRenderer hair27;
+        ModelRenderer hair28;
+        ModelRenderer hair29;
+        ModelRenderer hair30;
+        ModelRenderer hair31;
+        ModelRenderer hair32;
+        ModelRenderer hair33;
+        ModelRenderer hair34;
+        ModelRenderer hair35;
+        ModelRenderer hair36;
+        ModelRenderer hair37;
+        ModelRenderer hair38;
+        ModelRenderer hair39;
+        ModelRenderer hair40;
+        ModelRenderer hair41;
+        ModelRenderer hair42;
+        ModelRenderer hair43;
+        ModelRenderer hair44;
+        ModelRenderer hair45;
+        ModelRenderer hair46;
+        ModelRenderer hair47;
+        ModelRenderer hair48;
 
         hair = new ModelRenderer(this);
         hair.setPos(0.0F, -8.0F, 0.0F);
         head.addChild(hair);
-        
+
 
         hair1 = new ModelRenderer(this);
         hair1.setPos(-3.6F, 2.2F, -4.0F);
@@ -403,9 +402,9 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
         leftLegJoint.texOffs(12, 55).addBox(-0.4F, -1.5F, -2.5F, 1.0F, 2.0F, 1.0F, 0.0F, true);
 
         rightLegJoint.texOffs(12, 55).addBox(-0.6F, -1.5F, -2.5F, 1.0F, 2.0F, 1.0F, 0.0F, false);
-        
+
         leftLowerLeg.texOffs(60, 54).addBox(-0.5F, 1.0F, -2.25F, 1.0F, 3.0F, 1.0F, 0.0F, false);
-        
+
         rightLowerLeg.texOffs(60, 54).addBox(-0.7F, 1.0F, -2.25F, 1.0F, 3.0F, 1.0F, 0.0F, false);
 
         hairToAnimate = new ArrayList<>();
@@ -436,60 +435,60 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
             yVPrev -= (int) yVPrev;
             xRotAnim -= MathHelper.sin(xVPrev * TWO_PI);
             yRotAnim -= MathHelper.sin(yVPrev * TWO_PI);
-            
+
             hair.xRot += xRotAnim * 0.05F;
             hair.yRot += yRotAnim * 0.0125F;
         }
         ticksPrev = ticks;
     }
-    
+
     @Override
-    protected RotationAnglesArray[] initSummonPoseRotations() {
-        return new RotationAnglesArray[] {
-                new RotationAnglesArray(
-                        new RotationAngle(head, -0.2618F, 0.0F, 0.2618F),
-                        new RotationAngle(body, 0.0F, 0.5236F, 0.0F),
-                        new RotationAngle(upperPart, 0.0F, 0.5236F, 0.0F),
-                        new RotationAngle(leftArm, 0.7854F, 0.0F, -1.2217F),
-                        new RotationAngle(leftForeArm, -1.5708F, 0.0F, 0.7854F),
-                        new RotationAngle(rightArm, 0.0F, 0.0F, 1.8326F),
-                        new RotationAngle(rightForeArm, -1.9199F, 0.0F, -1.5708F),
-                        new RotationAngle(leftLeg, -1.0472F, 0.0F, 0.0F),
-                        new RotationAngle(leftLowerLeg, 2.0944F, 0.0F, 0.0F),
-                        new RotationAngle(rightLeg, 0.3491F, 0.0F, 0.0F)
-                        ),
-                new RotationAnglesArray(
-                        new RotationAngle(head, -0.3491F, 1.2217F, 0.0F),
-                        new RotationAngle(body, 0.0F, 0.7854F, 0.0F),
-                        new RotationAngle(leftArm, -0.6981F, 0.0F, -0.5236F),
-                        new RotationAngle(leftForeArm, -0.7854F, -0.7854F, 1.5708F),
-                        new RotationAngle(rightArm, -1.0472F, 0.0F, 1.8326F),
-                        new RotationAngle(rightForeArm, -1.5708F, 0.2618F, -0.2618F),
-                        new RotationAngle(leftLeg, -0.1745F, 0.0F, -0.0873F),
-                        new RotationAngle(rightLeg, 0.0873F, 0.0F, 0.0873F)
-                        ),
-                new RotationAnglesArray(
-                        new RotationAngle(head, 0.3491F, 1.0472F, 0.0F),
-                        new RotationAngle(body, 0.0F, -0.1745F, -0.1745F),
-                        new RotationAngle(upperPart, 0.0F, 0.2618F, 0.0F),
-                        new RotationAngle(leftArm, 0.0F, 0.0F, -0.2618F),
-                        new RotationAngle(rightArm, 0.7854F, 1.0472F, 1.0472F),
-                        new RotationAngle(rightForeArm, -0.2182F, -1.309F, -0.5236F),
-                        new RotationAngle(leftLeg, 0.1745F, -0.2618F, 0.2618F),
-                        new RotationAngle(leftLowerLeg, 0.2618F, 0.0F, 0.0F),
-                        new RotationAngle(rightLeg, -0.0873F, -0.2618F, 0.5236F),
-                        new RotationAngle(rightLowerLeg, 0.6981F, 0.0F, 0.0F)
-                        )
+    protected RotationAngle[][] initSummonPoseRotations() {
+        return new RotationAngle[][] {
+            new RotationAngle[] {
+                    new RotationAngle(head, -0.2618F, 0.0F, 0.2618F),
+                    new RotationAngle(body, 0.0F, 0.5236F, 0.0F),
+                    new RotationAngle(upperPart, 0.0F, 0.5236F, 0.0F),
+                    new RotationAngle(leftArm, 0.7854F, 0.0F, -1.2217F),
+                    new RotationAngle(leftForeArm, -1.5708F, 0.0F, 0.7854F),
+                    new RotationAngle(rightArm, 0.0F, 0.0F, 1.8326F),
+                    new RotationAngle(rightForeArm, -1.9199F, 0.0F, -1.5708F),
+                    new RotationAngle(leftLeg, -1.0472F, 0.0F, 0.0F),
+                    new RotationAngle(leftLowerLeg, 2.0944F, 0.0F, 0.0F),
+                    new RotationAngle(rightLeg, 0.3491F, 0.0F, 0.0F)
+            },
+            new RotationAngle[] {
+                    new RotationAngle(head, -0.3491F, 1.2217F, 0.0F),
+                    new RotationAngle(body, 0.0F, 0.7854F, 0.0F),
+                    new RotationAngle(leftArm, -0.6981F, 0.0F, -0.5236F),
+                    new RotationAngle(leftForeArm, -0.7854F, -0.7854F, 1.5708F),
+                    new RotationAngle(rightArm, -1.0472F, 0.0F, 1.8326F),
+                    new RotationAngle(rightForeArm, -1.5708F, 0.2618F, -0.2618F),
+                    new RotationAngle(leftLeg, -0.1745F, 0.0F, -0.0873F),
+                    new RotationAngle(rightLeg, 0.0873F, 0.0F, 0.0873F)
+            },
+            new RotationAngle[] {
+                    new RotationAngle(head, 0.3491F, 1.0472F, 0.0F),
+                    new RotationAngle(body, 0.0F, -0.1745F, -0.1745F),
+                    new RotationAngle(upperPart, 0.0F, 0.2618F, 0.0F),
+                    new RotationAngle(leftArm, 0.0F, 0.0F, -0.2618F),
+                    new RotationAngle(rightArm, 0.7854F, 1.0472F, 1.0472F),
+                    new RotationAngle(rightForeArm, -0.2182F, -1.309F, -0.5236F),
+                    new RotationAngle(leftLeg, 0.1745F, -0.2618F, 0.2618F),
+                    new RotationAngle(leftLowerLeg, 0.2618F, 0.0F, 0.0F),
+                    new RotationAngle(rightLeg, -0.0873F, -0.2618F, 0.5236F),
+                    new RotationAngle(rightLowerLeg, 0.6981F, 0.0F, 0.0F)
+            }
         };
     }
 
     @Override
     protected IModelPose<StarPlatinumEntity> rangedAttackPose() {
-        return new ModelPose<StarPlatinumEntity>(new RotationAnglesArray(
+        return new ModelPose<StarPlatinumEntity>(new RotationAngle[] {
                 new RotationAngle(body, 0.0F, -0.48F, 0.0F),
                 new RotationAngle(leftArm, 0.0F, 0.0F, -0.7854F),
                 new RotationAngle(leftForeArm, 0.0F, 0.0F, 0.6109F),
                 new RotationAngle(rightArm, -1.0908F, 0.0F, 1.5708F)
-                )); // TODO also use xRotation
+        }); // TODO also use xRotation
     }
 }

@@ -3,7 +3,6 @@ package com.github.standobyte.jojo.client.model.entity.stand;
 import com.github.standobyte.jojo.client.model.pose.IModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
-import com.github.standobyte.jojo.client.model.pose.RotationAnglesArray;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -18,11 +17,11 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
     private final ModelRenderer bone10;
     private final ModelRenderer bone11;
     private final ModelRenderer bone12;
-    
+
     public HierophantGreenModel() {
         this(64, 64);
     }
-    
+
     public HierophantGreenModel(int textureWidth, int textureHeight) {
         super(textureWidth, textureHeight);
         head.texOffs(0, 16).addBox(-4.5F, -4.5F, -1.0F, 9.0F, 2.0F, 2.0F, 0.0F, false);
@@ -73,26 +72,26 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
         setRotationAngle(bone12, 0.0F, 0.0F, 2.5307F);
         bone12.texOffs(42, 18).addBox(-0.5F, -4.5F, -2.5F, 1.0F, 5.0F, 5.0F, 0.0F, true);
     }
-    
+
     @Override
-    protected RotationAnglesArray[] initSummonPoseRotations() {
-        return new RotationAnglesArray[] {
-                new RotationAnglesArray(
-                        new RotationAngle(head, -0.5236F, 0.0F, 0.0F),
-                        new RotationAngle(leftArm, 0.0F, 0.0F, -0.5236F),
-                        new RotationAngle(leftForeArm, -0.5236F, 0.0F, 1.3963F),
-                        new RotationAngle(rightArm, -1.2217F, 0.0F, 0.0F),
-                        new RotationAngle(leftLeg, -1.8326F, 0.0F, 0.2618F),
-                        new RotationAngle(leftLowerLeg, 1.8326F, 0.0F, 0.0F),
-                        new RotationAngle(rightLeg, 0.0F, 0.0F, -0.2618F),
-                        new RotationAngle(rightLowerLeg, 1.5708F, 0.0F, 0.0F)
-                        )
+    protected RotationAngle[][] initSummonPoseRotations() {
+        return new RotationAngle[][] {
+            new RotationAngle[] { 
+                    new RotationAngle(head, -0.5236F, 0.0F, 0.0F),
+                    new RotationAngle(leftArm, 0.0F, 0.0F, -0.5236F),
+                    new RotationAngle(leftForeArm, -0.5236F, 0.0F, 1.3963F),
+                    new RotationAngle(rightArm, -1.2217F, 0.0F, 0.0F),
+                    new RotationAngle(leftLeg, -1.8326F, 0.0F, 0.2618F),
+                    new RotationAngle(leftLowerLeg, 1.8326F, 0.0F, 0.0F),
+                    new RotationAngle(rightLeg, 0.0F, 0.0F, -0.2618F),
+                    new RotationAngle(rightLowerLeg, 1.5708F, 0.0F, 0.0F)
+            }
         };
     }
 
     @Override
     protected IModelPose<HierophantGreenEntity> rangedAttackPose() {
-        return new ModelPose<HierophantGreenEntity>(new RotationAnglesArray(
+        return new ModelPose<HierophantGreenEntity>(new RotationAngle[] {
                 new RotationAngle(leftArm, -1.5708F, 0.0F, -1.309F),
                 new RotationAngle(leftForeArm, -0.9163F, 0.0F, 0.0F),
                 new RotationAngle(rightArm, -1.5708F, -0.6109F, 1.309F),
@@ -100,17 +99,17 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
                 new RotationAngle(leftLeg, 0.0F, 0.0F, -0.7418F),
                 new RotationAngle(leftLowerLeg, 0.0F, 0.0F, 2.0944F),
                 new RotationAngle(rightLeg, 0.0F, 0.0F, 0.2618F)
-                ));
+        });
     }
 
     // FIXME (model anim) HG grapple pose
-//    @Override
-//    protected void customPose(HierophantGreenEntity entity, StandPose pose, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
-//        super.customPose(entity, pose, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, phase);
-//        if (pose == HierophantGreenGrapple.GRAPPLE_POSE) {
-//            entity.setYBodyRot(entity.yRot);
-//            ModelRenderer arm = getArm(entity.getMainArm());
-//            arm.xRot = -1.5708F;
-//        }
-//    }
+    //    @Override
+    //    protected void customPose(HierophantGreenEntity entity, StandPose pose, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
+    //        super.customPose(entity, pose, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, phase);
+    //        if (pose == HierophantGreenGrapple.GRAPPLE_POSE) {
+    //            entity.setYBodyRot(entity.yRot);
+    //            ModelRenderer arm = getArm(entity.getMainArm());
+    //            arm.xRot = -1.5708F;
+    //        }
+    //    }
 }

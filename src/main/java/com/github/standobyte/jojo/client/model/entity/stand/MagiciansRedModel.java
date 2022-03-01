@@ -3,7 +3,6 @@ package com.github.standobyte.jojo.client.model.entity.stand;
 import com.github.standobyte.jojo.client.model.pose.IModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
-import com.github.standobyte.jojo.client.model.pose.RotationAnglesArray;
 import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
 import com.github.standobyte.jojo.util.MathUtil;
 
@@ -25,15 +24,15 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
     private ModelRenderer beakLowerRight;
     private ModelRenderer feather;
     private ModelRenderer feather2;
-    
+
     public MagiciansRedModel() {
         this(64, 64);
     }
-    
+
     public MagiciansRedModel(int textureWidth, int textureHeight) {
         super(textureWidth, textureHeight);
     }
-    
+
     @Override
     protected void addBaseBoxes() {
         ModelRenderer actualHead = head;
@@ -126,56 +125,56 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
         setRotationAngle(feather2, 0.3491F, 0.0F, 0.0F);
         feather2.texOffs(48, 1).addBox(-1.0F, -0.5F, 0.0F, 2.0F, 1.0F, 6.0F, 0.0F, false);
         feather2.texOffs(58, 5).addBox(-1.0F, 0.5F, 5.0F, 2.0F, 1.0F, 1.0F, 0.0F, false);
-        
+
         torso.texOffs(48, 34).addBox(-3.5F, 1.1F, -2.0F, 7.0F, 3.0F, 1.0F, 0.4F, false);
         torso.texOffs(52, 27).addBox(-2.5F, 4.0F, -2.3F, 5.0F, 6.0F, 1.0F, 0.0F, false);
     }
-    
+
     @Override
     protected ModelPose<MagiciansRedEntity> initPoseReset() {
         return super.initPoseReset()
                 .putRotation(new RotationAngle(beakUpper, 0.1745F, 0.0F, 0.0F))
                 .putRotation(new RotationAngle(beakLower, 0.0F, 0.0F, 0.0F));
     }
-    
+
     @Override
-    protected RotationAnglesArray[] initSummonPoseRotations() {
-        return new RotationAnglesArray[] {
-                new RotationAnglesArray(
-                        new RotationAngle(head, 0.0F, 0.1309F, 0.0F),
-                        new RotationAngle(beakUpper, -0.3491F, 0.0F, 0.0F),
-                        new RotationAngle(beakLower, 0.5236F, 0.0F, 0.0F),
-                        new RotationAngle(body, 0.0F, -0.3927F, 0.0F),
-                        new RotationAngle(leftArm, 0.0F, 0.0F, -2.3562F),
-                        new RotationAngle(rightArm, 0.0F, 0.0F, 2.3562F),
-                        new RotationAngle(leftLeg, 0.1745F, -0.7854F, 0.0F),
-                        new RotationAngle(rightLeg, -1.5708F, -0.7854F, 0.0F),
-                        new RotationAngle(rightLowerLeg, 2.3562F, 0.0F, 0.0F)
-                        ),
-                new RotationAnglesArray(
-                        new RotationAngle(head, -0.7854F, 0.0F, 0.0F),
-                        new RotationAngle(beakUpper, -0.3491F, 0.0F, 0.0F),
-                        new RotationAngle(beakLower, 0.5236F, 0.0F, 0.0F),
-                        new RotationAngle(leftArm, 0.0F, 2.3562F, -2.8798F),
-                        new RotationAngle(leftForeArm, 0.0F, 0.0F, 2.3562F),
-                        new RotationAngle(rightArm, 0.0F, -2.3562F, 2.8798F),
-                        new RotationAngle(rightForeArm, 0.0F, 0.0F, -2.3562F),
-                        new RotationAngle(leftLeg, 0.2182F, 0.0F, 0.1309F),
-                        new RotationAngle(rightLeg, 0.5236F, 0.0F, -0.1309F)
-                        )
+    protected RotationAngle[][] initSummonPoseRotations() {
+        return new RotationAngle[][] {
+            new RotationAngle[] {
+                    new RotationAngle(head, 0.0F, 0.1309F, 0.0F),
+                    new RotationAngle(beakUpper, -0.3491F, 0.0F, 0.0F),
+                    new RotationAngle(beakLower, 0.5236F, 0.0F, 0.0F),
+                    new RotationAngle(body, 0.0F, -0.3927F, 0.0F),
+                    new RotationAngle(leftArm, 0.0F, 0.0F, -2.3562F),
+                    new RotationAngle(rightArm, 0.0F, 0.0F, 2.3562F),
+                    new RotationAngle(leftLeg, 0.1745F, -0.7854F, 0.0F),
+                    new RotationAngle(rightLeg, -1.5708F, -0.7854F, 0.0F),
+                    new RotationAngle(rightLowerLeg, 2.3562F, 0.0F, 0.0F)
+            },
+            new RotationAngle[] {
+                    new RotationAngle(head, -0.7854F, 0.0F, 0.0F),
+                    new RotationAngle(beakUpper, -0.3491F, 0.0F, 0.0F),
+                    new RotationAngle(beakLower, 0.5236F, 0.0F, 0.0F),
+                    new RotationAngle(leftArm, 0.0F, 2.3562F, -2.8798F),
+                    new RotationAngle(leftForeArm, 0.0F, 0.0F, 2.3562F),
+                    new RotationAngle(rightArm, 0.0F, -2.3562F, 2.8798F),
+                    new RotationAngle(rightForeArm, 0.0F, 0.0F, -2.3562F),
+                    new RotationAngle(leftLeg, 0.2182F, 0.0F, 0.1309F),
+                    new RotationAngle(rightLeg, 0.5236F, 0.0F, -0.1309F)
+            }
         };
     }
-    
+
     @Override
     public void setupAnim(MagiciansRedEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
         leftArm.setPos(6.0F, -10.0F, 0.0F);
         rightArm.setPos(-6.0F, -10.0F, 0.0F);
         super.setupAnim(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
     }
-    
+
     @Override
     protected IModelPose<MagiciansRedEntity> rangedAttackPose() {
-        return new ModelPose<MagiciansRedEntity>(new RotationAnglesArray(
+        return new ModelPose<MagiciansRedEntity>(new RotationAngle[] {
                 new RotationAngle(beakUpper, -0.3491F, 0.0F, 0.0F),
                 new RotationAngle(beakLower, 0.5236F, 0.0F, 0.0F),
                 new RotationAngle(leftArm, -1.5708F, 1.0472F, 0.2182F),
@@ -185,7 +184,7 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
                 new RotationAngle(leftLeg, -0.3927F, 0.0F, 0.0873F),
                 new RotationAngle(leftLowerLeg, 0.7854F, 0.0F, 0.0F),
                 new RotationAngle(rightLeg, 0.2618F, 0.0F, -0.0873F)
-                ))
+        })
                 .setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
                     leftArm.setPos(4.0F, -10.0F, 0.0F);
                     rightArm.setPos(-4.0F, -10.0F, 0.0F);
@@ -195,15 +194,15 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
     }
 
     // FIXME (model anim) MR red bind pose
-//    @Override
-//    protected void customPose(MagiciansRedEntity entity, StandPose pose, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
-//        super.customPose(entity, pose, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, phase);
-//        if (pose == MagiciansRedRedBind.RED_BIND_POSE) {
-//            entity.setYBodyRot(entity.yRot);
-//            leftArm.xRot = -1.4708F;
-//            rightArm.xRot = -1.6708F;
-//            leftArm.yRot = 0.4712F;
-//            rightArm.yRot = -leftArm.yRot;
-//        }
-//    }
+    //    @Override
+    //    protected void customPose(MagiciansRedEntity entity, StandPose pose, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
+    //        super.customPose(entity, pose, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, phase);
+    //        if (pose == MagiciansRedRedBind.RED_BIND_POSE) {
+    //            entity.setYBodyRot(entity.yRot);
+    //            leftArm.xRot = -1.4708F;
+    //            rightArm.xRot = -1.6708F;
+    //            leftArm.yRot = 0.4712F;
+    //            rightArm.yRot = -leftArm.yRot;
+    //        }
+    //    }
 }
