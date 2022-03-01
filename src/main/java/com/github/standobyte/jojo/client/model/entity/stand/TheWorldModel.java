@@ -1,7 +1,11 @@
 package com.github.standobyte.jojo.client.model.entity.stand;
 
+import com.github.standobyte.jojo.action.actions.StandEntityAction;
+import com.github.standobyte.jojo.client.model.pose.ModelPose;
+import com.github.standobyte.jojo.client.model.pose.ModelPoseTransition;
+import com.github.standobyte.jojo.client.model.pose.ModelPoseTransitionMultiple;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
-import com.github.standobyte.jojo.client.model.pose.RotationAnglesArray;
+import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
 import com.github.standobyte.jojo.entity.stand.stands.TheWorldEntity;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -10,14 +14,14 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 
 
 public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
-    
+
     public TheWorldModel() {
         this(64, 64);
     }
-    
+
     public TheWorldModel(int textureWidth, int textureHeight) {
         super(textureWidth, textureHeight);
-        
+
         ModelRenderer slope;
         ModelRenderer slope2;
         ModelRenderer slopeBack;
@@ -53,7 +57,6 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         ModelRenderer heartCube8;
         ModelRenderer heartCube9;
 
-//        head.texOffs(48, 0).addBox(-2.5F, -2.75F, -5.5F, 5.0F, 5.0F, 3.0F, -1.75F, false);
         head.texOffs(0, 28).addBox(-4.0F, -3.3F, -3.8F, 8.0F, 1.0F, 1.0F, 0.2F, false);
         head.texOffs(22, 31).addBox(3.0F, -8.3F, -3.8F, 1.0F, 5.0F, 1.0F, 0.2F, true);
         head.texOffs(22, 31).addBox(-4.0F, -8.3F, -3.8F, 1.0F, 5.0F, 1.0F, 0.2F, false);
@@ -116,8 +119,8 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         head.addChild(faceLeft);
         setRotationAngle(faceLeft, 0.0F, -0.3023F, 0.0F);
         faceLeft.texOffs(12, 30).addBox(-4.2F, 0.2F, 0.2F, 4.0F, 6.0F, 1.0F, 0.2F, true);
-        
-        
+
+
         leftCable = new ModelRenderer(this);
         leftCable.setPos(1.25F, -3.3F, 0.25F);
         head.addChild(leftCable);
@@ -136,10 +139,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         torso.texOffs(52, 11).addBox(-3.0F, -0.25F, -2.5F, 1.0F, 10.0F, 5.0F, 0.25F, false);
         torso.texOffs(24, 0).addBox(0.5F, 1.0F, 2.0F, 2.0F, 6.0F, 2.0F, 0.0F, true);
         torso.texOffs(24, 0).addBox(-2.5F, 1.0F, 2.0F, 2.0F, 6.0F, 2.0F, 0.0F, false);
-//        torso.texOffs(48, 0).addBox(-2.5F, 10.0F, -3.5F, 5.0F, 5.0F, 3.0F, -1.0F, false);
-//        torso.texOffs(48, 0).addBox(-2.5F, 8.0F, -3.65F, 5.0F, 5.0F, 3.0F, -2.0F, false);
 
-        
         heartLargeAbdomen = new ModelRenderer(this);
         heartLargeAbdomen.setPos(0.0F, 13.5F, -1.75F);
         torso.addChild(heartLargeAbdomen);
@@ -156,11 +156,11 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         setRotationAngle(largeHeartCube2, 0.0F, 0.0F, -0.7854F);
         largeHeartCube2.texOffs(48, 1).addBox(0.0F, -2.0F, -0.5F, 1.0F, 2.0F, 1.0F, 0.25F, false);
 
-        
+
         heartSmallAbdomen = new ModelRenderer(this);
         heartSmallAbdomen.setPos(0.0F, 11.3F, -2.05F);
         torso.addChild(heartSmallAbdomen);
-        
+
         smallHeartCube1 = new ModelRenderer(this);
         smallHeartCube1.setPos(0.0F, 0.0F, 0.0F);
         heartSmallAbdomen.addChild(smallHeartCube1);
@@ -179,16 +179,12 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         setRotationAngle(smallHeartCube3, 0.0F, 0.0F, -0.7854F);
         smallHeartCube3.texOffs(48, 1).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
 
-
         leftArm.texOffs(48, 0).addBox(0.0F, -2.0F, -2.0F, 2.0F, 4.0F, 4.0F, 0.25F, true);
-        
-//        leftArmJoint.texOffs(48, 0).addBox(-2.5F, -3.5F, 0.7F, 5.0F, 5.0F, 3.0F, -1.25F, false);
 
-        
         heartLeftArm = new ModelRenderer(this);
         heartLeftArm.setPos(0.0F, -0.2F, 1.8F);
         leftForeArm.addChild(heartLeftArm);
-        
+
         heartCube4 = new ModelRenderer(this);
         heartCube4.setPos(0.0F, 0.0F, 0.0F);
         heartLeftArm.addChild(heartCube4);
@@ -206,18 +202,14 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         heartLeftArm.addChild(heartCube6);
         setRotationAngle(heartCube6, 0.0F, 0.0F, -0.7854F);
         heartCube6.texOffs(48, 1).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
-        
+
 
         leftForeArm.texOffs(36, 35).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 5.0F, 4.0F, 0.25F, true);
         leftForeArm.texOffs(41, 18).addBox(1.0F, 2.0F, -1.5F, 2.0F, 3.0F, 3.0F, -0.4F, true);
         leftForeArm.texOffs(27, 34).addBox(1.5F, 5.1F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, true);
-        
 
         rightArm.texOffs(48, 0).addBox(-2.0F, -2.0F, -2.0F, 2.0F, 4.0F, 4.0F, 0.25F, false);
 
-//        rightArmJoint.texOffs(48, 0).addBox(-2.5F, -3.5F, 0.7F, 5.0F, 5.0F, 3.0F, -1.25F, false);
-
-        
         heartRightArm = new ModelRenderer(this);
         heartRightArm.setPos(0.0F, -0.2F, 1.8F);
         rightArmJoint.addChild(heartRightArm);
@@ -239,16 +231,12 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         heartRightArm.addChild(heartCube3);
         setRotationAngle(heartCube3, 0.0F, 0.0F, -0.7854F);
         heartCube3.texOffs(48, 1).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
-        
 
         rightForeArm.texOffs(36, 35).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 5.0F, 4.0F, 0.25F, false);
         rightForeArm.texOffs(41, 18).addBox(-3.0F, 2.0F, -1.5F, 2.0F, 3.0F, 3.0F, -0.4F, false);
         rightForeArm.texOffs(27, 34).addBox(-2.5F, 5.1F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, false);
 
         leftLeg.texOffs(28, 42).addBox(1.6F, -1.75F, -1.5F, 1.0F, 3.0F, 3.0F, 0.0F, true);
-        
-//        leftLegJoint.texOffs(48, 0).addBox(-2.4F, -2.5F, -3.5F, 5.0F, 5.0F, 3.0F, -1.25F, false);
-
 
         heartLeftLeg = new ModelRenderer(this);
         heartLeftLeg.setPos(0.0F, 0.0F, -1.8F);
@@ -271,12 +259,8 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         heartLeftLeg.addChild(heartCube12);
         setRotationAngle(heartCube12, 0.0F, 0.0F, -0.7854F);
         heartCube12.texOffs(48, 1).addBox(0.0F, -1.05F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
-        
 
         rightLeg.texOffs(28, 42).addBox(-2.6F, -1.25F, -1.5F, 1.0F, 3.0F, 3.0F, 0.0F, false);
-
-//        rightLegJoint.texOffs(48, 0).addBox(-2.6F, -2.5F, -3.5F, 5.0F, 5.0F, 3.0F, -1.25F, false);
-
 
         heartRightLeg = new ModelRenderer(this);
         heartRightLeg.setPos(0.0F, 0.0F, -1.8F);
@@ -300,52 +284,111 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         setRotationAngle(heartCube9, 0.0F, 0.0F, -0.7854F);
         heartCube9.texOffs(48, 1).addBox(0.0F, -1.05F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
     }
-    
+
     @Override
-    protected RotationAnglesArray[] initSummonPoseRotations() {
-        return new RotationAnglesArray[] {
-                new RotationAnglesArray(
-                        new RotationAngle(head, 0.0F, -0.3491F, -0.0873F),
-                        new RotationAngle(body, 0.2618F, 0.0F, 0.0F),
-                        new RotationAngle(leftArm, -0.2618F, -0.7854F, -1.8326F),
-                        new RotationAngle(leftForeArm, -0.7854F, 0.0F, 0.0F),
-                        new RotationAngle(rightArm, 0.5236F, 0.0F, 0.0F),
-                        new RotationAngle(rightForeArm, 0.0F, 3.1416F, 2.1817F),
-                        new RotationAngle(leftLeg, -1.5708F, 0.0F, 0.0F),
-                        new RotationAngle(leftLowerLeg, 2.0944F, 0.0F, 0.0F),
-                        new RotationAngle(rightLeg, -1.1345F, 0.2618F, 0.0F),
-                        new RotationAngle(rightLowerLeg, 0.5236F, 0.0F, 0.0F)
-                        ),
-                new RotationAnglesArray(
-                        new RotationAngle(head, -0.2618F, 0.0F, 0.0F),
-                        new RotationAngle(body, 0.4363F, 0.0F, 0.0F),
-                        new RotationAngle(leftArm, -0.8727F, -0.2618F, -2.0944F),
-                        new RotationAngle(leftForeArm, -0.6981F, -0.8727F, 0.0873F),
-                        new RotationAngle(rightArm, 0.0F, 1.309F, 1.3963F),
-                        new RotationAngle(rightForeArm, -1.0472F, -0.3491F, -1.6581F),
-                        new RotationAngle(leftLeg, 1.0472F, 0.0F, -0.2618F),
-                        new RotationAngle(rightLeg, -0.7854F, 0.0F, 0.1745F),
-                        new RotationAngle(rightLowerLeg, 0.7854F, 0.2618F, 0.0F)
-                        ),
-                new RotationAnglesArray(
-                        new RotationAngle(leftArm, 0.0F, -0.5236F, -0.8727F),
-                        new RotationAngle(leftForeArm, 0.0F, 1.1781F, 0.9599F),
-                        new RotationAngle(rightArm, 0.0F, 0.5236F, 1.309F),
-                        new RotationAngle(rightForeArm, 0.0F, -1.1781F, -0.9599F),
-                        new RotationAngle(leftLeg, 0.0F, 0.0F, -0.1745F),
-                        new RotationAngle(rightLeg, -0.4363F, 0.0F, 0.1745F),
-                        new RotationAngle(rightLowerLeg, 1.0472F, 0.0F, 0.0F)
-                        ),
-                new RotationAnglesArray(
-                        new RotationAngle(body, 0.6981F, 0.5236F, 0.0F),
-                        new RotationAngle(leftArm, -0.4363F, -0.6109F, -1.1345F),
-                        new RotationAngle(leftForeArm, -1.0472F, 0.0F, 0.0F),
-                        new RotationAngle(rightArm, 0.0F, 1.4835F, 1.5708F),
-                        new RotationAngle(rightForeArm, -0.8727F, -0.3927F, -1.5708F),
-                        new RotationAngle(leftLeg, -1.5708F, 0.0F, -0.1745F),
-                        new RotationAngle(leftLowerLeg, 1.3963F, 0.0F, 0.0F),
-                        new RotationAngle(rightLeg, 0.0F, 0.0F, 0.1745F)
-                        )
+    protected RotationAngle[][] initSummonPoseRotations() {
+        return new RotationAngle[][] {
+            new RotationAngle[] {
+                    new RotationAngle(head, 0.0F, -0.3491F, -0.0873F),
+                    new RotationAngle(body, 0.2618F, 0.0F, 0.0F),
+                    new RotationAngle(leftArm, -0.2618F, -0.7854F, -1.8326F),
+                    new RotationAngle(leftForeArm, -0.7854F, 0.0F, 0.0F),
+                    new RotationAngle(rightArm, 0.5236F, 0.0F, 0.0F),
+                    new RotationAngle(rightForeArm, 0.0F, 3.1416F, 2.1817F),
+                    new RotationAngle(leftLeg, -1.5708F, 0.0F, 0.0F),
+                    new RotationAngle(leftLowerLeg, 2.0944F, 0.0F, 0.0F),
+                    new RotationAngle(rightLeg, -1.1345F, 0.2618F, 0.0F),
+                    new RotationAngle(rightLowerLeg, 0.5236F, 0.0F, 0.0F)
+            },
+            new RotationAngle[] {
+                    new RotationAngle(head, -0.2618F, 0.0F, 0.0F),
+                    new RotationAngle(body, 0.4363F, 0.0F, 0.0F),
+                    new RotationAngle(leftArm, -0.8727F, -0.2618F, -2.0944F),
+                    new RotationAngle(leftForeArm, -0.6981F, -0.8727F, 0.0873F),
+                    new RotationAngle(rightArm, 0.0F, 1.309F, 1.3963F),
+                    new RotationAngle(rightForeArm, -1.0472F, -0.3491F, -1.6581F),
+                    new RotationAngle(leftLeg, 1.0472F, 0.0F, -0.2618F),
+                    new RotationAngle(rightLeg, -0.7854F, 0.0F, 0.1745F),
+                    new RotationAngle(rightLowerLeg, 0.7854F, 0.2618F, 0.0F)
+            },
+            new RotationAngle[] {
+                    new RotationAngle(leftArm, 0.0F, -0.5236F, -0.8727F),
+                    new RotationAngle(leftForeArm, 0.0F, 1.1781F, 0.9599F),
+                    new RotationAngle(rightArm, 0.0F, 0.5236F, 1.309F),
+                    new RotationAngle(rightForeArm, 0.0F, -1.1781F, -0.9599F),
+                    new RotationAngle(leftLeg, 0.0F, 0.0F, -0.1745F),
+                    new RotationAngle(rightLeg, -0.4363F, 0.0F, 0.1745F),
+                    new RotationAngle(rightLowerLeg, 1.0472F, 0.0F, 0.0F)
+            },
+            new RotationAngle[] {
+                    new RotationAngle(body, 0.6981F, 0.5236F, 0.0F),
+                    new RotationAngle(leftArm, -0.4363F, -0.6109F, -1.1345F),
+                    new RotationAngle(leftForeArm, -1.0472F, 0.0F, 0.0F),
+                    new RotationAngle(rightArm, 0.0F, 1.4835F, 1.5708F),
+                    new RotationAngle(rightForeArm, -0.8727F, -0.3927F, -1.5708F),
+                    new RotationAngle(leftLeg, -1.5708F, 0.0F, -0.1745F),
+                    new RotationAngle(leftLowerLeg, 1.3963F, 0.0F, 0.0F),
+                    new RotationAngle(rightLeg, 0.0F, 0.0F, 0.1745F)
+            }
         };
+    }
+
+    @Override
+    protected StandActionAnimation<TheWorldEntity> initHeavyAttackAnim(boolean combo) {
+        if (combo) {
+            return super.initHeavyAttackAnim(combo);
+        }
+        else {
+            ModelPose<TheWorldEntity> pose1 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+                    new RotationAngle(leftArm, 0.0F, 0.0F, -0.5236F),
+                    new RotationAngle(leftForeArm, 0.0F, 0.0F, 0.5672F),
+                    new RotationAngle(rightArm, 0.2182F, 0.8727F, 1.3963F),
+                    new RotationAngle(rightForeArm, -1.1345F, -0.3927F, -1.5708F),
+                    new RotationAngle(leftLeg, 0.0F, 0.0436F, -0.1309F),
+                    new RotationAngle(rightLeg, 0.2618F, 0.2618F, 0.1309F)
+            });
+            ModelPose<TheWorldEntity> pose2 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+                    new RotationAngle(head, -0.2182F, 0.0F, 0.0F),
+                    new RotationAngle(body, 0.2182F, 0.2618F, 0.0F),
+                    new RotationAngle(upperPart, 0.0F, 0.1745F, 0.0F),
+                    new RotationAngle(leftArm, 0.0F, 0.0F, -0.5236F),
+                    new RotationAngle(leftForeArm, 0.0F, 0.0F, 0.5672F),
+                    new RotationAngle(rightArm, 0.6981F, 1.0036F, 2.0071F),
+                    new RotationAngle(rightForeArm, -0.7854F, -0.2618F, -1.5708F),
+                    new RotationAngle(leftLeg, 0.1745F, 0.0F, 0.0F),
+                    new RotationAngle(rightLeg, 0.2618F, 0.2618F, 0.1309F)
+            });
+            ModelPose<TheWorldEntity> pose3 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+                    new RotationAngle(body, 0.2182F, -0.5236F, 0.0F),
+                    new RotationAngle(upperPart, 0.0F, -0.5236F, 0.0F),
+                    new RotationAngle(leftArm, 0.0F, 0.4363F, -1.5708F),
+                    new RotationAngle(leftForeArm, 0.0F, 0.0F, 1.1781F),
+                    new RotationAngle(rightArm, -0.3927F, -0.2182F, 1.0472F),
+                    new RotationAngle(rightForeArm, 0.0F, 3.1416F, 0.6981F),
+                    new RotationAngle(leftLeg, -1.0472F, 0.0F, 0.0F),
+                    new RotationAngle(leftLowerLeg, 1.8326F, 0.0F, 0.0F),
+                    new RotationAngle(rightLeg, 0.2618F, 0.2618F, 0.1309F)
+            });
+            ModelPose<TheWorldEntity> pose4 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+                    new RotationAngle(body, 0.2182F, -0.0873F, 0.0F),
+                    new RotationAngle(upperPart, 0.0F, -0.0873F, 0.0F),
+                    new RotationAngle(leftArm, 0.0F, 0.4363F, -0.7854F),
+                    new RotationAngle(leftForeArm, 0.0F, 0.0F, 0.5672F),
+                    new RotationAngle(rightArm, 0.3927F, 0.0F, 0.3491F),
+                    new RotationAngle(rightForeArm, -1.4399F, 0.0F, -1.309F),
+                    new RotationAngle(leftLeg, -1.0472F, 0.0F, 0.0F),
+                    new RotationAngle(leftLowerLeg, 1.8326F, 0.0F, 0.0F),
+                    new RotationAngle(rightLeg, 0.2618F, 0.2618F, 0.1309F)
+            });
+            return new StandActionAnimation.Builder<TheWorldEntity>()
+                    .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<TheWorldEntity>(pose1, pose2).setEasing(pr -> Math.max(pr * 3F - 2F, 0F)))
+                    .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransition<TheWorldEntity>(pose2, pose3))
+                    .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransitionMultiple.Builder<TheWorldEntity>(pose3)
+                            .addPose(0.5F, pose3)
+                            .addPose(0.7F, pose4)
+                            .addPose(0.8F, pose4)
+                            .build(idlePose))
+                    .build(idlePose);
+        }
     }
 }

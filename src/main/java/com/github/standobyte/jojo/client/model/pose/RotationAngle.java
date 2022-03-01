@@ -25,12 +25,12 @@ public class RotationAngle {
     
     private float smallestDiff(float diff) {
         diff %= DOUBLE_PI;
-        if (diff > PI) {
-            diff -= DOUBLE_PI;
-        }
-        else if (diff < -PI) {
-            diff += DOUBLE_PI;
-        }
+//        if (diff > PI) {
+//            diff -= DOUBLE_PI;
+//        }
+//        else if (diff < -PI) {
+//            diff += DOUBLE_PI;
+//        }
         return diff;
     }
 }

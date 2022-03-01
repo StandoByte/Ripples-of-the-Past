@@ -4,7 +4,6 @@ import java.util.Arrays;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.BalanceTestServerConfig;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
@@ -237,6 +236,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     private static final float RESOLVE_UNDER_LIMIT_MULTIPLIER = 20F;
     private static final float RESOLVE_LIMIT_DECAY = 4F;
     private static final int RESOLVE_LIMIT_NO_DECAY_TICKS = 40;
+    private static final int[] RESOLVE_EFFECT_MIN = {300, 400, 500, 600};
+    private static final int[] RESOLVE_EFFECT_MAX = {600, 1200, 1500, 1800};
     @Override
     public boolean usesResolve() {
         return hasPower() && getType().usesResolve();
@@ -281,7 +282,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (!user.hasEffect(ModEffects.RESOLVE.get()) && this.resolve == getMaxResolve()) {
             setResolveLevel(Math.min(resolveLevel + 1, getMaxResolveLevel()));
             user.addEffect(new EffectInstance(ModEffects.RESOLVE.get(), 
-                    BalanceTestServerConfig.TEST_CONFIG.resolveEffectCapDuration.get(), resolveLevel - 1, false, 
+                    RESOLVE_EFFECT_MAX[Math.min(resolveLevel, RESOLVE_EFFECT_MAX.length) - 1], resolveLevel - 1, false, 
                     false, true));
         }
         
@@ -384,10 +385,11 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         float decay = 0;
         EffectInstance resolveEffect = user.getEffect(ModEffects.RESOLVE.get());
         if (resolveEffect != null) {
-            decay = getMaxResolve() / BalanceTestServerConfig.TEST_CONFIG.resolveEffectBaseDuration.get();
-            decay *= (getMaxResolveLevel() - Math.min(resolveEffect.getAmplifier(), getMaxResolveLevel()));
-            if (decay >= resolve) {
-                user.removeEffect(ModEffects.RESOLVE.get());
+            if (resolveEffect.getAmplifier() < RESOLVE_EFFECT_MIN.length) {
+                decay = getMaxResolve() / (float) RESOLVE_EFFECT_MIN[resolveEffect.getAmplifier()];
+                if (decay >= resolve) {
+                    user.removeEffect(ModEffects.RESOLVE.get());
+                }
             }
             
             resolveLimit = getMaxResolve();

@@ -557,7 +557,7 @@ public class ActionsOverlayGui extends AbstractGui {
     
     
     
-    private void renderPowerIcon(MatrixStack matrixStack, ElementPosition position, @Nonnull ActionsModeConfig<?> mode) { // FIXME stand icon alpha depending on range
+    private void renderPowerIcon(MatrixStack matrixStack, ElementPosition position, @Nonnull ActionsModeConfig<?> mode) {
         int x = position.x;
         if (position.alignment == Alignment.RIGHT) {
             x -= 16;

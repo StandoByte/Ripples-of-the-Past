@@ -53,4 +53,8 @@ public class MathUtil {
                 damageAfterAbsorb / (1 - armor / 125), 
                 5 * damageAfterAbsorb);
     }
+    
+    public static float inverseLerp(float x, float a, float b) {
+        return (x - a) / (b - a);
+    }
 }
