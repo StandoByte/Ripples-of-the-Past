@@ -53,7 +53,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
 
     @Override
     public float getEnergyTickInc(INonStandPower power) {
-        return -0.00278F;
+        return -1F / 360F;
     }
     
     @Override

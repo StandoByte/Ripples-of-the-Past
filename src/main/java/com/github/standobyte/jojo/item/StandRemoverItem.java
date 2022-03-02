@@ -21,6 +21,7 @@ public class StandRemoverItem extends Item {
         IStandPower power = IStandPower.getPlayerStandPower(player);
         if (!world.isClientSide()) {
             if (power.hasPower() && power.clear()) {
+                power.clearActionLearning();
                 return ActionResult.success(stack);
             }
             return ActionResult.fail(stack);

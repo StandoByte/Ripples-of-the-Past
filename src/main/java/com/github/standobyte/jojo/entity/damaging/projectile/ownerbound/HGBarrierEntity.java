@@ -162,7 +162,7 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
     public void shootEmeralds(Vector3d targetPos, int count, boolean shift, float damageReduction) {
         Vector3d barrierMiddle = position().add(getOriginPoint()).scale(0.5);
         for (int i = 0; i < count; i++) {
-            HGEmeraldEntity emeraldEntity = new HGEmeraldEntity(getOwner(), level);
+            HGEmeraldEntity emeraldEntity = new HGEmeraldEntity(getOwner(), level, null);
             emeraldEntity.setDamageFactor(damageReduction);
             emeraldEntity.setPos(barrierMiddle.x, barrierMiddle.y, barrierMiddle.z);
             Vector3d shootVec = targetPos.subtract(barrierMiddle);

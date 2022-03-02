@@ -39,7 +39,7 @@ public class SyncStandActionLearningPacket {
                 Action<IStandPower> standAction = (StandAction) msg.action;
                 IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
                     boolean showToast = msg.showToast && !standAction.isUnlocked(power) /*always false btw*/;
-                    power.setLearningProgressPoints(standAction, msg.progress, false);
+                    power.setLearningProgressPoints(standAction, msg.progress, false, false);
                     if (showToast) {
                         // FIXME (!) new stand action toast
 //                        ToastGui toastGui = Minecraft.getInstance().getToasts();

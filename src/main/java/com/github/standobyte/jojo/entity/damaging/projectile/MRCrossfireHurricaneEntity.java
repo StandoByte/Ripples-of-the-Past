@@ -1,27 +1,41 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.JojoModUtil;
 import com.github.standobyte.jojo.util.damage.IndirectStandEntityDamageSource;
 
+import net.minecraft.block.AbstractFireBlock;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.event.ForgeEventFactory;
 
 public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
     private boolean small;
     private Vector3d targetPos;
+    @Nullable
+    private IStandPower userStandPower;
     
-    public MRCrossfireHurricaneEntity(boolean small, LivingEntity shooter, World world) {
+    public MRCrossfireHurricaneEntity(boolean small, LivingEntity shooter, World world, IStandPower standPower) {
         super(small ? ModEntityTypes.MR_CROSSFIRE_HURRICANE_SPECIAL.get() : ModEntityTypes.MR_CROSSFIRE_HURRICANE.get(), shooter, world);
         this.small = small;
+        userStandPower = standPower;
     }
 
     public MRCrossfireHurricaneEntity(EntityType<? extends MRCrossfireHurricaneEntity> type, World world) {
@@ -113,6 +127,33 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
         if (!level.isClientSide) {
             level.explode(this, new IndirectStandEntityDamageSource("explosion.player", this, getOwner()), 
                     null, getX(), getY(), getZ(), small ? 0.5F : 3.0F, false, Explosion.Mode.NONE);
+        }
+    }
+    
+    public void onExplode(List<Entity> affectedEntities, List<BlockPos> affectedBlocks) {
+        LivingEntity magiciansRed = getOwner();
+        boolean hit = false;
+        for (Entity entity : affectedEntities) {
+            if (!entity.is(magiciansRed)) {
+                int seconds = 6;
+                if (entity instanceof StandEntity) {
+                    ((StandEntity) entity).setFireFromStand(seconds);
+                }
+                else {
+                    entity.setSecondsOnFire(seconds);
+                }
+                hit = true;
+            }
+        }
+        if (!level.isClientSide() && hit && userStandPower != null) {
+            userStandPower.addLearningProgressPoints(ModActions.MAGICIANS_RED_CROSSFIRE_HURRICANE.get(), 0.1F);
+        }
+        if (magiciansRed != null && ForgeEventFactory.getMobGriefingEvent(level, magiciansRed)) {
+            for (BlockPos pos : affectedBlocks) {
+                if (level.isEmptyBlock(pos)) {
+                    level.setBlockAndUpdate(pos, AbstractFireBlock.getState(level, pos));
+                }
+            }
         }
     }
 

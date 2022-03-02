@@ -24,7 +24,6 @@ public class ActionLearningProgressMap<P extends IPower<P, ?>> {
     }
     
     boolean setLearningProgressPoints(Action<P> action, float progress, P power) {
-        progress = Math.max(progress, wrappedMap.getOrDefault(action, 0F));
         if (wrappedMap.containsKey(action) && wrappedMap.get(action) == progress) {
             return false;
         }
