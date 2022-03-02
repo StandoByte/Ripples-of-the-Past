@@ -33,6 +33,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.SyncLeapCooldownPac
 import com.github.standobyte.jojo.network.packets.fromserver.SyncResolveLimitPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStaminaPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.SyncStandActionLearningClearPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStandActionLearningPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStandControlStatusPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStandStatsDataPacket;
@@ -106,6 +107,7 @@ public class PacketManager {
         channel.registerMessage(index++, SyncResolvePacket.class, SyncResolvePacket::encode, SyncResolvePacket::decode, SyncResolvePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, SyncResolveLimitPacket.class, SyncResolveLimitPacket::encode, SyncResolveLimitPacket::decode, SyncResolveLimitPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, SyncStandActionLearningPacket.class, SyncStandActionLearningPacket::encode, SyncStandActionLearningPacket::decode, SyncStandActionLearningPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        channel.registerMessage(index++, SyncStandActionLearningClearPacket.class, SyncStandActionLearningClearPacket::encode, SyncStandActionLearningClearPacket::decode, SyncStandActionLearningClearPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, TrSetStandEntityPacket.class, TrSetStandEntityPacket::encode, TrSetStandEntityPacket::decode, TrSetStandEntityPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, SyncStandStatsDataPacket.class, SyncStandStatsDataPacket::encode, SyncStandStatsDataPacket::decode, SyncStandStatsDataPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, SyncStandControlStatusPacket.class, SyncStandControlStatusPacket::encode, SyncStandControlStatusPacket::decode, SyncStandControlStatusPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));

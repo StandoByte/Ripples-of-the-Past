@@ -1087,9 +1087,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             break;
         default:
             punched = false;
-            if (punch == PunchType.LIGHT) {
-                addComboMeter(-0.1F, COMBO_TICKS);
-            }
             break;
         }
 

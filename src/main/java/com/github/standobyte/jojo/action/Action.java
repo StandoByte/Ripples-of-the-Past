@@ -265,7 +265,6 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return 1F;
     }
     
-    // FIXME onMaxTraining (unlock shift variations)
     public void onMaxTraining(P power) {}
     
     

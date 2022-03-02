@@ -24,9 +24,9 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
             float damageReduction = (float) standEntity.getRangeEfficiency();
             int emeralds = shift ? 2 : 1;
             for (int i = 0; i < emeralds; i++) {
-                HGEmeraldEntity emeraldEntity = new HGEmeraldEntity(standEntity, world);
+                HGEmeraldEntity emeraldEntity = new HGEmeraldEntity(standEntity, world, userPower);
                 emeraldEntity.setDamageFactor(damageReduction);
-                emeraldEntity.shootFromRotation(standEntity, shift ? 1.25F : 0.75F, shift ? 2.0F : 8.0F);
+                emeraldEntity.shootFromRotation(standEntity, shift ? 1.5F : 1F, shift ? 2.0F : 8.0F);
                 world.addFreshEntity(emeraldEntity);
             }
             

@@ -16,7 +16,6 @@ import com.github.standobyte.jojo.capability.entity.ProjectileHamonChargeCapProv
 import com.github.standobyte.jojo.command.TestBuildCommand;
 import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRCrossfireHurricaneEntity;
-import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
@@ -39,7 +38,6 @@ import com.github.standobyte.jojo.tileentity.StoneMaskTileEntity;
 import com.github.standobyte.jojo.util.damage.ModDamageSources;
 import com.github.standobyte.jojo.util.reflection.CommonReflection;
 
-import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -796,29 +794,8 @@ public class GameplayEventHandler {
     public static void onExplosionDetonate(ExplosionEvent.Detonate event) {
         Explosion explosion = event.getExplosion();
         if (explosion.getExploder() instanceof MRCrossfireHurricaneEntity) {
-            LivingEntity magiciansRed = explosion.getSourceMob();
-            for (Entity entity : event.getAffectedEntities()) {
-                if (!entity.is(magiciansRed)) {
-                    int seconds = 6;
-                    if (entity instanceof StandEntity) {
-                        ((StandEntity) entity).setFireFromStand(seconds);
-                    }
-                    else {
-                        entity.setSecondsOnFire(seconds);
-                    }
-                    if (!magiciansRed.level.isClientSide()) {
-                        // FIXME (!) crossfire hurricane learning progress
-                    }
-                }
-            }
-            World world = event.getWorld();
-            if (magiciansRed != null && ForgeEventFactory.getMobGriefingEvent(world, magiciansRed)) {
-                for (BlockPos pos : event.getAffectedBlocks()) {
-                    if (world.isEmptyBlock(pos)) {
-                        world.setBlockAndUpdate(pos, AbstractFireBlock.getState(world, pos));
-                    }
-                }
-            }
+            ((MRCrossfireHurricaneEntity) explosion.getExploder())
+            .onExplode(event.getAffectedEntities(), event.getAffectedBlocks());
         }
     }
     

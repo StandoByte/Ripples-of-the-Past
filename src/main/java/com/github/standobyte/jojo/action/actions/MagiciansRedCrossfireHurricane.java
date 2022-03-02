@@ -29,7 +29,7 @@ public class MagiciansRedCrossfireHurricane extends StandEntityAction {
                 }
             }
             for (int i = 0; i < n; i++) {
-                MRCrossfireHurricaneEntity ankh = new MRCrossfireHurricaneEntity(special, standEntity, world);
+                MRCrossfireHurricaneEntity ankh = new MRCrossfireHurricaneEntity(special, standEntity, world, userPower);
                 Vector2f rotOffsets = i == 0 ? Vector2f.ZERO
                         : MathUtil.xRotYRotOffsets(((double) i / (double) n + 0.5) * Math.PI, 2);
                 if (special && target.getType() != TargetType.EMPTY) {

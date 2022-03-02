@@ -1,6 +1,10 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
+import javax.annotation.Nullable;
+
+import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -9,9 +13,12 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class HGEmeraldEntity extends ModdedProjectileEntity {
-    
-    public HGEmeraldEntity(LivingEntity shooter, World world) {
+    @Nullable
+    private IStandPower userStandPower;
+
+    public HGEmeraldEntity(LivingEntity shooter, World world, @Nullable IStandPower standPower) {
         super(ModEntityTypes.HG_EMERALD.get(), shooter, world);
+        userStandPower = standPower;
     }
 
     public HGEmeraldEntity(EntityType<? extends HGEmeraldEntity> type, World world) {
@@ -22,26 +29,26 @@ public class HGEmeraldEntity extends ModdedProjectileEntity {
     public boolean standDamage() {
         return true;
     }
-    
+
     @Override
     public float getBaseDamage() {
         return 1.5F;
     }
-    
+
     @Override
     protected float getMaxHardnessBreakable() {
         return 1.0F;
     }
-    
+
     @Override
     protected int ticksLifespan() {
         return 100;
     }
-    
+
     @Override
     protected void afterEntityHit(EntityRayTraceResult entityRayTraceResult, boolean entityHurt) {
-        if (!level.isClientSide() && entityHurt) {
-            // FIXME (!) emerald splash learning progress
+        if (!level.isClientSide() && entityHurt && userStandPower != null) {
+            userStandPower.addLearningProgressPoints(ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get(), 0.004F);
         }
     }
 

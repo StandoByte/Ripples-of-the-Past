@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncResolveLimitPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStaminaPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.SyncStandActionLearningClearPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStandActionLearningPacket;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.PowerBaseImpl;
@@ -465,7 +466,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             setLearningProgressPoints(action, 
                     isUserCreative() || !action.isTrained() ? 
                             action.getMaxTrainingPoints(this)
-                            : 0F);
+                            : 0F, false, false);
             return true;
         }
         return false;
@@ -477,26 +478,39 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
 
     @Override
-    public void setLearningProgressPoints(Action<IStandPower> action, float points) {
-        setLearningProgressPoints(action, points, true);
-    }
-
-    @Override
-    public void setLearningProgressPoints(Action<IStandPower> action, float points, boolean clamp) {
+    public void setLearningProgressPoints(Action<IStandPower> action, float points, boolean clamp, boolean notLess) {
         if (clamp) {
             points = MathHelper.clamp(points, 0, action.getMaxTrainingPoints(this));
+        }
+        if (notLess) {
+            points = Math.max(points, getLearningProgressPoints(action));
         }
         float pts = points;
         if (actionLearningProgressMap.setLearningProgressPoints(action, points, this)) {
             serverPlayerUser.ifPresent(player -> {
                 PacketManager.sendToClient(new SyncStandActionLearningPacket(action, pts, false), player);
             });
+            if (!user.level.isClientSide() && 
+                    actionLearningProgressMap.getLearningProgressPoints(action, this) == 
+                    action.getMaxTrainingPoints(this)) {
+                action.onMaxTraining(this);
+            }
         }
     }
 
     @Override
     public void addLearningProgressPoints(Action<IStandPower> action, float points) {
-        setLearningProgressPoints(action, getLearningProgressPoints(action) + points);
+        setLearningProgressPoints(action, getLearningProgressPoints(action) + points, true, false);
+    }
+    
+    @Override
+    public ActionLearningProgressMap<IStandPower> clearActionLearning() {
+        ActionLearningProgressMap<IStandPower> previousMap = actionLearningProgressMap;
+        this.actionLearningProgressMap = new ActionLearningProgressMap<>();
+        serverPlayerUser.ifPresent(player -> {
+            PacketManager.sendToClient(new SyncStandActionLearningClearPacket(), player);
+        });
+        return previousMap;
     }
     
     @Override
@@ -574,7 +588,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             cnbt.putFloat("ResolveAchieved", maxAchievedResolve);
             cnbt.putInt("ResolveLimitTicks", noResolveLimitDecayTicks);
         }
-        cnbt.putInt("Exp", getXp());
+        cnbt.putInt("Xp", getXp());
         cnbt.putBoolean("Skipped", skippedProgression);
         actionLearningProgressMap.writeToNbt(cnbt);
         return cnbt;
@@ -587,7 +601,13 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             StandType<?> stand = ModStandTypes.Registry.getRegistry().getValue(new ResourceLocation(standName));
             if (stand != null) {
                 setType(stand);
-                xp = nbt.getInt("Exp");
+                if (nbt.contains("Exp")) {
+                    xp = nbt.getInt("Exp");
+                    // FIXME add unlocked actions from v0.1
+                }
+                else {
+                    xp = nbt.getInt("Xp");
+                }
             }
         }
         if (usesStamina()) {

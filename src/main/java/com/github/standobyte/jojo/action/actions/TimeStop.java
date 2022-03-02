@@ -86,7 +86,7 @@ public class TimeStop extends StandAction {
                         world.dimension(), player -> (JojoModConfig.COMMON.inTimeStopRange(
                                 chunkPos, new ChunkPos(player.blockPosition()))) && TimeHandler.canPlayerSeeInStoppedTime(player));
             }
-            // FIXME (!) add progress points
+            // FIXME (!) add progress points (inside TickingTimeStopInstance)
             user.addEffect(new EffectInstance(ModEffects.TIME_STOP.get(), timeStopTicks, 0, false, false, true));
         }
     }
