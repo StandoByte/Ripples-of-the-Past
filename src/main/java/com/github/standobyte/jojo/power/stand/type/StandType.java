@@ -216,7 +216,6 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
             event.getEntityLiving().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                 cap.setLastHurtByStand(attackerStand);
             });
-            attackerStand.addResolveOnAttack(event.getEntityLiving(), event.getAmount());
         }
     }
 

@@ -33,7 +33,7 @@ public class StandStatFormulas {
     
     public static final int getHeavyAttackWindup(double speed, float comboMeter) {
         double min = (40 - speed * 1.25) / 3;
-        double max = (40 - speed * 1.25) * 5 / 6;
+        double max = (40 - speed * 1.25) * 2 / 3;
         return MathHelper.ceil(MathHelper.lerp((double) (Math.min(comboMeter, 0.5F) * 2F), max, min));
     }
     
@@ -47,11 +47,10 @@ public class StandStatFormulas {
         return 0.5F + (float) strength * 0.25F;
     }
     
-    public static final int getLightAttackWindup(double speed, float recovery) {
+    public static final int getLightAttackWindup(double speed, float earlyStart) {
         int ticks = Math.max(5 - MathHelper.log2((int) speed), 1);
-        float earlyStartMultiplier = 2F * (0.5F - recovery);
-        if (earlyStartMultiplier > 0) {
-            ticks += (int) (lightAttackRecovery(speed) * earlyStartMultiplier);
+        if (earlyStart > 0) {
+            ticks += (int) (lightAttackRecovery(speed) * earlyStart);
         }
         return ticks;
     }

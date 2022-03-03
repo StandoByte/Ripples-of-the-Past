@@ -55,7 +55,7 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     void setXp(int xp);
     
     boolean unlockAction(Action<IStandPower> action);
-    void setLearningProgressPoints(Action<IStandPower> action, float progress, boolean clamp, boolean allowLower);
+    void setLearningProgressPoints(Action<IStandPower> action, float progress, boolean clamp, boolean notLess);
     void addLearningProgressPoints(Action<IStandPower> action, float progress);
     ActionLearningProgressMap<IStandPower> clearActionLearning();
     

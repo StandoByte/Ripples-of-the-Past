@@ -6,6 +6,8 @@ import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.EntityRayTraceResult;
@@ -48,7 +50,10 @@ public class HGEmeraldEntity extends ModdedProjectileEntity {
     @Override
     protected void afterEntityHit(EntityRayTraceResult entityRayTraceResult, boolean entityHurt) {
         if (!level.isClientSide() && entityHurt && userStandPower != null) {
-            userStandPower.addLearningProgressPoints(ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get(), 0.004F);
+            Entity target = entityRayTraceResult.getEntity();
+            if (target.getClassification(false) == EntityClassification.MONSTER || target.getType() == EntityType.PLAYER) {
+                userStandPower.addLearningProgressPoints(ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get(), 0.004F);
+            }
         }
     }
 
