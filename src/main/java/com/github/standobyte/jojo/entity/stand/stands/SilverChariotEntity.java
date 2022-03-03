@@ -88,7 +88,6 @@ public class SilverChariotEntity extends StandEntity {
 
     public void setArmor(boolean armor) {
         entityData.set(HAS_ARMOR, armor);
-
         updateModifier(getAttribute(Attributes.MOVEMENT_SPEED), NO_ARMOR_MOVEMENT_SPEED_BOOST, !armor);
         updateModifier(getAttribute(Attributes.ATTACK_SPEED), NO_ARMOR_ATTACK_SPEED_BOOST, !armor);
         updateModifier(getAttribute(Attributes.ARMOR), NO_ARMOR, !armor);

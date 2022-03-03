@@ -1089,10 +1089,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             punched = false;
             break;
         }
-
-        if (punch == PunchType.HEAVY_NO_COMBO || punch == PunchType.HEAVY_COMBO) {
-            addComboMeter(-0.51F, COMBO_TICKS);
-        }
         return punched;
     }
     

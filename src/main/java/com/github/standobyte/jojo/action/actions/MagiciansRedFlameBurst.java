@@ -23,10 +23,14 @@ public class MagiciansRedFlameBurst extends StandEntityAction {
         Random random = standEntity.getRandom();
         if (!world.isClientSide()) {
             MRFlameEntity flame = new MRFlameEntity(standEntity, world);
+            float velocity = (float) standEntity.getAttributeValue(ForgeMod.REACH_DISTANCE.get()) / 4F;
+            if (userPower.getResolveLevel() > 2) {
+                velocity *= 2F;
+            }
             flame.setDamageFactor((float) standEntity.getRangeEfficiency());
             flame.shootFromRotation(standEntity, standEntity.xRot + (random.nextFloat() - 0.5F) * 10F, 
                     standEntity.yRot + (random.nextFloat() - 0.5F) * 10F, 
-                    0, (float) standEntity.getAttributeValue(ForgeMod.REACH_DISTANCE.get()) / 4F, 0.0F);
+                    0, velocity, 0.0F);
             world.addFreshEntity(flame);
         }
         else {

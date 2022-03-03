@@ -44,11 +44,11 @@ public class StandEntityLightAttack extends StandEntityAction {
     
     @Override
     public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
-        float recovery = 1F;
+        float earlyStart = 0F;
         if (standEntity.getCurrentTaskAction() == this && standEntity.getCurrentTaskPhase() == Phase.RECOVERY) {
-            recovery = standEntity.getCurrentTaskCompletion(0);
+            earlyStart = 2F * (0.5F - standEntity.getCurrentTaskCompletion(0));
         }
-        int ticks = StandStatFormulas.getLightAttackWindup(standEntity.getAttackSpeed(), recovery);
+        int ticks = StandStatFormulas.getLightAttackWindup(standEntity.getAttackSpeed(), earlyStart);
         return ticks;
     }
     

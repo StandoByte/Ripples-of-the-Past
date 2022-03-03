@@ -35,6 +35,7 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.type.EntityStandType;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.github.standobyte.jojo.tileentity.StoneMaskTileEntity;
+import com.github.standobyte.jojo.util.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.damage.ModDamageSources;
 import com.github.standobyte.jojo.util.reflection.CommonReflection;
 
@@ -316,8 +317,17 @@ public class GameplayEventHandler {
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.LOW)
+    @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onLivingAttack(LivingAttackEvent event) {
+        DamageSource damageSrc = event.getSource();
+        if (damageSrc instanceof IStandDamageSource) {
+            IStandPower attackerStand = ((IStandDamageSource) damageSrc).getStandPower();
+            attackerStand.addResolveOnAttack(event.getEntityLiving(), event.getAmount());
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void cancelLivingAttack(LivingAttackEvent event) {
         HamonPowerType.snakeMuffler(event);
     }
 

@@ -13,6 +13,7 @@ import com.github.standobyte.jojo.util.damage.IndirectStandEntityDamageSource;
 
 import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
@@ -132,7 +133,6 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
     
     public void onExplode(List<Entity> affectedEntities, List<BlockPos> affectedBlocks) {
         LivingEntity magiciansRed = getOwner();
-        boolean hit = false;
         for (Entity entity : affectedEntities) {
             if (!entity.is(magiciansRed)) {
                 int seconds = 6;
@@ -142,11 +142,11 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
                 else {
                     entity.setSecondsOnFire(seconds);
                 }
-                hit = true;
+                if (!level.isClientSide() && userStandPower != null && 
+                        (entity.getClassification(false) == EntityClassification.MONSTER || entity.getType() == EntityType.PLAYER)) {
+                    userStandPower.addLearningProgressPoints(ModActions.MAGICIANS_RED_CROSSFIRE_HURRICANE.get(), 0.0625F);
+                }
             }
-        }
-        if (!level.isClientSide() && hit && userStandPower != null) {
-            userStandPower.addLearningProgressPoints(ModActions.MAGICIANS_RED_CROSSFIRE_HURRICANE.get(), 0.1F);
         }
         if (magiciansRed != null && ForgeEventFactory.getMobGriefingEvent(level, magiciansRed)) {
             for (BlockPos pos : affectedBlocks) {
