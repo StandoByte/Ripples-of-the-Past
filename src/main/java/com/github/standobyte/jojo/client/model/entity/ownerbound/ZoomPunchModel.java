@@ -64,7 +64,7 @@ public class ZoomPunchModel extends EntityModel<ZoomPunchEntity> {
         playerSleeveRight = new ModelRenderer(this);
         playerSleeveRight.xRot = -1.5708F;
         playerSleeveRight.setPos(0.0F, -2.0F, 0.0F);
-        playerSleeveRight.texOffs(40, 32).addBox(-2.0F, -10.0F, -2.0F, 4.0F, 12.0F, 4.0F, 0.0F, false);
+        playerSleeveRight.texOffs(40, 32).addBox(-2.0F, -10.0F, -2.0F, 4.0F, 12.0F, 4.0F, 0.25F, false);
 
         playerSleeveLeft = new ModelRenderer(this);
         playerSleeveLeft.xRot = -1.5708F;
@@ -74,7 +74,7 @@ public class ZoomPunchModel extends EntityModel<ZoomPunchEntity> {
         playerSleeveRightSlim = new ModelRenderer(this);
         playerSleeveRightSlim.xRot = -1.5708F;
         playerSleeveRightSlim.setPos(0.0F, -2.0F, 0.0F);
-        playerSleeveRightSlim.texOffs(40, 32).addBox(-2.0F, -10.0F, -2.0F, 3.0F, 12.0F, 4.0F, 0.0F, false);
+        playerSleeveRightSlim.texOffs(40, 32).addBox(-2.0F, -10.0F, -2.0F, 3.0F, 12.0F, 4.0F, 0.25F, false);
 
         playerSleeveLeftSlim = new ModelRenderer(this);
         playerSleeveLeftSlim.xRot = -1.5708F;

@@ -13,6 +13,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.actions.HamonAction;
+import com.github.standobyte.jojo.advancements.criterion.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
@@ -482,6 +483,9 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                                         receiverHamon.getHamonStrengthPoints() + hamon.getHamonStrengthPoints(), true, false);
                                 receiverHamon.setHamonStatPoints(HamonSkill.HamonStat.CONTROL, 
                                         receiverHamon.getHamonControlPoints() + hamon.getHamonControlPoints(), true, false);
+                                if (closestHamonUser instanceof ServerPlayerEntity) {
+                                    ModCriteriaTriggers.LAST_HAMON.get().trigger((ServerPlayerEntity) closestHamonUser, dead);
+                                }
                                 createHamonSparkParticlesEmitter(closestHamonUser, 1.0F);
                             }
                         }

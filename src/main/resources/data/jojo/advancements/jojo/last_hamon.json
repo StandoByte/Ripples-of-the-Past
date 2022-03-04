@@ -1,0 +1,29 @@
+{
+  "parent": "jojo:jojo/get_hamon",
+  "display": {
+    "icon": {
+      "item": "minecraft:golden_apple"
+    },
+    "title": {
+      "translate": "advancements.jojo.last_hamon.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.last_hamon.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "last_hamon": {
+      "trigger": "jojo:last_hamon",
+      "conditions": {}
+    }
+  },
+  "requirements": [
+    [
+      "last_hamon"
+    ]
+  ]
+}

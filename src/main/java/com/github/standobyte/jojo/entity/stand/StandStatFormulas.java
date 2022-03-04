@@ -50,7 +50,7 @@ public class StandStatFormulas {
     public static final int getLightAttackWindup(double speed, float earlyStart) {
         int ticks = Math.max(5 - MathHelper.log2((int) speed), 1);
         if (earlyStart > 0) {
-            ticks += (int) (lightAttackRecovery(speed) * earlyStart);
+            ticks += (int) (lightAttackRecovery(speed) * earlyStart * 0.5F);
         }
         return ticks;
     }

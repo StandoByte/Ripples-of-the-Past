@@ -17,7 +17,7 @@ import net.minecraft.world.World;
 public class StandEntityLightAttack extends StandEntityAction {
 
     public StandEntityLightAttack(StandEntityAction.Builder builder) {
-        super(builder.standAutoSummonMode(AutoSummonMode.ONE_ARM).staminaCost(20F).standUserSlowDownFactor(1.0F)
+        super(builder.standAutoSummonMode(AutoSummonMode.ONE_ARM).staminaCost(12.5F).standUserSlowDownFactor(1.0F)
                 .defaultStandOffsetFromUser().standOffsetFromUser(-0.75, 0.75)
                 .standTakesCrosshairTarget().standPose(StandPose.LIGHT_ATTACK));
     }
@@ -45,8 +45,8 @@ public class StandEntityLightAttack extends StandEntityAction {
     @Override
     public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
         float earlyStart = 0F;
-        if (standEntity.getCurrentTaskAction() == this && standEntity.getCurrentTaskPhase() == Phase.RECOVERY) {
-            earlyStart = 2F * (0.5F - standEntity.getCurrentTaskCompletion(0));
+        if (standEntity.getCurrentTaskAction() == this && standEntity.getCurrentTaskPhase() == Phase.WINDUP) {
+            earlyStart = 4F / 3F * (0.75F - standEntity.getCurrentTaskCompletion(0));
         }
         int ticks = StandStatFormulas.getLightAttackWindup(standEntity.getAttackSpeed(), earlyStart);
         return ticks;

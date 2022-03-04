@@ -70,8 +70,6 @@ public class TimeStopInstant extends StandAction {
             
             user.teleportTo(blinkPos.x, blinkPos.y, blinkPos.z);
             // FIXME (!) add progress points (depending on the distance)
-            power.addLearningProgressPoints(this, 1F);
-            power.addLearningProgressPoints(this.getBaseVariation(), 1F);
             if (power.isActive()) {
                 IStandManifestation stand = power.getStandManifestation();
                 if (stand instanceof StandEntity) {

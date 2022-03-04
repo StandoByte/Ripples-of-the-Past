@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.advancements.criterion.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -85,6 +86,9 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     
     protected void setType(T type) {
         this.type = type;
+        serverPlayerUser.ifPresent(player -> {
+            ModCriteriaTriggers.GET_POWER.get().trigger(player, getPowerClassification(), type);
+        });
         afterTypeInit(type);
     }
 

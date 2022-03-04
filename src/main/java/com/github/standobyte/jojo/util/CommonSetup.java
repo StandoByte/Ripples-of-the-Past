@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.util;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.advancements.criterion.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapStorage;
@@ -53,9 +54,12 @@ public class CommonSetup {
             CapabilityManager.INSTANCE.register(SaveFileUtilCap.class, new SaveFileUtilCapStorage(), () -> new SaveFileUtilCap());
             
             ArgumentTypes.register("stand", StandArgument.class, new ArgumentSerializer<>(StandArgument::new));
+
+            ModCriteriaTriggers.CriteriaTriggerSupplier.registerAll();
             
             PacketManager.init();
             StandStatsManager.init();
+            
         });
     }
 }

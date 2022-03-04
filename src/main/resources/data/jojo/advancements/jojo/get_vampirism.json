@@ -1,0 +1,32 @@
+{
+  "parent": "jojo:jojo/stone_mask",
+  "display": {
+    "icon": {
+      "item": "jojo:stone_mask"
+    },
+    "title": {
+      "translate": "advancements.jojo.get_vampirism.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.get_vampirism.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "get_jojo:vampirism": {
+      "trigger": "jojo:get_power",
+      "conditions": {
+        "classification": "non_stand",
+        "type": "jojo:vampirism"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "get_jojo:vampirism"
+    ]
+  ]
+}
