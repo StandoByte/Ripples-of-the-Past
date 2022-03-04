@@ -87,7 +87,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     protected void setType(T type) {
         this.type = type;
         serverPlayerUser.ifPresent(player -> {
-            ModCriteriaTriggers.GET_POWER.get().trigger(player, getPowerClassification(), type);
+            ModCriteriaTriggers.GET_POWER.get().trigger(player, this);
         });
         afterTypeInit(type);
     }
