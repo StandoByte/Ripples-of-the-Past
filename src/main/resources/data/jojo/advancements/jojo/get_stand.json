@@ -19,7 +19,9 @@
     "get_stand": {
       "trigger": "jojo:get_power",
       "conditions": {
-        "classification": "stand"
+        "jojopower": {
+          "classification": "stand"
+        }
       }
     }
   },

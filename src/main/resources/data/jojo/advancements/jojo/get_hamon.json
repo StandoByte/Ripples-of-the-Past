@@ -19,8 +19,10 @@
     "get_hamon": {
       "trigger": "jojo:get_power",
       "conditions": {
-        "classification": "non_stand",
-        "type": "jojo:hamon"
+        "jojopower": {
+          "classification": "non_stand",
+          "type": "jojo:hamon"
+        }
       }
     }
   },
