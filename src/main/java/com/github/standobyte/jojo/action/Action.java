@@ -1,7 +1,9 @@
 package com.github.standobyte.jojo.action;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -10,11 +12,13 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.advancements.criterion.ModCriteriaTriggers;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.util.JojoModUtil;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
@@ -26,7 +30,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
 public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<Action<?>> {
-    private static Map<Supplier<? extends Action<?>>, Supplier<? extends Action<?>>> SHIFT_VARIATIONS = new HashMap<>(); 
+    private static Map<Supplier<? extends Action<?>>, Supplier<? extends Action<?>>> SHIFT_VARIATIONS; 
     
     private final int holdDurationToFire;
     private final int holdDurationMax;
@@ -58,7 +62,9 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         this.cancelsVanillaClick = builder.cancelsVanillaClick;
         this.shoutSupplier = builder.shoutSupplier;
         if (builder.shiftVariationOf != null) {
-            SHIFT_VARIATIONS.put(builder.shiftVariationOf, () -> this);
+            for (Supplier<? extends Action<?>> action : builder.shiftVariationOf) {
+                SHIFT_VARIATIONS.put(action, () -> this);
+            }
         }
     }
     
@@ -76,11 +82,13 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
                 baseVariation.shiftVariation = null;
                 baseVariation = null;
             }
-            if (newShiftVariation.baseVariation != null) {
-                newShiftVariation.baseVariation.shiftVariation = null;
-            }
+//            if (newShiftVariation.baseVariation != null) {
+//                newShiftVariation.baseVariation.shiftVariation = null;
+//            }
             this.shiftVariation = newShiftVariation;
-            newShiftVariation.baseVariation = this;
+            if (newShiftVariation.baseVariation == null) {
+                newShiftVariation.baseVariation = this;
+            }
         }
     }
     
@@ -122,10 +130,6 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return ActionConditionResult.POSITIVE;
     }
     
-//    public boolean cancelHandRender(LivingEntity user, Hand hand) {
-//        return !itemChecks.containsKey(hand);
-//    }
-    
     public boolean ignoresPerformerStun() {
         return ignoresPerformerStun;
     }
@@ -158,6 +162,9 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     public void onPerform(World world, LivingEntity user, P power, ActionTarget target) {
+        if (user instanceof ServerPlayerEntity) {
+            ModCriteriaTriggers.ACTION_PERFORM.get().trigger((ServerPlayerEntity) user, this);
+        }
         perform(world, user, power, target);
     }
     
@@ -269,6 +276,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     
     
+    public static void initShiftVariationsMap() {
+        SHIFT_VARIATIONS = new HashMap<>();
+    }
+    
     public static void initShiftVariations() {
         if (SHIFT_VARIATIONS != null) {
             for (Map.Entry<Supplier<? extends Action<?>>, Supplier<? extends Action<?>>> entry : SHIFT_VARIATIONS.entrySet()) {
@@ -321,7 +332,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         private boolean swingHand = false;
         private boolean cancelsVanillaClick = true;
         private Supplier<SoundEvent> shoutSupplier = () -> null;
-        protected Supplier<? extends Action<?>> shiftVariationOf = null;
+        protected List<Supplier<? extends Action<?>>> shiftVariationOf = new ArrayList<>();
         
         public T cooldown(int cooldown) {
             this.cooldown = cooldown;
@@ -401,7 +412,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         }
         
         public T shiftVariationOf(Supplier<? extends Action<?>> action) {
-            this.shiftVariationOf = action;
+            this.shiftVariationOf.add(action);
             return getThis();
         }
         

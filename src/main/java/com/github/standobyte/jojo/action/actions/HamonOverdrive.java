@@ -76,7 +76,7 @@ public class HamonOverdrive extends HamonAction {
                 float knockback = 0;
                 
                 if (metalSilverOverdrive(hamon, user.getMainHandItem())) {
-                    damage *= 0.5F;
+                    damage *= 0.75F;
                 }
                 else if (turquoiseBlueOverdrive(hamon, user, targetEntity)) {
                     damage *= 2F;

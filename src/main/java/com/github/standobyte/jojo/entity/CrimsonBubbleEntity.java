@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.entity;
 import java.util.List;
 import java.util.Optional;
 
+import com.github.standobyte.jojo.advancements.criterion.ModCriteriaTriggers;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -19,6 +20,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.IPacket;
@@ -119,6 +121,9 @@ public class CrimsonBubbleEntity extends Entity {
             HamonPowerType.createHamonSparkParticlesEmitter(entity, 2.0F);
             if (hamon.getTechnique() == Technique.JOSEPH) {
                 JojoModUtil.sayVoiceLine(entity, ModSounds.JOSEPH_CRIMSON_BUBBLE_REACTION.get());
+            }
+            if (entity instanceof ServerPlayerEntity) {
+                ModCriteriaTriggers.LAST_HAMON.get().trigger((ServerPlayerEntity) entity, this);
             }
             hamonStrengthPoints = 0;
             hamonControlPoints = 0;

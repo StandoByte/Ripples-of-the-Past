@@ -1,0 +1,46 @@
+{
+  "parent": "jojo:jojo/meteorite",
+  "display": {
+    "icon": {
+      "item": "jojo:stand_arrow"
+    },
+    "title": {
+      "translate": "advancements.jojo.stand_arrow.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.stand_arrow.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "stand_arrow_normal": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "jojo:stand_arrow"
+          }
+        ]
+      }
+    },
+    "stand_arrow_beetle": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "jojo:stand_arrow_beetle"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "stand_arrow_normal",
+      "stand_arrow_beetle"
+    ]
+  ]
+}

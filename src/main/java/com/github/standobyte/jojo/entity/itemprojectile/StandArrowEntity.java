@@ -52,7 +52,9 @@ public class StandArrowEntity extends AbstractArrowEntity {
 
     @Override
     protected void doPostHurtEffects(LivingEntity target) {
-        StandArrowItem.onPiercedByArrow(target, arrowItem, level);
+        if (!level.isClientSide() && StandArrowItem.onPiercedByArrow(target, arrowItem, level)) {
+            
+        }
     }
 
     @Override

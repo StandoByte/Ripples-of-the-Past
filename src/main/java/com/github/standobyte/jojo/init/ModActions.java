@@ -186,11 +186,12 @@ public class ModActions {
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_PUNCH = ACTIONS.register("star_platinum_punch", 
             () -> new StandEntityLightAttack(new StandEntityAction.Builder().standSound(ModSounds.STAR_PLATINUM_ORA)));
     
-    public static final RegistryObject<StandEntityAction> STAR_PLATINUM_HEAVY_PUNCH = ACTIONS.register("star_platinum_heavy_punch", 
-            () -> new StandEntityHeavyAttack(new StandEntityAction.Builder().standSound(ModSounds.STAR_PLATINUM_ORA_LONG).shiftVariationOf(STAR_PLATINUM_PUNCH)));
-    
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_BARRAGE = ACTIONS.register("star_platinum_barrage", 
             () -> new StandEntityMeleeBarrage(new StandEntityAction.Builder().standSound(ModSounds.STAR_PLATINUM_ORA_ORA_ORA)));
+    
+    public static final RegistryObject<StandEntityAction> STAR_PLATINUM_HEAVY_PUNCH = ACTIONS.register("star_platinum_heavy_punch", 
+            () -> new StandEntityHeavyAttack(new StandEntityAction.Builder().standSound(ModSounds.STAR_PLATINUM_ORA_LONG)
+                    .shiftVariationOf(STAR_PLATINUM_PUNCH).shiftVariationOf(STAR_PLATINUM_BARRAGE)));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_STAR_FINGER = ACTIONS.register("star_platinum_star_finger", 
             () -> new StarPlatinumStarFinger(new StandEntityAction.Builder().standPerformDuration(20)
@@ -218,11 +219,12 @@ public class ModActions {
     public static final RegistryObject<StandEntityAction> THE_WORLD_PUNCH = ACTIONS.register("the_world_punch", 
             () -> new StandEntityLightAttack(new StandEntityAction.Builder().standSound(ModSounds.THE_WORLD_MUDA)));
     
-    public static final RegistryObject<StandEntityAction> THE_WORLD_HEAVY_PUNCH = ACTIONS.register("the_world_heavy_punch", 
-            () -> new StandEntityHeavyAttack(new StandEntityAction.Builder().shout(ModSounds.DIO_DIE).shiftVariationOf(THE_WORLD_PUNCH)));
-    
     public static final RegistryObject<StandEntityAction> THE_WORLD_BARRAGE = ACTIONS.register("the_world_barrage", 
             () -> new StandEntityMeleeBarrage(new StandEntityAction.Builder().standSound(ModSounds.THE_WORLD_MUDA_MUDA_MUDA)));
+    
+    public static final RegistryObject<StandEntityAction> THE_WORLD_HEAVY_PUNCH = ACTIONS.register("the_world_heavy_punch", 
+            () -> new StandEntityHeavyAttack(new StandEntityAction.Builder().shout(ModSounds.DIO_DIE)
+                    .shiftVariationOf(THE_WORLD_PUNCH).shiftVariationOf(THE_WORLD_BARRAGE)));
     
     public static final RegistryObject<StandEntityAction> THE_WORLD_BLOCK = ACTIONS.register("the_world_block", 
             () -> new StandEntityBlock());
@@ -273,11 +275,11 @@ public class ModActions {
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_ATTACK = ACTIONS.register("silver_chariot_attack", 
             () -> new StandEntityLightAttack(new StandEntityAction.Builder()));
     
-    public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_HEAVY_ATTACK = ACTIONS.register("silver_chariot_heavy_attack", 
-            () -> new StandEntityHeavyAttack(new StandEntityAction.Builder().shiftVariationOf(SILVER_CHARIOT_ATTACK)));
-    
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_BARRAGE = ACTIONS.register("silver_chariot_barrage", 
             () -> new SilverChariotMeleeBarrage(new StandEntityAction.Builder().shout(ModSounds.POLNAREFF_HORA_HORA_HORA)));
+    
+    public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_HEAVY_ATTACK = ACTIONS.register("silver_chariot_heavy_attack", 
+            () -> new StandEntityHeavyAttack(new StandEntityAction.Builder().shiftVariationOf(SILVER_CHARIOT_ATTACK).shiftVariationOf(SILVER_CHARIOT_BARRAGE)));
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_RAPIER_LAUNCH = ACTIONS.register("silver_chariot_rapier_launch", 
             () -> new SilverChariotRapierLaunch(new StandEntityAction.Builder().cooldown(100).resolveLevelToUnlock(1).defaultStandOffsetFromUser()
@@ -306,12 +308,12 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_CROSSFIRE_HURRICANE = ACTIONS.register("magicians_red_crossfire_hurricane", 
             () -> new MagiciansRedCrossfireHurricane(new StandEntityAction.Builder()
-                    .resolveLevelToUnlock(4).isTrained().holdToFire(40, false).standPose(StandPose.RANGED_ATTACK)
+                    .resolveLevelToUnlock(4).isTrained().holdToFire(30, false).standPose(StandPose.RANGED_ATTACK)
                     .shout(ModSounds.AVDOL_CROSSFIRE_HURRICANE).standSound(ModSounds.MAGICIANS_RED_FIRE_BLAST)));
     
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_CROSSFIRE_HURRICANE_SPECIAL = ACTIONS.register("magicians_red_ch_special", 
             () -> new MagiciansRedCrossfireHurricane(new StandEntityAction.Builder().resolveLevelToUnlock(-1)
-                    .holdToFire(60, false).standPose(StandPose.RANGED_ATTACK)
+                    .holdToFire(40, false).standPose(StandPose.RANGED_ATTACK)
                     .shout(ModSounds.AVDOL_CROSSFIRE_HURRICANE_SPECIAL).standSound(ModSounds.MAGICIANS_RED_FIRE_BLAST)
                     .shiftVariationOf(MAGICIANS_RED_CROSSFIRE_HURRICANE)));
     
@@ -325,7 +327,12 @@ public class ModActions {
     public static final RegistryObject<StandAction> MAGICIANS_RED_DETECTOR = ACTIONS.register("magicians_red_detector", 
             () -> new MagiciansRedDetector(new StandAction.Builder().resolveLevelToUnlock(3).autoSummonStand()));
     
-    
+
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void beforeActionsInit(RegistryEvent.Register<Action<?>> event) {
+        Action.initShiftVariationsMap();
+    }
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void afterActionsInit(RegistryEvent.Register<Action<?>> event) {
