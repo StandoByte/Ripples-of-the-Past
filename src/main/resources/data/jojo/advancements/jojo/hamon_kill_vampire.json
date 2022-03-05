@@ -11,7 +11,7 @@
     "description": {
       "translate": "advancements.jojo.hamon_kill_vampire.description"
     },
-    "frame": "task",
+    "frame": "goal",
     "show_toast": true,
     "announce_to_chat": true,
     "hidden": false

@@ -2,7 +2,8 @@
   "parent": "jojo:jojo/stone_mask",
   "display": {
     "icon": {
-      "item": "jojo:stone_mask"
+      "item": "jojo:stone_mask",
+      "nbt": "{Activated:1}"
     },
     "title": {
       "translate": "advancements.jojo.get_vampirism.title"

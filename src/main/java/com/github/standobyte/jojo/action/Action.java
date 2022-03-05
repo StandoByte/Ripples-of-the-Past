@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
-import com.github.standobyte.jojo.advancements.criterion.ModCriteriaTriggers;
+import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.util.JojoModUtil;

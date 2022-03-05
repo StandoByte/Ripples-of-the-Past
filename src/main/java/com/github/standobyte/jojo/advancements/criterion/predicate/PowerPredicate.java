@@ -24,15 +24,16 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.registries.ForgeRegistry;
 
 public class PowerPredicate {
-    public static final PowerPredicate ANY = new PowerPredicate(null, null, null);
+    public static final PowerPredicate TRUE = new PowerPredicate(null, null, null);
+    public static final PowerPredicate ANY_POWER = new PowerPredicate(null, null, null);
     @Nullable
     private final PowerClassification classification;
     @Nullable
     private final IPowerType<?, ?> type;
     @Nullable
     private final MinMaxBounds.IntBound standTier;
-
-    public PowerPredicate(@Nullable PowerClassification classification, @Nullable IPowerType<?, ?> type, 
+    
+    private PowerPredicate(@Nullable PowerClassification classification, @Nullable IPowerType<?, ?> type, 
             @Nullable MinMaxBounds.IntBound standTier) {
         this.classification = classification;
         this.type = type;
@@ -45,7 +46,7 @@ public class PowerPredicate {
 
     public boolean matches(IPower<?, ?> power) {
         if (power == null) {
-            return false;
+            return this == TRUE;
         }
         int standTier = -1;
         if (power.getPowerClassification() == PowerClassification.STAND && power.hasPower()) {
@@ -58,7 +59,7 @@ public class PowerPredicate {
         if (!hasPower) {
             return false;
         }
-        if (this == ANY) {
+        if (this == ANY_POWER) {
             return true;
         }
         
@@ -71,10 +72,10 @@ public class PowerPredicate {
     
     public static PowerPredicate fromJson(@Nullable JsonElement json) {
         if (json == null) {
-            return null;
+            return TRUE;
         }
         if (json.isJsonNull()) {
-            return ANY;
+            return ANY_POWER;
         }
         else {
             JsonObject jsonObject = JSONUtils.convertToJsonObject(json, "JoJo power");
@@ -119,22 +120,30 @@ public class PowerPredicate {
         return null;
     }
 
-    public JsonElement serializeToJson() {
-        if (this == ANY) {
-            return JsonNull.INSTANCE;
+    public void serializeToJson(JsonObject jsonobject, String key) {
+        if (this == TRUE) {
+            return;
         } 
         else {
-            JsonObject jsonObject = new JsonObject();
-            if (classification != null) {
-                jsonObject.addProperty("classification", classification.name().toLowerCase());
-                if (type != null) {
-                    jsonObject.addProperty("type", type.getRegistryName().toString());
-                }
-                if (classification == PowerClassification.STAND && standTier != null) {
-                    jsonObject.add("stand_tier", standTier.serializeToJson());
-                }
+            JsonElement serialized;
+            if (this == ANY_POWER) {
+                serialized = JsonNull.INSTANCE;
             }
-            return jsonObject;
+            else {
+                JsonObject jsonObject = new JsonObject();
+                if (classification != null) {
+                    jsonObject.addProperty("classification", classification.name().toLowerCase());
+                    if (type != null) {
+                        jsonObject.addProperty("type", type.getRegistryName().toString());
+                    }
+                    if (classification == PowerClassification.STAND && standTier != null) {
+                        jsonObject.add("stand_tier", standTier.serializeToJson());
+                    }
+                }
+                serialized = jsonObject;
+            }
+            
+            jsonobject.add(key, serialized);
         }
     }
 }

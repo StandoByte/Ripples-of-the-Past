@@ -2,7 +2,8 @@
   "parent": "jojo:jojo/get_vampirism",
   "display": {
     "icon": {
-      "item": "jojo:stone_mask"
+      "item": "jojo:stone_mask",
+      "nbt": "{Activated:1}"
     },
     "title": {
       "translate": "advancements.jojo.vampire_kill_hamon.title"
@@ -10,7 +11,7 @@
     "description": {
       "translate": "advancements.jojo.vampire_kill_hamon.description"
     },
-    "frame": "task",
+    "frame": "goal",
     "show_toast": true,
     "announce_to_chat": true,
     "hidden": false

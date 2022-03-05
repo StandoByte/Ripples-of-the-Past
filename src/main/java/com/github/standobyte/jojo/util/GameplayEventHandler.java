@@ -9,7 +9,7 @@ import java.util.function.Predicate;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.actions.VampirismFreeze;
-import com.github.standobyte.jojo.advancements.criterion.ModCriteriaTriggers;
+import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.block.StoneMaskBlock;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;

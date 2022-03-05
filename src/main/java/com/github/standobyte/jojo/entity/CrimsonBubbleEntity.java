@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.entity;
 import java.util.List;
 import java.util.Optional;
 
-import com.github.standobyte.jojo.advancements.criterion.ModCriteriaTriggers;
+import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModSounds;

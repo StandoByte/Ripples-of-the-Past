@@ -2,7 +2,7 @@
   "parent": "jojo:jojo/get_hamon",
   "display": {
     "icon": {
-      "item": "minecraft:golden_apple"
+      "item": "jojo:breath_control_mask"
     },
     "title": {
       "translate": "advancements.jojo.last_hamon.title"
