@@ -1,5 +1,10 @@
 package com.github.standobyte.jojo.advancements.criterion;
 
+import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.advancements.criterion.predicate.PowerPredicate;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.google.gson.JsonObject;
 
 import net.minecraft.advancements.criterion.AbstractCriterionTrigger;
@@ -7,6 +12,7 @@ import net.minecraft.advancements.criterion.CriterionInstance;
 import net.minecraft.advancements.criterion.DamageSourcePredicate;
 import net.minecraft.advancements.criterion.EntityPredicate;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.loot.ConditionArrayParser;
 import net.minecraft.loot.ConditionArraySerializer;
@@ -16,9 +22,11 @@ import net.minecraft.util.ResourceLocation;
 
 public class KilledPowerUserTrigger extends AbstractCriterionTrigger<KilledPowerUserTrigger.Instance> {
     private final ResourceLocation id;
+    private final boolean isPlayerKilled;
 
-    public KilledPowerUserTrigger(ResourceLocation id) {
+    public KilledPowerUserTrigger(ResourceLocation id, boolean isPlayerKilled) {
         this.id = id;
+        this.isPlayerKilled = isPlayerKilled;
     }
 
     @Override
@@ -28,8 +36,11 @@ public class KilledPowerUserTrigger extends AbstractCriterionTrigger<KilledPower
 
     public void trigger(ServerPlayerEntity player, Entity entity, DamageSource damageSource) {
         LootContext lootCtx = EntityPredicate.createContext(player, entity);
+        LivingEntity livingEntity = entity instanceof LivingEntity ? (LivingEntity) entity : null;
         trigger(player, (criterion) -> {
-            return criterion.matches(player, lootCtx, damageSource);
+            return criterion.matches(player, lootCtx, damageSource, 
+                    isPlayerKilled ? livingEntity : player, 
+                    isPlayerKilled ? player : livingEntity);
         });
     }
 
@@ -39,22 +50,52 @@ public class KilledPowerUserTrigger extends AbstractCriterionTrigger<KilledPower
                 this.id, 
                 playerPredicate, 
                 EntityPredicate.AndPredicate.fromJson(json, "entity", conditionArrayParser), 
-                DamageSourcePredicate.fromJson(json.get("killing_blow")));
+                DamageSourcePredicate.fromJson(json.get("killing_blow")), 
+                PowerPredicate.fromJson(json.get("power")),
+                PowerPredicate.fromJson(json.get("killed_power")));
     }
 
     public static class Instance extends CriterionInstance {
         private final EntityPredicate.AndPredicate entityPredicate;
         private final DamageSourcePredicate killingBlow;
+        private final PowerPredicate powerPredicate;
+        private final PowerPredicate killedPowerPredicate;
 
         public Instance(ResourceLocation id, EntityPredicate.AndPredicate player, 
-                EntityPredicate.AndPredicate entityPredicate, DamageSourcePredicate killingBlow) {
+                EntityPredicate.AndPredicate entityPredicate, DamageSourcePredicate killingBlow, 
+                PowerPredicate powerPredicate, PowerPredicate killedPowerPredicate) {
             super(id, player);
             this.entityPredicate = entityPredicate;
             this.killingBlow = killingBlow;
+            this.powerPredicate = powerPredicate;
+            this.killedPowerPredicate = killedPowerPredicate;
         }
 
-        public boolean matches(ServerPlayerEntity player, LootContext lootCtx, DamageSource damageSource) {
-            return !this.killingBlow.matches(player, damageSource) ? false : this.entityPredicate.matches(lootCtx);
+        public boolean matches(ServerPlayerEntity player, LootContext lootCtx, DamageSource damageSource, 
+                LivingEntity entity, LivingEntity killed) {
+            if (!this.killingBlow.matches(player, damageSource) || !this.entityPredicate.matches(lootCtx)) {
+                return false;
+            }
+            for (PowerClassification power : PowerClassification.values()) {
+                for (PowerClassification powerKilled : PowerClassification.values()) {
+                    if (this.powerPredicate.matches(IPower.getPowerOptional(entity, power))
+                            && this.killedPowerPredicate.matches(IPower.getPowerOptional(killed, powerKilled))) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        
+        // FIXME (!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!) remove
+        private LivingEntity standUser(LivingEntity mayBeStand) {
+            if (mayBeStand instanceof StandEntity) {
+                StandEntity stand = (StandEntity) mayBeStand;
+                if (stand.getUser() != null) {
+                    return stand.getUser();
+                }
+            }
+            return mayBeStand;
         }
 
         @Override
@@ -62,6 +103,8 @@ public class KilledPowerUserTrigger extends AbstractCriterionTrigger<KilledPower
             JsonObject jsonobject = super.serializeToJson(serializer);
             jsonobject.add("entity", this.entityPredicate.toJson(serializer));
             jsonobject.add("killing_blow", this.killingBlow.serializeToJson());
+            jsonobject.add("power", this.powerPredicate.serializeToJson());
+            jsonobject.add("killed_power", this.killedPowerPredicate.serializeToJson());
             return jsonobject;
         }
     }

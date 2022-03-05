@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.actions.VampirismFreeze;
+import com.github.standobyte.jojo.advancements.criterion.ModCriteriaTriggers;
 import com.github.standobyte.jojo.block.StoneMaskBlock;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
@@ -16,6 +17,7 @@ import com.github.standobyte.jojo.capability.entity.ProjectileHamonChargeCapProv
 import com.github.standobyte.jojo.command.TestBuildCommand;
 import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRCrossfireHurricaneEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
@@ -548,20 +550,34 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingDeath(LivingDeathEvent event) {
         if (!event.getEntity().level.isClientSide()) {
-            HamonPowerType.hamonPerksOnDeath(event);
-            summonSoul(event);
+            LivingEntity dead = event.getEntityLiving();
+            DamageSource dmgSource = event.getSource();
+            HamonPowerType.hamonPerksOnDeath(dead);
+            summonSoul(dead, dmgSource);
+            Entity killer = dmgSource.getEntity();
+            if (killer instanceof StandEntity) {
+                StandEntity killerStand = (StandEntity) killer;
+                if (killerStand.getUser() != null) {
+                    killer = killerStand.getUser();
+                }
+            }
+            if (killer instanceof ServerPlayerEntity) {
+                ModCriteriaTriggers.PLAYER_KILLED_ENTITY.get().trigger((ServerPlayerEntity) killer, dead, dmgSource);
+            }
+            if (dead instanceof ServerPlayerEntity) {
+                ModCriteriaTriggers.ENTITY_KILLED_PLAYER.get().trigger((ServerPlayerEntity) dead, killer, dmgSource);
+            }
         }
     }
     
-    private static void summonSoul(LivingDeathEvent event) {
-        LivingEntity entity = event.getEntityLiving();
+    private static void summonSoul(LivingEntity entity, DamageSource dmgSource) {
         if (JojoModUtil.isUndead(entity)) {
             return;
         }
         int ticks = IStandPower.getStandPowerOptional(entity)
                 .map(power -> getSoulAscensionTicks(entity, power)).orElse(0);
         
-        if (event.getSource() == TestBuildCommand.SOUL_TEST) ticks = 300;
+        if (dmgSource == TestBuildCommand.SOUL_TEST) ticks = 300;
         
         if (ticks > 0) {
             SoulEntity soulEntity = new SoulEntity(entity.level, entity, ticks);
