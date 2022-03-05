@@ -20,6 +20,10 @@ public class ModCriteriaTriggers {
             new CriteriaTriggerSupplier<>(() -> new GetPowerTrigger(new ResourceLocation(JojoMod.MOD_ID, "get_power")));
     public static final CriteriaTriggerSupplier<LastHamonTrigger> LAST_HAMON = 
             new CriteriaTriggerSupplier<>(() -> new LastHamonTrigger(new ResourceLocation(JojoMod.MOD_ID, "last_hamon")));
+    public static final CriteriaTriggerSupplier<KilledPowerUserTrigger> PLAYER_KILLED_ENTITY = 
+            new CriteriaTriggerSupplier<>(() -> new KilledPowerUserTrigger(new ResourceLocation(JojoMod.MOD_ID, "player_killed_entity"), false));
+    public static final CriteriaTriggerSupplier<KilledPowerUserTrigger> ENTITY_KILLED_PLAYER = 
+            new CriteriaTriggerSupplier<>(() -> new KilledPowerUserTrigger(new ResourceLocation(JojoMod.MOD_ID, "entity_killed_player"), true));
     
     
     

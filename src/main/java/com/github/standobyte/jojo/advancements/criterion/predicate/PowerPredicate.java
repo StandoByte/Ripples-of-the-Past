@@ -20,6 +20,7 @@ import com.google.gson.JsonSyntaxException;
 import net.minecraft.advancements.criterion.MinMaxBounds;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.registries.ForgeRegistry;
 
 public class PowerPredicate {
@@ -31,10 +32,15 @@ public class PowerPredicate {
     @Nullable
     private final MinMaxBounds.IntBound standTier;
 
-    public PowerPredicate(@Nullable PowerClassification classification, @Nullable IPowerType<?, ?> type, @Nullable MinMaxBounds.IntBound standTier) {
+    public PowerPredicate(@Nullable PowerClassification classification, @Nullable IPowerType<?, ?> type, 
+            @Nullable MinMaxBounds.IntBound standTier) {
         this.classification = classification;
         this.type = type;
         this.standTier = standTier;
+    }
+    
+    public boolean matches(LazyOptional<? extends IPower<?, ?>> powerOptional) {
+        return matches(powerOptional.orElse(null));
     }
 
     public boolean matches(IPower<?, ?> power) {

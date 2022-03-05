@@ -77,7 +77,6 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
 
 public class HamonPowerType extends NonStandPowerType<HamonData> {
 
@@ -440,8 +439,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
         }
     }
 
-    public static void hamonPerksOnDeath(LivingDeathEvent event) {
-        LivingEntity dead = event.getEntityLiving();
+    public static void hamonPerksOnDeath(LivingEntity dead) {
         if (JojoModConfig.COMMON.keepNonStandOnDeath.get()) return;
         INonStandPower.getNonStandPowerOptional(dead).ifPresent(power -> {
             power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
