@@ -47,30 +47,37 @@ public class PowerPredicate {
         if (power == null) {
             return false;
         }
-        int standTier = 0;
-        if (power.getPowerClassification() == PowerClassification.STAND) {
-            standTier = ((IStandPower) power).getTier();
+        int standTier = -1;
+        if (power.getPowerClassification() == PowerClassification.STAND && power.hasPower()) {
+            standTier = ((IStandPower) power).getType().getTier();
         }
-        return matches(power.getPowerClassification(), power.getType(), standTier);
+        return matches(power.hasPower(), power.getPowerClassification(), power.getType(), standTier);
     }
 
-    public boolean matches(PowerClassification classification, IPowerType<?, ?> type, int standTier) {
+    public boolean matches(boolean hasPower, PowerClassification classification, IPowerType<?, ?> type, int standTier) {
+        if (!hasPower) {
+            return false;
+        }
         if (this == ANY) {
             return true;
         }
-        else if (this.classification != null && this.classification != classification
+        
+        return !(this.classification != null && this.classification != classification
                 || this.type != null && this.type != type
-                || this.standTier != null && !this.standTier.matches(standTier)) {
-            return false;
-        }
-        return true;
+                || this.standTier != null && !this.standTier.matches(standTier));
     }
 
     
     
     public static PowerPredicate fromJson(@Nullable JsonElement json) {
-        if (json != null && !json.isJsonNull()) {
-            JsonObject jsonObject = JSONUtils.convertToJsonObject(json, "power");
+        if (json == null) {
+            return null;
+        }
+        if (json.isJsonNull()) {
+            return ANY;
+        }
+        else {
+            JsonObject jsonObject = JSONUtils.convertToJsonObject(json, "JoJo power");
             
             PowerClassification classification = jsonObject.has("classification") ? 
                     Enum.valueOf(PowerClassification.class, JSONUtils.getAsString(jsonObject, "classification").toUpperCase())
@@ -82,7 +89,6 @@ public class PowerPredicate {
             
             return new PowerPredicate(classification, type, standTier);
         }
-        return ANY;
     }
 
     @Nullable
