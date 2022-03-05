@@ -1,10 +1,16 @@
-package com.github.standobyte.jojo.advancements.criterion;
+package com.github.standobyte.jojo.advancements;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.advancements.criterion.ActionPerformTrigger;
+import com.github.standobyte.jojo.advancements.criterion.GetPowerTrigger;
+import com.github.standobyte.jojo.advancements.criterion.HamonStatsTrigger;
+import com.github.standobyte.jojo.advancements.criterion.KilledPowerUserTrigger;
+import com.github.standobyte.jojo.advancements.criterion.LastHamonTrigger;
+import com.github.standobyte.jojo.advancements.criterion.StandArrowHitTrigger;
 
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.criterion.AbstractCriterionTrigger;
@@ -20,10 +26,14 @@ public class ModCriteriaTriggers {
             new CriteriaTriggerSupplier<>(() -> new GetPowerTrigger(new ResourceLocation(JojoMod.MOD_ID, "get_power")));
     public static final CriteriaTriggerSupplier<LastHamonTrigger> LAST_HAMON = 
             new CriteriaTriggerSupplier<>(() -> new LastHamonTrigger(new ResourceLocation(JojoMod.MOD_ID, "last_hamon")));
+    public static final CriteriaTriggerSupplier<HamonStatsTrigger> HAMON_STATS = 
+            new CriteriaTriggerSupplier<>(() -> new HamonStatsTrigger(new ResourceLocation(JojoMod.MOD_ID, "hamon_stats")));
     public static final CriteriaTriggerSupplier<KilledPowerUserTrigger> PLAYER_KILLED_ENTITY = 
             new CriteriaTriggerSupplier<>(() -> new KilledPowerUserTrigger(new ResourceLocation(JojoMod.MOD_ID, "player_killed_entity"), false));
     public static final CriteriaTriggerSupplier<KilledPowerUserTrigger> ENTITY_KILLED_PLAYER = 
             new CriteriaTriggerSupplier<>(() -> new KilledPowerUserTrigger(new ResourceLocation(JojoMod.MOD_ID, "entity_killed_player"), true));
+    public static final CriteriaTriggerSupplier<StandArrowHitTrigger> STAND_ARROW_HIT = 
+            new CriteriaTriggerSupplier<>(() -> new StandArrowHitTrigger(new ResourceLocation(JojoMod.MOD_ID, "stand_arrow_hit")));
     
     
     

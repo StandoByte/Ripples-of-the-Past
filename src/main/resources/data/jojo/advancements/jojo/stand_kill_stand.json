@@ -10,7 +10,7 @@
     "description": {
       "translate": "advancements.jojo.stand_kill_stand.description"
     },
-    "frame": "task",
+    "frame": "goal",
     "show_toast": true,
     "announce_to_chat": true,
     "hidden": false

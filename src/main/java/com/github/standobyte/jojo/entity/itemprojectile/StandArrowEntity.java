@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.entity.itemprojectile;
 
 import java.util.Arrays;
 
+import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.item.StandArrowItem;
@@ -52,8 +53,11 @@ public class StandArrowEntity extends AbstractArrowEntity {
 
     @Override
     protected void doPostHurtEffects(LivingEntity target) {
-        if (!level.isClientSide() && StandArrowItem.onPiercedByArrow(target, arrowItem, level)) {
-            
+        if (!level.isClientSide()) {
+            boolean gaveStand = StandArrowItem.onPiercedByArrow(target, arrowItem, level);
+            if (getOwner() instanceof ServerPlayerEntity) {
+                ModCriteriaTriggers.STAND_ARROW_HIT.get().trigger((ServerPlayerEntity) getOwner(), this, target, gaveStand);
+            }
         }
     }
 

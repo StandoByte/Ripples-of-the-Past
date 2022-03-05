@@ -13,6 +13,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModItems;
@@ -135,6 +136,7 @@ public class HamonData extends TypeSpecificData {
         if (oldPoints != newPoints) {
             serverPlayer.ifPresent(player -> {
                 PacketManager.sendToClientsTrackingAndSelf(new TrSyncHamonStatsPacket(player.getId(), true, stat, newPoints), player);
+                ModCriteriaTriggers.HAMON_STATS.get().trigger(player, hamonStrengthLevel, hamonControlLevel, breathingTechniqueLevel);
             });
             if (oldLevel != getStatLevel(stat)) {
                 switch (stat) {
@@ -257,6 +259,7 @@ public class HamonData extends TypeSpecificData {
             recalcHamonDamage();
             serverPlayer.ifPresent(player -> {
                 PacketManager.sendToClientsTrackingAndSelf(new TrSyncHamonStatsPacket(player.getId(), true, getBreathingLevel()), player);
+                ModCriteriaTriggers.HAMON_STATS.get().trigger(player, hamonStrengthLevel, hamonControlLevel, breathingTechniqueLevel);
             });
         }
         giveBreathingTechniqueBuffs(power.getUser());
@@ -613,6 +616,9 @@ public class HamonData extends TypeSpecificData {
         hamonControlPoints = nbt.getInt("ControlPoints");
         hamonControlLevel = levelFromPoints(hamonControlPoints);
         breathingTechniqueLevel = nbt.getFloat("BreathingTechnique");
+        serverPlayer.ifPresent(player -> {
+            ModCriteriaTriggers.HAMON_STATS.get().trigger(player, hamonStrengthLevel, hamonControlLevel, breathingTechniqueLevel);
+        });
         recalcHamonDamage();
         fillSkillsFromNbt(nbt.getCompound("Skills"));
         CompoundNBT exercises = nbt.getCompound("Exercises");

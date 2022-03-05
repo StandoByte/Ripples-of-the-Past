@@ -64,6 +64,7 @@ import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.item.ClackersItem;
 import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
+import com.github.standobyte.jojo.item.StoneMaskItem;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.CloudParticle;
@@ -152,6 +153,9 @@ public class ClientSetup {
 
             ItemModelsProperties.register(ModItems.KNIFE.get(), new ResourceLocation(JojoMod.MOD_ID, "count"), (itemStack, clientWorld, livingEntity) -> {
                 return livingEntity != null ? itemStack.getCount() : 1;
+            });
+            ItemModelsProperties.register(ModItems.STONE_MASK.get(), new ResourceLocation(JojoMod.MOD_ID, "stone_mask_activated"), (itemStack, clientWorld, livingEntity) -> {
+                return itemStack.getTag().getByte(StoneMaskItem.NBT_ACTIVATION_KEY) > 0 ? 1 : 0;
             });
             ItemModelsProperties.register(ModItems.CLACKERS.get(), new ResourceLocation(JojoMod.MOD_ID, "clackers_spin"), (itemStack, clientWorld, livingEntity) -> {
                 if (livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack) {

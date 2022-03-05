@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.util;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.advancements.criterion.ModCriteriaTriggers;
+import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapStorage;

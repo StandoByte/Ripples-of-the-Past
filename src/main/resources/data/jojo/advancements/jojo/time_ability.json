@@ -19,25 +19,33 @@
     "sp_ts": {
       "trigger": "jojo:action_perform",
       "conditions": {
-        "action": "jojo:star_platinum_time_stop"
+        "action": {
+          "name": "jojo:star_platinum_time_stop"
+        }
       }
     },
     "sp_ts_blink": {
       "trigger": "jojo:action_perform",
       "conditions": {
-        "action": "jojo:star_platinum_ts_blink"
+        "action": {
+          "name": "jojo:star_platinum_ts_blink"
+        }
       }
     },
     "tw_ts": {
       "trigger": "jojo:action_perform",
       "conditions": {
-        "action": "jojo:the_world_time_stop"
+        "action": {
+          "name": "jojo:the_world_time_stop"
+        }
       }
     },
     "tw_ts_blink": {
       "trigger": "jojo:action_perform",
       "conditions": {
-        "action": "jojo:the_world_ts_blink"
+        "action": {
+          "name": "jojo:the_world_ts_blink"
+        }
       }
     }
   },

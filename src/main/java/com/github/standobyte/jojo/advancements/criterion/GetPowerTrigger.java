@@ -45,7 +45,7 @@ public class GetPowerTrigger extends AbstractCriterionTrigger<GetPowerTrigger.In
         @Override
         public JsonObject serializeToJson(ConditionArraySerializer serializer) {
             JsonObject jsonobject = super.serializeToJson(serializer);
-            jsonobject.add("jojopower", powerPredicate.serializeToJson());
+            powerPredicate.serializeToJson(jsonobject, "jojopower");
             return jsonobject;
         }
 
