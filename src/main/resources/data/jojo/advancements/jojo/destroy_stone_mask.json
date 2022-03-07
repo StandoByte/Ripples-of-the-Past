@@ -1,0 +1,35 @@
+{
+  "parent": "jojo:jojo/root",
+  "display": {
+    "icon": {
+      "item": "jojo:sledgehammer"
+    },
+    "title": {
+      "translate": "advancements.jojo.destroy_stone_mask.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.destroy_stone_mask.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "crafting_table": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "minecraft:crafting_table"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "crafting_table"
+    ]
+  ]
+}

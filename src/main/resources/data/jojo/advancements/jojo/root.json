@@ -1,7 +1,8 @@
 {
   "display": {
     "icon": {
-      "item": "minecraft:grass_block"
+      "item": "jojo:meteoric_scrap",
+      "nbt": "{Icon:1}"
     },
     "title": {
       "translate": "advancements.jojo.root.title"
@@ -16,20 +17,15 @@
     "background": "jojo:textures/gui/advancements/jojo.png"
   },
   "criteria": {
-    "crafting_table": {
-      "trigger": "minecraft:inventory_changed",
+    "do_nothing": {
+      "trigger": "minecraft:tick",
       "conditions": {
-        "items": [
-          {
-            "item": "minecraft:crafting_table"
-          }
-        ]
       }
     }
   },
   "requirements": [
     [
-      "crafting_table"
+      "do_nothing"
     ]
   ]
 }

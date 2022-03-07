@@ -2,7 +2,8 @@
   "parent": "jojo:jojo/get_stand",
   "display": {
     "icon": {
-      "item": "jojo:stand_arrow"
+      "item": "jojo:meteoric_scrap",
+      "nbt": "{Icon:6}"
     },
     "title": {
       "translate": "advancements.jojo.resolve.title"

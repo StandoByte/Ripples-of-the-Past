@@ -102,7 +102,7 @@ public class SpaceRipperStingyEyesEntity extends OwnerBoundProjectileEntity {
         if (isBoundToOwner()) {
             return 50;
         }
-        return MathHelper.floor(getLength() / (float) movementSpeed() * 2F) + 20;
+        return MathHelper.floor(getLength() / (float) movementSpeed() * 10F) + 20;
     }
     
     @Override

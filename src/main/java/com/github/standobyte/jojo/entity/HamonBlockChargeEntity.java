@@ -62,7 +62,7 @@ public class HamonBlockChargeEntity extends Entity {
                 return;
             }
             Vector3d pos = Vector3d.atCenterOf(blockPos);
-            hamonCharge.tick(null, level, getBoundingBox().inflate(0.1D));
+            hamonCharge.tick(null, blockPos, level, getBoundingBox().inflate(0.1D));
             if (tickCount == 60) {
                 Block block = level.getBlockState(blockPos).getBlock();
                 if (block == Blocks.CACTUS || block == Blocks.POTTED_CACTUS) {

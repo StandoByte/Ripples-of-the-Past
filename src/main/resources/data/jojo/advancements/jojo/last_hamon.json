@@ -2,7 +2,8 @@
   "parent": "jojo:jojo/get_hamon",
   "display": {
     "icon": {
-      "item": "jojo:breath_control_mask"
+      "item": "jojo:meteoric_scrap",
+      "nbt": "{Icon:2}"
     },
     "title": {
       "translate": "advancements.jojo.last_hamon.title"
