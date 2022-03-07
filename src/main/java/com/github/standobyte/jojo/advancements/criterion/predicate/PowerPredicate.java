@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.advancements.criterion.predicate;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
@@ -24,58 +25,54 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.registries.ForgeRegistry;
 
 public class PowerPredicate {
-    public static final PowerPredicate TRUE = new PowerPredicate(null, null, null);
-    public static final PowerPredicate ANY_POWER = new PowerPredicate(null, null, null);
-    @Nullable
+    public static final PowerPredicate ANY = new PowerPredicate(null, null, null, null);
     private final PowerClassification classification;
     @Nullable
     private final IPowerType<?, ?> type;
     @Nullable
+    private final SpecialTypeCheck typeCheck;
+    @Nullable
     private final MinMaxBounds.IntBound standTier;
     
-    private PowerPredicate(@Nullable PowerClassification classification, @Nullable IPowerType<?, ?> type, 
-            @Nullable MinMaxBounds.IntBound standTier) {
+    private PowerPredicate(PowerClassification classification, @Nullable IPowerType<?, ?> type, 
+            @Nullable SpecialTypeCheck powerCheck, @Nullable MinMaxBounds.IntBound standTier) {
         this.classification = classification;
         this.type = type;
+        this.typeCheck = powerCheck;
         this.standTier = standTier;
     }
     
-    public boolean matches(LazyOptional<? extends IPower<?, ?>> powerOptional) {
-        return matches(powerOptional.orElse(null));
+    public boolean matches(PowerClassification classification, LazyOptional<? extends IPower<?, ?>> powerOptional) {
+        return matches(classification, powerOptional.orElse(null));
     }
 
-    public boolean matches(IPower<?, ?> power) {
+    public boolean matches(PowerClassification classification, @Nullable IPower<?, ?> power) {
         if (power == null) {
-            return this == TRUE;
+            return matches(classification, null, -1);
         }
         int standTier = -1;
         if (power.getPowerClassification() == PowerClassification.STAND && power.hasPower()) {
             standTier = ((IStandPower) power).getType().getTier();
         }
-        return matches(power.hasPower(), power.getPowerClassification(), power.getType(), standTier);
+        return matches(power.getPowerClassification(), power.getType(), standTier);
     }
 
-    public boolean matches(boolean hasPower, PowerClassification classification, IPowerType<?, ?> type, int standTier) {
-        if (!hasPower) {
-            return false;
-        }
-        if (this == ANY_POWER) {
+    public boolean matches(PowerClassification classification, @Nullable IPowerType<?, ?> type, int standTier) {
+        if (this == ANY) {
             return true;
         }
         
-        return !(this.classification != null && this.classification != classification
-                || this.type != null && this.type != type
-                || this.standTier != null && !this.standTier.matches(standTier));
+        return (this.classification == null || this.classification == classification)
+                && (this.type == null || this.type == type)
+                && (this.typeCheck == null || this.typeCheck.matches(type))
+                && (this.standTier == null || this.standTier.matches(standTier));
     }
 
     
     
     public static PowerPredicate fromJson(@Nullable JsonElement json) {
-        if (json == null) {
-            return TRUE;
-        }
-        if (json.isJsonNull()) {
-            return ANY_POWER;
+        if (json == null || json.isJsonNull()) {
+            return ANY;
         }
         else {
             JsonObject jsonObject = JSONUtils.convertToJsonObject(json, "JoJo power");
@@ -83,67 +80,82 @@ public class PowerPredicate {
             PowerClassification classification = jsonObject.has("classification") ? 
                     Enum.valueOf(PowerClassification.class, JSONUtils.getAsString(jsonObject, "classification").toUpperCase())
                     : null;
+            if (classification == null) {
+                throw new JsonSyntaxException("No power classification specified");
+            }
                     
-            IPowerType<?, ?> type = deserializePowerType(classification, jsonObject);
+            
+            IPowerType<?, ?> type = null;
+            SpecialTypeCheck typeCheck = SpecialTypeCheck.ANY;
+            if (jsonObject.has("type")) {
+                typeCheck = null;
+                String typeString = JSONUtils.getAsString(jsonObject, "type");
+                for (SpecialTypeCheck check : SpecialTypeCheck.values()) {
+                    if (check.name().equals(typeString.toUpperCase())) {
+                        typeCheck = check;
+                        break;
+                    }
+                }
+                if (typeCheck == null) {
+                    ResourceLocation resLoc = new ResourceLocation(typeString);
+                    ForgeRegistry<? extends IPowerType<?, ?>> registry;
+                    switch (classification) {
+                    case STAND:
+                        registry = (ForgeRegistry<StandType<?>>) ModStandTypes.Registry.getRegistry();
+                        break;
+                    case NON_STAND:
+                        registry = (ForgeRegistry<NonStandPowerType<?>>) ModNonStandPowers.Registry.getRegistry();
+                        break;
+                    default:
+                        registry = null;
+                        break;
+                    }
+                    type = Optional.ofNullable(registry.getRaw(resLoc)).orElseThrow(() -> {
+                        return new JsonSyntaxException("Unknown power type '" + resLoc + "'");
+                    });
+                }
+            }
             
             MinMaxBounds.IntBound standTier = MinMaxBounds.IntBound.fromJson(jsonObject.get("stand_tier"));
             
-            return new PowerPredicate(classification, type, standTier);
+            return new PowerPredicate(classification, type, typeCheck, standTier);
         }
     }
 
-    @Nullable
-    private static IPowerType<?, ?> deserializePowerType(PowerClassification classification, JsonObject jsonObject) {
-        if (jsonObject.has("type")) {
-            ResourceLocation resLoc = new ResourceLocation(JSONUtils.getAsString(jsonObject, "type"));
-            if (classification == null) {
-                throw new JsonSyntaxException("No power classification specified for power type '" + resLoc + "'");
-            }
-            else {
-                ForgeRegistry<? extends IPowerType<?, ?>> registry;
-                switch (classification) {
-                case STAND:
-                    registry = (ForgeRegistry<StandType<?>>) ModStandTypes.Registry.getRegistry();
-                    break;
-                case NON_STAND:
-                    registry = (ForgeRegistry<NonStandPowerType<?>>) ModNonStandPowers.Registry.getRegistry();
-                    break;
-                default:
-                    registry = null;
-                    break;
-                }
-                return Optional.ofNullable(registry.getRaw(resLoc)).orElseThrow(() -> {
-                    return new JsonSyntaxException("Unknown power type '" + resLoc + "'");
-                });
-            }
+    public JsonElement serializeToJson() {
+        if (this == ANY) {
+            return JsonNull.INSTANCE;
         }
-        return null;
-    }
-
-    public void serializeToJson(JsonObject jsonobject, String key) {
-        if (this == TRUE) {
-            return;
-        } 
         else {
-            JsonElement serialized;
-            if (this == ANY_POWER) {
-                serialized = JsonNull.INSTANCE;
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("classification", classification.name().toLowerCase());
+            if (type != null) {
+                jsonObject.addProperty("type", type.getRegistryName().toString());
             }
-            else {
-                JsonObject jsonObject = new JsonObject();
-                if (classification != null) {
-                    jsonObject.addProperty("classification", classification.name().toLowerCase());
-                    if (type != null) {
-                        jsonObject.addProperty("type", type.getRegistryName().toString());
-                    }
-                    if (classification == PowerClassification.STAND && standTier != null) {
-                        jsonObject.add("stand_tier", standTier.serializeToJson());
-                    }
-                }
-                serialized = jsonObject;
+            else if (typeCheck != null) {
+                jsonObject.addProperty("type", typeCheck.name().toLowerCase());
             }
-            
-            jsonobject.add(key, serialized);
+            if (classification == PowerClassification.STAND && standTier != null) {
+                jsonObject.add("stand_tier", standTier.serializeToJson());
+            }
+            return jsonObject;
+        }
+    }
+    
+    
+    
+    private static enum SpecialTypeCheck {
+        ANY(type -> type != null),
+        NONE(type -> type == null);
+        
+        private final Predicate<IPowerType<?, ?>> typeCheck;
+        
+        private SpecialTypeCheck(Predicate<IPowerType<?, ?>> typeCheck) {
+            this.typeCheck = typeCheck;
+        }
+        
+        private boolean matches(IPowerType<?, ?> type) {
+            return typeCheck.test(type);
         }
     }
 }

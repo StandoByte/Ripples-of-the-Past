@@ -79,7 +79,7 @@ public class LivingUtilCap {
                 hamonCharge = null;
                 return;
             }
-            hamonCharge.tick(entity, entity.level, entity.getBoundingBox().inflate(1.0D));
+            hamonCharge.tick(entity, null, entity.level, entity.getBoundingBox().inflate(1.0D));
             if (entity.getRandom().nextInt(10) == 0) {
                 HamonPowerType.createHamonSparkParticlesEmitter(entity, hamonCharge.getCharge() / 40F);
             }

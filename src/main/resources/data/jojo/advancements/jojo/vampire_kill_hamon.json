@@ -2,8 +2,8 @@
   "parent": "jojo:jojo/get_vampirism",
   "display": {
     "icon": {
-      "item": "jojo:stone_mask",
-      "nbt": "{Activated:1}"
+      "item": "jojo:meteoric_scrap",
+      "nbt": "{Icon:3}"
     },
     "title": {
       "translate": "advancements.jojo.vampire_kill_hamon.title"

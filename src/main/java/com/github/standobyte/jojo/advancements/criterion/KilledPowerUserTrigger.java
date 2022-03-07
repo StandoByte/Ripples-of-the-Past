@@ -76,8 +76,8 @@ public class KilledPowerUserTrigger extends AbstractCriterionTrigger<KilledPower
             }
             for (PowerClassification power : PowerClassification.values()) {
                 for (PowerClassification powerKilled : PowerClassification.values()) {
-                    if (this.powerPredicate.matches(IPower.getPowerOptional(entity, power))
-                            && (this.killedPowerPredicate.matches(IPower.getPowerOptional(killed, powerKilled)))) {
+                    if (this.powerPredicate.matches(power, IPower.getPowerOptional(entity, power))
+                            && (this.killedPowerPredicate.matches(powerKilled, IPower.getPowerOptional(killed, powerKilled)))) {
                         return true;
                     }
                 }
@@ -90,8 +90,8 @@ public class KilledPowerUserTrigger extends AbstractCriterionTrigger<KilledPower
             JsonObject jsonobject = super.serializeToJson(serializer);
             jsonobject.add("entity", this.entityPredicate.toJson(serializer));
             jsonobject.add("killing_blow", this.killingBlow.serializeToJson());
-            this.powerPredicate.serializeToJson(jsonobject, "power");
-            this.killedPowerPredicate.serializeToJson(jsonobject, "killed_power");
+            jsonobject.add("power", this.powerPredicate.serializeToJson());
+            jsonobject.add("killed_power", this.killedPowerPredicate.serializeToJson());
             return jsonobject;
         }
     }

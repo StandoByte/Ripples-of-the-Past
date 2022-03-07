@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.advancements.criterion.predicate;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.entity.itemprojectile.StandArrowEntity;
+import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
@@ -13,7 +14,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.JSONUtils;
 
 public class StandArrowHitPredicate {
-    public static final StandArrowHitPredicate ANY = new StandArrowHitPredicate(EntityPredicate.ANY, null, PowerPredicate.TRUE, null);
+    public static final StandArrowHitPredicate ANY = new StandArrowHitPredicate(EntityPredicate.ANY, null, PowerPredicate.ANY, null);
     private final EntityPredicate arrowEntity;
     @Nullable
     private final Boolean gaveStand;
@@ -34,7 +35,7 @@ public class StandArrowHitPredicate {
         if (this == ANY) {
             return true;
         }
-        return this.arrowEntity.matches(player, arrow) && this.targetStand.matches(targetStand)
+        return this.arrowEntity.matches(player, arrow) && this.targetStand.matches(PowerClassification.STAND, targetStand)
                 && (this.gaveStand == null || this.gaveStand == gaveStand)
                 && (this.shotSelf == null || this.shotSelf == shotSelf);
     }
@@ -65,7 +66,7 @@ public class StandArrowHitPredicate {
             if (gaveStand != null) {
                 jsonobject.addProperty("gave_stand", gaveStand);
             }
-            targetStand.serializeToJson(jsonobject, "target_stand");
+            jsonobject.add("target_stand", targetStand.serializeToJson());
             if (shotSelf != null) {
                 jsonobject.addProperty("shot_self", gaveStand);
             }

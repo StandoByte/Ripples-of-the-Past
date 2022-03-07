@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.advancements.criterion;
 
 import com.github.standobyte.jojo.advancements.criterion.predicate.PowerPredicate;
 import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.google.gson.JsonObject;
 
 import net.minecraft.advancements.criterion.AbstractCriterionTrigger;
@@ -24,8 +25,8 @@ public class GetPowerTrigger extends AbstractCriterionTrigger<GetPowerTrigger.In
         return id;
     }
 
-    public void trigger(ServerPlayerEntity player, IPower<?, ?> power) {
-        trigger(player, criterion -> criterion.matches(power));
+    public void trigger(ServerPlayerEntity player, PowerClassification classification, IPower<?, ?> power) {
+        trigger(player, criterion -> criterion.matches(classification, power));
     }
 
     @Override
@@ -45,12 +46,12 @@ public class GetPowerTrigger extends AbstractCriterionTrigger<GetPowerTrigger.In
         @Override
         public JsonObject serializeToJson(ConditionArraySerializer serializer) {
             JsonObject jsonobject = super.serializeToJson(serializer);
-            powerPredicate.serializeToJson(jsonobject, "jojopower");
+            jsonobject.add("jojopower", this.powerPredicate.serializeToJson());
             return jsonobject;
         }
 
-        private boolean matches(IPower<?, ?> power) {
-            return this.powerPredicate.matches(power);
+        private boolean matches(PowerClassification classification, IPower<?, ?> power) {
+            return this.powerPredicate.matches(classification, power);
         }
     }
 

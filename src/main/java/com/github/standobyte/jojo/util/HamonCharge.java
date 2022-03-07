@@ -12,9 +12,11 @@ import com.github.standobyte.jojo.util.damage.ModDamageSources;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
@@ -22,6 +24,7 @@ public class HamonCharge {
     private float charge;
     private int chargeTicks;
     private UUID hamonUserId;
+    private Entity hamonUser;
     private boolean gavePoints;
     private float energySpent;
     
@@ -60,14 +63,16 @@ public class HamonCharge {
         return charge;
     }
     
-    public void tick(@Nullable Entity charged, World world, AxisAlignedBB aabb) {
+    public void tick(@Nullable Entity chargedEntity, @Nullable BlockPos chargedBlock, World world, AxisAlignedBB aabb) {
         if (!world.isClientSide()) {
             List<LivingEntity> entities = world.getEntitiesOfClass(LivingEntity.class, aabb, EntityPredicates.NO_CREATIVE_OR_SPECTATOR);
             for (LivingEntity target : entities) {
-                if (!target.is(charged) && target.isAlive() && target.getUUID() != hamonUserId) {
-                    if (ModDamageSources.dealHamonDamage(target, charge, charged, null)) {
+                if (!target.is(chargedEntity) && target.isAlive() && target.getUUID() != hamonUserId) {
+                    if (ModDamageSources.dealHamonDamage(target, charge, chargedEntity, null)) {
+                        Entity user = getUser(world);
+                        if (user instanceof ServerPlayerEntity) {
+                        }
                         if (!gavePoints) {
-                            Entity user = ((ServerWorld) world).getEntity(hamonUserId);
                             if (user instanceof LivingEntity) {
                                 INonStandPower.getNonStandPowerOptional((LivingEntity) user).ifPresent(power -> {
                                     power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
@@ -82,6 +87,13 @@ public class HamonCharge {
             }
             chargeTicks--;
         }
+    }
+    
+    private Entity getUser(World world) {
+        if (hamonUser == null && world instanceof ServerWorld) {
+            hamonUser = ((ServerWorld) world).getEntity(hamonUserId);
+        }
+        return hamonUser;
     }
     
     public boolean shouldBeRemoved() {

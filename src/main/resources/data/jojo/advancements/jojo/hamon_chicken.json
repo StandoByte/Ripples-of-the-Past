@@ -1,0 +1,31 @@
+{
+  "parent": "jojo:jojo/get_hamon",
+  "display": {
+    "icon": {
+      "item": "minecraft:feather"
+    },
+    "title": {
+      "translate": "advancements.jojo.hamon_chicken.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.hamon_chicken.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "charge_kill": {
+      "trigger": "jojo:hamon_charge_hit",
+      "conditions": {
+        
+      }
+    }
+  },
+  "requirements": [
+    [
+      "charge_kill"
+    ]
+  ]
+}

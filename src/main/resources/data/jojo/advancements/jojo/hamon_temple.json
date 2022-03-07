@@ -2,7 +2,7 @@
   "parent": "jojo:jojo/root",
   "display": {
     "icon": {
-      "item": "jojo:breath_control_mask"
+      "item": "minecraft:orange_terracotta"
     },
     "title": {
       "translate": "advancements.jojo.hamon_temple.title"
