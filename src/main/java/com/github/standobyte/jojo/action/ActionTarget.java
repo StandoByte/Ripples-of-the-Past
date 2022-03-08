@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.action;
 import javax.annotation.Nonnull;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -100,6 +101,34 @@ public class ActionTarget {
     
     public Vector3d getTargetPos() {
         return type == TargetType.ENTITY ? entity.getEyePosition(1.0F) : targetPos;
+    }
+    
+
+    public void writeToBuf(PacketBuffer buf) {
+        TargetType type = getType();
+        buf.writeEnum(type);
+        switch (type) {
+        case ENTITY:
+            buf.writeInt(getEntity(null).getId());
+            break;
+        case BLOCK:
+            buf.writeBlockPos(getBlockPos());
+            buf.writeEnum(getFace());
+            break;
+        default:
+        }
+    }
+    
+    public static ActionTarget readFromBuf(PacketBuffer buf) {
+        TargetType type = buf.readEnum(TargetType.class);
+        switch (type) {
+        case ENTITY:
+            return new ActionTarget(buf.readInt());
+        case BLOCK:
+            return new ActionTarget(buf.readBlockPos(), buf.readEnum(Direction.class));
+        default:
+            return ActionTarget.EMPTY;
+        }
     }
 
     public static enum TargetType {

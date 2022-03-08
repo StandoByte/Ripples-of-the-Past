@@ -7,10 +7,14 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.util.JojoModUtil;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.IDataSerializer;
 import net.minecraftforge.registries.DataSerializerEntry;
@@ -18,6 +22,8 @@ import net.minecraftforge.registries.DataSerializerEntry;
 public class StandEntityTask {
     @Nonnull
     private final StandEntityAction action;
+    @Nonnull
+    private ActionTarget target = ActionTarget.EMPTY;
     private int startingTicks;
     private int ticksLeft;
     @Nonnull
@@ -25,30 +31,54 @@ public class StandEntityTask {
     @Nullable
     private StandRelativeOffset offsetFromUser; // isn't synced to clients
     
-    StandEntityTask(StandEntityAction action, int ticks, StandEntityAction.Phase phase, boolean armsOnlyMode) {
+    StandEntityTask(StandEntityAction action, int ticks, StandEntityAction.Phase phase, boolean armsOnlyMode, ActionTarget target) {
         this.action = action;
         this.startingTicks = Math.max(ticks, 1);
         this.ticksLeft = this.startingTicks;
         this.phase = phase;
         this.offsetFromUser = action.getOffsetFromUser(armsOnlyMode);
+        setTarget(target);
+    }
+    
+    void setTarget(ActionTarget target) {
+        if (target != null) {
+            this.target = target;
+        }
+    }
+    
+    ActionTarget getTarget() {
+        return target;
     }
     
     void tick(IStandPower standPower, StandEntity standEntity) {
+        if (target.getType() == TargetType.ENTITY) {
+            Entity targetEntity = target.getEntity(standEntity.level);
+            if (targetEntity == null || !targetEntity.isAlive() || targetEntity == standEntity) {
+                setTarget(ActionTarget.EMPTY);
+            }
+        }
+        if (target.getType() != TargetType.EMPTY && !standEntity.isManuallyControlled()) {
+            JojoModUtil.rotateTowards(standEntity, target.getTargetPos());
+//            if (target.getType() == TargetType.BLOCK) {
+//                setTaskTarget(ActionTarget.EMPTY);
+//            }
+        }
+        
         if (phase == StandEntityAction.Phase.PERFORM && ticksLeft == startingTicks) {
-            action.standPerform(standEntity.level, standEntity, standPower, standEntity.getTaskTarget());
+            action.standPerform(standEntity.level, standEntity, standPower, target);
         }
         switch (phase) {
         case BUTTON_HOLD:
             action.standTickButtonHold(standEntity.level, standEntity, 
-                    startingTicks - ticksLeft, standPower, standEntity.getTaskTarget());
+                    startingTicks - ticksLeft, standPower, target);
             break;
         case WINDUP:
             action.standTickWindup(standEntity.level, standEntity, 
-                    startingTicks - ticksLeft, standPower, standEntity.getTaskTarget());
+                    startingTicks - ticksLeft, standPower, target);
             break;
         case PERFORM:
             action.standTickPerform(standEntity.level, standEntity, 
-                    startingTicks - ticksLeft, standPower, standEntity.getTaskTarget());
+                    startingTicks - ticksLeft, standPower, target);
             break;
         case RECOVERY:
             break;
@@ -123,6 +153,8 @@ public class StandEntityTask {
                 
                 buf.writeVarInt(task.startingTicks);
                 buf.writeEnum(task.phase);
+                
+                task.target.writeToBuf(buf);
             }
         }
 
@@ -139,15 +171,17 @@ public class StandEntityTask {
             
             int ticks = buf.readVarInt();
             StandEntityAction.Phase phase = buf.readEnum(StandEntityAction.Phase.class);
+            
+            ActionTarget target = ActionTarget.readFromBuf(buf);
 
-            return Optional.of(new StandEntityTask((StandEntityAction) action, ticks, phase, false));
+            return Optional.of(new StandEntityTask((StandEntityAction) action, ticks, phase, false, target));
         }
 
         @Override
         public Optional<StandEntityTask> copy(Optional<StandEntityTask> value) {
             if (value.isPresent()) {
                 StandEntityTask task = value.get();
-                StandEntityTask taskNew = new StandEntityTask(task.action, task.startingTicks, task.phase, false);
+                StandEntityTask taskNew = new StandEntityTask(task.action, task.startingTicks, task.phase, false, task.target);
                 taskNew.ticksLeft = task.ticksLeft;
                 return Optional.of(taskNew);
             }

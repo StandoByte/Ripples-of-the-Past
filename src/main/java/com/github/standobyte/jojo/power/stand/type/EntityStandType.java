@@ -16,11 +16,14 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPac
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
+import com.github.standobyte.jojo.util.JojoModUtil;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent;
 
@@ -43,6 +46,28 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
 
     public StandEntityType<? extends StandEntity> getEntityType() {
         return entityTypeSupplier.get();
+    }
+    
+    @Override
+    public RayTraceResult clientHitResult(IStandPower power, Entity cameraEntity, RayTraceResult vanillaHitResult) {
+        if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
+            StandEntity stand = (StandEntity) power.getStandManifestation();
+            // FIXME (!!) stand precision aiming
+//            LivingEntity aimingEntity = user;
+//            if (power.isActive()) {
+//                IStandManifestation stand = power.getStandManifestation();
+//                if (stand instanceof StandEntity) {
+//                    StandEntity standEntity = (StandEntity) stand;
+//                    if (standEntity.isManuallyControlled()) {
+//                        aimingEntity = standEntity;
+//                    }
+//                }
+//            }
+//            return JojoModUtil.rayTrace(aimingEntity, getClientAimRange(), entity -> {
+//                return !(entity instanceof LivingEntity) || user.canAttack((LivingEntity) entity);
+//            });
+        }
+        return super.clientHitResult(power, cameraEntity, vanillaHitResult);
     }
     
     @Override

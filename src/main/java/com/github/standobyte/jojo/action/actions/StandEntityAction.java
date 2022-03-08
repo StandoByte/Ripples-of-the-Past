@@ -13,7 +13,6 @@ import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
-import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.type.EntityStandType;
 
@@ -161,11 +160,7 @@ public abstract class StandEntityAction extends StandAction {
     }
     
     private void setAction(IStandPower standPower, StandEntity standEntity, int ticks, Phase phase, ActionTarget target) {
-        if (standEntity.setTask(this, ticks, phase)) {
-            if (standTakesCrosshairTarget(target)) {
-                standEntity.setTaskTarget(target);
-            }
-        }
+        standEntity.setTask(this, ticks, phase, standTakesCrosshairTarget(target) ? target : ActionTarget.EMPTY);
     }
     
     public boolean canBeScheduled(IStandPower standPower, StandEntity standEntity) {
@@ -234,21 +229,6 @@ public abstract class StandEntityAction extends StandAction {
     
     public float getStandAlpha(StandEntity standEntity, int ticksLeft, float partialTick) {
         return 1F;
-    }
-    
-    @Override
-    protected ActionTarget aim(World world, LivingEntity user, IStandPower power, double range) {
-        LivingEntity aimingEntity = user;
-        if (power.isActive()) {
-            IStandManifestation stand = power.getStandManifestation();
-            if (stand instanceof StandEntity) {
-                StandEntity standEntity = (StandEntity) stand;
-                if (standEntity.isManuallyControlled()) {
-                    aimingEntity = standEntity;
-                }
-            }
-        }
-        return super.aim(world, aimingEntity, power, range);
     }
     
     public float getUserMovementFactor(IStandPower standPower, StandEntity standEntity) {

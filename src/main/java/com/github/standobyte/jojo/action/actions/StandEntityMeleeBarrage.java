@@ -32,12 +32,12 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
             int hits = StandStatFormulas.getBarrageHitsPerSecond(standEntity.getAttackSpeed());
             int extraTickSwings = hits / 20;
             for (int i = 0; i < extraTickSwings; i++) {
-                swingAndPunch(standEntity);
+                swingAndPunch(standEntity, target);
             }
             
             if (standEntity.barragePunchDelayed) {
                 standEntity.barragePunchDelayed = false;
-                swingAndPunch(standEntity);
+                swingAndPunch(standEntity, target);
             }
             else {
                 double sp2 = hits % 20;
@@ -51,7 +51,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
                             standEntity.barrageDelayedPunches++;
                         }
                         else {
-                            swingAndPunch(standEntity);
+                            swingAndPunch(standEntity, target);
                         }
                     }
                 }
@@ -61,9 +61,9 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
         }
     }
     
-    private void swingAndPunch(StandEntity standEntity) {
+    private void swingAndPunch(StandEntity standEntity, ActionTarget target) {
         standEntity.swing(standEntity.alternateHands());
-        standEntity.punch(PunchType.BARRAGE);
+        standEntity.punch(PunchType.BARRAGE, target);
     }
     
     @Override

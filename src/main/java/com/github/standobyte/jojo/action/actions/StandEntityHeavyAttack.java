@@ -34,7 +34,7 @@ public class StandEntityHeavyAttack extends StandEntityAction {
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {
         if (!world.isClientSide()) {
-            standEntity.punch(standEntity.getComboMeter() >= 0.5F ? PunchType.HEAVY_COMBO : PunchType.HEAVY_NO_COMBO);
+            standEntity.punch(standEntity.getComboMeter() >= 0.5F ? PunchType.HEAVY_COMBO : PunchType.HEAVY_NO_COMBO, target);
         }
     }
     

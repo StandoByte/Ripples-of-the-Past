@@ -38,15 +38,18 @@ public class StandEntityLightAttack extends StandEntityAction {
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {
         if (!world.isClientSide()) {
-            standEntity.punch(PunchType.LIGHT);
+            standEntity.punch(PunchType.LIGHT, target);
         }
     }
     
     @Override
     public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
         float earlyStart = 0F;
-        if (standEntity.getCurrentTaskAction() == this && standEntity.getCurrentTaskPhase() == Phase.WINDUP) {
-            earlyStart = 4F / 3F * (0.75F - standEntity.getCurrentTaskCompletion(0));
+        if (standEntity.getCurrentTaskAction() == this) {
+            earlyStart = 1F;
+            if (standEntity.getCurrentTaskPhase() == Phase.RECOVERY) {
+                earlyStart -= standEntity.getCurrentTaskCompletion(0) * 4F;
+            }
         }
         int ticks = StandStatFormulas.getLightAttackWindup(standEntity.getAttackSpeed(), earlyStart);
         return ticks;
