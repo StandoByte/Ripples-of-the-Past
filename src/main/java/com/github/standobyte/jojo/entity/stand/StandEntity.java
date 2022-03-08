@@ -13,7 +13,6 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.action.actions.StandEntityHeavyAttack;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
@@ -127,8 +126,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     private static final int COMBO_TICKS = 40;
     private static final float COMBO_DECAY = 0.025F;
     
-    private static final DataParameter<ActionTarget> TASK_TARGET = (DataParameter<ActionTarget>) EntityDataManager.defineId(StandEntity.class, 
-            (IDataSerializer<ActionTarget>) ModDataSerializers.TASK_TARGET.get().getSerializer());
     private static final DataParameter<Optional<StandEntityTask>> CURRENT_TASK = EntityDataManager.defineId(StandEntity.class, 
             (IDataSerializer<Optional<StandEntityTask>>) ModDataSerializers.STAND_ENTITY_TASK.get().getSerializer());
     @Nullable
@@ -168,7 +165,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         entityData.define(ARMS_ONLY_MODE, (byte) 0);
         entityData.define(SWING_OFF_HAND, false);
         entityData.define(PUNCHES_COMBO, 0F);
-        entityData.define(TASK_TARGET, ActionTarget.EMPTY);
         entityData.define(CURRENT_TASK, Optional.empty());
     }
 
@@ -627,7 +623,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     protected void actuallyHurt(DamageSource dmgSource, float damageAmount) {
         boolean blockableAngle = canBlockOrParryFromAngle(dmgSource);
         if (!dmgSource.isBypassArmor() && blockableAngle && getCurrentTask() == null
-                && setTask(ModActions.STAND_ENTITY_BLOCK.get(), 5, StandEntityAction.Phase.PERFORM)) {}
+                && setTask(ModActions.STAND_ENTITY_BLOCK.get(), 5, StandEntityAction.Phase.PERFORM, ActionTarget.EMPTY)) {}
         if (transfersDamage() && hasUser()) {
             LivingEntity user = getUser();
             if (user != null && user.isAlive()) {
@@ -757,22 +753,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         super.tick();
         accumulateBarrageTickParry = false;
         LivingEntity user = getUser();
-
-        ActionTarget target = getTaskTarget();
-        if (target.getType() == TargetType.ENTITY) {
-            Entity targetEntity = target.getEntity(level);
-            if (targetEntity == null || !targetEntity.isAlive() || targetEntity == this) {
-                setTaskTarget(ActionTarget.EMPTY);
-            }
-        }
-        target = getTaskTarget();
-        if (target.getType() != TargetType.EMPTY && !isManuallyControlled()) {
-            JojoModUtil.rotateTowards(this, target.getTargetPos());
-//            if (target.getType() == TargetType.BLOCK) {
-//                setTaskTarget(ActionTarget.EMPTY);
-//            }
-        }
-        else if (user != null && !isRemotePositionFixed()) {
+        
+        if (user != null && !isRemotePositionFixed()) {
             float yRotSet = user.yRot;
             setRot(yRotSet, user.xRot);
             setYHeadRot(yRotSet);
@@ -918,8 +900,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
 
 
-    public boolean setTask(StandEntityAction action, int ticks, StandEntityAction.Phase phase) {
-        return setTask(new StandEntityTask(action, ticks, phase, isArmsOnlyMode()));
+    public boolean setTask(StandEntityAction action, int ticks, StandEntityAction.Phase phase, ActionTarget taskTarget) {
+        return setTask(new StandEntityTask(action, ticks, phase, isArmsOnlyMode(), taskTarget));
     }
 
     protected boolean setTask(StandEntityTask task) {
@@ -966,7 +948,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
     protected void clearTask(StandEntityTask clearedTask) {
         barrageParryCount = 0;
-        setTaskTarget(ActionTarget.EMPTY);
         updateNoPhysics();
         setStandPose(StandPose.IDLE);
         clearedTask.getAction().onClear(userPower, this);
@@ -979,7 +960,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         else if (isArmsOnlyMode()) {
             StandEntityAction unsummon = ModActions.STAND_ENTITY_UNSUMMON.get();
             setTask(new StandEntityTask(unsummon, unsummon.getStandActionTicks(userPower, this), 
-                    StandEntityAction.Phase.PERFORM, isArmsOnlyMode()));
+                    StandEntityAction.Phase.PERFORM, isArmsOnlyMode(), ActionTarget.EMPTY));
         }
     }
     
@@ -1018,16 +999,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return 0;
     }
 
-    public void setTaskTarget(ActionTarget target) {
-        if (target.getType() != TargetType.ENTITY || target.getEntity(level) != this) {
-            entityData.set(TASK_TARGET, target);
-        }
-    }
-
-    protected ActionTarget getTaskTarget() {
-        return entityData.get(TASK_TARGET);
-    }
-
     public float getUserMovementFactor() {
         StandEntityAction currentAction = getCurrentTaskAction();
         if (currentAction == null) {
@@ -1042,7 +1013,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return getAttackSpeed() > 0 && getAttributeValue(ForgeMod.REACH_DISTANCE.get()) > 0 ;
     }
 
-    public boolean punch(PunchType punch) {
+    // FIXME (!) recheck the target distance on perform FIXME (!) precision and losing the target from sight
+    public boolean punch(PunchType punch, ActionTarget target) {
         if (!accumulateBarrageTickParry) {
             accumulateBarrageTickParry = true;
             barrageParryCount = 1;
@@ -1052,7 +1024,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
 
         double distance = getAttributeValue(ForgeMod.REACH_DISTANCE.get());
-        ActionTarget target = getTaskTarget();
         switch (target.getType()) {
         case EMPTY:
             // FIXME (!) precision: expand the hitbox of smaller entities more
@@ -1445,7 +1416,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
     private void unsummonStand() {
         StandEntityAction unsummon = ModActions.STAND_ENTITY_UNSUMMON.get();
-        setTask(unsummon, unsummon.getStandActionTicks(userPower, this), StandEntityAction.Phase.PERFORM);
+        setTask(unsummon, unsummon.getStandActionTicks(userPower, this), StandEntityAction.Phase.PERFORM, ActionTarget.EMPTY);
     }
 
     public boolean isBeingRetracted() {

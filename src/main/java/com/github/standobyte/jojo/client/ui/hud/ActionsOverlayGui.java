@@ -17,6 +17,7 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.ActionTargetContainer;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.ui.hud.ActionsModeConfig.SelectedTargetIcon;
@@ -203,7 +204,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 return;
             }
             
-            ActionTarget target = ActionTarget.fromRayTraceResult(mc.hitResult);
+            ActionTarget target = ActionTarget.fromRayTraceResult(InputHandler.getInstance().mouseTarget);
             
             if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
                 RenderSystem.enableRescaleNormal();
@@ -453,14 +454,15 @@ public class ActionsOverlayGui extends AbstractGui {
     private <P extends IPower<P, ?>> boolean isActionAvaliable(Action<P> action, ActionsModeConfig<P> mode, 
             ActionType hotbar, ActionTarget mouseTarget, boolean isSelected) {
         P power = mode.getPower();
+        ActionTargetContainer targetContainer = new ActionTargetContainer(mouseTarget);
         if (isSelected) {
-            boolean rightTarget = power.checkTargetType(action, mouseTarget).isPositive();
+            boolean rightTarget = power.checkTargetType(action, targetContainer).isPositive();
             mode.getTargetIcon(hotbar).update(action.getTargetRequirement(), rightTarget);
-            boolean available = rightTarget && power.checkRequirements(action, mouseTarget, false).isPositive();
+            boolean available = rightTarget && power.checkRequirements(action, targetContainer, false).isPositive();
             return available;
         }
         else {
-            return power.checkRequirements(action, mouseTarget, true).isPositive();
+            return power.checkRequirements(action, targetContainer, true).isPositive();
         }
     }
     
@@ -512,33 +514,39 @@ public class ActionsOverlayGui extends AbstractGui {
             RenderSystem.popMatrix();
         }
 
-        // FIXME ____(test) does hold duration work?
         y += 10;
+        if (position.alignment == Alignment.RIGHT) {
+            x -= 20 * power.getActions(actionType).size();
+        }
         Action<P> heldAction = power.getHeldAction();
         int slot = -1;
         if (heldAction != null) {
             slot = power.getActions(actionType).indexOf(
                     heldAction.isShiftVariation() ? heldAction.getBaseVariation() : heldAction);
             if (slot > -1) {
-                drawHoldDuration(matrixStack, x, y, slot, heldAction, power, power.getHeldActionTicks());
+                drawHoldDuration(matrixStack, x, y, slot, position.alignment, heldAction, power, power.getHeldActionTicks());
             }
         }
         else if (action != null) {
             slot = mode.getSelectedSlot(actionType);
             if (slot > -1) {
-                drawHoldDuration(matrixStack, x, y, slot, action, power, 0);
+                drawHoldDuration(matrixStack, x, y, slot, position.alignment, action, power, 0);
             }
         }
     }
     
-    private <P extends IPower<P, ?>> void drawHoldDuration(MatrixStack matrixStack, int x, int y, int slot, Action<P> action, P power, int ticksHeld) {
+    private <P extends IPower<P, ?>> void drawHoldDuration(MatrixStack matrixStack, int x, int y, 
+            int slot, Alignment hotbarAlignment, Action<P> action, P power, int ticksHeld) {
         int ticksToFire = action.getHoldDurationToFire(power);
         if (ticksToFire > 0) {
-            x += slot * 20;
+            x += slot * 20 + 20;
+            if (hotbarAlignment == Alignment.RIGHT) {
+                x -= 2;
+            }
             ticksToFire = Math.max(ticksToFire - ticksHeld, 0);
             int seconds = ticksToFire == 0 ? 0 : (ticksToFire - 1) / 20 + 1;
             int color = ticksToFire == 0 ? 0x00FF00 : ticksHeld == 0 ? 0x808080 : 0xFFFFFF;
-            ClientUtil.drawRightAlignedString(matrixStack, mc.font, String.valueOf(seconds), x + 20, y + 13, color);
+            ClientUtil.drawRightAlignedString(matrixStack, mc.font, String.valueOf(seconds), x, y + 12, color);
         }
     }
     
@@ -946,11 +954,14 @@ public class ActionsOverlayGui extends AbstractGui {
     private <P extends IPower<P, ?>> boolean clickAction(ActionsModeConfig<P> mode, ActionType actionType, boolean shift, int index) {
         P power = mode.getPower();
         if (power != null) {
-            RayTraceResult target = mc.hitResult;
-            PacketManager.sendToServer(ClClickActionPacket.withRayTraceResult(power.getPowerClassification(), actionType, shift, index, target));
-            ActionTarget actionTarget = ActionTarget.fromRayTraceResult(target);
-            boolean actionWentOff = power.onClickAction(actionType, index, shift, actionTarget);
-            return actionWentOff;
+            Action<P> action = power.getAction(actionType, index, shift);
+            if (action != null) {
+                RayTraceResult target = InputHandler.getInstance().mouseTarget;
+                PacketManager.sendToServer(ClClickActionPacket.withRayTraceResult(power.getPowerClassification(), actionType, shift, index, target));
+                ActionTarget actionTarget = ActionTarget.fromRayTraceResult(target);
+                boolean actionWentOff = power.onClickAction(actionType, index, shift, actionTarget);
+                return actionWentOff;
+            }
         }
         return false;
     }

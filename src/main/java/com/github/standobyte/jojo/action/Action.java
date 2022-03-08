@@ -192,11 +192,6 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     public void onClick(World world, LivingEntity user, P power) {}
     
-    protected ActionTarget aim(World world, LivingEntity user, P power, double range) {
-        return ActionTarget.fromRayTraceResult(JojoModUtil.rayTrace(user, range, entity -> 
-        entity instanceof LivingEntity && user.canAttack((LivingEntity) entity)));
-    }
-    
     public int getCooldownValue() {
         return cooldown;
     }

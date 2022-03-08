@@ -47,6 +47,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.MovementInput;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.EntityRayTraceResult;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.RayTraceResult.Type;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -67,6 +68,8 @@ public class InputHandler {
     private ActionsOverlayGui actionsOverlay;
     private IStandPower standPower;
     private INonStandPower nonStandPower;
+    
+    public RayTraceResult mouseTarget;
 
     private static final String MAIN_CATEGORY = new String("key.categories." + JojoMod.MOD_ID);
     private KeyBinding toggleStand;
@@ -218,6 +221,8 @@ public class InputHandler {
             }
         }
         else {
+            pickMouseTarget();
+            
             if (leftClickBlockDelay > 0) {
                 leftClickBlockDelay--;
             }
@@ -276,6 +281,16 @@ public class InputHandler {
         }
     }
     
+    private void pickMouseTarget() {
+        mouseTarget = mc.hitResult;
+        if (actionsOverlay != null && actionsOverlay.getCurrentPower() != null) {
+            IPower<?, ?> power = actionsOverlay.getCurrentPower();
+            if (power.hasPower()) {
+                mouseTarget = power.clientHitResult(mc.getCameraEntity() != null ? mc.getCameraEntity() : mc.player, mouseTarget);
+            }
+        }
+    }
+    
     private final Map<IPower<?, ?>, ActionKey> heldKeys = new HashMap<>();
     
     private enum ActionKey {
@@ -308,7 +323,7 @@ public class InputHandler {
                 stopHeldAction(power, power.getPowerClassification() == actionsOverlay.getCurrentMode());
             }
             else {
-                PacketManager.sendToServer(ClHeldActionTargetPacket.withRayTraceResult(power.getPowerClassification(), mc.hitResult));
+                PacketManager.sendToServer(ClHeldActionTargetPacket.withRayTraceResult(power.getPowerClassification(), mouseTarget));
             }
         }
     }
@@ -361,7 +376,7 @@ public class InputHandler {
             return;
         }
 
-        boolean leftClickedBlock = actionType == ActionType.ATTACK && mc.hitResult.getType() == Type.BLOCK;
+        boolean leftClickedBlock = actionType == ActionType.ATTACK && mouseTarget.getType() == Type.BLOCK;
         if (leftClickedBlock && leftClickBlockDelay > 0 || power.getHeldAction() != null) {
             if (event != null) {
                 event.setSwingHand(false);

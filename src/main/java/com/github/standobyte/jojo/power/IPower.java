@@ -7,16 +7,19 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.ActionTargetContainer;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.common.util.LazyOptional;
 
 public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
@@ -51,10 +54,14 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
         }
         return false;
     }
-    ActionConditionResult checkRequirements(Action<P> action, ActionTarget target, boolean checkTargetType);
-    ActionConditionResult checkTargetType(Action<P> action, ActionTarget target);
+    ActionConditionResult checkRequirements(Action<P> action, ActionTargetContainer targetContainer, boolean checkTargetType);
+    ActionConditionResult checkTargetType(Action<P> action, ActionTargetContainer targetContainer);
     boolean canUsePower();
-
+    
+    default RayTraceResult clientHitResult(Entity cameraEntity, RayTraceResult mcHitResult) {
+        return getType() != null ? getType().clientHitResult((P) this, cameraEntity, mcHitResult) : mcHitResult;
+    }
+    
     float getLearningProgressPoints(Action<P> action);
     float getLearningProgressRatio(Action<P> action);
 

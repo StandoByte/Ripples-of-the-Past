@@ -306,7 +306,7 @@
   "jojo.message.action_condition.stun": "You are stunned",
   
   "jojo.message.action_condition.peaceful": "Monsters can't hurt anyone on Peaceful difficulty",
-  "jojo.message.action_condition.player_target": "You have to target a player with this action",
+  "jojo.message.action_condition.player_target": "You have to target a player with this ability",
   "jojo.message.action_condition.blood": "You can't satisfy your thirst with this creature",
   "jojo.message.action_condition.fire": "You can't do it while on fire",
   "jojo.message.action_condition.ultrawarm": "It's too hot in this place",
