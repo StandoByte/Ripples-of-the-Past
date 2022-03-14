@@ -46,7 +46,7 @@ public class ActionTarget {
             this.blockPos = null;
             this.face = null;
             this.entity = entity;
-            this.entityId = -1;
+            this.entityId = entity.getId();
             this.targetPos = null;
         }
         else {
@@ -94,13 +94,19 @@ public class ActionTarget {
     
     public Entity getEntity(World world) {
         if (entity == null) {
-            entity = world.getEntity(entityId);
+            cacheEntity(world);
         }
         return entity;
     }
     
+    public void cacheEntity(World world) {
+        if (world != null) {
+            entity = world.getEntity(entityId);
+        }
+    }
+    
     public Vector3d getTargetPos() {
-        return type == TargetType.ENTITY ? entity.getEyePosition(1.0F) : targetPos;
+        return type == TargetType.ENTITY && entity != null ? entity.getEyePosition(1.0F) : targetPos;
     }
     
 
@@ -109,7 +115,7 @@ public class ActionTarget {
         buf.writeEnum(type);
         switch (type) {
         case ENTITY:
-            buf.writeInt(getEntity(null).getId());
+            buf.writeInt(entityId);
             break;
         case BLOCK:
             buf.writeBlockPos(getBlockPos());

@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.util.MathUtil;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.util.HandSide;
 
 public class ModelPoseTransitionMultiple<T extends Entity> implements IModelPose<T> {
     private final NavigableMap<Float, ModelPoseTransition<T>> transitions = new TreeMap<>();
@@ -32,13 +33,14 @@ public class ModelPoseTransitionMultiple<T extends Entity> implements IModelPose
     }
 
     @Override
-    public void poseModel(float rotationAmount, T entity, float ticks, float yRotationOffset, float xRotation) {
+    public void poseModel(float rotationAmount, T entity, float ticks, float yRotationOffset, float xRotation, HandSide side) {
         rotationAmount = animPointFunc.apply(rotationAmount);
         Map.Entry<Float, ModelPoseTransition<T>> part = transitions.floorEntry(rotationAmount);
         if (part != null) {
             Map.Entry<Float, ModelPoseTransition<T>> nextPart = transitions.ceilingEntry(rotationAmount);
             float nextPartPoint = nextPart != null ? nextPart.getKey() : 1.0F;
-            part.getValue().poseModel(MathUtil.inverseLerp(rotationAmount, part.getKey(), nextPartPoint), entity, ticks, yRotationOffset, xRotation);
+            float rotation = part.getKey() == nextPartPoint ? nextPartPoint : MathUtil.inverseLerp(rotationAmount, part.getKey(), nextPartPoint);
+            part.getValue().poseModel(rotation, entity, ticks, yRotationOffset, xRotation, side);
         }
     }
 

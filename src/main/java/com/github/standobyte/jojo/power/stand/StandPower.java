@@ -230,15 +230,15 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     private static final float RESOLVE_DECAY = 5F;
     private static final int RESOLVE_NO_DECAY_TICKS = 400;
     private static final float RESOLVE_DMG_REDUCTION = 0.5F;
-    private static final float RESOLVE_EFFECT_DMG_REDUCTION = 0.8F;
+    private static final float RESOLVE_EFFECT_DMG_REDUCTION = 0.75F;
     private static final float RESOLVE_FOR_DMG_POINT = 0.5F;
     private static final float RESOLVE_LIMIT_FOR_DMG_POINT_TAKEN = 15F;
     private static final float RESOLVE_LIMIT_MANUAL_CONTROL_TICK = 0.1F;
     private static final float RESOLVE_UNDER_LIMIT_MULTIPLIER = 20F;
     private static final float RESOLVE_LIMIT_DECAY = 4F;
     private static final int RESOLVE_LIMIT_NO_DECAY_TICKS = 40;
-    private static final int[] RESOLVE_EFFECT_MIN = {300, 400, 500, 600};
-    private static final int[] RESOLVE_EFFECT_MAX = {600, 1200, 1500, 1800};
+    private static final int[] RESOLVE_EFFECT_MIN = {300, 400, 500, 600, 600};
+    private static final int[] RESOLVE_EFFECT_MAX = {600, 1200, 1500, 1800, 2400};
     @Override
     public boolean usesResolve() {
         return hasPower() && getType().usesResolve();
@@ -281,10 +281,10 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         this.noResolveDecayTicks = Math.max(this.noResolveDecayTicks, noDecayTicks);
         
         if (!user.hasEffect(ModEffects.RESOLVE.get()) && this.resolve == getMaxResolve()) {
-            setResolveLevel(Math.min(resolveLevel + 1, getMaxResolveLevel()));
             user.addEffect(new EffectInstance(ModEffects.RESOLVE.get(), 
-                    RESOLVE_EFFECT_MAX[Math.min(resolveLevel, RESOLVE_EFFECT_MAX.length) - 1], resolveLevel - 1, false, 
+                    RESOLVE_EFFECT_MAX[Math.min(resolveLevel, RESOLVE_EFFECT_MAX.length)], resolveLevel, false, 
                     false, true));
+            setResolveLevel(Math.min(resolveLevel + 1, getMaxResolveLevel()));
         }
         
         if (send) {
@@ -322,6 +322,13 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 getType().onNewResolveLevel(this);
             }
         }
+    }
+    
+    @Override
+    public void resetResolve() {
+        this.maxAchievedResolve = 0;
+        setResolve(0, 0);
+        setResolveLimit(0, 0);
     }
     
     @Override
@@ -548,7 +555,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     public boolean isLeapUnlocked() {
         if (standManifestation instanceof StandEntity) {
             StandEntity standEntity = (StandEntity) standManifestation;
-            return !standEntity.isArmsOnlyMode() && standEntity.isFollowingUser();
+            return standEntity.getAttackDamage() >= 6 && !standEntity.isArmsOnlyMode() && standEntity.isFollowingUser();
         }
         return false;
     }
@@ -557,7 +564,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     public float leapStrength() {
         StandEntity standEntity = (StandEntity) standManifestation;
         if (standEntity.isFollowingUser()) {
-            return StandStatFormulas.getLeapStrength(standEntity.getAttackDamage(null));
+            return StandStatFormulas.getLeapStrength(standEntity.getAttackDamage());
         }
         return 0;
     }

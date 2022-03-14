@@ -1,8 +1,8 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
-import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.util.JojoModUtil;
+import com.github.standobyte.jojo.util.damage.ModDamageSources;
 
 import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.block.BlockState;
@@ -41,17 +41,8 @@ public class MRFlameEntity extends ModdedProjectileEntity {
     
     @Override
     protected boolean hurtTarget(Entity target, LivingEntity owner) {
-        if (super.hurtTarget(target, owner)) {
-            int seconds = 3;
-            if (target instanceof StandEntity) {
-                ((StandEntity) target).setFireFromStand(seconds);
-            }
-            else {
-                target.setSecondsOnFire(seconds);
-            }
-            return true;
-        }
-        return false;
+        return ModDamageSources.dealDamageAndSetOnFire(target, 
+                entity -> super.hurtTarget(entity, owner), 5, true);
     }
 
     @Override

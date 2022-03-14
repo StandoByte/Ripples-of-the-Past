@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.actions.HamonAction;
 import com.github.standobyte.jojo.action.actions.HamonBubbleBarrier;
 import com.github.standobyte.jojo.action.actions.HamonBubbleCutter;
@@ -187,7 +188,8 @@ public class ModActions {
             () -> new StandEntityLightAttack(new StandEntityAction.Builder().standSound(ModSounds.STAR_PLATINUM_ORA)));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_BARRAGE = ACTIONS.register("star_platinum_barrage", 
-            () -> new StandEntityMeleeBarrage(new StandEntityAction.Builder().standSound(ModSounds.STAR_PLATINUM_ORA_ORA_ORA)));
+            () -> new StandEntityMeleeBarrage(new StandEntityAction.Builder().standTakesCrosshairTarget(TargetType.ENTITY)
+                    .standSound(ModSounds.STAR_PLATINUM_ORA_ORA_ORA)));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_HEAVY_PUNCH = ACTIONS.register("star_platinum_heavy_punch", 
             () -> new StandEntityHeavyAttack(new StandEntityAction.Builder().standSound(ModSounds.STAR_PLATINUM_ORA_LONG)
@@ -262,10 +264,12 @@ public class ModActions {
             () -> new StandEntityBlock());
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_GRAPPLE = ACTIONS.register("hierophant_green_grapple", 
-            () -> new HierophantGreenGrapple(new StandEntityAction.Builder().resolveLevelToUnlock(1).holdType().standPose(HierophantGreenGrapple.GRAPPLE_POSE)));
+            () -> new HierophantGreenGrapple(new StandEntityAction.Builder().resolveLevelToUnlock(1)
+                    .holdType().standUserSlowDownFactor(1.0F).standPose(HierophantGreenGrapple.GRAPPLE_POSE)));
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_GRAPPLE_ENTITY = ACTIONS.register("hierophant_green_grapple_entity", 
-            () -> new HierophantGreenGrapple(new StandEntityAction.Builder().resolveLevelToUnlock(1).holdType().standPose(HierophantGreenGrapple.GRAPPLE_POSE)
+            () -> new HierophantGreenGrapple(new StandEntityAction.Builder().resolveLevelToUnlock(1)
+                    .holdType().standUserSlowDownFactor(1.0F).standPose(HierophantGreenGrapple.GRAPPLE_POSE)
                     .shiftVariationOf(HIEROPHANT_GREEN_GRAPPLE)));
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_BARRIER = ACTIONS.register("hierophant_green_barrier", 

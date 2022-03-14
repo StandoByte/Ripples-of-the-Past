@@ -1,8 +1,11 @@
 package com.github.standobyte.jojo.client.model.entity.stand;
 
+import com.github.standobyte.jojo.action.actions.HierophantGreenGrapple;
+import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.client.model.pose.IModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
+import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -101,15 +104,14 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
                 new RotationAngle(rightLeg, 0.0F, 0.0F, 0.2618F)
         });
     }
-
-    // FIXME (model anim) HG grapple pose
-    //    @Override
-    //    protected void customPose(HierophantGreenEntity entity, StandPose pose, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
-    //        super.customPose(entity, pose, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, phase);
-    //        if (pose == HierophantGreenGrapple.GRAPPLE_POSE) {
-    //            entity.setYBodyRot(entity.yRot);
-    //            ModelRenderer arm = getArm(entity.getMainArm());
-    //            arm.xRot = -1.5708F;
-    //        }
-    //    }
+    
+    @Override
+    protected void initPoses() {
+        super.initPoses();
+        
+        actionAnim.put(HierophantGreenGrapple.GRAPPLE_POSE, new StandActionAnimation.Builder<HierophantGreenEntity>()
+                .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<HierophantGreenEntity>(new RotationAngle[] {
+                        new RotationAngle(rightArm, -1.5708F, 0.0F, 0.0F), // FIXME (!!) use xRotation
+                })).build(idlePose));
+    }
 }

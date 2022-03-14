@@ -16,6 +16,7 @@ import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.type.EntityStandType;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
@@ -65,9 +66,6 @@ public abstract class StandEntityAction extends StandAction {
         if (power.isActive()) {
             StandEntity stand = (StandEntity) power.getStandManifestation();
             ActionConditionResult checkStand = checkStandConditions(stand, power, target);
-            if (stand.isArmsOnlyMode() && !allowArmsOnly()) {
-                return ActionConditionResult.NEGATIVE;
-            }
             if (!checkStand.isPositive()) {
                 return checkStand;
             }
@@ -77,6 +75,19 @@ public abstract class StandEntityAction extends StandAction {
     
     protected ActionConditionResult checkStandConditions(StandEntity stand, IStandPower power, ActionTarget target) {
         return ActionConditionResult.POSITIVE;
+    }
+    
+    public boolean canStandTarget(StandEntity standEntity, ActionTarget target) {
+        if (!standTakesCrosshairTarget(target)) {
+            return false;
+        }
+        if (target.getType() != TargetType.EMPTY) {
+            Entity targetEntity = target.getEntity(standEntity.level);
+            if (targetEntity instanceof LivingEntity && !standEntity.canAttack((LivingEntity) targetEntity)) {
+                return false;
+            }
+        }
+        return true;
     }
     
     public void standTickButtonHold(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {}
@@ -101,19 +112,27 @@ public abstract class StandEntityAction extends StandAction {
     
     @Override
     public void onClick(World world, LivingEntity user, IStandPower power) {
-        if (!world.isClientSide() && !power.isActive()) {
-            switch (autoSummonMode) {
-            case FULL:
-                power.getType().summon(user, power, true);
-                break;
-            case ARMS:
-                ((EntityStandType<?>) power.getType()).summon(user, power, entity -> entity.setArmsOnlyMode(), true);
-                break;
-            case ONE_ARM:
-                ((EntityStandType<?>) power.getType()).summon(user, power, entity -> entity.setArmsOnlyMode(true, false), true);
-                break;
-            default:
-                break;
+        if (!world.isClientSide()) {
+            if (!power.isActive()) {
+                switch (autoSummonMode) {
+                case FULL:
+                    power.getType().summon(user, power, true);
+                    break;
+                case ARMS:
+                    ((EntityStandType<?>) power.getType()).summon(user, power, entity -> entity.setArmsOnlyMode(), true);
+                    break;
+                case ONE_ARM:
+                    ((EntityStandType<?>) power.getType()).summon(user, power, entity -> entity.setArmsOnlyMode(true, false), true);
+                    break;
+                default:
+                    break;
+                }
+            }
+            else {
+                StandEntity stand = (StandEntity) power.getStandManifestation();
+                if (stand.isArmsOnlyMode() && !allowArmsOnly()) {
+                    stand.fullSummonFromArms();
+                }   
             }
         }
     }
@@ -160,7 +179,7 @@ public abstract class StandEntityAction extends StandAction {
     }
     
     private void setAction(IStandPower standPower, StandEntity standEntity, int ticks, Phase phase, ActionTarget target) {
-        standEntity.setTask(this, ticks, phase, standTakesCrosshairTarget(target) ? target : ActionTarget.EMPTY);
+        standEntity.setTask(this, ticks, phase, target);
     }
     
     public boolean canBeScheduled(IStandPower standPower, StandEntity standEntity) {

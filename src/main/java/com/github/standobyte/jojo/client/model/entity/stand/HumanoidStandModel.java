@@ -1,8 +1,13 @@
 package com.github.standobyte.jojo.client.model.entity.stand;
 
+import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.client.model.pose.IModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
+import com.github.standobyte.jojo.client.model.pose.ModelPoseSided;
+import com.github.standobyte.jojo.client.model.pose.ModelPoseTransition;
+import com.github.standobyte.jojo.client.model.pose.RigidModelPose;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
+import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.util.MathUtil;
@@ -34,11 +39,14 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
     protected ModelRenderer rightLeg;
     protected ModelRenderer rightLegJoint;
     protected ModelRenderer rightLowerLeg;
+    
+    protected final ModelPoseSided<T> barrageSwing;
 
     public HumanoidStandModel() {
         this(64, 64);
     }
 
+    // FIXME (!) model constructor
     public HumanoidStandModel(int textureWidth, int textureHeight) {
         super(true, 16.0F, 0.0F, 2.0F, 2.0F, 24.0F);
         this.texWidth = textureWidth;
@@ -109,6 +117,8 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         rightLeg.addChild(rightLowerLeg);
 
         addBaseBoxes();
+        
+        barrageSwing = initArmSwingAnim();
     }
 
     public void afterInit() {
@@ -204,63 +214,84 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
             }
         }
     }
-
-    @Override
-    protected void swingArm(T entity, float swingAmount, float xRotation, HandSide swingingHand, float recovery) {
-        entity.setYBodyRot(entity.yRot);
+    
+    private ModelPoseSided<T> initArmSwingAnim() {
+        return initArmSwingAnim(1.0F);
+    }
+    
+    private ModelPoseSided<T> initArmSwingAnim(float backSwing) {
+        return new ModelPoseSided<>(
+                initArmSwingPose(HandSide.LEFT, backSwing, SwingPart.SWING), 
+                initArmSwingPose(HandSide.RIGHT, backSwing, SwingPart.SWING));
+    }
+    
+    private ModelPoseTransition<T> initArmSwingPose(HandSide swingingHand, float backSwingAmount, SwingPart animPart) {
         ModelRenderer punchingArm = getArm(swingingHand);
         ModelRenderer punchingForeArm = getForeArm(swingingHand);
         ModelRenderer otherArm = getArm(swingingHand.getOpposite());
         ModelRenderer otherForeArm = getForeArm(swingingHand.getOpposite());
+
+        float yRotBody = 0.5236F;
+        float yRotArm = yRotBody;
         if (swingingHand == HandSide.LEFT) {
-            punchingArm = this.leftArm;
-            punchingForeArm = this.leftForeArm;
-            otherArm = this.rightArm;
-            otherForeArm = this.rightForeArm;
+            yRotBody *= -1.0F;
         }
-        else {
-            punchingArm = this.rightArm;
-            punchingForeArm = this.rightForeArm;
-            otherArm = this.leftArm;
-            otherForeArm = this.leftForeArm;
-        }    
-
-        float swing = swingAmount * swingAmount * swingAmount;
-
-        upperPart.yRot = 0.5236F - 1.0472F * swing;
-        if (swingingHand == HandSide.LEFT) {
-            this.upperPart.yRot *= -1.0F;
+        
+        ModelPoseTransition<T> anim = null;
+        switch (animPart) {
+        case BACKSWING:
+            anim = new ModelPoseTransition<T>(
+                    new ModelPose<T>(new RotationAngle[] {
+                            new RotationAngle(upperPart, 0, yRotBody, 0),
+                            new RotationAngle(punchingArm, 0.3927F, 0, 1.0472F),
+                            new RotationAngle(punchingForeArm, -2.3562F, 0, 0),
+                            new RotationAngle(otherArm, -1.5708F, 0, 1.5708F),
+                            new RotationAngle(otherForeArm, 0, 0, 0)
+                    }), 
+                    new ModelPose<T>(new RotationAngle[] {
+                            new RotationAngle(upperPart, 0, yRotBody * backSwingAmount, 0),
+                            new RotationAngle(otherArm, -1.5708F + yRotArm * (backSwingAmount - 1), 0, 1.5708F),
+                    }).setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
+                        leftArm.zRot *= -1.0F;
+                        rightArm.yRot = -xRotation * MathUtil.DEG_TO_RAD; // FIXME (!!) use xRotation
+                        leftArm.yRot = xRotation * MathUtil.DEG_TO_RAD;
+                    }));
+            break;
+        case SWING:
+            anim = new ModelPoseTransition<T>(
+                    new ModelPose<T>(new RotationAngle[] {
+                            new RotationAngle(upperPart, 0, yRotBody * backSwingAmount, 0),
+                            new RotationAngle(punchingArm, 0.3927F, 0, 1.0472F),
+                            new RotationAngle(punchingForeArm, -2.3562F, 0, 0),
+                            new RotationAngle(otherArm, -1.5708F + yRotArm * (backSwingAmount - 1), 0, 1.5708F),
+                            new RotationAngle(otherForeArm, 0, 0, 0)
+                    }), 
+                    new ModelPose<T>(new RotationAngle[] {
+                            new RotationAngle(upperPart, 0, -yRotBody * backSwingAmount, 0),
+                            new RotationAngle(punchingArm, -1.5708F + yRotArm * (backSwingAmount - 1), 0, 1.5708F),
+                            new RotationAngle(punchingForeArm, 0, 0, 0),
+                            new RotationAngle(otherArm, 0.3927F, 0, 1.0472F),
+                            new RotationAngle(otherForeArm, -2.3562F, 0, 0)
+                    }).setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
+                        leftArm.zRot *= -1.0F;
+                        rightArm.yRot = -xRotation * MathUtil.DEG_TO_RAD;
+                        leftArm.yRot = xRotation * MathUtil.DEG_TO_RAD;
+                    }))
+                    .setEasing(sw -> sw * sw * sw);
+            break;
         }
-
-        swing = MathHelper.clamp(swing, 0, 1);
-
-        punchingArm.zRot = 1.0472F + swing * 0.5236F;
-        otherArm.zRot = 1.5708F - swing * 0.5236F;
-        leftArm.zRot *= -1.0F;
-
-        rightArm.yRot = -xRotation * MathUtil.DEG_TO_RAD;
-        leftArm.yRot = xRotation * MathUtil.DEG_TO_RAD;
-
-        punchingArm.xRot = 0.3927F - swing * 1.9635F;
-        otherArm.xRot = -1.5708F + swing * 1.9635F;
-
-        punchingForeArm.xRot = 2.3562F * (swing - 1);
-        otherForeArm.xRot = -2.3562F * swing;
-
-        recoveryAnim(recovery, upperPart, leftArm, leftForeArm, rightArm, rightForeArm);
+        return anim;
+    }
+    
+    private enum SwingPart {
+        BACKSWING,
+        SWING
     }
 
-    protected void recoveryAnim(float recoveryProgress, ModelRenderer... modelRenderers) {
-        if (recoveryProgress > 0) {
-            float anim = 1F - recoveryProgress;
-            for (ModelRenderer renderer : modelRenderers) {
-                if (renderer != null) {
-                    renderer.xRot *= anim;
-                    renderer.yRot *= anim;
-                    renderer.zRot *= anim;
-                }
-            }
-        }
+    @Override
+    protected void swingArmBarrage(T entity, float swingAmount, float yRotation, float xRotation, float ticks, HandSide swingingHand, float recovery) {
+        entity.setYBodyRot(entity.yRot);
+        barrageSwing.poseModel(swingAmount, entity, ticks, yRotation, xRotation, swingingHand);
     }
 
     protected ModelRenderer getArm(HandSide side) {
@@ -289,62 +320,30 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         rightArmForearmOnly.copyFrom(rightArm);
     }
 
-    // FIXME //
-    //    @Override
-    //    protected void blockingPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
-    //        this.upperPart.yRot = 0.0F;
-    //        this.rightForeArm.xRot = 0.0F;
-    //        this.leftForeArm.xRot = 0.0F;
-    //        
-    //        float blockXRot = MathHelper.clamp(xRotation, -60, 60) * MathUtil.DEG_TO_RAD / 2;
-    //        rightArm.xRot = -1.5708F + blockXRot;
-    //        leftArm.xRot = rightArm.xRot;
-    //
-    //        rightArm.yRot = blockXRot / 2;
-    //        leftArm.yRot = -rightArm.yRot;
-    //        
-    //        rightArm.zRot = Math.abs(blockXRot) / 2 - 0.7854F;
-    //        leftArm.zRot = -rightArm.zRot;
-    //        
-    //        rightForeArm.zRot = -1.0472F;
-    //        leftForeArm.zRot = -rightForeArm.zRot;
-    //    }
-    //
-    //    @Override
-    //    protected void lightAttackPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
-    //        float progress = entity.getCurrentTaskCompletion(ticks - entity.tickCount);
-    //        float swing = phase == Phase.WINDUP ? progress : 1F;
-    //        swingArm(entity, swing, xRotation,
-    //                entity.swingingArm == Hand.MAIN_HAND ? entity.getMainArm() : entity.getMainArm().getOpposite(), 
-    //                        phase == Phase.RECOVERY ? Math.max(4F * (progress - 1) + 1, 0F) : 0F);
-    //    }
-    //
-    //    @Override
-    //    protected void heavyAttackPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
-    //        float progress = entity.getCurrentTaskCompletion(ticks - entity.tickCount);
-    //        float swing = 0F;
-    //        switch (phase) {
-    //        case WINDUP:
-    //            swing = -progress * 0.75F;
-    //            break;
-    //        case PERFORM:
-    //            swing = 1.75F * progress - 0.75F;
-    //            break;
-    //        case RECOVERY:
-    //            swing = 1F;
-    //            break;
-    //        default:
-    //            break;
-    //        }
-    //        swingArm(entity, swing, xRotation,
-    //                entity.swingingArm == Hand.MAIN_HAND ? entity.getMainArm() : entity.getMainArm().getOpposite(), 
-    //                        phase == Phase.RECOVERY ? Math.max(2F * (progress - 1) + 1, 0F) : 0F);
-    //    }
-    //
-    //    @Override
-    //    protected void heavyAttackComboPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
-    //        heavyAttackPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, phase);
-    //    }
+    @Override
+    protected StandActionAnimation<T> initLightAttackAnim() {
+        IModelPose<T> armSwingPose = initArmSwingAnim();
+        return new StandActionAnimation.Builder<T>()
+                .addPose(StandEntityAction.Phase.WINDUP, armSwingPose)
+                .addPose(StandEntityAction.Phase.PERFORM, new RigidModelPose<T>(armSwingPose))
+                .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransition<T>(armSwingPose, idlePose)
+                        .setEasing(pr -> Math.max(4F * (pr - 1) + 1, 0F)))
+                .build(idlePose);
+    }
+    
+    @Override
+    protected StandActionAnimation<T> initHeavyAttackAnim(boolean combo) {
+        float backSwing = 1.75F;
+        return new StandActionAnimation.Builder<T>()
+                .addPose(StandEntityAction.Phase.WINDUP, 
+                        new ModelPoseSided<>(
+                                initArmSwingPose(HandSide.LEFT, backSwing, SwingPart.BACKSWING), 
+                                initArmSwingPose(HandSide.RIGHT, backSwing, SwingPart.BACKSWING)))
+                .addPose(StandEntityAction.Phase.PERFORM, initArmSwingAnim(backSwing))
+                .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransition<T>(initArmSwingAnim(backSwing), idlePose)
+                        .setEasing(pr -> Math.max(2F * (pr - 1) + 1, 0F)))
+                .build(idlePose);
+    }
 
     @Override
     protected ModelPose<T> initPoseReset() {

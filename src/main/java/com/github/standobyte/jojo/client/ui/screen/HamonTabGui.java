@@ -18,6 +18,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
+@SuppressWarnings("deprecation")
 public abstract class HamonTabGui extends AbstractGui {
     protected static final ResourceLocation ADV_WIDGETS = new ResourceLocation("textures/gui/advancements/widgets.png");
     protected final Minecraft minecraft;

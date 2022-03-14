@@ -1,8 +1,11 @@
 package com.github.standobyte.jojo.util.damage;
 
+import java.util.function.Predicate;
+
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.entity.RoadRollerEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModItems;
@@ -74,7 +77,7 @@ public class ModDamageSources {
         return type == EntityType.SNOW_GOLEM || type == EntityType.STRAY || type == EntityType.POLAR_BEAR;
     }
     
-    public static boolean dealColdDamage(Entity target, float amount, @Nullable Entity srcDirect, @Nullable Entity srcIndirect) { // TODO use vanilla mechanic in 1.18 version
+    public static boolean dealColdDamage(Entity target, float amount, @Nullable Entity srcDirect, @Nullable Entity srcIndirect) { // FIXME backport the vanilla mechanic
         if (target instanceof LivingEntity) {
             if (isImmuneToCold(target)) {
                 return false;
@@ -164,6 +167,25 @@ public class ModDamageSources {
     
     public static DamageSource roadRollerDamage(RoadRollerEntity entity) {
         return new EntityDamageSource(ROAD_ROLLER_MSG, entity);
+    }
+    
+    public static boolean dealDamageAndSetOnFire(Entity entity, Predicate<Entity> hurtEntity, int fireSeconds, boolean stand) {
+        int fireTicks = entity.getRemainingFireTicks();
+        setOnFire(entity, fireSeconds, stand);
+        boolean dealtDamage = hurtEntity.test(entity);
+        if (!dealtDamage) {
+            entity.setRemainingFireTicks(fireTicks);
+        }
+        return dealtDamage;
+    }
+    
+    public static void setOnFire(Entity entity, int fireSeconds, boolean stand) {
+        if (stand && entity instanceof StandEntity) {
+            ((StandEntity) entity).setFireFromStand(fireSeconds);
+        }
+        else {
+            entity.setSecondsOnFire(fireSeconds);
+        }
     }
     
     public static boolean hurtThroughInvulTicks(Entity target, DamageSource dmgSource, float amount) {

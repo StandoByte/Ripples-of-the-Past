@@ -47,6 +47,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrSyncHeldActionPac
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncKnivesCountPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncNonStandFlagPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncPowerTypePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrSyncStandTargetPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCachePacket;
 
 import net.minecraft.entity.Entity;
@@ -112,6 +113,7 @@ public class PacketManager {
         channel.registerMessage(index++, SyncStandStatsDataPacket.class, SyncStandStatsDataPacket::encode, SyncStandStatsDataPacket::decode, SyncStandStatsDataPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, SyncStandControlStatusPacket.class, SyncStandControlStatusPacket::encode, SyncStandControlStatusPacket::decode, SyncStandControlStatusPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, StandCancelManualMovementPacket.class, StandCancelManualMovementPacket::encode, StandCancelManualMovementPacket::decode, StandCancelManualMovementPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        channel.registerMessage(index++, TrSyncStandTargetPacket.class, TrSyncStandTargetPacket::encode, TrSyncStandTargetPacket::decode, TrSyncStandTargetPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, TrStandEntitySwingsPacket.class, TrStandEntitySwingsPacket::encode, TrStandEntitySwingsPacket::decode, TrStandEntitySwingsPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, UpdateClientCapCachePacket.class, UpdateClientCapCachePacket::encode, UpdateClientCapCachePacket::decode, UpdateClientCapCachePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, TrSyncKnivesCountPacket.class, TrSyncKnivesCountPacket::encode, TrSyncKnivesCountPacket::decode, TrSyncKnivesCountPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));

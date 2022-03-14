@@ -9,18 +9,19 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui.Alignment;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui.BarsOrientation;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui.ElementTransparency;
-import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 
+@SuppressWarnings("deprecation")
 public abstract class BarsRenderer {
     static final int BARS_WIDTH_PX = 28;
     
@@ -53,7 +54,7 @@ public abstract class BarsRenderer {
                     tickCounter, partialTick); 
         }
         if (standPower != null && standPower.hasPower()) {
-            if (!standPower.isStaminaInfinite() && standPower.usesStamina()) {
+            if (standPower.usesStamina() && !standPower.isStaminaInfinite()) {
                 // FIXME (!) get stamina costs
                 renderBarWithIcon(matrixStack, BarType.STAMINA, null, 
                         currentMode == PowerClassification.STAND, 0xFFFFFF, 1, 
@@ -163,7 +164,7 @@ public abstract class BarsRenderer {
     }
     
     protected final float alphaMultiplier(BarType barType) {
-        if (barType == BarType.STAMINA && Minecraft.getInstance().player.hasEffect(ModEffects.RESOLVE.get())) {
+        if (barType == BarType.STAMINA && StandUtil.standIgnoresStaminaDebuff(Minecraft.getInstance().player)) {
             return 0.3F;
         }
         return 1F;

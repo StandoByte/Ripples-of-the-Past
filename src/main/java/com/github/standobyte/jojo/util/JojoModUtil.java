@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket;
@@ -39,18 +40,21 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.EntityRayTraceResult;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 
 public class JojoModUtil {
     
     public static RayTraceResult rayTrace(Entity entity, double reachDistance, @Nullable Predicate<Entity> entityFilter) {
-        return rayTrace(entity, reachDistance, entityFilter, 0, 0);
+        return rayTrace(entity, reachDistance, entityFilter, 0);
     }
     
     public static RayTraceResult rayTrace(Entity entity, double reachDistance, @Nullable Predicate<Entity> entityFilter, 
@@ -67,6 +71,10 @@ public class JojoModUtil {
         return rayTrace(startPos, endPos, aabb, reachDistance, entity.level, entity, entityFilter, rayTraceInflate, standPrecision);
     }
     
+    public static RayTraceResult standRayTrace(StandEntity entity, @Nullable Predicate<Entity> entityFilter, double rayTraceInflate) {
+        return rayTrace(entity, entity.getAttributeValue(ForgeMod.REACH_DISTANCE.get()), entityFilter, rayTraceInflate, entity.getPrecision());
+    }
+    
     public static RayTraceResult rayTrace(Vector3d startPos, Vector3d endPos, AxisAlignedBB aabb, 
             double minDistance, World world, @Nullable Entity entity, @Nullable Predicate<Entity> entityFilter, 
             double rayTraceInflate, double standPrecision) {
@@ -76,7 +84,8 @@ public class JojoModUtil {
         minDistance *= minDistance;
         for (Entity potentialTarget : world.getEntities(entity, aabb, e -> !e.isSpectator() && e.isPickable() && (entityFilter == null || entityFilter.test(e)))) {
             AxisAlignedBB targetCollisionAABB = potentialTarget.getBoundingBox().inflate((double) potentialTarget.getPickRadius() + rayTraceInflate);
-            Optional<Vector3d> clipOptional = expandTargetAABB(targetCollisionAABB, standPrecision).clip(startPos, endPos);
+            targetCollisionAABB = standPrecisionTargetHitbox(targetCollisionAABB, standPrecision);
+            Optional<Vector3d> clipOptional = targetCollisionAABB.clip(startPos, endPos);
             if (targetCollisionAABB.contains(startPos)) {
                 if (minDistance >= 0.0D) {
                     targetEntity = potentialTarget;
@@ -103,10 +112,18 @@ public class JojoModUtil {
         if (targetEntity == null) {
             return world.clip(new RayTraceContext(startPos, endPos, RayTraceContext.BlockMode.OUTLINE, RayTraceContext.FluidMode.NONE, entity));
         }
-        return new EntityDistanceRayTraceResult(targetEntity, targetEntityPos, Math.sqrt(minDistance));
+        return new EntityRayTraceResult(targetEntity, targetEntityPos);
     }
     
-    private static AxisAlignedBB expandTargetAABB(AxisAlignedBB aabb, double standPrecision) {
+    private static AxisAlignedBB standPrecisionTargetHitbox(AxisAlignedBB aabb, double precision) {
+        if (precision > 0) {
+            double smallAabbAddFraction = Math.min(precision, 16) / 16;
+            aabb.inflate(
+                    Math.max(1.0 - aabb.getXsize(), 0) * smallAabbAddFraction, 
+                    Math.max(2.5 - aabb.getYsize(), 0) * smallAabbAddFraction, 
+                    Math.max(1.0 - aabb.getZsize(), 0) * smallAabbAddFraction);
+            aabb = aabb.inflate(precision / 20);
+        }
         return aabb;
     }
     
@@ -124,6 +141,26 @@ public class JojoModUtil {
             rayTraceResult = entityRayTraceResult;
         }
         return rayTraceResult;
+    }
+    
+    public static boolean isAnotherEntityTargeted(RayTraceResult rayTraceResult, Entity targettingEntity) {
+        return (rayTraceResult.getType() == RayTraceResult.Type.ENTITY
+                && !((EntityRayTraceResult) rayTraceResult).getEntity().is(targettingEntity));
+    }
+    
+    public static double getDistance(Entity entity, AxisAlignedBB aabb, double precision) {
+        aabb = standPrecisionTargetHitbox(aabb, precision);
+        Vector3d startPos = entity.getEyePosition(1.0F);
+        if (aabb.contains(startPos)) {
+            return 0;
+        }
+        Vector3d endPos = new Vector3d(
+                MathHelper.lerp(0.5D, aabb.minX, aabb.maxX), 
+                MathHelper.lerp(entity.getBbHeight() == 0 ? 0 : 
+                    entity.getEyeHeight() / entity.getBbHeight(), aabb.minY, aabb.maxY), 
+                MathHelper.lerp(0.5D, aabb.minZ, aabb.maxZ));
+        Optional<Vector3d> clipOptional = aabb.clip(startPos, endPos);
+        return clipOptional.map(clipVec -> startPos.distanceTo(clipVec) - entity.getBbWidth() / 2).orElse(-1D);
     }
     
     public static Iterable<Entity> getAllEntities(World world) {

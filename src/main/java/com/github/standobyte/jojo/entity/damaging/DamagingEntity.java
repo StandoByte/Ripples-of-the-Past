@@ -113,6 +113,10 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
             else {
                 entityHurt = hurtTarget(target, owner);
             }
+            int prevTargetFireTimer = target.getRemainingFireTicks();
+            if (isOnFire()) {
+                target.setSecondsOnFire(5);
+            }
             if (entityHurt) {
                 if (owner instanceof StandEntity && target instanceof LivingEntity) {
                     LivingEntity standUser = ((StandEntity) owner).getUser();
@@ -122,9 +126,9 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
                         livingTarget.lastHurtByPlayerTime = 100;
                     }
                 }
-                if (isOnFire()) {
-                    target.setSecondsOnFire(5);
-                }
+            }
+            else {
+                target.setRemainingFireTicks(prevTargetFireTimer);
             }
             afterEntityHit(entityRayTraceResult, entityHurt);
         }

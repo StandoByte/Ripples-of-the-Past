@@ -3,11 +3,13 @@ package com.github.standobyte.jojo.client.model.entity.stand;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
 import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
+import com.github.standobyte.jojo.util.MathUtil;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
 
@@ -173,6 +175,37 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
     }
 
     protected final Map<StandPose, StandActionAnimation<SilverChariotEntity>> rapierAnim = new HashMap<>();
+    @Override
+    protected void initPoses() {
+        super.initPoses();
+        
+        rapierAnim.put(StandPose.LIGHT_ATTACK, initLightAttackAnim());
+        
+        rapierAnim.put(StandPose.HEAVY_ATTACK, initHeavyAttackAnim(false));
+        
+        rapierAnim.put(StandPose.HEAVY_ATTACK_COMBO, initHeavyAttackAnim(true));
+        
+        rapierAnim.put(StandPose.RANGED_ATTACK, new StandActionAnimation.Builder<SilverChariotEntity>()
+                .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<SilverChariotEntity>(new RotationAngle[] {
+                        new RotationAngle(body, 0.0F, -0.7854F, 0.0F),
+                        new RotationAngle(upperPart, 0.0F, -0.7854F, 0.0F),
+                        new RotationAngle(leftArm, 0.2618F, 0.0F, -0.1309F),
+                        new RotationAngle(rightArm, 0.0F, 1.5708F, 1.5708F),
+                        new RotationAngle(rapier, 1.5708F, 0.0F, 0.0F)
+                }).setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
+                    rightArm.zRot -= xRotation * MathUtil.DEG_TO_RAD; // FIXME (!!) use xRotation
+                })).build(idlePose));
+        
+        rapierAnim.put(StandPose.BLOCK, new StandActionAnimation.Builder<SilverChariotEntity>()
+                .addPose(StandEntityAction.Phase.PERFORM, new ModelPose<SilverChariotEntity>(new RotationAngle[] {
+                        new RotationAngle(leftArm, -0.8727F, 0.0F, -0.1745F),
+                        new RotationAngle(leftForeArm, -1.5708F, 0.2618F, 0.0F),
+                        new RotationAngle(rightArm, 0.5236F, 0.0F, 0.1746F),
+                        new RotationAngle(rightForeArm, -1.9199F, 0.0F, 0.0F),
+                        new RotationAngle(rapier, 0.829F, 0.0F, -1.1781F)
+                })).build(idlePose));
+    }
+    
     protected StandActionAnimation<SilverChariotEntity> getActionAnim(SilverChariotEntity entity, StandPose poseType) {
         if (entity.hasRapier() && rapierAnim.containsKey(poseType)) {
             return rapierAnim.get(poseType);
@@ -231,35 +264,6 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
     //            }
     //            
     //            recoveryAnim(recovery, upperPart, leftArm, leftForeArm, rightArm, rightForeArm);
-    //        }
-    //    }
-    //    
-    //    @Override
-    //    public void blockingPose(SilverChariotEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
-    //        if (!entity.hasRapier()) {
-    //            super.blockingPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
-    //        }
-    //        else {
-    //            setRotationAngle(leftArm, -0.8727F, 0.0F, -0.1745F);
-    //            setRotationAngle(leftForeArm, -1.5708F, 0.2618F, 0.0F);
-    //            setRotationAngle(rightArm, 0.5236F, 0.0F, 0.1746F);
-    //            setRotationAngle(rightForeArm, -1.9199F, 0.0F, 0.0F);
-    //            if (rapier != null) {
-    //                setRotationAngle(rapier, 0.829F, 0.0F, -1.1781F);
-    //            }
-    //        }
-    //    }
-    //    
-    //    @Override
-    //    protected void rangedAttackPose(SilverChariotEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
-    //        entity.setYBodyRot(entity.yRot);
-    //        setRotationAngle(body, 0.0F, -0.7854F, 0.0F);
-    //        setRotationAngle(upperPart, 0.0F, -0.7854F, 0.0F);
-    //        setRotationAngle(leftArm, 0.2618F, 0.0F, -0.1309F);
-    //        setRotationAngle(rightArm, -1.5708F, 1.5708F, 0.0F);
-    //        setRotationAngle(rightArm, 0.0F, 1.5708F, 1.5708F - xRotation * MathUtil.DEG_TO_RAD);
-    //        if (rapier != null) {
-    //            setRotationAngle(rapier, 1.5708F, 0.0F, 0.0F);
     //        }
     //    }
 }

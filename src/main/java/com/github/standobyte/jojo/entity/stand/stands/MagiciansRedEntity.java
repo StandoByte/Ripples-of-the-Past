@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.entity.stand.stands;
 
+import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.util.damage.ModDamageSources;
@@ -22,18 +23,9 @@ public class MagiciansRedEntity extends StandEntity {
     }
     
     @Override
-    public boolean attackEntity(Entity target, PunchType punch, double attackDistance) {
-        if (super.attackEntity(target, punch, attackDistance)) {
-            int seconds = 10;
-            if (target instanceof StandEntity) {
-                ((StandEntity) target).setFireFromStand(seconds);
-            }
-            else {
-                target.setSecondsOnFire(seconds);
-            }
-            return true;
-        }
-        return false;
+    public boolean attackEntity(Entity target, PunchType punch, StandEntityAction action, int barrageHits) {
+        return ModDamageSources.dealDamageAndSetOnFire(target, 
+                entity -> super.attackEntity(target, punch, action, barrageHits), 10, true);
     }
     
     @Override

@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.client.model.pose;
 
+import com.github.standobyte.jojo.util.MathUtil;
+
 import net.minecraft.client.renderer.model.ModelRenderer;
 
 public class RotationAngle {
@@ -17,6 +19,10 @@ public class RotationAngle {
         this.angleZ = angleZ;
     }
     
+    public static RotationAngle fromDegrees(ModelRenderer modelRenderer, float angleX, float angleY, float angleZ) {
+        return new RotationAngle(modelRenderer, angleX * MathUtil.DEG_TO_RAD, angleY * MathUtil.DEG_TO_RAD, angleZ * MathUtil.DEG_TO_RAD);
+    }
+    
     public void applyRotation(float rotationAmount) {
         modelRenderer.xRot = modelRenderer.xRot + smallestDiff(angleX - modelRenderer.xRot) * rotationAmount;
         modelRenderer.yRot = modelRenderer.yRot + smallestDiff(angleY - modelRenderer.yRot) * rotationAmount;
@@ -25,12 +31,12 @@ public class RotationAngle {
     
     private float smallestDiff(float diff) {
         diff %= DOUBLE_PI;
-//        if (diff > PI) {
-//            diff -= DOUBLE_PI;
-//        }
-//        else if (diff < -PI) {
-//            diff += DOUBLE_PI;
-//        }
+        if (diff > PI) {
+            diff -= DOUBLE_PI;
+        }
+        else if (diff <= -PI) {
+            diff += DOUBLE_PI;
+        }
         return diff;
     }
 }
