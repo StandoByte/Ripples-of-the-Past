@@ -52,20 +52,15 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
     public RayTraceResult clientHitResult(IStandPower power, Entity cameraEntity, RayTraceResult vanillaHitResult) {
         if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
             StandEntity stand = (StandEntity) power.getStandManifestation();
-            // FIXME (!!) stand precision aiming
-//            LivingEntity aimingEntity = user;
-//            if (power.isActive()) {
-//                IStandManifestation stand = power.getStandManifestation();
-//                if (stand instanceof StandEntity) {
-//                    StandEntity standEntity = (StandEntity) stand;
-//                    if (standEntity.isManuallyControlled()) {
-//                        aimingEntity = standEntity;
-//                    }
-//                }
-//            }
-//            return JojoModUtil.rayTrace(aimingEntity, getClientAimRange(), entity -> {
-//                return !(entity instanceof LivingEntity) || user.canAttack((LivingEntity) entity);
-//            });
+            if (JojoModUtil.isAnotherEntityTargeted(vanillaHitResult, stand)) {
+                return super.clientHitResult(power, cameraEntity, vanillaHitResult);
+            }
+
+            RayTraceResult standHitResult = stand.precisionRayTrace(cameraEntity);
+
+            if (JojoModUtil.isAnotherEntityTargeted(standHitResult, stand)) {
+                return standHitResult;
+            }
         }
         return super.clientHitResult(power, cameraEntity, vanillaHitResult);
     }

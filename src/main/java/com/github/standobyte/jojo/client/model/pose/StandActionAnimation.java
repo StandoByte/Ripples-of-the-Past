@@ -6,6 +6,7 @@ import java.util.Map;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.util.HandSide;
 
 public class StandActionAnimation<T extends Entity> {
     private final Map<StandEntityAction.Phase, IModelPose<T>> phasePoses;
@@ -38,8 +39,8 @@ public class StandActionAnimation<T extends Entity> {
     }
     
     public void animate(StandEntityAction.Phase phase, float actionCompletion, 
-            T entity, float ticks, float yRotationOffset, float xRotation) {
-        phasePoses.get(phase).poseModel(actionCompletion, entity, ticks, yRotationOffset, xRotation);
+            T entity, float ticks, float yRotationOffset, float xRotation, HandSide side) {
+        phasePoses.get(phase).poseModel(actionCompletion, entity, ticks, yRotationOffset, xRotation, side);
     }
 
     

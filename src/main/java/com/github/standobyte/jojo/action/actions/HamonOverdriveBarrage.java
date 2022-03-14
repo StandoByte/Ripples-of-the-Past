@@ -12,6 +12,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
@@ -53,10 +54,10 @@ public class HamonOverdriveBarrage extends HamonAction {
                             }
                             else if (!ForgeHooks.canHarvestBlock(blockState, player, world, pos)) {
                                 digDuration *= 10F / 3F;
-                                dropItem = false;
+//                                dropItem = false;
                             }
                         }
-                        if (digDuration >= 0 && digDuration <= 3F) {
+                        if (digDuration >= 0 && digDuration <= 2.5F * user.getAttributeValue(Attributes.ATTACK_DAMAGE)) {
                             world.destroyBlock(pos, dropItem);
                             power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get().hamonPointsFromAction(HamonStat.STRENGTH, getHeldTickEnergyCost());
                         }

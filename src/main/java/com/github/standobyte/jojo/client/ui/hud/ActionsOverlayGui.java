@@ -59,6 +59,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
+@SuppressWarnings("deprecation")
 public class ActionsOverlayGui extends AbstractGui {
     private static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");
     private static final ResourceLocation OVERLAY_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/overlay.png");
@@ -733,7 +734,7 @@ public class ActionsOverlayGui extends AbstractGui {
                     1F - (float) power.getLeapCooldown() / (float) power.getLeapCooldownPeriod() : 1;
             boolean translucent = !power.canLeap();
             
-            renderFilledIcon(matrixStack, iconX, iconY, translucent, iconFill, 96, 238, 18, 18);
+            renderFilledIcon(matrixStack, iconX, iconY, translucent, iconFill, 96, 238, 18, 18, 0xFFFFFF);
         }
     }
     
@@ -745,18 +746,25 @@ public class ActionsOverlayGui extends AbstractGui {
                 int x = screenWidth / 2 + (modeSelectorPosition.alignment == Alignment.LEFT ? -24 : 6);
                 int y = screenHeight / 2 - 9;
                 float combo = ((StandEntity) stand).getComboMeter();
-                renderFilledIcon(matrixStack, x, y, false, combo, 96, 216, 18, 18);
+                int color = ((StandEntity) stand).willHeavyPunchCombo() ? 0x00FF00 : 0xFFFFFF;
+                renderFilledIcon(matrixStack, x, y, false, combo, 96, 216, 18, 18, color);
             }
         }
     }
     
     private void renderFilledIcon(MatrixStack matrixStack, int x, int y, boolean translucent, float fill, 
-            int texX, int texY, int texWidth, int texHeight) {
+            int texX, int texY, int texWidth, int texHeight, int color) {
         blit(matrixStack, x, y, texX, texY, texWidth, texHeight);
+        float[] rgb = ClientUtil.rgb(color);
+        float alpha = 1.0F;
         if (translucent) {
-            RenderSystem.color4f(0.5F, 0.5F, 0.5F, 0.75F);
+            for (int i = 0; i < 3; i++) {
+                rgb[i] *= 0.5F;
+            }
+            alpha = 0.75F;
         }
-        int px = (int) (19F * fill);
+        RenderSystem.color4f(rgb[0], rgb[1], rgb[2], alpha);
+        int px = (int) (18F * fill);
         blit(matrixStack, x, y + texHeight - px, texX + texWidth, texY + texHeight - px, texWidth, px);
         if (translucent) {
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);

@@ -1,7 +1,5 @@
 package com.github.standobyte.jojo.entity.stand;
 
-import java.util.Random;
-
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.util.MathUtil;
@@ -13,17 +11,8 @@ import net.minecraft.util.math.MathHelper;
 
 public class StandStatFormulas {
 
-    public static final float getHeavyAttackDamage(double strength, float armorPiercing, @Nullable LivingEntity armoredTarget) {
+    public static final float getHeavyAttackDamage(double strength, @Nullable LivingEntity armoredTarget) {
         float damage = Math.max((float) strength, 1F);
-        if (armoredTarget != null) {
-            float armor = (float) armoredTarget.getArmorValue();
-            float toughness = (float) armoredTarget.getAttributeValue(Attributes.ARMOR_TOUGHNESS);
-            if (armor > 0 && toughness > 0 && armorPiercing > 0) {
-                armorPiercing = MathHelper.clamp(armorPiercing, 0, 1);
-                float damagePierced = MathHelper.lerp(armorPiercing, CombatRules.getDamageAfterAbsorb(damage, armor, toughness), damage);
-                damage = MathUtil.inverseArmorProtectionDamage(damagePierced, armor, toughness);
-            }
-        }
         return damage;
     }
 
@@ -31,14 +20,28 @@ public class StandStatFormulas {
         return (float) strength * 0.0125F;
     }
     
+    public static final float addArmorPiercing(float damage, float armorPiercing, @Nullable LivingEntity armoredTarget) {
+        if (armoredTarget != null && armorPiercing > 0) {
+            float armor = (float) armoredTarget.getArmorValue();
+            if (armor > 0) {
+                float toughness = (float) armoredTarget.getAttributeValue(Attributes.ARMOR_TOUGHNESS);
+                armorPiercing = MathHelper.clamp(armorPiercing, 0, 1);
+                float damagePierced = MathHelper.lerp(armorPiercing, CombatRules.getDamageAfterAbsorb(damage, armor, toughness), damage);
+                damage = MathUtil.inverseArmorProtectionDamage(damagePierced, armor, toughness);
+            }
+        }
+        return damage;
+    }
+    
     public static final int getHeavyAttackWindup(double speed, float comboMeter) {
-        double min = (40 - speed * 1.25) / 3;
-        double max = (40 - speed * 1.25) * 2 / 3;
-        return MathHelper.ceil(MathHelper.lerp((double) (Math.min(comboMeter, 0.5F) * 2F), max, min));
+        float f = (40 - (float) speed * 1.25F);
+        float min = f / 6;
+        float max = f * 2 / 3;
+        return MathHelper.ceil(MathHelper.lerp(comboMeter, max, min));
     }
     
     public static final int getHeavyAttackRecovery(double speed) {
-        return MathHelper.floor((40 - speed * 1.25) / 3);
+        return MathHelper.floor((40 - speed * 1.25) / 2);
     }
     
     
@@ -48,9 +51,9 @@ public class StandStatFormulas {
     }
     
     public static final int getLightAttackWindup(double speed, float earlyStart) {
-        int ticks = Math.max(5 - MathHelper.log2((int) speed), 1);
+        int ticks = Math.max(6 - MathHelper.log2((int) speed), 1);
         if (earlyStart > 0) {
-            ticks += (int) (lightAttackRecovery(speed) * earlyStart * 0.5F) + 1;
+            ticks += (int) (lightAttackRecovery(speed) * earlyStart) + 1;
         }
         return ticks;
     }
@@ -69,7 +72,7 @@ public class StandStatFormulas {
     
     
     
-    public static final float getBarrageHitDamage(double strength, double precision, Random random) {
+    public static final float getBarrageHitDamage(double strength, double precision) {
         float damage = 0.04F + (float) strength * 0.01F;
         if (precision > 0) {
             double pr = precision / 16;
@@ -126,7 +129,7 @@ public class StandStatFormulas {
         return 0.1 + speed * 0.05;
     }
     
-    public static final boolean isBlockBreakable(double strength, float blockHardness, int blockHarvestLevel) { // TODO block breaking progress (B-statted stand can break obsidian, but it's slow)
+    public static final boolean isBlockBreakable(double strength, float blockHardness, int blockHarvestLevel) {
         /* damage:
          * 2                                4                                   8                                   12                                      16
          * 

@@ -133,8 +133,8 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         setRotationAngle(rightCable, 0.0873F, -0.1309F, 1.2217F);
         rightCable.texOffs(52, 29).addBox(-0.5F, 0.0F, 0.0F, 1.0F, 4.0F, 5.0F, 0.0F, false);
 
-        torso.texOffs(11, 37).addBox(-3.5F, 1.1F, -2.0F, 7.0F, 3.0F, 1.0F, 0.4F, false);
-        torso.texOffs(0, 31).addBox(-2.5F, 4.0F, -2.3F, 5.0F, 6.0F, 1.0F, 0.0F, false);
+        torso.texOffs(9, 37).addBox(-3.5F, 1.1F, -2.0F, 7.0F, 3.0F, 1.0F, 0.4F, false);
+        torso.texOffs(0, 30).addBox(-2.5F, 4.0F, -2.3F, 5.0F, 6.0F, 1.0F, 0.0F, false);
         torso.texOffs(52, 11).addBox(2.0F, -0.25F, -2.5F, 1.0F, 10.0F, 5.0F, 0.25F, true);
         torso.texOffs(52, 11).addBox(-3.0F, -0.25F, -2.5F, 1.0F, 10.0F, 5.0F, 0.25F, false);
         torso.texOffs(24, 0).addBox(0.5F, 1.0F, 2.0F, 2.0F, 6.0F, 2.0F, 0.0F, true);
@@ -206,7 +206,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
 
         leftForeArm.texOffs(36, 35).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 5.0F, 4.0F, 0.25F, true);
         leftForeArm.texOffs(41, 18).addBox(1.0F, 2.0F, -1.5F, 2.0F, 3.0F, 3.0F, -0.4F, true);
-        leftForeArm.texOffs(27, 34).addBox(1.5F, 5.1F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, true);
+        leftForeArm.texOffs(25, 34).addBox(1.5F, 5.1F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, true);
 
         rightArm.texOffs(48, 0).addBox(-2.0F, -2.0F, -2.0F, 2.0F, 4.0F, 4.0F, 0.25F, false);
 
@@ -234,7 +234,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
 
         rightForeArm.texOffs(36, 35).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 5.0F, 4.0F, 0.25F, false);
         rightForeArm.texOffs(41, 18).addBox(-3.0F, 2.0F, -1.5F, 2.0F, 3.0F, 3.0F, -0.4F, false);
-        rightForeArm.texOffs(27, 34).addBox(-2.5F, 5.1F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, false);
+        rightForeArm.texOffs(25, 34).addBox(-2.5F, 5.1F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, false);
 
         leftLeg.texOffs(28, 42).addBox(1.6F, -1.75F, -1.5F, 1.0F, 3.0F, 3.0F, 0.0F, true);
 
@@ -336,9 +336,46 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
     @Override
     protected StandActionAnimation<TheWorldEntity> initHeavyAttackAnim(boolean combo) {
         if (combo) {
-            return super.initHeavyAttackAnim(combo);
+            ModelPose<TheWorldEntity> pose1 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+                    RotationAngle.fromDegrees(head, -7.5F, 153.33F, 0F), 
+                    RotationAngle.fromDegrees(body, 0F, 153.33F, 0F),
+                    RotationAngle.fromDegrees(leftArm, 0F, 0F, -30F),
+                    RotationAngle.fromDegrees(leftForeArm, 0F, 0F, 15F),
+                    RotationAngle.fromDegrees(rightArm, -32.5F, 22.5F, -22.5F),
+                    RotationAngle.fromDegrees(rightForeArm, 0F, 0F, -45F),
+                    RotationAngle.fromDegrees(leftLeg, 0F, 0F, 0F),
+                    RotationAngle.fromDegrees(rightLeg, -10F, 0F, 20F),
+                    RotationAngle.fromDegrees(rightLowerLeg, 50F, 0F, 0F)
+            });
+            ModelPose<TheWorldEntity> pose2 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+                    RotationAngle.fromDegrees(head, -11.25F, 230F, 0F), 
+                    RotationAngle.fromDegrees(body, 0F, 230F, 0F),
+                    RotationAngle.fromDegrees(leftArm, 0F, 0F, -45F),
+                    RotationAngle.fromDegrees(leftForeArm, 0F, 0F, 22.5F),
+                    RotationAngle.fromDegrees(rightArm, -25.28F, 17.5F, -17.5F),
+                    RotationAngle.fromDegrees(rightForeArm, 0F, 0F, -35F),
+                    RotationAngle.fromDegrees(rightLeg, -15F, 0F, 30F),
+                    RotationAngle.fromDegrees(rightLowerLeg, 75F, 0F, 0F)
+            });
+            ModelPose<TheWorldEntity> pose3 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+                    RotationAngle.fromDegrees(head, -15F, 360F, 0F), 
+                    RotationAngle.fromDegrees(body, -43.00306F, 308.28988F, 36.20399F),
+                    RotationAngle.fromDegrees(leftArm, 0F, 0F, -60F),
+                    RotationAngle.fromDegrees(leftForeArm, 0F, 0F, 30F),
+                    RotationAngle.fromDegrees(rightArm, -18.06F, 12.5F, -12.5F),
+                    RotationAngle.fromDegrees(rightForeArm, 0F, 0F, -25F),
+                    RotationAngle.fromDegrees(leftLeg, 15.55245F, 35.50838F, -13.04428F),
+                    RotationAngle.fromDegrees(rightLeg, -30F, 0, 105F),
+                    RotationAngle.fromDegrees(rightLowerLeg, 0F, 0F, 0F)
+            });
+            return new StandActionAnimation.Builder<TheWorldEntity>()
+                    .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransitionMultiple.Builder<TheWorldEntity>(idlePose)
+                            .addPose(0.5F, pose1)
+                            .addPose(0.75F, pose2)
+                            .build(pose3))
+                    .build(idlePose);
         }
-        else {
+        else { // FIXME (!!) use xRotation
             ModelPose<TheWorldEntity> pose1 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
                     new RotationAngle(leftArm, 0.0F, 0.0F, -0.5236F),
                     new RotationAngle(leftForeArm, 0.0F, 0.0F, 0.5672F),
@@ -348,7 +385,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                     new RotationAngle(rightLeg, 0.2618F, 0.2618F, 0.1309F)
             });
             ModelPose<TheWorldEntity> pose2 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
-                    new RotationAngle(head, -0.2182F, 0.0F, 0.0F),
+                    new RotationAngle(head, -0.2182F, 0.0F, 0.0F), // FIXME (!!) ADD head rotation
                     new RotationAngle(body, 0.2182F, 0.2618F, 0.0F),
                     new RotationAngle(upperPart, 0.0F, 0.1745F, 0.0F),
                     new RotationAngle(leftArm, 0.0F, 0.0F, -0.5236F),

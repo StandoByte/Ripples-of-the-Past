@@ -1,8 +1,11 @@
 package com.github.standobyte.jojo.client.model.entity.stand;
 
+import com.github.standobyte.jojo.action.actions.MagiciansRedRedBind;
+import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.client.model.pose.IModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
+import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
 import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
 import com.github.standobyte.jojo.util.MathUtil;
 
@@ -184,25 +187,21 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
                 new RotationAngle(leftLeg, -0.3927F, 0.0F, 0.0873F),
                 new RotationAngle(leftLowerLeg, 0.7854F, 0.0F, 0.0F),
                 new RotationAngle(rightLeg, 0.2618F, 0.0F, -0.0873F)
-        })
-                .setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
-                    leftArm.setPos(4.0F, -10.0F, 0.0F);
-                    rightArm.setPos(-4.0F, -10.0F, 0.0F);
-                    setRotationAngle(head, -0.3927F + xRotation * MathUtil.DEG_TO_RAD, 0.0F, 0.0F);
-                })
-                .createRigid();
+        }).setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
+            leftArm.setPos(4.0F, -10.0F, 0.0F);
+            rightArm.setPos(-4.0F, -10.0F, 0.0F);
+            setRotationAngle(head, -0.3927F + xRotation * MathUtil.DEG_TO_RAD, 0.0F, 0.0F);
+        }).createRigid();
     }
-
-    // FIXME (model anim) MR red bind pose
-    //    @Override
-    //    protected void customPose(MagiciansRedEntity entity, StandPose pose, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation, Phase phase) {
-    //        super.customPose(entity, pose, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation, phase);
-    //        if (pose == MagiciansRedRedBind.RED_BIND_POSE) {
-    //            entity.setYBodyRot(entity.yRot);
-    //            leftArm.xRot = -1.4708F;
-    //            rightArm.xRot = -1.6708F;
-    //            leftArm.yRot = 0.4712F;
-    //            rightArm.yRot = -leftArm.yRot;
-    //        }
-    //    }
+    
+    @Override
+    protected void initPoses() {
+        super.initPoses();
+        
+        actionAnim.put(MagiciansRedRedBind.RED_BIND_POSE, new StandActionAnimation.Builder<MagiciansRedEntity>()
+                .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<MagiciansRedEntity>(new RotationAngle[] { // FIXME (!!) use xRotation
+                        new RotationAngle(leftArm, -1.4708F, 0.4712F, 0.0F),
+                        new RotationAngle(rightArm, -1.6708F, -0.4712F, 0.0F),
+                })).build(idlePose));
+    }
 }

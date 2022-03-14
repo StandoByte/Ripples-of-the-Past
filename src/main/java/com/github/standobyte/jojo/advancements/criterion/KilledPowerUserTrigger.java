@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.advancements.criterion;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.advancements.criterion.predicate.PowerPredicate;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
@@ -32,14 +34,16 @@ public class KilledPowerUserTrigger extends AbstractCriterionTrigger<KilledPower
         return this.id;
     }
 
-    public void trigger(ServerPlayerEntity player, Entity entity, DamageSource damageSource) {
-        LootContext lootCtx = EntityPredicate.createContext(player, entity);
-        LivingEntity livingEntity = entity instanceof LivingEntity ? (LivingEntity) entity : null;
-        trigger(player, (criterion) -> {
-            return criterion.matches(player, lootCtx, damageSource, 
-                    isPlayerKilled ? livingEntity : player, 
-                    isPlayerKilled ? player : livingEntity);
-        });
+    public void trigger(ServerPlayerEntity player, @Nullable Entity entity, DamageSource damageSource) {
+        if (entity != null) {
+            LootContext lootCtx = EntityPredicate.createContext(player, entity);
+            LivingEntity livingEntity = entity instanceof LivingEntity ? (LivingEntity) entity : null;
+            trigger(player, (criterion) -> {
+                return criterion.matches(player, lootCtx, damageSource, 
+                        isPlayerKilled ? livingEntity : player, 
+                        isPlayerKilled ? player : livingEntity);
+            });
+        }
     }
 
     @Override

@@ -3,7 +3,11 @@ package com.github.standobyte.jojo.entity.stand.stands;
 import java.util.List;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
+
+import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
+import com.github.standobyte.jojo.entity.stand.StandAttackProperties;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.init.ModEntityTypes;
@@ -126,23 +130,31 @@ public class SilverChariotEntity extends StandEntity {
     }
 
     @Override
-    public boolean attackEntity(Entity target, PunchType punch, double attackDistance) {
+    public boolean attackEntity(Entity target, PunchType punch, StandEntityAction action, int barrageHits) {
         if (target instanceof ProjectileEntity) {
             target.setDeltaMovement(target.getDeltaMovement().reverse());
             target.move(MoverType.SELF, target.getDeltaMovement());
             return true;
         }
         else {
-            return super.attackEntity(target, punch, attackDistance);
+            return super.attackEntity(target, punch, action, barrageHits);
         }
     }
     
     @Override
-    public double getAttackDamage(LivingEntity target) {
-        double damage = super.getAttackDamage(target);
-        if (hasRapier() && target instanceof SkeletonEntity) {
-            damage *= 0.6;
+    protected StandAttackProperties standAttackProperties(PunchType punchType, Entity target, StandEntityAction action, @Nullable LivingEntity targetLiving, 
+            double strength, double precision, double attackRange, double distance, double knockback, int barrageHits) {
+        StandAttackProperties attack = super.standAttackProperties(punchType, target, action, targetLiving, 
+                strength, precision, attackRange, distance, knockback, barrageHits);
+        
+        switch (punchType) {
+        case BARRAGE:
+            if (hasRapier() && targetLiving instanceof SkeletonEntity) {
+                attack.damage(attack.getDamage() * 0.75F);
+            }
+        default:
+            break;
         }
-        return damage;
+        return attack;
     }
 }

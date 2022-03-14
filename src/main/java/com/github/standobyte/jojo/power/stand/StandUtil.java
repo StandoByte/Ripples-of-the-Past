@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.client.StandController;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStandControlStatusPacket;
@@ -92,5 +93,9 @@ public class StandUtil {
                 }
             }
         }
+    }
+    
+    public static boolean standIgnoresStaminaDebuff(LivingEntity user) {
+        return user == null || user.hasEffect(ModEffects.RESOLVE.get());
     }
 }

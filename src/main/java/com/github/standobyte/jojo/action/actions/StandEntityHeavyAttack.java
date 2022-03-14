@@ -27,6 +27,7 @@ public class StandEntityHeavyAttack extends StandEntityAction {
     public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase) {
         standEntity.alternateHands();
         if (!world.isClientSide()) {
+            standEntity.setHeavyPunchCombo();
             standEntity.addComboMeter(-0.51F, 0);
         }
     }
@@ -34,7 +35,7 @@ public class StandEntityHeavyAttack extends StandEntityAction {
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {
         if (!world.isClientSide()) {
-            standEntity.punch(standEntity.getComboMeter() >= 0.5F ? PunchType.HEAVY_COMBO : PunchType.HEAVY_NO_COMBO, target);
+            standEntity.punch(standEntity.isHeavyComboPunching() ? PunchType.HEAVY_COMBO : PunchType.HEAVY_NO_COMBO, target, this);
         }
     }
     
@@ -55,6 +56,6 @@ public class StandEntityHeavyAttack extends StandEntityAction {
     
     @Override
     public StandPose getStandPose(IStandPower standPower, StandEntity standEntity) {
-        return standEntity.isHeavyPunchInCombo() ? StandPose.HEAVY_ATTACK_COMBO : super.getStandPose(standPower, standEntity);
+        return standEntity.isHeavyComboPunching() ? StandPose.HEAVY_ATTACK_COMBO : super.getStandPose(standPower, standEntity);
     }
 }

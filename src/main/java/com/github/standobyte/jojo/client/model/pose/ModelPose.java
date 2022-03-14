@@ -6,6 +6,7 @@ import java.util.function.UnaryOperator;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.HandSide;
 
 public class ModelPose<T extends Entity> implements IModelPose<T> {
     private final Map<ModelRenderer, RotationAngle> rotations = new HashMap<>();
@@ -41,7 +42,7 @@ public class ModelPose<T extends Entity> implements IModelPose<T> {
     }
     
     @Override
-    public void poseModel(float rotationAmount, T entity, float ticks, float yRotationOffset, float xRotation) {
+    public void poseModel(float rotationAmount, T entity, float ticks, float yRotationOffset, float xRotation, HandSide side) {
         rotationAmount = easingFunc.apply(rotationAmount);
         applyRotations(rotationAmount);
         additionalAnim(rotationAmount, entity, ticks, yRotationOffset, xRotation);
