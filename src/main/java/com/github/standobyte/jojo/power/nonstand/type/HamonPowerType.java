@@ -85,6 +85,11 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     }
     
     @Override
+    public boolean keepOnDeath(INonStandPower power) {
+        return JojoModConfig.COMMON.keepHamonOnDeath.get();
+    }
+    
+    @Override
     public void onClear(INonStandPower power) {
         power.getTypeSpecificData(this).ifPresent(hamon -> hamon.setBreathingLevel(0));
     }
@@ -440,7 +445,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     }
 
     public static void hamonPerksOnDeath(LivingEntity dead) {
-        if (JojoModConfig.COMMON.keepNonStandOnDeath.get()) return;
+        if (JojoModConfig.COMMON.keepHamonOnDeath.get()) return;
         INonStandPower.getNonStandPowerOptional(dead).ifPresent(power -> {
             power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
                 if (hamon.getTechnique() != null) {

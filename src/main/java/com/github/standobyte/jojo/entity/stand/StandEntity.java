@@ -246,8 +246,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     private void initStandAttributes(StandStats stats) {
         getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(stats.getBasePower());
-        applyAttributeModifier(Attributes.ATTACK_DAMAGE, UUID.fromString("636784fd-7dfc-4ad9-a2be-8b7f88d868a2"), 
-                "Stand attack damage from config", JojoModConfig.COMMON.standPowerMultiplier.get() - 1, Operation.MULTIPLY_TOTAL);
         getAttribute(Attributes.ATTACK_SPEED).setBaseValue(stats.getBaseAttackSpeed());
         getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(stats.getBaseMovementSpeed());
         getAttribute(ForgeMod.REACH_DISTANCE.get()).setBaseValue(getDefaultMeleeAttackRange());
@@ -955,6 +953,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         entityData.set(CURRENT_TASK, Optional.empty());
         if (scheduledTask != null) {
             StandEntityTask nextTask = scheduledTask;
+            if (clearedTask.getOffsetFromUser() != null) {
+                nextTask.setOffsetFromUser(clearedTask.getOffsetFromUser());
+            }
             scheduledTask = null;
             setTask(nextTask);
         }
@@ -1305,7 +1306,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             livingTarget = (LivingEntity) target;
         }
 
-        double strength = getAttackDamage();
+        double strength = getAttackDamage() * JojoModConfig.COMMON.standDamageMultiplier.get();
         double precision = getPrecision();
         double attackRange = getAttributeValue(ForgeMod.REACH_DISTANCE.get());
         double distance = JojoModUtil.getDistance(this, target.getBoundingBox(), precision);
@@ -1390,7 +1391,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             attack
             .damage(StandStatFormulas.getHeavyAttackDamage(strength, targetLiving))
             .armorPiercing(StandStatFormulas.getHeavyAttackArmorPiercing(strength))
-            .addKnockback((float) strength / 4 * heavyAttackCombo)
+            .addKnockback(1 + (float) strength / 3 * heavyAttackCombo)
             .disableBlocking(distance < attackRange * precision * 0.05);
 
             float targetProximityRatio = 1 - (float) (distance / attackRange);

@@ -448,9 +448,9 @@ public class InputHandler {
                             }
                         }
                         if (power.getPowerClassification() == PowerClassification.STAND) {
-                            leftDash.inputUpdate(input.left, mc.player);
-                            rightDash.inputUpdate(input.right, mc.player);
-                            backDash.inputUpdate(input.down, mc.player);
+                            leftDash.inputUpdate(input.left, input.right || input.up || input.down, mc.player);
+                            rightDash.inputUpdate(input.right, input.left || input.up || input.down, mc.player);
+                            backDash.inputUpdate(input.down, input.left || input.right || input.up, mc.player);
                         }
                     }
                 }
@@ -533,7 +533,11 @@ public class InputHandler {
             this.yRot = yRot;
         }
         
-        private void inputUpdate(boolean keyPress, ClientPlayerEntity player) {
+        private void inputUpdate(boolean keyPress, boolean anotherKeyPress, ClientPlayerEntity player) {
+            if (anotherKeyPress) {
+                triggerTime = 0;
+                return;
+            }
             if (triggerTime > 0) {
                 triggerTime--;
             }

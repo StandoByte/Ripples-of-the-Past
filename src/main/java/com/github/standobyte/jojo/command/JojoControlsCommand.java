@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.command;
 
-import com.github.standobyte.jojo.JojoModConfig;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -11,6 +10,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.KeybindTextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.ClickEvent;
@@ -30,12 +30,7 @@ public class JojoControlsCommand {
                     new KeybindTextComponent("key.use").withStyle(TextFormatting.ITALIC)).withStyle(TextFormatting.GRAY),
             new TranslationTextComponent("jojo.chat.command.controls.stand", 
                     new KeybindTextComponent("jojo.key.toggle_stand").withStyle(TextFormatting.ITALIC),
-                    new KeybindTextComponent("jojo.key.stand_remote_control").withStyle(TextFormatting.ITALIC)).withStyle(TextFormatting.GRAY)
-    };
-    private static final ITextComponent[] LAST_PAGE_VARIANTS = {
-            new TranslationTextComponent("jojo.chat.command.controls.changeable", new TranslationTextComponent("jojo.chat.command.controls.keep_off")).withStyle(TextFormatting.GRAY),
-            new TranslationTextComponent("jojo.chat.command.controls.changeable", new TranslationTextComponent("jojo.chat.command.controls.keep_stand_off")).withStyle(TextFormatting.GRAY),
-            new TranslationTextComponent("jojo.chat.command.controls.changeable", new TranslationTextComponent("jojo.chat.command.controls.keep_non_stand_off")).withStyle(TextFormatting.GRAY),
+                    new KeybindTextComponent("jojo.key.stand_remote_control").withStyle(TextFormatting.ITALIC)).withStyle(TextFormatting.GRAY),
             new TranslationTextComponent("jojo.chat.command.controls.changeable").withStyle(TextFormatting.GRAY)
     };
 
@@ -65,14 +60,7 @@ public class JojoControlsCommand {
     
     private static final ITextComponent getPage(int pageNum) {
         if (pageNum >= TEXT_PAGES.length) {
-            byte i = 0;
-            if (JojoModConfig.COMMON.keepNonStandOnDeath.get()) {
-                i |= 1;
-            }
-            if (JojoModConfig.COMMON.keepStandOnDeath.get()) {
-                i |= 2;
-            }
-            return LAST_PAGE_VARIANTS[i];
+            return StringTextComponent.EMPTY;
         }
         return TEXT_PAGES[pageNum];
     }

@@ -5,14 +5,16 @@ import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType
 
 import java.util.Random;
 
-import javax.annotation.Nullable;
-
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.ModActions;
+import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.TimeHandler;
 import com.github.standobyte.jojo.util.reflection.ClientReflection;
 import com.google.common.base.MoreObjects;
@@ -32,14 +34,13 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Timer;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
@@ -52,6 +53,9 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.event.TickEvent.RenderTickEvent;
+import net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent;
+import net.minecraftforge.event.entity.living.PotionEvent.PotionExpiryEvent;
+import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -63,13 +67,16 @@ public class ClientEventHandler {
     private Minecraft mc;
 
     private Timer clientTimer;
+    private boolean isTimeStopped = false;
     private boolean canSeeInStoppedTime = true;
     private boolean canMoveInStoppedTime = true;
     private float partialTickStoppedAt;
-    @Nullable
-    private ResourceLocation currentShader;
     private static final ResourceLocation SHADER_TIME_STOP = new ResourceLocation("shaders/post/desaturate.json");
     
+    private ResourceLocation resolveShader = null;
+    private StandOstSound ost;
+    
+    private boolean resetShader;
     private double zoomModifier;
     public boolean isZooming;
     
@@ -93,18 +100,6 @@ public class ClientEventHandler {
     
     
     
-    // FIXME (!) tmp, delete (shaders)
-    private static int i = 0;
-    public static void tmpHueShader(boolean random) {
-        int count = HueShiftShaders.SHADERS_HUE_SHIFT.length;
-        int index = random ? new Random().nextInt(count) : i++ % count;
-        ResourceLocation shader = HueShiftShaders.SHADERS_HUE_SHIFT[index];
-        Minecraft.getInstance().player.sendMessage(new StringTextComponent(String.valueOf(index) + ": " + shader.toString()), Util.NIL_UUID);
-        Minecraft.getInstance().gameRenderer.loadEffect(shader);
-    }
-    
-    
-    
     private boolean isTimeStopped(BlockPos blockPos) {
         return isTimeStopped(new ChunkPos(blockPos));
     }
@@ -122,7 +117,7 @@ public class ClientEventHandler {
         else {
             canSeeInStoppedTime = true;
             canMoveInStoppedTime = true;
-            mc.gameRenderer.checkEntityPostEffect(mc.options.getCameraType().isFirstPerson() ? mc.getCameraEntity() : null);
+            resetShader = true;
         }
     }
     
@@ -190,16 +185,27 @@ public class ClientEventHandler {
             if (event.phase == TickEvent.Phase.START) {
                 ActionsOverlayGui.getInstance().tick();
             }
-            if (isTimeStopped(mc.player.blockPosition())) {
-                if (event.phase == TickEvent.Phase.START) {
-                    if (!canSeeInStoppedTime) {
-                        ClientReflection.pauseClient(mc);
-                    }
+            isTimeStopped = isTimeStopped(mc.player.blockPosition());
+            
+            switch (event.phase) {
+            case START:
+                if (isTimeStopped && !canSeeInStoppedTime) {
+                    ClientReflection.pauseClient(mc);
                 }
-                else {
-                    if (canSeeInStoppedTime && mc.gameRenderer.currentEffect() == null) {
-                        mc.gameRenderer.loadEffect(SHADER_TIME_STOP);
-                    }
+                tickResolveEffect();
+                break;
+            case END:
+                if (resetShader) {
+                    mc.gameRenderer.checkEntityPostEffect(mc.options.getCameraType().isFirstPerson() ? mc.getCameraEntity() : null);
+                    resetShader = false;
+                }
+                break;
+            }
+            
+            if (mc.gameRenderer.currentEffect() == null) {
+                ResourceLocation shader = getCurrentShader();
+                if (shader != null) {
+                    mc.gameRenderer.loadEffect(shader);
                 }
             }
             
@@ -211,7 +217,80 @@ public class ClientEventHandler {
             }
         }
     }
+    
+    private ResourceLocation getCurrentShader() {
+        if (JojoModConfig.CLIENT.resolveShaders.get() && resolveShader != null) {
+            return resolveShader;
+        }
+        if (isTimeStopped && canSeeInStoppedTime) {
+            return SHADER_TIME_STOP;
+        }
+        return null;
+    }
 
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onResolveEffectStart(PotionAddedEvent event) {
+        if (event.getOldPotionEffect() == null && event.getPotionEffect().getEffect() == ModEffects.RESOLVE.get()) {
+            if (resolveShader == null) {
+                resolveShader = HueShiftShaders.SHADERS_HUE_SHIFT[new Random().nextInt(HueShiftShaders.SHADERS_HUE_SHIFT.length)];
+            }
+            
+            if (ost == null || ost.isStopped()) {
+                SoundEvent ostSound = IStandPower.getStandPowerOptional(mc.player).map(stand -> {
+                    if (stand.hasPower()) {
+                        return stand.getType().getOst();
+                    }
+                    return null;
+                }).orElse(null);
+                if (ostSound != null) {
+                    ost = new StandOstSound(ostSound, mc);
+                    mc.getSoundManager().play(ost);
+                }
+            }
+        }
+    }
+    
+    private void tickResolveEffect() {
+        if (mc.player.isAlive() && mc.player.hasEffect(ModEffects.RESOLVE.get())) {
+            if (mc.player.getEffect(ModEffects.RESOLVE.get()).getDuration() == 100) {
+                fadeAwayOst(200);
+            }
+        }
+        else {
+            stopResolveShader();
+            fadeAwayOst(0);
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onResolveEffectOver(PotionExpiryEvent event) {
+        if (event.getPotionEffect().getEffect() == ModEffects.RESOLVE.get()) {
+            stopResolveShader();
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onResolveEffectRemoved(PotionRemoveEvent event) {
+        if (event.getPotionEffect() != null && event.getPotionEffect().getEffect() == ModEffects.RESOLVE.get()) {
+            stopResolveShader();
+            fadeAwayOst(50);
+        }
+    }
+    
+    private void stopResolveShader() {
+        if (resolveShader != null) {
+            resetShader = true;
+            resolveShader = null;
+        }
+    }
+    
+    private void fadeAwayOst(int fadeAwayTicks) {
+        if (ost != null) {
+            ost.setFadeAway(fadeAwayTicks);
+            ost = null;
+        }
+    }
+    
     
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -249,7 +328,7 @@ public class ClientEventHandler {
                     }
                     else {
                         ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-                        if (hud.getSelectedAction(ActionType.ATTACK) == ModActions.JONATHAN_OVERDRIVE_BARRAGE.get() /* FIXME (!) && can use it*/) {
+                        if (hud.getSelectedAction(ActionType.ATTACK) == ModActions.JONATHAN_OVERDRIVE_BARRAGE.get()) {
                             FirstPersonRenderer renderer = mc.getItemInHandRenderer();
                             ClientPlayerEntity player = mc.player;
                             Hand swingingArm = MoreObjects.firstNonNull(player.swingingArm, Hand.MAIN_HAND);

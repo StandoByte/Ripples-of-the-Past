@@ -22,7 +22,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
-import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent;
@@ -32,10 +31,11 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
     private final boolean hasHeavyAttack;
     private final boolean hasFastAttack;
 
-    public EntityStandType(int tier, int color, ITextComponent partName, StandAction[] attacks, StandAction[] abilities, 
-            Supplier<SoundEvent> summonShoutSupplier, Class<T> statsClass, T defaultStats, 
+    public EntityStandType(int tier, int color, ITextComponent partName, 
+            StandAction[] attacks, StandAction[] abilities, 
+            Class<T> statsClass, T defaultStats, 
             Supplier<? extends StandEntityType<? extends StandEntity>> entityTypeSupplier) {
-        super(tier, color, partName, attacks, abilities, summonShoutSupplier, statsClass, defaultStats);
+        super(tier, color, partName, attacks, abilities, statsClass, defaultStats);
         this.entityTypeSupplier = entityTypeSupplier;
         
         hasHeavyAttack = Arrays.stream(attacks).anyMatch(

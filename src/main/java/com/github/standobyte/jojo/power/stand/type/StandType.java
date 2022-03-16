@@ -1,10 +1,17 @@
 package com.github.standobyte.jojo.power.stand.type;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import javax.annotation.Nullable;
+
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.actions.StandAction;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.init.ModStandTypes;
@@ -17,6 +24,8 @@ import com.github.standobyte.jojo.util.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.data.StandStatsManager;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
@@ -36,24 +45,52 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     private final T defaultStats;
     private final Class<T> statsClass;
     private String translationKey;
-    private final Supplier<SoundEvent> summonShoutSupplier;
+    private Supplier<SoundEvent> summonShoutSupplier = () -> null;
+    private Supplier<SoundEvent> ostSupplier = () -> null;
+    private Map<Integer, List<ItemStack>> resolveLevelItems = new HashMap<>();
     private ResourceLocation iconTexture;
     
-    public StandType(int tier, int color, ITextComponent partName, StandAction[] attacks, StandAction[] abilities, 
-            Supplier<SoundEvent> summonShoutSupplier, Class<T> statsClass, T defaultStats) {
+    public StandType(int tier, int color, ITextComponent partName, 
+            StandAction[] attacks, StandAction[] abilities, 
+            Class<T> statsClass, T defaultStats) {
         this.tier = MathHelper.clamp(tier, 0, StandUtil.TIER_XP_LEVELS.length - 1);
         this.color = color;
         this.partName = partName;
         this.attacks = attacks;
         this.abilities = abilities;
-        this.summonShoutSupplier = summonShoutSupplier;
         this.statsClass = statsClass;
         this.defaultStats = defaultStats;
+    }
+    
+    public StandType<T> addSummonShout(Supplier<SoundEvent> summonShoutSupplier) {
+        if (summonShoutSupplier != null) {
+            this.summonShoutSupplier = summonShoutSupplier;
+        }
+        return this;
+    }
+    
+    public StandType<T> addOst(Supplier<SoundEvent> ostSupplier) {
+        if (ostSupplier != null) {
+            this.ostSupplier = ostSupplier;
+        }
+        return this;
+    }
+    
+    public StandType<T> addItemOnResolveLevel(int resolveLevel, ItemStack item) {
+        if (item != null && !item.isEmpty()) {
+            resolveLevelItems.computeIfAbsent(resolveLevel, lvl -> new ArrayList<>()).add(item);
+        }
+        return this;
     }
     
     public StandType<T> addPrioritizedCondition(Predicate<LivingEntity> condition) { // FIXME sort this thing out
         this.prioritizedCondition = condition;
         return this;
+    }
+    
+    @Override
+    public boolean keepOnDeath(IStandPower power) {
+        return JojoModConfig.COMMON.keepStandOnDeath.get();
     }
     
     public T getStats() {
@@ -116,8 +153,17 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     public void onNewResolveLevel(IStandPower power) {
-        if (!power.getUser().level.isClientSide()) {
+        LivingEntity user = power.getUser();
+        if (!user.level.isClientSide()) {
             unlockNewActions(power);
+            
+            if (user instanceof PlayerEntity) {
+                List<ItemStack> giveItems = resolveLevelItems.get(power.getResolveLevel());
+                if (giveItems != null) {
+                    PlayerEntity player = (PlayerEntity) user;
+                    giveItems.forEach(item -> player.addItem(item.copy()));
+                }
+            }
         }
     }
     
@@ -199,6 +245,11 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
             }
         }
         return true;
+    }
+    
+    @Nullable
+    public SoundEvent getOst() {
+        return ostSupplier.get();
     }
     
     public abstract void unsummon(LivingEntity user, IStandPower standPower);

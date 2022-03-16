@@ -12,6 +12,7 @@ import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.power.stand.type.EntityStandType;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -33,11 +34,10 @@ public class ModStandTypes {
     public static final DeferredRegister<StandType<?>> STANDS = DeferredRegister.create(
             (Class<StandType<?>>) ((Class<?>) StandType.class), JojoMod.MOD_ID);
     
-    public static final RegistryObject<EntityStandType<TimeStopperStandStats>> STAR_PLATINUM = STANDS.register("star_platinum", 
+    public static final RegistryObject<StandType<TimeStopperStandStats>> STAR_PLATINUM = STANDS.register("star_platinum", 
             () -> new EntityStandType<>(6, 0xB000B0, PART_3_NAME,
                     new StandAction[] {ModActions.STAR_PLATINUM_PUNCH.get(), ModActions.STAR_PLATINUM_BARRAGE.get(), ModActions.STAR_PLATINUM_STAR_FINGER.get()},
                     new StandAction[] {ModActions.STAR_PLATINUM_BLOCK.get(), ModActions.STAR_PLATINUM_ZOOM.get(), ModActions.STAR_PLATINUM_TIME_STOP.get()},
-                    ModSounds.JOTARO_STAR_PLATINUM, 
                     TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
                     .power(16.0)
                     .speed(16.0)
@@ -46,13 +46,14 @@ public class ModStandTypes {
                     .precision(16.0)
                     .maxTimeStopTicks(100, 180)
                     .build(), 
-                    ModEntityTypes.STAR_PLATINUM));
+                    ModEntityTypes.STAR_PLATINUM)
+            .addSummonShout(ModSounds.JOTARO_STAR_PLATINUM)
+            .addOst(ModSounds.STAR_PLATINUM_OST));
     
-    public static final RegistryObject<EntityStandType<TimeStopperStandStats>> THE_WORLD = STANDS.register("the_world", 
+    public static final RegistryObject<StandType<TimeStopperStandStats>> THE_WORLD = STANDS.register("the_world", 
             () -> new EntityStandType<>(6, 0xFFD000, PART_3_NAME,
                     new StandAction[] {ModActions.THE_WORLD_PUNCH.get(), ModActions.THE_WORLD_BARRAGE.get()},
                     new StandAction[] {ModActions.THE_WORLD_BLOCK.get(), ModActions.THE_WORLD_TIME_STOP.get()},
-                    ModSounds.DIO_THE_WORLD, 
                     TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
                     .power(17.0)
                     .speed(16.0)
@@ -61,13 +62,15 @@ public class ModStandTypes {
                     .precision(12.0)
                     .maxTimeStopTicks(100, 180)
                     .build(), 
-                    ModEntityTypes.THE_WORLD));
+                    ModEntityTypes.THE_WORLD)
+            .addSummonShout(ModSounds.DIO_THE_WORLD)
+            .addOst(ModSounds.THE_WORLD_OST)
+            .addItemOnResolveLevel(4, new ItemStack(ModItems.ROAD_ROLLER.get())));
     
-    public static final RegistryObject<EntityStandType<StandStats>> HIEROPHANT_GREEN = STANDS.register("hierophant_green", 
+    public static final RegistryObject<StandType<StandStats>> HIEROPHANT_GREEN = STANDS.register("hierophant_green", 
             () -> new EntityStandType<>(4, 0x00B000, PART_3_NAME,
                     new StandAction[] {ModActions.HIEROPHANT_GREEN_STRING_ATTACK.get(), ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get()},
                     new StandAction[] {ModActions.HIEROPHANT_GREEN_BLOCK.get(), ModActions.HIEROPHANT_GREEN_GRAPPLE.get(), ModActions.HIEROPHANT_GREEN_BARRIER.get()},
-                    ModSounds.KAKYOIN_HIEROPHANT_GREEN, 
                     StandStats.class, new StandStats.Builder()
                     .power(8.0)
                     .speed(10.0)
@@ -75,13 +78,14 @@ public class ModStandTypes {
                     .durability(8.0)
                     .precision(6)
                     .build(), 
-                    ModEntityTypes.HIEROPHANT_GREEN));
+                    ModEntityTypes.HIEROPHANT_GREEN)
+            .addSummonShout(ModSounds.KAKYOIN_HIEROPHANT_GREEN)
+            .addOst(ModSounds.HIEROPHANT_GREEN_OST));
     
-    public static final RegistryObject<EntityStandType<StandStats>> SILVER_CHARIOT = STANDS.register("silver_chariot", 
+    public static final RegistryObject<StandType<StandStats>> SILVER_CHARIOT = STANDS.register("silver_chariot", 
             () -> new EntityStandType<>(5, 0xBEC8D6, PART_3_NAME,
                     new StandAction[] {ModActions.SILVER_CHARIOT_ATTACK.get(), ModActions.SILVER_CHARIOT_BARRAGE.get(), ModActions.SILVER_CHARIOT_RAPIER_LAUNCH.get()},
                     new StandAction[] {ModActions.SILVER_CHARIOT_BLOCK.get(), ModActions.SILVER_CHARIOT_TAKE_OFF_ARMOR.get()},
-                    ModSounds.POLNAREFF_SILVER_CHARIOT, 
                     StandStats.class, new StandStats.Builder()
                     .power(10.0)
                     .speed(14.0)
@@ -89,13 +93,14 @@ public class ModStandTypes {
                     .durability(10.0)
                     .precision(16.0)
                     .build(), 
-                    ModEntityTypes.SILVER_CHARIOT));
+                    ModEntityTypes.SILVER_CHARIOT)
+            .addSummonShout(ModSounds.POLNAREFF_SILVER_CHARIOT)
+            .addOst(ModSounds.SILVER_CHARIOT_OST));
     
-    public static final RegistryObject<EntityStandType<StandStats>> MAGICIANS_RED = STANDS.register("magicians_red", 
+    public static final RegistryObject<StandType<StandStats>> MAGICIANS_RED = STANDS.register("magicians_red", 
             () -> new EntityStandType<>(5, 0xFF6A00, PART_3_NAME,
                     new StandAction[] {ModActions.MAGICIANS_RED_PUNCH.get(), ModActions.MAGICIANS_RED_FLAME_BURST.get(), ModActions.MAGICIANS_RED_FIREBALL.get(), ModActions.MAGICIANS_RED_CROSSFIRE_HURRICANE.get()},
                     new StandAction[] {ModActions.MAGICIANS_RED_BLOCK.get(), ModActions.MAGICIANS_RED_RED_BIND.get(), ModActions.MAGICIANS_RED_DETECTOR.get()},
-                    ModSounds.AVDOL_MAGICIANS_RED, 
                     StandStats.class, new StandStats.Builder()
                     .power(12.0)
                     .speed(8.0)
@@ -103,7 +108,9 @@ public class ModStandTypes {
                     .durability(12.0)
                     .precision(4.0)
                     .build(), 
-                    ModEntityTypes.MAGICIANS_RED));
+                    ModEntityTypes.MAGICIANS_RED)
+            .addSummonShout(ModSounds.AVDOL_MAGICIANS_RED)
+            .addOst(ModSounds.MAGICIANS_RED_OST));
     
     public static final Supplier<EntityStandType<StandStats>> KILLER_QUEEN = () -> null;
     

@@ -96,8 +96,12 @@ public class StandDiscItem extends Item {
         }
     }
     
-    private static StandType<?> getStandFromStack(ItemStack stack) {
-        return ModStandTypes.Registry.getRegistry().getValue(new ResourceLocation(stack.getTag().getString(STAND_TAG)));
+    public static StandType<?> getStandFromStack(ItemStack stack) {
+        return ModStandTypes.Registry.getRegistry().getValue(getStandResLocFromStack(stack));
+    }
+    
+    public static ResourceLocation getStandResLocFromStack(ItemStack stack) {
+        return new ResourceLocation(stack.getTag().getString(STAND_TAG));
     }
     
     public static boolean validStandDisc(ItemStack stack) {

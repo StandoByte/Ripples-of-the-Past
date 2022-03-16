@@ -20,5 +20,10 @@ public class VampirismSpaceRipperStingyEyes extends VampirismAction {
             world.addFreshEntity(new SpaceRipperStingyEyesEntity(world, user, false));
         }
     }
+    
+    @Override
+    public int getCooldown(INonStandPower power, int ticksHeld) {
+        return super.getCooldown(power, ticksHeld) * ticksHeld / this.getHoldDurationMax(power);
+    }
 
 }
