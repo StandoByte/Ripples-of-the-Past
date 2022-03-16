@@ -28,6 +28,7 @@ public class RoadRollerItem extends Item {
 
     @Override
     public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
+        ItemStack handStack = player.getItemInHand(hand);
         if (!world.isClientSide()) {
             RoadRollerEntity roadRoller = new RoadRollerEntity(world);
             roadRoller.copyPosition(player);
@@ -38,8 +39,11 @@ public class RoadRollerItem extends Item {
                     .orElse(false)) {
                 JojoModUtil.sayVoiceLine(player, ModSounds.DIO_ROAD_ROLLER.get());
             }
+            if (!player.abilities.instabuild) {
+                handStack.shrink(1);
+            }
         }
-        return ActionResult.consume(player.getMainHandItem());
+        return ActionResult.consume(handStack);
     }
     
     private static final ITextComponent DESC = new TranslationTextComponent("item.jojo.road_roller_2");

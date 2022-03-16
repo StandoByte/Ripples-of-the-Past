@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.power.stand;
 
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -115,7 +116,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         abilities = Arrays.asList(standType.getAbilities());
         if (JojoModConfig.COMMON.skipStandProgression.get()
                 || user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild) {
-            skipProgression();
+            skipProgression(standType);
         }
         if (usesStamina()) {
             stamina = isUserCreative() ? getMaxStamina() : 0;
@@ -435,10 +436,13 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     
     @Override
-    public void skipProgression() {
+    public void skipProgression(StandType<?> standType) {
         this.skippedProgression = true;
         setResolveLevel(getMaxResolveLevel());
-        actionLearningProgressMap.forEach((action, points) -> {
+        Stream.concat(
+                Arrays.stream(standType.getAttacks()), 
+                Arrays.stream(standType.getAbilities()))
+        .forEach(action -> {
             actionLearningProgressMap.setLearningProgressPoints(action, action.getMaxTrainingPoints(this), this);
         });
     }

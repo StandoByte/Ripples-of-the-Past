@@ -12,9 +12,7 @@ public interface IPowerType<P extends IPower<P, T>, T extends IPowerType<P, T>> 
     static final String NO_POWER_NAME = "";
     int getColor();
     boolean isReplaceableWith(T newType);
-    default boolean isAlwaysLostOnDeath(P power) {
-        return false;
-    }
+    boolean keepOnDeath(P power);
     void tickUser(LivingEntity entity, P power);
     default RayTraceResult clientHitResult(P power, Entity cameraEntity, RayTraceResult vanillaHitResult) {
         return vanillaHitResult;

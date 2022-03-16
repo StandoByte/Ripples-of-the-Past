@@ -92,7 +92,7 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
     @Override
     public Vector3d getOriginPoint(float partialTick) {
         return originBlockPos == null
-                ? partialTick == 1.0F ? position() : standUser.getPosition(partialTick)
+                ? !level.isClientSide() || standUser == null ? position() : standUser.getPosition(partialTick)
                         : Vector3d.atCenterOf(originBlockPos);
     }
 

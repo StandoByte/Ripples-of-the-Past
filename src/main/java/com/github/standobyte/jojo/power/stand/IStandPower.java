@@ -46,7 +46,7 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     void addResolveOnAttack(LivingEntity target, float damageAmount);
     void addResolveOnTakingDamage(DamageSource damageSource, float damageAmount);
     
-    void skipProgression();
+    void skipProgression(StandType<?> standType);
     boolean wasProgressionSkipped();
     float getStatsDevelopment();
     

@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.power.nonstand.type;
 import java.util.Map;
 import java.util.function.IntBinaryOperator;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.actions.VampirismAction;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
@@ -41,6 +42,11 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
     }
     
     @Override
+    public boolean keepOnDeath(INonStandPower power) {
+        return JojoModConfig.COMMON.keepVampirismOnDeath.get() && power.getTypeSpecificData(this).get().isVampireAtFullPower();
+    }
+    
+    @Override
     public void onClear(INonStandPower power) {
         LivingEntity user = power.getUser();
         for (Map.Entry<Effect, IntBinaryOperator> entry : EFFECTS_AMPLIFIERS.entrySet()) {
@@ -53,7 +59,14 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
 
     @Override
     public float getEnergyTickInc(INonStandPower power) {
-        return -1F / 360F;
+        switch (power.getUser().level.getDifficulty()) {
+        case HARD:
+            return 0;
+        case NORMAL:
+            return -1F / 360F;
+        default:
+            return -1F / 72F;
+        }
     }
     
     @Override
@@ -64,11 +77,6 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
     @Override
     public float getStaminaRegenFactor(INonStandPower power, IStandPower standPower) {
         return Math.max((bloodLevel(power) - 4) * 4, 1);
-    }
-    
-    @Override
-    public boolean isAlwaysLostOnDeath(INonStandPower power) {
-        return !power.getTypeSpecificData(this).get().isVampireAtFullPower();
     }
 
     private static int bloodLevel(INonStandPower power) {

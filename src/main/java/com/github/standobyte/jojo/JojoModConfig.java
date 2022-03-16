@@ -22,16 +22,22 @@ import net.minecraftforge.registries.IForgeRegistry;
 
 @EventBusSubscriber(modid = JojoMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public class JojoModConfig {
-
+    
+    // FIXME (!) sync common config with clients
     public static class Common {
         private boolean loaded = false;
         
         public final ForgeConfigSpec.BooleanValue keepStandOnDeath;
-        public final ForgeConfigSpec.BooleanValue keepNonStandOnDeath;
-
-        public final ForgeConfigSpec.BooleanValue abilitiesBreakBlocks;
+        public final ForgeConfigSpec.BooleanValue keepHamonOnDeath;
+        public final ForgeConfigSpec.BooleanValue keepVampirismOnDeath;
         
-        public final ForgeConfigSpec.IntValue timeStopChunkRange;
+        public final ForgeConfigSpec.BooleanValue hamonTempleSpawn;
+        public final ForgeConfigSpec.BooleanValue meteoriteSpawn;
+        public final ForgeConfigSpec.BooleanValue pillarmanTempleSpawn;
+
+        public final ForgeConfigSpec.DoubleValue hamonPointsMultiplier;
+        public final ForgeConfigSpec.DoubleValue breathingTechniqueMultiplier;
+        public final ForgeConfigSpec.BooleanValue breathingTechniqueDeterioration;
 
         public final ForgeConfigSpec.BooleanValue prioritizeLeastTakenStands;
         public final ForgeConfigSpec.BooleanValue standTiers;
@@ -41,40 +47,63 @@ public class JojoModConfig {
 
         public final ForgeConfigSpec.BooleanValue skipStandProgression;
         public final ForgeConfigSpec.BooleanValue standStamina;
-        public final ForgeConfigSpec.DoubleValue standPowerMultiplier;
+        public final ForgeConfigSpec.DoubleValue standDamageMultiplier;
 
-        public final ForgeConfigSpec.DoubleValue hamonPointsMultiplier;
-        public final ForgeConfigSpec.DoubleValue breathingTechniqueMultiplier;
-        public final ForgeConfigSpec.BooleanValue breathingTechniqueDeterioration;
+        public final ForgeConfigSpec.BooleanValue abilitiesBreakBlocks;
         
-        public final ForgeConfigSpec.BooleanValue hamonTempleSpawn;
-        public final ForgeConfigSpec.BooleanValue meteoriteSpawn;
-        public final ForgeConfigSpec.BooleanValue pillarmanTempleSpawn;
+        public final ForgeConfigSpec.IntValue timeStopChunkRange;
         
         Common(ForgeConfigSpec.Builder builder) {
-            keepStandOnDeath = builder
-                    .comment(" Keep Stand after death.")
-                    .translation("jojo.config.keepStandOnDeath") 
-                    .define("keepStandOnDeath", false);
             
-            keepNonStandOnDeath = builder
-                    .comment(" Keep powers (Vampirism/Hamon) after death.")
-                    .translation("jojo.config.keepNonStandOnDeath")
-                    .define("keepNonStandOnDeath", false);
+            builder.push("Keep Powers After Death");
+                keepStandOnDeath = builder
+                        .comment(" Keep Stand after death.")
+                        .translation("jojo.config.keepStandOnDeath") 
+                        .define("keepStandOnDeath", true);
+                
+                keepHamonOnDeath = builder
+                        .comment(" Keep Hamon and its stats after death.")
+                        .translation("jojo.config.keepHamonOnDeath")
+                        .define("keepHamonOnDeath", true);
+                
+                keepVampirismOnDeath = builder
+                        .comment(" Keep vampirism after death.")
+                        .translation("jojo.config.keepHamonOnDeath")
+                        .define("keepHamonOnDeath", true);
+            builder.pop();
             
-            abilitiesBreakBlocks = builder
-                    .comment(" Whether or not Stands and abilities can break blocks.")
-                    .translation("jojo.config.abilitiesBreakBlocks")
-                    .define("abilitiesBreakBlocks", true);
+            builder.push("Structures Spawn");
+                hamonTempleSpawn = builder
+                        .translation("jojo.config.hamonTempleSpawn")
+                        .define("hamonTempleSpawn", true);
             
-            timeStopChunkRange = builder
-                    .comment(" Range of Time Stop ability in chunks.",
-                            "  If set to 0, the whole dimension is frozen in time.",
-                            "  Defaults to 12.")
-                    .translation("jojo.config.timeStopChunkRange")
-                    .defineInRange("timeStopChunkRange", 12, 0, Integer.MAX_VALUE);
+                meteoriteSpawn = builder
+                        .translation("jojo.config.meteoriteSpawn")
+                        .define("meteoriteSpawn", true);
+                    
+                pillarmanTempleSpawn = builder
+                        .translation("jojo.config.pillarmanTempleSpawn")
+                        .define("pillarmanTempleSpawn", true);
+            builder.pop();
             
-//            builder.push("Stand Arrow");
+            builder.comment(" Settings which affect the speed of Hamon training.").push("Hamon training");
+                hamonPointsMultiplier = builder
+                        .comment(" Hamon Strength and Control levels growth multiplier.")
+                        .translation("jojo.config.hamonPointsMultiplier")
+                        .defineInRange("hamonPointsMultiplier", 1.0, 0.0, 5000.0);
+                
+                breathingTechniqueMultiplier = builder
+                        .comment(" Breathing technique growth multiplier.")
+                        .translation("jojo.config.breathingTechniqueMultiplier")
+                        .defineInRange("breathingTechniqueMultiplier", 1.0, 0.0, HamonData.MAX_BREATHING_LEVEL);
+                
+                breathingTechniqueDeterioration = builder
+                        .comment(" Whether or not breathing technique deteriorates over time.")
+                        .translation("jojo.config.breathingTechniqueDeterioration")
+                        .define("breathingTechniqueDeterioration", true);
+            builder.pop();
+            
+            builder.comment(" Settings of Stand Arrow and the Stands pool.").push("Stand Arrow");
                 prioritizeLeastTakenStands = builder
                         .comment(" Whether or not random Stand gain effects (Stand Arrow, /stand random) give Stands that less players already have.")
                         .translation("jojo.config.prioritizeLeastTakenStands")
@@ -90,50 +119,34 @@ public class JojoModConfig {
                         .comment(" Whether or not the Stand tiers mechanic is enabled.")
                         .translation("jojo.config.standTiers")
                         .define("standTiers", true);
-//            builder.pop();
+            builder.pop();
+            
             skipStandProgression = builder
                     .comment(" Whether or not all of the abilities are unlocked after gaining a Stand in Survival.")
                     .translation("jojo.config.skipStandProgression")
                     .define("skipStandProgression", false);
-
+        
             standStamina = builder
                     .comment(" Whether or not Stand stamina mechanic is enabled.")
                     .translation("jojo.config.standStamina")
                     .define("standStamina", true);
-
-            standPowerMultiplier = builder
+        
+            standDamageMultiplier = builder
                     .comment(" Damage multiplier apllied to all Stands.")
                     .translation("jojo.config.standPowerMultiplier")
                     .defineInRange("standPowerMultiplier", 1.0, 0.0, 128.0);
             
-            builder.comment(" Settings which affect the speed of Hamon training.").push("Hamon training");
-                hamonPointsMultiplier = builder
-                        .comment(" Hamon Strength and Control levels growth multiplier.")
-                        .translation("jojo.config.hamonPointsMultiplier")
-                        .defineInRange("hamonPointsMultiplier", 1.0, 0.0, 5000.0);
-                breathingTechniqueMultiplier = builder
-                        .comment(" Breathing technique growth multiplier.")
-                        .translation("jojo.config.breathingTechniqueMultiplier")
-                        .defineInRange("breathingTechniqueMultiplier", 1.0, 0.0, HamonData.MAX_BREATHING_LEVEL);
-                breathingTechniqueDeterioration = builder
-                        .comment(" Whether or not breathing technique deteriorates over time.")
-                        .translation("jojo.config.breathingTechniqueDeterioration")
-                        .define("breathingTechniqueDeterioration", true);
-            builder.pop()
+            abilitiesBreakBlocks = builder
+                    .comment(" Whether or not Stands and abilities can break blocks.")
+                    .translation("jojo.config.abilitiesBreakBlocks")
+                    .define("abilitiesBreakBlocks", true);
             
-            .push("Structures Spawn");
-                hamonTempleSpawn = builder
-                        .translation("jojo.config.hamonTempleSpawn")
-                        .define("hamonTempleSpawn", true);
-            
-                meteoriteSpawn = builder
-                        .translation("jojo.config.meteoriteSpawn")
-                        .define("meteoriteSpawn", true);
-                    
-                pillarmanTempleSpawn = builder
-                        .translation("jojo.config.pillarmanTempleSpawn")
-                        .define("pillarmanTempleSpawn", true);
-            builder.pop();
+            timeStopChunkRange = builder
+                    .comment(" Range of Time Stop ability in chunks.",
+                            "  If set to 0, the whole dimension is frozen in time.",
+                            "  Defaults to 12.")
+                    .translation("jojo.config.timeStopChunkRange")
+                    .defineInRange("timeStopChunkRange", 12, 0, Integer.MAX_VALUE);
         }
         
         public boolean isConfigLoaded() {
@@ -187,7 +200,7 @@ public class JojoModConfig {
         
         public final ForgeConfigSpec.BooleanValue slotHotkeys;
         
-        public final ForgeConfigSpec.BooleanValue resolveShaders; // FIXME (!) test the shader setting
+        public final ForgeConfigSpec.BooleanValue resolveShaders;
         
         Client(ForgeConfigSpec.Builder builder) {
             barsPosition = builder

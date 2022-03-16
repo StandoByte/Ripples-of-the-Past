@@ -161,14 +161,15 @@ public class ModActions {
                     .holdType().holdEnergyCost(1F).heldSlowDownFactor(0.3F)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_SPACE_RIPPER_STINGY_EYES = ACTIONS.register("vampirism_space_ripper_stingy_eyes", 
-            () -> new VampirismSpaceRipperStingyEyes(new NonStandAction.Builder().ignoresPerformerStun().holdType(20).holdEnergyCost(40F).heldSlowDownFactor(0.3F)));
+            () -> new VampirismSpaceRipperStingyEyes(new NonStandAction.Builder().ignoresPerformerStun()
+                    .holdType(20).holdEnergyCost(40F).cooldown(200).heldSlowDownFactor(0.3F)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_BLOOD_GIFT = ACTIONS.register("vampirism_blood_gift", 
             () -> new VampirismBloodGift(new NonStandAction.Builder().needsEntityTarget().maxRangeEntityTarget(1.0D).emptyMainHand()
                     .holdToFire(60, false).holdEnergyCost(10F).heldSlowDownFactor(0.3F)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_ZOMBIE_SUMMON = ACTIONS.register("vampirism_zombie_summon", 
-            () -> new VampirismZombieSummon(new NonStandAction.Builder().energyCost(100F).cooldown(200)));
+            () -> new VampirismZombieSummon(new NonStandAction.Builder().energyCost(100F).cooldown(100)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_DARK_AURA = ACTIONS.register("vampirism_dark_aura", 
             () -> new VampirismDarkAura(new NonStandAction.Builder().ignoresPerformerStun().energyCost(50F).cooldown(100)));
@@ -243,7 +244,7 @@ public class ModActions {
     
 
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_STRING_ATTACK = ACTIONS.register("hierophant_green_attack", 
-            () -> new HierophantGreenStringAttack(new StandEntityAction.Builder().standPerformDuration(10).cooldown(10)));
+            () -> new HierophantGreenStringAttack(new StandEntityAction.Builder().standPerformDuration(10)));
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_STRING_BIND = ACTIONS.register("hierophant_green_attack_binding", 
             () -> new HierophantGreenStringAttack(new StandEntityAction.Builder().standPerformDuration(25)

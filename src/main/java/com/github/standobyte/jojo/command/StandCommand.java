@@ -131,6 +131,7 @@ public class StandCommand {
             if (power != null) {
                 StandType<?> toBeRemoved = power.getType();
                 if (power.clear()) {
+                    power.clearActionLearning();
                     i++;
                     removedStand = toBeRemoved;
                 }

@@ -511,8 +511,8 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
 
     @Override
-    public void onClone(P oldPower, boolean wasDeath, boolean configToKeep) {
-        if ((!wasDeath || configToKeep) && oldPower.hasPower() && !oldPower.getType().isAlwaysLostOnDeath(oldPower)) {
+    public void onClone(P oldPower, boolean wasDeath) {
+        if (oldPower.hasPower() && (!wasDeath || oldPower.getType().keepOnDeath(oldPower))) {
             keepPower(oldPower, wasDeath);
         }
     }

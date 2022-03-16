@@ -137,8 +137,8 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         torso.texOffs(0, 30).addBox(-2.5F, 4.0F, -2.3F, 5.0F, 6.0F, 1.0F, 0.0F, false);
         torso.texOffs(52, 11).addBox(2.0F, -0.25F, -2.5F, 1.0F, 10.0F, 5.0F, 0.25F, true);
         torso.texOffs(52, 11).addBox(-3.0F, -0.25F, -2.5F, 1.0F, 10.0F, 5.0F, 0.25F, false);
-        torso.texOffs(24, 0).addBox(0.5F, 1.0F, 2.0F, 2.0F, 6.0F, 2.0F, 0.0F, true);
-        torso.texOffs(24, 0).addBox(-2.5F, 1.0F, 2.0F, 2.0F, 6.0F, 2.0F, 0.0F, false);
+        torso.texOffs(24, 0).addBox(0.6F, 1.0F, 2.0F, 2.0F, 6.0F, 2.0F, 0.0F, true);
+        torso.texOffs(24, 0).addBox(-2.6F, 1.0F, 2.0F, 2.0F, 6.0F, 2.0F, 0.0F, false);
 
         heartLargeAbdomen = new ModelRenderer(this);
         heartLargeAbdomen.setPos(0.0F, 13.5F, -1.75F);

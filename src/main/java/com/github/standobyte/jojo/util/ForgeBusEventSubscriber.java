@@ -7,7 +7,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
@@ -132,10 +131,8 @@ public class ForgeBusEventSubscriber {
     public static void onPlayerClone(PlayerEvent.Clone event) {
         PlayerEntity original = event.getOriginal();
         PlayerEntity player = event.getPlayer();
-        IStandPower.getPlayerStandPower(player).onClone(IStandPower.getPlayerStandPower(original), 
-                event.isWasDeath(), JojoModConfig.COMMON.keepStandOnDeath.get());
-        INonStandPower.getPlayerNonStandPower(player).onClone(INonStandPower.getPlayerNonStandPower(original), 
-                event.isWasDeath(), JojoModConfig.COMMON.keepNonStandOnDeath.get());
+        IStandPower.getPlayerStandPower(player).onClone(IStandPower.getPlayerStandPower(original), event.isWasDeath());
+        INonStandPower.getPlayerNonStandPower(player).onClone(INonStandPower.getPlayerNonStandPower(original), event.isWasDeath());
         
         original.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(oldCap -> {
             player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(newCap -> {
