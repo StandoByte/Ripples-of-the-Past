@@ -167,10 +167,15 @@ public class JojoModUtil {
         return world.isClientSide() ? ((ClientWorld) world).entitiesForRendering() : ((ServerWorld) world).getAllEntities();
     }
     
-    public static void rotateTowards(Entity entity, Vector3d targetPos) {
+    public static void rotateTowards(Entity entity, Vector3d targetPos, float maxAngle) {
         Vector3d targetVec = targetPos.subtract(entity.getEyePosition(1.0F));
+        
         float yRot = MathUtil.yRotDegFromVec(targetVec);
         float xRot = MathUtil.xRotDegFromVec(targetVec);
+        
+        yRot = entity.yRot + MathHelper.clamp(MathHelper.degreesDifference(entity.yRot, yRot), -maxAngle, maxAngle);
+        xRot = entity.xRot + MathHelper.clamp(MathHelper.degreesDifference(entity.xRot, xRot), -maxAngle, maxAngle);
+        
         entity.yRot = yRot % 360.0F;
         entity.xRot = xRot % 360.0F;
         entity.setYHeadRot(yRot);

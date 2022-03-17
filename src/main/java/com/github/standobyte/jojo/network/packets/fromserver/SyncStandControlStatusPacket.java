@@ -35,7 +35,7 @@ public class SyncStandControlStatusPacket {
 
     public static void handle(SyncStandControlStatusPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
-            StandUtil.setManualControl(ClientUtil.getClientPlayer(), msg.manualControl, msg.keepPosition); // FIXME when i die with the stand summoned, throws "java.lang.IllegalStateException: Player's stand power capability is empty."
+            StandUtil.setManualControl(ClientUtil.getClientPlayer(), msg.manualControl, msg.keepPosition); // FIXME (!!!) when i die with the stand summoned, throws "java.lang.IllegalStateException: Player's stand power capability is empty."
         });
         ctx.get().setPacketHandled(true);
     }

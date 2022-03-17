@@ -7,6 +7,8 @@ import net.minecraft.util.math.vector.Vector3d;
 public class MathUtil {
     public static final float DEG_TO_RAD = (float) (Math.PI / 180D);
     public static final float RAD_TO_DEG = (float) (180D / Math.PI);
+    private static final float PI = (float) Math.PI;
+    private static final float DOUBLE_PI = PI * 2F;
     
     public static float yRotDegFromVec(Vector3d vec) {
         return (float) -MathHelper.atan2(vec.x, vec.z) * RAD_TO_DEG;
@@ -44,6 +46,25 @@ public class MathUtil {
         }
         return new Vector2f((float) Math.toDegrees(angleYZ), (float) Math.toDegrees(angleXZ));
     }
+    
+    public static float rotLerp(float lerp, float angleA, float angleB) {
+        return angleA + lerp * MathHelper.wrapDegrees(angleB - angleA);
+    }
+    
+    public static float rotLerpRad(float lerp, float angleA, float angleB) {
+        return angleA + lerp * wrapRadians(angleB - angleA);
+    }
+    
+    public static float wrapRadians(float angle) {
+        angle %= DOUBLE_PI;
+        if (angle >= PI) {
+            angle -= DOUBLE_PI;
+        }
+        if (angle < -PI) {
+            angle += DOUBLE_PI;
+        }
+        return angle;
+     }
     
     public static float inverseArmorProtectionDamage(float damageAfterAbsorb, float armor, float toughness) {
         float f = armor / 25 - 1;

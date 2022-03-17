@@ -12,7 +12,6 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.util.JojoModUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;
@@ -40,6 +39,9 @@ public class StandEntityTask {
         this.phase = phase;
         this.offsetFromUser = action.getOffsetFromUser(armsOnlyMode);
         setTarget(stand, target);
+        if (stand != null) {
+            rotateStand(stand, false);
+        }
     }
     
     void setTarget(StandEntity stand, ActionTarget target) {
@@ -64,17 +66,10 @@ public class StandEntityTask {
 //            if (!standEntity.level.isClientSide() && ticksLeft < startingTicks) {
 //                double angleCos = standEntity.getLookAngle().dot(target.getTargetPos().subtract(standEntity.getEyePosition(1.0F)).normalize());
 //            }
-            
-            if (!standEntity.isManuallyControlled()) {
-                standEntity.rotatedTowardsTarget = true;
-                Vector3d targetPos = target.getTargetPos();
-                if (targetPos != null) {
-                    JojoModUtil.rotateTowards(standEntity, targetPos);
-                }
-//                if (target.getType() == TargetType.BLOCK) {
-//                    setTarget(ActionTarget.EMPTY);
-//                }
-            }
+//            if (!standEntity.isManuallyControlled() && target.getType() == TargetType.BLOCK) {
+//                setTarget(ActionTarget.EMPTY);
+//            }
+            rotateStand(standEntity, true);
         }
         
         if (phase == StandEntityAction.Phase.PERFORM && ticksLeft == startingTicks) {
@@ -121,6 +116,16 @@ public class StandEntityTask {
                 break;
             default:
                 break;
+            }
+        }
+    }
+    
+    private void rotateStand(StandEntity standEntity, boolean limitBySpeed) {
+        if (!standEntity.isManuallyControlled()) {
+            standEntity.rotatedTowardsTarget = true;
+            Vector3d targetPos = target.getTargetPos();
+            if (targetPos != null) {
+                standEntity.rotateTowards(targetPos, limitBySpeed);
             }
         }
     }

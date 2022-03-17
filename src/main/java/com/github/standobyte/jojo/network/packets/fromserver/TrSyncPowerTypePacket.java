@@ -6,6 +6,10 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
+import com.github.standobyte.jojo.power.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
+import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.github.standobyte.jojo.power.IPowerType;
 
 import net.minecraft.entity.Entity;
@@ -59,7 +63,18 @@ public class TrSyncPowerTypePacket<P extends IPower<P, T>, T extends IPowerType<
                         power.clear();
                     }
                     else {
-                        IPower.castAndGivePower(power, msg.powerType, msg.classification);
+                        switch (msg.classification) {
+                        case STAND:
+                            if (power instanceof IStandPower && msg.powerType instanceof StandType) {
+                                ((IStandPower) power).givePower((StandType<?>) msg.powerType);
+                            }
+                            break;
+                        case NON_STAND:
+                            if (power instanceof INonStandPower && msg.powerType instanceof NonStandPowerType<?>) {
+                                ((INonStandPower) power).givePower((NonStandPowerType<?>) msg.powerType);
+                            }
+                            break;
+                        }
                     }
                 });
             }
