@@ -564,7 +564,7 @@ public class GameplayEventHandler {
             if (killer instanceof ServerPlayerEntity) {
                 ModCriteriaTriggers.PLAYER_KILLED_ENTITY.get().trigger((ServerPlayerEntity) killer, dead, dmgSource);
             }
-            if (dead instanceof ServerPlayerEntity) {
+            if (dead instanceof ServerPlayerEntity && killer != null) {
                 ModCriteriaTriggers.ENTITY_KILLED_PLAYER.get().trigger((ServerPlayerEntity) dead, killer, dmgSource);
             }
         }

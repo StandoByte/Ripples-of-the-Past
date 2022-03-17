@@ -629,8 +629,11 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     @Override
     protected void actuallyHurt(DamageSource dmgSource, float damageAmount) {
         boolean blockableAngle = canBlockOrParryFromAngle(dmgSource);
-        if (!dmgSource.isBypassArmor() && blockableAngle && getCurrentTask() == null
-                && setTask(ModActions.STAND_ENTITY_BLOCK.get(), 5, StandEntityAction.Phase.PERFORM, ActionTarget.EMPTY)) {}
+        if (!dmgSource.isBypassArmor() && blockableAngle) {
+            if (getCurrentTask() == null) {
+                setTask(ModActions.STAND_ENTITY_BLOCK.get(), 5, StandEntityAction.Phase.PERFORM, ActionTarget.EMPTY);
+            }
+        }
         if (transfersDamage() && hasUser()) {
             LivingEntity user = getUser();
             if (user != null && user.isAlive()) {
@@ -639,7 +642,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                     if (damageAmount <= 0) return;
                     damageAmount = getDamageAfterArmorAbsorb(dmgSource, damageAmount);
                     damageAmount = getDamageAfterMagicAbsorb(dmgSource, damageAmount);
-                    damageAmount = damageResistance(dmgSource, damageAmount, blockableAngle);
+                    damageAmount = standDamageResistance(dmgSource, damageAmount, blockableAngle);
                     float damageAfterAbsorption = Math.max(damageAmount - getAbsorptionAmount(), 0.0F);
                     setAbsorptionAmount(getAbsorptionAmount() - (damageAmount - damageAfterAbsorption));
                     float absorbedDamage = damageAmount - damageAfterAbsorption;
@@ -678,7 +681,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return StandPose.BLOCK.equals(getStandPose());
     }
     
-    protected float damageResistance(DamageSource damageSrc, float damageAmount, boolean blockableAngle) {
+    protected float standDamageResistance(DamageSource damageSrc, float damageAmount, boolean blockableAngle) {
         if (!damageSrc.isBypassArmor()) {
             float blockedRatio = 0;
             if (blockableAngle && isStandBlocking() && userPower != null) {
@@ -686,7 +689,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 if (userPower.usesStamina()) {
                     float staminaCost = StandStatFormulas.getBlockStaminaCost(damageAmount);
                     float stamina = userPower.getStamina();
-                    if (!userPower.consumeStamina(staminaCost)) {
+                    if (!userPower.consumeStamina(staminaCost) && !StandUtil.standIgnoresStaminaDebuff(getUser())) {
                         blockedRatio = stamina / staminaCost;
                         standCrash();
                     }
@@ -709,6 +712,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         Vector3d diffVec = dmgPosition.subtract(position()).normalize();
         return diffVec.dot(viewVec) > 0.707D;
     }
+    
 
 
 
@@ -1051,7 +1055,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             aim = precisionRayTrace(user);
             if (JojoModUtil.isAnotherEntityTargeted(aim, this)
                     || target.getType() == TargetType.EMPTY && aim.getType() != RayTraceResult.Type.MISS) {
-                JojoModUtil.rotateTowards(this, ActionTarget.fromRayTraceResult(aim).getTargetPos());
+                rotateTowards(ActionTarget.fromRayTraceResult(aim).getTargetPos(), true);
             }
         }
         target = ActionTarget.fromRayTraceResult(precisionRayTrace(this));
@@ -1071,6 +1075,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             break;
         }
         return punched;
+    }
+    
+    public void rotateTowards(Vector3d target, boolean limitBySpeed) {
+        JojoModUtil.rotateTowards(this, target, limitBySpeed ? (float) getAttackSpeed() / 16F * 18F : 360F);
     }
     
     public double getDistanceToTarget(ActionTarget target) {
@@ -1432,7 +1440,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     protected void standCrash() {
-        if (!level.isClientSide() && !StandUtil.standIgnoresStaminaDebuff(getUser())) {
+        if (!level.isClientSide()) {
             stopTask(true);
             addEffect(new EffectInstance(ModEffects.STUN.get(), 30));
         }

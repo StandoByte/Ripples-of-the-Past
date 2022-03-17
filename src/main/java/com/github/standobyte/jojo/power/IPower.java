@@ -9,9 +9,7 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTargetContainer;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.power.stand.type.StandType;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -96,21 +94,6 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
 
     public static IPower<?, ?> getPlayerPower(PlayerEntity player, PowerClassification classification) {
         return classification == PowerClassification.STAND ? IStandPower.getPlayerStandPower(player) : INonStandPower.getPlayerNonStandPower(player);
-    }
-    
-    public static void castAndGivePower(IPower<?, ?> power, IPowerType<?, ?> powerType, PowerClassification classification) { // FIXME get rid of this shit
-        switch (classification) {
-        case STAND:
-            if (power instanceof IStandPower && powerType instanceof StandType) {
-                ((IStandPower) power).givePower((StandType<?>) powerType);
-            }
-            break;
-        case NON_STAND:
-            if (power instanceof INonStandPower && powerType instanceof NonStandPowerType<?>) {
-                ((INonStandPower) power).givePower((NonStandPowerType<?>) powerType);
-            }
-            break;
-        }
     }
     
     public static enum PowerClassification {
