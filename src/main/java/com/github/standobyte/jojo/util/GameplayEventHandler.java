@@ -95,6 +95,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
@@ -574,12 +575,15 @@ public class GameplayEventHandler {
         if (JojoModUtil.isUndead(entity)) {
             return;
         }
-        int ticks = IStandPower.getStandPowerOptional(entity)
-                .map(power -> getSoulAscensionTicks(entity, power)).orElse(0);
+        LazyOptional<IStandPower> standOptional = IStandPower.getStandPowerOptional(entity);
+        int ticks = standOptional.map(power -> getSoulAscensionTicks(entity, power)).orElse(0);
         
         if (dmgSource == TestBuildCommand.SOUL_TEST) ticks = 300;
         
         if (ticks > 0) {
+            if (entity instanceof ServerPlayerEntity) {
+                ModCriteriaTriggers.SOUL_ASCENSION.get().trigger((ServerPlayerEntity) entity, standOptional.orElse(null), ticks);
+            }
             SoulEntity soulEntity = new SoulEntity(entity.level, entity, ticks);
             entity.level.addFreshEntity(soulEntity);
         }

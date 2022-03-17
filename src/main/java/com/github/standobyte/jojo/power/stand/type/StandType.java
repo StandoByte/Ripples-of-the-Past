@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -41,7 +40,6 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     private final ITextComponent partName;
     private final StandAction[] attacks;
     private final StandAction[] abilities;
-    private Predicate<LivingEntity> prioritizedCondition = null;
     private final T defaultStats;
     private final Class<T> statsClass;
     private String translationKey;
@@ -80,11 +78,6 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         if (item != null && !item.isEmpty()) {
             resolveLevelItems.computeIfAbsent(resolveLevel, lvl -> new ArrayList<>()).add(item);
         }
-        return this;
-    }
-    
-    public StandType<T> addPrioritizedCondition(Predicate<LivingEntity> condition) { // FIXME sort this thing out
-        this.prioritizedCondition = condition;
         return this;
     }
     
@@ -219,10 +212,6 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
 
     public int getTier() {
         return tier;
-    }
-    
-    public boolean prioritizedCondition(LivingEntity entity) {
-        return prioritizedCondition == null ? false : prioritizedCondition.test(entity);
     }
     
     public void toggleSummon(IStandPower standPower) {
