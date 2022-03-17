@@ -16,20 +16,18 @@
     "hidden": false
   },
   "criteria": {
-    "crafting_table": {
-      "trigger": "minecraft:inventory_changed",
+    "destroy_stone_mask": {
+      "trigger": "jojo:destroy_stone_mask",
       "conditions": {
-        "items": [
-          {
-            "item": "minecraft:crafting_table"
-          }
-        ]
+        "item_used": {
+          "item": "jojo:sledgehammer"
+        }
       }
     }
   },
   "requirements": [
     [
-      "crafting_table"
+      "destroy_stone_mask"
     ]
   ]
 }

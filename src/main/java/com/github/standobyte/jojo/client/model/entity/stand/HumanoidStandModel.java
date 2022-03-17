@@ -40,7 +40,7 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
     protected ModelRenderer rightLegJoint;
     protected ModelRenderer rightLowerLeg;
     
-    protected final ModelPoseSided<T> barrageSwing;
+    protected ModelPoseSided<T> barrageSwing;
 
     public HumanoidStandModel() {
         this(64, 64);
@@ -117,8 +117,6 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         rightLeg.addChild(rightLowerLeg);
 
         addBaseBoxes();
-        
-        barrageSwing = initArmSwingAnim();
     }
 
     public void afterInit() {
@@ -133,6 +131,8 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         rightArmForearmOnly.setPos(rightArm.x, rightArm.y, rightArm.z);
         upperPart.addChild(rightArmForearmOnly);
         rightArmForearmOnly.addChild(rightForeArm);
+        
+        barrageSwing = initArmSwingAnim();
     }
 
     protected void addBaseBoxes() {

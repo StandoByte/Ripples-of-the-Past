@@ -16,20 +16,15 @@
     "hidden": false
   },
   "criteria": {
-    "crafting_table": {
-      "trigger": "minecraft:inventory_changed",
+    "soul_ascension": {
+      "trigger": "jojo:soul_ascension",
       "conditions": {
-        "items": [
-          {
-            "item": "minecraft:crafting_table"
-          }
-        ]
       }
     }
   },
   "requirements": [
     [
-      "crafting_table"
+      "soul_ascension"
     ]
   ]
 }

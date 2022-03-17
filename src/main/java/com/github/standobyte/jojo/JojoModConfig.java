@@ -68,8 +68,8 @@ public class JojoModConfig {
                 
                 keepVampirismOnDeath = builder
                         .comment(" Keep vampirism after death.")
-                        .translation("jojo.config.keepHamonOnDeath")
-                        .define("keepHamonOnDeath", true);
+                        .translation("jojo.config.keepVampirismOnDeath")
+                        .define("keepVampirismOnDeath", true);
             builder.pop();
             
             builder.push("Structures Spawn");
