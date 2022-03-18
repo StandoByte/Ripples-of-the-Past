@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
@@ -77,7 +76,6 @@ public class StoneMaskDestroyedTrigger extends AbstractCriterionTrigger<StoneMas
         }
 
         public boolean matches(Block block, ItemStack itemUsed, ItemStack stoneMaskItem) {
-            JojoMod.LOGGER.debug(this.itemUsed.matches(itemUsed));
             return (this.block == null || this.block == block)
                     && this.itemUsed.matches(itemUsed) && this.stoneMaskItem.matches(stoneMaskItem);
         }

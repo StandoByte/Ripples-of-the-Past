@@ -37,6 +37,7 @@ public class SoulController {
         return instance;
     }
     
+    // FIXME (soul) currently there's no way to make sure it's called BEFORE the death screen opens (in fact it isn't when the player is killed by a mob)
     public void onSoulSpawn(SoulEntity soulEntity) {
         if (!mc.player.isSpectator() && soulEntity.getOriginEntity() == mc.player) {
             mc.setCameraEntity(soulEntity);

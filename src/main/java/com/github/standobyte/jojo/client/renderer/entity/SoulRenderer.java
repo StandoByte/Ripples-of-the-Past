@@ -35,17 +35,19 @@ public class SoulRenderer<T extends SoulEntity> extends EntityRenderer<T> {
         if (!soulEntity.isInvisibleTo(Minecraft.getInstance().player)) {
             LivingEntity originEntity = soulEntity.getOriginEntity();
             if (originEntity != null) {
-                LivingRenderer renderer = (LivingRenderer) entityRenderDispatcher.getRenderer(originEntity);
-                renderLiving(originEntity, renderer, renderer.getModel(), soulEntity, 
+                renderSoul(originEntity, soulEntity, 
                         yRotation, partialTick, matrixStack, buffer, packedLight);
             }
             super.render(soulEntity, yRotation, partialTick, matrixStack, buffer, packedLight);
         }
     }
-
-    private <E extends LivingEntity, M extends EntityModel<E>> void renderLiving(E entity, LivingRenderer<E, M> renderer, M model, T soulEntity, 
+    
+    private <E extends LivingEntity, M extends EntityModel<E>> void renderSoul(E entity, T soulEntity, 
             float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
+        LivingRenderer<E, M> renderer = (LivingRenderer<E, M>) entityRenderDispatcher.getRenderer(entity);
         if (MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Pre<E, M>(entity, renderer, partialTick, matrixStack, buffer, packedLight))) return;
+        
+        M model = renderer.getModel();
         matrixStack.pushPose();
         model.attackTime = 0;
 
