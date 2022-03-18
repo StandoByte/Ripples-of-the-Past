@@ -579,13 +579,14 @@ public class GameplayEventHandler {
         int ticks = standOptional.map(power -> getSoulAscensionTicks(entity, power)).orElse(0);
         
         if (dmgSource == TestBuildCommand.SOUL_TEST) ticks = 300;
-        
+
         if (ticks > 0) {
-            if (entity instanceof ServerPlayerEntity) {
-                ModCriteriaTriggers.SOUL_ASCENSION.get().trigger((ServerPlayerEntity) entity, standOptional.orElse(null), ticks);
-            }
-            SoulEntity soulEntity = new SoulEntity(entity.level, entity, ticks);
-            entity.level.addFreshEntity(soulEntity);
+            // FIXME (soul) disabled for now
+//            if (entity instanceof ServerPlayerEntity) {
+//                ModCriteriaTriggers.SOUL_ASCENSION.get().trigger((ServerPlayerEntity) entity, standOptional.orElse(null), ticks);
+//            }
+//            SoulEntity soulEntity = new SoulEntity(entity.level, entity, ticks);
+//            entity.level.addFreshEntity(soulEntity);
         }
     }
     
@@ -600,7 +601,8 @@ public class GameplayEventHandler {
             return 0;
         }
         
-        int ticks = (int) (60 * stand.getResolveLevel() * (stand.getResolveRatio() + 1));
+        float resolveRatio = user.hasEffect(ModEffects.RESOLVE.get()) ? 1 : stand.getResolveRatio();
+        int ticks = (int) (60 * stand.getResolveLevel() * (resolveRatio + 1));
         if (hardcore) {
             ticks += ticks / 2;
         }

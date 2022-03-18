@@ -252,6 +252,23 @@ public class ClientEventHandler {
     
     private void tickResolveEffect() {
         if (mc.player.isAlive() && mc.player.hasEffect(ModEffects.RESOLVE.get())) {
+            if (resolveShader == null) {
+                resolveShader = HueShiftShaders.SHADERS_HUE_SHIFT[new Random().nextInt(HueShiftShaders.SHADERS_HUE_SHIFT.length)];
+            }
+            
+//            if (ost == null || ost.isStopped()) {
+//                SoundEvent ostSound = IStandPower.getStandPowerOptional(mc.player).map(stand -> {
+//                    if (stand.hasPower()) {
+//                        return stand.getType().getOst();
+//                    }
+//                    return null;
+//                }).orElse(null);
+//                if (ostSound != null) {
+//                    ost = new StandOstSound(ostSound, mc);
+//                    mc.getSoundManager().play(ost);
+//                }
+//            }
+            
             if (mc.player.getEffect(ModEffects.RESOLVE.get()).getDuration() == 100) {
                 fadeAwayOst(200);
             }

@@ -203,7 +203,7 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
     
     @Override
     public boolean isInvisibleTo(PlayerEntity player) {
-        return !player.isSpectator() && (!ClientUtil.shouldStandsRender(player) || invisibleFlag());
+        return !player.isSpectator() && !player.is(originEntity) && (!ClientUtil.shouldStandsRender(player) || invisibleFlag());
     }
 
     @Override
