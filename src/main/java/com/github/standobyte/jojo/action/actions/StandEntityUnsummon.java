@@ -49,8 +49,13 @@ public final class StandEntityUnsummon extends StandEntityAction {
         return !standEntity.isArmsOnlyMode();
     }
     
+    @Override
+    public boolean canStaminaRegen(IStandPower standPower, StandEntity standEntity) {
+        return true;
+    }
+    
     public int getUnsummonDuration(StandEntity standEntity) {
-        return standEntity.isArmsOnlyMode() ? 10 : 20;
+        return standEntity.isArmsOnlyMode() ? 10 : 15;
     }
     
     @Override

@@ -14,6 +14,7 @@ import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.action.actions.StandEntityAction.Phase;
 import com.github.standobyte.jojo.client.model.pose.IModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
+import com.github.standobyte.jojo.client.model.pose.ModelPose.ModelAnim;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseTransition;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
 import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
@@ -81,8 +82,9 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     public void prepareMobModel(T entity, float walkAnimPos, float walkAnimSpeed, float partialTick) {
         StandPose currentPose = entity.getStandPose();
 //        if (currentPose != poseType) {
-//            resetPose();
+//            resetPose(entity);
 //        }
+        initPoses();
         poseType = currentPose;
     }
 
@@ -118,7 +120,8 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
 
     protected void poseStand(T entity, float ticks, float yRotationOffset, float xRotation, 
             StandPose standPose, @Nullable Phase actionPhase, float actionCompletion, HandSide swingingHand) {
-        initPoses();
+        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!
+//        initPoses();
         if (actionAnim.containsKey(standPose)) {
             onPose(entity, ticks);
             StandActionAnimation<T> anim = getActionAnim(entity, standPose);
@@ -146,11 +149,19 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         idleLoopTickStamp = ticks;
     }
 
+    private final ModelAnim<T> HEAD_ROTATION = (rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
+        headParts().forEach(part -> {
+            part.yRot = yRotationOffset * MathUtil.DEG_TO_RAD;
+            part.xRot = xRotation * MathUtil.DEG_TO_RAD;
+            part.zRot = 0;
+        });
+    };
+    
     protected void initPoses() {
         poseReset = initPoseReset();
 
-        idlePose = initIdlePose();
-        idleLoop = new ModelPoseTransition<T>(idlePose, initIdlePose2Loop()).setEasing(MathHelper::sin);
+        idlePose = initIdlePose().setAdditionalAnim(HEAD_ROTATION);
+        idleLoop = new ModelPoseTransition<T>(idlePose, initIdlePose2Loop()).setEasing(ticks -> MathHelper.sin(ticks / 20));
 
         summonPoses = initSummonPoses();
 
@@ -166,14 +177,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     protected abstract ModelPose<T> initPoseReset();
 
     protected ModelPose<T> initIdlePose() {
-        return initPoseReset()
-                .setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
-                    headParts().forEach(part -> {
-                        part.yRot = yRotationOffset * MathUtil.DEG_TO_RAD;
-                        part.xRot = xRotation * MathUtil.DEG_TO_RAD;
-                        part.zRot = 0;
-                    });
-                });
+        return initPoseReset();
     }
 
     protected ModelPose<T> initIdlePose2Loop() {
@@ -204,7 +208,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     }
 
     protected StandActionAnimation<T> initBlockAnim() {
-        return new StandActionAnimation.Builder<T>().addPose(StandEntityAction.Phase.PERFORM, blockPose()).build(idlePose);
+        return new StandActionAnimation.Builder<T>().addPose(StandEntityAction.Phase.BUTTON_HOLD, blockPose()).build(idlePose);
     }
 
     protected IModelPose<T> blockPose() {

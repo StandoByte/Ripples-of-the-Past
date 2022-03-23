@@ -1,8 +1,6 @@
 package com.github.standobyte.jojo.advancements.criterion;
 
 import com.github.standobyte.jojo.advancements.criterion.predicate.PowerPredicate;
-import com.github.standobyte.jojo.power.IPower;
-import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.google.gson.JsonObject;
 
 import net.minecraft.advancements.criterion.AbstractCriterionTrigger;
@@ -73,18 +71,8 @@ public class KilledPowerUserTrigger extends AbstractCriterionTrigger<KilledPower
 
         public boolean matches(ServerPlayerEntity player, LootContext lootCtx, DamageSource damageSource, 
                 LivingEntity entity, LivingEntity killed) {
-            if (!this.killingBlow.matches(player, damageSource) || !this.entityPredicate.matches(lootCtx)) {
-                return false;
-            }
-            for (PowerClassification power : PowerClassification.values()) {
-                for (PowerClassification powerKilled : PowerClassification.values()) {
-                    if (this.powerPredicate.matches(power, IPower.getPowerOptional(entity, power))
-                            && (this.killedPowerPredicate.matches(powerKilled, IPower.getPowerOptional(killed, powerKilled)))) {
-                        return true;
-                    }
-                }
-            }
-            return false;
+            return this.killingBlow.matches(player, damageSource) && this.entityPredicate.matches(lootCtx)
+                    && powerPredicate.matches(entity) && killedPowerPredicate.matches(killed);
         }
 
         @Override

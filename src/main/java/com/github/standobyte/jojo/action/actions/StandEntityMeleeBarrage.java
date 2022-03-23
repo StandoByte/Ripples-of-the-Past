@@ -60,7 +60,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
         if (!world.isClientSide()) {
             standEntity.barrageTickPunches(target, this, hitsThisTick);
             // FIXME tick stamina cost in builder (for highlighting)
-            userPower.consumeStamina(5F);
+            userPower.consumeStamina(4F);
         }
     }
     

@@ -16,7 +16,7 @@ public class TommyGunBulletRenderer extends SimpleEntityRenderer<TommyGunBulletE
         super(renderManager, new TommyGunBulletModel(), new ResourceLocation(JojoMod.MOD_ID, "textures/entity/projectiles/tommy_gun_bullet.png"));
     }
 
-    // FIXME (!) bullets seem to fly to another direction on such high velocity
+    // FIXME bullets seem to fly to another direction on such high velocity
     @Override
     public void render(TommyGunBulletEntity entity, float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
         

@@ -3,9 +3,11 @@ package com.github.standobyte.jojo.action.actions;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
+import com.github.standobyte.jojo.init.ModCustomStats;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.World;
@@ -42,6 +44,9 @@ public class VampirismZombieSummon extends VampirismAction {
                 zombie.copyPosition(user);
                 zombie.setOwner(user);
                 world.addFreshEntity(zombie);
+            }
+            if (user instanceof ServerPlayerEntity) {
+                ((ServerPlayerEntity) user).awardStat(ModCustomStats.VAMPIRE_ZOMBIES_SUMMONED, zombiesToSummon);
             }
         }
     }

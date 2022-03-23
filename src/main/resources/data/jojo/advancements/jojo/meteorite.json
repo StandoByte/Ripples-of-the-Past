@@ -1,0 +1,33 @@
+{
+  "parent": "jojo:jojo/root",
+  "display": {
+    "icon": {
+      "item": "jojo:meteoric_ore"
+    },
+    "title": {
+      "translate": "advancements.jojo.meteorite.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.meteorite.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "at_meteorite": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "location": {
+          "feature": "jojo:meteorite"
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "at_meteorite"
+    ]
+  ]
+}

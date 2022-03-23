@@ -46,7 +46,7 @@ public abstract class BarsRenderer {
         this.y = y;
         align(alignment);
         if (nonStandPower != null && nonStandPower.hasPower()) {
-            // FIXME (!) get energy costs
+            // FIXME get energy costs
             renderBarWithIcon(matrixStack, BarType.ENERGY, nonStandPower.getType(), 
                     currentMode == PowerClassification.NON_STAND, nonStandPower.getType().getColor(), 1, 
                     nonStandPower.getEnergy(), nonStandPower.getMaxEnergy(), 
@@ -55,7 +55,7 @@ public abstract class BarsRenderer {
         }
         if (standPower != null && standPower.hasPower()) {
             if (standPower.usesStamina() && !standPower.isStaminaInfinite()) {
-                // FIXME (!) get stamina costs
+                // FIXME get stamina costs
                 renderBarWithIcon(matrixStack, BarType.STAMINA, null, 
                         currentMode == PowerClassification.STAND, 0xFFFFFF, 1, 
                         standPower.getStamina(), standPower.getMaxStamina(), 
@@ -100,7 +100,7 @@ public abstract class BarsRenderer {
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, barAlpha);
             // cost
             if (costAlpha > 0) {
-                // FIXME (!) cost
+                // FIXME cost
 //              renderCost(matrixStack, attackCostValue, maxValue, fill, barHeight, 0, alpha);
 //              renderCost(matrixStack, abilityCostValue, maxValue, fill, barHeight, 3, alpha);
             }

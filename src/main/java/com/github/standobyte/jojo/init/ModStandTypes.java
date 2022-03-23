@@ -73,10 +73,10 @@ public class ModStandTypes {
                     new StandAction[] {ModActions.HIEROPHANT_GREEN_BLOCK.get(), ModActions.HIEROPHANT_GREEN_GRAPPLE.get(), ModActions.HIEROPHANT_GREEN_BARRIER.get()},
                     StandStats.class, new StandStats.Builder()
                     .power(8.0)
-                    .speed(10.0)
+                    .speed(12.0)
                     .range(50.0)
-                    .durability(8.0)
-                    .precision(6)
+                    .durability(12.0)
+                    .precision(8.0)
                     .build(), 
                     ModEntityTypes.HIEROPHANT_GREEN)
             .addSummonShout(ModSounds.KAKYOIN_HIEROPHANT_GREEN)
@@ -90,7 +90,7 @@ public class ModStandTypes {
                     .power(10.0)
                     .speed(14.0)
                     .range(10.0, 10.0)
-                    .durability(10.0)
+                    .durability(12.0)
                     .precision(16.0)
                     .build(), 
                     ModEntityTypes.SILVER_CHARIOT)
@@ -103,10 +103,10 @@ public class ModStandTypes {
                     new StandAction[] {ModActions.MAGICIANS_RED_BLOCK.get(), ModActions.MAGICIANS_RED_RED_BIND.get(), ModActions.MAGICIANS_RED_DETECTOR.get()},
                     StandStats.class, new StandStats.Builder()
                     .power(12.0)
-                    .speed(8.0)
+                    .speed(10.0)
                     .range(5.0)
                     .durability(12.0)
-                    .precision(4.0)
+                    .precision(8.0)
                     .build(), 
                     ModEntityTypes.MAGICIANS_RED)
             .addSummonShout(ModSounds.AVDOL_MAGICIANS_RED)

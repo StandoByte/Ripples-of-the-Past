@@ -16,13 +16,16 @@ import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.util.JojoModUtil;
+import com.github.standobyte.jojo.util.MathUtil;
 
 import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.util.CombatRules;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.IndirectEntityDamageSource;
@@ -106,7 +109,7 @@ public class ModDamageSources {
                         .map(power -> power.getType() == ModNonStandPowers.HAMON.get()).orElse(false)) {
                     return false;
                 }
-                amount *= 0.5F;
+                amount *= 0.25F;
             }
             DamageSource dmgSource = srcDirect == null ? HAMON : 
                     srcIndirect == null ? new EntityDamageSource(HAMON.getMsgId() + ".entity", srcDirect).bypassArmor() : 
@@ -194,5 +197,18 @@ public class ModDamageSources {
         boolean dealtDamage = target.hurt(dmgSource, amount);
         target.invulnerableTime = invulTime;
         return dealtDamage;
+    }
+    
+    public static float addArmorPiercing(float damage, float armorPiercing, @Nullable LivingEntity armoredTarget) {
+        if (armoredTarget != null && armorPiercing > 0) {
+            float armor = (float) armoredTarget.getArmorValue();
+            if (armor > 0) {
+                float toughness = (float) armoredTarget.getAttributeValue(Attributes.ARMOR_TOUGHNESS);
+                armorPiercing = MathHelper.clamp(armorPiercing, 0, 1);
+                float damagePierced = MathHelper.lerp(armorPiercing, CombatRules.getDamageAfterAbsorb(damage, armor, toughness), damage);
+                damage = MathUtil.inverseArmorProtectionDamage(damagePierced, armor, toughness);
+            }
+        }
+        return damage;
     }
 }

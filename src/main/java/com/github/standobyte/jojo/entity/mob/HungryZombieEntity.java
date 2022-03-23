@@ -15,10 +15,12 @@ import com.github.standobyte.jojo.util.JojoModUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.merchant.villager.VillagerEntity;
+import net.minecraft.entity.monster.AbstractIllagerEntity;
 import net.minecraft.entity.monster.ZombieEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -185,10 +187,16 @@ public class HungryZombieEntity extends ZombieEntity {
         createZombie(world, getOwner(), entityDead, isPersistenceRequired());
     }
     
-    public static void createZombie(ServerWorld world, LivingEntity owner, LivingEntity dead, boolean makePersistent) {
-        if ((world.getDifficulty() == Difficulty.NORMAL && dead.getRandom().nextBoolean() || world.getDifficulty() == Difficulty.HARD)
-                && dead instanceof VillagerEntity && ForgeEventFactory.canLivingConvert(dead, ModEntityTypes.HUNGRY_ZOMBIE.get(), (timer) -> {})) {
-            HungryZombieEntity zombie = ((VillagerEntity) dead).convertTo(ModEntityTypes.HUNGRY_ZOMBIE.get(), true);
+    public static boolean createZombie(ServerWorld world, LivingEntity owner, LivingEntity dead, boolean makePersistent) {
+        if ((world.getDifficulty() == Difficulty.NORMAL && dead.getRandom().nextBoolean() || world.getDifficulty() == Difficulty.HARD)) {
+            HungryZombieEntity zombie;
+            if ((dead instanceof VillagerEntity || dead instanceof AbstractIllagerEntity) 
+                    && ForgeEventFactory.canLivingConvert(dead, ModEntityTypes.HUNGRY_ZOMBIE.get(), (timer) -> {})) {
+                zombie = ((MobEntity) dead).convertTo(ModEntityTypes.HUNGRY_ZOMBIE.get(), true);
+            }
+            else {
+                return false;
+            }
             zombie.finalizeSpawn(
                     world, 
                     world.getCurrentDifficultyAt(zombie.blockPosition()), 
@@ -200,6 +208,8 @@ public class HungryZombieEntity extends ZombieEntity {
             if (!dead.isSilent()) {
                 world.levelEvent(null, 1026, dead.blockPosition(), 0);
             }
+            return true;
         }
+        return false;
     }
 }

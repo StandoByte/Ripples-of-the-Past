@@ -180,7 +180,7 @@ public class InputHandler {
                     for (int i = 0; i < 9; i++) {
                         if (mc.options.keyHotbarSlots[i].consumeClick()) {
                             if (chooseAttack) {
-                                // FIXME (controls) doesn't seem to work for key 2 while walking (???)
+                                // FIXME (!) (controls) doesn't seem to work for key 2 while walking (???)
                                 actionsOverlay.selectAction(ActionType.ATTACK, i);
                             }
                             if (chooseAbility) {
@@ -190,7 +190,7 @@ public class InputHandler {
                     }
                 }
                 else {
-                    // FIXME (controls) behaves weird when mapped to 1-9
+                    // FIXME (!) (controls) behaves weird when mapped to 1-9
                     if (attackSlots != null) {
                         for (int i = 0; i < 9; i++) {
                             if (attackSlots[i].consumeClick()) {
@@ -506,7 +506,7 @@ public class InputHandler {
     private final DashTrigger backDash = new DashTrigger(180F);
     
     private void dash(ClientPlayerEntity player, float yRot) {
-        // FIXME (dash) set leap cd
+        // FIXME (!) (dash) set leap cd
         player.setOnGround(false);
         player.hasImpulse = true;
         Vector3d dash = Vector3d.directionFromRotation(0, player.yRot + yRot).scale(0.5).add(0, 0.2, 0);

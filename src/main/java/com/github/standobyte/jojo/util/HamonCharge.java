@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
@@ -70,7 +71,8 @@ public class HamonCharge {
                 if (!target.is(chargedEntity) && target.isAlive() && target.getUUID() != hamonUserId) {
                     if (ModDamageSources.dealHamonDamage(target, charge, chargedEntity, null)) {
                         Entity user = getUser(world);
-                        if (user instanceof ServerPlayerEntity) {
+                        if (!target.isAlive() && user instanceof ServerPlayerEntity) {
+                            ModCriteriaTriggers.HAMON_CHARGE_KILL.get().trigger((ServerPlayerEntity) user, target, chargedEntity, chargedBlock);
                         }
                         if (!gavePoints) {
                             if (user instanceof LivingEntity) {

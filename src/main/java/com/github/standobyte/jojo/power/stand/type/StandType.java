@@ -19,6 +19,7 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.util.JojoModUtil;
+import com.github.standobyte.jojo.util.OstSoundList;
 import com.github.standobyte.jojo.util.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.data.StandStatsManager;
 
@@ -44,7 +45,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     private final Class<T> statsClass;
     private String translationKey;
     private Supplier<SoundEvent> summonShoutSupplier = () -> null;
-    private Supplier<SoundEvent> ostSupplier = () -> null;
+    private OstSoundList ostSupplier = null;
     private Map<Integer, List<ItemStack>> resolveLevelItems = new HashMap<>();
     private ResourceLocation iconTexture;
     
@@ -67,7 +68,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         return this;
     }
     
-    public StandType<T> addOst(Supplier<SoundEvent> ostSupplier) {
+    public StandType<T> addOst(OstSoundList ostSupplier) {
         if (ostSupplier != null) {
             this.ostSupplier = ostSupplier;
         }
@@ -237,8 +238,11 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     @Nullable
-    public SoundEvent getOst() {
-        return ostSupplier.get();
+    public SoundEvent getOst(int level) {
+        if (ostSupplier == null) {
+            return null;
+        }
+        return ostSupplier.get(level);
     }
     
     public abstract void unsummon(LivingEntity user, IStandPower standPower);

@@ -94,7 +94,9 @@ public class ModActions {
     
     public static final RegistryObject<HamonAction> HAMON_ZOOM_PUNCH = ACTIONS.register("hamon_zoom_punch", 
             () -> new HamonZoomPunch(new HamonAction.Builder().energyCost(800F).cooldown(14).emptyMainHand()
-                    .shout(Technique.JONATHAN, ModSounds.JONATHAN_ZOOM_PUNCH).shout(Technique.ZEPPELI, ModSounds.ZEPPELI_ZOOM_PUNCH).shout(Technique.JOSEPH, ModSounds.JOSEPH_ZOOM_PUNCH)));
+                    .shout(Technique.JONATHAN, ModSounds.JONATHAN_ZOOM_PUNCH)
+                    .shout(Technique.ZEPPELI, ModSounds.ZEPPELI_ZOOM_PUNCH)
+                    .shout(Technique.JOSEPH, ModSounds.JOSEPH_ZOOM_PUNCH)));
 
     public static final RegistryObject<HamonAction> HAMON_SPEED_BOOST = ACTIONS.register("hamon_speed_boost", 
             () -> new HamonSpeedBoost(new HamonAction.Builder().energyCost(600F)));

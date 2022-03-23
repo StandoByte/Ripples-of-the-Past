@@ -186,6 +186,10 @@ public abstract class StandEntityAction extends StandAction {
         return true;
     }
     
+    public boolean canStaminaRegen(IStandPower standPower, StandEntity standEntity) {
+        return false;
+    }
+    
     public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase) {}
     
     public void playSound(StandEntity standEntity, IStandPower standPower, Phase phase) {

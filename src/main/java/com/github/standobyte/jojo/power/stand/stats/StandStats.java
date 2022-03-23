@@ -132,8 +132,8 @@ public class StandStats {
         private double rangeMax = 5.0;
         private double durabilityBase = 8.0;
         private double durabilityMax = 8.0;
-        private double precisionBase = 0.5;
-        private double precisionMax = 0.5;
+        private double precisionBase = 8.0;
+        private double precisionMax = 8.0;
         
         public T power(double power) {
             return power(power, power);

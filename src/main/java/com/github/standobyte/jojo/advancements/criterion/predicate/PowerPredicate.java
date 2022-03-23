@@ -19,6 +19,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
 import net.minecraft.advancements.criterion.MinMaxBounds;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.LazyOptional;
@@ -40,6 +41,15 @@ public class PowerPredicate {
         this.type = type;
         this.typeCheck = powerCheck;
         this.standTier = standTier;
+    }
+    
+    public boolean matches(LivingEntity powerUser) {
+        for (PowerClassification classification : PowerClassification.values()) {
+            if (matches(classification, IPower.getPowerOptional(powerUser, classification))) {
+                return true;
+            }
+        }
+        return false;
     }
     
     public boolean matches(PowerClassification classification, LazyOptional<? extends IPower<?, ?>> powerOptional) {
