@@ -13,7 +13,7 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
-// FIXME smth like the voice line system for stands
+// FIXME (!) smth like the voice line system for stands
 public class StandEntityLightAttack extends StandEntityAction {
 
     public StandEntityLightAttack(StandEntityAction.Builder builder) {
@@ -44,14 +44,12 @@ public class StandEntityLightAttack extends StandEntityAction {
     
     @Override
     public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
-        float earlyStart = 0F;
-        if (standEntity.getCurrentTaskAction() == this) {
-            earlyStart = 1F;
-            if (standEntity.getCurrentTaskPhase() == Phase.RECOVERY) {
-                earlyStart -= standEntity.getCurrentTaskCompletion(0) * 4F;
-            }
-        }
-        int ticks = StandStatFormulas.getLightAttackWindup(standEntity.getAttackSpeed(), earlyStart);
+        double speed = standEntity.getAttackSpeed();
+//        if (standEntity.getCurrentTaskAction() == this && 
+//                (standEntity.getCurrentTaskPhase() != Phase.RECOVERY || standEntity.getCurrentTaskCompletion(0) < 0.25)) {
+//            speed *= 0.8;
+//        }
+        int ticks = StandStatFormulas.getLightAttackWindup(speed);
         return ticks;
     }
     

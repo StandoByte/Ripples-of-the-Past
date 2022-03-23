@@ -4,7 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
+import com.github.standobyte.jojo.client.model.pose.IModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
+import com.github.standobyte.jojo.client.model.pose.ModelPoseSided;
+import com.github.standobyte.jojo.client.model.pose.ModelPoseTransition;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
 import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
@@ -12,6 +15,7 @@ import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.util.MathUtil;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.util.HandSide;
 
 // Made with Blockbench 3.9.2
 
@@ -179,9 +183,20 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
     protected void initPoses() {
         super.initPoses();
         
+        // FIXME (!!) SC attack animation
         rapierAnim.put(StandPose.LIGHT_ATTACK, initLightAttackAnim());
-        
-        rapierAnim.put(StandPose.HEAVY_ATTACK, initHeavyAttackAnim(false));
+
+        // FIXME (!!) SC heavy attack charge
+        rapierAnim.put(StandPose.HEAVY_ATTACK, new StandActionAnimation.Builder<SilverChariotEntity>()
+                .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<SilverChariotEntity>(new RotationAngle[] {
+                        new RotationAngle(body, 0.0F, -0.7854F, 0.0F),
+                        new RotationAngle(upperPart, 0.0F, -0.7854F, 0.0F),
+                        new RotationAngle(leftArm, 0.2618F, 0.0F, -0.1309F),
+                        new RotationAngle(rightArm, 0.0F, 1.5708F, 1.5708F),
+                        new RotationAngle(rapier, 1.5708F, 0.0F, 0.0F)
+                }).setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
+                    rightArm.zRot -= xRotation * MathUtil.DEG_TO_RAD;
+                })).build(idlePose));
         
         rapierAnim.put(StandPose.HEAVY_ATTACK_COMBO, initHeavyAttackAnim(true));
         
@@ -193,17 +208,21 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
                         new RotationAngle(rightArm, 0.0F, 1.5708F, 1.5708F),
                         new RotationAngle(rapier, 1.5708F, 0.0F, 0.0F)
                 }).setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
-                    rightArm.zRot -= xRotation * MathUtil.DEG_TO_RAD; // FIXME (!!) use xRotation
+                    rightArm.zRot -= xRotation * MathUtil.DEG_TO_RAD;
                 })).build(idlePose));
         
         rapierAnim.put(StandPose.BLOCK, new StandActionAnimation.Builder<SilverChariotEntity>()
-                .addPose(StandEntityAction.Phase.PERFORM, new ModelPose<SilverChariotEntity>(new RotationAngle[] {
+                .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<SilverChariotEntity>(new RotationAngle[] {
                         new RotationAngle(leftArm, -0.8727F, 0.0F, -0.1745F),
                         new RotationAngle(leftForeArm, -1.5708F, 0.2618F, 0.0F),
                         new RotationAngle(rightArm, 0.5236F, 0.0F, 0.1746F),
                         new RotationAngle(rightForeArm, -1.9199F, 0.0F, 0.0F),
                         new RotationAngle(rapier, 0.829F, 0.0F, -1.1781F)
                 })).build(idlePose));
+
+        rapierBarrageSwing = new ModelPoseSided<>(
+                initBarrageSwingPose(HandSide.LEFT), 
+                initBarrageSwingPose(HandSide.RIGHT));
     }
     
     protected StandActionAnimation<SilverChariotEntity> getActionAnim(SilverChariotEntity entity, StandPose poseType) {
@@ -213,57 +232,38 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
         return super.getActionAnim(entity, poseType);
     }
 
-    // FIXME (model anim) SC poses and animations
-    //    @Override
-    //    protected void swingArm(SilverChariotEntity entity, float swingAmount, float xRotation, HandSide swingingHand, float recovery) {
-    //        if (!entity.hasRapier()) {
-    //            super.swingArm(entity, swingAmount, xRotation, swingingHand, recovery);
-    //        }
-    //        else {
-    //            if (swingingHand != entity.getMainArm()) {
-    //                swingingHand = swingingHand.getOpposite();
-    //                attackTime = 1 - attackTime;
-    //            }
-    //            ModelRenderer punchingArm;
-    //            ModelRenderer punchingForeArm;
-    //            ModelRenderer otherArm;
-    //            if (swingingHand == HandSide.LEFT) {
-    //                punchingArm = this.leftArm;
-    //                punchingForeArm = this.leftForeArm;
-    //                otherArm = this.rightArm;
-    //            }
-    //            else {
-    //                punchingArm = this.rightArm;
-    //                punchingForeArm = this.rightForeArm;
-    //                otherArm = this.leftArm;
-    //            }    
-    //            
-    //            float f1 = 1.0F - swingAmount;
-    //            f1 = f1 * f1;
-    //            f1 = f1 * f1;
-    //            f1 = 1.0F - f1;
-    //            
-    //            upperPart.yRot = -0.7854F;
-    //            if (swingingHand == HandSide.LEFT) {
-    //                this.upperPart.yRot *= -1.0F;
-    //            }
-    //            
-    //            punchingArm.zRot = 0;
-    //            otherArm.zRot = 1.0472F;
-    //            leftArm.zRot *= -1.0F;
-    //            punchingForeArm.zRot = -1.5708F * (1 - f1);
-    //            
-    //            punchingArm.yRot = 2.3562F - 1.7453F * f1;
-    //            otherArm.yRot = 0;
-    //            leftArm.yRot *= -1.0F;
-    //            
-    //            punchingArm.xRot = -1.5708F + xRotation * MathUtil.DEG_TO_RAD;
-    //            
-    //            if (rapier != null) {
-    //                rapier.xRot = 0.7854F + 0.7854F * (1F - recovery);
-    //            }
-    //            
-    //            recoveryAnim(recovery, upperPart, leftArm, leftForeArm, rightArm, rightForeArm);
-    //        }
-    //    }
+    protected ModelPoseSided<SilverChariotEntity> rapierBarrageSwing;
+    private ModelPoseTransition<SilverChariotEntity> initBarrageSwingPose(HandSide swingingHand) {
+        ModelRenderer punchingArm = getArm(swingingHand);
+        ModelRenderer punchingForeArm = getForeArm(swingingHand);
+        ModelRenderer otherArm = getArm(swingingHand.getOpposite());
+
+        float yRotUpperPart = -0.7854F;
+        if (swingingHand == HandSide.LEFT) {
+            yRotUpperPart *= -1.0F;
+        }
+        
+        return new ModelPoseTransition<>(
+                new ModelPose<SilverChariotEntity>(new RotationAngle[] {
+                        new RotationAngle(upperPart, 0, yRotUpperPart, 0),
+                        new RotationAngle(otherArm, 0, 0, 1.0472F),
+                        new RotationAngle(punchingArm, -1.5708F, 2.3562F, 0),
+                        new RotationAngle(punchingForeArm, 0, 0, -1.5708F),
+                        new RotationAngle(rapier, 1.5708F, 0, 0)
+                }), 
+                new ModelPose<SilverChariotEntity>(new RotationAngle[] {
+                        new RotationAngle(punchingArm, -1.5708F, 0.6109F, 0),
+                        new RotationAngle(punchingForeArm, 0, 0, 0)
+                }).setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
+                    leftArm.zRot *= -1.0F;
+                    leftArm.yRot *= -1.0F;
+                    punchingArm.xRot += xRotation * MathUtil.DEG_TO_RAD;
+                }))
+                .setEasing(sw -> sw * sw * sw);
+    }
+    
+    @Override
+    protected IModelPose<SilverChariotEntity> getBarrageSwingAnim(SilverChariotEntity entity) {
+        return entity.hasRapier() ? rapierBarrageSwing : barrageSwing;
+    }
 }

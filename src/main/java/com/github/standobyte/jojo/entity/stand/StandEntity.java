@@ -784,7 +784,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 StandEntityAction currentAction = getCurrentTaskAction();
                 if (currentAction == null || !currentAction.isCombatAction()) {
                     float decay = COMBO_DECAY;
-                    if (getComboMeter() > 0.5F) {
+                    if (getComboMeter() < 0.5F) {
                         decay *= 0.5F;
                     }
                     setComboMeter(Math.max(getComboMeter() - decay, 0));
@@ -1344,7 +1344,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             }
         }
         
-        boolean attacked = hurtTarget(target, dmgSource, StandStatFormulas.addArmorPiercing(attack.getDamage(), attack.getArmorPiercing(), livingTarget));
+        boolean attacked = hurtTarget(target, dmgSource, ModDamageSources.addArmorPiercing(attack.getDamage(), attack.getArmorPiercing(), livingTarget));
         if (attacked) {
             
             if (livingTarget != null) {
@@ -1398,16 +1398,13 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             
             attack
             .damage(StandStatFormulas.getHeavyAttackDamage(strength, targetLiving))
-            .armorPiercing(StandStatFormulas.getHeavyAttackArmorPiercing(strength))
             .addKnockback(1 + (float) strength / 3 * heavyAttackCombo)
             .disableBlocking(distance < attackRange * precision * 0.05);
 
+            // FIXME (!) nerf this
             float targetProximityRatio = 1 - (float) (distance / attackRange);
             if (targetProximityRatio > 0.75) {
                 attack.damage(attack.getDamage() * (targetProximityRatio * 2 - 0.5F));
-            }
-            else if (targetProximityRatio < 0.5) {
-                attack.armorPiercing(attack.getArmorPiercing() * (targetProximityRatio * 2));
             }
             break;
         case BARRAGE:

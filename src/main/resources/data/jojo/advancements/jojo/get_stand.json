@@ -1,0 +1,33 @@
+{
+  "parent": "jojo:jojo/stand_arrow",
+  "display": {
+    "icon": {
+      "item": "jojo:stand_arrow"
+    },
+    "title": {
+      "translate": "advancements.jojo.get_stand.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.get_stand.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "get_stand": {
+      "trigger": "jojo:get_power",
+      "conditions": {
+        "jojopower": {
+          "classification": "stand"
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "get_stand"
+    ]
+  ]
+}

@@ -17,6 +17,8 @@ import net.minecraft.util.math.MathHelper;
 
 public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
     private final List<ModelRenderer> hairToAnimate;
+    private final ModelRenderer leftShoulder;
+    private final ModelRenderer rightShoulder;
 
     public StarPlatinumModel() {
         this(64, 64);
@@ -373,10 +375,18 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
         head.texOffs(44, 44).addBox(3.5F, -4.0F, -3.0F, 1.0F, 2.0F, 2.0F, 0.0F, true);
         head.texOffs(44, 56).addBox(-0.5F, -0.5F, -4.5F, 1.0F, 1.0F, 1.0F, 0.0F, false);
 
+        leftShoulder = new ModelRenderer(this);
+        leftShoulder.setPos(4.0F, 0.0F, 0.0F);
+        torso.addChild(leftShoulder);
+        leftShoulder.texOffs(37, 30).addBox(0.0F, -0.5F, -2.5F, 5.0F, 1.0F, 5.0F, 0.0F, true);
+
+        rightShoulder = new ModelRenderer(this);
+        rightShoulder.setPos(-4.0F, 0.0F, 0.0F);
+        torso.addChild(rightShoulder);
+        rightShoulder.texOffs(37, 30).addBox(-5.0F, -0.5F, -2.5F, 5.0F, 1.0F, 5.0F, 0.0F, false);
+
         torso.texOffs(26, 30).addBox(-3.5F, 1.1F, -2.0F, 7.0F, 3.0F, 1.0F, 0.4F, false);
         torso.texOffs(12, 37).addBox(-2.5F, 4.0F, -2.3F, 5.0F, 6.0F, 1.0F, 0.0F, false);
-        torso.texOffs(37, 30).addBox(-9.0F, -0.6F, -2.5F, 5.0F, 1.0F, 5.0F, 0.0F, false);
-        torso.texOffs(37, 30).addBox(4.0F, -0.6F, -2.5F, 5.0F, 1.0F, 5.0F, 0.0F, true);
         torso.texOffs(0, 30).addBox(-4.0F, -0.25F, -2.75F, 8.0F, 2.0F, 5.0F, 0.1F, false);
         torso.texOffs(26, 34).addBox(-2.0F, 10.0F, -2.15F, 4.0F, 5.0F, 0.0F, 0.0F, false);
         torso.texOffs(26, 34).addBox(-2.0F, 10.0F, 2.15F, 4.0F, 5.0F, 0.0F, 0.0F, false);
@@ -440,7 +450,16 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
             hair.yRot += yRotAnim * 0.0125F;
         }
         ticksPrev = ticks;
+        
+//        rotateShoulderPad(rightShoulder, rightArm);
+//        rotateShoulderPad(leftShoulder, leftArm);
     }
+    
+//    private void rotateShoulderPad(ModelRenderer shoulderPad, ModelRenderer arm) {
+//        if (shoulderPad != null && arm != null) {
+//            shoulderPad.zRot = arm.zRot / 2;
+//        }
+//    }
 
     @Override
     protected RotationAngle[][] initSummonPoseRotations() {
@@ -481,14 +500,42 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
             }
         };
     }
-
+    
     @Override
     protected IModelPose<StarPlatinumEntity> rangedAttackPose() {
         return new ModelPose<StarPlatinumEntity>(new RotationAngle[] {
                 new RotationAngle(body, 0.0F, -0.48F, 0.0F),
                 new RotationAngle(leftArm, 0.0F, 0.0F, -0.7854F),
                 new RotationAngle(leftForeArm, 0.0F, 0.0F, 0.6109F),
-                new RotationAngle(rightArm, -1.0908F, 0.0F, 1.5708F) // FIXME (!!) use xRotation
+                new RotationAngle(rightArm, -1.0908F, 0.0F, 1.5708F), // FIXME (!!) use xRotation
+                new RotationAngle(rightForeArm, 0.0F, 0.0F, 0.0F)
         });
     }
+    
+    
+
+//    @Override
+//    protected ModelPose<StarPlatinumEntity> initIdlePose() {
+//        return new ModelPose<StarPlatinumEntity>(new RotationAngle[] {
+//                new RotationAngle(body, 0.0F, -0.5236F, 0.0F),
+//                new RotationAngle(leftArm, -0.2618F, 0.0F, -0.7854F),
+//                new RotationAngle(leftForeArm, -1.5708F, -0.5236F, 0.5236F),
+//                new RotationAngle(rightArm, -0.3927F, 0.5236F, 0.3927F),
+//                new RotationAngle(rightForeArm, -1.5708F, 1.0472F, -1.5708F),
+//                new RotationAngle(leftLeg, 0.0873F, 0.1745F, -0.2618F),
+//                new RotationAngle(leftLowerLeg, 0.2618F, 0.0F, 0.0F),
+//                new RotationAngle(rightLeg, -0.0436F, 0.0F, 0.3491F),
+//                new RotationAngle(rightLowerLeg, 0.2618F, 0.0F, -0.3491F)
+//        });
+//    }
+//
+//    @Override
+//    protected ModelPose<StarPlatinumEntity> initIdlePose2Loop() {
+//        return new ModelPose<StarPlatinumEntity>(new RotationAngle[] {
+//                new RotationAngle(leftArm, -0.2618F, 0.0F, -0.6981F),
+//                new RotationAngle(leftForeArm, -1.5708F, -0.3491F, 0.5236F),
+//                new RotationAngle(rightArm, -0.2618F, 0.5236F, 0.3927F),
+//                new RotationAngle(rightForeArm, -1.5708F, 0.8727F, -1.5708F)
+//        });
+//    }
 }

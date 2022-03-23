@@ -54,8 +54,6 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.event.TickEvent.RenderTickEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent;
-import net.minecraftforge.event.entity.living.PotionEvent.PotionExpiryEvent;
-import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -73,7 +71,9 @@ public class ClientEventHandler {
     private float partialTickStoppedAt;
     private static final ResourceLocation SHADER_TIME_STOP = new ResourceLocation("shaders/post/desaturate.json");
     
+    private Random random = new Random();
     private ResourceLocation resolveShader = null;
+    private int resolveShaderNum = random.nextInt(HueShiftShaders.SHADERS_HUE_SHIFT.length);
     private StandOstSound ost;
     
     private boolean resetShader;
@@ -227,70 +227,52 @@ public class ClientEventHandler {
         }
         return null;
     }
+    
+    
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onResolveEffectStart(PotionAddedEvent event) {
         if (event.getOldPotionEffect() == null && event.getPotionEffect().getEffect() == ModEffects.RESOLVE.get()) {
             if (resolveShader == null) {
-                resolveShader = HueShiftShaders.SHADERS_HUE_SHIFT[new Random().nextInt(HueShiftShaders.SHADERS_HUE_SHIFT.length)];
+                resolveShaderNum = random.nextInt(HueShiftShaders.SHADERS_HUE_SHIFT.length);
+                resolveShader = HueShiftShaders.SHADERS_HUE_SHIFT[resolveShaderNum];
             }
             
-            if (ost == null || ost.isStopped()) {
-                SoundEvent ostSound = IStandPower.getStandPowerOptional(mc.player).map(stand -> {
-                    if (stand.hasPower()) {
-                        return stand.getType().getOst();
-                    }
-                    return null;
-                }).orElse(null);
-                if (ostSound != null) {
-                    ost = new StandOstSound(ostSound, mc);
-                    mc.getSoundManager().play(ost);
-                }
-            }
+            startPlayingOst(event.getPotionEffect().getAmplifier());
         }
     }
     
     private void tickResolveEffect() {
         if (mc.player.isAlive() && mc.player.hasEffect(ModEffects.RESOLVE.get())) {
             if (resolveShader == null) {
-                resolveShader = HueShiftShaders.SHADERS_HUE_SHIFT[new Random().nextInt(HueShiftShaders.SHADERS_HUE_SHIFT.length)];
+                resolveShader = HueShiftShaders.SHADERS_HUE_SHIFT[resolveShaderNum];
             }
             
-//            if (ost == null || ost.isStopped()) {
-//                SoundEvent ostSound = IStandPower.getStandPowerOptional(mc.player).map(stand -> {
-//                    if (stand.hasPower()) {
-//                        return stand.getType().getOst();
-//                    }
-//                    return null;
-//                }).orElse(null);
-//                if (ostSound != null) {
-//                    ost = new StandOstSound(ostSound, mc);
-//                    mc.getSoundManager().play(ost);
-//                }
-//            }
-            
             if (mc.player.getEffect(ModEffects.RESOLVE.get()).getDuration() == 100) {
-                fadeAwayOst(200);
+                fadeAwayOst(150);
             }
         }
         else {
             stopResolveShader();
-            fadeAwayOst(0);
+            fadeAwayOst(20);
         }
     }
+    
+    private void startPlayingOst(int level) {
+        mc.getMusicManager().stopPlaying();
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void onResolveEffectOver(PotionExpiryEvent event) {
-        if (event.getPotionEffect().getEffect() == ModEffects.RESOLVE.get()) {
-            stopResolveShader();
-        }
-    }
-
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void onResolveEffectRemoved(PotionRemoveEvent event) {
-        if (event.getPotionEffect() != null && event.getPotionEffect().getEffect() == ModEffects.RESOLVE.get()) {
-            stopResolveShader();
-            fadeAwayOst(50);
+        if (ost == null || ost.isStopped()) {
+            ost = null;
+            SoundEvent ostSound = IStandPower.getStandPowerOptional(mc.player).map(stand -> {
+                if (stand.hasPower()) {
+                    return stand.getType().getOst(level);
+                }
+                return null;
+            }).orElse(null);
+            if (ostSound != null) {
+                ost = new StandOstSound(ostSound, mc);
+                mc.getSoundManager().play(ost);
+            }
         }
     }
     
@@ -298,12 +280,18 @@ public class ClientEventHandler {
         if (resolveShader != null) {
             resetShader = true;
             resolveShader = null;
+            resolveShaderNum = random.nextInt(HueShiftShaders.SHADERS_HUE_SHIFT.length);
         }
     }
     
     private void fadeAwayOst(int fadeAwayTicks) {
         if (ost != null) {
-            ost.setFadeAway(fadeAwayTicks);
+            if (!ost.isStopped()) {
+                ost.setFadeAway(fadeAwayTicks);
+            }
+            else {
+                mc.getSoundManager().stop(ost);
+            }
             ost = null;
         }
     }

@@ -1,0 +1,43 @@
+{
+  "parent": "jojo:jojo/stand_kill_stand",
+  "display": {
+    "icon": {
+      "item": "jojo:meteoric_scrap",
+      "nbt": "{Icon:5}"
+    },
+    "title": {
+      "translate": "advancements.jojo.stand6_kill_stand6.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.stand6_kill_stand6.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "stand_user_killed": {
+      "trigger": "jojo:player_killed_entity",
+      "conditions": {
+        "power": {
+          "classification": "stand",
+          "stand_tier": {
+            "min": 6
+          }
+        },
+        "killed_power": {
+          "classification": "stand",
+          "stand_tier": {
+            "min": 6
+          }
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "stand_user_killed"
+    ]
+  ]
+}

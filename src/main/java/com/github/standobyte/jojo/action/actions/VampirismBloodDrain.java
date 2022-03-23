@@ -2,8 +2,10 @@ package com.github.standobyte.jojo.action.actions;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
+import com.github.standobyte.jojo.init.ModCustomStats;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -17,9 +19,11 @@ import net.minecraft.entity.INPC;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.monster.AbstractIllagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
+import net.minecraft.stats.Stats;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.World;
@@ -60,11 +64,14 @@ public class VampirismBloodDrain extends VampirismAction {
                 if (!targetEntity.isDeadOrDying()) {
                     int difficulty = world.getDifficulty().getId();
                     float bloodAndHealModifier = 0.25F + difficulty * 0.75F;
+                    boolean isHuman = false;
                     if (targetEntity instanceof PlayerEntity) {
                         bloodAndHealModifier *= 3F;
+                        isHuman = true;
                     }
                     else if (targetEntity instanceof INPC || targetEntity instanceof AbstractIllagerEntity) {
                         bloodAndHealModifier *= 2F;
+                        isHuman = true;
                     }
                     if (INonStandPower.getNonStandPowerOptional(targetEntity).map(
                             p -> p.getType() == ModNonStandPowers.HAMON.get()).orElse(false)) {
@@ -84,7 +91,17 @@ public class VampirismBloodDrain extends VampirismAction {
                             power.addEnergy(healed * VampirismPowerType.healCost(world.getDifficulty()));
                         }
                         if (targetEntity.isDeadOrDying()) {
-                            HungryZombieEntity.createZombie((ServerWorld) world, user, targetEntity, false);
+                            boolean zombieCreated = HungryZombieEntity.createZombie((ServerWorld) world, user, targetEntity, false);
+                            if (user instanceof ServerPlayerEntity) {
+                                ServerPlayerEntity player = (ServerPlayerEntity) user;
+                                player.awardStat(isHuman ? ModCustomStats.VAMPIRE_PEOPLE_DRAINED : ModCustomStats.VAMPIRE_ANIMALS_DRAINED);
+                                if (zombieCreated) {
+                                    player.awardStat(ModCustomStats.VAMPIRE_ZOMBIES_CREATED);
+                                }
+                                ModCriteriaTriggers.VAMPIRE_PEOPLE_DRAINED.get().trigger(player, 
+                                        player.getStats().getValue(Stats.CUSTOM.get(ModCustomStats.VAMPIRE_PEOPLE_DRAINED)), 
+                                        player.getStats().getValue(Stats.CUSTOM.get(ModCustomStats.VAMPIRE_ZOMBIES_CREATED)));
+                            }
                         }
                     }
                 }

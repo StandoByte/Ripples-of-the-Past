@@ -74,7 +74,7 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
     public float getStaminaRegen(IStandPower power) {
         if (power.isActive()) {
             StandEntity stand = (StandEntity) power.getStandManifestation();
-            return stand.hasTask() ? 0 : 1F;
+            return stand.hasTask() && !stand.getCurrentTaskAction().canStaminaRegen(power, stand) ? 0 : 1F;
         }
         return super.getStaminaRegen(power);
     }

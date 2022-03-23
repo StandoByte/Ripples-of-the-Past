@@ -62,7 +62,7 @@ public class SilverChariotEntity extends StandEntity {
 
     @Override
     public double getDefaultMeleeAttackRange() {
-        return super.getDefaultMeleeAttackRange() + 1;
+        return super.getDefaultMeleeAttackRange() + 1.25;
     }
 
     @Override

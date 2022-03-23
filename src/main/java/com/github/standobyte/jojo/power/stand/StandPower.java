@@ -559,7 +559,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     public boolean isLeapUnlocked() {
         if (standManifestation instanceof StandEntity) {
             StandEntity standEntity = (StandEntity) standManifestation;
-            return standEntity.getAttackDamage() >= 6 && !standEntity.isArmsOnlyMode() && standEntity.isFollowingUser();
+            return StandStatFormulas.getLeapStrength(standEntity.getAttackDamage()) >= 1.5 && !standEntity.isArmsOnlyMode() && standEntity.isFollowingUser();
         }
         return false;
     }
@@ -614,7 +614,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 setType(stand);
                 if (nbt.contains("Exp")) {
                     xp = nbt.getInt("Exp");
-                    // FIXME add unlocked actions from v0.1
+                    // FIXME (!) add unlocked actions from v0.1
                 }
                 else {
                     xp = nbt.getInt("Xp");

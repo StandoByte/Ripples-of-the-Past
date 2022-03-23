@@ -7,9 +7,11 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.advancements.criterion.ActionPerformTrigger;
 import com.github.standobyte.jojo.advancements.criterion.GetPowerTrigger;
+import com.github.standobyte.jojo.advancements.criterion.HamonChargeKillTrigger;
 import com.github.standobyte.jojo.advancements.criterion.HamonStatsTrigger;
 import com.github.standobyte.jojo.advancements.criterion.KilledPowerUserTrigger;
 import com.github.standobyte.jojo.advancements.criterion.LastHamonTrigger;
+import com.github.standobyte.jojo.advancements.criterion.PeopleDrainedTrigger;
 import com.github.standobyte.jojo.advancements.criterion.SoulAscensionTrigger;
 import com.github.standobyte.jojo.advancements.criterion.StandArrowHitTrigger;
 import com.github.standobyte.jojo.advancements.criterion.StoneMaskDestroyedTrigger;
@@ -30,6 +32,10 @@ public class ModCriteriaTriggers {
             new CriteriaTriggerSupplier<>(() -> new LastHamonTrigger(new ResourceLocation(JojoMod.MOD_ID, "last_hamon")));
     public static final CriteriaTriggerSupplier<HamonStatsTrigger> HAMON_STATS = 
             new CriteriaTriggerSupplier<>(() -> new HamonStatsTrigger(new ResourceLocation(JojoMod.MOD_ID, "hamon_stats")));
+    public static final CriteriaTriggerSupplier<HamonChargeKillTrigger> HAMON_CHARGE_KILL = 
+            new CriteriaTriggerSupplier<>(() -> new HamonChargeKillTrigger(new ResourceLocation(JojoMod.MOD_ID, "hamon_charge_kill")));
+    public static final CriteriaTriggerSupplier<PeopleDrainedTrigger> VAMPIRE_PEOPLE_DRAINED = 
+            new CriteriaTriggerSupplier<>(() -> new PeopleDrainedTrigger(new ResourceLocation(JojoMod.MOD_ID, "vampire_people_drained")));
     public static final CriteriaTriggerSupplier<KilledPowerUserTrigger> PLAYER_KILLED_ENTITY = 
             new CriteriaTriggerSupplier<>(() -> new KilledPowerUserTrigger(new ResourceLocation(JojoMod.MOD_ID, "player_killed_entity"), false));
     public static final CriteriaTriggerSupplier<KilledPowerUserTrigger> ENTITY_KILLED_PLAYER = 

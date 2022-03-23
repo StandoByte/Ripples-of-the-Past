@@ -9,7 +9,6 @@ import com.github.standobyte.jojo.client.model.pose.RigidModelPose;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
 import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.util.MathUtil;
 import com.google.common.collect.ImmutableList;
 
@@ -40,7 +39,6 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
     protected ModelRenderer rightLegJoint;
     protected ModelRenderer rightLowerLeg;
     
-    protected ModelPoseSided<T> barrageSwing;
 
     public HumanoidStandModel() {
         this(64, 64);
@@ -131,8 +129,6 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         rightArmForearmOnly.setPos(rightArm.x, rightArm.y, rightArm.z);
         upperPart.addChild(rightArmForearmOnly);
         rightArmForearmOnly.addChild(rightForeArm);
-        
-        barrageSwing = initArmSwingAnim();
     }
 
     protected void addBaseBoxes() {
@@ -215,11 +211,18 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         }
     }
     
+    @Override
+    protected void initPoses() {
+        super.initPoses();
+        barrageSwing = initArmSwingAnim();
+    }
+
+    protected ModelPoseSided<T> barrageSwing;
     private ModelPoseSided<T> initArmSwingAnim() {
-        return initArmSwingAnim(1.0F);
+        return initBarrageSwingAnim(1.0F);
     }
     
-    private ModelPoseSided<T> initArmSwingAnim(float backSwing) {
+    private ModelPoseSided<T> initBarrageSwingAnim(float backSwing) {
         return new ModelPoseSided<>(
                 initArmSwingPose(HandSide.LEFT, backSwing, SwingPart.SWING), 
                 initArmSwingPose(HandSide.RIGHT, backSwing, SwingPart.SWING));
@@ -242,6 +245,7 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         case BACKSWING:
             anim = new ModelPoseTransition<T>(
                     new ModelPose<T>(new RotationAngle[] {
+                            new RotationAngle(body, 0, 0, 0),
                             new RotationAngle(upperPart, 0, yRotBody, 0),
                             new RotationAngle(punchingArm, 0.3927F, 0, 1.0472F),
                             new RotationAngle(punchingForeArm, -2.3562F, 0, 0),
@@ -260,6 +264,7 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         case SWING:
             anim = new ModelPoseTransition<T>(
                     new ModelPose<T>(new RotationAngle[] {
+                            new RotationAngle(body, 0, 0, 0),
                             new RotationAngle(upperPart, 0, yRotBody * backSwingAmount, 0),
                             new RotationAngle(punchingArm, 0.3927F, 0, 1.0472F),
                             new RotationAngle(punchingForeArm, -2.3562F, 0, 0),
@@ -291,7 +296,11 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
     @Override
     protected void swingArmBarrage(T entity, float swingAmount, float yRotation, float xRotation, float ticks, HandSide swingingHand, float recovery) {
         entity.setYBodyRot(entity.yRot);
-        barrageSwing.poseModel(swingAmount, entity, ticks, yRotation, xRotation, swingingHand);
+        getBarrageSwingAnim(entity).poseModel(swingAmount, entity, ticks, yRotation, xRotation, swingingHand);
+    }
+    
+    protected IModelPose<T> getBarrageSwingAnim(T entity) {
+        return barrageSwing;
     }
 
     protected ModelRenderer getArm(HandSide side) {
@@ -339,8 +348,8 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
                         new ModelPoseSided<>(
                                 initArmSwingPose(HandSide.LEFT, backSwing, SwingPart.BACKSWING), 
                                 initArmSwingPose(HandSide.RIGHT, backSwing, SwingPart.BACKSWING)))
-                .addPose(StandEntityAction.Phase.PERFORM, initArmSwingAnim(backSwing))
-                .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransition<T>(initArmSwingAnim(backSwing), idlePose)
+                .addPose(StandEntityAction.Phase.PERFORM, initBarrageSwingAnim(backSwing))
+                .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransition<T>(initBarrageSwingAnim(backSwing), idlePose)
                         .setEasing(pr -> Math.max(2F * (pr - 1) + 1, 0F)))
                 .build(idlePose);
     }
@@ -366,6 +375,7 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
     protected IModelPose<T> blockPose() {
         xRotation = MathHelper.clamp(xRotation, -60, 60) * MathUtil.DEG_TO_RAD / 2;
         return new ModelPose<T>(new RotationAngle[] {
+                new RotationAngle(body, 0, 0, 0),
                 new RotationAngle(upperPart, 0.0F, 0.0F, 0.0F),
                 new RotationAngle(rightForeArm, 0.0F, 0.0F, -1.0472F),
                 new RotationAngle(leftForeArm, 0.0F, 0.0F, 1.0472F)
@@ -380,8 +390,7 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
 
             rightArm.zRot = Math.abs(blockXRot) / 2 - 0.7854F;
             leftArm.zRot = -rightArm.zRot;
-        })
-        .createRigid();
+        });
     }
 
     @Override
@@ -391,7 +400,6 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         rotateJoint(rightArmJoint, rightForeArm);
         rotateJoint(leftLegJoint, leftLowerLeg);
         rotateJoint(rightLegJoint, rightLowerLeg);
-        actionAnim.put(StandPose.HEAVY_ATTACK, initHeavyAttackAnim(false));
     }
 
     protected void rotateJoint(ModelRenderer joint, ModelRenderer limbPart) {

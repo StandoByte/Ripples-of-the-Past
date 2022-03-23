@@ -1,0 +1,39 @@
+{
+  "parent": "jojo:jojo/get_vampirism",
+  "display": {
+    "icon": {
+      "item": "jojo:meteoric_scrap",
+      "nbt": "{Icon:3}"
+    },
+    "title": {
+      "translate": "advancements.jojo.vampire_kill_hamon.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.vampire_kill_hamon.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "hamon_user_killed": {
+      "trigger": "jojo:player_killed_entity",
+      "conditions": {
+        "power": {
+          "classification": "non_stand",
+          "type": "jojo:vampirism"
+        },
+        "killed_power": {
+          "classification": "non_stand",
+          "type": "jojo:hamon"
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "hamon_user_killed"
+    ]
+  ]
+}

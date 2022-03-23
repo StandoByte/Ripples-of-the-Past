@@ -2,34 +2,13 @@ package com.github.standobyte.jojo.entity.stand;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.util.MathUtil;
-
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.util.CombatRules;
 import net.minecraft.util.math.MathHelper;
 
 public class StandStatFormulas {
 
     public static final float getHeavyAttackDamage(double strength, @Nullable LivingEntity armoredTarget) {
         float damage = Math.max((float) strength, 1F);
-        return damage;
-    }
-
-    public static final float getHeavyAttackArmorPiercing(double strength) {
-        return (float) strength * 0.0125F;
-    }
-    
-    public static final float addArmorPiercing(float damage, float armorPiercing, @Nullable LivingEntity armoredTarget) {
-        if (armoredTarget != null && armorPiercing > 0) {
-            float armor = (float) armoredTarget.getArmorValue();
-            if (armor > 0) {
-                float toughness = (float) armoredTarget.getAttributeValue(Attributes.ARMOR_TOUGHNESS);
-                armorPiercing = MathHelper.clamp(armorPiercing, 0, 1);
-                float damagePierced = MathHelper.lerp(armorPiercing, CombatRules.getDamageAfterAbsorb(damage, armor, toughness), damage);
-                damage = MathUtil.inverseArmorProtectionDamage(damagePierced, armor, toughness);
-            }
-        }
         return damage;
     }
     
@@ -50,12 +29,8 @@ public class StandStatFormulas {
         return 0.5F + (float) strength * 0.25F;
     }
     
-    public static final int getLightAttackWindup(double speed, float earlyStart) {
-        int ticks = Math.max(6 - MathHelper.log2((int) speed), 1);
-        if (earlyStart > 0) {
-            ticks += (int) (lightAttackRecovery(speed) * earlyStart) + 1;
-        }
-        return ticks;
+    public static final int getLightAttackWindup(double speed) {
+        return Math.max((int) (10 - speed * 0.4), 0);
     }
     
     public static final int getLightAttackRecovery(double speed) {

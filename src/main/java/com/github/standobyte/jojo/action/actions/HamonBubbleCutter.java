@@ -17,7 +17,7 @@ public class HamonBubbleCutter extends HamonAction {
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             boolean shift = isShiftVariation();
-            int bubbles = shift ? 6 : 12;
+            int bubbles = shift ? 4 : 8;
             for (int i = 0; i < bubbles; i++) {
                 HamonBubbleCutterEntity bubbleCutterEntity = new HamonBubbleCutterEntity(user, world);
                 float velocity = 1.35F + user.getRandom().nextFloat() * 0.3F;
