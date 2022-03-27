@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.util.HamonCharge;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
 
 public class LivingUtilCap {
     private final LivingEntity entity;
@@ -17,6 +18,7 @@ public class LivingUtilCap {
     
     private boolean reduceKnockback;
     private float futureKnockbackFactor;
+    private Vector3d latestExplosionPos = null;
     
     HamonCharge hamonCharge;
     
@@ -62,6 +64,16 @@ public class LivingUtilCap {
     public float getKnockbackFactorOneTime() {
         reduceKnockback = false;
         return futureKnockbackFactor;
+    }
+    
+    public void setLatestExplosionPos(Vector3d pos) {
+        this.latestExplosionPos = pos;
+    }
+    
+    public Vector3d popLatestExplosionPos() {
+        Vector3d pos = this.latestExplosionPos;
+        this.latestExplosionPos = null;
+        return pos;
     }
     
     

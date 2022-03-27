@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.advancements.criterion.PeopleDrainedTrigger;
 import com.github.standobyte.jojo.advancements.criterion.SoulAscensionTrigger;
 import com.github.standobyte.jojo.advancements.criterion.StandArrowHitTrigger;
 import com.github.standobyte.jojo.advancements.criterion.StoneMaskDestroyedTrigger;
+import com.github.standobyte.jojo.advancements.criterion.UnconditionalTrigger;
 
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.criterion.AbstractCriterionTrigger;
@@ -36,6 +37,8 @@ public class ModCriteriaTriggers {
             new CriteriaTriggerSupplier<>(() -> new HamonChargeKillTrigger(new ResourceLocation(JojoMod.MOD_ID, "hamon_charge_kill")));
     public static final CriteriaTriggerSupplier<PeopleDrainedTrigger> VAMPIRE_PEOPLE_DRAINED = 
             new CriteriaTriggerSupplier<>(() -> new PeopleDrainedTrigger(new ResourceLocation(JojoMod.MOD_ID, "vampire_people_drained")));
+    public static final CriteriaTriggerSupplier<UnconditionalTrigger> VAMPIRE_HAMON_DAMAGE_SCARF = 
+            new CriteriaTriggerSupplier<>(() -> new UnconditionalTrigger(new ResourceLocation(JojoMod.MOD_ID, "vampire_hamon_damage_scarf")));
     public static final CriteriaTriggerSupplier<KilledPowerUserTrigger> PLAYER_KILLED_ENTITY = 
             new CriteriaTriggerSupplier<>(() -> new KilledPowerUserTrigger(new ResourceLocation(JojoMod.MOD_ID, "player_killed_entity"), false));
     public static final CriteriaTriggerSupplier<KilledPowerUserTrigger> ENTITY_KILLED_PLAYER = 

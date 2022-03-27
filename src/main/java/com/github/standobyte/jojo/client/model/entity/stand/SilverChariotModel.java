@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.client.model.pose.IModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseSided;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseTransition;
+import com.github.standobyte.jojo.client.model.pose.ModelPoseTransitionMultiple;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
 import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
@@ -183,10 +184,9 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
     protected void initPoses() {
         super.initPoses();
         
-        // FIXME (!!) SC attack animation
+        // FIXME (!!!!) SC attack animation
         rapierAnim.put(StandPose.LIGHT_ATTACK, initLightAttackAnim());
 
-        // FIXME (!!) SC heavy attack charge
         rapierAnim.put(StandPose.HEAVY_ATTACK, new StandActionAnimation.Builder<SilverChariotEntity>()
                 .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<SilverChariotEntity>(new RotationAngle[] {
                         new RotationAngle(body, 0.0F, -0.7854F, 0.0F),
@@ -197,11 +197,42 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
                 }).setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
                     rightArm.zRot -= xRotation * MathUtil.DEG_TO_RAD;
                 })).build(idlePose));
-        
-        rapierAnim.put(StandPose.HEAVY_ATTACK_COMBO, initHeavyAttackAnim(true));
+
+
+        ModelPose<SilverChariotEntity> sweepPose1 = new ModelPose<SilverChariotEntity>(new RotationAngle[] {
+                RotationAngle.fromDegrees(head, 0F, -45F, 0F), 
+                RotationAngle.fromDegrees(body, 0F, -90F, 0F),
+                RotationAngle.fromDegrees(upperPart, 0F, -30F, 0F),
+                RotationAngle.fromDegrees(rightArm, 0F, 45F, 75F),
+                RotationAngle.fromDegrees(rightForeArm, 0F, 0F, -120F),
+                RotationAngle.fromDegrees(rapier, 82.5F, 0F, 0F)
+        });
+        ModelPose<SilverChariotEntity> sweepPose2 = new ModelPose<SilverChariotEntity>(new RotationAngle[] {
+                RotationAngle.fromDegrees(head, 0F, -36F, 0F), 
+                RotationAngle.fromDegrees(body, 0F, -69F, 0F),
+                RotationAngle.fromDegrees(upperPart, 0F, -24F, 0F),
+                RotationAngle.fromDegrees(rightArm, 2.5F, 36F, 84F),
+                RotationAngle.fromDegrees(rightForeArm, 0F, 0F, 0F),
+                RotationAngle.fromDegrees(rapier, 90F, 0F, 0F)
+        });
+        ModelPose<SilverChariotEntity> sweepPose3 = new ModelPose<SilverChariotEntity>(new RotationAngle[] {
+                RotationAngle.fromDegrees(head, 0F, 0F, 0F), 
+                RotationAngle.fromDegrees(body, 0F, 15F, 0F),
+                RotationAngle.fromDegrees(upperPart, 0F, 0F, 0F),
+                RotationAngle.fromDegrees(leftArm, 45F, -30F, -75F),
+                RotationAngle.fromDegrees(leftForeArm, 0F, 0F, 30F),
+                RotationAngle.fromDegrees(rightArm, 12.5F, 0F, 120F)
+        });
+        rapierAnim.put(StandPose.HEAVY_ATTACK_COMBO, new StandActionAnimation.Builder<SilverChariotEntity>()
+                .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<SilverChariotEntity>(idlePose, sweepPose1))
+                .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransitionMultiple.Builder<SilverChariotEntity>(idlePose)
+                        .addPose(0.0F, sweepPose1)
+                        .addPose(0.2F, sweepPose2)
+                        .build(sweepPose3))
+                .build(idlePose));
         
         rapierAnim.put(StandPose.RANGED_ATTACK, new StandActionAnimation.Builder<SilverChariotEntity>()
-                .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<SilverChariotEntity>(new RotationAngle[] {
+                .addPose(StandEntityAction.Phase.PERFORM, new ModelPose<SilverChariotEntity>(new RotationAngle[] {
                         new RotationAngle(body, 0.0F, -0.7854F, 0.0F),
                         new RotationAngle(upperPart, 0.0F, -0.7854F, 0.0F),
                         new RotationAngle(leftArm, 0.2618F, 0.0F, -0.1309F),
@@ -220,6 +251,7 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
                         new RotationAngle(rapier, 0.829F, 0.0F, -1.1781F)
                 })).build(idlePose));
 
+        // FIXME (!!!!) fix SC barrage animation
         rapierBarrageSwing = new ModelPoseSided<>(
                 initBarrageSwingPose(HandSide.LEFT), 
                 initBarrageSwingPose(HandSide.RIGHT));

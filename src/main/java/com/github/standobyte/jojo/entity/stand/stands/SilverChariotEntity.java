@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
 import com.github.standobyte.jojo.entity.stand.StandAttackProperties;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
+import com.github.standobyte.jojo.init.ModEntityAttributes;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 
 import net.minecraft.entity.Entity;
@@ -28,20 +29,23 @@ import net.minecraftforge.common.ForgeMod;
 
 public class SilverChariotEntity extends StandEntity {
     private static final AttributeModifier NO_ARMOR_MOVEMENT_SPEED_BOOST = new AttributeModifier(
-            UUID.fromString("a31ffbee-5a26-4022-a298-59c839e5048d"), "Movement speed boost with no armor", 2, AttributeModifier.Operation.MULTIPLY_BASE);
+            UUID.fromString("a31ffbee-5a26-4022-a298-59c839e5048d"), "Movement speed boost with no armor", 1, AttributeModifier.Operation.MULTIPLY_BASE);
     private static final AttributeModifier NO_ARMOR_ATTACK_SPEED_BOOST = new AttributeModifier(
             UUID.fromString("c3e4ddb0-daa9-4cbb-acb9-dbc7eecad3f1"), "Attack speed boost with no armor", 1, AttributeModifier.Operation.MULTIPLY_BASE);
     private static final AttributeModifier NO_ARMOR = new AttributeModifier(
             UUID.fromString("d4987f5f-55e8-45db-9a5e-b2fd0a98c2ec"), "No armor", -1, AttributeModifier.Operation.MULTIPLY_TOTAL);
     private static final AttributeModifier NO_ARMOR_TOUGHNESS = new AttributeModifier(
             UUID.fromString("8dfd5e42-a578-4f4a-aafd-b86ef965b9f3"), "No armor toughness", -1, AttributeModifier.Operation.MULTIPLY_TOTAL);
+    private static final AttributeModifier NO_ARMOR_DURABILITY_DECREASE = new AttributeModifier(
+            UUID.fromString("47c93a42-b04f-44f3-97be-5f542d97c000"), "No durability without armor", -1, AttributeModifier.Operation.MULTIPLY_TOTAL);
     
     public static final AttributeModifier NO_RAPIER_DAMAGE_DECREASE = new AttributeModifier(
             UUID.fromString("84331a3b-73f1-4461-b240-6d688897e3f4"), "Attack damage decrease without rapier", -0.25, AttributeModifier.Operation.MULTIPLY_BASE);
     private static final AttributeModifier NO_RAPIER_ATTACK_SPEED_DECREASE = new AttributeModifier(
             UUID.fromString("485642f9-5475-4d74-8b54-dea9c53fe62e"), "Attack speed decrease without rapier", -0.75, AttributeModifier.Operation.MULTIPLY_BASE);
+    private static final double RAPIER_RANGE = 1;
     private static final AttributeModifier NO_RAPIER_ATTACK_RANGE_DECREASE = new AttributeModifier(
-            UUID.fromString("ba319644-fab3-4d4c-bcdf-26fd05dd62f5"), "Attack range decrease without rapier", -1, AttributeModifier.Operation.ADDITION);
+            UUID.fromString("ba319644-fab3-4d4c-bcdf-26fd05dd62f5"), "Attack range decrease without rapier", -RAPIER_RANGE, AttributeModifier.Operation.ADDITION);
     
     private static final DataParameter<Boolean> HAS_RAPIER = EntityDataManager.defineId(SilverChariotEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> HAS_ARMOR = EntityDataManager.defineId(SilverChariotEntity.class, DataSerializers.BOOLEAN);
@@ -62,7 +66,7 @@ public class SilverChariotEntity extends StandEntity {
 
     @Override
     public double getDefaultMeleeAttackRange() {
-        return super.getDefaultMeleeAttackRange() + 1.25;
+        return super.getDefaultMeleeAttackRange() + RAPIER_RANGE;
     }
 
     @Override
@@ -96,6 +100,7 @@ public class SilverChariotEntity extends StandEntity {
         updateModifier(getAttribute(Attributes.ATTACK_SPEED), NO_ARMOR_ATTACK_SPEED_BOOST, !armor);
         updateModifier(getAttribute(Attributes.ARMOR), NO_ARMOR, !armor);
         updateModifier(getAttribute(Attributes.ARMOR_TOUGHNESS), NO_ARMOR_TOUGHNESS, !armor);
+        updateModifier(getAttribute(ModEntityAttributes.STAND_DURABILITY.get()), NO_ARMOR_DURABILITY_DECREASE, !armor);
     }
     
     @Override
@@ -148,6 +153,12 @@ public class SilverChariotEntity extends StandEntity {
                 strength, precision, attackRange, distance, knockback, barrageHits);
         
         switch (punchType) {
+        case HEAVY_NO_COMBO:
+            if (hasRapier()) {
+                attack.addKnockback(attack.getAdditionalKnockback() * 0.5F);
+                attack.knockbackYRotDeg((random.nextFloat() * 15F + 30F) * (random.nextBoolean() ? -1 : 1));
+            }
+            break;
         case BARRAGE:
             if (hasRapier() && targetLiving instanceof SkeletonEntity) {
                 attack.damage(attack.getDamage() * 0.75F);

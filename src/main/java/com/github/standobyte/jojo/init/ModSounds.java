@@ -34,8 +34,8 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> BLADE_HAT_ENTITY_HIT = SOUNDS.register("blade_hat_entity_hit",
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "blade_hat_entity_hit")));
     
-    public static final RegistryObject<SoundEvent> PILLARMAN_AWAKENING = SOUNDS.register("pillarman_awakening",
-            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "pillarman_awakening")));
+    public static final RegistryObject<SoundEvent> PILLAR_MAN_AWAKENING = SOUNDS.register("pillar_man_awakening",
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "pillar_man_awakening")));
     
     public static final RegistryObject<SoundEvent> AJA_STONE_CHARGING = SOUNDS.register("aja_stone_charging",
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "aja_stone_charging")));

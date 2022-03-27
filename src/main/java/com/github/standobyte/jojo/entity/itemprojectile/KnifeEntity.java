@@ -4,7 +4,7 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -96,7 +96,7 @@ public class KnifeEntity extends ItemProjectileEntity {
     protected boolean hurtTarget(Entity target, Entity thrower) {
         float dmgAmount = getActualDamage();
         DamageSource damagesource = DamageSource.arrow(this, thrower == null ? this : thrower);
-        return ModDamageSources.hurtThroughInvulTicks(target, damagesource, dmgAmount);
+        return DamageUtil.hurtThroughInvulTicks(target, damagesource, dmgAmount);
     }
     
     @Override

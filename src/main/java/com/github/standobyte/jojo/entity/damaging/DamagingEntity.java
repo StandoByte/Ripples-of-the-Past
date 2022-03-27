@@ -8,7 +8,7 @@ import com.github.standobyte.jojo.util.JojoModUtil;
 import com.github.standobyte.jojo.util.MathUtil;
 import com.github.standobyte.jojo.util.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.damage.IndirectStandEntityDamageSource;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -144,7 +144,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     }
     
     protected boolean hurtTarget(Entity target, DamageSource dmgSource, float dmgAmount) {
-        return ModDamageSources.hurtThroughInvulTicks(target, dmgSource, dmgAmount);
+        return DamageUtil.hurtThroughInvulTicks(target, dmgSource, dmgAmount);
     }
     
     protected DamageSource getDamageSource(LivingEntity owner) { // TODO damage sources/death messages
@@ -217,7 +217,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
         return damageFactor;
     }
     
-    // FIXME (!) (stand projectile) a method in StandEntity which does this automatically
+    // FIXME (!!!!!!!!) (stand projectile) a method in StandEntity which does this automatically
     public void setDamageFactor(float damageFactor) {
         this.damageFactor = MathHelper.clamp(damageFactor, 0.0F, 1.0F);
     }

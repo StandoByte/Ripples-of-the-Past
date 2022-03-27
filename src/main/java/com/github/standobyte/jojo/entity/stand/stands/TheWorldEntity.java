@@ -25,10 +25,15 @@ public class TheWorldEntity extends StandEntity {
         
         switch (punchType) {
         case HEAVY_NO_COMBO:
-            attack.armorPiercing((float) strength * 0.01F).addKnockback(6);
+            attack
+            .armorPiercing((float) strength * 0.01F)
+            .addKnockback(6);
             break;
         case HEAVY_COMBO:
-            attack.addKnockback(4).knockbackYRotDeg(60);
+            attack
+            .addKnockback(4)
+            .knockbackYRotDeg(60)
+            .disableBlocking((1 - (float) (distance / attackRange)) - 0.5F);
             break;
         default:
             break;

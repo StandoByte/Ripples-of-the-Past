@@ -35,6 +35,7 @@ import com.github.standobyte.jojo.action.actions.MagiciansRedFireball;
 import com.github.standobyte.jojo.action.actions.MagiciansRedFlameBurst;
 import com.github.standobyte.jojo.action.actions.MagiciansRedRedBind;
 import com.github.standobyte.jojo.action.actions.NonStandAction;
+import com.github.standobyte.jojo.action.actions.SilverChariotHeavyAttack;
 import com.github.standobyte.jojo.action.actions.SilverChariotMeleeBarrage;
 import com.github.standobyte.jojo.action.actions.SilverChariotRapierLaunch;
 import com.github.standobyte.jojo.action.actions.SilverChariotTakeOffArmor;
@@ -58,6 +59,7 @@ import com.github.standobyte.jojo.action.actions.VampirismHamonSuicide;
 import com.github.standobyte.jojo.action.actions.VampirismSpaceRipperStingyEyes;
 import com.github.standobyte.jojo.action.actions.VampirismZombieSummon;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
+import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
 import com.github.standobyte.jojo.util.TimeHandler;
 
@@ -93,7 +95,7 @@ public class ModActions {
                     .shout(Technique.JONATHAN, ModSounds.JONATHAN_SENDO_OVERDRIVE)));
     
     public static final RegistryObject<HamonAction> HAMON_ZOOM_PUNCH = ACTIONS.register("hamon_zoom_punch", 
-            () -> new HamonZoomPunch(new HamonAction.Builder().energyCost(800F).cooldown(14).emptyMainHand()
+            () -> new HamonZoomPunch(new HamonAction.Builder().energyCost(800F).cooldown(14, 0).emptyMainHand()
                     .shout(Technique.JONATHAN, ModSounds.JONATHAN_ZOOM_PUNCH)
                     .shout(Technique.ZEPPELI, ModSounds.ZEPPELI_ZOOM_PUNCH)
                     .shout(Technique.JOSEPH, ModSounds.JOSEPH_ZOOM_PUNCH)));
@@ -150,7 +152,7 @@ public class ModActions {
             () -> new HamonBubbleCutter(new HamonAction.Builder().energyCost(500F).swingHand().shout(ModSounds.CAESAR_BUBBLE_CUTTER)));
     
     public static final RegistryObject<HamonAction> CAESAR_BUBBLE_CUTTER_GLIDING = ACTIONS.register("caesar_bubble_cutter_gliding", 
-            () -> new HamonBubbleCutter(new HamonAction.Builder().energyCost(600F).swingHand()
+            () -> new HamonBubbleCutter(new HamonAction.Builder().energyCost(600F).cooldown(0, 50).swingHand()
                     .shout(ModSounds.CAESAR_BUBBLE_CUTTER_GLIDING).shiftVariationOf(CAESAR_BUBBLE_CUTTER)));
     
 
@@ -164,17 +166,17 @@ public class ModActions {
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_SPACE_RIPPER_STINGY_EYES = ACTIONS.register("vampirism_space_ripper_stingy_eyes", 
             () -> new VampirismSpaceRipperStingyEyes(new NonStandAction.Builder().ignoresPerformerStun()
-                    .holdType(20).holdEnergyCost(40F).cooldown(200).heldSlowDownFactor(0.3F)));
+                    .holdType(20).holdEnergyCost(40F).cooldown(0, 200).heldSlowDownFactor(0.3F)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_BLOOD_GIFT = ACTIONS.register("vampirism_blood_gift", 
             () -> new VampirismBloodGift(new NonStandAction.Builder().needsEntityTarget().maxRangeEntityTarget(1.0D).emptyMainHand()
                     .holdToFire(60, false).holdEnergyCost(10F).heldSlowDownFactor(0.3F)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_ZOMBIE_SUMMON = ACTIONS.register("vampirism_zombie_summon", 
-            () -> new VampirismZombieSummon(new NonStandAction.Builder().energyCost(100F).cooldown(100)));
+            () -> new VampirismZombieSummon(new NonStandAction.Builder().energyCost(100F).cooldown(0, 100)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_DARK_AURA = ACTIONS.register("vampirism_dark_aura", 
-            () -> new VampirismDarkAura(new NonStandAction.Builder().ignoresPerformerStun().energyCost(50F).cooldown(100)));
+            () -> new VampirismDarkAura(new NonStandAction.Builder().ignoresPerformerStun().energyCost(50F).cooldown(0, 100)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_HAMON_SUICIDE = ACTIONS.register("vampirism_hamon_suicide", 
             () -> new VampirismHamonSuicide(new NonStandAction.Builder().ignoresPerformerStun().holdToFire(100, false)));
@@ -184,7 +186,12 @@ public class ModActions {
             () -> new StandEntityUnsummon());
 
     public static final RegistryObject<StandEntityAction> STAND_ENTITY_BLOCK = ACTIONS.register("stand_entity_block", 
-            () -> new StandEntityBlock());
+            () -> new StandEntityBlock() {
+                @Override
+                public StandRelativeOffset getOffsetFromUser(boolean armsOnlyMode) {
+                    return null;
+                }
+            });
     
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_PUNCH = ACTIONS.register("star_platinum_punch", 
@@ -200,7 +207,7 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_STAR_FINGER = ACTIONS.register("star_platinum_star_finger", 
             () -> new StarPlatinumStarFinger(new StandEntityAction.Builder().standPerformDuration(20)
-                    .cooldown(60).ignoresPerformerStun().resolveLevelToUnlock(1).defaultStandOffsetFromUser()
+                    .cooldown(20, 40).ignoresPerformerStun().resolveLevelToUnlock(1).defaultStandOffsetFromUser()
                     .standPose(StandPose.RANGED_ATTACK).shout(ModSounds.JOTARO_STAR_FINGER).standSound(ModSounds.STAR_PLATINUM_STAR_FINGER)));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_BLOCK = ACTIONS.register("star_platinum_block", 
@@ -254,12 +261,12 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_EMERALD_SPLASH = ACTIONS.register("hierophant_green_emerald_splash", 
             () -> new HierophantGreenEmeraldSplash(new StandEntityAction.Builder()
-                    .standPerformDuration(30).cooldown(40).resolveLevelToUnlock(1).isTrained().defaultStandOffsetFromUser()
+                    .standPerformDuration(30).cooldown(30, 10).resolveLevelToUnlock(1).isTrained().defaultStandOffsetFromUser()
                     .standPose(StandPose.RANGED_ATTACK).shout(ModSounds.KAKYOIN_EMERALD_SPLASH).standSound(ModSounds.HIEROPHANT_GREEN_EMERALD_SPLASH)));
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED = ACTIONS.register("hierophant_green_es_concentrated", 
             () -> new HierophantGreenEmeraldSplash(new StandEntityAction.Builder()
-                    .standPerformDuration(5).cooldown(40).resolveLevelToUnlock(-1).defaultStandOffsetFromUser()
+                    .standPerformDuration(5).cooldown(5, 30).resolveLevelToUnlock(-1).defaultStandOffsetFromUser()
                     .standPose(StandPose.RANGED_ATTACK).shout(ModSounds.KAKYOIN_EMERALD_SPLASH).standSound(ModSounds.HIEROPHANT_GREEN_EMERALD_SPLASH)
                     .shiftVariationOf(HIEROPHANT_GREEN_EMERALD_SPLASH)));
     
@@ -286,10 +293,10 @@ public class ModActions {
             () -> new SilverChariotMeleeBarrage(new StandEntityAction.Builder().shout(ModSounds.POLNAREFF_HORA_HORA_HORA)));
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_HEAVY_ATTACK = ACTIONS.register("silver_chariot_heavy_attack", 
-            () -> new StandEntityHeavyAttack(new StandEntityAction.Builder().shiftVariationOf(SILVER_CHARIOT_ATTACK).shiftVariationOf(SILVER_CHARIOT_BARRAGE)));
+            () -> new SilverChariotHeavyAttack(new StandEntityAction.Builder().shiftVariationOf(SILVER_CHARIOT_ATTACK).shiftVariationOf(SILVER_CHARIOT_BARRAGE)));
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_RAPIER_LAUNCH = ACTIONS.register("silver_chariot_rapier_launch", 
-            () -> new SilverChariotRapierLaunch(new StandEntityAction.Builder().cooldown(100).resolveLevelToUnlock(1).defaultStandOffsetFromUser()
+            () -> new SilverChariotRapierLaunch(new StandEntityAction.Builder().cooldown(0, 100).resolveLevelToUnlock(1).defaultStandOffsetFromUser()
                     .standPose(StandPose.RANGED_ATTACK).standSound(ModSounds.SILVER_CHARIOT_RAPIER_SHOT)));
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_BLOCK = ACTIONS.register("silver_chariot_block", 

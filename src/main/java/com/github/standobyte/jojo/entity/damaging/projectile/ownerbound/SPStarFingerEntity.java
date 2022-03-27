@@ -28,8 +28,9 @@ public class SPStarFingerEntity extends OwnerBoundProjectileEntity {
     @Override
     public float getBaseDamage() {
         LivingEntity owner = getOwner();
-        return owner != null ? (float) owner.getAttributeValue(Attributes.ATTACK_DAMAGE) : 
+        float damage = owner != null ? (float) owner.getAttributeValue(Attributes.ATTACK_DAMAGE) : 
             (float) ModStandTypes.STAR_PLATINUM.get().getStats().getBasePower();
+        return damage *= 0.75F;
     }
     
     @Override

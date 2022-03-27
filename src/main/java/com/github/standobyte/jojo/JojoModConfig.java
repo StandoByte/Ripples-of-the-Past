@@ -33,7 +33,7 @@ public class JojoModConfig {
         
         public final ForgeConfigSpec.BooleanValue hamonTempleSpawn;
         public final ForgeConfigSpec.BooleanValue meteoriteSpawn;
-        public final ForgeConfigSpec.BooleanValue pillarmanTempleSpawn;
+        public final ForgeConfigSpec.BooleanValue pillarManTempleSpawn;
 
         public final ForgeConfigSpec.DoubleValue hamonPointsMultiplier;
         public final ForgeConfigSpec.DoubleValue breathingTechniqueMultiplier;
@@ -78,9 +78,9 @@ public class JojoModConfig {
                         .translation("jojo.config.meteoriteSpawn")
                         .define("meteoriteSpawn", true);
                     
-                pillarmanTempleSpawn = builder
-                        .translation("jojo.config.pillarmanTempleSpawn")
-                        .define("pillarmanTempleSpawn", true);
+                pillarManTempleSpawn = builder
+                        .translation("jojo.config.pillarManTempleSpawn")
+                        .define("pillarManTempleSpawn", true);
             builder.pop();
             
             builder.comment(" Settings which affect the speed of Hamon training.").push("Hamon training");

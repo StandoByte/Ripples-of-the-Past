@@ -6,7 +6,7 @@ import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -25,8 +25,8 @@ public class HamonScarletOverdrive extends HamonAction {
             if (target.getType() == TargetType.ENTITY) {
                 HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
                 Entity targetEntity = target.getEntity(user.level);
-                if (ModDamageSources.dealDamageAndSetOnFire(targetEntity, 
-                        entity -> ModDamageSources.dealHamonDamage(entity, 0.1F, user, null), 
+                if (DamageUtil.dealDamageAndSetOnFire(targetEntity, 
+                        entity -> DamageUtil.dealHamonDamage(entity, 0.1F, user, null), 
                         MathHelper.floor(2 + 8F * (float) hamon.getHamonStrengthLevel() / (float) HamonData.MAX_STAT_LEVEL), false)) {
                     hamon.hamonPointsFromAction(HamonStat.STRENGTH, getEnergyCost(power));
                 }

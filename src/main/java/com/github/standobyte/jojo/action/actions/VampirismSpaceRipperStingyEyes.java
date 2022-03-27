@@ -20,7 +20,8 @@ public class VampirismSpaceRipperStingyEyes extends VampirismAction {
             world.addFreshEntity(new SpaceRipperStingyEyesEntity(world, user, false));
         }
     }
-    
+
+    // FIXME (!!!!!!!) cooldown
     @Override
     public int getCooldown(INonStandPower power, int ticksHeld) {
         return super.getCooldown(power, ticksHeld) * ticksHeld / this.getHoldDurationMax(power);

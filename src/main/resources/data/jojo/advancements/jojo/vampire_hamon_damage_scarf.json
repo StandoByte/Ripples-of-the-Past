@@ -16,20 +16,14 @@
     "hidden": false
   },
   "criteria": {
-    "crafting_table": {
-      "trigger": "minecraft:inventory_changed",
-      "conditions": {
-        "items": [
-          {
-            "item": "minecraft:crafting_table"
-          }
-        ]
-      }
+    "vampire_hamon_damage_scarf": {
+      "trigger": "jojo:vampire_hamon_damage_scarf",
+      "conditions": {}
     }
   },
   "requirements": [
     [
-      "crafting_table"
+      "vampire_hamon_damage_scarf"
     ]
   ]
 }

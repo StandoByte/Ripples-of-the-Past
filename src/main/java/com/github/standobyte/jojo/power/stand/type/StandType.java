@@ -32,7 +32,6 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
 public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry<StandType<?>> implements IPowerType<IStandPower, StandType<?>> {
@@ -253,11 +252,10 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         return standPower.getStandManifestation() != null;
     }
     
-    public static void onHurtByStand(LivingDamageEvent event) {
-        DamageSource damageSrc = event.getSource();
-        if (damageSrc instanceof IStandDamageSource) {
-            IStandPower attackerStand = ((IStandDamageSource) damageSrc).getStandPower();
-            event.getEntityLiving().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+    public static void onHurtByStand(DamageSource dmgSource, LivingEntity target) {
+        if (dmgSource instanceof IStandDamageSource) {
+            IStandPower attackerStand = ((IStandDamageSource) dmgSource).getStandPower();
+            target.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                 cap.setLastHurtByStand(attackerStand);
             });
         }

@@ -1,7 +1,5 @@
 package com.github.standobyte.jojo.entity.stand;
 
-import javax.annotation.Nullable;
-
 import net.minecraft.util.math.MathHelper;
 
 public class StandAttackProperties {
@@ -10,8 +8,7 @@ public class StandAttackProperties {
     private float knockback = 1.0F;
     private float knockbackYRot = 0;
     private float armorPiercing = 0;
-    @Nullable
-    private Boolean disableBlocking = null;
+    private float disableBlockingChance = 0;
     private float parryTiming = 0;
     
     
@@ -46,8 +43,8 @@ public class StandAttackProperties {
         return this;
     }
     
-    public StandAttackProperties disableBlocking(boolean always) {
-        this.disableBlocking = always;
+    public StandAttackProperties disableBlocking(float chance) {
+        this.disableBlockingChance = MathHelper.clamp(chance, 0, 1);
         return this;
     }
     
@@ -87,11 +84,11 @@ public class StandAttackProperties {
     }
     
     public boolean disablesBlocking() {
-        return disableBlocking != null;
+        return disableBlockingChance > 0;
     }
     
-    public boolean alwaysDisablesBlocking() {
-        return disableBlocking != null && disableBlocking;
+    public float getDisableBlockingChance() {
+        return disableBlockingChance;
     }
     
     public boolean canParryHeavyAttack() {

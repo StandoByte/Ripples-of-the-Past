@@ -17,7 +17,6 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.RefreshMovementInTimeStopPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncWorldTimeStopPacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.nonstand.type.VampirismPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
 import com.google.common.collect.ImmutableSet;
@@ -322,10 +321,10 @@ public class TimeHandler {
     public static int getMaxTimeStopTicks(IStandPower standPower, LazyOptional<INonStandPower> otherPower) {
         return ((TimeStopperStandStats) standPower.getType().getStats()).getMaxTimeStopTicks(otherPower.map(power -> {
             if (power.getType() == ModNonStandPowers.VAMPIRISM.get()) {
-                return (float) VampirismPowerType.bloodLevel(power, 1) / 5F;
+                return power.getEnergy() / power.getMaxEnergy() >= 0.8F;
             }
-            return 0F;
-        }).orElse(0F));
+            return false;
+        }).orElse(false));
     }
     
     

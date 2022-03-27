@@ -8,7 +8,7 @@ import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -40,7 +40,7 @@ public class HamonTornadoOverdrive extends HamonAction {
                 List<Entity> targets = user.level.getEntities(user, aabb);
                 boolean points = false;
                 for (Entity entity : targets) {
-                    if (ModDamageSources.dealHamonDamage(entity, damage, user, null)) {
+                    if (DamageUtil.dealHamonDamage(entity, damage, user, null)) {
                         points = true;
                     }
                 }

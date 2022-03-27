@@ -9,7 +9,7 @@ import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -69,7 +69,7 @@ public class HamonCharge {
             List<LivingEntity> entities = world.getEntitiesOfClass(LivingEntity.class, aabb, EntityPredicates.NO_CREATIVE_OR_SPECTATOR);
             for (LivingEntity target : entities) {
                 if (!target.is(chargedEntity) && target.isAlive() && target.getUUID() != hamonUserId) {
-                    if (ModDamageSources.dealHamonDamage(target, charge, chargedEntity, null)) {
+                    if (DamageUtil.dealHamonDamage(target, charge, chargedEntity, null)) {
                         Entity user = getUser(world);
                         if (!target.isAlive() && user instanceof ServerPlayerEntity) {
                             ModCriteriaTriggers.HAMON_CHARGE_KILL.get().trigger((ServerPlayerEntity) user, target, chargedEntity, chargedBlock);

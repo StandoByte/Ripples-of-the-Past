@@ -9,7 +9,7 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import net.minecraft.world.World;
 
 public class HierophantGreenGrapple extends StandEntityAction {
-    public static final StandPose GRAPPLE_POSE = new StandPose();
+    public static final StandPose GRAPPLE_POSE = new StandPose("HG_GRAPPLE");
     
     public HierophantGreenGrapple(StandEntityAction.Builder builder) {
         super(builder);

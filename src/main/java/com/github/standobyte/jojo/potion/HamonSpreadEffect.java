@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.potion;
 
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.EffectType;
@@ -13,7 +13,7 @@ public class HamonSpreadEffect extends UncurableEffect {
     
     @Override
     public void applyEffectTick(LivingEntity livingEntity, int amplifier) {
-        ModDamageSources.dealHamonDamage(livingEntity, 1F, null, null);
+        DamageUtil.dealHamonDamage(livingEntity, 1F, null, null);
     }
 
     @Override

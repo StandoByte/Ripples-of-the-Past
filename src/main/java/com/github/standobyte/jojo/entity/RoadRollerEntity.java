@@ -5,7 +5,7 @@ import java.util.List;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -96,7 +96,7 @@ public class RoadRollerEntity extends Entity {
                 List<LivingEntity> entities = level.getEntitiesOfClass(LivingEntity.class, aabb, EntityPredicates.LIVING_ENTITY_STILL_ALIVE);
                 for (LivingEntity entity : entities) {
                     if (!this.is(entity.getVehicle())) {
-                        entity.hurt(ModDamageSources.roadRollerDamage(this), damage);
+                        entity.hurt(DamageUtil.roadRollerDamage(this), damage);
                     }
                 }
             }

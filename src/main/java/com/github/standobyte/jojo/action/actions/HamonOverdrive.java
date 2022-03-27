@@ -10,7 +10,7 @@ import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -88,7 +88,7 @@ public class HamonOverdrive extends HamonAction {
                     dmgScale = (0.2F + swingStrengthScale * swingStrengthScale * 0.8F);
                     damage *= dmgScale;
                 }
-                if (ModDamageSources.dealHamonDamage(targetEntity, damage, user, null)) {
+                if (DamageUtil.dealHamonDamage(targetEntity, damage, user, null)) {
                     hamon.hamonPointsFromAction(HamonStat.STRENGTH, getEnergyCost(power) * dmgScale);
                     if (knockback > 0) {
                         targetEntity.knockback(knockback, 

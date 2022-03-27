@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -48,7 +48,7 @@ public class SatiporojaScarfBindingEntity extends OwnerBoundProjectileEntity {
 
     @Override
     protected boolean hurtTarget(Entity target, LivingEntity owner) {
-        return ModDamageSources.dealHamonDamage(target, 0.003F, this, owner);
+        return DamageUtil.dealHamonDamage(target, 0.003F, this, owner);
     }
 
     @Override

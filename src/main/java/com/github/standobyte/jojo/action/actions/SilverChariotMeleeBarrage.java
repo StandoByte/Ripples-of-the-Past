@@ -25,6 +25,14 @@ public class SilverChariotMeleeBarrage extends StandEntityMeleeBarrage {
     }
     
     @Override
+    public int getHoldDurationMax(IStandPower standPower) {
+        if (standPower.getStandManifestation() instanceof SilverChariotEntity && !((SilverChariotEntity) standPower.getStandManifestation()).hasArmor()) {
+            return 200;
+        }
+        return super.getHoldDurationMax(standPower);
+    }
+    
+    @Override
     protected SoundEvent getShout(LivingEntity user, IStandPower power, ActionTarget target, boolean wasActive) {
         if (power.isActive()) {
             SilverChariotEntity chariot = (SilverChariotEntity) power.getStandManifestation();
