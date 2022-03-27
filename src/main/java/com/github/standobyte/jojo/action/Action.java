@@ -35,7 +35,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     private final int holdDurationToFire;
     private final int holdDurationMax;
     private final float heldSlowDownFactor;
-    private final int cooldown;
+    private final int cooldownTechnical;
+    private final int cooldownAdditional;
     private final TargetRequirement targetRequirement;
     private final double maxRangeSqEntityTarget;
     private final double maxRangeSqBlockTarget;
@@ -52,7 +53,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         this.holdDurationMax = builder.holdDurationMax;
         this.holdDurationToFire = builder.holdDurationToFire;
         this.heldSlowDownFactor = builder.heldSlowDownFactor;
-        this.cooldown = builder.cooldown;
+        this.cooldownTechnical = builder.cooldownTechnical;
+        this.cooldownAdditional = builder.cooldownAdditional;
         this.targetRequirement = builder.needsBlockTarget ? builder.needsEntityTarget ? TargetRequirement.ANY : TargetRequirement.BLOCK : builder.needsEntityTarget ? TargetRequirement.ENTITY : TargetRequirement.NONE;
         this.maxRangeSqEntityTarget = builder.maxRangeSqEntityTarget;
         this.maxRangeSqBlockTarget = builder.maxRangeSqBlockTarget;
@@ -191,9 +193,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     public void onClick(World world, LivingEntity user, P power) {}
-    
+
+    // FIXME (!!!!!!!) cooldown
     public int getCooldownValue() {
-        return cooldown;
+        return cooldownTechnical + cooldownAdditional;
     }
     
     public int getCooldown(P power, int ticksHeld) {
@@ -315,7 +318,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         private int holdDurationToFire = 0;
         private int holdDurationMax = 0;
         private float heldSlowDownFactor = 1.0F;
-        private int cooldown = 0;
+        private int cooldownTechnical;
+        private int cooldownAdditional;
         private boolean needsEntityTarget = false;
         private boolean needsBlockTarget = false;
         private static final double MAX_RANGE_ENTITY_TARGET = 6.0D;
@@ -329,8 +333,9 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         private Supplier<SoundEvent> shoutSupplier = () -> null;
         protected List<Supplier<? extends Action<?>>> shiftVariationOf = new ArrayList<>();
         
-        public T cooldown(int cooldown) {
-            this.cooldown = cooldown;
+        public T cooldown(int technical, int additional) {
+            this.cooldownTechnical = technical;
+            this.cooldownAdditional = additional;
             return getThis();
         }
         

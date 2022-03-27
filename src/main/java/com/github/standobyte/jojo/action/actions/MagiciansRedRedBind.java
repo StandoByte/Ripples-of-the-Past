@@ -10,7 +10,7 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import net.minecraft.world.World;
 
 public class MagiciansRedRedBind extends StandEntityAction {
-    public static final StandPose RED_BIND_POSE = new StandPose();
+    public static final StandPose RED_BIND_POSE = new StandPose("MR_RED_BIND");
 
     public MagiciansRedRedBind(StandEntityAction.Builder builder) {
         super(builder);

@@ -10,7 +10,7 @@ import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -78,7 +78,7 @@ public class HamonProjectileShieldEntity extends Entity implements IEntityAdditi
                     float energyCost = amount * 30;
                     if (power.consumeEnergy(energyCost)) {
                         if (projectile != null) {
-                            ModDamageSources.dealHamonDamage(projectile, 0.1F, this, user);
+                            DamageUtil.dealHamonDamage(projectile, 0.1F, this, user);
                             if (!(projectile instanceof AbstractArrowEntity)) {
                                 projectile.setDeltaMovement(projectile.getDeltaMovement().reverse());
                                 projectile.move(MoverType.SELF, projectile.getDeltaMovement());

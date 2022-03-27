@@ -14,7 +14,7 @@ import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.MathUtil;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -324,7 +324,7 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
         if (!level.isClientSide && isAlive()) {
             if (source instanceof LivingEntity) {
                 float energy = Math.min(getEnergy(), 100);
-                ModDamageSources.dealHamonDamage((LivingEntity) source, energy * 0.04F, this, null);
+                DamageUtil.dealHamonDamage((LivingEntity) source, energy * 0.04F, this, null);
                 setEnergy(getEnergy() - energy);
             }
             setHealth(getHealth() - amount);

@@ -2,9 +2,13 @@ package com.github.standobyte.jojo.util;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
+
+import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
@@ -15,7 +19,6 @@ import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.command.TestBuildCommand;
-import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRCrossfireHurricaneEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModBlocks;
@@ -37,8 +40,9 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.type.EntityStandType;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.github.standobyte.jojo.tileentity.StoneMaskTileEntity;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
+import com.github.standobyte.jojo.util.damage.IModdedDamageSource;
 import com.github.standobyte.jojo.util.damage.IStandDamageSource;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
 import com.github.standobyte.jojo.util.reflection.CommonReflection;
 
 import net.minecraft.block.Block;
@@ -84,6 +88,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.LanguageMap;
@@ -110,6 +115,7 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionApplicableEvent;
@@ -136,7 +142,7 @@ public class GameplayEventHandler {
         if (!entity.level.isClientSide() && entity.invulnerableTime <= 10) {
             float sunDamage = getSunDamage(entity);
             if (sunDamage > 0) {
-                ModDamageSources.dealUltravioletDamage(entity, sunDamage, null, null, true);
+                DamageUtil.dealUltravioletDamage(entity, sunDamage, null, null, true);
             }
         }
         entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
@@ -314,6 +320,21 @@ public class GameplayEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onLivingHurtStart(LivingAttackEvent event) {
+        DamageSource dmgSource = event.getSource();
+        if (event.getEntity().invulnerableTime > 0 && dmgSource instanceof IModdedDamageSource && 
+                ((IModdedDamageSource) dmgSource).bypassInvulTicks()) {
+            event.setCanceled(true);
+            DamageUtil.hurtThroughInvulTicks(event.getEntity(), dmgSource, event.getAmount());
+            return;
+        }
+        
+        standBlockUserAttack(dmgSource, event.getEntityLiving(), stand -> {
+            if (!stand.isInvulnerableTo(dmgSource)) {
+                stand.hurt(dmgSource, event.getAmount());
+                event.setCanceled(true);
+            };
+        });
+        
         HamonPowerType.cancelCactusDamage(event);
         if (VampirismFreeze.onUserAttacked(event)) {
             event.setCanceled(true);
@@ -333,6 +354,63 @@ public class GameplayEventHandler {
     public static void cancelLivingAttack(LivingAttackEvent event) {
         HamonPowerType.snakeMuffler(event);
     }
+    
+    @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
+    public static void inCaseOfExplosionCancel(LivingAttackEvent event) {
+        if (event.isCanceled() && event.getSource().isExplosion()) {
+            event.getEntityLiving().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(util -> util.popLatestExplosionPos());
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void blockDamageWithStand(LivingHurtEvent event) {
+        DamageSource dmgSource = event.getSource();
+        LivingEntity target = event.getEntityLiving();
+        if (dmgSource.isExplosion()) {
+            Vector3d explosionPos = target.getCapability(LivingUtilCapProvider.CAPABILITY).map(util -> util.popLatestExplosionPos()).orElse(null);
+            if (explosionPos != null) {
+                StandEntity stand = getTargetStand(target);
+                if (stand != null && stand.isFollowingUser() && stand.isStandBlocking()) {
+                    double standDurability = stand.getDurability();
+                    if (standDurability > 4) {
+                        double cos = explosionPos.subtract(target.position()).normalize().dot(stand.getLookAngle());
+                        if (cos > 0) {
+                            float multiplier = Math.max((1F - (float) cos), 4F / (float) standDurability);
+                            event.setAmount(event.getAmount() * multiplier);
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            standBlockUserAttack(dmgSource, target, stand -> {
+                if (stand.isInvulnerableTo(dmgSource)) {
+                    double standDurability = stand.getDurability();
+                    if (standDurability > 0) {
+                        event.setAmount(Math.max(event.getAmount() - (float) standDurability / 2F, 0));
+                    }
+                }
+            });
+        }
+    }
+
+    @Nullable
+    private static StandEntity getTargetStand(LivingEntity target) {
+        return IStandPower.getStandPowerOptional(target).map(stand -> {
+            return Optional.ofNullable(stand.getStandManifestation() instanceof StandEntity ? (StandEntity) stand.getStandManifestation() : null);
+        }).orElse(Optional.empty()).orElse(null);
+    }
+    
+    private static void standBlockUserAttack(DamageSource dmgSource, LivingEntity target, Consumer<StandEntity> standBehavior) {
+        if (dmgSource.getDirectEntity() != null && dmgSource.getSourcePosition() != null) {
+            StandEntity stand = getTargetStand(target);
+            if (stand != null && stand.isFollowingUser() && stand.isStandBlocking()
+                    && stand.canBlockDamage(dmgSource) && stand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())) {
+                standBehavior.accept(stand);
+            }
+        }
+    }
+    
 
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public static void resolveOnTakingDamage(LivingDamageEvent event) {
@@ -356,14 +434,14 @@ public class GameplayEventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingDamage(LivingDamageEvent event) {
-        activateStoneMasks(event);
-        StandType.onHurtByStand(event);
+        activateStoneMasks(event.getSource(), event.getAmount(), event.getEntityLiving());
+        StandType.onHurtByStand(event.getSource(), event.getEntityLiving());
     }
 
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void prepareToReduceKnockback(LivingDamageEvent event) {
-        float knockbackReduction = ModDamageSources.knockbackReduction(event.getSource());
+        float knockbackReduction = DamageUtil.knockbackReduction(event.getSource());
         if (knockbackReduction >= 0 && knockbackReduction < 1) {
             event.getEntityLiving().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(util -> {
                 util.setFutureKnockbackFactor(knockbackReduction);
@@ -382,11 +460,9 @@ public class GameplayEventHandler {
         });
     }
 
-    private static void activateStoneMasks(LivingDamageEvent event) {
-        DamageSource dmgSource = event.getSource();
-        if (event.getAmount() >= 0.98F && 
+    private static void activateStoneMasks(DamageSource dmgSource, float dmgAmount, LivingEntity target) {
+        if (dmgAmount >= 0.98F && 
                 (!dmgSource.isBypassArmor() && !dmgSource.isFire() && !dmgSource.isMagic() && !dmgSource.isBypassMagic() || dmgSource == DamageSource.FALL)) {
-            LivingEntity target = event.getEntityLiving();
             if (!JojoModUtil.canBleed(target)) {
                 return;
             }
@@ -452,7 +528,7 @@ public class GameplayEventHandler {
         else if (effect == ModEffects.UNDEAD_REGENERATION.get() || effect == ModEffects.HAMON_SPREAD.get()) {
             event.setResult(Result.DENY);
         }
-        if (effect == ModEffects.FREEZE.get() && ModDamageSources.isImmuneToCold(entity)) {
+        if (effect == ModEffects.FREEZE.get() && DamageUtil.isImmuneToCold(entity)) {
             event.setResult(Result.DENY);
         }
     }
@@ -778,7 +854,7 @@ public class GameplayEventHandler {
                 if (waterProjectile && hamon.isSkillLearned(HamonSkill.TURQUOISE_BLUE_OVERDRIVE)) {
                     dmgCheckWater *= 1.25;
                 }
-                ModDamageSources.dealHamonDamage(rayTrace.getEntity(), dmgCheckWater, thrown, thrower);
+                DamageUtil.dealHamonDamage(rayTrace.getEntity(), dmgCheckWater, thrown, thrower);
                 hamon.hamonPointsFromAction(HamonStat.STRENGTH, spentEnergy);
             });
         });
@@ -825,6 +901,16 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onExplosionDetonate(ExplosionEvent.Detonate event) {
         Explosion explosion = event.getExplosion();
+        
+        event.getAffectedEntities().forEach(entity -> {
+            if (entity instanceof LivingEntity) {
+                ((LivingEntity) entity).getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(util -> {
+                    util.setLatestExplosionPos(explosion.getPosition());
+                });
+                        
+            }
+        });
+        
         if (explosion.getExploder() instanceof MRCrossfireHurricaneEntity) {
             ((MRCrossfireHurricaneEntity) explosion.getExploder())
             .onExplode(event.getAffectedEntities(), event.getAffectedBlocks());

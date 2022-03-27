@@ -199,7 +199,7 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
         super.initPoses();
         
         actionAnim.put(MagiciansRedRedBind.RED_BIND_POSE, new StandActionAnimation.Builder<MagiciansRedEntity>()
-                .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<MagiciansRedEntity>(new RotationAngle[] { // FIXME (!!) use xRotation
+                .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<MagiciansRedEntity>(new RotationAngle[] { // FIXME (!) (stand anim) use xRotation
                         new RotationAngle(leftArm, -1.4708F, 0.4712F, 0.0F),
                         new RotationAngle(rightArm, -1.6708F, -0.4712F, 0.0F),
                 })).build(idlePose));

@@ -7,7 +7,7 @@ import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -60,7 +60,7 @@ public class SatiporojaScarfItem extends CustomModelArmorItem {
         return INonStandPower.getNonStandPowerOptional(user).map(power -> 
         power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(hamon -> {
             if (!user.level.isClientSide()) {
-                if (power.consumeEnergy(500) && ModDamageSources.dealHamonDamage(target, 0.6F, user, null)) {
+                if (power.consumeEnergy(500) && DamageUtil.dealHamonDamage(target, 0.6F, user, null)) {
                     if (user.isShiftKeyDown() && hamon.isSkillLearned(HamonSkill.SNAKE_MUFFLER) && power.consumeEnergy(100)) {
                         SatiporojaScarfBindingEntity scarf = new SatiporojaScarfBindingEntity(user.level, user);
                         scarf.attachToEntity(target);

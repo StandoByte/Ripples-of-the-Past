@@ -10,7 +10,7 @@ import com.github.standobyte.jojo.entity.itemprojectile.StandArrowEntity;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.type.StandType;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.enchantment.Enchantment;
@@ -52,7 +52,7 @@ public class StandArrowItem extends ArrowItem {
     public static boolean onPiercedByArrow(Entity entity, ItemStack stack, World world) {
         if (entity instanceof LivingEntity) {
             LivingEntity livingEntity = (LivingEntity) entity;
-            livingEntity.hurt(ModDamageSources.STAND_VIRUS, Math.min(livingEntity.getMaxHealth(), 20F) - 1F);
+            livingEntity.hurt(DamageUtil.STAND_VIRUS, Math.min(livingEntity.getMaxHealth(), 20F) - 1F);
             stack.hurtAndBreak(1, livingEntity, pl -> {});
             if (livingEntity instanceof PlayerEntity) {
                 return playerPiercedByArrow((PlayerEntity) livingEntity, stack, world, false);
@@ -66,7 +66,7 @@ public class StandArrowItem extends ArrowItem {
         if (!world.isClientSide()) {
             if (!power.hasPower()) {
                 if (dealVirusDamage) {
-                    player.hurt(ModDamageSources.STAND_VIRUS, Math.min(player.getHealth(), 11F) - 1F);
+                    player.hurt(DamageUtil.STAND_VIRUS, Math.min(player.getHealth(), 11F) - 1F);
                 }
                 StandType<?> stand = null;
                 boolean checkTier = JojoModConfig.COMMON.standTiers.get();

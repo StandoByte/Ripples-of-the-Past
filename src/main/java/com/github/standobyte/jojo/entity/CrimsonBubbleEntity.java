@@ -13,7 +13,7 @@ import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
 import com.github.standobyte.jojo.util.JojoModUtil;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -129,7 +129,7 @@ public class CrimsonBubbleEntity extends Entity {
             hamonControlPoints = 0;
         }
         else {
-            ModDamageSources.dealHamonDamage(entity, getDamage(), this, null);
+            DamageUtil.dealHamonDamage(entity, getDamage(), this, null);
             hamonStrengthPoints = Math.max(hamonStrengthPoints - 1, 0);
             hamonControlPoints = Math.max(hamonControlPoints - 1, 0);
         }
@@ -146,7 +146,7 @@ public class CrimsonBubbleEntity extends Entity {
         }
         else {
             if (dmgSource.getDirectEntity() instanceof LivingEntity) {
-                ModDamageSources.dealHamonDamage((LivingEntity) dmgSource.getDirectEntity(), getDamage(), this, null);
+                DamageUtil.dealHamonDamage((LivingEntity) dmgSource.getDirectEntity(), getDamage(), this, null);
             }
             hamonStrengthPoints = Math.max(hamonStrengthPoints - (int) amount, 0);
             hamonControlPoints = Math.max(hamonControlPoints - (int) amount, 0);

@@ -39,7 +39,7 @@ import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.JojoModUtil;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.block.BlockState;
@@ -338,7 +338,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                         power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
                             if (hamon.isSkillLearned(HamonSkill.SNAKE_MUFFLER)) {
                                 JojoModUtil.sayVoiceLine(target, ModSounds.LISA_LISA_SNAKE_MUFFLER.get());
-                                ModDamageSources.dealHamonDamage(attacker, 0.75F, target, null);
+                                DamageUtil.dealHamonDamage(attacker, 0.75F, target, null);
                                 power.consumeEnergy(energyCost);
                                 livingAttacker.addEffect(new EffectInstance(Effects.GLOWING, 200));
                                 event.setCanceled(true);

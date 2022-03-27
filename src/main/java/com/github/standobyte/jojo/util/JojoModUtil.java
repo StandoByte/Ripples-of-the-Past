@@ -81,30 +81,30 @@ public class JojoModUtil {
         aabb.inflate(rayTraceInflate);
         Entity targetEntity = null;
         Vector3d targetEntityPos = null;
-        minDistance *= minDistance;
+        double minDistanceSqr = minDistance * minDistance;
         for (Entity potentialTarget : world.getEntities(entity, aabb, e -> !e.isSpectator() && e.isPickable() && (entityFilter == null || entityFilter.test(e)))) {
             AxisAlignedBB targetCollisionAABB = potentialTarget.getBoundingBox().inflate((double) potentialTarget.getPickRadius() + rayTraceInflate);
             targetCollisionAABB = standPrecisionTargetHitbox(targetCollisionAABB, standPrecision);
             Optional<Vector3d> clipOptional = targetCollisionAABB.clip(startPos, endPos);
             if (targetCollisionAABB.contains(startPos)) {
-                if (minDistance >= 0.0D) {
+                if (minDistanceSqr >= 0.0D) {
                     targetEntity = potentialTarget;
                     targetEntityPos = clipOptional.orElse(startPos);
-                    minDistance = 0.0D;
+                    minDistanceSqr = 0.0D;
                 }
             } else if (clipOptional.isPresent()) {
                 Vector3d clipVec = clipOptional.get();
                 double clipDistanceSqr = startPos.distanceToSqr(clipVec);
-                if (clipDistanceSqr < minDistance || minDistance == 0.0D) {
+                if (clipDistanceSqr < minDistanceSqr || minDistanceSqr == 0.0D) {
                     if (entity != null && potentialTarget.getRootVehicle() == entity.getRootVehicle() && !potentialTarget.canRiderInteract()) {
-                        if (minDistance == 0.0D) {
+                        if (minDistanceSqr == 0.0D) {
                             targetEntity = potentialTarget;
                             targetEntityPos = clipVec;
                         }
                     } else {
                         targetEntity = potentialTarget;
                         targetEntityPos = clipVec;
-                        minDistance = clipDistanceSqr;
+                        minDistanceSqr = clipDistanceSqr;
                     }
                 }
             }
@@ -148,18 +148,18 @@ public class JojoModUtil {
                 && !((EntityRayTraceResult) rayTraceResult).getEntity().is(targettingEntity));
     }
     
-    public static double getDistance(Entity entity, AxisAlignedBB aabb, double precision) {
-        aabb = standPrecisionTargetHitbox(aabb, precision);
+    public static double getDistance(Entity entity, AxisAlignedBB targetAabb, double precision) {
+        targetAabb = standPrecisionTargetHitbox(targetAabb, precision);
         Vector3d startPos = entity.getEyePosition(1.0F);
-        if (aabb.contains(startPos)) {
+        if (targetAabb.contains(startPos)) {
             return 0;
         }
         Vector3d endPos = new Vector3d(
-                MathHelper.lerp(0.5D, aabb.minX, aabb.maxX), 
+                MathHelper.lerp(0.5D, targetAabb.minX, targetAabb.maxX), 
                 MathHelper.lerp(entity.getBbHeight() == 0 ? 0 : 
-                    entity.getEyeHeight() / entity.getBbHeight(), aabb.minY, aabb.maxY), 
-                MathHelper.lerp(0.5D, aabb.minZ, aabb.maxZ));
-        Optional<Vector3d> clipOptional = aabb.clip(startPos, endPos);
+                    entity.getEyeHeight() / entity.getBbHeight(), targetAabb.minY, targetAabb.maxY), 
+                MathHelper.lerp(0.5D, targetAabb.minZ, targetAabb.maxZ));
+        Optional<Vector3d> clipOptional = targetAabb.clip(startPos, endPos);
         return clipOptional.map(clipVec -> startPos.distanceTo(clipVec) - entity.getBbWidth() / 2).orElse(-1D);
     }
     

@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.entity.damaging;
 
 import com.github.standobyte.jojo.util.JojoModUtil;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -62,7 +62,7 @@ public class LightBeamEntity extends DamagingEntity {
         if (!level.isClientSide()) {
             Entity target = entityRayTraceResult.getEntity();
             target.setSecondsOnFire((int) damage / 2);
-            ModDamageSources.dealUltravioletDamage(target, damage, this, getOwner(), false);
+            DamageUtil.dealUltravioletDamage(target, damage, this, getOwner(), false);
         }
     }
 

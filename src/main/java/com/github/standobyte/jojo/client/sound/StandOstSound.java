@@ -1,5 +1,11 @@
 package com.github.standobyte.jojo.client.sound;
 
+import java.util.ConcurrentModificationException;
+
+import javax.annotation.Nullable;
+
+import com.github.standobyte.jojo.JojoMod;
+
 import net.minecraft.client.GameSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
@@ -12,6 +18,7 @@ public class StandOstSound extends TickableSound implements ITickableSound {
     private int fadeAwayTicks = -1;
     private int fadeAwayInitialTicks = -1;
     
+    @Nullable
     private final GameSettings options;
     private final float musicVolume;
 
@@ -27,9 +34,16 @@ public class StandOstSound extends TickableSound implements ITickableSound {
         this.attenuation = ISound.AttenuationType.NONE;
         this.relative = true;
         
-        this.options = mc.options;
+        GameSettings options = mc.options;
         this.musicVolume = options.getSoundSourceVolume(SoundCategory.MUSIC);
-        this.options.setSoundCategoryVolume(SoundCategory.MUSIC, 0);
+        try {
+            options.setSoundCategoryVolume(SoundCategory.MUSIC, 0);
+        }
+        catch (ConcurrentModificationException e) {
+            JojoMod.LOGGER.warn("Failed setting Minecraft music volume to 0 when playing OST.");
+            options = null;
+        }
+        this.options = options;
     }
 
     @Override
@@ -46,7 +60,9 @@ public class StandOstSound extends TickableSound implements ITickableSound {
     
     private void stopOst() {
         stop();
-        options.setSoundCategoryVolume(SoundCategory.MUSIC, musicVolume);
+        if (options != null) {
+            options.setSoundCategoryVolume(SoundCategory.MUSIC, musicVolume);
+        }
     }
     
     public void setFadeAway(int ticks) {

@@ -507,7 +507,7 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
                 new RotationAngle(body, 0.0F, -0.48F, 0.0F),
                 new RotationAngle(leftArm, 0.0F, 0.0F, -0.7854F),
                 new RotationAngle(leftForeArm, 0.0F, 0.0F, 0.6109F),
-                new RotationAngle(rightArm, -1.0908F, 0.0F, 1.5708F), // FIXME (!!) use xRotation
+                new RotationAngle(rightArm, -1.0908F, 0.0F, 1.5708F), // FIXME (!) (stand anim) use xRotation
                 new RotationAngle(rightForeArm, 0.0F, 0.0F, 0.0F)
         });
     }

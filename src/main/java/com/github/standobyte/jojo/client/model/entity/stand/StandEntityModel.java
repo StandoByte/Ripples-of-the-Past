@@ -95,6 +95,8 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     @Override
     public void setupAnim(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
         HandSide swingingHand = entity.getSwingingHand();
+        
+//        initPoses();
 
         idlePose.poseModel(1, entity, ticks, yRotationOffset, xRotation, swingingHand);
 
@@ -120,8 +122,6 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
 
     protected void poseStand(T entity, float ticks, float yRotationOffset, float xRotation, 
             StandPose standPose, @Nullable Phase actionPhase, float actionCompletion, HandSide swingingHand) {
-        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!
-//        initPoses();
         if (actionAnim.containsKey(standPose)) {
             onPose(entity, ticks);
             StandActionAnimation<T> anim = getActionAnim(entity, standPose);

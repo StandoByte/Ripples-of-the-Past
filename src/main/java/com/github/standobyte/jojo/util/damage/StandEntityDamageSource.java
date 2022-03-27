@@ -11,11 +11,12 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
-public class StandEntityDamageSource extends EntityDamageSource implements IStandDamageSource {
+public class StandEntityDamageSource extends EntityDamageSource implements IStandDamageSource, IModdedDamageSource {
     protected final IStandPower stand;
 //    @Nullable
 //    protected final Entity standUser;
     private float knockbackFactor = 1;
+    private boolean bypassInvulTicks = false;
     protected boolean showStandUserName;
 
     public StandEntityDamageSource(String msgId, Entity damagingEntity, IStandPower stand) {
@@ -47,13 +48,26 @@ public class StandEntityDamageSource extends EntityDamageSource implements IStan
         return false;
     }
 
+    @Override
     public StandEntityDamageSource setKnockbackReduction(float factor) {
         this.knockbackFactor = MathHelper.clamp(factor, 0, 1);
         return this;
     }
 
+    @Override
     public float getKnockbackFactor() {
         return knockbackFactor;
+    }
+
+    @Override
+    public StandEntityDamageSource setBypassInvulTicksInEvent() {
+        this.bypassInvulTicks = true;
+        return this;
+    }
+
+    @Override
+    public boolean bypassInvulTicks() {
+        return bypassInvulTicks;
     }
 
     public StandEntityDamageSource setShowStandUserName() {

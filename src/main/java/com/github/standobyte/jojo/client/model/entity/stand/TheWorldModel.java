@@ -375,7 +375,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                             .build(pose3))
                     .build(idlePose);
         }
-        else { // FIXME (!!) use xRotation
+        else { // FIXME (!) (stand anim) use xRotation
             ModelPose<TheWorldEntity> pose1 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
                     new RotationAngle(leftArm, 0.0F, 0.0F, -0.5236F),
                     new RotationAngle(leftForeArm, 0.0F, 0.0F, 0.5672F),
@@ -385,7 +385,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                     new RotationAngle(rightLeg, 0.2618F, 0.2618F, 0.1309F)
             });
             ModelPose<TheWorldEntity> pose2 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
-                    new RotationAngle(head, -0.2182F, 0.0F, 0.0F), // FIXME (!!) ADD head rotation
+                    new RotationAngle(head, -0.2182F, 0.0F, 0.0F), // FIXME (!!) (stand anim) ADD head rotation
                     new RotationAngle(body, 0.2182F, 0.2618F, 0.0F),
                     new RotationAngle(upperPart, 0.0F, 0.1745F, 0.0F),
                     new RotationAngle(leftArm, 0.0F, 0.0F, -0.5236F),

@@ -12,7 +12,7 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.VampirismPowerType;
 import com.github.standobyte.jojo.util.JojoModUtil;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.INPC;
@@ -116,7 +116,7 @@ public class VampirismBloodDrain extends VampirismAction {
             Effects.CONFUSION
     };
     public static boolean drainBlood(LivingEntity attacker, LivingEntity target, float bloodDrainDamage, float healAmount) {
-        boolean hurt = target.hurt(ModDamageSources.bloodDrainDamage(attacker), bloodDrainDamage);
+        boolean hurt = target.hurt(DamageUtil.bloodDrainDamage(attacker), bloodDrainDamage);
         if (hurt) {
             attacker.heal(healAmount);
             int effectsLvl = attacker.level.getDifficulty().getId() - 1;

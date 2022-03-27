@@ -4,6 +4,7 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModActions;
@@ -23,6 +24,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.CombatRules;
@@ -31,16 +34,19 @@ import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.IndirectEntityDamageSource;
 import net.minecraft.util.math.MathHelper;
 
-public class ModDamageSources {
+public class DamageUtil {
     private static final DamageSource ULTRAVIOLET = new DamageSource("ultraviolet").bypassArmor();
     private static final String BLOOD_DRAIN_MSG = "bloodDrain";
     private static final DamageSource COLD = new DamageSource("cold").bypassArmor();
     public static final DamageSource HAMON = new DamageSource("hamon").bypassArmor();
-    private static final DamageSource PILLARMAN_ABSORPTION = new DamageSource("pillarmanAbsorption").setScalesWithDifficulty();
+    private static final DamageSource PILLAR_MAN_ABSORPTION = new DamageSource("pillarManAbsorption").setScalesWithDifficulty();
     public static final DamageSource STAND_VIRUS = new DamageSource("standVirus").bypassArmor();
     private static final String ROAD_ROLLER_MSG = "roadRoller";
     
     public static float knockbackReduction(DamageSource source) {
+        if (source instanceof StandLinkDamageSource) {
+            return 0;
+        }
         if (source instanceof EntityDamageSource) {
             if (source.getDirectEntity() instanceof LivingEntity && 
                     INonStandPower.getNonStandPowerOptional((LivingEntity) source.getDirectEntity())
@@ -51,8 +57,8 @@ public class ModDamageSources {
             if (msgId != null && (msgId.startsWith(BLOOD_DRAIN_MSG) || msgId.startsWith(COLD.msgId) || msgId.startsWith(ROAD_ROLLER_MSG))) {
                 return 0;
             }
-            if (source instanceof StandEntityDamageSource) {
-                return ((StandEntityDamageSource) source).getKnockbackFactor();
+            if (source instanceof IModdedDamageSource) {
+                return ((IModdedDamageSource) source).getKnockbackFactor();
             }
         }
         return 1;
@@ -135,6 +141,9 @@ public class ModDamageSources {
             }
             if (hurtThroughInvulTicks(target, dmgSource, amount)) {
                 HamonPowerType.createHamonSparkParticlesEmitter(target, amount / HamonData.MAX_HAMON_DAMAGE);
+                if (scarf && undeadTarget && livingTarget instanceof ServerPlayerEntity) {
+                    ModCriteriaTriggers.VAMPIRE_HAMON_DAMAGE_SCARF.get().trigger((ServerPlayerEntity) livingTarget);
+                }
                 return true;
             }
         }
@@ -162,7 +171,7 @@ public class ModDamageSources {
                 return false;
             }
             DamageSource dmgSource = 
-                    src == null ? PILLARMAN_ABSORPTION : new EntityDamageSource(PILLARMAN_ABSORPTION.getMsgId() + ".entity", src);
+                    src == null ? PILLAR_MAN_ABSORPTION : new EntityDamageSource(PILLAR_MAN_ABSORPTION.getMsgId() + ".entity", src);
             return target.hurt(dmgSource, amount);
         }
         return false;
@@ -210,5 +219,13 @@ public class ModDamageSources {
             }
         }
         return damage;
+    }
+    
+    public static void disableShield(PlayerEntity target, float chance) {
+        if (!target.level.isClientSide() && target.getRandom().nextFloat() < chance) {
+            target.getCooldowns().addCooldown(target.getUseItem().getItem(), 100);
+            target.stopUsingItem();
+            target.level.broadcastEntityEvent(target, (byte) 30);
+        }
     }
 }

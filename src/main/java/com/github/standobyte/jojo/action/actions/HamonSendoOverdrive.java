@@ -9,7 +9,7 @@ import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -48,7 +48,7 @@ public class HamonSendoOverdrive extends HamonAction {
             List<Entity> entities = world.getEntitiesOfClass(LivingEntity.class, aabb, EntityPredicates.NO_CREATIVE_OR_SPECTATOR);
             boolean givePoints = false;
             for (Entity entity : entities) {
-                if (!entity.is(user) && ModDamageSources.dealHamonDamage(entity, 0.25F, user, null)) {
+                if (!entity.is(user) && DamageUtil.dealHamonDamage(entity, 0.25F, user, null)) {
                     givePoints = true;
                 }
             }

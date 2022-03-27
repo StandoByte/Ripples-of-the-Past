@@ -9,7 +9,8 @@ import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.JojoModUtil;
 import com.github.standobyte.jojo.util.damage.IndirectStandEntityDamageSource;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
+import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
 
 import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.entity.Entity;
@@ -115,6 +116,11 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
     }
     
     @Override
+    public boolean isInvulnerableTo(DamageSource dmgSource) {
+        return dmgSource.isExplosion() || super.isInvulnerableTo(dmgSource);
+    }
+    
+    @Override
     protected void afterBlockHit(BlockRayTraceResult blockRayTraceResult, boolean brokenBlock) {
         explode();
     }
@@ -126,8 +132,11 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
     
     private void explode() {
         if (!level.isClientSide) {
-            level.explode(this, new IndirectStandEntityDamageSource("explosion.player", this, getOwner()), 
-                    null, getX(), getY(), getZ(), small ? 0.5F : 3.0F, false, Explosion.Mode.NONE);
+            StandEntityDamageSource dmgSource = new IndirectStandEntityDamageSource("explosion.stand", this, getOwner());
+            if (small) {
+                dmgSource.setBypassInvulTicksInEvent();
+            }
+            level.explode(this, dmgSource.setExplosion(), null, getX(), getY(), getZ(), small ? 0.5F : 3.0F, false, Explosion.Mode.NONE);
         }
     }
     
@@ -135,7 +144,7 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
         LivingEntity magiciansRed = getOwner();
         for (Entity entity : affectedEntities) {
             if (!entity.is(magiciansRed)) {
-                ModDamageSources.setOnFire(entity, 10, true);
+                DamageUtil.setOnFire(entity, 10, true);
                 if (!level.isClientSide() && userStandPower != null && 
                         (entity.getClassification(false) == EntityClassification.MONSTER || entity.getType() == EntityType.PLAYER)) {
                     userStandPower.addLearningProgressPoints(ModActions.MAGICIANS_RED_CROSSFIRE_HURRICANE.get(), 0.0625F);

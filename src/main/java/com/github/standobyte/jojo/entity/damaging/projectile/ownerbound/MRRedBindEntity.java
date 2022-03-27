@@ -5,7 +5,7 @@ import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.JojoModUtil;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -52,7 +52,7 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
                 else {
                     bound.addEffect(new EffectInstance(ModEffects.STUN.get(), 60));
                     if (bound.getRemainingFireTicks() % 20 == 0 || bound.getRemainingFireTicks() <= 0) {
-                        ModDamageSources.setOnFire(bound, 3, true);
+                        DamageUtil.setOnFire(bound, 3, true);
                     }
                     Vector3d vecToOwner = owner.position().subtract(bound.position());
                     if (vecToOwner.lengthSqr() > 2.25) {

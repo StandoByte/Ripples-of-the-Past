@@ -23,9 +23,9 @@
     "subtitle": "jojo.subtitle.blade_hat_entity_hit",
     "sounds": [ "jojo:blade_hat_entity_hit" ]
   },
-  "pillarman_awakening": {
-    "subtitle": "jojo.subtitle.pillarman_awakening",
-    "sounds": [ "jojo:pillarman_awakening" ]
+  "pillar_man_awakening": {
+    "subtitle": "jojo.subtitle.pillar_man_awakening",
+    "sounds": [ "jojo:pillar_man_awakening" ]
   },
   "aja_stone_charging": {
     "subtitle": "jojo.subtitle.aja_stone_charging",

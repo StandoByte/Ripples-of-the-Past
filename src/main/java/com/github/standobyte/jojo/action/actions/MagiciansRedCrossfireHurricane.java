@@ -22,8 +22,8 @@ public class MagiciansRedCrossfireHurricane extends StandEntityAction {
         if (!world.isClientSide()) {
             boolean special = isShiftVariation();
             int n = special ? 8 : 1;
-            if (special) {
-                // FIXME (!) aim at 32 blocks distance
+            if (special && target.getType() == TargetType.EMPTY) {
+                target = ActionTarget.fromRayTraceResult(standEntity.aimWithStandOrUser(32, target));
             }
             for (int i = 0; i < n; i++) {
                 MRCrossfireHurricaneEntity ankh = new MRCrossfireHurricaneEntity(special, standEntity, world, userPower);

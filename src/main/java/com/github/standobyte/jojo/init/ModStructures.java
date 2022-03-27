@@ -79,7 +79,7 @@ public class ModStructures {
                 && biome.getClimate().precipitation == Biome.RainType.SNOW && biome.getCategory() != Biome.Category.OCEAN);
         registerConfiguredStructure(registry, CONFIGURED_PILLARMAN_TEMPLE.get(), 
                 new ResourceLocation(JojoMod.MOD_ID, "configured_pillarman_temple"), PILLARMAN_TEMPLE.get(), 
-                biome -> JojoModConfig.COMMON.pillarmanTempleSpawn.get()
+                biome -> JojoModConfig.COMMON.pillarManTempleSpawn.get()
                 && biome.getCategory() == Biome.Category.JUNGLE);
     }
     

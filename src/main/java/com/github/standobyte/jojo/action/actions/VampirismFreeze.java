@@ -7,7 +7,7 @@ import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -49,7 +49,7 @@ public class VampirismFreeze extends VampirismAction {
                 if (entityTarget instanceof LivingEntity && !entityTarget.isOnFire()) {
                     int difficulty = world.getDifficulty().getId();
                     LivingEntity targetLiving = (LivingEntity) entityTarget;
-                    if (ModDamageSources.dealColdDamage(targetLiving, 1.5F * difficulty, user, null)) {
+                    if (DamageUtil.dealColdDamage(targetLiving, 1.5F * difficulty, user, null)) {
                         EffectInstance freezeInstance = targetLiving.getEffect(ModEffects.FREEZE.get());
                         if (freezeInstance == null) {
                             world.playSound(null, targetLiving, ModSounds.VAMPIRE_FREEZE.get(), targetLiving.getSoundSource(), 1.0F, 1.0F);
@@ -69,7 +69,7 @@ public class VampirismFreeze extends VampirismAction {
     
     public static boolean onUserAttacked(LivingAttackEvent event) {
         Entity attacker = event.getSource().getDirectEntity();
-        if (attacker instanceof LivingEntity && !attacker.isOnFire() && !ModDamageSources.isImmuneToCold(attacker)) {
+        if (attacker instanceof LivingEntity && !attacker.isOnFire() && !DamageUtil.isImmuneToCold(attacker)) {
             LivingEntity targetLiving = event.getEntityLiving();
             return INonStandPower.getNonStandPowerOptional(targetLiving).map(power -> {
                 if (power.getHeldAction(true) == ModActions.VAMPIRISM_FREEZE.get()) {

@@ -20,6 +20,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
         return !stand.canAttackMelee() ? ActionConditionResult.NEGATIVE : super.checkStandConditions(stand, power, target);
     }
 
+    // FIXME (!!!!!!!) cooldown
     @Override
     public int getCooldown(IStandPower power, int ticksHeld) {
         return MathHelper.floor((float) (getCooldownValue() * ticksHeld) / (float) getHoldDurationMax(power) + 0.5F);
