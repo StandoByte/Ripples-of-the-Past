@@ -18,6 +18,7 @@ public class StandEntityDamageSource extends EntityDamageSource implements IStan
     private float knockbackFactor = 1;
     private boolean bypassInvulTicks = false;
     protected boolean showStandUserName;
+    private int barrageHits = 0;
 
     public StandEntityDamageSource(String msgId, Entity damagingEntity, IStandPower stand) {
         super(msgId, damagingEntity);
@@ -46,6 +47,15 @@ public class StandEntityDamageSource extends EntityDamageSource implements IStan
             }
         }
         return false;
+    }
+    
+    public StandEntityDamageSource setBarrageHitsCount(int hits) {
+        this.barrageHits = hits;
+        return this;
+    }
+    
+    public int getBarrageHitsCount() {
+        return barrageHits;
     }
 
     @Override

@@ -356,9 +356,11 @@
   "jojo.config.standStamina": "Stand Stamina",
   "jojo.config.standStamina.tooltip": "Whether or not Stand stamina mechanic is enabled.",
   "jojo.config.standDamageMultiplier": "Stand damage multiplier",
-  "jojo.config.standDamageMultiplier.tooltip": "Damage multiplier apllied to all Stands.",
+  "jojo.config.standDamageMultiplier.tooltip": "Damage multiplier applied to all Stands.",
   "jojo.config.abilitiesBreakBlocks": "Abilities break blocks",
   "jojo.config.abilitiesBreakBlocks.tooltip": "Whether or not Stands and abilities from the mod can break blocks.",
+  "jojo.config.hamonDamageMultiplier": "Hamon damage multiplier",
+  "jojo.config.hamonDamageMultiplier.tooltip": "Damage multiplier applied to all Hamon attacks.",
   "jojo.config.timeStopChunkRange": "Time Stop chunk range",
   "jojo.config.timeStopChunkRange.tooltip": "Range of Time Stop ability in chunks. If set to 0, the whole dimension is frozen in time.",
   

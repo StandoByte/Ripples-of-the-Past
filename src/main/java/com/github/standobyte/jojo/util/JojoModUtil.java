@@ -148,8 +148,7 @@ public class JojoModUtil {
                 && !((EntityRayTraceResult) rayTraceResult).getEntity().is(targettingEntity));
     }
     
-    public static double getDistance(Entity entity, AxisAlignedBB targetAabb, double precision) {
-        targetAabb = standPrecisionTargetHitbox(targetAabb, precision);
+    public static double getDistance(Entity entity, AxisAlignedBB targetAabb) {
         Vector3d startPos = entity.getEyePosition(1.0F);
         if (targetAabb.contains(startPos)) {
             return 0;
