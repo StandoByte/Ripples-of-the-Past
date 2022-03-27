@@ -27,7 +27,7 @@ public class SilverChariotMeleeBarrage extends StandEntityMeleeBarrage {
     @Override
     public int getHoldDurationMax(IStandPower standPower) {
         if (standPower.getStandManifestation() instanceof SilverChariotEntity && !((SilverChariotEntity) standPower.getStandManifestation()).hasArmor()) {
-            return 200;
+            return Integer.MAX_VALUE;
         }
         return super.getHoldDurationMax(standPower);
     }

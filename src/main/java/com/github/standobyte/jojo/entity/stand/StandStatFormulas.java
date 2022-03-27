@@ -65,7 +65,7 @@ public class StandStatFormulas {
     }
     
     public static final int getBarrageMaxDuration(double durability) {
-        return 20 + (int) (durability * 5.0);
+        return 20 + (int) (durability * 5.0) * 1000;
     }
     
     
@@ -81,19 +81,19 @@ public class StandStatFormulas {
     }
     
     public static final float getBlockStaminaCost(float incomingDamage) {
-        return 3F * (float) Math.pow(incomingDamage, 1.5);
+        return 0.5F * (float) Math.pow(incomingDamage, 2);
     }
     
     public static final int getSummonLockTicks(double speed) {
         return Math.max(20 - (int) (speed * 1.25), 0);
     }
     
-    public static final float rangeStrengthFactor(double rangeEffective, double rangeMax, double distance) {
-        if (distance <= rangeEffective) {
-            return 1F;
-        }
-        float f = (float) ((rangeMax - rangeEffective) / (2 * rangeEffective - rangeMax - distance));
-        return f * f;
+    public static final int getBlockingBreakTicks(double durability) {
+        return Math.min(120 - (int) (durability * 5), 1);
+    }
+    
+    public static final float getMaxBarrageParryTickDamage(double durability) {
+        return Math.max(((float) durability - 4F) * 0.125F, 0);
     }
     
     public static final float getLeapStrength(double strength) {
@@ -126,10 +126,16 @@ public class StandStatFormulas {
         return blockHardness < Math.exp(strength / 4) && blockHarvestLevel < (int) strength / 4;
     }
     
-    // parryTiming
     // dash
     // projectileAccuracy
     // hitboxExpansion
     // unsummonedAttackDeflectSpeed
     
+    public static final float rangeStrengthFactor(double rangeEffective, double rangeMax, double distance) {
+        if (distance <= rangeEffective) {
+            return 1F;
+        }
+        float f = (float) ((rangeMax - rangeEffective) / (2 * rangeEffective - rangeMax - distance));
+        return f * f;
+    }
 }

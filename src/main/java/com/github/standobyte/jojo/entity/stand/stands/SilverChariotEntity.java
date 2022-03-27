@@ -3,8 +3,6 @@ package com.github.standobyte.jojo.entity.stand.stands;
 import java.util.List;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
-
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
 import com.github.standobyte.jojo.entity.stand.StandAttackProperties;
@@ -14,7 +12,6 @@ import com.github.standobyte.jojo.init.ModEntityAttributes;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
@@ -147,9 +144,9 @@ public class SilverChariotEntity extends StandEntity {
     }
     
     @Override
-    protected StandAttackProperties standAttackProperties(PunchType punchType, Entity target, StandEntityAction action, @Nullable LivingEntity targetLiving, 
+    protected StandAttackProperties standAttackProperties(PunchType punchType, Entity target, StandEntityAction action,
             double strength, double precision, double attackRange, double distance, double knockback, int barrageHits) {
-        StandAttackProperties attack = super.standAttackProperties(punchType, target, action, targetLiving, 
+        StandAttackProperties attack = super.standAttackProperties(punchType, target, action, 
                 strength, precision, attackRange, distance, knockback, barrageHits);
         
         switch (punchType) {
@@ -160,7 +157,7 @@ public class SilverChariotEntity extends StandEntity {
             }
             break;
         case BARRAGE:
-            if (hasRapier() && targetLiving instanceof SkeletonEntity) {
+            if (hasRapier() && target instanceof SkeletonEntity) {
                 attack.damage(attack.getDamage() * 0.75F);
             }
         default:

@@ -4,6 +4,7 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -139,6 +140,7 @@ public class DamageUtil {
                 }).orElse(1F)).orElse(1F);
                 amount *= hamonMultiplier;
             }
+            amount *= JojoModConfig.COMMON.hamonDamageMultiplier.get().floatValue();
             if (hurtThroughInvulTicks(target, dmgSource, amount)) {
                 HamonPowerType.createHamonSparkParticlesEmitter(target, amount / HamonData.MAX_HAMON_DAMAGE);
                 if (scarf && undeadTarget && livingTarget instanceof ServerPlayerEntity) {

@@ -45,6 +45,8 @@ public class JojoModConfig {
         private List<ResourceLocation> bannedStandsResLocs;
         private boolean[] tiersAvaliable = new boolean[7];
 
+        public final ForgeConfigSpec.DoubleValue hamonDamageMultiplier;
+        
         public final ForgeConfigSpec.BooleanValue skipStandProgression;
         public final ForgeConfigSpec.BooleanValue standStamina;
         public final ForgeConfigSpec.DoubleValue standDamageMultiplier;
@@ -129,7 +131,7 @@ public class JojoModConfig {
                     .define("standStamina", true);
         
             standDamageMultiplier = builder
-                    .comment(" Damage multiplier apllied to all Stands.")
+                    .comment(" Damage multiplier applied to all Stands.")
                     .translation("jojo.config.standPowerMultiplier")
                     .defineInRange("standPowerMultiplier", 1.0, 0.0, 128.0);
             
@@ -137,6 +139,11 @@ public class JojoModConfig {
                     .comment(" Whether or not Stands and abilities can break blocks.")
                     .translation("jojo.config.abilitiesBreakBlocks")
                     .define("abilitiesBreakBlocks", true);
+            
+            hamonDamageMultiplier = builder
+                    .comment(" Damage multiplier applied to all Hamon attacks.")
+                    .translation("jojo.config.hamonDamageMultiplier")
+                    .defineInRange("hamonDamageMultiplier", 1.0, 0.0, 128.0);
             
             timeStopChunkRange = builder
                     .comment(" Range of Time Stop ability in chunks.",

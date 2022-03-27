@@ -1,6 +1,8 @@
 package com.github.standobyte.jojo.entity.stand;
 
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
 
 public class StandAttackProperties {
     private float damage;
@@ -10,6 +12,8 @@ public class StandAttackProperties {
     private float armorPiercing = 0;
     private float disableBlockingChance = 0;
     private float parryTiming = 0;
+    private Vector3d sweepingAabb;
+    private float sweepingDamage;
     
     
     
@@ -50,6 +54,17 @@ public class StandAttackProperties {
     
     public StandAttackProperties parryTiming(float parryTiming) {
         this.parryTiming = MathHelper.clamp(parryTiming, 0, 1);
+        return this;
+    }
+    
+    public StandAttackProperties sweepingAttack(double x, double y, double z, float damage) {
+        x = Math.max(x, 0);
+        y = Math.max(y, 0);
+        z = Math.max(z, 0);
+        if ((x > 0 || y > 0 || z > 0) && damage > 0) {
+            this.sweepingAabb = new Vector3d(x, y, z);
+            this.sweepingDamage = damage;
+        }
         return this;
     }
 
@@ -97,6 +112,18 @@ public class StandAttackProperties {
     
     public float getHeavyAttackParryTiming() {
         return parryTiming;
+    }
+    
+    public boolean isSweepingAttack() {
+        return sweepingAabb != null && sweepingDamage > 0;
+    }
+    
+    public AxisAlignedBB sweepingAttackAabb(AxisAlignedBB targetAabb) {
+        return targetAabb.inflate(sweepingAabb.x, sweepingAabb.y, sweepingAabb.z);
+    }
+    
+    public float getSweepingDamage() {
+        return sweepingDamage;
     }
     
 }
