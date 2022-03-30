@@ -21,10 +21,13 @@ public class VampirismSpaceRipperStingyEyes extends VampirismAction {
         }
     }
 
-    // FIXME (!!!!!!!) cooldown
     @Override
-    public int getCooldown(INonStandPower power, int ticksHeld) {
-        return super.getCooldown(power, ticksHeld) * ticksHeld / this.getHoldDurationMax(power);
+    public int getCooldownAdditional(INonStandPower power, int ticksHeld) {
+        int cd = super.getCooldown(power, ticksHeld);
+        if (getHoldDurationMax(power) > 0) {
+            cd = (int) ((float) (cd * ticksHeld) / (float) getHoldDurationMax(power));
+        }
+        return cd;
     }
 
 }

@@ -75,18 +75,19 @@ public class StandEntityTask {
         if (phase == StandEntityAction.Phase.PERFORM && ticksLeft == startingTicks) {
             action.standPerform(standEntity.level, standEntity, standPower, target);
         }
+        int phaseTicks = startingTicks - ticksLeft;
         switch (phase) {
         case BUTTON_HOLD:
             action.standTickButtonHold(standEntity.level, standEntity, 
-                    startingTicks - ticksLeft, standPower, target);
+                    phaseTicks, standPower, target);
             break;
         case WINDUP:
             action.standTickWindup(standEntity.level, standEntity, 
-                    startingTicks - ticksLeft, standPower, target);
+                    phaseTicks, standPower, target);
             break;
         case PERFORM:
             action.standTickPerform(standEntity.level, standEntity, 
-                    startingTicks - ticksLeft, standPower, target);
+                    phaseTicks, standPower, target);
             break;
         case RECOVERY:
             break;
@@ -130,19 +131,19 @@ public class StandEntityTask {
         }
     }
     
-    public StandEntityAction getAction() {
+    StandEntityAction getAction() {
         return action;
     }
     
-    public int getTicksLeft() {
+    int getTicksLeft() {
         return ticksLeft;
     }
     
-    public float getTaskCompletion(float partialTick) {
+    float getTaskCompletion(float partialTick) {
         return Math.min(1F - ((float) ticksLeft - partialTick) / (float) startingTicks, 1F);
     }
     
-    public StandEntityAction.Phase getPhase() {
+    StandEntityAction.Phase getPhase() {
         return phase;
     }
     

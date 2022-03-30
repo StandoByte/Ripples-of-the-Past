@@ -190,7 +190,11 @@ public abstract class StandEntityAction extends StandAction {
         return false;
     }
     
-    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase) {}
+    public boolean useDeltaMovement(IStandPower standPower, StandEntity standEntity) {
+        return false;
+    }
+    
+    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, int ticks) {}
     
     public void playSound(StandEntity standEntity, IStandPower standPower, Phase phase) {
         SoundEvent sound = getSound(standEntity, standPower);
@@ -371,7 +375,7 @@ public abstract class StandEntityAction extends StandAction {
         }
         
         public T defaultStandOffsetFromUser() {
-            this.userOffset = new StandRelativeOffset(0, 0.5);
+            this.userOffset = StandRelativeOffset.noYOffset(0, 0.5);
             return getThis();
         }
         
@@ -384,12 +388,12 @@ public abstract class StandEntityAction extends StandAction {
         }
         
         public T standOffsetFromUser(double left, double forward, boolean armsOnlyMode) {
-            setStandOffset(new StandRelativeOffset(left, forward), armsOnlyMode);
+            setStandOffset(StandRelativeOffset.noYOffset(left, forward), armsOnlyMode);
             return getThis();
         }
         
-        public T standOffsetFromUser(double left, double forward, double y, boolean armsOnlyMode) {
-            setStandOffset(new StandRelativeOffset(left, forward, y), armsOnlyMode);
+        public T standOffsetFromUser(double left, double y, double forward, boolean armsOnlyMode) {
+            setStandOffset(StandRelativeOffset.withYOffset(left, y, forward), armsOnlyMode);
             return getThis();
         }
         

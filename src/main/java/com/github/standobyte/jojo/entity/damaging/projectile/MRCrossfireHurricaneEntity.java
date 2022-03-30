@@ -8,8 +8,8 @@ import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.JojoModUtil;
-import com.github.standobyte.jojo.util.damage.IndirectStandEntityDamageSource;
 import com.github.standobyte.jojo.util.damage.DamageUtil;
+import com.github.standobyte.jojo.util.damage.IndirectStandEntityDamageSource;
 import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
 
 import net.minecraft.block.AbstractFireBlock;

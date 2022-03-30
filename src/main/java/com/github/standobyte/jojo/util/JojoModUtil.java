@@ -52,16 +52,16 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 
 public class JojoModUtil {
-    
+
     public static RayTraceResult rayTrace(Entity entity, double reachDistance, @Nullable Predicate<Entity> entityFilter) {
         return rayTrace(entity, reachDistance, entityFilter, 0);
     }
-    
+
     public static RayTraceResult rayTrace(Entity entity, double reachDistance, @Nullable Predicate<Entity> entityFilter, 
             double rayTraceInflate) {
         return rayTrace(entity, reachDistance, entityFilter, rayTraceInflate, 0);
     }
-    
+
     public static RayTraceResult rayTrace(Entity entity, double reachDistance, @Nullable Predicate<Entity> entityFilter, 
             double rayTraceInflate, double standPrecision) {
         Vector3d startPos = entity.getEyePosition(1.0F);
@@ -70,11 +70,11 @@ public class JojoModUtil {
         AxisAlignedBB aabb = entity.getBoundingBox().expandTowards(rtVec).inflate(1.0D);
         return rayTrace(startPos, endPos, aabb, reachDistance, entity.level, entity, entityFilter, rayTraceInflate, standPrecision);
     }
-    
+
     public static RayTraceResult standRayTrace(StandEntity entity, @Nullable Predicate<Entity> entityFilter, double rayTraceInflate) {
         return rayTrace(entity, entity.getAttributeValue(ForgeMod.REACH_DISTANCE.get()), entityFilter, rayTraceInflate, entity.getPrecision());
     }
-    
+
     public static RayTraceResult rayTrace(Vector3d startPos, Vector3d endPos, AxisAlignedBB aabb, 
             double minDistance, World world, @Nullable Entity entity, @Nullable Predicate<Entity> entityFilter, 
             double rayTraceInflate, double standPrecision) {
@@ -114,7 +114,7 @@ public class JojoModUtil {
         }
         return new EntityRayTraceResult(targetEntity, targetEntityPos);
     }
-    
+
     private static AxisAlignedBB standPrecisionTargetHitbox(AxisAlignedBB aabb, double precision) {
         if (precision > 0) {
             double smallAabbAddFraction = Math.min(precision, 16) / 16;
@@ -126,7 +126,7 @@ public class JojoModUtil {
         }
         return aabb;
     }
-    
+
     public static RayTraceResult getHitResult(Entity projectile, @Nullable Predicate<Entity> targetPredicate, RayTraceContext.BlockMode blockMode) {
         World world = projectile.level;
         Vector3d pos = projectile.position();
@@ -142,12 +142,12 @@ public class JojoModUtil {
         }
         return rayTraceResult;
     }
-    
+
     public static boolean isAnotherEntityTargeted(RayTraceResult rayTraceResult, Entity targettingEntity) {
         return (rayTraceResult.getType() == RayTraceResult.Type.ENTITY
                 && !((EntityRayTraceResult) rayTraceResult).getEntity().is(targettingEntity));
     }
-    
+
     public static double getDistance(Entity entity, AxisAlignedBB targetAabb) {
         Vector3d startPos = entity.getEyePosition(1.0F);
         if (targetAabb.contains(startPos)) {
@@ -161,40 +161,40 @@ public class JojoModUtil {
         Optional<Vector3d> clipOptional = targetAabb.clip(startPos, endPos);
         return clipOptional.map(clipVec -> startPos.distanceTo(clipVec) - entity.getBbWidth() / 2).orElse(-1D);
     }
-    
+
     public static Iterable<Entity> getAllEntities(World world) {
         return world.isClientSide() ? ((ClientWorld) world).entitiesForRendering() : ((ServerWorld) world).getAllEntities();
     }
-    
+
     public static void rotateTowards(Entity entity, Vector3d targetPos, float maxAngle) {
         Vector3d targetVec = targetPos.subtract(entity.getEyePosition(1.0F));
-        
+
         float yRot = MathUtil.yRotDegFromVec(targetVec);
         float xRot = MathUtil.xRotDegFromVec(targetVec);
-        
+
         yRot = entity.yRot + MathHelper.clamp(MathHelper.degreesDifference(entity.yRot, yRot), -maxAngle, maxAngle);
         xRot = entity.xRot + MathHelper.clamp(MathHelper.degreesDifference(entity.xRot, xRot), -maxAngle, maxAngle);
-        
+
         entity.yRot = yRot % 360.0F;
         entity.xRot = xRot % 360.0F;
         entity.setYHeadRot(yRot);
     }
-    
-    
-    
+
+
+
     public static boolean canEntityDestroy(World world, BlockPos pos, LivingEntity entity) {
         BlockState state = world.getBlockState(pos);
         return JojoModConfig.COMMON.abilitiesBreakBlocks.get() && state.canEntityDestroy(world, pos, entity) && ForgeEventFactory.onEntityDestroyBlock(entity, pos, state);
     }
-    
-    
-    
+
+
+
     public static ResourceLocation makeTextureLocation(String folderName, String namespace, String path) {
         return new ResourceLocation(namespace, "textures/"+ folderName + "/" + path + ".png");
     }
-    
 
-    
+
+
     public static <T extends Entity> List<T> entitiesAround(Class<? extends T> clazz, Entity centerEntity, double radius, boolean includeSelf, @Nullable Predicate<? super T> filter) {
         AxisAlignedBB aabb = new AxisAlignedBB(centerEntity.position().subtract(radius, radius, radius), centerEntity.position().add(radius, radius, radius));
         return centerEntity.level.getEntitiesOfClass(clazz, aabb, entity -> (includeSelf || entity != centerEntity) && (filter == null || filter.test(entity)));
@@ -220,7 +220,7 @@ public class JojoModUtil {
     public static boolean canBleed(LivingEntity entity) {
         return entity instanceof PlayerEntity || entity instanceof AgeableEntity || entity instanceof INPC || entity instanceof AbstractIllagerEntity;
     }
-    
+
     public static void extinguishFieryStandEntity(Entity entity, ServerWorld world) {
         JojoModUtil.playSound(world, null, entity.getX(), entity.getY(), entity.getZ(), 
                 SoundEvents.FIRE_EXTINGUISH, entity.getSoundSource(), 1.0F, 1.0F, StandUtil::isPlayerStandUser);
@@ -228,11 +228,11 @@ public class JojoModUtil {
                 8, entity.getBbWidth() / 2F, entity.getBbHeight() / 2F, entity.getBbWidth() / 2F, 0);
         entity.remove();
     }
-    
+
     public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine) {
         sayVoiceLine(entity, voiceLine, 1.0F, 1.0F);
     }
-    
+
     public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine, float volume, float pitch) {
         if (!entity.level.isClientSide() && canPlayVoiceLine(entity, voiceLine)) {
             if (entity instanceof PlayerEntity) {
@@ -243,7 +243,7 @@ public class JojoModUtil {
             }
         }
     }
-    
+
     private static boolean canPlayVoiceLine(LivingEntity entity, SoundEvent voiceLine) {
         if (entity.hasEffect(Effects.INVISIBILITY)) {
             return false;
@@ -282,7 +282,7 @@ public class JojoModUtil {
             pitch = event.getPitch();
             broadcastWithCondition(((ServerWorld) world).getServer().getPlayerList().getPlayers(), clientHandled, 
                     x, y, z, volume > 1.0F ? (double)(16.0F * volume) : 16.0D, world.dimension(), 
-                    new SPlaySoundEffectPacket(sound, category, x, y, z, volume, pitch), condition);
+                            new SPlaySoundEffectPacket(sound, category, x, y, z, volume, pitch), condition);
         }
         else if (clientHandled != null && condition.test(clientHandled)) {
             world.playSound(clientHandled, x, y, z, sound, category, volume, pitch);
@@ -300,7 +300,7 @@ public class JojoModUtil {
             pitch = event.getPitch();
             broadcastWithCondition(((ServerWorld) world).getServer().getPlayerList().getPlayers(), clientHandled, 
                     entity.getX(), entity.getY(), entity.getZ(), volume > 1.0F ? (double)(16.0F * volume) : 16.0D, world.dimension(), 
-                    new SSpawnMovingSoundEffectPacket(sound, category, entity, volume, pitch), condition);
+                            new SSpawnMovingSoundEffectPacket(sound, category, entity, volume, pitch), condition);
         }
         else if (clientHandled != null && condition.test(clientHandled)) {
             world.playSound(clientHandled, entity, sound, category, volume, pitch);

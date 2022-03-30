@@ -14,6 +14,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.util.JojoModUtil;
 
@@ -193,14 +194,17 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     public void onClick(World world, LivingEntity user, P power) {}
-
-    // FIXME (!!!!!!!) cooldown
-    public int getCooldownValue() {
-        return cooldownTechnical + cooldownAdditional;
+    
+    public int getCooldownTechnical() {
+        return cooldownTechnical;
+    }
+    
+    protected int getCooldownAdditional(P power, int ticksHeld) {
+        return power.isUserCreative() || power.getUser().hasEffect(ModEffects.RESOLVE.get()) ? 0 : cooldownAdditional;
     }
     
     public int getCooldown(P power, int ticksHeld) {
-        return getCooldownValue();
+        return getCooldownTechnical() + getCooldownAdditional(power, ticksHeld);
     }
 
     public boolean swingHand() {

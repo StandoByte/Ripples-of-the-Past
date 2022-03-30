@@ -19,7 +19,7 @@ public class MagiciansRedRedBind extends StandEntityAction {
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {
         if (!world.isClientSide()) {
-            world.addFreshEntity(new MRRedBindEntity(world, standEntity, userPower));
+            standEntity.addProjectile(new MRRedBindEntity(world, standEntity, userPower));
             standEntity.playSound(ModSounds.MAGICIANS_RED_RED_BIND.get(), 1.0F, 1.0F);
         }
     }

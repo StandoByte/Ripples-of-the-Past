@@ -65,7 +65,7 @@ public class StandStatFormulas {
     }
     
     public static final int getBarrageMaxDuration(double durability) {
-        return 20 + (int) (durability * 5.0) * 1000;
+        return 20 + (int) (durability * 5.0);
     }
     
     

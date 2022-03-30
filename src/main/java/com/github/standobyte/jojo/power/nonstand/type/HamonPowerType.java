@@ -435,7 +435,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
             LivingEntity entity = event.getEntityLiving();
             INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
                 power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
-                    if (hamon.isSkillLearned(HamonSkill.WATER_WALKING) && power.consumeEnergy(event.getAmount() * 0.5F)) {
+                    if (power.consumeEnergy(event.getAmount() * 0.5F)) {
                         HamonPowerType.createHamonSparkParticles(entity.level, null, entity.getX(), entity.getY(0.5), entity.getZ(), 0.1F);
                         event.setCanceled(true);
                     }

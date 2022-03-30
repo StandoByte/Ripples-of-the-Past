@@ -6,7 +6,6 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public class StandEntityMeleeBarrage extends StandEntityAction {
@@ -18,12 +17,6 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
     @Override
     protected ActionConditionResult checkStandConditions(StandEntity stand, IStandPower power, ActionTarget target) {
         return !stand.canAttackMelee() ? ActionConditionResult.NEGATIVE : super.checkStandConditions(stand, power, target);
-    }
-
-    // FIXME (!!!!!!!) cooldown
-    @Override
-    public int getCooldown(IStandPower power, int ticksHeld) {
-        return MathHelper.floor((float) (getCooldownValue() * ticksHeld) / (float) getHoldDurationMax(power) + 0.5F);
     }
 
     @Override
@@ -59,7 +52,10 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
             }
         }
         if (!world.isClientSide()) {
-            standEntity.barrageTickPunches(target, this, hitsThisTick);
+            boolean attacked = standEntity.barrageTickPunches(target, this, hitsThisTick);
+            if (!attacked) {
+                
+            }
             // FIXME tick stamina cost in builder (for highlighting)
             userPower.consumeStamina(4F);
         }

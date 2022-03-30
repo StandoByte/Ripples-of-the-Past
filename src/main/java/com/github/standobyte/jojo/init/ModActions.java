@@ -215,7 +215,7 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_ZOOM = ACTIONS.register("star_platinum_zoom", 
             () -> new StarPlatinumZoom(new StandEntityAction.Builder().holdType().ignoresPerformerStun()
-                    .standOffsetFromUser(-0.25, -0.3, -0.25)));
+                    .standOffsetFromUser(-0.25, -0.25, -0.3)));
     
     public static final RegistryObject<StandAction> STAR_PLATINUM_TIME_STOP = ACTIONS.register("star_platinum_time_stop", 
             () -> new TimeStop(new StandAction.Builder().holdToFire(30, false)
@@ -296,7 +296,8 @@ public class ModActions {
             () -> new SilverChariotHeavyAttack(new StandEntityAction.Builder().shiftVariationOf(SILVER_CHARIOT_ATTACK).shiftVariationOf(SILVER_CHARIOT_BARRAGE)));
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_RAPIER_LAUNCH = ACTIONS.register("silver_chariot_rapier_launch", 
-            () -> new SilverChariotRapierLaunch(new StandEntityAction.Builder().cooldown(0, 100).resolveLevelToUnlock(1).defaultStandOffsetFromUser()
+            () -> new SilverChariotRapierLaunch(new StandEntityAction.Builder().cooldown(0, 100)
+                    .ignoresPerformerStun().resolveLevelToUnlock(1).defaultStandOffsetFromUser()
                     .standPose(StandPose.RANGED_ATTACK).standSound(ModSounds.SILVER_CHARIOT_RAPIER_SHOT)));
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_BLOCK = ACTIONS.register("silver_chariot_block", 

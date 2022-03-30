@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
+import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModStandTypes;
@@ -9,9 +10,7 @@ import net.minecraft.block.SoundType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.monster.SkeletonEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -40,20 +39,18 @@ public class SCRapierEntity extends ModdedProjectileEntity {
         return true;
     }
     
+    @Deprecated
     @Override
-    public float getBaseDamage() {
+    protected float getBaseDamage() {
+        return 0F;
+    }
+    
+    @Override
+    public float getDamageAmount() {
         LivingEntity owner = getOwner();
         float damage;
         if (owner != null) {
-            ModifiableAttributeInstance attackDamage = owner.getAttribute(Attributes.ATTACK_DAMAGE);
-            AttributeModifier modifier = SilverChariotEntity.NO_RAPIER_DAMAGE_DECREASE;
-            if (modifier != null) {
-                attackDamage.removeModifier(modifier);
-            }
-            damage = (float) attackDamage.getValue();
-            if (modifier != null) {
-                attackDamage.addPermanentModifier(modifier);
-            }
+            damage = (float) owner.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
         }
         else {
             damage = (float) ModStandTypes.SILVER_CHARIOT.get().getStats().getBasePower();
@@ -75,6 +72,10 @@ public class SCRapierEntity extends ModdedProjectileEntity {
     protected int ticksLifespan() {
         return Integer.MAX_VALUE;
     }
+
+    @Override
+    protected void breakProjectile(TargetType targetType) {
+    }
     
     @Override
     protected void onHitBlock(BlockRayTraceResult blockRayTraceResult) {
@@ -83,21 +84,8 @@ public class SCRapierEntity extends ModdedProjectileEntity {
             BlockState blockState = level.getBlockState(blockPos);
             SoundType soundType = blockState.getSoundType(level, blockPos, this);
             level.playSound(null, blockPos, soundType.getHitSound(), SoundCategory.BLOCKS, (soundType.getVolume() + 1.0F) / 8.0F, soundType.getPitch() * 0.5F);
-            Vector3d motion = getDeltaMovement();
             Direction hitFace = blockRayTraceResult.getDirection();
-            switch (hitFace.getAxis()) {
-            case X:
-                setDeltaMovement(-motion.x, motion.y, motion.z);
-                break;
-            case Y:
-                setDeltaMovement(motion.x, -motion.y, motion.z);
-                break;
-            case Z:
-                setDeltaMovement(motion.x, motion.y, -motion.z);
-                break;
-            }
-            rotateTowardsMovement(1.0F);
-            ricochet++;
+            ricochet(hitFace);
         }
         else {
             Vector3d pos = position();
@@ -123,6 +111,25 @@ public class SCRapierEntity extends ModdedProjectileEntity {
                     getY() + movementVec.y * k, 
                     getZ() + movementVec.z * k);
             setDeltaMovement(Vector3d.ZERO);
+        }
+    }
+    
+    private void ricochet(Direction hitSurfaceDirection) {
+        if (hitSurfaceDirection != null) {
+            Vector3d motion = getDeltaMovement();
+            switch (hitSurfaceDirection.getAxis()) {
+            case X:
+                setDeltaMovement(-motion.x, motion.y, motion.z);
+                break;
+            case Y:
+                setDeltaMovement(motion.x, -motion.y, motion.z);
+                break;
+            case Z:
+                setDeltaMovement(motion.x, motion.y, -motion.z);
+                break;
+            }
+            rotateTowardsMovement(1.0F);
+            ricochet++;
         }
     }
 

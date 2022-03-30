@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
 import com.github.standobyte.jojo.entity.stand.StandAttackProperties;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
+import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModEntityAttributes;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 
@@ -21,6 +22,7 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeMod;
 
@@ -48,6 +50,7 @@ public class SilverChariotEntity extends StandEntity {
     private static final DataParameter<Boolean> HAS_ARMOR = EntityDataManager.defineId(SilverChariotEntity.class, DataSerializers.BOOLEAN);
     
     private int ticksAfterArmorRemoval;
+    private Vector3d dashVec = Vector3d.ZERO;
 
     public SilverChariotEntity(StandEntityType<SilverChariotEntity> type, World world) {
         super(type, world);
@@ -101,6 +104,11 @@ public class SilverChariotEntity extends StandEntity {
     }
     
     @Override
+    protected float getPhysicalResistance(float blockedRatio) {
+        return StandStatFormulas.getPhysicalResistance(0, 0, blockedRatio);
+    }
+    
+    @Override
     public void tick() {
         super.tick();
         if (!level.isClientSide()) {
@@ -121,6 +129,14 @@ public class SilverChariotEntity extends StandEntity {
     
     public int getTicksAfterArmorRemoval() {
         return ticksAfterArmorRemoval;
+    }
+    
+    public void setDashVec(Vector3d dashVec) {
+        this.dashVec = dashVec;
+    }
+    
+    public Vector3d getDashVec() {
+        return dashVec;
     }
     
     @Override
@@ -152,8 +168,8 @@ public class SilverChariotEntity extends StandEntity {
         switch (punchType) {
         case HEAVY_NO_COMBO:
             if (hasRapier()) {
-                attack.addKnockback(attack.getAdditionalKnockback() * 0.5F);
-                attack.knockbackYRotDeg((random.nextFloat() * 15F + 30F) * (random.nextBoolean() ? -1 : 1));
+                attack.addKnockback(4);
+                attack.knockbackYRotDeg((60F + random.nextFloat() * 30F) * (random.nextBoolean() ? -1 : 1));
             }
             break;
         case BARRAGE:
@@ -164,5 +180,10 @@ public class SilverChariotEntity extends StandEntity {
             break;
         }
         return attack;
+    }
+    
+    @Override
+    protected double leapBaseStrength() {
+        return getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
     }
 }
