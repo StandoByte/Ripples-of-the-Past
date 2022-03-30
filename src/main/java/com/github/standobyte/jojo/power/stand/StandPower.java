@@ -557,18 +557,16 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     @Override
     public boolean isLeapUnlocked() {
-        if (standManifestation instanceof StandEntity) {
-            StandEntity standEntity = (StandEntity) standManifestation;
-            return StandStatFormulas.getLeapStrength(standEntity.getAttackDamage()) >= 1.5 && !standEntity.isArmsOnlyMode() && standEntity.isFollowingUser();
-        }
-        return false;
+        return leapStrength() >= 1.5;
     }
     
     @Override
     public float leapStrength() {
-        StandEntity standEntity = (StandEntity) standManifestation;
-        if (standEntity.isFollowingUser()) {
-            return StandStatFormulas.getLeapStrength(standEntity.getAttackDamage());
+        if (standManifestation instanceof StandEntity) {
+            StandEntity standEntity = (StandEntity) standManifestation;
+            if (!standEntity.isArmsOnlyMode() && standEntity.isFollowingUser()) {
+                return standEntity.getLeapStrength();
+            }
         }
         return 0;
     }

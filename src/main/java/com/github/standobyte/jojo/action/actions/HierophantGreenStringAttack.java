@@ -22,11 +22,9 @@ public class HierophantGreenStringAttack extends StandEntityAction {
             int n = shift ? 4 : 7;
             for (int i = 0; i < n; i++) {
                 Vector2f rotOffsets = i > 0 ? MathUtil.xRotYRotOffsets((double) i / (double) n * Math.PI * 2, 10) : Vector2f.ZERO;
-                HGStringEntity string = new HGStringEntity(world, standEntity, rotOffsets.y, rotOffsets.x, shift);
-                world.addFreshEntity(string);
+                standEntity.addProjectile(new HGStringEntity(world, standEntity, rotOffsets.y, rotOffsets.x, shift));
             }
-            HGStringEntity string = new HGStringEntity(world, standEntity, 0, 0, shift);
-            world.addFreshEntity(string);
+            standEntity.addProjectile(new HGStringEntity(world, standEntity, 0, 0, shift));
         }
     }
 

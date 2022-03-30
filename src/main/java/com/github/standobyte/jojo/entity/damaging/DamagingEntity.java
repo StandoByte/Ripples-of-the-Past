@@ -6,9 +6,9 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.util.JojoModUtil;
 import com.github.standobyte.jojo.util.MathUtil;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 import com.github.standobyte.jojo.util.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.damage.IndirectStandEntityDamageSource;
-import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -26,7 +26,6 @@ import net.minecraft.util.IndirectEntityDamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.EntityRayTraceResult;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -36,7 +35,7 @@ import net.minecraftforge.fml.network.NetworkHooks;
 
 public abstract class DamagingEntity extends ProjectileEntity implements IEntityAdditionalSpawnData {
     protected static final Vector3d DEFAULT_POS_OFFSET = new Vector3d(0.0D, -0.3D, 0.0D);
-    protected float damageFactor = 1.0F;
+    private float damageFactor;
     private LivingEntity livingEntityOwner = null;
 
     public DamagingEntity(EntityType<? extends DamagingEntity> entityType, @Nullable LivingEntity owner, World world) {
@@ -120,10 +119,13 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
             if (entityHurt) {
                 if (owner instanceof StandEntity && target instanceof LivingEntity) {
                     LivingEntity standUser = ((StandEntity) owner).getUser();
-                    if (standUser instanceof PlayerEntity) {
+                    if (standUser != null) {
                         LivingEntity livingTarget = (LivingEntity) target;
-                        livingTarget.setLastHurtByPlayer((PlayerEntity) standUser);
-                        livingTarget.lastHurtByPlayerTime = 100;
+                        if (standUser instanceof PlayerEntity) {
+                            livingTarget.setLastHurtByPlayer((PlayerEntity) standUser);
+                            livingTarget.lastHurtByPlayerTime = 100;
+                        }
+                        livingTarget.setLastHurtByMob(standUser);
                     }
                 }
             }
@@ -140,7 +142,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     }
     
     protected boolean hurtTarget(Entity target, LivingEntity owner) {
-        return hurtTarget(target, getDamageSource(owner), getBaseDamage() * getDamageFactor());
+        return hurtTarget(target, getDamageSource(owner), getDamageAmount());
     }
     
     protected boolean hurtTarget(Entity target, DamageSource dmgSource, float dmgAmount) {
@@ -213,18 +215,17 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     
     protected void afterBlockHit(BlockRayTraceResult blockRayTraceResult, boolean blockDestroyed) {}
     
-    protected float getDamageFactor() {
-        return damageFactor;
-    }
-    
-    // FIXME (!!!!!!!!) (stand projectile) a method in StandEntity which does this automatically
-    public void setDamageFactor(float damageFactor) {
-        this.damageFactor = MathHelper.clamp(damageFactor, 0.0F, 1.0F);
-    }
-    
     protected abstract int ticksLifespan();
+
+    protected abstract float getBaseDamage();
     
-    public abstract float getBaseDamage();
+    protected float getDamageAmount() {
+        return getBaseDamage() * damageFactor;
+    }
+    
+    public void setDamageFactor(float damageFactor) {
+        this.damageFactor = damageFactor;
+    }
     
     protected abstract float getMaxHardnessBreakable();
     

@@ -55,7 +55,7 @@ public class HierophantGreenEntity extends StandEntity {
 //                    .getManaCost() / rangedAttackDuration(shift) * 0.5F;
             int barrierEmeralds = Math.max(getPlacedBarriersCount() * multiplier / 10, 1);
             for (int i = 0; i < barrierEmeralds/* && getUserPower().consumeMana(manaCost)*/; i++) {
-                placedBarriers.get(random.nextInt(placedBarriers.size())).shootEmeralds(pos, 1, shift, (float) getRangeEfficiency());
+                placedBarriers.get(random.nextInt(placedBarriers.size())).shootEmeralds(pos, 1, shift);
             }
             canBarriersShoot = false;
         }

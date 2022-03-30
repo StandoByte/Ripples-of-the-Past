@@ -3,7 +3,6 @@ package com.github.standobyte.jojo.action.actions;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
@@ -19,7 +18,7 @@ public final class StandEntityUnsummon extends StandEntityAction {
     @Override
     public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
         LivingEntity user = standEntity.getUser();
-        if (user != null && standEntity.isCloseToEntity(user) && !standEntity.hasEffect(ModEffects.STUN.get())) {
+        if (user != null && standEntity.isCloseToEntity(user)) {
             int maxTicks = getUnsummonDuration(standEntity);
             if (standEntity.unsummonTicks == maxTicks) {
                 if (!world.isClientSide()) {
@@ -27,9 +26,11 @@ public final class StandEntityUnsummon extends StandEntityAction {
                 }
             }
             else {
-                if (!world.isClientSide()) {
+                if (standEntity.isArmsOnlyMode()) {
                     standEntity.setTaskPosOffset(0, 0, 0);
-                    standEntity.setPos(user.getX(), user.getY(), user.getZ());
+                }
+                else {
+                    standEntity.tickUnsummonOffset();
                 }
                 standEntity.unsummonTicks++;
             }
@@ -46,7 +47,7 @@ public final class StandEntityUnsummon extends StandEntityAction {
     
     @Override
     public boolean isCancelable(IStandPower standPower, StandEntity standEntity, Phase phase, StandEntityAction newAction) {
-        return !standEntity.isArmsOnlyMode();
+        return !standEntity.isArmsOnlyMode() && newAction != this;
     }
     
     @Override

@@ -12,43 +12,48 @@ public class StandRelativeOffset {
     private double y;
 //    private float yRotOffset;
     
-    public StandRelativeOffset(double left, double forward) {
-        this(left, forward, false, 0);
+    public static StandRelativeOffset noYOffset(double left, double forward) {
+        return new StandRelativeOffset(left, 0, forward, false);
     }
     
-    public StandRelativeOffset(double left, double forward, double y) {
-        this(left, forward, true, y);
+    public static StandRelativeOffset withYOffset(double left, double y, double forward) {
+        return new StandRelativeOffset(left, y, forward, true);
     }
     
-    private StandRelativeOffset(double left, double forward, boolean doYOffset, double y) {
+    public static StandRelativeOffset copy(StandRelativeOffset offset) {
+        return new StandRelativeOffset(offset.left, offset.y, offset.forward, offset.doYOffset);
+    }
+    
+    private StandRelativeOffset(double left, double y, double forward, boolean doYOffset) {
         this.left = left;
         this.forward = forward;
         this.doYOffset = doYOffset;
         this.y = y;
     }
     
-    public void addHorizontalOffset(double left, double forward) {
-        setHorizontalOffset(this.left + left, this.forward + forward);
-    }
-    
-    public void setHorizontalOffset(double left, double forward) {
-        this.left = left;
-        this.forward = forward;
-    }
-    
     Vector3d getAbsoluteVec(StandRelativeOffset offsetDefault, float yRot) {
         return MathUtil.relativeCoordsToAbsolute(left, doYOffset ? y : offsetDefault.y, forward, yRot);
+    }
+    
+    Vector3d toRelativeVec() {
+        return new Vector3d(left, y, forward);
+    }
+    
+    void setFromRelativeVec(Vector3d vec) {
+        this.left = vec.x;
+        this.y = vec.y;
+        this.forward = vec.z;
     }
     
 
     public void writeToBuf(PacketBuffer buf) {
         buf.writeDouble(left);
+        buf.writeDouble(y);
         buf.writeDouble(forward);
         buf.writeBoolean(doYOffset);
-        buf.writeDouble(y);
     }
     
     public static StandRelativeOffset readFromBuf(PacketBuffer buf) {
-        return new StandRelativeOffset(buf.readDouble(), buf.readDouble(), buf.readBoolean(), buf.readDouble());
+        return new StandRelativeOffset(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readBoolean());
     }
 }

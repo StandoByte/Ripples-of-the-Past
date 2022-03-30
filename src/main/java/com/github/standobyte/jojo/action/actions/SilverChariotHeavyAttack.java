@@ -4,6 +4,7 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.PunchType;
+import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
@@ -37,7 +38,7 @@ public class SilverChariotHeavyAttack extends StandEntityHeavyAttack {
     public int getStandActionTicks(IStandPower standPower, StandEntity standEntity) {
         return standEntity.isHeavyComboPunching() ? 
                 3
-                : super.getStandWindupTicks(standPower, standEntity);
+                : StandStatFormulas.getHeavyAttackWindup(standEntity.getAttackSpeed(), standEntity.getLastHeavyPunchCombo());
     }
     
     @Override
@@ -62,15 +63,35 @@ public class SilverChariotHeavyAttack extends StandEntityHeavyAttack {
                         }
                     });
         }
-        else {
-            // FIXME (!!!!) (SC) thrusting stab
+    }
+    
+    @Override
+    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, int ticks) {
+        super.onTaskSet(world, standEntity, standPower, phase, ticks);
+        if (!standEntity.isHeavyComboPunching() && ticks > 0) {
+            ((SilverChariotEntity) standEntity).setDashVec(standEntity.getLookAngle().scale(10D / (double) ticks));
         }
     }
 
     @Override
     public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
         if (!standEntity.isHeavyComboPunching()) {
-            // FIXME (!!!!) (SC) thrusting stab
+            // FIXME (!!!!!!!!) (SC thrusting attack) hit all entities in front of SC each tick
+            // FIXME (!!!!!!!!) (SC thrusting attack) no hitting same entities multiple times
+            float completion = standEntity.getCurrentTaskCompletion(1.0F);
+            boolean lastTick = completion < 1;
+            standEntity.setDeltaMovement(lastTick ? ((SilverChariotEntity) standEntity).getDashVec().scale(completion * 2) : Vector3d.ZERO);
+            if (!world.isClientSide()) {
+                standEntity.punch(PunchType.HEAVY_COMBO, target, this);
+                if (lastTick && standEntity.isFollowingUser()) {
+                    standEntity.retractStand(false);
+                }
+            }
         }
+    }
+    
+    @Override
+    public boolean useDeltaMovement(IStandPower standPower, StandEntity standEntity) {
+        return !standEntity.isHeavyComboPunching();
     }
 }

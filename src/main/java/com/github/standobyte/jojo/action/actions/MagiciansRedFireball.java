@@ -17,9 +17,7 @@ public class MagiciansRedFireball extends StandEntityAction {
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {
         if (!world.isClientSide()) {
-            MRFireballEntity fireball = new MRFireballEntity(standEntity, world);
-            fireball.shootFromRotation(standEntity, 1.5F, 4.0F);
-            world.addFreshEntity(fireball);
+            standEntity.shootProjectile(new MRFireballEntity(standEntity, world), 1.5F, 4.0F);
             standEntity.playSound(ModSounds.MAGICIANS_RED_FIREBALL.get(), 1.0F, 1.0F);
         }
     }

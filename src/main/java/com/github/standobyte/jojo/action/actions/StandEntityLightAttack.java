@@ -27,7 +27,7 @@ public class StandEntityLightAttack extends StandEntityAction {
     }
     
     @Override
-    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase) {
+    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, int ticks) {
         if (standEntity.isArmsOnlyMode() && standEntity.swingingArm == Hand.OFF_HAND) {
             standEntity.setArmsOnlyMode(true, true);
         }

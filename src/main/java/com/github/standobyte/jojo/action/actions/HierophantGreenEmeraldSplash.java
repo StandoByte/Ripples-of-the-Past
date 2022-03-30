@@ -21,13 +21,9 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
     public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
         if (!world.isClientSide()) {
             boolean shift = isShiftVariation();
-            float damageReduction = (float) standEntity.getRangeEfficiency();
             int emeralds = shift ? 2 : 1;
             for (int i = 0; i < emeralds; i++) {
-                HGEmeraldEntity emeraldEntity = new HGEmeraldEntity(standEntity, world, userPower);
-                emeraldEntity.setDamageFactor(damageReduction);
-                emeraldEntity.shootFromRotation(standEntity, shift ? 1.5F : 1F, shift ? 2.0F : 8.0F);
-                world.addFreshEntity(emeraldEntity);
+                standEntity.shootProjectile(new HGEmeraldEntity(standEntity, world, userPower), shift ? 1.5F : 1F, shift ? 2.0F : 8.0F);
             }
             
             HierophantGreenEntity hierophant = (HierophantGreenEntity) standEntity;

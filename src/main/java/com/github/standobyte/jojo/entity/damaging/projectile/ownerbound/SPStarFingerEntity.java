@@ -2,11 +2,9 @@ package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.init.ModStandTypes;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
@@ -27,10 +25,7 @@ public class SPStarFingerEntity extends OwnerBoundProjectileEntity {
     
     @Override
     public float getBaseDamage() {
-        LivingEntity owner = getOwner();
-        float damage = owner != null ? (float) owner.getAttributeValue(Attributes.ATTACK_DAMAGE) : 
-            (float) ModStandTypes.STAR_PLATINUM.get().getStats().getBasePower();
-        return damage *= 0.75F;
+        return 6F;
     }
     
     @Override

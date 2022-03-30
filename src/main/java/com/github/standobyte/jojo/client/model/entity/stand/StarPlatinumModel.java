@@ -514,28 +514,32 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
     
     
 
-//    @Override
-//    protected ModelPose<StarPlatinumEntity> initIdlePose() {
-//        return new ModelPose<StarPlatinumEntity>(new RotationAngle[] {
-//                new RotationAngle(body, 0.0F, -0.5236F, 0.0F),
-//                new RotationAngle(leftArm, -0.2618F, 0.0F, -0.7854F),
-//                new RotationAngle(leftForeArm, -1.5708F, -0.5236F, 0.5236F),
-//                new RotationAngle(rightArm, -0.3927F, 0.5236F, 0.3927F),
-//                new RotationAngle(rightForeArm, -1.5708F, 1.0472F, -1.5708F),
-//                new RotationAngle(leftLeg, 0.0873F, 0.1745F, -0.2618F),
-//                new RotationAngle(leftLowerLeg, 0.2618F, 0.0F, 0.0F),
-//                new RotationAngle(rightLeg, -0.0436F, 0.0F, 0.3491F),
-//                new RotationAngle(rightLowerLeg, 0.2618F, 0.0F, -0.3491F)
-//        });
-//    }
-//
-//    @Override
-//    protected ModelPose<StarPlatinumEntity> initIdlePose2Loop() {
-//        return new ModelPose<StarPlatinumEntity>(new RotationAngle[] {
-//                new RotationAngle(leftArm, -0.2618F, 0.0F, -0.6981F),
-//                new RotationAngle(leftForeArm, -1.5708F, -0.3491F, 0.5236F),
-//                new RotationAngle(rightArm, -0.2618F, 0.5236F, 0.3927F),
-//                new RotationAngle(rightForeArm, -1.5708F, 0.8727F, -1.5708F)
-//        });
-//    }
+    @Override
+    protected ModelPose<StarPlatinumEntity> initIdlePose() {
+        return new ModelPose<StarPlatinumEntity>(new RotationAngle[] {
+                new RotationAngle(body, 0.0F, -0.5236F, 0.0F),
+                new RotationAngle(upperPart, 0.0F, 0.0F, 0.0F),
+                new RotationAngle(leftArm, -0.2618F, 0.0F, -0.7854F),
+                new RotationAngle(leftForeArm, -1.5708F, -0.5236F, 0.5236F),
+                new RotationAngle(rightArm, -0.3927F, 0.5236F, 0.2618F),
+                new RotationAngle(rightForeArm, -1.5708F, 1.0472F, -1.5708F),
+                new RotationAngle(leftLeg, 0.0873F, 0.1745F, -0.2618F),
+                new RotationAngle(leftLeg, 0.0873F, 0.2618F, -0.3491F),
+                new RotationAngle(leftLowerLeg, 0.2618F, 0.0F, 0.0F),
+                new RotationAngle(leftLowerLeg, 0.2618F, 0.0F, 0.0F),
+                new RotationAngle(rightLeg, -0.0436F, 0.0F, 0.3491F),
+                new RotationAngle(rightLeg, -0.0436F, 0.0F, 0.4363F),
+                new RotationAngle(rightLowerLeg, 0.2618F, 0.0F, -0.3491F)
+        });
+    }
+
+    @Override
+    protected ModelPose<StarPlatinumEntity> initIdlePose2Loop() {
+        return new ModelPose<StarPlatinumEntity>(new RotationAngle[] {
+                new RotationAngle(leftArm, -0.2618F, 0.0F, -0.6981F),
+                new RotationAngle(leftForeArm, -1.5708F, -0.3491F, 0.5236F),
+                new RotationAngle(rightArm, -0.2618F, 0.5236F, 0.2618F),
+                new RotationAngle(rightForeArm, -1.5708F, 0.8727F, -1.5708F)
+        });
+    }
 }
