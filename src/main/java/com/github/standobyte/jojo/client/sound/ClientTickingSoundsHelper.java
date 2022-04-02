@@ -52,7 +52,7 @@ public abstract class ClientTickingSoundsHelper {
     
     public static void playStandEntityCancelableActionSound(StandEntity stand, SoundEvent sound, StandEntityAction action, float volume, float pitch) {
         Minecraft mc = Minecraft.getInstance();
-        if (!stand.isVisibleForAll() && !StandUtil.isPlayerStandUser(mc.player)) {
+        if (!stand.isVisibleForAll() && !StandUtil.isEntityStandUser(mc.player)) {
             return;
         }
         
@@ -73,7 +73,7 @@ public abstract class ClientTickingSoundsHelper {
             LivingEntity user = stand.getUser();
             if (user != null) {
                 Minecraft mc = Minecraft.getInstance();
-                if (!stand.isVisibleForAll() && !StandUtil.isPlayerStandUser(mc.player)) {
+                if (!stand.isVisibleForAll() && !StandUtil.isEntityStandUser(mc.player)) {
                     return;
                 }
 

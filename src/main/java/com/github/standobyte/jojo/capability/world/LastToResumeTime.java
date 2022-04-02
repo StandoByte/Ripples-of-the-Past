@@ -34,7 +34,7 @@ public class LastToResumeTime {
                 if (entity != null) {
                     if (timeStopTicksLeft == TIME_RESUME_SOUND_TICKS && timeResumeSound != null) {
                         PacketManager.sendGloballyWithCondition(new PlaySoundAtClientPacket(timeResumeSound, SoundCategory.AMBIENT, entity.blockPosition(), 5.0F, 1.0F), 
-                                world.dimension(), player -> (JojoModConfig.COMMON.inTimeStopRange(
+                                world.dimension(), player -> (JojoModConfig.getCommonConfigInstance().inTimeStopRange(
                                         chunkPos, new ChunkPos(player.blockPosition()))) && TimeHandler.canPlayerSeeInStoppedTime(player));
                     }
                     else if (timeResumeVoiceLine != null) {

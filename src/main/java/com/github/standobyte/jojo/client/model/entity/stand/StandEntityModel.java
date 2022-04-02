@@ -98,7 +98,8 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         
 //        initPoses();
 
-        idlePose.poseModel(1, entity, ticks, yRotationOffset, xRotation, swingingHand);
+        // FIXME (!!) idle pose messing up summon poses
+        idlePose.poseModel(1.0F, entity, ticks, yRotationOffset, xRotation, swingingHand);
 
         if (poseType == StandPose.SUMMON && (ticks > SUMMON_ANIMATION_LENGTH || entity.isArmsOnlyMode())) {
             entity.setStandPose(StandPose.IDLE);
@@ -184,7 +185,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         return initIdlePose();
     }
 
-    private static final float SUMMON_ANIMATION_LENGTH = 20.0F;
+    private static final float SUMMON_ANIMATION_LENGTH = 2000.0F;
     private static final float SUMMON_ANIMATION_POSE_REVERSE_POINT = 0.75F;
     protected List<IModelPose<T>> initSummonPoses() {
         return Arrays.stream(initSummonPoseRotations())
@@ -262,7 +263,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     }
 
     private void resetPose(T entity) {
-        poseReset.poseModel(0, entity, 0, 0, 0, entity.getSwingingHand());
+        poseReset.poseModel(1, entity, 0, 0, 0, entity.getSwingingHand());
     }
 
     protected abstract void rotateAdditionalArmSwings();

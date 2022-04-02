@@ -22,6 +22,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
     public TheWorldModel(int textureWidth, int textureHeight) {
         super(textureWidth, textureHeight);
 
+        ModelRenderer headpiece;
         ModelRenderer slope;
         ModelRenderer slope2;
         ModelRenderer slopeBack;
@@ -57,10 +58,6 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         ModelRenderer heartCube8;
         ModelRenderer heartCube9;
 
-        head.texOffs(0, 28).addBox(-4.0F, -3.3F, -3.8F, 8.0F, 1.0F, 1.0F, 0.2F, false);
-        head.texOffs(22, 31).addBox(3.0F, -8.3F, -3.8F, 1.0F, 5.0F, 1.0F, 0.2F, true);
-        head.texOffs(22, 31).addBox(-4.0F, -8.3F, -3.8F, 1.0F, 5.0F, 1.0F, 0.2F, false);
-
 
         heartSmallHead = new ModelRenderer(this);
         heartSmallHead.setPos(0.0F, 0.55F, -4.0F);
@@ -85,9 +82,16 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         smallHeartCube6.texOffs(48, 1).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
 
 
+        headpiece = new ModelRenderer(this);
+        headpiece.setPos(0.0F, -2.0F, -5.3F);
+        head.addChild(headpiece);
+        headpiece.texOffs(0, 28).addBox(-4.0F, -1.2F, 1.5F, 8.0F, 1.0F, 1.0F, 0.2F, false);
+        headpiece.texOffs(22, 31).addBox(3.0F, -6.2F, 1.5F, 1.0F, 5.0F, 1.0F, 0.2F, true);
+        headpiece.texOffs(22, 31).addBox(-4.0F, -6.2F, 1.5F, 1.0F, 5.0F, 1.0F, 0.2F, false);
+
         slope = new ModelRenderer(this);
-        slope.setPos(0.0F, -8.5F, -4.0F);
-        head.addChild(slope);
+        slope.setPos(0.0F, -6.4F, 1.3F);
+        headpiece.addChild(slope);
         setRotationAngle(slope, 0.3578F, 0.0F, 0.0F);
         slope.texOffs(0, 16).addBox(-4.0F, 0.2F, 0.2F, 8.0F, 4.0F, 8.0F, 0.2F, false);
         slope.texOffs(0, 16).addBox(-4.2F, 0.06F, 6.35F, 1.0F, 4.0F, 3.0F, -1.0F, true);
@@ -102,21 +106,21 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         slopeBack.texOffs(25, 17).addBox(-4.0F, 0.2F, 0.2F, 8.0F, 7.0F, 0.0F, 0.2F, false);
 
         slope2 = new ModelRenderer(this);
-        slope2.setPos(0.0F, -2.1F, -2.6F);
-        head.addChild(slope2);
+        slope2.setPos(0.0F, 0.0F, 2.7F);
+        headpiece.addChild(slope2);
         setRotationAngle(slope2, 0.2755F, 0.0F, 0.0F);
         slope2.texOffs(26, 24).addBox(-4.0F, -3.2F, 0.2F, 8.0F, 3.0F, 7.0F, 0.2F, false);
         slope2.texOffs(0, 28).addBox(-4.0F, -1.2F, 5.9372F, 8.0F, 1.0F, 1.0F, 0.2F, false);
 
         faceRight = new ModelRenderer(this);
-        faceRight.setPos(-4.2F, -8.5F, -4.0F);
-        head.addChild(faceRight);
+        faceRight.setPos(-4.2F, -6.4F, 1.3F);
+        headpiece.addChild(faceRight);
         setRotationAngle(faceRight, 0.0F, 0.3023F, 0.0F);
         faceRight.texOffs(12, 30).addBox(0.2F, 0.2F, 0.2F, 4.0F, 6.0F, 1.0F, 0.2F, false);
 
         faceLeft = new ModelRenderer(this);
-        faceLeft.setPos(4.2F, -8.5F, -4.0F);
-        head.addChild(faceLeft);
+        faceLeft.setPos(4.2F, -6.4F, 1.3F);
+        headpiece.addChild(faceLeft);
         setRotationAngle(faceLeft, 0.0F, -0.3023F, 0.0F);
         faceLeft.texOffs(12, 30).addBox(-4.2F, 0.2F, 0.2F, 4.0F, 6.0F, 1.0F, 0.2F, true);
 
@@ -135,8 +139,8 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
 
         torso.texOffs(9, 37).addBox(-3.5F, 1.1F, -2.0F, 7.0F, 3.0F, 1.0F, 0.4F, false);
         torso.texOffs(0, 30).addBox(-2.5F, 4.0F, -2.3F, 5.0F, 6.0F, 1.0F, 0.0F, false);
-        torso.texOffs(52, 11).addBox(2.0F, -0.25F, -2.5F, 1.0F, 10.0F, 5.0F, 0.25F, true);
-        torso.texOffs(52, 11).addBox(-3.0F, -0.25F, -2.5F, 1.0F, 10.0F, 5.0F, 0.25F, false);
+        torso.texOffs(52, 11).addBox(2.0F, 0.0F, -2.5F, 1.0F, 10.0F, 5.0F, 0.25F, true);
+        torso.texOffs(52, 11).addBox(-3.0F, 0.0F, -2.5F, 1.0F, 10.0F, 5.0F, 0.25F, false);
         torso.texOffs(24, 0).addBox(0.6F, 1.0F, 2.0F, 2.0F, 6.0F, 2.0F, 0.0F, true);
         torso.texOffs(24, 0).addBox(-2.6F, 1.0F, 2.0F, 2.0F, 6.0F, 2.0F, 0.0F, false);
 

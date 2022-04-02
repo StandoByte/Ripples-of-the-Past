@@ -71,15 +71,15 @@ public class ModStructures {
 
         registerConfiguredStructure(registry, CONFIGURED_HAMON_TEMPLE.get(), 
                 new ResourceLocation(JojoMod.MOD_ID, "configured_hamon_temple"), HAMON_TEMPLE.get(), 
-                biome -> JojoModConfig.COMMON.hamonTempleSpawn.get()
+                biome -> JojoModConfig.getCommonConfigInstance().hamonTempleSpawn.get()
                 && biome.getCategory() == Biome.Category.EXTREME_HILLS);
         registerConfiguredStructure(registry, CONFIGURED_METEORITE.get(), 
                 new ResourceLocation(JojoMod.MOD_ID, "configured_meteorite"), METEORITE.get(), 
-                biome -> JojoModConfig.COMMON.meteoriteSpawn.get()
+                biome -> JojoModConfig.getCommonConfigInstance().meteoriteSpawn.get()
                 && biome.getClimate().precipitation == Biome.RainType.SNOW && biome.getCategory() != Biome.Category.OCEAN);
         registerConfiguredStructure(registry, CONFIGURED_PILLARMAN_TEMPLE.get(), 
                 new ResourceLocation(JojoMod.MOD_ID, "configured_pillarman_temple"), PILLARMAN_TEMPLE.get(), 
-                biome -> JojoModConfig.COMMON.pillarManTempleSpawn.get()
+                biome -> JojoModConfig.getCommonConfigInstance().pillarManTempleSpawn.get()
                 && biome.getCategory() == Biome.Category.JUNGLE);
     }
     

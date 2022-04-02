@@ -69,7 +69,7 @@ public class StandArrowItem extends ArrowItem {
                     player.hurt(DamageUtil.STAND_VIRUS, Math.min(player.getHealth(), 11F) - 1F);
                 }
                 StandType<?> stand = null;
-                boolean checkTier = JojoModConfig.COMMON.standTiers.get();
+                boolean checkTier = JojoModConfig.getCommonConfigInstance().standTiers.get();
                 int tier = checkTier ? StandUtil.standTierFromXp(player.experienceLevel, true) : -1;
                 if (!checkTier || tier > -1) {
                     stand = StandUtil.randomStandByTier(tier, player, random);
@@ -79,7 +79,7 @@ public class StandArrowItem extends ArrowItem {
                 }
                 if (stand != null && power.givePower(stand)) {
                     if (!player.abilities.instabuild) {
-                        if (JojoModConfig.COMMON.standTiers.get()) {
+                        if (JojoModConfig.getCommonConfigInstance().standTiers.get()) {
                             player.giveExperienceLevels(-StandUtil.tierLowerBorder(stand.getTier()));
                         }
                         stack.hurtAndBreak(1, player, pl -> {});
@@ -100,7 +100,7 @@ public class StandArrowItem extends ArrowItem {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
         IFormattableTextComponent text = null;
-        if (JojoModConfig.COMMON.standTiers.get()) {
+        if (JojoModConfig.getCommonConfigInstance().standTiers.get()) {
             PlayerEntity player = ClientUtil.getClientPlayer();
             if (player != null) {
                 int currentTier = StandUtil.standTierFromXp(player.experienceLevel, true);
@@ -125,7 +125,7 @@ public class StandArrowItem extends ArrowItem {
         }
         else {
             for (int i = 0; i < StandUtil.MAX_TIER; i++) {
-                if (JojoModConfig.COMMON.tierHasUnbannedStands(i)) {
+                if (JojoModConfig.getCommonConfigInstance().tierHasUnbannedStands(i)) {
                     return;
                 }
             }

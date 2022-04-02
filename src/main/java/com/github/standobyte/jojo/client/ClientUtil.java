@@ -48,7 +48,7 @@ public class ClientUtil {
     }
 
     public static boolean shouldStandsRender(PlayerEntity player) {
-        return StandUtil.isPlayerStandUser(player);
+        return StandUtil.isEntityStandUser(player);
     }
 
     public static void openHamonTeacherUi() {

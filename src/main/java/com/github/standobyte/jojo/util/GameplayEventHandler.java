@@ -30,6 +30,7 @@ import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.item.StoneMaskItem;
+import com.github.standobyte.jojo.potion.IApplicableEffect;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
@@ -518,17 +519,11 @@ public class GameplayEventHandler {
     public static void onPotionApply(PotionApplicableEvent event) {
         LivingEntity entity = event.getEntityLiving();
         Effect effect = event.getPotionEffect().getEffect();
-        if (JojoModUtil.isUndead(entity)) {
-            if (entity instanceof PlayerEntity) {
-                if (effect == Effects.POISON || effect == Effects.HUNGER || effect == Effects.REGENERATION) {
-                    event.setResult(Result.DENY);
-                }
-            }
-        }
-        else if (effect == ModEffects.UNDEAD_REGENERATION.get() || effect == ModEffects.HAMON_SPREAD.get()) {
+        if ((effect == Effects.POISON || effect == Effects.HUNGER || effect == Effects.REGENERATION)
+                && entity instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) entity)) {
             event.setResult(Result.DENY);
         }
-        if (effect == ModEffects.FREEZE.get() && DamageUtil.isImmuneToCold(entity)) {
+        else if (effect instanceof IApplicableEffect && !((IApplicableEffect) effect).isApplicable(entity)) {
             event.setResult(Result.DENY);
         }
     }
@@ -672,7 +667,7 @@ public class GameplayEventHandler {
         }
         boolean hardcore = user.level.getLevelData().isHardcore();
         if (user instanceof PlayerEntity && (
-                JojoModConfig.COMMON.keepStandOnDeath.get() && !hardcore
+                JojoModConfig.getCommonConfigInstance().keepStandOnDeath.get() && !hardcore
                 || stand.wasProgressionSkipped())) {
             return 0;
         }

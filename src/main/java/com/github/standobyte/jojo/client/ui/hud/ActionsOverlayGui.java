@@ -739,7 +739,7 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     private void renderStandComboIcon(MatrixStack matrixStack, IStandPower standPower, int screenWidth, int screenHeight) {
-        if (standPower.isActive() && standPower.getType().usesStandComboMechanic()) {
+        if (standPower.isActive() && standPower.isComboUnlocked() && standPower.getType().usesStandComboMechanic()) {
             mc.getTextureManager().bind(OVERLAY_LOCATION);
             IStandManifestation stand = standPower.getStandManifestation();
             if (stand instanceof StandEntity) {

@@ -49,13 +49,14 @@ public class JojoModConfig {
         
         public final ForgeConfigSpec.BooleanValue skipStandProgression;
         public final ForgeConfigSpec.BooleanValue standStamina;
+        // FIXME (!!!!!) stand projectiles damage
         public final ForgeConfigSpec.DoubleValue standDamageMultiplier;
 
         public final ForgeConfigSpec.BooleanValue abilitiesBreakBlocks;
         
         public final ForgeConfigSpec.IntValue timeStopChunkRange;
         
-        Common(ForgeConfigSpec.Builder builder) {
+        private Common(ForgeConfigSpec.Builder builder) {
             
             builder.push("Keep Powers After Death");
                 keepStandOnDeath = builder
@@ -206,7 +207,7 @@ public class JojoModConfig {
         
         public final ForgeConfigSpec.BooleanValue resolveShaders;
         
-        Client(ForgeConfigSpec.Builder builder) {
+        private Client(ForgeConfigSpec.Builder builder) {
             barsPosition = builder
                     .comment(" Position of Energy, Stamina and Resolve bars in the HUD.")
                     .translation("jojo.config.client.barsPosition") 
@@ -232,11 +233,17 @@ public class JojoModConfig {
 
 
     static final ForgeConfigSpec commonSpec;
-    public static final Common COMMON;
+    private static final Common COMMON;
     static {
         final Pair<Common, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(Common::new);
         commonSpec = specPair.getRight();
         COMMON = specPair.getLeft();
+    }
+    
+    private static Common COMMON_REMOTE_SERVER = COMMON;
+    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!! if on remote server - instance with values from server
+    public static Common getCommonConfigInstance() {
+        return COMMON;
     }
 
     static final ForgeConfigSpec clientSpec;

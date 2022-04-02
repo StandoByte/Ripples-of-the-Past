@@ -1,12 +1,14 @@
 package com.github.standobyte.jojo.potion;
 
+import com.github.standobyte.jojo.util.damage.DamageUtil;
+
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectType;
 
-public class FreezeEffect extends Effect {
+public class FreezeEffect extends Effect implements IApplicableEffect {
     
     public FreezeEffect(EffectType type, int liquidColor) {
         super(type, liquidColor);
@@ -23,4 +25,9 @@ public class FreezeEffect extends Effect {
     
     @Override
     public boolean isDurationEffectTick(int duration, int amplifier) { return true; }
+
+    @Override
+    public boolean isApplicable(LivingEntity entity) {
+        return !DamageUtil.isImmuneToCold(entity);
+    }
 }

@@ -41,7 +41,7 @@ public class WorldUtilCap {
     
     public boolean isTimeStopped(ChunkPos chunkPos) {
         for (Map.Entry<ChunkPos, Integer> entry : timeStopTicks.entrySet()) {
-            if (entry.getValue() > 0 && JojoModConfig.COMMON.inTimeStopRange(entry.getKey(), chunkPos)) {
+            if (entry.getValue() > 0 && JojoModConfig.getCommonConfigInstance().inTimeStopRange(entry.getKey(), chunkPos)) {
                 return true;
             }
         }
@@ -67,7 +67,7 @@ public class WorldUtilCap {
     public int getTimeStopTicks(ChunkPos chunkPos) {
         return timeStopTicks.entrySet()
                 .stream()
-                .filter(center -> JojoModConfig.COMMON.inTimeStopRange(center.getKey(), chunkPos))
+                .filter(center -> JojoModConfig.getCommonConfigInstance().inTimeStopRange(center.getKey(), chunkPos))
                 .max(Comparator.comparingInt(Map.Entry::getValue))
                 .map(Map.Entry::getValue)
                 .orElse(0);

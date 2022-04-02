@@ -49,6 +49,9 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     void skipProgression(StandType<?> standType);
     boolean wasProgressionSkipped();
     float getStatsDevelopment();
+    default boolean isComboUnlocked() {
+        return getResolveLevel() >= 1;
+    }
     
     @Deprecated
     int getXp();
