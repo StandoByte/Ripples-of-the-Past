@@ -232,7 +232,7 @@ public class ClientEventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onResolveEffectStart(PotionAddedEvent event) {
-        if (event.getOldPotionEffect() == null && event.getPotionEffect().getEffect() == ModEffects.RESOLVE.get()) {
+        if (event.getEntity().is(mc.player) && event.getOldPotionEffect() == null && event.getPotionEffect().getEffect() == ModEffects.RESOLVE.get()) {
             if (resolveShader == null) {
                 resolveShaderNum = random.nextInt(HueShiftShaders.SHADERS_HUE_SHIFT.length);
                 resolveShader = HueShiftShaders.SHADERS_HUE_SHIFT[resolveShaderNum];
@@ -263,16 +263,15 @@ public class ClientEventHandler {
 
         if (ost == null || ost.isStopped()) {
             ost = null;
-            SoundEvent ostSound = IStandPower.getStandPowerOptional(mc.player).map(stand -> {
+            IStandPower.getStandPowerOptional(mc.player).ifPresent(stand -> {
                 if (stand.hasPower()) {
-                    return stand.getType().getOst(level);
+                    SoundEvent ostSound = stand.getType().getOst(level);
+                    if (ostSound != null) {
+                        ost = new StandOstSound(ostSound, mc);
+                        mc.getSoundManager().play(ost);
+                    }
                 }
-                return null;
-            }).orElse(null);
-            if (ostSound != null) {
-                ost = new StandOstSound(ostSound, mc);
-                mc.getSoundManager().play(ost);
-            }
+            });
         }
     }
     

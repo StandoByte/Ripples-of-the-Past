@@ -242,7 +242,7 @@ public class HamonData extends TypeSpecificData {
         if (isSkillLearned(HamonSkill.NATURAL_TALENT)) {
             energyCost *= 2;
         }
-        energyCost *= JojoModConfig.COMMON.hamonPointsMultiplier.get().floatValue();
+        energyCost *= JojoModConfig.getCommonConfigInstance().hamonPointsMultiplier.get().floatValue();
         int points = (int) (energyCost / ENERGY_PER_POINT);
         if (random.nextFloat() < (energyCost % ENERGY_PER_POINT) / ENERGY_PER_POINT) points++;
         setHamonStatPoints(stat, getStatPoints(stat) + points, false, false);
@@ -359,7 +359,7 @@ public class HamonData extends TypeSpecificData {
         }
         float lvlInc = (2 * MathHelper.clamp(getAverageExercisePoints(), 0F, 1F)) - 1F;
         if (lvlInc < 0) {
-            if (!JojoModConfig.COMMON.breathingTechniqueDeterioration.get()) {
+            if (!JojoModConfig.getCommonConfigInstance().breathingTechniqueDeterioration.get()) {
                 lvlInc = 0;
             }
             else {
@@ -371,7 +371,7 @@ public class HamonData extends TypeSpecificData {
             float bonus = breathingTrainingBonus;
             breathingTrainingBonus += lvlInc * 0.25F;
             lvlInc += bonus;
-            lvlInc *= JojoModConfig.COMMON.breathingTechniqueMultiplier.get().floatValue();
+            lvlInc *= JojoModConfig.getCommonConfigInstance().breathingTechniqueMultiplier.get().floatValue();
             if (isSkillLearned(HamonSkill.NATURAL_TALENT)) {
                 lvlInc *= 2;
             }
@@ -657,10 +657,10 @@ public class HamonData extends TypeSpecificData {
     }
 
     public enum Exercise {
-        MINING(300),
-        RUNNING(180),
-        SWIMMING(180),
-        MEDITATION(90);
+        MINING(240),
+        RUNNING(150),
+        SWIMMING(150),
+        MEDITATION(60);
 
         public final int maxTicks;
 

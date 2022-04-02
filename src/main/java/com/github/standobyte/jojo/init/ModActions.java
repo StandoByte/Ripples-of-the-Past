@@ -158,15 +158,15 @@ public class ModActions {
 
     public static final RegistryObject<VampirismAction> VAMPIRISM_BLOOD_DRAIN = ACTIONS.register("vampirism_blood_drain", 
             () -> new VampirismBloodDrain(new NonStandAction.Builder().needsEntityTarget()
-                    .maxRangeEntityTarget(2.0D).emptyMainHand().holdType().heldSlowDownFactor(0.5F)));
+                    .maxRangeEntityTarget(2.0D).emptyMainHand().holdType()));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_FREEZE = ACTIONS.register("vampirism_freeze", 
             () -> new VampirismFreeze(new NonStandAction.Builder().maxRangeEntityTarget(2.0D).emptyMainHand()
-                    .holdType().holdEnergyCost(1F).heldSlowDownFactor(0.3F)));
+                    .holdType().holdEnergyCost(1F).heldSlowDownFactor(0.5F)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_SPACE_RIPPER_STINGY_EYES = ACTIONS.register("vampirism_space_ripper_stingy_eyes", 
             () -> new VampirismSpaceRipperStingyEyes(new NonStandAction.Builder().ignoresPerformerStun()
-                    .holdType(20).holdEnergyCost(40F).cooldown(0, 200).heldSlowDownFactor(0.3F)));
+                    .holdType(20).holdEnergyCost(30F).cooldown(0, 200).heldSlowDownFactor(0.3F)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_BLOOD_GIFT = ACTIONS.register("vampirism_blood_gift", 
             () -> new VampirismBloodGift(new NonStandAction.Builder().needsEntityTarget().maxRangeEntityTarget(1.0D).emptyMainHand()
@@ -176,7 +176,7 @@ public class ModActions {
             () -> new VampirismZombieSummon(new NonStandAction.Builder().energyCost(100F).cooldown(0, 100)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_DARK_AURA = ACTIONS.register("vampirism_dark_aura", 
-            () -> new VampirismDarkAura(new NonStandAction.Builder().ignoresPerformerStun().energyCost(50F).cooldown(0, 100)));
+            () -> new VampirismDarkAura(new NonStandAction.Builder().ignoresPerformerStun().energyCost(20F).cooldown(0, 200)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_HAMON_SUICIDE = ACTIONS.register("vampirism_hamon_suicide", 
             () -> new VampirismHamonSuicide(new NonStandAction.Builder().ignoresPerformerStun().holdToFire(100, false)));

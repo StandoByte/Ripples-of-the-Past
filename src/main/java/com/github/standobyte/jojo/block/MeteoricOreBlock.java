@@ -5,6 +5,7 @@ import java.util.Random;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.init.ModParticles;
+import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.block.BlockState;
@@ -45,7 +46,7 @@ public class MeteoricOreBlock extends OreBlock {
         double y = pos.getY();
         double z = pos.getZ();
         for (LivingEntity entity : world.getEntitiesOfClass(LivingEntity.class, (new AxisAlignedBB(x, y, z, x, y, z)).inflate(2.0D, 2.0D, 2.0D))) {
-            if (entity.getMobType() != CreatureAttribute.UNDEAD && entity.getHealth() < entity.getMaxHealth()) {
+            if (entity.getMobType() != CreatureAttribute.UNDEAD && entity.getHealth() < entity.getMaxHealth() && !StandUtil.isEntityStandUser(entity)) {
                 entity.hurt(DamageUtil.STAND_VIRUS, 4.0F);
             }
         }

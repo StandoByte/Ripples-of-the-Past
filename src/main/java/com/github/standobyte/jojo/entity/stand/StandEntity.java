@@ -121,7 +121,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     private static final DataParameter<Integer> USER_ID = EntityDataManager.defineId(StandEntity.class, DataSerializers.INT);
     private WeakReference<LivingEntity> userRef = new WeakReference<LivingEntity>(null);
     private IStandPower userPower;
-    private StandRelativeOffset offsetDefault = StandRelativeOffset.withYOffset(-1, 0.2, -0.75);
+    private StandRelativeOffset offsetDefault = StandRelativeOffset.withYOffset(-1, 0.2, -0.5);
     private StandRelativeOffset offsetDefaultArmsOnly = StandRelativeOffset.withYOffset(0, 0, 0.15);
 
     private static final DataParameter<Boolean> SWING_OFF_HAND = EntityDataManager.defineId(StandEntity.class, DataSerializers.BOOLEAN);
@@ -595,7 +595,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public void playSound(SoundEvent sound, float volume, float pitch, @Nullable PlayerEntity player) {
         if (!this.isSilent()) {
             if (!isVisibleForAll()) {
-                JojoModUtil.playSound(level, player, getX(), getY(), getZ(), sound, getSoundSource(), volume, pitch, StandUtil::isPlayerStandUser);
+                JojoModUtil.playSound(level, player, getX(), getY(), getZ(), sound, getSoundSource(), volume, pitch, StandUtil::isEntityStandUser);
             }
             else {
                 level.playSound(player, getX(), getY(), getZ(), sound, getSoundSource(), volume, pitch);
@@ -711,7 +711,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         strength = event.getStrength();
         xRatio = event.getRatioX();
         zRatio = event.getRatioZ();
-        strength *= (float) (1.0D - getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
+        strength *= 1.0F - (float) getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
         if (isStandBlocking() && canBlockOrParryFromAngle(position().add(new Vector3d(xRatio, 0, zRatio)))) {
             strength *= 0.2F;
         }
@@ -1386,6 +1386,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     public float getComboMeter() {
+        if (userPower != null && !userPower.isComboUnlocked()) {
+            return 0;
+        }
         return entityData.get(PUNCHES_COMBO);
     }
     
@@ -1428,7 +1431,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             dmgSource.setBarrageHitsCount(barrageHits);
         }
 
-        double strength = getAttackDamage() * JojoModConfig.COMMON.standDamageMultiplier.get();
+        double strength = getAttackDamage();
         double precision = getPrecision();
         double attackRange = getAttributeValue(ForgeMod.REACH_DISTANCE.get());
         double distance = JojoModUtil.getDistance(this, target.getBoundingBox());
@@ -1520,7 +1523,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             if (target instanceof LivingEntity) {
                 LivingEntity targetLiving = (LivingEntity) target;
                 if (attack.getAdditionalKnockback() > 0) {
-                    float knockbackYRot = yRot + attack.getknockbackYRotDeg();
+                    float knockbackYRot = yRot + attack.getKnockbackYRotDeg();
                     targetLiving.knockback(
                             attack.getAdditionalKnockback() * 0.5F, 
                             (double) MathHelper.sin(knockbackYRot * MathUtil.DEG_TO_RAD), 
@@ -1550,7 +1553,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
 
     protected boolean hurtTarget(Entity target, DamageSource dmgSource, float damage) {
-        return DamageUtil.hurtThroughInvulTicks(target, dmgSource, damage);
+        return DamageUtil.hurtThroughInvulTicks(target, dmgSource, damage
+                * JojoModConfig.getCommonConfigInstance().standDamageMultiplier.get().floatValue());
     }
     
     protected void parryHeavyAttack() {

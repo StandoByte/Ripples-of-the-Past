@@ -31,14 +31,14 @@ public class StandUtil {
             Collection<StandType<?>> stands = ModStandTypes.Registry.getRegistry().getValues();
             List<StandType<?>> filtered = 
                     stands.stream()
-                    .filter(stand -> (tier < 0 || stand.getTier() == tier) && !JojoModConfig.COMMON.isStandBanned(stand))
+                    .filter(stand -> (tier < 0 || stand.getTier() == tier) && !JojoModConfig.getCommonConfigInstance().isStandBanned(stand))
                     .collect(Collectors.toList());
             
             if (filtered.isEmpty()) {
                 return null;
             }
             
-            if (JojoModConfig.COMMON.prioritizeLeastTakenStands.get()) {
+            if (JojoModConfig.getCommonConfigInstance().prioritizeLeastTakenStands.get()) {
                 filtered = SaveFileUtilCapProvider.getSaveFileCap((ServerWorld) entity.level).leastTakenStands(filtered);
             }
             
@@ -51,7 +51,7 @@ public class StandUtil {
     
     public static int standTierFromXp(int xpLvl, boolean withConfigBans) {
         for (int i = MAX_TIER; i >= 0; i--) {
-            if (xpLvl >= tierLowerBorder(i) && (!withConfigBans || JojoModConfig.COMMON.tierHasUnbannedStands(i))) {
+            if (xpLvl >= tierLowerBorder(i) && (!withConfigBans || JojoModConfig.getCommonConfigInstance().tierHasUnbannedStands(i))) {
                 return i;
             }
         }
@@ -60,7 +60,7 @@ public class StandUtil {
     
     public static int arrowPoolNextTier(int startingTier) {
         for (int i = startingTier + 1; i <= MAX_TIER; i++) {
-            if (JojoModConfig.COMMON.tierHasUnbannedStands(i)) {
+            if (JojoModConfig.getCommonConfigInstance().tierHasUnbannedStands(i)) {
                 return i;
             }
         }
@@ -71,8 +71,8 @@ public class StandUtil {
         return TIER_XP_LEVELS[tier];
     }
     
-    public static boolean isPlayerStandUser(PlayerEntity player) {
-        return player.getCapability(StandCapProvider.STAND_CAP).map(cap -> cap.hasPower()).orElse(false);
+    public static boolean isEntityStandUser(LivingEntity entity) {
+        return entity.getCapability(StandCapProvider.STAND_CAP).map(cap -> cap.hasPower()).orElse(false);
     }
     
     public static void setManualControl(PlayerEntity player, boolean manualControl, boolean keepPosition) {

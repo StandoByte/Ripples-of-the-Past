@@ -102,7 +102,7 @@ public class MRDetectorEntity extends Entity implements IEntityAdditionalSpawnDa
     
     @Override
     public void onSyncedDataUpdated(DataParameter<?> parameter) {
-        if (level.isClientSide() && ENTITY_DETECTED.equals(parameter) && isEntityDetected() && StandUtil.isPlayerStandUser(ClientUtil.getClientPlayer())) {
+        if (level.isClientSide() && ENTITY_DETECTED.equals(parameter) && isEntityDetected() && StandUtil.isEntityStandUser(ClientUtil.getClientPlayer())) {
             ClientTickingSoundsHelper.playMagiciansRedDetectorSound(this);
         }
         super.onSyncedDataUpdated(parameter);

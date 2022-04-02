@@ -1,11 +1,12 @@
 package com.github.standobyte.jojo.potion;
 
+import com.github.standobyte.jojo.util.JojoModUtil;
 import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.EffectType;
 
-public class HamonSpreadEffect extends UncurableEffect {
+public class HamonSpreadEffect extends UncurableEffect implements IApplicableEffect {
 
     public HamonSpreadEffect(EffectType type, int liquidColor) {
         super(type, liquidColor);
@@ -24,5 +25,10 @@ public class HamonSpreadEffect extends UncurableEffect {
         } else {
             return true;
         }
+    }
+
+    @Override
+    public boolean isApplicable(LivingEntity entity) {
+        return JojoModUtil.isUndead(entity);
     }
 }

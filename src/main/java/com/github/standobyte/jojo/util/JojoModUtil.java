@@ -184,7 +184,8 @@ public class JojoModUtil {
 
     public static boolean canEntityDestroy(World world, BlockPos pos, LivingEntity entity) {
         BlockState state = world.getBlockState(pos);
-        return JojoModConfig.COMMON.abilitiesBreakBlocks.get() && state.canEntityDestroy(world, pos, entity) && ForgeEventFactory.onEntityDestroyBlock(entity, pos, state);
+        return JojoModConfig.getCommonConfigInstance().abilitiesBreakBlocks.get()
+                && state.canEntityDestroy(world, pos, entity) && ForgeEventFactory.onEntityDestroyBlock(entity, pos, state);
     }
 
 
@@ -218,12 +219,13 @@ public class JojoModUtil {
     }
 
     public static boolean canBleed(LivingEntity entity) {
-        return entity instanceof PlayerEntity || entity instanceof AgeableEntity || entity instanceof INPC || entity instanceof AbstractIllagerEntity;
+        return entity.getMobType() == CreatureAttribute.UNDEAD && 
+                entity instanceof PlayerEntity || entity instanceof AgeableEntity || entity instanceof INPC || entity instanceof AbstractIllagerEntity;
     }
 
     public static void extinguishFieryStandEntity(Entity entity, ServerWorld world) {
         JojoModUtil.playSound(world, null, entity.getX(), entity.getY(), entity.getZ(), 
-                SoundEvents.FIRE_EXTINGUISH, entity.getSoundSource(), 1.0F, 1.0F, StandUtil::isPlayerStandUser);
+                SoundEvents.FIRE_EXTINGUISH, entity.getSoundSource(), 1.0F, 1.0F, StandUtil::isEntityStandUser);
         world.sendParticles(ParticleTypes.LARGE_SMOKE, entity.getX(), entity.getY(), entity.getZ(), 
                 8, entity.getBbWidth() / 2F, entity.getBbHeight() / 2F, entity.getBbWidth() / 2F, 0);
         entity.remove();

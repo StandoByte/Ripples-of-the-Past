@@ -1,10 +1,12 @@
 package com.github.standobyte.jojo.potion;
 
+import com.github.standobyte.jojo.util.JojoModUtil;
+
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectType;
 
-public class UndeadRegenerationEffect extends Effect {
+public class UndeadRegenerationEffect extends Effect implements IApplicableEffect {
 
     public UndeadRegenerationEffect(EffectType type, int liquidColor) {
         super(type, liquidColor);
@@ -28,4 +30,8 @@ public class UndeadRegenerationEffect extends Effect {
         }
     }
 
+    @Override
+    public boolean isApplicable(LivingEntity entity) {
+        return JojoModUtil.isUndead(entity);
+    }
 }

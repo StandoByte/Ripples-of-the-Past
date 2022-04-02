@@ -9,6 +9,7 @@ public class StandAttackProperties {
     private float addCombo;
     private float knockback = 1.0F;
     private float knockbackYRot = 0;
+    private float knockbackY = 0;
     private float armorPiercing = 0;
     private float disableBlockingChance = 0;
     private float parryTiming = 0;
@@ -39,6 +40,11 @@ public class StandAttackProperties {
     
     public StandAttackProperties knockbackYRotDeg(float knockbackYRot) {
         this.knockbackYRot = knockbackYRot;
+        return this;
+    }
+    
+    public StandAttackProperties knockbackY(float knockbackY) {
+        this.knockbackY = knockbackY;
         return this;
     }
     
@@ -90,8 +96,13 @@ public class StandAttackProperties {
         return Math.max(knockback - 1, 0);
     }
 
-    public float getknockbackYRotDeg() {
+    public float getKnockbackYRotDeg() {
         return knockbackYRot;
+    }
+    
+    // FIXME (!!!!) upwards knockback
+    public double getKnockbackY() {
+        return knockbackY;
     }
 
     public float getArmorPiercing() {

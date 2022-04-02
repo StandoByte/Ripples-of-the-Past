@@ -62,7 +62,7 @@ public class StandDiscItem extends Item {
     }
 
     private boolean canGainStand(PlayerEntity player, int playerTier, StandType<?> stand) {
-        return player.abilities.instabuild || !JojoModConfig.COMMON.standTiers.get()
+        return player.abilities.instabuild || !JojoModConfig.getCommonConfigInstance().standTiers.get()
                 || StandUtil.standTierFromXp(player.experienceLevel, false) >= stand.getTier() || playerTier >= stand.getTier();
     }
     
@@ -70,7 +70,7 @@ public class StandDiscItem extends Item {
     public void fillItemCategory(ItemGroup group, NonNullList<ItemStack> items) {
         if (this.allowdedIn(group)) {
             for (StandType<?> standType : ModStandTypes.Registry.getRegistry()) {
-                if (!JojoModConfig.COMMON.isConfigLoaded() || !JojoModConfig.COMMON.isStandBanned(standType)) {
+                if (!JojoModConfig.getCommonConfigInstance().isConfigLoaded() || !JojoModConfig.getCommonConfigInstance().isStandBanned(standType)) {
                     ItemStack item = new ItemStack(this);
                     setStandType(item, standType);
                     items.add(item);
@@ -90,7 +90,7 @@ public class StandDiscItem extends Item {
             StandType<?> stand = ModStandTypes.Registry.getRegistry().getValue(new ResourceLocation(standRegistryName));
             tooltip.add(new TranslationTextComponent(stand.getTranslationKey()));
             tooltip.add(stand.getPartName());
-            if (JojoModConfig.COMMON.standTiers.get()) {
+            if (JojoModConfig.getCommonConfigInstance().standTiers.get()) {
                 tooltip.add(new TranslationTextComponent("jojo.disc.tier", stand.getTier()).withStyle(TextFormatting.GRAY));
             }
         }

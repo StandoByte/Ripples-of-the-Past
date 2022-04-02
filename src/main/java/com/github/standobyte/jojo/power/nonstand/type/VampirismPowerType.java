@@ -43,7 +43,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
     
     @Override
     public boolean keepOnDeath(INonStandPower power) {
-        return JojoModConfig.COMMON.keepVampirismOnDeath.get() && power.getTypeSpecificData(this).get().isVampireAtFullPower();
+        return JojoModConfig.getCommonConfigInstance().keepVampirismOnDeath.get() && power.getTypeSpecificData(this).get().isVampireAtFullPower();
     }
     
     @Override
