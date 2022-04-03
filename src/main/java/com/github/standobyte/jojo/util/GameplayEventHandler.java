@@ -30,6 +30,8 @@ import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.item.StoneMaskItem;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartPacket;
 import com.github.standobyte.jojo.potion.IApplicableEffect;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
@@ -73,6 +75,7 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPlayEntityEffectPacket;
 import net.minecraft.network.play.server.SPlaySoundEffectPacket;
+import net.minecraft.network.play.server.SRemoveEntityEffectPacket;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
@@ -533,15 +536,30 @@ public class GameplayEventHandler {
         EntityStandType.giveSharedEffectsFromUser(event);
         
         Entity entity = event.getEntity();
-        if (!entity.level.isClientSide() && ModEffects.isEffectTracked(event.getPotionEffect().getEffect())) {
-            ((ServerChunkProvider) entity.getCommandSenderWorld().getChunkSource()).broadcast(entity, 
-                    new SPlayEntityEffectPacket(entity.getId(), event.getPotionEffect()));
+        EffectInstance effectInstance = event.getPotionEffect();
+        if (!entity.level.isClientSide()) {
+            if (ModEffects.isEffectTracked(effectInstance.getEffect())) {
+                ((ServerChunkProvider) entity.getCommandSenderWorld().getChunkSource()).broadcast(entity, 
+                        new SPlayEntityEffectPacket(entity.getId(), effectInstance));
+            }
+            if (effectInstance.getEffect() == ModEffects.RESOLVE.get() && entity instanceof ServerPlayerEntity) {
+                PacketManager.sendToClient(new ResolveEffectStartPacket(effectInstance.getAmplifier()), (ServerPlayerEntity) entity);
+            }
         }
     }
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onPotionRemoved(PotionRemoveEvent event) {
         VampirismPowerType.cancelVampiricEffectRemoval(event);
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void trackedPotionRemoved(PotionRemoveEvent event) {
+        Entity entity = event.getEntity();
+        if (!entity.level.isClientSide() && ModEffects.isEffectTracked(event.getPotionEffect().getEffect())) {
+            ((ServerChunkProvider) entity.getCommandSenderWorld().getChunkSource()).broadcast(entity, 
+                    new SRemoveEntityEffectPacket(entity.getId(), event.getPotion()));
+        }
     }
     
     @SubscribeEvent

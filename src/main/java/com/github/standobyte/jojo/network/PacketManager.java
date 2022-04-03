@@ -26,6 +26,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.HamonTeachersSkills
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.RefreshMovementInTimeStopPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandCancelManualMovementPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncEnergyPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncHamonExercisesPacket;
@@ -107,6 +108,7 @@ public class PacketManager {
         channel.registerMessage(index++, SyncStaminaPacket.class, SyncStaminaPacket::encode, SyncStaminaPacket::decode, SyncStaminaPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, SyncResolvePacket.class, SyncResolvePacket::encode, SyncResolvePacket::decode, SyncResolvePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, SyncResolveLimitPacket.class, SyncResolveLimitPacket::encode, SyncResolveLimitPacket::decode, SyncResolveLimitPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        channel.registerMessage(index++, ResolveEffectStartPacket.class, ResolveEffectStartPacket::encode, ResolveEffectStartPacket::decode, ResolveEffectStartPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, SyncStandActionLearningPacket.class, SyncStandActionLearningPacket::encode, SyncStandActionLearningPacket::decode, SyncStandActionLearningPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, SyncStandActionLearningClearPacket.class, SyncStandActionLearningClearPacket::encode, SyncStandActionLearningClearPacket::decode, SyncStandActionLearningClearPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, TrSetStandEntityPacket.class, TrSetStandEntityPacket::encode, TrSetStandEntityPacket::decode, TrSetStandEntityPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
