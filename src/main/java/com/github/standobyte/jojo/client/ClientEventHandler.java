@@ -53,7 +53,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.event.TickEvent.RenderTickEvent;
-import net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -230,16 +229,13 @@ public class ClientEventHandler {
     
     
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void onResolveEffectStart(PotionAddedEvent event) {
-        if (event.getEntity().is(mc.player) && event.getOldPotionEffect() == null && event.getPotionEffect().getEffect() == ModEffects.RESOLVE.get()) {
-            if (resolveShader == null) {
-                resolveShaderNum = random.nextInt(HueShiftShaders.SHADERS_HUE_SHIFT.length);
-                resolveShader = HueShiftShaders.SHADERS_HUE_SHIFT[resolveShaderNum];
-            }
-            
-            startPlayingOst(event.getPotionEffect().getAmplifier());
+    public void onResolveEffectStart(int effectAmplifier) {
+        if (resolveShader == null) {
+            resolveShaderNum = random.nextInt(HueShiftShaders.SHADERS_HUE_SHIFT.length);
+            resolveShader = HueShiftShaders.SHADERS_HUE_SHIFT[resolveShaderNum];
         }
+
+        startPlayingOst(effectAmplifier);
     }
     
     private void tickResolveEffect() {

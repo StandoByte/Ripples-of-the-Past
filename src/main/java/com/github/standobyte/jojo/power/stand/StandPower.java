@@ -233,9 +233,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     private static final float RESOLVE_DMG_REDUCTION = 0.5F;
     private static final float RESOLVE_EFFECT_DMG_REDUCTION = 0.75F;
     private static final float RESOLVE_FOR_DMG_POINT = 0.5F;
-    private static final float RESOLVE_LIMIT_FOR_DMG_POINT_TAKEN = 15F;
+    private static final float RESOLVE_LIMIT_FOR_DMG_POINT_TAKEN = 5F;
     private static final float RESOLVE_LIMIT_MANUAL_CONTROL_TICK = 0.1F;
-    private static final float RESOLVE_UNDER_LIMIT_MULTIPLIER = 20F;
+    private static final float RESOLVE_UNDER_LIMIT_MULTIPLIER = 10F;
     private static final float RESOLVE_LIMIT_DECAY = 4F;
     private static final int RESOLVE_LIMIT_NO_DECAY_TICKS = 40;
     private static final int[] RESOLVE_EFFECT_MIN = {300, 400, 500, 600, 600};
@@ -396,7 +396,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (resolveEffect != null) {
             if (resolveEffect.getAmplifier() < RESOLVE_EFFECT_MIN.length) {
                 decay = getMaxResolve() / (float) RESOLVE_EFFECT_MIN[resolveEffect.getAmplifier()];
-                if (decay >= resolve) {
+                if (!user.level.isClientSide() && decay >= resolve) {
                     user.removeEffect(ModEffects.RESOLVE.get());
                 }
             }

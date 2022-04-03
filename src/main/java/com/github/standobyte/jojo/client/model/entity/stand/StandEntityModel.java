@@ -185,7 +185,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         return initIdlePose();
     }
 
-    private static final float SUMMON_ANIMATION_LENGTH = 2000.0F;
+    private static final float SUMMON_ANIMATION_LENGTH = 20.0F;
     private static final float SUMMON_ANIMATION_POSE_REVERSE_POINT = 0.75F;
     protected List<IModelPose<T>> initSummonPoses() {
         return Arrays.stream(initSummonPoseRotations())
