@@ -136,7 +136,7 @@ public class DamageUtil {
                         int effectLvl = MathHelper.clamp(MathHelper.floor(1.5F * effectStr * dmgAmount), 0, 3);
                         livingTarget.addEffect(new EffectInstance(ModEffects.HAMON_SPREAD.get(), effectDuration, effectLvl));
                     }
-                    return hamon.getHamonDamageMultiplier();
+                    return hamon.getHamonDamageMultiplier() * hamon.hamonEfficiency();
                 }).orElse(1F)).orElse(1F);
                 amount *= hamonMultiplier;
             }

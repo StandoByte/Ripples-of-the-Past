@@ -107,6 +107,7 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
             StandEntity standEntity = (StandEntity) standPower.getStandManifestation();
             if (standEntity.isArmsOnlyMode()) {
                 standEntity.fullSummonFromArms();
+                triggerAdvancement(standPower, standPower.getStandManifestation());
             }
             else {
                 unsummon(standPower.getUser(), standPower);
@@ -141,8 +142,16 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
             standEntity.playStandSummonSound();
             
             PacketManager.sendToClientsTrackingAndSelf(new TrSetStandEntityPacket(user.getId(), standEntity.getId()), user);
+            
+            triggerAdvancement(standPower, standPower.getStandManifestation());
         }
         return true;
+    }
+    
+    protected void triggerAdvancement(IStandPower standPower, IStandManifestation stand) {
+        if (stand instanceof StandEntity && !((StandEntity) stand).isArmsOnlyMode()) {
+            super.triggerAdvancement(standPower, stand);
+        }
     }
 
     @Override

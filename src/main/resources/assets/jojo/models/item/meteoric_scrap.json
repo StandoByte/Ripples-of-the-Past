@@ -45,6 +45,18 @@
         "jojo:icon": 7
       },
       "model": "jojo:item/item_icon7"
+    },
+    {
+      "predicate": {
+        "jojo:icon": 8
+      },
+      "model": "jojo:item/item_icon8"
+    },
+    {
+      "predicate": {
+        "jojo:icon": 9
+      },
+      "model": "jojo:item/item_icon9"
     }
   ]
 }

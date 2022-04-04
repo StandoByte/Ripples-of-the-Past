@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.advancements.criterion;
 import com.github.standobyte.jojo.advancements.criterion.predicate.PowerPredicate;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
+import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.google.gson.JsonObject;
 
 import net.minecraft.advancements.criterion.AbstractCriterionTrigger;
@@ -13,10 +14,10 @@ import net.minecraft.loot.ConditionArrayParser;
 import net.minecraft.loot.ConditionArraySerializer;
 import net.minecraft.util.ResourceLocation;
 
-public class GetPowerTrigger extends AbstractCriterionTrigger<GetPowerTrigger.Instance> {
+public class StandSummonTrigger extends AbstractCriterionTrigger<StandSummonTrigger.Instance> {
     private final ResourceLocation id;
 
-    public GetPowerTrigger(ResourceLocation id) {
+    public StandSummonTrigger(ResourceLocation id) {
         this.id = id;
     }
 
@@ -25,14 +26,14 @@ public class GetPowerTrigger extends AbstractCriterionTrigger<GetPowerTrigger.In
         return id;
     }
 
-    public void trigger(ServerPlayerEntity player, PowerClassification classification, IPower<?, ?> power) {
-        trigger(player, criterion -> criterion.matches(classification, power));
+    public void trigger(ServerPlayerEntity player, IStandPower standPower) {
+        trigger(player, criterion -> criterion.matches(standPower.getPowerClassification(), standPower));
     }
 
     @Override
-    protected GetPowerTrigger.Instance createInstance(JsonObject json, AndPredicate playerPredicate,
+    protected StandSummonTrigger.Instance createInstance(JsonObject json, AndPredicate playerPredicate,
             ConditionArrayParser conditionArrayParser) {
-        return new GetPowerTrigger.Instance(id, playerPredicate, PowerPredicate.fromJson(json.get("jojopower"), null));
+        return new StandSummonTrigger.Instance(id, playerPredicate, PowerPredicate.fromJson(json.get("stand"), PowerClassification.STAND));
     }
 
     public static class Instance extends CriterionInstance {
@@ -46,7 +47,7 @@ public class GetPowerTrigger extends AbstractCriterionTrigger<GetPowerTrigger.In
         @Override
         public JsonObject serializeToJson(ConditionArraySerializer serializer) {
             JsonObject jsonobject = super.serializeToJson(serializer);
-            jsonobject.add("jojopower", this.powerPredicate.serializeToJson());
+            jsonobject.add("stand", this.powerPredicate.serializeToJson());
             return jsonobject;
         }
 

@@ -49,7 +49,7 @@ public class StandArrowHitPredicate {
             
             EntityPredicate arrowEntity = EntityPredicate.fromJson(jsonObject.get("arrow"));
             Boolean gaveStand = jsonObject.has("gave_stand") ? JSONUtils.getAsBoolean(jsonObject, "gave_stand") : null;
-            PowerPredicate targetStand = PowerPredicate.fromJson(jsonObject.get("targetStand"));
+            PowerPredicate targetStand = PowerPredicate.fromJson(jsonObject.get("target_stand"), PowerClassification.STAND);
             Boolean shotSelf = jsonObject.has("shot_self") ? JSONUtils.getAsBoolean(jsonObject, "shot_self") : null;
             
             return new StandArrowHitPredicate(arrowEntity, gaveStand, targetStand, shotSelf);

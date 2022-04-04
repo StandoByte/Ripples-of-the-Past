@@ -34,7 +34,7 @@ public class SoulAscensionTrigger extends AbstractCriterionTrigger<SoulAscension
     protected SoulAscensionTrigger.Instance createInstance(JsonObject json, AndPredicate playerPredicate,
             ConditionArrayParser conditionArrayParser) {
         return new SoulAscensionTrigger.Instance(id, playerPredicate, 
-                PowerPredicate.fromJson(json.get("stand")), MinMaxBounds.IntBound.fromJson(json.get("ascension_ticks")));
+                PowerPredicate.fromJson(json.get("stand"), null), MinMaxBounds.IntBound.fromJson(json.get("ascension_ticks")));
     }
 
     public static class Instance extends CriterionInstance {

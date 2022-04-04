@@ -211,17 +211,24 @@ public class HamonData extends TypeSpecificData {
     }
 
     public float getHamonDamageMultiplier() {
-        float reducingFactor = 1;
+        return hamonDamageFactor;
+    }
+    
+    // FIXME (!!!!) use this for all hamon actions
+    public float hamonEfficiency() {
+        float efficiency = 1;
         LivingEntity user = power.getUser();
+        
         float healthRatio = user.getHealth() / user.getMaxHealth();
         if (healthRatio < 0.5F) {
-            reducingFactor *= healthRatio * 1.5F + 0.25F;
+            efficiency *= healthRatio * 1.5F + 0.25F;
         }
+        
         EffectInstance freezeEffect = power.getUser().getEffect(ModEffects.FREEZE.get());
         if (freezeEffect != null) {
-            reducingFactor *= Math.max(1 - (freezeEffect.getAmplifier() + 1) * 0.2F, 0);
+            efficiency *= Math.max(1 - (freezeEffect.getAmplifier() + 1) * 0.25F, 0);
         }
-        return hamonDamageFactor * reducingFactor;
+        return efficiency;
     }
 
     public static final float MAX_HAMON_DAMAGE = (float) (Math.pow(1.03, MAX_STAT_LEVEL) * (1 + 0.05 * MAX_BREATHING_LEVEL)); // 35.34962

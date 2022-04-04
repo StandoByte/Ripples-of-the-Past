@@ -19,7 +19,9 @@
     "zombie_created": {
       "trigger": "jojo:vampire_people_drained",
       "conditions": {
-        "zombies_created": 1
+        "zombies_created": {
+          "min": 1
+        }
       }
     }
   },

@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
@@ -206,6 +207,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 }
                 return 1F;
             }).orElse(1F);
+            
             if (getUser() instanceof PlayerEntity) {
                 PlayerEntity player = (PlayerEntity) getUser();
                 if (getStamina() < getMaxStamina()) {
@@ -215,6 +217,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                     staminaRegen *= 1.5F;
                 }
             }
+            
             addStamina(staminaRegen * getStaminaDurabilityModifier(), false);
         }
     }
@@ -312,7 +315,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (!usesResolve() && !hasPower()) {
             return 0;
         }
-        return getType().getResolveLevels();
+        return getType().getMaxResolveLevel();
     }
     
     @Override
@@ -321,6 +324,11 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             this.resolveLevel = level;
             if (!user.level.isClientSide() && hasPower()) {
                 getType().onNewResolveLevel(this);
+                if (level >= getType().getMaxResolveLevel()) {
+                    serverPlayerUser.ifPresent(player -> {
+                        ModCriteriaTriggers.STAND_MAX.get().trigger(player);
+                    });
+                }
             }
         }
     }

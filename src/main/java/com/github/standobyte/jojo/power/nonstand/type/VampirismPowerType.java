@@ -90,7 +90,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
         int bloodLevel = Math.min((int) (power.getEnergy() / power.getMaxEnergy() * 5F), 4);
         bloodLevel += difficulty;
         if (!power.getTypeSpecificData(ModNonStandPowers.VAMPIRISM.get()).get().isVampireAtFullPower()) {
-            bloodLevel = Math.max(bloodLevel - 1, 1);
+            bloodLevel = Math.max(bloodLevel - 2, 1);
         }
         return bloodLevel;
     }

@@ -80,7 +80,7 @@ public class PowerPredicate {
 
     
     
-    public static PowerPredicate fromJson(@Nullable JsonElement json) {
+    public static PowerPredicate fromJson(@Nullable JsonElement json, @Nullable PowerClassification defaultClassification) {
         if (json == null || json.isJsonNull()) {
             return ANY;
         }
@@ -89,7 +89,7 @@ public class PowerPredicate {
             
             PowerClassification classification = jsonObject.has("classification") ? 
                     Enum.valueOf(PowerClassification.class, JSONUtils.getAsString(jsonObject, "classification").toUpperCase())
-                    : null;
+                    : defaultClassification;
             if (classification == null) {
                 throw new JsonSyntaxException("No power classification specified");
             }

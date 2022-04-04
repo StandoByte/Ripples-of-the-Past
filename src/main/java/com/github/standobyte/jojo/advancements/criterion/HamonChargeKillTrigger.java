@@ -70,7 +70,7 @@ public class HamonChargeKillTrigger extends AbstractCriterionTrigger<HamonCharge
                 id, 
                 playerPredicate, 
                 EntityPredicate.AndPredicate.fromJson(json, "killed_entity", conditionArrayParser), 
-                PowerPredicate.fromJson(json.get("killed_power")),
+                PowerPredicate.fromJson(json.get("killed_power"), null),
                 EntityPredicate.AndPredicate.fromJson(json, "charged_entity", conditionArrayParser), 
                 block, 
                 blockState,
