@@ -1,34 +1,34 @@
 {
-  "parent": "jojo:jojo/stand_arrow",
+  "parent": "jojo:jojo/resolve",
   "display": {
     "icon": {
       "item": "jojo:meteoric_scrap",
-      "nbt": "{Icon:8}"
+      "nbt": "{Icon:6}"
     },
     "title": {
-      "translate": "advancements.jojo.get_stand.title"
+      "translate": "advancements.jojo.stand_max.title"
     },
     "description": {
-      "translate": "advancements.jojo.get_stand.description"
+      "translate": "advancements.jojo.stand_max.description"
     },
     "frame": "task",
     "show_toast": true,
     "announce_to_chat": true,
     "hidden": false
   },
+  "rewards": {
+    "experience": 250
+  },
   "criteria": {
-    "get_stand": {
-      "trigger": "jojo:get_power",
+    "stand_max": {
+      "trigger": "jojo:stand_max",
       "conditions": {
-        "jojopower": {
-          "classification": "stand"
-        }
       }
     }
   },
   "requirements": [
     [
-      "get_stand"
+      "stand_max"
     ]
   ]
 }

@@ -10,16 +10,21 @@
     "description": {
       "translate": "advancements.jojo.drain_humans.description"
     },
-    "frame": "task",
+    "frame": "challenge",
     "show_toast": true,
     "announce_to_chat": true,
     "hidden": false
+  },
+  "rewards": {
+    "experience": 100
   },
   "criteria": {
     "people_drained": {
       "trigger": "jojo:vampire_people_drained",
       "conditions": {
-        "people_drained": 50
+        "people_drained": {
+          "min": 64
+        }
       }
     }
   },

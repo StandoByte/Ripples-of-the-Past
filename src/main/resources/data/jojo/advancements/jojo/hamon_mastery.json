@@ -15,6 +15,9 @@
     "announce_to_chat": true,
     "hidden": false
   },
+  "rewards": {
+    "experience": 250
+  },
   "criteria": {
     "max_stats": {
       "trigger": "jojo:hamon_stats",

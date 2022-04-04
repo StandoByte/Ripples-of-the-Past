@@ -16,7 +16,7 @@ import net.minecraft.world.World;
 public class StandEntityLightAttack extends StandEntityAction {
 
     public StandEntityLightAttack(StandEntityAction.Builder builder) {
-        super(builder.standAutoSummonMode(AutoSummonMode.ONE_ARM).staminaCost(12.5F).standUserSlowDownFactor(1.0F)
+        super(builder.standAutoSummonMode(AutoSummonMode.ONE_ARM).staminaCost(10F).standUserSlowDownFactor(1.0F)
                 .defaultStandOffsetFromUser().standOffsetFromUser(-0.75, 0.75)
                 .standTakesCrosshairTarget().standPose(StandPose.LIGHT_ATTACK));
     }

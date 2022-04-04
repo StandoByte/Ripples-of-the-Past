@@ -49,8 +49,8 @@ public class KilledPowerUserTrigger extends AbstractCriterionTrigger<KilledPower
                 playerPredicate, 
                 EntityPredicate.AndPredicate.fromJson(json, "entity", conditionArrayParser), 
                 DamageSourcePredicate.fromJson(json.get("killing_blow")), 
-                PowerPredicate.fromJson(json.get("power")),
-                PowerPredicate.fromJson(json.get("killed_power")));
+                PowerPredicate.fromJson(json.get("power"), null),
+                PowerPredicate.fromJson(json.get("killed_power"), null));
     }
 
     public static class Instance extends CriterionInstance {

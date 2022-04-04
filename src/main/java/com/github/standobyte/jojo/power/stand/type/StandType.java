@@ -12,9 +12,11 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.actions.StandAction;
+import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.power.IPowerType;
+import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
@@ -25,6 +27,7 @@ import com.github.standobyte.jojo.util.data.StandStatsManager;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
@@ -141,7 +144,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         return false;
     }
     
-    public int getResolveLevels() {
+    public int getMaxResolveLevel() {
         return 4;
     }
     
@@ -222,6 +225,12 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
             unsummon(standPower.getUser(), standPower);
         }
     }
+    
+    protected void triggerAdvancement(IStandPower standPower, IStandManifestation stand) {
+        if (standPower.getUser() instanceof ServerPlayerEntity) {
+            ModCriteriaTriggers.SUMMON_STAND.get().trigger((ServerPlayerEntity) standPower.getUser(), standPower);
+        }
+    }
 
     public boolean summon(LivingEntity user, IStandPower standPower, boolean withoutNameVoiceLine) {
         if (!standPower.canUsePower()) {
@@ -233,6 +242,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
                 JojoModUtil.sayVoiceLine(user, shout);
             }
         }
+        triggerAdvancement(standPower, standPower.getStandManifestation());
         return true;
     }
     

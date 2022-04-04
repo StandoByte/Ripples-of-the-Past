@@ -14,6 +14,7 @@ import com.github.standobyte.jojo.advancements.criterion.LastHamonTrigger;
 import com.github.standobyte.jojo.advancements.criterion.PeopleDrainedTrigger;
 import com.github.standobyte.jojo.advancements.criterion.SoulAscensionTrigger;
 import com.github.standobyte.jojo.advancements.criterion.StandArrowHitTrigger;
+import com.github.standobyte.jojo.advancements.criterion.StandSummonTrigger;
 import com.github.standobyte.jojo.advancements.criterion.StoneMaskDestroyedTrigger;
 import com.github.standobyte.jojo.advancements.criterion.UnconditionalTrigger;
 
@@ -45,6 +46,10 @@ public class ModCriteriaTriggers {
             new CriteriaTriggerSupplier<>(() -> new KilledPowerUserTrigger(new ResourceLocation(JojoMod.MOD_ID, "entity_killed_player"), true));
     public static final CriteriaTriggerSupplier<StoneMaskDestroyedTrigger> STONE_MASK_DESTROYED = 
             new CriteriaTriggerSupplier<>(() -> new StoneMaskDestroyedTrigger(new ResourceLocation(JojoMod.MOD_ID, "destroy_stone_mask")));
+    public static final CriteriaTriggerSupplier<StandSummonTrigger> SUMMON_STAND = 
+            new CriteriaTriggerSupplier<>(() -> new StandSummonTrigger(new ResourceLocation(JojoMod.MOD_ID, "summon_stand")));
+    public static final CriteriaTriggerSupplier<UnconditionalTrigger> STAND_MAX = 
+            new CriteriaTriggerSupplier<>(() -> new UnconditionalTrigger(new ResourceLocation(JojoMod.MOD_ID, "stand_max")));
     public static final CriteriaTriggerSupplier<StandArrowHitTrigger> STAND_ARROW_HIT = 
             new CriteriaTriggerSupplier<>(() -> new StandArrowHitTrigger(new ResourceLocation(JojoMod.MOD_ID, "stand_arrow_hit")));
     public static final CriteriaTriggerSupplier<SoulAscensionTrigger> SOUL_ASCENSION = 

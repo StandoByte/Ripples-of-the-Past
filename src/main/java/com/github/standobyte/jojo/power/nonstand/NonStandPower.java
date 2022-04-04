@@ -148,7 +148,11 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     }
     
     private void tickEnergy() {
-        energy = MathHelper.clamp(energy + type.getEnergyTickInc(this), 0, getMaxEnergy());
+        float inc = type.getEnergyTickInc(this);
+        if (isUserCreative()) {
+            inc = Math.max(inc, 0);
+        }
+        energy = MathHelper.clamp(energy + inc, 0, getMaxEnergy());
     }
     
     @Override

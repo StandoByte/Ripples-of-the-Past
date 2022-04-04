@@ -1,5 +1,5 @@
 {
-  "parent": "jojo:jojo/get_stand",
+  "parent": "jojo:jojo/summon_stand",
   "display": {
     "icon": {
       "item": "jojo:meteoric_scrap",

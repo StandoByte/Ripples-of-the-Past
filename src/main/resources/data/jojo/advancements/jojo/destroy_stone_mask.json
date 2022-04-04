@@ -1,5 +1,5 @@
 {
-  "parent": "jojo:jojo/root",
+  "parent": "jojo:jojo/stone_mask",
   "display": {
     "icon": {
       "item": "jojo:sledgehammer"
