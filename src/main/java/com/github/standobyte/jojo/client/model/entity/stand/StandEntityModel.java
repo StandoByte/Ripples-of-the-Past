@@ -98,7 +98,6 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         
 //        initPoses();
 
-        // FIXME (!!) idle pose messing up summon poses
         idlePose.poseModel(1.0F, entity, ticks, yRotationOffset, xRotation, swingingHand);
 
         if (poseType == StandPose.SUMMON && (ticks > SUMMON_ANIMATION_LENGTH || entity.isArmsOnlyMode())) {
@@ -132,6 +131,8 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
             }
         }
         else if (standPose == StandPose.SUMMON && summonPoses.size() > 0) {
+            resetPose(entity);
+            
             onPose(entity, ticks);
             summonPoses.get(entity.getSummonPoseRandomByte() % summonPoses.size())
             .poseModel(ticks, entity, ticks, yRotationOffset, xRotation, swingingHand);
@@ -152,8 +153,8 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
 
     private final ModelAnim<T> HEAD_ROTATION = (rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
         headParts().forEach(part -> {
-            part.yRot = yRotationOffset * MathUtil.DEG_TO_RAD;
-            part.xRot = xRotation * MathUtil.DEG_TO_RAD;
+            part.yRot = MathUtil.rotLerpRad(rotationAmount, part.yRot, yRotationOffset * MathUtil.DEG_TO_RAD);
+            part.xRot = MathUtil.rotLerpRad(rotationAmount, part.xRot, xRotation * MathUtil.DEG_TO_RAD);
             part.zRot = 0;
         });
     };
@@ -189,9 +190,9 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     private static final float SUMMON_ANIMATION_POSE_REVERSE_POINT = 0.75F;
     protected List<IModelPose<T>> initSummonPoses() {
         return Arrays.stream(initSummonPoseRotations())
-                .map(rotationAngles -> new ModelPose<T>(rotationAngles).setEasing(ticks -> 
+                .map(rotationAngles -> new ModelPoseTransition<T>(new ModelPose<T>(rotationAngles), idlePose).setEasing(ticks -> 
                 MathHelper.clamp(
-                        (SUMMON_ANIMATION_LENGTH - ticks) / (SUMMON_ANIMATION_LENGTH * (1 - SUMMON_ANIMATION_POSE_REVERSE_POINT)), 
+                        (ticks - SUMMON_ANIMATION_LENGTH) / (SUMMON_ANIMATION_LENGTH * (1 - SUMMON_ANIMATION_POSE_REVERSE_POINT)) + 1, 
                         0F, 1F)))
                 .collect(Collectors.toCollection(ArrayList::new));
     }

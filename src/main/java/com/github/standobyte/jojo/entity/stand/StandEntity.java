@@ -19,6 +19,7 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.action.actions.StandEntityHeavyAttack;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -1480,7 +1481,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             
             attack
             .damage(StandStatFormulas.getHeavyAttackDamage(strength, target instanceof LivingEntity ? (LivingEntity) target : null))
-            .addKnockback(1 + (float) strength / 4 * heavyAttackCombo);
+            .addKnockback(1 + (float) strength / 4 * heavyAttackCombo)
+            .makeSetStandInvulTime();
             break;
         case BARRAGE:
             attack
@@ -1492,36 +1494,56 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return attack;
     }
     
-    protected final boolean doAttack(Entity target, StandAttackProperties attack, StandEntityDamageSource dmgSource, Function<StandAttackProperties, Float> damage) {
+    protected final boolean doAttack(Entity target, StandAttackProperties attack, StandEntityDamageSource dmgSource, Function<StandAttackProperties, Float> damageMethod) {
         if (attack.reducesKnockback()) {
             dmgSource.setKnockbackReduction(attack.getKnockbackReduction());
         }
 
-        if (target instanceof StandEntity) {
-            StandEntity targetStand = (StandEntity) target;
-            if ((attack.canParryHeavyAttack() || attack.disablesBlocking())) {
-                if (attack.canParryHeavyAttack()) {
-                    if (targetStand.getCurrentTaskAction() instanceof StandEntityHeavyAttack
-                            && targetStand.getCurrentTaskPhase() == StandEntityAction.Phase.WINDUP
-                            && targetStand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())
-                            && 1F - targetStand.getCurrentTaskCompletion(0) < attack.getHeavyAttackParryTiming()) {
-                        targetStand.parryHeavyAttack();
-                        return false;
+        float damage = damageMethod.apply(attack);
+        LivingEntity targetLiving = null;
+        if (target instanceof LivingEntity) {
+            targetLiving = (LivingEntity) target;
+            
+            damage = DamageUtil.addArmorPiercing(damage, attack.getArmorPiercing(), targetLiving);
+            
+            if (attack.setsStandInvulTime()) {
+                dmgSource.makeSetStandInvulTicks();
+            }
+            
+            if (target instanceof StandEntity) {
+                StandEntity targetStand = (StandEntity) target;
+                
+                if ((attack.canParryHeavyAttack() || attack.disablesBlocking())) {
+                    if (attack.canParryHeavyAttack()) {
+                        if (targetStand.getCurrentTaskAction() instanceof StandEntityHeavyAttack
+                                && targetStand.getCurrentTaskPhase() == StandEntityAction.Phase.WINDUP
+                                && targetStand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())
+                                && 1F - targetStand.getCurrentTaskCompletion(0) < attack.getHeavyAttackParryTiming()) {
+                            targetStand.parryHeavyAttack();
+                            return false;
+                        }
+                    }
+                    
+                    if (attack.disablesBlocking() && random.nextFloat() < attack.getDisableBlockingChance()) {
+                        targetStand.stopStandBlocking(StandStatFormulas.getBlockingBreakTicks(targetStand.getDurability()));
                     }
                 }
-                
-                if (attack.disablesBlocking() && random.nextFloat() < attack.getDisableBlockingChance()) {
-                    targetStand.stopStandBlocking(StandStatFormulas.getBlockingBreakTicks(targetStand.getDurability()));
-                }
             }
+            
+            final float dmg = damage;
+            damage = targetLiving.getCapability(LivingUtilCapProvider.CAPABILITY).map(cap -> {
+                return cap.onStandAttack(dmg);
+            }).orElse(damage);
         }
         
-        boolean hurt = hurtTarget(target, dmgSource, DamageUtil.addArmorPiercing(damage.apply(attack), attack.getArmorPiercing(), 
-                target instanceof LivingEntity ? (LivingEntity) target : null));
+        if (damage <= 0) {
+            return false;
+        }
+        
+        boolean hurt = hurtTarget(target, dmgSource, damage);
         
         if (hurt) {
-            if (target instanceof LivingEntity) {
-                LivingEntity targetLiving = (LivingEntity) target;
+            if (targetLiving != null) {
                 if (attack.getAdditionalKnockback() > 0) {
                     float knockbackYRot = yRot + attack.getKnockbackYRotDeg();
                     targetLiving.knockback(

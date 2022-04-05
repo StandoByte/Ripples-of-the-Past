@@ -17,8 +17,8 @@ public class MagiciansRedEntity extends StandEntity {
     
     @Override
     protected boolean hurtTarget(Entity target, DamageSource dmgSource, float damage) {
-        boolean dmgPhysical = DamageUtil.hurtThroughInvulTicks(target, dmgSource, damage / 2);
         boolean dmgFire = DamageUtil.hurtThroughInvulTicks(target, dmgSource.setIsFire(), damage / 2);
+        boolean dmgPhysical = DamageUtil.hurtThroughInvulTicks(target, dmgSource, damage / 2);
         return dmgPhysical || dmgFire;
     }
     

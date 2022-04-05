@@ -512,6 +512,14 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
         });
     }
     
+//    @Override
+//    protected StandActionAnimation<StarPlatinumEntity> initHeavyAttackAnim(boolean combo) {
+//        if (!combo) {
+//            return super.initHeavyAttackAnim(combo);
+//        }
+//        // FIXME (!!!!) uppercut anim
+//    }
+    
     
 
     @Override

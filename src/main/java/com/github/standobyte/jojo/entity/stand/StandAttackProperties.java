@@ -9,12 +9,13 @@ public class StandAttackProperties {
     private float addCombo;
     private float knockback = 1.0F;
     private float knockbackYRot = 0;
-    private float knockbackY = 0;
+    private float knockbackXRot = 0;
     private float armorPiercing = 0;
     private float disableBlockingChance = 0;
     private float parryTiming = 0;
     private Vector3d sweepingAabb;
     private float sweepingDamage;
+    private boolean setStandInvulTime = false;
     
     
     
@@ -43,8 +44,8 @@ public class StandAttackProperties {
         return this;
     }
     
-    public StandAttackProperties knockbackY(float knockbackY) {
-        this.knockbackY = knockbackY;
+    public StandAttackProperties knockbackXRot(float knockbackXRot) {
+        this.knockbackXRot = knockbackXRot;
         return this;
     }
     
@@ -71,6 +72,11 @@ public class StandAttackProperties {
             this.sweepingAabb = new Vector3d(x, y, z);
             this.sweepingDamage = damage;
         }
+        return this;
+    }
+    
+    public StandAttackProperties makeSetStandInvulTime() {
+        this.setStandInvulTime = true;
         return this;
     }
 
@@ -101,8 +107,8 @@ public class StandAttackProperties {
     }
     
     // FIXME (!!!!) upwards knockback
-    public double getKnockbackY() {
-        return knockbackY;
+    public double getKnockbackXRot() {
+        return knockbackXRot;
     }
 
     public float getArmorPiercing() {
@@ -137,4 +143,7 @@ public class StandAttackProperties {
         return sweepingDamage;
     }
     
+    public boolean setsStandInvulTime() {
+        return setStandInvulTime;
+    }
 }

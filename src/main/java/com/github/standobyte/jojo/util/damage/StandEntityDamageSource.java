@@ -19,6 +19,7 @@ public class StandEntityDamageSource extends EntityDamageSource implements IStan
     private boolean bypassInvulTicks = false;
     protected boolean showStandUserName;
     private int barrageHits = 0;
+    private boolean setsStandInvulTicks = false;
 
     public StandEntityDamageSource(String msgId, Entity damagingEntity, IStandPower stand) {
         super(msgId, damagingEntity);
@@ -78,6 +79,16 @@ public class StandEntityDamageSource extends EntityDamageSource implements IStan
     @Override
     public boolean bypassInvulTicks() {
         return bypassInvulTicks;
+    }
+
+    public StandEntityDamageSource makeSetStandInvulTicks() {
+        this.setsStandInvulTicks = true;
+        return this;
+    }
+
+    @Override
+    public boolean setsStandInvulTicks() {
+        return setsStandInvulTicks;
     }
 
     public StandEntityDamageSource setShowStandUserName() {
