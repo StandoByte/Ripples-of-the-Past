@@ -82,7 +82,7 @@ public class SilverChariotHeavyAttack extends StandEntityHeavyAttack {
             boolean lastTick = completion < 1;
             standEntity.setDeltaMovement(lastTick ? ((SilverChariotEntity) standEntity).getDashVec().scale(completion * 2) : Vector3d.ZERO);
             if (!world.isClientSide()) {
-                standEntity.punch(PunchType.HEAVY_COMBO, target, this);
+                standEntity.punch(PunchType.HEAVY_NO_COMBO, target, this);
                 if (lastTick && standEntity.isFollowingUser()) {
                     standEntity.retractStand(false);
                 }

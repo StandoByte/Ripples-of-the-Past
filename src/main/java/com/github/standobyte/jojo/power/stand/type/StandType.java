@@ -137,7 +137,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     public float getStaminaRegen(IStandPower power) {
-        return 2.5F;
+        return 2F;
     }
     
     public boolean usesResolve() {
@@ -262,11 +262,12 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         return standPower.getStandManifestation() != null;
     }
     
-    public static void onHurtByStand(DamageSource dmgSource, LivingEntity target) {
+    public static void onHurtByStand(DamageSource dmgSource, float dmgAmount, LivingEntity target) {
         if (dmgSource instanceof IStandDamageSource) {
-            IStandPower attackerStand = ((IStandDamageSource) dmgSource).getStandPower();
+            IStandDamageSource standDmgSource = (IStandDamageSource) dmgSource;
+            IStandPower attackerStand = standDmgSource.getStandPower();
             target.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                cap.setLastHurtByStand(attackerStand);
+                cap.setLastHurtByStand(attackerStand, dmgAmount, standDmgSource.setsStandInvulTicks());
             });
         }
     }

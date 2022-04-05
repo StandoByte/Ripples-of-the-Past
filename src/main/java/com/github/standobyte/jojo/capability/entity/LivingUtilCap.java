@@ -15,6 +15,8 @@ public class LivingUtilCap {
     
     private IStandPower lastHurtByStand;
     private int lastHurtByStandTicks;
+    public float lastStandDamage;
+    public int standInvulnerableTime;
     
     private boolean reduceKnockback;
     private float futureKnockbackFactor;
@@ -33,9 +35,17 @@ public class LivingUtilCap {
     
     
     
-    public void setLastHurtByStand(IStandPower stand) {
+    public float onStandAttack(float damage) {
+        this.lastStandDamage = damage;
+        return standInvulnerableTime > 0 ? Math.max(damage - lastStandDamage, 0) : damage;
+    }
+    
+    public void setLastHurtByStand(IStandPower stand, float damage, boolean setInvulTicks) {
         this.lastHurtByStand = stand;
         this.lastHurtByStandTicks = 100;
+        if (setInvulTicks) {
+            this.standInvulnerableTime = 10;
+        }
     }
     
     @Nullable
@@ -49,6 +59,9 @@ public class LivingUtilCap {
             if (lastHurtByStandTicks == 0) {
                 lastHurtByStand = null;
             }
+        }
+        if (standInvulnerableTime > 0) {
+            standInvulnerableTime--;
         }
     }
     

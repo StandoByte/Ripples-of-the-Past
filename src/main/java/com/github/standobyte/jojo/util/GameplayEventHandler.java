@@ -439,7 +439,7 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingDamage(LivingDamageEvent event) {
         activateStoneMasks(event.getSource(), event.getAmount(), event.getEntityLiving());
-        StandType.onHurtByStand(event.getSource(), event.getEntityLiving());
+        StandType.onHurtByStand(event.getSource(), event.getAmount(), event.getEntityLiving());
     }
 
 

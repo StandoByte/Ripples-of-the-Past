@@ -6,6 +6,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.renderer.entity.stand.MagiciansRedRenderer;
 import com.github.standobyte.jojo.entity.MRDetectorEntity;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -14,7 +15,6 @@ import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.Atlases;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.model.EntityModel;
-import net.minecraft.client.renderer.model.ModelBakery;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -100,8 +100,8 @@ public class MRDetectorModel extends EntityModel<MRDetectorEntity> {
     }
     
     private void renderFlame(MatrixStack matrixStack, IRenderTypeBuffer buffer, Vector3d offset, float strength, ActiveRenderInfo camera) {
-        TextureAtlasSprite spriteFire0 = ModelBakery.FIRE_0.sprite();
-        TextureAtlasSprite spriteFire1 = ModelBakery.FIRE_1.sprite();
+        TextureAtlasSprite spriteFire0 = MagiciansRedRenderer.FIRE_0.get();
+        TextureAtlasSprite spriteFire1 = MagiciansRedRenderer.FIRE_1.get();
         matrixStack.pushPose();
         matrixStack.translate(offset.x, offset.y, offset.z);
         float scale = strength * 0.2F;
