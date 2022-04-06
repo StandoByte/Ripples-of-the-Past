@@ -4,6 +4,7 @@ import com.github.standobyte.jojo.action.actions.MagiciansRedRedBind;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.client.model.pose.IModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
+import com.github.standobyte.jojo.client.model.pose.ModelPoseTransition;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
 import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
 import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
@@ -203,5 +204,47 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
                         new RotationAngle(leftArm, -1.4708F, 0.4712F, 0.0F),
                         new RotationAngle(rightArm, -1.6708F, -0.4712F, 0.0F),
                 })).build(idlePose));
+    }
+
+    @Override
+    protected StandActionAnimation<MagiciansRedEntity> initHeavyAttackAnim(boolean combo) {
+        if (combo) {
+            ModelPose<MagiciansRedEntity> pose1 = new ModelPose<MagiciansRedEntity>(new RotationAngle[] {
+                    RotationAngle.fromDegrees(head, -15F, 0F, 0F), 
+                    RotationAngle.fromDegrees(body, -49.1066F, -20.7048F, 22.2077F),
+                    RotationAngle.fromDegrees(leftLeg, 45F, 30F, 0F),
+                    RotationAngle.fromDegrees(rightLeg, -75F, 30F, 30F),
+                    RotationAngle.fromDegrees(rightLowerLeg, 60F, 0F, 0F)
+            });
+            ModelPose<MagiciansRedEntity> pose2 = new ModelPose<MagiciansRedEntity>(new RotationAngle[] {
+                    RotationAngle.fromDegrees(head, -30F, -15F, 0F), 
+                    RotationAngle.fromDegrees(body, -54.7356F, -30F, 35.2644F),
+                    new RotationAngle(beakUpper, -0.3491F, 0.0F, 0.0F),
+                    new RotationAngle(beakLower, 0.5236F, 0.0F, 0.0F),
+                    RotationAngle.fromDegrees(leftArm, -60F, 0.0F, -45F),
+                    RotationAngle.fromDegrees(leftForeArm, 0.0F, 0.0F, 50F),
+                    RotationAngle.fromDegrees(rightArm, 45F, -10F, 10F),
+                    RotationAngle.fromDegrees(rightForeArm, 0F, 0F, 0F),
+                    RotationAngle.fromDegrees(leftLeg, 45F, 45F, 0F),
+                    RotationAngle.fromDegrees(rightLeg, -105F, 30F, 30F),
+                    RotationAngle.fromDegrees(rightLowerLeg, 90F, 0F, 0F)
+            });
+            ModelPose<MagiciansRedEntity> pose3 = new ModelPose<MagiciansRedEntity>(new RotationAngle[] {
+                    RotationAngle.fromDegrees(head, -45F, -10F, 0F), 
+                    RotationAngle.fromDegrees(body, -59.3179F, -27.034F, 37.4537F),
+                    RotationAngle.fromDegrees(leftArm, -135F, -15F, 30F),
+                    RotationAngle.fromDegrees(rightArm, 0.2182F, 0.8727F, 1.3963F),
+                    RotationAngle.fromDegrees(rightArm, -180F, 30F, -45F),
+                    RotationAngle.fromDegrees(rightForeArm, 0F, 0F, -45F),
+                    RotationAngle.fromDegrees(leftLeg, 50F, 45F, 0F),
+                    RotationAngle.fromDegrees(rightLeg, -42.6168F, 9.6867F, 44.9391F),
+                    RotationAngle.fromDegrees(rightLowerLeg, 0F, 0F, 0F)
+            });
+            return new StandActionAnimation.Builder<MagiciansRedEntity>()
+                    .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<MagiciansRedEntity>(pose1, pose2))
+                    .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransition<MagiciansRedEntity>(pose2, pose3))
+                    .build(idlePose);
+        }
+        return super.initHeavyAttackAnim(combo);
     }
 }

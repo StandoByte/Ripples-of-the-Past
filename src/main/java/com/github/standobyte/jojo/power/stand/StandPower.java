@@ -234,7 +234,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     private static final float RESOLVE_DECAY = 5F;
     private static final int RESOLVE_NO_DECAY_TICKS = 400;
     private static final float RESOLVE_DMG_REDUCTION = 0.5F;
-    private static final float RESOLVE_EFFECT_DMG_REDUCTION = 0.75F;
+    private static final float RESOLVE_EFFECT_DMG_REDUCTION = 0.5F;
     private static final float RESOLVE_FOR_DMG_POINT = 0.5F;
     private static final float RESOLVE_LIMIT_FOR_DMG_POINT_TAKEN = 5F;
     private static final float RESOLVE_LIMIT_MANUAL_CONTROL_TICK = 0.1F;
@@ -367,7 +367,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public float getResolveDmgReduction() {
         if (user.hasEffect(ModEffects.RESOLVE.get())) {
-            return RESOLVE_EFFECT_DMG_REDUCTION;
+            return RESOLVE_DMG_REDUCTION;
         }
         if (usesResolve()) {
             return getResolveRatio() * RESOLVE_DMG_REDUCTION;

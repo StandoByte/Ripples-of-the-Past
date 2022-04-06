@@ -24,5 +24,4 @@ public class HierophantGreenGlowLayer extends StandModelLayerRenderer<Hierophant
     public ResourceLocation getLayerTexture() {
         return LAYER_TEXTURE;
     }
-
 }

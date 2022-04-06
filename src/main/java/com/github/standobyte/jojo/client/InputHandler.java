@@ -448,9 +448,9 @@ public class InputHandler {
                             }
                         }
                         if (power.getPowerClassification() == PowerClassification.STAND) {
-                            leftDash.inputUpdate(input.left, input.right || input.up || input.down, mc.player);
-                            rightDash.inputUpdate(input.right, input.left || input.up || input.down, mc.player);
-                            backDash.inputUpdate(input.down, input.left || input.right || input.up, mc.player);
+                            leftDash.inputUpdate(input.left, input.right || input.down, mc.player);
+                            rightDash.inputUpdate(input.right, input.left || input.down, mc.player);
+                            backDash.inputUpdate(input.down, input.left || input.right, mc.player);
                         }
                     }
                 }
@@ -506,7 +506,7 @@ public class InputHandler {
     private final DashTrigger backDash = new DashTrigger(180F);
     
     private void dash(ClientPlayerEntity player, float yRot) {
-        // FIXME (!) (dash) set leap cd
+        // FIXME (!) (dash) set leap cd (depending on stand speed), use stamina
         player.setOnGround(false);
         player.hasImpulse = true;
         Vector3d dash = Vector3d.directionFromRotation(0, player.yRot + yRot).scale(0.5).add(0, 0.2, 0);
@@ -542,13 +542,10 @@ public class InputHandler {
                 triggerTime--;
             }
             if (keyPress) {
-                if (triggerTime <= 0) {
-                    triggerTime = 7;
-                }
-                else if (triggerGap) {
+                if (triggerTime > 0 && triggerGap) {
                     dash(player, yRot);
-                    triggerTime = 0;
                 }
+                triggerTime = 7;
             }
             triggerGap = !keyPress;
         }
