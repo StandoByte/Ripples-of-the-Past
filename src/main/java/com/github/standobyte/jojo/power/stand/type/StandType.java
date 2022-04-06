@@ -267,7 +267,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
             IStandDamageSource standDmgSource = (IStandDamageSource) dmgSource;
             IStandPower attackerStand = standDmgSource.getStandPower();
             target.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                cap.setLastHurtByStand(attackerStand, dmgAmount, standDmgSource.setsStandInvulTicks());
+                cap.setLastHurtByStand(attackerStand, dmgAmount, standDmgSource.getStandInvulTicks());
             });
         }
     }

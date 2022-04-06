@@ -1456,7 +1456,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             }
             
             addComboMeter(attack.getAddCombo(), COMBO_TICKS);
-            setLastHurtMob(target);
+            if (!isManuallyControlled()) {
+                setLastHurtMob(target);
+            }
         }
         return attacked;
     }
@@ -1482,7 +1484,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             attack
             .damage(StandStatFormulas.getHeavyAttackDamage(strength, target instanceof LivingEntity ? (LivingEntity) target : null))
             .addKnockback(1 + (float) strength / 4 * heavyAttackCombo)
-            .makeSetStandInvulTime();
+            .setStandInvulTime(10);
             break;
         case BARRAGE:
             attack
@@ -1506,9 +1508,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             
             damage = DamageUtil.addArmorPiercing(damage, attack.getArmorPiercing(), targetLiving);
             
-            if (attack.setsStandInvulTime()) {
-                dmgSource.makeSetStandInvulTicks();
-            }
+            dmgSource.setStandInvulTicks(attack.getStandInvulTime());
             
             if (target instanceof StandEntity) {
                 StandEntity targetStand = (StandEntity) target;
@@ -1546,10 +1546,17 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             if (targetLiving != null) {
                 if (attack.getAdditionalKnockback() > 0) {
                     float knockbackYRot = yRot + attack.getKnockbackYRotDeg();
-                    targetLiving.knockback(
-                            attack.getAdditionalKnockback() * 0.5F, 
-                            (double) MathHelper.sin(knockbackYRot * MathUtil.DEG_TO_RAD), 
-                            (double) (-MathHelper.cos(knockbackYRot * MathUtil.DEG_TO_RAD)));
+                    float knockbackXRot = attack.getKnockbackXRot();
+                    float knockbackStrength = attack.getAdditionalKnockback() * 0.5F;
+                    if (Math.abs(knockbackXRot) < 90) {
+                        targetLiving.knockback(
+                                knockbackStrength * MathHelper.cos(knockbackXRot * MathUtil.DEG_TO_RAD), 
+                                (double) MathHelper.sin(knockbackYRot * MathUtil.DEG_TO_RAD), 
+                                (double) (-MathHelper.cos(knockbackYRot * MathUtil.DEG_TO_RAD)));
+                    }
+                    if (knockbackXRot != 0) {
+                        DamageUtil.upwardsKnockback(targetLiving, -knockbackStrength * MathHelper.sin(knockbackXRot * MathUtil.DEG_TO_RAD));
+                    }
                 }
                 
                 LivingEntity user = getUser();
@@ -1558,9 +1565,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                         targetLiving.setLastHurtByPlayer((PlayerEntity) user);
                         targetLiving.lastHurtByPlayerTime = 100;
                     }
-                    if (isFollowingUser() || distanceToSqr(user) < 16) {
-                        targetLiving.setLastHurtByMob(user);
-                    }
+                    targetLiving.setLastHurtByMob(user);
                 }
 
                 if (attack.disablesBlocking() && 

@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.action.actions;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.entity.AfterimageEntity;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -37,11 +37,9 @@ public class SilverChariotTakeOffArmor extends StandEntityAction {
             if (standEntity instanceof SilverChariotEntity) {
                 SilverChariotEntity chariot = (SilverChariotEntity) standEntity;
                 chariot.setArmor(!chariot.hasArmor());
-                for (int i = 1; i <= 10; i++) {
-                    AfterimageEntity afterimage = new AfterimageEntity(world, chariot, i);
-                    afterimage.setLifeSpan(Integer.MAX_VALUE);
-                    world.addFreshEntity(afterimage);
-                }
+                chariot.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                    cap.addAfterimages(10, Integer.MAX_VALUE);
+                });
                 chariot.playSound(ModSounds.SILVER_CHARIOT_ARMOR_OFF.get(), 1.0F, 1.0F);
             }
         }

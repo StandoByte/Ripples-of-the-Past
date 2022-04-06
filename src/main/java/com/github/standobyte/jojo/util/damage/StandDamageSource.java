@@ -27,7 +27,7 @@ public class StandDamageSource extends DamageSource implements IStandDamageSourc
     }
 
     @Override
-    public boolean setsStandInvulTicks() {
-        return false;
+    public int getStandInvulTicks() {
+        return 0;
     }
 }

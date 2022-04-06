@@ -368,8 +368,8 @@
   "star_platinum_time_resume": {
     "sounds": [ "jojo:stand/star_platinum_time_resume" ]
   },
-  "time_stop_blink": {
-    "sounds": [ "jojo:stand/time_stop_blink" ]
+  "star_platinum_time_stop_blink": {
+    "sounds": [ "jojo:stand/star_platinum_time_stop_blink" ]
   },
   "dio_die": {
     "subtitle": "jojo.subtitle.die",
@@ -420,6 +420,9 @@
   },
   "the_world_time_resume": {
     "sounds": [ "jojo:stand/the_world_time_resume" ]
+  },
+  "the_world_time_stop_blink": {
+    "sounds": [ "jojo:stand/the_world_time_stop_blink" ]
   },
   "road_roller_hit": {
     "subtitle": "jojo.subtitle.road_roller_hit",

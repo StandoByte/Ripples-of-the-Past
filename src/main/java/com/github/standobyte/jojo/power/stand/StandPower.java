@@ -452,6 +452,10 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 Arrays.stream(standType.getAbilities()))
         .forEach(action -> {
             actionLearningProgressMap.setLearningProgressPoints(action, action.getMaxTrainingPoints(this), this);
+            if (action.hasShiftVariation()) {
+                Action<IStandPower> shiftAction = action.getShiftVariationIfPresent();
+                actionLearningProgressMap.setLearningProgressPoints(shiftAction, shiftAction.getMaxTrainingPoints(this), this);
+            }
         });
     }
     

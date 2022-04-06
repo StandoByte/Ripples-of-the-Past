@@ -25,11 +25,11 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
     protected ModelRenderer upperPart;
     protected ModelRenderer torso;
     protected ModelRenderer leftArm;
-    protected ModelRenderer leftArmForearmOnly;
+    private ModelRenderer leftArmForearmOnly;
     protected ModelRenderer leftArmJoint;
     protected ModelRenderer leftForeArm;
     protected ModelRenderer rightArm;
-    protected ModelRenderer rightArmForearmOnly;
+    private ModelRenderer rightArmForearmOnly;
     protected ModelRenderer rightArmJoint;
     protected ModelRenderer rightForeArm;
     protected ModelRenderer leftLeg;

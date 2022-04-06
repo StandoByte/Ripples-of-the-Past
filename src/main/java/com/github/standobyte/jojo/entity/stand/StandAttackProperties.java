@@ -15,7 +15,7 @@ public class StandAttackProperties {
     private float parryTiming = 0;
     private Vector3d sweepingAabb;
     private float sweepingDamage;
-    private boolean setStandInvulTime = false;
+    private int standInvulTime = 0;
     
     
     
@@ -45,7 +45,7 @@ public class StandAttackProperties {
     }
     
     public StandAttackProperties knockbackXRot(float knockbackXRot) {
-        this.knockbackXRot = knockbackXRot;
+        this.knockbackXRot = MathHelper.clamp(knockbackXRot, -90F, 90F);
         return this;
     }
     
@@ -75,8 +75,8 @@ public class StandAttackProperties {
         return this;
     }
     
-    public StandAttackProperties makeSetStandInvulTime() {
-        this.setStandInvulTime = true;
+    public StandAttackProperties setStandInvulTime(int ticks) {
+        this.standInvulTime = ticks;
         return this;
     }
 
@@ -107,7 +107,7 @@ public class StandAttackProperties {
     }
     
     // FIXME (!!!!) upwards knockback
-    public double getKnockbackXRot() {
+    public float getKnockbackXRot() {
         return knockbackXRot;
     }
 
@@ -143,7 +143,7 @@ public class StandAttackProperties {
         return sweepingDamage;
     }
     
-    public boolean setsStandInvulTime() {
-        return setStandInvulTime;
+    public int getStandInvulTime() {
+        return standInvulTime;
     }
 }

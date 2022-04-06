@@ -168,8 +168,16 @@ public class SilverChariotEntity extends StandEntity {
         switch (punchType) {
         case HEAVY_NO_COMBO:
             if (hasRapier()) {
-                attack.addKnockback(1.25F);
-                attack.knockbackYRotDeg((60F + random.nextFloat() * 30F) * (random.nextBoolean() ? -1 : 1));
+                if (getAttackSpeed() < 24) {
+                    attack
+                    .addKnockback(1.5F)
+                    .knockbackYRotDeg((75F + random.nextFloat() * 30F) * (random.nextBoolean() ? -1 : 1));
+                }
+                else {
+                    attack
+                    .addKnockback(0.25F)
+                    .knockbackXRot(-90F);
+                }
             }
             break;
         case BARRAGE:

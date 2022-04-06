@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.action.actions;
 
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.entity.AfterimageEntity;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
@@ -35,11 +35,9 @@ public class HamonSpeedBoost extends HamonAction {
         if (!world.isClientSide()) {
             int duration = 20 + MathHelper.floor(180F * effectStr);
             if (hamon.isSkillLearned(HamonSkill.AFTERIMAGES)) {
-                for (int i = 1; i <= 7; i++) {
-                    AfterimageEntity afterimage = new AfterimageEntity(world, user, i);
-                    afterimage.setLifeSpan(duration);
-                    world.addFreshEntity(afterimage);
-                }
+                user.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                    cap.addAfterimages(7, duration);
+                });
             }
             if (!user.hasEffect(Effects.MOVEMENT_SPEED)) {
                 hamon.hamonPointsFromAction(HamonStat.CONTROL, getEnergyCost(power));

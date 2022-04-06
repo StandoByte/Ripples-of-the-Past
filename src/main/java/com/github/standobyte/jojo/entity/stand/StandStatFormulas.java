@@ -30,7 +30,7 @@ public class StandStatFormulas {
     }
     
     public static final int getLightAttackWindup(double speed, float comboMeter) {
-        return Math.max((int) ((10 - speed * 0.4) * (1.0 - 0.3 * comboMeter)) + 1, 0);
+        return Math.max((int) ((8 - speed * 0.25) * (1.0 - 0.4 * comboMeter)) + 1, 0);
     }
     
     public static final int getLightAttackRecovery(double speed) {

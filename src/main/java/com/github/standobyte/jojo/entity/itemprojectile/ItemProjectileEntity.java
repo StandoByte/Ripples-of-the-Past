@@ -12,6 +12,7 @@ import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -20,9 +21,10 @@ import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.RayTraceResult.Type;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 
-public abstract class ItemProjectileEntity extends AbstractArrowEntity {
+public abstract class ItemProjectileEntity extends AbstractArrowEntity implements IEntityAdditionalSpawnData {
     protected boolean leftOwner;
 
     protected ItemProjectileEntity(EntityType<? extends ItemProjectileEntity> type, LivingEntity thrower, World world) {
@@ -67,7 +69,7 @@ public abstract class ItemProjectileEntity extends AbstractArrowEntity {
     @Override
     protected boolean canHitEntity(Entity entity) {
         if (super.canHitEntity(entity)) {
-            if (!level.isClientSide() && !canHitOwnerProjectile() && entity instanceof ProjectileEntity) {
+            if (!canHitOwnerProjectile() && entity instanceof ProjectileEntity) {
                 Entity ownerThis = getOwner();
                 Entity ownerThat = ((ProjectileEntity) entity).getOwner();
                 return ownerThis == null || ownerThat == null || ownerThis.getUUID() != ownerThat.getUUID();
@@ -209,5 +211,18 @@ public abstract class ItemProjectileEntity extends AbstractArrowEntity {
     @Override
     public IPacket<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
+    }
+    
+    @Override
+    public void writeSpawnData(PacketBuffer buffer) {
+        buffer.writeInt(getOwner() != null ? getOwner().getId() : -1);
+    }
+
+    @Override
+    public void readSpawnData(PacketBuffer additionalData) {
+        int ownerId = additionalData.readInt();
+        if (ownerId > -1) {
+            setOwner(level.getEntity(ownerId));
+        }
     }
 }
