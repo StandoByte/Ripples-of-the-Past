@@ -863,10 +863,11 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 StandEntityAction currentAction = getCurrentTaskAction();
                 if (currentAction == null || !currentAction.isCombatAction()) {
                     float decay = COMBO_DECAY;
-                    if (getComboMeter() < 0.5F) {
+                    float combo = entityData.get(PUNCHES_COMBO);
+                    if (combo < 0.5F) {
                         decay *= 0.5F;
                     }
-                    setComboMeter(Math.max(getComboMeter() - decay, 0));
+                    setComboMeter(Math.max(combo - decay, 0));
                 }
             }
             

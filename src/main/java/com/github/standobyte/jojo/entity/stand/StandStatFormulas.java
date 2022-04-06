@@ -7,33 +7,33 @@ import net.minecraft.util.math.MathHelper;
 
 public class StandStatFormulas {
 
-    public static final float getHeavyAttackDamage(double strength, @Nullable LivingEntity armoredTarget) {
+    public static float getHeavyAttackDamage(double strength, @Nullable LivingEntity armoredTarget) {
         float damage = Math.max((float) strength, 1F);
         return damage;
     }
     
-    public static final int getHeavyAttackWindup(double speed, float comboMeter) {
+    public static int getHeavyAttackWindup(double speed, float comboMeter) {
         float f = (40 - (float) speed * 1.25F);
         float min = f / 3;
         float max = f * 2 / 3;
         return MathHelper.ceil(MathHelper.lerp(comboMeter, max, min));
     }
     
-    public static final int getHeavyAttackRecovery(double speed) {
+    public static int getHeavyAttackRecovery(double speed) {
         return MathHelper.floor((40 - speed * 1.25) / 2);
     }
     
     
     
-    public static final float getLightAttackDamage(double strength) {
+    public static float getLightAttackDamage(double strength) {
         return 0.4F + (float) strength * 0.2F;
     }
     
-    public static final int getLightAttackWindup(double speed, float comboMeter) {
+    public static int getLightAttackWindup(double speed, float comboMeter) {
         return Math.max((int) ((8 - speed * 0.25) * (1.0 - 0.4 * comboMeter)) + 1, 0);
     }
     
-    public static final int getLightAttackRecovery(double speed) {
+    public static int getLightAttackRecovery(double speed) {
         return Math.round(lightAttackRecovery(speed));
     }
     
@@ -41,13 +41,13 @@ public class StandStatFormulas {
         return Math.max((40.0F - (float) speed * 1.25F) / 3.0F, 0);
     }
     
-    public static final float getParryTiming(double precision) {
+    public static float getParryTiming(double precision) {
         return Math.min(0.05F + (float) precision * 0.025F, 1F);
     }
     
     
     
-    public static final float getBarrageHitDamage(double strength, double precision) {
+    public static float getBarrageHitDamage(double strength, double precision) {
         float damage = 0.04F + (float) strength * 0.01F;
         if (precision > 0) {
             double pr = precision / 16;
@@ -56,55 +56,55 @@ public class StandStatFormulas {
         return damage;
     }
     
-    public static final int getBarrageHitsPerSecond(double speed) {
+    public static int getBarrageHitsPerSecond(double speed) {
         return Math.max((int) (speed * 8.0 - 20.0), 0);
     }
     
-    public static final int getBarrageRecovery(double speed) {
+    public static int getBarrageRecovery(double speed) {
         return MathHelper.floor((40.0 - speed * 1.25) / 5.0);
     }
     
-    public static final int getBarrageMaxDuration(double durability) {
+    public static int getBarrageMaxDuration(double durability) {
         return 20 + (int) (durability * 5.0);
     }
     
     
     
-    public static final float getPhysicalResistance(double durability, double strength, float blocked) {
+    public static float getPhysicalResistance(double durability, double strength, float blocked) {
         double resistance = MathHelper.clamp(durability * 0.01875 + strength * 0.0125, 0, 1);
         resistance += (1 - resistance) * blocked * 0.8;
         return (float) resistance;
     }
     
-    public static final float getStaminaMultiplier(double durability) {
+    public static float getStaminaMultiplier(double durability) {
         return (float) Math.pow(2, durability / 8 - 1);
     }
     
-    public static final float getBlockStaminaCost(float incomingDamage) {
+    public static float getBlockStaminaCost(float incomingDamage) {
         return 0.5F * (float) Math.pow(incomingDamage, 2);
     }
     
-    public static final int getSummonLockTicks(double speed) {
+    public static int getSummonLockTicks(double speed) {
         return Math.max(20 - (int) (speed * 1.25), 0);
     }
     
-    public static final int getBlockingBreakTicks(double durability) {
+    public static int getBlockingBreakTicks(double durability) {
         return Math.min(120 - (int) (durability * 5), 1);
     }
     
-    public static final float getMaxBarrageParryTickDamage(double durability) {
+    public static float getMaxBarrageParryTickDamage(double durability) {
         return Math.max(((float) durability - 4F) * 0.125F, 0);
     }
     
-    public static final float getLeapStrength(double strength) {
+    public static float getLeapStrength(double strength) {
         return (float) Math.min(strength, 40) / 5F;
     }
     
-    public static final double getMovementSpeed(double speed) {
+    public static double getMovementSpeed(double speed) {
         return 0.1 + speed * 0.05;
     }
     
-    public static final boolean isBlockBreakable(double strength, float blockHardness, int blockHarvestLevel) {
+    public static boolean isBlockBreakable(double strength, float blockHardness, int blockHarvestLevel) {
         /* damage:
          * 2                                4                                   8                                   12                                      16
          * 
@@ -131,7 +131,7 @@ public class StandStatFormulas {
     // hitboxExpansion
     // unsummonedAttackDeflectSpeed
     
-    public static final float rangeStrengthFactor(double rangeEffective, double rangeMax, double distance) {
+    public static float rangeStrengthFactor(double rangeEffective, double rangeMax, double distance) {
         if (distance <= rangeEffective) {
             return 1F;
         }

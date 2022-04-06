@@ -103,7 +103,7 @@ public class ModStandTypes {
                     new StandAction[] {ModActions.MAGICIANS_RED_BLOCK.get(), ModActions.MAGICIANS_RED_RED_BIND.get(), ModActions.MAGICIANS_RED_DETECTOR.get()},
                     StandStats.class, new StandStats.Builder()
                     .power(12.0)
-                    .speed(10.0)
+                    .speed(11.0)
                     .range(5.0)
                     .durability(12.0)
                     .precision(8.0)
