@@ -129,7 +129,6 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             if (leapCooldown > 0) {
                 leapCooldown--;
             }
-            // FIXME !!!!!!!!!!!!!!!!!!!!!! does it tick when the player is offline on a remote server? (hamon in particular)
             getType().tickUser(getUser(), getThis());
         }
     }

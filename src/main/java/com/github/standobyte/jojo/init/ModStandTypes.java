@@ -87,7 +87,7 @@ public class ModStandTypes {
                     new StandAction[] {ModActions.SILVER_CHARIOT_ATTACK.get(), ModActions.SILVER_CHARIOT_BARRAGE.get(), ModActions.SILVER_CHARIOT_RAPIER_LAUNCH.get()},
                     new StandAction[] {ModActions.SILVER_CHARIOT_BLOCK.get(), ModActions.SILVER_CHARIOT_TAKE_OFF_ARMOR.get()},
                     StandStats.class, new StandStats.Builder()
-                    .power(10.0)
+                    .power(9.0)
                     .speed(14.0)
                     .range(10.0, 10.0)
                     .durability(12.0)

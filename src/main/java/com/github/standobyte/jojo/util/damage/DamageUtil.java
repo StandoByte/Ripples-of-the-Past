@@ -230,4 +230,19 @@ public class DamageUtil {
             target.level.broadcastEntityEvent(target, (byte) 30);
         }
     }
+
+    public static void upwardsKnockback(LivingEntity target, float strength) {
+        strength *= (1.0F - (float) target.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
+        if (strength != 0) {
+            target.hasImpulse = true;
+            target.setDeltaMovement(target.getDeltaMovement().add(0, strength, 0));
+        }
+        
+        if (target instanceof StandEntity) {
+            LivingEntity standUser = ((StandEntity) target).getUser();
+            if (standUser != null && !standUser.is(target)) {
+                upwardsKnockback(standUser, strength);
+            }
+        }
+    }
 }

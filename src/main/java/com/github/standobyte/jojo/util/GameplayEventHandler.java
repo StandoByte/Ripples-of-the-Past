@@ -371,20 +371,22 @@ public class GameplayEventHandler {
         DamageSource dmgSource = event.getSource();
         LivingEntity target = event.getEntityLiving();
         if (dmgSource.isExplosion()) {
-            Vector3d explosionPos = target.getCapability(LivingUtilCapProvider.CAPABILITY).map(util -> util.popLatestExplosionPos()).orElse(null);
-            if (explosionPos != null) {
-                StandEntity stand = getTargetStand(target);
-                if (stand != null && stand.isFollowingUser() && stand.isStandBlocking()) {
-                    double standDurability = stand.getDurability();
-                    if (standDurability > 4) {
-                        double cos = explosionPos.subtract(target.position()).normalize().dot(stand.getLookAngle());
-                        if (cos > 0) {
-                            float multiplier = Math.max((1F - (float) cos), 4F / (float) standDurability);
-                            event.setAmount(event.getAmount() * multiplier);
+            target.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(util -> {
+                Vector3d explosionPos = util.popLatestExplosionPos();
+                if (explosionPos != null) {
+                    StandEntity stand = getTargetStand(target);
+                    if (stand != null && stand.isFollowingUser() && stand.isStandBlocking()) {
+                        double standDurability = stand.getDurability();
+                        if (standDurability > 4) {
+                            double cos = explosionPos.subtract(target.position()).normalize().dot(stand.getLookAngle());
+                            if (cos > 0) {
+                                float multiplier = Math.max((1F - (float) cos), 4F / (float) standDurability);
+                                event.setAmount(event.getAmount() * multiplier);
+                            }
                         }
                     }
                 }
-            }
+            });
         }
         else {
             standBlockUserAttack(dmgSource, target, stand -> {

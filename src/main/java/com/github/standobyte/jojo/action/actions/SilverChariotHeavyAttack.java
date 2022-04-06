@@ -76,12 +76,11 @@ public class SilverChariotHeavyAttack extends StandEntityHeavyAttack {
     @Override
     public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
         if (!standEntity.isHeavyComboPunching()) {
-            // FIXME (!!!!!!!!) (SC thrusting attack) hit all entities in front of SC each tick
-            // FIXME (!!!!!!!!) (SC thrusting attack) no hitting same entities multiple times
             float completion = standEntity.getCurrentTaskCompletion(1.0F);
             boolean lastTick = completion < 1;
             standEntity.setDeltaMovement(lastTick ? ((SilverChariotEntity) standEntity).getDashVec().scale(completion * 2) : Vector3d.ZERO);
             if (!world.isClientSide()) {
+                // FIXME (!!!!!!!!) (SC thrusting attack) hit all entities in front of SC
                 standEntity.punch(PunchType.HEAVY_NO_COMBO, target, this);
                 if (lastTick && standEntity.isFollowingUser()) {
                     standEntity.retractStand(false);

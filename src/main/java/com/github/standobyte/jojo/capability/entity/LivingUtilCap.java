@@ -1,7 +1,12 @@
 package com.github.standobyte.jojo.capability.entity;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.entity.AfterimageEntity;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.HamonCharge;
@@ -24,6 +29,8 @@ public class LivingUtilCap {
     
     HamonCharge hamonCharge;
     
+    private final List<AfterimageEntity> afterimages = new ArrayList<>();
+    
     public LivingUtilCap(LivingEntity entity) {
         this.entity = entity;
     }
@@ -31,6 +38,14 @@ public class LivingUtilCap {
     public void tick() {
         lastHurtByStandTick();
         hamonChargeTick();
+        
+        Iterator<AfterimageEntity> it = afterimages.iterator();
+        while (it.hasNext()) {
+            AfterimageEntity afterimage = it.next();
+            if (!afterimage.isAlive()) {
+                it.remove();
+            }
+        }
     }
     
     
@@ -40,11 +55,11 @@ public class LivingUtilCap {
         return standInvulnerableTime > 0 ? Math.max(damage - lastStandDamage, 0) : damage;
     }
     
-    public void setLastHurtByStand(IStandPower stand, float damage, boolean setInvulTicks) {
+    public void setLastHurtByStand(IStandPower stand, float damage, int invulTicks) {
         this.lastHurtByStand = stand;
         this.lastHurtByStandTicks = 100;
-        if (setInvulTicks) {
-            this.standInvulnerableTime = 10;
+        if (invulTicks > 0) {
+            this.standInvulnerableTime = invulTicks;
         }
     }
     
@@ -107,6 +122,25 @@ public class LivingUtilCap {
             hamonCharge.tick(entity, null, entity.level, entity.getBoundingBox().inflate(1.0D));
             if (entity.getRandom().nextInt(10) == 0) {
                 HamonPowerType.createHamonSparkParticlesEmitter(entity, hamonCharge.getCharge() / 40F);
+            }
+        }
+    }
+    
+    
+    
+    public void addAfterimages(int count, int lifespan) {
+        if (!entity.level.isClientSide()) {
+            count -= afterimages.size();
+            for (AfterimageEntity afterimage : afterimages) {
+                if (afterimage.isAlive()) {
+                    afterimage.setLifeSpan(afterimage.tickCount + lifespan);
+                }
+            }
+            for (int i = 0; i < count; i++) {
+                AfterimageEntity afterimage = new AfterimageEntity(entity.level, entity, i);
+                afterimage.setLifeSpan(lifespan);
+                afterimages.add(afterimage);
+                entity.level.addFreshEntity(afterimage);
             }
         }
     }

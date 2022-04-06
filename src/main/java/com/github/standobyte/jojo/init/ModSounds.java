@@ -262,11 +262,11 @@ public class ModSounds {
 
     public static final RegistryObject<SoundEvent> STAR_PLATINUM_TIME_RESUME = SOUNDS.register("star_platinum_time_resume", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "star_platinum_time_resume")));
+
+    public static final RegistryObject<SoundEvent> STAR_PLATINUM_TIME_STOP_BLINK = SOUNDS.register("star_platinum_time_stop_blink", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "star_platinum_time_stop_blink")));
     
     public static final OstSoundList STAR_PLATINUM_OST = new OstSoundList(new ResourceLocation(JojoMod.MOD_ID, "star_platinum_ost"), SOUNDS);
-
-    public static final RegistryObject<SoundEvent> TIME_STOP_BLINK = SOUNDS.register("time_stop_blink", 
-            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "time_stop_blink")));
 
     public static final RegistryObject<SoundEvent> KAKYOIN_HIEROPHANT_GREEN = SOUNDS.register("kakyoin_hierophant_green", 
             () -> new MultiSoundEvent(new ResourceLocation(JojoMod.MOD_ID, "kakyoin_hierophant_green"), new ResourceLocation(JojoMod.MOD_ID, "kakyoin_hierophant")));
@@ -317,6 +317,9 @@ public class ModSounds {
 
     public static final RegistryObject<SoundEvent> THE_WORLD_TIME_RESUME = SOUNDS.register("the_world_time_resume", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "the_world_time_resume")));
+
+    public static final RegistryObject<SoundEvent> THE_WORLD_TIME_STOP_BLINK = SOUNDS.register("the_world_time_stop_blink", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "the_world_time_stop_blink")));
 
     public static final RegistryObject<SoundEvent> ROAD_ROLLER_HIT = SOUNDS.register("road_roller_hit", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "road_roller_hit")));

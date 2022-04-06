@@ -225,7 +225,8 @@ public class ModActions {
     
     public static final RegistryObject<StandAction> STAR_PLATINUM_TIME_STOP_BLINK = ACTIONS.register("star_platinum_ts_blink", 
             () -> new TimeStopInstant(new StandAction.Builder()
-                    .resolveLevelToUnlock(4).isTrained().ignoresPerformerStun().shiftVariationOf(STAR_PLATINUM_TIME_STOP)));
+                    .resolveLevelToUnlock(4).isTrained().ignoresPerformerStun().shiftVariationOf(STAR_PLATINUM_TIME_STOP), 
+                    ModSounds.STAR_PLATINUM_TIME_STOP_BLINK));
     
 
     public static final RegistryObject<StandEntityAction> THE_WORLD_PUNCH = ACTIONS.register("the_world_punch", 
@@ -249,7 +250,8 @@ public class ModActions {
     
     public static final RegistryObject<StandAction> THE_WORLD_TIME_STOP_BLINK = ACTIONS.register("the_world_ts_blink", 
             () -> new TimeStopInstant(new StandAction.Builder().resolveLevelToUnlock(1).isTrained()
-                    .ignoresPerformerStun().shiftVariationOf(THE_WORLD_TIME_STOP)));
+                    .ignoresPerformerStun().shiftVariationOf(THE_WORLD_TIME_STOP), 
+                    ModSounds.THE_WORLD_TIME_STOP_BLINK));
     
 
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_STRING_ATTACK = ACTIONS.register("hierophant_green_attack", 
