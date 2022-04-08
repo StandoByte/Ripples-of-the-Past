@@ -9,7 +9,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.HandSide;
 
 public class ModelPose<T extends Entity> implements IModelPose<T> {
-    private final Map<ModelRenderer, RotationAngle> rotations = new HashMap<>();
+    final Map<ModelRenderer, RotationAngle> rotations = new HashMap<>();
     private UnaryOperator<Float> easingFunc = x -> x;
     private ModelAnim<T> additionalAnim = null;
 

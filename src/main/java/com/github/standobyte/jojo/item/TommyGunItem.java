@@ -105,7 +105,7 @@ public class TommyGunItem extends Item {
         if (ammoToLoad > 0) {
             if (entity instanceof PlayerEntity) {
                 PlayerEntity player = (PlayerEntity) entity;
-                // FIXME (!) tommy gun ammo
+                // FIXME (!!) tommy gun ammo
 //                if (!player.abilities.instabuild) {
 //                    for (int i = 0; i < player.inventory.getContainerSize(); ++i) {
 //                        ItemStack ammoStack = player.inventory.getItem(i);

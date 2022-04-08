@@ -26,11 +26,11 @@ public class StandStatFormulas {
     
     
     public static float getLightAttackDamage(double strength) {
-        return 0.4F + (float) strength * 0.2F;
+        return 0.5F + (float) strength * 0.3F;
     }
     
     public static int getLightAttackWindup(double speed, float comboMeter) {
-        return Math.max((int) ((8 - speed * 0.25) * (1.0 - 0.4 * comboMeter)) + 1, 0);
+        return Math.max((int) ((8 - speed * 0.25) * (1.0 - 0.4 * comboMeter) + 1.75F), 0);
     }
     
     public static int getLightAttackRecovery(double speed) {

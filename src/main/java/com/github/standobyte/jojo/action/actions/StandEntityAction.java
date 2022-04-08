@@ -65,6 +65,10 @@ public abstract class StandEntityAction extends StandAction {
     public ActionConditionResult checkConditions(LivingEntity user, IStandPower power, ActionTarget target) {
         if (power.isActive()) {
             StandEntity stand = (StandEntity) power.getStandManifestation();
+            StandEntityAction currentAction = stand.getCurrentTaskAction();
+            if (currentAction != null && !currentAction.isCancelable(power, stand, stand.getCurrentTaskPhase(), this)) {
+                return ActionConditionResult.NEGATIVE;
+            }
             ActionConditionResult checkStand = checkStandConditions(stand, power, target);
             if (!checkStand.isPositive()) {
                 return checkStand;
@@ -181,10 +185,11 @@ public abstract class StandEntityAction extends StandAction {
     private void setAction(IStandPower standPower, StandEntity standEntity, int ticks, Phase phase, ActionTarget target) {
         standEntity.setTask(this, ticks, phase, target);
     }
-    
-    public boolean canBeScheduled(IStandPower standPower, StandEntity standEntity) {
-        return true;
-    }
+
+    // scheduled stand task
+//    public boolean canBeScheduled(IStandPower standPower, StandEntity standEntity) {
+//        return true;
+//    }
     
     public boolean canStaminaRegen(IStandPower standPower, StandEntity standEntity) {
         return false;

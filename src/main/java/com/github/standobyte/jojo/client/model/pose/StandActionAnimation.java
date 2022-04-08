@@ -11,7 +11,7 @@ import net.minecraft.util.HandSide;
 public class StandActionAnimation<T extends Entity> {
     private final Map<StandEntityAction.Phase, IModelPose<T>> phasePoses;
     
-    private StandActionAnimation(StandActionAnimation.Builder<T> builder, ModelPose<T> idlePose) {
+    private StandActionAnimation(StandActionAnimation.Builder<T> builder, IModelPose<T> idlePose) {
         this.phasePoses = builder.phasePoses;
         StandEntityAction.Phase[] phases = StandEntityAction.Phase.values();
         int iLastMissing = -1;
@@ -53,7 +53,7 @@ public class StandActionAnimation<T extends Entity> {
             return this;
         }
         
-        public StandActionAnimation<T> build(ModelPose<T> idlePose) {
+        public StandActionAnimation<T> build(IModelPose<T> idlePose) {
             return new StandActionAnimation<T>(this, idlePose);
         }
     }

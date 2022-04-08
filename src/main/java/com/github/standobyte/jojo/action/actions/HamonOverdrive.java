@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.actions;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
@@ -57,6 +58,10 @@ public class HamonOverdrive extends HamonAction {
     
     @Override
     public float getEnergyCost(INonStandPower power) {
+        return Math.min(power.getEnergy(), getMaxEnergyCost(power));
+    }
+     
+    private float getMaxEnergyCost(INonStandPower power) {
         float energyCost = super.getEnergyCost(power);
         if (metalSilverOverdrive(power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get(), power.getUser().getMainHandItem())) {
             energyCost += 250;
@@ -86,8 +91,9 @@ public class HamonOverdrive extends HamonAction {
                 if (user instanceof PlayerEntity) {
                     float swingStrengthScale = ((PlayerEntity) user).getAttackStrengthScale(0.5F);
                     dmgScale = (0.2F + swingStrengthScale * swingStrengthScale * 0.8F);
-                    damage *= dmgScale;
                 }
+                dmgScale *= getEnergyCost(power) / getMaxEnergyCost(power);
+                damage *= dmgScale;
                 if (DamageUtil.dealHamonDamage(targetEntity, damage, user, null)) {
                     hamon.hamonPointsFromAction(HamonStat.STRENGTH, getEnergyCost(power) * dmgScale);
                     if (knockback > 0) {

@@ -16,6 +16,7 @@ import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.JojoModUtil;
 
 import net.minecraft.entity.LivingEntity;
@@ -275,6 +276,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     public void onMaxTraining(P power) {}
+    
+    public boolean canUserSeeInStoppedTime(LivingEntity user, P power) {
+        return false;
+    }
     
     
     

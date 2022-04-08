@@ -59,6 +59,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
+// FIXME (!!) hamon exercises hud
 @SuppressWarnings("deprecation")
 public class ActionsOverlayGui extends AbstractGui {
     private static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");

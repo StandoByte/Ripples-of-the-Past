@@ -41,10 +41,10 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
 
     protected StandPose poseType = StandPose.SUMMON;
     private float idleLoopTickStamp = 0;
-    protected ModelPose<T> poseReset;
-    protected ModelPose<T> idlePose;
+    private ModelPose<T> poseReset;
+    protected IModelPose<T> idlePose;
     protected IModelPose<T> idleLoop;
-    protected List<IModelPose<T>> summonPoses;
+    private List<IModelPose<T>> summonPoses;
     protected final Map<StandPose, StandActionAnimation<T>> actionAnim = new HashMap<>();
 
     protected StandEntityModel(boolean scaleHead, float yHeadOffset, float zHeadOffset) {
@@ -151,7 +151,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         idleLoopTickStamp = ticks;
     }
 
-    private final ModelAnim<T> HEAD_ROTATION = (rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
+    protected final ModelAnim<T> HEAD_ROTATION = (rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
         headParts().forEach(part -> {
             part.yRot = MathUtil.rotLerpRad(rotationAmount, part.yRot, yRotationOffset * MathUtil.DEG_TO_RAD);
             part.xRot = MathUtil.rotLerpRad(rotationAmount, part.xRot, xRotation * MathUtil.DEG_TO_RAD);
@@ -162,7 +162,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     protected void initPoses() {
         poseReset = initPoseReset();
 
-        idlePose = initIdlePose().setAdditionalAnim(HEAD_ROTATION);
+        idlePose = initBaseIdlePose();
         idleLoop = new ModelPoseTransition<T>(idlePose, initIdlePose2Loop()).setEasing(ticks -> MathHelper.sin(ticks / 20));
 
         summonPoses = initSummonPoses();
@@ -178,12 +178,16 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
 
     protected abstract ModelPose<T> initPoseReset();
 
+    protected IModelPose<T> initBaseIdlePose() {
+        return initIdlePose().setAdditionalAnim(HEAD_ROTATION);
+    }
+
     protected ModelPose<T> initIdlePose() {
         return initPoseReset();
     }
 
-    protected ModelPose<T> initIdlePose2Loop() {
-        return initIdlePose();
+    protected IModelPose<T> initIdlePose2Loop() {
+        return initBaseIdlePose();
     }
 
     private static final float SUMMON_ANIMATION_LENGTH = 20.0F;
@@ -210,19 +214,19 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     }
 
     protected StandActionAnimation<T> initBlockAnim() {
-        return new StandActionAnimation.Builder<T>().addPose(StandEntityAction.Phase.BUTTON_HOLD, blockPose()).build(idlePose);
+        return new StandActionAnimation.Builder<T>().addPose(StandEntityAction.Phase.BUTTON_HOLD, initBlockPose()).build(idlePose);
     }
 
-    protected IModelPose<T> blockPose() {
-        return initIdlePose();
+    protected IModelPose<T> initBlockPose() {
+        return initBaseIdlePose();
     }
 
     protected StandActionAnimation<T> initRangedAttackAnim() {
-        return new StandActionAnimation.Builder<T>().addPose(StandEntityAction.Phase.BUTTON_HOLD, rangedAttackPose()).build(idlePose);
+        return new StandActionAnimation.Builder<T>().addPose(StandEntityAction.Phase.BUTTON_HOLD, initRangedAttackPose()).build(idlePose);
     }
 
-    protected IModelPose<T> rangedAttackPose() {
-        return initIdlePose();
+    protected IModelPose<T> initRangedAttackPose() {
+        return initBaseIdlePose();
     }
 
     protected abstract void swingArmBarrage(T entity, float swingAmount, float yRotation, float xRotation, float ticks, HandSide swingingHand, float recovery);
@@ -268,6 +272,10 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     }
 
     protected abstract void rotateAdditionalArmSwings();
+    
+    public ModelRenderer getOppositeHandside(ModelRenderer modelRenderer) {
+        return modelRenderer;
+    }
 
     public enum VisibilityMode {
         ALL,

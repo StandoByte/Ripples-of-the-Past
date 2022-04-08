@@ -29,7 +29,8 @@ public class HamonSunlightYellowOverdrive extends HamonAction {
         Entity entity = target.getEntity(user.level);
         if (entity instanceof LivingEntity) {
             LivingEntity targetEntity = (LivingEntity) entity;
-            if (!targetEntity.isInvulnerableTo(DamageUtil.HAMON) && targetEntity.getBoundingBox().inflate(user.getBbWidth() + 0.5F).contains(user.getEyePosition(1.0F))) {
+            if (!targetEntity.isInvulnerableTo(DamageUtil.HAMON) && targetEntity.getBoundingBox()
+                    .inflate(user.getBbWidth() + 0.5F).intersects(user.getBoundingBox())) {
                 return ActionConditionResult.POSITIVE;
             }
         }

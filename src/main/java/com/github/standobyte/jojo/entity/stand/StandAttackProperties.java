@@ -106,7 +106,6 @@ public class StandAttackProperties {
         return knockbackYRot;
     }
     
-    // FIXME (!!!!) upwards knockback
     public float getKnockbackXRot() {
         return knockbackXRot;
     }

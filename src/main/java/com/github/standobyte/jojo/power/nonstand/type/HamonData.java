@@ -214,7 +214,7 @@ public class HamonData extends TypeSpecificData {
         return hamonDamageFactor;
     }
     
-    // FIXME (!!!!) use this for all hamon actions
+    // FIXME (!!) use this for all hamon actions
     public float hamonEfficiency() {
         float efficiency = 1;
         LivingEntity user = power.getUser();
@@ -365,6 +365,7 @@ public class HamonData extends TypeSpecificData {
             return;
         }
         float lvlInc = (2 * MathHelper.clamp(getAverageExercisePoints(), 0F, 1F)) - 1F;
+        // FIXME (!!) why tf does it go down when the user is offline
         if (lvlInc < 0) {
             if (!JojoModConfig.getCommonConfigInstance().breathingTechniqueDeterioration.get()) {
                 lvlInc = 0;

@@ -6,9 +6,9 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 
 public class RotationAngle {
     public final ModelRenderer modelRenderer;
-    private final float angleX;
-    private final float angleY;
-    private final float angleZ;
+    final float angleX;
+    final float angleY;
+    final float angleZ;
     
     public RotationAngle(ModelRenderer modelRenderer, float angleX, float angleY, float angleZ) {
         this.modelRenderer = modelRenderer;

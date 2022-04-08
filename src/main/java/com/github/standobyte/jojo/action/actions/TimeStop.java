@@ -23,7 +23,6 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
-// FIXME (!) time stop learning progress
 public class TimeStop extends StandAction {
     private Supplier<SoundEvent> voiceLineWithStandSummoned = () -> null;
     private Supplier<SoundEvent> timeStopSound = () -> null;
@@ -87,6 +86,10 @@ public class TimeStop extends StandAction {
                                 chunkPos, new ChunkPos(player.blockPosition()))) && TimeHandler.canPlayerSeeInStoppedTime(player));
             }
             // FIXME (!) add progress points (inside TickingTimeStopInstance)
+            power.addLearningProgressPoints(this, 5);
+            if (hasShiftVariation()) {
+                power.addLearningProgressPoints(getShiftVariationIfPresent(), 5);
+            }
             user.addEffect(new EffectInstance(ModEffects.TIME_STOP.get(), timeStopTicks, 0, false, false, true));
         }
     }
@@ -116,5 +119,10 @@ public class TimeStop extends StandAction {
         LivingEntity user = power.getUser();
         int timeStopTicks = TimeHandler.getTimeStopTicks(power, this, user, INonStandPower.getNonStandPowerOptional(user));
         return new TranslationTextComponent(key, String.format("%.2f", (float) timeStopTicks / 20F));
+    }
+    
+    @Override
+    public boolean canUserSeeInStoppedTime(LivingEntity user, IStandPower power) {
+        return true;
     }
 }
