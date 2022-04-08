@@ -340,7 +340,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
     @Override
     protected StandActionAnimation<TheWorldEntity> initHeavyAttackAnim(boolean combo) {
         if (combo) {
-            ModelPose<TheWorldEntity> pose1 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+            ModelPose<TheWorldEntity> kickPose1 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
                     RotationAngle.fromDegrees(head, -7.5F, 153.33F, 0F), 
                     RotationAngle.fromDegrees(body, 0F, 153.33F, 0F),
                     RotationAngle.fromDegrees(leftArm, 0F, 0F, -30F),
@@ -351,7 +351,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                     RotationAngle.fromDegrees(rightLeg, -10F, 0F, 20F),
                     RotationAngle.fromDegrees(rightLowerLeg, 50F, 0F, 0F)
             });
-            ModelPose<TheWorldEntity> pose2 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+            ModelPose<TheWorldEntity> kickPose2 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
                     RotationAngle.fromDegrees(head, -11.25F, 230F, 0F), 
                     RotationAngle.fromDegrees(body, 0F, 230F, 0F),
                     RotationAngle.fromDegrees(leftArm, 0F, 0F, -45F),
@@ -361,7 +361,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                     RotationAngle.fromDegrees(rightLeg, -15F, 0F, 30F),
                     RotationAngle.fromDegrees(rightLowerLeg, 75F, 0F, 0F)
             });
-            ModelPose<TheWorldEntity> pose3 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+            ModelPose<TheWorldEntity> kickPose3 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
                     RotationAngle.fromDegrees(head, -15F, 360F, 0F), 
                     RotationAngle.fromDegrees(body, -43.00306F, 308.28988F, 36.20399F),
                     RotationAngle.fromDegrees(leftArm, 0F, 0F, -60F),
@@ -374,13 +374,13 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
             });
             return new StandActionAnimation.Builder<TheWorldEntity>()
                     .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransitionMultiple.Builder<TheWorldEntity>(idlePose)
-                            .addPose(0.5F, pose1)
-                            .addPose(0.75F, pose2)
-                            .build(pose3))
+                            .addPose(0.5F, kickPose1)
+                            .addPose(0.75F, kickPose2)
+                            .build(kickPose3))
                     .build(idlePose);
         }
         else { // FIXME (!) (stand anim) use xRotation
-            ModelPose<TheWorldEntity> pose1 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+            ModelPose<TheWorldEntity> donutPose1 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
                     new RotationAngle(leftArm, 0.0F, 0.0F, -0.5236F),
                     new RotationAngle(leftForeArm, 0.0F, 0.0F, 0.5672F),
                     new RotationAngle(rightArm, 0.2182F, 0.8727F, 1.3963F),
@@ -388,8 +388,8 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                     new RotationAngle(leftLeg, 0.0F, 0.0436F, -0.1309F),
                     new RotationAngle(rightLeg, 0.2618F, 0.2618F, 0.1309F)
             });
-            ModelPose<TheWorldEntity> pose2 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
-                    new RotationAngle(head, -0.2182F, 0.0F, 0.0F), // FIXME (!!) (stand anim) ADD head rotation
+            ModelPose<TheWorldEntity> donutPose2 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+                    new RotationAngle(head, -0.2182F, 0.0F, 0.0F), 
                     new RotationAngle(body, 0.2182F, 0.2618F, 0.0F),
                     new RotationAngle(upperPart, 0.0F, 0.1745F, 0.0F),
                     new RotationAngle(leftArm, 0.0F, 0.0F, -0.5236F),
@@ -399,7 +399,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                     new RotationAngle(leftLeg, 0.1745F, 0.0F, 0.0F),
                     new RotationAngle(rightLeg, 0.2618F, 0.2618F, 0.1309F)
             });
-            ModelPose<TheWorldEntity> pose3 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+            ModelPose<TheWorldEntity> donutPose3 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
                     new RotationAngle(body, 0.2182F, -0.5236F, 0.0F),
                     new RotationAngle(upperPart, 0.0F, -0.5236F, 0.0F),
                     new RotationAngle(leftArm, 0.0F, 0.4363F, -1.5708F),
@@ -410,7 +410,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                     new RotationAngle(leftLowerLeg, 1.8326F, 0.0F, 0.0F),
                     new RotationAngle(rightLeg, 0.2618F, 0.2618F, 0.1309F)
             });
-            ModelPose<TheWorldEntity> pose4 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+            ModelPose<TheWorldEntity> donutPose4 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
                     new RotationAngle(body, 0.2182F, -0.0873F, 0.0F),
                     new RotationAngle(upperPart, 0.0F, -0.0873F, 0.0F),
                     new RotationAngle(leftArm, 0.0F, 0.4363F, -0.7854F),
@@ -422,12 +422,12 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                     new RotationAngle(rightLeg, 0.2618F, 0.2618F, 0.1309F)
             });
             return new StandActionAnimation.Builder<TheWorldEntity>()
-                    .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<TheWorldEntity>(pose1, pose2).setEasing(pr -> Math.max(pr * 3F - 2F, 0F)))
-                    .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransition<TheWorldEntity>(pose2, pose3))
-                    .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransitionMultiple.Builder<TheWorldEntity>(pose3)
-                            .addPose(0.5F, pose3)
-                            .addPose(0.7F, pose4)
-                            .addPose(0.8F, pose4)
+                    .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<TheWorldEntity>(donutPose1, donutPose2).setEasing(pr -> Math.max(pr * 3F - 2F, 0F)))
+                    .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransition<TheWorldEntity>(donutPose2, donutPose3))
+                    .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransitionMultiple.Builder<TheWorldEntity>(donutPose3)
+                            .addPose(0.5F, donutPose3)
+                            .addPose(0.7F, donutPose4)
+                            .addPose(0.8F, donutPose4)
                             .build(idlePose))
                     .build(idlePose);
         }

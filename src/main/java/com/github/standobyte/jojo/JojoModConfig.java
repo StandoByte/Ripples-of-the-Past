@@ -23,7 +23,7 @@ import net.minecraftforge.registries.IForgeRegistry;
 @EventBusSubscriber(modid = JojoMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public class JojoModConfig {
     
-    // FIXME (!) sync common config with clients
+    // FIXME (!!) sync common config with clients
     public static class Common {
         private boolean loaded = false;
         
@@ -61,15 +61,15 @@ public class JojoModConfig {
             builder.push("Keep Powers After Death");
                 keepStandOnDeath = builder
                         .translation("jojo.config.keepStandOnDeath") 
-                        .define("keepStandOnDeath", true);
+                        .define("keepStandOnDeath", false);
                 
                 keepHamonOnDeath = builder
                         .translation("jojo.config.keepHamonOnDeath")
-                        .define("keepHamonOnDeath", true);
+                        .define("keepHamonOnDeath", false);
                 
                 keepVampirismOnDeath = builder
                         .translation("jojo.config.keepVampirismOnDeath")
-                        .define("keepVampirismOnDeath", true);
+                        .define("keepVampirismOnDeath", false);
             builder.pop();
             
             builder.push("Structures Spawn");
@@ -241,7 +241,7 @@ public class JojoModConfig {
     }
     
     private static Common COMMON_REMOTE_SERVER = COMMON;
-    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!! if on remote server - instance with values from server
+    // FIXME (!!) if on remote server - instance with values from server
     public static Common getCommonConfigInstance() {
         return COMMON;
     }

@@ -1,7 +1,5 @@
 package com.github.standobyte.jojo.util;
 
-import java.util.Set;
-
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
@@ -19,7 +17,6 @@ import com.github.standobyte.jojo.network.packets.fromserver.SyncWorldTimeStopPa
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
-import com.google.common.collect.ImmutableSet;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -56,8 +53,6 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 @EventBusSubscriber(modid = JojoMod.MOD_ID)
 public class TimeHandler {
-    private static final ImmutableSet.Builder<Action<?>> TIME_STOP_ACTIONS_BUILDER = ImmutableSet.builder(); 
-    private static Set<Action<?>> ALLOW_MOVING_IN_STOPPED_TIME = null;
     
     public static void setTimeResumeSounds(World world, ChunkPos chunkPos, int timeStopTicks, TimeStop timeStop, LivingEntity timeStopUser) {
         WorldUtilCap cap = world.getCapability(WorldUtilCapProvider.CAPABILITY).resolve().get();
@@ -131,17 +126,30 @@ public class TimeHandler {
     private static boolean hasTimeStopAbility(LivingEntity entity) {
         return IStandPower.getStandPowerOptional(entity).map(stand -> {
             for (Action<IStandPower> ability : stand.getAbilities()) {
-                if (ability.isUnlocked(stand) && ALLOW_MOVING_IN_STOPPED_TIME.contains(ability)) {
+                if (ability.isUnlocked(stand) && ability.canUserSeeInStoppedTime(entity, stand)) {
                     return true;
                 }
             }
             for (Action<IStandPower> attack : stand.getAttacks()) {
-                if (attack.isUnlocked(stand) && ALLOW_MOVING_IN_STOPPED_TIME.contains(attack)) {
+                if (attack.isUnlocked(stand) && attack.canUserSeeInStoppedTime(entity, stand)) {
                     return true;
                 }
             }
             return false;
-        }).orElse(false);
+        }).orElse(false) || 
+                INonStandPower.getNonStandPowerOptional(entity).map(power -> {
+                    for (Action<INonStandPower> ability : power.getAbilities()) {
+                        if (ability.isUnlocked(power) && ability.canUserSeeInStoppedTime(entity, power)) {
+                            return true;
+                        }
+                    }
+                    for (Action<INonStandPower> attack : power.getAttacks()) {
+                        if (attack.isUnlocked(power) && attack.canUserSeeInStoppedTime(entity, power)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }).orElse(false);
     }
     
     
@@ -304,17 +312,6 @@ public class TimeHandler {
 
     public static final int MIN_TIME_STOP_TICKS = 5;
     public static int getTimeStopTicks(IStandPower standPower, StandAction timeStopAction, LivingEntity user, LazyOptional<INonStandPower> otherPower) {
-//        float ticks = (float) (standPower.getXp() - minStandExp) / (float) (IStandPower.MAX_EXP - minStandExp) * 95F + 5;
-//        ticks *= otherPower.map(power -> {
-//           if (power.getType() == ModNonStandPowers.VAMPIRISM.get()) {
-//               return 1F + (float) ((VampirismPowerType.bloodLevel(power, Difficulty.EASY) - 1) * 4) / 15F;
-//           }
-//           return 1F;
-//        }).orElse(1F);
-//        return MathHelper.floor(ticks);
-//        
-
-        // FIXME (!) ts ticks
         return MathHelper.floor(standPower.getLearningProgressPoints(timeStopAction)) + MIN_TIME_STOP_TICKS;
     }
     
@@ -325,17 +322,5 @@ public class TimeHandler {
             }
             return false;
         }).orElse(false));
-    }
-    
-    
-    
-    public static void addAllowMovingInStoppedTime(Action<?> action) {
-        if (ALLOW_MOVING_IN_STOPPED_TIME == null) {
-            TIME_STOP_ACTIONS_BUILDER.add(action);
-        }
-    }
-    
-    public static void initTimeManipulatingActions() {
-        ALLOW_MOVING_IN_STOPPED_TIME = TIME_STOP_ACTIONS_BUILDER.build();
     }
 }

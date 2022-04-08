@@ -55,7 +55,7 @@ public class MathUtil {
         return angleA + lerp * wrapRadians(angleB - angleA);
     }
     
-    // FIXME !!!!!!!!!!!! remove this, then fix weird head rotation
+    // FIXME (!) remove this, then fix weird head rotation
     public static float wrapRadians(float angle) {
         angle %= DOUBLE_PI;
         if (angle >= PI) {

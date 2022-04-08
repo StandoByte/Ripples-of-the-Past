@@ -64,11 +64,12 @@ public class StandEntityLightAttack extends StandEntityAction {
         }
         return super.isCancelable(standPower, standEntity, phase, newAction);
     }
-    
-    @Override
-    public boolean canBeScheduled(IStandPower standPower, StandEntity standEntity) {
-        return standEntity.getCurrentTaskAction() != this;
-    }
+
+    // scheduled stand task
+//    @Override
+//    public boolean canBeScheduled(IStandPower standPower, StandEntity standEntity) {
+//        return standEntity.getCurrentTaskAction() != this;
+//    }
     
     @Override
     public boolean isCombatAction() {

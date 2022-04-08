@@ -93,7 +93,7 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
     }
 
     @Override
-    protected IModelPose<HierophantGreenEntity> rangedAttackPose() {
+    protected IModelPose<HierophantGreenEntity> initRangedAttackPose() {
         return new ModelPose<HierophantGreenEntity>(new RotationAngle[] {
                 new RotationAngle(leftArm, -1.5708F, 0.0F, -1.309F),
                 new RotationAngle(leftForeArm, -0.9163F, 0.0F, 0.0F),

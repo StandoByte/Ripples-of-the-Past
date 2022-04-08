@@ -44,7 +44,6 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         this(64, 64);
     }
 
-    // FIXME (!) model constructor
     public HumanoidStandModel(int textureWidth, int textureHeight) {
         super(true, 16.0F, 0.0F, 2.0F, 2.0F, 24.0F);
         this.texWidth = textureWidth;
@@ -222,13 +221,13 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         return initBarrageSwingAnim(1.0F);
     }
     
-    private ModelPoseSided<T> initBarrageSwingAnim(float backSwing) {
+    protected ModelPoseSided<T> initBarrageSwingAnim(float backSwing) {
         return new ModelPoseSided<>(
                 initArmSwingPose(HandSide.LEFT, backSwing, SwingPart.SWING), 
                 initArmSwingPose(HandSide.RIGHT, backSwing, SwingPart.SWING));
     }
     
-    private ModelPoseTransition<T> initArmSwingPose(HandSide swingingHand, float backSwingAmount, SwingPart animPart) {
+    protected ModelPoseTransition<T> initArmSwingPose(HandSide swingingHand, float backSwingAmount, SwingPart animPart) {
         ModelRenderer punchingArm = getArm(swingingHand);
         ModelRenderer punchingForeArm = getForeArm(swingingHand);
         ModelRenderer otherArm = getArm(swingingHand.getOpposite());
@@ -288,7 +287,7 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         return anim;
     }
     
-    private enum SwingPart {
+    protected enum SwingPart {
         BACKSWING,
         SWING
     }
@@ -321,6 +320,23 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
             return rightForeArm;
         }
         return null;
+    }
+    
+    @Override
+    public ModelRenderer getOppositeHandside(ModelRenderer modelRenderer) {
+        if (modelRenderer == leftArm) {
+            return rightArm;
+        }
+        if (modelRenderer == rightArm) {
+            return leftArm;
+        }
+        if (modelRenderer == leftForeArm) {
+            return rightForeArm;
+        }
+        if (modelRenderer == rightForeArm) {
+            return leftForeArm;
+        }
+        return super.getOppositeHandside(modelRenderer);
     }
 
     @Override
@@ -372,7 +388,7 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
     }
 
     @Override
-    protected IModelPose<T> blockPose() {
+    protected IModelPose<T> initBlockPose() {
         xRotation = MathHelper.clamp(xRotation, -60, 60) * MathUtil.DEG_TO_RAD / 2;
         return new ModelPose<T>(new RotationAngle[] {
                 new RotationAngle(body, 0, 0, 0),

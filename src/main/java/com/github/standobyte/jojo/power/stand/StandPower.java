@@ -624,7 +624,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 setType(stand);
                 if (nbt.contains("Exp")) {
                     xp = nbt.getInt("Exp");
-                    // FIXME (!) add unlocked actions from v0.1
+                    // FIXME (!!) add unlocked actions from v0.1
                 }
                 else {
                     xp = nbt.getInt("Xp");

@@ -21,7 +21,7 @@ import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
 
 public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
-    // FIXME (!) effects are not removed on /jojopower remove
+    // FIXME (!!) effects are not removed on /jojopower remove
     private static Map<Effect, IntBinaryOperator> EFFECTS_AMPLIFIERS;
     
     public static void initVampiricEffectsMap() {

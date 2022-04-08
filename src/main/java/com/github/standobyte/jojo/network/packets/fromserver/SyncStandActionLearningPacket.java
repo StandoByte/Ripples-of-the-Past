@@ -41,7 +41,7 @@ public class SyncStandActionLearningPacket {
                     boolean showToast = msg.showToast && !standAction.isUnlocked(power) /*always false btw*/;
                     power.setLearningProgressPoints(standAction, msg.progress, false, false);
                     if (showToast) {
-                        // FIXME (!) new stand action toast
+                        // FIXME (!!) new stand action toast
 //                        ToastGui toastGui = Minecraft.getInstance().getToasts();
 //                        ActionToast.addOrUpdate(toastGui, 
 //                                type == ActionType.ATTACK ? ActionToast.Type.STAND_ATTACK_VARIATION : ActionToast.Type.STAND_ABILITY_VARIATION, 

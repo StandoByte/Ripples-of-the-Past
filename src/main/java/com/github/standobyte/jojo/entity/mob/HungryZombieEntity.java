@@ -61,6 +61,7 @@ public class HungryZombieEntity extends ZombieEntity {
                 .add(Attributes.ATTACK_DAMAGE, 5.0D);
     }
 
+    // FIXME (!!) make zombies not attack villagers if the owner is nearby (~16 blocks)
     @Override
     protected void registerGoals() {
         super.registerGoals();

@@ -14,6 +14,7 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
@@ -142,8 +143,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
     private static final DataParameter<Optional<StandEntityTask>> CURRENT_TASK = EntityDataManager.defineId(StandEntity.class, 
             (IDataSerializer<Optional<StandEntityTask>>) ModDataSerializers.STAND_ENTITY_TASK.get().getSerializer());
-    @Nullable
-    private StandEntityTask scheduledTask;
+    // scheduled stand task
+//    @Nullable
+//    private StandEntityTask scheduledTask;
     public boolean rotatedTowardsTarget;
     
     protected StandPose standPose = StandPose.SUMMON;
@@ -413,7 +415,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public void fullSummonFromArms() {
         if (!level.isClientSide() && isArmsOnlyMode()) {
             entityData.set(ARMS_ONLY_MODE, (byte) 2);
-            scheduledTask = null;
+            // scheduled stand task
+//            scheduledTask = null;
             StandEntityTask currentTask = getCurrentTask();
             if (currentTask != null) {
                 StandEntityAction action = currentTask.getAction();
@@ -1010,9 +1013,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 userPower.consumeStamina(task.getAction().getStaminaCost(userPower));
                 return true;
             }
-            else if (task.getAction().canBeScheduled(userPower, this)) {
-                this.scheduledTask = task;
-            }
+            // scheduled stand task
+//            else if (task.getAction().canBeScheduled(userPower, this)) {
+//                this.scheduledTask = task;
+//            }
         }
         return false;
     }
@@ -1048,15 +1052,17 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         setStandPose(StandPose.IDLE);
         clearedTask.getAction().onClear(userPower, this);
         entityData.set(CURRENT_TASK, Optional.empty());
-        if (scheduledTask != null) {
-            StandEntityTask nextTask = scheduledTask;
-            if (clearedTask.getOffsetFromUser() != null) {
-                nextTask.setOffsetFromUser(clearedTask.getOffsetFromUser());
-            }
-            scheduledTask = null;
-            setTask(nextTask);
-        }
-        else if (isArmsOnlyMode() && newAction == null) {
+        // scheduled stand task
+//        if (scheduledTask != null) {
+//            StandEntityTask nextTask = scheduledTask;
+//            if (clearedTask.getOffsetFromUser() != null) {
+//                nextTask.setOffsetFromUser(clearedTask.getOffsetFromUser());
+//            }
+//            scheduledTask = null;
+//            setTask(nextTask);
+//        }
+//        else 
+            if (isArmsOnlyMode() && newAction == null) {
             StandEntityAction unsummon = ModActions.STAND_ENTITY_UNSUMMON.get();
             setTask(new StandEntityTask(this, unsummon, unsummon.getStandActionTicks(userPower, this), 
                     StandEntityAction.Phase.PERFORM, isArmsOnlyMode(), ActionTarget.EMPTY));
@@ -1546,7 +1552,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         if (hurt) {
             if (targetLiving != null) {
                 if (attack.getAdditionalKnockback() > 0) {
-                    float knockbackYRot = yRot + attack.getKnockbackYRotDeg();
+                    Vector3d vecToTarget = target.position().subtract(this.position());
+                    float knockbackYRot = (float) -MathHelper.atan2(vecToTarget.x, vecToTarget.z) * MathUtil.RAD_TO_DEG + attack.getKnockbackYRotDeg();
                     float knockbackXRot = attack.getKnockbackXRot();
                     float knockbackStrength = attack.getAdditionalKnockback() * 0.5F;
                     if (Math.abs(knockbackXRot) < 90) {

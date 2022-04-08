@@ -177,7 +177,7 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
     }
 
     @Override
-    protected IModelPose<MagiciansRedEntity> rangedAttackPose() {
+    protected IModelPose<MagiciansRedEntity> initRangedAttackPose() {
         return new ModelPose<MagiciansRedEntity>(new RotationAngle[] {
                 new RotationAngle(beakUpper, -0.3491F, 0.0F, 0.0F),
                 new RotationAngle(beakLower, 0.5236F, 0.0F, 0.0F),
@@ -209,14 +209,14 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
     @Override
     protected StandActionAnimation<MagiciansRedEntity> initHeavyAttackAnim(boolean combo) {
         if (combo) {
-            ModelPose<MagiciansRedEntity> pose1 = new ModelPose<MagiciansRedEntity>(new RotationAngle[] {
+            ModelPose<MagiciansRedEntity> kickPose1 = new ModelPose<MagiciansRedEntity>(new RotationAngle[] {
                     RotationAngle.fromDegrees(head, -15F, 0F, 0F), 
                     RotationAngle.fromDegrees(body, -49.1066F, -20.7048F, 22.2077F),
                     RotationAngle.fromDegrees(leftLeg, 45F, 30F, 0F),
                     RotationAngle.fromDegrees(rightLeg, -75F, 30F, 30F),
                     RotationAngle.fromDegrees(rightLowerLeg, 60F, 0F, 0F)
             });
-            ModelPose<MagiciansRedEntity> pose2 = new ModelPose<MagiciansRedEntity>(new RotationAngle[] {
+            ModelPose<MagiciansRedEntity> kickPose2 = new ModelPose<MagiciansRedEntity>(new RotationAngle[] {
                     RotationAngle.fromDegrees(head, -30F, -15F, 0F), 
                     RotationAngle.fromDegrees(body, -54.7356F, -30F, 35.2644F),
                     new RotationAngle(beakUpper, -0.3491F, 0.0F, 0.0F),
@@ -229,7 +229,7 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
                     RotationAngle.fromDegrees(rightLeg, -105F, 30F, 30F),
                     RotationAngle.fromDegrees(rightLowerLeg, 90F, 0F, 0F)
             });
-            ModelPose<MagiciansRedEntity> pose3 = new ModelPose<MagiciansRedEntity>(new RotationAngle[] {
+            ModelPose<MagiciansRedEntity> kickPose3 = new ModelPose<MagiciansRedEntity>(new RotationAngle[] {
                     RotationAngle.fromDegrees(head, -45F, -10F, 0F), 
                     RotationAngle.fromDegrees(body, -59.3179F, -27.034F, 37.4537F),
                     RotationAngle.fromDegrees(leftArm, -135F, -15F, 30F),
@@ -241,8 +241,8 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
                     RotationAngle.fromDegrees(rightLowerLeg, 0F, 0F, 0F)
             });
             return new StandActionAnimation.Builder<MagiciansRedEntity>()
-                    .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<MagiciansRedEntity>(pose1, pose2))
-                    .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransition<MagiciansRedEntity>(pose2, pose3))
+                    .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<MagiciansRedEntity>(kickPose1, kickPose2))
+                    .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransition<MagiciansRedEntity>(kickPose2, kickPose3))
                     .build(idlePose);
         }
         return super.initHeavyAttackAnim(combo);

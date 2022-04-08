@@ -61,7 +61,6 @@ import com.github.standobyte.jojo.action.actions.VampirismZombieSummon;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
-import com.github.standobyte.jojo.util.TimeHandler;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
@@ -354,17 +353,6 @@ public class ModActions {
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void afterActionsInit(RegistryEvent.Register<Action<?>> event) {
         Action.initShiftVariations();
-        addTimeStopAbilities(event);
-    }
-    
-    public static void addTimeStopAbilities(RegistryEvent.Register<Action<?>> event) {
-        TimeHandler.addAllowMovingInStoppedTime(THE_WORLD_TIME_STOP.get());
-        TimeHandler.addAllowMovingInStoppedTime(STAR_PLATINUM_TIME_STOP.get());
-    }
-    
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void initTimeManipulatingActions(RegistryEvent.Register<Action<?>> event) {
-        TimeHandler.initTimeManipulatingActions();
     }
     
     
