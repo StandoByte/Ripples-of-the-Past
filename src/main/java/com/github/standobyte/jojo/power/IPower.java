@@ -52,6 +52,8 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
         }
         return false;
     }
+    void queueNextAction(Action<P> action);
+    boolean clickQueuedAction();
     ActionConditionResult checkRequirements(Action<P> action, ActionTargetContainer targetContainer, boolean checkTargetType);
     ActionConditionResult checkTargetType(Action<P> action, ActionTargetContainer targetContainer);
     boolean canUsePower();
@@ -97,8 +99,18 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     }
     
     public static enum PowerClassification {
-        STAND,
-        NON_STAND
+        STAND(IStandPower.class),
+        NON_STAND(INonStandPower.class);
+        
+        private final Class<? extends IPower<?, ?>> powerClass;
+        
+        private PowerClassification(Class<? extends IPower<?, ?>> powerClass) {
+            this.powerClass = powerClass;
+        }
+        
+        public Class<? extends IPower<?, ?>> getPowerClass() {
+            return powerClass;
+        }
     }
     
     public static enum ActionType {

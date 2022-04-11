@@ -7,15 +7,12 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncResolveLimitPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStaminaPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStandActionLearningClearPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStandActionLearningPacket;
@@ -25,19 +22,12 @@ import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 
-import net.minecraft.entity.EntityClassification;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
 
 public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> implements IStandPower {
     private int tier = 0;
@@ -45,12 +35,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     private IStandManifestation standManifestation = null;
     private float stamina;
     
-    private float resolve;
-    private int noResolveDecayTicks;
-    private int resolveLevel;
-    private float resolveLimit;
-    private float maxAchievedResolve;
-    private int noResolveLimitDecayTicks;
+    private ResolveCounter resolveCounter = new ResolveCounter();
     @Deprecated
     private int xp = 0;
     private boolean skippedProgression;
@@ -83,11 +68,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             }
             type = null;
             stamina = 0;
-            resolve = 0;
-            noResolveDecayTicks = 0;
-            resolveLevel = 0;
-            resolveLimit = 0;
-            noResolveLimitDecayTicks = 0;
+            resolveCounter.reset();
             xp = 0;
             serverPlayerUser.ifPresent(player -> {
                 SaveFileUtilCapProvider.getSaveFileCap(player).removePlayerStand(standType);
@@ -123,7 +104,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             stamina = isUserCreative() ? getMaxStamina() : 0;
         }
         if (usesResolve()) {
-            resolve = 0;
+            resolveCounter.onStandAcquired();
         }
         tier = Math.max(tier, standType.getTier());
     }
@@ -230,19 +211,18 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         return 1F;
     }
     
+    
 
-    private static final float RESOLVE_DECAY = 5F;
-    private static final int RESOLVE_NO_DECAY_TICKS = 400;
-    private static final float RESOLVE_DMG_REDUCTION = 0.5F;
-    private static final float RESOLVE_EFFECT_DMG_REDUCTION = 0.5F;
-    private static final float RESOLVE_FOR_DMG_POINT = 0.5F;
-    private static final float RESOLVE_LIMIT_FOR_DMG_POINT_TAKEN = 5F;
-    private static final float RESOLVE_LIMIT_MANUAL_CONTROL_TICK = 0.1F;
-    private static final float RESOLVE_UNDER_LIMIT_MULTIPLIER = 10F;
-    private static final float RESOLVE_LIMIT_DECAY = 4F;
-    private static final int RESOLVE_LIMIT_NO_DECAY_TICKS = 40;
-    private static final int[] RESOLVE_EFFECT_MIN = {300, 400, 500, 600, 600};
-    private static final int[] RESOLVE_EFFECT_MAX = {600, 1200, 1500, 1800, 2400};
+    @Override
+    public ResolveCounter getResolveCounter() {
+        return resolveCounter;
+    }
+    
+    @Override
+    public void setResolveCounter(ResolveCounter resolve) {
+        this.resolveCounter = resolve;
+    }
+    
     @Override
     public boolean usesResolve() {
         return hasPower() && getType().usesResolve();
@@ -253,7 +233,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (!usesResolve()) {
             return 0;
         }
-        return resolve;
+        return resolveCounter.getResolveValue();
     }
 
     @Override
@@ -261,186 +241,56 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (!usesResolve()) {
             return 0;
         }
-        return MAX_RESOLVE;
-    }
-    
-    @Override
-    public void addResolve(float amount) {
-        if (usesResolve()) {
-            setResolve(this.resolve + amount, RESOLVE_NO_DECAY_TICKS);
-        }
-    }
-    
-    @Override
-    public void setResolve(float amount, int noDecayTicks) {
-        setResolve(amount, noDecayTicks, this.maxAchievedResolve);
+        return resolveCounter.getMaxResolveValue();
     }
 
     @Override
-    public void setResolve(float amount, int noDecayTicks, float maxAchievedResolve) {
-        amount = MathHelper.clamp(amount, 0, getMaxResolve());
-        boolean send = this.resolve != amount || this.noResolveDecayTicks != noDecayTicks;
-        this.resolve = amount;
-        this.maxAchievedResolve = Math.max(maxAchievedResolve, this.resolve);
-        this.noResolveDecayTicks = Math.max(this.noResolveDecayTicks, noDecayTicks);
-        
-        if (!user.hasEffect(ModEffects.RESOLVE.get()) && this.resolve == getMaxResolve()) {
-            user.addEffect(new EffectInstance(ModEffects.RESOLVE.get(), 
-                    RESOLVE_EFFECT_MAX[Math.min(resolveLevel, RESOLVE_EFFECT_MAX.length)], resolveLevel, false, 
-                    false, true));
-            setResolveLevel(Math.min(resolveLevel + 1, getMaxResolveLevel()));
+    public float getMaxAchievedResolve() {
+        if (!usesResolve()) {
+            return 0;
         }
-        
-        if (send) {
-            serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new SyncResolvePacket(getResolve(), maxAchievedResolve, resolveLevel, noResolveDecayTicks), player);
-            });
-        }
-        
-        setResolveLimit(Math.max(resolveLimit, getResolve()), noDecayTicks);
+        return resolveCounter.getMaxAchievedValue();
     }
-    
-    @Override
-    public int getNoResolveDecayTicks() {
-        return noResolveDecayTicks;
-    }
-    
+
     @Override
     public int getResolveLevel() {
-        return usesResolve() ? resolveLevel : 0;
+        if (!usesResolve()) {
+            return 0;
+        }
+        return resolveCounter.getResolveLevel();
     }
-    
+
+    @Override
+    public void setResolveLevel(int level) {
+        if (usesResolve()) {
+            resolveCounter.setResolveLevel(level);
+        }
+    }
+
     @Override
     public int getMaxResolveLevel() {
-        if (!usesResolve() && !hasPower()) {
+        if (!usesResolve()) {
             return 0;
         }
         return getType().getMaxResolveLevel();
     }
-    
-    @Override
-    public void setResolveLevel(int level) {
-        if (usesResolve()) {
-            this.resolveLevel = level;
-            if (!user.level.isClientSide() && hasPower()) {
-                getType().onNewResolveLevel(this);
-                if (level >= getType().getMaxResolveLevel()) {
-                    serverPlayerUser.ifPresent(player -> {
-                        ModCriteriaTriggers.STAND_MAX.get().trigger(player);
-                    });
-                }
-            }
-        }
-    }
-    
-    @Override
-    public void resetResolve() {
-        this.maxAchievedResolve = 0;
-        setResolve(0, 0);
-        setResolveLimit(0, 0);
-    }
-    
-    @Override
-    public float getResolveLimit() {
-        return MathHelper.clamp(Math.max(resolveLimit, maxAchievedResolve), getResolve(), getMaxResolve());
-    }
-    
-    @Override
-    public void addResolveLimit(float amount) {
-        float hpRatio = user.getHealth() / user.getMaxHealth();
-        setResolveLimit(getResolveLimit() + amount, (int) ((float) RESOLVE_LIMIT_NO_DECAY_TICKS * (10F - hpRatio * 9F)));
-    }
-    
-    @Override
-    public void setResolveLimit(float amount, int noDecayTicks) {
-        amount = MathHelper.clamp(amount, 0, getMaxResolve());
-        boolean send = this.resolveLimit != amount;
-        this.resolveLimit = amount;
-        this.noResolveLimitDecayTicks = Math.max(this.noResolveLimitDecayTicks, noDecayTicks);
-        if (send) {
-            serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new SyncResolveLimitPacket(resolveLimit, noResolveLimitDecayTicks), player);
-            });
-        }
-    }
-    
+
     @Override
     public float getResolveDmgReduction() {
         if (user.hasEffect(ModEffects.RESOLVE.get())) {
-            return RESOLVE_DMG_REDUCTION;
+            return ResolveCounter.RESOLVE_DMG_REDUCTION;
         }
         if (usesResolve()) {
-            return getResolveRatio() * RESOLVE_DMG_REDUCTION;
+            return getResolveRatio() * ResolveCounter.RESOLVE_DMG_REDUCTION;
         }
         return 0;
     }
-    
-    @Override
-    public void addResolveOnAttack(LivingEntity target, float damageAmount) {
-        if (usesResolve() && target.getClassification(false) == EntityClassification.MONSTER || target.getType() == EntityType.PLAYER) {
-            damageAmount = Math.min(damageAmount, target.getHealth());
-            float resolveBase = damageAmount * RESOLVE_FOR_DMG_POINT;
-            float resolveHasMultiplier = MathHelper.clamp(getResolveLimit() - getResolve(), 0, resolveBase);
-            float resolveNoMultiplier = Math.max(resolveBase - resolveHasMultiplier, 0);
-            addResolve(resolveHasMultiplier * RESOLVE_UNDER_LIMIT_MULTIPLIER + resolveNoMultiplier);
-        }
-    }
-    
-    @Override
-    public void addResolveOnTakingDamage(DamageSource damageSource, float damageAmount) {
-        if (usesResolve() && damageSource.getEntity() != null) {
-            World world = damageSource.getEntity().level;
-            if (!world.isClientSide()) {
-                boolean noNaturalRegen = ((ServerWorld) world).getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION);
-                addResolveLimit(damageAmount * RESOLVE_LIMIT_FOR_DMG_POINT_TAKEN * (noNaturalRegen ? 1F : 2F));
-                setResolve(getResolve(), RESOLVE_NO_DECAY_TICKS);
-            }
-        }
-    }
-    
+
     private void tickResolve() {
-        float decay = 0;
-        EffectInstance resolveEffect = user.getEffect(ModEffects.RESOLVE.get());
-        if (resolveEffect != null) {
-            if (resolveEffect.getAmplifier() < RESOLVE_EFFECT_MIN.length) {
-                decay = getMaxResolve() / (float) RESOLVE_EFFECT_MIN[resolveEffect.getAmplifier()];
-                if (!user.level.isClientSide() && decay >= resolve) {
-                    user.removeEffect(ModEffects.RESOLVE.get());
-                }
-            }
-            
-            resolveLimit = getMaxResolve();
+        if (usesResolve()) {
+            resolveCounter.tick();
         }
-        else {
-            boolean noDecay = noResolveDecayTicks > 0;
-            if (noDecay) {
-                noResolveDecayTicks--;
-            }
-            if (!noDecay) {
-                decay = RESOLVE_DECAY;
-            }
-            if (isActive()) {
-                if (getStandManifestation() instanceof StandEntity && ((StandEntity) getStandManifestation()).isManuallyControlled()) {
-                    resolveLimit = Math.min(resolveLimit + RESOLVE_LIMIT_MANUAL_CONTROL_TICK, getMaxResolve());
-                    noResolveLimitDecayTicks = 1;
-                }
-                else {
-                    decay /= 4F;
-                }
-            }
-            
-            if (noResolveLimitDecayTicks > 0) {
-                noResolveLimitDecayTicks--;
-            }
-            else {
-                float hpRatio = user.getHealth() / user.getMaxHealth();
-                resolveLimit = Math.max(resolveLimit - RESOLVE_LIMIT_DECAY * hpRatio * hpRatio, 0);
-            }
-        }
-        
-        resolve = Math.max(resolve - decay, 0);
     }
-    
     
     
     @Override
@@ -558,6 +408,11 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
     
     @Override
+    public boolean isStandRemotelyControlled() {
+        return standManifestation instanceof StandEntity ? ((StandEntity) standManifestation).isManuallyControlled() : false;
+    }
+    
+    @Override
     public int getTier() {
         return tier;
     }
@@ -602,12 +457,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             cnbt.putFloat("Stamina", stamina);
         }
         if (usesResolve()) {
-            cnbt.putFloat("Resolve", resolve);
-            cnbt.putByte("ResolveLevel", (byte) resolveLevel);
-            cnbt.putInt("ResolveTicks", noResolveDecayTicks);
-            cnbt.putFloat("ResolveLimit", resolveLimit);
-            cnbt.putFloat("ResolveAchieved", maxAchievedResolve);
-            cnbt.putInt("ResolveLimitTicks", noResolveLimitDecayTicks);
+            cnbt.put("Resolve", resolveCounter.writeNBT());
         }
         cnbt.putInt("Xp", getXp());
         cnbt.putBoolean("Skipped", skippedProgression);
@@ -635,12 +485,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             stamina = nbt.getFloat("Stamina");
         }
         if (usesResolve()) {
-            resolve = nbt.getFloat("Resolve");
-            resolveLevel = nbt.getByte("ResolveLevel");
-            noResolveDecayTicks = nbt.getInt("ResolveTicks");
-            resolveLimit = nbt.getFloat("ResolveLimit");
-            maxAchievedResolve = nbt.getFloat("ResolveAchieved");
-            noResolveLimitDecayTicks = nbt.getInt("ResolveLimitTicks");
+            resolveCounter.readNbt(nbt.getCompound("Resolve"));
         }
         skippedProgression = nbt.getBoolean("Skipped");
         actionLearningProgressMap.readFromNbt(nbt);
@@ -652,16 +497,12 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         super.keepPower(oldPower, wasDeath);
         this.xp = oldPower.getXp();
         this.stamina = oldPower.getStamina();
-        if (!wasDeath) {
-            this.resolve = oldPower.getResolve();
-            this.noResolveDecayTicks = oldPower.getNoResolveDecayTicks();
-            StandPower cast = (StandPower) oldPower;
-            this.resolveLimit = cast.resolveLimit;
-            this.noResolveLimitDecayTicks = cast.noResolveLimitDecayTicks;
+        this.setResolveCounter(oldPower.getResolveCounter());
+        if (wasDeath) {
+            this.resolveCounter.alwaysResetOnDeath();
         }
-        this.resolveLevel = oldPower.getResolveLevel();
         this.skippedProgression = oldPower.wasProgressionSkipped();
-        this.actionLearningProgressMap = ((StandPower) oldPower).actionLearningProgressMap; // FIXME can i remove this cast?
+        this.actionLearningProgressMap = ((StandPower) oldPower).actionLearningProgressMap; // FIXME can i remove this casts?
     }
     
     @Override
@@ -673,8 +514,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                     PacketManager.sendToClient(new SyncStaminaPacket(stamina), player);
                 }
                 if (usesResolve()) {
-                    PacketManager.sendToClient(new SyncResolvePacket(resolve, maxAchievedResolve, resolveLevel, noResolveDecayTicks), player);
-                    PacketManager.sendToClient(new SyncResolveLimitPacket(resolveLimit, noResolveLimitDecayTicks), player);
+                    resolveCounter.syncWithUser(player);
                 }
             }
             actionLearningProgressMap.forEach((action, progress) -> {

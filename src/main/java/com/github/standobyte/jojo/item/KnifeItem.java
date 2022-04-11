@@ -35,11 +35,14 @@ public class KnifeItem extends Item {
 
     public KnifeItem(Properties properties) {
         super(properties);
+        
         Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
         builder.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", 2.0D, AttributeModifier.Operation.ADDITION));
         this.attributeModifiers = builder.build();
+
         DispenserBlock.registerBehavior(this, new ProjectileDispenseBehavior() {
-            protected ProjectileEntity getProjectile(World world, IPosition position, ItemStack itemStack) {
+            @Override
+            protected ProjectileEntity getProjectile(World world, IPosition position, ItemStack stack) {
                 KnifeEntity knife = new KnifeEntity(world, position.x(), position.y(), position.z());
                 knife.pickup = AbstractArrowEntity.PickupStatus.ALLOWED;
                 return knife;

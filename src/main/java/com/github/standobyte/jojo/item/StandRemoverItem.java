@@ -1,7 +1,11 @@
 package com.github.standobyte.jojo.item;
 
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.util.JojoModUtil;
 
+import net.minecraft.block.DispenserBlock;
+import net.minecraft.dispenser.DefaultDispenseItemBehavior;
+import net.minecraft.dispenser.IBlockSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -13,6 +17,19 @@ public class StandRemoverItem extends Item {
 
     public StandRemoverItem(Properties properties) {
         super(properties);
+
+        DispenserBlock.registerBehavior(this, new DefaultDispenseItemBehavior() {
+            protected ItemStack execute(IBlockSource blockSource, ItemStack stack) {
+                if (JojoModUtil.dispenseOnNearbyEntity(blockSource, stack, entity -> {
+                    return IStandPower.getStandPowerOptional(entity).map(power -> {
+                        return power.hasPower() && power.clear();
+                    }).orElse(false);
+                }, false)) {
+                    return stack;
+                }
+                return super.execute(blockSource, stack);
+            }
+        });
     }
 
     @Override

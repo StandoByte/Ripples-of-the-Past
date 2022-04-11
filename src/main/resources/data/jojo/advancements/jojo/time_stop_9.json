@@ -14,7 +14,10 @@
     "frame": "task",
     "show_toast": true,
     "announce_to_chat": true,
-    "hidden": false
+    "hidden": true
+  },
+  "rewards": {
+    "experience": 100
   },
   "criteria": {
     "time_stop_effect": {

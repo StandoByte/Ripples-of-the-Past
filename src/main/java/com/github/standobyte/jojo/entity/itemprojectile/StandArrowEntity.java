@@ -35,14 +35,23 @@ public class StandArrowEntity extends AbstractArrowEntity {
     private ItemStack arrowItem = new ItemStack(ModItems.STAND_ARROW.get());
     private boolean dealtDamage;
     
+    public StandArrowEntity(World world, double x, double y, double z, ItemStack arrowItem) {
+        super(ModEntityTypes.STAND_ARROW.get(), x, y, z, world);
+        setArrowStack(arrowItem);
+    }
+    
     public StandArrowEntity(World world, LivingEntity thrower, ItemStack arrowItem) {
         super(ModEntityTypes.STAND_ARROW.get(), thrower, world);
-        this.arrowItem = arrowItem.copy();
-        this.entityData.set(LOYALTY, (byte) EnchantmentHelper.getLoyalty(arrowItem));
+        setArrowStack(arrowItem);
     }
     
     public StandArrowEntity(EntityType<? extends AbstractArrowEntity> type, World world) {
         super(type, world);
+    }
+    
+    private void setArrowStack(ItemStack arrowItem) {
+        this.arrowItem = arrowItem.copy();
+        this.entityData.set(LOYALTY, (byte) EnchantmentHelper.getLoyalty(arrowItem));
     }
 
     @Override

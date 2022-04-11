@@ -22,6 +22,7 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.Hand;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeMod;
@@ -137,6 +138,11 @@ public class SilverChariotEntity extends StandEntity {
     
     public Vector3d getDashVec() {
         return dashVec;
+    }
+    
+    @Override
+    public HandSide getSwingingHand() {
+        return hasRapier() ? HandSide.RIGHT : super.getSwingingHand();
     }
     
     @Override

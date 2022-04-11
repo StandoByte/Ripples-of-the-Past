@@ -17,6 +17,8 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.util.Direction.Axis;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -98,6 +100,17 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
                     });
                 });
             }
+        }
+    }
+    
+    @Override
+    protected void onHitBlock(BlockRayTraceResult blockRayTraceResult) {
+        super.onHitBlock(blockRayTraceResult);
+        if (blockRayTraceResult.getDirection().getAxis() == Axis.Y) {
+            setDeltaMovement(getDeltaMovement().subtract(0, getDeltaMovement().y, 0));
+        }
+        else {
+            setDeltaMovement(getDeltaMovement().subtract(getDeltaMovement().x, 0, getDeltaMovement().z));
         }
     }
     

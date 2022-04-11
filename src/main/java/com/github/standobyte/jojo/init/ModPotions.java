@@ -19,4 +19,10 @@ public class ModPotions {
     
     public static final RegistryObject<Potion> FREEZE_STRONG_POTION = POTIONS.register("strong_freeze", 
             () -> new Potion(new EffectInstance(ModEffects.FREEZE.get(), 450, 1)));
+    
+    public static final RegistryObject<Potion> SUN_RESISTANCE_POTION = POTIONS.register("sun_resistance", 
+            () -> new Potion(new EffectInstance(ModEffects.FREEZE.get(), 3600, 0)));
+    
+    public static final RegistryObject<Potion> SUN_RESISTANCE_LONG_POTION = POTIONS.register("long_sun_resistance", 
+            () -> new Potion(new EffectInstance(ModEffects.FREEZE.get(), 9600, 0)));
 }

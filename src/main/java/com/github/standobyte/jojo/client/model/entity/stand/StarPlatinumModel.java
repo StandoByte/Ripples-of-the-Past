@@ -7,14 +7,12 @@ import java.util.List;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.client.model.pose.IModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
-import com.github.standobyte.jojo.client.model.pose.ModelPoseSided;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseTransition;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
 import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
 import com.github.standobyte.jojo.entity.stand.stands.StarPlatinumEntity;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.util.HandSide;
 import net.minecraft.util.math.MathHelper;
 
 // Made with Blockbench 3.9.2
@@ -523,17 +521,17 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
             return super.initHeavyAttackAnim(combo);
         }
         IModelPose<StarPlatinumEntity> uppercutPose1 = new ModelPose<StarPlatinumEntity>(new RotationAngle[] {
-                RotationAngle.fromDegrees(upperPart, 0F, 0F, 0F), 
+                RotationAngle.fromDegrees(upperPart, 0F, 15F, 0F), 
                 RotationAngle.fromDegrees(leftArm, 10F, 0F, -60F),
                 RotationAngle.fromDegrees(leftForeArm, -90F, 15F, 90F),
                 RotationAngle.fromDegrees(rightArm, 45F, 0F, 15F), 
                 RotationAngle.fromDegrees(rightForeArm, -90F, -30F, -90F)});
         
         IModelPose<StarPlatinumEntity> uppercutPose2 = new ModelPose<StarPlatinumEntity>(new RotationAngle[] {
-                RotationAngle.fromDegrees(upperPart, 0F, -30F, 0F), 
+                RotationAngle.fromDegrees(upperPart, 0F, -45F, 0F), 
                 RotationAngle.fromDegrees(leftArm, 0F, 0F, -90F),
                 RotationAngle.fromDegrees(leftForeArm, -105F, 0F, 0F),
-                RotationAngle.fromDegrees(rightArm, -135F, 30F, 0F), 
+                RotationAngle.fromDegrees(rightArm, -135F, 45F, 0F), 
                 RotationAngle.fromDegrees(rightForeArm, -90F, 60F, -90F)});
         
         return new StandActionAnimation.Builder<StarPlatinumEntity>()

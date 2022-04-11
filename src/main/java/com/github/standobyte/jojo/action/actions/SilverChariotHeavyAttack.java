@@ -7,8 +7,10 @@ import com.github.standobyte.jojo.entity.stand.StandEntity.PunchType;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.util.JojoModUtil;
 
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeMod;
@@ -52,11 +54,8 @@ public class SilverChariotHeavyAttack extends StandEntityHeavyAttack {
                         double cos = standLookVec.dot(targetVec);
                         if (cos > -0.5) {
                             standEntity.attackEntity(targetEntity, PunchType.HEAVY_COMBO, this, 1, attack -> {
-                                if (cos < 0) {
-                                    attack.damage(attack.getDamage() * 0.6667F);
-                                }
-                                if (cos < 0.7071) {
-                                    attack.damage(attack.getDamage() * 0.75F);
+                                if (cos < 0.5) {
+                                    attack.damage(attack.getDamage() * 0.5F);
                                 }
                                 attack.addKnockback(1);
                             });
@@ -78,10 +77,18 @@ public class SilverChariotHeavyAttack extends StandEntityHeavyAttack {
         if (!standEntity.isHeavyComboPunching()) {
             float completion = standEntity.getCurrentTaskCompletion(1.0F);
             boolean lastTick = completion < 1;
-            standEntity.setDeltaMovement(lastTick ? ((SilverChariotEntity) standEntity).getDashVec().scale(completion * 2) : Vector3d.ZERO);
+            standEntity.setDeltaMovement(lastTick ? ((SilverChariotEntity) standEntity).getDashVec().scale(completion * 2.5) : Vector3d.ZERO);
             if (!world.isClientSide()) {
-                // FIXME (!!!!!!!!) (SC thrusting attack) hit all entities in front of SC
-                standEntity.punch(PunchType.HEAVY_NO_COMBO, target, this);
+                if (!lastTick && !standEntity.isBeingRetracted()) {
+                    for (RayTraceResult rayTraceResult : JojoModUtil.rayTrace(standEntity, 
+                            standEntity.getAttributeValue(ForgeMod.REACH_DISTANCE.get()), 
+                            standEntity.canTarget(), 0.25, standEntity.getPrecision(), Integer.MAX_VALUE)) {
+                        standEntity.attackTarget(ActionTarget.fromRayTraceResult(rayTraceResult), PunchType.HEAVY_NO_COMBO, this, 1);
+                    }
+                }
+                else {
+                    standEntity.punch(PunchType.HEAVY_NO_COMBO, target, this);
+                }
                 if (lastTick && standEntity.isFollowingUser()) {
                     standEntity.retractStand(false);
                 }

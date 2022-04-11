@@ -34,7 +34,6 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRunAwayPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonParticlesPacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.nonstand.type.HamonData.Exercise;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -71,7 +70,6 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.BlockSnapshot;
@@ -171,32 +169,6 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
             }
             if (user instanceof PlayerEntity) {
                 ServerPlayerEntity player = (ServerPlayerEntity) user;
-                float multiplier = player.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.BREATH_CONTROL_MASK.get() ? 2F : 0;
-                if (player.swinging) {
-                    hamon.incExerciseTicks(Exercise.MINING, multiplier);
-                }
-                if (player.isSwimming()) {
-                    hamon.incExerciseTicks(Exercise.SWIMMING, multiplier);
-                }
-                else if (player.isSprinting() && player.isOnGround()) {
-                    hamon.incExerciseTicks(Exercise.RUNNING, multiplier);
-                }
-                if (player.hasEffect(ModEffects.MEDITATION.get())) {
-                    if (hamon.updateMeditation(player.position(), player.yHeadRot, player.xRot)) {
-                        if (player.tickCount % 800 == 400) {
-                            JojoModUtil.sayVoiceLine(player, hamon.getBreathingSound(), 0.75F, 1.0F);
-                        }
-                        player.addEffect(new EffectInstance(ModEffects.MEDITATION.get(), Math.max(Exercise.MEDITATION.maxTicks - hamon.getExerciseTicks(Exercise.MEDITATION), 210)));
-                        hamon.incExerciseTicks(Exercise.MEDITATION, multiplier);
-                        player.getFoodData().addExhaustion(-0.001F);
-                        if (player.tickCount % 200 == 0 && player.isHurt() && player.level.getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION)) {
-                            player.heal(1.0F);
-                        }
-                    }
-                    else {
-                        player.removeEffect(ModEffects.MEDITATION.get());
-                    }
-                }
                 hamon.newDayCheck(player.level);
                 if (hamon.isSkillLearned(HamonSkill.ROPE_TRAP)) {
                     if (player.isOnGround() && player.isShiftKeyDown()) {
@@ -264,6 +236,9 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                     }
                 }
             }
+        }
+        if (user instanceof PlayerEntity) {
+            hamon.tickExercises((PlayerEntity) user);
         }
     }
 

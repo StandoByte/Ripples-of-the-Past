@@ -16,7 +16,6 @@ import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.power.IPower;
-import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.JojoModUtil;
 
 import net.minecraft.entity.LivingEntity;
@@ -196,7 +195,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     public void onClick(World world, LivingEntity user, P power) {}
     
-    public int getCooldownTechnical() {
+    public int getCooldownTechnical(P power) {
         return cooldownTechnical;
     }
     
@@ -205,7 +204,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     public int getCooldown(P power, int ticksHeld) {
-        return getCooldownTechnical() + getCooldownAdditional(power, ticksHeld);
+        return getCooldownTechnical(power) + getCooldownAdditional(power, ticksHeld);
     }
 
     public boolean swingHand() {

@@ -49,7 +49,6 @@ public class JojoModConfig {
         
         public final ForgeConfigSpec.BooleanValue skipStandProgression;
         public final ForgeConfigSpec.BooleanValue standStamina;
-        // FIXME (!!!!!) stand projectiles damage
         public final ForgeConfigSpec.DoubleValue standDamageMultiplier;
 
         public final ForgeConfigSpec.BooleanValue abilitiesBreakBlocks;

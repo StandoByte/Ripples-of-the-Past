@@ -67,7 +67,7 @@ public abstract class StandEntityAction extends StandAction {
             StandEntity stand = (StandEntity) power.getStandManifestation();
             StandEntityAction currentAction = stand.getCurrentTaskAction();
             if (currentAction != null && !currentAction.isCancelable(power, stand, stand.getCurrentTaskPhase(), this)) {
-                return ActionConditionResult.NEGATIVE;
+                return ActionConditionResult.NEGATIVE_QUEUE_INPUT;
             }
             ActionConditionResult checkStand = checkStandConditions(stand, power, target);
             if (!checkStand.isPositive()) {
@@ -186,10 +186,9 @@ public abstract class StandEntityAction extends StandAction {
         standEntity.setTask(this, ticks, phase, target);
     }
 
-    // scheduled stand task
-//    public boolean canBeScheduled(IStandPower standPower, StandEntity standEntity) {
-//        return true;
-//    }
+    public boolean canBeQueued(IStandPower standPower, StandEntity standEntity) {
+        return getHoldDurationMax(standPower) == 0;
+    }
     
     public boolean canStaminaRegen(IStandPower standPower, StandEntity standEntity) {
         return false;

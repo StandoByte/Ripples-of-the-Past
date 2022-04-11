@@ -67,7 +67,7 @@ public abstract class BarsRenderer {
                 renderBarWithIcon(matrixStack, BarType.RESOLVE, null, 
                         currentMode == PowerClassification.STAND, color, (float) standPower.getResolveLevel() / (float) standPower.getMaxResolveLevel(), 
                         standPower.getResolve(), standPower.getMaxResolve(), 
-                        0, 0, standPower.getResolveLimit(), 
+                        0, 0, standPower.getMaxAchievedResolve(), 
                         tickCounter, partialTick);
             }
         }

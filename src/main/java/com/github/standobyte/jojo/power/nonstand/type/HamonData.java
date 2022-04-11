@@ -21,12 +21,14 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillLearnPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillsResetPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.SyncHamonExercisesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncHamonStatsPacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.TypeSpecificData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonSkillType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
+import com.github.standobyte.jojo.util.JojoModUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attribute;
@@ -35,6 +37,7 @@ import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.EffectInstance;
@@ -42,6 +45,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeMod;
 
@@ -231,7 +235,7 @@ public class HamonData extends TypeSpecificData {
         return efficiency;
     }
 
-    public static final float MAX_HAMON_DAMAGE = (float) (Math.pow(1.03, MAX_STAT_LEVEL) * (1 + 0.05 * MAX_BREATHING_LEVEL)); // 35.34962
+    public static final float MAX_HAMON_DAMAGE = (float) (Math.pow(1.03, MAX_STAT_LEVEL) * (1 + 0.04 * MAX_BREATHING_LEVEL)); // 29.458
     private void recalcHamonDamage() {
         hamonDamageFactor = (float) (Math.pow(1.03, hamonStrengthLevel) * (1 + 0.05 * breathingTechniqueLevel));
     }
@@ -297,11 +301,49 @@ public class HamonData extends TypeSpecificData {
         }
     }
 
+    private boolean incExerciseLastTick;
+    private boolean incExerciseThisTick;
+    public void tickExercises(PlayerEntity user) {
+        incExerciseThisTick = false;
+        float multiplier = user.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.BREATH_CONTROL_MASK.get() ? 2F : 0;
+        if (user.swinging) {
+            incExerciseTicks(Exercise.MINING, multiplier, user.level.isClientSide());
+        }
+        if (user.isSwimming()) {
+            incExerciseTicks(Exercise.SWIMMING, multiplier, user.level.isClientSide());
+        }
+        else if (user.isSprinting() && user.isOnGround()) {
+            incExerciseTicks(Exercise.RUNNING, multiplier, user.level.isClientSide());
+        }
+        if (user.hasEffect(ModEffects.MEDITATION.get())) {
+            incExerciseTicks(Exercise.MEDITATION, multiplier, user.level.isClientSide());
+            if (!user.level.isClientSide()) {
+                if (updateMeditation(user.position(), user.yHeadRot, user.xRot)) {
+                    if (user.tickCount % 800 == 400) {
+                        JojoModUtil.sayVoiceLine(user, getBreathingSound(), 0.75F, 1.0F);
+                    }
+                    user.addEffect(new EffectInstance(ModEffects.MEDITATION.get(), Math.max(Exercise.MEDITATION.maxTicks - getExerciseTicks(Exercise.MEDITATION), 210)));
+                    user.getFoodData().addExhaustion(-0.001F);
+                    if (user.tickCount % 200 == 0 && user.isHurt() && user.level.getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION)) {
+                        user.heal(1.0F);
+                    }
+                }
+                else {
+                    user.removeEffect(ModEffects.MEDITATION.get());
+                }
+            }
+        }
+        if (incExerciseLastTick && !incExerciseThisTick && user instanceof ServerPlayerEntity) {
+            PacketManager.sendToClient(new SyncHamonExercisesPacket(this), (ServerPlayerEntity) user);
+        }
+        incExerciseLastTick = incExerciseThisTick;
+    }
+
     public int getExerciseTicks(Exercise exercise) {
         return exerciseTicks.get(exercise);
     }
 
-    public void incExerciseTicks(Exercise exercise, float multiplier) {
+    private void incExerciseTicks(Exercise exercise, float multiplier, boolean clientSide) {
         int ticks = exerciseTicks.get(exercise);
         if (ticks < exercise.maxTicks) {
             int inc = 1;
@@ -312,7 +354,11 @@ public class HamonData extends TypeSpecificData {
             inc = Math.min(inc, exercise.maxTicks - ticks);
             exerciseTicks.put(exercise, ticks + inc);
             avgExercisePoints += (double) inc / exercise.maxTicks / exerciseTicks.size();
+            if (clientSide) {
+                // FIXME update exercises HUD bar transparency
+            }
         }
+        this.incExerciseThisTick = true;
     }
 
     public void setExerciseTicks(int mining, int running, int swimming, int meditation) {
@@ -335,7 +381,7 @@ public class HamonData extends TypeSpecificData {
         this.meditationXRot = headXRot;
     }
 
-    public boolean updateMeditation(Vector3d position, float headYRot, float headXRot) {
+    private boolean updateMeditation(Vector3d position, float headYRot, float headXRot) {
         if (isMeditating) {
             isMeditating = meditationPosition.closerThan(position, 0.1D)
                     && (headYRot - meditationYRot) < 1F
@@ -551,7 +597,7 @@ public class HamonData extends TypeSpecificData {
         }
     }
     
-    public SoundEvent getBreathingSound() {
+    private SoundEvent getBreathingSound() {
         Technique technique = getTechnique();
         if (technique == null) {
             return ModSounds.BREATH_DEFAULT.get();

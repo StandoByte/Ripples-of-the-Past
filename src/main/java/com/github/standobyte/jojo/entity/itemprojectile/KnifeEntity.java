@@ -33,8 +33,8 @@ public class KnifeEntity extends ItemProjectileEntity {
        super(ModEntityTypes.KNIFE.get(), shooter, world);
     }
 
-    public KnifeEntity(World worldIn, double x, double y, double z) {
-       super(ModEntityTypes.KNIFE.get(), x, y, z, worldIn);
+    public KnifeEntity(World world, double x, double y, double z) {
+       super(ModEntityTypes.KNIFE.get(), x, y, z, world);
     }
 
     public KnifeEntity(EntityType<? extends KnifeEntity> type, World world) {

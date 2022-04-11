@@ -12,13 +12,17 @@ import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.github.standobyte.jojo.util.damage.DamageUtil;
 
+import net.minecraft.block.DispenserBlock;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.dispenser.IPosition;
+import net.minecraft.dispenser.ProjectileDispenseBehavior;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.ArrowItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
@@ -33,6 +37,15 @@ public class StandArrowItem extends ArrowItem {
 
     public StandArrowItem(Properties properties) {
         super(properties);
+        
+        DispenserBlock.registerBehavior(this, new ProjectileDispenseBehavior() {
+            @Override
+            protected ProjectileEntity getProjectile(World world, IPosition position, ItemStack stack) {
+                StandArrowEntity arrow = new StandArrowEntity(world, position.x(), position.y(), position.z(), stack);
+                arrow.pickup = AbstractArrowEntity.PickupStatus.ALLOWED;
+                return arrow;
+            }
+        });
     }
 
     @Override
@@ -52,7 +65,7 @@ public class StandArrowItem extends ArrowItem {
     public static boolean onPiercedByArrow(Entity entity, ItemStack stack, World world) {
         if (entity instanceof LivingEntity) {
             LivingEntity livingEntity = (LivingEntity) entity;
-            livingEntity.hurt(DamageUtil.STAND_VIRUS, Math.min(livingEntity.getMaxHealth(), 20F) - 1F);
+            livingEntity.hurt(DamageUtil.STAND_VIRUS, Math.min(livingEntity.getHealth(), 20F) - 1F);
             stack.hurtAndBreak(1, livingEntity, pl -> {});
             if (livingEntity instanceof PlayerEntity) {
                 return playerPiercedByArrow((PlayerEntity) livingEntity, stack, world, false);

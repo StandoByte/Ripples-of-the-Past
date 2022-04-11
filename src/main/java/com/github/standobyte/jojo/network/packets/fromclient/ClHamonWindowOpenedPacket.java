@@ -10,7 +10,6 @@ import com.github.standobyte.jojo.network.packets.fromserver.SyncHamonExercisesP
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
-import com.github.standobyte.jojo.power.nonstand.type.HamonData.Exercise;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
@@ -31,12 +30,7 @@ public class ClHamonWindowOpenedPacket {
             ServerPlayerEntity player = ctx.get().getSender();
             INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
                 power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
-                    PacketManager.sendToClient(new SyncHamonExercisesPacket(
-                            hamon.getExerciseTicks(Exercise.MINING), 
-                            hamon.getExerciseTicks(Exercise.RUNNING), 
-                            hamon.getExerciseTicks(Exercise.SWIMMING), 
-                            hamon.getExerciseTicks(Exercise.MEDITATION), 
-                            hamon.getTrainingBonus()), player);
+                    PacketManager.sendToClient(new SyncHamonExercisesPacket(hamon), player);
                     EnumSet<HamonSkill> skills = HamonPowerType.nearbyTeachersSkills(player);
                     PacketManager.sendToClient(skills.isEmpty() ? new HamonTeachersSkillsPacket() : new HamonTeachersSkillsPacket(HamonTeachersSkillsPacket.encodeSkills(skills)), player);
                 });

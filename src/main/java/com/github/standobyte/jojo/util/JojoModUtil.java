@@ -1,6 +1,9 @@
 package com.github.standobyte.jojo.util;
 
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -8,7 +11,6 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
-import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket;
@@ -17,22 +19,27 @@ import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.block.DispenserBlock;
 import net.minecraft.client.network.play.IClientPlayNetHandler;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.dispenser.IBlockSource;
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.INPC;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.monster.AbstractIllagerEntity;
+import net.minecraft.entity.passive.WaterMobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.ProjectileHelper;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.play.server.SPlaySoundEffectPacket;
 import net.minecraft.network.play.server.SSpawnMovingSoundEffectPacket;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.Effects;
+import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
@@ -47,7 +54,6 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 
@@ -64,33 +70,37 @@ public class JojoModUtil {
 
     public static RayTraceResult rayTrace(Entity entity, double reachDistance, @Nullable Predicate<Entity> entityFilter, 
             double rayTraceInflate, double standPrecision) {
+        return rayTrace(entity, reachDistance, entityFilter, rayTraceInflate, 0, 1)[0];
+    }
+
+    public static RayTraceResult[] rayTrace(Entity entity, double reachDistance, @Nullable Predicate<Entity> entityFilter, 
+            double rayTraceInflate, double standPrecision, int entitiesCount) {
         Vector3d startPos = entity.getEyePosition(1.0F);
         Vector3d rtVec = entity.getViewVector(1.0F).scale(reachDistance);
         Vector3d endPos = startPos.add(rtVec);
         AxisAlignedBB aabb = entity.getBoundingBox().expandTowards(rtVec).inflate(1.0D);
-        return rayTrace(startPos, endPos, aabb, reachDistance, entity.level, entity, entityFilter, rayTraceInflate, standPrecision);
-    }
-
-    public static RayTraceResult standRayTrace(StandEntity entity, @Nullable Predicate<Entity> entityFilter, double rayTraceInflate) {
-        return rayTrace(entity, entity.getAttributeValue(ForgeMod.REACH_DISTANCE.get()), entityFilter, rayTraceInflate, entity.getPrecision());
+        return rayTrace(startPos, endPos, aabb, reachDistance, entity.level, entity, entityFilter, rayTraceInflate, standPrecision, entitiesCount);
     }
 
     public static RayTraceResult rayTrace(Vector3d startPos, Vector3d endPos, AxisAlignedBB aabb, 
             double minDistance, World world, @Nullable Entity entity, @Nullable Predicate<Entity> entityFilter, 
             double rayTraceInflate, double standPrecision) {
+        return rayTrace(startPos, endPos, aabb, minDistance, world, entity, entityFilter, rayTraceInflate, standPrecision, 1)[0];
+    }
+
+    public static RayTraceResult[] rayTrace(Vector3d startPos, Vector3d endPos, AxisAlignedBB aabb, 
+            double minDistance, World world, @Nullable Entity entity, @Nullable Predicate<Entity> entityFilter, 
+            double rayTraceInflate, double standPrecision, int entitiesCount) {
         aabb.inflate(rayTraceInflate);
-        Entity targetEntity = null;
-        Vector3d targetEntityPos = null;
         double minDistanceSqr = minDistance * minDistance;
+        Map<EntityRayTraceResult, Double> rayTracedWithDistance = new HashMap<>();
         for (Entity potentialTarget : world.getEntities(entity, aabb, e -> !e.isSpectator() && e.isPickable() && (entityFilter == null || entityFilter.test(e)))) {
             AxisAlignedBB targetCollisionAABB = potentialTarget.getBoundingBox().inflate((double) potentialTarget.getPickRadius() + rayTraceInflate);
             targetCollisionAABB = standPrecisionTargetHitbox(targetCollisionAABB, standPrecision);
             Optional<Vector3d> clipOptional = targetCollisionAABB.clip(startPos, endPos);
             if (targetCollisionAABB.contains(startPos)) {
                 if (minDistanceSqr >= 0.0D) {
-                    targetEntity = potentialTarget;
-                    targetEntityPos = clipOptional.orElse(startPos);
-                    minDistanceSqr = 0.0D;
+                    rayTracedWithDistance.put(new EntityRayTraceResult(potentialTarget, clipOptional.orElse(startPos)), 0.0);
                 }
             } else if (clipOptional.isPresent()) {
                 Vector3d clipVec = clipOptional.get();
@@ -98,21 +108,25 @@ public class JojoModUtil {
                 if (clipDistanceSqr < minDistanceSqr || minDistanceSqr == 0.0D) {
                     if (entity != null && potentialTarget.getRootVehicle() == entity.getRootVehicle() && !potentialTarget.canRiderInteract()) {
                         if (minDistanceSqr == 0.0D) {
-                            targetEntity = potentialTarget;
-                            targetEntityPos = clipVec;
+                            rayTracedWithDistance.put(new EntityRayTraceResult(potentialTarget, clipVec), 0.0);
                         }
                     } else {
-                        targetEntity = potentialTarget;
-                        targetEntityPos = clipVec;
-                        minDistanceSqr = clipDistanceSqr;
+                        rayTracedWithDistance.put(new EntityRayTraceResult(potentialTarget, clipVec), clipDistanceSqr);
                     }
                 }
             }
         }
-        if (targetEntity == null) {
-            return world.clip(new RayTraceContext(startPos, endPos, RayTraceContext.BlockMode.OUTLINE, RayTraceContext.FluidMode.NONE, entity));
+        if (rayTracedWithDistance.isEmpty()) {
+            return new RayTraceResult[] { 
+                    world.clip(new RayTraceContext(startPos, endPos, RayTraceContext.BlockMode.OUTLINE, RayTraceContext.FluidMode.NONE, entity))
+                    };
         }
-        return new EntityRayTraceResult(targetEntity, targetEntityPos);
+        return rayTracedWithDistance.entrySet().stream()
+        .sorted(Comparator.comparingDouble(Map.Entry::getValue))
+        .map(Map.Entry::getKey)
+        .toArray(EntityRayTraceResult[]::new);
+        
+//        return new EntityRayTraceResult(targetEntity, targetEntityPos);
     }
 
     private static AxisAlignedBB standPrecisionTargetHitbox(AxisAlignedBB aabb, double precision) {
@@ -180,6 +194,20 @@ public class JojoModUtil {
         entity.setYHeadRot(yRot);
     }
 
+    public static boolean dispenseOnNearbyEntity(IBlockSource blockSource, ItemStack itemStack, Predicate<LivingEntity> action, boolean shrinkStack) {
+        BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
+        List<LivingEntity> entities = blockSource.getLevel().getEntitiesOfClass(LivingEntity.class, new AxisAlignedBB(blockPos), EntityPredicates.NO_SPECTATORS);
+        for (LivingEntity entity : entities) {
+            if (action.test(entity)) {
+                if (shrinkStack) {
+                    itemStack.shrink(1);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
 
 
     public static boolean canEntityDestroy(World world, BlockPos pos, LivingEntity entity) {
@@ -220,7 +248,7 @@ public class JojoModUtil {
 
     public static boolean canBleed(LivingEntity entity) {
         return entity.getMobType() == CreatureAttribute.UNDEAD && 
-                entity instanceof PlayerEntity || entity instanceof AgeableEntity || entity instanceof INPC || entity instanceof AbstractIllagerEntity;
+                entity instanceof PlayerEntity || entity instanceof AgeableEntity || entity instanceof INPC || entity instanceof AbstractIllagerEntity || entity instanceof WaterMobEntity;
     }
 
     public static void extinguishFieryStandEntity(Entity entity, ServerWorld world) {

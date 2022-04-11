@@ -9,8 +9,13 @@ import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.type.StandType;
+import com.github.standobyte.jojo.util.JojoModUtil;
 
+import net.minecraft.block.DispenserBlock;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.dispenser.DefaultDispenseItemBehavior;
+import net.minecraft.dispenser.IBlockSource;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -30,6 +35,22 @@ public class StandDiscItem extends Item {
 
     public StandDiscItem(Properties properties) {
         super(properties);
+
+        DispenserBlock.registerBehavior(this, new DefaultDispenseItemBehavior() {
+            protected ItemStack execute(IBlockSource blockSource, ItemStack stack) {
+                if (validStandDisc(stack)) {
+                    StandType<?> stand = getStandFromStack(stack);
+                    if (JojoModUtil.dispenseOnNearbyEntity(blockSource, stack, entity -> {
+                        return IStandPower.getStandPowerOptional(entity).map(power -> {
+                            return canGainStand(entity, power.getTier(), stand) && power.givePower(stand);
+                        }).orElse(false);
+                    }, true)) {
+                        return stack;
+                    }
+                }
+                return super.execute(blockSource, stack);
+            }
+        });
     }
     
     @Override
@@ -61,9 +82,13 @@ public class StandDiscItem extends Item {
         return ActionResult.fail(stack);
     }
 
-    private boolean canGainStand(PlayerEntity player, int playerTier, StandType<?> stand) {
-        return player.abilities.instabuild || !JojoModConfig.getCommonConfigInstance().standTiers.get()
-                || StandUtil.standTierFromXp(player.experienceLevel, false) >= stand.getTier() || playerTier >= stand.getTier();
+    private static boolean canGainStand(LivingEntity entity, int playerTier, StandType<?> stand) {
+        if (entity instanceof PlayerEntity) {
+            PlayerEntity player = (PlayerEntity) entity;
+            return player.abilities.instabuild || !JojoModConfig.getCommonConfigInstance().standTiers.get()
+                    || StandUtil.standTierFromXp(player.experienceLevel, false) >= stand.getTier() || playerTier >= stand.getTier();
+        }
+        return false;
     }
     
     @Override

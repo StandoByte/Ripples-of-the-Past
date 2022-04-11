@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.action.actions.VampirismFreeze;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.block.StoneMaskBlock;
@@ -19,6 +20,7 @@ import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.command.TestBuildCommand;
+import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRCrossfireHurricaneEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModBlocks;
@@ -58,6 +60,8 @@ import net.minecraft.entity.EntityPredicate;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
 import net.minecraft.entity.ai.goal.PrioritizedGoal;
@@ -349,9 +353,43 @@ public class GameplayEventHandler {
     public static void onLivingAttack(LivingAttackEvent event) {
         DamageSource damageSrc = event.getSource();
         if (damageSrc instanceof IStandDamageSource) {
-            IStandPower attackerStand = ((IStandDamageSource) damageSrc).getStandPower();
-            attackerStand.addResolveOnAttack(event.getEntityLiving(), event.getAmount());
+            IStandDamageSource standDamageSrc = (IStandDamageSource) damageSrc;
+            IStandPower attackerStand = standDamageSrc.getStandPower();
+            if (attackerStand.usesResolve()) {
+                attackerStand.getResolveCounter().onAttack(event.getEntityLiving(), standDamageSrc, event.getAmount());
+            }
         }
+    }
+    
+    // TODO unsummoned stand auto-block
+    @SuppressWarnings("unused")
+    private double getAttackSpeed(DamageSource damageSrc) {
+        Entity entity = damageSrc.getDirectEntity();
+        if (entity == null) {
+            return -1;
+        }
+        if (entity instanceof ProjectileEntity) {
+            double velocity = entity.getDeltaMovement().length();
+            //
+        }
+        if (entity instanceof LivingEntity) {
+            LivingEntity entityLiving = (LivingEntity) entity;
+            if (entity instanceof StandEntity) {
+                StandEntity entityStand = ((StandEntity) entity);
+                StandEntityAction attack = entityStand.getCurrentTaskAction();
+                if (attack != null) {
+                    //
+                }
+            }
+            ModifiableAttributeInstance attackSpeedAttribute = entityLiving.getAttribute(Attributes.ATTACK_SPEED);
+            if (attackSpeedAttribute != null) {
+                double attackSpeed = ((LivingEntity) entity).getAttributeValue(Attributes.ATTACK_SPEED);
+                //
+            }
+            //
+        }
+        //
+        return 1234;
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
@@ -421,7 +459,9 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public static void resolveOnTakingDamage(LivingDamageEvent event) {
         IStandPower.getStandPowerOptional(event.getEntityLiving()).ifPresent(stand -> {
-            stand.addResolveOnTakingDamage(event.getSource(), event.getAmount());
+            if (stand.usesResolve()) {
+                stand.getResolveCounter().onGettingAttacked(event.getSource(), event.getAmount(), event.getEntityLiving());
+            }
         });
     }
 
@@ -641,11 +681,10 @@ public class GameplayEventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingDeath(LivingDeathEvent event) {
-        if (!event.getEntity().level.isClientSide()) {
-            LivingEntity dead = event.getEntityLiving();
-            DamageSource dmgSource = event.getSource();
+        LivingEntity dead = event.getEntityLiving();
+        DamageSource dmgSource = event.getSource();
+        if (!dead.level.isClientSide()) {
             HamonPowerType.hamonPerksOnDeath(dead);
-            summonSoul(dead, dmgSource);
             Entity killer = dmgSource.getEntity();
             if (killer instanceof StandEntity) {
                 StandEntity killerStand = (StandEntity) killer;
@@ -659,11 +698,13 @@ public class GameplayEventHandler {
             if (dead instanceof ServerPlayerEntity && killer != null) {
                 ModCriteriaTriggers.ENTITY_KILLED_PLAYER.get().trigger((ServerPlayerEntity) dead, killer, dmgSource);
             }
+            summonSoul(dead, dmgSource);
         }
     }
     
     private static void summonSoul(LivingEntity entity, DamageSource dmgSource) {
-        if (JojoModUtil.isUndead(entity)) {
+        if (JojoModUtil.isUndead(entity) || 
+                entity instanceof PlayerEntity && entity.level.getGameRules().getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN)) {
             return;
         }
         LazyOptional<IStandPower> standOptional = IStandPower.getStandPowerOptional(entity);
@@ -672,12 +713,11 @@ public class GameplayEventHandler {
         if (dmgSource == TestBuildCommand.SOUL_TEST) ticks = 300;
 
         if (ticks > 0) {
-            // FIXME (soul) disabled for now
-//            if (entity instanceof ServerPlayerEntity) {
-//                ModCriteriaTriggers.SOUL_ASCENSION.get().trigger((ServerPlayerEntity) entity, standOptional.orElse(null), ticks);
-//            }
-//            SoulEntity soulEntity = new SoulEntity(entity.level, entity, ticks);
-//            entity.level.addFreshEntity(soulEntity);
+            if (entity instanceof ServerPlayerEntity) {
+                ModCriteriaTriggers.SOUL_ASCENSION.get().trigger((ServerPlayerEntity) entity, standOptional.orElse(null), ticks);
+            }
+            SoulEntity soulEntity = new SoulEntity(entity.level, entity, ticks);
+            entity.level.addFreshEntity(soulEntity);
         }
     }
     
@@ -693,7 +733,7 @@ public class GameplayEventHandler {
         }
         
         float resolveRatio = user.hasEffect(ModEffects.RESOLVE.get()) ? 1 : stand.getResolveRatio();
-        int ticks = (int) (60 * stand.getResolveLevel() * (resolveRatio + 1));
+        int ticks = (int) (60 * (stand.getResolveLevel() + resolveRatio));
         if (hardcore) {
             ticks += ticks / 2;
         }

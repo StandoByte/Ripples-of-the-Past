@@ -69,7 +69,7 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
 
     @Override
     protected int ticksLifespan() {
-        return ModActions.HAMON_ZOOM_PUNCH.get().getCooldownTechnical();
+        return ModActions.HAMON_ZOOM_PUNCH.get().getCooldownTechnical(null);
     }
     
     @Override
@@ -90,7 +90,7 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
         super.remove();
         if (tickCount < ticksLifespan()) {
             INonStandPower.getNonStandPowerOptional(getOwner()).ifPresent(power -> {
-                power.setCooldownTimer(ModActions.HAMON_ZOOM_PUNCH.get(), 0, ModActions.HAMON_ZOOM_PUNCH.get().getCooldownTechnical());
+                power.setCooldownTimer(ModActions.HAMON_ZOOM_PUNCH.get(), 0, ModActions.HAMON_ZOOM_PUNCH.get().getCooldownTechnical(null));
             });
         }
     }

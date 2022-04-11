@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData.Exercise;
 
 import net.minecraft.network.PacketBuffer;
@@ -25,8 +26,17 @@ public class SyncHamonExercisesPacket {
     private final int swimmingTicks;
     private final int meditationTicks;
     private final float trainingBonus;
+    
+    public SyncHamonExercisesPacket(HamonData hamon) {
+        this(
+                hamon.getExerciseTicks(Exercise.MINING), 
+                hamon.getExerciseTicks(Exercise.RUNNING), 
+                hamon.getExerciseTicks(Exercise.SWIMMING), 
+                hamon.getExerciseTicks(Exercise.MEDITATION), 
+                hamon.getTrainingBonus());
+    }
 
-    public SyncHamonExercisesPacket(int miningTicks, int runningTicks, int swimmingTicks, int meditationTicks, float trainingBonus) {
+    private SyncHamonExercisesPacket(int miningTicks, int runningTicks, int swimmingTicks, int meditationTicks, float trainingBonus) {
         this.miningTicks = miningTicks;
         this.runningTicks = runningTicks;
         this.swimmingTicks = swimmingTicks;

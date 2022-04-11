@@ -80,7 +80,8 @@ public class TimeStop extends StandAction {
             ChunkPos chunkPos = new ChunkPos(blockPos);
             TimeHandler.setTimeResumeSounds(world, chunkPos, timeStopTicks, this, user);
             TimeHandler.stopTime(world, timeStopTicks, chunkPos);
-            if (timeStopTicks >= 40 && timeStopSound != null && timeStopSound.get() != null) {
+            if (timeStopTicks >= 40 && timeStopSound != null && timeStopSound.get() != null
+                    && !TimeHandler.isTimeStopped(world, user.blockPosition())) {
                 PacketManager.sendGloballyWithCondition(new PlaySoundAtClientPacket(timeStopSound.get(), SoundCategory.AMBIENT, blockPos, 5.0F, 1.0F), 
                         world.dimension(), player -> (JojoModConfig.getCommonConfigInstance().inTimeStopRange(
                                 chunkPos, new ChunkPos(player.blockPosition()))) && TimeHandler.canPlayerSeeInStoppedTime(player));
@@ -92,6 +93,11 @@ public class TimeStop extends StandAction {
             }
             user.addEffect(new EffectInstance(ModEffects.TIME_STOP.get(), timeStopTicks, 0, false, false, true));
         }
+    }
+    
+    @Override
+    public int getCooldownTechnical(IStandPower power) {
+        return TimeHandler.getTimeStopTicks(power, this, power.getUser(), INonStandPower.getNonStandPowerOptional(power.getUser()));
     }
 
     @Override
