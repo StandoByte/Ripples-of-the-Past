@@ -10,6 +10,7 @@ import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.InputUpdateEvent;
 import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -20,7 +21,7 @@ public class SoulController {
     
     private final Minecraft mc;
     private SoulEntity playerSoulEntity = null;
-    private boolean showDeathScreen = true;
+    private int soulEntityWaitingTimer = -1;
 
     private SoulController(Minecraft mc) {
         this.mc = mc;
@@ -37,13 +38,33 @@ public class SoulController {
         return instance;
     }
     
-    // FIXME (soul) currently there's no way to make sure it's called BEFORE the death screen opens (in fact it isn't when the player is killed by a mob)
+    @SubscribeEvent
+    public void tick(ClientTickEvent event) {
+        if (mc.player != null) {
+            if (mc.player.isDeadOrDying()) {
+                if (soulEntityWaitingTimer > 0) {
+                    if (playerSoulEntity != null) {
+                        soulEntityWaitingTimer = 0;
+                    }
+                    else {
+                        soulEntityWaitingTimer--;
+                    }
+                }
+            }
+            else {
+                soulEntityWaitingTimer = -1;
+                if (playerSoulEntity != null && !playerSoulEntity.isAlive()) {
+                    mc.setCameraEntity(mc.player);
+                    playerSoulEntity = null;
+                }
+            }
+        }
+    }
+    
     public void onSoulSpawn(SoulEntity soulEntity) {
         if (!mc.player.isSpectator() && soulEntity.getOriginEntity() == mc.player) {
             mc.setCameraEntity(soulEntity);
             playerSoulEntity = soulEntity;
-            showDeathScreen = mc.player.shouldShowDeathScreen();
-            mc.player.setShowDeathScreen(true);
         }
     }
     
@@ -54,18 +75,22 @@ public class SoulController {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void cancelRespawnScreen(GuiOpenEvent event) {
         boolean soul = isCameraEntityPlayerSoul();
-        if (event.getGui() instanceof DeathScreen && (soul || !showDeathScreen)) {
-            event.setGui(null);
-            if (!soul) {
-                mc.player.setShowDeathScreen(showDeathScreen);
-                mc.player.respawn();
+        if (event.getGui() instanceof DeathScreen) {
+            if (soulEntityWaitingTimer == -1) {
+                soulEntityWaitingTimer = 100;
+            }
+            if (soul || soulEntityWaitingTimer > 0) {
+                event.setGui(null);
+                if (playerSoulEntity != null && !playerSoulEntity.isAlive() && soulEntityWaitingTimer <= 0) {
+                    mc.player.respawn();
+                }
             }
         }
     }
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void cancelHandsRender(RenderHandEvent event) {
-        if (isCameraEntityPlayerSoul()) {
+        if (playerSoulEntity != null && playerSoulEntity == mc.getCameraEntity() && !mc.player.isSpectator() && mc.player.isDeadOrDying()) {
             event.setCanceled(true);
         }
     }

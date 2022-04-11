@@ -43,10 +43,10 @@ public class JojoControlsCommand {
     }
 
     private static int writePage(int page, CommandContext<CommandSource> ctx) {
-        page = MathHelper.clamp(page, 1, TEXT_PAGES.length + 1);
-        IFormattableTextComponent text = new TranslationTextComponent("jojo.chat.command.controls.page", String.valueOf(page), TEXT_PAGES.length + 1).withStyle(TextFormatting.DARK_GRAY);
+        page = MathHelper.clamp(page, 1, TEXT_PAGES.length);
+        IFormattableTextComponent text = new TranslationTextComponent("jojo.chat.command.controls.page", String.valueOf(page), TEXT_PAGES.length).withStyle(TextFormatting.DARK_GRAY);
         text.append(getPage(page - 1));
-        if (page <= TEXT_PAGES.length) {
+        if (page < TEXT_PAGES.length) {
             final int pageNext = page + 1;
             text.append(new TranslationTextComponent("jojo.chat.command.controls.next_page").withStyle((style) -> {
                 return style.withColor(TextFormatting.GREEN)
@@ -59,7 +59,7 @@ public class JojoControlsCommand {
     }
     
     private static final ITextComponent getPage(int pageNum) {
-        if (pageNum >= TEXT_PAGES.length) {
+        if (pageNum > TEXT_PAGES.length) {
             return StringTextComponent.EMPTY;
         }
         return TEXT_PAGES[pageNum];

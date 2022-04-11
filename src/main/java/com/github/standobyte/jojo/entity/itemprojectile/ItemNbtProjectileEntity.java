@@ -14,11 +14,20 @@ public abstract class ItemNbtProjectileEntity extends ItemProjectileEntity {
 
     public ItemNbtProjectileEntity(EntityType<? extends ItemNbtProjectileEntity> type, World world, LivingEntity thrower, ItemStack thrownStack) {
         super(type, thrower, world);
-        this.thrownStack = thrownStack.copy();
+        setPickupItem(thrownStack);
+    }
+
+    public ItemNbtProjectileEntity(EntityType<? extends ItemNbtProjectileEntity> type, World world, double x, double y, double z, ItemStack thrownStack) {
+        super(type, x, y, z, world);
+        setPickupItem(thrownStack);
     }
 
     protected ItemNbtProjectileEntity(EntityType<? extends ItemNbtProjectileEntity> type, World world) {
         super(type, world);
+    }
+    
+    private void setPickupItem(ItemStack item) {
+        this.thrownStack = thrownStack.copy();
     }
 
     @Override

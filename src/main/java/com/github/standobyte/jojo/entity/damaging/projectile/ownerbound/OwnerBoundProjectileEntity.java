@@ -9,11 +9,13 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.util.JojoModUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MoverType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.DataParameter;
@@ -33,6 +35,7 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     protected static final DataParameter<Boolean> IS_BOUND_TO_OWNER = EntityDataManager.defineId(OwnerBoundProjectileEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Optional<BlockPos>> BLOCK_ATTACHED_TO = EntityDataManager.defineId(OwnerBoundProjectileEntity.class, DataSerializers.OPTIONAL_BLOCK_POS);
     private static final DataParameter<Integer> ENTITY_ATTACHED_TO = EntityDataManager.defineId(OwnerBoundProjectileEntity.class, DataSerializers.INT);
+    private static final DataParameter<Boolean> IS_MOVING_FORWARD = EntityDataManager.defineId(OwnerBoundProjectileEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> IS_RETRACTING = EntityDataManager.defineId(OwnerBoundProjectileEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Float> DISTANCE = EntityDataManager.defineId(OwnerBoundProjectileEntity.class, DataSerializers.FLOAT);
     private LivingEntity attachedEntity;
@@ -152,9 +155,7 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     protected Vector3d getNextOriginOffset() {
         LivingEntity owner = getOwner();
         float distance = updateDistance();
-        if (!isRetracting()) {
-            checkRetract();
-        }
+        updateMotionFlags();
         if (isRetracting() && distance <= 0) {
             return null;
         }
@@ -163,24 +164,37 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     }
     
     protected float updateDistance() {
-        if (!isRetracting()) {
+        if (isMovingForward()) {
             return getDistance() + movementSpeed();
         }
-        else {
+        if (isRetracting()) {
             return getDistance() - retractSpeed();
         }
+        return getDistance();
     }
     
     protected abstract float movementSpeed();
+    
+    protected int timeAtFullLength() {
+        return 0;
+    }
     
     protected float retractSpeed() {
         return movementSpeed();
     }
     
-    protected void checkRetract() {
-        if (tickCount >= (int) ((float) ticksLifespan() * retractSpeed() / (movementSpeed() + retractSpeed()))) {
+    protected void updateMotionFlags() {
+        int stopForwardMotionMark = (int) (maxDistance() / movementSpeed());
+        if (isMovingForward() && tickCount >= stopForwardMotionMark) {
+            setIsMovingForward(false);
+        }
+        if (!isRetracting() && tickCount >= stopForwardMotionMark + timeAtFullLength()) {
             setIsRetracting(true);
         }
+    }
+    
+    private float maxDistance() {
+        return movementSpeed() * retractSpeed() * (ticksLifespan() - timeAtFullLength()) / (movementSpeed() * retractSpeed());
     }
     
     protected Vector3d originOffset(float yRot, float xRot, double distance) {
@@ -249,6 +263,16 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
         return attachedEntity;
     }
     
+    protected void dragTarget(Entity entity, Vector3d vec) {
+        entity.move(MoverType.PLAYER, vec);
+        if (entity instanceof StandEntity) {
+            LivingEntity standUser = ((StandEntity) entity).getUser();
+            if (standUser != null) {
+                standUser.move(MoverType.PLAYER, vec);
+            }
+        }
+    }
+    
     public void attachToBlockPos(BlockPos blockPos) {
         entityData.set(BLOCK_ATTACHED_TO, Optional.of(blockPos));
     }
@@ -263,6 +287,14 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     
     protected float getDistance() {
         return entityData.get(DISTANCE);
+    }
+    
+    protected void setIsMovingForward(boolean isMovingForward) {
+        entityData.set(IS_RETRACTING, isMovingForward);
+    }
+    
+    protected boolean isMovingForward() {
+        return entityData.get(IS_MOVING_FORWARD);
     }
     
     protected void setIsRetracting(boolean isRetracting) {
@@ -280,6 +312,7 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
         entityData.define(ENTITY_ATTACHED_TO, -1);
         entityData.define(BLOCK_ATTACHED_TO, Optional.empty());
         entityData.define(DISTANCE, 0F);
+        entityData.define(IS_MOVING_FORWARD, true);
         entityData.define(IS_RETRACTING, false);
     }
     
@@ -329,6 +362,7 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
             nbt.putUUID("AttachedEntity", attachedEntity.getUUID());
         }
         nbt.putFloat("Distance", getDistance());
+        nbt.putBoolean("IsMovingForward", isMovingForward());
         nbt.putBoolean("IsRetracting", isRetracting());
     }
 
@@ -344,6 +378,7 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
             this.attachedEntityUUID = nbt.getUUID("AttachedEntity");
         }
         setDistance(nbt.getFloat("Distance"));
+        setIsMovingForward(nbt.getBoolean("IsMovingForward"));
         setIsRetracting(nbt.getBoolean("IsRetracting"));
      }
 }

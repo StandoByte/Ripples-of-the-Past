@@ -10,7 +10,6 @@ import com.github.standobyte.jojo.util.damage.DamageUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MoverType;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -43,24 +42,28 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
                 remove();
                 return;
             }
-            LivingEntity bound = getEntityAttachedTo();
-            if (bound != null) {
-                LivingEntity owner = getOwner();
-                if (!bound.isAlive() || owner.distanceToSqr(bound) > 100) {
+        }
+        LivingEntity bound = getEntityAttachedTo();
+        if (bound != null) {
+            LivingEntity owner = getOwner();
+            if (!bound.isAlive() || owner.distanceToSqr(bound) > 100) {
+                if (!level.isClientSide()) {
                     remove();
                 }
-                else {
+            }
+            else {
+                if (!level.isClientSide()) {
                     bound.addEffect(new EffectInstance(ModEffects.STUN.get(), 60));
                     if (bound.getRemainingFireTicks() % 20 == 0 || bound.getRemainingFireTicks() <= 0) {
                         DamageUtil.setOnFire(bound, 3, true);
                     }
-                    Vector3d vecToOwner = owner.position().subtract(bound.position());
-                    if (vecToOwner.lengthSqr() > 2.25) {
-                        bound.move(MoverType.PLAYER, vecToOwner.normalize().scale(0.15D));
-                    }
-                    else {
-                        remove();
-                    }
+                }
+                Vector3d vecToOwner = owner.position().subtract(bound.position());
+                if (vecToOwner.lengthSqr() > 2.25) {
+                    dragTarget(bound, vecToOwner.normalize().scale(0.15));
+                }
+                else if (!level.isClientSide()) {
+                    remove();
                 }
             }
         }
@@ -117,5 +120,5 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
     }
     
     @Override
-    protected void checkRetract() {}
+    protected void updateMotionFlags() {}
 }

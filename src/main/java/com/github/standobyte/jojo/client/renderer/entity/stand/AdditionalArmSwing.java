@@ -13,6 +13,8 @@ public class AdditionalArmSwing {
     public final Vector3d offset;
     
     public AdditionalArmSwing(float anim, HandSide side, StandEntity stand, double maxOffset) {
+//        anim = (anim - 1) * 0.5F + 1;
+        anim *= MAX_ANIM_DURATION;
         this.anim = anim;
         this.side = side;
         Random random = stand.getRandom();
@@ -32,6 +34,7 @@ public class AdditionalArmSwing {
         return side;
     }
     
+    public static final float MAX_ANIM_DURATION = 2;
     public float getAnim() {
         return anim;
     }

@@ -36,7 +36,7 @@ public class SyncResolvePacket {
         ctx.get().enqueueWork(() -> {
             IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
                 power.setResolveLevel(msg.resolveLevel);
-                power.setResolve(msg.resolve, msg.noDecayTicks, msg.maxAchievedResolve);
+//                power.setResolve(msg.resolve, msg.noDecayTicks, msg.maxAchievedResolve);
             });
         });
         ctx.get().setPacketHandled(true);

@@ -40,7 +40,12 @@ public class SPStarFingerEntity extends OwnerBoundProjectileEntity {
     
     @Override
     protected float movementSpeed() {
-        return 0.4F;
+        return 0.5F;
+    }
+    
+    @Override
+    protected int timeAtFullLength() {
+        return 4;
     }
     
     @Override

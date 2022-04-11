@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.entity.damaging;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.util.JojoModUtil;
@@ -35,7 +36,7 @@ import net.minecraftforge.fml.network.NetworkHooks;
 
 public abstract class DamagingEntity extends ProjectileEntity implements IEntityAdditionalSpawnData {
     protected static final Vector3d DEFAULT_POS_OFFSET = new Vector3d(0.0D, -0.3D, 0.0D);
-    private float damageFactor;
+    private float damageFactor = 1F;
     private LivingEntity livingEntityOwner = null;
 
     public DamagingEntity(EntityType<? extends DamagingEntity> entityType, @Nullable LivingEntity owner, World world) {
@@ -103,15 +104,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
         if (!level.isClientSide()) {
             Entity target = entityRayTraceResult.getEntity();
             LivingEntity owner = getOwner();
-            boolean entityHurt;
-            if (checkPvpRules() && 
-                    owner instanceof StandEntity && !((StandEntity) owner).canHarm(target) || 
-                    owner instanceof PlayerEntity && target instanceof PlayerEntity && !((PlayerEntity) owner).canHarmPlayer((PlayerEntity) target)) {
-                    entityHurt = false;
-            }
-            else {
-                entityHurt = hurtTarget(target, owner);
-            }
+            boolean entityHurt = hurtTarget(target, owner);
             int prevTargetFireTimer = target.getRemainingFireTicks();
             if (isOnFire()) {
                 target.setSecondsOnFire(5);
@@ -159,8 +152,8 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     @Override
     protected boolean canHitEntity(Entity entity) {
         if (super.canHitEntity(entity)) {
+            LivingEntity owner = getOwner();
             if (entity instanceof LivingEntity) {
-                LivingEntity owner = getOwner();
                 if (owner == null) {
                     return true;
                 }
@@ -171,7 +164,9 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
                     return owner.canAttack((LivingEntity) entity);
                 }
             }
-            return true;
+            return !(checkPvpRules() && 
+                    owner instanceof StandEntity && !((StandEntity) owner).canHarm(entity) || 
+                    owner instanceof PlayerEntity && entity instanceof PlayerEntity && !((PlayerEntity) owner).canHarmPlayer((PlayerEntity) entity));
         }
         return false;
     }
@@ -219,8 +214,13 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
 
     protected abstract float getBaseDamage();
     
-    protected float getDamageAmount() {
-        return getBaseDamage() * damageFactor;
+    protected final float getDamageAmount() {
+        float configMultiplier = standDamage() || getOwner() instanceof StandEntity ? JojoModConfig.getCommonConfigInstance().standDamageMultiplier.get().floatValue() : 1;
+        return getBaseDamage() * damageFactor * configMultiplier;
+    }
+    
+    protected float getDamageFinalCalc(float damage) {
+        return damage;
     }
     
     public void setDamageFactor(float damageFactor) {

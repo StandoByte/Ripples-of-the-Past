@@ -10,12 +10,10 @@ import com.github.standobyte.jojo.power.stand.type.StandType;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.DamageSource;
 import net.minecraftforge.common.util.LazyOptional;
 
 public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     public static final int MAX_EXP = 1000;
-    public static final float MAX_RESOLVE = 1000;
 
     boolean usesStamina();
     float getStamina();
@@ -25,26 +23,22 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     boolean isStaminaInfinite();
     void setStamina(float amount);
 
+    ResolveCounter getResolveCounter();
+    void setResolveCounter(ResolveCounter resolve);
     boolean usesResolve();
     float getResolve();
     float getMaxResolve();
     default float getResolveRatio() {
+        if (!usesResolve()) {
+            return 0;
+        }
         return getResolve() / getMaxResolve();
     }
-    void addResolve(float amount);
-    void setResolve(float amount, int noDecayTicks);
-    void setResolve(float amount, int noDecayTicks, float maxAchievedResolve);
-    int getNoResolveDecayTicks();
+    float getMaxAchievedResolve();
     int getResolveLevel();
-    int getMaxResolveLevel();
     void setResolveLevel(int level);
-    float getResolveLimit();
-    void addResolveLimit(float amount);
-    void setResolveLimit(float amount, int noDecayTicks);
-    void resetResolve();
+    int getMaxResolveLevel();
     float getResolveDmgReduction();
-    void addResolveOnAttack(LivingEntity target, float damageAmount);
-    void addResolveOnTakingDamage(DamageSource damageSource, float damageAmount);
     
     void skipProgression(StandType<?> standType);
     boolean wasProgressionSkipped();
@@ -67,6 +61,7 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     @Nullable
     IStandManifestation getStandManifestation();
     void toggleSummon();
+    boolean isStandRemotelyControlled();
     
     int getTier();
     

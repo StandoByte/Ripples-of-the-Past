@@ -1,8 +1,7 @@
 package com.github.standobyte.jojo.client.model.pose;
 
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
@@ -12,20 +11,19 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.HandSide;
 
 public class ConditionalModelPose<T extends Entity> implements IModelPose<T> {
-    private final SortedMap<Predicate<T>, IModelPose<T>> poseChecks = new TreeMap<>();
+    private final List<PoseCondition<T>> poseConditions = new ArrayList<>();
     
-    // FIXME (!!!!) breaks the renderers init for whatever reason
     public ConditionalModelPose<T> addPose(@Nullable Predicate<T> condition, IModelPose<T> pose) {
-        poseChecks.put(condition == null ? entity -> true : condition, pose);
+        poseConditions.add(new PoseCondition<T>(condition == null ? entity -> true : condition, pose));
         return this;
     }
 
     @Override
     public void poseModel(float rotationAmount, T entity, float ticks, float yRotationOffset, float xRotation,
             HandSide side) {
-        for (Map.Entry<Predicate<T>, IModelPose<T>> entry : poseChecks.entrySet()) {
-            if (entry.getKey().test(entity)) {
-                entry.getValue().poseModel(rotationAmount, entity, ticks, yRotationOffset, xRotation, side);
+        for (PoseCondition<T> poseCondition : poseConditions) {
+            if (poseCondition.condition.test(entity)) {
+                poseCondition.pose.poseModel(rotationAmount, entity, ticks, yRotationOffset, xRotation, side);
                 return;
             }
         }
@@ -33,10 +31,19 @@ public class ConditionalModelPose<T extends Entity> implements IModelPose<T> {
 
     @Override
     public IModelPose<T> setEasing(UnaryOperator<Float> function) {
-        for (IModelPose<T> model : poseChecks.values()) {
-            model.setEasing(function);
-        }
+        poseConditions.stream()
+        .map(poseCondition -> poseCondition.pose)
+        .forEach(pose -> pose.setEasing(function));
         return this;
     }
 
+    private static class PoseCondition<T extends Entity> {
+        private final Predicate<T> condition;
+        private final IModelPose<T> pose;
+        
+        private PoseCondition(Predicate<T> condition, IModelPose<T> pose) {
+            this.condition = condition;
+            this.pose = pose;
+        }
+    }
 }

@@ -39,18 +39,21 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
                 remove();
                 return;
             }
-            LivingEntity bound = getEntityAttachedTo();
-            if (bound != null) {
-                LivingEntity owner = getOwner();
-                if (!bound.isAlive()) {
+        }
+        LivingEntity bound = getEntityAttachedTo();
+        if (bound != null) {
+            LivingEntity owner = getOwner();
+            if (!bound.isAlive()) {
+                if (!level.isClientSide()) {
                     remove();
                 }
-                else {
-                    Vector3d vecToOwner = owner.position().subtract(bound.position());
-                    if (vecToOwner.lengthSqr() > 4) {
-                        bound.move(MoverType.PLAYER, vecToOwner.normalize().scale(2D));
-                        bound.fallDistance = 0;
-                    }
+            }
+            else {
+                // KEKW FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! free flight
+                Vector3d vecToOwner = owner.position().subtract(bound.position());
+                if (vecToOwner.lengthSqr() > 4) {
+                    dragTarget(bound, vecToOwner.normalize().scale(2));
+                    bound.fallDistance = 0;
                 }
             }
         }
@@ -106,6 +109,11 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
     }
     
     @Override
+    protected boolean canHitEntity(Entity entity) {
+        return !entity.is(getOwner());
+    }
+    
+    @Override
     protected boolean hurtTarget(Entity target, LivingEntity owner) {
         if (getEntityAttachedTo() == null && bindEntities) {
             if (target instanceof LivingEntity) {
@@ -117,7 +125,7 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
     }
     
     @Override
-    protected void checkRetract() {}
+    protected void updateMotionFlags() {}
     
     @Override
     protected void afterBlockHit(BlockRayTraceResult blockRayTraceResult, boolean brokenBlock) {

@@ -18,6 +18,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.command.JojoControlsCommand;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.SyncInputBufferPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncLeapCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncHeldActionPacket;
@@ -49,6 +50,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     private ActionCooldownTracker cooldowns = new ActionCooldownTracker();
     private int leapCooldown;
     protected HeldActionData<P> heldActionData;
+    private Action<P> inputBuffer;
 
     public PowerBaseImpl(LivingEntity user) {
         this.user = user;
@@ -226,6 +228,9 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                     performAction(action, target);
                     return true;
                 }
+                else if (result.queueInput()) {
+                    queueNextAction(action);
+                }
                 else {
                     sendMessage(action, result);
                     return false;
@@ -234,7 +239,25 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         }
         return false;
     }
-
+    
+    @Override
+    public void queueNextAction(Action<P> action) {
+        this.inputBuffer = action;
+        serverPlayerUser.ifPresent(player -> {
+            PacketManager.sendToClient(new SyncInputBufferPacket(getPowerClassification(), action), player);
+        });
+    }
+    
+    @Override
+    public boolean clickQueuedAction() {
+        if (inputBuffer != null) {
+            boolean ret = onClickAction(inputBuffer, user != null && user.isShiftKeyDown(), ActionTarget.EMPTY);
+            inputBuffer = null;
+            return ret;
+        }
+        return false;
+    }
+    
     private void sendMessage(Action<P> action, ActionConditionResult result) {
         if (!user.level.isClientSide() && action.sendsConditionMessage()) {
             ITextComponent message = result.getWarning();

@@ -29,7 +29,7 @@ public class SyncResolveLimitPacket {
     public static void handle(SyncResolveLimitPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
-                power.setResolveLimit(msg.resolveLimit, msg.noDecayTicks);
+//                power.setResolveLimit(msg.resolveLimit, msg.noDecayTicks);
             });
         });
         ctx.get().setPacketHandled(true);

@@ -96,7 +96,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     public void setupAnim(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
         HandSide swingingHand = entity.getSwingingHand();
         
-//        initPoses();
+        initPoses();
 
         idlePose.poseModel(1.0F, entity, ticks, yRotationOffset, xRotation, swingingHand);
 
@@ -117,7 +117,8 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         this.yRotation = yRotationOffset;
         this.xRotation = xRotation;
         this.ticks = ticks;
-        /*if (!Minecraft.getInstance().isPaused())*/ entity.clUpdateSwings(Minecraft.getInstance().getDeltaFrameTime());
+        if (!Minecraft.getInstance().isPaused())
+        entity.clUpdateSwings(Minecraft.getInstance().getDeltaFrameTime());
     }
 
     protected void poseStand(T entity, float ticks, float yRotationOffset, float xRotation, 
@@ -241,6 +242,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
 
     public abstract ModelRenderer armModel(HandSide side);
 
+    // FIXME !!!!!!!!!!!!!!!!!!! rapier textures are seemingly bugged when armor is on
     public void renderArmSwings(T entity, MatrixStack matrixStack, IVertexBuilder buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
         List<AdditionalArmSwing> swings = entity.getSwingsWithOffsets();
         if (!swings.isEmpty()) {
@@ -249,16 +251,8 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
                 matrixStack.pushPose();
                 setVisibilityMode(swing.getSide() == HandSide.LEFT ? VisibilityMode.LEFT_ARM_ONLY : VisibilityMode.RIGHT_ARM_ONLY, true);
                 matrixStack.translate(swing.offset.x, swing.offset.y, swing.offset.z);
-                float anim = swing.getAnim();
-                HandSide swingingHand;
-                if (anim <= 1) {
-                    attackTime = anim;
-                    swingingHand = swing.getSide();
-                }
-                else {
-                    attackTime = anim - 1;
-                    swingingHand = swing.getSide().getOpposite();
-                }
+                attackTime = swing.getAnim() / AdditionalArmSwing.MAX_ANIM_DURATION;
+                HandSide swingingHand = swing.getSide();
                 swingArmBarrage(entity, attackTime, yRotation, xRotation, ticks, swingingHand, 0F);
                 rotateAdditionalArmSwings();
                 renderToBuffer(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha * 0.5F);

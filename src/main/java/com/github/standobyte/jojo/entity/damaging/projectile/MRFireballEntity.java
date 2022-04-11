@@ -36,6 +36,11 @@ public class MRFireballEntity extends ModdedProjectileEntity implements IRenders
     }
     
     @Override
+    public float getBaseDamage() {
+        return 2.0F;
+    }
+    
+    @Override
     protected boolean hurtTarget(Entity target, LivingEntity owner) {
         return DamageUtil.dealDamageAndSetOnFire(target, 
                 entity -> super.hurtTarget(entity, owner), 5, true);
@@ -80,11 +85,6 @@ public class MRFireballEntity extends ModdedProjectileEntity implements IRenders
     @Override
     public boolean isOnFire() {
         return true;
-    }
-    
-    @Override
-    public float getBaseDamage() {
-        return 2.0F;
     }
     
     @Override

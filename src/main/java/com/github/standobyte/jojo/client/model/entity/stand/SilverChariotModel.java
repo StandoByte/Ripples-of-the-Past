@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.client.model.pose.ModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseSided;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseTransition;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseTransitionMultiple;
+import com.github.standobyte.jojo.client.model.pose.RigidModelPose;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
 import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
@@ -186,7 +187,18 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
         super.initPoses();
         
         // FIXME (!!!!) SC attack animation
-        rapierAnim.put(StandPose.LIGHT_ATTACK, initLightAttackAnim());
+//        rapierAnim.put(StandPose.LIGHT_ATTACK, initLightAttackAnim());
+        
+        IModelPose<SilverChariotEntity> armSwingPose = new ModelPoseSided<>(
+                initRapierBarrageSwing(HandSide.LEFT), 
+                initRapierBarrageSwing(HandSide.RIGHT));
+        rapierAnim.put(StandPose.LIGHT_ATTACK, new StandActionAnimation.Builder<SilverChariotEntity>()
+                .addPose(StandEntityAction.Phase.WINDUP, armSwingPose)
+                .addPose(StandEntityAction.Phase.PERFORM, new RigidModelPose<SilverChariotEntity>(armSwingPose))
+                .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransition<SilverChariotEntity>(armSwingPose, idlePose)
+                        .setEasing(pr -> Math.max(4F * (pr - 1) + 1, 0F)))
+                .build(idlePose));
+        
 
         rapierAnim.put(StandPose.HEAVY_ATTACK, new StandActionAnimation.Builder<SilverChariotEntity>()
                 .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<SilverChariotEntity>(new RotationAngle[] {
@@ -253,21 +265,21 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
 
         // FIXME (!!!!) fix SC barrage animation
         rapierBarrageSwing = new ModelPoseSided<>(
-                initBarrageSwingPose(HandSide.LEFT), 
-                initBarrageSwingPose(HandSide.RIGHT));
+                initRapierBarrageSwing(HandSide.LEFT), 
+                initRapierBarrageSwing(HandSide.RIGHT));
     }
 
     @Override
     protected IModelPose<SilverChariotEntity> initBaseIdlePose() {
-//        return new ConditionalModelPose<SilverChariotEntity>()
-//                .addPose(chariot -> !chariot.hasRapier(), 
-//                        super.initBaseIdlePose())
-//                .addPose(chariot -> chariot.hasRapier() && chariot.hasArmor(), 
-//                        super.initBaseIdlePose())
-//                .addPose(chariot -> chariot.hasRapier() && !chariot.hasArmor(), 
-        return
+        return new ConditionalModelPose<SilverChariotEntity>()
+                .addPose(chariot -> !chariot.hasRapier(), 
+                        super.initBaseIdlePose())
+                .addPose(chariot -> chariot.hasRapier() && chariot.hasArmor(), 
+                        super.initBaseIdlePose())
+                .addPose(chariot -> chariot.hasRapier() && !chariot.hasArmor(), 
                         new ModelPose<SilverChariotEntity>(new RotationAngle[] {
-                                new RotationAngle(body, 0.2618F, 0.5236F, 0.0436F),
+                                new RotationAngle(body, 0.2618F, 0.7854F, 0.0436F),
+                                new RotationAngle(upperPart, 0.0F, -0.5236F, 0.0F),
                                 new RotationAngle(leftArm, -0.6109F, 0.3927F, -1.0472F),
                                 new RotationAngle(leftForeArm, -1.3963F, 0.2618F, 0.2618F),
                                 new RotationAngle(rightArm, 0.5236F, 0.0F, 1.3963F),
@@ -277,33 +289,27 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
                                 new RotationAngle(leftLowerLeg, 0.0873F, 0.0F, 0.0F),
                                 new RotationAngle(rightLeg, -0.5236F, 0.3927F, 0.3927F),
                                 new RotationAngle(rightLowerLeg, 1.5708F, 0.0F, 0.0F)
-                        }).setAdditionalAnim(HEAD_ROTATION);//);
+                        }).setAdditionalAnim(HEAD_ROTATION));
     }
 
     @Override
     protected IModelPose<SilverChariotEntity> initIdlePose2Loop() {
-//        return new ConditionalModelPose<SilverChariotEntity>()
-//                .addPose(chariot -> !chariot.hasRapier(), 
-//                        super.initIdlePose2Loop())
-//                .addPose(chariot -> chariot.hasRapier() && chariot.hasArmor(), 
-//                        super.initIdlePose2Loop())
-//                .addPose(chariot -> chariot.hasRapier() && !chariot.hasArmor(), 
-        return
+        return new ConditionalModelPose<SilverChariotEntity>()
+                .addPose(chariot -> !chariot.hasRapier(), 
+                        super.initIdlePose2Loop())
+                .addPose(chariot -> chariot.hasRapier() && chariot.hasArmor(), 
+                        super.initIdlePose2Loop())
+                .addPose(chariot -> chariot.hasRapier() && !chariot.hasArmor(), 
                         new ModelPose<SilverChariotEntity>(new RotationAngle[] {
-                                new RotationAngle(body, 0.2618F, 0.5236F, 0.0436F),
-                                new RotationAngle(leftArm, -0.6981F, 0.3927F, -1.0472F),
-                                new RotationAngle(leftForeArm, -1.4835F, 0.2618F, 0.2618F),
-                                new RotationAngle(rightArm, 0.6109F, 0.0F, 1.3963F),
-                                new RotationAngle(rightForeArm, -0.5236F, 1.0472F, 1.1345F),
-                                new RotationAngle(rapier, 0.0F, 0.0F, -0.1309F),
-                                new RotationAngle(leftLeg, 0.0F, -0.1309F, 0.0F),
-                                new RotationAngle(leftLowerLeg, 0.0873F, 0.0F, 0.0F),
-                                new RotationAngle(rightLeg, -0.5236F, 0.3927F, 0.3927F),
-                                new RotationAngle(rightLowerLeg, 1.5708F, 0.0F, 0.0F)
-        });
-//                        }));
+                                new RotationAngle(leftArm, -0.6545F, 0.3927F, -1.0472F),
+                                new RotationAngle(leftForeArm, -1.4399F, 0.2618F, 0.2618F),
+                                new RotationAngle(rightArm, 0.5672F, 0.0F, 1.3963F),
+                                new RotationAngle(rightForeArm, -0.5236F, 1.0472F, 1.0906F)
+                                })
+                        );
     }
     
+    @Override
     protected StandActionAnimation<SilverChariotEntity> getActionAnim(SilverChariotEntity entity, StandPose poseType) {
         if (entity.hasRapier() && rapierAnim.containsKey(poseType)) {
             return rapierAnim.get(poseType);
@@ -312,33 +318,41 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
     }
 
     protected ModelPoseSided<SilverChariotEntity> rapierBarrageSwing;
-    private ModelPoseTransition<SilverChariotEntity> initBarrageSwingPose(HandSide swingingHand) {
+    private ModelPoseTransition<SilverChariotEntity> initRapierBarrageSwing(HandSide swingingHand) {
         ModelRenderer punchingArm = getArm(swingingHand);
         ModelRenderer punchingForeArm = getForeArm(swingingHand);
         ModelRenderer otherArm = getArm(swingingHand.getOpposite());
+        ModelRenderer otherForeArm = getForeArm(swingingHand.getOpposite());
 
-        float yRotUpperPart = -0.7854F;
+        float yRotUpperPart = -0.2618F;
         if (swingingHand == HandSide.LEFT) {
             yRotUpperPart *= -1.0F;
         }
         
         return new ModelPoseTransition<>(
                 new ModelPose<SilverChariotEntity>(new RotationAngle[] {
+                        new RotationAngle(body, 0, 0, 0),
                         new RotationAngle(upperPart, 0, yRotUpperPart, 0),
-                        new RotationAngle(otherArm, 0, 0, 1.0472F),
-                        new RotationAngle(punchingArm, -1.5708F, 2.3562F, 0),
-                        new RotationAngle(punchingForeArm, 0, 0, -1.5708F),
+                        new RotationAngle(otherArm, -yRotUpperPart * 2, 0, 1.0472F),
+                        new RotationAngle(otherForeArm, 0, 0, 0),
+                        new RotationAngle(punchingArm, 0.7854F - yRotUpperPart, 0, 1.5708F),
+                        new RotationAngle(punchingForeArm, -2.3562F, 0, 0),
                         new RotationAngle(rapier, 1.5708F, 0, 0)
                 }), 
                 new ModelPose<SilverChariotEntity>(new RotationAngle[] {
-                        new RotationAngle(punchingArm, -1.5708F, 0.6109F, 0),
+                        new RotationAngle(upperPart, 0, yRotUpperPart * 3, 0),
+                        new RotationAngle(otherArm, 0, 0, 1.0472F),
+                        new RotationAngle(punchingArm, -1.5708F, -yRotUpperPart * 3, 0),
                         new RotationAngle(punchingForeArm, 0, 0, 0)
                 }).setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
                     leftArm.zRot *= -1.0F;
                     leftArm.yRot *= -1.0F;
                     punchingArm.xRot += xRotation * MathUtil.DEG_TO_RAD;
                 }))
-                .setEasing(sw -> sw * sw * sw);
+                .setEasing(sw -> {
+                    float halfSwing = sw < 0.4F ? sw * 20 / 8 : sw > 0.6F ? (1 - sw) * 20 / 8 : 1F;
+                    return halfSwing * halfSwing * halfSwing;
+                });
     }
     
     @Override

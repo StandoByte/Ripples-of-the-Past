@@ -97,7 +97,7 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
         }
         if (level.isClientSide()) {
             if (isControlledByLocalInstance()) {
-                // FIXME (soul) sync body rotation
+                // FIXME (!!!!) (soul) sync body rotation
                 this.yRot = originEntity.yRot % 360F;
                 this.xRot = originEntity.xRot;
                 yBodyRotO = yBodyRot;

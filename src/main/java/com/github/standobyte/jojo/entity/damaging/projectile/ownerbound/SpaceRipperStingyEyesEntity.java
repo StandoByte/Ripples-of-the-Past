@@ -111,7 +111,7 @@ public class SpaceRipperStingyEyesEntity extends OwnerBoundProjectileEntity {
     }
     
     @Override
-    protected void checkRetract() {}
+    protected void updateMotionFlags() {}
 
     @Override
     public boolean standDamage() {

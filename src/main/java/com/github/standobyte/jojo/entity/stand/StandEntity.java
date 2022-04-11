@@ -14,7 +14,6 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
@@ -397,6 +396,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return (entityData.get(ARMS_ONLY_MODE) & 1) > 0;
     }
     
+    public boolean wasSummonedAsArms() {
+        return (entityData.get(ARMS_ONLY_MODE) & 2) > 0;
+    }
+    
     public boolean showArm(Hand hand) {
         switch (hand) {
         case MAIN_HAND:
@@ -406,10 +409,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         default:
             return false;
         }
-    }
-    
-    public boolean wasSummonedAsArms() {
-        return (entityData.get(ARMS_ONLY_MODE) & 2) > 0;
     }
     
     public void fullSummonFromArms() {
@@ -422,9 +421,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 StandEntityAction action = currentTask.getAction();
                 if (action == ModActions.STAND_ENTITY_UNSUMMON.get()) {
                     stopTask();
-                }
-                else {
-                    currentTask.setOffsetFromUser(action.getOffsetFromUser(false));
                 }
             }
         }
@@ -446,6 +442,13 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 }
                 else if (gradualSummonWeaknessTicks == 0) {
                     removeArmsOnlyModifiers();
+                }
+                StandEntityTask currentTask = getCurrentTask();
+                if (currentTask != null) {
+                    StandEntityAction action = currentTask.getAction();
+                    if (action != ModActions.STAND_ENTITY_UNSUMMON.get()) {
+                        currentTask.setOffsetFromUser(action.getOffsetFromUser(false));
+                    }
                 }
             }
         }
@@ -802,7 +805,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     @Override
     public boolean isInvulnerableTo(DamageSource damageSrc) {
-        return this.is(damageSrc.getEntity()) || damageSrc != DamageSource.OUT_OF_WORLD && (isInvulnerable() 
+        return this.is(damageSrc.getEntity()) || damageSrc != DamageSource.OUT_OF_WORLD 
+                && !damageSrc.getMsgId().contains("stand")
+                && (isInvulnerable() 
                 || !(damageSrc instanceof IStandDamageSource) && damageSrc != DamageSource.ON_FIRE 
                 || damageSrc.isFire() && !level.getGameRules().getBoolean(GameRules.RULE_FIRE_DAMAGE))
                 || getUser() instanceof PlayerEntity && ((PlayerEntity) getUser()).abilities.invulnerable && !damageSrc.isBypassInvul();
@@ -1052,17 +1057,14 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         setStandPose(StandPose.IDLE);
         clearedTask.getAction().onClear(userPower, this);
         entityData.set(CURRENT_TASK, Optional.empty());
-        // scheduled stand task
-//        if (scheduledTask != null) {
-//            StandEntityTask nextTask = scheduledTask;
-//            if (clearedTask.getOffsetFromUser() != null) {
-//                nextTask.setOffsetFromUser(clearedTask.getOffsetFromUser());
-//            }
-//            scheduledTask = null;
-//            setTask(nextTask);
-//        }
-//        else 
-            if (isArmsOnlyMode() && newAction == null) {
+        // isn't called on client
+        if (userPower.clickQueuedAction()) {
+            StandEntityTask nextTask = getCurrentTask();
+            if (nextTask != null && clearedTask.getOffsetFromUser() != null) {
+                nextTask.setOffsetFromUser(clearedTask.getOffsetFromUser());
+            }
+        }
+        else if (isArmsOnlyMode() && newAction == null) {
             StandEntityAction unsummon = ModActions.STAND_ENTITY_UNSUMMON.get();
             setTask(new StandEntityTask(this, unsummon, unsummon.getStandActionTicks(userPower, this), 
                     StandEntityAction.Phase.PERFORM, isArmsOnlyMode(), ActionTarget.EMPTY));
@@ -1145,10 +1147,13 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return reachDistance;
     }
 
+    public Predicate<Entity> canTarget() {
+        return entity -> !entity.is(this) && !entity.is(getUser());
+    }
+    
     public RayTraceResult precisionRayTrace(Entity aimingEntity, double reachDistance) {
-        Predicate<Entity> entityFilter = entity -> !entity.is(this) && !entity.is(getUser());
         return JojoModUtil.rayTrace(aimingEntity, 
-                reachDistance, entityFilter, 0.25, getPrecision());
+                reachDistance, canTarget(), 0.25, getPrecision());
     }
     
     public boolean canAttackMelee() {
@@ -1178,6 +1183,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         target = finalTarget.getType() != TargetType.EMPTY && isTargetInReach(finalTarget) ? finalTarget : ActionTarget.EMPTY;
         setTaskTarget(target);
         
+        return attackTarget(target, punch, action, barrageHits);
+    }
+    
+    public boolean attackTarget(ActionTarget target, PunchType punch, StandEntityAction action, int barrageHits) {
         boolean punched;
         switch (target.getType()) {
         case BLOCK:
@@ -1307,7 +1316,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             while (iter.hasNext()) {
                 AdditionalArmSwing swing = iter.next();
                 float anim = swing.addDelta(timeDelta);
-                if (anim > 2F) {
+                if (anim > AdditionalArmSwing.MAX_ANIM_DURATION) {
                     iter.remove();
                 }
             }

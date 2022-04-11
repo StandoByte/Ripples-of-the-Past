@@ -40,6 +40,11 @@ public class MRFlameEntity extends ModdedProjectileEntity {
     }
     
     @Override
+    public float getBaseDamage() {
+        return 1.0F;
+    }
+    
+    @Override
     protected boolean hurtTarget(Entity target, LivingEntity owner) {
         return DamageUtil.dealDamageAndSetOnFire(target, 
                 entity -> super.hurtTarget(entity, owner), 5, true);
@@ -102,11 +107,6 @@ public class MRFlameEntity extends ModdedProjectileEntity {
         if (!level.isClientSide()) {
             JojoModUtil.extinguishFieryStandEntity(this, (ServerWorld) level);
         }
-    }
-    
-    @Override
-    public float getBaseDamage() {
-        return 1.0F;
     }
     
     @Override

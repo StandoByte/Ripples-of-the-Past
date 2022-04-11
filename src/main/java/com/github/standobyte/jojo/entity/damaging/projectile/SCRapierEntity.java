@@ -19,12 +19,14 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.RayTraceContext;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class SCRapierEntity extends ModdedProjectileEntity {
     private static final int MAX_RICOCHETS = 12;
-    private int ricochet;
+    private int ricochetCount;
     
     public SCRapierEntity(LivingEntity shooter, World world) {
         super(ModEntityTypes.SC_RAPIER.get(), shooter, world);
@@ -39,14 +41,8 @@ public class SCRapierEntity extends ModdedProjectileEntity {
         return true;
     }
     
-    @Deprecated
     @Override
     protected float getBaseDamage() {
-        return 0F;
-    }
-    
-    @Override
-    public float getDamageAmount() {
         LivingEntity owner = getOwner();
         float damage;
         if (owner != null) {
@@ -55,7 +51,15 @@ public class SCRapierEntity extends ModdedProjectileEntity {
         else {
             damage = (float) ModStandTypes.SILVER_CHARIOT.get().getStats().getBasePower();
         }
-        return damage + (float) ricochet * 1F;
+        return damage;
+    }
+    
+    @Override
+    public void setDamageFactor(float damageFactor) {}
+    
+    @Override
+    protected float getDamageFinalCalc(float damage) {
+        return damage + (float) ricochetCount * 1F;
     }
 
     @Override
@@ -79,15 +83,16 @@ public class SCRapierEntity extends ModdedProjectileEntity {
     
     @Override
     protected void onHitBlock(BlockRayTraceResult blockRayTraceResult) {
-        if (ricochet < MAX_RICOCHETS) {
+        boolean ricochet = false;
+        if (ricochetCount < MAX_RICOCHETS) {
             BlockPos blockPos = blockRayTraceResult.getBlockPos();
             BlockState blockState = level.getBlockState(blockPos);
             SoundType soundType = blockState.getSoundType(level, blockPos, this);
             level.playSound(null, blockPos, soundType.getHitSound(), SoundCategory.BLOCKS, (soundType.getVolume() + 1.0F) / 8.0F, soundType.getPitch() * 0.5F);
             Direction hitFace = blockRayTraceResult.getDirection();
-            ricochet(hitFace);
+            ricochet = ricochet(hitFace);
         }
-        else {
+        if (!ricochet) {
             Vector3d pos = position();
             Vector3d movementVec = getDeltaMovement();
             Direction hitFace = blockRayTraceResult.getDirection();
@@ -114,23 +119,33 @@ public class SCRapierEntity extends ModdedProjectileEntity {
         }
     }
     
-    private void ricochet(Direction hitSurfaceDirection) {
+    private boolean ricochet(Direction hitSurfaceDirection) {
         if (hitSurfaceDirection != null) {
             Vector3d motion = getDeltaMovement();
+            Vector3d motionNew;
             switch (hitSurfaceDirection.getAxis()) {
             case X:
-                setDeltaMovement(-motion.x, motion.y, motion.z);
+                motionNew = new Vector3d(-motion.x, motion.y, motion.z);
                 break;
             case Y:
-                setDeltaMovement(motion.x, -motion.y, motion.z);
+                motionNew = new Vector3d(motion.x, -motion.y, motion.z);
                 break;
             case Z:
-                setDeltaMovement(motion.x, motion.y, -motion.z);
+                motionNew = new Vector3d(motion.x, motion.y, -motion.z);
                 break;
+            default:
+                return false;
             }
+            if (level.clip(new RayTraceContext(position(), position().add(motionNew.normalize().scale(16)), 
+                    RayTraceContext.BlockMode.OUTLINE, RayTraceContext.FluidMode.NONE, this)).getType() == RayTraceResult.Type.MISS) {
+                return false;
+            }
+            setDeltaMovement(motionNew);
             rotateTowardsMovement(1.0F);
-            ricochet++;
+            ricochetCount++;
+            return true;
         }
+        return false;
     }
 
     @Override
@@ -169,13 +184,13 @@ public class SCRapierEntity extends ModdedProjectileEntity {
     @Override
     protected void addAdditionalSaveData(CompoundNBT nbt) {
         super.addAdditionalSaveData(nbt);
-        nbt.putInt("Ricochets", ricochet);
+        nbt.putInt("Ricochets", ricochetCount);
     }
 
     @Override
     protected void readAdditionalSaveData(CompoundNBT nbt) {
         super.readAdditionalSaveData(nbt);
-        ricochet = nbt.getInt("Ricochets");
+        ricochetCount = nbt.getInt("Ricochets");
     }
 
 }
