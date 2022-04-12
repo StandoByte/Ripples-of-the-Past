@@ -251,6 +251,20 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
         return resolveCounter.getMaxAchievedValue();
     }
+    
+    @Override
+    public void setResolve(float resolve) {
+        if (usesResolve()) {
+            resolveCounter.setResolveValue(resolve);
+        }
+    }
+    
+    @Override
+    public void addResolve(float resolve) {
+        if (usesResolve()) {
+            resolveCounter.addResolveValue(resolve, this);
+        }
+    }
 
     @Override
     public int getResolveLevel() {

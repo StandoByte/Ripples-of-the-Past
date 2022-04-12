@@ -274,6 +274,9 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> KAKYOIN_EMERALD_SPLASH = SOUNDS.register("kakyoin_emerald_splash", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "kakyoin_emerald_splash")));
     
+    public static final RegistryObject<SoundEvent> RERO = SOUNDS.register("rero", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "rero")));
+    
     public static final RegistryObject<SoundEvent> HIEROPHANT_GREEN_SUMMON = SOUNDS.register("hierophant_green_summon", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "hierophant_green_summon")));
     

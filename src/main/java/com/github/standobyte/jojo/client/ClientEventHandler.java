@@ -364,4 +364,18 @@ public class ClientEventHandler {
             AbstractGui.drawCenteredString(event.getMatrixStack(), mc.font, new TranslationTextComponent("jojo.to_be_continued"), x + 61, y + 8, 0x525544);
         }
     }
+    
+//    @SubscribeEvent(priority = EventPriority.LOWEST)
+//    public void onUseItemStart(LivingEntityUseItemEvent.Start event) {
+//        if (event.getEntity().level.isClientSide() && event.getItem().isEdible()) {
+//            String itemName = event.getItem().getItem().getRegistryName().getPath();
+//            if (((itemName.contains("berry") || itemName.contains("berries")) && event.getEntityLiving().getRandom().nextFloat() < 0.125F ||
+//                (itemName.contains("cherry") || itemName.contains("cherries")))
+//                    && IStandPower.getStandPowerOptional(event.getEntityLiving()).map(stand -> {
+//                        return stand.getType() == ModStandTypes.HIEROPHANT_GREEN.get();
+//                    }).orElse(false)) {
+//                ClientTickingSoundsHelper.playItemUseSound(event.getEntityLiving(), ModSounds.RERO.get(), 1.0F, 1.0F, true, event.getItem());
+//            }
+//        }
+//    }
 }

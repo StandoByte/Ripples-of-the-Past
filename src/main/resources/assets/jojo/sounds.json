@@ -440,6 +440,10 @@
     "subtitle": "jojo.subtitle.emerald_splash_name",
     "sounds": [ "jojo:stand_user/kakyoin_emerald_splash" ]
   },
+  "rero": {
+    "subtitle": "jojo.subtitle.rero",
+    "sounds": [ "jojo:stand_user/rero" ]
+  },
   "hierophant_green_summon": {
     "subtitle": "jojo.subtitle.stand_summon",
     "sounds": [ "jojo:stand/hierophant_green_summon", "jojo:stand/hierophant_green_summon_2" ]

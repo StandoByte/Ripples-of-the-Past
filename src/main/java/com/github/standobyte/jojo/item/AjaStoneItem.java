@@ -95,7 +95,8 @@ public class AjaStoneItem extends Item {
     @Override
     public void onUseTick(World world, LivingEntity entity, ItemStack stack, int remainingTicks) {
         if (world.isClientSide() && remainingTicks == getUseDuration(stack)) {
-            ClientTickingSoundsHelper.playAjaStoneChargingSound(entity, stack);
+            ClientTickingSoundsHelper.playItemUseSound(entity, ModSounds.AJA_STONE_CHARGING.get(), 
+                    0.25F, 1.0F + (random.nextFloat() - random.nextFloat()) * 0.05F, false, stack);
         }
     }
     

@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.client.sound;
 
-import java.util.Random;
 import java.util.function.Predicate;
 
 import com.github.standobyte.jojo.action.Action;
@@ -114,10 +113,9 @@ public abstract class ClientTickingSoundsHelper {
                 ModSounds.HAMON_CONCENTRATION.get(), hamonUser.getSoundSource(), 1.0F, 1.0F, false, hamonUser, stopCondition));
     }
     
-    public static void playAjaStoneChargingSound(LivingEntity entity, ItemStack stack) {
-        Random random = entity.getRandom();
-        Minecraft.getInstance().getSoundManager().play(new StoppableEntityTickableSound<LivingEntity>(ModSounds.AJA_STONE_CHARGING.get(), 
-                entity.getSoundSource(), 0.25F, 1.0F + (random.nextFloat() - random.nextFloat()) * 0.05F, false, entity, 
+    public static void playItemUseSound(LivingEntity entity, SoundEvent sound, float volume, float pitch, boolean looping, ItemStack stack) {
+        Minecraft.getInstance().getSoundManager().play(new StoppableEntityTickableSound<LivingEntity>(sound, 
+                entity.getSoundSource(), volume, pitch, looping, entity, 
                 e -> !e.isUsingItem() || !e.getUseItem().sameItem(stack)));
     }
     

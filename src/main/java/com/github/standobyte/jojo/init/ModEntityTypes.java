@@ -76,11 +76,11 @@ public class ModEntityTypes {
             .build(new ResourceLocation(JojoMod.MOD_ID, "blade_hat").toString()));
     
     public static final RegistryObject<EntityType<SpaceRipperStingyEyesEntity>> SPACE_RIPPER_STINGY_EYES = ENTITIES.register("space_ripper_stingy_eyes", 
-            () -> EntityType.Builder.<SpaceRipperStingyEyesEntity>of(SpaceRipperStingyEyesEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon()
+            () -> EntityType.Builder.<SpaceRipperStingyEyesEntity>of(SpaceRipperStingyEyesEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().setUpdateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "space_ripper_stingy_eyes").toString()));
     
     public static final RegistryObject<EntityType<ZoomPunchEntity>> ZOOM_PUNCH = ENTITIES.register("zoom_punch", 
-            () -> EntityType.Builder.<ZoomPunchEntity>of(ZoomPunchEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon()
+            () -> EntityType.Builder.<ZoomPunchEntity>of(ZoomPunchEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().setUpdateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "zoom_punch").toString()));
     
     public static final RegistryObject<EntityType<AfterimageEntity>> AFTERIMAGE = ENTITIES.register("afterimage", 
@@ -162,11 +162,11 @@ public class ModEntityTypes {
             .build(new ResourceLocation(JojoMod.MOD_ID, "pillarman_temple_engraving").toString()));
     
     public static final RegistryObject<EntityType<SPStarFingerEntity>> SP_STAR_FINGER = ENTITIES.register("sp_star_finger", 
-            () -> EntityType.Builder.<SPStarFingerEntity>of(SPStarFingerEntity::new, EntityClassification.MISC).sized(0.125F, 0.125F).noSummon().noSave()
+            () -> EntityType.Builder.<SPStarFingerEntity>of(SPStarFingerEntity::new, EntityClassification.MISC).sized(0.125F, 0.125F).noSummon().noSave().setUpdateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "sp_star_finger").toString()));
     
     public static final RegistryObject<EntityType<HGStringEntity>> HG_STRING = ENTITIES.register("hg_string", 
-            () -> EntityType.Builder.<HGStringEntity>of(HGStringEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().noSave()
+            () -> EntityType.Builder.<HGStringEntity>of(HGStringEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().noSave().setUpdateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "hg_string").toString()));
     
     public static final RegistryObject<EntityType<HGEmeraldEntity>> HG_EMERALD = ENTITIES.register("hg_emerald", 
@@ -174,11 +174,11 @@ public class ModEntityTypes {
             .build(new ResourceLocation(JojoMod.MOD_ID, "hg_emerald").toString()));
     
     public static final RegistryObject<EntityType<HGGrapplingStringEntity>> HG_GRAPPLING_STRING = ENTITIES.register("hg_grappling_string", 
-            () -> EntityType.Builder.<HGGrapplingStringEntity>of(HGGrapplingStringEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().noSave()
+            () -> EntityType.Builder.<HGGrapplingStringEntity>of(HGGrapplingStringEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().noSave().setUpdateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "hg_grappling_string").toString()));
     
     public static final RegistryObject<EntityType<HGBarrierEntity>> HG_BARRIER = ENTITIES.register("hg_barrier", 
-            () -> EntityType.Builder.<HGBarrierEntity>of(HGBarrierEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().noSave()
+            () -> EntityType.Builder.<HGBarrierEntity>of(HGBarrierEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().noSave().setShouldReceiveVelocityUpdates(false).setUpdateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "hg_barrier").toString()));
     
     public static final RegistryObject<EntityType<SCRapierEntity>> SC_RAPIER = ENTITIES.register("sc_rapier", 
@@ -206,7 +206,7 @@ public class ModEntityTypes {
             .build(new ResourceLocation(JojoMod.MOD_ID, "mr_crossfire_hurricane_special").toString()));
     
     public static final RegistryObject<EntityType<MRRedBindEntity>> MR_RED_BIND = ENTITIES.register("mr_red_bind", 
-            () -> EntityType.Builder.<MRRedBindEntity>of(MRRedBindEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().noSave()
+            () -> EntityType.Builder.<MRRedBindEntity>of(MRRedBindEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().noSave().setUpdateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "mr_red_bind").toString()));
     
     public static final RegistryObject<EntityType<MRDetectorEntity>> MR_DETECTOR = ENTITIES.register("mr_detector", 

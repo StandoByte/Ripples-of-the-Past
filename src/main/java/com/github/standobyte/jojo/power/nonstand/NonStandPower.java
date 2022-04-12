@@ -63,7 +63,9 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     public boolean clear() {
         if (super.clear()) {
             type.onClear(this);
-            type = null;
+            NonStandPowerType<?> clearedType = this.type;
+            this.type = null;
+            clearedType.afterClear(this);
             typeSpecificData = null;
             energy = 0;
             return true;

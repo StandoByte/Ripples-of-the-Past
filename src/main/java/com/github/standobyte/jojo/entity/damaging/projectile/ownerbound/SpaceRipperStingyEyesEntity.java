@@ -13,6 +13,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -48,11 +49,17 @@ public class SpaceRipperStingyEyesEntity extends OwnerBoundProjectileEntity {
             }
         }
     }
+    
+    @Override
+    public boolean isInvulnerableTo(DamageSource damageSource) {
+        return damageSource != DamageSource.OUT_OF_WORLD && !damageSource.isCreativePlayer();
+    }
 
     @Override
     public void onSyncedDataUpdated(DataParameter<?> dataParameter) {
         if (IS_BOUND_TO_OWNER.equals(dataParameter) && !isBoundToOwner() && getOwner() != null) {
             detachedOriginPos = getOriginPoint();
+            setLength((float) position().subtract(detachedOriginPos).length());
         }
         super.onSyncedDataUpdated(dataParameter);
     }
@@ -102,7 +109,7 @@ public class SpaceRipperStingyEyesEntity extends OwnerBoundProjectileEntity {
         if (isBoundToOwner()) {
             return 50;
         }
-        return MathHelper.floor(getLength() / (float) movementSpeed() * 10F) + 20;
+        return MathHelper.floor(getLength() / (float) movementSpeed() * 20F) + 20;
     }
     
     @Override

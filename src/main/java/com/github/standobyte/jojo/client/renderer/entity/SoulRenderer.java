@@ -53,7 +53,7 @@ public class SoulRenderer<T extends SoulEntity> extends EntityRenderer<T> {
 
         model.riding = false;
         model.young = entity.isBaby();
-        float yHeadRotation = yRotation;
+        float yHeadRotation = MathHelper.rotLerp(partialTick, soulEntity.yHeadRotO, soulEntity.yHeadRot);
         float yBodyRotation = MathHelper.rotLerp(partialTick, soulEntity.yBodyRotO, soulEntity.yBodyRot);
         float f2 = yHeadRotation - yBodyRotation;
         

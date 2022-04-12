@@ -21,8 +21,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.AmbientEntity;
 import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class HamonOrganismInfusion extends HamonAction {
@@ -49,6 +51,10 @@ public class HamonOrganismInfusion extends HamonAction {
             if (blockState.getMaterial() == Material.EGG && 
                     !power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get().isSkillLearned(HamonSkill.ANIMAL_INFUSION)) {
                 return conditionMessage("animal_infusion");
+            }
+            if (!user.level.getEntitiesOfClass(HamonBlockChargeEntity.class, 
+                    new AxisAlignedBB(Vector3d.atCenterOf(blockPos), Vector3d.atCenterOf(blockPos))).isEmpty()) {
+                return ActionConditionResult.NEGATIVE;
             }
             Block block = blockState.getBlock();
             if (!(isBlockLiving(blockState) || block instanceof FlowerPotBlock && blockState.getBlock() != Blocks.FLOWER_POT)) {
