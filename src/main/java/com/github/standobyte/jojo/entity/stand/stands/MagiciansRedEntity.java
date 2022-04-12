@@ -6,20 +6,12 @@ import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 
 public class MagiciansRedEntity extends StandEntity {
     
     public MagiciansRedEntity(StandEntityType<MagiciansRedEntity> type, World world) {
         super(type, world);
-    }
-    
-    @Override
-    protected boolean hurtTarget(Entity target, DamageSource dmgSource, float damage) {
-        boolean dmgFire = DamageUtil.hurtThroughInvulTicks(target, dmgSource.setIsFire(), damage / 2);
-        boolean dmgPhysical = DamageUtil.hurtThroughInvulTicks(target, dmgSource, damage / 2);
-        return dmgPhysical || dmgFire;
     }
     
     @Override

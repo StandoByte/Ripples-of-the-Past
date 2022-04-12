@@ -41,6 +41,7 @@ import com.github.standobyte.jojo.action.actions.SilverChariotRapierLaunch;
 import com.github.standobyte.jojo.action.actions.SilverChariotTakeOffArmor;
 import com.github.standobyte.jojo.action.actions.StandAction;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
+import com.github.standobyte.jojo.action.actions.StandEntityAction.Phase;
 import com.github.standobyte.jojo.action.actions.StandEntityBlock;
 import com.github.standobyte.jojo.action.actions.StandEntityHeavyAttack;
 import com.github.standobyte.jojo.action.actions.StandEntityLightAttack;
@@ -58,6 +59,7 @@ import com.github.standobyte.jojo.action.actions.VampirismFreeze;
 import com.github.standobyte.jojo.action.actions.VampirismHamonSuicide;
 import com.github.standobyte.jojo.action.actions.VampirismSpaceRipperStingyEyes;
 import com.github.standobyte.jojo.action.actions.VampirismZombieSummon;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
@@ -187,27 +189,27 @@ public class ModActions {
     public static final RegistryObject<StandEntityAction> STAND_ENTITY_BLOCK = ACTIONS.register("stand_entity_block", 
             () -> new StandEntityBlock() {
                 @Override
-                public StandRelativeOffset getOffsetFromUser(boolean armsOnlyMode) {
+                public StandRelativeOffset getOffsetFromUser(StandEntity stand) {
                     return null;
                 }
             });
     
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_PUNCH = ACTIONS.register("star_platinum_punch", 
-            () -> new StandEntityLightAttack(new StandEntityAction.Builder().standSound(ModSounds.STAR_PLATINUM_ORA)));
+            () -> new StandEntityLightAttack(new StandEntityAction.Builder().standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_ORA)));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_BARRAGE = ACTIONS.register("star_platinum_barrage", 
             () -> new StandEntityMeleeBarrage(new StandEntityAction.Builder().standTakesCrosshairTarget(TargetType.ENTITY)
                     .standSound(ModSounds.STAR_PLATINUM_ORA_ORA_ORA)));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_HEAVY_PUNCH = ACTIONS.register("star_platinum_heavy_punch", 
-            () -> new StandEntityHeavyAttack(new StandEntityAction.Builder().standSound(ModSounds.STAR_PLATINUM_ORA_LONG)
+            () -> new StandEntityHeavyAttack(new StandEntityAction.Builder().standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_ORA_LONG)
                     .shiftVariationOf(STAR_PLATINUM_PUNCH).shiftVariationOf(STAR_PLATINUM_BARRAGE)));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_STAR_FINGER = ACTIONS.register("star_platinum_star_finger", 
             () -> new StarPlatinumStarFinger(new StandEntityAction.Builder().standPerformDuration(20)
                     .cooldown(20, 40).ignoresPerformerStun().resolveLevelToUnlock(1).defaultStandOffsetFromUser()
-                    .standPose(StandPose.RANGED_ATTACK).shout(ModSounds.JOTARO_STAR_FINGER).standSound(ModSounds.STAR_PLATINUM_STAR_FINGER)));
+                    .standPose(StandPose.RANGED_ATTACK).shout(ModSounds.JOTARO_STAR_FINGER).standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_STAR_FINGER)));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_BLOCK = ACTIONS.register("star_platinum_block", 
             () -> new StandEntityBlock());
@@ -229,7 +231,7 @@ public class ModActions {
     
 
     public static final RegistryObject<StandEntityAction> THE_WORLD_PUNCH = ACTIONS.register("the_world_punch", 
-            () -> new StandEntityLightAttack(new StandEntityAction.Builder().standSound(ModSounds.THE_WORLD_MUDA)));
+            () -> new StandEntityLightAttack(new StandEntityAction.Builder().standSound(Phase.WINDUP, ModSounds.THE_WORLD_MUDA)));
     
     public static final RegistryObject<StandEntityAction> THE_WORLD_BARRAGE = ACTIONS.register("the_world_barrage", 
             () -> new StandEntityMeleeBarrage(new StandEntityAction.Builder().standSound(ModSounds.THE_WORLD_MUDA_MUDA_MUDA)));

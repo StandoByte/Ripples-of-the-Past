@@ -8,7 +8,9 @@ import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.JojoModUtil;
+import com.github.standobyte.jojo.util.MathUtil;
 
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
@@ -68,6 +70,15 @@ public class SilverChariotHeavyAttack extends StandEntityHeavyAttack {
     public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, int ticks) {
         super.onTaskSet(world, standEntity, standPower, phase, ticks);
         if (!standEntity.isHeavyComboPunching() && ticks > 0) {
+            if (standEntity.isFollowingUser() && standEntity.getAttackSpeed() < 24) {
+                LivingEntity user = standEntity.getUser();
+                if (user != null) {
+                    Vector3d vec = MathUtil.relativeCoordsToAbsolute(0, 0, 1.0, user.yRot);
+                    standEntity.setPos(user.getX() + vec.x, 
+                            standEntity.getY(), 
+                            user.getZ() + vec.z);
+                }
+            }
             ((SilverChariotEntity) standEntity).setDashVec(standEntity.getLookAngle().scale(10D / (double) ticks));
         }
     }
@@ -77,7 +88,7 @@ public class SilverChariotHeavyAttack extends StandEntityHeavyAttack {
         if (!standEntity.isHeavyComboPunching()) {
             float completion = standEntity.getCurrentTaskCompletion(1.0F);
             boolean lastTick = completion < 1;
-            standEntity.setDeltaMovement(lastTick ? ((SilverChariotEntity) standEntity).getDashVec().scale(completion * 2.5) : Vector3d.ZERO);
+            standEntity.setDeltaMovement(lastTick ? ((SilverChariotEntity) standEntity).getDashVec().scale(completion * 2) : Vector3d.ZERO);
             if (!world.isClientSide()) {
                 if (!lastTick && !standEntity.isBeingRetracted()) {
                     for (RayTraceResult rayTraceResult : JojoModUtil.rayTrace(standEntity, 

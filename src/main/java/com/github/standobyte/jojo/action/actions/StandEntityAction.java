@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.action.actions;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -37,7 +39,7 @@ public abstract class StandEntityAction extends StandAction {
     @Nullable
     protected final StandRelativeOffset userOffsetArmsOnly;
     public final boolean enablePhysics;
-    private final Supplier<SoundEvent> standSoundSupplier;
+    private final Map<Phase, Supplier<SoundEvent>> standSounds;
     
     public StandEntityAction(StandEntityAction.AbstractBuilder<?> builder) {
         super(builder);
@@ -53,7 +55,7 @@ public abstract class StandEntityAction extends StandAction {
         this.userOffset = builder.userOffset;
         this.userOffsetArmsOnly = builder.userOffsetArmsOnly;
         this.enablePhysics = builder.enablePhysics;
-        this.standSoundSupplier = builder.standSoundSupplier;
+        this.standSounds = builder.standSounds;
     }
     
     @Override
@@ -161,9 +163,9 @@ public abstract class StandEntityAction extends StandAction {
     
     @Override
     public void stoppedHolding(World world, LivingEntity user, IStandPower power, int ticksHeld) {
-        if (!world.isClientSide()) {
-            invokeForStand(power, stand -> stand.stopTask());
-        }
+//        if (!world.isClientSide()) {
+        invokeForStand(power, stand -> stand.stopTaskWithRecovery());
+//        }
     }
 
     @Override
@@ -201,14 +203,15 @@ public abstract class StandEntityAction extends StandAction {
     public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, int ticks) {}
     
     public void playSound(StandEntity standEntity, IStandPower standPower, Phase phase) {
-        SoundEvent sound = getSound(standEntity, standPower);
+        SoundEvent sound = getSound(standEntity, standPower, phase);
         if (sound != null) {
             playSoundAtStand(standEntity.level, standEntity, sound, standPower, phase);
         }
     }
     
     @Nullable
-    protected SoundEvent getSound(StandEntity standEntity, IStandPower standPower) {
+    protected SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase) {
+        Supplier<SoundEvent> standSoundSupplier = standSounds.get(phase);
         if (standSoundSupplier == null) {
             return null;
         }
@@ -218,7 +221,7 @@ public abstract class StandEntityAction extends StandAction {
     protected void playSoundAtStand(World world, StandEntity standEntity, SoundEvent sound, IStandPower standPower, Phase phase) {
         if (world.isClientSide()) {
             if (isCancelable(standPower, standEntity, phase, null)) {
-                ClientTickingSoundsHelper.playStandEntityCancelableActionSound(standEntity, sound, this, 1.0F, 1.0F);
+                ClientTickingSoundsHelper.playStandEntityCancelableActionSound(standEntity, sound, this, phase, 1.0F, 1.0F);
             }
             else {
                 standEntity.playSound(sound, 1.0F, 1.0F, ClientUtil.getClientPlayer());
@@ -227,8 +230,8 @@ public abstract class StandEntityAction extends StandAction {
     }
     
     @Nullable
-    public StandRelativeOffset getOffsetFromUser(boolean armsOnlyMode) {
-        return armsOnlyMode ? userOffsetArmsOnly : userOffset;
+    public StandRelativeOffset getOffsetFromUser(StandEntity stand) {
+        return stand.isArmsOnlyMode() ? userOffsetArmsOnly : userOffset;
     }
     
     protected boolean standTakesCrosshairTarget(ActionTarget target) {
@@ -256,6 +259,10 @@ public abstract class StandEntityAction extends StandAction {
         return false;
     }
     
+    public boolean canFollowUpBarrage() {
+        return false;
+    }
+    
     public void onClear(IStandPower standPower, StandEntity standEntity) {}
     
     public float getStandAlpha(StandEntity standEntity, int ticksLeft, float partialTick) {
@@ -274,7 +281,16 @@ public abstract class StandEntityAction extends StandAction {
         BUTTON_HOLD,
         WINDUP,
         PERFORM,
-        RECOVERY
+        RECOVERY;
+        
+        @Nullable
+        public Phase getNextPhase() {
+            int num = ordinal() + 1;
+            if (num == values().length) {
+                return null;
+            }
+            return values()[num];
+        }
     }
     
     
@@ -302,7 +318,7 @@ public abstract class StandEntityAction extends StandAction {
         @Nullable
         private StandRelativeOffset userOffsetArmsOnly = null;
         private boolean enablePhysics = true;
-        private Supplier<SoundEvent> standSoundSupplier = () -> null;
+        private final Map<Phase, Supplier<SoundEvent>> standSounds = new HashMap<>();
 
         public T staminaCost(float staminaCost) {
             this.staminaCost = staminaCost;
@@ -416,7 +432,13 @@ public abstract class StandEntityAction extends StandAction {
         }
         
         public T standSound(Supplier<SoundEvent> soundSupplier) {
-            this.standSoundSupplier = soundSupplier;
+            return standSound(Phase.PERFORM, soundSupplier);
+        }
+        
+        public T standSound(Phase phase, Supplier<SoundEvent> soundSupplier) {
+            if (phase != null) {
+                this.standSounds.put(phase, soundSupplier);
+            }
             return getThis();
         }
     }

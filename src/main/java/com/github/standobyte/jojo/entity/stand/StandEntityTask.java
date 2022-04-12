@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
@@ -22,6 +23,7 @@ import net.minecraftforge.registries.DataSerializerEntry;
 public class StandEntityTask {
     @Nonnull
     private final StandEntityAction action;
+    private final StandEntity stand;
     @Nonnull
     private ActionTarget target = ActionTarget.EMPTY;
     private int startingTicks;
@@ -31,13 +33,14 @@ public class StandEntityTask {
     @Nullable
     private StandRelativeOffset offsetFromUser;
     
-    StandEntityTask(@Nullable StandEntity stand, StandEntityAction action, int ticks, 
+    StandEntityTask(StandEntity stand, StandEntityAction action, int ticks, 
             StandEntityAction.Phase phase, boolean armsOnlyMode, ActionTarget target) {
         this.action = action;
+        this.stand = stand;
         this.startingTicks = Math.max(ticks, 1);
         this.ticksLeft = this.startingTicks;
         this.phase = phase;
-        this.offsetFromUser = action.getOffsetFromUser(armsOnlyMode);
+        this.offsetFromUser = action.getOffsetFromUser(stand);
         setTarget(stand, target);
         if (stand != null) {
             rotateStand(stand, false);
@@ -95,30 +98,45 @@ public class StandEntityTask {
         
         ticksLeft--;
         if (ticksLeft <= 0) {
-            switch (phase) {
-            case WINDUP:
-                this.phase = StandEntityAction.Phase.PERFORM;
-                this.startingTicks = action.getStandActionTicks(standPower, standEntity);
-                this.ticksLeft = startingTicks;
-                break;
-            case PERFORM:
-                int recoveryTicks = action.getStandRecoveryTicks(standPower, standEntity);
-                if (recoveryTicks > 0) {
-                    this.phase = StandEntityAction.Phase.RECOVERY;
-                    this.startingTicks = recoveryTicks;
-                    this.ticksLeft = startingTicks;
-                }
-                else {
-                    standEntity.stopTask();
-                }
-                break;
-            case RECOVERY:
-                standEntity.stopTask();
-                break;
-            default:
-                break;
-            }
+            moveToPhase(phase.getNextPhase(), standPower, standEntity);
         }
+    }
+
+    public void moveToPhase(@Nullable StandEntityAction.Phase phase, IStandPower standPower, StandEntity standEntity) {
+        if (phase == null) {
+            standEntity.stopTask();
+            return;
+        }
+        int ticks;
+        switch (phase) {
+        case WINDUP:
+            ticks = action.getStandWindupTicks(standPower, standEntity);
+            break;
+        case PERFORM:
+            ticks = action.getStandActionTicks(standPower, standEntity);
+            break;
+        case RECOVERY:
+            ticks = action.getStandRecoveryTicks(standPower, standEntity);
+            break;
+        default:
+            return;
+        }
+        if (!setPhase(phase, ticks)) {
+            moveToPhase(phase.getNextPhase(), standPower, standEntity);
+        }
+        else {
+            action.playSound(standEntity, standPower, phase);
+        }
+    }
+    
+    private boolean setPhase(StandEntityAction.Phase phase, int ticks) {
+        if (ticks > 0) {
+            this.phase = phase;
+            this.startingTicks = ticks;
+            this.ticksLeft = startingTicks;
+            return true;
+        }
+        return false;        
     }
     
     private void rotateStand(StandEntity standEntity, boolean limitBySpeed) {
@@ -170,6 +188,8 @@ public class StandEntityTask {
                 
                 buf.writeRegistryIdUnsafe(ModActions.Registry.getRegistry(), task.action);
                 
+                buf.writeInt(task.stand.getId());
+                
                 buf.writeVarInt(task.startingTicks);
                 buf.writeEnum(task.phase);
                 
@@ -193,6 +213,8 @@ public class StandEntityTask {
                 return Optional.empty();
             }
             
+            Entity entity = ClientUtil.getEntityById(buf.readInt());
+            
             int ticks = buf.readVarInt();
             StandEntityAction.Phase phase = buf.readEnum(StandEntityAction.Phase.class);
             
@@ -203,7 +225,8 @@ public class StandEntityTask {
                 offset = StandRelativeOffset.readFromBuf(buf);
             }
             
-            StandEntityTask task = new StandEntityTask(null, (StandEntityAction) action, ticks, phase, false, target);
+            StandEntityTask task = new StandEntityTask(entity instanceof StandEntity ? (StandEntity) entity : null, 
+                    (StandEntityAction) action, ticks, phase, false, target);
             task.setOffsetFromUser(offset);
             return Optional.of(task);
         }
@@ -212,7 +235,7 @@ public class StandEntityTask {
         public Optional<StandEntityTask> copy(Optional<StandEntityTask> value) {
             if (value.isPresent()) {
                 StandEntityTask task = value.get();
-                StandEntityTask taskNew = new StandEntityTask(null, task.action, task.startingTicks, task.phase, false, task.target);
+                StandEntityTask taskNew = new StandEntityTask(task.stand, task.action, task.startingTicks, task.phase, false, task.target);
                 taskNew.ticksLeft = task.ticksLeft;
                 if (taskNew.target.getType() == TargetType.ENTITY) {
                     Entity entity = taskNew.target.getEntity(null);

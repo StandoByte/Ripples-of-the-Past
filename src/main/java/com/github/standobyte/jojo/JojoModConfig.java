@@ -50,6 +50,7 @@ public class JojoModConfig {
         public final ForgeConfigSpec.BooleanValue skipStandProgression;
         public final ForgeConfigSpec.BooleanValue standStamina;
         public final ForgeConfigSpec.DoubleValue standDamageMultiplier;
+        public final ForgeConfigSpec.BooleanValue soulAscension;
 
         public final ForgeConfigSpec.BooleanValue abilitiesBreakBlocks;
         
@@ -134,6 +135,10 @@ public class JojoModConfig {
                     .comment(" Damage multiplier applied to all Stands.")
                     .translation("jojo.config.standPowerMultiplier")
                     .defineInRange("standPowerMultiplier", 1.0, 0.0, 128.0);
+            
+            soulAscension = builder
+                    .translation("jojo.config.soulAscension")
+                    .define("soulAscension", true);
             
             abilitiesBreakBlocks = builder
                     .comment(" Whether or not Stands and abilities can break blocks.")

@@ -20,8 +20,16 @@ public class StandRelativeOffset {
         return new StandRelativeOffset(left, y, forward, true);
     }
     
-    public static StandRelativeOffset copy(StandRelativeOffset offset) {
-        return new StandRelativeOffset(offset.left, offset.y, offset.forward, offset.doYOffset);
+    public StandRelativeOffset copy() {
+        return new StandRelativeOffset(this.left, this.y, this.forward, this.doYOffset);
+    }
+    
+    public StandRelativeOffset copy(Double left, Double y, Double forward) {
+        return new StandRelativeOffset(
+                left == null ? this.left : left, 
+                y == null ? this.y : y, 
+                forward == null ? this.forward : forward, 
+                this.doYOffset || y != null);
     }
     
     private StandRelativeOffset(double left, double y, double forward, boolean doYOffset) {
@@ -43,6 +51,14 @@ public class StandRelativeOffset {
         this.left = vec.x;
         this.y = vec.y;
         this.forward = vec.z;
+    }
+    
+    public double getLeft() {
+        return left;
+    }
+    
+    public double getForward() {
+        return forward;
     }
     
 
