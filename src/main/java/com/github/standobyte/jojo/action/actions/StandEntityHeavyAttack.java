@@ -55,6 +55,11 @@ public class StandEntityHeavyAttack extends StandEntityAction {
     }
     
     @Override
+    public boolean canFollowUpBarrage() {
+        return true;
+    }
+    
+    @Override
     public StandPose getStandPose(IStandPower standPower, StandEntity standEntity) {
         return standEntity.isHeavyComboPunching() ? StandPose.HEAVY_ATTACK_COMBO : super.getStandPose(standPower, standEntity);
     }

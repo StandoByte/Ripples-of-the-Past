@@ -369,6 +369,8 @@
   "jojo.config.standStamina.tooltip": "Whether or not Stand stamina mechanic is enabled.",
   "jojo.config.standDamageMultiplier": "Stand damage multiplier",
   "jojo.config.standDamageMultiplier.tooltip": "Damage multiplier applied to all Stands.",
+  "jojo.config.soulAscension": "Soul Ascension",
+  "jojo.config.soulAscension.tooltip": "",
   "jojo.config.abilitiesBreakBlocks": "Abilities break blocks",
   "jojo.config.abilitiesBreakBlocks.tooltip": "Whether or not Stands and abilities from the mod can break blocks.",
   "jojo.config.hamonDamageMultiplier": "Hamon damage multiplier",

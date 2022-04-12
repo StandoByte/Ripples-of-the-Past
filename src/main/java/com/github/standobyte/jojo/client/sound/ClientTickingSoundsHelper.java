@@ -2,6 +2,8 @@ package com.github.standobyte.jojo.client.sound;
 
 import java.util.function.Predicate;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
@@ -49,7 +51,8 @@ public abstract class ClientTickingSoundsHelper {
         mc.getSoundManager().play(sound);
     }
     
-    public static void playStandEntityCancelableActionSound(StandEntity stand, SoundEvent sound, StandEntityAction action, float volume, float pitch) {
+    public static void playStandEntityCancelableActionSound(StandEntity stand, SoundEvent sound, 
+            StandEntityAction action, @Nullable StandEntityAction.Phase phase, float volume, float pitch) {
         Minecraft mc = Minecraft.getInstance();
         if (!stand.isVisibleForAll() && !StandUtil.isEntityStandUser(mc.player)) {
             return;
@@ -64,7 +67,7 @@ public abstract class ClientTickingSoundsHelper {
         pitch = event.getPitch();
         
         mc.getSoundManager().play(new StoppableEntityTickableSound<StandEntity>(sound, category, 
-                volume, pitch, false, stand, e -> e.getCurrentTaskAction() != action));
+                volume, pitch, false, stand, e -> e.getCurrentTaskAction() != action || phase != null && e.getCurrentTaskPhase() != phase));
     }
     
     public static void playStandEntityUnsummonSound(StandEntity stand, SoundEvent sound, float volume, float pitch) {

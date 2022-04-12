@@ -703,7 +703,7 @@ public class GameplayEventHandler {
     }
     
     private static void summonSoul(LivingEntity entity, DamageSource dmgSource) {
-        if (JojoModUtil.isUndead(entity) || 
+        if (!JojoModConfig.getCommonConfigInstance().soulAscension.get() || JojoModUtil.isUndead(entity) || 
                 entity instanceof PlayerEntity && entity.level.getGameRules().getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN)) {
             return;
         }

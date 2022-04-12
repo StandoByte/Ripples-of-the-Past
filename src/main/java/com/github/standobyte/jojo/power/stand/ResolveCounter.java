@@ -74,7 +74,7 @@ public class ResolveCounter {
     }
     
     int getResolveLevel() {
-        return resolveLevel;
+        return resolveLevel + 4;
     }
     
 

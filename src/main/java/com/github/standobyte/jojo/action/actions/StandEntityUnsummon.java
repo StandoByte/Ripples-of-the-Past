@@ -62,6 +62,7 @@ public final class StandEntityUnsummon extends StandEntityAction {
     @Override
     public void onClear(IStandPower standPower, StandEntity standEntity) {
         standEntity.unsummonTicks = 0;
+        standEntity.unsummonOffset = standEntity.getDefaultOffsetFromUser().copy();
     }
     
     @Override
@@ -71,7 +72,7 @@ public final class StandEntityUnsummon extends StandEntityAction {
     }
     
     @Override
-    protected SoundEvent getSound(StandEntity standEntity, IStandPower standPower) {
+    protected SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase) {
         return standEntity.getStandUnsummonSound();
     }
     
