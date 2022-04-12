@@ -711,7 +711,7 @@ public class GameplayEventHandler {
         int ticks = standOptional.map(power -> getSoulAscensionTicks(entity, power)).orElse(0);
         
         if (dmgSource == TestBuildCommand.SOUL_TEST) ticks = 300;
-
+        
         if (ticks > 0) {
             if (entity instanceof ServerPlayerEntity) {
                 ModCriteriaTriggers.SOUL_ASCENSION.get().trigger((ServerPlayerEntity) entity, standOptional.orElse(null), ticks);
@@ -722,7 +722,7 @@ public class GameplayEventHandler {
     }
     
     private static int getSoulAscensionTicks(LivingEntity user, IStandPower stand) {
-        if (!stand.usesResolve()) {
+        if (!stand.usesResolve() || stand.getResolveLevel() <= 0) {
             return 0;
         }
         boolean hardcore = user.level.getLevelData().isHardcore();

@@ -65,11 +65,16 @@ public class StandArrowItem extends ArrowItem {
     public static boolean onPiercedByArrow(Entity entity, ItemStack stack, World world) {
         if (entity instanceof LivingEntity) {
             LivingEntity livingEntity = (LivingEntity) entity;
-            livingEntity.hurt(DamageUtil.STAND_VIRUS, Math.min(livingEntity.getHealth(), 20F) - 1F);
+            livingEntity.hurt(DamageUtil.STAND_VIRUS, Math.min(livingEntity.getHealth(), 11F) - 1F);
             stack.hurtAndBreak(1, livingEntity, pl -> {});
+            boolean gaveStand = false;
             if (livingEntity instanceof PlayerEntity) {
-                return playerPiercedByArrow((PlayerEntity) livingEntity, stack, world, false);
+                gaveStand = playerPiercedByArrow((PlayerEntity) livingEntity, stack, world, false);
+                if (!gaveStand) {
+                    livingEntity.hurt(DamageUtil.STAND_VIRUS, 10F);
+                }
             }
+            return gaveStand;
         }
         return false;
     }

@@ -1582,7 +1582,11 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                         targetLiving.setLastHurtByPlayer((PlayerEntity) user);
                         targetLiving.lastHurtByPlayerTime = 100;
                     }
-                    targetLiving.setLastHurtByMob(user);
+                    LivingEntity aggroTo = isFollowingUser() || targetLiving.canSee(user) ? user : 
+                                StandUtil.isEntityStandUser(targetLiving) ? this : null;
+                    if (aggroTo != null) {
+                        targetLiving.setLastHurtByMob(aggroTo);
+                    }
                 }
 
                 if (attack.disablesBlocking() && 

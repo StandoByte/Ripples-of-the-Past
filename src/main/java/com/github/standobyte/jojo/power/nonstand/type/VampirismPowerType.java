@@ -47,7 +47,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
     }
     
     @Override
-    public void onClear(INonStandPower power) {
+    public void afterClear(INonStandPower power) {
         LivingEntity user = power.getUser();
         for (Map.Entry<Effect, IntBinaryOperator> entry : EFFECTS_AMPLIFIERS.entrySet()) {
             EffectInstance effectInstance = user.getEffect(entry.getKey());

@@ -37,6 +37,8 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
     
     public void onClear(INonStandPower power) {}
     
+    public void afterClear(INonStandPower power) {}
+    
     @Override
     public String getTranslationKey() {
         if (translationKey == null) {

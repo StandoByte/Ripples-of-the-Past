@@ -13,7 +13,6 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
-// FIXME (!) make it so that it can hook up user when in remote control
 public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
     private IStandPower userStandPower;
     private boolean bindEntities;
@@ -54,6 +53,11 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
                 if (vecToOwner.lengthSqr() > 4) {
                     dragTarget(bound, vecToOwner.normalize().scale(2));
                     bound.fallDistance = 0;
+                }
+                if (owner instanceof StandEntity && bound.is(((StandEntity) owner).getUser())) {
+                    owner.setDeltaMovement(Vector3d.ZERO);
+                    // not always works
+                    ((StandEntity) owner).moveStandManually(0, 0, false, false);
                 }
             }
         }

@@ -21,6 +21,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
 public class ResolveCounter {
+    public static final float SOUL_TEAMMATE_RESOLVE_TICK = 0F;
+    public static final float SOUL_LOOK_RESOLVE_TICK = 0F;
     public static final float RESOLVE_DMG_REDUCTION = 0.5F;
     private static final float MAX_RESOLVE = 1000;
     private static final float RESOLVE_DECAY = 5F;

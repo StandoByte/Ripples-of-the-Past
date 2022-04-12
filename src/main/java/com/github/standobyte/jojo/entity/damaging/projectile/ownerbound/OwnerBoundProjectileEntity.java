@@ -83,7 +83,9 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
             Vector3d originPoint = ownerPosition(1.0F, false);
             Vector3d nextOriginOffset = getNextOriginOffset();
             if (nextOriginOffset == null) {
-                remove();
+                if (!level.isClientSide()) {
+                    remove();
+                }
                 return true;
             }
     
@@ -194,7 +196,7 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     }
     
     private float maxDistance() {
-        return movementSpeed() * retractSpeed() * (ticksLifespan() - timeAtFullLength()) / (movementSpeed() * retractSpeed());
+        return movementSpeed() * retractSpeed() * (ticksLifespan() - timeAtFullLength()) / (movementSpeed() + retractSpeed());
     }
     
     protected Vector3d originOffset(float yRot, float xRot, double distance) {
@@ -264,6 +266,7 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     }
     
     protected void dragTarget(Entity entity, Vector3d vec) {
+        // FIXME (!!) bumpy movement
         entity.move(MoverType.PLAYER, vec);
         if (entity instanceof StandEntity) {
             LivingEntity standUser = ((StandEntity) entity).getUser();
@@ -290,7 +293,7 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     }
     
     protected void setIsMovingForward(boolean isMovingForward) {
-        entityData.set(IS_RETRACTING, isMovingForward);
+        entityData.set(IS_MOVING_FORWARD, isMovingForward);
     }
     
     protected boolean isMovingForward() {
