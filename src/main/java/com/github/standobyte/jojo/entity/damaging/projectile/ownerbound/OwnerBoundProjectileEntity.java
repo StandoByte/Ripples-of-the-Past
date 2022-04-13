@@ -351,6 +351,11 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     public boolean shouldRenderAtSqrDistance(double distance) {
         return isBoundToOwner() && getOwner() == ClientUtil.getClientPlayer() ? true : super.shouldRenderAtSqrDistance(distance);
     }
+    
+    @Override
+    public boolean canUpdate() {
+        return getOwner() != null && isBoundToOwner() ? getOwner().canUpdate() : super.canUpdate();
+    }
 
     @Override
     protected void addAdditionalSaveData(CompoundNBT nbt) {

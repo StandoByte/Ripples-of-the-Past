@@ -19,7 +19,6 @@ import com.github.standobyte.jojo.block.StoneMaskBlock;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.ProjectileHamonChargeCapProvider;
-import com.github.standobyte.jojo.command.TestBuildCommand;
 import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRCrossfireHurricaneEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -710,8 +709,6 @@ public class GameplayEventHandler {
         LazyOptional<IStandPower> standOptional = IStandPower.getStandPowerOptional(entity);
         int ticks = standOptional.map(power -> getSoulAscensionTicks(entity, power)).orElse(0);
         
-        if (dmgSource == TestBuildCommand.SOUL_TEST) ticks = 300;
-        
         if (ticks > 0) {
             if (entity instanceof ServerPlayerEntity) {
                 ModCriteriaTriggers.SOUL_ASCENSION.get().trigger((ServerPlayerEntity) entity, standOptional.orElse(null), ticks);
@@ -721,14 +718,14 @@ public class GameplayEventHandler {
         }
     }
     
-    private static int getSoulAscensionTicks(LivingEntity user, IStandPower stand) {
+    public static int getSoulAscensionTicks(LivingEntity user, IStandPower stand) {
         if (!stand.usesResolve() || stand.getResolveLevel() <= 0) {
             return 0;
         }
         boolean hardcore = user.level.getLevelData().isHardcore();
         if (user instanceof PlayerEntity && (
-                JojoModConfig.getCommonConfigInstance().keepStandOnDeath.get() && !hardcore
-                || stand.wasProgressionSkipped())) {
+                stand.wasProgressionSkipped() || 
+                JojoModConfig.getCommonConfigInstance().keepStandOnDeath.get() && !hardcore)) {
             return 0;
         }
         

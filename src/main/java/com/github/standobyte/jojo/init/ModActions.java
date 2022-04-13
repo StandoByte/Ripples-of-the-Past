@@ -209,7 +209,7 @@ public class ModActions {
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_STAR_FINGER = ACTIONS.register("star_platinum_star_finger", 
             () -> new StarPlatinumStarFinger(new StandEntityAction.Builder().standPerformDuration(20)
                     .cooldown(20, 40).ignoresPerformerStun().resolveLevelToUnlock(1).defaultStandOffsetFromUser()
-                    .standPose(StandPose.RANGED_ATTACK).shout(ModSounds.JOTARO_STAR_FINGER).standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_STAR_FINGER)));
+                    .standPose(StandPose.RANGED_ATTACK).shout(ModSounds.JOTARO_STAR_FINGER).standSound(Phase.PERFORM, ModSounds.STAR_PLATINUM_STAR_FINGER)));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_BLOCK = ACTIONS.register("star_platinum_block", 
             () -> new StandEntityBlock());

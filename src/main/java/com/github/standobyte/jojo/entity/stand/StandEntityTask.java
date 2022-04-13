@@ -12,6 +12,7 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModActions;
+import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.Entity;
@@ -40,7 +41,7 @@ public class StandEntityTask {
         this.startingTicks = Math.max(ticks, 1);
         this.ticksLeft = this.startingTicks;
         this.phase = phase;
-        this.offsetFromUser = action.getOffsetFromUser(stand);
+        this.offsetFromUser = stand.hasEffect(ModEffects.STUN.get()) ? null : action.getOffsetFromUser(stand);
         setTarget(stand, target);
         if (stand != null) {
             rotateStand(stand, false);

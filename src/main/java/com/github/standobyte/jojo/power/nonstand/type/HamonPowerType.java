@@ -138,7 +138,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     @Override
     public float getEnergyTickInc(INonStandPower power) {
         LivingEntity user = power.getUser();
-        if (user.getAirSupply() < user.getMaxAirSupply() && !user.hasEffect(ModEffects.FREEZE.get())) {
+        if (user.getAirSupply() < user.getMaxAirSupply() || user.hasEffect(ModEffects.FREEZE.get())) {
             return 0;
         }
         float amount = power.getTypeSpecificData(this).get().getEnergyRegenPoints();

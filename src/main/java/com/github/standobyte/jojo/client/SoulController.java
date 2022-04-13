@@ -2,6 +2,8 @@ package com.github.standobyte.jojo.client;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.SoulEntity;
+import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.util.GameplayEventHandler;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.DeathScreen;
@@ -22,6 +24,8 @@ public class SoulController {
     private final Minecraft mc;
     private SoulEntity playerSoulEntity = null;
     private int soulEntityWaitingTimer = -1;
+    private IStandPower standPower = null;
+    private boolean willSoulSpawn = false;
 
     private SoulController(Minecraft mc) {
         this.mc = mc;
@@ -57,6 +61,11 @@ public class SoulController {
                     mc.setCameraEntity(mc.player);
                     playerSoulEntity = null;
                 }
+                
+                if (standPower == null) {
+                    updateStandCache();
+                }
+                willSoulSpawn = GameplayEventHandler.getSoulAscensionTicks(mc.player, standPower) > 0;
             }
         }
     }
@@ -76,7 +85,7 @@ public class SoulController {
     public void cancelRespawnScreen(GuiOpenEvent event) {
         boolean soul = isCameraEntityPlayerSoul();
         if (event.getGui() instanceof DeathScreen) {
-            if (soulEntityWaitingTimer == -1) {
+            if (soulEntityWaitingTimer == -1 && willSoulSpawn) {
                 soulEntityWaitingTimer = 100;
             }
             if (soul || soulEntityWaitingTimer > 0) {
@@ -100,5 +109,9 @@ public class SoulController {
         if (isCameraEntityPlayerSoul() && event.getMovementInput().jumping) {
             playerSoulEntity.skipAscension();
         }
+    }
+    
+    public void updateStandCache() {
+        standPower = IStandPower.getPlayerStandPower(mc.player);
     }
 }

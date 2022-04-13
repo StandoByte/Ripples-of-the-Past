@@ -116,8 +116,8 @@ public class ClientEventHandler {
         else {
             canSeeInStoppedTime = true;
             canMoveInStoppedTime = true;
-            resetShader = true;
         }
+        resetShader = true;
     }
     
     public void updateCanMoveInStoppedTime(boolean canMove, ChunkPos chunkPos) {
@@ -218,11 +218,11 @@ public class ClientEventHandler {
     }
     
     private ResourceLocation getCurrentShader() {
-        if (JojoModConfig.CLIENT.resolveShaders.get() && resolveShader != null) {
-            return resolveShader;
-        }
         if (isTimeStopped && canSeeInStoppedTime) {
             return SHADER_TIME_STOP;
+        }
+        if (JojoModConfig.CLIENT.resolveShaders.get() && resolveShader != null) {
+            return resolveShader;
         }
         return null;
     }

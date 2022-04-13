@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.stand.type.StandType;
+import com.google.common.collect.Lists;
 
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.ChunkPos;
@@ -23,7 +24,7 @@ import net.minecraftforge.registries.IForgeRegistry;
 @EventBusSubscriber(modid = JojoMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public class JojoModConfig {
     
-    // FIXME (!!) sync common config with clients
+    // FIXME (!!!!) sync common config with clients
     public static class Common {
         private boolean loaded = false;
         
@@ -45,16 +46,15 @@ public class JojoModConfig {
         private List<ResourceLocation> bannedStandsResLocs;
         private boolean[] tiersAvaliable = new boolean[7];
 
-        public final ForgeConfigSpec.DoubleValue hamonDamageMultiplier;
-        
+        public final ForgeConfigSpec.BooleanValue abilitiesBreakBlocks;
+        public final ForgeConfigSpec.DoubleValue standDamageMultiplier;
         public final ForgeConfigSpec.BooleanValue skipStandProgression;
         public final ForgeConfigSpec.BooleanValue standStamina;
-        public final ForgeConfigSpec.DoubleValue standDamageMultiplier;
+        public final ForgeConfigSpec.ConfigValue<List<? extends Float>> resolvePoints;
         public final ForgeConfigSpec.BooleanValue soulAscension;
-
-        public final ForgeConfigSpec.BooleanValue abilitiesBreakBlocks;
-        
         public final ForgeConfigSpec.IntValue timeStopChunkRange;
+
+        public final ForgeConfigSpec.DoubleValue hamonDamageMultiplier;
         
         private Common(ForgeConfigSpec.Builder builder) {
             
@@ -108,54 +108,66 @@ public class JojoModConfig {
                         .comment(" Whether or not random Stand gain effects (Stand Arrow, /stand random) give Stands that less players already have.")
                         .translation("jojo.config.prioritizeLeastTakenStands")
                         .define("prioritizeLeastTakenStands", false);
+                
                 bannedStands = builder
                         .comment(" List of Stands excluded from Stand Arrow and /stand random pool.",
                                 "  These stands will still be available via /stand give command",
                                 "  Their Discs won't be added to the mod's Creative tab, but they can still be found in the Search tab.\"",
                                 "  The format is the same as for /stand give command (e.g., \"jojo:star_platinum\").")
                         .translation("jojo.config.bannedStands")
-                        .defineList("bannedStands", Arrays.asList("jojo:example_1", "jojo:example_2"), s -> s instanceof String && ResourceLocation.tryParse((String) s) != null);
+                        .defineListAllowEmpty(Lists.newArrayList("bannedStands"), 
+                                () -> Arrays.asList("jojo:example_1", "jojo:example_2"), 
+                                s -> s instanceof String && ResourceLocation.tryParse((String) s) != null);
+                
                 standTiers = builder
                         .comment(" Whether or not the Stand tiers mechanic is enabled.")
                         .translation("jojo.config.standTiers")
                         .define("standTiers", true);
             builder.pop();
             
-            skipStandProgression = builder
-                    .comment(" Whether or not all of the abilities are unlocked after gaining a Stand in Survival.")
-                    .translation("jojo.config.skipStandProgression")
-                    .define("skipStandProgression", false);
-        
-            standStamina = builder
-                    .comment(" Whether or not Stand stamina mechanic is enabled.")
-                    .translation("jojo.config.standStamina")
-                    .define("standStamina", true);
-        
-            standDamageMultiplier = builder
-                    .comment(" Damage multiplier applied to all Stands.")
-                    .translation("jojo.config.standPowerMultiplier")
-                    .defineInRange("standPowerMultiplier", 1.0, 0.0, 128.0);
+            builder.push("Stand settings");
+                abilitiesBreakBlocks = builder
+                        .comment(" Whether or not Stands and abilities can break blocks.")
+                        .translation("jojo.config.abilitiesBreakBlocks")
+                        .define("abilitiesBreakBlocks", true);
             
-            soulAscension = builder
-                    .translation("jojo.config.soulAscension")
-                    .define("soulAscension", true);
+                standDamageMultiplier = builder
+                        .comment(" Damage multiplier applied to all Stands.")
+                        .translation("jojo.config.standPowerMultiplier")
+                        .defineInRange("standPowerMultiplier", 1.0, 0.0, 128.0);
             
-            abilitiesBreakBlocks = builder
-                    .comment(" Whether or not Stands and abilities can break blocks.")
-                    .translation("jojo.config.abilitiesBreakBlocks")
-                    .define("abilitiesBreakBlocks", true);
+                skipStandProgression = builder
+                        .comment(" Whether or not all of the abilities are unlocked after gaining a Stand in Survival.")
+                        .translation("jojo.config.skipStandProgression")
+                        .define("skipStandProgression", false);
+            
+                standStamina = builder
+                        .comment(" Whether or not Stand stamina mechanic is enabled.")
+                        .translation("jojo.config.standStamina")
+                        .define("standStamina", true);
+                
+                resolvePoints = builder
+                        .comment(" Max resolve points at each Resolve level (starting from 0)", 
+                                "  All values must be higher than 0.")
+                        .translation("jojo.config.resolvePoints")
+                        .defineList("resolvePoints", Arrays.asList(100F, 250F, 500F, 1000F, 2500F), pts -> pts instanceof Float && ((Float) pts) > 0); // FIXME !!!!!!!!!!!!!!!!!!!!!! default resolve values
+                
+                soulAscension = builder
+                        .translation("jojo.config.soulAscension")
+                        .define("soulAscension", true);
+                
+                timeStopChunkRange = builder
+                        .comment(" Range of Time Stop ability in chunks.",
+                                "  If set to 0, the whole dimension is frozen in time.",
+                                "  Defaults to 12.")
+                        .translation("jojo.config.timeStopChunkRange")
+                        .defineInRange("timeStopChunkRange", 12, 0, Integer.MAX_VALUE);
+            builder.pop();
             
             hamonDamageMultiplier = builder
                     .comment(" Damage multiplier applied to all Hamon attacks.")
                     .translation("jojo.config.hamonDamageMultiplier")
                     .defineInRange("hamonDamageMultiplier", 1.0, 0.0, 128.0);
-            
-            timeStopChunkRange = builder
-                    .comment(" Range of Time Stop ability in chunks.",
-                            "  If set to 0, the whole dimension is frozen in time.",
-                            "  Defaults to 12.")
-                    .translation("jojo.config.timeStopChunkRange")
-                    .defineInRange("timeStopChunkRange", 12, 0, Integer.MAX_VALUE);
         }
         
         public boolean isConfigLoaded() {
