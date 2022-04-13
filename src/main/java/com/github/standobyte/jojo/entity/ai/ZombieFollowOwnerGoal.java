@@ -76,7 +76,7 @@ public class ZombieFollowOwnerGoal extends Goal {
         zombie.getLookControl().setLookAt(owner, 10.0F, (float) zombie.getMaxHeadXRot());
         if (--timeToRecalcPath <= 0) {
             timeToRecalcPath = 10;
-            if (!zombie.isLeashed() && !zombie.isPassenger() && zombie.isOwnerNearby()) {
+            if (!zombie.isLeashed() && !zombie.isPassenger() && !zombie.farFromOwner(12)) {
                 navigator.moveTo(owner, followSpeed);
             }
         }
