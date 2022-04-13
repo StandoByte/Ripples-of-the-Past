@@ -34,15 +34,12 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
         }
         return getResolve() / getMaxResolve();
     }
-    float getMaxAchievedResolve();
-    void setResolve(float resolve);
-    void addResolve(float resolve);
     int getResolveLevel();
     void setResolveLevel(int level);
     int getMaxResolveLevel();
     float getResolveDmgReduction();
     
-    void skipProgression(StandType<?> standType);
+    void skipProgression(@Nullable StandType<?> standType);
     boolean wasProgressionSkipped();
     float getStatsDevelopment();
     default boolean isComboUnlocked() {

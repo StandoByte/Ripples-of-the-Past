@@ -447,7 +447,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 StandEntityTask currentTask = getCurrentTask();
                 if (currentTask != null) {
                     StandEntityAction action = currentTask.getAction();
-                    if (action != ModActions.STAND_ENTITY_UNSUMMON.get()) {
+                    if (action != ModActions.STAND_ENTITY_UNSUMMON.get() || !hasEffect(ModEffects.STUN.get())) {
                         currentTask.setOffsetFromUser(action.getOffsetFromUser(this));
                     }
                 }
@@ -889,13 +889,14 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         if (summonLockTicks > 0) {
             summonLockTicks--;
         }
-        else if (!hasEffect(ModEffects.STUN.get())) {
+        else {
+            boolean stun = hasEffect(ModEffects.STUN.get());
             StandEntityTask currentTask = getCurrentTask();
-            if (currentTask != null) {
+            if (currentTask != null && (!stun || currentTask.getAction().ignoresPerformerStun())) {
                 currentTask.tick(userPower, this);
             }
             
-            if (gradualSummonWeaknessTicks > 0) {
+            if (!stun && gradualSummonWeaknessTicks > 0) {
                 gradualSummonWeaknessTicks--;
                 
                 if (gradualSummonWeaknessTicks == 0 && !level.isClientSide()) {

@@ -7,12 +7,14 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStaminaPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStandActionLearningClearPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStandActionLearningPacket;
@@ -35,7 +37,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     private IStandManifestation standManifestation = null;
     private float stamina;
     
-    private ResolveCounter resolveCounter = new ResolveCounter();
+    private final ResolveCounter resolveCounter;
     @Deprecated
     private int xp = 0;
     private boolean skippedProgression;
@@ -45,6 +47,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     public StandPower(LivingEntity user) {
         super(user);
+        resolveCounter = new ResolveCounter(this, serverPlayerUser);
     }
 
     @Override
@@ -70,6 +73,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             stamina = 0;
             resolveCounter.reset();
             xp = 0;
+            skippedProgression = false;
             serverPlayerUser.ifPresent(player -> {
                 SaveFileUtilCapProvider.getSaveFileCap(player).removePlayerStand(standType);
             });
@@ -220,7 +224,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     @Override
     public void setResolveCounter(ResolveCounter resolve) {
-        this.resolveCounter = resolve;
+        this.resolveCounter.clone(resolve);
     }
     
     @Override
@@ -245,39 +249,25 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
 
     @Override
-    public float getMaxAchievedResolve() {
-        if (!usesResolve()) {
-            return 0;
-        }
-        return resolveCounter.getMaxAchievedValue();
-    }
-    
-    @Override
-    public void setResolve(float resolve) {
-        if (usesResolve()) {
-            resolveCounter.setResolveValue(resolve);
-        }
-    }
-    
-    @Override
-    public void addResolve(float resolve) {
-        if (usesResolve()) {
-            resolveCounter.addResolveValue(resolve, this);
-        }
-    }
-
-    @Override
     public int getResolveLevel() {
         if (!usesResolve()) {
             return 0;
         }
         return resolveCounter.getResolveLevel();
     }
-
+    
     @Override
     public void setResolveLevel(int level) {
         if (usesResolve()) {
             resolveCounter.setResolveLevel(level);
+            if (!user.level.isClientSide() && hasPower()) {
+                getType().onNewResolveLevel(this);
+                if (level >= getType().getMaxResolveLevel()) {
+                    serverPlayerUser.ifPresent(player -> {
+                        ModCriteriaTriggers.STAND_MAX.get().trigger(player);
+                    });
+                }
+            }
         }
     }
 
@@ -308,19 +298,21 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     
     @Override
-    public void skipProgression(StandType<?> standType) {
+    public void skipProgression(@Nullable StandType<?> standType) {
         this.skippedProgression = true;
-        setResolveLevel(getMaxResolveLevel());
-        Stream.concat(
-                Arrays.stream(standType.getAttacks()), 
-                Arrays.stream(standType.getAbilities()))
-        .forEach(action -> {
-            actionLearningProgressMap.setLearningProgressPoints(action, action.getMaxTrainingPoints(this), this);
-            if (action.hasShiftVariation()) {
-                Action<IStandPower> shiftAction = action.getShiftVariationIfPresent();
-                actionLearningProgressMap.setLearningProgressPoints(shiftAction, shiftAction.getMaxTrainingPoints(this), this);
-            }
-        });
+        resolveCounter.setResolveLevel(getMaxResolveLevel());
+        if (standType != null) {
+            Stream.concat(
+                    Arrays.stream(standType.getAttacks()), 
+                    Arrays.stream(standType.getAbilities()))
+            .forEach(action -> {
+                actionLearningProgressMap.setLearningProgressPoints(action, action.getMaxTrainingPoints(this), this);
+                if (action.hasShiftVariation()) {
+                    Action<IStandPower> shiftAction = action.getShiftVariationIfPresent();
+                    actionLearningProgressMap.setLearningProgressPoints(shiftAction, shiftAction.getMaxTrainingPoints(this), this);
+                }
+            });
+        }
     }
     
     @Override
@@ -516,7 +508,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             this.resolveCounter.alwaysResetOnDeath();
         }
         this.skippedProgression = oldPower.wasProgressionSkipped();
-        this.actionLearningProgressMap = ((StandPower) oldPower).actionLearningProgressMap; // FIXME can i remove this casts?
+        this.actionLearningProgressMap = ((StandPower) oldPower).actionLearningProgressMap; // FIXME can i remove this cast?
     }
     
     @Override
@@ -534,6 +526,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             actionLearningProgressMap.forEach((action, progress) -> {
                 PacketManager.sendToClient(new SyncStandActionLearningPacket(action, progress, false), player);
             });
+            if (skippedProgression) {
+                PacketManager.sendToClient(new SkippedStandProgressionPacket(), player);
+            }
         });
     }
     

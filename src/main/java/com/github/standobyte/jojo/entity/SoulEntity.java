@@ -99,13 +99,15 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
             level.getEntitiesOfClass(LivingEntity.class, 
                     new AxisAlignedBB(getBoundingBox().getCenter(), getBoundingBox().getCenter()).inflate(24), 
                     entity -> originEntity.isAlliedTo(entity)).forEach(entity -> {
-                        IStandPower.getStandPowerOptional(entity).ifPresent(stand -> stand.addResolve(ResolveCounter.SOUL_TEAMMATE_RESOLVE_TICK));
+                        IStandPower.getStandPowerOptional(entity).ifPresent(stand -> 
+                        stand.getResolveCounter().addResolveValue(ResolveCounter.SOUL_TEAMMATE_RESOLVE_TICK));
                     });
             RayTraceResult rayTrace = JojoModUtil.rayTrace(this, 32, null, 1.0);
             if (rayTrace.getType() == RayTraceResult.Type.ENTITY) {
                 Entity lookEntity = ((EntityRayTraceResult) rayTrace).getEntity();
                 if (lookEntity instanceof LivingEntity) {
-                    IStandPower.getStandPowerOptional((LivingEntity) lookEntity).ifPresent(stand -> stand.addResolve(ResolveCounter.SOUL_LOOK_RESOLVE_TICK));
+                    IStandPower.getStandPowerOptional((LivingEntity) lookEntity).ifPresent(stand -> 
+                    stand.getResolveCounter().addResolveValue(ResolveCounter.SOUL_LOOK_RESOLVE_TICK));
                 }
             }
         }

@@ -1,10 +1,15 @@
 package com.github.standobyte.jojo.power.stand;
 
-import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
-import com.github.standobyte.jojo.entity.stand.StandEntity;
+import java.util.List;
+import java.util.Optional;
+
+import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncResolveLimitPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ResetResolveValuePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.SyncMaxAchievedResolvePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.SyncResolveLevelPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncResolvePacket;
 import com.github.standobyte.jojo.util.damage.IStandDamageSource;
 
@@ -16,31 +21,29 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
 
 public class ResolveCounter {
     public static final float SOUL_TEAMMATE_RESOLVE_TICK = 0F;
     public static final float SOUL_LOOK_RESOLVE_TICK = 0F;
     public static final float RESOLVE_DMG_REDUCTION = 0.5F;
-    private static final float MAX_RESOLVE = 1000;
     private static final float RESOLVE_DECAY = 5F;
-    private static final int RESOLVE_NO_DECAY_TICKS = 400;
-    private static final float RESOLVE_EFFECT_DMG_REDUCTION = 0.5F;
+    private static final int RESOLVE_NO_DECAY_TICKS = 300;
     private static final float RESOLVE_FOR_DMG_POINT = 0.5F;
-    private static final float RESOLVE_LIMIT_FOR_DMG_POINT_TAKEN = 5F;
-    private static final float RESOLVE_LIMIT_MANUAL_CONTROL_TICK = 0.1F;
-    private static final float RESOLVE_UNDER_LIMIT_MULTIPLIER = 10F;
-    private static final float RESOLVE_LIMIT_DECAY = 4F;
-    private static final int RESOLVE_LIMIT_NO_DECAY_TICKS = 40;
     private static final int[] RESOLVE_EFFECT_MIN = {300, 400, 500, 600, 600};
     private static final int[] RESOLVE_EFFECT_MAX = {600, 1200, 1500, 1800, 2400};
+    
+    private final IStandPower stand;
+    private final Optional<ServerPlayerEntity> serverPlayerUser;
     
     private float resolve = 0;
     private int resolveLevel = 0;
     private int noResolveDecayTicks = 0;
     private float maxAchievedResolve = 0;
+    
+    protected ResolveCounter(IStandPower stand, Optional<ServerPlayerEntity> serverPlayerUser) {
+        this.stand = stand;
+        this.serverPlayerUser = serverPlayerUser;
+    }
 
 
     // TODO
@@ -54,8 +57,28 @@ public class ResolveCounter {
     void onStandAcquired() {
     }
 
-    // TODO
     void tick() {
+        if (stand.getUser() != null && stand.getUser().hasEffect(ModEffects.RESOLVE.get())) {
+            EffectInstance effect = stand.getUser().getEffect(ModEffects.RESOLVE.get());
+            if (effect.getAmplifier() < RESOLVE_EFFECT_MIN.length) {
+                resolve = Math.max(resolve - getMaxResolveValue() / (float) RESOLVE_EFFECT_MIN[effect.getAmplifier()], 0);
+                if (!stand.getUser().level.isClientSide() && resolve == 0) {
+                    stand.getUser().removeEffect(ModEffects.RESOLVE.get());
+                }
+            }
+        }
+        else {
+            if (noResolveDecayTicks > 0) {
+                noResolveDecayTicks--;
+            }
+            else {
+                resolve = Math.max(resolve - getResolveDecay(), 0);
+            }
+        }
+    }
+    
+    private float getResolveDecay() {
+        return RESOLVE_DECAY;
     }
     
     
@@ -64,49 +87,89 @@ public class ResolveCounter {
         return resolve;
     }
 
-    // TODO
     float getMaxResolveValue() {
-        return MAX_RESOLVE;
+        List<? extends Float> ptsList = JojoModConfig.getCommonConfigInstance().resolvePoints.get();
+        return ptsList.get(Math.min(getResolveLevel(), ptsList.size() - 1));
     }
     
-    float getMaxAchievedValue() {
+    public float getMaxAchievedValue() {
         return maxAchievedResolve;
     }
     
     int getResolveLevel() {
-        return resolveLevel + 4;
+        return resolveLevel;
     }
     
 
 
-    // TODO
-    public void setResolveValue(float resolve) {
+    public void setResolveValue(float resolve, int noDecayTicks) {
+        resolve = MathHelper.clamp(resolve, 0, getMaxResolveValue());
+        if (noDecayTicks < 0) {
+            noDecayTicks = this.noResolveDecayTicks;
+        }
         
+        boolean send = this.resolve != resolve || this.noResolveDecayTicks != noDecayTicks;
+        this.maxAchievedResolve = Math.max(Math.max(this.resolve, resolve), maxAchievedResolve);
+        this.resolve = resolve;
+        this.noResolveDecayTicks = noDecayTicks;
+        
+        int ticks = noDecayTicks;
+        if (send) {
+            serverPlayerUser.ifPresent(player -> {
+                PacketManager.sendToClient(new SyncResolvePacket(getResolveValue(), ticks), player);
+            });
+        }
+        
+        if (resolve == getMaxResolveValue() && stand.getUser() != null && !stand.getUser().hasEffect(ModEffects.RESOLVE.get())) {
+            stand.getUser().addEffect(new EffectInstance(ModEffects.RESOLVE.get(), 
+                    RESOLVE_EFFECT_MAX[Math.min(resolveLevel, RESOLVE_EFFECT_MAX.length)], resolveLevel, false, 
+                    false, true));
+        }
+    }
+    
+    public void setMaxAchievedValue(float value) {
+        this.maxAchievedResolve = value;
     }
 
+    public void addResolveValue(float resolve) {
+        setResolveValue(getResolveValue() + boostAddedValue(resolve), RESOLVE_NO_DECAY_TICKS);
+    }
+    
     // TODO
-    public void addResolveValue(float resolve, IStandPower standPower) {
-        
+    private float boostAddedValue(float value) {
+        return value;
+    }
+    
+    public void resetResolveValue() {
+        this.resolve = 0;
+        this.noResolveDecayTicks = 0;
+        this.maxAchievedResolve = 0;
+        serverPlayerUser.ifPresent(player -> {
+            PacketManager.sendToClient(new ResetResolveValuePacket(), player);
+        });
     }
 
-    // TODO
-    public void setResolveLevel(int level) {
-        
-    }
-
-    // TODO
-    void syncWithUser(ServerPlayerEntity user) {
-//        PacketManager.sendToClient(new SyncResolvePacket(resolve, maxAchievedResolve, resolveLevel, noResolveDecayTicks), user);
-//        PacketManager.sendToClient(new SyncResolveLimitPacket(resolveLimit, noResolveLimitDecayTicks), user);
+    void setResolveLevel(int level) {
+        JojoMod.LOGGER.debug(level);
+        boolean send = this.resolveLevel != level;
+        this.resolveLevel = level;
+        if (send) {
+            serverPlayerUser.ifPresent(player -> {
+                PacketManager.sendToClient(new SyncResolveLevelPacket(getResolveLevel()), player);
+            });
+        }
     }
     
     
 
-    // TODO
     public void onAttack(LivingEntity target, IStandDamageSource dmgSource, float dmgAmount) {
-        /* add resolve (with boosts):
-         * 
-         */
+        if (stand.usesResolve() && target.getClassification(false) == EntityClassification.MONSTER || target.getType() == EntityType.PLAYER) {
+            dmgAmount = Math.min(dmgAmount, target.getHealth());
+            addResolveValue(dmgAmount * RESOLVE_FOR_DMG_POINT);
+            if (stand.getUser().hasEffect(ModEffects.RESOLVE.get())) {
+                setResolveValue(Math.max(getMaxResolveValue() * 0.5F, getResolveValue()), 0);
+            }
+        }
     }
 
     // TODO
@@ -114,49 +177,55 @@ public class ResolveCounter {
         
     }
 
-    // TODO
     public void onResolveEffectStarted(int amplifier, IStandPower stand) {
-//        if (stand.getResolveLevel() < stand.getMaxResolveLevel()) {
-//            stand.setResolveLevel(Math.min(amplifier + 1, stand.getMaxResolveLevel()));
-//        }
-//        stand.setResolve(stand.getMaxResolve(), 0);
+        stand.setResolveLevel(Math.min(amplifier + 1, stand.getMaxResolveLevel()));
+        setResolveValue(stand.getMaxResolve(), 0);
+    }
+
+    public void onResolveEffectEnded(int amplifier, IStandPower stand) {
+        resetResolveValue();
+    }
+    
+    
+    
+    // TODO
+    void clone(ResolveCounter previous) {
+        this.resolve = previous.resolve;
+        this.resolveLevel = previous.resolveLevel;
+        this.noResolveDecayTicks = previous.noResolveDecayTicks;
+        this.maxAchievedResolve = previous.maxAchievedResolve;
     }
 
     // TODO
-    public void onResolveEffectEnded(int amplifier, IStandPower stand) {
-        
+    void alwaysResetOnDeath() {
+        resolve = 0;
+        noResolveDecayTicks = 0;
+        maxAchievedResolve = 0;
     }
-    
-    
+
+    // TODO
+    void syncWithUser(ServerPlayerEntity player) {
+        PacketManager.sendToClient(new SyncResolvePacket(getResolveValue(), noResolveDecayTicks), player);
+        PacketManager.sendToClient(new SyncMaxAchievedResolvePacket(maxAchievedResolve), player);
+        PacketManager.sendToClient(new SyncResolveLevelPacket(getResolveLevel()), player);
+    }
 
     // TODO
     void readNbt(CompoundNBT nbt) {
-//        resolve = nbt.getFloat("Resolve");
-//        resolveLevel = nbt.getByte("ResolveLevel");
-//        noResolveDecayTicks = nbt.getInt("ResolveTicks");
-//        resolveLimit = nbt.getFloat("ResolveLimit");
-//        maxAchievedResolve = nbt.getFloat("ResolveAchieved");
-//        noResolveLimitDecayTicks = nbt.getInt("ResolveLimitTicks");
+        resolve = nbt.getFloat("Resolve");
+        resolveLevel = nbt.getByte("ResolveLevel");
+        noResolveDecayTicks = nbt.getInt("ResolveTicks");
+        maxAchievedResolve = nbt.getFloat("ResolveAchieved");
     }
 
     // TODO
     CompoundNBT writeNBT() {
         CompoundNBT resolveNbt = new CompoundNBT();
-//        resolveNbt.putFloat("Resolve", resolve);
-//        resolveNbt.putByte("ResolveLevel", (byte) resolveLevel);
-//        resolveNbt.putInt("ResolveTicks", noResolveDecayTicks);
-//        resolveNbt.putFloat("ResolveLimit", resolveLimit);
-//        resolveNbt.putFloat("ResolveAchieved", maxAchievedResolve);
-//        resolveNbt.putInt("ResolveLimitTicks", noResolveLimitDecayTicks);
+        resolveNbt.putFloat("Resolve", resolve);
+        resolveNbt.putByte("ResolveLevel", (byte) resolveLevel);
+        resolveNbt.putInt("ResolveTicks", noResolveDecayTicks);
+        resolveNbt.putFloat("ResolveAchieved", maxAchievedResolve);
         return resolveNbt;
-    }
-
-    // TODO
-    void alwaysResetOnDeath() {
-//        this.resolve = 0;
-//        this.noResolveDecayTicks = 0;
-//        this.resolveLimit = 0;
-//        this.noResolveLimitDecayTicks = 0;
     }
  
     
@@ -191,109 +260,6 @@ public class ResolveCounter {
     
 
     
-//    @Override
-//    public void addResolve(float amount) {
-//        if (usesResolve()) {
-//            setResolve(getResolve() + amount, RESOLVE_NO_DECAY_TICKS);
-//        }
-//    }
-//    
-//    @Override
-//    public void setResolve(float amount, int noDecayTicks) {
-//        setResolve(amount, noDecayTicks, this.maxAchievedResolve);
-//    }
-//
-//    @Override
-//    public void setResolve(float amount, int noDecayTicks, float maxAchievedResolve) {
-//        amount = MathHelper.clamp(amount, 0, getMaxResolve());
-//        boolean send = this.resolve != amount || this.noResolveDecayTicks != noDecayTicks;
-//        this.resolve = amount;
-//        this.maxAchievedResolve = Math.max(maxAchievedResolve, this.resolve);
-//        this.noResolveDecayTicks = Math.max(this.noResolveDecayTicks, noDecayTicks);
-//        
-//        if (!user.hasEffect(ModEffects.RESOLVE.get()) && this.resolve == getMaxResolve()) {
-//            user.addEffect(new EffectInstance(ModEffects.RESOLVE.get(), 
-//                    RESOLVE_EFFECT_MAX[Math.min(resolveLevel, RESOLVE_EFFECT_MAX.length)], resolveLevel, false, 
-//                    false, true));
-//            setResolveLevel(Math.min(resolveLevel + 1, getMaxResolveLevel()));
-//        }
-//        
-//        if (send) {
-//            serverPlayerUser.ifPresent(player -> {
-//                PacketManager.sendToClient(new SyncResolvePacket(getResolve(), maxAchievedResolve, resolveLevel, noResolveDecayTicks), player);
-//            });
-//        }
-//        
-//        setResolveLimit(Math.max(resolveLimit, getResolve()), noDecayTicks);
-//    }
-//    
-//    @Override
-//    public int getNoResolveDecayTicks() {
-//        return noResolveDecayTicks;
-//    }
-//    
-//    @Override
-//    public int getResolveLevel() {
-//        return usesResolve() ? resolveLevel : 0;
-//    }
-//    
-//    @Override
-//    public void setResolveLevel(int level) {
-//        if (usesResolve()) {
-//            this.resolveLevel = level;
-//            if (!user.level.isClientSide() && hasPower()) {
-//                getType().onNewResolveLevel(this);
-//                if (level >= getType().getMaxResolveLevel()) {
-//                    serverPlayerUser.ifPresent(player -> {
-//                        ModCriteriaTriggers.STAND_MAX.get().trigger(player);
-//                    });
-//                }
-//            }
-//        }
-//    }
-//    
-//    @Override
-//    public void resetResolve() {
-//        this.maxAchievedResolve = 0;
-//        setResolve(0, 0);
-//        setResolveLimit(0, 0);
-//    }
-//    
-//    @Override
-//    public float getResolveLimit() {
-//        return MathHelper.clamp(Math.max(resolveLimit, maxAchievedResolve), getResolve(), getMaxResolve());
-//    }
-//    
-//    @Override
-//    public void addResolveLimit(float amount) {
-//        float hpRatio = user.getHealth() / user.getMaxHealth();
-//        setResolveLimit(getResolveLimit() + amount, (int) ((float) RESOLVE_LIMIT_NO_DECAY_TICKS * (10F - hpRatio * 9F)));
-//    }
-//    
-//    @Override
-//    public void setResolveLimit(float amount, int noDecayTicks) {
-//        amount = MathHelper.clamp(amount, 0, getMaxResolve());
-//        boolean send = this.resolveLimit != amount;
-//        this.resolveLimit = amount;
-//        this.noResolveLimitDecayTicks = Math.max(this.noResolveLimitDecayTicks, noDecayTicks);
-//        if (send) {
-//            serverPlayerUser.ifPresent(player -> {
-//                PacketManager.sendToClient(new SyncResolveLimitPacket(resolveLimit, noResolveLimitDecayTicks), player);
-//            });
-//        }
-//    }
-//    
-//    @Override
-//    public float getResolveDmgReduction() {
-//        if (user.hasEffect(ModEffects.RESOLVE.get())) {
-//            return RESOLVE_DMG_REDUCTION;
-//        }
-//        if (usesResolve()) {
-//            return getResolveRatio() * RESOLVE_DMG_REDUCTION;
-//        }
-//        return 0;
-//    }
-//    
 //    @Override
 //    public void addResolveOnAttack(LivingEntity target, float damageAmount) {
 //        if (usesResolve() && target.getClassification(false) == EntityClassification.MONSTER || target.getType() == EntityType.PLAYER) {

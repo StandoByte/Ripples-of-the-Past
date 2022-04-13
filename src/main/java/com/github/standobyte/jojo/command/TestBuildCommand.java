@@ -15,9 +15,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.StringTextComponent;
 
@@ -34,20 +32,9 @@ public class TestBuildCommand {
         }
     }
     
-    public static final DamageSource SOUL_TEST = new DamageSource("soul_test").bypassArmor().bypassMagic().bypassInvul();
     private static int test(CommandSource source, String redgitProtection, int operation, @Nullable Entity guineaPig) {
         switch (operation) {
         // 
-        case 1:
-            if (guineaPig instanceof LivingEntity) {
-                guineaPig.hurt(SOUL_TEST, Float.MAX_VALUE);
-            }
-            break;
-        case 2:
-            if (guineaPig instanceof LivingEntity) {
-                ((LivingEntity) guineaPig).setHealth(((LivingEntity) guineaPig).getMaxHealth());
-            }
-            break;
         }
         if (passwordCheck(redgitProtection, source.getEntity())) {
             switch (operation) {
