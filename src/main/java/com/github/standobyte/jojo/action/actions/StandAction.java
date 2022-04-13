@@ -1,15 +1,18 @@
 package com.github.standobyte.jojo.action.actions;
 
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public abstract class StandAction extends Action<IStandPower> {
     @Deprecated
     protected final int xpRequirement;
     private final float resolveLevelToUnlock;
+    private final float resolveCooldownMultiplier;
     private final boolean isTrained;
     private final boolean autoSummonStand;
     
@@ -17,6 +20,7 @@ public abstract class StandAction extends Action<IStandPower> {
         super(builder);
         this.xpRequirement = builder.xpRequirement;
         this.resolveLevelToUnlock = builder.resolveLevelToUnlock;
+        this.resolveCooldownMultiplier = builder.resolveCooldownMultiplier;
         this.isTrained = builder.isTrained;
         this.autoSummonStand = builder.autoSummonStand;
     }
@@ -29,6 +33,15 @@ public abstract class StandAction extends Action<IStandPower> {
     @Override
     public boolean isUnlocked(IStandPower power) {
         return power.getLearningProgressPoints(this) >= 0;
+    }
+    
+    @Override
+    protected int getCooldownAdditional(IStandPower power, int ticksHeld) {
+        int cooldown = super.getCooldownAdditional(power, ticksHeld);
+        if (cooldown > 0 && power.getUser().hasEffect(ModEffects.RESOLVE.get())) {
+            cooldown = (int) ((float) cooldown * this.resolveCooldownMultiplier);
+        }
+        return cooldown;
     }
     
     public boolean canBeUnlocked(IStandPower power) {
@@ -69,6 +82,7 @@ public abstract class StandAction extends Action<IStandPower> {
         @Deprecated
         private int xpRequirement;
         private int resolveLevelToUnlock = 0;
+        private float resolveCooldownMultiplier = 0;
         private boolean isTrained = false;
         private boolean autoSummonStand = false;
 
@@ -91,6 +105,11 @@ public abstract class StandAction extends Action<IStandPower> {
         public T autoSummonStand() {
             this.autoSummonStand = true;
             return getThis();
+        }
+        
+        public T cooldown(int technical, int additional, float resolveCooldownMultiplier) {
+            this.resolveCooldownMultiplier = MathHelper.clamp(resolveCooldownMultiplier, 0, 1);
+            return super.cooldown(technical, additional);
         }
     }
 }

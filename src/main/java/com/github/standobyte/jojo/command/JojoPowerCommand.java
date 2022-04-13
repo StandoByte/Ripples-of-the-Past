@@ -42,6 +42,7 @@ public class JojoPowerCommand {
             if (power != null) {
                 if (!power.hasPower() && power.givePower(powerType)) {
                     i++;
+                    power.getTypeSpecificData(ModNonStandPowers.VAMPIRISM.get()).ifPresent(vampirism -> vampirism.setVampireFullPower(true));
                 }
                 else if (targets.size() == 1) {
                     throw GIVE_SINGLE_EXCEPTION.create(targets.iterator().next().getName());

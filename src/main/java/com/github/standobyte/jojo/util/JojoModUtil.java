@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket;
@@ -28,6 +29,7 @@ import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.INPC;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MoverType;
 import net.minecraft.entity.monster.AbstractIllagerEntity;
 import net.minecraft.entity.passive.WaterMobEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -257,6 +259,14 @@ public class JojoModUtil {
         world.sendParticles(ParticleTypes.LARGE_SMOKE, entity.getX(), entity.getY(), entity.getZ(), 
                 8, entity.getBbWidth() / 2F, entity.getBbHeight() / 2F, entity.getBbWidth() / 2F, 0);
         entity.remove();
+    }
+    
+    public static void deflectProjectile(Entity projectile) {
+        projectile.setDeltaMovement(projectile.getDeltaMovement().reverse());
+        projectile.move(MoverType.SELF, projectile.getDeltaMovement());
+        if (projectile instanceof ModdedProjectileEntity) {
+            ((ModdedProjectileEntity) projectile).setIsDeflected();
+        }
     }
 
     public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine) {

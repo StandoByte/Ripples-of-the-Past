@@ -597,7 +597,7 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void trackedPotionRemoved(PotionRemoveEvent event) {
         Entity entity = event.getEntity();
-        if (!entity.level.isClientSide() && ModEffects.isEffectTracked(event.getPotionEffect().getEffect())) {
+        if (!entity.level.isClientSide() && event.getPotionEffect() != null && ModEffects.isEffectTracked(event.getPotionEffect().getEffect())) {
             ((ServerChunkProvider) entity.getCommandSenderWorld().getChunkSource()).broadcast(entity, 
                     new SRemoveEntityEffectPacket(entity.getId(), event.getPotion()));
         }

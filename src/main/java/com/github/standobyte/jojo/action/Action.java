@@ -14,8 +14,8 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.util.JojoModUtil;
 
 import net.minecraft.entity.LivingEntity;
@@ -200,7 +200,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     protected int getCooldownAdditional(P power, int ticksHeld) {
-        return power.isUserCreative() || power.getUser().hasEffect(ModEffects.RESOLVE.get()) ? 0 : cooldownAdditional;
+        return power.isUserCreative() ? 0 : cooldownAdditional;
     }
     
     public int getCooldown(P power, int ticksHeld) {
@@ -264,6 +264,21 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     protected TranslationTextComponent getTranslatedName(P power, String key) {
         return new TranslationTextComponent(key);
+    }
+    
+    @Nullable
+    public ActionType getActionType(P power) {
+        for (Action<P> attack : power.getAttacks()) {
+            if (attack == this) {
+                return ActionType.ATTACK;
+            }
+        }
+        for (Action<P> ability : power.getAbilities()) {
+            if (ability == this) {
+                return ActionType.ABILITY;
+            }
+        }
+        return null;
     }
     
     public boolean isTrained() {

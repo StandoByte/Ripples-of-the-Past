@@ -27,10 +27,10 @@ public class HamonSpeedBoost extends HamonAction {
         HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
         float effectStr = (float) hamon.getHamonControlLevel() / (float) HamonData.MAX_STAT_LEVEL;
         int speedLvl = MathHelper.floor(1.5F * effectStr);
-        int hasteLvl = 0;
+        int hasteLvl = MathHelper.floor(1.5F * effectStr);
         if (hamon.isSkillLearned(HamonSkill.AFTERIMAGES)) {
-            speedLvl += 1;
-            hasteLvl = 1;
+            speedLvl++;
+            hasteLvl++;
         }
         if (!world.isClientSide()) {
             int duration = 20 + MathHelper.floor(180F * effectStr);

@@ -876,6 +876,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                     if (combo < 0.5F) {
                         decay *= 0.5F;
                     }
+                    if (user != null && user.hasEffect(ModEffects.RESOLVE.get())) {
+                        decay *= 0.5F;
+                    }
                     setComboMeter(Math.max(combo - decay, 0));
                 }
             }
@@ -1442,6 +1445,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     public void addComboMeter(float combo, int noDecayTicks) {
+        if (getUser() != null && getUser().hasEffect(ModEffects.RESOLVE.get())) {
+            combo *= 2F;
+        }
         setComboMeter(getComboMeter() + combo);
         this.noComboDecayTicks = Math.max(this.noComboDecayTicks, noDecayTicks);
     }

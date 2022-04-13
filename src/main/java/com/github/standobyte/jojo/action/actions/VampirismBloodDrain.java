@@ -83,9 +83,8 @@ public class VampirismBloodDrain extends VampirismAction {
                         damage *= 1 - Math.min((freeze.getAmplifier() + 1) * 0.2F, 1);
                     }
                     power.addEnergy(damage * bloodAndHealModifier);
-                    damage *= 5;
                     float healed = user.getHealth();
-                    if (drainBlood(user, targetEntity, damage, damage * 0.1F * bloodAndHealModifier)) {
+                    if (drainBlood(user, targetEntity, damage * 4, damage * 0.5F * bloodAndHealModifier)) {
                         healed = user.getHealth() - healed;
                         if (healed > 0) {
                             power.addEnergy(healed * VampirismPowerType.healCost(world.getDifficulty()));

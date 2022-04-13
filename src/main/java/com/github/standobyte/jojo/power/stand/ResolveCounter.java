@@ -3,7 +3,6 @@ package com.github.standobyte.jojo.power.stand;
 import java.util.List;
 import java.util.Optional;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -120,7 +119,7 @@ public class ResolveCounter {
             });
         }
         
-        if (resolve == getMaxResolveValue() && stand.getUser() != null && !stand.getUser().hasEffect(ModEffects.RESOLVE.get())) {
+        if (resolve == getMaxResolveValue() && stand.getUser() != null && !stand.getUser().level.isClientSide() && !stand.getUser().hasEffect(ModEffects.RESOLVE.get())) {
             stand.getUser().addEffect(new EffectInstance(ModEffects.RESOLVE.get(), 
                     RESOLVE_EFFECT_MAX[Math.min(resolveLevel, RESOLVE_EFFECT_MAX.length)], resolveLevel, false, 
                     false, true));
@@ -150,7 +149,6 @@ public class ResolveCounter {
     }
 
     void setResolveLevel(int level) {
-        JojoMod.LOGGER.debug(level);
         boolean send = this.resolveLevel != level;
         this.resolveLevel = level;
         if (send) {

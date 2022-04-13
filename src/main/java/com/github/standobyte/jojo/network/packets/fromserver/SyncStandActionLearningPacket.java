@@ -5,9 +5,13 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.actions.StandAction;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.ui.toasts.ActionToast;
 import com.github.standobyte.jojo.init.ModActions;
+import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.toasts.ToastGui;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
@@ -38,14 +42,15 @@ public class SyncStandActionLearningPacket {
             if (msg.action instanceof StandAction) {
                 Action<IStandPower> standAction = (StandAction) msg.action;
                 IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
-                    boolean showToast = msg.showToast && !standAction.isUnlocked(power) /*always false btw*/;
+                    boolean showToast = msg.showToast && !standAction.isUnlocked(power);
                     power.setLearningProgressPoints(standAction, msg.progress, false, false);
-                    if (showToast) {
-                        // FIXME (!!) new stand action toast
-//                        ToastGui toastGui = Minecraft.getInstance().getToasts();
-//                        ActionToast.addOrUpdate(toastGui, 
-//                                type == ActionType.ATTACK ? ActionToast.Type.STAND_ATTACK_VARIATION : ActionToast.Type.STAND_ABILITY_VARIATION, 
-//                                        action, power.getType());
+                    ActionType actionType = standAction.getActionType(power);
+                    if (showToast && actionType != null) {
+                        ToastGui toastGui = Minecraft.getInstance().getToasts();
+                        ActionToast.addOrUpdate(toastGui, 
+                                ActionToast.Type.getToastType(
+                                        power.getPowerClassification(), actionType, standAction.isShiftVariation()), 
+                                standAction, power.getType());
                     }
                 });
             }
