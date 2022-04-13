@@ -49,7 +49,7 @@ public class VampirismFreeze extends VampirismAction {
                 if (entityTarget instanceof LivingEntity && !entityTarget.isOnFire()) {
                     int difficulty = world.getDifficulty().getId();
                     LivingEntity targetLiving = (LivingEntity) entityTarget;
-                    if (DamageUtil.dealColdDamage(targetLiving, 1.5F * difficulty, user, null)) {
+                    if (DamageUtil.dealColdDamage(targetLiving, (float) Math.pow(2, difficulty), user, null)) {
                         EffectInstance freezeInstance = targetLiving.getEffect(ModEffects.FREEZE.get());
                         if (freezeInstance == null) {
                             world.playSound(null, targetLiving, ModSounds.VAMPIRE_FREEZE.get(), targetLiving.getSoundSource(), 1.0F, 1.0F);

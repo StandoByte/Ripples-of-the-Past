@@ -14,9 +14,11 @@ import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.RefreshMovementInTimeStopPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncWorldTimeStopPacket;
+import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
+import com.google.common.collect.Streams;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -124,32 +126,20 @@ public class TimeHandler {
     }
     
     private static boolean hasTimeStopAbility(LivingEntity entity) {
-        return IStandPower.getStandPowerOptional(entity).map(stand -> {
-            for (Action<IStandPower> ability : stand.getAbilities()) {
-                if (ability.isUnlocked(stand) && ability.canUserSeeInStoppedTime(entity, stand)) {
-                    return true;
-                }
-            }
-            for (Action<IStandPower> attack : stand.getAttacks()) {
-                if (attack.isUnlocked(stand) && attack.canUserSeeInStoppedTime(entity, stand)) {
-                    return true;
-                }
-            }
-            return false;
-        }).orElse(false) || 
+        return 
+                IStandPower.getStandPowerOptional(entity).map(stand -> {
+                    return Streams.concat(stand.getAttacks().stream(), stand.getAbilities().stream())
+                            .anyMatch(action -> allowsToSeeInStoppedTime(action, stand, entity));
+                }).orElse(false) 
+                ||
                 INonStandPower.getNonStandPowerOptional(entity).map(power -> {
-                    for (Action<INonStandPower> ability : power.getAbilities()) {
-                        if (ability.isUnlocked(power) && ability.canUserSeeInStoppedTime(entity, power)) {
-                            return true;
-                        }
-                    }
-                    for (Action<INonStandPower> attack : power.getAttacks()) {
-                        if (attack.isUnlocked(power) && attack.canUserSeeInStoppedTime(entity, power)) {
-                            return true;
-                        }
-                    }
-                    return false;
+                    return Streams.concat(power.getAttacks().stream(), power.getAbilities().stream())
+                            .anyMatch(action -> allowsToSeeInStoppedTime(action, power, entity));
                 }).orElse(false);
+    }
+    
+    private static <P extends IPower<P, ?>> boolean allowsToSeeInStoppedTime(Action<P> action, P power, LivingEntity user) {
+        return action.canUserSeeInStoppedTime(user, power) && action.isUnlocked(power);
     }
     
     

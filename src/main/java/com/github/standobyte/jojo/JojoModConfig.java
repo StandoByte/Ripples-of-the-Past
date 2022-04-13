@@ -12,6 +12,7 @@ import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.google.common.collect.Lists;
 
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -150,7 +151,7 @@ public class JojoModConfig {
                         .comment(" Max resolve points at each Resolve level (starting from 0)", 
                                 "  All values must be higher than 0.")
                         .translation("jojo.config.resolvePoints")
-                        .defineList("resolvePoints", Arrays.asList(100F, 250F, 500F, 1000F, 2500F), pts -> pts instanceof Float && ((Float) pts) > 0); // FIXME !!!!!!!!!!!!!!!!!!!!!! default resolve values
+                        .defineList("resolvePoints", Arrays.asList(100F, 250F, 500F, 1000F, 2500F), pts -> pts instanceof Float && ((Float) pts) > 0); // FIXME (!!!!!) default resolve values
                 
                 soulAscension = builder
                         .translation("jojo.config.soulAscension")
@@ -212,7 +213,31 @@ public class JojoModConfig {
         public boolean tierHasUnbannedStands(int tier) {
             return tiersAvaliable[tier];
         }
+        
+        
+        
+        public static class SyncedValues {
+            
+            public static SyncedValues writeValues(Common config) {
+                return new SyncedValues();
+            }
+            
+            public void changeValues(Common config) {
+                
+            }
+            
+            public void writeToBuf(PacketBuffer buf) {
+                
+            }
+            
+            public static SyncedValues readFromBuf(PacketBuffer buf) {
+                return new SyncedValues();
+            }
+        }
     }
+
+    // FIXME !!!!!!!!!!!!!!!!!!!! config sync: send packet
+//    new SyncCommonConfigToClientPacket(JojoModConfig.Common.SyncedValues.writeValues(JojoModConfig.COMMON));
     
     public static class Client {
         

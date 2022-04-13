@@ -52,10 +52,6 @@ public class HamonOrganismInfusion extends HamonAction {
                     !power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get().isSkillLearned(HamonSkill.ANIMAL_INFUSION)) {
                 return conditionMessage("animal_infusion");
             }
-            if (!user.level.getEntitiesOfClass(HamonBlockChargeEntity.class, 
-                    new AxisAlignedBB(Vector3d.atCenterOf(blockPos), Vector3d.atCenterOf(blockPos))).isEmpty()) {
-                return ActionConditionResult.NEGATIVE;
-            }
             Block block = blockState.getBlock();
             if (!(isBlockLiving(blockState) || block instanceof FlowerPotBlock && blockState.getBlock() != Blocks.FLOWER_POT)) {
                 return conditionMessage("living_plant");
@@ -74,6 +70,9 @@ public class HamonOrganismInfusion extends HamonAction {
             int chargeTicks = 100 + MathHelper.floor((float) (1100 * hamon.getHamonStrengthLevel()) / (float) HamonData.MAX_STAT_LEVEL);
             switch(target.getType()) {
             case BLOCK:
+                BlockPos blockPos = target.getBlockPos();
+                world.getEntitiesOfClass(HamonBlockChargeEntity.class, 
+                        new AxisAlignedBB(Vector3d.atCenterOf(blockPos), Vector3d.atCenterOf(blockPos))).forEach(Entity::remove);
                 HamonBlockChargeEntity charge = new HamonBlockChargeEntity(world, target.getBlockPos());
                 charge.setCharge(0.02F * hamon.getHamonDamageMultiplier(), chargeTicks, user, getEnergyCost(power));
                 world.addFreshEntity(charge);

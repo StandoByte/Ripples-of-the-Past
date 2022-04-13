@@ -24,7 +24,6 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
-//FIXME (!!) time stop learning progress
 public class TimeStopInstant extends StandAction {
     private final Supplier<SoundEvent> blinkSound;
 
@@ -78,7 +77,7 @@ public class TimeStopInstant extends StandAction {
             }
             
             user.teleportTo(blinkPos.x, blinkPos.y, blinkPos.z);
-            // FIXME (!!) add progress points (depending on the distance)
+            // FIXME (!!!!) add progress points (depending on the distance)
             if (power.isActive()) {
                 IStandManifestation stand = power.getStandManifestation();
                 if (stand instanceof StandEntity) {

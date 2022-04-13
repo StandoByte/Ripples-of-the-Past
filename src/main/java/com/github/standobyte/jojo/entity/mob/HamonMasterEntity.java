@@ -48,7 +48,12 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser 
     }
 
     @Override
-    public boolean requiresCustomPersistence() { // if he somehow despawns again, i swear...
+    public boolean removeWhenFarAway(double distanceFromPlayer) {
+        return false;
+    }
+
+    @Override
+    public boolean requiresCustomPersistence() {
         return true;
     }
 

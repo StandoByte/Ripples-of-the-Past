@@ -177,7 +177,7 @@ public class ModActions {
             () -> new VampirismZombieSummon(new NonStandAction.Builder().energyCost(100F).cooldown(0, 100)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_DARK_AURA = ACTIONS.register("vampirism_dark_aura", 
-            () -> new VampirismDarkAura(new NonStandAction.Builder().ignoresPerformerStun().energyCost(20F).cooldown(0, 200)));
+            () -> new VampirismDarkAura(new NonStandAction.Builder().ignoresPerformerStun().energyCost(50F).cooldown(0, 300)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_HAMON_SUICIDE = ACTIONS.register("vampirism_hamon_suicide", 
             () -> new VampirismHamonSuicide(new NonStandAction.Builder().ignoresPerformerStun().holdToFire(100, false)));
@@ -219,7 +219,7 @@ public class ModActions {
                     .standOffsetFromUser(-0.25, -0.25, -0.3)));
     
     public static final RegistryObject<StandAction> STAR_PLATINUM_TIME_STOP = ACTIONS.register("star_platinum_time_stop", 
-            () -> new TimeStop(new StandAction.Builder().holdToFire(30, false).cooldown(0, 600)
+            () -> new TimeStop(new StandAction.Builder().holdToFire(30, false).cooldown(0, 600, 0.3333F)
                     .resolveLevelToUnlock(4).isTrained().ignoresPerformerStun().autoSummonStand().shout(ModSounds.JOTARO_STAR_PLATINUM_THE_WORLD))
             .voiceLineWithStandSummoned(ModSounds.JOTARO_THE_WORLD).timeStopSound(ModSounds.STAR_PLATINUM_TIME_STOP)
             .timeResumeVoiceLine(ModSounds.JOTARO_TIME_RESUMES).timeResumeSound(ModSounds.STAR_PLATINUM_TIME_RESUME));
@@ -244,7 +244,7 @@ public class ModActions {
             () -> new StandEntityBlock());
     
     public static final RegistryObject<StandAction> THE_WORLD_TIME_STOP = ACTIONS.register("the_world_time_stop", 
-            () -> new TimeStop(new StandAction.Builder().resolveLevelToUnlock(1).isTrained().holdToFire(30, false).cooldown(0, 600)
+            () -> new TimeStop(new StandAction.Builder().resolveLevelToUnlock(1).isTrained().holdToFire(30, false).cooldown(0, 600, 0.3333F)
                     .ignoresPerformerStun().shout(ModSounds.DIO_THE_WORLD))
             .voiceLineWithStandSummoned(ModSounds.DIO_TIME_STOP).timeStopSound(ModSounds.THE_WORLD_TIME_STOP)
             .timeResumeVoiceLine(ModSounds.DIO_TIME_RESUMES).timeResumeSound(ModSounds.THE_WORLD_TIME_RESUME));

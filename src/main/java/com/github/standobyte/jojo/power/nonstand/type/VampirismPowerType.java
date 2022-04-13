@@ -21,7 +21,6 @@ import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
 
 public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
-    // FIXME (!!) effects are not removed on /jojopower remove
     private static Map<Effect, IntBinaryOperator> EFFECTS_AMPLIFIERS;
     
     public static void initVampiricEffectsMap() {
@@ -83,6 +82,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
         return bloodLevel(power, power.getUser().level.getDifficulty().getId());
     }
     
+    // full blood bar on normal => 6
     public static int bloodLevel(INonStandPower power, int difficulty) {
         if (difficulty == 0) {
             return -1;

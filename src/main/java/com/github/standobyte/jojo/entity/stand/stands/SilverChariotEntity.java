@@ -11,9 +11,9 @@ import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModEntityAttributes;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.util.JojoModUtil;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.MoverType;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.monster.SkeletonEntity;
@@ -156,8 +156,7 @@ public class SilverChariotEntity extends StandEntity {
     @Override
     public boolean attackEntity(Entity target, PunchType punch, StandEntityAction action, int barrageHits) {
         if (target instanceof ProjectileEntity) {
-            target.setDeltaMovement(target.getDeltaMovement().reverse());
-            target.move(MoverType.SELF, target.getDeltaMovement());
+            JojoModUtil.deflectProjectile(target);
             return true;
         }
         else {

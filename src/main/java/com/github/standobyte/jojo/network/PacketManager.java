@@ -30,6 +30,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.ResetResolveValuePa
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandCancelManualMovementPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.SyncCommonConfigToClientPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncEnergyPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncHamonExercisesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncInputBufferPacket;
@@ -134,6 +135,8 @@ public class PacketManager {
         channel.registerMessage(index++, PlaySoundAtClientPacket.class, PlaySoundAtClientPacket::encode, PlaySoundAtClientPacket::decode, PlaySoundAtClientPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, SyncWorldTimeStopPacket.class, SyncWorldTimeStopPacket::encode, SyncWorldTimeStopPacket::decode, SyncWorldTimeStopPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         channel.registerMessage(index++, RefreshMovementInTimeStopPacket.class, RefreshMovementInTimeStopPacket::encode, RefreshMovementInTimeStopPacket::decode, RefreshMovementInTimeStopPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, SyncCommonConfigToClientPacket.class, SyncCommonConfigToClientPacket::encode, SyncCommonConfigToClientPacket::decode, SyncCommonConfigToClientPacket::handle, Optional.of(NetworkDirection.LOGIN_TO_CLIENT));
     }
 
     public static void sendToServer(Object msg) {

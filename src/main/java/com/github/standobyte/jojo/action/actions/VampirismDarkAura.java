@@ -1,9 +1,8 @@
 package com.github.standobyte.jojo.action.actions;
 
-import java.util.List;
-
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
@@ -36,8 +35,8 @@ public class VampirismDarkAura extends VampirismAction {
         int difficulty = world.getDifficulty().getId();
         int range = 16 * difficulty - 8;
         if (!world.isClientSide()) {
-            List<LivingEntity> entitiesAround = JojoModUtil.entitiesAround(LivingEntity.class, user, range, false, entity -> !JojoModUtil.isUndead(entity));
-            for (LivingEntity entity : entitiesAround) {
+            for (LivingEntity entity : JojoModUtil.entitiesAround(
+                    LivingEntity.class, user, range, false, entity -> !JojoModUtil.isUndead(entity))) {
                 boolean passive = entity instanceof AgeableEntity;
                 int amplifier = MathHelper.floor((difficulty - 1) * 1.5);
                 int duration = passive ? 600 : 200;
@@ -46,6 +45,13 @@ public class VampirismDarkAura extends VampirismAction {
                 entity.addEffect(new EffectInstance(Effects.DIG_SLOWDOWN, duration, amplifier));
                 if (passive) {
                     entity.addEffect(new EffectInstance(ModEffects.STUN.get(), duration));
+                }
+            }
+            if (world.getDifficulty() == Difficulty.HARD) {
+                for (HungryZombieEntity zombie : JojoModUtil.entitiesAround(
+                        HungryZombieEntity.class, user, range, false, zombie -> user.is(zombie.getOwner()))) {
+                    zombie.addEffect(new EffectInstance(Effects.MOVEMENT_SPEED, 300, 1));
+                    zombie.addEffect(new EffectInstance(Effects.DAMAGE_BOOST, 300, 0));
                 }
             }
         }

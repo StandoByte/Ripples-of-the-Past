@@ -367,7 +367,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         float pts = points;
         if (actionLearningProgressMap.setLearningProgressPoints(action, points, this)) {
             serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new SyncStandActionLearningPacket(action, pts, false), player);
+                PacketManager.sendToClient(new SyncStandActionLearningPacket(action, pts, true), player);
             });
             if (!user.level.isClientSide() && 
                     actionLearningProgressMap.getLearningProgressPoints(action, this) == 
