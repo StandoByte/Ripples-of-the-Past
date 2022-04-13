@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.actions.VampirismBloodDrain;
 import com.github.standobyte.jojo.entity.ai.ZombieFollowOwnerGoal;
+import com.github.standobyte.jojo.entity.ai.ZombieNearestAttackableTargetGoal;
 import com.github.standobyte.jojo.entity.ai.ZombieOwnerHurtByTargetGoal;
 import com.github.standobyte.jojo.entity.ai.ZombieOwnerHurtTargetGoal;
 import com.github.standobyte.jojo.init.ModEntityTypes;
@@ -19,9 +20,18 @@ import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.goal.HurtByTargetGoal;
+import net.minecraft.entity.ai.goal.MoveThroughVillageGoal;
+import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
+import net.minecraft.entity.ai.goal.WaterAvoidingRandomWalkingGoal;
+import net.minecraft.entity.ai.goal.ZombieAttackGoal;
+import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
 import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.monster.AbstractIllagerEntity;
 import net.minecraft.entity.monster.ZombieEntity;
+import net.minecraft.entity.monster.ZombifiedPiglinEntity;
+import net.minecraft.entity.passive.IronGolemEntity;
+import net.minecraft.entity.passive.TurtleEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -37,7 +47,7 @@ import net.minecraftforge.event.ForgeEventFactory;
 
 public class HungryZombieEntity extends ZombieEntity {
     protected static final DataParameter<Optional<UUID>> OWNER_UUID = EntityDataManager.defineId(HungryZombieEntity.class, DataSerializers.OPTIONAL_UUID);
-    private boolean isOwnerNearby;
+    private double distanceFromOwner;
 
     public HungryZombieEntity(World world) {
         this(ModEntityTypes.HUNGRY_ZOMBIE.get(), world);
@@ -61,13 +71,24 @@ public class HungryZombieEntity extends ZombieEntity {
                 .add(Attributes.ATTACK_DAMAGE, 5.0D);
     }
 
-    // FIXME (!!) make zombies not attack villagers if the owner is nearby (~16 blocks)
     @Override
     protected void registerGoals() {
         super.registerGoals();
         this.goalSelector.addGoal(6, new ZombieFollowOwnerGoal(this, 1.0D, 10.0F, 2.0F, false));
         this.targetSelector.addGoal(1, new ZombieOwnerHurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new ZombieOwnerHurtTargetGoal(this));
+    }
+
+    @Override
+    protected void addBehaviourGoals() {
+        this.goalSelector.addGoal(2, new ZombieAttackGoal(this, 1.0D, false));
+        this.goalSelector.addGoal(6, new MoveThroughVillageGoal(this, 1.0D, true, 4, this::canBreakDoors));
+        this.goalSelector.addGoal(7, new WaterAvoidingRandomWalkingGoal(this, 1.0D));
+        this.targetSelector.addGoal(1, (new HurtByTargetGoal(this)).setAlertOthers(ZombifiedPiglinEntity.class));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, PlayerEntity.class, true));
+        this.targetSelector.addGoal(3, new ZombieNearestAttackableTargetGoal<>(this, AbstractVillagerEntity.class, false));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolemEntity.class, true));
+        this.targetSelector.addGoal(5, new NearestAttackableTargetGoal<>(this, TurtleEntity.class, 10, true, false, TurtleEntity.BABY_ON_LAND_SELECTOR));
     }
 
     public void addAdditionalSaveData(CompoundNBT compound) {
@@ -119,12 +140,12 @@ public class HungryZombieEntity extends ZombieEntity {
         super.tick();
         if (!level.isClientSide()) {
             LivingEntity owner = getOwner();
-            isOwnerNearby = owner != null && distanceToSqr(owner) <= 144;
+            distanceFromOwner = owner != null ? distanceToSqr(owner) : -1;
         }
     }
     
-    public boolean isOwnerNearby() {
-        return isOwnerNearby;
+    public boolean farFromOwner(double distance) {
+        return distanceFromOwner > Math.pow(distance, 2);
     }
 
     @Override
