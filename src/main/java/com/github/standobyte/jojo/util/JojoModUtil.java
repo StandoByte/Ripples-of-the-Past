@@ -249,8 +249,8 @@ public class JojoModUtil {
     }
 
     public static boolean canBleed(LivingEntity entity) {
-        return entity.getMobType() == CreatureAttribute.UNDEAD && 
-                entity instanceof PlayerEntity || entity instanceof AgeableEntity || entity instanceof INPC || entity instanceof AbstractIllagerEntity || entity instanceof WaterMobEntity;
+        return entity.getMobType() != CreatureAttribute.UNDEAD && 
+                (entity instanceof PlayerEntity || entity instanceof AgeableEntity || entity instanceof INPC || entity instanceof AbstractIllagerEntity || entity instanceof WaterMobEntity);
     }
 
     public static void extinguishFieryStandEntity(Entity entity, ServerWorld world) {

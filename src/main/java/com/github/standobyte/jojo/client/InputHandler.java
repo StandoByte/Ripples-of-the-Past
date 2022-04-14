@@ -28,6 +28,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonStartMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHeldActionTargetPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnLeapPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClOnStandDashPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClStopHeldActionPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandManualControlPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandSummonPacket;
@@ -507,6 +508,7 @@ public class InputHandler {
     
     private void dash(ClientPlayerEntity player, float yRot) {
         // FIXME (!!) (dash) set leap cd (depending on stand speed), use stamina
+        PacketManager.sendToServer(new ClOnStandDashPacket());
         player.setOnGround(false);
         player.hasImpulse = true;
         Vector3d dash = Vector3d.directionFromRotation(0, player.yRot + yRot).scale(0.5).add(0, 0.2, 0);

@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
@@ -50,6 +51,7 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerChangedDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerRespawnEvent;
 import net.minecraftforge.event.world.BiomeLoadingEvent;
 import net.minecraftforge.event.world.WorldEvent;
@@ -143,6 +145,7 @@ public class ForgeBusEventSubscriber {
 
     @SubscribeEvent
     public static void onPlayerLoggedIn(PlayerLoggedInEvent event) {
+        JojoModConfig.Common.SyncedValues.syncWithClient((ServerPlayerEntity) event.getPlayer());
         syncPowerData(event.getPlayer());
     }
     
@@ -160,6 +163,13 @@ public class ForgeBusEventSubscriber {
         IStandPower.getPlayerStandPower(player).syncWithUserOnly();
         INonStandPower.getPlayerNonStandPower(player).syncWithUserOnly();
         PacketManager.sendToClient(new UpdateClientCapCachePacket(), (ServerPlayerEntity) player);
+    }
+    
+    
+    
+    @SubscribeEvent
+    public static void onPlayerLogout(PlayerLoggedOutEvent event) {
+        JojoModConfig.Common.SyncedValues.onPlayerLogout((ServerPlayerEntity) event.getPlayer());
     }
     
     

@@ -25,6 +25,7 @@ import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -446,6 +447,13 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     @Override
     public int getLeapCooldownPeriod() {
+        if (standManifestation instanceof StandEntity) {
+            StandEntity standEntity = (StandEntity) standManifestation;
+            if (!standEntity.isArmsOnlyMode() && standEntity.isFollowingUser()) {
+                double speed = standEntity.getAttributeValue(Attributes.MOVEMENT_SPEED);
+                return StandStatFormulas.leapCooldown(speed);
+            }
+        }
         return 0;
     }
     
@@ -453,6 +461,23 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     public void onLeap() {
         super.onLeap();
         consumeStamina(200);
+    }
+    
+    @Override
+    public void onDash() {
+        setLeapCooldown(getDashCooldownPeriod());
+        consumeStamina(25);
+    }
+    
+    private int getDashCooldownPeriod() {
+        if (standManifestation instanceof StandEntity) {
+            StandEntity standEntity = (StandEntity) standManifestation;
+            if (!standEntity.isArmsOnlyMode() && standEntity.isFollowingUser()) {
+                double speed = standEntity.getAttributeValue(Attributes.MOVEMENT_SPEED);
+                return StandStatFormulas.dashCooldown(speed);
+            }
+        }
+        return 0;
     }
 
     @Override

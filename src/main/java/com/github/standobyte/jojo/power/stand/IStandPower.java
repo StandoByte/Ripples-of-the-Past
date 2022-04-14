@@ -64,6 +64,8 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     
     int getTier();
     
+    void onDash();
+    
     public static LazyOptional<IStandPower> getStandPowerOptional(LivingEntity entity) {
         if (entity instanceof PlayerEntity) {
             return entity.getCapability(StandCapProvider.STAND_CAP);

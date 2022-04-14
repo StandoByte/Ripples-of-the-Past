@@ -322,13 +322,15 @@ public class ClientEventHandler {
         if (event.getHand() == Hand.MAIN_HAND) {
             Entity entity = Minecraft.getInstance().getCameraEntity();
             if (entity instanceof LivingEntity) {
-                INonStandPower.getNonStandPowerOptional((LivingEntity) entity).ifPresent(power -> {
+                LivingEntity livingEntity = (LivingEntity) entity;
+                INonStandPower.getNonStandPowerOptional(livingEntity).ifPresent(power -> {
                     if (power.isActionOnCooldown(ModActions.HAMON_ZOOM_PUNCH.get())) {
                         event.setCanceled(true);
                     }
                     else {
                         ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-                        if (hud.getSelectedAction(ActionType.ATTACK) == ModActions.JONATHAN_OVERDRIVE_BARRAGE.get()) {
+                        if (hud.getSelectedAction(ActionType.ATTACK) == ModActions.JONATHAN_OVERDRIVE_BARRAGE.get()
+                                && livingEntity.getMainHandItem().isEmpty() && livingEntity.getOffhandItem().isEmpty()) {
                             FirstPersonRenderer renderer = mc.getItemInHandRenderer();
                             ClientPlayerEntity player = mc.player;
                             Hand swingingArm = MoreObjects.firstNonNull(player.swingingArm, Hand.MAIN_HAND);
