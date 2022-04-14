@@ -70,12 +70,12 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
     
     @Override
     public float getMaxStaminaFactor(INonStandPower power, IStandPower standPower) {
-        return Math.max((bloodLevel(power) - 4) * 2, 1);
+        return Math.max((bloodLevel(power) - 3) * 2, 1);
     }
 
     @Override
     public float getStaminaRegenFactor(INonStandPower power, IStandPower standPower) {
-        return Math.max((bloodLevel(power) - 4) * 4, 1);
+        return Math.max((bloodLevel(power) - 3) * 4, 1);
     }
 
     private static int bloodLevel(INonStandPower power) {

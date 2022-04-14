@@ -104,6 +104,14 @@ public class StandStatFormulas {
         return 0.1 + speed * 0.05;
     }
     
+    public static int leapCooldown(double movementSpeed) {
+        return dashCooldown(movementSpeed) + 10;
+    }
+    
+    public static int dashCooldown(double movementSpeed) {
+        return Math.max((int) (27.5 - movementSpeed * 25), 0);
+    }
+    
     public static boolean isBlockBreakable(double strength, float blockHardness, int blockHarvestLevel) {
         /* damage:
          * 2                                4                                   8                                   12                                      16

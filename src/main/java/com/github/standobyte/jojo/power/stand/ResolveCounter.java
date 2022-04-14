@@ -12,22 +12,33 @@ import com.github.standobyte.jojo.network.packets.fromserver.SyncResolveLevelPac
 import com.github.standobyte.jojo.network.packets.fromserver.SyncResolvePacket;
 import com.github.standobyte.jojo.util.damage.IStandDamageSource;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.GameRules;
+import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 
 public class ResolveCounter {
     public static final float SOUL_TEAMMATE_RESOLVE_TICK = 0F;
     public static final float SOUL_LOOK_RESOLVE_TICK = 0F;
-    public static final float RESOLVE_DMG_REDUCTION = 0.5F;
+    public static final float RESOLVE_DMG_REDUCTION = 0.6667F;
+    public static final Float[] DEFAULT_MAX_RESOLVE_VALUES = {100F, 250F, 500F, 1000F, 2500F};
     private static final float RESOLVE_DECAY = 5F;
     private static final int RESOLVE_NO_DECAY_TICKS = 300;
     private static final float RESOLVE_FOR_DMG_POINT = 0.5F;
+    private static final int RESOLVE_BOOST_NO_DECAY_TICKS = 100;
+    private static final int RESOLVE_BOOST_MAX = 10;
+    private static final float RESOLVE_BOOST_MIN_HP = 5;
+    private static final float RESOLVE_BOOST_MAX_HP = 15;
     private static final int[] RESOLVE_EFFECT_MIN = {300, 400, 500, 600, 600};
     private static final int[] RESOLVE_EFFECT_MAX = {600, 1200, 1500, 1800, 2400};
     
@@ -35,9 +46,15 @@ public class ResolveCounter {
     private final Optional<ServerPlayerEntity> serverPlayerUser;
     
     private float resolve = 0;
-    private int resolveLevel = 0;
     private int noResolveDecayTicks = 0;
+    
+    private int resolveLevel = 0;
+    
+    private float gettingAttackedBoost = 0;
+    private int boostDecayTicks = 0;
+    
     private float maxAchievedResolve = 0;
+    
     
     protected ResolveCounter(IStandPower stand, Optional<ServerPlayerEntity> serverPlayerUser) {
         this.stand = stand;
@@ -138,6 +155,14 @@ public class ResolveCounter {
     private float boostAddedValue(float value) {
         return value;
     }
+
+    // TODO
+    public float getPointsBoost(LivingEntity user) {
+        if (user.getHealth() <= 5F) {
+            return RESOLVE_BOOST_MAX;
+        }
+        return gettingAttackedBoost;
+    }
     
     public void resetResolveValue() {
         this.resolve = 0;
@@ -163,7 +188,9 @@ public class ResolveCounter {
     public void onAttack(LivingEntity target, IStandDamageSource dmgSource, float dmgAmount) {
         if (stand.usesResolve() && target.getClassification(false) == EntityClassification.MONSTER || target.getType() == EntityType.PLAYER) {
             dmgAmount = Math.min(dmgAmount, target.getHealth());
-            addResolveValue(dmgAmount * RESOLVE_FOR_DMG_POINT);
+            double attackStrength = Optional.ofNullable(target.getAttribute(Attributes.ATTACK_DAMAGE))
+                    .map(ModifiableAttributeInstance::getValue).orElse(0.0);
+//            addResolveValue(dmgAmount * RESOLVE_FOR_DMG_POINT);
             if (stand.getUser().hasEffect(ModEffects.RESOLVE.get())) {
                 setResolveValue(Math.max(getMaxResolveValue() * 0.5F, getResolveValue()), 0);
             }
@@ -172,7 +199,15 @@ public class ResolveCounter {
 
     // TODO
     public void onGettingAttacked(DamageSource dmgSource, float dmgAmount, LivingEntity user) {
-        
+        Entity attacker = dmgSource.getEntity();
+        if (stand.usesResolve() && attacker != null && !attacker.is(user)) {
+            World world = attacker.level;
+            if (!world.isClientSide()) {
+                boolean noNaturalRegen = ((ServerWorld) world).getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION);
+                float missingHpRatio = 1F - user.getHealth() / user.getMaxHealth();
+                
+            }
+        }
     }
 
     public void onResolveEffectStarted(int amplifier, IStandPower stand) {

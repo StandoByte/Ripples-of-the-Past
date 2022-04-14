@@ -8,10 +8,15 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.ResetSyncedCommonConfigPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.SyncCommonConfigPacket;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
+import com.github.standobyte.jojo.power.stand.ResolveCounter;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.google.common.collect.Lists;
 
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.ChunkPos;
@@ -19,7 +24,6 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.config.ModConfig.ModConfigEvent;
 import net.minecraftforge.registries.IForgeRegistry;
 
 @EventBusSubscriber(modid = JojoMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
@@ -151,7 +155,7 @@ public class JojoModConfig {
                         .comment(" Max resolve points at each Resolve level (starting from 0)", 
                                 "  All values must be higher than 0.")
                         .translation("jojo.config.resolvePoints")
-                        .defineList("resolvePoints", Arrays.asList(100F, 250F, 500F, 1000F, 2500F), pts -> pts instanceof Float && ((Float) pts) > 0); // FIXME (!!!!!) default resolve values
+                        .defineList("resolvePoints", Arrays.asList(ResolveCounter.DEFAULT_MAX_RESOLVE_VALUES), pts -> pts instanceof Float && ((Float) pts) > 0);
                 
                 soulAscension = builder
                         .translation("jojo.config.soulAscension")
@@ -181,6 +185,11 @@ public class JojoModConfig {
                 return true;
             }
             return Math.abs(center.x - pos.x) < range && Math.abs(center.z - pos.z) < range;
+        }
+        
+        private void onLoadOrReload() {
+            loaded = true;
+            initBannedStands();
         }
         
         private void initBannedStands() {
@@ -215,29 +224,45 @@ public class JojoModConfig {
         }
         
         
-        
+
         public static class SyncedValues {
-            
-            public static SyncedValues writeValues(Common config) {
-                return new SyncedValues();
+            private final boolean standStamina;
+
+            private SyncedValues(Common config) {
+                standStamina = config.standStamina.get();
             }
             
-            public void changeValues(Common config) {
-                
+            public SyncedValues(PacketBuffer buf) {
+                standStamina = buf.readBoolean();
             }
-            
+
             public void writeToBuf(PacketBuffer buf) {
-                
+                buf.writeBoolean(standStamina);
             }
             
-            public static SyncedValues readFromBuf(PacketBuffer buf) {
-                return new SyncedValues();
+            public void changeConfigValues() {
+                COMMON_SYNCED_TO_CLIENT.standStamina.set(standStamina);
+                
+                COMMON_SYNCED_TO_CLIENT.onLoadOrReload();
+            }
+
+            public static void resetConfig() {
+                COMMON_SYNCED_TO_CLIENT.standStamina.clearCache();
+                
+                COMMON_SYNCED_TO_CLIENT.onLoadOrReload();
+            }
+
+            public static void syncWithClient(ServerPlayerEntity player) {
+                PacketManager.sendToClient(new SyncCommonConfigPacket(new SyncedValues(COMMON_FROM_FILE)), player);
+            }
+            
+            public static void onPlayerLogout(ServerPlayerEntity player) {
+                PacketManager.sendToClient(new ResetSyncedCommonConfigPacket(), player);
             }
         }
     }
-
-    // FIXME !!!!!!!!!!!!!!!!!!!! config sync: send packet
-//    new SyncCommonConfigToClientPacket(JojoModConfig.Common.SyncedValues.writeValues(JojoModConfig.COMMON));
+    
+    
     
     public static class Client {
         
@@ -274,17 +299,18 @@ public class JojoModConfig {
 
 
     static final ForgeConfigSpec commonSpec;
-    private static final Common COMMON;
+    private static final Common COMMON_FROM_FILE;
+    private static final Common COMMON_SYNCED_TO_CLIENT;
     static {
         final Pair<Common, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(Common::new);
         commonSpec = specPair.getRight();
-        COMMON = specPair.getLeft();
+        COMMON_FROM_FILE = specPair.getLeft();
+        COMMON_SYNCED_TO_CLIENT = new ForgeConfigSpec.Builder().configure(Common::new).getLeft();
     }
     
-    private static Common COMMON_REMOTE_SERVER = COMMON;
-    // FIXME (!!) if on remote server - instance with values from server
-    public static Common getCommonConfigInstance() {
-        return COMMON;
+    public static Common getCommonConfigInstance(/*boolean isClientSide*/) {
+        return COMMON_FROM_FILE;
+//        return isClientSide ? COMMON_SYNCED_TO_CLIENT : COMMON_FROM_FILE;
     }
 
     static final ForgeConfigSpec clientSpec;
@@ -296,11 +322,10 @@ public class JojoModConfig {
     }
     
     @SubscribeEvent
-    public static void onConfigLoad(ModConfigEvent event) {
+    public static void onConfigLoad(ModConfig.ModConfigEvent event) {
         ModConfig config = event.getConfig();
         if (JojoMod.MOD_ID.equals(config.getModId()) && config.getType() == ModConfig.Type.COMMON) {
-            COMMON.loaded = true;
-            COMMON.initBannedStands();
+            COMMON_FROM_FILE.onLoadOrReload();
         }
     }
 }
