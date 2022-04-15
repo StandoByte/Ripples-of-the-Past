@@ -242,7 +242,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
 
     public abstract ModelRenderer armModel(HandSide side);
 
-    // FIXME !!!!!!!!!!!!!!!!!!! rapier textures are seemingly bugged when armor is on
+    // FIXME (!!!!) rapier textures are seemingly bugged when armor is on
     public void renderArmSwings(T entity, MatrixStack matrixStack, IVertexBuilder buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
         List<AdditionalArmSwing> swings = entity.getSwingsWithOffsets();
         if (!swings.isEmpty()) {

@@ -84,7 +84,7 @@ public class TimeStop extends StandAction {
             if (timeStopTicks >= 40 && timeStopSound != null && timeStopSound.get() != null
                     && !invadingStoppedTime) {
                 PacketManager.sendGloballyWithCondition(new PlaySoundAtClientPacket(timeStopSound.get(), SoundCategory.AMBIENT, blockPos, 5.0F, 1.0F), 
-                        world.dimension(), player -> (JojoModConfig.getCommonConfigInstance().inTimeStopRange(
+                        world.dimension(), player -> (JojoModConfig.getCommonConfigInstance(false).inTimeStopRange(
                                 chunkPos, new ChunkPos(player.blockPosition()))) && TimeHandler.canPlayerSeeInStoppedTime(player));
             }
             // FIXME (!) add progress points (inside TickingTimeStopInstance)

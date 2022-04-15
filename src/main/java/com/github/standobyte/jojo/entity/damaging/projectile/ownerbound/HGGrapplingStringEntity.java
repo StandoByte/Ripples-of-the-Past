@@ -48,7 +48,7 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
                 }
             }
             else {
-                // KEKW FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! free flight
+                // KEKW FIXME (!!!!) free flight
                 Vector3d vecToOwner = owner.position().subtract(bound.position());
                 if (vecToOwner.lengthSqr() > 4) {
                     dragTarget(bound, vecToOwner.normalize().scale(2));

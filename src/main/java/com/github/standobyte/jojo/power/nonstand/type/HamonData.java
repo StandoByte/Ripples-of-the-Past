@@ -253,7 +253,7 @@ public class HamonData extends TypeSpecificData {
         if (isSkillLearned(HamonSkill.NATURAL_TALENT)) {
             energyCost *= 2;
         }
-        energyCost *= JojoModConfig.getCommonConfigInstance().hamonPointsMultiplier.get().floatValue();
+        energyCost *= JojoModConfig.getCommonConfigInstance(false).hamonPointsMultiplier.get().floatValue();
         int points = (int) (energyCost / ENERGY_PER_POINT);
         if (random.nextFloat() < (energyCost % ENERGY_PER_POINT) / ENERGY_PER_POINT) points++;
         setHamonStatPoints(stat, getStatPoints(stat) + points, false, false);
@@ -413,7 +413,7 @@ public class HamonData extends TypeSpecificData {
         float lvlInc = (2 * MathHelper.clamp(getAverageExercisePoints(), 0F, 1F)) - 1F;
         // FIXME (!!) why tf does it go down when the user is offline
         if (lvlInc < 0) {
-            if (!JojoModConfig.getCommonConfigInstance().breathingTechniqueDeterioration.get()) {
+            if (!JojoModConfig.getCommonConfigInstance(false).breathingTechniqueDeterioration.get()) {
                 lvlInc = 0;
             }
             else {
@@ -425,7 +425,7 @@ public class HamonData extends TypeSpecificData {
             float bonus = breathingTrainingBonus;
             breathingTrainingBonus += lvlInc * 0.25F;
             lvlInc += bonus;
-            lvlInc *= JojoModConfig.getCommonConfigInstance().breathingTechniqueMultiplier.get().floatValue();
+            lvlInc *= JojoModConfig.getCommonConfigInstance(false).breathingTechniqueMultiplier.get().floatValue();
             if (isSkillLearned(HamonSkill.NATURAL_TALENT)) {
                 lvlInc *= 2;
             }

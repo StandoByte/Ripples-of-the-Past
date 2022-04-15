@@ -104,7 +104,7 @@ public class ResolveCounter {
     }
 
     float getMaxResolveValue() {
-        List<? extends Float> ptsList = JojoModConfig.getCommonConfigInstance().resolvePoints.get();
+        List<? extends Float> ptsList = JojoModConfig.getCommonConfigInstance(stand.getUser().level.isClientSide()).resolvePoints.get();
         return ptsList.get(Math.min(getResolveLevel(), ptsList.size() - 1));
     }
     

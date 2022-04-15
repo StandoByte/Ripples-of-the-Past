@@ -29,6 +29,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.thread.SidedThreadGroups;
 
 public class StandDiscItem extends Item {
     private static final String STAND_TAG = "Stand";
@@ -85,8 +86,8 @@ public class StandDiscItem extends Item {
     private static boolean canGainStand(LivingEntity entity, int playerTier, StandType<?> stand) {
         if (entity instanceof PlayerEntity) {
             PlayerEntity player = (PlayerEntity) entity;
-            return player.abilities.instabuild || !JojoModConfig.getCommonConfigInstance().standTiers.get()
-                    || StandUtil.standTierFromXp(player.experienceLevel, false) >= stand.getTier() || playerTier >= stand.getTier();
+            return player.abilities.instabuild || !JojoModConfig.getCommonConfigInstance(entity.level.isClientSide()).standTiers.get()
+                    || StandUtil.standTierFromXp(player.experienceLevel, false, entity.level.isClientSide()) >= stand.getTier() || playerTier >= stand.getTier();
         }
         return false;
     }
@@ -94,8 +95,10 @@ public class StandDiscItem extends Item {
     @Override
     public void fillItemCategory(ItemGroup group, NonNullList<ItemStack> items) {
         if (this.allowdedIn(group)) {
+            boolean isClientSide = Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT;
             for (StandType<?> standType : ModStandTypes.Registry.getRegistry()) {
-                if (!JojoModConfig.getCommonConfigInstance().isConfigLoaded() || !JojoModConfig.getCommonConfigInstance().isStandBanned(standType)) {
+                if (!JojoModConfig.getCommonConfigInstance(isClientSide).isConfigLoaded()
+                        || !JojoModConfig.getCommonConfigInstance(isClientSide).isStandBanned(standType)) {
                     ItemStack item = new ItemStack(this);
                     setStandType(item, standType);
                     items.add(item);
@@ -115,7 +118,7 @@ public class StandDiscItem extends Item {
             StandType<?> stand = ModStandTypes.Registry.getRegistry().getValue(new ResourceLocation(standRegistryName));
             tooltip.add(new TranslationTextComponent(stand.getTranslationKey()));
             tooltip.add(stand.getPartName());
-            if (JojoModConfig.getCommonConfigInstance().standTiers.get()) {
+            if (JojoModConfig.getCommonConfigInstance(true).standTiers.get()) {
                 tooltip.add(new TranslationTextComponent("jojo.disc.tier", stand.getTier()).withStyle(TextFormatting.GRAY));
             }
         }
