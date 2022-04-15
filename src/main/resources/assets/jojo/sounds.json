@@ -373,11 +373,23 @@
   },
   "dio_die": {
     "subtitle": "jojo.subtitle.die",
-    "sounds": [ "jojo:stand_user/dio_die" ] 
+    "sounds": [ "jojo:stand_user/dio_die", "jojo:stand_user/dio_die_2" ] 
   },
   "dio_the_world": {
     "subtitle": "jojo.subtitle.the_world_name",
-    "sounds": [ "jojo:stand_user/dio_the_world", "jojo:stand_user/dio_the_world_2", "jojo:stand_user/dio_the_world_3" ] 
+    "sounds": [ "jojo:stand_user/dio_the_world", "jojo:stand_user/dio_the_world_2", "jojo:stand_user/dio_the_world_3", "jojo:stand_user/dio_the_world_4", "jojo:stand_user/dio_the_world_5" ] 
+  },
+  "dio_muda": {
+    "subtitle": "jojo.subtitle.muda",
+    "sounds": [ "jojo:stand_user/dio_muda", "jojo:stand_user/dio_muda_2", "jojo:stand_user/dio_muda_3", "jojo:stand_user/dio_muda_4" ]
+  },
+  "dio_muda_muda": {
+    "subtitle": "jojo.subtitle.muda_muda_muda",
+    "sounds": [ "jojo:stand_user/dio_muda_muda", "jojo:stand_user/dio_muda_muda_2" ]
+  },
+  "dio_wry": {
+    "subtitle": "jojo.subtitle.wry",
+    "sounds": [ "jojo:stand_user/dio_wry", "jojo:stand_user/dio_wry_2" ]
   },
   "dio_toki_yo_tomare": {
     "subtitle": "jojo.subtitle.toki_yo_tomare",
@@ -389,7 +401,7 @@
   },
   "dio_time_resumes": {
     "subtitle": "jojo.subtitle.time_resumes.dasu",
-    "sounds": [ "jojo:stand_user/dio_time_resumes" ]
+    "sounds": [ "jojo:stand_user/dio_time_resumes", "jojo:stand_user/dio_time_resumes_2" ]
   },
   "dio_times_up": {
     "subtitle": "jojo.subtitle.times_up",
@@ -401,19 +413,15 @@
   },
   "dio_road_roller": {
     "subtitle": "jojo.subtitle.rodo_rolla_da",
-    "sounds": [ "jojo:stand_user/dio_road_roller" ]
+    "sounds": [ "jojo:stand_user/dio_road_roller", "jojo:stand_user/dio_road_roller_2" ]
   },
   "the_world_summon": {
     "subtitle": "jojo.subtitle.stand_summon",
     "sounds": [ "jojo:stand/the_world_summon", "jojo:stand/the_world_summon_2" ]
   },
-  "the_world_muda": {
-    "subtitle": "jojo.subtitle.muda",
-    "sounds": [ "jojo:stand/the_world_muda", "jojo:stand/the_world_muda_2", "jojo:stand/the_world_muda_3", "jojo:stand/the_world_muda_4" ]
-  },
   "the_world_muda_muda_muda": {
     "subtitle": "jojo.subtitle.muda_muda_muda",
-    "sounds": [ "jojo:stand/the_world_muda_muda_muda", "jojo:stand/the_world_muda_muda_muda_2", "jojo:stand/the_world_muda_muda_muda_3" ]
+    "sounds": [ "jojo:stand/the_world_muda_muda_muda", "jojo:stand/the_world_muda_muda_muda_2" ]
   },
   "the_world_time_stop": {
     "sounds": [ "jojo:stand/the_world_time_stop" ]

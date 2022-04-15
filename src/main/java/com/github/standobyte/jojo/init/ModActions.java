@@ -49,6 +49,7 @@ import com.github.standobyte.jojo.action.actions.StandEntityMeleeBarrage;
 import com.github.standobyte.jojo.action.actions.StandEntityUnsummon;
 import com.github.standobyte.jojo.action.actions.StarPlatinumStarFinger;
 import com.github.standobyte.jojo.action.actions.StarPlatinumZoom;
+import com.github.standobyte.jojo.action.actions.TheWorldBarrage;
 import com.github.standobyte.jojo.action.actions.TimeStop;
 import com.github.standobyte.jojo.action.actions.TimeStopInstant;
 import com.github.standobyte.jojo.action.actions.VampirismAction;
@@ -231,10 +232,10 @@ public class ModActions {
     
 
     public static final RegistryObject<StandEntityAction> THE_WORLD_PUNCH = ACTIONS.register("the_world_punch", 
-            () -> new StandEntityLightAttack(new StandEntityAction.Builder().standSound(Phase.WINDUP, ModSounds.THE_WORLD_MUDA)));
+            () -> new StandEntityLightAttack(new StandEntityAction.Builder().shout(ModSounds.DIO_MUDA)));
     
     public static final RegistryObject<StandEntityAction> THE_WORLD_BARRAGE = ACTIONS.register("the_world_barrage", 
-            () -> new StandEntityMeleeBarrage(new StandEntityAction.Builder().standSound(ModSounds.THE_WORLD_MUDA_MUDA_MUDA)));
+            () -> new TheWorldBarrage(new StandEntityAction.Builder().standSound(ModSounds.THE_WORLD_MUDA_MUDA_MUDA).shout(ModSounds.DIO_MUDA_MUDA), ModSounds.DIO_WRY));
     
     public static final RegistryObject<StandEntityAction> THE_WORLD_HEAVY_PUNCH = ACTIONS.register("the_world_heavy_punch", 
             () -> new StandEntityHeavyAttack(new StandEntityAction.Builder().shout(ModSounds.DIO_DIE)

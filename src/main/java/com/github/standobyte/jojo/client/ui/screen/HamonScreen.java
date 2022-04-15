@@ -31,7 +31,7 @@ public class HamonScreen extends Screen {
     static final int WINDOW_THIN_BORDER = 9;
     static final int WINDOW_UPPER_BORDER = 18;
     
-    static final ResourceLocation WINDOW = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/hamon_window.png");
+    public static final ResourceLocation WINDOW = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/hamon_window.png");
     static final ResourceLocation TABS = new ResourceLocation("textures/gui/advancements/tabs.png");
     
     private HamonTabGui[] tabs;
