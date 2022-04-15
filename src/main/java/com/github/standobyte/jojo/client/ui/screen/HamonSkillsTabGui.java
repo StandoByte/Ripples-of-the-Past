@@ -41,7 +41,7 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
 
     @Override
     void addButtons() {
-        learnButton = new Button(screen.windowPosX() + 150, screen.windowPosY() + 87, 64, 20, new TranslationTextComponent("hamon.learnButton"), button -> {
+        learnButton = new Button(screen.windowPosX() + 150, screen.windowPosY() + 86, 64, 20, new TranslationTextComponent("hamon.learnButton"), button -> {
             if (selectedSkill != null) {
                 PacketManager.sendToServer(new ClHamonLearnButtonPacket(selectedSkill.skill));
                 screen.clickedOnSkill = true;
@@ -49,7 +49,7 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
         });
         screen.addButton(learnButton);
 
-        creativeResetButton = new Button(screen.windowPosX() + 16, screen.windowPosY() + 87, 64, 20, new TranslationTextComponent("hamon.resetButton"), button -> {
+        creativeResetButton = new Button(screen.windowPosX() + 16, screen.windowPosY() + 86, 64, 20, new TranslationTextComponent("hamon.resetButton"), button -> {
             PacketManager.sendToServer(new ClHamonResetSkillsButtonPacket(getSkillsType()));
         });
         screen.addButton(creativeResetButton);

@@ -68,7 +68,7 @@ public class ModStandTypes {
             .addItemOnResolveLevel(4, new ItemStack(ModItems.ROAD_ROLLER.get())));
     
     public static final RegistryObject<StandType<StandStats>> HIEROPHANT_GREEN = STANDS.register("hierophant_green", 
-            () -> new EntityStandType<>(4, 0x00B000, PART_3_NAME,
+            () -> new EntityStandType<>(5, 0x00B000, PART_3_NAME,
                     new StandAction[] {ModActions.HIEROPHANT_GREEN_STRING_ATTACK.get(), ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get()},
                     new StandAction[] {ModActions.HIEROPHANT_GREEN_BLOCK.get(), ModActions.HIEROPHANT_GREEN_GRAPPLE.get(), ModActions.HIEROPHANT_GREEN_BARRIER.get()},
                     StandStats.class, new StandStats.Builder()
