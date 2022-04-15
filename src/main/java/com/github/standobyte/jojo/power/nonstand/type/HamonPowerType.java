@@ -169,7 +169,6 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
             }
             if (user instanceof PlayerEntity) {
                 ServerPlayerEntity player = (ServerPlayerEntity) user;
-                hamon.newDayCheck(player.level);
                 if (hamon.isSkillLearned(HamonSkill.ROPE_TRAP)) {
                     if (player.isOnGround() && player.isShiftKeyDown()) {
                         BlockPos pos = player.blockPosition();
@@ -239,6 +238,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
         }
         if (user instanceof PlayerEntity) {
             hamon.tickExercises((PlayerEntity) user);
+            hamon.newDayCheck(user.level);
         }
     }
 

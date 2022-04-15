@@ -21,17 +21,23 @@ import com.github.standobyte.jojo.action.ActionTargetContainer;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.ui.hud.ActionsModeConfig.SelectedTargetIcon;
+import com.github.standobyte.jojo.client.ui.screen.HamonScreen;
+import com.github.standobyte.jojo.client.ui.screen.HamonStatsTabGui;
 import com.github.standobyte.jojo.client.ui.sprites.SpriteUploaders;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClClickActionPacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.nonstand.type.HamonData;
+import com.github.standobyte.jojo.power.nonstand.type.HamonData.Exercise;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -59,7 +65,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-// FIXME (!!) hamon exercises hud
 @SuppressWarnings("deprecation")
 public class ActionsOverlayGui extends AbstractGui {
     private static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");
@@ -78,6 +83,8 @@ public class ActionsOverlayGui extends AbstractGui {
     private final ElementTransparency energyBarTransparency = new ElementTransparency(40, 10);
     private final ElementTransparency staminaBarTransparency = new ElementTransparency(40, 10);
     private final ElementTransparency resolveBarTransparency = new ElementTransparency(40, 10);
+    private final ImmutableMap<Exercise, ElementTransparency> exerciseBarsTransparency = Arrays.stream(Exercise.values())
+            .collect(Maps.toImmutableEnumMap(ex -> ex, ex -> new ElementTransparency(40, 10)));
     
     private final BarsRenderer verticalBars = new VerticalBarsRenderer(this, 
             energyBarTransparency, staminaBarTransparency, resolveBarTransparency);
@@ -87,7 +94,11 @@ public class ActionsOverlayGui extends AbstractGui {
             modeSelectorTransparency,
             energyBarTransparency,
             staminaBarTransparency,
-            resolveBarTransparency
+            resolveBarTransparency,
+            exerciseBarsTransparency.get(Exercise.MINING),
+            exerciseBarsTransparency.get(Exercise.RUNNING),
+            exerciseBarsTransparency.get(Exercise.SWIMMING),
+            exerciseBarsTransparency.get(Exercise.MEDITATION)
     };
     
     private boolean attackSelection;
@@ -128,6 +139,10 @@ public class ActionsOverlayGui extends AbstractGui {
             }
         }
         tickCount++;
+    }
+    
+    public void onHamonExerciseValueChanged(Exercise exercise) {
+        exerciseBarsTransparency.get(exercise).reset();
     }
     
     public boolean isActive() {
@@ -182,6 +197,12 @@ public class ActionsOverlayGui extends AbstractGui {
             
             if (showModeSelector) {
                 renderModeSelector(matrixStack, modeSelectorPosition, partialTick);
+            }
+            
+            if (nonStandUiMode != null && nonStandUiMode.getPower() != null) {
+                nonStandUiMode.getPower().getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
+                    renderHamonExerciseBars(matrixStack, hamonExerciseBarsPosition, hamon, partialTick);
+                });
             }
             
             RenderSystem.disableRescaleNormal();
@@ -244,6 +265,7 @@ public class ActionsOverlayGui extends AbstractGui {
     private final ElementPosition hotbarsPosition = new ElementPosition();
     private final ElementPosition standStrengthPosition = new ElementPosition();
     private final ElementPosition modeSelectorPosition = new ElementPosition();
+    private final ElementPosition hamonExerciseBarsPosition = new ElementPosition();
     
     private void updateElementPositions(PositionConfig barsConfig, PositionConfig hotbarsConfig, int screenWidth, int screenHeight) {
         int halfWidth = screenWidth / 2;
@@ -292,6 +314,11 @@ public class ActionsOverlayGui extends AbstractGui {
         modeSelectorPosition.x = hotbarsConfig.aligment == Alignment.LEFT ? halfWidth + 9 : halfWidth - 29;
         modeSelectorPosition.y = halfHeight - 31;
         modeSelectorPosition.alignment = hotbarsConfig.aligment;
+
+        // FIXME (!!!!!!) hamon exercises hud position
+        hamonExerciseBarsPosition.x = 100;
+        hamonExerciseBarsPosition.y = 100;
+        hamonExerciseBarsPosition.alignment = Alignment.LEFT;
     }
     
     
@@ -771,6 +798,19 @@ public class ActionsOverlayGui extends AbstractGui {
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
+
+    private void renderHamonExerciseBars(MatrixStack matrixStack, ElementPosition position, HamonData hamon, float partialTick) {
+        mc.getTextureManager().bind(HamonScreen.WINDOW);
+        int x = position.x;
+        int y = position.y;
+        for (Exercise exercise : Exercise.values()) {
+            ElementTransparency transparency = exerciseBarsTransparency.get(exercise);
+            if (transparency.shouldRender()) {
+                HamonStatsTabGui.drawExerciseBar(this, matrixStack, x, y, hamon, exercise, transparency.getAlpha(partialTick));
+                y += 9;
+            }
+        }
+    }
     
     
     
@@ -803,6 +843,7 @@ public class ActionsOverlayGui extends AbstractGui {
         private ElementTransparency(int ticksMax, int ticksStartFadeAway) {
             this.ticksMax = ticksMax;
             this.ticksStartFadeAway = ticksStartFadeAway;
+            this.ticks = 0;
         }
         
         private void reset() {

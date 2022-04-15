@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
+import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModItems;
@@ -304,16 +305,19 @@ public class HamonData extends TypeSpecificData {
 
     private boolean incExerciseLastTick;
     private boolean incExerciseThisTick;
+    private boolean exerciseCompleted;
     public void tickExercises(PlayerEntity user) {
         incExerciseThisTick = false;
+        exerciseCompleted = false;
         float multiplier = user.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.BREATH_CONTROL_MASK.get() ? 2F : 0;
         if (user.swinging) {
             incExerciseTicks(Exercise.MINING, multiplier, user.level.isClientSide());
         }
-        if (user.isSwimming()) {
+        // FIXME (!!!!!!) and isn't stuck in place
+        if (user.isSwimming() && !(user.xxa == 0 && user.zza == 0 && user.yya == 0)) {
             incExerciseTicks(Exercise.SWIMMING, multiplier, user.level.isClientSide());
         }
-        else if (user.isSprinting() && user.isOnGround()) {
+        else if (user.isSprinting() && user.isOnGround() && !user.isSwimming()) {
             incExerciseTicks(Exercise.RUNNING, multiplier, user.level.isClientSide());
         }
         if (user.hasEffect(ModEffects.MEDITATION.get())) {
@@ -323,7 +327,7 @@ public class HamonData extends TypeSpecificData {
                     if (user.tickCount % 800 == 400) {
                         JojoModUtil.sayVoiceLine(user, getBreathingSound(), 0.75F, 1.0F);
                     }
-                    user.addEffect(new EffectInstance(ModEffects.MEDITATION.get(), Math.max(Exercise.MEDITATION.maxTicks - getExerciseTicks(Exercise.MEDITATION), 210)));
+                    user.addEffect(new EffectInstance(ModEffects.MEDITATION.get(), Math.max(Exercise.MEDITATION.getMaxTicks(getBreathingLevel()) - getExerciseTicks(Exercise.MEDITATION), 210)));
                     user.getFoodData().addExhaustion(-0.001F);
                     if (user.tickCount % 200 == 0 && user.isHurt() && user.level.getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION)) {
                         user.heal(1.0F);
@@ -337,7 +341,7 @@ public class HamonData extends TypeSpecificData {
         if (incExerciseThisTick) {
             recalcAvgExercisePoints();
         }
-        if (incExerciseLastTick && !incExerciseThisTick && user instanceof ServerPlayerEntity) {
+        if ((incExerciseLastTick && !incExerciseThisTick || exerciseCompleted) && user instanceof ServerPlayerEntity) {
             PacketManager.sendToClient(new SyncHamonExercisesPacket(this), (ServerPlayerEntity) user);
         }
         incExerciseLastTick = incExerciseThisTick;
@@ -349,14 +353,22 @@ public class HamonData extends TypeSpecificData {
 
     private void incExerciseTicks(Exercise exercise, float multiplier, boolean clientSide) {
         int ticks = exerciseTicks.get(exercise);
-        if (ticks < exercise.maxTicks) {
+        int maxTicks = exercise.getMaxTicks(getBreathingLevel());
+        if (ticks < maxTicks) {
             int inc = 1;
             if (multiplier > 1F) {
                 inc = MathHelper.floor(multiplier);
                 if (random.nextFloat() < MathHelper.frac(multiplier)) inc++;
             }
-            inc = Math.min(inc, exercise.maxTicks - ticks);
-            if (clientSide && ticks + inc == exercise.maxTicks) return;
+            inc = Math.min(inc, maxTicks - ticks);
+            if (ticks + inc == maxTicks) {
+                if (clientSide) {
+                    return;
+                }
+                else {
+                    this.exerciseCompleted = true;
+                }
+            }
             setExerciseValue(exercise, ticks + inc, clientSide);
             this.incExerciseThisTick = true;
         }
@@ -372,14 +384,14 @@ public class HamonData extends TypeSpecificData {
     
     private void setExerciseValue(Exercise exercise, int value, boolean clientSide) {
         if (exerciseTicks.put(exercise, value) != value && clientSide) {
-            // FIXME (!!) update exercise HUD bar transparency
+            ActionsOverlayGui.getInstance().onHamonExerciseValueChanged(exercise);
         }
     }
     
     private void recalcAvgExercisePoints() {
         avgExercisePoints = (float) exerciseTicks.entrySet()
                 .stream()
-                .mapToDouble(entry -> (double) entry.getValue() / (double) entry.getKey().maxTicks)
+                .mapToDouble(entry -> (double) entry.getValue() / (double) entry.getKey().getMaxTicks(getBreathingLevel()))
                 .reduce(Double::sum)
                 .getAsDouble()
                 / (float) exerciseTicks.size();
@@ -431,30 +443,34 @@ public class HamonData extends TypeSpecificData {
         if (prevDay == -1 || prevDay == day) {
             return;
         }
-        float lvlInc = (2 * MathHelper.clamp(getAverageExercisePoints(), 0F, 1F)) - 1F;
-        JojoMod.LOGGER.debug(getAverageExercisePoints());
-        // FIXME (!!) why tf does it go down when the user is offline
-        if (lvlInc < 0) {
-            if (!JojoModConfig.getCommonConfigInstance(false).breathingTechniqueDeterioration.get()) {
-                lvlInc = 0;
+        if (!world.isClientSide()) {
+            float lvlInc = (2 * MathHelper.clamp(getAverageExercisePoints(), 0F, 1F)) - 1F;
+            recalcAvgExercisePoints();
+            JojoMod.LOGGER.debug(getAverageExercisePoints());
+            // FIXME (!!) why tf does it go down when the user is offline
+            if (lvlInc < 0) {
+                if (!JojoModConfig.getCommonConfigInstance(false).breathingTechniqueDeterioration.get()) {
+                    lvlInc = 0;
+                }
+                else {
+                    lvlInc *= 0.25F;
+                }
+                breathingTrainingBonus = 0;
             }
             else {
-                lvlInc *= 0.25F;
+                float bonus = breathingTrainingBonus;
+                breathingTrainingBonus += lvlInc * 0.25F;
+                lvlInc = multiplyPositiveBreathingTraining(lvlInc + bonus);
             }
-            breathingTrainingBonus = 0;
+            setBreathingLevel(getBreathingLevel() + lvlInc);
+            avgExercisePoints = 0;
+            if (isSkillLearned(HamonSkill.CHEAT_DEATH)) {
+                HamonPowerType.updateCheatDeathEffect(power.getUser());
+            }
         }
-        else {
-            float bonus = breathingTrainingBonus;
-            breathingTrainingBonus += lvlInc * 0.25F;
-            lvlInc = multiplyPositiveBreathingTraining(lvlInc + bonus);
-        }
-        setBreathingLevel(getBreathingLevel() + lvlInc);
-        avgExercisePoints = 0;
         for (Exercise exercise : exerciseTicks.keySet()) {
-            exerciseTicks.put(exercise, 0);
-        }
-        if (isSkillLearned(HamonSkill.CHEAT_DEATH)) {
-            HamonPowerType.updateCheatDeathEffect(power.getUser());
+            setExerciseValue(exercise, 0, world.isClientSide());
+            avgExercisePoints = 0;
         }
     }
 
@@ -729,15 +745,19 @@ public class HamonData extends TypeSpecificData {
     }
 
     public enum Exercise {
-        MINING(210),
-        RUNNING(150),
-        SWIMMING(150),
-        MEDITATION(90);
+        MINING(180),
+        RUNNING(120),
+        SWIMMING(120),
+        MEDITATION(60);
 
-        public final int maxTicks;
+        private final int maxTicks;
 
         private Exercise(float seconds) {
             this.maxTicks = (int) (seconds * 20F);
+        }
+        
+        public int getMaxTicks(float breathingTechnique) {
+            return maxTicks;
         }
     }
 }

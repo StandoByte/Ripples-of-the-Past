@@ -120,10 +120,10 @@ public class HamonStatsTabGui extends HamonTabGui {
         }
 
         // exercise bars
-        drawExerciseBar(matrixStack, intScrollX + 15, exercises1Y, screen.hamon, Exercise.MINING);
-        drawExerciseBar(matrixStack, intScrollX + 111, exercises1Y, screen.hamon, Exercise.RUNNING);
-        drawExerciseBar(matrixStack, intScrollX + 15, exercises2Y, screen.hamon, Exercise.SWIMMING);
-        drawExerciseBar(matrixStack, intScrollX + 111, exercises2Y, screen.hamon, Exercise.MEDITATION);
+        drawExerciseBar(this, matrixStack, intScrollX + 15, exercises1Y, screen.hamon, Exercise.MINING, 1.0F);
+        drawExerciseBar(this, matrixStack, intScrollX + 111, exercises1Y, screen.hamon, Exercise.RUNNING, 1.0F);
+        drawExerciseBar(this, matrixStack, intScrollX + 15, exercises2Y, screen.hamon, Exercise.SWIMMING, 1.0F);
+        drawExerciseBar(this, matrixStack, intScrollX + 111, exercises2Y, screen.hamon, Exercise.MEDITATION, 1.0F);
 
         // total exercises bar
         blit(matrixStack, intScrollX + 6, exercisesAvgY + 1, 1, 235, (int) (198 * screen.hamon.getAverageExercisePoints()), 5);
@@ -139,23 +139,24 @@ public class HamonStatsTabGui extends HamonTabGui {
         RenderSystem.disableBlend();
     }
     
-    // FIXME (!!) draw exercise HUD bar
-    private void drawExerciseBar(MatrixStack matrixStack, int x, int y, HamonData hamon, Exercise exercise) {
+    public static void drawExerciseBar(AbstractGui gui, MatrixStack matrixStack, int x, int y, HamonData hamon, Exercise exercise, float alpha) {
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
         int ticks = hamon.getExerciseTicks(exercise);
-        int ticksMax = exercise.maxTicks;
-        blit(matrixStack, x + 1, y + 1, 1, 247, 90 * ticks / ticksMax, 5);
-        blit(matrixStack, x, y, 0, 240, 92, 7);
+        int ticksMax = exercise.getMaxTicks(hamon.getBreathingLevel());
+        gui.blit(matrixStack, x + 1, y + 1, 1, 247, 90 * ticks / ticksMax, 5);
+        gui.blit(matrixStack, x, y, 0, 240, 92, 7);
         
         matrixStack.pushPose();
         matrixStack.scale(0.5F, 0.5F, 0.5F);
 
-        blit(matrixStack, (x - 3) * 2, (y - 1) * 2, 96 + exercise.ordinal() * 16, 240, 16, 16);
+        gui.blit(matrixStack, (x - 3) * 2, (y - 1) * 2, 96 + exercise.ordinal() * 16, 240, 16, 16);
         
         if (ticks >= ticksMax) {
-            blit(matrixStack, (x + 85) * 2, (y - 1) * 2, 160, 240, 16, 16);
+            gui.blit(matrixStack, (x + 85) * 2, (y - 1) * 2, 160, 240, 16, 16);
         }
         
         matrixStack.popPose();
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     @Override
