@@ -46,7 +46,7 @@ public class HamonStatsTabGui extends HamonTabGui {
         int textWidth = HamonScreen.WINDOW_WIDTH - 30;
         strengthDescLines = minecraft.font.split(new TranslationTextComponent("hamon.strength_stat.desc"), textWidth);
         controlDescLines = minecraft.font.split(new TranslationTextComponent("hamon.control_stat.desc"), textWidth);
-        ITextComponent desc = JojoModConfig.getCommonConfigInstance().breathingTechniqueDeterioration.get() ? 
+        ITextComponent desc = JojoModConfig.getCommonConfigInstance(true).breathingTechniqueDeterioration.get() ? 
                 new TranslationTextComponent("hamon.breathing_stat.desc", new TranslationTextComponent("hamon.breathing_stat.notice"))
                 : new TranslationTextComponent("hamon.breathing_stat.desc");
         breathingDescLines = minecraft.font.split(desc, textWidth);

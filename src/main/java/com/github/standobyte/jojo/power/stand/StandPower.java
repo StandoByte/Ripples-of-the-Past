@@ -101,8 +101,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     protected void afterTypeInit(StandType<?> standType) {
         attacks = Arrays.asList(standType.getAttacks());
         abilities = Arrays.asList(standType.getAbilities());
-        if (JojoModConfig.getCommonConfigInstance().skipStandProgression.get()
-                || user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild) {
+        if (user != null && (JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).skipStandProgression.get()
+                || user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild)) {
             skipProgression(standType);
         }
         if (usesStamina()) {
@@ -165,7 +165,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     @Override
     public boolean isStaminaInfinite() {
-        return isUserCreative() || !JojoModConfig.getCommonConfigInstance().standStamina.get();
+        return user == null || isUserCreative() || 
+                !JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).standStamina.get();
     }
 
     @Override

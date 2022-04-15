@@ -702,10 +702,6 @@ public class GameplayEventHandler {
     }
     
     private static void summonSoul(LivingEntity entity, DamageSource dmgSource) {
-        if (!JojoModConfig.getCommonConfigInstance().soulAscension.get() || JojoModUtil.isUndead(entity) || 
-                entity instanceof PlayerEntity && entity.level.getGameRules().getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN)) {
-            return;
-        }
         LazyOptional<IStandPower> standOptional = IStandPower.getStandPowerOptional(entity);
         int ticks = standOptional.map(power -> getSoulAscensionTicks(entity, power)).orElse(0);
         
@@ -719,13 +715,15 @@ public class GameplayEventHandler {
     }
     
     public static int getSoulAscensionTicks(LivingEntity user, IStandPower stand) {
-        if (!stand.usesResolve() || stand.getResolveLevel() <= 0) {
+        if (!stand.usesResolve() || stand.getResolveLevel() <= 0 ||
+                !JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).soulAscension.get() || JojoModUtil.isUndead(user) || 
+                user instanceof PlayerEntity && user.level.getGameRules().getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN)) {
             return 0;
         }
         boolean hardcore = user.level.getLevelData().isHardcore();
         if (user instanceof PlayerEntity && (
                 stand.wasProgressionSkipped() || 
-                JojoModConfig.getCommonConfigInstance().keepStandOnDeath.get() && !hardcore)) {
+                JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).keepStandOnDeath.get() && !hardcore)) {
             return 0;
         }
         

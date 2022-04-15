@@ -67,7 +67,7 @@ public class TimeHandler {
         WorldUtilCap cap = world.getCapability(WorldUtilCapProvider.CAPABILITY).resolve().get();
         cap.setTimeStopTicks(ticks, chunkPos);
         JojoModUtil.getAllEntities(world).forEach(entity -> {
-            if (JojoModConfig.getCommonConfigInstance().inTimeStopRange(chunkPos, new ChunkPos(entity.blockPosition()))) {
+            if (JojoModConfig.getCommonConfigInstance(world.isClientSide()).inTimeStopRange(chunkPos, new ChunkPos(entity.blockPosition()))) {
                 updateEntityTimeStop(entity, false, true);
             }
         });

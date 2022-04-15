@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.entity.damaging.projectile;
 
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
-import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.OwnerBoundProjectileEntity;
 import com.github.standobyte.jojo.util.MathUtil;
 
 import net.minecraft.entity.Entity;
@@ -22,7 +21,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public abstract class ModdedProjectileEntity extends DamagingEntity {
-    private static final DataParameter<Boolean> IS_DEFLECTED = EntityDataManager.defineId(OwnerBoundProjectileEntity.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> IS_DEFLECTED = EntityDataManager.defineId(ModdedProjectileEntity.class, DataSerializers.BOOLEAN);
     private int ownerId = -1;
     
     protected ModdedProjectileEntity(EntityType<? extends ModdedProjectileEntity> type, LivingEntity shooter, World world) {

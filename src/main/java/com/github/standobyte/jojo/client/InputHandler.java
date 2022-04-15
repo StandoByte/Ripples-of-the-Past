@@ -507,12 +507,10 @@ public class InputHandler {
     private final DashTrigger backDash = new DashTrigger(180F);
     
     private void dash(ClientPlayerEntity player, float yRot) {
-        // FIXME (!!) (dash) set leap cd (depending on stand speed), use stamina
         PacketManager.sendToServer(new ClOnStandDashPacket());
         player.setOnGround(false);
         player.hasImpulse = true;
         Vector3d dash = Vector3d.directionFromRotation(0, player.yRot + yRot).scale(0.5).add(0, 0.2, 0);
-        // FIXME (dash) different speeds with the same distance
         player.setDeltaMovement(player.getDeltaMovement().add(dash));
     }
     

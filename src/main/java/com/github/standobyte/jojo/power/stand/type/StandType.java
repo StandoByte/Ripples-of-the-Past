@@ -86,7 +86,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     
     @Override
     public boolean keepOnDeath(IStandPower power) {
-        return JojoModConfig.getCommonConfigInstance().keepStandOnDeath.get();
+        return JojoModConfig.getCommonConfigInstance(false).keepStandOnDeath.get();
     }
     
     public T getStats() {

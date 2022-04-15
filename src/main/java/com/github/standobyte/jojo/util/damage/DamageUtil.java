@@ -140,7 +140,7 @@ public class DamageUtil {
                 }).orElse(1F)).orElse(1F);
                 amount *= hamonMultiplier;
             }
-            amount *= JojoModConfig.getCommonConfigInstance().hamonDamageMultiplier.get().floatValue();
+            amount *= JojoModConfig.getCommonConfigInstance(false).hamonDamageMultiplier.get().floatValue();
             if (hurtThroughInvulTicks(target, dmgSource, amount)) {
                 HamonPowerType.createHamonSparkParticlesEmitter(target, amount / HamonData.MAX_HAMON_DAMAGE);
                 if (scarf && undeadTarget && livingTarget instanceof ServerPlayerEntity) {

@@ -31,14 +31,14 @@ public class StandUtil {
             Collection<StandType<?>> stands = ModStandTypes.Registry.getRegistry().getValues();
             List<StandType<?>> filtered = 
                     stands.stream()
-                    .filter(stand -> (tier < 0 || stand.getTier() == tier) && !JojoModConfig.getCommonConfigInstance().isStandBanned(stand))
+                    .filter(stand -> (tier < 0 || stand.getTier() == tier) && !JojoModConfig.getCommonConfigInstance(false).isStandBanned(stand))
                     .collect(Collectors.toList());
             
             if (filtered.isEmpty()) {
                 return null;
             }
             
-            if (JojoModConfig.getCommonConfigInstance().prioritizeLeastTakenStands.get()) {
+            if (JojoModConfig.getCommonConfigInstance(false).prioritizeLeastTakenStands.get()) {
                 filtered = SaveFileUtilCapProvider.getSaveFileCap((ServerWorld) entity.level).leastTakenStands(filtered);
             }
             
@@ -49,9 +49,10 @@ public class StandUtil {
         return null;
     }
     
-    public static int standTierFromXp(int xpLvl, boolean withConfigBans) {
+    public static int standTierFromXp(int xpLvl, boolean withConfigBans, boolean isClientSide) {
         for (int i = MAX_TIER; i >= 0; i--) {
-            if (xpLvl >= tierLowerBorder(i) && (!withConfigBans || JojoModConfig.getCommonConfigInstance().tierHasUnbannedStands(i))) {
+            if (xpLvl >= tierLowerBorder(i) && (!withConfigBans
+                    || JojoModConfig.getCommonConfigInstance(isClientSide).tierHasUnbannedStands(i))) {
                 return i;
             }
         }
@@ -59,8 +60,9 @@ public class StandUtil {
     }
     
     public static int arrowPoolNextTier(int startingTier) {
+        boolean isClientSide = true;
         for (int i = startingTier + 1; i <= MAX_TIER; i++) {
-            if (JojoModConfig.getCommonConfigInstance().tierHasUnbannedStands(i)) {
+            if (JojoModConfig.getCommonConfigInstance(isClientSide).tierHasUnbannedStands(i)) {
                 return i;
             }
         }

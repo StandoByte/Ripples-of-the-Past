@@ -1640,7 +1640,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     protected boolean hurtTarget(Entity target, DamageSource dmgSource, float damage) {
         return DamageUtil.hurtThroughInvulTicks(target, dmgSource, damage
-                * JojoModConfig.getCommonConfigInstance().standDamageMultiplier.get().floatValue());
+                * JojoModConfig.getCommonConfigInstance(false).standDamageMultiplier.get().floatValue());
     }
     
     protected void parryHeavyAttack() {

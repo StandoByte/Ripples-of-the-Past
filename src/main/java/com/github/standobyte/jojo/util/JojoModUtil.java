@@ -13,6 +13,7 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
@@ -21,7 +22,6 @@ import com.github.standobyte.jojo.power.stand.StandUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.DispenserBlock;
-import net.minecraft.client.network.play.IClientPlayNetHandler;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.dispenser.IBlockSource;
 import net.minecraft.entity.AgeableEntity;
@@ -33,16 +33,13 @@ import net.minecraft.entity.MoverType;
 import net.minecraft.entity.monster.AbstractIllagerEntity;
 import net.minecraft.entity.passive.WaterMobEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.ProjectileHelper;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.IPacket;
 import net.minecraft.network.play.server.SPlaySoundEffectPacket;
 import net.minecraft.network.play.server.SSpawnMovingSoundEffectPacket;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.EntityPredicates;
-import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
@@ -214,7 +211,7 @@ public class JojoModUtil {
 
     public static boolean canEntityDestroy(World world, BlockPos pos, LivingEntity entity) {
         BlockState state = world.getBlockState(pos);
-        return JojoModConfig.getCommonConfigInstance().abilitiesBreakBlocks.get()
+        return JojoModConfig.getCommonConfigInstance(world.isClientSide()).abilitiesBreakBlocks.get()
                 && state.canEntityDestroy(world, pos, entity) && ForgeEventFactory.onEntityDestroyBlock(entity, pos, state);
     }
 
@@ -320,7 +317,7 @@ public class JojoModUtil {
             category = event.getCategory();
             volume = event.getVolume();
             pitch = event.getPitch();
-            broadcastWithCondition(((ServerWorld) world).getServer().getPlayerList().getPlayers(), clientHandled, 
+            NetworkUtil.broadcastWithCondition(((ServerWorld) world).getServer().getPlayerList().getPlayers(), clientHandled, 
                     x, y, z, volume > 1.0F ? (double)(16.0F * volume) : 16.0D, world.dimension(), 
                             new SPlaySoundEffectPacket(sound, category, x, y, z, volume, pitch), condition);
         }
@@ -338,28 +335,12 @@ public class JojoModUtil {
             category = event.getCategory();
             volume = event.getVolume();
             pitch = event.getPitch();
-            broadcastWithCondition(((ServerWorld) world).getServer().getPlayerList().getPlayers(), clientHandled, 
+            NetworkUtil.broadcastWithCondition(((ServerWorld) world).getServer().getPlayerList().getPlayers(), clientHandled, 
                     entity.getX(), entity.getY(), entity.getZ(), volume > 1.0F ? (double)(16.0F * volume) : 16.0D, world.dimension(), 
                             new SSpawnMovingSoundEffectPacket(sound, category, entity, volume, pitch), condition);
         }
         else if (clientHandled != null && condition.test(clientHandled)) {
             world.playSound(clientHandled, entity, sound, category, volume, pitch);
-        }
-    }
-
-    private static void broadcastWithCondition(List<ServerPlayerEntity> players, @Nullable PlayerEntity clientHandled, 
-            double x, double y, double z, double radius, RegistryKey<World> dimension, IPacket<IClientPlayNetHandler> packet, 
-            Predicate<PlayerEntity> condition) {
-        for (int i = 0; i < players.size(); ++i) {
-            ServerPlayerEntity player = players.get(i);
-            if (player != clientHandled && player.level.dimension() == dimension && condition.test(player)) {
-                double d0 = x - player.getX();
-                double d1 = y - player.getY();
-                double d2 = z - player.getZ();
-                if (d0 * d0 + d1 * d1 + d2 * d2 < radius * radius) {
-                    player.connection.send(packet);
-                }
-            }
         }
     }
 }
