@@ -72,7 +72,7 @@ public class SyncHamonExercisesPacket {
         ctx.get().enqueueWork(() -> {
             INonStandPower.getNonStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
                 power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
-                    hamon.setExerciseTicks(msg.miningTicks, msg.runningTicks, msg.swimmingTicks, msg.meditationTicks);
+                    hamon.setExerciseTicks(msg.miningTicks, msg.runningTicks, msg.swimmingTicks, msg.meditationTicks, true);
                     hamon.setTrainingBonus(msg.trainingBonus);
                 });
             });

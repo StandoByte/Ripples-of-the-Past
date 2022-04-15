@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
@@ -333,6 +334,9 @@ public class HamonData extends TypeSpecificData {
                 }
             }
         }
+        if (incExerciseThisTick) {
+            recalcAvgExercisePoints();
+        }
         if (incExerciseLastTick && !incExerciseThisTick && user instanceof ServerPlayerEntity) {
             PacketManager.sendToClient(new SyncHamonExercisesPacket(this), (ServerPlayerEntity) user);
         }
@@ -352,26 +356,33 @@ public class HamonData extends TypeSpecificData {
                 if (random.nextFloat() < MathHelper.frac(multiplier)) inc++;
             }
             inc = Math.min(inc, exercise.maxTicks - ticks);
-            exerciseTicks.put(exercise, ticks + inc);
-            avgExercisePoints += (double) inc / exercise.maxTicks / exerciseTicks.size();
-            if (clientSide) {
-                // FIXME update exercises HUD bar transparency
-            }
+            if (clientSide && ticks + inc == exercise.maxTicks) return;
+            setExerciseValue(exercise, ticks + inc, clientSide);
+            this.incExerciseThisTick = true;
         }
-        this.incExerciseThisTick = true;
     }
 
-    public void setExerciseTicks(int mining, int running, int swimming, int meditation) {
-        exerciseTicks.put(Exercise.MINING, mining);
-        exerciseTicks.put(Exercise.RUNNING, running);
-        exerciseTicks.put(Exercise.SWIMMING, swimming);
-        exerciseTicks.put(Exercise.MEDITATION, meditation);
-        avgExercisePoints = (
-                (float)mining / Exercise.MINING.maxTicks + 
-                (float)running / Exercise.RUNNING.maxTicks + 
-                (float)swimming / Exercise.SWIMMING.maxTicks + 
-                (float)meditation / Exercise.MEDITATION.maxTicks) 
-                / exerciseTicks.size();
+    public void setExerciseTicks(int mining, int running, int swimming, int meditation, boolean clientSide) {
+        setExerciseValue(Exercise.MINING, mining, clientSide);
+        setExerciseValue(Exercise.RUNNING, running, clientSide);
+        setExerciseValue(Exercise.SWIMMING, swimming, clientSide);
+        setExerciseValue(Exercise.MEDITATION, meditation, clientSide);
+        recalcAvgExercisePoints();
+    }
+    
+    private void setExerciseValue(Exercise exercise, int value, boolean clientSide) {
+        if (exerciseTicks.put(exercise, value) != value && clientSide) {
+            // FIXME (!!) update exercise HUD bar transparency
+        }
+    }
+    
+    private void recalcAvgExercisePoints() {
+        avgExercisePoints = (float) exerciseTicks.entrySet()
+                .stream()
+                .mapToDouble(entry -> (double) entry.getValue() / (double) entry.getKey().maxTicks)
+                .reduce(Double::sum)
+                .getAsDouble()
+                / (float) exerciseTicks.size();
     }
 
     public void startMeditating(Vector3d position, float headYRot, float headXRot) {
@@ -399,6 +410,16 @@ public class HamonData extends TypeSpecificData {
         return breathingTrainingBonus;
     }
     
+    public float multiplyPositiveBreathingTraining(float training) {
+        if (training > 0) {
+            if (isSkillLearned(HamonSkill.NATURAL_TALENT)) {
+                training *= 2;
+            }
+            training *= JojoModConfig.getCommonConfigInstance(false).breathingTechniqueMultiplier.get().floatValue();
+        }
+        return training;
+    }
+    
     public void setTrainingBonus(float trainingBonus) {
         this.breathingTrainingBonus = trainingBonus;
     }
@@ -411,6 +432,7 @@ public class HamonData extends TypeSpecificData {
             return;
         }
         float lvlInc = (2 * MathHelper.clamp(getAverageExercisePoints(), 0F, 1F)) - 1F;
+        JojoMod.LOGGER.debug(getAverageExercisePoints());
         // FIXME (!!) why tf does it go down when the user is offline
         if (lvlInc < 0) {
             if (!JojoModConfig.getCommonConfigInstance(false).breathingTechniqueDeterioration.get()) {
@@ -424,11 +446,7 @@ public class HamonData extends TypeSpecificData {
         else {
             float bonus = breathingTrainingBonus;
             breathingTrainingBonus += lvlInc * 0.25F;
-            lvlInc += bonus;
-            lvlInc *= JojoModConfig.getCommonConfigInstance(false).breathingTechniqueMultiplier.get().floatValue();
-            if (isSkillLearned(HamonSkill.NATURAL_TALENT)) {
-                lvlInc *= 2;
-            }
+            lvlInc = multiplyPositiveBreathingTraining(lvlInc + bonus);
         }
         setBreathingLevel(getBreathingLevel() + lvlInc);
         avgExercisePoints = 0;
@@ -680,7 +698,7 @@ public class HamonData extends TypeSpecificData {
         for (Exercise exercise : Exercise.values()) {
             exercisesNbt[exercise.ordinal()] = exercises.getInt(exercise.toString());
         }
-        setExerciseTicks(exercisesNbt[0], exercisesNbt[1], exercisesNbt[2], exercisesNbt[3]);
+        setExerciseTicks(exercisesNbt[0], exercisesNbt[1], exercisesNbt[2], exercisesNbt[3], false);
         lastTickedDay = nbt.getLong("LastDay");
         breathingTrainingBonus = nbt.getFloat("TrainingBonus");
     }
@@ -711,10 +729,10 @@ public class HamonData extends TypeSpecificData {
     }
 
     public enum Exercise {
-        MINING(240),
+        MINING(210),
         RUNNING(150),
         SWIMMING(150),
-        MEDITATION(60);
+        MEDITATION(90);
 
         public final int maxTicks;
 
