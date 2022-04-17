@@ -19,6 +19,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 
@@ -136,6 +137,10 @@ public class ModStandTypes {
                return IPowerType.NO_POWER_NAME;
             }
             return resourceLocation.toString();
+        }
+        
+        public static int getNumericId(ResourceLocation regName) {
+            return ((ForgeRegistry<StandType<?>>) getRegistry()).getID(regName);
         }
     }
 }
