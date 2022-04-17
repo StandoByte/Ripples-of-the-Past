@@ -66,7 +66,6 @@ import com.github.standobyte.jojo.item.ClackersItem;
 import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
-import com.github.standobyte.jojo.power.stand.type.StandType;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.CloudParticle;
@@ -92,7 +91,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.registries.ForgeRegistry;
 
 @EventBusSubscriber(modid = JojoMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ClientSetup {
@@ -183,7 +181,7 @@ public class ClientSetup {
                         CrossbowItem.containsChargedProjectile(itemStack, ModItems.STAND_ARROW_BEETLE.get())) ? 1 : 0;
             });
             ItemModelsProperties.register(ModItems.STAND_DISC.get(), new ResourceLocation(JojoMod.MOD_ID, "stand_id"), (itemStack, clientWorld, livingEntity) -> {
-                return StandDiscItem.validStandDisc(itemStack) ? ((ForgeRegistry<StandType<?>>) ModStandTypes.Registry.getRegistry()).getID(StandDiscItem.getStandResLocFromStack(itemStack)) : -1;
+                return StandDiscItem.validStandDisc(itemStack) ? ModStandTypes.Registry.getNumericId(StandDiscItem.getStandResLocFromStack(itemStack)) : -1;
             });
 //            ItemModelsProperties.register(ModItems.EMPEROR.get(), new ResourceLocation(JojoMod.MOD_ID, "stand_invisible"), STAND_ITEM_INVISIBLE);
 
