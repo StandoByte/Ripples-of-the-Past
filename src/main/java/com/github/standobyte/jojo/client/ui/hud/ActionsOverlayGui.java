@@ -120,8 +120,10 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     public void tick() {
-        for (ElementTransparency element : tickingTransparencies) {
-            element.tick();
+        if (!mc.isPaused()) {
+            for (ElementTransparency element : tickingTransparencies) {
+                element.tick();
+            }
         }
         INonStandPower power = nonStandUiMode.getPower();
         if (power != null) {
@@ -315,9 +317,13 @@ public class ActionsOverlayGui extends AbstractGui {
         modeSelectorPosition.y = halfHeight - 31;
         modeSelectorPosition.alignment = hotbarsConfig.aligment;
 
-        // FIXME (!!!!!!) hamon exercises hud position
-        hamonExerciseBarsPosition.x = 100;
-        hamonExerciseBarsPosition.y = 100;
+        hamonExerciseBarsPosition.x = 10;
+        hamonExerciseBarsPosition.y = screenHeight - 5;
+        for (ElementTransparency bar : exerciseBarsTransparency.values()) {
+            if (bar.shouldRender()) {
+                hamonExerciseBarsPosition.y -= 9;
+            }
+        }
         hamonExerciseBarsPosition.alignment = Alignment.LEFT;
     }
     

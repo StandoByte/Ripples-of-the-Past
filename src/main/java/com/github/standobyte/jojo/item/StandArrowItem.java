@@ -84,7 +84,7 @@ public class StandArrowItem extends ArrowItem {
         if (!world.isClientSide()) {
             if (!power.hasPower()) {
                 if (dealVirusDamage) {
-                    player.hurt(DamageUtil.STAND_VIRUS, Math.min(player.getMaxHealth(), 11F) - 1F);
+                    player.hurt(DamageUtil.STAND_VIRUS, Math.min(player.getMaxHealth(), 6F) - 1F);
                 }
                 StandType<?> stand = null;
                 boolean checkTier = JojoModConfig.getCommonConfigInstance(world.isClientSide()).standTiers.get();

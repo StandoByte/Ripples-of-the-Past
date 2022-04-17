@@ -715,7 +715,7 @@ public class GameplayEventHandler {
     }
     
     public static int getSoulAscensionTicks(LivingEntity user, IStandPower stand) {
-        if (!stand.usesResolve() || stand.getResolveLevel() <= 0 ||
+        if (!stand.usesResolve() || stand.getResolveLevel() == 0 ||
                 !JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).soulAscension.get() || JojoModUtil.isUndead(user) || 
                 user instanceof PlayerEntity && user.level.getGameRules().getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN)) {
             return 0;

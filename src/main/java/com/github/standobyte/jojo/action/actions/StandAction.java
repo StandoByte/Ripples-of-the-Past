@@ -15,6 +15,8 @@ public abstract class StandAction extends Action<IStandPower> {
     private final float resolveCooldownMultiplier;
     private final boolean isTrained;
     private final boolean autoSummonStand;
+    private final float staminaCost;
+    private final float staminaCostTick;
     
     public StandAction(StandAction.AbstractBuilder<?> builder) {
         super(builder);
@@ -23,6 +25,8 @@ public abstract class StandAction extends Action<IStandPower> {
         this.resolveCooldownMultiplier = builder.resolveCooldownMultiplier;
         this.isTrained = builder.isTrained;
         this.autoSummonStand = builder.autoSummonStand;
+        this.staminaCost = builder.staminaCost;
+        this.staminaCostTick = builder.staminaCostTick;
     }
 
     @Deprecated
@@ -58,7 +62,12 @@ public abstract class StandAction extends Action<IStandPower> {
     }
     
     public float getStaminaCost(IStandPower stand) {
-        return 0;
+        return staminaCost;
+    }
+    
+    // FIXME (!!!!!!!!) drain stamina each tick (either in StandEntity or stuff like TimeStopInstance)
+    public float getStaminaCostTicking(IStandPower stand) {
+        return staminaCostTick;
     }
     
     @Override
@@ -85,6 +94,8 @@ public abstract class StandAction extends Action<IStandPower> {
         private float resolveCooldownMultiplier = 0;
         private boolean isTrained = false;
         private boolean autoSummonStand = false;
+        private float staminaCost = 0;
+        private float staminaCostTick = 0;
 
         @Deprecated
         public T xpRequirement(int xpRequirement) {
@@ -104,6 +115,16 @@ public abstract class StandAction extends Action<IStandPower> {
         
         public T autoSummonStand() {
             this.autoSummonStand = true;
+            return getThis();
+        }
+
+        public T staminaCost(float staminaCost) {
+            this.staminaCost = staminaCost;
+            return getThis();
+        }
+
+        public T staminaCostTick(float staminaCostTick) {
+            this.staminaCostTick = staminaCostTick;
             return getThis();
         }
         

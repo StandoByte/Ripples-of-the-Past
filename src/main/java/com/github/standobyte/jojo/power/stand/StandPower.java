@@ -201,7 +201,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                     player.causeFoodExhaustion(0.005F);
                 }
                 if (player.getFoodData().getFoodLevel() > 17) {
-                    staminaRegen *= 1.5F;
+                    staminaRegen *= 1.25F;
                 }
             }
             
