@@ -61,7 +61,7 @@ public class JojoModConfig {
         public final ForgeConfigSpec.DoubleValue standDamageMultiplier;
         public final ForgeConfigSpec.BooleanValue skipStandProgression;
         public final ForgeConfigSpec.BooleanValue standStamina;
-        // FIXME (!!!!!) "List on key resolvePoints is deemed to need correction. It failed validation."
+        // FIXME (!!!!!!!!) "List on key resolvePoints is deemed to need correction. It failed validation."
         public final ForgeConfigSpec.ConfigValue<List<? extends Float>> resolvePoints;
         public final ForgeConfigSpec.BooleanValue soulAscension;
         public final ForgeConfigSpec.IntValue timeStopChunkRange;

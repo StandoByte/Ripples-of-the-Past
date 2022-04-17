@@ -190,7 +190,8 @@ public class ResolveCounter {
             dmgAmount = Math.min(dmgAmount, target.getHealth());
             double attackStrength = Optional.ofNullable(target.getAttribute(Attributes.ATTACK_DAMAGE))
                     .map(ModifiableAttributeInstance::getValue).orElse(0.0);
-//            addResolveValue(dmgAmount * RESOLVE_FOR_DMG_POINT);
+            
+            addResolveValue(dmgAmount * RESOLVE_FOR_DMG_POINT);
             if (stand.getUser().hasEffect(ModEffects.RESOLVE.get())) {
                 setResolveValue(Math.max(getMaxResolveValue() * 0.5F, getResolveValue()), 0);
             }

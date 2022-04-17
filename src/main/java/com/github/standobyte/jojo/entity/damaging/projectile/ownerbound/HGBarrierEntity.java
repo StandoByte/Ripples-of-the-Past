@@ -148,7 +148,7 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
                 entityData.set(WAS_RIPPED, true);
                 if (getOwner() instanceof HierophantGreenEntity) {
                     HierophantGreenEntity stand = (HierophantGreenEntity) getOwner();
-                    stand.shootEmeraldsFromBarriers(entityRayTraceResult.getLocation(), false, 3);
+                    stand.shootEmeraldsFromBarriers(entityRayTraceResult.getLocation(), true, 3);
                     if (stand.getUser() != null) {
                         stand.getUser().hurt(DamageSource.GENERIC, 0.1F);
                     }

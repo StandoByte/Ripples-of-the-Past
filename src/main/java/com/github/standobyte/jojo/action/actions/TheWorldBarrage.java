@@ -19,7 +19,7 @@ public class TheWorldBarrage extends StandEntityMeleeBarrage {
         this.wryyyyyyyyyyy = greatestHighShout == null ? () -> null : greatestHighShout;
     }
 
-    // FIXME (!!!!!!) DIO and TW muda not overlapping
+    // FIXME (!!!!) DIO and TW muda not overlapping
     @Override
     protected SoundEvent getShout(LivingEntity user, IStandPower power, ActionTarget target, boolean wasActive) {
         if (wasActive && INonStandPower.getNonStandPowerOptional(user).map(otherPower -> {
@@ -28,13 +28,13 @@ public class TheWorldBarrage extends StandEntityMeleeBarrage {
         }).orElse(false)) {
             return wryyyyyyyyyyy.get();
         }
-        return super.getShout(user, power, target, wasActive);
-//        return null;
+//        return super.getShout(user, power, target, wasActive);
+        return null;
     }
     
     @Override
     protected SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase) {
-        return null;
-//        return super.getSound(standEntity, standPower, phase);
+//        return null;
+        return super.getSound(standEntity, standPower, phase);
     }
 }

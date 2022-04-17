@@ -25,7 +25,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public abstract class StandEntityAction extends StandAction {
-    private final float staminaCost;
     protected final int standWindupDuration;
     protected final int standPerformDuration;
     protected final int standRecoveryDuration;
@@ -43,7 +42,6 @@ public abstract class StandEntityAction extends StandAction {
     
     public StandEntityAction(StandEntityAction.AbstractBuilder<?> builder) {
         super(builder);
-        this.staminaCost = builder.staminaCost;
         this.standWindupDuration = builder.standWindupDuration;
         this.standPerformDuration = builder.standPerformDuration;
         this.standRecoveryDuration = builder.standRecoveryDuration;
@@ -141,11 +139,6 @@ public abstract class StandEntityAction extends StandAction {
                 }   
             }
         }
-    }
-    
-    @Override
-    public float getStaminaCost(IStandPower stand) {
-        return staminaCost;
     }
     
     @Override
@@ -304,7 +297,6 @@ public abstract class StandEntityAction extends StandAction {
     }
     
     protected abstract static class AbstractBuilder<T extends StandEntityAction.AbstractBuilder<T>> extends StandAction.AbstractBuilder<T> {
-        private float staminaCost;
         private int standWindupDuration = 0;
         private int standPerformDuration = 1;
         private int standRecoveryDuration = 0;
@@ -319,11 +311,6 @@ public abstract class StandEntityAction extends StandAction {
         private StandRelativeOffset userOffsetArmsOnly = null;
         private boolean enablePhysics = true;
         private final Map<Phase, Supplier<SoundEvent>> standSounds = new HashMap<>();
-
-        public T staminaCost(float staminaCost) {
-            this.staminaCost = staminaCost;
-            return getThis();
-        }
 
         @Deprecated
         @Override

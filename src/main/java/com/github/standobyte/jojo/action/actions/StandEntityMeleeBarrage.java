@@ -13,7 +13,8 @@ import net.minecraft.world.World;
 public class StandEntityMeleeBarrage extends StandEntityAction {
 
     public StandEntityMeleeBarrage(StandEntityAction.Builder builder) {
-        super(builder.standAutoSummonMode(AutoSummonMode.ARMS).holdType().standUserSlowDownFactor(0.3F).defaultStandOffsetFromUser());
+        super(builder.standAutoSummonMode(AutoSummonMode.ARMS).holdType().staminaCostTick(2.5F)
+                .standUserSlowDownFactor(0.3F).defaultStandOffsetFromUser());
     }
 
     @Override
@@ -59,8 +60,6 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
 //            if (!attacked && !standEntity.isArmsOnlyMode()) {
 //                standEntity.addBarrageOffset();
 //            }
-            // FIXME tick stamina cost in builder (for highlighting)
-            userPower.consumeStamina(2.5F);
         }
     }
     
