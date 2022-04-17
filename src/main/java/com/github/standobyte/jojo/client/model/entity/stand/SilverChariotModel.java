@@ -206,6 +206,7 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
                         new RotationAngle(upperPart, 0.0F, -0.7854F, 0.0F),
                         new RotationAngle(leftArm, 0.2618F, 0.0F, -0.1309F),
                         new RotationAngle(rightArm, 0.0F, 1.5708F, 1.5708F),
+                        new RotationAngle(rightForeArm, 0.0F, 0.0F, 0.0F),
                         new RotationAngle(rapier, 1.5708F, 0.0F, 0.0F)
                 }).setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
                     rightArm.zRot -= xRotation * MathUtil.DEG_TO_RAD;

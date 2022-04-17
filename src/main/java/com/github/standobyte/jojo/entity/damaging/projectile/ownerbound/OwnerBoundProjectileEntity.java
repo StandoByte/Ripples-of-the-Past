@@ -22,6 +22,7 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -265,6 +266,10 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
         return attachedEntity;
     }
     
+    protected boolean isAttachedToAnEntity() {
+        return entityData.get(ENTITY_ATTACHED_TO) > -1;
+    }
+    
     protected void dragTarget(Entity entity, Vector3d vec) {
         // FIXME (!!) bumpy movement
         entity.move(MoverType.PLAYER, vec);
@@ -353,8 +358,18 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     }
     
     @Override
+    public SoundCategory getSoundSource() {
+        return isBoundToOwner() && getOwner() != null ? getOwner().getSoundSource() : super.getSoundSource();
+    }
+    
+    @Override
+    public boolean isSilent() {
+        return isBoundToOwner() && getOwner() != null ? getOwner().isSilent() : super.isSilent();
+    }
+    
+    @Override
     public boolean canUpdate() {
-        return getOwner() != null && isBoundToOwner() ? getOwner().canUpdate() : super.canUpdate();
+        return isBoundToOwner() && getOwner() != null ? getOwner().canUpdate() : super.canUpdate();
     }
 
     @Override

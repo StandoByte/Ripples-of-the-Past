@@ -34,7 +34,7 @@ public class HGEmeraldEntity extends ModdedProjectileEntity {
 
     @Override
     public float getBaseDamage() {
-        return 1.5F;
+        return 1F;
     }
 
     @Override

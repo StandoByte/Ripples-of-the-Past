@@ -859,7 +859,11 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         updatePosition(user);
         
         if (isManuallyControlled()) {
-            move(MoverType.PLAYER, getManualMovement());
+            Vector3d manualMovementVec = getManualMovement();
+            if (!Vector3d.ZERO.equals(manualMovementVec)) {
+                move(MoverType.PLAYER, manualMovementVec);
+                setDeltaMovement(Vector3d.ZERO);
+            }
         }
         
         if (!level.isClientSide()) {
@@ -1111,7 +1115,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     @Nullable
-    protected StandEntityTask getCurrentTask() {
+    public StandEntityTask getCurrentTask() {
         return entityData.get(CURRENT_TASK).orElse(null);
     }
     
