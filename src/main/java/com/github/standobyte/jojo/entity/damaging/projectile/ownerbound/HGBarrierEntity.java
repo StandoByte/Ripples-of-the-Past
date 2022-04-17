@@ -154,7 +154,7 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
                     }
                 }
                 JojoModUtil.playSound(level, null, target.getX(), target.getY(), target.getZ(), 
-                        ModSounds.HIEROPHANT_GREEN_BARRIER_RIPPED.get(), getOwner().getSoundSource(), 1.0F, 1.0F, StandUtil::isEntityStandUser);
+                        ModSounds.HIEROPHANT_GREEN_BARRIER_RIPPED.get(), getSoundSource(), 1.0F, 1.0F, StandUtil::isEntityStandUser);
             }
         }
     }

@@ -87,23 +87,24 @@ public class SilverChariotHeavyAttack extends StandEntityHeavyAttack {
     public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
         if (!standEntity.isHeavyComboPunching()) {
             float completion = standEntity.getCurrentTaskCompletion(1.0F);
-            boolean lastTick = completion < 1;
-            standEntity.setDeltaMovement(lastTick ? ((SilverChariotEntity) standEntity).getDashVec().scale(completion * 2) : Vector3d.ZERO);
+            boolean lastTick = standEntity.getCurrentTask().getTicksLeft() <= 1;
+            boolean moveForward = completion <= 0.5F;
             if (!world.isClientSide()) {
-                if (!lastTick && !standEntity.isBeingRetracted()) {
+                if (moveForward) {
                     for (RayTraceResult rayTraceResult : JojoModUtil.rayTrace(standEntity, 
                             standEntity.getAttributeValue(ForgeMod.REACH_DISTANCE.get()), 
                             standEntity.canTarget(), 0.25, standEntity.getPrecision(), Integer.MAX_VALUE)) {
                         standEntity.attackTarget(ActionTarget.fromRayTraceResult(rayTraceResult), PunchType.HEAVY_NO_COMBO, this, 1);
                     }
                 }
-                else {
+                else if (!Vector3d.ZERO.equals(standEntity.getDeltaMovement())) {
                     standEntity.punch(PunchType.HEAVY_NO_COMBO, target, this);
                 }
                 if (lastTick && standEntity.isFollowingUser()) {
                     standEntity.retractStand(false);
                 }
             }
+            standEntity.setDeltaMovement(moveForward ? ((SilverChariotEntity) standEntity).getDashVec().scale(completion * 8) : Vector3d.ZERO);
         }
     }
     

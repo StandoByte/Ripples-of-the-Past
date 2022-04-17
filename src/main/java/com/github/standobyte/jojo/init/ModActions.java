@@ -263,7 +263,7 @@ public class ModActions {
             () -> new HierophantGreenStringAttack(new StandEntityAction.Builder().staminaCost(____).standPerformDuration(10)));
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_STRING_BIND = ACTIONS.register("hierophant_green_attack_binding", 
-            () -> new HierophantGreenStringAttack(new StandEntityAction.Builder().staminaCost(____).standPerformDuration(25)
+            () -> new HierophantGreenStringAttack(new StandEntityAction.Builder().staminaCost(____).standPerformDuration(25).cooldown(25, 20)
                     .shiftVariationOf(HIEROPHANT_GREEN_STRING_ATTACK)));
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_EMERALD_SPLASH = ACTIONS.register("hierophant_green_emerald_splash", 

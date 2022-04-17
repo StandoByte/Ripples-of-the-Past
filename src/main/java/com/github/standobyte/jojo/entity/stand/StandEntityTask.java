@@ -154,8 +154,12 @@ public class StandEntityTask {
         return action;
     }
     
-    int getTicksLeft() {
+    public int getTicksLeft() {
         return ticksLeft;
+    }
+    
+    public int getStartingTicks() {
+        return startingTicks;
     }
     
     float getTaskCompletion(float partialTick) {

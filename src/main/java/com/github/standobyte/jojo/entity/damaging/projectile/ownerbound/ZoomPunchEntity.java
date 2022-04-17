@@ -103,6 +103,9 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
     @Override
     public float getBaseDamage() {
         LivingEntity owner = getOwner();
+        if (owner == null) {
+            return (float) Attributes.ATTACK_DAMAGE.getDefaultValue();
+        }
         ItemStack heldItem = owner.getMainHandItem();
         if (!heldItem.isEmpty()) {
             Multimap<Attribute, AttributeModifier> itemModifiers = heldItem.getAttributeModifiers(EquipmentSlotType.MAINHAND);
@@ -149,7 +152,7 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
 
     @Override
     public boolean isOnFire() {
-        return getOwner().isOnFire();
+        return getOwner() == null ? super.isOnFire() : getOwner().isOnFire();
     }
 
     @Override

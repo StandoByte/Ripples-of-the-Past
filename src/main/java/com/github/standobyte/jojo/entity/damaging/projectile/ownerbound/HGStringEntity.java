@@ -62,8 +62,8 @@ public class HGStringEntity extends OwnerBoundProjectileEntity {
                 Entity target = entityRayTraceResult.getEntity();
                 if (target instanceof LivingEntity) {
                     LivingEntity livingTarget = (LivingEntity) target;
-                    livingTarget.addEffect(new EffectInstance(ModEffects.STUN.get(), ticksLifespan() - tickCount));
                     attachToEntity(livingTarget);
+                    livingTarget.addEffect(new EffectInstance(ModEffects.STUN.get(), ticksLifespan() - tickCount));
                 }
             }
             else {
@@ -79,7 +79,8 @@ public class HGStringEntity extends OwnerBoundProjectileEntity {
 
     @Override
     protected int ticksLifespan() {
-        return isBinding ? ModActions.HIEROPHANT_GREEN_STRING_BIND.get().getStandActionTicks(null, null)
+        return isBinding ? ModActions.HIEROPHANT_GREEN_STRING_BIND.get().getStandActionTicks(null, null) 
+                + (isAttachedToAnEntity() ? 10 : 0)
                 : ModActions.HIEROPHANT_GREEN_STRING_ATTACK.get().getStandActionTicks(null, null);
     }
     

@@ -93,7 +93,7 @@
   "advancements.jojo.hamon_mastery.title": "The North Wind Has Created a Viking!",
   "advancements.jojo.hamon_mastery.description": "Get to the maximum levels of Hamon strength and Hamon control",
   "advancements.jojo.last_hamon.title": "It's My Last Hamon!",
-  "advancements.jojo.last_hamon.description": "Receive a Hamon user's life energy",
+  "advancements.jojo.last_hamon.description": "Receive another Hamon user's life energy",
   "advancements.jojo.hamon_chicken.title": "You Couldn't Even Beat That Chicken!",
   "advancements.jojo.hamon_chicken.description": "Defeat another Hamon user... by charging a chicken",
   "advancements.jojo.pillarman_temple.title": "What is This Man Carved into the Pillar?!",
@@ -619,7 +619,7 @@
   "action.jojo.vampirism_space_ripper_stingy_eyes": "Space Ripper Stingy Eyes",
   "action.jojo.vampirism_zombie_summon": "Zombie Summon",
   "action.jojo.vampirism_blood_gift": "Blood Gift",
-  "action.jojo.vampirism_dark_aura": "Evil Aura",
+  "action.jojo.vampirism_dark_aura": "Evil Atmosphere",
   "action.jojo.vampirism_hamon_suicide": "Use Hamon",
   
   "jojo.subtitle.stand_summon": "Stand summoned",

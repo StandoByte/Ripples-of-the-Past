@@ -84,7 +84,6 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
 //        if (currentPose != poseType) {
 //            resetPose(entity);
 //        }
-        initPoses();
         poseType = currentPose;
     }
 
@@ -96,7 +95,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     public void setupAnim(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
         HandSide swingingHand = entity.getSwingingHand();
         
-        initPoses();
+//        initPoses();
 
         idlePose.poseModel(1.0F, entity, ticks, yRotationOffset, xRotation, swingingHand);
 

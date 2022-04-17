@@ -27,7 +27,7 @@ public abstract class StretchingEntityRenderer<T extends OwnerBoundProjectileEnt
     
     protected float getAlpha(T entity, float partialTick) {
         LivingEntity owner = entity.getOwner();
-        return owner instanceof StandEntity ? ((StandEntity) entity.getOwner()).getAlpha(partialTick) : 1.0F;
+        return owner instanceof StandEntity ? ((StandEntity) owner).getAlpha(partialTick) : 1.0F;
     }
 
     @Override

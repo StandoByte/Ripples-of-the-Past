@@ -12,6 +12,7 @@ import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
@@ -283,6 +284,10 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
 
     @Override
     public float getResolveDmgReduction() {
+        if (INonStandPower.getNonStandPowerOptional(user).map(power -> 
+        power.getType() == ModNonStandPowers.VAMPIRISM.get()).orElse(false)) {
+            return 0;
+        }
         if (user.hasEffect(ModEffects.RESOLVE.get())) {
             return ResolveCounter.RESOLVE_DMG_REDUCTION;
         }
