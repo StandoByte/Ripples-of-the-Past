@@ -71,9 +71,12 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
             }
         }
         else if (!level.isClientSide() && !wasRipped()) {
-            RayTraceResult rayTraceResult = rayTrace();
-            if (rayTraceResult.getType() == RayTraceResult.Type.ENTITY && !ForgeEventFactory.onProjectileImpact(this, rayTraceResult)) {
-                entityData.set(WAS_RIPPED, true);
+            RayTraceResult[] rayTrace = rayTrace();
+            for (RayTraceResult result : rayTrace) {
+                if (result.getType() == RayTraceResult.Type.ENTITY && !ForgeEventFactory.onProjectileImpact(this, result)) {
+                    entityData.set(WAS_RIPPED, true);
+                    break;
+                }
             }
         }
     }

@@ -210,13 +210,13 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     }
 
     @Override
-    protected RayTraceResult rayTrace() {
+    protected RayTraceResult[] rayTrace() {
         Vector3d startPos = getOriginPoint();
         Vector3d endPos = position().add(getDeltaMovement());
         Vector3d rtVec = startPos.subtract(endPos);
         AxisAlignedBB aabb = getBoundingBox().expandTowards(rtVec).inflate(1.0D);
         double minDistance = rtVec.length();
-        return JojoModUtil.rayTrace(startPos, endPos, aabb, minDistance, level, this, this::canHitEntity, getBbWidth() / 2, 0);
+        return JojoModUtil.rayTraceMultipleEntities(startPos, endPos, aabb, minDistance, level, this, this::canHitEntity, getBbWidth() / 2, 0);
     }
     
     @Override

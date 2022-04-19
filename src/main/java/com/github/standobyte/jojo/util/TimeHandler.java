@@ -8,7 +8,6 @@ import com.github.standobyte.jojo.action.actions.TimeStop;
 import com.github.standobyte.jojo.capability.world.WorldUtilCap;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.init.ModEffects;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -305,12 +304,8 @@ public class TimeHandler {
         return MathHelper.floor(standPower.getLearningProgressPoints(timeStopAction)) + MIN_TIME_STOP_TICKS;
     }
     
-    public static int getMaxTimeStopTicks(IStandPower standPower, LazyOptional<INonStandPower> otherPower) {
-        return ((TimeStopperStandStats) standPower.getType().getStats()).getMaxTimeStopTicks(otherPower.map(power -> {
-            if (power.getType() == ModNonStandPowers.VAMPIRISM.get()) {
-                return power.getEnergy() / power.getMaxEnergy() >= 0.8F;
-            }
-            return false;
-        }).orElse(false));
+    public static int getMaxTimeStopTicks(IStandPower standPower) {
+        return ((TimeStopperStandStats) standPower.getType().getStats())
+                .getMaxTimeStopTicks(TimeStop.vampireTimeStopDuration(standPower.getUser()));
     }
 }

@@ -4,8 +4,6 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
-import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
@@ -22,10 +20,7 @@ public class TheWorldBarrage extends StandEntityMeleeBarrage {
     // FIXME (!!!!) DIO and TW muda not overlapping
     @Override
     protected SoundEvent getShout(LivingEntity user, IStandPower power, ActionTarget target, boolean wasActive) {
-        if (wasActive && INonStandPower.getNonStandPowerOptional(user).map(otherPower -> {
-            return otherPower.getTypeSpecificData(ModNonStandPowers.VAMPIRISM.get()).isPresent()
-                    && otherPower.getEnergy() / otherPower.getMaxEnergy() >= 0.8F;
-        }).orElse(false)) {
+        if (wasActive && TimeStop.vampireTimeStopDuration(user)) {
             return wryyyyyyyyyyy.get();
         }
 //        return super.getShout(user, power, target, wasActive);

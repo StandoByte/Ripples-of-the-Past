@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
@@ -118,7 +119,16 @@ public class TimeStop extends StandAction {
 
     @Override
     public float getMaxTrainingPoints(IStandPower power) {
-        return TimeHandler.getMaxTimeStopTicks(power, INonStandPower.getNonStandPowerOptional(power.getUser())) - TimeHandler.MIN_TIME_STOP_TICKS;
+        return TimeHandler.getMaxTimeStopTicks(power) - TimeHandler.MIN_TIME_STOP_TICKS;
+    }
+    
+    public static boolean vampireTimeStopDuration(LivingEntity entity) {
+        return INonStandPower.getNonStandPowerOptional(entity).map(power -> {
+            if (power.getType() == ModNonStandPowers.VAMPIRISM.get()) {
+                return power.getEnergy() / power.getMaxEnergy() >= 0.8F;
+            }
+            return false;
+        }).orElse(false);
     }
 
     @Override

@@ -92,7 +92,7 @@ public class TimeStopInstant extends StandAction {
 
     @Override
     public float getMaxTrainingPoints(IStandPower power) {
-        return TimeHandler.getMaxTimeStopTicks(power, INonStandPower.getNonStandPowerOptional(power.getUser()));
+        return TimeHandler.getMaxTimeStopTicks(power) - TimeHandler.MIN_TIME_STOP_TICKS;
     }
     
     @Override

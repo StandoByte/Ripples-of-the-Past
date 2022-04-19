@@ -89,14 +89,16 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     }
     
     protected final void checkHit() {
-        RayTraceResult rayTraceResult = rayTrace();
-        if (rayTraceResult.getType() != RayTraceResult.Type.MISS && !ForgeEventFactory.onProjectileImpact(this, rayTraceResult)) {
-            onHit(rayTraceResult);
+        RayTraceResult[] rayTrace = rayTrace();
+        for (RayTraceResult result : rayTrace) {
+            if (result.getType() != RayTraceResult.Type.MISS && !ForgeEventFactory.onProjectileImpact(this, result)) {
+                onHit(result);
+            }
         }
     }
 
-    protected RayTraceResult rayTrace() {
-        return ProjectileHelper.getHitResult(this, this::canHitEntity);
+    protected RayTraceResult[] rayTrace() {
+        return new RayTraceResult[] { ProjectileHelper.getHitResult(this, this::canHitEntity) };
     }
     
     @Override

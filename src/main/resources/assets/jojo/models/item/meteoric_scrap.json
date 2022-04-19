@@ -57,6 +57,12 @@
         "jojo:icon": 9
       },
       "model": "jojo:item/item_icon9"
+    },
+    {
+      "predicate": {
+        "jojo:icon": 10
+      },
+      "model": "jojo:soul_cloud_pic"
     }
   ]
 }

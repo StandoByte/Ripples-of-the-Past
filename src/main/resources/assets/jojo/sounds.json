@@ -459,8 +459,14 @@
   "hierophant_green_emerald_splash": {
     "sounds": [ "jojo:stand/hierophant_green_emerald_splash", "jojo:stand/hierophant_green_emerald_splash_2", "jojo:stand/hierophant_green_emerald_splash_3" ]
   },
+  "hierophant_green_barrier_placed": {
+    "sounds": [ "jojo:stand/hierophant_green_barrier_ripped" ]
+  },
   "hierophant_green_barrier_ripped": {
     "sounds": [ "jojo:stand/hierophant_green_barrier_ripped" ]
+  },
+  "hierophant_green_grapple_catch": {
+    "sounds": [ "jojo:stand/water_splash" ]
   },
   "polnareff_silver_chariot": {
     "subtitle": "jojo.subtitle.silver_chariot_name",
