@@ -5,9 +5,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
+import com.github.standobyte.jojo.action.actions.HierophantGreenBarrier;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGBarrierEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
+import com.github.standobyte.jojo.init.ModSounds;
 
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
@@ -57,7 +59,7 @@ public class HierophantGreenEntity extends StandEntity {
 //                    .getManaCost() / rangedAttackDuration(shift) * 0.5F;
             int barrierEmeralds = Math.max(getPlacedBarriersCount() * multiplier / 10, 1);
             for (int i = 0; i < barrierEmeralds/* && getUserPower().consumeMana(manaCost)*/; i++) {
-                placedBarriers.get(random.nextInt(placedBarriers.size())).shootEmeralds(pos, 1, shift);
+                placedBarriers.get(random.nextInt(placedBarriers.size())).shootEmeralds(pos, 1, true);
             }
             canBarriersShoot = false;
         }
@@ -97,8 +99,20 @@ public class HierophantGreenEntity extends StandEntity {
         }
     }
     
+    public boolean canPlaceBarrier() {
+        return getPlacedBarriersCount() < HierophantGreenBarrier.getMaxBarriersPlaceable(getUserPower());
+    }
+    
+    public boolean hasBarrierAttached() {
+        return getPlacedBarriersCount() > 0 || 
+                stringFromStand != null && stringFromStand.isAlive() && stringFromStand != stringToUser;
+    }
+    
     public void attachBarrier(BlockPos blockPos) {
         if (!level.isClientSide()) {
+            if (!canPlaceBarrier()) {
+                return;
+            }
             if (stringFromStand != null && stringFromStand.isAlive()) {
                 if (blockPos.equals(stringFromStand.getOriginBlockPos())) {
                     return;
@@ -110,6 +124,7 @@ public class HierophantGreenEntity extends StandEntity {
             stringFromStand = new HGBarrierEntity(level, this);
             stringFromStand.setOriginBlockPos(blockPos);
             level.addFreshEntity(stringFromStand);
+            playSound(ModSounds.HIEROPHANT_GREEN_BARRIER_PLACED.get(), 1.0F, 1.0F);
         }
     }
     

@@ -51,8 +51,8 @@ public class MRFlameEntity extends ModdedProjectileEntity {
     }
 
     @Override
-    protected RayTraceResult rayTrace() {
-        return JojoModUtil.getHitResult(this, this::canHitEntity, RayTraceContext.BlockMode.OUTLINE);
+    protected RayTraceResult[] rayTrace() {
+        return new RayTraceResult[] { JojoModUtil.getHitResult(this, this::canHitEntity, RayTraceContext.BlockMode.OUTLINE) };
     }
     
     @Override

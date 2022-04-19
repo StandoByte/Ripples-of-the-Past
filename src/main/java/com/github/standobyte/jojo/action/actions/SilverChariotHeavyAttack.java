@@ -91,9 +91,9 @@ public class SilverChariotHeavyAttack extends StandEntityHeavyAttack {
             boolean moveForward = completion <= 0.5F;
             if (!world.isClientSide()) {
                 if (moveForward) {
-                    for (RayTraceResult rayTraceResult : JojoModUtil.rayTrace(standEntity, 
+                    for (RayTraceResult rayTraceResult : JojoModUtil.rayTraceMultipleEntities(standEntity, 
                             standEntity.getAttributeValue(ForgeMod.REACH_DISTANCE.get()), 
-                            standEntity.canTarget(), 0.25, standEntity.getPrecision(), Integer.MAX_VALUE)) {
+                            standEntity.canTarget(), 0.25, standEntity.getPrecision())) {
                         standEntity.attackTarget(ActionTarget.fromRayTraceResult(rayTraceResult), PunchType.HEAVY_NO_COMBO, this, 1);
                     }
                 }

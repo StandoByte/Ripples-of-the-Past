@@ -20,7 +20,7 @@ public class HierophantGreenBarrier extends StandEntityAction {
     protected ActionConditionResult checkStandConditions(StandEntity stand, IStandPower power, ActionTarget target) {
         if (stand instanceof HierophantGreenEntity) {
             HierophantGreenEntity hierophant = (HierophantGreenEntity) stand;
-            if (hierophant.getPlacedBarriersCount() >= getMaxBarriersPlaceable(power)) {
+            if (!hierophant.canPlaceBarrier()) {
                 return conditionMessage("barrier");
             }
             return ActionConditionResult.POSITIVE;
@@ -36,7 +36,7 @@ public class HierophantGreenBarrier extends StandEntityAction {
         }
     }
     
-    private int getMaxBarriersPlaceable(IStandPower power) {
+    public static int getMaxBarriersPlaceable(IStandPower power) {
         int level = power.getResolveLevel();
         return level >= 4 ? 100 : 15;
     }

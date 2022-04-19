@@ -3,7 +3,7 @@
   "display": {
     "icon": {
       "item": "jojo:meteoric_scrap",
-      "nbt": "{Icon:6}"
+      "nbt": "{Icon:10}"
     },
     "title": {
       "translate": "advancements.jojo.soul.title"

@@ -37,7 +37,7 @@ public class LightBeamEntity extends DamagingEntity {
         this.length = length;
         LivingEntity shooter = getOwner();
         if (shooter != null) {
-            target = rayTrace();
+            target = rayTrace()[0];
             if (target.getType() != RayTraceResult.Type.MISS) {
                 length = MathHelper.sqrt(shooter.distanceToSqr(target.getLocation()));
             }
@@ -45,8 +45,8 @@ public class LightBeamEntity extends DamagingEntity {
     }
 
     @Override
-    public RayTraceResult rayTrace() {
-        return JojoModUtil.rayTrace(this, length, e -> e != getOwner());
+    public RayTraceResult[] rayTrace() {
+        return new RayTraceResult[] { JojoModUtil.rayTrace(this, length, e -> e != getOwner()) };
     }
     
     @Override

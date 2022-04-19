@@ -1,8 +1,10 @@
 package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.Entity;
@@ -17,6 +19,7 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
     private IStandPower userStandPower;
     private boolean bindEntities;
     private StandEntity stand;
+    private boolean placedBarrier = false;
 
     public HGGrapplingStringEntity(World world, StandEntity entity, IStandPower userStand) {
         super(ModEntityTypes.HG_GRAPPLING_STRING.get(), entity, world);
@@ -86,6 +89,13 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
                     }
                 }
             }
+            else if (!level.isClientSide() && !placedBarrier && owner instanceof HierophantGreenEntity) {
+                HierophantGreenEntity hierophant = (HierophantGreenEntity) owner;
+                if (hierophant.hasBarrierAttached()) {
+                    hierophant.attachBarrier(blockPosition());
+                }
+                placedBarrier = true;
+            }
             return true;
         }
         return false;
@@ -122,6 +132,7 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
         if (getEntityAttachedTo() == null && bindEntities) {
             if (target instanceof LivingEntity) {
                 attachToEntity((LivingEntity) target);
+                playSound(ModSounds.HIEROPHANT_GREEN_GRAPPLE_CATCH.get(), 1.0F, 1.0F);
                 return true;
             }
         }
@@ -134,6 +145,9 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
     @Override
     protected void afterBlockHit(BlockRayTraceResult blockRayTraceResult, boolean brokenBlock) {
         if (!brokenBlock && !bindEntities) {
+            if (!getBlockPosAttachedTo().isPresent()) {
+                playSound(ModSounds.HIEROPHANT_GREEN_GRAPPLE_CATCH.get(), 1.0F, 1.0F);
+            }
             attachToBlockPos(blockRayTraceResult.getBlockPos());
         }
     }

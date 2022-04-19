@@ -69,27 +69,27 @@ public class JojoModUtil {
 
     public static RayTraceResult rayTrace(Entity entity, double reachDistance, @Nullable Predicate<Entity> entityFilter, 
             double rayTraceInflate, double standPrecision) {
-        return rayTrace(entity, reachDistance, entityFilter, rayTraceInflate, 0, 1)[0];
+        return rayTraceMultipleEntities(entity, reachDistance, entityFilter, rayTraceInflate, 0)[0];
     }
 
-    public static RayTraceResult[] rayTrace(Entity entity, double reachDistance, @Nullable Predicate<Entity> entityFilter, 
-            double rayTraceInflate, double standPrecision, int entitiesCount) {
+    public static RayTraceResult[] rayTraceMultipleEntities(Entity entity, double reachDistance, @Nullable Predicate<Entity> entityFilter, 
+            double rayTraceInflate, double standPrecision) {
         Vector3d startPos = entity.getEyePosition(1.0F);
         Vector3d rtVec = entity.getViewVector(1.0F).scale(reachDistance);
         Vector3d endPos = startPos.add(rtVec);
         AxisAlignedBB aabb = entity.getBoundingBox().expandTowards(rtVec).inflate(1.0D);
-        return rayTrace(startPos, endPos, aabb, reachDistance, entity.level, entity, entityFilter, rayTraceInflate, standPrecision, entitiesCount);
+        return rayTraceMultipleEntities(startPos, endPos, aabb, reachDistance, entity.level, entity, entityFilter, rayTraceInflate, standPrecision);
     }
 
     public static RayTraceResult rayTrace(Vector3d startPos, Vector3d endPos, AxisAlignedBB aabb, 
             double minDistance, World world, @Nullable Entity entity, @Nullable Predicate<Entity> entityFilter, 
             double rayTraceInflate, double standPrecision) {
-        return rayTrace(startPos, endPos, aabb, minDistance, world, entity, entityFilter, rayTraceInflate, standPrecision, 1)[0];
+        return rayTraceMultipleEntities(startPos, endPos, aabb, minDistance, world, entity, entityFilter, rayTraceInflate, standPrecision)[0];
     }
 
-    public static RayTraceResult[] rayTrace(Vector3d startPos, Vector3d endPos, AxisAlignedBB aabb, 
+    public static RayTraceResult[] rayTraceMultipleEntities(Vector3d startPos, Vector3d endPos, AxisAlignedBB aabb, 
             double minDistance, World world, @Nullable Entity entity, @Nullable Predicate<Entity> entityFilter, 
-            double rayTraceInflate, double standPrecision, int entitiesCount) {
+            double rayTraceInflate, double standPrecision) {
         aabb.inflate(rayTraceInflate);
         double minDistanceSqr = minDistance * minDistance;
         Map<EntityRayTraceResult, Double> rayTracedWithDistance = new HashMap<>();

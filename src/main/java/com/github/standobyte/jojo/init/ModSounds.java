@@ -283,8 +283,14 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> HIEROPHANT_GREEN_EMERALD_SPLASH = SOUNDS.register("hierophant_green_emerald_splash", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "hierophant_green_emerald_splash")));
     
+    public static final RegistryObject<SoundEvent> HIEROPHANT_GREEN_BARRIER_PLACED = SOUNDS.register("hierophant_green_barrier_placed", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "hierophant_green_barrier_placed")));
+    
     public static final RegistryObject<SoundEvent> HIEROPHANT_GREEN_BARRIER_RIPPED = SOUNDS.register("hierophant_green_barrier_ripped", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "hierophant_green_barrier_ripped")));
+    
+    public static final RegistryObject<SoundEvent> HIEROPHANT_GREEN_GRAPPLE_CATCH = SOUNDS.register("hierophant_green_grapple_catch", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "hierophant_green_grapple_catch")));
     
     public static final OstSoundList HIEROPHANT_GREEN_OST = new OstSoundList(new ResourceLocation(JojoMod.MOD_ID, "hierophant_green_ost"), SOUNDS);
 
