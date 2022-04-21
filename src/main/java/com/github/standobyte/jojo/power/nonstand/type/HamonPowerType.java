@@ -396,16 +396,16 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                     if (power.hasMana(manaCost)) {
                         power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
                             if (hamon.isSkillLearned(HamonSkill.SNAKE_MUFFLER)) {
+                                playerTarget.getCooldowns().addCooldown(ModItems.SATIPOROJA_SCARF.get(), 80);
                                 JojoModUtil.sayVoiceLine(target, ModSounds.LISA_LISA_SNAKE_MUFFLER.get());
-                                ModDamageSources.dealHamonDamage(attacker, 0.75F, target, null);
                                 power.consumeMana(manaCost);
+                                ModDamageSources.dealHamonDamage(attacker, 0.75F, target, null);
                                 livingAttacker.addEffect(new EffectInstance(Effects.GLOWING, 200));
                                 event.setCanceled(true);
                                 SnakeMufflerEntity snakeMuffler = new SnakeMufflerEntity(target.level, target);
                                 snakeMuffler.setEntityToJumpOver(attacker);
                                 target.level.addFreshEntity(snakeMuffler);
                                 snakeMuffler.attachToBlockPos(target.blockPosition());
-                                playerTarget.getCooldowns().addCooldown(ModItems.SATIPOROJA_SCARF.get(), 80);
                             }
                         });
                     }
