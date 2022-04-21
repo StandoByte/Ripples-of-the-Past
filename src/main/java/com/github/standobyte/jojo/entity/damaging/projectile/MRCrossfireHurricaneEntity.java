@@ -1,10 +1,13 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
+import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModActions;
+import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.JojoModUtil;
@@ -140,6 +143,21 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
         }
     }
     
+    public void explosionFilterEntities(List<Entity> inExplosion) {
+        LivingEntity owner = getOwner();
+        LivingEntity standUser = getOwner() instanceof StandEntity ? ((StandEntity) owner).getUser() : null;
+        boolean canAffectStandUser = standUser != null
+                && IStandPower.getStandPowerOptional(standUser).map(stand -> stand.getResolveLevel() < 4).orElse(true)
+                && !standUser.hasEffect(ModEffects.RESOLVE.get());
+        Iterator<Entity> it = inExplosion.iterator();
+        while (it.hasNext()) {
+            Entity entity = it.next();
+            if (entity.is(owner) || !canAffectStandUser && entity.is(standUser)) {
+                it.remove();
+            }
+        }
+    }
+    
     public void onExplode(List<Entity> affectedEntities, List<BlockPos> affectedBlocks) {
         LivingEntity magiciansRed = getOwner();
         for (Entity entity : affectedEntities) {
@@ -158,6 +176,11 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
                 }
             }
         }
+    }
+    
+    @Override
+    public boolean ignoreExplosion() {
+        return true;
     }
 
     @Override

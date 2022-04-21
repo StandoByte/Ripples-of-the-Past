@@ -420,7 +420,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     }
 
     public static void hamonPerksOnDeath(LivingEntity dead) {
-        if (JojoModConfig.getCommonConfigInstance(false).keepHamonOnDeath.get()) return;
+        if (JojoModConfig.getCommonConfigInstance(false).keepHamonOnDeath.get() && !dead.level.getLevelData().isHardcore()) return;
         INonStandPower.getNonStandPowerOptional(dead).ifPresent(power -> {
             power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
                 if (hamon.getTechnique() != null) {

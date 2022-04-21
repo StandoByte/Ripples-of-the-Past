@@ -76,8 +76,11 @@ public class StandEntityTask {
             rotateStand(standEntity, true);
         }
         
-        if (phase == StandEntityAction.Phase.PERFORM && ticksLeft == startingTicks) {
-            action.standPerform(standEntity.level, standEntity, standPower, target);
+        if (phase == StandEntityAction.Phase.PERFORM) {
+            standPower.consumeStamina(action.getStaminaCost(standPower));
+            if (ticksLeft == startingTicks) {
+                action.standPerform(standEntity.level, standEntity, standPower, target);
+            }
         }
         int phaseTicks = startingTicks - ticksLeft;
         switch (phase) {

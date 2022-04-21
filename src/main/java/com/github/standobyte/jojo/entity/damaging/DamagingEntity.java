@@ -105,7 +105,6 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     protected void onHitEntity(EntityRayTraceResult entityRayTraceResult) {
         if (!level.isClientSide()) {
             Entity target = entityRayTraceResult.getEntity();
-            // FIXME (!!!!!!!!) null check
             LivingEntity owner = getOwner();
             boolean entityHurt = hurtTarget(target, owner);
             int prevTargetFireTimer = target.getRemainingFireTicks();
@@ -137,7 +136,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
         return true;
     }
     
-    protected boolean hurtTarget(Entity target, LivingEntity owner) {
+    protected boolean hurtTarget(Entity target, @Nullable LivingEntity owner) {
         return hurtTarget(target, getDamageSource(owner), getDamageAmount());
     }
     

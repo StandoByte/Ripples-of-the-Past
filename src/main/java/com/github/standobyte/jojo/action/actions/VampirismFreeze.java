@@ -9,13 +9,23 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.util.damage.DamageUtil;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.FlowingFluidBlock;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.util.Direction;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.BlockSnapshot;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 
 public class VampirismFreeze extends VampirismAction {
@@ -60,6 +70,30 @@ public class VampirismFreeze extends VampirismAction {
                             int duration = freezeInstance.getDuration() + additionalDuration;
                             int lvl = duration / 120;
                             targetLiving.addEffect(new EffectInstance(ModEffects.FREEZE.get(), duration, lvl));
+                        }
+                    }
+                }
+            }
+            frostWalkerImitation(user, world, user.blockPosition(), 4);
+        }
+    }
+    
+    private void frostWalkerImitation(LivingEntity entity, World world, BlockPos entityPos, float radius) {
+        if (entity.isOnGround()) {
+            BlockState ice = Blocks.FROSTED_ICE.defaultBlockState();
+            BlockPos.Mutable posMutable = new BlockPos.Mutable();
+            for (BlockPos blockPos : BlockPos.betweenClosed(entityPos.offset(-radius, -1.0, -radius), entityPos.offset(radius, -1.0, radius))) {
+                if (blockPos.closerThan(entity.position(), (double) radius)) {
+                    posMutable.set(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ());
+                    BlockState blockState = world.getBlockState(posMutable);
+                    if (blockState.getBlock().isAir(blockState, world, posMutable)) {
+                        blockState = world.getBlockState(blockPos);
+                        boolean isFull = blockState.getBlock() == Blocks.WATER && blockState.getValue(FlowingFluidBlock.LEVEL) == 0;
+                        if (blockState.getMaterial() == Material.WATER && isFull && ice.canSurvive(world, blockPos)
+                                && world.isUnobstructed(ice, blockPos, ISelectionContext.empty())
+                                && !ForgeEventFactory.onBlockPlace(entity, BlockSnapshot.create(world.dimension(), world, blockPos), Direction.UP)) {
+                            world.setBlockAndUpdate(blockPos, ice);
+                            world.getBlockTicks().scheduleTick(blockPos, Blocks.FROSTED_ICE, MathHelper.nextInt(entity.getRandom(), 20, 40));
                         }
                     }
                 }

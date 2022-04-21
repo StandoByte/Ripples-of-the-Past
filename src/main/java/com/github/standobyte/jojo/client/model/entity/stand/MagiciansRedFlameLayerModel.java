@@ -14,7 +14,7 @@ public class MagiciansRedFlameLayerModel extends MagiciansRedModel {
     }
     
     @Override
-    protected void addBaseBoxes() {
+    protected void addLayerSpecificBoxes() {
         leftForeArm.addChild(new FlameModelRenderer(this).setFireSprites(MagiciansRedRenderer.FIRE_0, MagiciansRedRenderer.FIRE_1)
                 .addFlame(3.0F, 4.0F, 3.0F));
         rightForeArm.addChild(new FlameModelRenderer(this).setFireSprites(MagiciansRedRenderer.FIRE_0, MagiciansRedRenderer.FIRE_1)

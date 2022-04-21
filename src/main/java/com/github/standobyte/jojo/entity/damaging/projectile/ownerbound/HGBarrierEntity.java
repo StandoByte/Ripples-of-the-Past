@@ -151,7 +151,7 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
                 entityData.set(WAS_RIPPED, true);
                 if (getOwner() instanceof HierophantGreenEntity) {
                     HierophantGreenEntity stand = (HierophantGreenEntity) getOwner();
-                    stand.shootEmeraldsFromBarriers(entityRayTraceResult.getLocation(), true, 3);
+                    stand.shootEmeraldsFromBarriers(entityRayTraceResult.getLocation(), 3);
                     if (stand.getUser() != null) {
                         stand.getUser().hurt(DamageSource.GENERIC, 0.1F);
                     }
@@ -162,13 +162,13 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
         }
     }
     
-    public void shootEmeralds(Vector3d targetPos, int count, boolean shift) {
+    public void shootEmeralds(Vector3d targetPos, int count) {
         Vector3d barrierMiddle = position().add(getOriginPoint()).scale(0.5);
         for (int i = 0; i < count; i++) {
             HGEmeraldEntity emeraldEntity = new HGEmeraldEntity(getOwner(), level, null);
             emeraldEntity.setPos(barrierMiddle.x, barrierMiddle.y, barrierMiddle.z);
             Vector3d shootVec = targetPos.subtract(barrierMiddle);
-            emeraldEntity.shoot(shootVec.x, shootVec.y, shootVec.z, shift ? 1.25F : 0.75F, 2.0F);
+            emeraldEntity.shoot(shootVec.x, shootVec.y, shootVec.z, 1F, 2.0F);
             level.addFreshEntity(emeraldEntity);
 //            JojoModUtil.playSound(level, null, barrierMiddle.x, barrierMiddle.y, barrierMiddle.z, 
 //                    ModEntityTypes.HIEROPHANT_GREEN.get().getSound(StandSoundType.RANGED_ATTACK), 

@@ -65,7 +65,6 @@ public abstract class StandAction extends Action<IStandPower> {
         return staminaCost;
     }
     
-    // FIXME (!!!!!!!!) drain stamina each tick (either in StandEntity or stuff like TimeStopInstance)
     public float getStaminaCostTicking(IStandPower stand) {
         return staminaCostTick;
     }

@@ -21,6 +21,8 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
 
     public TheWorldModel(int textureWidth, int textureHeight) {
         super(textureWidth, textureHeight);
+        
+        addHumanoidBaseBoxes(null);
 
         ModelRenderer headpiece;
         ModelRenderer slope;

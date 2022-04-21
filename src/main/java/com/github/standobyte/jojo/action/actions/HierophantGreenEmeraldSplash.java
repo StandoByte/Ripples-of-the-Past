@@ -32,7 +32,7 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
                 RayTraceResult rayTrace = JojoModUtil.rayTrace(hierophant.isManuallyControlled() ? standEntity : hierophant.getUser(), 
                         standEntity.getMaxRange(), entity -> entity instanceof LivingEntity && hierophant.canAttack((LivingEntity) entity));
                 if (rayTrace.getType() != RayTraceResult.Type.MISS) {
-                    hierophant.shootEmeraldsFromBarriers(rayTrace.getLocation(), shift, 1);
+                    hierophant.shootEmeraldsFromBarriers(rayTrace.getLocation(), 1);
                 }
             }
         }

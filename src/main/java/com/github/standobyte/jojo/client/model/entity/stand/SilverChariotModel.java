@@ -36,10 +36,10 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
 
     public SilverChariotModel(int textureWidth, int textureHeight) {
         super(textureWidth, textureHeight);
+        addLayerSpecificBoxes();
     }
 
-    @Override
-    protected void addBaseBoxes() {
+    protected void addLayerSpecificBoxes() {
         head.texOffs(22, 0).addBox(-4.0F, -5.1F, -4.0F, 8.0F, 3.0F, 3.0F, -0.1F, false);
         head.texOffs(0, 8).addBox(-4.0F, -4.25F, -1.05F, 8.0F, 2.0F, 5.0F, -0.05F, false);
         head.texOffs(18, 18).addBox(-4.0F, -4.85F, -4.0F, 8.0F, 3.0F, 1.0F, 0.25F, false);
