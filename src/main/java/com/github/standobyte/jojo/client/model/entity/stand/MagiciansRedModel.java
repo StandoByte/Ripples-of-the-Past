@@ -35,15 +35,13 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
 
     public MagiciansRedModel(int textureWidth, int textureHeight) {
         super(textureWidth, textureHeight);
+        addLayerSpecificBoxes();
     }
 
-    @Override
-    protected void addBaseBoxes() {
-        ModelRenderer actualHead = head;
-        this.head = new ModelRenderer(this);
-        super.addBaseBoxes();
-        this.head = actualHead;
+    protected void addLayerSpecificBoxes() {
         head.texOffs(24, 0).addBox(-3.5F, -7.0F, -4.0F, 7.0F, 7.0F, 8.0F, 0.0F, false);
+        addHumanoidBaseBoxes(part -> part != head);
+        
         head.texOffs(0, 16).addBox(-4.1F, -7.4F, -4.4F, 1.0F, 7.0F, 2.0F, -0.4F, false);
         head.texOffs(6, 16).addBox(-4.1F, -1.6F, -4.4F, 1.0F, 2.0F, 2.0F, -0.4F, false);
         head.texOffs(0, 16).addBox(3.1F, -7.4F, -4.4F, 1.0F, 7.0F, 2.0F, -0.4F, true);

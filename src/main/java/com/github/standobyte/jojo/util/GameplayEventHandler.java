@@ -948,6 +948,16 @@ public class GameplayEventHandler {
         }
     }
     
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void explosionFilterEntities(ExplosionEvent.Detonate event) {
+        Explosion explosion = event.getExplosion();
+        
+        if (explosion.getExploder() instanceof MRCrossfireHurricaneEntity) {
+            ((MRCrossfireHurricaneEntity) explosion.getExploder())
+            .explosionFilterEntities(event.getAffectedEntities());
+        }
+    }
+    
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onExplosionDetonate(ExplosionEvent.Detonate event) {
         Explosion explosion = event.getExplosion();
@@ -957,7 +967,6 @@ public class GameplayEventHandler {
                 ((LivingEntity) entity).getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(util -> {
                     util.setLatestExplosionPos(explosion.getPosition());
                 });
-                        
             }
         });
         

@@ -21,11 +21,16 @@ public class SilverChariotArmorLayerModel extends SilverChariotModel {
     
     public SilverChariotArmorLayerModel(int textureWidth, int textureHeight) {
         super(textureWidth, textureHeight);
-
+    }
+    
+    @Override
+    protected void addLayerSpecificBoxes() {
+        head.texOffs(24, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, 0.1F, false);
         head.texOffs(12, 10).addBox(-1.0F, -8.0F, -4.0F, 2.0F, 2.0F, 8.0F, 0.25F, false);
         head.texOffs(32, 16).addBox(-2.0F, -9.0F, -4.375F, 4.0F, 4.0F, 1.0F, -0.75F, false);
         head.texOffs(44, 56).addBox(-0.5F, -6.5F, -4.5F, 1.0F, 1.0F, 1.0F, 0.0F, false);
 
+        torso.texOffs(0, 0).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 6.0F, 4.0F, 0.1F, false);
         torso.texOffs(0, 40).addBox(-3.5F, 0.75F, -2.5F, 7.0F, 2.0F, 1.0F, 0.1F, false);
         torso.texOffs(0, 38).addBox(-3.5F, 2.9F, -2.5F, 1.0F, 1.0F, 1.0F, 0.1F, false);
         torso.texOffs(4, 38).addBox(2.5F, 2.9F, -2.5F, 1.0F, 1.0F, 1.0F, 0.1F, false);
@@ -46,6 +51,7 @@ public class SilverChariotArmorLayerModel extends SilverChariotModel {
         setRotationAngle(leftTorsoTube, 0.0F, 0.0F, 0.3491F);
         leftTorsoTube.texOffs(52, 30).addBox(-1.5F, -3.0F, -0.5F, 3.0F, 6.0F, 1.0F, 0.0F, true);
 
+        leftArm.texOffs(16, 44).addBox(-2.0F, -2.1F, -2.0F, 4.0F, 6.0F, 4.0F, 0.1F, false);
         leftArm.texOffs(0, 46).addBox(2.0F, 2.9F, -0.5F, 1.0F, 1.0F, 1.0F, 0.1F, true);
 
         leftShoulder = new ModelRenderer(this);
@@ -57,6 +63,8 @@ public class SilverChariotArmorLayerModel extends SilverChariotModel {
         leftShoulder.texOffs(58, 19).addBox(0.0F, -3.0F, -0.5F, 1.0F, 1.0F, 1.0F, 0.0F, false);
         leftShoulder.texOffs(50, 15).addBox(0.0F, -0.5F, -3.0F, 1.0F, 1.0F, 6.0F, 0.0F, true);
 
+        leftForeArm.texOffs(16, 54).addBox(-2.0F, 0.1F, -2.0F, 4.0F, 6.0F, 4.0F, 0.099F, false);
+        
         thorn1 = new ModelRenderer(this);
         thorn1.setPos(0.5F, -2.0F, -2.0F);
         leftShoulder.addChild(thorn1);
@@ -69,6 +77,7 @@ public class SilverChariotArmorLayerModel extends SilverChariotModel {
         setRotationAngle(thorn2, -0.7854F, 0.0F, 0.0F);
         thorn2.texOffs(58, 19).addBox(-0.5F, -0.5F, -0.5F, 1.0F, 1.0F, 1.0F, 0.0F, false);
 
+        rightArm.texOffs(0, 44).addBox(-2.0F, -2.1F, -2.0F, 4.0F, 6.0F, 4.0F, 0.1F, false);
         rightArm.texOffs(0, 46).addBox(-3.0F, 2.9F, -0.5F, 1.0F, 1.0F, 1.0F, 0.1F, false);
 
         rightShoulder = new ModelRenderer(this);
@@ -79,6 +88,8 @@ public class SilverChariotArmorLayerModel extends SilverChariotModel {
         rightShoulder.texOffs(56, 8).addBox(-0.5F, 2.0F, -1.5F, 1.0F, 4.0F, 3.0F, 0.0F, false);
         rightShoulder.texOffs(58, 19).addBox(-0.5F, -3.0F, -0.5F, 1.0F, 1.0F, 1.0F, 0.0F, false);
         rightShoulder.texOffs(50, 15).addBox(-0.5F, -0.5F, -3.0F, 1.0F, 1.0F, 6.0F, 0.0F, false);
+        
+        rightForeArm.texOffs(0, 54).addBox(-2.0F, 0.1F, -2.0F, 4.0F, 6.0F, 4.0F, 0.099F, false);
 
         thorn3 = new ModelRenderer(this);
         thorn3.setPos(0.0F, -2.0F, -2.0F);
@@ -92,32 +103,15 @@ public class SilverChariotArmorLayerModel extends SilverChariotModel {
         setRotationAngle(thorn4, -0.7854F, 0.0F, 0.0F);
         thorn4.texOffs(58, 19).addBox(-0.5F, -0.5F, -0.5F, 1.0F, 1.0F, 1.0F, 0.0F, false);
 
+        leftLeg.texOffs(48, 44).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.1F, false);
         leftLeg.texOffs(58, 22).addBox(1.85F, 0.0F, -1.0F, 1.0F, 4.0F, 2.0F, 0.0F, true);
         leftLeg.texOffs(48, 22).addBox(1.85F, 1.0F, -2.0F, 1.0F, 2.0F, 4.0F, 0.0F, true);
-        
-        rightLeg.texOffs(58, 22).addBox(-2.85F, 0.0F, -1.0F, 1.0F, 4.0F, 2.0F, 0.0F, false);
-        rightLeg.texOffs(48, 22).addBox(-2.85F, 1.0F, -2.0F, 1.0F, 2.0F, 4.0F, 0.0F, false);
-    }
-    
-    @Override
-    protected void addBaseBoxes() {
-        head.texOffs(24, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, 0.1F, false);
-
-        torso.texOffs(0, 0).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 6.0F, 4.0F, 0.1F, false);
-
-        leftArm.texOffs(16, 44).addBox(-2.0F, -2.1F, -2.0F, 4.0F, 6.0F, 4.0F, 0.1F, false);
-
-        leftForeArm.texOffs(16, 54).addBox(-2.0F, 0.1F, -2.0F, 4.0F, 6.0F, 4.0F, 0.099F, false);
-
-        rightArm.texOffs(0, 44).addBox(-2.0F, -2.1F, -2.0F, 4.0F, 6.0F, 4.0F, 0.1F, false);
-
-        rightForeArm.texOffs(0, 54).addBox(-2.0F, 0.1F, -2.0F, 4.0F, 6.0F, 4.0F, 0.099F, false);
-
-        leftLeg.texOffs(48, 44).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.1F, false);
 
         leftLowerLeg.texOffs(48, 54).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.099F, false);
 
         rightLeg.texOffs(32, 44).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.1F, false);
+        rightLeg.texOffs(58, 22).addBox(-2.85F, 0.0F, -1.0F, 1.0F, 4.0F, 2.0F, 0.0F, false);
+        rightLeg.texOffs(48, 22).addBox(-2.85F, 1.0F, -2.0F, 1.0F, 2.0F, 4.0F, 0.0F, false);
 
         rightLowerLeg.texOffs(32, 54).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.099F, false);
     }

@@ -19,7 +19,7 @@ public class IndirectStandEntityDamageSource extends StandEntityDamageSource {
                         IStandPower.getStandPowerOptional(((StandEntity) owner).getUser()).orElse(null)
                         : IStandPower.getStandPowerOptional(owner).orElse(null));
         this.standName = null;
-        this.owner = (Entity)owner;
+        this.owner = owner;
     }
     
     public IndirectStandEntityDamageSource(String msgId, Entity damagingEntity, Entity owner, IStandPower stand) {

@@ -30,6 +30,7 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
     public StarPlatinumModel(int textureWidth, int textureHeight) {
         super(textureWidth, textureHeight);
         
+        addHumanoidBaseBoxes(null);
         // hair goes brrrrr
         ModelRenderer hair;
         ModelRenderer hair1;

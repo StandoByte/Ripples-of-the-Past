@@ -1,5 +1,11 @@
 package com.github.standobyte.jojo.client.model.entity.stand;
 
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.client.model.pose.IModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
@@ -11,6 +17,7 @@ import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.util.MathUtil;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.HandSide;
@@ -112,8 +119,24 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         rightLowerLeg = new ModelRenderer(this);
         rightLowerLeg.setPos(0.0F, 6.0F, 0.0F);
         rightLeg.addChild(rightLowerLeg);
-
-        addBaseBoxes();
+        
+        
+        baseHumanoidBoxes = ImmutableMap.<ModelRenderer, Consumer<ModelRenderer>>builder()
+                .put(head, part ->          part.texOffs(24, 0) .addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, 0.0F, false))
+                .put(torso, part ->         part.texOffs(0, 0)  .addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, 0.0F, false))
+                .put(leftArm, part ->       part.texOffs(16, 44).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false))
+                .put(leftArmJoint, part ->  part.texOffs(0, 38) .addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.1F, true))
+                .put(leftForeArm, part ->   part.texOffs(16, 54).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false))
+                .put(rightArm, part ->      part.texOffs(0, 44) .addBox(-2.0F, -2.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false))
+                .put(rightArmJoint, part -> part.texOffs(0, 38) .addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.1F, false))
+                .put(rightForeArm, part ->  part.texOffs(0, 54) .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false))
+                .put(leftLeg, part ->       part.texOffs(48, 44).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false))
+                .put(leftLegJoint, part ->  part.texOffs(52, 38).addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.1F, true))
+                .put(leftLowerLeg, part ->  part.texOffs(48, 54).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false))
+                .put(rightLeg, part ->      part.texOffs(32, 44).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false))
+                .put(rightLegJoint, part -> part.texOffs(52, 38).addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.1F, false))
+                .put(rightLowerLeg, part -> part.texOffs(32, 54).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false))
+                .build();
     }
 
     public void afterInit() {
@@ -130,35 +153,15 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         rightArmForearmOnly.addChild(rightForeArm);
     }
 
-    protected void addBaseBoxes() {
-        head.texOffs(24, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
-
-        torso.texOffs(0, 0).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, 0.0F, false);
-
-        leftArm.texOffs(16, 44).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
-
-        leftArmJoint.texOffs(0, 38).addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.1F, true);
-
-        leftForeArm.texOffs(16, 54).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false);
-
-        rightArm.texOffs(0, 44).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
-
-        rightArmJoint.texOffs(0, 38).addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.1F, false);
-
-        rightForeArm.texOffs(0, 54).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false);
-
-        leftLeg.texOffs(48, 44).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
-
-        leftLegJoint.texOffs(52, 38).addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.1F, true);
-
-        leftLowerLeg.texOffs(48, 54).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false);
-
-        rightLeg.texOffs(32, 44).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
-
-        rightLegJoint.texOffs(52, 38).addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.1F, false);
-
-        rightLowerLeg.texOffs(32, 54).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false);
+    protected final void addHumanoidBaseBoxes(@Nullable Predicate<ModelRenderer> partPredicate) {
+        for (Map.Entry<ModelRenderer, Consumer<ModelRenderer>> entry : baseHumanoidBoxes.entrySet()) {
+            if (partPredicate == null || partPredicate.test(entry.getKey())) {
+                entry.getValue().accept(entry.getKey());
+            }
+        }
     }
+    
+    private final Map<ModelRenderer, Consumer<ModelRenderer>> baseHumanoidBoxes;
 
     @Override
     protected void updatePartsVisibility(VisibilityMode mode, boolean forearmOnly) {

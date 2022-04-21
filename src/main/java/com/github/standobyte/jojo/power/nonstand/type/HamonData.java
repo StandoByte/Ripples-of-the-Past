@@ -220,7 +220,7 @@ public class HamonData extends TypeSpecificData {
         return hamonDamageFactor;
     }
     
-    // FIXME (!!!!!!!!) use this for all hamon actions
+    // FIXME (!!!!) use this for all hamon actions
     public float hamonEfficiency() {
         float efficiency = 1;
         LivingEntity user = power.getUser();

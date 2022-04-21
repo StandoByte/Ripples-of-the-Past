@@ -27,6 +27,9 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
 
     public HierophantGreenModel(int textureWidth, int textureHeight) {
         super(textureWidth, textureHeight);
+        
+        addHumanoidBaseBoxes(null);
+        
         head.texOffs(0, 16).addBox(-4.5F, -4.5F, -1.0F, 9.0F, 2.0F, 2.0F, 0.0F, false);
         head.texOffs(52, 28).addBox(-1.5F, -8.5F, -1.5F, 3.0F, 1.0F, 3.0F, 0.0F, false);
         head.texOffs(48, 4).addBox(-1.5F, -2.1F, -4.5F, 3.0F, 2.0F, 2.0F, 0.0F, false);
