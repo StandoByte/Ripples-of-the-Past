@@ -421,11 +421,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
     
     @Override
-    public boolean isStandRemotelyControlled() {
-        return standManifestation instanceof StandEntity ? ((StandEntity) standManifestation).isManuallyControlled() : false;
-    }
-    
-    @Override
     public int getTier() {
         return tier;
     }

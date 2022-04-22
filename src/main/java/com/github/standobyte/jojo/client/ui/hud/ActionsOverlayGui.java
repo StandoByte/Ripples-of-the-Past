@@ -210,13 +210,17 @@ public class ActionsOverlayGui extends AbstractGui {
             RenderSystem.disableRescaleNormal();
             RenderSystem.disableBlend();
         }
-        else if (showModeSelector && event.getType() == RenderGameOverlayEvent.ElementType.TEXT) {
+        else if (event.getType() == RenderGameOverlayEvent.ElementType.TEXT) {
             RenderSystem.enableRescaleNormal();
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 
-            drawModeSelectorNames(matrixStack, modeSelectorPosition, partialTick);
+            if (showModeSelector) {
+                drawModeSelectorNames(matrixStack, modeSelectorPosition, partialTick);
+            }
+            
+            drawBarsText(matrixStack, barsRenderer, partialTick);
             
             RenderSystem.disableRescaleNormal();
             RenderSystem.disableBlend();
@@ -337,6 +341,13 @@ public class ActionsOverlayGui extends AbstractGui {
             renderer.render(matrixStack, x, y, pos.alignment, 
                     currentMode != null ? currentMode.powerClassification : null, nonStandUiMode.getPower(), standUiMode.getPower(), 
                     tickCount, partialTick);
+        }
+    }
+    
+    private void drawBarsText(MatrixStack matrixStack, BarsRenderer renderer, float partialTick) {
+        if (renderer != null) {
+            renderer.drawTextAfterRender(matrixStack, getCurrentMode(), nonStandUiMode.getPower(), 
+                    standUiMode.getPower(), tickCount, partialTick, mc.font, this);
         }
     }
 
@@ -820,14 +831,14 @@ public class ActionsOverlayGui extends AbstractGui {
     
     
     
-    private void drawString(MatrixStack matrixStack, FontRenderer font, ITextComponent text, int x, int y, Alignment alignment, int color) {
+    void drawString(MatrixStack matrixStack, FontRenderer font, ITextComponent text, int x, int y, Alignment alignment, int color) {
         if (alignment == Alignment.RIGHT) {
             x -= font.width(text);
         }
         drawString(matrixStack, font, text, x, y, color);
     }
     
-    private void drawBackdrop(MatrixStack matrixStack, int x, int y, int width, Alignment alignment, 
+    void drawBackdrop(MatrixStack matrixStack, int x, int y, int width, Alignment alignment, 
             @Nullable ElementTransparency transparency, float partialTick) {
         int backdropColor = mc.options.getBackgroundColor(0.0F);
         if (backdropColor != 0) {

@@ -20,6 +20,9 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 
 @SuppressWarnings("deprecation")
 public abstract class BarsRenderer {
@@ -69,6 +72,25 @@ public abstract class BarsRenderer {
                         standPower.getResolve(), standPower.getMaxResolve(), 
                         0, 0, standPower.getResolveCounter().getMaxAchievedValue(), 
                         tickCounter, partialTick);
+                
+                setResolveBonusTextPos(x, y, alignment);
+            }
+        }
+    }
+
+    protected void setResolveBonusTextPos(int barsX, int barsY, Alignment barsAlignment) {}
+    
+    protected int resolveBonusX;
+    protected int resolveBonusY;
+    protected Alignment resolveBonusAlignment;
+    void drawTextAfterRender(MatrixStack matrixStack, 
+            @Nullable PowerClassification currentMode, INonStandPower nonStandPower, IStandPower standPower, 
+            int tickCounter, float partialTick, FontRenderer font, ActionsOverlayGui hud) {
+        if (currentMode == PowerClassification.STAND && standPower != null && standPower.hasPower() && standPower.usesResolve()) {
+            float bonus = standPower.getResolveCounter().getBoostVisible(standPower.getUser());
+            if (bonus > 1) {
+                drawText(matrixStack, new StringTextComponent("x" + String.format("%.2f", bonus)), 
+                        resolveBonusX, resolveBonusY, Alignment.RIGHT, standPower.getType().getColor(), partialTick, font, hud);
             }
         }
     }
@@ -174,5 +196,13 @@ public abstract class BarsRenderer {
         ENERGY,
         STAMINA,
         RESOLVE
+    }
+    
+    
+
+    protected void drawText(MatrixStack matrixStack, ITextComponent text, int x, int y, Alignment alignment, 
+            int color, float partialTick, FontRenderer font, ActionsOverlayGui hud) {
+        hud.drawBackdrop(matrixStack, x, y, font.width(text), alignment, null, partialTick);
+        hud.drawString(matrixStack, font, text, x, y, alignment, color);
     }
 }

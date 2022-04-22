@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.InMemoryCommentedFormat;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.NetworkUtil;
@@ -158,7 +159,8 @@ public class JojoModConfig {
                         .define("standStamina", true);
                 
                 resolvePoints = builder
-                        .comment(" Max resolve points at each Resolve level (starting from 0)", 
+                        .comment(" Max resolve points at each Resolve level (starting from 0).", 
+                                "  Decrease these values to make getting to each level easier.", 
                                 "  All values must be higher than 0.")
                         .translation("jojo.config.resolvePoints")
                         .defineList("resolvePoints", Arrays.asList(ResolveCounter.DEFAULT_MAX_RESOLVE_VALUES), 
@@ -454,7 +456,7 @@ public class JojoModConfig {
     }
     
     public static Common getCommonConfigInstance(boolean isClientSide) {
-        return isClientSide ? COMMON_SYNCED_TO_CLIENT : COMMON_FROM_FILE;
+        return isClientSide && !ClientUtil.isLocalServer() ? COMMON_SYNCED_TO_CLIENT : COMMON_FROM_FILE;
     }
 
     static final ForgeConfigSpec clientSpec;

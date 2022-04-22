@@ -37,6 +37,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.SyncHamonExercisesP
 import com.github.standobyte.jojo.network.packets.fromserver.SyncInputBufferPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncLeapCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncMaxAchievedResolvePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.SyncResolveBoostsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncResolveLevelPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStaminaPacket;
@@ -243,6 +244,11 @@ public class PacketManager {
         .encoder(SyncResolveLevelPacket::encode)
         .decoder(SyncResolveLevelPacket::decode)
         .consumer(SyncResolveLevelPacket::handle).add();
+        
+        channel.messageBuilder(SyncResolveBoostsPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(SyncResolveBoostsPacket::encode)
+        .decoder(SyncResolveBoostsPacket::decode)
+        .consumer(SyncResolveBoostsPacket::handle).add();
         
         channel.messageBuilder(SyncMaxAchievedResolvePacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(SyncMaxAchievedResolvePacket::encode)

@@ -106,4 +106,18 @@ public class HorizontalBarsRenderer extends BarsRenderer {
     protected void drawBarElement(MatrixStack matrixStack, int x, int y, int texX, int texY, int width, int length) {
         super.drawBarElement(matrixStack, x, y, texX, texY, length, width);
     }
+
+    @Override
+    protected void setResolveBonusTextPos(int barsX, int barsY, Alignment barsAlignment) {
+        switch (barsAlignment) {
+        case LEFT:
+            this.resolveBonusX = barsX + 245;
+            break;
+        case RIGHT:
+            this.resolveBonusX = barsX - 219;
+            break;
+        }
+        this.resolveBonusY = barsY + 13;
+        this.resolveBonusAlignment = barsAlignment;
+    }
 }

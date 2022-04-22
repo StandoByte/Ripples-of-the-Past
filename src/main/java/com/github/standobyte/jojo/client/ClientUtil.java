@@ -38,6 +38,10 @@ public class ClientUtil {
     public static World getClientWorld() {
         return Minecraft.getInstance().level;
     }
+    
+    public static boolean isLocalServer() {
+        return Minecraft.getInstance().isLocalServer();
+    }
 
     public static Entity getEntityById(int entityId) {
         return Minecraft.getInstance().level.getEntity(entityId);

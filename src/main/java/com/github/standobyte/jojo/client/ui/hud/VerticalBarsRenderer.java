@@ -82,4 +82,18 @@ public class VerticalBarsRenderer extends BarsRenderer {
             RenderSystem.enableBlend();
         }
     }
+
+    @Override
+    protected void setResolveBonusTextPos(int barsX, int barsY, Alignment barsAlignment) {
+        switch (barsAlignment) {
+        case LEFT:
+            this.resolveBonusX = barsX + 38;
+            break;
+        case RIGHT:
+            this.resolveBonusX = barsX - 7;
+            break;
+        }
+        this.resolveBonusY = barsY + 106;
+        this.resolveBonusAlignment = barsAlignment;
+    }
 }
