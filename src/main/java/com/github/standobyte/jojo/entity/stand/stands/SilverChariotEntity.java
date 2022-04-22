@@ -199,4 +199,13 @@ public class SilverChariotEntity extends StandEntity {
     protected double leapBaseStrength() {
         return getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
     }
+    
+    @Override
+    public float getUserMovementFactor() {
+        float factor = super.getUserMovementFactor();
+        if (!hasArmor() && getUserPower() != null && getUserPower().getResolveLevel() >= 4) {
+            factor += (1 - factor) * 0.5F;
+        }
+        return factor;
+    }
 }

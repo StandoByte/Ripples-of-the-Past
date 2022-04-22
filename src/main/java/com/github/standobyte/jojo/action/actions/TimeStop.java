@@ -59,7 +59,7 @@ public class TimeStop extends StandAction {
         if (TimeHandler.isTimeStopped(user.level, user.blockPosition())) {
             return null;
         }
-        if (wasActive && voiceLineWithStandSummoned != null) {
+        if (wasActive && voiceLineWithStandSummoned != null && voiceLineWithStandSummoned.get() != null) {
             return voiceLineWithStandSummoned.get();
         }
         return super.getShout(user, power, target, wasActive);
@@ -88,13 +88,18 @@ public class TimeStop extends StandAction {
                         world.dimension(), player -> (JojoModConfig.getCommonConfigInstance(false).inTimeStopRange(
                                 chunkPos, new ChunkPos(player.blockPosition()))) && TimeHandler.canPlayerSeeInStoppedTime(player));
             }
-            // FIXME (!) add progress points (inside TickingTimeStopInstance)
+            // FIXME (!!!!) add progress points inside TickingTimeStopInstance instead
             power.addLearningProgressPoints(this, 5);
             if (hasShiftVariation()) {
                 power.addLearningProgressPoints(getShiftVariationIfPresent(), 5);
             }
             user.addEffect(new EffectInstance(ModEffects.TIME_STOP.get(), timeStopTicks, 0, false, false, true));
         }
+    }
+    
+    @Override
+    public float getStaminaCost(IStandPower stand) {
+        return super.getStaminaCost(stand) + getStaminaCostTicking(stand) * 100;
     }
     
     @Override

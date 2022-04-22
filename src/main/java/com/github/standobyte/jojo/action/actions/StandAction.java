@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.action.actions;
 
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
@@ -70,10 +71,26 @@ public abstract class StandAction extends Action<IStandPower> {
     }
     
     @Override
+    public void onPerform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
+        super.onPerform(world, user, power, target);
+        if (!world.isClientSide() && !staminaConsumedDifferently(power)) {
+            power.consumeStamina(getStaminaCost(power));
+        }
+    }
+    
+    @Override
     public void onClick(World world, LivingEntity user, IStandPower power) {
-        if (!world.isClientSide() && !power.isActive() && autoSummonStand) {
+        if (!world.isClientSide() && !power.isActive() && autoSummonStand(power)) {
             power.getType().summon(user, power, true);
         }
+    }
+    
+    protected boolean autoSummonStand(IStandPower power) {
+        return autoSummonStand;
+    }
+    
+    public boolean staminaConsumedDifferently(IStandPower power) {
+        return false;
     }
     
     

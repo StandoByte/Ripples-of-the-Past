@@ -42,15 +42,15 @@ public class StandEntityTask {
         this.ticksLeft = this.startingTicks;
         this.phase = phase;
         this.offsetFromUser = stand.hasEffect(ModEffects.STUN.get()) ? null : action.getOffsetFromUser(stand);
-        setTarget(stand, target);
+        setTarget(stand, target, stand.getUserPower());
         if (stand != null) {
             rotateStand(stand, false);
         }
     }
     
-    void setTarget(StandEntity stand, ActionTarget target) {
-        if (target != null && (stand == null || 
-                target.getType() == TargetType.EMPTY || action.canStandTarget(stand, target))) {
+    void setTarget(StandEntity standEntity, ActionTarget target, IStandPower standPower) {
+        if (target != null && (standEntity == null || 
+                target.getType() == TargetType.EMPTY || action.canStandTarget(standEntity, target, standPower))) {
             this.target = target;
         }
     }
@@ -77,7 +77,7 @@ public class StandEntityTask {
         }
         
         if (phase == StandEntityAction.Phase.PERFORM) {
-            standPower.consumeStamina(action.getStaminaCost(standPower));
+            standPower.consumeStamina(action.getStaminaCostTicking(standPower));
             if (ticksLeft == startingTicks) {
                 action.standPerform(standEntity.level, standEntity, standPower, target);
             }

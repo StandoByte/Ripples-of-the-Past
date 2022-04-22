@@ -59,6 +59,7 @@ public class HamonProjectileShieldEntity extends Entity implements IEntityAdditi
     @Override
     public void push(Entity entity) {}
 
+    // FIXME (!!!!) find another way to detect projectiles
     @Override
     public boolean isPickable() {
         return true;

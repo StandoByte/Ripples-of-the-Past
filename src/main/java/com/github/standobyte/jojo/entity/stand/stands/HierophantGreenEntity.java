@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.action.actions.HierophantGreenBarrier;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGBarrierEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
+import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModSounds;
 
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -53,12 +54,10 @@ public class HierophantGreenEntity extends StandEntity {
     
     public void shootEmeraldsFromBarriers(Vector3d pos, int multiplier) {
         if (canBarriersShoot && getUserPower() != null) {
-            // FIXME (!!!!!!!!) shoot emeralds from barriers
-            // remove the shift arg ( == true)
-//            float manaCost = (shift ? ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get() : ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED.get())
-//                    .getManaCost() / rangedAttackDuration(shift) * 0.5F;
+            // FIXME (!!!!) emeralds from barriers change
+            float staminaCost = (ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED.get()).getStaminaCostTicking(getUserPower());
             int barrierEmeralds = Math.max(getPlacedBarriersCount() * multiplier / 10, 1);
-            for (int i = 0; i < barrierEmeralds/* && getUserPower().consumeMana(manaCost)*/; i++) {
+            for (int i = 0; i < barrierEmeralds && getUserPower().consumeStamina(staminaCost); i++) {
                 placedBarriers.get(random.nextInt(placedBarriers.size())).shootEmeralds(pos, 1);
             }
             canBarriersShoot = false;

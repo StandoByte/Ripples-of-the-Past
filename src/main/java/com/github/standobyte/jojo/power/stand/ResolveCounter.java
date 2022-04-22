@@ -31,9 +31,9 @@ public class ResolveCounter {
     public static final float SOUL_TEAMMATE_RESOLVE_TICK = 0F;
     public static final float SOUL_LOOK_RESOLVE_TICK = 0F;
     public static final float RESOLVE_DMG_REDUCTION = 0.6667F;
-    public static final Float[] DEFAULT_MAX_RESOLVE_VALUES = {100F, 250F, 500F, 1000F, 2500F};
-    private static final float RESOLVE_DECAY = 5F;
-    private static final int RESOLVE_NO_DECAY_TICKS = 300;
+    public static final Double[] DEFAULT_MAX_RESOLVE_VALUES = {100.0, 250.0, 500.0, 1000.0, 2500.0};
+    private static final float RESOLVE_DECAY = 1F;
+    private static final int RESOLVE_NO_DECAY_TICKS = 100;
     private static final float RESOLVE_FOR_DMG_POINT = 0.5F;
     private static final int RESOLVE_BOOST_NO_DECAY_TICKS = 100;
     private static final int RESOLVE_BOOST_MAX = 10;
@@ -104,8 +104,8 @@ public class ResolveCounter {
     }
 
     float getMaxResolveValue() {
-        List<? extends Float> ptsList = JojoModConfig.getCommonConfigInstance(stand.getUser().level.isClientSide()).resolvePoints.get();
-        return ptsList.get(Math.min(getResolveLevel(), ptsList.size() - 1));
+        List<? extends Double> ptsList = JojoModConfig.getCommonConfigInstance(stand.getUser().level.isClientSide()).resolvePoints.get();
+        return ptsList.get(Math.min(getResolveLevel(), ptsList.size() - 1)).floatValue();
     }
     
     public float getMaxAchievedValue() {

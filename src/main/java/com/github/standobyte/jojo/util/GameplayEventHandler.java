@@ -34,6 +34,8 @@ import com.github.standobyte.jojo.item.StoneMaskItem;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartPacket;
 import com.github.standobyte.jojo.potion.IApplicableEffect;
+import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
@@ -170,7 +172,7 @@ public class GameplayEventHandler {
             player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                 cap.tick();
             });
-            if (player.tickCount % 60 == 0 && !player.isInvisible() && player.xxa == 0 && player.zza == 0 && player instanceof ServerPlayerEntity) {
+            if (player.tickCount % 60 == 0 && !player.isInvisible() && player instanceof ServerPlayerEntity) {
                 long timeNotActive = Util.getMillis() - ((ServerPlayerEntity) player).getLastActionTime();
                 if (timeNotActive > 60000) {
                     ((ServerWorld) player.level).sendParticles(ModParticles.MENACING.get(), player.getX(), player.getEyeY(), player.getZ(), 
@@ -395,7 +397,7 @@ public class GameplayEventHandler {
     public static void cancelLivingAttack(LivingAttackEvent event) {
         HamonPowerType.snakeMuffler(event);
     }
-    
+
     @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
     public static void inCaseOfExplosionCancel(LivingAttackEvent event) {
         if (event.isCanceled() && event.getSource().isExplosion()) {
@@ -481,6 +483,11 @@ public class GameplayEventHandler {
     public static void onLivingDamage(LivingDamageEvent event) {
         activateStoneMasks(event.getSource(), event.getAmount(), event.getEntityLiving());
         StandType.onHurtByStand(event.getSource(), event.getAmount(), event.getEntityLiving());
+        
+        for (PowerClassification powerClassification : PowerClassification.values()) {
+            IPower.getPowerOptional(event.getEntityLiving(), powerClassification).ifPresent(power -> 
+            power.onUserGettingAttacked(event.getSource(), event.getAmount()));
+        }
     }
 
 

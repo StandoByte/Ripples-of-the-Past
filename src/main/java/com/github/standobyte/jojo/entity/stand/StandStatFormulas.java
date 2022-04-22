@@ -109,7 +109,7 @@ public class StandStatFormulas {
     }
     
     public static int dashCooldown(double movementSpeed) {
-        return Math.max((int) (27.5 - movementSpeed * 25), 0);
+        return Math.max((int) (30 - movementSpeed * 25), 2);
     }
     
     public static boolean isBlockBreakable(double strength, float blockHardness, int blockHarvestLevel) {

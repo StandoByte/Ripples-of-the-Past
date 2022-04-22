@@ -61,8 +61,7 @@ public class JojoModConfig {
         public final ForgeConfigSpec.DoubleValue standDamageMultiplier;
         public final ForgeConfigSpec.BooleanValue skipStandProgression;
         public final ForgeConfigSpec.BooleanValue standStamina;
-        // FIXME (!!!!!!!!) "List on key resolvePoints is deemed to need correction. It failed validation."
-        public final ForgeConfigSpec.ConfigValue<List<? extends Float>> resolvePoints;
+        public final ForgeConfigSpec.ConfigValue<List<? extends Double>> resolvePoints;
         public final ForgeConfigSpec.BooleanValue soulAscension;
         public final ForgeConfigSpec.IntValue timeStopChunkRange;
 
@@ -162,7 +161,14 @@ public class JojoModConfig {
                         .comment(" Max resolve points at each Resolve level (starting from 0)", 
                                 "  All values must be higher than 0.")
                         .translation("jojo.config.resolvePoints")
-                        .defineList("resolvePoints", Arrays.asList(ResolveCounter.DEFAULT_MAX_RESOLVE_VALUES), pts -> pts instanceof Float && ((Float) pts) > 0);
+                        .defineList("resolvePoints", Arrays.asList(ResolveCounter.DEFAULT_MAX_RESOLVE_VALUES), 
+                                pts -> {
+                                    if (pts instanceof Double) {
+                                        Double num = (Double) pts;
+                                        return num > 0 && Float.isFinite(num.floatValue());
+                                    }
+                                    return false;
+                                });
                 
                 soulAscension = builder
                         .translation("jojo.config.soulAscension")
@@ -355,7 +361,7 @@ public class JojoModConfig {
 //                COMMON_SYNCED_TO_CLIENT.standDamageMultiplier.set(standDamageMultiplier);
                 COMMON_SYNCED_TO_CLIENT.skipStandProgression.set(skipStandProgression);
                 COMMON_SYNCED_TO_CLIENT.standStamina.set(standStamina);
-                COMMON_SYNCED_TO_CLIENT.resolvePoints.set(Floats.asList(resolvePoints));
+                COMMON_SYNCED_TO_CLIENT.resolvePoints.set(Floats.asList(resolvePoints).stream().map(Float::doubleValue).collect(Collectors.toList()));
                 COMMON_SYNCED_TO_CLIENT.soulAscension.set(soulAscension);
                 COMMON_SYNCED_TO_CLIENT.timeStopChunkRange.set(timeStopChunkRange);
                 
@@ -464,6 +470,14 @@ public class JojoModConfig {
         ModConfig config = event.getConfig();
         if (JojoMod.MOD_ID.equals(config.getModId()) && config.getType() == ModConfig.Type.COMMON) {
             COMMON_FROM_FILE.onLoadOrReload();
+        }
+    }
+    
+    @SubscribeEvent
+    public static void onConfigReload(ModConfig.Reloading event) {
+        ModConfig config = event.getConfig();
+        if (JojoMod.MOD_ID.equals(config.getModId()) && config.getType() == ModConfig.Type.COMMON) {
+            // FIXME sync the config to all players on the server
         }
     }
 }

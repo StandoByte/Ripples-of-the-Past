@@ -45,8 +45,8 @@ import com.github.standobyte.jojo.action.actions.StandEntityAction.Phase;
 import com.github.standobyte.jojo.action.actions.StandEntityBlock;
 import com.github.standobyte.jojo.action.actions.StandEntityHeavyAttack;
 import com.github.standobyte.jojo.action.actions.StandEntityLightAttack;
-import com.github.standobyte.jojo.action.actions.StandEntityMeleeBarrage;
 import com.github.standobyte.jojo.action.actions.StandEntityUnsummon;
+import com.github.standobyte.jojo.action.actions.StarPlatinumBarrage;
 import com.github.standobyte.jojo.action.actions.StarPlatinumStarFinger;
 import com.github.standobyte.jojo.action.actions.StarPlatinumZoom;
 import com.github.standobyte.jojo.action.actions.TheWorldBarrage;
@@ -195,13 +195,12 @@ public class ModActions {
                     return null;
                 }
             });
-    private static final float ____ = 0; // FIXME (!!!!!!!!) stamina cost values
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_PUNCH = ACTIONS.register("star_platinum_punch", 
             () -> new StandEntityLightAttack(new StandEntityAction.Builder().standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_ORA)));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_BARRAGE = ACTIONS.register("star_platinum_barrage", 
-            () -> new StandEntityMeleeBarrage(new StandEntityAction.Builder().standTakesCrosshairTarget(TargetType.ENTITY)
+            () -> new StarPlatinumBarrage(new StandEntityAction.Builder().standTakesCrosshairTarget(TargetType.ENTITY)
                     .standSound(ModSounds.STAR_PLATINUM_ORA_ORA_ORA)));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_HEAVY_PUNCH = ACTIONS.register("star_platinum_heavy_punch", 
@@ -221,13 +220,13 @@ public class ModActions {
                     .standOffsetFromUser(-0.25, -0.25, -0.3)));
     
     public static final RegistryObject<StandAction> STAR_PLATINUM_TIME_STOP = ACTIONS.register("star_platinum_time_stop", 
-            () -> new TimeStop(new StandAction.Builder().holdToFire(40, false).staminaCost(____).staminaCostTick(____).cooldown(0, 600, 0.3333F)
+            () -> new TimeStop(new StandAction.Builder().holdToFire(40, false).staminaCost(500).staminaCostTick(7.5F).cooldown(0, 600, 0.3333F)
                     .resolveLevelToUnlock(4).isTrained().ignoresPerformerStun().autoSummonStand().shout(ModSounds.JOTARO_STAR_PLATINUM_THE_WORLD))
-            .voiceLineWithStandSummoned(ModSounds.JOTARO_THE_WORLD).timeStopSound(ModSounds.STAR_PLATINUM_TIME_STOP)
+            .timeStopSound(ModSounds.STAR_PLATINUM_TIME_STOP)
             .timeResumeVoiceLine(ModSounds.JOTARO_TIME_RESUMES).timeResumeSound(ModSounds.STAR_PLATINUM_TIME_RESUME));
     
     public static final RegistryObject<StandAction> STAR_PLATINUM_TIME_STOP_BLINK = ACTIONS.register("star_platinum_ts_blink", 
-            () -> new TimeStopInstant(new StandAction.Builder().staminaCost(____).staminaCostTick(____)
+            () -> new TimeStopInstant(new StandAction.Builder().staminaCost(500).staminaCostTick(7.5F)
                     .resolveLevelToUnlock(4).isTrained().ignoresPerformerStun().shiftVariationOf(STAR_PLATINUM_TIME_STOP), 
                     ModSounds.STAR_PLATINUM_TIME_STOP_BLINK));
     
@@ -247,13 +246,13 @@ public class ModActions {
             () -> new StandEntityBlock());
     
     public static final RegistryObject<StandAction> THE_WORLD_TIME_STOP = ACTIONS.register("the_world_time_stop", 
-            () -> new TheWorldTimeStop(new StandAction.Builder().holdToFire(40, false).staminaCost(____).staminaCostTick(____).cooldown(0, 600, 0.3333F)
+            () -> new TheWorldTimeStop(new StandAction.Builder().holdToFire(40, false).staminaCost(500).staminaCostTick(7.5F).cooldown(0, 600, 0.3333F)
                     .resolveLevelToUnlock(2).isTrained().ignoresPerformerStun().shout(ModSounds.DIO_THE_WORLD))
             .voiceLineWithStandSummoned(ModSounds.DIO_TIME_STOP).timeStopSound(ModSounds.THE_WORLD_TIME_STOP)
             .timeResumeVoiceLine(ModSounds.DIO_TIME_RESUMES).timeResumeSound(ModSounds.THE_WORLD_TIME_RESUME));
     
     public static final RegistryObject<StandAction> THE_WORLD_TIME_STOP_BLINK = ACTIONS.register("the_world_ts_blink", 
-            () -> new TimeStopInstant(new StandAction.Builder().staminaCost(____).staminaCostTick(____)
+            () -> new TimeStopInstant(new StandAction.Builder().staminaCost(500).staminaCostTick(7.5F)
                     .resolveLevelToUnlock(2).isTrained().ignoresPerformerStun()
                     .shiftVariationOf(THE_WORLD_TIME_STOP), 
                     ModSounds.THE_WORLD_TIME_STOP_BLINK));

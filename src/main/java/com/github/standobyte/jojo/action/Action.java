@@ -200,7 +200,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     protected int getCooldownAdditional(P power, int ticksHeld) {
-        return power.isUserCreative() ? 0 : cooldownAdditional;
+        return power.isUserCreative() ? 0 : cooldownAdditional * 0;
     }
     
     public int getCooldown(P power, int ticksHeld) {
@@ -243,6 +243,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     public boolean holdOnly() {
         return holdDurationToFire == 0 && holdDurationMax > 0;
+    }
+    
+    public boolean cancelHeldOnGettingAttacked(P power) {
+        return false;
     }
     
     protected String getTranslationKey(P power, ActionTarget target) {

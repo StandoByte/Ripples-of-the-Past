@@ -69,7 +69,7 @@ public class JojoModUtil {
 
     public static RayTraceResult rayTrace(Entity entity, double reachDistance, @Nullable Predicate<Entity> entityFilter, 
             double rayTraceInflate, double standPrecision) {
-        return rayTraceMultipleEntities(entity, reachDistance, entityFilter, rayTraceInflate, 0)[0];
+        return rayTraceMultipleEntities(entity, reachDistance, entityFilter, rayTraceInflate, standPrecision)[0];
     }
 
     public static RayTraceResult[] rayTraceMultipleEntities(Entity entity, double reachDistance, @Nullable Predicate<Entity> entityFilter, 

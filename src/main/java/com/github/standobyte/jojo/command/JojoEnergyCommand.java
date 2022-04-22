@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.command;
 
 import java.util.Collection;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.FloatArgumentType;
@@ -62,7 +61,6 @@ public class JojoEnergyCommand {
                 if (INonStandPower.getNonStandPowerOptional((LivingEntity) entity).map(power -> {
                     if (power.hasPower()) {
                         float amount;
-                        JojoMod.LOGGER.debug(numType);
                         switch (numType) {
                         case RATIO:
                             amount = value * power.getMaxEnergy();

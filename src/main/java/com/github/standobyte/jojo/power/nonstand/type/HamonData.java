@@ -313,7 +313,7 @@ public class HamonData extends TypeSpecificData {
         if (user.swinging) {
             incExerciseTicks(Exercise.MINING, multiplier, user.level.isClientSide());
         }
-        // FIXME (!!!!!!!!) and isn't stuck in place
+        // FIXME (!!!!) and isn't stuck in place
         if (user.isSwimming() && !(user.xxa == 0 && user.zza == 0 && user.yya == 0)) {
             incExerciseTicks(Exercise.SWIMMING, multiplier, user.level.isClientSide());
         }
@@ -446,7 +446,7 @@ public class HamonData extends TypeSpecificData {
         if (!world.isClientSide()) {
             float lvlInc = (2 * MathHelper.clamp(getAverageExercisePoints(), 0F, 1F)) - 1F;
             recalcAvgExercisePoints();
-            JojoMod.LOGGER.debug(getAverageExercisePoints());
+            JojoMod.LOGGER.debug(power.getUser().getDisplayName().getString() + ": Day " + day + " (from " + prevDay + "), Hamon exercise training: " + getAverageExercisePoints());
             // FIXME (!!) why tf does it go down when the user is offline
             if (lvlInc < 0) {
                 if (!JojoModConfig.getCommonConfigInstance(false).breathingTechniqueDeterioration.get()) {
