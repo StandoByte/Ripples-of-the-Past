@@ -29,6 +29,9 @@ public class TheWorldBarrage extends StandEntityMeleeBarrage {
     
     @Override
     protected SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase) {
+        if (!standEntity.isArmsOnlyMode() && TimeStop.vampireTimeStopDuration(standPower.getUser())) {
+            return null;
+        }
 //        return null;
         return super.getSound(standEntity, standPower, phase);
     }

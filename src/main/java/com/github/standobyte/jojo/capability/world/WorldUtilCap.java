@@ -15,8 +15,8 @@ import net.minecraft.world.World;
 
 public class WorldUtilCap {
     private final World world;
-    // FIXME (!) time stop rewrite
-    private final WorldTimeStops timeStops = new WorldTimeStops();
+    // FIXME (!!!!) time stop rewrite
+    final WorldTimeStopHandler timeStops;
     Map<ChunkPos, Integer> timeStopTicks = new HashMap<>();
     Map<ChunkPos, LastToResumeTime> timeResumption = new HashMap<>();
     public boolean gameruleDayLightCycle;
@@ -24,6 +24,7 @@ public class WorldUtilCap {
     
     public WorldUtilCap(World world) {
         this.world = world;
+        this.timeStops = new WorldTimeStopHandler(world);
     }
     
     public void setTimeStopTicks(int ticks, ChunkPos chunkPos) {

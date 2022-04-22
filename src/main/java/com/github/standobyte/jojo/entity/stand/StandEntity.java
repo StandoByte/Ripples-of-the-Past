@@ -301,23 +301,23 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
     private static final AttributeModifier ATTACK_DAMAGE_ARMS_ONLY = new AttributeModifier(
             UUID.fromString("aaa82f0e-f1a7-47d1-9066-e1a025be02df"), "Stand attack damage with only arms", -0.25, Operation.MULTIPLY_TOTAL);
-    private static final AttributeModifier ATTACK_SPEED_ARMS_ONLY = new AttributeModifier(
-            UUID.fromString("5b26b3d1-405c-402b-aee6-d5a0657386fe"), "Stand attack speed with only arms", -0.25, Operation.MULTIPLY_TOTAL);
+//    private static final AttributeModifier ATTACK_SPEED_ARMS_ONLY = new AttributeModifier(
+//            UUID.fromString("5b26b3d1-405c-402b-aee6-d5a0657386fe"), "Stand attack speed with only arms", -0.25, Operation.MULTIPLY_TOTAL);
     private static final AttributeModifier DURABILITY_ARMS_ONLY = new AttributeModifier(
-            UUID.fromString("244dd41c-aa40-4604-91f9-a788a40227ca"), "Stand durability with only arms", -0.5, Operation.MULTIPLY_TOTAL);
+            UUID.fromString("244dd41c-aa40-4604-91f9-a788a40227ca"), "Stand durability with only arms", -0.25, Operation.MULTIPLY_TOTAL);
     private static final AttributeModifier PRECISION_ARMS_ONLY = new AttributeModifier(
             UUID.fromString("f2d493e2-830a-4891-b756-65cc2be6f14f"), "Stand precision with only arms", -1, Operation.MULTIPLY_TOTAL);
     
     private void addArmsOnlyModifiers() {
         addModifier(getAttribute(Attributes.ATTACK_DAMAGE), ATTACK_DAMAGE_ARMS_ONLY);
-        addModifier(getAttribute(Attributes.ATTACK_SPEED), ATTACK_SPEED_ARMS_ONLY);
+//        addModifier(getAttribute(Attributes.ATTACK_SPEED), ATTACK_SPEED_ARMS_ONLY);
         addModifier(getAttribute(ModEntityAttributes.STAND_DURABILITY.get()), DURABILITY_ARMS_ONLY);
         addModifier(getAttribute(ModEntityAttributes.STAND_PRECISION.get()), PRECISION_ARMS_ONLY);
     }
     
     private void removeArmsOnlyModifiers() {
         updateModifier(getAttribute(Attributes.ATTACK_DAMAGE), ATTACK_DAMAGE_ARMS_ONLY, false);
-        updateModifier(getAttribute(Attributes.ATTACK_SPEED), ATTACK_SPEED_ARMS_ONLY, false);
+//        updateModifier(getAttribute(Attributes.ATTACK_SPEED), ATTACK_SPEED_ARMS_ONLY, false);
         updateModifier(getAttribute(ModEntityAttributes.STAND_DURABILITY.get()), DURABILITY_ARMS_ONLY, false);
         updateModifier(getAttribute(ModEntityAttributes.STAND_PRECISION.get()), PRECISION_ARMS_ONLY, false);
     }
@@ -1276,7 +1276,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         if (target != null) {
             StandEntityTask task = getCurrentTask();
             if (task != null) {
-                task.setTarget(this, target);
+                task.setTarget(this, target, userPower);
                 if (!level.isClientSide()) {
                     PacketManager.sendToClientsTracking(new TrSyncStandTargetPacket(getId(), target), this);
                 }
@@ -1925,7 +1925,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     @Override
     public boolean isPickable() {
         return super.isPickable() && 
-                (!level.isClientSide() || !ClientUtil.getClientPlayer().is(getUser()));
+                !(level.isClientSide() && (ClientUtil.getClientPlayer().is(getUser()) || !StandUtil.isEntityStandUser(ClientUtil.getClientPlayer())));
     }
 
     @Override

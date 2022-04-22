@@ -20,6 +20,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -42,7 +43,8 @@ public class TimeStopInstant extends StandAction {
     
     @Override
     protected void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
-        int timeStopTicks = TimeHandler.getTimeStopTicks(power, this, user, INonStandPower.getNonStandPowerOptional(user));
+        int timeStopTicks = Math.min(TimeHandler.getTimeStopTicks(power, this, user, INonStandPower.getNonStandPowerOptional(user)), 
+                MathHelper.floor(power.getStamina() / getStaminaCostTicking(power)));
         SoundEvent sound = blinkSound.get();
         if (sound != null) {
             JojoModUtil.playSound(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, user.getX(), user.getY(), user.getZ(), 
@@ -50,8 +52,8 @@ public class TimeStopInstant extends StandAction {
         }
         if (!world.isClientSide()) {
             Vector3d blinkPos = null;
+            double speed = user.getSpeed() * 2.1585;
             if (target.getType() == TargetType.EMPTY) {
-                double speed = user.getSpeed() * 2.1585;
                 RayTraceResult rayTrace = JojoModUtil.rayTrace(user, speed * timeStopTicks, null);
                 if (rayTrace.getType() == RayTraceResult.Type.MISS) {
                     blinkPos = rayTrace.getLocation();
@@ -76,8 +78,13 @@ public class TimeStopInstant extends StandAction {
                 break;
             }
             
+            int impliedTicks = MathHelper.ceil(user.position().subtract(blinkPos).length() / speed);
+            power.consumeStamina(impliedTicks * getStaminaCostTicking(power));
             user.teleportTo(blinkPos.x, blinkPos.y, blinkPos.z);
-            // FIXME (!!!!!!!!) add progress points (depending on the distance)
+            power.addLearningProgressPoints(this, 5);
+            if (isShiftVariation()) {
+                power.addLearningProgressPoints(getBaseVariation(), 5);
+            }
             if (power.isActive()) {
                 IStandManifestation stand = power.getStandManifestation();
                 if (stand instanceof StandEntity) {

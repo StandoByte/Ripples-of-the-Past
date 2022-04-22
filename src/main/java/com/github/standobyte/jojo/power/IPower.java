@@ -17,6 +17,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.common.util.LazyOptional;
 
@@ -75,6 +76,8 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     void setHeldActionTarget(ActionTarget target);
     void stopHeldAction(boolean shouldFire);
 
+    void onUserGettingAttacked(DamageSource dmgSource, float dmgAmount);
+    
     boolean canLeap();
     boolean isLeapUnlocked();
     float leapStrength();

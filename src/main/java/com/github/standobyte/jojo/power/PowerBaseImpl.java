@@ -30,6 +30,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
@@ -489,6 +490,16 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                 else {
                     serverPlayerUser.ifPresent(player -> PacketManager.sendToClient(packet, player));
                 }
+            }
+        }
+    }
+    
+    @Override
+    public void onUserGettingAttacked(DamageSource dmgSource, float dmgAmount) {
+        if (dmgSource.getDirectEntity() != null) {
+            Action<P> heldAction = getHeldAction();
+            if (heldAction != null && heldAction.cancelHeldOnGettingAttacked(getThis())) {
+                stopHeldAction(false);
             }
         }
     }

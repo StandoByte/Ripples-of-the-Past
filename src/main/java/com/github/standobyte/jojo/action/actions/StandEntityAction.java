@@ -81,8 +81,8 @@ public abstract class StandEntityAction extends StandAction {
         return ActionConditionResult.POSITIVE;
     }
     
-    public boolean canStandTarget(StandEntity standEntity, ActionTarget target) {
-        if (!standTakesCrosshairTarget(target)) {
+    public boolean canStandTarget(StandEntity standEntity, ActionTarget target, IStandPower standPower) {
+        if (!standTakesCrosshairTarget(target, standPower)) {
             return false;
         }
         if (target.getType() != TargetType.EMPTY) {
@@ -139,6 +139,11 @@ public abstract class StandEntityAction extends StandAction {
                 }   
             }
         }
+    }
+    
+    @Override
+    public boolean staminaConsumedDifferently(IStandPower power) {
+        return true;
     }
     
     @Override
@@ -227,7 +232,7 @@ public abstract class StandEntityAction extends StandAction {
         return stand.isArmsOnlyMode() ? userOffsetArmsOnly : userOffset;
     }
     
-    protected boolean standTakesCrosshairTarget(ActionTarget target) {
+    protected boolean standTakesCrosshairTarget(ActionTarget target, IStandPower standPower) {
         if (getTargetRequirement() != null && !getTargetRequirement().checkTargetType(TargetType.EMPTY)
                 && getTargetRequirement().checkTargetType(target.getType())) {
             return true;

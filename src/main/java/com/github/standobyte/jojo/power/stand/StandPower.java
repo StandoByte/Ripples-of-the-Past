@@ -198,9 +198,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             
             if (getUser() instanceof PlayerEntity) {
                 PlayerEntity player = (PlayerEntity) getUser();
-                if (getStamina() < getMaxStamina()) {
-                    player.causeFoodExhaustion(0.005F);
-                }
+//                if (getStamina() < getMaxStamina()) {
+//                    player.causeFoodExhaustion(0.005F);
+//                }
                 if (player.getFoodData().getFoodLevel() > 17) {
                     staminaRegen *= 1.25F;
                 }
