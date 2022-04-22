@@ -953,6 +953,8 @@ public class GameplayEventHandler {
                 }
             }
         }
+        
+        IStandPower.getStandPowerOptional(event.getPlayer()).ifPresent(stand -> stand.getResolveCounter().onChatMessage(event.getMessage()));
     }
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)

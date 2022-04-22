@@ -18,7 +18,7 @@ public class ResolveEffect extends UncurableEffect {
         super.addAttributeModifiers(entity, attributes, amplifier);
         IStandPower.getStandPowerOptional(entity).ifPresent(stand -> {
             if (stand.usesResolve()) {
-                stand.getResolveCounter().onResolveEffectStarted(amplifier, stand);
+                stand.getResolveCounter().onResolveEffectStarted(amplifier);
             }
         });
     }
@@ -28,7 +28,7 @@ public class ResolveEffect extends UncurableEffect {
         super.addAttributeModifiers(entity, attributes, amplifier);
         IStandPower.getStandPowerOptional(entity).ifPresent(stand -> {
             if (stand.usesResolve()) {
-                stand.getResolveCounter().onResolveEffectEnded(amplifier, stand);
+                stand.getResolveCounter().onResolveEffectEnded(amplifier);
             }
         });
     }

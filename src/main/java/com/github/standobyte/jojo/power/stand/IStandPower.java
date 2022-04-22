@@ -60,7 +60,6 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     @Nullable
     IStandManifestation getStandManifestation();
     void toggleSummon();
-    boolean isStandRemotelyControlled();
     
     int getTier();
     
