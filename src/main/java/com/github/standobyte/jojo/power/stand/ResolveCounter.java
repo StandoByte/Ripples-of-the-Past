@@ -26,10 +26,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameRules;
 
 public class ResolveCounter {
-    public static final float SOUL_TEAMMATE_RESOLVE_TICK = 0F;
-    public static final float SOUL_LOOK_RESOLVE_TICK = 0F;
     public static final float RESOLVE_DMG_REDUCTION = 0.6667F;
-    public static final Double[] DEFAULT_MAX_RESOLVE_VALUES = {2500.0, 5000.0, 10000.0, 20000.0, 50000.0};
+    public static final Double[] DEFAULT_MAX_RESOLVE_VALUES = {2500.0, 5000.0, 10000.0, 20000.0, 15000.0};
     private static final float RESOLVE_DECAY = 2F;
     private static final int RESOLVE_NO_DECAY_TICKS = 200;
     private static final float RESOLVE_FOR_DMG_POINT = 1F;
@@ -92,7 +90,8 @@ public class ResolveCounter {
         if (stand.getUser() != null && stand.getUser().hasEffect(ModEffects.RESOLVE.get())) {
             EffectInstance effect = stand.getUser().getEffect(ModEffects.RESOLVE.get());
             if (effect.getAmplifier() < RESOLVE_EFFECT_MIN.length) {
-                resolve = Math.max(resolve - getMaxResolveValue() / (float) RESOLVE_EFFECT_MIN[effect.getAmplifier()], 0);
+                resolve = Math.max(resolve - getMaxResolveValue() / 
+                        (float) RESOLVE_EFFECT_MIN[Math.min(effect.getAmplifier(), RESOLVE_EFFECT_MIN.length)], 0);
                 if (!stand.getUser().level.isClientSide() && resolve == 0) {
                     stand.getUser().removeEffect(ModEffects.RESOLVE.get());
                 }
@@ -284,6 +283,16 @@ public class ResolveCounter {
 
     public void onResolveEffectEnded(int amplifier) {
         resetResolveValue();
+    }
+    
+    
+    
+    public void soulAddResolveLook() {
+        setResolveValue(getResolveValue() + getMaxResolveValue() / 60, -1);
+    }
+    
+    public void soulAddResolveTeammate() {
+        setResolveValue(getResolveValue() + getMaxResolveValue() / 300, -1);
     }
     
 

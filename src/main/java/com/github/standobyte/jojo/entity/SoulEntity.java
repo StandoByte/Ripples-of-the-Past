@@ -10,7 +10,6 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRemovePlayerSoulEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClSoulRotationPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.power.stand.ResolveCounter;
 import com.github.standobyte.jojo.util.JojoModUtil;
 
 import net.minecraft.command.arguments.EntityAnchorArgument;
@@ -100,14 +99,14 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
                     new AxisAlignedBB(getBoundingBox().getCenter(), getBoundingBox().getCenter()).inflate(24), 
                     entity -> originEntity.isAlliedTo(entity)).forEach(entity -> {
                         IStandPower.getStandPowerOptional(entity).ifPresent(stand -> 
-                        stand.getResolveCounter().addResolveValue(ResolveCounter.SOUL_TEAMMATE_RESOLVE_TICK));
+                        stand.getResolveCounter().soulAddResolveTeammate());
                     });
             RayTraceResult rayTrace = JojoModUtil.rayTrace(this, 32, null, 1.0);
             if (rayTrace.getType() == RayTraceResult.Type.ENTITY) {
                 Entity lookEntity = ((EntityRayTraceResult) rayTrace).getEntity();
                 if (lookEntity instanceof LivingEntity) {
                     IStandPower.getStandPowerOptional((LivingEntity) lookEntity).ifPresent(stand -> 
-                    stand.getResolveCounter().addResolveValue(ResolveCounter.SOUL_LOOK_RESOLVE_TICK));
+                    stand.getResolveCounter().soulAddResolveLook());
                 }
             }
         }

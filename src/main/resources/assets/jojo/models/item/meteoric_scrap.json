@@ -62,7 +62,7 @@
       "predicate": {
         "jojo:icon": 10
       },
-      "model": "jojo:soul_cloud_pic"
+      "model": "jojo:item/item_icon10"
     }
   ]
 }
