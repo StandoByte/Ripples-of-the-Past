@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.entity;
 
 import java.util.List;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -90,12 +91,13 @@ public class RoadRollerEntity extends Entity {
             }
         }
         if (!level.isClientSide()) {
-            float damage = (float) -movement.y * 20F;
+            float damage = (float) -movement.y * 10F;
             if (damage > 0) {
                 AxisAlignedBB aabb = getBoundingBox().contract(0, getBbHeight() * 3 / 4, 0);
                 List<LivingEntity> entities = level.getEntitiesOfClass(LivingEntity.class, aabb, EntityPredicates.LIVING_ENTITY_STILL_ALIVE);
                 for (LivingEntity entity : entities) {
                     if (!this.is(entity.getVehicle())) {
+                        JojoMod.LOGGER.debug(damage);
                         entity.hurt(DamageUtil.roadRollerDamage(this), damage);
                     }
                 }
@@ -149,6 +151,7 @@ public class RoadRollerEntity extends Entity {
                 Vector3d dmgVec = dmgPos.vectorTo(position()).normalize();
                 double cos = dmgVec.dot(UPWARDS_VECTOR);
                 Vector3d movement = getDeltaMovement();
+                // FIXME (!!!!) adjust road roller movement from attacks
                 setDeltaMovement(movement.x, Math.min(movement.y + cos * amount * 0.04D, 0), movement.z);
             }
             if (!level.isClientSide()) {

@@ -91,8 +91,9 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser 
         }
     }
 
+    // FIXME liquid walking
     @Override
-    public boolean canStandOnFluid(Fluid fluid) { // TODO Forge PR to add LivingStandOnFluidEvent or smth
+    public boolean canStandOnFluid(Fluid fluid) {
         return hamon.isSkillLearned(HamonSkill.LAVA_WALKING) || hamon.isSkillLearned(HamonSkill.WATER_WALKING) && fluid.is(FluidTags.WATER);
     }
 

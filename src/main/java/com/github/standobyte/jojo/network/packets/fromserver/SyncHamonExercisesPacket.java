@@ -13,12 +13,12 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 public class SyncHamonExercisesPacket {
-    private static final long MASK_MINING = (1L << MathHelper.log2(MathHelper.smallestEncompassingPowerOfTwo(Exercise.MINING.getMaxTicks(0)))) - 1L;
-    private static final int BITS_RUNNING = MathHelper.log2(MathHelper.smallestEncompassingPowerOfTwo(Exercise.RUNNING.getMaxTicks(0)));
+    private static final long MASK_MINING = (1L << MathHelper.log2(MathHelper.smallestEncompassingPowerOfTwo(Exercise.MINING.getMaxTicks(null)))) - 1L;
+    private static final int BITS_RUNNING = MathHelper.log2(MathHelper.smallestEncompassingPowerOfTwo(Exercise.RUNNING.getMaxTicks(null)));
     private static final long MASK_RUNNING = (1L << BITS_RUNNING) - 1L;
-    private static final int BITS_SWIMMING = MathHelper.log2(MathHelper.smallestEncompassingPowerOfTwo(Exercise.SWIMMING.getMaxTicks(0)));
+    private static final int BITS_SWIMMING = MathHelper.log2(MathHelper.smallestEncompassingPowerOfTwo(Exercise.SWIMMING.getMaxTicks(null)));
     private static final long MASK_SWIMMING = (1L << BITS_SWIMMING) - 1L;
-    private static final int BITS_MEDITATION = MathHelper.log2(MathHelper.smallestEncompassingPowerOfTwo(Exercise.MEDITATION.getMaxTicks(0)));
+    private static final int BITS_MEDITATION = MathHelper.log2(MathHelper.smallestEncompassingPowerOfTwo(Exercise.MEDITATION.getMaxTicks(null)));
     private static final long MASK_MEDITATION = (1L << BITS_MEDITATION) - 1L;
 
     private final int miningTicks;

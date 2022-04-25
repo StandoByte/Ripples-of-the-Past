@@ -211,6 +211,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             StandEntityAction action = getCurrentTaskAction();
             if (action != null) {
                 StandEntityAction.Phase phase = getCurrentTaskPhase();
+                // FIXME !!!!!!!!!!!!!!!!! when synced to a respawning player, userPower == null
                 action.playSound(this, userPower, phase);
                 action.onTaskSet(level, this, userPower, phase, this.getCurrentTask().getTicksLeft());
             }

@@ -13,6 +13,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.util.TimeHandler;
 
 import net.minecraft.entity.LivingEntity;
@@ -21,8 +22,10 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.LazyOptional;
 
 public class TimeStop extends StandAction {
     private Supplier<SoundEvent> voiceLineWithStandSummoned = () -> null;
@@ -75,7 +78,7 @@ public class TimeStop extends StandAction {
 
     @Override
     protected void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
-        int timeStopTicks = TimeHandler.getTimeStopTicks(power, this, user, INonStandPower.getNonStandPowerOptional(user));
+        int timeStopTicks = getTimeStopTicks(power, this, user, INonStandPower.getNonStandPowerOptional(user));
         if (!world.isClientSide()) {
             BlockPos blockPos = user.blockPosition();
             ChunkPos chunkPos = new ChunkPos(blockPos);
@@ -104,7 +107,7 @@ public class TimeStop extends StandAction {
     
     @Override
     public int getCooldownTechnical(IStandPower power) {
-        return TimeHandler.getTimeStopTicks(power, this, power.getUser(), INonStandPower.getNonStandPowerOptional(power.getUser()));
+        return getTimeStopTicks(power, this, power.getUser(), INonStandPower.getNonStandPowerOptional(power.getUser()));
     }
 
     @Override
@@ -124,7 +127,31 @@ public class TimeStop extends StandAction {
 
     @Override
     public float getMaxTrainingPoints(IStandPower power) {
-        return TimeHandler.getMaxTimeStopTicks(power) - TimeHandler.MIN_TIME_STOP_TICKS;
+        return getMaxTimeStopTicks(power) - MIN_TIME_STOP_TICKS;
+    }
+
+    @Override
+    public TranslationTextComponent getTranslatedName(IStandPower power, String key) {
+        LivingEntity user = power.getUser();
+        int timeStopTicks = getTimeStopTicks(power, this, user, INonStandPower.getNonStandPowerOptional(user));
+        return new TranslationTextComponent(key, String.format("%.2f", (float) timeStopTicks / 20F));
+    }
+    
+    @Override
+    public boolean canUserSeeInStoppedTime(LivingEntity user, IStandPower power) {
+        return true;
+    }
+
+    
+    
+    public static final int MIN_TIME_STOP_TICKS = 5;
+    public static int getTimeStopTicks(IStandPower standPower, StandAction timeStopAction, LivingEntity user, LazyOptional<INonStandPower> otherPower) {
+        return MathHelper.floor(standPower.getLearningProgressPoints(timeStopAction)) + MIN_TIME_STOP_TICKS;
+    }
+    
+    public static int getMaxTimeStopTicks(IStandPower standPower) {
+        return ((TimeStopperStandStats) standPower.getType().getStats())
+                .getMaxTimeStopTicks(TimeStop.vampireTimeStopDuration(standPower.getUser()));
     }
     
     public static boolean vampireTimeStopDuration(LivingEntity entity) {
@@ -134,17 +161,5 @@ public class TimeStop extends StandAction {
             }
             return false;
         }).orElse(false);
-    }
-
-    @Override
-    public TranslationTextComponent getTranslatedName(IStandPower power, String key) {
-        LivingEntity user = power.getUser();
-        int timeStopTicks = TimeHandler.getTimeStopTicks(power, this, user, INonStandPower.getNonStandPowerOptional(user));
-        return new TranslationTextComponent(key, String.format("%.2f", (float) timeStopTicks / 20F));
-    }
-    
-    @Override
-    public boolean canUserSeeInStoppedTime(LivingEntity user, IStandPower power) {
-        return true;
     }
 }

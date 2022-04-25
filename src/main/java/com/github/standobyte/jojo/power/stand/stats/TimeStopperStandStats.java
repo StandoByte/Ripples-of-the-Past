@@ -1,9 +1,10 @@
 package com.github.standobyte.jojo.power.stand.stats;
 
+import com.github.standobyte.jojo.action.actions.TimeStop;
+
 import net.minecraft.network.PacketBuffer;
 
 public class TimeStopperStandStats extends StandStats {
-    public static final int MIN_TIME_STOP_TICKS = 5;
     private final int maxTimeStopTicks;
     private final int maxTimeStopTicksVampire;
 
@@ -41,7 +42,7 @@ public class TimeStopperStandStats extends StandStats {
         private int maxTimeStopTicksVampire = 180;
         
         public Builder maxTimeStopTicks(int forHuman, int forVampire) {
-            forHuman = Math.max(MIN_TIME_STOP_TICKS, forHuman);
+            forHuman = Math.max(TimeStop.MIN_TIME_STOP_TICKS, forHuman);
             forVampire = Math.max(forHuman, forVampire);
             this.maxTimeStopTicks = forHuman;
             this.maxTimeStopTicksVampire = forVampire;

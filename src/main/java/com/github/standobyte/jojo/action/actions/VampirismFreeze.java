@@ -50,7 +50,7 @@ public class VampirismFreeze extends VampirismAction {
         }
         return ActionConditionResult.POSITIVE;
     }
-    
+
     @Override
     protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (!world.isClientSide() && requirementsFulfilled) {
@@ -63,12 +63,12 @@ public class VampirismFreeze extends VampirismAction {
                         EffectInstance freezeInstance = targetLiving.getEffect(ModEffects.FREEZE.get());
                         if (freezeInstance == null) {
                             world.playSound(null, targetLiving, ModSounds.VAMPIRE_FREEZE.get(), targetLiving.getSoundSource(), 1.0F, 1.0F);
-                            targetLiving.addEffect(new EffectInstance(ModEffects.FREEZE.get(), difficulty * 30, 0));
+                            targetLiving.addEffect(new EffectInstance(ModEffects.FREEZE.get(), (difficulty + 1) * 50, 0));
                         }
                         else {
-                            int additionalDuration = 1 << difficulty;
+                            int additionalDuration = (difficulty - 1) * 5 + 1;
                             int duration = freezeInstance.getDuration() + additionalDuration;
-                            int lvl = duration / 120;
+                            int lvl = duration / 100;
                             targetLiving.addEffect(new EffectInstance(ModEffects.FREEZE.get(), duration, lvl));
                         }
                     }
@@ -100,7 +100,7 @@ public class VampirismFreeze extends VampirismAction {
             }
         }
     }
-    
+
     public static boolean onUserAttacked(LivingAttackEvent event) {
         Entity attacker = event.getSource().getDirectEntity();
         if (attacker instanceof LivingEntity && !attacker.isOnFire() && !DamageUtil.isImmuneToCold(attacker)) {
@@ -109,7 +109,7 @@ public class VampirismFreeze extends VampirismAction {
                 if (power.getHeldAction(true) == ModActions.VAMPIRISM_FREEZE.get()) {
                     World world = attacker.level;
                     int difficulty = world.getDifficulty().getId();
-                    ((LivingEntity) attacker).addEffect(new EffectInstance(ModEffects.FREEZE.get(), difficulty * 60, difficulty));
+                    ((LivingEntity) attacker).addEffect(new EffectInstance(ModEffects.FREEZE.get(), difficulty * 100, difficulty));
                     world.playSound(null, attacker, ModSounds.VAMPIRE_FREEZE.get(), attacker.getSoundSource(), 1.0F, 1.0F);
                     return true;
                 }

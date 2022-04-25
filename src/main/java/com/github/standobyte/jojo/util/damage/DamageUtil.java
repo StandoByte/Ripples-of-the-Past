@@ -180,7 +180,7 @@ public class DamageUtil {
     }
     
     public static DamageSource roadRollerDamage(RoadRollerEntity entity) {
-        return new EntityDamageSource(ROAD_ROLLER_MSG, entity);
+        return new EntityDamageSource(ROAD_ROLLER_MSG, entity).bypassArmor();
     }
     
     public static boolean dealDamageAndSetOnFire(Entity entity, Predicate<Entity> hurtEntity, int fireSeconds, boolean stand) {
