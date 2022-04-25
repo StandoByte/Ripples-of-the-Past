@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.init;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.client.renderer.RoadRollerISTER;
 import com.github.standobyte.jojo.item.AjaStoneItem;
 import com.github.standobyte.jojo.item.BladeHatItem;
 import com.github.standobyte.jojo.item.ClackersItem;
@@ -73,7 +74,8 @@ public class ModItems {
             () -> new KnifeItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(16)));
 
     public static final RegistryObject<RoadRollerItem> ROAD_ROLLER = ITEMS.register("road_roller", 
-            () -> new RoadRollerItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1)));
+            () -> new RoadRollerItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1)
+                    .setISTER(() -> RoadRollerISTER::new)));
 
     public static final RegistryObject<BlockItem> METEORIC_IRON = ITEMS.register("meteoric_iron", 
             () -> new BlockItem(ModBlocks.METEORIC_IRON.get(), new Item.Properties().tab(JojoMod.MAIN_TAB)));
