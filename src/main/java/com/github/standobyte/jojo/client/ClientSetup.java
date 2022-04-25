@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.client;
 
 import java.util.Map;
+import java.util.function.UnaryOperator;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.model.ArmorModelRegistry;
@@ -8,6 +9,7 @@ import com.github.standobyte.jojo.client.model.armor.BladeHatArmorModel;
 import com.github.standobyte.jojo.client.model.armor.BreathControlMaskModel;
 import com.github.standobyte.jojo.client.model.armor.SatiporojaScarfArmorModel;
 import com.github.standobyte.jojo.client.model.armor.StoneMaskModel;
+import com.github.standobyte.jojo.client.model.item.RoadRollerBakedModel;
 import com.github.standobyte.jojo.client.particle.MeteoriteVirusParticle;
 import com.github.standobyte.jojo.client.particle.OneTickFlameParticle;
 import com.github.standobyte.jojo.client.particle.OnomatopoeiaParticle;
@@ -76,6 +78,8 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
+import net.minecraft.client.renderer.model.IBakedModel;
+import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.CrossbowItem;
 import net.minecraft.item.IItemPropertyGetter;
@@ -85,6 +89,7 @@ import net.minecraft.particles.BasicParticleType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ColorHandlerEvent;
+import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -98,6 +103,7 @@ public class ClientSetup {
     private static final IItemPropertyGetter STAND_ITEM_INVISIBLE = (itemStack, clientWorld, livingEntity) -> {
         return !ClientUtil.shouldStandsRender(Minecraft.getInstance().player) ? 1 : 0;
     };
+    
     @SubscribeEvent
     public static void onFMLClientSetup(FMLClientSetupEvent event) {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.BLADE_HAT.get(), BladeHatRenderer::new);
@@ -218,6 +224,27 @@ public class ClientSetup {
         ItemColors itemColors = event.getItemColors();
         itemColors.register((stack, layer) -> layer == 0 ? -1 : 
             ClientUtil.discColor(StandDiscItem.getColor(stack)), ModItems.STAND_DISC.get());
+    }
+    
+    @SubscribeEvent
+    public static void onModelBake(ModelBakeEvent event) {
+        registerCustomBakedModel(ModItems.ROAD_ROLLER.get().getRegistryName(), event.getModelRegistry(), 
+                model -> new RoadRollerBakedModel(model));
+    }
+    
+    private static void registerCustomBakedModel(ResourceLocation resLoc, 
+            Map<ResourceLocation, IBakedModel> modelRegistry, UnaryOperator<IBakedModel> newModel) {
+        ModelResourceLocation modelResLoc = new ModelResourceLocation(resLoc, "inventory");
+        IBakedModel existingModel = modelRegistry.get(modelResLoc);
+        if (existingModel == null) {
+            throw new RuntimeException("Did not find original model in registry");
+        }
+        else if (existingModel.isCustomRenderer()) {
+            throw new RuntimeException("Tried to replace model twice");
+        }
+        else {
+            modelRegistry.put(modelResLoc, newModel.apply(existingModel));
+        }
     }
 
     @SubscribeEvent

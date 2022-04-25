@@ -11,9 +11,10 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.ResourceLocation;
 
 public class RoadRollerRenderer extends SimpleEntityRenderer<RoadRollerEntity, RoadRollerModel> {
+    public static final ResourceLocation TEXTURE = new ResourceLocation(JojoMod.MOD_ID, "textures/entity/road_roller.png");
 
     public RoadRollerRenderer(EntityRendererManager renderManager) {
-        super(renderManager, new RoadRollerModel(), new ResourceLocation(JojoMod.MOD_ID, "textures/entity/road_roller.png"));
+        super(renderManager, new RoadRollerModel(), TEXTURE);
     }
     
     @Override
