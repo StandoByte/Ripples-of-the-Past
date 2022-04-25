@@ -90,10 +90,10 @@ public enum HamonSkill {
             RewardType.ABILITY, ModActions.HAMON_PROJECTILE_SHIELD),
     WATER_WALKING("water_walking", REPELLING_OVERDRIVE, null, 
             HamonStat.CONTROL, null, 
-            RewardType.PASSIVE, null), // TODO liquid walking (water)
+            RewardType.PASSIVE, null), // FIXME liquid walking (water)
     LAVA_WALKING("lava_walking", REPELLING_OVERDRIVE, WATER_WALKING, 
             HamonStat.CONTROL, null, 
-            RewardType.PASSIVE, null), // TODO liquid walking (lava)
+            RewardType.PASSIVE, null), // FIXME liquid walking (lava)
     
 
     NATURAL_TALENT("natural_talent", null, null, 

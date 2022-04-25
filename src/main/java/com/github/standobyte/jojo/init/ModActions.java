@@ -165,11 +165,11 @@ public class ModActions {
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_FREEZE = ACTIONS.register("vampirism_freeze", 
             () -> new VampirismFreeze(new NonStandAction.Builder().maxRangeEntityTarget(2.0D).emptyMainHand()
-                    .holdType().holdEnergyCost(1F).heldSlowDownFactor(0.5F)));
+                    .holdType().holdEnergyCost(1F).heldSlowDownFactor(0.75F)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_SPACE_RIPPER_STINGY_EYES = ACTIONS.register("vampirism_space_ripper_stingy_eyes", 
             () -> new VampirismSpaceRipperStingyEyes(new NonStandAction.Builder().ignoresPerformerStun()
-                    .holdType(20).holdEnergyCost(30F).cooldown(0, 200).heldSlowDownFactor(0.3F)));
+                    .holdType(20).holdEnergyCost(30F).cooldown(0, 50).heldSlowDownFactor(0.3F)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_BLOOD_GIFT = ACTIONS.register("vampirism_blood_gift", 
             () -> new VampirismBloodGift(new NonStandAction.Builder().needsEntityTarget().maxRangeEntityTarget(1.0D).emptyMainHand()

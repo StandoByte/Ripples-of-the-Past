@@ -3,7 +3,6 @@ package com.github.standobyte.jojo.util;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.action.actions.StandAction;
 import com.github.standobyte.jojo.action.actions.TimeStop;
 import com.github.standobyte.jojo.capability.world.WorldUtilCap;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
@@ -16,7 +15,6 @@ import com.github.standobyte.jojo.network.packets.fromserver.SyncWorldTimeStopPa
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
 import com.google.common.collect.Streams;
 
 import net.minecraft.entity.Entity;
@@ -27,11 +25,9 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.server.SPlayEntityEffectPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.WorldTickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -297,15 +293,5 @@ public class TimeHandler {
     
     public static boolean isTimeStopped(World world, ChunkPos chunkPos) {
         return world.getCapability(WorldUtilCapProvider.CAPABILITY).map(cap -> cap.isTimeStopped(chunkPos)).orElse(false);
-    }
-
-    public static final int MIN_TIME_STOP_TICKS = 5;
-    public static int getTimeStopTicks(IStandPower standPower, StandAction timeStopAction, LivingEntity user, LazyOptional<INonStandPower> otherPower) {
-        return MathHelper.floor(standPower.getLearningProgressPoints(timeStopAction)) + MIN_TIME_STOP_TICKS;
-    }
-    
-    public static int getMaxTimeStopTicks(IStandPower standPower) {
-        return ((TimeStopperStandStats) standPower.getType().getStats())
-                .getMaxTimeStopTicks(TimeStop.vampireTimeStopDuration(standPower.getUser()));
     }
 }

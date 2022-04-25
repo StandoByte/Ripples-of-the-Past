@@ -43,7 +43,7 @@ public class TimeStopInstant extends StandAction {
     
     @Override
     protected void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
-        int timeStopTicks = Math.min(TimeHandler.getTimeStopTicks(power, this, user, INonStandPower.getNonStandPowerOptional(user)), 
+        int timeStopTicks = Math.min(TimeStop.getTimeStopTicks(power, this, user, INonStandPower.getNonStandPowerOptional(user)), 
                 MathHelper.floor(power.getStamina() / getStaminaCostTicking(power)));
         SoundEvent sound = blinkSound.get();
         if (sound != null) {
@@ -99,7 +99,7 @@ public class TimeStopInstant extends StandAction {
 
     @Override
     public float getMaxTrainingPoints(IStandPower power) {
-        return TimeHandler.getMaxTimeStopTicks(power) - TimeHandler.MIN_TIME_STOP_TICKS;
+        return TimeStop.getMaxTimeStopTicks(power) - TimeStop.MIN_TIME_STOP_TICKS;
     }
     
     @Override

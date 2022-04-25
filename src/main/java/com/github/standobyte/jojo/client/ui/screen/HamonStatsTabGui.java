@@ -142,7 +142,7 @@ public class HamonStatsTabGui extends HamonTabGui {
     public static void drawExerciseBar(AbstractGui gui, MatrixStack matrixStack, int x, int y, HamonData hamon, Exercise exercise, float alpha) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
         int ticks = hamon.getExerciseTicks(exercise);
-        int ticksMax = exercise.getMaxTicks(hamon.getBreathingLevel());
+        int ticksMax = exercise.getMaxTicks(hamon);
         gui.blit(matrixStack, x + 1, y + 1, 1, 247, 90 * ticks / ticksMax, 5);
         gui.blit(matrixStack, x, y, 0, 240, 92, 7);
         

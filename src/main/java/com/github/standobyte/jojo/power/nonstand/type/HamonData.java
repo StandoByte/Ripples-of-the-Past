@@ -327,7 +327,7 @@ public class HamonData extends TypeSpecificData {
                     if (user.tickCount % 800 == 400) {
                         JojoModUtil.sayVoiceLine(user, getBreathingSound(), 0.75F, 1.0F);
                     }
-                    user.addEffect(new EffectInstance(ModEffects.MEDITATION.get(), Math.max(Exercise.MEDITATION.getMaxTicks(getBreathingLevel()) - getExerciseTicks(Exercise.MEDITATION), 210)));
+                    user.addEffect(new EffectInstance(ModEffects.MEDITATION.get(), Math.max(Exercise.MEDITATION.getMaxTicks(this) - getExerciseTicks(Exercise.MEDITATION), 210)));
                     user.getFoodData().addExhaustion(-0.001F);
                     if (user.tickCount % 200 == 0 && user.isHurt() && user.level.getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION)) {
                         user.heal(1.0F);
@@ -353,7 +353,7 @@ public class HamonData extends TypeSpecificData {
 
     private void incExerciseTicks(Exercise exercise, float multiplier, boolean clientSide) {
         int ticks = exerciseTicks.get(exercise);
-        int maxTicks = exercise.getMaxTicks(getBreathingLevel());
+        int maxTicks = exercise.getMaxTicks(this);
         if (ticks < maxTicks) {
             int inc = 1;
             if (multiplier > 1F) {
@@ -391,7 +391,7 @@ public class HamonData extends TypeSpecificData {
     private void recalcAvgExercisePoints() {
         avgExercisePoints = (float) exerciseTicks.entrySet()
                 .stream()
-                .mapToDouble(entry -> (double) entry.getValue() / (double) entry.getKey().getMaxTicks(getBreathingLevel()))
+                .mapToDouble(entry -> (double) entry.getValue() / (double) entry.getKey().getMaxTicks(this))
                 .reduce(Double::sum)
                 .getAsDouble()
                 / (float) exerciseTicks.size();
@@ -745,19 +745,20 @@ public class HamonData extends TypeSpecificData {
     }
 
     public enum Exercise {
-        MINING(180),
-        RUNNING(120),
-        SWIMMING(120),
-        MEDITATION(60);
+        MINING(210),
+        RUNNING(150),
+        SWIMMING(150),
+        MEDITATION(90);
 
-        private final int maxTicks;
+        private final float maxTicks;
 
         private Exercise(float seconds) {
-            this.maxTicks = (int) (seconds * 20F);
+            this.maxTicks = seconds * 20F;
         }
         
-        public int getMaxTicks(float breathingTechnique) {
-            return maxTicks;
+        public int getMaxTicks(@Nullable HamonData hamon) {
+            float multiplier = hamon != null ? (MAX_BREATHING_LEVEL - hamon.getBreathingLevel()) / MAX_BREATHING_LEVEL * 0.75F + 0.25F : 1;
+            return MathHelper.floor(maxTicks * multiplier);
         }
     }
 }

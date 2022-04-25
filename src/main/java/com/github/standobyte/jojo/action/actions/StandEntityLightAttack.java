@@ -49,6 +49,9 @@ public class StandEntityLightAttack extends StandEntityAction {
 //            speed *= 0.8;
 //        }
         int ticks = StandStatFormulas.getLightAttackWindup(speed, standEntity.getComboMeter());
+        if (standEntity.isArmsOnlyMode() && standEntity.tickCount <= 1) {
+            ticks = Math.max(ticks / 2, 1);
+        }
         return ticks;
     }
     
