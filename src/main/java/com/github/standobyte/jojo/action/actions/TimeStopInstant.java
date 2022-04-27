@@ -13,7 +13,7 @@ import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.JojoModUtil;
-import com.github.standobyte.jojo.util.TimeHandler;
+import com.github.standobyte.jojo.util.TimeUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -35,7 +35,7 @@ public class TimeStopInstant extends StandAction {
     
     @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
-        if (TimeHandler.isTimeStopped(user.level, user.blockPosition())) {
+        if (TimeUtil.isTimeStopped(user.level, user.blockPosition())) {
             return ActionConditionResult.NEGATIVE;
         }
         return ActionConditionResult.POSITIVE;
@@ -48,7 +48,7 @@ public class TimeStopInstant extends StandAction {
         SoundEvent sound = blinkSound.get();
         if (sound != null) {
             JojoModUtil.playSound(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, user.getX(), user.getY(), user.getZ(), 
-                    sound, SoundCategory.AMBIENT, 5.0F, 1.0F, TimeHandler::canPlayerSeeInStoppedTime);
+                    sound, SoundCategory.AMBIENT, 5.0F, 1.0F, TimeUtil::canPlayerSeeInStoppedTime);
         }
         if (!world.isClientSide()) {
             Vector3d blinkPos = null;

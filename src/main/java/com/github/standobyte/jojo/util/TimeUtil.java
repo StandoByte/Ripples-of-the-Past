@@ -1,9 +1,8 @@
 package com.github.standobyte.jojo.util;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.action.actions.TimeStop;
+import com.github.standobyte.jojo.capability.world.TimeStopInstance;
 import com.github.standobyte.jojo.capability.world.WorldUtilCap;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.init.ModEffects;
@@ -19,13 +18,11 @@ import com.google.common.collect.Streams;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.play.server.SPlayEntityEffectPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.TickEvent;
@@ -49,63 +46,17 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 @EventBusSubscriber(modid = JojoMod.MOD_ID)
-public class TimeHandler {
-    
-    public static void setTimeResumeSounds(World world, ChunkPos chunkPos, int timeStopTicks, TimeStop timeStop, LivingEntity timeStopUser) {
-        WorldUtilCap cap = world.getCapability(WorldUtilCapProvider.CAPABILITY).resolve().get();
-        if (!cap.isTimeStopped(chunkPos) || timeStopTicks > cap.getTimeStopTicks(chunkPos)) {
-            cap.setLastToResumeTime(timeStopUser, chunkPos, timeStop.getTimeResumeSfx(), timeStop.getTimeResumeVoiceLine());
-        }
-    }
+public class TimeUtil {
 
-    public static void stopTime(World world, int ticks, ChunkPos chunkPos) {
+    public static void stopTime(World world, TimeStopInstance instance) {
         WorldUtilCap cap = world.getCapability(WorldUtilCapProvider.CAPABILITY).resolve().get();
-        cap.setTimeStopTicks(ticks, chunkPos);
-        JojoModUtil.getAllEntities(world).forEach(entity -> {
-            if (JojoModConfig.getCommonConfigInstance(world.isClientSide()).inTimeStopRange(chunkPos, new ChunkPos(entity.blockPosition()))) {
-                updateEntityTimeStop(entity, false, true);
-            }
-        });
-        
-        if (!world.isClientSide()) {
-            ServerWorld serverWorld = (ServerWorld) world;
-            serverWorld.players().forEach(player -> {
-                if (player.level == world) {
-                    sendWorldTimeStopData(player, world, chunkPos);
-                }
-            });
-            cap.gameruleDayLightCycle = world.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT);
-            world.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(false, serverWorld.getServer());
-            cap.gameruleWeatherCycle = world.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE);
-            world.getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(false, serverWorld.getServer());
-        }
+        cap.getWorldTimeStops().addTimeStop(instance);
     }
     
-    public static void resumeTime(World world, ChunkPos chunkPos, boolean resetCap) {
-        JojoModUtil.getAllEntities(world).forEach(entity -> {
-            updateEntityTimeStop(entity, true, true);
-        });
-        
-        if (!world.isClientSide()) {
-            ServerWorld serverWorld = (ServerWorld) world;
-            serverWorld.players().forEach(player -> {
-                if (player.level == world) {
-                    PacketManager.sendToClient(SyncWorldTimeStopPacket.timeResumed(chunkPos), player);
-                }
-            });
-            world.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                world.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(cap.gameruleDayLightCycle, serverWorld.getServer());
-                world.getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(cap.gameruleWeatherCycle, serverWorld.getServer());
-            });
-        }
-        if (resetCap) {
-            world.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                cap.resetTimeStopTicks(chunkPos);
-            });
-        }
+    public static void resumeTime(World world, TimeStopInstance instance) {
+        WorldUtilCap cap = world.getCapability(WorldUtilCapProvider.CAPABILITY).resolve().get();
+        cap.getWorldTimeStops().removeTimeStop(instance);
     }
-    
-    
     
     public static boolean canPlayerSeeInStoppedTime(PlayerEntity player) {
         return canPlayerSeeInStoppedTime(canPlayerMoveInStoppedTime(player, true), hasTimeStopAbility(player));
@@ -115,7 +66,7 @@ public class TimeHandler {
         return canMove || hasTimeStopAbility;
     }
     
-    private static boolean canPlayerMoveInStoppedTime(PlayerEntity player, boolean checkEffect) {
+    public static boolean canPlayerMoveInStoppedTime(PlayerEntity player, boolean checkEffect) {
         return checkEffect && player.hasEffect(ModEffects.TIME_STOP.get()) || player.isCreative() || player.isSpectator() || 
                 player instanceof ServerPlayerEntity && ((ServerPlayerEntity) player).server.isSingleplayerOwner(player.getGameProfile());
     }
@@ -143,14 +94,9 @@ public class TimeHandler {
     public static void onEntityJoinWorld(EntityJoinWorldEvent event) {
         Entity entity = event.getEntity();
         if (isTimeStopped(event.getWorld(), entity.blockPosition())) {
-            updateEntityTimeStop(entity, false, true);
+            event.getWorld().getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> 
+            cap.getWorldTimeStops().updateEntityTimeStop(entity, false, true));
         }
-    }
-    
-    public static void updateEntityTimeStop(Entity entity, boolean canMove, boolean checkEffect) {
-        entity.canUpdate(canMove || checkEffect && entity instanceof LivingEntity && ((LivingEntity) entity).hasEffect(ModEffects.TIME_STOP.get()) || 
-                entity instanceof PlayerEntity && canPlayerMoveInStoppedTime((PlayerEntity) entity, false)
-                || entity instanceof EndermanEntity); // for the lulz
     }
 
     
@@ -173,39 +119,36 @@ public class TimeHandler {
         sendWorldTimeStopData(player, player.level, new ChunkPos(player.blockPosition()));
     }
     
-    private static void sendWorldTimeStopData(ServerPlayerEntity player, World world, ChunkPos chunkPos) {
+    public static void sendWorldTimeStopData(ServerPlayerEntity player, World world, ChunkPos chunkPos) {
         if (isTimeStopped(world, player.blockPosition())) {
             boolean canMove = canPlayerMoveInStoppedTime(player, true);
             boolean canSee = canPlayerSeeInStoppedTime(canMove, hasTimeStopAbility(player));
             PacketManager.sendToClient(new SyncWorldTimeStopPacket(
-                    world.getCapability(WorldUtilCapProvider.CAPABILITY).map(cap -> cap.getTimeStopTicks(chunkPos)).orElse(0), 
+                    world.getCapability(WorldUtilCapProvider.CAPABILITY).map(cap -> cap.getWorldTimeStops().getTimeStopTicks(chunkPos)).orElse(0), 
                     chunkPos, canSee, canMove), player);
         }
-        else {
-            PacketManager.sendToClient(SyncWorldTimeStopPacket.timeResumed(chunkPos), player);
-        }
     }
-    
-    
-    
+
+
+
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onServerWorldTick(WorldTickEvent event) {
         if (event.phase != TickEvent.Phase.START) {
             return;
         }
         event.world.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-            cap.tickStoppedTime();
+            cap.getWorldTimeStops().tick();
         });
     }
-    
-    
-    
+
+
+
     @SubscribeEvent
     public static void onTSEffectAdded(PotionAddedEvent event) {
         LivingEntity entity = event.getEntityLiving();
         ChunkPos chunkPos = new ChunkPos(entity.blockPosition());
         if (event.getOldPotionEffect() == null && event.getPotionEffect().getEffect() == ModEffects.TIME_STOP.get() && isTimeStopped(entity.level, chunkPos)) {
-            updateEntityTimeStop(entity, true, false);
+            entity.level.getCapability(WorldUtilCapProvider.CAPABILITY).resolve().get().getWorldTimeStops().updateEntityTimeStop(entity, false, false);
             if (!entity.level.isClientSide()) {
                 ((ServerWorld) entity.level).getChunkSource().broadcast(entity, (new SPlayEntityEffectPacket(entity.getId(), event.getPotionEffect())));
                 PacketManager.sendToClientsTrackingAndSelf(new RefreshMovementInTimeStopPacket(entity.getId(), chunkPos, true), entity);
@@ -218,10 +161,11 @@ public class TimeHandler {
         LivingEntity entity = event.getEntityLiving();
         ChunkPos chunkPos = new ChunkPos(entity.blockPosition());
         if (event.getPotionEffect().getEffect() == ModEffects.TIME_STOP.get() && isTimeStopped(entity.level, chunkPos)) {
-            updateEntityTimeStop(entity, false, false);
+            WorldUtilCap worldCap = entity.level.getCapability(WorldUtilCapProvider.CAPABILITY).resolve().get();
+            worldCap.getWorldTimeStops().updateEntityTimeStop(entity, false, false);
             if (!entity.level.isClientSide()) {
                 PacketManager.sendToClientsTrackingAndSelf(new RefreshMovementInTimeStopPacket(entity.getId(), chunkPos, false), entity);
-                if (entity.level.getCapability(WorldUtilCapProvider.CAPABILITY).resolve().get().getTimeStopTicks(new ChunkPos(entity.blockPosition())) >= 40 && 
+                if (worldCap.getWorldTimeStops().getTimeStopTicks(new ChunkPos(entity.blockPosition())) >= 40 && 
                         IStandPower.getStandPowerOptional(entity).map(stand -> stand.getType() == ModStandTypes.THE_WORLD.get()).orElse(false)) {
                     JojoModUtil.sayVoiceLine(entity, ModSounds.DIO_CANT_MOVE.get());
                 };
@@ -234,7 +178,7 @@ public class TimeHandler {
         LivingEntity entity = event.getEntityLiving();
         ChunkPos chunkPos = new ChunkPos(entity.blockPosition());
         if (event.getPotion() == ModEffects.TIME_STOP.get() && isTimeStopped(entity.level, chunkPos)) {
-            updateEntityTimeStop(entity, false, false);
+            entity.level.getCapability(WorldUtilCapProvider.CAPABILITY).resolve().get().getWorldTimeStops().updateEntityTimeStop(entity, false, false);
             if (!entity.level.isClientSide()) {
                 PacketManager.sendToClientsTrackingAndSelf(new RefreshMovementInTimeStopPacket(entity.getId(), chunkPos, false), entity);
             }
@@ -292,6 +236,6 @@ public class TimeHandler {
     }  
     
     public static boolean isTimeStopped(World world, ChunkPos chunkPos) {
-        return world.getCapability(WorldUtilCapProvider.CAPABILITY).map(cap -> cap.isTimeStopped(chunkPos)).orElse(false);
+        return world.getCapability(WorldUtilCapProvider.CAPABILITY).map(cap -> cap.getWorldTimeStops().isTimeStopped(chunkPos)).orElse(false);
     }
 }
