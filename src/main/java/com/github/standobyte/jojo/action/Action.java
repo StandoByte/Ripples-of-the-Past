@@ -200,7 +200,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     protected int getCooldownAdditional(P power, int ticksHeld) {
-        return power.isUserCreative() ? 0 : cooldownAdditional * 0;
+        return power.isUserCreative() ? 0 : cooldownAdditional;
     }
     
     public int getCooldown(P power, int ticksHeld) {

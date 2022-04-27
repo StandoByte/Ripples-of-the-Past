@@ -2,11 +2,10 @@ package com.github.standobyte.jojo.action.actions;
 
 import java.util.function.Supplier;
 
-import javax.annotation.Nullable;
-
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.capability.world.TimeStopInstance;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -14,7 +13,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPa
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
-import com.github.standobyte.jojo.util.TimeHandler;
+import com.github.standobyte.jojo.util.TimeUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.EffectInstance;
@@ -59,7 +58,7 @@ public class TimeStop extends StandAction {
 
     @Override
     protected SoundEvent getShout(LivingEntity user, IStandPower power, ActionTarget target, boolean wasActive) {
-        if (TimeHandler.isTimeStopped(user.level, user.blockPosition())) {
+        if (TimeUtil.isTimeStopped(user.level, user.blockPosition())) {
             return null;
         }
         if (wasActive && voiceLineWithStandSummoned != null && voiceLineWithStandSummoned.get() != null) {
@@ -82,14 +81,15 @@ public class TimeStop extends StandAction {
         if (!world.isClientSide()) {
             BlockPos blockPos = user.blockPosition();
             ChunkPos chunkPos = new ChunkPos(blockPos);
-            boolean invadingStoppedTime = TimeHandler.isTimeStopped(world, user.blockPosition());
-            TimeHandler.setTimeResumeSounds(world, chunkPos, timeStopTicks, this, user);
-            TimeHandler.stopTime(world, timeStopTicks, chunkPos);
+            boolean invadingStoppedTime = TimeUtil.isTimeStopped(world, user.blockPosition());
+            TimeStopInstance instance = new TimeStopInstance(world, timeStopTicks, chunkPos, 
+                    JojoModConfig.getCommonConfigInstance(world.isClientSide()).timeStopChunkRange.get(), 
+                    user, timeResumeSound.get(), timeResumeVoiceLine.get());
+            TimeUtil.stopTime(world, instance);
             if (timeStopTicks >= 40 && timeStopSound != null && timeStopSound.get() != null
                     && !invadingStoppedTime) {
                 PacketManager.sendGloballyWithCondition(new PlaySoundAtClientPacket(timeStopSound.get(), SoundCategory.AMBIENT, blockPos, 5.0F, 1.0F), 
-                        world.dimension(), player -> (JojoModConfig.getCommonConfigInstance(false).inTimeStopRange(
-                                chunkPos, new ChunkPos(player.blockPosition()))) && TimeHandler.canPlayerSeeInStoppedTime(player));
+                        world.dimension(), player -> (instance.inRange(new ChunkPos(player.blockPosition()))) && TimeUtil.canPlayerSeeInStoppedTime(player));
             }
             // FIXME (!!!!) add progress points inside TickingTimeStopInstance instead
             power.addLearningProgressPoints(this, 5);
@@ -112,17 +112,7 @@ public class TimeStop extends StandAction {
 
     @Override
     public int getHoldDurationToFire(IStandPower power) { 
-        return TimeHandler.isTimeStopped(power.getUser().level, power.getUser().blockPosition()) ? 0 : super.getHoldDurationToFire(power);
-    }
-
-    @Nullable
-    public SoundEvent getTimeResumeSfx() {
-        return timeResumeSound.get();
-    }
-
-    @Nullable
-    public SoundEvent getTimeResumeVoiceLine() {
-        return timeResumeVoiceLine.get();
+        return TimeUtil.isTimeStopped(power.getUser().level, power.getUser().blockPosition()) ? 0 : super.getHoldDurationToFire(power);
     }
 
     @Override

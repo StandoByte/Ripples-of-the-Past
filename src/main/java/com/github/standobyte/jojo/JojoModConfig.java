@@ -25,7 +25,6 @@ import com.google.common.primitives.Floats;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -192,14 +191,6 @@ public class JojoModConfig {
         
         public boolean isConfigLoaded() {
             return loaded;
-        }
-        
-        public boolean inTimeStopRange(ChunkPos center, ChunkPos pos) {
-            int range = timeStopChunkRange.get();
-            if (range <= 0) {
-                return true;
-            }
-            return Math.abs(center.x - pos.x) < range && Math.abs(center.z - pos.z) < range;
         }
         
         private void onLoadOrReload() {

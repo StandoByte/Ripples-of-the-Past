@@ -12,16 +12,16 @@ public class WorldUtilCapStorage implements IStorage<WorldUtilCap> {
     public INBT writeNBT(Capability<WorldUtilCap> capability, WorldUtilCap instance, Direction side) {
         CompoundNBT cnbt = new CompoundNBT();
         // FIXME time stop storage?
-        cnbt.putBoolean("GameruleDayLightCycle", instance.gameruleDayLightCycle);
-        cnbt.putBoolean("GameruleWeatherCycle", instance.gameruleWeatherCycle);
+//        cnbt.putBoolean("GameruleDayLightCycle", instance.gameruleDayLightCycle);
+//        cnbt.putBoolean("GameruleWeatherCycle", instance.gameruleWeatherCycle);
         return cnbt;
     }
 
     @Override
     public void readNBT(Capability<WorldUtilCap> capability, WorldUtilCap instance, Direction side, INBT nbt) {
-        CompoundNBT cnbt = (CompoundNBT) nbt;
+//        CompoundNBT cnbt = (CompoundNBT) nbt;
         // FIXME time stop storage?
-        instance.gameruleDayLightCycle = cnbt.getBoolean("GameruleDayLightCycle");
-        instance.gameruleWeatherCycle = cnbt.getBoolean("GameruleWeatherCycle");
+//        instance.gameruleDayLightCycle = cnbt.getBoolean("GameruleDayLightCycle");
+//        instance.gameruleWeatherCycle = cnbt.getBoolean("GameruleWeatherCycle");
     }
 }

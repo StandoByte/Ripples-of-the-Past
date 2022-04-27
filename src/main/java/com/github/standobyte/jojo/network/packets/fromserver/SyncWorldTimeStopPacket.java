@@ -2,9 +2,11 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 
 import java.util.function.Supplier;
 
+import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.capability.world.TimeStopInstance;
 import com.github.standobyte.jojo.client.ClientEventHandler;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.util.TimeHandler;
+import com.github.standobyte.jojo.util.TimeUtil;
 
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.ChunkPos;
@@ -51,10 +53,13 @@ public class SyncWorldTimeStopPacket {
         ctx.get().enqueueWork(() -> {
             World world = ClientUtil.getClientWorld();
             if (msg.timeStopTicks > 0) {
-                TimeHandler.stopTime(world, msg.timeStopTicks, msg.chunkPos);
+                TimeUtil.stopTime(world, TimeStopInstance.withoutSounds(world, msg.timeStopTicks, msg.chunkPos, 
+                        JojoModConfig.getCommonConfigInstance(true).timeStopChunkRange.get()));
             }
             else {
-                TimeHandler.resumeTime(world, msg.chunkPos, true);
+                // FIXME (!!!!!!!!!!!!) time resumption (remove the time stop instance) (TimeStopInstance#id?)
+                TimeStopInstance tsInstance = null;
+                TimeUtil.resumeTime(world, tsInstance);
             }
             ClientEventHandler.getInstance().setTimeStopClientState(msg.timeStopTicks, msg.chunkPos, msg.canSee, msg.canMove);
         });

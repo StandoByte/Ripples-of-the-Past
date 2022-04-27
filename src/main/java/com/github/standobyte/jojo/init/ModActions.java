@@ -220,7 +220,7 @@ public class ModActions {
                     .standOffsetFromUser(-0.25, -0.25, -0.3)));
     
     public static final RegistryObject<StandAction> STAR_PLATINUM_TIME_STOP = ACTIONS.register("star_platinum_time_stop", 
-            () -> new TimeStop(new StandAction.Builder().holdToFire(40, false).staminaCost(500).staminaCostTick(7.5F).cooldown(0, 600, 0.3333F)
+            () -> new TimeStop(new StandAction.Builder().holdToFire(40, false).staminaCost(500).staminaCostTick(7.5F)//.cooldown(0, 600, 0.3333F)
                     .resolveLevelToUnlock(4).isTrained().ignoresPerformerStun().autoSummonStand().shout(ModSounds.JOTARO_STAR_PLATINUM_THE_WORLD))
             .timeStopSound(ModSounds.STAR_PLATINUM_TIME_STOP)
             .timeResumeVoiceLine(ModSounds.JOTARO_TIME_RESUMES).timeResumeSound(ModSounds.STAR_PLATINUM_TIME_RESUME));
@@ -246,7 +246,7 @@ public class ModActions {
             () -> new StandEntityBlock());
     
     public static final RegistryObject<StandAction> THE_WORLD_TIME_STOP = ACTIONS.register("the_world_time_stop", 
-            () -> new TheWorldTimeStop(new StandAction.Builder().holdToFire(40, false).staminaCost(500).staminaCostTick(7.5F).cooldown(0, 600, 0.3333F)
+            () -> new TheWorldTimeStop(new StandAction.Builder().holdToFire(40, false).staminaCost(500).staminaCostTick(7.5F)//.cooldown(0, 600, 0.3333F)
                     .resolveLevelToUnlock(2).isTrained().ignoresPerformerStun().shout(ModSounds.DIO_THE_WORLD))
             .voiceLineWithStandSummoned(ModSounds.DIO_TIME_STOP).timeStopSound(ModSounds.THE_WORLD_TIME_STOP)
             .timeResumeVoiceLine(ModSounds.DIO_TIME_RESUMES).timeResumeSound(ModSounds.THE_WORLD_TIME_RESUME));
