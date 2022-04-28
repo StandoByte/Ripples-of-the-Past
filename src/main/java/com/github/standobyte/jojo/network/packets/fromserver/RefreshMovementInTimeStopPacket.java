@@ -38,7 +38,7 @@ public class RefreshMovementInTimeStopPacket {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity != null) {
                 entity.level.getCapability(WorldUtilCapProvider.CAPABILITY).orElseThrow(() -> new IllegalStateException("World util capability is empty."))
-                .getWorldTimeStops().updateEntityTimeStop(entity, msg.canMove, false);
+                .getTimeStopHandler().updateEntityTimeStop(entity, msg.canMove, false);
                 if (entity.is(ClientUtil.getClientPlayer())) {
                     ClientEventHandler.getInstance().updateCanMoveInStoppedTime(msg.canMove, msg.chunkPos);
                 }

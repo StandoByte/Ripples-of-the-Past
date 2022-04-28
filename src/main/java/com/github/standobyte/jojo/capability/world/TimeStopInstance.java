@@ -4,17 +4,21 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.SyncWorldTimeStopPacket;
 import com.github.standobyte.jojo.util.JojoModUtil;
 import com.github.standobyte.jojo.util.TimeUtil;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 
 public class TimeStopInstance {
+    private static int i = 0;
     private final World world;
+    private final int id;
     private int ticks;
     final ChunkPos centerPos;
     final int chunkRange;
@@ -27,6 +31,11 @@ public class TimeStopInstance {
     
     public TimeStopInstance(World world, int ticks, ChunkPos pos, int chunkRange, 
             LivingEntity user, SoundEvent timeResumeSound, SoundEvent timeResumeVoiceLine) {
+        this(world, ticks, pos, chunkRange, user, timeResumeSound, timeResumeVoiceLine, i++);
+    }
+    
+    private TimeStopInstance(World world, int ticks, ChunkPos pos, int chunkRange, 
+            LivingEntity user, SoundEvent timeResumeSound, SoundEvent timeResumeVoiceLine, int id) {
         this.world = world;
         this.ticks = ticks;
         this.centerPos = pos;
@@ -34,10 +43,11 @@ public class TimeStopInstance {
         this.user = user;
         this.timeResumeSound = timeResumeSound;
         this.timeResumeVoiceLine = timeResumeVoiceLine;
+        this.id = id;
     }
     
-    public static TimeStopInstance withoutSounds(World world, int ticks, ChunkPos pos, int chunkRange) {
-        return new TimeStopInstance(world, ticks, pos, chunkRange, null, null, null);
+    public static TimeStopInstance withoutSounds(World world, int ticks, ChunkPos pos, int chunkRange, int id) {
+        return new TimeStopInstance(world, ticks, pos, chunkRange, null, null, null, id);
     }
     
     public boolean tick() {
@@ -84,5 +94,15 @@ public class TimeStopInstance {
             timeResumeSound = null;
             timeResumeVoiceLine = null;
         }
+    }
+    
+    public int getId() {
+        return id;
+    }
+    
+    public void syncToClient(ServerPlayerEntity player) {
+        boolean canMove = TimeUtil.canPlayerMoveInStoppedTime(player, true);
+        boolean canSee = TimeUtil.canPlayerSeeInStoppedTime(canMove, TimeUtil.hasTimeStopAbility(player));
+        PacketManager.sendToClient(new SyncWorldTimeStopPacket(ticks, centerPos, canSee, canMove, id), player);
     }
 }

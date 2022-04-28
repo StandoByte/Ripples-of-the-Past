@@ -4,14 +4,14 @@ import net.minecraft.world.World;
 
 public class WorldUtilCap {
     private final World world;
-    final WorldTimeStopInstances timeStops;
+    final TimeStopHandler timeStops;
     
     public WorldUtilCap(World world) {
         this.world = world;
-        this.timeStops = new WorldTimeStopInstances(world);
+        this.timeStops = new TimeStopHandler(world);
     }
     
-    public WorldTimeStopInstances getWorldTimeStops() {
+    public TimeStopHandler getTimeStopHandler() {
         return timeStops;
     }
 }
