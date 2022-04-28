@@ -14,6 +14,7 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
@@ -104,6 +105,7 @@ import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
+import net.minecraftforge.fml.network.FMLPlayMessages;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 abstract public class StandEntity extends LivingEntity implements IStandManifestation, IEntityAdditionalSpawnData {
@@ -196,22 +198,12 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             noPhysics = getStandFlag(StandFlag.NO_PHYSICS);
         }
         else if (USER_ID.equals(dataParameter)) {
-            userRef = lookupUser();
-            if (level.isClientSide()) {
-                LivingEntity user = getUser();
-                if (user != null) {
-                    IStandPower standPower = IStandPower.getStandPowerOptional(user).resolve().get();
-                    if (standPower.getStandManifestation() != this) {
-                        standPower.setStandManifestation(this);
-                    }
-                }
-            }
+            updateUserFromNetwork(entityData.get(USER_ID));
         }
         else if (CURRENT_TASK.equals(dataParameter)) {
             StandEntityAction action = getCurrentTaskAction();
             if (action != null) {
                 StandEntityAction.Phase phase = getCurrentTaskPhase();
-                // FIXME !!!!!!!!!!!!!!!!! when synced to a respawning player, userPower == null
                 action.playSound(this, userPower, phase);
                 action.onTaskSet(level, this, userPower, phase, this.getCurrentTask().getTicksLeft());
             }
@@ -465,17 +457,28 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     @Override
-    public void setUser(LivingEntity user) {
+    public void setUserAndPower(LivingEntity user, IStandPower power) {
         if (!level.isClientSide()) {
             entityData.set(USER_ID, user.getId());
         }
+
+        this.userPower = power;
+        if (!level.isClientSide() && power != null) {
+            modifiersFromResolveLevel(power.getStatsDevelopment());
+        }
     }
     
-    @Override
-    public void setUserPower(IStandPower power) {
-        this.userPower = power;
-        if (power != null) {
-            modifiersFromResolveLevel(power.getStatsDevelopment());
+    private void updateUserFromNetwork(int userId) {
+        JojoMod.LOGGER.debug("stand set user");
+        userRef = lookupUser(userId);
+        if (level.isClientSide()) {
+            LivingEntity user = getUser();
+            if (user != null) {
+                IStandPower standPower = IStandPower.getStandPowerOptional(user).resolve().get();
+                if (standPower.getStandManifestation() != this) {
+                    standPower.setStandManifestation(this);
+                }
+            }
         }
     }
     
@@ -497,8 +500,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
 
     @Nullable
-    private WeakReference<LivingEntity> lookupUser() {
-        Entity user = level.getEntity(entityData.get(USER_ID));
+    private WeakReference<LivingEntity> lookupUser(int userId) {
+        Entity user = level.getEntity(userId);
         if (user instanceof LivingEntity) {
             return new WeakReference<LivingEntity>((LivingEntity) user);
         }
@@ -2021,9 +2024,15 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     @Override
     public void writeSpawnData(PacketBuffer buffer) {
+        buffer.writeInt(entityData.get(USER_ID));
         buffer.writeVarInt(summonPoseRandomByte);
     }
-
+    
+    protected void beforeClientSpawn(FMLPlayMessages.SpawnEntity packet, World world) {
+        int userId = packet.getAdditionalData().readInt();
+        entityData.set(USER_ID, userId);
+    }
+    
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
         summonPoseRandomByte = additionalData.readVarInt();
