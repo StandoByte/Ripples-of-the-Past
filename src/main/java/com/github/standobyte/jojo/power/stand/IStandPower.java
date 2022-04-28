@@ -14,6 +14,9 @@ import net.minecraftforge.common.util.LazyOptional;
 
 public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     public static final int MAX_EXP = 1000;
+    
+    boolean givePower(StandType<?> standType, boolean countTaken);
+    @Nullable StandType<?> putOutStand();
 
     boolean usesStamina();
     float getStamina();

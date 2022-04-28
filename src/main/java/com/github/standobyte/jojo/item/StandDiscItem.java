@@ -33,6 +33,7 @@ import net.minecraftforge.fml.common.thread.SidedThreadGroups;
 
 public class StandDiscItem extends Item {
     private static final String STAND_TAG = "Stand";
+    public static final String WS_TAG = "WSPutOut";
 
     public StandDiscItem(Properties properties) {
         super(properties);
@@ -65,7 +66,7 @@ public class StandDiscItem extends Item {
                     player.displayClientMessage(new TranslationTextComponent("jojo.chat.message.low_tier"), true);
                     return ActionResult.fail(stack);
                 }
-                if (power.givePower(stand)) {
+                if (power.givePower(stand, !stack.getTag().getBoolean(WS_TAG))) {
                     if (!player.abilities.instabuild) {
                         stack.shrink(1);
                     }
