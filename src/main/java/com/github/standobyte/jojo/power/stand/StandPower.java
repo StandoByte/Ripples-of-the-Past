@@ -54,18 +54,35 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
 
     @Override
     public boolean givePower(StandType<?> standType) {
+        return givePower(standType, true);
+    }
+
+    @Override
+    public boolean givePower(StandType<?> standType, boolean countTaken) {
         if (super.givePower(standType)) {
-            serverPlayerUser.ifPresent(player -> {
-                SaveFileUtilCapProvider.getSaveFileCap(player).addPlayerStand(standType);
-            });
+            if (countTaken) {
+                serverPlayerUser.ifPresent(player -> {
+                    SaveFileUtilCapProvider.getSaveFileCap(player).addPlayerStand(standType);
+                });
+            }
             standType.unlockNewActions(this);
             return true;
         }
         return false;
     }
-
+    
     @Override
     public boolean clear() {
+        return clear(true);
+    }
+    
+    @Override
+    public StandType<?> putOutStand() {
+        StandType<?> standType = getType();
+        return clear(false) ? standType : null;
+    }
+    
+    private boolean clear(boolean countTaken) {
         StandType<?> standType = getType();
         if (super.clear()) {
             if (isActive()) {
@@ -76,9 +93,11 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             resolveCounter.reset();
             xp = 0;
             skippedProgression = false;
-            serverPlayerUser.ifPresent(player -> {
-                SaveFileUtilCapProvider.getSaveFileCap(player).removePlayerStand(standType);
-            });
+            if (countTaken) {
+                serverPlayerUser.ifPresent(player -> {
+                    SaveFileUtilCapProvider.getSaveFileCap(player).removePlayerStand(standType);
+                });
+            }
             return true;
         }
         return false;
