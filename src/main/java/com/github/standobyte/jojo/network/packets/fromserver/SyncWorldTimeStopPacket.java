@@ -18,16 +18,18 @@ public class SyncWorldTimeStopPacket {
     private final ChunkPos chunkPos;
     private final boolean canSee;
     private final boolean canMove;
+    private final int instanceId;
     
-    public static SyncWorldTimeStopPacket timeResumed(ChunkPos chunkPos) {
-        return new SyncWorldTimeStopPacket(0, chunkPos, true, true);
+    public static SyncWorldTimeStopPacket timeResumed(ChunkPos chunkPos, int instanceId) {
+        return new SyncWorldTimeStopPacket(0, chunkPos, true, true, instanceId);
     }
     
-    public SyncWorldTimeStopPacket(int timeStopTicks, ChunkPos chunkPos, boolean canSee, boolean canMove) {
+    public SyncWorldTimeStopPacket(int timeStopTicks, ChunkPos chunkPos, boolean canSee, boolean canMove, int instanceId) {
         this.timeStopTicks = timeStopTicks;
         this.chunkPos = chunkPos;
         this.canSee = canSee;
         this.canMove = canMove;
+        this.instanceId = instanceId;
     }
     
     public static void encode(SyncWorldTimeStopPacket msg, PacketBuffer buf) {
@@ -42,11 +44,12 @@ public class SyncWorldTimeStopPacket {
         buf.writeVarInt(msg.timeStopTicks);
         buf.writeInt(msg.chunkPos.x);
         buf.writeInt(msg.chunkPos.z);
+        buf.writeInt(msg.instanceId);
     }
     
     public static SyncWorldTimeStopPacket decode(PacketBuffer buf) {
         byte flags = buf.readByte();
-        return new SyncWorldTimeStopPacket(buf.readVarInt(), new ChunkPos(buf.readInt(), buf.readInt()), (flags & 1) > 0, (flags & 2) > 0);
+        return new SyncWorldTimeStopPacket(buf.readVarInt(), new ChunkPos(buf.readInt(), buf.readInt()), (flags & 1) > 0, (flags & 2) > 0, buf.readInt());
     }
 
     public static void handle(SyncWorldTimeStopPacket msg, Supplier<NetworkEvent.Context> ctx) {
@@ -54,12 +57,10 @@ public class SyncWorldTimeStopPacket {
             World world = ClientUtil.getClientWorld();
             if (msg.timeStopTicks > 0) {
                 TimeUtil.stopTime(world, TimeStopInstance.withoutSounds(world, msg.timeStopTicks, msg.chunkPos, 
-                        JojoModConfig.getCommonConfigInstance(true).timeStopChunkRange.get()));
+                        JojoModConfig.getCommonConfigInstance(true).timeStopChunkRange.get(), msg.instanceId));
             }
             else {
-                // FIXME (!!!!!!!!!!!!) time resumption (remove the time stop instance) (TimeStopInstance#id?)
-                TimeStopInstance tsInstance = null;
-                TimeUtil.resumeTime(world, tsInstance);
+                TimeUtil.resumeTime(world, msg.instanceId);
             }
             ClientEventHandler.getInstance().setTimeStopClientState(msg.timeStopTicks, msg.chunkPos, msg.canSee, msg.canMove);
         });
