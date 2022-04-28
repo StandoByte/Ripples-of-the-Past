@@ -422,8 +422,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     public void setStandManifestation(IStandManifestation standManifestation) {
         this.standManifestation = standManifestation;
         if (standManifestation != null) {
-            standManifestation.setUser(getUser());
-            standManifestation.setUserPower(this);
+            standManifestation.setUserAndPower(getUser(), this);
         }
     }
     

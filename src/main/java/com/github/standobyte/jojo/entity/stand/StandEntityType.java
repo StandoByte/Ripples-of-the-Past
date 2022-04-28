@@ -16,6 +16,7 @@ import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.network.FMLPlayMessages;
 import net.minecraftforge.fml.network.FMLPlayMessages.SpawnEntity;
 
 public class StandEntityType<T extends StandEntity> extends EntityType<T> {
@@ -68,6 +69,13 @@ public class StandEntityType<T extends StandEntity> extends EntityType<T> {
     @Override
     public T create(World world) {
         return factory.create(this, world);
+    }
+    
+    @Override
+    public T customClientSpawn(FMLPlayMessages.SpawnEntity packet, World world) {
+        T entity = super.customClientSpawn(packet, world);
+        entity.beforeClientSpawn(packet, world);
+        return entity;
     }
 
     public interface IStandFactory<T extends StandEntity> {
