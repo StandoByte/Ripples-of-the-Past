@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.network;
 
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
@@ -168,7 +169,7 @@ public class PacketManager {
         channel.registerMessage(index++, TrSyncPowerTypePacket.class, 
                 TrSyncPowerTypePacket::encode, 
                 TrSyncPowerTypePacket::decode, 
-                TrSyncPowerTypePacket::handle);
+                TrSyncPowerTypePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
         channel.messageBuilder(TrSyncHeldActionPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(TrSyncHeldActionPacket::encode)

@@ -1033,7 +1033,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
 
     public boolean setTask(StandEntityAction action, int ticks, StandEntityAction.Phase phase, ActionTarget taskTarget) {
-        return setTask(new StandEntityTask(this, action, ticks, phase, isArmsOnlyMode(), taskTarget));
+        return setTask(StandEntityTask.makeServerSideTask(this, userPower, action, ticks, phase, isArmsOnlyMode(), taskTarget));
     }
 
     protected boolean setTask(StandEntityTask task) {
@@ -1095,7 +1095,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         else if (newAction == null) {
             if (isArmsOnlyMode()) {
                 StandEntityAction unsummon = ModActions.STAND_ENTITY_UNSUMMON.get();
-                setTask(new StandEntityTask(this, unsummon, unsummon.getStandActionTicks(userPower, this), 
+                setTask(StandEntityTask.makeServerSideTask(this, userPower, unsummon, unsummon.getStandActionTicks(userPower, this), 
                         StandEntityAction.Phase.PERFORM, isArmsOnlyMode(), ActionTarget.EMPTY));
             }
             else if (getUser() != null && !isCloseToEntity(getUser()) && isFollowingUser()) {

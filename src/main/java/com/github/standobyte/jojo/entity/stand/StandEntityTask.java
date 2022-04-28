@@ -10,7 +10,6 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
-import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -24,7 +23,6 @@ import net.minecraftforge.registries.DataSerializerEntry;
 public class StandEntityTask {
     @Nonnull
     private final StandEntityAction action;
-    private final StandEntity stand;
     @Nonnull
     private ActionTarget target = ActionTarget.EMPTY;
     private int startingTicks;
@@ -34,25 +32,38 @@ public class StandEntityTask {
     @Nullable
     private StandRelativeOffset offsetFromUser;
     
-    StandEntityTask(StandEntity stand, StandEntityAction action, int ticks, 
-            StandEntityAction.Phase phase, boolean armsOnlyMode, ActionTarget target) {
+    private StandEntityTask(StandEntityAction action, int ticks, 
+            StandEntityAction.Phase phase, boolean armsOnlyMode, ActionTarget target, 
+            StandRelativeOffset offset) {
         this.action = action;
-        this.stand = stand;
         this.startingTicks = Math.max(ticks, 1);
         this.ticksLeft = this.startingTicks;
         this.phase = phase;
-        this.offsetFromUser = stand.hasEffect(ModEffects.STUN.get()) ? null : action.getOffsetFromUser(stand);
-        setTarget(stand, target, stand.getUserPower());
-        if (stand != null) {
-            rotateStand(stand, false);
+        this.offsetFromUser = offset;
+        this.target = target;
+    }
+    
+    static StandEntityTask makeServerSideTask(StandEntity standEntity, IStandPower standPower, StandEntityAction action, int ticks, 
+            StandEntityAction.Phase phase, boolean armsOnlyMode, ActionTarget target) {
+        StandRelativeOffset offset = standEntity.hasEffect(ModEffects.STUN.get()) ? null : action.getOffsetFromUser(standEntity);
+        if (!canTarget(standEntity, target, standPower, action)) {
+            target = ActionTarget.EMPTY;
         }
+        
+        StandEntityTask task = new StandEntityTask(action, ticks, phase, armsOnlyMode, target, offset);
+        
+        return task;
     }
     
     void setTarget(StandEntity standEntity, ActionTarget target, IStandPower standPower) {
-        if (target != null && (standEntity == null || 
-                target.getType() == TargetType.EMPTY || action.canStandTarget(standEntity, target, standPower))) {
+        if (canTarget(standEntity, target, standPower, action)) {
             this.target = target;
         }
+    }
+    
+    private static boolean canTarget(StandEntity standEntity, ActionTarget target, IStandPower standPower, StandEntityAction action) {
+        return target != null && 
+                (standEntity == null || target.getType() == TargetType.EMPTY || action.canStandTarget(standEntity, target, standPower));
     }
     
     ActionTarget getTarget() {
@@ -60,12 +71,6 @@ public class StandEntityTask {
     }
 
     void tick(IStandPower standPower, StandEntity standEntity) {
-        if (!standEntity.level.isClientSide() && target.getType() == TargetType.ENTITY) {
-            Entity targetEntity = target.getEntity(standEntity.level);
-            if (targetEntity == null || !targetEntity.isAlive() || targetEntity.is(standEntity)) {
-                standEntity.setTaskTarget(ActionTarget.EMPTY);
-            }
-        }
         if (target.getType() != TargetType.EMPTY) {
 //            if (!standEntity.level.isClientSide() && ticksLeft < startingTicks) {
 //                double angleCos = standEntity.getLookAngle().dot(target.getTargetPos().subtract(standEntity.getEyePosition(1.0F)).normalize());
@@ -74,6 +79,12 @@ public class StandEntityTask {
 //                setTarget(ActionTarget.EMPTY);
 //            }
             rotateStand(standEntity, true);
+        }
+        if (!standEntity.level.isClientSide() && target.getType() == TargetType.ENTITY) {
+            Entity targetEntity = target.getEntity(standEntity.level);
+            if (targetEntity == null || !targetEntity.isAlive() || targetEntity.is(standEntity)) {
+                standEntity.setTaskTarget(ActionTarget.EMPTY);
+            }
         }
         
         if (phase == StandEntityAction.Phase.PERFORM) {
@@ -196,8 +207,6 @@ public class StandEntityTask {
                 
                 buf.writeRegistryIdUnsafe(ModActions.Registry.getRegistry(), task.action);
                 
-                buf.writeInt(task.stand.getId());
-                
                 buf.writeVarInt(task.startingTicks);
                 buf.writeEnum(task.phase);
                 
@@ -221,8 +230,6 @@ public class StandEntityTask {
                 return Optional.empty();
             }
             
-            Entity entity = ClientUtil.getEntityById(buf.readInt());
-            
             int ticks = buf.readVarInt();
             StandEntityAction.Phase phase = buf.readEnum(StandEntityAction.Phase.class);
             
@@ -233,9 +240,7 @@ public class StandEntityTask {
                 offset = StandRelativeOffset.readFromBuf(buf);
             }
             
-            StandEntityTask task = new StandEntityTask(entity instanceof StandEntity ? (StandEntity) entity : null, 
-                    (StandEntityAction) action, ticks, phase, false, target);
-            task.setOffsetFromUser(offset);
+            StandEntityTask task = new StandEntityTask((StandEntityAction) action, ticks, phase, false, target, offset);
             return Optional.of(task);
         }
 
@@ -243,7 +248,7 @@ public class StandEntityTask {
         public Optional<StandEntityTask> copy(Optional<StandEntityTask> value) {
             if (value.isPresent()) {
                 StandEntityTask task = value.get();
-                StandEntityTask taskNew = new StandEntityTask(task.stand, task.action, task.startingTicks, task.phase, false, task.target);
+                StandEntityTask taskNew = new StandEntityTask(task.action, task.startingTicks, task.phase, false, task.target, task.offsetFromUser);
                 taskNew.ticksLeft = task.ticksLeft;
                 if (taskNew.target.getType() == TargetType.ENTITY) {
                     Entity entity = taskNew.target.getEntity(null);
