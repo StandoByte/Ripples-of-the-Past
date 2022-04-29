@@ -94,10 +94,11 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     @Override
     public void setupAnim(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
         HandSide swingingHand = entity.getSwingingHand();
-        
-//        initPoses();
+        headParts().forEach(part -> {
+            setRotationAngle(part, 0, 0, 0);
+        });
 
-        idlePose.poseModel(1.0F, entity, ticks, yRotationOffset, xRotation, swingingHand);
+//        initPoses();
 
         if (poseType == StandPose.SUMMON && (ticks > SUMMON_ANIMATION_LENGTH || entity.isArmsOnlyMode())) {
             entity.setStandPose(StandPose.IDLE);
@@ -105,6 +106,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         }
 
         if (attackTime > 0.0F) {
+            idlePose.poseModel(1.0F, entity, ticks, yRotationOffset, xRotation, swingingHand);
             swingArmBarrage(entity, this.attackTime, yRotationOffset, xRotation, ticks, 
                     swingingHand, 0);
         }
@@ -123,7 +125,9 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     protected void poseStand(T entity, float ticks, float yRotationOffset, float xRotation, 
             StandPose standPose, @Nullable Phase actionPhase, float actionCompletion, HandSide swingingHand) {
         if (actionAnim.containsKey(standPose)) {
+            idlePose.poseModel(1.0F, entity, ticks, yRotationOffset, xRotation, swingingHand);
             onPose(entity, ticks);
+            
             StandActionAnimation<T> anim = getActionAnim(entity, standPose);
             if (anim != null) {
                 anim.animate(actionPhase, actionCompletion, 
@@ -131,14 +135,10 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
             }
         }
         else if (standPose == StandPose.SUMMON && summonPoses.size() > 0) {
-            resetPose(entity);
-            
-            onPose(entity, ticks);
-            summonPoses.get(entity.getSummonPoseRandomByte() % summonPoses.size())
-            .poseModel(ticks, entity, ticks, yRotationOffset, xRotation, swingingHand);
+            poseSummon(entity, ticks, yRotationOffset, xRotation, swingingHand);
         }
         else {
-            idleLoop.poseModel(ticks - idleLoopTickStamp, entity, ticks, yRotationOffset, xRotation, swingingHand);
+            poseIdleLoop(entity, ticks, yRotationOffset, xRotation, swingingHand);
         }
     }
 
@@ -158,6 +158,26 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
             part.zRot = 0;
         });
     };
+    
+    protected void poseSummon(T entity, float ticks, float yRotationOffset, float xRotation, HandSide swingingHand) {
+        resetPose(entity);
+        onPose(entity, ticks);
+        
+        summonPoses.get(entity.getSummonPoseRandomByte() % summonPoses.size())
+        .poseModel(1.0F, entity, ticks, yRotationOffset, xRotation, swingingHand);
+
+        idlePose.poseModel(summonPoseRotation(ticks), entity, ticks, yRotationOffset, xRotation, swingingHand);
+    }
+    
+    private static float summonPoseRotation(float ticks) {
+        return MathHelper.clamp(
+                (ticks - SUMMON_ANIMATION_LENGTH) / (SUMMON_ANIMATION_LENGTH * (1 - SUMMON_ANIMATION_POSE_REVERSE_POINT)) + 1, 
+                0F, 1F);
+    }
+    
+    protected void poseIdleLoop(T entity, float ticks, float yRotationOffset, float xRotation, HandSide swingingHand) {
+        idleLoop.poseModel(ticks - idleLoopTickStamp, entity, ticks, yRotationOffset, xRotation, swingingHand);
+    }
     
     protected void initPoses() {
         poseReset = initPoseReset();
@@ -187,17 +207,14 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     }
 
     protected IModelPose<T> initIdlePose2Loop() {
-        return initBaseIdlePose();
+        return initIdlePose();
     }
 
     private static final float SUMMON_ANIMATION_LENGTH = 20.0F;
     private static final float SUMMON_ANIMATION_POSE_REVERSE_POINT = 0.75F;
     protected List<IModelPose<T>> initSummonPoses() {
         return Arrays.stream(initSummonPoseRotations())
-                .map(rotationAngles -> new ModelPoseTransition<T>(new ModelPose<T>(rotationAngles), idlePose).setEasing(ticks -> 
-                MathHelper.clamp(
-                        (ticks - SUMMON_ANIMATION_LENGTH) / (SUMMON_ANIMATION_LENGTH * (1 - SUMMON_ANIMATION_POSE_REVERSE_POINT)) + 1, 
-                        0F, 1F)))
+                .map(rotationAngles -> new ModelPose<T>(rotationAngles))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 

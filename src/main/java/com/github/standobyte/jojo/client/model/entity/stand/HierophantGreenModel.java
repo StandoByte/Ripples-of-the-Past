@@ -115,6 +115,35 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
         actionAnim.put(HierophantGreenGrapple.GRAPPLE_POSE, new StandActionAnimation.Builder<HierophantGreenEntity>()
                 .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<HierophantGreenEntity>(new RotationAngle[] {
                         new RotationAngle(rightArm, -1.5708F, 0.0F, 0.0F), // FIXME (!) (stand anim) use xRotation
+                        new RotationAngle(rightForeArm, 0.0F, 0.0F, 0.0F), 
+                        new RotationAngle(body, 0.0F, 0.0F, 0.0F), 
                 })).build(idlePose));
+    }
+    
+    
+    @Override
+    protected ModelPose<HierophantGreenEntity> initIdlePose() {
+        return new ModelPose<HierophantGreenEntity>(new RotationAngle[] {
+                new RotationAngle(body, 0.0F, 0.3491F, 0.0F),
+                new RotationAngle(upperPart, 0.0F, 0.0F, 0.0F),
+                new RotationAngle(leftArm, 0.0F, 0.0F, -0.2182F),
+                new RotationAngle(leftForeArm, -0.4363F, 0.0F, 0.0F),
+                new RotationAngle(rightArm, -0.0873F, 0.0F, 0.7854F),
+                new RotationAngle(rightForeArm, -1.9199F, -0.5672F, 0.9599F),
+                new RotationAngle(leftLeg, -0.2618F, -0.4363F, -0.1309F),
+                new RotationAngle(leftLowerLeg, 0.7854F, -0.1309F, 0.0F),
+                new RotationAngle(rightLeg, 0.2182F, 0.1309F, 0.1309F),
+                new RotationAngle(rightLowerLeg, 0.2182F, 0.1309F, 0.0F)
+        });
+    }
+
+    @Override
+    protected ModelPose<HierophantGreenEntity> initIdlePose2Loop() {
+        return new ModelPose<HierophantGreenEntity>(new RotationAngle[] {
+                new RotationAngle(leftArm, 0.0873F, 0.0F, -0.2182F),
+                new RotationAngle(leftForeArm, -0.5236F, 0.0F, 0.0F),
+                new RotationAngle(rightArm, 0.0698F, 0.0F, 0.7854F),
+                new RotationAngle(rightForeArm, -2.0071F, -0.4363F, 0.9599F)
+        });
     }
 }

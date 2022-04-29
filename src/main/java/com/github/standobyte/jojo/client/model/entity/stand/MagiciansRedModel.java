@@ -245,4 +245,30 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
         }
         return super.initHeavyAttackAnim(combo);
     }
+    
+    @Override
+    protected ModelPose<MagiciansRedEntity> initIdlePose() {
+        return new ModelPose<MagiciansRedEntity>(new RotationAngle[] {
+                new RotationAngle(body, 0.0F, 0.1309F, 0.0F),
+                new RotationAngle(upperPart, 0.0F, 0.0F, 0.0F),
+                new RotationAngle(leftArm, 0.3054F, 0.0F, -0.2182F),
+                new RotationAngle(leftForeArm, -2.0944F, -0.2618F, 1.0472F),
+                new RotationAngle(rightArm, 0.1309F, 0.0F, 0.4363F),
+                new RotationAngle(rightForeArm, -2.3562F, 0.2618F, -1.8326F),
+                new RotationAngle(leftLeg, 0.1309F, -0.1309F, 0.0F),
+                new RotationAngle(leftLowerLeg, 0.2618F, 0.0F, 0.0F),
+                new RotationAngle(rightLeg, 0.0F, -0.1309F, 0.2182F),
+                new RotationAngle(rightLowerLeg, 0.1309F, 0.0F, 0.0F),
+        });
+    }
+
+    @Override
+    protected ModelPose<MagiciansRedEntity> initIdlePose2Loop() {
+        return new ModelPose<MagiciansRedEntity>(new RotationAngle[] {
+                new RotationAngle(leftArm, 0.3927F, 0.0F, -0.1745F),
+                new RotationAngle(leftForeArm, -1.9635F, -0.1309F, 1.0472F),
+                new RotationAngle(rightArm, 0.1309F, 0.0F, 0.3054F),
+                new RotationAngle(rightForeArm, -2.3562F, 0.2618F, -1.7017F)
+        });
+    }
 }
