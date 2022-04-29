@@ -399,23 +399,23 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
         torso.texOffs(28, 55).addBox(3.5F, 10.5F, -1.0F, 1.0F, 1.0F, 2.0F, 0.0F, true);
         torso.texOffs(28, 55).addBox(-4.5F, 10.5F, -1.0F, 1.0F, 1.0F, 2.0F, 0.0F, false);
 
-        leftArmJoint.texOffs(12, 55).addBox(-0.5F, -1.0F, 1.5F, 1.0F, 2.0F, 1.0F, 0.0F, false);
+        leftArm.texOffs(12, 55).addBox(-0.5F, 3.0F, 1.5F, 1.0F, 2.0F, 1.0F, 0.0F, false);
 
         leftForeArm.texOffs(55, 4).addBox(1.5F, 3.2F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, true);
         leftForeArm.texOffs(48, 0).addBox(1.5F, 3.8F, -1.0F, 1.0F, 1.0F, 2.0F, -0.2F, true);
         leftForeArm.texOffs(56, 3).addBox(1.5F, 4.4F, -1.5F, 1.0F, 1.0F, 3.0F, -0.2F, true);
         leftForeArm.texOffs(48, 3).addBox(1.5F, 5.0F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, true);
 
-        rightArmJoint.texOffs(12, 55).addBox(-0.5F, -1.0F, 1.5F, 1.0F, 2.0F, 1.0F, 0.0F, false);
+        rightArm.texOffs(12, 55).addBox(-0.5F, 3.0F, 1.5F, 1.0F, 2.0F, 1.0F, 0.0F, false);
 
         rightForeArm.texOffs(55, 4).addBox(-2.5F, 3.2F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
         rightForeArm.texOffs(48, 0).addBox(-2.5F, 3.8F, -1.0F, 1.0F, 1.0F, 2.0F, -0.2F, false);
         rightForeArm.texOffs(56, 3).addBox(-2.5F, 4.4F, -1.5F, 1.0F, 1.0F, 3.0F, -0.2F, false);
         rightForeArm.texOffs(48, 3).addBox(-2.5F, 5.0F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, false);
 
-        leftLegJoint.texOffs(12, 55).addBox(-0.4F, -1.5F, -2.5F, 1.0F, 2.0F, 1.0F, 0.0F, true);
+        leftLeg.texOffs(12, 55).addBox(-0.4F, 4.5F, -2.5F, 1.0F, 2.0F, 1.0F, 0.0F, true);
 
-        rightLegJoint.texOffs(12, 55).addBox(-0.6F, -1.5F, -2.5F, 1.0F, 2.0F, 1.0F, 0.0F, false);
+        rightLeg.texOffs(12, 55).addBox(-0.6F, 4.5F, -2.5F, 1.0F, 2.0F, 1.0F, 0.0F, false);
 
         leftLowerLeg.texOffs(60, 54).addBox(-0.5F, 1.0F, -2.25F, 1.0F, 3.0F, 1.0F, 0.0F, false);
 
@@ -555,11 +555,8 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
                 new RotationAngle(rightArm, -0.3927F, 0.5236F, 0.2618F),
                 new RotationAngle(rightForeArm, -1.5708F, 1.0472F, -1.5708F),
                 new RotationAngle(leftLeg, 0.0873F, 0.1745F, -0.2618F),
-                new RotationAngle(leftLeg, 0.0873F, 0.2618F, -0.3491F),
-                new RotationAngle(leftLowerLeg, 0.2618F, 0.0F, 0.0F),
                 new RotationAngle(leftLowerLeg, 0.2618F, 0.0F, 0.0F),
                 new RotationAngle(rightLeg, -0.0436F, 0.0F, 0.3491F),
-                new RotationAngle(rightLeg, -0.0436F, 0.0F, 0.4363F),
                 new RotationAngle(rightLowerLeg, 0.2618F, 0.0F, -0.3491F)
         });
     }

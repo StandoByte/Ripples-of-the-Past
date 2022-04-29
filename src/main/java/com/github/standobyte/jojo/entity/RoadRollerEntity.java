@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.entity;
 
 import java.util.List;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -97,7 +96,6 @@ public class RoadRollerEntity extends Entity {
                 List<LivingEntity> entities = level.getEntitiesOfClass(LivingEntity.class, aabb, EntityPredicates.LIVING_ENTITY_STILL_ALIVE);
                 for (LivingEntity entity : entities) {
                     if (!this.is(entity.getVehicle())) {
-                        JojoMod.LOGGER.debug(damage);
                         entity.hurt(DamageUtil.roadRollerDamage(this), damage);
                     }
                 }

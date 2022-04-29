@@ -14,7 +14,6 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
@@ -469,7 +468,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     private void updateUserFromNetwork(int userId) {
-        JojoMod.LOGGER.debug("stand set user");
         userRef = lookupUser(userId);
         if (level.isClientSide()) {
             LivingEntity user = getUser();
