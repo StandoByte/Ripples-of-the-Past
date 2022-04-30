@@ -21,6 +21,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClStandManualMoveme
 import com.github.standobyte.jojo.network.packets.fromclient.ClStopHeldActionPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandManualControlPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandSummonPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillLearnPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillsResetPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonTeachersSkillsPacket;
@@ -190,6 +191,11 @@ public class PacketManager {
         .encoder(TrSyncCooldownPacket::encode)
         .decoder(TrSyncCooldownPacket::decode)
         .consumer(TrSyncCooldownPacket::handle).add();
+        
+        channel.messageBuilder(BloodParticlesPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(BloodParticlesPacket::encode)
+        .decoder(BloodParticlesPacket::decode)
+        .consumer(BloodParticlesPacket::handle).add();
         
         channel.messageBuilder(TrSyncHamonStatsPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(TrSyncHamonStatsPacket::encode)

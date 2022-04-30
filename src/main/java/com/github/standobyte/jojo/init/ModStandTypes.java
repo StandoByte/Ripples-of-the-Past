@@ -56,7 +56,7 @@ public class ModStandTypes {
                     new StandAction[] {ModActions.THE_WORLD_PUNCH.get(), ModActions.THE_WORLD_BARRAGE.get()},
                     new StandAction[] {ModActions.THE_WORLD_BLOCK.get(), ModActions.THE_WORLD_TIME_STOP.get()},
                     TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
-                    .power(16.0)
+                    .power(16.5)
                     .speed(16.0)
                     .range(2.0, 10.0)
                     .durability(16.0)

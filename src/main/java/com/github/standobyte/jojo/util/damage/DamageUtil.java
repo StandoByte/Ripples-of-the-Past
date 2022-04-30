@@ -133,7 +133,7 @@ public class DamageUtil {
                     if (undeadTarget && !scarf && hamon.isSkillLearned(HamonSkill.HAMON_SPREAD)) {
                         float effectStr = (hamon.getHamonDamageMultiplier() - 1) / (HamonData.MAX_HAMON_DAMAGE - 1);
                         int effectDuration = 25 + MathHelper.floor(125F * effectStr);
-                        int effectLvl = MathHelper.clamp(MathHelper.floor(1.5F * effectStr * dmgAmount), 0, 3);
+                        int effectLvl = MathHelper.clamp(MathHelper.floor(1.5F * effectStr * dmgAmount * hamon.hamonEfficiency()), 0, 3);
                         livingTarget.addEffect(new EffectInstance(ModEffects.HAMON_SPREAD.get(), effectDuration, effectLvl));
                     }
                     return hamon.getHamonDamageMultiplier() * hamon.hamonEfficiency();

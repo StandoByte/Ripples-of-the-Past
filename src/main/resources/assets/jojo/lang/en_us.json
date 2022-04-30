@@ -306,6 +306,7 @@
   "jojo.chat.message.new_hamon_learner": "%s wants to start learning Hamon (interact with them to start their training)",
   "jojo.chat.message.hamon_window_hint": "(Press %s or interact with a Hamon user to open Hamon skill window)",
   "jojo.chat.message.cant_learn_hamon": "You already have a power incompatible with Hamon",
+  "jojo.chat.message.stone_mask_peaceful": "You can't turn into a vampire on Peaceful difficulty",
   
   "jojo.chat.message.tmp_not_enough_xp": "You are not strong enough to gain a Stand",
   
@@ -389,7 +390,7 @@
   "jojo.config.client.resolveShaders": "Resolve shaders",
   "jojo.config.client.resolveShaders.tooltip": "Enable shaders during Resolve effect.",
   
-  "stand.unknown": "Unknown stand: %s",
+  "stand.unknown": "Unknown Stand: %s",
   "commands.stand.give.success.single": "Gave %s to %s",
   "commands.stand.give.success.multiple": "Gave %s to %s players",
   "commands.stand.give.success.multiple.random": "Gave random Stands to %s players",
