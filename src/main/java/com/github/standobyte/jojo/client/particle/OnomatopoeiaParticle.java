@@ -83,7 +83,7 @@ public class OnomatopoeiaParticle extends SpriteTexturedParticle {
         public Particle createParticle(BasicParticleType type, ClientWorld world, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
             OnomatopoeiaParticle particle = new OnomatopoeiaParticle(world, x, y, z, xSpeed, ySpeed, zSpeed);
             particle.pickSprite(spriteSet);
-            particle.lifetime = 40;
+            particle.setLifetime(40);
             particle.scale(2F);
             return particle;
         }

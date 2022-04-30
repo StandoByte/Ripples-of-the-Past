@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.util;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -32,6 +33,7 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.item.StoneMaskItem;
 import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartPacket;
 import com.github.standobyte.jojo.potion.IApplicableEffect;
 import com.github.standobyte.jojo.power.IPower;
@@ -89,6 +91,7 @@ import net.minecraft.scoreboard.Team;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
@@ -481,7 +484,7 @@ public class GameplayEventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingDamage(LivingDamageEvent event) {
-        activateStoneMasks(event.getSource(), event.getAmount(), event.getEntityLiving());
+        dropBlood(event.getSource(), event.getAmount(), event.getEntityLiving());
         StandType.onHurtByStand(event.getSource(), event.getAmount(), event.getEntityLiving());
         
         for (PowerClassification powerClassification : PowerClassification.values()) {
@@ -512,7 +515,9 @@ public class GameplayEventHandler {
         });
     }
 
-    private static void activateStoneMasks(DamageSource dmgSource, float dmgAmount, LivingEntity target) {
+    private static void dropBlood(DamageSource dmgSource, float dmgAmount, LivingEntity target) {
+        World world = target.level;
+        if (world.isClientSide()) return;
         if (dmgAmount >= 0.98F && 
                 (!dmgSource.isBypassArmor() && !dmgSource.isFire() && !dmgSource.isMagic() && !dmgSource.isBypassMagic() || dmgSource == DamageSource.FALL)) {
             if (!JojoModUtil.canBleed(target)) {
@@ -520,12 +525,15 @@ public class GameplayEventHandler {
             }
             double radius = 2;
             BlockPos entityPos = target.blockPosition();
-            World world = target.level;
-            List<LivingEntity> entitiesAround = JojoModUtil.entitiesAround(LivingEntity.class, target, radius, true,
-                    entity -> entity.getItemBySlot(EquipmentSlotType.HEAD).getItem() instanceof StoneMaskItem);
-            for (LivingEntity entity : entitiesAround) {
-                applyStoneMask(entity, entity.getItemBySlot(EquipmentSlotType.HEAD));
-            }
+            
+            List<Vector3d> particlePos = new ArrayList<>();
+            List<LivingEntity> entitiesAround = JojoModUtil.entitiesAround(LivingEntity.class, target, radius, true, EntityPredicates.NO_SPECTATORS);
+            entitiesAround.forEach(entity -> {
+                if (dropBloodOnEntity(dmgSource, entity)) {
+                    particlePos.add(entity.getEyePosition(1.0F));
+                }
+            });
+            
             BlockPos.betweenClosedStream(entityPos.offset(-radius, -radius, -radius), entityPos.offset(radius, radius, radius))
             .filter(pos -> world.getBlockState(pos).getBlock() == ModBlocks.STONE_MASK.get())
             .forEach(pos -> {
@@ -537,18 +545,42 @@ public class GameplayEventHandler {
                     if (tileEntity instanceof StoneMaskTileEntity) {
                         ((StoneMaskTileEntity) tileEntity).activate();
                     }
+                    particlePos.add(Vector3d.atBottomCenterOf(pos));
                     break;
                 default:
                     Block.popResource(world, pos, StoneMaskBlock.getItemFromBlock(world, pos, blockState));
                     world.removeBlock(pos, false);
+                    particlePos.add(Vector3d.atCenterOf(pos));
                     break;
                 }
             });
+            
+            if (!particlePos.isEmpty()) {
+                Vector3d particleSource = target.getBoundingBox().getCenter();
+                int count = Math.min((int) (dmgAmount * 5), 50);
+                particlePos.forEach(pos -> {
+                    PacketManager.sendToClientsTracking(new BloodParticlesPacket(particleSource, pos, count), target);
+                });
+            }
         }
+    }
+    
+    private static boolean dropBloodOnEntity(DamageSource dmgSource, LivingEntity entity) {
+        boolean dropped = false;
+        ItemStack headArmor = entity.getItemBySlot(EquipmentSlotType.HEAD);
+        if (headArmor.getItem() instanceof StoneMaskItem && applyStoneMask(entity, headArmor)) {
+            dropped = true;
+        }
+        if (entity.getType() == EntityType.ZOMBIE) return true;
+        return dropped;
     }
 
     public static boolean applyStoneMask(LivingEntity entity, ItemStack headStack) {
         if (entity.level.getDifficulty() == Difficulty.PEACEFUL) {
+            if (entity instanceof ServerPlayerEntity) {
+                ((ServerPlayerEntity) entity).displayClientMessage(
+                        new TranslationTextComponent("jojo.chat.message.stone_mask_peaceful"), true);
+            }
             return false;
         }
         if (entity instanceof PlayerEntity) {
