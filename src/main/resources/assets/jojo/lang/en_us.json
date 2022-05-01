@@ -24,6 +24,7 @@
   "item.jojo.stand_arrow_beetle": "Beetle Stand Arrow",
   "item.jojo.stand_disc": "Stand Disc",
   "item.jojo.stand_remover": "Remove Stand",
+  "item.jojo.cocoa_gum": "Cocoa Gum",
   
   "entity.jojo.hungry_zombie": "Hungry Zombie",
   "entity.jojo.hamon_master": "Hamon Master",
@@ -581,7 +582,7 @@
   "hamonSkill.crimson_bubble.name": "Crimson Bubble",
   "hamonSkill.crimson_bubble.desc": "When you die, you put your life energy (Hamon Strength and Control points) into a bubble, from which it can be transferred to another Hamon user.",
   "hamonSkill.aja_stone_keeper.name": "Keeper of Aja Stone",
-  "hamonSkill.aja_stone_keeper.desc": "You can instantly charge an Aja Stone with Hamon by using it while sneaking. When using a regular Aja Stone, you have a small chance to it into Super Aja.",
+  "hamonSkill.aja_stone_keeper.desc": "You can instantly charge an Aja Stone with Hamon. When using a regular Aja Stone, you have a small chance to it into Super Aja.",
   "hamonSkill.satiporoja_scarf.name": "Satiporoja Beetle Scarf",
   "hamonSkill.satiporoja_scarf.desc": "You get a scarf which, when worn, reduces Hamon energy spent and absorbs Hamon damage. You can use it as a Hamon-conductive melee weapon or swing it to cover a larger area of targets.",
   "hamonSkill.snake_muffler.name": "Snake Muffler",

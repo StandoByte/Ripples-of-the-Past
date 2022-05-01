@@ -101,4 +101,7 @@ public class ModItems {
     public static final RegistryObject<StandRemoverItem> STAND_REMOVER = ITEMS.register("stand_remover",
             () -> new StandRemoverItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1)));
 
+//    public static final RegistryObject<Item> COCOA_GUM = ITEMS.register("cocoa_gum", 
+//            () -> new GumItem(new Item.Properties().tab(JojoMod.MAIN_TAB).food(new Food.Builder().nutrition(2).saturationMod(0.1F).build())));
+
 }

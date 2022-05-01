@@ -38,7 +38,7 @@ public class AjaStoneItem extends Item {
     @Override
     public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (player.isShiftKeyDown()) {
+//        if (player.isShiftKeyDown()) {
             INonStandPower power = INonStandPower.getPlayerNonStandPower(player);
             if (power.hasEnergy(getHamonChargeCost())) {
                 Optional<HamonData> hamonOptional = power.getTypeSpecificData(ModNonStandPowers.HAMON.get());
@@ -58,7 +58,7 @@ public class AjaStoneItem extends Item {
                     }
                 }
             }
-        }
+//        }
         if (sufficientLight(world, player)) {
             player.startUsingItem(hand);
             return ActionResult.consume(stack);

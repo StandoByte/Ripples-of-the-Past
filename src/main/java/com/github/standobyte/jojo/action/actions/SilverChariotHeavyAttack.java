@@ -47,7 +47,7 @@ public class SilverChariotHeavyAttack extends StandEntityHeavyAttack {
     
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {
-        if (standEntity.isHeavyComboPunching()) {
+        if (!world.isClientSide() && standEntity.isHeavyComboPunching()) {
             double reach = standEntity.getAttributeValue(ForgeMod.REACH_DISTANCE.get());
             world.getEntities(standEntity, standEntity.getBoundingBox().inflate(reach, 0, reach), 
                     e -> !e.isSpectator() && e.isPickable() && standEntity.canHarm(e)).forEach(targetEntity -> {
