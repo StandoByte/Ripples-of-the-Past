@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.item;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -25,6 +27,7 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.item.UseAction;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -105,20 +108,63 @@ public class TommyGunItem extends Item {
         if (ammoToLoad > 0) {
             if (entity instanceof PlayerEntity) {
                 PlayerEntity player = (PlayerEntity) entity;
-                // FIXME (!!) tommy gun ammo
-//                if (!player.abilities.instabuild) {
-//                    for (int i = 0; i < player.inventory.getContainerSize(); ++i) {
-//                        ItemStack ammoStack = player.inventory.getItem(i);
-//                    }
-//                }
-                player.getCooldowns().addCooldown(this, (int) (ammoToLoad * 1.5F));
+                ammoToLoad = consumeAmmo(player, ammoToLoad);
+                if (!world.isClientSide()) {
+                    player.getCooldowns().addCooldown(this, ammoToLoad * 2);
+                }
             }
             if (ammoToLoad > 0) {
-                stack.getTag().putInt("Ammo", getAmmo(stack) + ammoToLoad);
+                if (!world.isClientSide()) {
+                    stack.getTag().putInt("Ammo", getAmmo(stack) + ammoToLoad);
+                }
                 return true;
             }
         }
         return false;
+    }
+
+    private static final int GUNPOWDER_TO_BULLET = 1;
+    private int consumeAmmo(PlayerEntity player, int ammoToLoad) {
+        if (!player.abilities.instabuild) {
+            List<ItemStack> ironNuggets = new ArrayList<>();
+            int ironNuggetsCount = 0;
+            List<ItemStack> gunpowder = new ArrayList<>();
+            int gunpowderCount = 0;
+            
+            for (int i = 0; i < player.inventory.getContainerSize(); ++i) {
+                ItemStack inventoryStack = player.inventory.getItem(i);
+                if (inventoryStack.getItem() == Items.IRON_NUGGET) {
+                    ironNuggets.add(inventoryStack);
+                    ironNuggetsCount += inventoryStack.getCount();
+                }
+                else if (inventoryStack.getItem() == Items.GUNPOWDER) {
+                    gunpowder.add(inventoryStack);
+                    gunpowderCount += inventoryStack.getCount();
+                }
+            }
+            
+            ammoToLoad = Math.min(Math.min(ironNuggetsCount, gunpowderCount / GUNPOWDER_TO_BULLET), ammoToLoad);
+            ironNuggetsCount = ammoToLoad;
+            gunpowderCount = ammoToLoad * GUNPOWDER_TO_BULLET;
+
+            for (ItemStack ironNuggetsStack : ironNuggets) {
+                int consumed = Math.min(ironNuggetsStack.getCount(), ironNuggetsCount);
+                if (!player.level.isClientSide()) {
+                    ironNuggetsStack.shrink(consumed);
+                }
+                ironNuggetsCount -= consumed;
+                if (ironNuggetsCount == 0) break;
+            }
+            for (ItemStack gunpowderStack : gunpowder) {
+                int consumed = Math.min(gunpowderStack.getCount(), gunpowderCount);
+                if (!player.level.isClientSide()) {
+                    gunpowderStack.shrink(consumed);
+                }
+                gunpowderCount -= consumed;
+                if (gunpowderCount == 0) break;
+            }
+        }
+        return ammoToLoad;
     }
 
     @Override
