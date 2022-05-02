@@ -1,33 +1,48 @@
 package com.github.standobyte.jojo.util;
 
-import java.util.Map;
-import java.util.function.Supplier;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 import com.github.standobyte.jojo.action.actions.StandAction;
 import com.github.standobyte.jojo.init.ModActions;
-import com.google.common.collect.ImmutableMap;
+import com.github.standobyte.jojo.power.stand.ActionLearningProgressMap;
+import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.type.StandType;
+import com.google.common.collect.Streams;
 
 public class LegacyUtil {
-    private static final Map<Supplier<? extends StandAction>, Integer> EXP_REQUIREMENT = 
-            new ImmutableMap.Builder<Supplier<? extends StandAction>, Integer>()
-/*1*/        .put(ModActions.STAR_PLATINUM_STAR_FINGER, 300)
-/*4*/        .put(ModActions.STAR_PLATINUM_TIME_STOP, 950)
-/*4*/        .put(ModActions.STAR_PLATINUM_TIME_STOP_BLINK, 950)
-/*1*/        .put(ModActions.THE_WORLD_TIME_STOP, 500)
-/*1*/        .put(ModActions.THE_WORLD_TIME_STOP_BLINK, 500)
-/*0*/        .put(ModActions.HIEROPHANT_GREEN_STRING_BIND, 200)
-/*1*/        .put(ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH, 50)
-/*1+*/       .put(ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED, 400)
-/*1*/        .put(ModActions.HIEROPHANT_GREEN_GRAPPLE, 100)
-/*1*/        .put(ModActions.HIEROPHANT_GREEN_GRAPPLE_ENTITY, 100)
-/*3*/        .put(ModActions.HIEROPHANT_GREEN_BARRIER, 700)
-/*1*/        .put(ModActions.SILVER_CHARIOT_RAPIER_LAUNCH, 200)
-/*3*/        .put(ModActions.SILVER_CHARIOT_TAKE_OFF_ARMOR, 600)
-/*0*/        .put(ModActions.MAGICIANS_RED_FLAME_BURST, 50)
-/*1*/        .put(ModActions.MAGICIANS_RED_FIREBALL, 150)
-/*4*/        .put(ModActions.MAGICIANS_RED_CROSSFIRE_HURRICANE, 700)
-/*4+*/       .put(ModActions.MAGICIANS_RED_CROSSFIRE_HURRICANE_SPECIAL, 1000)
-/*3*/        .put(ModActions.MAGICIANS_RED_RED_BIND, 450)
-/*2*/        .put(ModActions.MAGICIANS_RED_DETECTOR, 500)
-            .build();
+    
+    public static void readNbtStandXp(IStandPower power, int xpValue, ActionLearningProgressMap<IStandPower> unlockedActions) {
+        if (power.hasPower()) {
+            StandType<?> stand = power.getType();
+            Streams.concat(Arrays.stream(stand.getAttacks()), Arrays.stream(stand.getAbilities()))
+            .flatMap(action -> action.hasShiftVariation() && action.getShiftVariationIfPresent() instanceof StandAction
+                    ? Stream.of(action, (StandAction) action.getShiftVariationIfPresent()) : Stream.of(action))
+            .filter(action -> action.canBeUnlocked(power) || action.getXpRequirement() <= xpValue)
+            .forEach(action -> unlockedActions.setLearningProgressPoints(action, getLearningFromXp(action, xpValue, power), power));
+        }
+    }
+    
+    private static float getLearningFromXp(StandAction action, int xpValue, IStandPower power) {
+        int min = -1;
+        int max = -1;
+        float ptsRatio = 1;
+        if (action == ModActions.STAR_PLATINUM_TIME_STOP.get() || action == ModActions.STAR_PLATINUM_TIME_STOP_BLINK.get() || 
+                action == ModActions.THE_WORLD_TIME_STOP.get() || action == ModActions.THE_WORLD_TIME_STOP_BLINK.get()) {
+            min = action.getXpRequirement();
+            max = 1000;
+        }
+        if (action == ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get()) {
+            min = ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get().getXpRequirement();
+            max = ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED.get().getXpRequirement();
+        }
+        if (action == ModActions.MAGICIANS_RED_CROSSFIRE_HURRICANE.get()) {
+            min = ModActions.MAGICIANS_RED_CROSSFIRE_HURRICANE.get().getXpRequirement();
+            max = ModActions.MAGICIANS_RED_CROSSFIRE_HURRICANE_SPECIAL.get().getXpRequirement();
+        }
+        if (min > -1 && max > -1) {
+            ptsRatio = (Math.min(xpValue, max) - min) / (max - min);
+        }
+        return action.getMaxTrainingPoints(power) * ptsRatio;
+    }
 }

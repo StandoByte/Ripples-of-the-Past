@@ -23,7 +23,7 @@ public class ActionLearningProgressMap<P extends IPower<P, ?>> {
         return MathHelper.clamp(wrappedMap.get(action), 0F, action.getMaxTrainingPoints(power));
     }
     
-    boolean setLearningProgressPoints(Action<P> action, float progress, P power) {
+    public boolean setLearningProgressPoints(Action<P> action, float progress, P power) {
         if (wrappedMap.containsKey(action) && wrappedMap.get(action) == progress) {
             return false;
         }

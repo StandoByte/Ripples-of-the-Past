@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.actions.StandAction;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -24,6 +25,7 @@ import com.github.standobyte.jojo.power.PowerBaseImpl;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.stand.type.StandType;
+import com.github.standobyte.jojo.util.LegacyUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
@@ -331,12 +333,10 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             Stream.concat(
                     Arrays.stream(standType.getAttacks()), 
                     Arrays.stream(standType.getAbilities()))
+            .flatMap(action -> action.hasShiftVariation() && action.getShiftVariationIfPresent() instanceof StandAction
+                    ? Stream.of(action, (StandAction) action.getShiftVariationIfPresent()) : Stream.of(action))
             .forEach(action -> {
                 actionLearningProgressMap.setLearningProgressPoints(action, action.getMaxTrainingPoints(this), this);
-                if (action.hasShiftVariation()) {
-                    Action<IStandPower> shiftAction = action.getShiftVariationIfPresent();
-                    actionLearningProgressMap.setLearningProgressPoints(shiftAction, shiftAction.getMaxTrainingPoints(this), this);
-                }
             });
         }
     }
@@ -525,6 +525,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 if (nbt.contains("Exp")) {
                     xp = nbt.getInt("Exp");
                     // FIXME (!!) add unlocked actions from v0.1
+                    LegacyUtil.readNbtStandXp(this, xp, actionLearningProgressMap);
                 }
                 else {
                     xp = nbt.getInt("Xp");
