@@ -130,8 +130,12 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
     }
 
     @Override
-    public int getExpRewardMultiplier() {
-        return 5;
+    public float getTargetResolveMultiplier(INonStandPower power) {
+        LivingEntity entity = power.getUser();
+        if (entity != null) {
+            return (float) Math.pow(2, Math.max(entity.level.getDifficulty().getId() - 1, 0));
+        }
+        return 1;
     }
     
     @Override

@@ -51,7 +51,7 @@ public class SCRapierEntity extends ModdedProjectileEntity {
         else {
             damage = (float) ModStandTypes.SILVER_CHARIOT.get().getStats().getBasePower();
         }
-        return damage;
+        return damage * 1.5F;
     }
     
     @Override

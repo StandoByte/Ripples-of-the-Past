@@ -88,7 +88,9 @@ public class StandEntityTask {
         }
         
         if (phase == StandEntityAction.Phase.PERFORM) {
-            standPower.consumeStamina(action.getStaminaCostTicking(standPower));
+            if (!standEntity.level.isClientSide()) {
+                standPower.consumeStamina(action.getStaminaCostTicking(standPower));
+            }
             if (ticksLeft == startingTicks) {
                 action.standPerform(standEntity.level, standEntity, standPower, target);
             }

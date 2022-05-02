@@ -449,9 +449,9 @@ public class InputHandler {
                             }
                         }
                         if (power.getPowerClassification() == PowerClassification.STAND) {
-                            leftDash.inputUpdate(input.left, input.right || input.down, mc.player);
-                            rightDash.inputUpdate(input.right, input.left || input.down, mc.player);
-                            backDash.inputUpdate(input.down, input.left || input.right, mc.player);
+//                            leftDash.inputUpdate(input.left, input.right || input.down, mc.player);
+//                            rightDash.inputUpdate(input.right, input.left || input.down, mc.player);
+//                            backDash.inputUpdate(input.down, input.left || input.right, mc.player);
                         }
                     }
                 }

@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModActions;
-import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.JojoModUtil;
@@ -147,8 +146,7 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
         LivingEntity owner = getOwner();
         LivingEntity standUser = getOwner() instanceof StandEntity ? ((StandEntity) owner).getUser() : null;
         boolean canAffectStandUser = standUser != null
-                && IStandPower.getStandPowerOptional(standUser).map(stand -> stand.getResolveLevel() < 4).orElse(true)
-                && !standUser.hasEffect(ModEffects.RESOLVE.get());
+                && IStandPower.getStandPowerOptional(standUser).map(stand -> stand.getResolveLevel() < 4).orElse(true);
         Iterator<Entity> it = inExplosion.iterator();
         while (it.hasNext()) {
             Entity entity = it.next();

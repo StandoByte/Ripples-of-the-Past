@@ -505,6 +505,11 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
     
     @Override
+    public float getTargetResolveMultiplier() {
+        return hasPower() ? getType().getTargetResolveMultiplier(getThis()) : 1F;
+    }
+    
+    @Override
     public boolean canLeap() {
         return hasPower() && user.isOnGround() && getLeapCooldown() == 0 && isLeapUnlocked() && leapStrength() > 0;
     }

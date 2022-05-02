@@ -159,7 +159,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
                 return true;
             }
             if (entity instanceof LivingEntity) {
-                if (entity.is(owner)) {
+                if (entity.is(owner) || owner instanceof StandEntity && entity.is(((StandEntity) owner).getUser())) {
                     return canHitOwner();
                 }
                 else {

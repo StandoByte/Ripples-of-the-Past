@@ -447,7 +447,7 @@ public class HamonData extends TypeSpecificData {
             float lvlInc = (2 * MathHelper.clamp(getAverageExercisePoints(), 0F, 1F)) - 1F;
             recalcAvgExercisePoints();
             JojoMod.LOGGER.debug(power.getUser().getDisplayName().getString() + ": Day " + day + " (from " + prevDay + "), Hamon exercise training: " + getAverageExercisePoints());
-            // FIXME (!!) why tf does it go down when the user is offline
+            // FIXME breathing technique going down for offline players on servers
             if (lvlInc < 0) {
                 if (!JojoModConfig.getCommonConfigInstance(false).breathingTechniqueDeterioration.get()) {
                     lvlInc = 0;

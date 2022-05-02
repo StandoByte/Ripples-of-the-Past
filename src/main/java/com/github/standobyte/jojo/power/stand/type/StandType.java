@@ -184,7 +184,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     @Override
-    public int getExpRewardMultiplier() {
+    public float getTargetResolveMultiplier(IStandPower power) {
         return tier + 1;
     }
     

@@ -30,7 +30,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class ClackersItem extends Item {
-    public static final int TICKS_MAX_POWER = 100;
+    public static final int TICKS_MAX_POWER = 80;
     
     private final Multimap<Attribute, AttributeModifier> attributeModifiers;
 
@@ -113,7 +113,7 @@ public class ClackersItem extends Item {
             }
             else if (!world.isClientSide() && power > 0.5) {
                 ClackersEntity clackers = new ClackersEntity(world, entity);
-                float projectileSpeed = power == 1.0F ? 4 : power * 3;
+                float projectileSpeed = power == 1.0F ? 3 : power * 2;
                 float hamonDmg = projectileSpeed * 0.5F;
                 clackers.setHamonDamage(hamonDmg);
                 clackers.setHamonEnergySpent(Math.min(ticksUsed, TICKS_MAX_POWER) * CHARGE_TICK_COST + Math.max(ticksUsed - TICKS_MAX_POWER, 0) * UPKEEP_TICK_COST);
