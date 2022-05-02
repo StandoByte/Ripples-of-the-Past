@@ -12,7 +12,13 @@ import com.github.standobyte.jojo.network.packets.fromserver.SyncMaxAchievedReso
 import com.github.standobyte.jojo.network.packets.fromserver.SyncResolveBoostsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncResolveLevelPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncResolvePacket;
+import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.power.IPower.PowerClassification;
+import com.github.standobyte.jojo.util.DiscardingSortedMultisetWrapper;
 import com.github.standobyte.jojo.util.damage.IStandDamageSource;
+import com.google.common.collect.BoundType;
+import com.google.common.collect.Multiset;
+import com.google.common.collect.SortedMultiset;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityClassification;
@@ -35,21 +41,19 @@ public class ResolveCounter {
     private static final int[] RESOLVE_EFFECT_MAX = {600, 1200, 1500, 1800, 2400};
 
     
-    private static final float BOOST_ATTACK_MAX = 2F;
-    private static final float BOOST_PER_DMG_DEALT = 0.005F;
+    private static final float BOOST_ATTACK_MAX = 5F;
+    private static final float BOOST_PER_DMG_DEALT = 0.05F;
     
-    private static final float BOOST_MISSING_HP_MAX = 5F;
+    private static final float BOOST_MISSING_HP_MAX = 10F;
     private static final float BOOST_MIN_HP = 5F;
     private static final float BOOST_MAX_HP = 15F;
-    private static final float BOOST_NO_NATURAL_REGEN_MULTIPLIER = 4F;
-    
-    private static final float BOOST_ALREADY_ACHIEVED = 5F;
+    private static final float BOOST_NO_NATURAL_REGEN_MULTIPLIER = 2F;
     
     private static final float BOOST_REMOTE_MAX = 5F;
-    private static final float BOOST_REMOTE_PER_TICK = 0.005F;
+    private static final float BOOST_REMOTE_PER_TICK = 0.025F;
     
     private static final float BOOST_CHAT_MAX = 1.25F;
-    private static final float BOOST_PER_CHARACTER = 0.025F;
+    private static final float BOOST_PER_CHARACTER = 0.05F;
     
     private final IStandPower stand;
     private final Optional<ServerPlayerEntity> serverPlayerUser;
@@ -59,7 +63,9 @@ public class ResolveCounter {
     
     private int resolveLevel = 0;
     
-    private float maxAchievedResolve = 0;
+    private DiscardingSortedMultisetWrapper<Float> resolveRecords = 
+            new DiscardingSortedMultisetWrapper<>(99);
+    private float maxAchievedValue;
     
     private float boostAttack = 1;
     private float boostRemoteControl = 1;
@@ -77,7 +83,8 @@ public class ResolveCounter {
         resolve = 0;
         resolveLevel = 0;
         noResolveDecayTicks = 0;
-        maxAchievedResolve = 0;
+        resolveRecords.clear();
+        maxAchievedValue = 0;
         
         setBoosts(1, 1, 1);
         hpOnGettingAttacked = -1;
@@ -100,6 +107,10 @@ public class ResolveCounter {
         else {
             if (noResolveDecayTicks > 0) {
                 noResolveDecayTicks--;
+                if (noResolveDecayTicks == 0) {
+                    resolveRecords.add(resolve);
+                    setMaxAchievedValue(resolveRecords.getMax());
+                }
             }
             else {
                 boolean hadValue = resolve > 0;
@@ -132,7 +143,17 @@ public class ResolveCounter {
     }
     
     public float getMaxAchievedValue() {
-        return maxAchievedResolve;
+        return maxAchievedValue;
+    }
+    
+    public void setMaxAchievedValue(float value) {
+        boolean send = this.maxAchievedValue != value;
+        this.maxAchievedValue = value;
+        if (send) {
+            serverPlayerUser.ifPresent(player -> {
+                PacketManager.sendToClient(new SyncMaxAchievedResolvePacket(value), player);
+            });
+        }
     }
     
     int getResolveLevel() {
@@ -148,7 +169,6 @@ public class ResolveCounter {
         }
         
         boolean send = this.resolve != resolve || this.noResolveDecayTicks != noDecayTicks;
-        this.maxAchievedResolve = Math.max(Math.max(this.resolve, resolve), maxAchievedResolve);
         this.resolve = resolve;
         this.noResolveDecayTicks = noDecayTicks;
         
@@ -165,10 +185,6 @@ public class ResolveCounter {
                     false, true));
         }
     }
-    
-    public void setMaxAchievedValue(float value) {
-        this.maxAchievedResolve = value;
-    }
 
     public void addResolveValue(float resolve) {
         setResolveValue(getResolveValue() + boostAddedValue(resolve, stand.getUser()), RESOLVE_NO_DECAY_TICKS);
@@ -178,10 +194,26 @@ public class ResolveCounter {
     
     private float boostAddedValue(float value, LivingEntity entity) {
         value *= boostFromAttack() * boostFromGettingAttacked(entity);
-        
-        float recordDiff = MathHelper.clamp(getMaxAchievedValue() - getResolveValue(), 0, value * BOOST_ALREADY_ACHIEVED);
-        value += recordDiff * (BOOST_ALREADY_ACHIEVED - 1F) / BOOST_ALREADY_ACHIEVED;
+        value = multiplyRecords(value);
         return value;
+    }
+    
+    private float multiplyRecords(float addedValue) {
+        float totalBoostedValue = 0;
+        SortedMultiset<Float> higherRecords = resolveRecords.getWrappedSet().tailMultiset(this.resolve, BoundType.OPEN);
+        float lowerBorder = getResolveValue();
+        for (Multiset.Entry<Float> entry : higherRecords.entrySet()) {
+            float upperBorder = entry.getElement();
+            float multiplier = 1 + entry.getCount();
+            float sectionValueBoosted = MathHelper.clamp(addedValue, 0, (upperBorder - lowerBorder) / multiplier);
+            if (sectionValueBoosted == 0) {
+                break;
+            }
+            addedValue -= sectionValueBoosted;
+            totalBoostedValue += sectionValueBoosted * multiplier;
+            lowerBorder = upperBorder;
+        }
+        return totalBoostedValue + addedValue;
     }
     
     private float boostFromAttack() {
@@ -194,7 +226,7 @@ public class ResolveCounter {
             hp = hpOnGettingAttacked;
         }
         hp = MathHelper.clamp(hp, BOOST_MIN_HP, BOOST_MAX_HP);
-        float boost = (BOOST_MAX_HP - hp) * (BOOST_MISSING_HP_MAX - 1) / (BOOST_MAX_HP - BOOST_MIN_HP) + 1;
+        float boost = MathHelper.clamp((BOOST_MAX_HP - hp) * (BOOST_MISSING_HP_MAX - 1) / (BOOST_MAX_HP - BOOST_MIN_HP) + 1, 0, BOOST_MAX_HP);
         if (!user.level.getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION)) boost *= BOOST_NO_NATURAL_REGEN_MULTIPLIER;
         return boost;
     }
@@ -223,7 +255,16 @@ public class ResolveCounter {
         if (stand.usesResolve() && target.getClassification(false) == EntityClassification.MONSTER || target.getType() == EntityType.PLAYER) {
             LivingEntity user = stand.getUser();
             dmgAmount = Math.min(dmgAmount, target.getHealth());
-            addResolveValue(dmgAmount * RESOLVE_FOR_DMG_POINT);
+            float points = dmgAmount * RESOLVE_FOR_DMG_POINT;
+            for (PowerClassification classification : PowerClassification.values()) {
+                points *= IPower.getPowerOptional(target, classification).map(power -> {
+                    if (power.hasPower()) {
+                        return power.getTargetResolveMultiplier();
+                    }
+                    return 1F;
+                }).orElse(1F);
+            }
+            addResolveValue(points);
             if (user.hasEffect(ModEffects.RESOLVE.get())) {
                 setResolveValue(Math.max(getMaxResolveValue() * 0.5F, getResolveValue()), 0);
             }
@@ -310,7 +351,8 @@ public class ResolveCounter {
     public void resetResolveValue() {
         this.resolve = 0;
         this.noResolveDecayTicks = 0;
-        this.maxAchievedResolve = 0;
+        this.resolveRecords.clear();
+        this.maxAchievedValue = 0;
         setBoosts(1, 1, 1);
         hpOnGettingAttacked = -1;
         serverPlayerUser.ifPresent(player -> {
@@ -322,7 +364,8 @@ public class ResolveCounter {
         this.resolve = previous.resolve;
         this.resolveLevel = previous.resolveLevel;
         this.noResolveDecayTicks = previous.noResolveDecayTicks;
-        this.maxAchievedResolve = previous.maxAchievedResolve;
+        this.resolveRecords = previous.resolveRecords;
+        this.maxAchievedValue = previous.maxAchievedValue;
         this.boostAttack = previous.boostAttack;
         this.boostRemoteControl = previous.boostRemoteControl;
         this.boostChat = previous.boostChat;
@@ -332,14 +375,13 @@ public class ResolveCounter {
     void alwaysResetOnDeath() {
         resolve = 0;
         noResolveDecayTicks = 0;
-        maxAchievedResolve = 0;
         setBoosts(1, 1, 1);
         hpOnGettingAttacked = -1;
     }
 
     void syncWithUser(ServerPlayerEntity player) {
         PacketManager.sendToClient(new SyncResolvePacket(getResolveValue(), noResolveDecayTicks), player);
-        PacketManager.sendToClient(new SyncMaxAchievedResolvePacket(maxAchievedResolve), player);
+        PacketManager.sendToClient(new SyncMaxAchievedResolvePacket(maxAchievedValue), player);
         PacketManager.sendToClient(new SyncResolveLevelPacket(getResolveLevel()), player);
         PacketManager.sendToClient(new SyncResolveBoostsPacket(boostAttack, boostRemoteControl, boostChat, hpOnGettingAttacked), player);
     }
@@ -348,7 +390,8 @@ public class ResolveCounter {
         resolve = nbt.getFloat("Resolve");
         resolveLevel = nbt.getByte("ResolveLevel");
         noResolveDecayTicks = nbt.getInt("ResolveTicks");
-        maxAchievedResolve = nbt.getFloat("ResolveAchieved");
+        // FIXME (!!!!!!!!) resolve records load
+//        resolveRecord = nbt.getFloat("ResolveAchieved");
         boostAttack = nbt.getFloat("BoostAttack");
         boostRemoteControl = nbt.getFloat("BoostRemoteControl");
         boostChat = nbt.getFloat("BoostChat");
@@ -360,7 +403,8 @@ public class ResolveCounter {
         resolveNbt.putFloat("Resolve", resolve);
         resolveNbt.putByte("ResolveLevel", (byte) resolveLevel);
         resolveNbt.putInt("ResolveTicks", noResolveDecayTicks);
-        resolveNbt.putFloat("ResolveAchieved", maxAchievedResolve);
+        // FIXME (!!!!!!!!) resolve records save
+//        resolveNbt.putFloat("ResolveAchieved", resolveRecord);
         resolveNbt.putFloat("BoostAttack", boostAttack);
         resolveNbt.putFloat("BoostRemoteControl", boostRemoteControl);
         resolveNbt.putFloat("BoostChat", boostChat);

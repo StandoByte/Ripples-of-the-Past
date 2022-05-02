@@ -19,7 +19,7 @@ public interface IPowerType<P extends IPower<P, T>, T extends IPowerType<P, T>> 
     }
     Action<P>[] getAttacks();
     Action<P>[] getAbilities();
-    int getExpRewardMultiplier();
+    float getTargetResolveMultiplier(P power);
     String getTranslationKey();
     ResourceLocation getIconTexture();
     String getEnergyString();

@@ -249,6 +249,8 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
     @Override
     protected ModelPose<MagiciansRedEntity> initIdlePose() {
         return new ModelPose<MagiciansRedEntity>(new RotationAngle[] {
+                new RotationAngle(beakUpper, 0.1745F, 0.0F, 0.0F),
+                new RotationAngle(beakLower, 0.0F, 0.0F, 0.0F),
                 new RotationAngle(body, 0.0F, 0.1309F, 0.0F),
                 new RotationAngle(upperPart, 0.0F, 0.0F, 0.0F),
                 new RotationAngle(leftArm, 0.3054F, 0.0F, -0.2182F),

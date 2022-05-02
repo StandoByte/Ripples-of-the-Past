@@ -77,6 +77,7 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     void stopHeldAction(boolean shouldFire);
 
     void onUserGettingAttacked(DamageSource dmgSource, float dmgAmount);
+    float getTargetResolveMultiplier();
     
     boolean canLeap();
     boolean isLeapUnlocked();

@@ -93,8 +93,8 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     }
 
     @Override
-    public int getExpRewardMultiplier() {
-        return 4;
+    public float getTargetResolveMultiplier(INonStandPower power) {
+        return 2;
     }
     
     @Override
