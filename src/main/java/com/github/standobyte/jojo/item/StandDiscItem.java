@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.item;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -44,7 +45,7 @@ public class StandDiscItem extends Item {
                     StandType<?> stand = getStandFromStack(stack);
                     if (JojoModUtil.dispenseOnNearbyEntity(blockSource, stack, entity -> {
                         return IStandPower.getStandPowerOptional(entity).map(power -> {
-                            return canGainStand(entity, power.getTier(), stand) && power.givePower(stand);
+                            return standFitsTier(entity, power.getTier(), stand) && power.givePower(stand);
                         }).orElse(false);
                     }, true)) {
                         return stack;
@@ -62,7 +63,10 @@ public class StandDiscItem extends Item {
         if (!world.isClientSide()) {
             if (validStandDisc(stack)) {
                 StandType<?> stand = getStandFromStack(stack);
-                if (!canGainStand(player, power.getTier(), stand)) {
+                if (JojoModConfig.getCommonConfigInstance(false).isStandBanned(stand)) {
+                    return ActionResult.fail(stack);
+                }
+                if (!standFitsTier(player, power.getTier(), stand)) {
                     player.displayClientMessage(new TranslationTextComponent("jojo.chat.message.low_tier"), true);
                     return ActionResult.fail(stack);
                 }
@@ -84,11 +88,13 @@ public class StandDiscItem extends Item {
         return ActionResult.fail(stack);
     }
 
-    private static boolean canGainStand(LivingEntity entity, int playerTier, StandType<?> stand) {
+    private static boolean standFitsTier(LivingEntity entity, int playerTier, StandType<?> stand) {
         if (entity instanceof PlayerEntity) {
             PlayerEntity player = (PlayerEntity) entity;
             return player.abilities.instabuild || !JojoModConfig.getCommonConfigInstance(entity.level.isClientSide()).standTiers.get()
-                    || StandUtil.standTierFromXp(player.experienceLevel, false, entity.level.isClientSide()) >= stand.getTier() || playerTier >= stand.getTier();
+                    || Arrays.stream(StandUtil.standTiersFromXp(player.experienceLevel, false, entity.level.isClientSide()))
+                    .anyMatch(tier -> tier >= stand.getTier())
+                    || playerTier >= stand.getTier();
         }
         return false;
     }

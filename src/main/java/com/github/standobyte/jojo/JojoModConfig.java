@@ -3,6 +3,7 @@ package com.github.standobyte.jojo;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -51,6 +52,7 @@ public class JojoModConfig {
 
         public final ForgeConfigSpec.BooleanValue prioritizeLeastTakenStands;
         public final ForgeConfigSpec.BooleanValue standTiers;
+        public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> standTierXpLevels;
         
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> bannedStands;
         private List<StandType<?>> bannedStandsSynced = null;
@@ -123,7 +125,7 @@ public class JojoModConfig {
                 bannedStands = builder
                         .comment(" List of Stands excluded from Stand Arrow and /stand random pool.",
                                 "  These stands will still be available via /stand give command",
-                                "  Their Discs won't be added to the mod's Creative tab, but they can still be found in the Search tab.\"",
+                                "  Their Discs won't be added to the mod's Creative tab, but they can still be found in the Search tab (although they can't be used to gain a banned Stand).\"",
                                 "  The format is the same as for /stand give command (e.g., \"jojo:star_platinum\").")
                         .translation("jojo.config.bannedStands")
                         .defineListAllowEmpty(Lists.newArrayList("bannedStands"), 
@@ -134,6 +136,16 @@ public class JojoModConfig {
                         .comment(" Whether or not the Stand tiers mechanic is enabled.")
                         .translation("jojo.config.standTiers")
                         .define("standTiers", true);
+                
+                standTierXpLevels = builder
+                        .comment(" Experience levels nesessary to get a Stand from each tier.", 
+                                "  If the list is shorter than the default, next tiers use the last value.",
+                                "  For example, if the list only contains number 15, you'll be able to get any Stand as long as you have 15 experience levels.", 
+                                "  Making a value lower that the previous one might lead to an unexpected result.")
+                        .translation("jojo.config.standTierXpLevels")
+                        .defineList(Lists.newArrayList("standTierXpLevels"), 
+                                () -> Arrays.asList(0, 1, 10, 20, 30, 40, 55), 
+                                s -> s instanceof Integer && (Integer) s >= 0);
             builder.pop();
             
             builder.push("Stand settings");
@@ -254,6 +266,7 @@ public class JojoModConfig {
 
             private final boolean prioritizeLeastTakenStands;
             private final boolean standTiers;
+            private final int[] standTierXpLevels;
             private final List<StandType<?>> bannedStands;
 
             private final boolean abilitiesBreakBlocks;
@@ -269,6 +282,7 @@ public class JojoModConfig {
             public SyncedValues(PacketBuffer buf) {
 //                hamonPointsMultiplier = buf.readDouble();
 //                breathingTechniqueMultiplier = buf.readDouble();
+                standTierXpLevels = buf.readVarIntArray();
                 bannedStands = NetworkUtil.readRegistryIdsSafe(buf, StandType.class);
 //                standDamageMultiplier = buf.readDouble();
                 resolvePoints = NetworkUtil.readFloatArray(buf);
@@ -292,6 +306,7 @@ public class JojoModConfig {
             public void writeToBuf(PacketBuffer buf) {
 //                buf.writeDouble(hamonPointsMultiplier);
 //                buf.writeDouble(breathingTechniqueMultiplier);
+                buf.writeVarIntArray(standTierXpLevels);
                 NetworkUtil.writeRegistryIds(buf, bannedStands);
 //                buf.writeDouble(standDamageMultiplier);
                 NetworkUtil.writeFloatArray(buf, resolvePoints);
@@ -325,6 +340,7 @@ public class JojoModConfig {
                 breathingTechniqueDeterioration = config.breathingTechniqueDeterioration.get();
                 prioritizeLeastTakenStands = config.prioritizeLeastTakenStands.get();
                 standTiers = config.standTiers.get();
+                standTierXpLevels = config.standTierXpLevels.get().stream().mapToInt(Integer::intValue).toArray();
                 bannedStands = config.bannedStandsResLocs.stream()
                         .map(key -> ModStandTypes.Registry.getRegistry().getValue(key))
                         .collect(Collectors.toList());
@@ -349,6 +365,7 @@ public class JojoModConfig {
                 COMMON_SYNCED_TO_CLIENT.breathingTechniqueDeterioration.set(breathingTechniqueDeterioration);
                 COMMON_SYNCED_TO_CLIENT.prioritizeLeastTakenStands.set(prioritizeLeastTakenStands);
                 COMMON_SYNCED_TO_CLIENT.standTiers.set(standTiers);
+                COMMON_SYNCED_TO_CLIENT.standTierXpLevels.set(IntStream.of(standTierXpLevels).boxed().collect(Collectors.toList()));
                 COMMON_SYNCED_TO_CLIENT.bannedStandsSynced = bannedStands;
                 COMMON_SYNCED_TO_CLIENT.abilitiesBreakBlocks.set(abilitiesBreakBlocks);
 //                COMMON_SYNCED_TO_CLIENT.standDamageMultiplier.set(standDamageMultiplier);
@@ -373,6 +390,7 @@ public class JojoModConfig {
                 COMMON_SYNCED_TO_CLIENT.breathingTechniqueDeterioration.clearCache();
                 COMMON_SYNCED_TO_CLIENT.prioritizeLeastTakenStands.clearCache();
                 COMMON_SYNCED_TO_CLIENT.standTiers.clearCache();
+                COMMON_SYNCED_TO_CLIENT.standTierXpLevels.clearCache();
                 COMMON_SYNCED_TO_CLIENT.bannedStandsSynced = null;
                 COMMON_SYNCED_TO_CLIENT.abilitiesBreakBlocks.clearCache();
 //                COMMON_SYNCED_TO_CLIENT.standDamageMultiplier.clearCache();

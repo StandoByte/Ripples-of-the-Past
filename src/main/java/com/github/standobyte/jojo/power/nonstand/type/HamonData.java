@@ -328,7 +328,7 @@ public class HamonData extends TypeSpecificData {
                         JojoModUtil.sayVoiceLine(user, getBreathingSound(), 0.75F, 1.0F);
                     }
                     user.addEffect(new EffectInstance(ModEffects.MEDITATION.get(), Math.max(Exercise.MEDITATION.getMaxTicks(this) - getExerciseTicks(Exercise.MEDITATION), 210)));
-                    user.getFoodData().addExhaustion(-0.001F);
+                    user.getFoodData().addExhaustion(-0.0025F);
                     if (user.tickCount % 200 == 0 && user.isHurt() && user.level.getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION)) {
                         user.heal(1.0F);
                     }
@@ -341,8 +341,10 @@ public class HamonData extends TypeSpecificData {
         if (incExerciseThisTick) {
             recalcAvgExercisePoints();
         }
-        if ((incExerciseLastTick && !incExerciseThisTick || exerciseCompleted) && user instanceof ServerPlayerEntity) {
-            PacketManager.sendToClient(new SyncHamonExercisesPacket(this), (ServerPlayerEntity) user);
+        if (incExerciseLastTick && !incExerciseThisTick || exerciseCompleted) {
+            serverPlayer.ifPresent(player -> {
+                PacketManager.sendToClient(new SyncHamonExercisesPacket(this), player);
+            });
         }
         incExerciseLastTick = incExerciseThisTick;
     }
@@ -603,7 +605,7 @@ public class HamonData extends TypeSpecificData {
             }
         }
         serverPlayer.ifPresent(player -> {
-            PacketManager.sendToClient(new HamonSkillsResetPacket(type), (ServerPlayerEntity) player);
+            PacketManager.sendToClient(new HamonSkillsResetPacket(type), player);
         });
     }
     
@@ -736,6 +738,7 @@ public class HamonData extends TypeSpecificData {
                 onSkillAdded(skill);
             }
         }
+        PacketManager.sendToClient(new SyncHamonExercisesPacket(this), user);
     }
 
     @Override

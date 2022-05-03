@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.item;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 import javax.annotation.Nullable;
 
@@ -88,17 +89,24 @@ public class StandArrowItem extends ArrowItem {
                 }
                 StandType<?> stand = null;
                 boolean checkTier = JojoModConfig.getCommonConfigInstance(world.isClientSide()).standTiers.get();
-                int tier = checkTier ? StandUtil.standTierFromXp(player.experienceLevel, true, false) : -1;
-                if (!checkTier || tier > -1) {
-                    stand = StandUtil.randomStandByTier(tier, player, random);
+                if (checkTier) {
+                    int[] tiers = StandUtil.standTiersFromXp(player.experienceLevel, true, false);
+                    if (tiers.length > 0) {
+                        stand = StandUtil.randomStandFromTiers(tiers, player, random);
+                    }
+                    else {
+                        player.displayClientMessage(new TranslationTextComponent("jojo.chat.message.tmp_not_enough_xp"), true); // TODO remove the message after adding stands for each tier
+                        return false;
+                    }
                 }
                 else {
-                    player.displayClientMessage(new TranslationTextComponent("jojo.chat.message.tmp_not_enough_xp"), true); // TODO remove the message after adding stands for each tier
+                    stand = StandUtil.randomStand(player, random);
                 }
+                
                 if (stand != null && power.givePower(stand)) {
                     if (!player.abilities.instabuild) {
                         if (JojoModConfig.getCommonConfigInstance(world.isClientSide()).standTiers.get()) {
-                            player.giveExperienceLevels(-StandUtil.tierLowerBorder(stand.getTier()));
+                            player.giveExperienceLevels(-StandUtil.tierLowerBorder(stand.getTier(), false));
                         }
                         stack.hurtAndBreak(1, player, pl -> {});
                     }
@@ -121,19 +129,34 @@ public class StandArrowItem extends ArrowItem {
         if (JojoModConfig.getCommonConfigInstance(true).standTiers.get()) {
             PlayerEntity player = ClientUtil.getClientPlayer();
             if (player != null) {
-                int currentTier = StandUtil.standTierFromXp(player.experienceLevel, true, true);
-                int nextTier = StandUtil.arrowPoolNextTier(currentTier);
-                if (currentTier > -1) {
+                int[] currentTiers = StandUtil.standTiersFromXp(player.experienceLevel, true, true);
+                int minTier = IntStream.of(currentTiers).min().orElse(-1);
+                int maxTier = IntStream.of(currentTiers).max().orElse(-1);
+                int nextTier = StandUtil.arrowPoolNextTier(maxTier + 1, true);
+                if (currentTiers.length > 0) {
                     if (nextTier > -1) {
-                        text = new TranslationTextComponent("jojo.arrow.tier", currentTier, StandUtil.tierLowerBorder(nextTier));
+                        if (currentTiers.length == 1) {
+                            text = new TranslationTextComponent("jojo.arrow.tier", minTier, 
+                                    StandUtil.tierLowerBorder(nextTier, true));
+                        }
+                        else {
+                            text = new TranslationTextComponent("jojo.arrow.tiers", minTier, maxTier, 
+                                    StandUtil.tierLowerBorder(nextTier, true));
+                        }
                     }
                     else {
-                        text = new TranslationTextComponent("jojo.arrow.max_tier", currentTier);
+                        if (currentTiers.length == 1) {
+                            text = new TranslationTextComponent("jojo.arrow.max_tier", minTier);
+                        }
+                        else {
+                            text = new TranslationTextComponent("jojo.arrow.max_tiers", minTier, maxTier);
+                        }
                     }
                 }
                 else {
                     if (nextTier > -1) {
-                        text = new TranslationTextComponent("jojo.arrow.no_tier", StandUtil.tierLowerBorder(nextTier), nextTier);
+                        text = new TranslationTextComponent("jojo.arrow.no_tier", 
+                                StandUtil.tierLowerBorder(nextTier, true), nextTier);
                     }
                     else {
                         text = new TranslationTextComponent("jojo.arrow.no_stands").withStyle(TextFormatting.OBFUSCATED);
@@ -142,7 +165,7 @@ public class StandArrowItem extends ArrowItem {
             }
         }
         else {
-            for (int i = 0; i < StandUtil.MAX_TIER; i++) {
+            for (int i = 0; i < StandUtil.getMaxTier(true); i++) {
                 if (JojoModConfig.getCommonConfigInstance(true).tierHasUnbannedStands(i)) {
                     return;
                 }
