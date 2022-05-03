@@ -108,11 +108,6 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
     }
     
     @Override
-    protected boolean canHitOwner() {
-        return true;
-    }
-    
-    @Override
     protected DamageSource getDamageSource(LivingEntity owner) {
         return super.getDamageSource(owner).setIsFire();
     }

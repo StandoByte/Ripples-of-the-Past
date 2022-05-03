@@ -4,7 +4,6 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.actions.HamonAction;
 import com.github.standobyte.jojo.action.actions.HamonBubbleBarrier;
 import com.github.standobyte.jojo.action.actions.HamonBubbleCutter;
@@ -50,6 +49,7 @@ import com.github.standobyte.jojo.action.actions.StarPlatinumBarrage;
 import com.github.standobyte.jojo.action.actions.StarPlatinumStarFinger;
 import com.github.standobyte.jojo.action.actions.StarPlatinumZoom;
 import com.github.standobyte.jojo.action.actions.TheWorldBarrage;
+import com.github.standobyte.jojo.action.actions.TheWorldTSHeavyAttack;
 import com.github.standobyte.jojo.action.actions.TheWorldTimeStop;
 import com.github.standobyte.jojo.action.actions.TimeStop;
 import com.github.standobyte.jojo.action.actions.TimeStopInstant;
@@ -200,8 +200,7 @@ public class ModActions {
             () -> new StandEntityLightAttack(new StandEntityAction.Builder().standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_ORA)));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_BARRAGE = ACTIONS.register("star_platinum_barrage", 
-            () -> new StarPlatinumBarrage(new StandEntityAction.Builder().standTakesCrosshairTarget(TargetType.ENTITY)
-                    .standSound(ModSounds.STAR_PLATINUM_ORA_ORA_ORA)));
+            () -> new StarPlatinumBarrage(new StandEntityAction.Builder().standSound(ModSounds.STAR_PLATINUM_ORA_ORA_ORA)));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_HEAVY_PUNCH = ACTIONS.register("star_platinum_heavy_punch", 
             () -> new StandEntityHeavyAttack(new StandEntityAction.Builder().standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_ORA_LONG)
@@ -241,7 +240,7 @@ public class ModActions {
             () -> new TheWorldBarrage(new StandEntityAction.Builder()
                     .standSound(ModSounds.THE_WORLD_MUDA_MUDA_MUDA).shout(ModSounds.DIO_MUDA_MUDA), ModSounds.DIO_WRY));
     
-    public static final RegistryObject<StandEntityAction> THE_WORLD_HEAVY_PUNCH = ACTIONS.register("the_world_heavy_punch", 
+    public static final RegistryObject<StandEntityHeavyAttack> THE_WORLD_HEAVY_PUNCH = ACTIONS.register("the_world_heavy_punch", 
             () -> new StandEntityHeavyAttack(new StandEntityAction.Builder().shout(ModSounds.DIO_DIE)
                     .shiftVariationOf(THE_WORLD_PUNCH).shiftVariationOf(THE_WORLD_BARRAGE)));
     
@@ -255,12 +254,16 @@ public class ModActions {
             .voiceLineWithStandSummoned(ModSounds.DIO_TIME_STOP).timeStopSound(ModSounds.THE_WORLD_TIME_STOP)
             .timeResumeVoiceLine(ModSounds.DIO_TIME_RESUMES).timeResumeSound(ModSounds.THE_WORLD_TIME_RESUME));
     
-    public static final RegistryObject<StandAction> THE_WORLD_TIME_STOP_BLINK = ACTIONS.register("the_world_ts_blink", 
+    public static final RegistryObject<TimeStopInstant> THE_WORLD_TIME_STOP_BLINK = ACTIONS.register("the_world_ts_blink", 
             () -> new TimeStopInstant(new StandAction.Builder().staminaCost(500).staminaCostTick(7.5F)
                     .resolveLevelToUnlock(2).isTrained().ignoresPerformerStun()
                     .shiftVariationOf(THE_WORLD_TIME_STOP)
                     .xpRequirement(500), 
                     ModSounds.THE_WORLD_TIME_STOP_BLINK));
+    
+    public static final RegistryObject<StandEntityAction> THE_WORLD_TS_PUNCH = ACTIONS.register("the_world_ts_punch", 
+            () -> new TheWorldTSHeavyAttack(new StandEntityAction.Builder().resolveLevelToUnlock(3).standPose(TheWorldTSHeavyAttack.TS_PUNCH_POSE), 
+                    THE_WORLD_HEAVY_PUNCH, THE_WORLD_TIME_STOP_BLINK));
     
 
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_STRING_ATTACK = ACTIONS.register("hierophant_green_attack", 

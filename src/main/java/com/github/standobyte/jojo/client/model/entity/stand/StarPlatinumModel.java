@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.client.model.pose.ModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseTransition;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
 import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
+import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.stands.StarPlatinumEntity;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -506,21 +507,18 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
     }
     
     @Override
-    protected IModelPose<StarPlatinumEntity> initRangedAttackPose() {
-        return new ModelPose<StarPlatinumEntity>(new RotationAngle[] {
-                new RotationAngle(body, 0.0F, -0.48F, 0.0F),
-                new RotationAngle(leftArm, 0.0F, 0.0F, -0.7854F),
-                new RotationAngle(leftForeArm, 0.0F, 0.0F, 0.6109F),
-                new RotationAngle(rightArm, -1.0908F, 0.0F, 1.5708F), // FIXME (!) (stand anim) use xRotation
-                new RotationAngle(rightForeArm, 0.0F, 0.0F, 0.0F)
-        });
-    }
-    
-    @Override
-    protected StandActionAnimation<StarPlatinumEntity> initHeavyAttackAnim(boolean combo) {
-        if (!combo) {
-            return super.initHeavyAttackAnim(combo);
-        }
+    protected void initActionPoses() {
+        actionAnim.put(StandPose.RANGED_ATTACK, new StandActionAnimation.Builder<StarPlatinumEntity>()
+                .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<StarPlatinumEntity>(new RotationAngle[] {
+                        new RotationAngle(body, 0.0F, -0.48F, 0.0F),
+                        new RotationAngle(leftArm, 0.0F, 0.0F, -0.7854F),
+                        new RotationAngle(leftForeArm, 0.0F, 0.0F, 0.6109F),
+                        new RotationAngle(rightArm, -1.0908F, 0.0F, 1.5708F), // FIXME (!) (stand anim) use xRotation
+                        new RotationAngle(rightForeArm, 0.0F, 0.0F, 0.0F)
+                }))
+                .build(idlePose));
+        
+
         IModelPose<StarPlatinumEntity> uppercutPose1 = new ModelPose<StarPlatinumEntity>(new RotationAngle[] {
                 RotationAngle.fromDegrees(upperPart, 0F, 15F, 0F), 
                 RotationAngle.fromDegrees(leftArm, 10F, 0F, -60F),
@@ -534,13 +532,12 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
                 RotationAngle.fromDegrees(leftForeArm, -105F, 0F, 0F),
                 RotationAngle.fromDegrees(rightArm, -135F, 45F, 0F), 
                 RotationAngle.fromDegrees(rightForeArm, -90F, 60F, -90F)});
+        actionAnim.put(StandPose.HEAVY_ATTACK_COMBO, new StandActionAnimation.Builder<StarPlatinumEntity>()
+                .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<StarPlatinumEntity>(idlePose, uppercutPose1))
+                .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransition<StarPlatinumEntity>(uppercutPose1, uppercutPose2))
+                .build(idlePose));
         
-        return new StandActionAnimation.Builder<StarPlatinumEntity>()
-                .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<StarPlatinumEntity>(
-                        idlePose, uppercutPose1))
-                .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransition<StarPlatinumEntity>(
-                        uppercutPose1, uppercutPose2))
-                .build(idlePose);
+        super.initActionPoses();
     }
     
     

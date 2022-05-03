@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.client.model.pose.RigidModelPose;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
 import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.util.MathUtil;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -214,9 +215,50 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
     }
     
     @Override
-    protected void initPoses() {
-        super.initPoses();
-        barrageSwing = initArmSwingAnim();
+    protected void initActionPoses() {
+        super.initActionPoses();
+        if (barrageSwing == null) barrageSwing = initArmSwingAnim();
+        
+        IModelPose<T> armSwingPose = initArmSwingAnim();
+        actionAnim.putIfAbsent(StandPose.LIGHT_ATTACK, 
+                new StandActionAnimation.Builder<T>()
+                .addPose(StandEntityAction.Phase.WINDUP, armSwingPose)
+                .addPose(StandEntityAction.Phase.PERFORM, new RigidModelPose<T>(armSwingPose))
+                .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransition<T>(armSwingPose, idlePose)
+                        .setEasing(pr -> Math.max(4F * (pr - 1) + 1, 0F)))
+                .build(idlePose));
+
+        float backSwing = 1.75F;
+        StandActionAnimation<T> heavyAttackAnim = new StandActionAnimation.Builder<T>()
+                .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseSided<>(
+                        initArmSwingPose(HandSide.LEFT, backSwing, SwingPart.BACKSWING), 
+                        initArmSwingPose(HandSide.RIGHT, backSwing, SwingPart.BACKSWING)))
+                .addPose(StandEntityAction.Phase.PERFORM, initBarrageSwingAnim(backSwing))
+                .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransition<T>(initBarrageSwingAnim(backSwing), idlePose)
+                        .setEasing(pr -> Math.max(2F * (pr - 1) + 1, 0F)))
+                .build(idlePose);
+        actionAnim.putIfAbsent(StandPose.HEAVY_ATTACK, heavyAttackAnim);
+
+        actionAnim.putIfAbsent(StandPose.HEAVY_ATTACK_COMBO, heavyAttackAnim);
+        
+        actionAnim.putIfAbsent(StandPose.BLOCK, new StandActionAnimation.Builder<T>()
+                .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<T>(new RotationAngle[] {
+                        new RotationAngle(body, 0, 0, 0),
+                        new RotationAngle(upperPart, 0.0F, 0.0F, 0.0F),
+                        new RotationAngle(rightForeArm, 0.0F, 0.0F, -1.0472F),
+                        new RotationAngle(leftForeArm, 0.0F, 0.0F, 1.0472F)
+                }).setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
+                    float blockXRot = MathHelper.clamp(xRotation, -60, 60) * MathUtil.DEG_TO_RAD / 2;
+                    rightArm.xRot = -1.5708F + blockXRot;
+                    leftArm.xRot = rightArm.xRot;
+
+                    rightArm.yRot = blockXRot / 2;
+                    leftArm.yRot = -rightArm.yRot;
+
+                    rightArm.zRot = Math.abs(blockXRot) / 2 - 0.7854F;
+                    leftArm.zRot = -rightArm.zRot;
+                }))
+                .build(idlePose));
     }
 
     protected ModelPoseSided<T> barrageSwing;
@@ -349,31 +391,6 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
     }
 
     @Override
-    protected StandActionAnimation<T> initLightAttackAnim() {
-        IModelPose<T> armSwingPose = initArmSwingAnim();
-        return new StandActionAnimation.Builder<T>()
-                .addPose(StandEntityAction.Phase.WINDUP, armSwingPose)
-                .addPose(StandEntityAction.Phase.PERFORM, new RigidModelPose<T>(armSwingPose))
-                .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransition<T>(armSwingPose, idlePose)
-                        .setEasing(pr -> Math.max(4F * (pr - 1) + 1, 0F)))
-                .build(idlePose);
-    }
-    
-    @Override
-    protected StandActionAnimation<T> initHeavyAttackAnim(boolean combo) {
-        float backSwing = 1.75F;
-        return new StandActionAnimation.Builder<T>()
-                .addPose(StandEntityAction.Phase.WINDUP, 
-                        new ModelPoseSided<>(
-                                initArmSwingPose(HandSide.LEFT, backSwing, SwingPart.BACKSWING), 
-                                initArmSwingPose(HandSide.RIGHT, backSwing, SwingPart.BACKSWING)))
-                .addPose(StandEntityAction.Phase.PERFORM, initBarrageSwingAnim(backSwing))
-                .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransition<T>(initBarrageSwingAnim(backSwing), idlePose)
-                        .setEasing(pr -> Math.max(2F * (pr - 1) + 1, 0F)))
-                .build(idlePose);
-    }
-
-    @Override
     protected ModelPose<T> initPoseReset() {
         return new ModelPose<T>(
                 new RotationAngle[] {
@@ -388,28 +405,6 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
                         new RotationAngle(leftLeg, 0, 0, 0),
                         new RotationAngle(leftLowerLeg, 0, 0, 0)
                 });
-    }
-
-    @Override
-    protected IModelPose<T> initBlockPose() {
-        xRotation = MathHelper.clamp(xRotation, -60, 60) * MathUtil.DEG_TO_RAD / 2;
-        return new ModelPose<T>(new RotationAngle[] {
-                new RotationAngle(body, 0, 0, 0),
-                new RotationAngle(upperPart, 0.0F, 0.0F, 0.0F),
-                new RotationAngle(rightForeArm, 0.0F, 0.0F, -1.0472F),
-                new RotationAngle(leftForeArm, 0.0F, 0.0F, 1.0472F)
-        })
-        .setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
-            float blockXRot = MathHelper.clamp(xRotation, -60, 60) * MathUtil.DEG_TO_RAD / 2;
-            rightArm.xRot = -1.5708F + blockXRot;
-            leftArm.xRot = rightArm.xRot;
-
-            rightArm.yRot = blockXRot / 2;
-            leftArm.yRot = -rightArm.yRot;
-
-            rightArm.zRot = Math.abs(blockXRot) / 2 - 0.7854F;
-            leftArm.zRot = -rightArm.zRot;
-        });
     }
 
     @Override

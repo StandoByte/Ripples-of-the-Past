@@ -269,7 +269,7 @@ public class ResolveCounter {
                 setResolveValue(Math.max(getMaxResolveValue() * 0.5F, getResolveValue()), 0);
             }
             if (!user.level.isClientSide() && boostAttack < BOOST_ATTACK_MAX) {
-                float boost = dmgAmount * BOOST_ATTACK_MAX * BOOST_PER_DMG_DEALT;
+                float boost = dmgAmount * BOOST_PER_DMG_DEALT;
                 boostAttack = Math.min(boostAttack + boost, BOOST_ATTACK_MAX);
                 if (user instanceof ServerPlayerEntity) {
                     PacketManager.sendToClient(new SyncResolveBoostsPacket(boostAttack, boostRemoteControl, boostChat, hpOnGettingAttacked), (ServerPlayerEntity) user);

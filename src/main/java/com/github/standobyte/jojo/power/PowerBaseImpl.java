@@ -374,6 +374,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     protected void performAction(Action<P> action, ActionTarget target) {
         if (!action.holdOnly()) {
             World world = user.level;
+            target = action.targetBeforePerform(world, user, getThis(), target);
             action.onPerform(world, user, getThis(), target);
             if (!world.isClientSide()) {
                 setCooldownTimer(action, action.getCooldown(getThis(), -1));

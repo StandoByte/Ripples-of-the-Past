@@ -133,6 +133,10 @@ public class MRDetectorEntity extends Entity implements IEntityAdditionalSpawnDa
     public Vector3f getDetectedDirection() {
         return new Vector3f(entityData.get(DETECTED_X), entityData.get(DETECTED_Y), entityData.get(DETECTED_Z));
     }
+    
+    public Entity getOwner() {
+        return owner;
+    }
 
     @Override
     protected void readAdditionalSaveData(CompoundNBT nbt) {
