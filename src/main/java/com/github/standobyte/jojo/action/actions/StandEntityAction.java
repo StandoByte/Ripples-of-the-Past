@@ -158,6 +158,11 @@ public abstract class StandEntityAction extends StandAction {
     
     @Override
     protected void holdTick(World world, LivingEntity user, IStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {}
+
+    @Override
+    public boolean isHeldSentToTracking() {
+        return true;
+    }
     
     @Override
     public void stoppedHolding(World world, LivingEntity user, IStandPower power, int ticksHeld) {

@@ -405,7 +405,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
 
     @Override
     public void addLearningProgressPoints(Action<IStandPower> action, float points) {
-        setLearningProgressPoints(action, getLearningProgressPoints(action) + points, true, false);
+        setLearningProgressPoints(action, getLearningProgressPoints(action) + points, true, true);
     }
     
     @Override

@@ -12,12 +12,9 @@ public class StarPlatinumBarrage extends StandEntityMeleeBarrage {
 
     @Override
     protected boolean standTakesCrosshairTarget(ActionTarget target, IStandPower standPower) {
-        if (super.standTakesCrosshairTarget(target, standPower)) {
-            if (target.getType() == TargetType.ENTITY) {
-                return standPower.getResolveLevel() >= 3;
-            }
-            return true;
+        if (target.getType() == TargetType.ENTITY) {
+            return standPower.getResolveLevel() >= 3;
         }
-        return false;
+        return super.standTakesCrosshairTarget(target, standPower);
     }
 }

@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.action.actions.StandEntityAction.Phase;
 import com.github.standobyte.jojo.client.model.pose.IModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
@@ -63,6 +62,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
 
     public void afterInit() {
         initPoses();
+        initActionPoses();
     }
 
     protected final void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
@@ -99,6 +99,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         });
 
 //        initPoses();
+//        initActionPoses();
 
         if (poseType == StandPose.SUMMON && (ticks > SUMMON_ANIMATION_LENGTH || entity.isArmsOnlyMode())) {
             entity.setStandPose(StandPose.IDLE);
@@ -180,19 +181,15 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     }
     
     protected void initPoses() {
-        poseReset = initPoseReset();
+        if (poseReset == null) poseReset = initPoseReset();
 
-        idlePose = initBaseIdlePose();
-        idleLoop = new ModelPoseTransition<T>(idlePose, initIdlePose2Loop()).setEasing(ticks -> MathHelper.sin(ticks / 20));
+        if (idlePose == null) idlePose = initBaseIdlePose();
+        if (idleLoop == null) idleLoop = new ModelPoseTransition<T>(idlePose, initIdlePose2Loop()).setEasing(ticks -> MathHelper.sin(ticks / 20));
 
-        summonPoses = initSummonPoses();
-
-        actionAnim.put(StandPose.LIGHT_ATTACK, initLightAttackAnim());
-        actionAnim.put(StandPose.HEAVY_ATTACK, initHeavyAttackAnim(false));
-        actionAnim.put(StandPose.HEAVY_ATTACK_COMBO, initHeavyAttackAnim(true));
-        actionAnim.put(StandPose.RANGED_ATTACK, initRangedAttackAnim());
-        actionAnim.put(StandPose.BLOCK, initBlockAnim());
+        if (summonPoses == null) summonPoses = initSummonPoses();
     }
+
+    protected void initActionPoses() {}
 
 
 
@@ -220,30 +217,6 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
 
     protected RotationAngle[][] initSummonPoseRotations() {
         return new RotationAngle[0][0];
-    }
-
-    protected StandActionAnimation<T> initLightAttackAnim() {
-        return new StandActionAnimation.Builder<T>().addPose(StandEntityAction.Phase.PERFORM, initPoseReset()).build(idlePose);
-    }
-
-    protected StandActionAnimation<T> initHeavyAttackAnim(boolean combo) {
-        return initLightAttackAnim();
-    }
-
-    protected StandActionAnimation<T> initBlockAnim() {
-        return new StandActionAnimation.Builder<T>().addPose(StandEntityAction.Phase.BUTTON_HOLD, initBlockPose()).build(idlePose);
-    }
-
-    protected IModelPose<T> initBlockPose() {
-        return initBaseIdlePose();
-    }
-
-    protected StandActionAnimation<T> initRangedAttackAnim() {
-        return new StandActionAnimation.Builder<T>().addPose(StandEntityAction.Phase.BUTTON_HOLD, initRangedAttackPose()).build(idlePose);
-    }
-
-    protected IModelPose<T> initRangedAttackPose() {
-        return initBaseIdlePose();
     }
 
     protected abstract void swingArmBarrage(T entity, float swingAmount, float yRotation, float xRotation, float ticks, HandSide swingingHand, float recovery);

@@ -2,10 +2,10 @@ package com.github.standobyte.jojo.client.model.entity.stand;
 
 import com.github.standobyte.jojo.action.actions.HierophantGreenGrapple;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
-import com.github.standobyte.jojo.client.model.pose.IModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
 import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
+import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -94,30 +94,30 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
             }
         };
     }
-
-    @Override
-    protected IModelPose<HierophantGreenEntity> initRangedAttackPose() {
-        return new ModelPose<HierophantGreenEntity>(new RotationAngle[] {
-                new RotationAngle(leftArm, -1.5708F, 0.0F, -1.309F),
-                new RotationAngle(leftForeArm, -0.9163F, 0.0F, 0.0F),
-                new RotationAngle(rightArm, -1.5708F, -0.6109F, 1.309F),
-                new RotationAngle(rightForeArm, 0.7854F, 3.1416F, 0.0F),
-                new RotationAngle(leftLeg, 0.0F, 0.0F, -0.7418F),
-                new RotationAngle(leftLowerLeg, 0.0F, 0.0F, 2.0944F),
-                new RotationAngle(rightLeg, 0.0F, 0.0F, 0.2618F)
-        });
-    }
     
     @Override
-    protected void initPoses() {
-        super.initPoses();
-        
+    protected void initActionPoses() {
+        actionAnim.put(StandPose.RANGED_ATTACK, new StandActionAnimation.Builder<HierophantGreenEntity>()
+                .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<HierophantGreenEntity>(new RotationAngle[] {
+                        new RotationAngle(leftArm, -1.5708F, 0.0F, -1.309F),
+                        new RotationAngle(leftForeArm, -0.9163F, 0.0F, 0.0F),
+                        new RotationAngle(rightArm, -1.5708F, -0.6109F, 1.309F),
+                        new RotationAngle(rightForeArm, 0.7854F, 3.1416F, 0.0F),
+                        new RotationAngle(leftLeg, 0.0F, 0.0F, -0.7418F),
+                        new RotationAngle(leftLowerLeg, 0.0F, 0.0F, 2.0944F),
+                        new RotationAngle(rightLeg, 0.0F, 0.0F, 0.2618F)
+                }))
+                .build(idlePose));
+
         actionAnim.put(HierophantGreenGrapple.GRAPPLE_POSE, new StandActionAnimation.Builder<HierophantGreenEntity>()
                 .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<HierophantGreenEntity>(new RotationAngle[] {
                         new RotationAngle(rightArm, -1.5708F, 0.0F, 0.0F), // FIXME (!) (stand anim) use xRotation
                         new RotationAngle(rightForeArm, 0.0F, 0.0F, 0.0F), 
                         new RotationAngle(body, 0.0F, 0.0F, 0.0F), 
-                })).build(idlePose));
+                }))
+                .build(idlePose));
+        
+        super.initActionPoses();
     }
     
     
