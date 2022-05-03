@@ -85,7 +85,7 @@ public class StandCommand {
             for (ServerPlayerEntity player : targets) {
                 IStandPower power = IStandPower.getStandPowerOptional(player).orElse(null);
                 if (power != null) {
-                    stand = StandUtil.randomStandByTier(-1, player, player.getRandom());
+                    stand = StandUtil.randomStand(player, player.getRandom());
                     if (stand == null) {
                         if (targets.size() == 1) {
                             throw GIVE_SINGLE_EXCEPTION_RANDOM.create(targets.iterator().next().getName());

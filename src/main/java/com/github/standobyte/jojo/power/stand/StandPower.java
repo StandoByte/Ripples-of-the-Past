@@ -379,7 +379,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
 
     @Override
     public float getLearningProgressPoints(Action<IStandPower> action) {
-        return actionLearningProgressMap.getLearningProgressPoints(action, this);
+        return actionLearningProgressMap.getLearningProgressPoints(action, this, true);
     }
 
     @Override
@@ -388,7 +388,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             points = MathHelper.clamp(points, 0, action.getMaxTrainingPoints(this));
         }
         if (notLess) {
-            points = Math.max(points, getLearningProgressPoints(action));
+            points = Math.max(points, actionLearningProgressMap.getLearningProgressPoints(action, this, false));
         }
         float pts = points;
         if (actionLearningProgressMap.setLearningProgressPoints(action, points, this)) {
@@ -396,7 +396,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 PacketManager.sendToClient(new SyncStandActionLearningPacket(action, pts, true), player);
             });
             if (!user.level.isClientSide() && 
-                    actionLearningProgressMap.getLearningProgressPoints(action, this) == 
+                    actionLearningProgressMap.getLearningProgressPoints(action, this, true) == 
                     action.getMaxTrainingPoints(this)) {
                 action.onMaxTraining(this);
             }
