@@ -45,7 +45,7 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
     boolean setSelectedSlot(ActionType hotbar, int slot) {
         if (slot > -1) {
             List<Action<P>> actions = power.getActions(hotbar);
-            if (slot >= actions.size() || !actions.get(slot).isUnlocked(power)) {
+            if (slot >= actions.size() || !actions.get(slot).isVisible(power)) {
                 slot = -1;
             }
         }
@@ -73,7 +73,7 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
         }
         if (actions.size() > slot) {
             Action<P> action = actions.get(slot);
-            if (action != null && action.isUnlocked(getPower())) {
+            if (action != null && action.isVisible(getPower())) {
                 return action;
             }
         }

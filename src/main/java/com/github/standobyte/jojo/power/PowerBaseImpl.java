@@ -189,7 +189,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             return null;
         }
         Action<P> action = actions.get(index);
-        if (shift && action.getShiftVariationIfPresent().isUnlocked(getThis())) {
+        if (shift && action.getShiftVariationIfPresent().isVisible(getThis())) {
             action = action.getShiftVariationIfPresent();
         }
         return action;
@@ -298,6 +298,9 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             return condition;
         }
 
+        if (!action.isVisible(getThis())) {
+            return ActionConditionResult.NEGATIVE;
+        }
         if (!action.isUnlocked(getThis())) {
             return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition.not_unlocked"));
         }

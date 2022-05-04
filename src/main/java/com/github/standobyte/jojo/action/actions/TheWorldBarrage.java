@@ -27,6 +27,7 @@ public class TheWorldBarrage extends StandEntityMeleeBarrage {
         return null;
     }
     
+    // FIXME (!!!!) never returns null for other clients
     @Override
     protected SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase) {
         if (!standEntity.isArmsOnlyMode() && TimeStop.vampireTimeStopDuration(standPower.getUser())) {

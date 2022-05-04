@@ -35,6 +35,7 @@ public class LivingUtilCap {
         this.entity = entity;
     }
     
+    // FIXME !!!!!!!!!!!!!!!!!!!!!!! call it from a different place (bc it should also be called in time stop)
     public void tick() {
         lastHurtByStandTick();
         hamonChargeTick();
