@@ -8,6 +8,8 @@ import com.github.standobyte.jojo.client.ClientEventHandler;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.util.TimeUtil;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
@@ -18,17 +20,20 @@ public class SyncWorldTimeStopPacket {
     private final ChunkPos chunkPos;
     private final boolean canSee;
     private final boolean canMove;
+    private final int timeStopperId;
     private final int instanceId;
     
     public static SyncWorldTimeStopPacket timeResumed(ChunkPos chunkPos, int instanceId) {
-        return new SyncWorldTimeStopPacket(0, chunkPos, true, true, instanceId);
+        return new SyncWorldTimeStopPacket(0, chunkPos, true, true, -1, instanceId);
     }
     
-    public SyncWorldTimeStopPacket(int timeStopTicks, ChunkPos chunkPos, boolean canSee, boolean canMove, int instanceId) {
+    public SyncWorldTimeStopPacket(int timeStopTicks, ChunkPos chunkPos, 
+            boolean canSee, boolean canMove, int timeStopperId, int instanceId) {
         this.timeStopTicks = timeStopTicks;
         this.chunkPos = chunkPos;
         this.canSee = canSee;
         this.canMove = canMove;
+        this.timeStopperId = timeStopperId;
         this.instanceId = instanceId;
     }
     
@@ -44,20 +49,24 @@ public class SyncWorldTimeStopPacket {
         buf.writeVarInt(msg.timeStopTicks);
         buf.writeInt(msg.chunkPos.x);
         buf.writeInt(msg.chunkPos.z);
+        buf.writeInt(msg.timeStopperId);
         buf.writeInt(msg.instanceId);
     }
     
     public static SyncWorldTimeStopPacket decode(PacketBuffer buf) {
         byte flags = buf.readByte();
-        return new SyncWorldTimeStopPacket(buf.readVarInt(), new ChunkPos(buf.readInt(), buf.readInt()), (flags & 1) > 0, (flags & 2) > 0, buf.readInt());
+        return new SyncWorldTimeStopPacket(buf.readVarInt(), new ChunkPos(buf.readInt(), buf.readInt()), 
+                (flags & 1) > 0, (flags & 2) > 0, buf.readInt(), buf.readInt());
     }
 
     public static void handle(SyncWorldTimeStopPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             World world = ClientUtil.getClientWorld();
             if (msg.timeStopTicks > 0) {
-                TimeUtil.stopTime(world, TimeStopInstance.withoutSounds(world, msg.timeStopTicks, msg.chunkPos, 
-                        JojoModConfig.getCommonConfigInstance(true).timeStopChunkRange.get(), msg.instanceId));
+                Entity entity = ClientUtil.getEntityById(msg.timeStopperId);
+                TimeUtil.stopTime(world, new TimeStopInstance(world, msg.timeStopTicks, msg.chunkPos, 
+                        JojoModConfig.getCommonConfigInstance(true).timeStopChunkRange.get(), 
+                        entity instanceof LivingEntity ? (LivingEntity) entity : null, msg.instanceId));
             }
             else {
                 TimeUtil.resumeTime(world, msg.instanceId);

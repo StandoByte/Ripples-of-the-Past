@@ -35,6 +35,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     private final int holdDurationToFire;
     private final int holdDurationMax;
+    private final boolean continueHolding;
     private final float heldSlowDownFactor;
     private final int cooldownTechnical;
     private final int cooldownAdditional;
@@ -53,6 +54,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     public Action(Action.AbstractBuilder<?> builder) {
         this.holdDurationMax = builder.holdDurationMax;
         this.holdDurationToFire = builder.holdDurationToFire;
+        this.continueHolding = builder.continueHolding;
         this.heldSlowDownFactor = builder.heldSlowDownFactor;
         this.cooldownTechnical = builder.cooldownTechnical;
         this.cooldownAdditional = builder.cooldownAdditional;
@@ -142,6 +144,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     public abstract boolean isUnlocked(P power);
+    
+    public boolean isVisible(P power) {
+        return isUnlocked(power);
+    }
     
     protected static ActionConditionResult conditionMessage(String postfix) {
         return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition." + postfix));
@@ -242,7 +248,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     public int getHoldDurationMax(P power) {
-        return holdDurationMax;
+        return continueHolding ? holdDurationMax : getHoldDurationToFire(power);
     }
     
     public boolean holdOnly() {
@@ -253,25 +259,20 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return false;
     }
     
-    protected String getTranslationKey(P power, ActionTarget target) {
+    public String getTranslationKey(P power, ActionTarget target) {
         if (translationKey == null) {
             translationKey = Util.makeDescriptionId("action", this.getRegistryName());
         }
         return this.translationKey;
     }
     
-    public ITextComponent getName(P power, ActionTarget target) {
-        return getTranslatedName(power, getTranslationKey(power, target));
-    }
-    
-    public ITextComponent getNameShortened(P power, ActionTarget target) {
-        return ClientUtil.shortenedTranslationExists(getTranslationKey(power, target)) ? 
-                getTranslatedName(power, ClientUtil.getShortenedTranslationKey(getTranslationKey(power, target)))
-                : getName(power, target);
-    }
-    
-    protected TranslationTextComponent getTranslatedName(P power, String key) {
+    public TranslationTextComponent getTranslatedName(P power, String key) {
         return new TranslationTextComponent(key);
+    }
+    
+    public ITextComponent getNameShortened(P power, String key) {
+        return getTranslatedName(power, ClientUtil.shortenedTranslationExists(key) ? 
+                ClientUtil.getShortenedTranslationKey(key) : key);
     }
     
     @Nullable
@@ -348,6 +349,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     protected abstract static class AbstractBuilder<T extends Action.AbstractBuilder<T>> {
         private int holdDurationToFire = 0;
         private int holdDurationMax = 0;
+        private boolean continueHolding = false;
         private float heldSlowDownFactor = 1.0F;
         private int cooldownTechnical;
         private int cooldownAdditional;
@@ -427,7 +429,6 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         }
         
         public T holdType(int maxHoldTicks) {
-            this.holdDurationToFire = 0;
             this.holdDurationMax = maxHoldTicks;
             return getThis();
         }
@@ -438,7 +439,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         
         public T holdToFire(int ticksToFire, boolean continueHolding) {
             this.holdDurationToFire = ticksToFire;
-            this.holdDurationMax = continueHolding ? Integer.MAX_VALUE : ticksToFire;
+            this.holdDurationMax = Integer.MAX_VALUE;
+            this.continueHolding = continueHolding;
             return getThis();
         }
         

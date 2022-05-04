@@ -38,8 +38,8 @@ public class HamonHealing extends HamonAction {
             Entity targetEntity = target.getType() == TargetType.ENTITY && hamon.isSkillLearned(HamonSkill.HEALING_TOUCH) ? target.getEntity(world) : null;
             LivingEntity targetLiving = targetEntity instanceof LivingEntity ? (LivingEntity) targetEntity : null;
             LivingEntity entityToHeal = targetEntity != null && canBeHealed(targetLiving, user) ? targetLiving : user;
-            int regenDuration = 80 + MathHelper.floor(220F * effectStr);
-            int regenLvl = MathHelper.floor(3.5F * effectStr);
+            int regenDuration = 80 + MathHelper.floor(160F * effectStr);
+            int regenLvl = MathHelper.floor(2.5F * effectStr);
 //            if (entityToHeal.getHealth() < entityToHeal.getMaxHealth()) {
                 hamon.hamonPointsFromAction(HamonStat.CONTROL, getEnergyCost(power));
 //            }
@@ -84,7 +84,7 @@ public class HamonHealing extends HamonAction {
     }
     
     @Override
-    protected String getTranslationKey(INonStandPower power, ActionTarget target) {
+    public String getTranslationKey(INonStandPower power, ActionTarget target) {
         String key = super.getTranslationKey(power, target);
         if (power.getTypeSpecificData(ModNonStandPowers.HAMON.get())
                 .map(hamon -> hamon.isSkillLearned(HamonSkill.HEALING_TOUCH)).orElse(false)

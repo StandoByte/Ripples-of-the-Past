@@ -421,7 +421,7 @@ public class ActionsOverlayGui extends AbstractGui {
         P power = mode.getPower();
         action = handleShift(action, power);
         
-        if (action.isUnlocked(power)) {
+        if (action.isVisible(power)) {
             TextureAtlasSprite textureAtlasSprite = SpriteUploaders.getActionSprites().getSprite(action);
             mc.getTextureManager().bind(textureAtlasSprite.atlas().location());
             
@@ -493,7 +493,7 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     public <P extends IPower<P, ?>> boolean shiftVarSelected(P power, Action<P> action, boolean shift) {
-        return power.getHeldAction() != action && shift && action.getShiftVariationIfPresent().isUnlocked(power) 
+        return power.getHeldAction() != action && shift && action.getShiftVariationIfPresent().isVisible(power) 
                 || power.getHeldAction() == action.getShiftVariationIfPresent();
     }
     
@@ -537,13 +537,16 @@ public class ActionsOverlayGui extends AbstractGui {
         if (action != null) {
             action = handleShift(action, power);
             // action name
-            ITextComponent actionName = action.getName(power, target);
+            String translationKey = action.getTranslationKey(power, target);
+            ITextComponent actionName = action.getTranslatedName(power, translationKey);
             if (action.getHoldDurationMax(power) > 0) {
                 actionName = new TranslationTextComponent("jojo.overlay.hold", actionName);
             }
-            if (action.hasShiftVariation() && action.getShiftVariationIfPresent().isUnlocked(power)) {
+            if (action.hasShiftVariation() && action.getShiftVariationIfPresent().isVisible(power)) {
+                Action<P> shiftVar = action.getShiftVariationIfPresent();
                 actionName = new TranslationTextComponent("jojo.overlay.shift", actionName, 
-                        new KeybindTextComponent(mc.options.keyShift.getName()), action.getShiftVariationIfPresent().getName(power, target));
+                        new KeybindTextComponent(mc.options.keyShift.getName()), 
+                        shiftVar.getNameShortened(power, shiftVar.getTranslationKey(power, target)));
             }
             actionName = new TranslationTextComponent(
                     actionType == ActionType.ATTACK ? "jojo.overlay.action.attack" : "jojo.overlay.action.ability", actionName);
@@ -999,7 +1002,7 @@ public class ActionsOverlayGui extends AbstractGui {
         IntBinaryOperator operator = backwards ? DEC : INC;
         int i;
         for (i = operator.applyAsInt(startingIndex, actions.size()); 
-             i > -1 && i % actions.size() != startingIndex && !actions.get(i).isUnlocked(power);
+             i > -1 && i % actions.size() != startingIndex && !actions.get(i).isVisible(power);
              i = operator.applyAsInt(i, actions.size())) {
         }
         mode.setSelectedSlot(hotbar, i);

@@ -18,9 +18,10 @@ public class TheWorldTimeStop extends TimeStop {
         return shortedHoldDuration(power, super.getHoldDurationToFire(power));
     }
     
+    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!! delete
     @Override
     public int getHoldDurationMax(IStandPower power) {
-        return shortedHoldDuration(power, super.getHoldDurationMax(power));
+        return super.getHoldDurationMax(power);
     }
     
     private int shortedHoldDuration(IStandPower power, int ticks) {
