@@ -248,7 +248,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     public int getHoldDurationMax(P power) {
-        return continueHolding ? holdDurationMax : getHoldDurationToFire(power);
+        return holdOnly() || continueHolding ? holdDurationMax : getHoldDurationToFire(power);
     }
     
     public boolean holdOnly() {
