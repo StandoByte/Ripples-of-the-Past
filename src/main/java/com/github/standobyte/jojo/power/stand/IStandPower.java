@@ -17,6 +17,8 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     
     boolean givePower(StandType<?> standType, boolean countTaken);
     @Nullable StandType<?> putOutStand();
+    public void setGivenByDisc();
+    public boolean wasGivenByDisc();
 
     boolean usesStamina();
     float getStamina();

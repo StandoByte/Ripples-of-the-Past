@@ -35,7 +35,8 @@ public class HamonSendoOverdrive extends HamonAction {
             Direction face = target.getFace();
             double diameter = 2 + (double) (hamon.getHamonStrengthLevel() * 6) / (double) HamonData.MAX_STAT_LEVEL;
             double radiusMinus1 = (diameter - 1) / 2;
-            AxisAlignedBB aabb = new AxisAlignedBB(pos).inflate(radiusMinus1).move(Vector3d.atLowerCornerOf(face.getNormal()).scale(-radiusMinus1));
+            AxisAlignedBB aabb = new AxisAlignedBB(pos).inflate(radiusMinus1).expandTowards(Vector3d.atLowerCornerOf(face.getNormal()))
+                    .move(Vector3d.atLowerCornerOf(face.getNormal()).scale(-radiusMinus1));
             Random random = user.getRandom();
             int sparksCount = Math.max(MathHelper.floor(diameter * diameter * diameter / 16), 1);
             for (int i = 0; i < sparksCount; i++) {

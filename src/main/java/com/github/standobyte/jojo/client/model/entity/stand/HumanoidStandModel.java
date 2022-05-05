@@ -301,7 +301,7 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
                             new RotationAngle(otherArm, -1.5708F + yRotArm * (backSwingAmount - 1), 0, 1.5708F),
                     }).setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
                         leftArm.zRot *= -1.0F;
-                        rightArm.yRot = -xRotation * MathUtil.DEG_TO_RAD; // FIXME (!) (stand anim) use xRotation
+                        rightArm.yRot = -xRotation * MathUtil.DEG_TO_RAD;
                         leftArm.yRot = xRotation * MathUtil.DEG_TO_RAD;
                     }));
             break;

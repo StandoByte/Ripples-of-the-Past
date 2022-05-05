@@ -3,6 +3,8 @@ package com.github.standobyte.jojo.power.stand;
 import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEffects;
@@ -251,7 +253,7 @@ public class ResolveCounter {
     
     
 
-    public void onAttack(LivingEntity target, IStandDamageSource dmgSource, float dmgAmount) {
+    public void onAttack(LivingEntity target, DamageSource dmgSource, @Nullable IStandDamageSource standDmgSource, float dmgAmount) {
         if (stand.usesResolve() && target.getClassification(false) == EntityClassification.MONSTER || target.getType() == EntityType.PLAYER) {
             LivingEntity user = stand.getUser();
             dmgAmount = Math.min(dmgAmount, target.getHealth());
@@ -263,6 +265,9 @@ public class ResolveCounter {
                     }
                     return 1F;
                 }).orElse(1F);
+            }
+            if (standDmgSource == null) {
+                points *= 0.5F;
             }
             addResolveValue(points);
             if (user.hasEffect(ModEffects.RESOLVE.get())) {

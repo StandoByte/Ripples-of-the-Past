@@ -17,7 +17,7 @@ public class TheWorldBarrage extends StandEntityMeleeBarrage {
         this.wryyyyyyyyyyy = greatestHighShout == null ? () -> null : greatestHighShout;
     }
 
-    // FIXME (!!!!) DIO and TW muda not overlapping
+    // FIXME (!!!!) DIO and TW muda not overlapping (especially for tracking)
     @Override
     protected SoundEvent getShout(LivingEntity user, IStandPower power, ActionTarget target, boolean wasActive) {
         if (wasActive && TimeStop.vampireTimeStopDuration(user)) {
