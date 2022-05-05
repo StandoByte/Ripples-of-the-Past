@@ -197,45 +197,43 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     
     @Override
     public final boolean onClickAction(Action<P> action, boolean shift, ActionTarget target) {
-        if (heldActionData == null) {
-            boolean wasActive = isActive();
-            action.onClick(user.level, user, getThis());
-            ActionTargetContainer targetContainer = new ActionTargetContainer(target);
-            ActionConditionResult result = checkRequirements(action, targetContainer, true);
-            target = targetContainer.getTarget();
-            serverPlayerUser.ifPresent(player -> {
-                player.resetLastActionTime();
-            });
-            if (action.getHoldDurationMax(getThis()) > 0) {
-                action.startedHolding(user.level, user, getThis(), target, result.isPositive());
-                if (result.isPositive() || !result.shouldStopHeldAction()) {
-                    if (!user.level.isClientSide()) {
-                        action.playVoiceLine(user, getThis(), target, wasActive, shift);
-                    }
-                    setHeldAction(action);
-                    setHeldActionTarget(target);
-                    return true;
+        boolean wasActive = isActive();
+        action.onClick(user.level, user, getThis());
+        ActionTargetContainer targetContainer = new ActionTargetContainer(target);
+        ActionConditionResult result = checkRequirements(action, targetContainer, true);
+        target = targetContainer.getTarget();
+        serverPlayerUser.ifPresent(player -> {
+            player.resetLastActionTime();
+        });
+        if (action.getHoldDurationMax(getThis()) > 0) {
+            action.startedHolding(user.level, user, getThis(), target, result.isPositive());
+            if (result.isPositive() || !result.shouldStopHeldAction()) {
+                if (!user.level.isClientSide()) {
+                    action.playVoiceLine(user, getThis(), target, wasActive, shift);
                 }
-                else {
-                    sendMessage(action, result);
-                    return false;
-                }
+                setHeldAction(action);
+                setHeldActionTarget(target);
+                return true;
             }
             else {
-                if (result.isPositive()) {
-                    if (!user.level.isClientSide()) {
-                        action.playVoiceLine(user, getThis(), target, wasActive, shift);
-                    }
-                    performAction(action, target);
-                    return true;
+                sendMessage(action, result);
+                return false;
+            }
+        }
+        else {
+            if (result.isPositive()) {
+                if (!user.level.isClientSide()) {
+                    action.playVoiceLine(user, getThis(), target, wasActive, shift);
                 }
-                else if (result.queueInput()) {
-                    queueNextAction(action);
-                }
-                else {
-                    sendMessage(action, result);
-                    return false;
-                }
+                performAction(action, target);
+                return true;
+            }
+            else if (result.queueInput()) {
+                queueNextAction(action);
+            }
+            else {
+                sendMessage(action, result);
+                return false;
             }
         }
         return false;
@@ -273,7 +271,11 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
 
     @Override
     public ActionConditionResult checkRequirements(Action<P> action, ActionTargetContainer targetContainer, boolean checkTargetType) {
-        if (!canUsePower() || heldActionData != null && heldActionData.action != action) {
+        if (!canUsePower()) {
+            return ActionConditionResult.NEGATIVE;
+        }
+        
+        if (heldActionData != null && !heldActionData.action.heldAllowsOtherActions(getThis()) && heldActionData.action != action) {
             return ActionConditionResult.NEGATIVE;
         }
 

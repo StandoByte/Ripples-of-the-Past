@@ -378,7 +378,7 @@ public class InputHandler {
         }
 
         boolean leftClickedBlock = actionType == ActionType.ATTACK && mc.hitResult.getType() == Type.BLOCK;
-        if (leftClickedBlock && leftClickBlockDelay > 0 || power.getHeldAction() != null) {
+        if (leftClickedBlock && leftClickBlockDelay > 0) {
             if (event != null) {
                 event.setSwingHand(false);
                 event.setCanceled(true);

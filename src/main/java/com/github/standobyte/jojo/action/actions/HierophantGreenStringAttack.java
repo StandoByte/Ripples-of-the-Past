@@ -1,7 +1,5 @@
 package com.github.standobyte.jojo.action.actions;
 
-import javax.annotation.Nullable;
-
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGStringEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -28,11 +26,6 @@ public class HierophantGreenStringAttack extends StandEntityAction {
             }
             standEntity.addProjectile(new HGStringEntity(world, standEntity, 0, 0, shift));
         }
-    }
-    
-    @Override
-    public boolean isCancelable(IStandPower standPower, StandEntity standEntity, Phase phase, @Nullable StandEntityAction newAction) {
-        return super.isCancelable(standPower, standEntity, phase, newAction);
     }
 
 }

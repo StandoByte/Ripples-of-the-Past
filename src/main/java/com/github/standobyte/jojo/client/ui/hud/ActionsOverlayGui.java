@@ -228,7 +228,7 @@ public class ActionsOverlayGui extends AbstractGui {
         
         if (currentMode != null) {
             if (currentMode.getPower() == null || !currentMode.getPower().hasPower()) {
-                JojoMod.LOGGER.warn("Failed rendering {} HUD", currentMode.powerClassification);
+                JojoMod.getLogger().warn("Failed rendering {} HUD", currentMode.powerClassification);
                 currentMode = null;
                 return;
             }
@@ -1026,6 +1026,9 @@ public class ActionsOverlayGui extends AbstractGui {
         if (power != null) {
             Action<P> action = power.getAction(actionType, index, shift);
             if (action != null) {
+                if (power.getHeldAction() != null && action.getHoldDurationMax(power) > 0) {
+                    return false;
+                }
                 RayTraceResult target = InputHandler.getInstance().mouseTarget;
                 PacketManager.sendToServer(ClClickActionPacket.withRayTraceResult(power.getPowerClassification(), actionType, shift, index, target));
                 ActionTarget actionTarget = ActionTarget.fromRayTraceResult(target);

@@ -30,7 +30,6 @@ public abstract class StandEntityAction extends StandAction {
     protected final int standRecoveryDuration;
     private final AutoSummonMode autoSummonMode;
     private final TargetRequirement crosshairTargetForStand;
-    private final boolean isCancelable;
     private final float userMovementFactor;
     private final StandPose standPose;
     @Nullable
@@ -47,7 +46,6 @@ public abstract class StandEntityAction extends StandAction {
         this.standRecoveryDuration = builder.standRecoveryDuration;
         this.autoSummonMode = builder.autoSummonMode;
         this.crosshairTargetForStand = builder.crosshairTargetForStand;
-        this.isCancelable = builder.isCancelable;
         this.userMovementFactor = builder.userMovementFactor;
         this.standPose = builder.standPose;
         this.userOffset = builder.userOffset;
@@ -66,7 +64,7 @@ public abstract class StandEntityAction extends StandAction {
         if (power.isActive()) {
             StandEntity stand = (StandEntity) power.getStandManifestation();
             StandEntityAction currentAction = stand.getCurrentTaskAction();
-            if (currentAction != null && !currentAction.isCancelable(power, stand, stand.getCurrentTaskPhase(), this)) {
+            if (currentAction != null && currentAction != this && !currentAction.isCancelable(power, stand, stand.getCurrentTaskPhase(), this)) {
                 return ActionConditionResult.NEGATIVE_QUEUE_INPUT;
             }
             ActionConditionResult checkStand = checkStandConditions(stand, power, target);
@@ -167,7 +165,11 @@ public abstract class StandEntityAction extends StandAction {
     @Override
     public void stoppedHolding(World world, LivingEntity user, IStandPower power, int ticksHeld) {
 //        if (!world.isClientSide()) {
-        invokeForStand(power, stand -> stand.stopTaskWithRecovery());
+        invokeForStand(power, stand -> {
+            if (stand.getCurrentTaskAction() == this) {
+                stand.stopTaskWithRecovery();
+            }
+        });
 //        }
     }
 
@@ -253,9 +255,14 @@ public abstract class StandEntityAction extends StandAction {
             consumer.accept(((StandEntity) power.getStandManifestation()));
         }
     }
-    
+
     public boolean isCancelable(IStandPower standPower, StandEntity standEntity, Phase phase, @Nullable StandEntityAction newAction) {
-        return phase != Phase.RECOVERY && (isCancelable || getHoldDurationMax(standPower) > 0);
+        return getHoldDurationMax(standPower) > 0 && phase != Phase.RECOVERY && getStandRecoveryTicks(standPower, standEntity) == 0;
+    }
+    
+    @Override
+    public boolean heldAllowsOtherActions(IStandPower standPower) {
+        return getHoldDurationToFire(standPower) == 0;
     }
     
     public boolean isCombatAction() {
@@ -312,7 +319,6 @@ public abstract class StandEntityAction extends StandAction {
         private int standRecoveryDuration = 0;
         private AutoSummonMode autoSummonMode = AutoSummonMode.FULL;
         private TargetRequirement crosshairTargetForStand = null;
-        private boolean isCancelable = false;
         private float userMovementFactor = 0.5F;
         private StandPose standPose = StandPose.IDLE;
         @Nullable
@@ -371,11 +377,6 @@ public abstract class StandEntityAction extends StandAction {
                 this.crosshairTargetForStand = null;
                 break;
             }
-            return getThis();
-        }
-        
-        public T isCancelable() {
-            this.isCancelable = true;
             return getThis();
         }
         

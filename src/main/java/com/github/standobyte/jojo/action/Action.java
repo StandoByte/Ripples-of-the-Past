@@ -259,6 +259,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return false;
     }
     
+    public boolean heldAllowsOtherActions(P power) {
+        return false;
+    }
+    
     public String getTranslationKey(P power, ActionTarget target) {
         if (translationKey == null) {
             translationKey = Util.makeDescriptionId("action", this.getRegistryName());

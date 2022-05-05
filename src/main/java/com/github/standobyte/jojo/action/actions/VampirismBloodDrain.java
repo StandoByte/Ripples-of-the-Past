@@ -144,4 +144,9 @@ public class VampirismBloodDrain extends VampirismAction {
             ClientTickingSoundsHelper.playHeldActionSound(ModSounds.VAMPIRE_BLOOD_DRAIN.get(), 1.0F, 1.0F, true, user, power, this);
         }
     }
+    
+    @Override
+    public boolean heldAllowsOtherActions(INonStandPower power) {
+        return true;
+    }
 }

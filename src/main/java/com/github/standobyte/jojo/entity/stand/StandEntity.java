@@ -749,7 +749,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             return false;
         }
         StandEntityTask currentTask = getCurrentTask();
-        return currentTask == null || currentTask.getAction().isCancelable(userPower, this, currentTask.getPhase(), null);
+        return currentTask == null || currentTask.getAction().isCancelable(userPower, 
+                this, currentTask.getPhase(), ModActions.STAND_ENTITY_BLOCK.get());
     }
 
     public boolean isStandBlocking() {
@@ -983,20 +984,20 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return isArmsOnlyMode() ? offsetDefaultArmsOnly : offsetDefault;
     }
     
-    public void addBarrageOffset() {
-        if (!isArmsOnlyMode()) {
-            StandEntityTask currentTask = getCurrentTask();
-            if (currentTask != null) {
-                StandRelativeOffset offset = currentTask.getOffsetFromUser();
-                double currentOffset = offset.getForward();
-                double newOffset = Math.min(currentOffset + 0.025, rangeEffective);
-                if (newOffset != currentOffset) {
-                    offset = offset.copy(null, null, newOffset);
-                    setTaskPosOffset(offset, true);
-                }
-            }
-        }
-    }
+//    public void addBarrageOffset() {
+//        if (!isArmsOnlyMode()) {
+//            StandEntityTask currentTask = getCurrentTask();
+//            if (currentTask != null) {
+//                StandRelativeOffset offset = currentTask.getOffsetFromUser();
+//                double currentOffset = offset.getForward();
+//                double newOffset = Math.min(currentOffset + 0.025, rangeEffective);
+//                if (newOffset != currentOffset) {
+//                    offset = offset.copy(null, null, newOffset);
+//                    setTaskPosOffset(offset, true);
+//                }
+//            }
+//        }
+//    }
     
     public void setTaskPosOffset(double left, double forward) {
         setTaskPosOffset(StandRelativeOffset.noYOffset(left, forward), false);
@@ -1104,7 +1105,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             }
         }
     }
-    
+
     public void stopTaskWithRecovery() {
         StandEntityTask currentTask = getCurrentTask();
         if (currentTask != null) {
@@ -1549,7 +1550,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         case BARRAGE:
             attack
             .damage(StandStatFormulas.getBarrageHitDamage(strength, precision) * barrageHits)
-            .addCombo(0.0025F * barrageHits)
+            .addCombo(0.003F * barrageHits)
             .reduceKnockback(0.1F);
             break;
         }

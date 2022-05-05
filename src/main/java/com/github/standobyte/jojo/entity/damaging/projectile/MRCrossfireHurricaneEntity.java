@@ -172,6 +172,11 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
     }
     
     @Override
+    public boolean isOnFire() {
+        return false;
+    }
+    
+    @Override
     public boolean ignoreExplosion() {
         return true;
     }

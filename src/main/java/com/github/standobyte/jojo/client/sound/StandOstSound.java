@@ -40,7 +40,7 @@ public class StandOstSound extends TickableSound implements ITickableSound {
             options.setSoundCategoryVolume(SoundCategory.MUSIC, 0);
         }
         catch (ConcurrentModificationException e) {
-            JojoMod.LOGGER.warn("Failed setting Minecraft music volume to 0 when playing OST.");
+            JojoMod.getLogger().warn("Failed setting Minecraft music volume to 0 when playing OST.");
             options = null;
         }
         this.options = options;

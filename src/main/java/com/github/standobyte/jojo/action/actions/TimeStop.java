@@ -85,7 +85,7 @@ public class TimeStop extends StandAction {
 
     @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
-        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!! prevent using the ability right after the time stop
+        // FIXME (!!!!!!!!!!!!) prevent using the ability right after the time stop
         if (user.hasEffect(ModEffects.TIME_STOP.get())
                 && user.getEffect(ModEffects.TIME_STOP.get()).getDuration()
                 > getTimeStopTicks(power, this, user, INonStandPower.getNonStandPowerOptional(user)) - 20) {
@@ -141,7 +141,7 @@ public class TimeStop extends StandAction {
         return super.getStaminaCost(stand) + getStaminaCostTicking(stand) * 100;
     }
     
-    // FIXME !!!!!!!!!!!!!!!!! cooldown
+    // FIXME (!!!!!!!!!!!!) cooldown
     @Override
     public int getCooldownTechnical(IStandPower power) {
         return 0 * getTimeStopTicks(power, this, power.getUser(), INonStandPower.getNonStandPowerOptional(power.getUser()));

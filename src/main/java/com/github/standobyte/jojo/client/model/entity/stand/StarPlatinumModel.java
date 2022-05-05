@@ -524,14 +524,15 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
                 RotationAngle.fromDegrees(leftArm, 10F, 0F, -60F),
                 RotationAngle.fromDegrees(leftForeArm, -90F, 15F, 90F),
                 RotationAngle.fromDegrees(rightArm, 45F, 0F, 15F), 
-                RotationAngle.fromDegrees(rightForeArm, -90F, -30F, -90F)});
-        
+                RotationAngle.fromDegrees(rightForeArm, -90F, -30F, -90F)
+        });
         IModelPose<StarPlatinumEntity> uppercutPose2 = new ModelPose<StarPlatinumEntity>(new RotationAngle[] {
                 RotationAngle.fromDegrees(upperPart, 0F, -45F, 0F), 
                 RotationAngle.fromDegrees(leftArm, 0F, 0F, -90F),
                 RotationAngle.fromDegrees(leftForeArm, -105F, 0F, 0F),
                 RotationAngle.fromDegrees(rightArm, -135F, 45F, 0F), 
-                RotationAngle.fromDegrees(rightForeArm, -90F, 60F, -90F)});
+                RotationAngle.fromDegrees(rightForeArm, -90F, 60F, -90F)
+        });
         actionAnim.put(StandPose.HEAVY_ATTACK_COMBO, new StandActionAnimation.Builder<StarPlatinumEntity>()
                 .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<StarPlatinumEntity>(idlePose, uppercutPose1))
                 .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransition<StarPlatinumEntity>(uppercutPose1, uppercutPose2))

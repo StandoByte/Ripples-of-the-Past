@@ -32,6 +32,7 @@ import com.github.standobyte.jojo.action.actions.MagiciansRedCrossfireHurricane;
 import com.github.standobyte.jojo.action.actions.MagiciansRedDetector;
 import com.github.standobyte.jojo.action.actions.MagiciansRedFireball;
 import com.github.standobyte.jojo.action.actions.MagiciansRedFlameBurst;
+import com.github.standobyte.jojo.action.actions.MagiciansRedHeavyAttack;
 import com.github.standobyte.jojo.action.actions.MagiciansRedRedBind;
 import com.github.standobyte.jojo.action.actions.NonStandAction;
 import com.github.standobyte.jojo.action.actions.SilverChariotHeavyAttack;
@@ -336,7 +337,7 @@ public class ModActions {
             () -> new StandEntityLightAttack(new StandEntityAction.Builder()));
 
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_HEAVY_PUNCH = ACTIONS.register("magicians_red_heavy_punch", 
-            () -> new StandEntityHeavyAttack(new StandEntityAction.Builder().shiftVariationOf(MAGICIANS_RED_PUNCH)));
+            () -> new MagiciansRedHeavyAttack(new StandEntityAction.Builder().shiftVariationOf(MAGICIANS_RED_PUNCH)));
     
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_FLAME_BURST = ACTIONS.register("magicians_red_flame_burst", 
             () -> new MagiciansRedFlameBurst(new StandEntityAction.Builder().staminaCostTick(3).holdType()
@@ -344,7 +345,7 @@ public class ModActions {
                     .xpRequirement(50)));
     
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_FIREBALL = ACTIONS.register("magicians_red_fireball", 
-            () -> new MagiciansRedFireball(new StandEntityAction.Builder().staminaCost(75).resolveLevelToUnlock(1).standPerformDuration(3)
+            () -> new MagiciansRedFireball(new StandEntityAction.Builder().staminaCost(75).resolveLevelToUnlock(2).standPerformDuration(3)
                     .standPose(StandPose.RANGED_ATTACK).standSound(ModSounds.MAGICIANS_RED_FIREBALL)
                     .xpRequirement(150)));
     
@@ -365,7 +366,7 @@ public class ModActions {
             () -> new StandEntityBlock());
     
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_RED_BIND = ACTIONS.register("magicians_red_red_bind", 
-            () -> new MagiciansRedRedBind(new StandEntityAction.Builder().staminaCostTick(1).resolveLevelToUnlock(2).holdType().heldSlowDownFactor(0.3F)
+            () -> new MagiciansRedRedBind(new StandEntityAction.Builder().staminaCostTick(1).resolveLevelToUnlock(1).holdType().heldSlowDownFactor(0.3F)
                     .standPose(MagiciansRedRedBind.RED_BIND_POSE).shout(ModSounds.AVDOL_RED_BIND).standSound(ModSounds.MAGICIANS_RED_FIRE_BLAST)
                     .xpRequirement(450)));
     

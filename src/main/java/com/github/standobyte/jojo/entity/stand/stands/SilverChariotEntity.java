@@ -157,7 +157,7 @@ public class SilverChariotEntity extends StandEntity {
     public boolean attackEntity(Entity target, PunchType punch, StandEntityAction action, int barrageHits) {
         if (target instanceof ProjectileEntity) {
             if (target.getType() != ModEntityTypes.SPACE_RIPPER_STINGY_EYES.get()) {
-                JojoModUtil.deflectProjectile(target);
+                JojoModUtil.deflectProjectile(target, getLookAngle());
                 return true;
             }
             return false;

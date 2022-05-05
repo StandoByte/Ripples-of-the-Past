@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.entity;
 
 import javax.annotation.Nonnull;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEntityTypes;
@@ -59,7 +58,6 @@ public class HamonProjectileShieldEntity extends Entity implements IEntityAdditi
         copyPosition(user);
         level.getEntitiesOfClass(ProjectileEntity.class, getBoundingBox().inflate(4), 
                 entity -> entity.isAlive()).forEach(projectile -> {
-                    JojoMod.LOGGER.debug(projectile.getDeltaMovement().length());
                     if (getBoundingBox().contains(projectile.position().add(projectile.getDeltaMovement()))) {
                         deflectProjectile(projectile);
                     }
@@ -101,7 +99,7 @@ public class HamonProjectileShieldEntity extends Entity implements IEntityAdditi
         if (power != null && hamon != null) {
             float energyCost = speed * 60;
             if (power.hasEnergy(energyCost)) {
-                JojoModUtil.deflectProjectile(projectile);
+                JojoModUtil.deflectProjectile(projectile, null);
             }
             if (!level.isClientSide()) {
                 if (power.consumeEnergy(energyCost)) {

@@ -110,6 +110,11 @@ public class MRFlameEntity extends ModdedProjectileEntity {
     }
     
     @Override
+    public boolean isOnFire() {
+        return false;
+    }
+    
+    @Override
     protected float getMaxHardnessBreakable() {
         return 0;
     }

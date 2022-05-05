@@ -130,8 +130,8 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
                 new RotationAngle(leftForeArm, -0.4363F, 0.0F, 0.0F),
                 new RotationAngle(rightArm, -0.0873F, 0.0F, 0.7854F),
                 new RotationAngle(rightForeArm, -1.9199F, -0.5672F, 0.9599F),
-                new RotationAngle(leftLeg, -0.2618F, -0.4363F, -0.1309F),
-                new RotationAngle(leftLowerLeg, 0.7854F, -0.1309F, 0.0F),
+                new RotationAngle(leftLeg, -0.5672F, -0.6109F, -0.1309F),
+                new RotationAngle(leftLowerLeg, 1.309F, -0.1309F, 0.0F),
                 new RotationAngle(rightLeg, 0.2182F, 0.1309F, 0.1309F),
                 new RotationAngle(rightLowerLeg, 0.2182F, 0.1309F, 0.0F)
         });

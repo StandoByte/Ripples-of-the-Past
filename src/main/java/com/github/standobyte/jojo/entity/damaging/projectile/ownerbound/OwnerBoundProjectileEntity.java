@@ -55,7 +55,9 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
         if (isBoundToOwner()) {
             LivingEntity owner = getOwner();
             if (owner == null) {
-                remove();
+                if (!level.isClientSide()) {
+                    remove();
+                }
                 return;
             }
         }
