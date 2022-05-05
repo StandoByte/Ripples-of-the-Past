@@ -45,6 +45,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Deprecated
     private int xp = 0;
     private boolean skippedProgression;
+    private boolean givenByDisc;
     
     private ActionLearningProgressMap<IStandPower> actionLearningProgressMap = new ActionLearningProgressMap<>();
     
@@ -95,6 +96,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             resolveCounter.reset();
             xp = 0;
             skippedProgression = false;
+            givenByDisc = false;
             if (countTaken) {
                 serverPlayerUser.ifPresent(player -> {
                     SaveFileUtilCapProvider.getSaveFileCap(player).removePlayerStand(standType);
@@ -103,6 +105,16 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             return true;
         }
         return false;
+    }
+    
+    @Override
+    public void setGivenByDisc() {
+        givenByDisc = true;
+    }
+    
+    @Override
+    public boolean wasGivenByDisc() {
+        return givenByDisc;
     }
     
     @Override
@@ -405,6 +417,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
 
     @Override
     public void addLearningProgressPoints(Action<IStandPower> action, float points) {
+        if (user != null && user.hasEffect(ModEffects.RESOLVE.get())) {
+            points *= 4;
+        }
         setLearningProgressPoints(action, getLearningProgressPoints(action) + points, true, true);
     }
     
@@ -511,6 +526,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
         cnbt.putInt("Xp", getXp());
         cnbt.putBoolean("Skipped", skippedProgression);
+        cnbt.putBoolean("Disc", givenByDisc);
         actionLearningProgressMap.writeToNbt(cnbt);
         return cnbt;
     }
@@ -524,7 +540,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 setType(stand);
                 if (nbt.contains("Exp")) {
                     xp = nbt.getInt("Exp");
-                    // FIXME (!!) add unlocked actions from v0.1
                     LegacyUtil.readNbtStandXp(this, xp, actionLearningProgressMap);
                 }
                 else {
@@ -539,6 +554,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             resolveCounter.readNbt(nbt.getCompound("Resolve"));
         }
         skippedProgression = nbt.getBoolean("Skipped");
+        givenByDisc = nbt.getBoolean("Disc");
         actionLearningProgressMap.readFromNbt(nbt);
         super.readNBT(nbt);
     }
@@ -553,6 +569,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             this.resolveCounter.alwaysResetOnDeath();
         }
         this.skippedProgression = oldPower.wasProgressionSkipped();
+        this.givenByDisc = oldPower.wasGivenByDisc();
         this.actionLearningProgressMap = ((StandPower) oldPower).actionLearningProgressMap; // FIXME can i remove this cast?
     }
     

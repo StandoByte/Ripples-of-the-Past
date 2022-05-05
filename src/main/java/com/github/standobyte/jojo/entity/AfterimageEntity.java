@@ -56,8 +56,10 @@ public class AfterimageEntity extends Entity implements IEntityAdditionalSpawnDa
     public void tick() {
         super.tick();
         ticksDelayed++;
-        if (originEntity == null || !originEntity.isAlive() || !level.isClientSide() && tickCount > lifeSpan) {
-            remove();
+        if (originEntity == null || !originEntity.isAlive() || tickCount > lifeSpan) {
+            if (!level.isClientSide()) {
+                remove();
+            }
             return;
         }
         originPosQueue.add(new PosData(originEntity.position(), originEntity.xRot, originEntity.yRot));

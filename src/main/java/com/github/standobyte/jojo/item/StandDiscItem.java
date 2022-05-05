@@ -70,7 +70,14 @@ public class StandDiscItem extends Item {
                     player.displayClientMessage(new TranslationTextComponent("jojo.chat.message.low_tier"), true);
                     return ActionResult.fail(stack);
                 }
+                if (power.wasGivenByDisc()) {
+                    StandType<?> previousDiscStand = power.putOutStand();
+                    if (previousDiscStand != null) {
+                        player.drop(withStandType(new ItemStack(this), previousDiscStand), false);
+                    }
+                }
                 if (power.givePower(stand, !stack.getTag().getBoolean(WS_TAG))) {
+                    power.setGivenByDisc();
                     if (!player.abilities.instabuild) {
                         stack.shrink(1);
                     }
@@ -106,16 +113,15 @@ public class StandDiscItem extends Item {
             for (StandType<?> standType : ModStandTypes.Registry.getRegistry()) {
                 if (!JojoModConfig.getCommonConfigInstance(isClientSide).isConfigLoaded()
                         || !JojoModConfig.getCommonConfigInstance(isClientSide).isStandBanned(standType)) {
-                    ItemStack item = new ItemStack(this);
-                    setStandType(item, standType);
-                    items.add(item);
+                    items.add(withStandType(new ItemStack(this), standType));
                 }
             }
         }
     }
     
-    public static void setStandType(ItemStack discStack, StandType<?> standType) {
+    public static ItemStack withStandType(ItemStack discStack, StandType<?> standType) {
         discStack.getOrCreateTag().putString(STAND_TAG, ModStandTypes.Registry.getKeyAsString(standType));
+        return discStack;
     }
     
     @Override

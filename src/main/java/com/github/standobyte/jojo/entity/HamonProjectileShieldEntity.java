@@ -55,7 +55,7 @@ public class HamonProjectileShieldEntity extends Entity implements IEntityAdditi
             if (!level.isClientSide()) remove();
             return;
         }
-        copyPosition(user);
+        setPos(user.getX(), user.getY() - 0.25, user.getZ());
         level.getEntitiesOfClass(ProjectileEntity.class, getBoundingBox().inflate(4), 
                 entity -> entity.isAlive()).forEach(projectile -> {
                     if (getBoundingBox().contains(projectile.position().add(projectile.getDeltaMovement()))) {

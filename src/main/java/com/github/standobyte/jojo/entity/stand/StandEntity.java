@@ -1854,6 +1854,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                     forward *= 0.5;
                 }
                 manualMovement = getAbsoluteMotion(new Vector3d((double)strafe, y, (double)forward), speed, this.yRot).scale(getUserMovementFactor());
+                // FIXME !!!!!!!!!!!!!!!!!!!!!!!!! stop the uncontrollable floating in manual mode (after smth like an explosion)
+                if (strafe != 0 || forward != 0 || jumping || sneaking) {
+                    setDeltaMovement(Vector3d.ZERO);
+                }
             }
             else {
                 manualMovement = Vector3d.ZERO;

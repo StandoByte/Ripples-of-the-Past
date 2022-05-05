@@ -88,7 +88,7 @@ public class ModEntityTypes {
             .build(new ResourceLocation(JojoMod.MOD_ID, "afterimage").toString()));
     
     public static final RegistryObject<EntityType<HamonProjectileShieldEntity>> HAMON_PROJECTILE_SHIELD = ENTITIES.register("hamon_projectile_shield", 
-            () -> EntityType.Builder.<HamonProjectileShieldEntity>of(HamonProjectileShieldEntity::new, EntityClassification.MISC).sized(3.0F, 3.0F).noSummon().noSave()
+            () -> EntityType.Builder.<HamonProjectileShieldEntity>of(HamonProjectileShieldEntity::new, EntityClassification.MISC).sized(3.0F, 3.0F).setUpdateInterval(Integer.MAX_VALUE).setShouldReceiveVelocityUpdates(false).noSummon().noSave()
             .build(new ResourceLocation(JojoMod.MOD_ID, "hamon_projectile_shield").toString()));
     
     public static final RegistryObject<EntityType<LeavesGliderEntity>> LEAVES_GLIDER = ENTITIES.register("leaves_glider", 
@@ -178,7 +178,7 @@ public class ModEntityTypes {
             .build(new ResourceLocation(JojoMod.MOD_ID, "hg_grappling_string").toString()));
     
     public static final RegistryObject<EntityType<HGBarrierEntity>> HG_BARRIER = ENTITIES.register("hg_barrier", 
-            () -> EntityType.Builder.<HGBarrierEntity>of(HGBarrierEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().noSave().setShouldReceiveVelocityUpdates(false).setUpdateInterval(20)
+            () -> EntityType.Builder.<HGBarrierEntity>of(HGBarrierEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().noSave().setShouldReceiveVelocityUpdates(false).setUpdateInterval(Integer.MAX_VALUE)
             .build(new ResourceLocation(JojoMod.MOD_ID, "hg_barrier").toString()));
     
     public static final RegistryObject<EntityType<SCRapierEntity>> SC_RAPIER = ENTITIES.register("sc_rapier", 
@@ -210,7 +210,7 @@ public class ModEntityTypes {
             .build(new ResourceLocation(JojoMod.MOD_ID, "mr_red_bind").toString()));
     
     public static final RegistryObject<EntityType<MRDetectorEntity>> MR_DETECTOR = ENTITIES.register("mr_detector", 
-            () -> EntityType.Builder.<MRDetectorEntity>of(MRDetectorEntity::new, EntityClassification.MISC).sized(0.5F, 0.5F).noSummon().noSave().setUpdateInterval(2)
+            () -> EntityType.Builder.<MRDetectorEntity>of(MRDetectorEntity::new, EntityClassification.MISC).sized(0.5F, 0.5F).noSummon().noSave().setUpdateInterval(2).setUpdateInterval(Integer.MAX_VALUE).setShouldReceiveVelocityUpdates(false)
             .build(new ResourceLocation(JojoMod.MOD_ID, "mr_detector").toString()));
 
     /*

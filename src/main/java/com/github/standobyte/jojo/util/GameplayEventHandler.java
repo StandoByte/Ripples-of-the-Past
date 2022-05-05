@@ -360,8 +360,15 @@ public class GameplayEventHandler {
             IStandDamageSource standDamageSrc = (IStandDamageSource) damageSrc;
             IStandPower attackerStand = standDamageSrc.getStandPower();
             if (attackerStand.usesResolve()) {
-                attackerStand.getResolveCounter().onAttack(event.getEntityLiving(), standDamageSrc, event.getAmount());
+                attackerStand.getResolveCounter().onAttack(event.getEntityLiving(), damageSrc, standDamageSrc, event.getAmount());
             }
+        }
+        else if (damageSrc.getEntity() instanceof LivingEntity) {
+            IStandPower.getStandPowerOptional((LivingEntity) damageSrc.getEntity()).ifPresent(attackerStand -> {
+                if (attackerStand.usesResolve() && attackerStand.isActive()) {
+                    attackerStand.getResolveCounter().onAttack(event.getEntityLiving(), damageSrc, null, event.getAmount());
+                }
+            });
         }
     }
     

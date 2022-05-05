@@ -1027,7 +1027,7 @@ public class ActionsOverlayGui extends AbstractGui {
             Action<P> action = power.getAction(actionType, index, shift);
             if (action != null) {
                 if (power.getHeldAction() != null && action.getHoldDurationMax(power) > 0) {
-                    return false;
+                    return true;
                 }
                 RayTraceResult target = InputHandler.getInstance().mouseTarget;
                 PacketManager.sendToServer(ClClickActionPacket.withRayTraceResult(power.getPowerClassification(), actionType, shift, index, target));

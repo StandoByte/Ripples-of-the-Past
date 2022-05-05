@@ -355,14 +355,17 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         private int holdDurationMax = 0;
         private boolean continueHolding = false;
         private float heldSlowDownFactor = 1.0F;
+        
         private int cooldownTechnical;
         private int cooldownAdditional;
+        
         private boolean needsEntityTarget = false;
         private boolean needsBlockTarget = false;
         private static final double MAX_RANGE_ENTITY_TARGET = 6.0D;
         private static final double MAX_RANGE_BLOCK_TARGET = 8.0D;
         private double maxRangeSqEntityTarget = MAX_RANGE_ENTITY_TARGET * MAX_RANGE_ENTITY_TARGET;
         private double maxRangeSqBlockTarget = MAX_RANGE_BLOCK_TARGET * MAX_RANGE_BLOCK_TARGET;
+        
         private Map<Hand, Function<ItemStack, String>> itemChecks = new EnumMap<>(Hand.class);
         private boolean ignoresPerformerStun = false;
         private boolean swingHand = false;

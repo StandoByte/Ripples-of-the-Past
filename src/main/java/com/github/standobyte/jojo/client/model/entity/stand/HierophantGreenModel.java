@@ -111,7 +111,7 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
 
         actionAnim.put(HierophantGreenGrapple.GRAPPLE_POSE, new StandActionAnimation.Builder<HierophantGreenEntity>()
                 .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<HierophantGreenEntity>(new RotationAngle[] {
-                        new RotationAngle(rightArm, -1.5708F, 0.0F, 0.0F), // FIXME (!) (stand anim) use xRotation
+                        new RotationAngle(rightArm, -1.5708F, 0.0F, 0.0F), 
                         new RotationAngle(rightForeArm, 0.0F, 0.0F, 0.0F), 
                         new RotationAngle(body, 0.0F, 0.0F, 0.0F), 
                 }))
