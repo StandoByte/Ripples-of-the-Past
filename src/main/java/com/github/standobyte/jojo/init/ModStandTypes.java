@@ -38,7 +38,7 @@ public class ModStandTypes {
     public static final RegistryObject<StandType<TimeStopperStandStats>> STAR_PLATINUM = STANDS.register("star_platinum", 
             () -> new EntityStandType<>(6, 0xB000B0, PART_3_NAME,
                     new StandAction[] {ModActions.STAR_PLATINUM_PUNCH.get(), ModActions.STAR_PLATINUM_BARRAGE.get(), ModActions.STAR_PLATINUM_STAR_FINGER.get()},
-                    new StandAction[] {ModActions.STAR_PLATINUM_BLOCK.get(), ModActions.STAR_PLATINUM_ZOOM.get(), ModActions.STAR_PLATINUM_TIME_STOP.get()},
+                    new StandAction[] {ModActions.STAR_PLATINUM_BLOCK.get(), ModActions.STAR_PLATINUM_ZOOM.get(), ModActions.STAR_PLATINUM_TIME_STOP.get(), ModActions.STAR_PLATINUM_STAR_FINGER.get()},
                     TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
                     .power(16.0)
                     .speed(16.0)

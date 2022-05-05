@@ -37,7 +37,7 @@ public class ArmorModelRegistry {
             INSTANCE.armorModels = builder.build();
             for (Item item : ForgeRegistries.ITEMS) {
                 if (item instanceof CustomModelArmorItem && !INSTANCE.armorModels.containsKey(item)) {
-                    JojoMod.LOGGER.error(ARMORMODEL, "No armor model registered for {}", ForgeRegistries.ITEMS.getKey(item));
+                    JojoMod.getLogger().error(ARMORMODEL, "No armor model registered for {}", ForgeRegistries.ITEMS.getKey(item));
                 }
             }
         }

@@ -38,6 +38,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPlaySoundEffectPacket;
 import net.minecraft.network.play.server.SSpawnMovingSoundEffectPacket;
 import net.minecraft.particles.ParticleTypes;
+import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.ResourceLocation;
@@ -258,12 +259,21 @@ public class JojoModUtil {
         entity.remove();
     }
     
-    public static void deflectProjectile(Entity projectile) {
-        projectile.setDeltaMovement(projectile.getDeltaMovement().reverse());
+    public static void deflectProjectile(Entity projectile, @Nullable Vector3d deflectVec) {
+        projectile.setDeltaMovement(deflectVec != null ? 
+                deflectVec.scale(Math.sqrt(projectile.getDeltaMovement().lengthSqr() / deflectVec.lengthSqr()))
+                : projectile.getDeltaMovement().reverse());
         projectile.move(MoverType.SELF, projectile.getDeltaMovement());
         if (projectile instanceof ModdedProjectileEntity) {
             ((ModdedProjectileEntity) projectile).setIsDeflected();
         }
+    }
+    
+    public static boolean removeEffectInstance(LivingEntity entity, EffectInstance effectInstance) {
+        if (entity.getActiveEffectsMap().get(effectInstance.getEffect()) == effectInstance) {
+            return entity.removeEffect(effectInstance.getEffect());
+        }
+        return false;
     }
 
     public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine) {

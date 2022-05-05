@@ -21,6 +21,10 @@ public class RotationAngle {
         return new RotationAngle(modelRenderer, angleX * MathUtil.DEG_TO_RAD, angleY * MathUtil.DEG_TO_RAD, angleZ * MathUtil.DEG_TO_RAD);
     }
     
+    public static RotationAngle blockbenchRotationAngle(ModelRenderer modelRenderer, float angleX, float angleY, float angleZ) {
+        return fromDegrees(modelRenderer, -angleX, -angleY, angleZ);
+    }
+    
     public void applyRotation(float rotationAmount) {
         modelRenderer.xRot = MathUtil.rotLerpRad(rotationAmount, modelRenderer.xRot, angleX);
         modelRenderer.yRot = MathUtil.rotLerpRad(rotationAmount, modelRenderer.yRot, angleY);

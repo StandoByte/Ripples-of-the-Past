@@ -64,7 +64,7 @@ public class ClStandManualMovementPacket {
                     double motionSq = stand.getDeltaMovement().lengthSqr(); // d9
                     double diffSq = diffX * diffX + diffY * diffY + diffZ * diffZ; // d10
                     if (diffSq - motionSq > 100.0D) {
-                        JojoMod.LOGGER.warn("{} ({}'s stand) moved too quickly! {},{},{}", stand.getName().getString(), player.getName().getString(), diffX, diffY, diffZ);
+                        JojoMod.getLogger().warn("{} ({}'s stand) moved too quickly! {},{},{}", stand.getName().getString(), player.getName().getString(), diffX, diffY, diffZ);
                         PacketManager.sendToClient(new StandCancelManualMovementPacket(stand.getX(), stand.getY(), stand.getZ()), player);
                         return;
                     }

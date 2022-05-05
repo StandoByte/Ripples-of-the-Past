@@ -42,6 +42,10 @@ public class JojoMod {
         }
 	};
 	
+	public static Logger getLogger() {
+	    return LOGGER;
+	}
+	
     public JojoMod() {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, JojoModConfig.commonSpec);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, JojoModConfig.clientSpec);

@@ -17,6 +17,8 @@ import net.minecraft.world.server.ServerWorld;
 
 public class MRRedBindEntity extends OwnerBoundProjectileEntity {
     private IStandPower userStandPower;
+    private EffectInstance stunEffect = null;
+    private int ticksTargetClose = 0;
 
     public MRRedBindEntity(World world, LivingEntity entity, IStandPower userStand) {
         super(ModEntityTypes.MR_RED_BIND.get(), entity, world);
@@ -53,16 +55,16 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
             }
             else {
                 if (!level.isClientSide()) {
-                    bound.addEffect(new EffectInstance(ModEffects.STUN.get(), 60));
                     if (bound.getRemainingFireTicks() % 20 == 0 || bound.getRemainingFireTicks() <= 0) {
                         DamageUtil.setOnFire(bound, 3, true);
                     }
                 }
                 Vector3d vecToOwner = owner.position().subtract(bound.position());
-                if (vecToOwner.lengthSqr() > 2.25) {
-                    dragTarget(bound, vecToOwner.normalize().scale(0.15));
+                if (vecToOwner.lengthSqr() > 4) {
+                    dragTarget(bound, vecToOwner.normalize().scale(0.2));
+                    ticksTargetClose = 0;
                 }
-                else if (!level.isClientSide()) {
+                else if (!level.isClientSide() && ticksTargetClose++ > 10) {
                     remove();
                 }
             }
@@ -78,14 +80,33 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
     }
     
     @Override
+    public boolean isOnFire() {
+        return false;
+    }
+    
+    @Override
     protected boolean hurtTarget(Entity target, LivingEntity owner) {
         if (getEntityAttachedTo() == null) {
-            if (target instanceof LivingEntity) {
-                attachToEntity((LivingEntity) target);
+            if (target instanceof LivingEntity && !target.isInvulnerableTo(getDamageSource(owner))) {
+                LivingEntity targetLiving = (LivingEntity) target;
+                attachToEntity(targetLiving);
+                stunEffect = new EffectInstance(ModEffects.STUN.get(), ticksLifespan() - tickCount);
+                targetLiving.addEffect(stunEffect);
                 return true;
             }
         }
         return false;
+    }
+    
+    @Override
+    public void remove() {
+        super.remove();
+        if (!level.isClientSide() && stunEffect != null) {
+            LivingEntity bound = getEntityAttachedTo();
+            if (bound != null) {
+                JojoModUtil.removeEffectInstance(bound, stunEffect);
+            }
+        }
     }
 
     private static final Vector3d OFFSET = new Vector3d(0, -0.25, 0.5);
@@ -111,12 +132,12 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
     
     @Override
     protected int ticksLifespan() {
-        return getEntityAttachedTo() == null ? 10 : 100;
+        return isAttachedToAnEntity() ? 100 : 7;
     }
     
     @Override
     protected float movementSpeed() {
-        return 0.75F;
+        return 1.0F;
     }
     
     @Override

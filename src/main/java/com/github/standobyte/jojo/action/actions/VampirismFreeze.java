@@ -134,4 +134,9 @@ public class VampirismFreeze extends VampirismAction {
             user.level.addParticle(ParticleTypes.CLOUD, particlePos.x, particlePos.y, particlePos.z, 0, 0, 0);
         }
     }
+    
+    @Override
+    public boolean heldAllowsOtherActions(INonStandPower power) {
+        return true;
+    }
 }
