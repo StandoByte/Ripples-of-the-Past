@@ -283,10 +283,10 @@ public class JojoModUtil {
     public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine, float volume, float pitch) {
         if (!entity.level.isClientSide() && canPlayVoiceLine(entity, voiceLine)) {
             if (entity instanceof PlayerEntity) {
-                playVoiceLineSound(entity, voiceLine, entity.getSoundSource(), volume, pitch);
+                playVoiceLineSound(entity, voiceLine, SoundCategory.VOICE, volume, pitch);
             }
             else {
-                entity.level.playSound(null, entity, voiceLine, entity.getSoundSource(), volume, pitch);
+                entity.level.playSound(null, entity, voiceLine, SoundCategory.VOICE, volume, pitch);
             }
         }
     }

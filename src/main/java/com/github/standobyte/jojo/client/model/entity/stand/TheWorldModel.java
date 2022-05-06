@@ -433,9 +433,48 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                         .addPose(0.75F, kickPose2)
                         .build(kickPose3))
                 .build(idlePose));
-        
-        // FIXME (!!!!) TW new attack anim
-        actionAnim.put(TheWorldTSHeavyAttack.TS_PUNCH_POSE, actionAnim.get(StandPose.HEAVY_ATTACK));
+
+        ModelPose<TheWorldEntity> punchPose1 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+                RotationAngle.fromDegrees(head, 0.0F, 0.0F, 0F), 
+                RotationAngle.fromDegrees(body, 40F, 45F, 0F),
+                RotationAngle.fromDegrees(upperPart, 0F, 0F, 0F),
+                RotationAngle.fromDegrees(leftArm, -25F, -35F, -65F),
+                RotationAngle.fromDegrees(leftForeArm, -50F, 0F, -17.5F),
+                RotationAngle.fromDegrees(rightArm, 0F, 85F, 90F),
+                RotationAngle.fromDegrees(rightForeArm, -33.0896F, -17.2568F, -105.9398F),
+                RotationAngle.fromDegrees(leftLeg, -90F, 0F, -10F),
+                RotationAngle.fromDegrees(leftLowerLeg, 80F, 0F, 0F),
+                RotationAngle.fromDegrees(rightLeg, 0F, 0F, 10F),
+                RotationAngle.fromDegrees(rightLowerLeg, 0F, 0F, 0F)
+        });
+        ModelPose<TheWorldEntity> punchPose2 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+                RotationAngle.fromDegrees(head, 0.0F, 22.5F, 0.0F), 
+                RotationAngle.fromDegrees(body, 40F, 60F, 0F),
+                RotationAngle.fromDegrees(leftArm, -10F, -35F, -65F),
+                RotationAngle.fromDegrees(leftForeArm, -40F, -5F, -17.5F),
+                RotationAngle.fromDegrees(rightArm, 105F, 67.5F, 180F),
+                RotationAngle.fromDegrees(rightForeArm, -50.4689F, -48.3643F, -73.6793F),
+                RotationAngle.fromDegrees(rightLeg, 10F, 0F, 10F)
+        });
+        ModelPose<TheWorldEntity> punchPose3 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+                RotationAngle.fromDegrees(head, 0.0F, 0.0F, 0F), 
+                RotationAngle.fromDegrees(body, 30F, -30F, 0F),
+                RotationAngle.fromDegrees(leftArm, 5F, -25F, -45F),
+                RotationAngle.fromDegrees(leftForeArm, -60F, 20F, 30F),
+                RotationAngle.fromDegrees(rightArm, -49.308F, 34.8829F, 81.833F),
+                RotationAngle.fromDegrees(rightForeArm, -37.8852F, -9.0337F, -12.7323F),
+                RotationAngle.fromDegrees(leftLeg, -120F, 0F, -10F),
+                RotationAngle.fromDegrees(leftLowerLeg, 120F, 0F, 0F),
+                RotationAngle.fromDegrees(rightLeg, 0F, 0F, 10F),
+                RotationAngle.fromDegrees(rightLowerLeg, 45F, 0F, 0F)
+        });
+        actionAnim.put(TheWorldTSHeavyAttack.TS_PUNCH_POSE, new StandActionAnimation.Builder<TheWorldEntity>()
+                .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<TheWorldEntity>(punchPose1, punchPose2))
+                .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransition<TheWorldEntity>(punchPose2, punchPose3))
+                .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransitionMultiple.Builder<TheWorldEntity>(punchPose3)
+                        .addPose(0.5F, punchPose3)
+                        .build(idlePose))
+                .build(idlePose));
         
         super.initActionPoses();
     }

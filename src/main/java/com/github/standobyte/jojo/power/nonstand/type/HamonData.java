@@ -706,9 +706,6 @@ public class HamonData extends TypeSpecificData {
         hamonControlPoints = nbt.getInt("ControlPoints");
         hamonControlLevel = levelFromPoints(hamonControlPoints);
         breathingTechniqueLevel = nbt.getFloat("BreathingTechnique");
-        serverPlayer.ifPresent(player -> {
-            ModCriteriaTriggers.HAMON_STATS.get().trigger(player, hamonStrengthLevel, hamonControlLevel, breathingTechniqueLevel);
-        });
         recalcHamonDamage();
         fillSkillsFromNbt(nbt.getCompound("Skills"));
         CompoundNBT exercises = nbt.getCompound("Exercises");
@@ -739,6 +736,7 @@ public class HamonData extends TypeSpecificData {
             }
         }
         PacketManager.sendToClient(new SyncHamonExercisesPacket(this), user);
+        ModCriteriaTriggers.HAMON_STATS.get().trigger(user, hamonStrengthLevel, hamonControlLevel, breathingTechniqueLevel);
     }
 
     @Override

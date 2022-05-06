@@ -181,12 +181,16 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     }
     
     protected void initPoses() {
-        if (poseReset == null) poseReset = initPoseReset();
+        if (poseReset == null)
+            poseReset = initPoseReset();
 
-        if (idlePose == null) idlePose = initBaseIdlePose();
-        if (idleLoop == null) idleLoop = new ModelPoseTransition<T>(idlePose, initIdlePose2Loop()).setEasing(ticks -> MathHelper.sin(ticks / 20));
+        if (idlePose == null)
+            idlePose = initBaseIdlePose();
+        if (idleLoop == null)
+            idleLoop = new ModelPoseTransition<T>(idlePose, initIdlePose2Loop()).setEasing(ticks -> MathHelper.sin(ticks / 20));
 
-        if (summonPoses == null) summonPoses = initSummonPoses();
+        if (summonPoses == null)
+            summonPoses = initSummonPoses();
     }
 
     protected void initActionPoses() {}

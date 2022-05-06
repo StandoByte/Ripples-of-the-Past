@@ -19,7 +19,7 @@ public class TheWorldTimeStop extends TimeStop {
     }
     
     private int shortedHoldDuration(IStandPower power, int ticks) {
-        return power.getResolveLevel() >= 4 ? ticks / 2 : ticks;
+        return power.getResolveLevel() >= 4 ? 20 : ticks;
     }
     
     @Override
