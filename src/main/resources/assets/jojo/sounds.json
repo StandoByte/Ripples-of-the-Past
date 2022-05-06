@@ -391,6 +391,10 @@
     "subtitle": "jojo.subtitle.wry",
     "sounds": [ "jojo:stand_user/dio_wry", "jojo:stand_user/dio_wry_2" ]
   },
+  "dio_this_is_the_world": {
+    "subtitle": "jojo.subtitle.this_is_the_world",
+    "sounds": [ "jojo:stand_user/dio_this_is_the_world", "jojo:stand_user/dio_this_is_the_world_2" ]
+  },
   "dio_toki_yo_tomare": {
     "subtitle": "jojo.subtitle.toki_yo_tomare",
     "sounds": [ "jojo:stand_user/dio_toki_yo_tomare", "jojo:stand_user/dio_toki_yo_tomare_2" ] 

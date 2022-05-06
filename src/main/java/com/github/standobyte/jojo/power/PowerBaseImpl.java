@@ -82,6 +82,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                                         .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + JojoControlsCommand.LITERAL))
                                         .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslationTextComponent("jojo.chat.controls.tooltip"))))));
             });
+            ModCriteriaTriggers.GET_POWER.get().trigger(player, getPowerClassification(), this);
         });
         return true;
     }
@@ -90,9 +91,6 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     
     protected void setType(T type) {
         this.type = type;
-        serverPlayerUser.ifPresent(player -> {
-            ModCriteriaTriggers.GET_POWER.get().trigger(player, getPowerClassification(), this);
-        });
         afterTypeInit(type);
     }
 
@@ -573,6 +571,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         serverPlayerUser.ifPresent(player -> {
             if (hasPower()) {
                 PacketManager.sendToClient(new SyncLeapCooldownPacket(getPowerClassification(), leapCooldown), player);
+                ModCriteriaTriggers.GET_POWER.get().trigger(player, getPowerClassification(), this);
                 syncWithTrackingOrUser(player);
             }
         });

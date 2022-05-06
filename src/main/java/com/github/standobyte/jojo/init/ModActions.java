@@ -249,7 +249,7 @@ public class ModActions {
             () -> new StandEntityBlock());
     
     public static final RegistryObject<StandAction> THE_WORLD_TIME_STOP = ACTIONS.register("the_world_time_stop", 
-            () -> new TheWorldTimeStop(new StandAction.Builder().holdToFire(40, false).staminaCost(500).staminaCostTick(7.5F)//.cooldown(0, 600, 0.3333F)
+            () -> new TheWorldTimeStop(new StandAction.Builder().holdToFire(30, false).staminaCost(500).staminaCostTick(7.5F)//.cooldown(0, 600, 0.3333F)
                     .resolveLevelToUnlock(2).isTrained().ignoresPerformerStun().shout(ModSounds.DIO_THE_WORLD)
                     .xpRequirement(500))
             .voiceLineWithStandSummoned(ModSounds.DIO_TIME_STOP).timeStopSound(ModSounds.THE_WORLD_TIME_STOP)

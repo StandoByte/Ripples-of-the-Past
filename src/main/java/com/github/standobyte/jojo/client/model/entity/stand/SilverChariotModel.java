@@ -203,6 +203,7 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
                         new RotationAngle(body, 0.0F, -0.7854F, 0.0F),
                         new RotationAngle(upperPart, 0.0F, -0.7854F, 0.0F),
                         new RotationAngle(leftArm, 0.2618F, 0.0F, -0.1309F),
+                        new RotationAngle(leftForeArm, 0.0F, 0.0F, 0.0F),
                         new RotationAngle(rightArm, 0.0F, 1.5708F, 1.5708F),
                         new RotationAngle(rightForeArm, 0.0F, 0.0F, 0.0F),
                         new RotationAngle(rapier, 1.5708F, 0.0F, 0.0F)
@@ -276,7 +277,19 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
                 .addPose(chariot -> !chariot.hasRapier(), 
                         super.initBaseIdlePose())
                 .addPose(chariot -> chariot.hasRapier() && chariot.hasArmor(), 
-                        super.initBaseIdlePose())
+                        new ModelPose<SilverChariotEntity>(new RotationAngle[] {
+                                new RotationAngle(body, 0.0F, -0.2618F, 0.0F),
+                                new RotationAngle(torso, 0.0F, 0.0F, 0.0F),
+                                new RotationAngle(leftArm, 0.9163F, -0.2618F, 0.1309F),
+                                new RotationAngle(leftForeArm, -1.309F, 0.0F, 0.0F),
+                                new RotationAngle(rightArm, -0.5236F, 0.0F, -0.2618F),
+                                new RotationAngle(rightForeArm, 0.0F, 0.0F, 0.0F),
+                                new RotationAngle(rapier, -0.3927F, 0.1309F, 0.0F),
+                                new RotationAngle(leftLeg, 0.1309F, -0.1309F, 0.0F),
+                                new RotationAngle(leftLowerLeg, 0.1309F, 0.0873F, 0.0F),
+                                new RotationAngle(rightLeg, -0.1745F, 0.1309F, 0.0F),
+                                new RotationAngle(rightLowerLeg, 0.2618F, 0.0F, 0.0F),
+                        }).setAdditionalAnim(HEAD_ROTATION))
                 .addPose(chariot -> chariot.hasRapier() && !chariot.hasArmor(), 
                         new ModelPose<SilverChariotEntity>(new RotationAngle[] {
                                 new RotationAngle(body, 0.2618F, 0.7854F, 0.0436F),
@@ -299,7 +312,11 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
                 .addPose(chariot -> !chariot.hasRapier(), 
                         super.initIdlePose2Loop())
                 .addPose(chariot -> chariot.hasRapier() && chariot.hasArmor(), 
-                        super.initIdlePose2Loop())
+                        new ModelPose<SilverChariotEntity>(new RotationAngle[] {
+                                new RotationAngle(leftArm, 0.9599F, -0.2182F, 0.1309F),
+                                new RotationAngle(leftForeArm, -1.3526F, 0.0F, 0.0F),
+                                new RotationAngle(rightArm, -0.5672F, 0.0F, -0.3491F),
+                        }).setAdditionalAnim(HEAD_ROTATION))
                 .addPose(chariot -> chariot.hasRapier() && !chariot.hasArmor(), 
                         new ModelPose<SilverChariotEntity>(new RotationAngle[] {
                                 new RotationAngle(leftArm, -0.6545F, 0.3927F, -1.0472F),
