@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModPaintings;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModPotions;
+import com.github.standobyte.jojo.init.ModRecipeSerializers;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.init.ModStructures;
@@ -69,6 +70,7 @@ public class JojoMod {
         ModPaintings.PAINTINGS.register(modEventBus);
         ModParticles.PARTICLES.register(modEventBus);
         ModPotions.POTIONS.register(modEventBus);
+        ModRecipeSerializers.SERIALIZERS.register(modEventBus);
         ModSounds.SOUNDS.register(modEventBus);
         ModStructures.STRUCTURES.register(modEventBus);
         ModTileEntities.TILE_ENTITIES.register(modEventBus);

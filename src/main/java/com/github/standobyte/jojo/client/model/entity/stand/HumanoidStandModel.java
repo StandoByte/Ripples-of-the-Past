@@ -33,10 +33,12 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
     protected ModelRenderer upperPart;
     protected ModelRenderer torso;
     protected ModelRenderer leftArm;
+    @Deprecated
     private ModelRenderer leftArmForearmOnly;
     protected ModelRenderer leftArmJoint;
     protected ModelRenderer leftForeArm;
     protected ModelRenderer rightArm;
+    @Deprecated
     private ModelRenderer rightArmForearmOnly;
     protected ModelRenderer rightArmJoint;
     protected ModelRenderer rightForeArm;
@@ -166,6 +168,8 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
 
     @Override
     protected void updatePartsVisibility(VisibilityMode mode, boolean forearmOnly) {
+        // FIXME (!!!!!!!!!!!!) remove the forearmOnly ModelRenderers?
+        forearmOnly = false;
         if (mode == VisibilityMode.ALL) {
             head.visible = true;
             torso.visible = true;
