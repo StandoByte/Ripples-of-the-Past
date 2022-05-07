@@ -20,10 +20,11 @@ public class AdditionalArmSwing {
         Random random = stand.getRandom();
         double upOffset = (random.nextDouble() - 0.5) * maxOffset;
         double leftOffset = random.nextDouble() * maxOffset / 2;
+        double frontOffset = random.nextDouble() * 0.5;
         if (side == HandSide.RIGHT) {
             leftOffset *= -1;
         }
-        offset = new Vector3d(leftOffset, upOffset, 0);
+        offset = new Vector3d(leftOffset, upOffset, frontOffset);
     }
     
     public float addDelta(float delta) {
