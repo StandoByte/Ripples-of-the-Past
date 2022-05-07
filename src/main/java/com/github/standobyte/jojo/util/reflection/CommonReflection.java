@@ -15,7 +15,12 @@ import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
 import net.minecraft.entity.ai.goal.PrioritizedGoal;
 import net.minecraft.entity.ai.goal.TargetGoal;
 import net.minecraft.entity.monster.CreeperEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.inventory.CraftingInventory;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.PlayerContainer;
+import net.minecraft.inventory.container.WorkbenchContainer;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.gen.FlatGenerationSettings;
 import net.minecraft.world.gen.feature.StructureFeature;
@@ -77,5 +82,22 @@ public class CommonReflection {
             FlatGenerationSettings.class, "field_202247_j");
     public static Map<Structure<?>, StructureFeature<?, ?>> flatGenSettingsStructures() {
         return ReflectionUtil.getFieldValue(FLAT_GENERATION_SETTING_STRUCTURE_FEATURES, null);
+    }
+    
+    
+    
+    private static final Field CRAFTING_INVENTORY_MENU = ObfuscationReflectionHelper.findField(CraftingInventory.class, "field_70465_c");
+    public static Container getCraftingInventoryMenu(CraftingInventory inventory) {
+        return ReflectionUtil.getFieldValue(CRAFTING_INVENTORY_MENU, inventory);
+    }
+    
+    private static final Field PLAYER_CONTAINER_OWNER = ObfuscationReflectionHelper.findField(PlayerContainer.class, "field_82862_h");
+    public static PlayerEntity getPlayer(PlayerContainer container) {
+        return ReflectionUtil.getFieldValue(PLAYER_CONTAINER_OWNER, container);
+    }
+    
+    private static final Field WORKBENCH_CONTAINER_PLAYER = ObfuscationReflectionHelper.findField(WorkbenchContainer.class, "field_192390_i");
+    public static PlayerEntity getPlayer(WorkbenchContainer container) {
+        return ReflectionUtil.getFieldValue(WORKBENCH_CONTAINER_PLAYER, container);
     }
 }
