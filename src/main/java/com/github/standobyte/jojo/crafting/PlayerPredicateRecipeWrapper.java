@@ -1,7 +1,5 @@
 package com.github.standobyte.jojo.crafting;
 
-import java.util.function.Predicate;
-
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.util.reflection.CommonReflection;
@@ -11,31 +9,47 @@ import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.inventory.container.WorkbenchContainer;
-import net.minecraft.item.crafting.SpecialRecipe;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.ICraftingRecipe;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
-public abstract class PlayerConditionCraftingRecipe extends SpecialRecipe {
-    private final Predicate<PlayerEntity> condition;
-
-    public PlayerConditionCraftingRecipe(ResourceLocation id, Predicate<PlayerEntity> condition) {
-        super(id);
-        this.condition = condition;
+public abstract class PlayerPredicateRecipeWrapper<R extends ICraftingRecipe> implements ICraftingRecipe {
+    protected final R recipe;
+    
+    protected PlayerPredicateRecipeWrapper(R recipe) {
+        this.recipe = recipe;
     }
 
     @Override
     public boolean matches(CraftingInventory inventory, World world) {
-        if (inventoryMatches(inventory, world)) {
-            PlayerEntity player = getPlayer(inventory);
-            return player != null ? condition.test(player) : false;
-        }
-        return false;
+        return recipe.matches(inventory, world) && playerMatches(getPlayer(inventory));
     }
     
-    protected abstract boolean inventoryMatches(CraftingInventory inventory, World world);
+    protected abstract boolean playerMatches(PlayerEntity player);
 
+    @Override
+    public ItemStack assemble(CraftingInventory inventory) {
+        return recipe.assemble(inventory);
+    }
+
+    @Override
+    public boolean canCraftInDimensions(int width, int height) {
+        return recipe.canCraftInDimensions(width, height);
+    }
+
+    @Override
+    public ItemStack getResultItem() {
+        return recipe.getResultItem();
+    }
+
+    @Override
+    public ResourceLocation getId() {
+        return recipe.getId();
+    }
+    
     @Nullable
-    protected final PlayerEntity getPlayer(CraftingInventory inventory) {
+    private static PlayerEntity getPlayer(CraftingInventory inventory) {
         PlayerEntity player = null;
         Container menu = CommonReflection.getCraftingInventoryMenu(inventory);
         if (menu instanceof PlayerContainer) {
@@ -46,4 +60,5 @@ public abstract class PlayerConditionCraftingRecipe extends SpecialRecipe {
         }
         return player;
     }
+
 }

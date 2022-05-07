@@ -1368,7 +1368,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         swings.reset();
         for (int i = 0; i < count; i++) {
             double maxOffset = 0.9 / (getPrecision() / 16 + 1) - 0.9 / 11;
-            swingsWithOffsets.add(new AdditionalArmSwing((float) i / (float) count, (bits & 1) == 1 ? HandSide.RIGHT : HandSide.LEFT, this, maxOffset));
+            float f = (float) i / (float) count;
+            swingsWithOffsets.add(new AdditionalArmSwing(f, (bits & 1) == 1 ? HandSide.RIGHT : HandSide.LEFT, this, maxOffset));
             bits >>= 1;
         }
     }

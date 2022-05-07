@@ -31,6 +31,7 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
 
 public abstract class StandEntityModel<T extends StandEntity> extends AgeableModel<T> {
     protected VisibilityMode visibilityMode = VisibilityMode.ALL;
@@ -243,7 +244,8 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
             for (AdditionalArmSwing swing : swings) {
                 matrixStack.pushPose();
                 setVisibilityMode(swing.getSide() == HandSide.LEFT ? VisibilityMode.LEFT_ARM_ONLY : VisibilityMode.RIGHT_ARM_ONLY, true);
-                matrixStack.translate(swing.offset.x, swing.offset.y, swing.offset.z);
+                Vector3d offset = new Vector3d(swing.offset.x, -swing.offset.y, swing.offset.z).xRot(xRotation * MathUtil.DEG_TO_RAD);
+                matrixStack.translate(offset.x, offset.y, -offset.z);
                 attackTime = swing.getAnim() / AdditionalArmSwing.MAX_ANIM_DURATION;
                 HandSide swingingHand = swing.getSide();
                 swingArmBarrage(entity, attackTime, yRotation, xRotation, ticks, swingingHand, 0F);
