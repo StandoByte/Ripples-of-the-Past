@@ -21,13 +21,18 @@ public abstract class ExtendingEntityRenderer<T extends OwnerBoundProjectileEnti
     }
     
     protected float getAlpha(T entity, float partialTick) {
-        LivingEntity owner = entity.getOwner();
-        return owner instanceof StandEntity ? ((StandEntity) owner).getAlpha(partialTick) : 1.0F;
+        if (entity.standDamage()) {
+            LivingEntity owner = entity.getOwner();
+            if (owner instanceof StandEntity) {
+                return ((StandEntity) owner).getAlpha(partialTick);
+            }
+        }
+        return 1.0F;
     }
 
     @Override
     protected void rotateModel(M model, T entity, float partialTick, float yRotation, float xRotation, MatrixStack matrixStack) {
-        Vector3d originPos = entity.getOriginPoint(partialTick);
+        Vector3d originPos = getOriginPos(entity, partialTick);
         Vector3d entityPos = new Vector3d(
                 MathHelper.lerp((double) partialTick, entity.xo, entity.getX()), 
                 MathHelper.lerp((double) partialTick, entity.yo, entity.getY()), 
@@ -37,6 +42,10 @@ public abstract class ExtendingEntityRenderer<T extends OwnerBoundProjectileEnti
         xRotation = MathUtil.xRotDegFromVec(extentVec);
         model.setLength((float) extentVec.length());
         model.setupAnim(entity, 0, 0, entity.tickCount + partialTick, yRotation, xRotation);
+    }
+    
+    protected Vector3d getOriginPos(T entity, float partialTick) {
+        return entity.getOriginPoint(partialTick);
     }
     
     @Override

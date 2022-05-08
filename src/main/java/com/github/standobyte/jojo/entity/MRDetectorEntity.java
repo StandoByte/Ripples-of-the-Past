@@ -59,7 +59,7 @@ public class MRDetectorEntity extends Entity implements IEntityAdditionalSpawnDa
             setPos(newPos.x, newPos.y, newPos.z);
         }
         else {
-            remove();
+            if (!level.isClientSide()) remove();
             return;
         }
         if (!level.isClientSide()) {

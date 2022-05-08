@@ -1,8 +1,7 @@
 {
   "display": {
     "icon": {
-      "item": "jojo:meteoric_scrap",
-      "nbt": "{Icon:1}"
+      "item": "jojo:stone_mask"
     },
     "title": {
       "translate": "advancements.jojo.root.title"

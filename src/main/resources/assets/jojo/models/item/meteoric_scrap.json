@@ -63,6 +63,12 @@
         "jojo:icon": 10
       },
       "model": "jojo:item/item_icon10"
+    },
+    {
+      "predicate": {
+        "jojo:icon": 11
+      },
+      "model": "jojo:item/item_icon11"
     }
   ]
 }

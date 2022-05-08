@@ -176,10 +176,12 @@ public class GameplayEventHandler {
                 cap.tick();
             });
             if (player.tickCount % 60 == 0 && !player.isInvisible() && player instanceof ServerPlayerEntity) {
-                long timeNotActive = Util.getMillis() - ((ServerPlayerEntity) player).getLastActionTime();
+                ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
+                long timeNotActive = Util.getMillis() - serverPlayer.getLastActionTime();
                 if (timeNotActive > 60000) {
                     ((ServerWorld) player.level).sendParticles(ModParticles.MENACING.get(), player.getX(), player.getEyeY(), player.getZ(), 
                             0,  MathHelper.cos(player.yRot * MathUtil.DEG_TO_RAD), 0.5D, MathHelper.sin(player.yRot * MathUtil.DEG_TO_RAD), 0.005D);
+                    ModCriteriaTriggers.AFK.get().trigger(serverPlayer);
                 }
             }
         }

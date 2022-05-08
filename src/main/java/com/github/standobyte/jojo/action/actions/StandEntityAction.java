@@ -164,13 +164,11 @@ public abstract class StandEntityAction extends StandAction {
     
     @Override
     public void stoppedHolding(World world, LivingEntity user, IStandPower power, int ticksHeld) {
-//        if (!world.isClientSide()) {
         invokeForStand(power, stand -> {
             if (stand.getCurrentTaskAction() == this) {
                 stand.stopTaskWithRecovery();
             }
         });
-//        }
     }
 
     @Override
@@ -189,7 +187,7 @@ public abstract class StandEntityAction extends StandAction {
         return autoSummonMode == AutoSummonMode.ARMS || autoSummonMode == AutoSummonMode.ONE_ARM;
     }
     
-    private void setAction(IStandPower standPower, StandEntity standEntity, int ticks, Phase phase, ActionTarget target) {
+    protected void setAction(IStandPower standPower, StandEntity standEntity, int ticks, Phase phase, ActionTarget target) {
         standEntity.setTask(this, ticks, phase, target);
     }
 
