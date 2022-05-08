@@ -64,6 +64,7 @@ import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.effect.LightningBoltEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -362,6 +363,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
     protected double leapBaseStrength() {
         return getAttributeValue(Attributes.ATTACK_DAMAGE);
+    }
+    
+    public double getStaminaCondition() {
+        return staminaCondition;
     }
     
 
@@ -1190,7 +1195,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
 
     public Predicate<Entity> canTarget() {
-        return entity -> !entity.is(this) && !entity.is(getUser());
+        return entity -> !entity.is(this) && !entity.is(getUser())
+                && !(entity instanceof ProjectileEntity && this.is(((ProjectileEntity) entity).getOwner()));
     }
     
     public RayTraceResult precisionRayTrace(Entity aimingEntity, double reachDistance) {
@@ -1478,6 +1484,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
     public boolean isHeavyComboPunching() {
         return getLastHeavyPunchCombo() >= 0.5F;
+    }
+    
+    public int getNoComboDecayTicks() {
+        return noComboDecayTicks;
     }
     
     public boolean attackEntity(Entity target, PunchType punch, StandEntityAction action, int barrageHits) {
@@ -1855,7 +1865,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                     forward *= 0.5;
                 }
                 manualMovement = getAbsoluteMotion(new Vector3d((double)strafe, y, (double)forward), speed, this.yRot).scale(getUserMovementFactor());
-                // FIXME !!!!!!!!!!!!!!!!!!!!!!!!! stop the uncontrollable floating in manual mode (after smth like an explosion)
+                // FIXME (!!!!!!!!!!!!) stop the uncontrollable floating in manual mode (after smth like an explosion)
                 if (strafe != 0 || forward != 0 || jumping || sneaking) {
                     setDeltaMovement(Vector3d.ZERO);
                 }

@@ -46,6 +46,8 @@ public class ModCriteriaTriggers {
             new CriteriaTriggerSupplier<>(() -> new KilledPowerUserTrigger(new ResourceLocation(JojoMod.MOD_ID, "entity_killed_player"), true));
     public static final CriteriaTriggerSupplier<StoneMaskDestroyedTrigger> STONE_MASK_DESTROYED = 
             new CriteriaTriggerSupplier<>(() -> new StoneMaskDestroyedTrigger(new ResourceLocation(JojoMod.MOD_ID, "destroy_stone_mask")));
+    public static final CriteriaTriggerSupplier<UnconditionalTrigger> AFK = 
+            new CriteriaTriggerSupplier<>(() -> new UnconditionalTrigger(new ResourceLocation(JojoMod.MOD_ID, "afk")));
     public static final CriteriaTriggerSupplier<StandSummonTrigger> SUMMON_STAND = 
             new CriteriaTriggerSupplier<>(() -> new StandSummonTrigger(new ResourceLocation(JojoMod.MOD_ID, "summon_stand")));
     public static final CriteriaTriggerSupplier<UnconditionalTrigger> STAND_MAX = 

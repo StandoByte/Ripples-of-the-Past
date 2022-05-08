@@ -42,7 +42,7 @@ public class SilverChariotHeavyAttack extends StandEntityHeavyAttack {
     public int getStandActionTicks(IStandPower standPower, StandEntity standEntity) {
         return standEntity.isHeavyComboPunching() ? 
                 3
-                : StandStatFormulas.getHeavyAttackWindup(standEntity.getAttackSpeed(), standEntity.getLastHeavyPunchCombo());
+                : Math.max(StandStatFormulas.getHeavyAttackWindup(standEntity.getAttackSpeed(), standEntity.getLastHeavyPunchCombo()), 2);
     }
     
     @Override

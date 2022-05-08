@@ -1,28 +1,33 @@
 package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.JojoModUtil;
 import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
 public class MRRedBindEntity extends OwnerBoundProjectileEntity {
-    private IStandPower userStandPower;
+    protected static final DataParameter<Boolean> KICK_COMBO = EntityDataManager.defineId(MRRedBindEntity.class, DataSerializers.BOOLEAN);
+    
+    private StandEntity ownerStand;
     private EffectInstance stunEffect = null;
     private int ticksTargetClose = 0;
 
-    public MRRedBindEntity(World world, LivingEntity entity, IStandPower userStand) {
+    public MRRedBindEntity(World world, StandEntity entity) {
         super(ModEntityTypes.MR_RED_BIND.get(), entity, world);
-        this.userStandPower = userStand;
+        this.ownerStand = entity;
     }
     
     public MRRedBindEntity(EntityType<? extends MRRedBindEntity> entityType, World world) {
@@ -40,7 +45,7 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
             return;
         }
         if (!level.isClientSide()) {
-            if (userStandPower == null || userStandPower.getHeldAction() != ModActions.MAGICIANS_RED_RED_BIND.get()) {
+            if (ownerStand == null || ownerStand.getCurrentTaskAction() != ModActions.MAGICIANS_RED_RED_BIND.get() && !isInKickCombo()) {
                 remove();
                 return;
             }
@@ -109,6 +114,28 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
         }
     }
 
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        entityData.define(KICK_COMBO, false);
+    }
+    
+    public void setKickCombo() {
+        entityData.set(KICK_COMBO, true);
+    }
+    
+    public boolean isInKickCombo() {
+        return entityData.get(KICK_COMBO);
+    }
+    
+    public StandEntity getOwnerAsStand() {
+        if (ownerStand == null) {
+            LivingEntity owner = getOwner();
+            ownerStand = owner instanceof StandEntity ? (StandEntity) owner : null;
+        }
+        return ownerStand;
+    }
+
     private static final Vector3d OFFSET = new Vector3d(0, -0.25, 0.5);
     @Override
     protected Vector3d getOwnerRelativeOffset() {
@@ -131,8 +158,12 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
     }
     
     @Override
-    protected int ticksLifespan() {
-        return isAttachedToAnEntity() ? 100 : 7;
+    public int ticksLifespan() {
+        return isAttachedToAnEntity() ? 
+                isInKickCombo() ? 
+                        Integer.MAX_VALUE
+                        : 100
+                : 7;
     }
     
     @Override

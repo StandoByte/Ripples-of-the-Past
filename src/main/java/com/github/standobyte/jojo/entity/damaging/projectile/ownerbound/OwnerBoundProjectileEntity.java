@@ -268,7 +268,7 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
         return attachedEntity;
     }
     
-    protected boolean isAttachedToAnEntity() {
+    public boolean isAttachedToAnEntity() {
         return entityData.get(ENTITY_ATTACHED_TO) > -1;
     }
     

@@ -156,7 +156,7 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
 
         if (!entity.isVisibleForAll() && model.getPose() == StandPose.IDLE && model.attackTime == 0 && 
                 entity.isFollowingUser() && !Minecraft.getInstance().player.isShiftKeyDown()) {
-            float idleY = MathHelper.sin(ticks * 0.04F) * 0.04F;
+            float idleY = MathHelper.sin((ticks - model.idleLoopTickStamp) * 0.04F) * 0.04F;
             matrixStack.translate(0.0D, idleY, 0.0D);
         }
         

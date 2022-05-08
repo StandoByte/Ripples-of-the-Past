@@ -40,7 +40,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     protected float ticks;
 
     protected StandPose poseType = StandPose.SUMMON;
-    private float idleLoopTickStamp = 0;
+    public float idleLoopTickStamp = 0;
     private ModelPose<T> poseReset;
     protected IModelPose<T> idlePose;
     protected IModelPose<T> idleLoop;

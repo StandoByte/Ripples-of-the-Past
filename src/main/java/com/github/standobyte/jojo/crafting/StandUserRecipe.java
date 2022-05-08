@@ -35,7 +35,7 @@ public abstract class StandUserRecipe<R extends ICraftingRecipe> extends PlayerP
             this.factory = factory;
         }
 
-        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! exceptions
+        // FIXME (!!!!!!!!!!!!) exceptions
         @Override
         public StandUserRecipe<R> fromJson(ResourceLocation id, JsonObject json) {
             R recipe = wrappedRecipeSerializer.fromJson(id, json);

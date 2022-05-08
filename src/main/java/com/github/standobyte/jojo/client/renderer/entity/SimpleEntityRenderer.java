@@ -34,7 +34,7 @@ public abstract class SimpleEntityRenderer<T extends Entity, M extends EntityMod
 
     @Override
     public void render(T entity, float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
-        if (!entity.isInvisible() || !entity.isInvisibleTo(Minecraft.getInstance().player)) {
+        if (shouldRender(entity)) {
             matrixStack.pushPose();
             matrixStack.scale(1.0F, -1.0F, -1.0F);
             M model = getEntityModel();
@@ -44,6 +44,10 @@ public abstract class SimpleEntityRenderer<T extends Entity, M extends EntityMod
             matrixStack.popPose();
             super.render(entity, yRotation, partialTick, matrixStack, buffer, packedLight);
         }
+    }
+    
+    protected boolean shouldRender(T entity) {
+        return !entity.isInvisible() || !entity.isInvisibleTo(Minecraft.getInstance().player);
     }
     
     protected void rotateModel(M model, T entity, float partialTick, float yRotation, float xRotation, MatrixStack matrixStack) {

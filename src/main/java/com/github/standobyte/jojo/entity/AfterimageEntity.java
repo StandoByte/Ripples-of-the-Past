@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.UUID;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 
 import net.minecraft.entity.Entity;
@@ -38,6 +39,7 @@ public class AfterimageEntity extends Entity implements IEntityAdditionalSpawnDa
     }
     
     private void setOriginEntity(Entity entity) {
+        JojoMod.LOGGER.debug(entity);
         this.originEntity = entity;
         if (entity != null) {
             copyPosition(entity);
@@ -103,13 +105,15 @@ public class AfterimageEntity extends Entity implements IEntityAdditionalSpawnDa
             setOriginEntity(((ServerWorld) level).getEntity(originUuid));
         }
         buffer.writeInt(originEntity == null ? -1 : originEntity.getId());
-        buffer.writeInt(delay);
+        buffer.writeVarInt(delay);
+        buffer.writeInt(lifeSpan);
     }
 
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
         setOriginEntity(level.getEntity(additionalData.readInt()));
-        delay = additionalData.readInt();
+        delay = additionalData.readVarInt();
+        lifeSpan = additionalData.readInt();
     }
 
     private static class PosData {

@@ -210,7 +210,7 @@ public class ModEntityTypes {
             .build(new ResourceLocation(JojoMod.MOD_ID, "mr_red_bind").toString()));
     
     public static final RegistryObject<EntityType<MRDetectorEntity>> MR_DETECTOR = ENTITIES.register("mr_detector", 
-            () -> EntityType.Builder.<MRDetectorEntity>of(MRDetectorEntity::new, EntityClassification.MISC).sized(0.5F, 0.5F).noSummon().noSave().setUpdateInterval(2).setUpdateInterval(Integer.MAX_VALUE).setShouldReceiveVelocityUpdates(false)
+            () -> EntityType.Builder.<MRDetectorEntity>of(MRDetectorEntity::new, EntityClassification.MISC).sized(0.5F, 0.5F).noSummon().noSave().setUpdateInterval(Integer.MAX_VALUE).setShouldReceiveVelocityUpdates(false)
             .build(new ResourceLocation(JojoMod.MOD_ID, "mr_detector").toString()));
 
     /*

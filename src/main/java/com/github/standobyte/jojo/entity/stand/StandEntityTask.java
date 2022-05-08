@@ -156,6 +156,11 @@ public class StandEntityTask {
         return false;        
     }
     
+    public void addTicksToPhase(int ticks) {
+        this.startingTicks += ticks;
+        this.ticksLeft += ticks;
+    }
+    
     private void rotateStand(StandEntity standEntity, boolean limitBySpeed) {
         if (!standEntity.isManuallyControlled()) {
             standEntity.rotatedTowardsTarget = true;
