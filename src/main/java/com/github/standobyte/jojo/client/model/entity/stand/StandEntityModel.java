@@ -72,12 +72,12 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         modelRenderer.zRot = z;
     }
 
-    public void setVisibilityMode(VisibilityMode mode, boolean forearmOnly) {
+    public void setVisibilityMode(VisibilityMode mode) {
         this.visibilityMode = mode;
-        updatePartsVisibility(mode, forearmOnly);
+        updatePartsVisibility(mode);
     }
 
-    protected abstract void updatePartsVisibility(VisibilityMode mode, boolean forearmOnly);
+    protected abstract void updatePartsVisibility(VisibilityMode mode);
 
     @Override
     public void prepareMobModel(T entity, float walkAnimPos, float walkAnimSpeed, float partialTick) {
@@ -243,13 +243,12 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
             resetPose(entity);
             for (AdditionalArmSwing swing : swings) {
                 matrixStack.pushPose();
-                setVisibilityMode(swing.getSide() == HandSide.LEFT ? VisibilityMode.LEFT_ARM_ONLY : VisibilityMode.RIGHT_ARM_ONLY, true);
+                setVisibilityMode(swing.getSide() == HandSide.LEFT ? VisibilityMode.LEFT_ARM_ONLY : VisibilityMode.RIGHT_ARM_ONLY);
                 Vector3d offset = new Vector3d(swing.offset.x, -swing.offset.y, swing.offset.z).xRot(xRotation * MathUtil.DEG_TO_RAD);
                 matrixStack.translate(offset.x, offset.y, -offset.z);
                 attackTime = swing.getAnim() / AdditionalArmSwing.MAX_ANIM_DURATION;
                 HandSide swingingHand = swing.getSide();
                 swingArmBarrage(entity, attackTime, yRotation, xRotation, ticks, swingingHand, 0F);
-                rotateAdditionalArmSwings();
                 renderToBuffer(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha * 0.5F);
                 matrixStack.popPose();
             }
@@ -260,8 +259,6 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         poseReset.poseModel(1, entity, 0, 0, 0, entity.getSwingingHand());
     }
 
-    protected abstract void rotateAdditionalArmSwings();
-    
     public ModelRenderer getOppositeHandside(ModelRenderer modelRenderer) {
         return modelRenderer;
     }

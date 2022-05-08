@@ -1285,9 +1285,11 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         if (target != null) {
             StandEntityTask task = getCurrentTask();
             if (task != null) {
-                task.setTarget(this, target, userPower);
+                boolean sendTarget = task.setTarget(this, target, userPower);
                 if (!level.isClientSide()) {
-                    PacketManager.sendToClientsTracking(new TrSyncStandTargetPacket(getId(), target), this);
+                    if (sendTarget) {
+                        PacketManager.sendToClientsTracking(new TrSyncStandTargetPacket(getId(), target), this);
+                    }
                 }
                 else {
                     target.cacheEntity(level);

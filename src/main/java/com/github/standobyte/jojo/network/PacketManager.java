@@ -71,7 +71,6 @@ import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.LogicalSidedProvider;
 import net.minecraftforge.fml.network.NetworkDirection;
-import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.fml.network.PacketDistributor.TargetPoint;
@@ -352,11 +351,6 @@ public class PacketManager {
         .decoder(RefreshMovementInTimeStopPacket::decode)
         .consumer(RefreshMovementInTimeStopPacket::handle).add();
         
-        channel.messageBuilder(RefreshMovementInTimeStopPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(RefreshMovementInTimeStopPacket::encode)
-        .decoder(RefreshMovementInTimeStopPacket::decode)
-        .consumer(RefreshMovementInTimeStopPacket::handle).add();
-        
         channel.messageBuilder(SyncCommonConfigPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(SyncCommonConfigPacket::encode)
         .decoder(SyncCommonConfigPacket::decode)
@@ -408,11 +402,5 @@ public class PacketManager {
                 channel.send(PacketDistributor.PLAYER.with(() -> player), msg);
             }
         }
-    }
-    
-    
-    
-    public static <MSG> void replyToServerHandshake(MSG msgToReply, NetworkEvent.Context context) {
-        channel.reply(msgToReply, context);
     }
 }

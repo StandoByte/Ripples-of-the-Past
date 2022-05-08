@@ -33,13 +33,9 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
     protected ModelRenderer upperPart;
     protected ModelRenderer torso;
     protected ModelRenderer leftArm;
-    @Deprecated
-    private ModelRenderer leftArmForearmOnly;
     protected ModelRenderer leftArmJoint;
     protected ModelRenderer leftForeArm;
     protected ModelRenderer rightArm;
-    @Deprecated
-    private ModelRenderer rightArmForearmOnly;
     protected ModelRenderer rightArmJoint;
     protected ModelRenderer rightForeArm;
     protected ModelRenderer leftLeg;
@@ -142,20 +138,6 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
                 .build();
     }
 
-    public void afterInit() {
-        super.afterInit();
-
-        leftArmForearmOnly = new ModelRenderer(this);
-        leftArmForearmOnly.setPos(leftArm.x, leftArm.y, leftArm.z);
-        upperPart.addChild(leftArmForearmOnly);
-        leftArmForearmOnly.addChild(leftForeArm);
-
-        rightArmForearmOnly = new ModelRenderer(this);
-        rightArmForearmOnly.setPos(rightArm.x, rightArm.y, rightArm.z);
-        upperPart.addChild(rightArmForearmOnly);
-        rightArmForearmOnly.addChild(rightForeArm);
-    }
-
     protected final void addHumanoidBaseBoxes(@Nullable Predicate<ModelRenderer> partPredicate) {
         for (Map.Entry<ModelRenderer, Consumer<ModelRenderer>> entry : baseHumanoidBoxes.entrySet()) {
             if (partPredicate == null || partPredicate.test(entry.getKey())) {
@@ -167,9 +149,7 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
     private final Map<ModelRenderer, Consumer<ModelRenderer>> baseHumanoidBoxes;
 
     @Override
-    protected void updatePartsVisibility(VisibilityMode mode, boolean forearmOnly) {
-        // FIXME (!!!!!!!!!!!!) remove the forearmOnly ModelRenderers?
-        forearmOnly = false;
+    protected void updatePartsVisibility(VisibilityMode mode) {
         if (mode == VisibilityMode.ALL) {
             head.visible = true;
             torso.visible = true;
@@ -177,40 +157,24 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
             rightLeg.visible = true;
             leftArm.visible = true;
             rightArm.visible = true;
-            leftArmForearmOnly.visible = false;
-            rightArmForearmOnly.visible = false;
         }
         else {
             head.visible = false;
             torso.visible = false;
             leftLeg.visible = false;
             rightLeg.visible = false;
-            ModelRenderer leftArmRenderer;
-            ModelRenderer rightArmRenderer;
-            if (forearmOnly) {
-                leftArm.visible = false;
-                rightArm.visible = false;
-                leftArmRenderer = leftArmForearmOnly;
-                rightArmRenderer = rightArmForearmOnly;
-            }
-            else {
-                leftArmForearmOnly.visible = false;
-                rightArmForearmOnly.visible = false;
-                leftArmRenderer = leftArm;
-                rightArmRenderer = rightArm;
-            }
             switch (mode) {
             case ARMS_ONLY:
-                leftArmRenderer.visible = true;
-                rightArmRenderer.visible = true;
+                leftArm.visible = true;
+                rightArm.visible = true;
                 break;
             case LEFT_ARM_ONLY:
-                leftArmRenderer.visible = true;
-                rightArmRenderer.visible = false;
+                leftArm.visible = true;
+                rightArm.visible = false;
                 break;
             case RIGHT_ARM_ONLY:
-                leftArmRenderer.visible = false;
-                rightArmRenderer.visible = true;
+                leftArm.visible = false;
+                rightArm.visible = true;
                 break;
             default:
                 break;
@@ -386,12 +350,6 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
             return leftForeArm;
         }
         return super.getOppositeHandside(modelRenderer);
-    }
-
-    @Override
-    protected void rotateAdditionalArmSwings() {
-        leftArmForearmOnly.copyFrom(leftArm);
-        rightArmForearmOnly.copyFrom(rightArm);
     }
 
     @Override

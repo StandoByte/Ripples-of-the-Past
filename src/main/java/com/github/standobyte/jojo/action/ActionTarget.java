@@ -136,7 +136,28 @@ public class ActionTarget {
             return ActionTarget.EMPTY;
         }
     }
-
+    
+    @Override
+    public boolean equals(Object object) {
+        return this == object || object instanceof ActionTarget && this.sameTarget((ActionTarget) object);
+    }
+    
+    public boolean sameTarget(ActionTarget target) {
+        if (target != null && this.type == target.type) {
+            switch (type) {
+            case BLOCK:
+                return this.blockPos.equals(target.blockPos);
+            case ENTITY:
+                int idThis = this.entity != null ? this.entity.getId() : this.entityId;
+                int idThat = target.entity != null ? target.entity.getId() : target.entityId;
+                return idThis == idThat;
+            default:
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public static enum TargetType {
         EMPTY,
         BLOCK,

@@ -118,6 +118,10 @@ public class TimeStopInstance {
         }
     }
     
+    public SoundEvent getTimeResumeSound() {
+        return timeResumeSound;
+    }
+    
     public int getId() {
         return id;
     }
