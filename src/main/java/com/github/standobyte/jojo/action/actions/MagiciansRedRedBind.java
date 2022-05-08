@@ -37,7 +37,7 @@ public class MagiciansRedRedBind extends StandEntityAction {
                         if (getLandedRedBind(stand).map(redBind -> {
                             stand.addComboMeter(0, 40);
                             int ticks = Math.min(stand.getNoComboDecayTicks(), redBind.ticksLifespan() - redBind.tickCount);
-                            // FIXME (!!!!!!!!!!!!!!!!) adds a second one
+                            // FIXME (!!!!!!!!!!!!) (MR RB kick) adds a second RB entity
                             setAction(power, stand, ticks, Phase.PERFORM, ActionTarget.EMPTY);
                             return true;
                         }).orElse(false)) {

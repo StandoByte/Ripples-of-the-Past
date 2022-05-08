@@ -55,10 +55,13 @@ public class StandEntityTask {
         return task;
     }
     
-    void setTarget(StandEntity standEntity, ActionTarget target, IStandPower standPower) {
+    boolean setTarget(StandEntity standEntity, ActionTarget target, IStandPower standPower) {
         if (canTarget(standEntity, target, standPower, action)) {
+            boolean targetChanged = !target.sameTarget(this.target);
             this.target = target;
+            return targetChanged;
         }
+        return false;
     }
     
     private static boolean canTarget(StandEntity standEntity, ActionTarget target, IStandPower standPower, StandEntityAction action) {

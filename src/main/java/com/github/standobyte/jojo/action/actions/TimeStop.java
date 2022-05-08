@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.action.actions;
 
+import java.util.Comparator;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -106,11 +108,23 @@ public class TimeStop extends StandAction {
             ChunkPos chunkPos = new ChunkPos(blockPos);
             boolean invadingStoppedTime = TimeUtil.isTimeStopped(world, user.blockPosition());
             TimeStopInstance instance = new TimeStopInstance(world, timeStopTicks, chunkPos, 
-                    JojoModConfig.getCommonConfigInstance(world.isClientSide()).timeStopChunkRange.get(), user)
-                    .setSounds(
-                            timeResumeSound.get(), 
-                            power.isActive() ? timeResumeVoiceLine.get() : null, 
-                            power.isActive() ? timeManualResumeVoiceLine.get() : null);
+                    JojoModConfig.getCommonConfigInstance(world.isClientSide()).timeStopChunkRange.get(), user);
+            Optional<TimeStopInstance> currentMaxInstance = world.getCapability(WorldUtilCapProvider.CAPABILITY)
+                    .map(cap -> cap.getTimeStopHandler().getInstancesInPos(chunkPos).stream().max(Comparator.comparingInt(TimeStopInstance::getTicksLeft)))
+                    .orElse(Optional.empty());
+            
+            if (invadingStoppedTime && currentMaxInstance.map(TimeStopInstance::getTicksLeft).orElse(0) > timeStopTicks) {
+                instance.setSounds(
+                        currentMaxInstance.get().getTimeResumeSound(), 
+                        null, 
+                        null);
+            }
+            else {
+                instance.setSounds(
+                        timeResumeSound.get(), 
+                        power.isActive() ? timeResumeVoiceLine.get() : null, 
+                        power.isActive() ? timeManualResumeVoiceLine.get() : null);
+            }
             TimeUtil.stopTime(world, instance);
             if (timeStopTicks >= 40 && timeStopSound != null && timeStopSound.get() != null
                     && !invadingStoppedTime) {

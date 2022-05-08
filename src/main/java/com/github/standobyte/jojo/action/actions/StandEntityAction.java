@@ -80,8 +80,8 @@ public abstract class StandEntityAction extends StandAction {
     }
     
     public boolean canStandTarget(StandEntity standEntity, ActionTarget target, IStandPower standPower) {
-        if (!standTakesCrosshairTarget(target, standPower)) {
-            return false;
+        if (standTakesCrosshairTarget(target, standPower)) {
+            return true;
         }
         if (target.getType() != TargetType.EMPTY) {
             Entity targetEntity = target.getEntity(standEntity.level);
@@ -255,7 +255,8 @@ public abstract class StandEntityAction extends StandAction {
     }
 
     public boolean isCancelable(IStandPower standPower, StandEntity standEntity, Phase phase, @Nullable StandEntityAction newAction) {
-        return getHoldDurationMax(standPower) > 0 && phase != Phase.RECOVERY && getStandRecoveryTicks(standPower, standEntity) == 0;
+        return getHoldDurationMax(standPower) > 0 && phase != Phase.RECOVERY
+                && (newAction == null || getStandRecoveryTicks(standPower, standEntity) == 0);
     }
     
     @Override
