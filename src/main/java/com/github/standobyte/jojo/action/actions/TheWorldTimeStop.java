@@ -4,8 +4,8 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 
 public class TheWorldTimeStop extends TimeStop {
 
-    public TheWorldTimeStop(Builder builder) {
-        super(builder);
+    public TheWorldTimeStop(Builder builder, float learningPerTick) {
+        super(builder, learningPerTick);
     }
 
     @Override

@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.ResetResolveValuePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncMaxAchievedResolvePacket;
@@ -16,6 +17,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.SyncResolveLevelPac
 import com.github.standobyte.jojo.network.packets.fromserver.SyncResolvePacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
+import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.util.DiscardingSortedMultisetWrapper;
 import com.github.standobyte.jojo.util.damage.IStandDamageSource;
 import com.google.common.collect.BoundType;
@@ -223,6 +225,9 @@ public class ResolveCounter {
     }
     
     private float boostFromGettingAttacked(LivingEntity user) {
+        if (INonStandPower.getNonStandPowerOptional(user).map(power -> power.getType() == ModNonStandPowers.VAMPIRISM.get()).orElse(false)) {
+           return BOOST_MISSING_HP_MAX / 2;
+        }
         float hp = user.getHealth();
         if (hpOnGettingAttacked > -1 && hpOnGettingAttacked < hp) {
             hp = hpOnGettingAttacked;
@@ -378,6 +383,8 @@ public class ResolveCounter {
     }
 
     void alwaysResetOnDeath() {
+        resolveRecords.add(resolve);
+        setMaxAchievedValue(resolveRecords.getMax());
         resolve = 0;
         noResolveDecayTicks = 0;
         setBoosts(1, 1, 1);

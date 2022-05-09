@@ -379,8 +379,9 @@ public class ActionsOverlayGui extends AbstractGui {
                 // action icons
                 x += 3;
                 y += 3;
+                boolean shift = mc.player.isShiftKeyDown();
                 for (int i = 0; i < actions.size(); i++) {
-                    Action<P> action = actions.get(i);
+                    Action<P> action = power.getAction(actionType, i, shift);
                     renderActionIcon(matrixStack, actionType, mode, action, target, x + 20 * i, y, partialTick, i == selected, alpha);
                 }
                 // highlight when hotbar key is pressed
@@ -419,9 +420,8 @@ public class ActionsOverlayGui extends AbstractGui {
     private <P extends IPower<P, ?>> void renderActionIcon(MatrixStack matrixStack, ActionType actionType, ActionsModeConfig<P> mode, 
             Action<P> action, ActionTarget target, int x, int y, float partialTick, boolean isSelected, float hotbarAlpha) {
         P power = mode.getPower();
-        action = handleShift(action, power);
         
-        if (action.isVisible(power)) {
+        if (action != null) {
             TextureAtlasSprite textureAtlasSprite = SpriteUploaders.getActionSprites().getSprite(action);
             mc.getTextureManager().bind(textureAtlasSprite.atlas().location());
             
@@ -480,23 +480,6 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private <P extends IPower<P, ?>> Action<P> handleShift(Action<P> action, P power) {
-        if (power.getHeldAction() != null) {
-            if (power.getHeldAction() == action.getShiftVariationIfPresent()) {
-                action = action.getShiftVariationIfPresent();
-            }
-        }
-        if (shiftVarSelected(power, action, mc.player.isShiftKeyDown())) {
-            action = action.getShiftVariationIfPresent();
-        }
-        return action;
-    }
-    
-    public <P extends IPower<P, ?>> boolean shiftVarSelected(P power, Action<P> action, boolean shift) {
-        return power.getHeldAction() != action && shift && action.getShiftVariationIfPresent().isVisible(power) 
-                || power.getHeldAction() == action.getShiftVariationIfPresent();
-    }
-    
     private <P extends IPower<P, ?>> boolean isActionAvaliable(Action<P> action, ActionsModeConfig<P> mode, 
             ActionType hotbar, ActionTarget mouseTarget, boolean isSelected) {
         P power = mode.getPower();
@@ -528,25 +511,26 @@ public class ActionsOverlayGui extends AbstractGui {
     
     private <P extends IPower<P, ?>> void drawHotbarText(MatrixStack matrixStack, ElementPosition position, ActionType actionType, ActionTarget target, @Nonnull ActionsModeConfig<P> mode) {
         P power = mode.getPower();
-        Action<P> action = mode.getSelectedAction(actionType);
         int x = position.x;
         int y = position.y + 16 + 3;
         if (actionType == ActionType.ABILITY) {
             y += getHotbarsYDiff();
         }
+        Action<P> action = mode.getSelectedAction(actionType, mc.player.isShiftKeyDown());
         if (action != null) {
-            action = handleShift(action, power);
             // action name
             String translationKey = action.getTranslationKey(power, target);
             ITextComponent actionName = action.getTranslatedName(power, translationKey);
             if (action.getHoldDurationMax(power) > 0) {
                 actionName = new TranslationTextComponent("jojo.overlay.hold", actionName);
             }
-            if (action.hasShiftVariation() && action.getShiftVariationIfPresent().isVisible(power)) {
-                Action<P> shiftVar = action.getShiftVariationIfPresent();
-                actionName = new TranslationTextComponent("jojo.overlay.shift", actionName, 
-                        new KeybindTextComponent(mc.options.keyShift.getName()), 
-                        shiftVar.getNameShortened(power, shiftVar.getTranslationKey(power, target)));
+            if (action.hasShiftVariation()) {
+                Action<P> shiftVar = action.getShiftVariationIfPresent().getVisibleAction(power);
+                if (shiftVar != null) {
+                    actionName = new TranslationTextComponent("jojo.overlay.shift", actionName, 
+                            new KeybindTextComponent(mc.options.keyShift.getName()), 
+                            shiftVar.getNameShortened(power, shiftVar.getTranslationKey(power, target)));
+                }
             }
             actionName = new TranslationTextComponent(
                     actionType == ActionType.ATTACK ? "jojo.overlay.action.attack" : "jojo.overlay.action.ability", actionName);
@@ -606,7 +590,7 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     private <P extends IPower<P, ?>> int getSelectedActionHoldDuration(ActionType actionType, @Nonnull ActionsModeConfig<P> mode) {
-        Action<P> action = mode.getSelectedAction(actionType);
+        Action<P> action = mode.getSelectedAction(actionType, mc.player.isShiftKeyDown());
         if (action != null) {
             return action.getHoldDurationMax(mode.getPower());
         }
@@ -1002,7 +986,7 @@ public class ActionsOverlayGui extends AbstractGui {
         IntBinaryOperator operator = backwards ? DEC : INC;
         int i;
         for (i = operator.applyAsInt(startingIndex, actions.size()); 
-             i > -1 && i % actions.size() != startingIndex && !actions.get(i).isVisible(power);
+             i > -1 && i % actions.size() != startingIndex && actions.get(i).getVisibleAction(power) == null;
              i = operator.applyAsInt(i, actions.size())) {
         }
         mode.setSelectedSlot(hotbar, i);
@@ -1044,22 +1028,8 @@ public class ActionsOverlayGui extends AbstractGui {
         if (currentMode == null) {
             return null;
         }
-        return getSelectedAction(currentMode, type);
+        return currentMode.getSelectedAction(type, mc.player.isShiftKeyDown());
     }
-    
-    @Nullable
-    private <P extends IPower<P, ?>> Action<P> getSelectedAction(
-            ActionsModeConfig<P> mode, ActionType type) {
-        Action<P> action = mode.getSelectedAction(type);
-        if (action == null) {
-            return null;
-        }
-        if (shiftVarSelected(mode.getPower(), action, mc.player.isShiftKeyDown())) {
-            action = action.getShiftVariationIfPresent();
-        }
-        return action;
-    }
-    
     
     
     

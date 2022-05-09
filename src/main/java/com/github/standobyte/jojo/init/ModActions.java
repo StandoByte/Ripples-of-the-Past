@@ -52,6 +52,7 @@ import com.github.standobyte.jojo.action.actions.StarPlatinumZoom;
 import com.github.standobyte.jojo.action.actions.TheWorldBarrage;
 import com.github.standobyte.jojo.action.actions.TheWorldTSHeavyAttack;
 import com.github.standobyte.jojo.action.actions.TheWorldTimeStop;
+import com.github.standobyte.jojo.action.actions.TimeResume;
 import com.github.standobyte.jojo.action.actions.TimeStop;
 import com.github.standobyte.jojo.action.actions.TimeStopInstant;
 import com.github.standobyte.jojo.action.actions.VampirismAction;
@@ -220,18 +221,22 @@ public class ModActions {
             () -> new StarPlatinumZoom(new StandEntityAction.Builder().holdType().ignoresPerformerStun()
                     .standOffsetFromUser(-0.25, -0.25, -0.3)));
     
-    public static final RegistryObject<StandAction> STAR_PLATINUM_TIME_STOP = ACTIONS.register("star_platinum_time_stop", 
-            () -> new TimeStop(new StandAction.Builder().holdToFire(40, false).staminaCost(500).staminaCostTick(7.5F)//.cooldown(0, 600, 0.3333F)
+    public static final RegistryObject<TimeStop> STAR_PLATINUM_TIME_STOP = ACTIONS.register("star_platinum_time_stop", 
+            () -> new TimeStop(new StandAction.Builder().holdToFire(40, false)
+                    .staminaCost(250).staminaCostTick(5F).cooldown(0, 3, 0.3333F)
                     .resolveLevelToUnlock(4).isTrained().ignoresPerformerStun().autoSummonStand().shout(ModSounds.JOTARO_STAR_PLATINUM_THE_WORLD)
-                    .xpRequirement(950))
+                    .xpRequirement(950), 0.25F)
             .timeStopSound(ModSounds.STAR_PLATINUM_TIME_STOP)
             .addTimeResumeVoiceLine(ModSounds.JOTARO_TIME_RESUMES).timeResumeSound(ModSounds.STAR_PLATINUM_TIME_RESUME));
     
+    public static final RegistryObject<TimeResume> TIME_RESUME = ACTIONS.register("time_resume", 
+            () -> new TimeResume(new StandAction.Builder()));
+    
     public static final RegistryObject<StandAction> STAR_PLATINUM_TIME_STOP_BLINK = ACTIONS.register("star_platinum_ts_blink", 
-            () -> new TimeStopInstant(new StandAction.Builder().staminaCost(500).staminaCostTick(7.5F)
+            () -> new TimeStopInstant(new StandAction.Builder()
                     .resolveLevelToUnlock(4).isTrained().ignoresPerformerStun().shiftVariationOf(STAR_PLATINUM_TIME_STOP)
                     .xpRequirement(950), 
-                    ModSounds.STAR_PLATINUM_TIME_STOP_BLINK));
+                    STAR_PLATINUM_TIME_STOP, ModSounds.STAR_PLATINUM_TIME_STOP_BLINK));
     
 
     public static final RegistryObject<StandEntityAction> THE_WORLD_PUNCH = ACTIONS.register("the_world_punch", 
@@ -248,20 +253,21 @@ public class ModActions {
     public static final RegistryObject<StandEntityAction> THE_WORLD_BLOCK = ACTIONS.register("the_world_block", 
             () -> new StandEntityBlock());
     
-    public static final RegistryObject<StandAction> THE_WORLD_TIME_STOP = ACTIONS.register("the_world_time_stop", 
-            () -> new TheWorldTimeStop(new StandAction.Builder().holdToFire(30, false).staminaCost(500).staminaCostTick(7.5F)//.cooldown(0, 600, 0.3333F)
+    public static final RegistryObject<TimeStop> THE_WORLD_TIME_STOP = ACTIONS.register("the_world_time_stop", 
+            () -> new TheWorldTimeStop(new StandAction.Builder().holdToFire(30, false)
+                    .staminaCost(250).staminaCostTick(5F).cooldown(0, 3, 0.3333F)
                     .resolveLevelToUnlock(2).isTrained().ignoresPerformerStun().shout(ModSounds.DIO_THE_WORLD)
-                    .xpRequirement(500))
+                    .xpRequirement(500), 0.1F)
             .voiceLineWithStandSummoned(ModSounds.DIO_TIME_STOP).timeStopSound(ModSounds.THE_WORLD_TIME_STOP)
             .addTimeResumeVoiceLine(ModSounds.DIO_TIME_RESUMES, true).addTimeResumeVoiceLine(ModSounds.DIO_TIMES_UP, false)
             .timeResumeSound(ModSounds.THE_WORLD_TIME_RESUME));
     
     public static final RegistryObject<TimeStopInstant> THE_WORLD_TIME_STOP_BLINK = ACTIONS.register("the_world_ts_blink", 
-            () -> new TimeStopInstant(new StandAction.Builder().staminaCost(500).staminaCostTick(7.5F)
+            () -> new TimeStopInstant(new StandAction.Builder()
                     .resolveLevelToUnlock(2).isTrained().ignoresPerformerStun()
                     .shiftVariationOf(THE_WORLD_TIME_STOP)
                     .xpRequirement(500), 
-                    ModSounds.THE_WORLD_TIME_STOP_BLINK));
+                    THE_WORLD_TIME_STOP, ModSounds.THE_WORLD_TIME_STOP_BLINK));
     
     public static final RegistryObject<StandEntityAction> THE_WORLD_TS_PUNCH = ACTIONS.register("the_world_ts_punch", 
             () -> new TheWorldTSHeavyAttack(new StandEntityAction.Builder().resolveLevelToUnlock(3).standPose(TheWorldTSHeavyAttack.TS_PUNCH_POSE), 

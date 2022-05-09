@@ -80,9 +80,6 @@ public abstract class StandEntityAction extends StandAction {
     }
     
     public boolean canStandTarget(StandEntity standEntity, ActionTarget target, IStandPower standPower) {
-        if (standTakesCrosshairTarget(target, standPower)) {
-            return true;
-        }
         if (target.getType() != TargetType.EMPTY) {
             Entity targetEntity = target.getEntity(standEntity.level);
             if (targetEntity instanceof LivingEntity && !standEntity.canAttack((LivingEntity) targetEntity)) {
@@ -90,6 +87,17 @@ public abstract class StandEntityAction extends StandAction {
             }
         }
         return true;
+    }
+    
+    public boolean standTakesCrosshairTarget(ActionTarget target, IStandPower standPower) {
+        if (getTargetRequirement() != null && !getTargetRequirement().checkTargetType(TargetType.EMPTY)
+                && getTargetRequirement().checkTargetType(target.getType())) {
+            return true;
+        }
+        if (crosshairTargetForStand != null) {
+            return crosshairTargetForStand.checkTargetType(target.getType());
+        }
+        return false;
     }
     
     public void standTickButtonHold(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {}
@@ -235,17 +243,6 @@ public abstract class StandEntityAction extends StandAction {
     @Nullable
     public StandRelativeOffset getOffsetFromUser(StandEntity stand) {
         return stand.isArmsOnlyMode() ? userOffsetArmsOnly : userOffset;
-    }
-    
-    protected boolean standTakesCrosshairTarget(ActionTarget target, IStandPower standPower) {
-        if (getTargetRequirement() != null && !getTargetRequirement().checkTargetType(TargetType.EMPTY)
-                && getTargetRequirement().checkTargetType(target.getType())) {
-            return true;
-        }
-        if (crosshairTargetForStand != null) {
-            return crosshairTargetForStand.checkTargetType(target.getType());
-        }
-        return false;
     }
     
     protected final void invokeForStand(IStandPower power, Consumer<StandEntity> consumer) {

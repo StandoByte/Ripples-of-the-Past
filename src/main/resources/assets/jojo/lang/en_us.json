@@ -657,7 +657,7 @@
   "action.jojo.star_platinum_block": "Block",
   "action.jojo.star_platinum_zoom": "Zoom",
   "action.jojo.star_platinum_time_stop": "Time stop (%ss)",
-  "action.jojo.star_platinum_time_stop.resume": "Resume time",
+  "action.jojo.time_resume": "Resume time",
   "action.jojo.star_platinum_ts_blink": "Move in stopped time",
   "action.jojo.star_platinum_ts_blink.shortened": "Teleport",
   "jojo.subtitle.star_platinum_name": "\"Star Platinum!\"",

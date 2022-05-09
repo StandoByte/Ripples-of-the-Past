@@ -72,10 +72,10 @@ public abstract class StandAction extends Action<IStandPower> {
     
     @Override
     public void onPerform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
-        super.onPerform(world, user, power, target);
         if (!world.isClientSide() && !staminaConsumedDifferently(power)) {
             power.consumeStamina(getStaminaCost(power));
         }
+        super.onPerform(world, user, power, target);
     }
     
     @Override

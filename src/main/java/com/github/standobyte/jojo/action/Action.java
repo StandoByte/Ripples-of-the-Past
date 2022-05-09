@@ -145,8 +145,9 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     public abstract boolean isUnlocked(P power);
     
-    public boolean isVisible(P power) {
-        return isUnlocked(power);
+    @Nullable
+    public Action<P> getVisibleAction(P power) {
+        return isUnlocked(power) ? this : null;
     }
     
     protected static ActionConditionResult conditionMessage(String postfix) {
@@ -302,10 +303,16 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return 1F;
     }
     
+    public void onTrainingPoints(P power, float points) {}
+    
     public void onMaxTraining(P power) {}
     
     public boolean canUserSeeInStoppedTime(LivingEntity user, P power) {
         return false;
+    }
+    
+    public boolean canBeUsedInStoppedTime(LivingEntity user, P power) {
+        return canUserSeeInStoppedTime(user, power);
     }
     
     

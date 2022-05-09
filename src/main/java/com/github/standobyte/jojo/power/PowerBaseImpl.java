@@ -154,9 +154,10 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         return cooldowns.getCooldownPercent(action, partialTick);
     }
 
-    private void setCooldownTimer(Action<?> action, int value) {
+    @Override
+    public void setCooldownTimer(Action<?> action, int value) {
         if (value > 0) {
-            setCooldownTimer(action, value, value);
+            updateCooldownTimer(action, value, value);
             if (!user.level.isClientSide()) {
                 PacketManager.sendToClientsTrackingAndSelf(new TrSyncCooldownPacket(user.getId(), getPowerClassification(), action, value), user);
             }
@@ -164,7 +165,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
 
     @Override
-    public final void setCooldownTimer(Action<?> action, int value, int totalCooldown) {
+    public final void updateCooldownTimer(Action<?> action, int value, int totalCooldown) {
         cooldowns.addCooldown(action, value, totalCooldown);
     }
     
@@ -186,15 +187,23 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         if (index < 0 || index >= actions.size()) {
             return null;
         }
-        Action<P> action = actions.get(index);
-        if (shift && action.getShiftVariationIfPresent().isVisible(getThis())) {
-            action = action.getShiftVariationIfPresent();
+        Action<P> action = actions.get(index).getVisibleAction(getThis());
+        Action<P> held = getHeldAction();
+        if (action == held) {
+            return action;
+        }
+        if (action != null && action.hasShiftVariation()) {
+            Action<P> shiftVar = action.getShiftVariationIfPresent().getVisibleAction(getThis());
+            if (shiftVar != null && (shift || shiftVar == held)) {
+                action = shiftVar;
+            }
         }
         return action;
     }
     
     @Override
     public final boolean onClickAction(Action<P> action, boolean shift, ActionTarget target) {
+        if (action == null || getHeldAction() == action) return false;
         boolean wasActive = isActive();
         action.onClick(user.level, user, getThis());
         ActionTargetContainer targetContainer = new ActionTargetContainer(target);
@@ -298,9 +307,6 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             return condition;
         }
 
-        if (!action.isVisible(getThis())) {
-            return ActionConditionResult.NEGATIVE;
-        }
         if (!action.isUnlocked(getThis())) {
             return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition.not_unlocked"));
         }

@@ -46,7 +46,7 @@ public class StandEntityTask {
     static StandEntityTask makeServerSideTask(StandEntity standEntity, IStandPower standPower, StandEntityAction action, int ticks, 
             StandEntityAction.Phase phase, boolean armsOnlyMode, ActionTarget target) {
         StandRelativeOffset offset = standEntity.hasEffect(ModEffects.STUN.get()) ? null : action.getOffsetFromUser(standEntity);
-        if (!canTarget(standEntity, target, standPower, action)) {
+        if (!action.standTakesCrosshairTarget(target, standPower) || !canTarget(standEntity, target, standPower, action)) {
             target = ActionTarget.EMPTY;
         }
         

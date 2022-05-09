@@ -311,15 +311,18 @@ public class InputHandler {
     }
     
     private void checkHeldAction(IPower<?, ?> power) {
+        boolean keyHeld;
+        if (heldKeys.containsKey(power)) {
+            keyHeld = heldKeys.get(power).getKey(mc).isDown();
+            if (!keyHeld) {
+                heldKeys.remove(power);
+            }
+        }
+        else {
+            keyHeld = mc.options.keyAttack.isDown() || mc.options.keyUse.isDown() || mc.options.keyPickItem.isDown();
+        }
         Action<?> heldAction = power.getHeldAction();
         if (heldAction != null) {
-            boolean keyHeld;
-            if (heldKeys.containsKey(power)) {
-                keyHeld = heldKeys.get(power).getKey(mc).isDown();
-            }
-            else {
-                keyHeld = mc.options.keyAttack.isDown() || mc.options.keyUse.isDown() || mc.options.keyPickItem.isDown();
-            }
             if (!keyHeld) {
                 stopHeldAction(power, power.getPowerClassification() == actionsOverlay.getCurrentMode());
             }
@@ -332,7 +335,6 @@ public class InputHandler {
     public void stopHeldAction(IPower<?, ?> power, boolean shouldFire) {
         if (power.getHeldAction() != null) {
             power.stopHeldAction(shouldFire);
-            heldKeys.remove(power);
             PacketManager.sendToServer(new ClStopHeldActionPacket(power.getPowerClassification(), shouldFire));
         }
     }

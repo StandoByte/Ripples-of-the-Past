@@ -45,7 +45,7 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
     boolean setSelectedSlot(ActionType hotbar, int slot) {
         if (slot > -1) {
             List<Action<P>> actions = power.getActions(hotbar);
-            if (slot >= actions.size() || !actions.get(slot).isVisible(power)) {
+            if (slot >= actions.size() || actions.get(slot).getVisibleAction(power) == null) {
                 slot = -1;
             }
         }
@@ -65,20 +65,16 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
     }
     
     @Nullable
-    Action<P> getSelectedAction(ActionType hotbar) {
-        List<Action<P>> actions = power.getActions(hotbar);
+    Action<P> getSelectedAction(ActionType hotbar, boolean shift) {
         int slot = getSelectedSlot(hotbar);
         if (slot == -1) {
             return null;
         }
-        if (actions.size() > slot) {
-            Action<P> action = actions.get(slot);
-            if (action != null && action.isVisible(getPower())) {
-                return action;
-            }
+        Action<P> action = getPower().getAction(hotbar, slot, shift);
+        if (action == null) {
+            setSelectedSlot(hotbar, -1);
         }
-        setSelectedSlot(hotbar, -1);
-        return null;
+        return action;
     }
     
     SelectedTargetIcon getTargetIcon(ActionType hotbar) {

@@ -84,7 +84,7 @@ public class ModEntityTypes {
             .build(new ResourceLocation(JojoMod.MOD_ID, "zoom_punch").toString()));
     
     public static final RegistryObject<EntityType<AfterimageEntity>> AFTERIMAGE = ENTITIES.register("afterimage", 
-            () -> EntityType.Builder.<AfterimageEntity>of(AfterimageEntity::new, EntityClassification.MISC).sized(0.6F, 1.8F).noSummon()
+            () -> EntityType.Builder.<AfterimageEntity>of(AfterimageEntity::new, EntityClassification.MISC).sized(0.6F, 1.8F).noSummon().setUpdateInterval(Integer.MAX_VALUE).setShouldReceiveVelocityUpdates(false)
             .build(new ResourceLocation(JojoMod.MOD_ID, "afterimage").toString()));
     
     public static final RegistryObject<EntityType<HamonProjectileShieldEntity>> HAMON_PROJECTILE_SHIELD = ENTITIES.register("hamon_projectile_shield", 

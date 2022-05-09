@@ -221,26 +221,28 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     private void tickStamina() {
         if (usesStamina()) {
-            float staminaRegen = getType().getStaminaRegen(this);
-            staminaRegen *= INonStandPower.getNonStandPowerOptional(getUser()).map(power -> {
-                if (power.hasPower()) {
-                    return power.getType().getStaminaRegenFactor(power, this);
-                }
-                return 1F;
-            }).orElse(1F);
             
-            if (getUser() instanceof PlayerEntity) {
-                PlayerEntity player = (PlayerEntity) getUser();
-//                if (getStamina() < getMaxStamina()) {
-//                    player.causeFoodExhaustion(0.005F);
-//                }
-                if (player.getFoodData().getFoodLevel() > 17) {
-                    staminaRegen *= 1.25F;
-                }
-            }
-            
-            addStamina(staminaRegen * getStaminaDurabilityModifier(), false);
+            addStamina(getStaminaTickGain(), false);
         }
+    }
+    
+    @Override
+    public float getStaminaTickGain() {
+        float staminaRegen = getType().getStaminaRegen(this);
+        staminaRegen *= INonStandPower.getNonStandPowerOptional(getUser()).map(power -> {
+            if (power.hasPower()) {
+                return power.getType().getStaminaRegenFactor(power, this);
+            }
+            return 1F;
+        }).orElse(1F);
+        
+        if (getUser() instanceof PlayerEntity) {
+            PlayerEntity player = (PlayerEntity) getUser();
+            if (player.getFoodData().getFoodLevel() > 17) {
+                staminaRegen *= 1.25F;
+            }
+        }
+        return staminaRegen * getStaminaDurabilityModifier();
     }
     
     private float getStaminaDurabilityModifier() {
@@ -407,10 +409,13 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             serverPlayerUser.ifPresent(player -> {
                 PacketManager.sendToClient(new SyncStandActionLearningPacket(action, pts, true), player);
             });
-            if (!user.level.isClientSide() && 
-                    actionLearningProgressMap.getLearningProgressPoints(action, this, true) == 
-                    action.getMaxTrainingPoints(this)) {
-                action.onMaxTraining(this);
+            
+            if (user != null && !user.level.isClientSide()) {
+                action.onTrainingPoints(this, actionLearningProgressMap.getLearningProgressPoints(action, this, false));
+                if (actionLearningProgressMap.getLearningProgressPoints(action, this, true)
+                        == action.getMaxTrainingPoints(this)) {
+                    action.onMaxTraining(this);
+                }
             }
         }
     }

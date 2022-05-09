@@ -131,6 +131,7 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionApplicableEvent;
+import net.minecraftforge.event.entity.living.PotionEvent.PotionExpiryEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
@@ -650,6 +651,15 @@ public class GameplayEventHandler {
                     new SRemoveEntityEffectPacket(entity.getId(), event.getPotion()));
         }
     }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void trackedPotionExpired(PotionExpiryEvent event) {
+        Entity entity = event.getEntity();
+        if (!entity.level.isClientSide() && event.getPotionEffect() != null && ModEffects.isEffectTracked(event.getPotionEffect().getEffect())) {
+            ((ServerChunkProvider) entity.getCommandSenderWorld().getChunkSource()).broadcast(entity, 
+                    new SRemoveEntityEffectPacket(entity.getId(), event.getPotionEffect().getEffect()));
+        }
+    }
     
     @SubscribeEvent
     public static void syncTrackedEffects(PlayerEvent.StartTracking event) {
@@ -684,15 +694,16 @@ public class GameplayEventHandler {
             if (target instanceof PlayerEntity) {
                 PlayerEntity targetPlayer = (PlayerEntity) target;
                 INonStandPower targetPower = INonStandPower.getPlayerNonStandPower(targetPlayer);
-                if (targetPower.getType() == ModNonStandPowers.HAMON.get()) {
+                INonStandPower playerPower = INonStandPower.getPlayerNonStandPower(event.getPlayer());
+                if (targetPower.getType() == ModNonStandPowers.HAMON.get()
+                        && (!playerPower.hasPower() || playerPower.getType().isReplaceableWith(ModNonStandPowers.HAMON.get()))) {
                     HamonPowerType.interactWithHamonTeacher(target.level, event.getPlayer(), targetPlayer, 
                             targetPower.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get());
                     event.setCanceled(true);
                     event.setCancellationResult(ActionResultType.sidedSuccess(target.level.isClientSide));
                 }
                 else {
-                    INonStandPower.getPlayerNonStandPower(event.getPlayer())
-                    .getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
+                    playerPower.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
                         hamon.interactWithNewLearner(targetPlayer);
                         event.setCanceled(true);
                         event.setCancellationResult(ActionResultType.sidedSuccess(target.level.isClientSide));

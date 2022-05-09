@@ -27,6 +27,7 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     boolean consumeStamina(float amount);
     boolean isStaminaInfinite();
     void setStamina(float amount);
+    float getStaminaTickGain();
 
     ResolveCounter getResolveCounter();
     void setResolveCounter(ResolveCounter resolve);
