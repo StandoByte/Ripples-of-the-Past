@@ -50,7 +50,7 @@ public class TrSyncCooldownPacket {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity instanceof LivingEntity) {
                 IPower.getPowerOptional((LivingEntity) entity, msg.classification).ifPresent(power -> 
-                power.setCooldownTimer(msg.action, msg.value, msg.totalCooldown));
+                power.updateCooldownTimer(msg.action, msg.value, msg.totalCooldown));
             }
         });
         ctx.get().setPacketHandled(true);

@@ -4,11 +4,12 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
 
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
-import com.github.standobyte.jojo.power.nonstand.INonStandPower;
+import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.JojoModUtil;
@@ -26,32 +27,33 @@ import net.minecraft.world.World;
 
 public class TimeStopInstant extends StandAction {
     private final Supplier<SoundEvent> blinkSound;
+    private final Supplier<TimeStop> baseTimeStop;
 
-    public TimeStopInstant(StandAction.Builder builder, @Nonnull Supplier<SoundEvent> blinkSound) {
+    public TimeStopInstant(StandAction.Builder builder, @Nonnull Supplier<TimeStop> baseTimeStop, @Nonnull Supplier<SoundEvent> blinkSound) {
         super(builder);
         this.blinkSound = blinkSound;
+        this.baseTimeStop = baseTimeStop;
     }
     
     @Override
-    public boolean isVisible(IStandPower power) {
-        if (super.isVisible(power)) {
-            LivingEntity user = power.getUser();
-            return user != null && !TimeUtil.isTimeStopped(user.level, user.blockPosition());
-        }
-        return false;
+    public Action<IStandPower> getVisibleAction(IStandPower power) {
+        LivingEntity user = power.getUser();
+        return user != null && TimeResume.userTimeStopInstance(user.level, user, null)
+                ? ModActions.TIME_RESUME.get() : super.getVisibleAction(power);
     }
     
     
     @Override
     protected void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
-        int timeStopTicks = Math.min(TimeStop.getTimeStopTicks(power, this, user, INonStandPower.getNonStandPowerOptional(user)), 
-                MathHelper.floor(power.getStamina() / getStaminaCostTicking(power)));
-        SoundEvent sound = blinkSound.get();
-        if (sound != null) {
-            JojoModUtil.playSound(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, user.getX(), user.getY(), user.getZ(), 
-                    sound, SoundCategory.AMBIENT, 5.0F, 1.0F, TimeUtil::canPlayerSeeInStoppedTime);
-        }
         if (!world.isClientSide()) {
+            int timeStopTicks = Math.min(TimeStop.getTimeStopTicks(power, this), 
+                    MathHelper.floor(power.getStamina() / getStaminaCostTicking(power)));
+            SoundEvent sound = blinkSound.get();
+            if (sound != null) {
+                JojoModUtil.playSound(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, user.getX(), user.getY(), user.getZ(), 
+                        sound, SoundCategory.AMBIENT, 5.0F, 1.0F, TimeUtil::canPlayerSeeInStoppedTime);
+            }
+            
             Vector3d blinkPos = null;
             double speed = user.getSpeed() * 2.1585;
             if (target.getType() == TargetType.EMPTY) {
@@ -82,9 +84,9 @@ public class TimeStopInstant extends StandAction {
             int impliedTicks = MathHelper.ceil(user.position().subtract(blinkPos).length() / speed);
             power.consumeStamina(impliedTicks * getStaminaCostTicking(power));
             user.teleportTo(blinkPos.x, blinkPos.y, blinkPos.z);
-            power.addLearningProgressPoints(this, 5);
-            if (isShiftVariation()) {
-                power.addLearningProgressPoints(getBaseVariation(), 5);
+            if (baseTimeStop.get() != null) {
+                float learning = baseTimeStop.get().getLearningPerTick() * impliedTicks;
+                power.addLearningProgressPoints(baseTimeStop.get(), learning);
             }
             if (power.isActive()) {
                 IStandManifestation stand = power.getStandManifestation();
@@ -96,6 +98,16 @@ public class TimeStopInstant extends StandAction {
                 }
             }
         }
+    }
+    
+    @Override
+    public float getStaminaCost(IStandPower stand) {
+        return baseTimeStop.get() != null ? baseTimeStop.get().getStaminaCost(stand) : super.getStaminaCost(stand);
+    }
+    
+    @Override
+    public float getStaminaCostTicking(IStandPower stand) {
+        return baseTimeStop.get() != null ? baseTimeStop.get().getStaminaCostTicking(stand) : super.getStaminaCostTicking(stand);
     }
 
     @Override

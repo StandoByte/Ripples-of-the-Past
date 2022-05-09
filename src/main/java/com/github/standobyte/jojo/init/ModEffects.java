@@ -51,7 +51,6 @@ public class ModEffects {
     public static final RegistryObject<StaminaRegenEffect> STAMINA_REGEN = EFFECTS.register("stamina_regen", 
             () -> new StaminaRegenEffect(EffectType.BENEFICIAL, 0x149900));
 
-    // FIXME (!!!!!!!!!!!!) leave the effect only as time stop immunity
     public static final RegistryObject<UncurableEffect> TIME_STOP = EFFECTS.register("time_stop", 
             () -> new UncurableEffect(EffectType.BENEFICIAL, 0x707070));
     

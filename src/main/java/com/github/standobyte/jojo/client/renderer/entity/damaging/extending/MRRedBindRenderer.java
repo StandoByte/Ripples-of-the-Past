@@ -28,10 +28,10 @@ public class MRRedBindRenderer extends ExtendingEntityRenderer<MRRedBindEntity, 
     
     @Override
     protected Vector3d getOriginPos(MRRedBindEntity entity, float partialTick) {
-        if (entity.isInKickCombo()) {
-            // FIXME (!!!!!!!!!!!!) (MR RB kick) origin pos at arms
-            return second ? super.getOriginPos(entity, partialTick).add(0, 0.5, 0) : super.getOriginPos(entity, partialTick).add(0, -0.5, 0);
-        }
+//        if (entity.isInKickCombo()) {
+//            // FIXME (!!!!!!!!!!!!) (MR RB kick) origin pos at arms
+//            return second ? super.getOriginPos(entity, partialTick).add(0, 0.5, 0) : super.getOriginPos(entity, partialTick).add(0, -0.5, 0);
+//        }
         return super.getOriginPos(entity, partialTick);
     }
     

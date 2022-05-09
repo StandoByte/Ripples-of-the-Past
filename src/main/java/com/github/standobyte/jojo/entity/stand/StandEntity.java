@@ -1229,7 +1229,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         
         ActionTarget finalTarget = ActionTarget.fromRayTraceResult(aimWithStandOrUser(getAimDistance(getUser()), target));
         target = finalTarget.getType() != TargetType.EMPTY && isTargetInReach(finalTarget) ? finalTarget : ActionTarget.EMPTY;
-        setTaskTarget(target);
+        if (action.standTakesCrosshairTarget(target, userPower)) {
+            setTaskTarget(target);
+        }
         
         return attackTarget(target, punch, action, barrageHits);
     }
@@ -1461,7 +1463,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     public void addComboMeter(float combo, int noDecayTicks) {
-        if (getUser() != null && getUser().hasEffect(ModEffects.RESOLVE.get())) {
+        if (combo > 0 && getUser() != null && getUser().hasEffect(ModEffects.RESOLVE.get())) {
             combo *= 2F;
         }
         setComboMeter(getComboMeter() + combo);

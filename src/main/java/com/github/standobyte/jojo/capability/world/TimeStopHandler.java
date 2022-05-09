@@ -39,11 +39,11 @@ public class TimeStopHandler {
         Iterator<Entity> entityIter = stoppedInTime.iterator();
         while (entityIter.hasNext()) {
             Entity entity = entityIter.next();
-            if (!entity.isAlive() || entity.canUpdate()) {
+            if (!entity.isAlive()) {
                 entityIter.remove();
             }
             
-            else if (entity.invulnerableTime > 0 && entity instanceof LivingEntity) {
+            else if (entity.invulnerableTime > 0 && entity instanceof LivingEntity && !entity.canUpdate()) {
                 entity.invulnerableTime--;
             }
         }
@@ -51,7 +51,7 @@ public class TimeStopHandler {
         Iterator<Map.Entry<Integer, TimeStopInstance>> instanceIter = timeStopInstances.entrySet().iterator();
         while (instanceIter.hasNext()) {
             Map.Entry<Integer, TimeStopInstance> entry = instanceIter.next();
-            if (entry.getValue().tick()) {
+            if (entry.getValue().tick() && !world.isClientSide()) {
                 instanceIter.remove();
                 onRemovedTimeStop(entry.getValue());
             }
@@ -62,17 +62,6 @@ public class TimeStopHandler {
         return timeStopInstances.values().stream()
                 .anyMatch(instance -> instance.isTimeStopped(chunkPos));
     }
-    
-    // FIXME (!!!!!!!!!!!!) why exactly is this commented out?
-//    public static void sendWorldTimeStopData(ServerPlayerEntity player, World world, ChunkPos chunkPos) {
-//        if (isTimeStopped(world, player.blockPosition())) {
-//            boolean canMove = canPlayerMoveInStoppedTime(player, true);
-//            boolean canSee = canPlayerSeeInStoppedTime(canMove, hasTimeStopAbility(player));
-//            PacketManager.sendToClient(new SyncWorldTimeStopPacket(
-//                    world.getCapability(WorldUtilCapProvider.CAPABILITY).map(cap -> cap.getTimeStopHandler().getTimeStopTicks(chunkPos)).orElse(0), 
-//                    chunkPos, canSee, canMove), player);
-//        }
-//    }
     
     public int getTimeStopTicks(ChunkPos chunkPos) {
         return timeStopInstances.values().stream()
@@ -92,7 +81,7 @@ public class TimeStopHandler {
     
     public void addTimeStop(TimeStopInstance instance) {
         if (timeStopInstances.containsKey(instance.getId())) {
-            throw new IllegalStateException("A time stop instance with the id " + instance.getId() + "exists already!");
+            throw new IllegalStateException("A time stop instance with the id " + instance.getId() + " exists already!");
         }
         if (!userStoppedTime(instance.user).isPresent()) {
             timeStopInstances.put(instance.getId(), instance);
@@ -108,7 +97,7 @@ public class TimeStopHandler {
     
     private void onAddedTimeStop(TimeStopInstance instance) {
         JojoModUtil.getAllEntities(world).forEach(entity -> {
-            if (instance.inRange(new ChunkPos(entity.blockPosition()))) {
+            if (instance.inRange(TimeStopHandler.getChunkPos(entity))) {
                 updateEntityTimeStop(entity, false, true);
             }
         });
@@ -142,6 +131,8 @@ public class TimeStopHandler {
                 entityToCheck = standEntity.getUser();
             }
         }
+
+        // FIXME (!!!!!!!!!!!!!!!!) wtf is going on with other players' stands
         
         canMove = canMove || checkEffect && entityToCheck instanceof LivingEntity && ((LivingEntity) entityToCheck).hasEffect(ModEffects.TIME_STOP.get()) || 
                 entityToCheck instanceof PlayerEntity && TimeUtil.canPlayerMoveInStoppedTime((PlayerEntity) entityToCheck, false)
@@ -164,13 +155,18 @@ public class TimeStopHandler {
     }
     
     private void onRemovedTimeStop(TimeStopInstance instance) {
-        updateAllEntitiesFreeze();
+        JojoModUtil.getAllEntities(world).forEach(entity -> {
+            ChunkPos pos = TimeStopHandler.getChunkPos(entity);
+            if (instance.inRange(pos)) {
+                updateEntityTimeStop(entity, !isTimeStopped(pos), true);
+            }
+        });
         
         if (!world.isClientSide()) {
             ServerWorld serverWorld = (ServerWorld) world;
             serverWorld.players().forEach(player -> {
                 if (player.level == world) {
-                    PacketManager.sendToClient(SyncWorldTimeStopPacket.timeResumed(instance.centerPos, instance.getId()), player);
+                    PacketManager.sendToClient(SyncWorldTimeStopPacket.timeResumed(instance.getId()), player);
                 }
             });
             if (timeStopInstances.isEmpty()) {
@@ -180,15 +176,17 @@ public class TimeStopHandler {
                 });
             }
         }
+        
+        instance.onRemoved(world);
     }
     
     public TimeStopInstance getById(int id) {
         return timeStopInstances.get(id);
     }
     
-    public void updateAllEntitiesFreeze() {
-        JojoModUtil.getAllEntities(world).forEach(entity -> {
-            updateEntityTimeStop(entity, true, true);
-        });
+
+    
+    public static ChunkPos getChunkPos(Entity entity) {
+        return new ChunkPos(entity.blockPosition());
     }
 }
