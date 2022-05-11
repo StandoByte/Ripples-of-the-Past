@@ -221,7 +221,7 @@ public class HamonData extends TypeSpecificData {
     }
     
     // FIXME (!!!!) use this for all hamon actions
-    public float hamonEfficiency() {
+    public float getEfficiencyDecrease() {
         float efficiency = 1;
         LivingEntity user = power.getUser();
         
@@ -236,10 +236,16 @@ public class HamonData extends TypeSpecificData {
         }
         return efficiency;
     }
-
-    public static final float MAX_HAMON_DAMAGE = (float) (Math.pow(1.03, MAX_STAT_LEVEL) * (1 + 0.04 * MAX_BREATHING_LEVEL)); // 29.458
+    
+    public static final float MAX_HAMON_DAMAGE = dmgFormula(MAX_STAT_LEVEL, MAX_BREATHING_LEVEL); // 35.6908
     private void recalcHamonDamage() {
-        hamonDamageFactor = (float) (Math.pow(1.03, hamonStrengthLevel) * (1 + 0.05 * breathingTechniqueLevel));
+        hamonDamageFactor = dmgFormula(hamonStrengthLevel, breathingTechniqueLevel);
+    }
+
+    private static final double STR_EXP_SCALING = 1.0333;
+    private static final double BRTH_SCALING = 0.04;
+    private static float dmgFormula(float strength, float breathingTechnique) {
+        return (float) (Math.pow(STR_EXP_SCALING, strength) * (1 + BRTH_SCALING * breathingTechnique));
     }
 
     public float getEnergyLimitFactor() {

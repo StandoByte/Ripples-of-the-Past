@@ -334,6 +334,7 @@
   "jojo.message.action_condition.target_too_many_health": "The target has too much health",
   "jojo.message.action_condition.hand": "This can only be performed with an empty hand",
   "jojo.message.action_condition.hands": "This can only be performed with both hands empty",
+  "jojo.message.action_condition.hamon_full_freeze": "Your bloodstream can't carry oxygen",
   "jojo.message.action_condition.animal_infusion": "You haven't learned a way to infuse animals with Hamon",
   "jojo.message.action_condition.animal": "Only animal mobs can be infused",
   "jojo.message.action_condition.living_plant": "Only blocks made of a living matter can be infused",
