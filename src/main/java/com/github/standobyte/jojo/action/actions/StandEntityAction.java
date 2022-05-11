@@ -241,8 +241,8 @@ public abstract class StandEntityAction extends StandAction {
     }
     
     @Nullable
-    public StandRelativeOffset getOffsetFromUser(StandEntity stand) {
-        return stand.isArmsOnlyMode() ? userOffsetArmsOnly : userOffset;
+    public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, ActionTarget target) {
+        return standEntity.isArmsOnlyMode() ? userOffsetArmsOnly : userOffset;
     }
     
     protected final void invokeForStand(IStandPower power, Consumer<StandEntity> consumer) {

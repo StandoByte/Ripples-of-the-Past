@@ -16,6 +16,7 @@ import com.github.standobyte.jojo.capability.world.SaveFileUtilCapStorage;
 import com.github.standobyte.jojo.capability.world.WorldUtilCap;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapStorage;
 import com.github.standobyte.jojo.command.StandArgument;
+import com.github.standobyte.jojo.init.ModPotions;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.NonStandPower;
@@ -60,6 +61,7 @@ public class CommonSetup {
             PacketManager.init();
             StandStatsManager.init();
             
+            ModPotions.registerRecipes();
         });
     }
 }

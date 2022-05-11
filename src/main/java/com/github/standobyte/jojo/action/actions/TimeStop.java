@@ -29,16 +29,14 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
 public class TimeStop extends StandAction {
-    private final float learningPerTick;
     private Supplier<SoundEvent> voiceLineWithStandSummoned = () -> null;
     private Supplier<SoundEvent> timeStopSound = () -> null;
     private Supplier<SoundEvent> timeResumeVoiceLine = () -> null;
     private Supplier<SoundEvent> timeManualResumeVoiceLine = () -> null;
     private Supplier<SoundEvent> timeResumeSound = () -> null;
 
-    public TimeStop(StandAction.Builder builder, float learningPerTick) {
+    public TimeStop(StandAction.Builder builder) {
         super(builder);
-        this.learningPerTick = learningPerTick;
     }
 
     public TimeStop voiceLineWithStandSummoned(Supplier<SoundEvent> voiceLine) {
@@ -137,10 +135,6 @@ public class TimeStop extends StandAction {
         return true;
     }
     
-    public float getLearningPerTick() {
-        return learningPerTick;
-    }
-    
     @Override
     public void onTrainingPoints(IStandPower power, float points) {
         if (hasShiftVariation()) {
@@ -167,10 +161,6 @@ public class TimeStop extends StandAction {
     @Override
     protected int getCooldownAdditional(IStandPower power, int ticksHeld) {
         return 0;
-    }
-    
-    public int getCooldownAfterTimeStop(IStandPower power, int ticksTimeStop) {
-        return super.getCooldownAdditional(power, -1) * ticksTimeStop;
     }
     
     

@@ -189,14 +189,16 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
             INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
                 if (power.getType() == ModNonStandPowers.VAMPIRISM.get()) {
                     float healCost = healCost(entity.level.getDifficulty());
-                    float actualHeal = Math.min(event.getAmount(), power.getEnergy() / healCost);
-                    actualHeal = Math.min(actualHeal, entity.getMaxHealth() - entity.getHealth());
-                    if (actualHeal > 0) {
-                        power.consumeEnergy(Math.min(actualHeal, entity.getMaxHealth() - entity.getHealth()) * healCost);
-                        event.setAmount(actualHeal);
-                    }
-                    else {
-                        event.setCanceled(true);
+                    if (healCost > 0) {
+                        float actualHeal = Math.min(event.getAmount(), power.getEnergy() / healCost);
+                        actualHeal = Math.min(actualHeal, entity.getMaxHealth() - entity.getHealth());
+                        if (actualHeal > 0) {
+                            power.consumeEnergy(Math.min(actualHeal, entity.getMaxHealth() - entity.getHealth()) * healCost);
+                            event.setAmount(actualHeal);
+                        }
+                        else {
+                            event.setCanceled(true);
+                        }
                     }
                 }
             });

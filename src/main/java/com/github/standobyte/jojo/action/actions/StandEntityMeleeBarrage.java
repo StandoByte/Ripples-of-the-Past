@@ -4,10 +4,13 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.World;
 
 public class StandEntityMeleeBarrage extends StandEntityAction {
@@ -61,6 +64,17 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
 //                standEntity.addBarrageOffset();
 //            }
         }
+    }
+    
+    // FIXME (!!!!) barrage offset
+    @Override
+    public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, ActionTarget target) {
+        if (target.getType() == TargetType.EMPTY || standEntity.isArmsOnlyMode()) {
+            return super.getOffsetFromUser(standPower, standEntity, target);
+        }
+        LivingEntity user = standEntity.getUser();
+        double frontOffset = 0.5;
+        return StandRelativeOffset.noYOffset(0, frontOffset);
     }
     
     private void swing(StandEntity standEntity) {

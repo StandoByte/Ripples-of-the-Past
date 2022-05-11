@@ -45,7 +45,9 @@ public class StandEntityTask {
     
     static StandEntityTask makeServerSideTask(StandEntity standEntity, IStandPower standPower, StandEntityAction action, int ticks, 
             StandEntityAction.Phase phase, boolean armsOnlyMode, ActionTarget target) {
-        StandRelativeOffset offset = standEntity.hasEffect(ModEffects.STUN.get()) ? null : action.getOffsetFromUser(standEntity);
+        StandRelativeOffset offset = standEntity.hasEffect(ModEffects.STUN.get()) || !standEntity.hasUser() ? 
+                null
+                : action.getOffsetFromUser(standPower, standEntity, target);
         if (!action.standTakesCrosshairTarget(target, standPower) || !canTarget(standEntity, target, standPower, action)) {
             target = ActionTarget.EMPTY;
         }
@@ -198,7 +200,6 @@ public class StandEntityTask {
         this.offsetFromUser = offset;
     }
     
-    // FIXME (!) glitches when too close to the task target
     @Nullable
     StandRelativeOffset getOffsetFromUser() {
         return offsetFromUser;

@@ -411,6 +411,10 @@
     "subtitle": "jojo.subtitle.times_up",
     "sounds": [ "jojo:stand_user/dio_times_up" ]
   },
+  "dio_zero": {
+    "subtitle": "jojo.subtitle.zero",
+    "sounds": [ "jojo:stand_user/dio_zero" ]
+  },
   "dio_cant_move": {
     "subtitle": "jojo.subtitle.cant_move",
     "sounds": [ "jojo:stand_user/dio_cant_move" ]

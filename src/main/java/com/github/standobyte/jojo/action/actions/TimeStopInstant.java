@@ -12,6 +12,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.util.JojoModUtil;
 import com.github.standobyte.jojo.util.TimeUtil;
 
@@ -45,14 +46,15 @@ public class TimeStopInstant extends StandAction {
     
     @Override
     protected void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
+        SoundEvent sound = blinkSound.get();
+        if (sound != null) {
+            JojoModUtil.playSound(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, user.getX(), user.getY(), user.getZ(), 
+                    sound, SoundCategory.AMBIENT, 5.0F, 1.0F, TimeUtil::canPlayerSeeInStoppedTime);
+        }
+        
         if (!world.isClientSide()) {
             int timeStopTicks = Math.min(TimeStop.getTimeStopTicks(power, this), 
                     MathHelper.floor(power.getStamina() / getStaminaCostTicking(power)));
-            SoundEvent sound = blinkSound.get();
-            if (sound != null) {
-                JojoModUtil.playSound(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, user.getX(), user.getY(), user.getZ(), 
-                        sound, SoundCategory.AMBIENT, 5.0F, 1.0F, TimeUtil::canPlayerSeeInStoppedTime);
-            }
             
             Vector3d blinkPos = null;
             double speed = user.getSpeed() * 2.1585;
@@ -84,10 +86,13 @@ public class TimeStopInstant extends StandAction {
             int impliedTicks = MathHelper.ceil(user.position().subtract(blinkPos).length() / speed);
             power.consumeStamina(impliedTicks * getStaminaCostTicking(power));
             user.teleportTo(blinkPos.x, blinkPos.y, blinkPos.z);
-            if (baseTimeStop.get() != null) {
-                float learning = baseTimeStop.get().getLearningPerTick() * impliedTicks;
+            if (baseTimeStop.get() != null && power.hasPower()
+                    && power.getType().getStats() instanceof TimeStopperStandStats) {
+                TimeStopperStandStats stats = (TimeStopperStandStats) power.getType().getStats();
+                float learning = stats.maxDurationGrowthPerTick * impliedTicks;
                 power.addLearningProgressPoints(baseTimeStop.get(), learning);
             }
+            
             if (power.isActive()) {
                 IStandManifestation stand = power.getStandManifestation();
                 if (stand instanceof StandEntity) {

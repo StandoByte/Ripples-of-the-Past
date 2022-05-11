@@ -52,6 +52,7 @@ public class VampirismDarkAura extends VampirismAction {
                         HungryZombieEntity.class, user, range, false, zombie -> user.is(zombie.getOwner()))) {
                     zombie.addEffect(new EffectInstance(Effects.MOVEMENT_SPEED, 300, 1));
                     zombie.addEffect(new EffectInstance(Effects.DAMAGE_BOOST, 300, 0));
+                    zombie.addEffect(new EffectInstance(Effects.DAMAGE_RESISTANCE, 300, 0));
                 }
             }
         }

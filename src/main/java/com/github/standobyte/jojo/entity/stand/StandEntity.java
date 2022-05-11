@@ -442,10 +442,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                     removeArmsOnlyModifiers();
                 }
                 StandEntityTask currentTask = getCurrentTask();
-                if (currentTask != null) {
+                if (currentTask != null && hasUser()) {
                     StandEntityAction action = currentTask.getAction();
                     if (action != ModActions.STAND_ENTITY_UNSUMMON.get() || !hasEffect(ModEffects.STUN.get())) {
-                        currentTask.setOffsetFromUser(action.getOffsetFromUser(this));
+                        currentTask.setOffsetFromUser(action.getOffsetFromUser(getUserPower(), this, currentTask.getTarget()));
                     }
                 }
             }
@@ -951,6 +951,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 StandRelativeOffset relativeOffset = getOffsetFromUser();
                 if (relativeOffset != null) {
                     Vector3d offset = relativeOffset.getAbsoluteVec(getDefaultOffsetFromUser(), yRot);
+                    // FIXME (!) glitches when too close to the target entity
                     setPos(user.getX() + offset.x, 
                             user.getY() + (user.isShiftKeyDown() ? 0 : offset.y), 
                             user.getZ() + offset.z);

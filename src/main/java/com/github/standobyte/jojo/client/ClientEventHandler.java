@@ -21,6 +21,8 @@ import com.google.common.base.MoreObjects;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.ISound;
+import net.minecraft.client.audio.ISound.AttenuationType;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.DeathScreen;
@@ -49,6 +51,7 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderNameplateEvent;
+import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
@@ -123,6 +126,16 @@ public class ClientEventHandler {
     public void updateCanMoveInStoppedTime(boolean canMove, ChunkPos chunkPos) {
         if (isTimeStopped(chunkPos)) {
             this.canMoveInStoppedTime = canMove;
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void onPlaySound(PlaySoundEvent event) {
+        if (!canSeeInStoppedTime) {
+            ISound sound = event.getResultSound();
+            if (sound != null && sound.getAttenuation() == AttenuationType.LINEAR) {
+                event.setResultSound(null);
+            }
         }
     }
     

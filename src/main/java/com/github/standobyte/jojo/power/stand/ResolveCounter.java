@@ -19,6 +19,7 @@ import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.util.DiscardingSortedMultisetWrapper;
+import com.github.standobyte.jojo.util.JojoModUtil;
 import com.github.standobyte.jojo.util.damage.IStandDamageSource;
 import com.google.common.collect.BoundType;
 import com.google.common.collect.Multiset;
@@ -30,6 +31,8 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.FloatNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
@@ -69,6 +72,7 @@ public class ResolveCounter {
     
     private DiscardingSortedMultisetWrapper<Float> resolveRecords = 
             new DiscardingSortedMultisetWrapper<>(99);
+    private float nextRecord;
     private float maxAchievedValue;
     
     private float boostAttack = 1;
@@ -82,17 +86,6 @@ public class ResolveCounter {
         this.serverPlayerUser = serverPlayerUser;
     }
 
-
-    void reset() {
-        resolve = 0;
-        resolveLevel = 0;
-        noResolveDecayTicks = 0;
-        resolveRecords.clear();
-        maxAchievedValue = 0;
-        
-        setBoosts(1, 1, 1);
-        hpOnGettingAttacked = -1;
-    }
 
     void onStandAcquired() {
     }
@@ -112,8 +105,12 @@ public class ResolveCounter {
             if (noResolveDecayTicks > 0) {
                 noResolveDecayTicks--;
                 if (noResolveDecayTicks == 0) {
-                    resolveRecords.add(resolve);
-                    setMaxAchievedValue(resolveRecords.getMax());
+                    if (resolveRecords.isEmpty()) {
+                        saveResolveRecord(resolve, true);
+                    }
+                    else {
+                        nextRecord = resolve;
+                    }
                 }
             }
             else {
@@ -125,6 +122,9 @@ public class ResolveCounter {
                 if (hadValue && resolve == 0) {
                     boostChat = 1;
                     hpOnGettingAttacked = -1;
+                    if (nextRecord > 0) {
+                        saveResolveRecord(nextRecord, true);
+                    }
                 }
             }
         }
@@ -133,6 +133,16 @@ public class ResolveCounter {
     
     private float getResolveDecay() {
         return RESOLVE_DECAY;
+    }
+    
+    private void saveResolveRecord(float value, boolean syncMaxRecord) {
+        resolveRecords.add(nextRecord);
+        if (syncMaxRecord) {
+            setMaxAchievedValue(resolveRecords.getMax());
+        }
+        else {
+            this.maxAchievedValue = value;
+        }
     }
     
     
@@ -357,14 +367,20 @@ public class ResolveCounter {
     public void setHpOnAttack(float hp) {
         this.hpOnGettingAttacked = hp;
     }
-    
-    public void resetResolveValue() {
-        this.resolve = 0;
-        this.noResolveDecayTicks = 0;
-        this.resolveRecords.clear();
-        this.maxAchievedValue = 0;
+
+    void reset() {
+        resolve = 0;
+        resolveLevel = 0;
+        noResolveDecayTicks = 0;
+        nextRecord = 0;
+        resolveRecords.clear();
+        maxAchievedValue = 0;
         setBoosts(1, 1, 1);
         hpOnGettingAttacked = -1;
+    }
+    
+    public void resetResolveValue() {
+        reset();
         serverPlayerUser.ifPresent(player -> {
             PacketManager.sendToClient(new ResetResolveValuePacket(), player);
         });
@@ -374,6 +390,7 @@ public class ResolveCounter {
         this.resolve = previous.resolve;
         this.resolveLevel = previous.resolveLevel;
         this.noResolveDecayTicks = previous.noResolveDecayTicks;
+        this.nextRecord = previous.nextRecord;
         this.resolveRecords = previous.resolveRecords;
         this.maxAchievedValue = previous.maxAchievedValue;
         this.boostAttack = previous.boostAttack;
@@ -383,10 +400,11 @@ public class ResolveCounter {
     }
 
     void alwaysResetOnDeath() {
-        resolveRecords.add(resolve);
-        setMaxAchievedValue(resolveRecords.getMax());
+        saveResolveRecord(resolve, false);
+        
         resolve = 0;
         noResolveDecayTicks = 0;
+        nextRecord = 0;
         setBoosts(1, 1, 1);
         hpOnGettingAttacked = -1;
     }
@@ -402,12 +420,18 @@ public class ResolveCounter {
         resolve = nbt.getFloat("Resolve");
         resolveLevel = nbt.getByte("ResolveLevel");
         noResolveDecayTicks = nbt.getInt("ResolveTicks");
-        // FIXME (!!!!!!!!) resolve records load
-//        resolveRecord = nbt.getFloat("ResolveAchieved");
+        nextRecord = nbt.getFloat("NextRecord");
         boostAttack = nbt.getFloat("BoostAttack");
         boostRemoteControl = nbt.getFloat("BoostRemoteControl");
         boostChat = nbt.getFloat("BoostChat");
         hpOnGettingAttacked = nbt.getFloat("HpOnGettingAttacked");
+        
+        if (nbt.contains("ResolveRecord", JojoModUtil.getNbtId(ListNBT.class))) {
+            ListNBT listNBT = nbt.getList("ResolveRecord", JojoModUtil.getNbtId(FloatNBT.class));
+            for (int i = 0; i < listNBT.size(); i++) {
+                this.resolveRecords.add(listNBT.getFloat(i));
+            }
+        }
     }
 
     CompoundNBT writeNBT() {
@@ -415,12 +439,18 @@ public class ResolveCounter {
         resolveNbt.putFloat("Resolve", resolve);
         resolveNbt.putByte("ResolveLevel", (byte) resolveLevel);
         resolveNbt.putInt("ResolveTicks", noResolveDecayTicks);
-        // FIXME (!!!!!!!!) resolve records save
-//        resolveNbt.putFloat("ResolveAchieved", resolveRecord);
+        resolveNbt.putFloat("NextRecord", nextRecord);
         resolveNbt.putFloat("BoostAttack", boostAttack);
         resolveNbt.putFloat("BoostRemoteControl", boostRemoteControl);
         resolveNbt.putFloat("BoostChat", boostChat);
         resolveNbt.putFloat("HpOnGettingAttacked", hpOnGettingAttacked);
+        
+        ListNBT recordNbt = new ListNBT();
+        for (float record : resolveRecords.getWrappedSet()) {
+            recordNbt.add(FloatNBT.valueOf(record));
+        }
+        resolveNbt.put("ResolveRecord", recordNbt);
+        
         return resolveNbt;
     }
 }
