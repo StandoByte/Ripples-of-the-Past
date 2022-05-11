@@ -19,6 +19,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.stand.StandUtil;
+import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.DispenserBlock;
@@ -35,6 +36,20 @@ import net.minecraft.entity.passive.WaterMobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileHelper;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.ByteArrayNBT;
+import net.minecraft.nbt.ByteNBT;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.DoubleNBT;
+import net.minecraft.nbt.EndNBT;
+import net.minecraft.nbt.FloatNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.IntArrayNBT;
+import net.minecraft.nbt.IntNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.LongArrayNBT;
+import net.minecraft.nbt.LongNBT;
+import net.minecraft.nbt.ShortNBT;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.play.server.SPlaySoundEffectPacket;
 import net.minecraft.network.play.server.SSpawnMovingSoundEffectPacket;
 import net.minecraft.particles.ParticleTypes;
@@ -58,6 +73,25 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 
 public class JojoModUtil {
+    private static final ImmutableMap<Class<? extends INBT>, Integer> NBT_ID = new ImmutableMap.Builder<Class<? extends INBT>, Integer>()
+            .put(EndNBT.class, 0)
+            .put(ByteNBT.class, 1)
+            .put(ShortNBT.class, 2)
+            .put(IntNBT.class, 3)
+            .put(LongNBT.class, 4)
+            .put(FloatNBT.class, 5)
+            .put(DoubleNBT.class, 6)
+            .put(ByteArrayNBT.class, 7)
+            .put(StringNBT.class, 8)
+            .put(ListNBT.class, 9)
+            .put(CompoundNBT.class, 10)
+            .put(IntArrayNBT.class, 11)
+            .put(LongArrayNBT.class, 12)
+            .build();
+    
+    public static int getNbtId(Class<? extends INBT> clazz) {
+        return NBT_ID.getOrDefault(clazz, -1);
+    }
 
     public static RayTraceResult rayTrace(Entity entity, double reachDistance, @Nullable Predicate<Entity> entityFilter) {
         return rayTrace(entity, reachDistance, entityFilter, 0);

@@ -28,11 +28,12 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 
 public abstract class ClientTickingSoundsHelper {
-    public static void playVoiceLine(Entity entity, SoundEvent soundEvent, SoundCategory category, float volume, float pitch) {
+    
+    public static boolean playVoiceLine(Entity entity, SoundEvent soundEvent, SoundCategory category, float volume, float pitch) {
         Minecraft mc = Minecraft.getInstance();
         
         PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(mc.player, soundEvent, category, volume, pitch);
-        if (event.isCanceled() || event.getSound() == null) return;
+        if (event.isCanceled() || event.getSound() == null) return false;
         soundEvent = event.getSound();
         category = event.getCategory();
         volume = event.getVolume();
@@ -46,9 +47,10 @@ public abstract class ClientTickingSoundsHelper {
             }
             return alreadyPlaying;
         }).orElse(true)) {
-            return;
+            return false;
         }
         mc.getSoundManager().play(sound);
+        return true;
     }
     
     public static void playStandEntityCancelableActionSound(StandEntity stand, SoundEvent sound, 

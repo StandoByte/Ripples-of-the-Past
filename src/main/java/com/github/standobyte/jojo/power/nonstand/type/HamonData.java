@@ -313,7 +313,7 @@ public class HamonData extends TypeSpecificData {
         if (user.swinging) {
             incExerciseTicks(Exercise.MINING, multiplier, user.level.isClientSide());
         }
-        // FIXME (!!!!) and isn't stuck in place
+        // FIXME and isn't stuck in place
         if (user.isSwimming() && !(user.xxa == 0 && user.zza == 0 && user.yya == 0)) {
             incExerciseTicks(Exercise.SWIMMING, multiplier, user.level.isClientSide());
         }

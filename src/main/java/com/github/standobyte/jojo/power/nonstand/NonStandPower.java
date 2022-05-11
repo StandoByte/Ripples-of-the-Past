@@ -11,7 +11,7 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTargetContainer;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncEnergyPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrSyncEnergyPacket;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.PowerBaseImpl;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
@@ -91,7 +91,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
         ActionConditionResult result = super.checkRequirements(action, targetContainer, checkTargetType);
         if (!result.isPositive()) {
             serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new SyncEnergyPacket(getEnergy()), player);
+                PacketManager.sendToClient(new TrSyncEnergyPacket(player.getId(), getEnergy()), player);
             });
         }
         return result;
@@ -144,7 +144,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
         this.energy = amount;
         if (send) {
             serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new SyncEnergyPacket(getEnergy()), player);
+                PacketManager.sendToClientsTrackingAndSelf(new TrSyncEnergyPacket(player.getId(), getEnergy()), player);
             });
         }
     }
@@ -242,7 +242,6 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
         super.syncWithUserOnly();
         serverPlayerUser.ifPresent(player -> {
             if (hasPower()) {
-                PacketManager.sendToClient(new SyncEnergyPacket(energy), player);
                 getTypeSpecificData(null).ifPresent(data -> {
                     data.syncWithUserOnly(player);
                 });
@@ -254,9 +253,13 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     public void syncWithTrackingOrUser(ServerPlayerEntity player) {
         super.syncWithTrackingOrUser(player);
         if (hasPower()) {
-            getTypeSpecificData(null).ifPresent(data -> {
-                data.syncWithTrackingOrUser(getUser(), player);
-            });
+            LivingEntity user = getUser();
+            if (user != null) {
+                PacketManager.sendToClient(new TrSyncEnergyPacket(user.getId(), energy), player);
+                getTypeSpecificData(null).ifPresent(data -> {
+                    data.syncWithTrackingOrUser(user, player);
+                });
+            }
         }
     }
 }

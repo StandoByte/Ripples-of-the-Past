@@ -3,11 +3,13 @@ package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
+import com.github.standobyte.jojo.util.JojoModUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.DoubleNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
@@ -158,9 +160,11 @@ public class SpaceRipperStingyEyesEntity extends OwnerBoundProjectileEntity {
 
     @Override
     protected void readAdditionalSaveData(CompoundNBT nbt) {
-        if (nbt.contains("DetachedOrigin", 9)) {
-            ListNBT detachedPosList = nbt.getList("DetachedOrigin", 6);
-            detachedOriginPos = new Vector3d(detachedPosList.getDouble(0), detachedPosList.getDouble(1), detachedPosList.getDouble(2));
+        if (nbt.contains("DetachedOrigin", JojoModUtil.getNbtId(ListNBT.class))) {
+            ListNBT detachedPosList = nbt.getList("DetachedOrigin", JojoModUtil.getNbtId(DoubleNBT.class));
+            if (detachedPosList.size() >= 3) {
+                detachedOriginPos = new Vector3d(detachedPosList.getDouble(0), detachedPosList.getDouble(1), detachedPosList.getDouble(2));
+            }
         }
         super.readAdditionalSaveData(nbt);
         setLength(nbt.getFloat("Length"));

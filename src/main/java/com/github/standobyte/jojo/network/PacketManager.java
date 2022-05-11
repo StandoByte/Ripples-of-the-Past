@@ -34,7 +34,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartP
 import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandCancelManualMovementPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncCommonConfigPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncEnergyPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrSyncEnergyPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncHamonExercisesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncInputBufferPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncLeapCooldownPacket;
@@ -181,10 +181,10 @@ public class PacketManager {
         .decoder(SyncInputBufferPacket::decode)
         .consumer(SyncInputBufferPacket::handle).add();
         
-        channel.messageBuilder(SyncEnergyPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(SyncEnergyPacket::encode)
-        .decoder(SyncEnergyPacket::decode)
-        .consumer(SyncEnergyPacket::handle).add();
+        channel.messageBuilder(TrSyncEnergyPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(TrSyncEnergyPacket::encode)
+        .decoder(TrSyncEnergyPacket::decode)
+        .consumer(TrSyncEnergyPacket::handle).add();
         
         channel.messageBuilder(TrSyncCooldownPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(TrSyncCooldownPacket::encode)

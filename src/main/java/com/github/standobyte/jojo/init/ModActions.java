@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.actions.HamonAction;
 import com.github.standobyte.jojo.action.actions.HamonBubbleBarrier;
 import com.github.standobyte.jojo.action.actions.HamonBubbleCutter;
@@ -67,6 +68,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
+import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
@@ -193,7 +195,7 @@ public class ModActions {
     public static final RegistryObject<StandEntityAction> STAND_ENTITY_BLOCK = ACTIONS.register("stand_entity_block", 
             () -> new StandEntityBlock() {
                 @Override
-                public StandRelativeOffset getOffsetFromUser(StandEntity stand) {
+                public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, ActionTarget target) {
                     return null;
                 }
             });
@@ -223,9 +225,9 @@ public class ModActions {
     
     public static final RegistryObject<TimeStop> STAR_PLATINUM_TIME_STOP = ACTIONS.register("star_platinum_time_stop", 
             () -> new TimeStop(new StandAction.Builder().holdToFire(40, false)
-                    .staminaCost(250).staminaCostTick(5F).cooldown(0, 3, 0.3333F)
+                    .staminaCost(250).staminaCostTick(5F)
                     .resolveLevelToUnlock(4).isTrained().ignoresPerformerStun().autoSummonStand().shout(ModSounds.JOTARO_STAR_PLATINUM_THE_WORLD)
-                    .xpRequirement(950), 0.25F)
+                    .xpRequirement(950))
             .timeStopSound(ModSounds.STAR_PLATINUM_TIME_STOP)
             .addTimeResumeVoiceLine(ModSounds.JOTARO_TIME_RESUMES).timeResumeSound(ModSounds.STAR_PLATINUM_TIME_RESUME));
     
@@ -255,9 +257,9 @@ public class ModActions {
     
     public static final RegistryObject<TimeStop> THE_WORLD_TIME_STOP = ACTIONS.register("the_world_time_stop", 
             () -> new TheWorldTimeStop(new StandAction.Builder().holdToFire(30, false)
-                    .staminaCost(250).staminaCostTick(5F).cooldown(0, 3, 0.3333F)
+                    .staminaCost(250).staminaCostTick(5F)
                     .resolveLevelToUnlock(2).isTrained().ignoresPerformerStun().shout(ModSounds.DIO_THE_WORLD)
-                    .xpRequirement(500), 0.1F)
+                    .xpRequirement(500))
             .voiceLineWithStandSummoned(ModSounds.DIO_TIME_STOP).timeStopSound(ModSounds.THE_WORLD_TIME_STOP)
             .addTimeResumeVoiceLine(ModSounds.DIO_TIME_RESUMES, true).addTimeResumeVoiceLine(ModSounds.DIO_TIMES_UP, false)
             .timeResumeSound(ModSounds.THE_WORLD_TIME_RESUME));

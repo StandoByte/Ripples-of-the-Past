@@ -4,6 +4,7 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.util.JojoModUtil;
 import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.block.Block;
@@ -14,6 +15,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.DoubleNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
@@ -132,9 +134,11 @@ public class KnifeEntity extends ItemProjectileEntity {
     @Override
     public void readAdditionalSaveData(CompoundNBT nbt) {
         super.readAdditionalSaveData(nbt);
-        if (nbt.contains("TSHitMotion", 9)) {
-            ListNBT listNBT = nbt.getList("TSHitMotion", 6);
-            timeStopHitMotion = new Vector3d(listNBT.getDouble(0), listNBT.getDouble(1), listNBT.getDouble(2));
+        if (nbt.contains("TSHitMotion", JojoModUtil.getNbtId(ListNBT.class))) {
+            ListNBT listNBT = nbt.getList("TSHitMotion", JojoModUtil.getNbtId(DoubleNBT.class));
+            if (listNBT.size() >= 3) {
+                timeStopHitMotion = new Vector3d(listNBT.getDouble(0), listNBT.getDouble(1), listNBT.getDouble(2));
+            }
         }
     }
 

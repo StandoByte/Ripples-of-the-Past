@@ -5,6 +5,7 @@ import java.util.Comparator;
 import javax.annotation.Nullable;
 
 import com.google.common.collect.Multiset;
+import com.google.common.collect.Multisets;
 import com.google.common.collect.SortedMultiset;
 import com.google.common.collect.TreeMultiset;
 
@@ -37,6 +38,14 @@ public class DiscardingSortedMultisetWrapper<E extends Comparable<? super E>> {
         }
         return wrappedMultiset.add(element);
     }
+    
+    public int size() {
+        return wrappedMultiset.size();
+    }
+    
+    public boolean isEmpty() {
+        return wrappedMultiset.isEmpty();
+    }
 
     @Nullable
     public E getMax() {
@@ -49,6 +58,6 @@ public class DiscardingSortedMultisetWrapper<E extends Comparable<? super E>> {
     }
 
     public SortedMultiset<E> getWrappedSet() {
-        return wrappedMultiset;
+        return Multisets.unmodifiableSortedMultiset(wrappedMultiset);
     }
 }

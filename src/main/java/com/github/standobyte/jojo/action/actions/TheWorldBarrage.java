@@ -20,20 +20,13 @@ public class TheWorldBarrage extends StandEntityMeleeBarrage {
     // FIXME (!!!!) DIO and TW muda not overlapping (especially for tracking)
     @Override
     protected SoundEvent getShout(LivingEntity user, IStandPower power, ActionTarget target, boolean wasActive) {
-        if (wasActive && TimeStop.vampireTimeStopDuration(user)) {
-            return wryyyyyyyyyyy.get();
-        }
-//        return super.getShout(user, power, target, wasActive);
-        return null;
+        return wasActive && TimeStop.vampireTimeStopDuration(user) ? wryyyyyyyyyyy.get() : super.getShout(user, power, target, wasActive);
+//        return null;
     }
     
-    // FIXME (!!!!) never returns null for other clients
     @Override
     protected SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase) {
-        if (!standEntity.isArmsOnlyMode() && TimeStop.vampireTimeStopDuration(standPower.getUser())) {
-            return null;
-        }
-//        return null;
-        return super.getSound(standEntity, standPower, phase);
+        return null;
+//        return super.getSound(standEntity, standPower, phase);
     }
 }

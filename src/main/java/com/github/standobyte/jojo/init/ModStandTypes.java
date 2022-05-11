@@ -46,6 +46,9 @@ public class ModStandTypes {
                     .durability(16.0)
                     .precision(16.0)
                     .maxTimeStopTicks(100, 180)
+                    .maxDurationGrowthPerTick(0.25F)
+                    .maxDurationDecayPerDay(0)
+                    .cooldownPerTick(3)
                     .build(), 
                     ModEntityTypes.STAR_PLATINUM)
             .addSummonShout(ModSounds.JOTARO_STAR_PLATINUM)
@@ -62,6 +65,9 @@ public class ModStandTypes {
                     .durability(16.0)
                     .precision(12.0)
                     .maxTimeStopTicks(100, 180)
+                    .maxDurationGrowthPerTick(0.1F)
+                    .maxDurationDecayPerDay(0)
+                    .cooldownPerTick(3)
                     .build(), 
                     ModEntityTypes.THE_WORLD)
             .addSummonShout(ModSounds.DIO_THE_WORLD)

@@ -22,6 +22,7 @@ import net.minecraft.entity.MoverType;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.DoubleNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.util.DamageSource;
@@ -165,9 +166,11 @@ public class CrimsonBubbleEntity extends Entity {
     protected void readAdditionalSaveData(CompoundNBT compound) {
         this.hamonStrengthPoints = compound.getInt("StrengthPoints");
         this.hamonControlPoints = compound.getInt("ControlPoints");
-        if (compound.contains("InitialPoint", 9)) {
-            ListNBT listNBT = compound.getList("InitialPoint", 6);
-            this.initialPoint = new Vector3d(listNBT.getDouble(0), listNBT.getDouble(1), listNBT.getDouble(2));
+        if (compound.contains("InitialPoint", JojoModUtil.getNbtId(ListNBT.class))) {
+            ListNBT listNBT = compound.getList("InitialPoint", JojoModUtil.getNbtId(DoubleNBT.class));
+            if (listNBT.size() >= 3) {
+                this.initialPoint = new Vector3d(listNBT.getDouble(0), listNBT.getDouble(1), listNBT.getDouble(2));
+            }
         }
     }
 
