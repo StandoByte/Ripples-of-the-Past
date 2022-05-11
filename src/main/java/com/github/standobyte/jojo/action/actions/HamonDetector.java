@@ -27,7 +27,7 @@ public class HamonDetector extends HamonAction {
         if (requirementsFulfilled) {
             if (!world.isClientSide() && ticksHeld < 160 || ticksHeld % 20 == 0) {
                 HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
-                double controlRatio = (double) hamon.getHamonControlLevel() / (double) HamonData.MAX_STAT_LEVEL;
+                double controlRatio = (double) hamon.getHamonControlLevel() / (double) HamonData.MAX_STAT_LEVEL * hamon.getEfficiencyDecrease();
                 double radius = (double) ticksHeld * (controlRatio * 0.8D + 0.2D);
                 double maxRadius = 8D + controlRatio * 24D;
                 List<LivingEntity> entitiesAround = JojoModUtil.entitiesAround(LivingEntity.class, user, Math.min(radius, maxRadius), false, null);

@@ -530,7 +530,7 @@ public class GameplayEventHandler {
         if (world.isClientSide()) return;
         if (dmgAmount >= 0.98F && 
                 (!dmgSource.isBypassArmor() && !dmgSource.isFire() && !dmgSource.isMagic() && !dmgSource.isBypassMagic() || dmgSource == DamageSource.FALL)) {
-            if (!JojoModUtil.canBleed(target)) {
+            if (!JojoModUtil.canBleed(target) || dmgSource.getMsgId().startsWith(DamageUtil.PILLAR_MAN_ABSORPTION.getMsgId())) {
                 return;
             }
             double radius = 2;

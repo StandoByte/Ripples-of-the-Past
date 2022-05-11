@@ -76,7 +76,7 @@ public class HamonOverdriveBarrage extends HamonAction {
                     targetEntity.invulnerableTime = invulTicks;
                 }
                 if (!world.isClientSide()) {
-                    DamageUtil.dealHamonDamage(targetEntity, 0.05F, user, null);
+                    DamageUtil.dealHamonDamage(targetEntity, 0.1F, user, null);
                 }
                 break;
             default:
