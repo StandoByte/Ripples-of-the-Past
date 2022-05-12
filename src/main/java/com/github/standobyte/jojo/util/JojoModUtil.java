@@ -92,7 +92,13 @@ public class JojoModUtil {
     public static int getNbtId(Class<? extends INBT> clazz) {
         return NBT_ID.getOrDefault(clazz, -1);
     }
-
+    
+    public static <E> E getOrLast(List<E> list, int index) {
+        return list.get(Math.min(index, list.size() - 1));
+    }
+    
+    
+    
     public static RayTraceResult rayTrace(Entity entity, double reachDistance, @Nullable Predicate<Entity> entityFilter) {
         return rayTrace(entity, reachDistance, entityFilter, 0);
     }

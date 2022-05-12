@@ -63,9 +63,11 @@ public abstract class StandEntityAction extends StandAction {
     public ActionConditionResult checkConditions(LivingEntity user, IStandPower power, ActionTarget target) {
         if (power.isActive()) {
             StandEntity stand = (StandEntity) power.getStandManifestation();
-            StandEntityAction currentAction = stand.getCurrentTaskAction();
-            if (currentAction != null && currentAction != this && !currentAction.isCancelable(power, stand, stand.getCurrentTaskPhase(), this)) {
-                return ActionConditionResult.NEGATIVE_QUEUE_INPUT;
+            if (canBeQueued(power, stand)) {
+                StandEntityAction currentAction = stand.getCurrentTaskAction();
+                if (currentAction != null && currentAction.canQueue(this, power, stand)) {
+                    return ActionConditionResult.NEGATIVE_QUEUE_INPUT;
+                }
             }
             ActionConditionResult checkStand = checkStandConditions(stand, power, target);
             if (!checkStand.isPositive()) {
@@ -89,7 +91,7 @@ public abstract class StandEntityAction extends StandAction {
         return true;
     }
     
-    public boolean standTakesCrosshairTarget(ActionTarget target, IStandPower standPower) {
+    public boolean standTakesCrosshairTarget(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
         if (getTargetRequirement() != null && !getTargetRequirement().checkTargetType(TargetType.EMPTY)
                 && getTargetRequirement().checkTargetType(target.getType())) {
             return true;
@@ -140,9 +142,18 @@ public abstract class StandEntityAction extends StandAction {
             }
             else {
                 StandEntity stand = (StandEntity) power.getStandManifestation();
-                if (stand.isArmsOnlyMode() && !allowArmsOnly()) {
-                    stand.fullSummonFromArms();
-                }   
+                if (stand.isArmsOnlyMode()) {
+                    switch (autoSummonMode) {
+                    case ARMS:
+                        stand.setArmsOnlyMode();
+                        break;
+                    case FULL:
+                        stand.fullSummonFromArms();
+                        break;
+                    default:
+                        break;
+                    }
+                }
             }
         }
     }
@@ -198,10 +209,6 @@ public abstract class StandEntityAction extends StandAction {
     protected void setAction(IStandPower standPower, StandEntity standEntity, int ticks, Phase phase, ActionTarget target) {
         standEntity.setTask(this, ticks, phase, target);
     }
-
-    public boolean canBeQueued(IStandPower standPower, StandEntity standEntity) {
-        return getHoldDurationMax(standPower) == 0;
-    }
     
     public boolean canStaminaRegen(IStandPower standPower, StandEntity standEntity) {
         return false;
@@ -249,6 +256,14 @@ public abstract class StandEntityAction extends StandAction {
         if (power.isActive()) {
             consumer.accept(((StandEntity) power.getStandManifestation()));
         }
+    }
+    
+    protected boolean canBeQueued(IStandPower standPower, StandEntity standEntity) {
+        return getHoldDurationMax(standPower) == 0;
+    }
+    
+    protected boolean canQueue(StandEntityAction nextAction, IStandPower standPower, StandEntity standEntity) {
+        return nextAction != this && !isCancelable(standPower, standEntity, standEntity.getCurrentTaskPhase(), nextAction);
     }
 
     public boolean isCancelable(IStandPower standPower, StandEntity standEntity, Phase phase, @Nullable StandEntityAction newAction) {
