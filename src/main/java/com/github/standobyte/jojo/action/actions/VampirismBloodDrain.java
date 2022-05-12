@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.action.actions;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
@@ -62,8 +63,9 @@ public class VampirismBloodDrain extends VampirismAction {
             if (!world.isClientSide() && target.getEntity(world) instanceof LivingEntity) {
                 LivingEntity targetEntity = (LivingEntity) target.getEntity(world);
                 if (!targetEntity.isDeadOrDying()) {
-                    int difficulty = world.getDifficulty().getId();
-                    float bloodAndHealModifier = 0.25F + difficulty * 0.75F;
+                    float bloodAndHealModifier = JojoModUtil.getOrLast(
+                            JojoModConfig.getCommonConfigInstance(false).bloodDrainMultiplier.get(), 
+                            world.getDifficulty().getId()).floatValue();
                     boolean isHuman = false;
                     if (targetEntity instanceof PlayerEntity) {
                         bloodAndHealModifier *= 3F;
@@ -77,14 +79,13 @@ public class VampirismBloodDrain extends VampirismAction {
                             p -> p.getType() == ModNonStandPowers.HAMON.get()).orElse(false)) {
                         bloodAndHealModifier *= 6.667F;
                     }
-                    float damage = 0.5F * difficulty;
                     EffectInstance freeze = targetEntity.getEffect(ModEffects.FREEZE.get());
                     if (freeze != null) {
-                        damage *= 1 - Math.min((freeze.getAmplifier() + 1) * 0.2F, 1);
+                        bloodAndHealModifier *= 1 - Math.min((freeze.getAmplifier() + 1) * 0.2F, 1);
                     }
-                    power.addEnergy(damage * bloodAndHealModifier);
+                    power.addEnergy(bloodAndHealModifier);
                     float healed = user.getHealth();
-                    if (drainBlood(user, targetEntity, damage * 4, damage * 0.5F * bloodAndHealModifier)) {
+                    if (drainBlood(user, targetEntity, 4, bloodAndHealModifier * 0.5F)) {
                         healed = user.getHealth() - healed;
                         if (healed > 0) {
                             power.addEnergy(healed * VampirismPowerType.healCost(world.getDifficulty()));

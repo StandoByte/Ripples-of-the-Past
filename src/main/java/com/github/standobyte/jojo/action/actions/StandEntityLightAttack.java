@@ -44,35 +44,34 @@ public class StandEntityLightAttack extends StandEntityAction {
     @Override
     public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
         double speed = standEntity.getAttackSpeed();
-//        if (standEntity.getCurrentTaskAction() == this && 
-//                (standEntity.getCurrentTaskPhase() != Phase.RECOVERY || standEntity.getCurrentTaskCompletion(0) < 0.25)) {
-//            speed *= 0.8;
-//        }
-        int ticks = StandStatFormulas.getLightAttackWindup(speed, standEntity.getComboMeter());
-        if (standEntity.isArmsOnlyMode() && standEntity.tickCount <= 1) {
-            ticks = Math.max(ticks / 2, 1);
-        }
-        return ticks;
+        return StandStatFormulas.getLightAttackWindup(speed, standEntity.getComboMeter());
+    }
+    
+    @Override
+    public int getStandActionTicks(IStandPower standPower, StandEntity standEntity) {
+        double speed = standEntity.getAttackSpeed();
+        return StandStatFormulas.getLightAttackRecovery(speed, standEntity.getComboMeter());
     }
     
     @Override
     public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
-        return StandStatFormulas.getLightAttackRecovery(standEntity.getAttackSpeed());
+        double speed = standEntity.getAttackSpeed();
+        return StandStatFormulas.getLightAttackRecovery(speed, standEntity.getComboMeter())
+                * (standEntity.isArmsOnlyMode() ? 2 : 4);
     }
     
     @Override
     public boolean isCancelable(IStandPower standPower, StandEntity standEntity, Phase phase, @Nullable StandEntityAction newAction) {
         if (phase == Phase.RECOVERY) {
-            return newAction != null && newAction.isCombatAction();
+            return true;
         }
         return super.isCancelable(standPower, standEntity, phase, newAction);
     }
-
-    // scheduled stand task 
-//    @Override
-//    public boolean canBeScheduled(IStandPower standPower, StandEntity standEntity) {
-//        return standEntity.getCurrentTaskAction() != this;
-//    }
+    
+    @Override
+    protected boolean canQueue(StandEntityAction nextAction, IStandPower standPower, StandEntity standEntity) {
+        return false;
+    }
     
     @Override
     public boolean isCombatAction() {

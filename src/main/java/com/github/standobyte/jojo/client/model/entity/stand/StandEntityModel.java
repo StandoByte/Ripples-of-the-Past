@@ -21,6 +21,8 @@ import com.github.standobyte.jojo.client.renderer.entity.stand.AdditionalArmSwin
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.util.MathUtil;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
@@ -62,6 +64,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     }
 
     public void afterInit() {
+        initOpposites();
         initPoses();
         initActionPoses();
     }
@@ -258,9 +261,12 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     private void resetPose(T entity) {
         poseReset.poseModel(1, entity, 0, 0, 0, entity.getSwingingHand());
     }
-
-    public ModelRenderer getOppositeHandside(ModelRenderer modelRenderer) {
-        return modelRenderer;
+    
+    protected void initOpposites() {}
+    
+    protected final BiMap<ModelRenderer, ModelRenderer> oppositeHandside = HashBiMap.create();
+    public final ModelRenderer getOppositeHandside(ModelRenderer modelRenderer) {
+        return oppositeHandside.computeIfAbsent(modelRenderer, k -> oppositeHandside.inverse().getOrDefault(modelRenderer, modelRenderer));
     }
 
     public enum VisibilityMode {

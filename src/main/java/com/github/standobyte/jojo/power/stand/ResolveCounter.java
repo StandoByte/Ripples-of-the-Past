@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.power.stand;
 
-import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -152,8 +151,9 @@ public class ResolveCounter {
     }
 
     float getMaxResolveValue() {
-        List<? extends Double> ptsList = JojoModConfig.getCommonConfigInstance(stand.getUser().level.isClientSide()).resolvePoints.get();
-        return ptsList.get(Math.min(getResolveLevel(), ptsList.size() - 1)).floatValue();
+        return JojoModUtil.getOrLast(
+                JojoModConfig.getCommonConfigInstance(stand.getUser().level.isClientSide()).resolvePoints.get(), 
+                getResolveLevel()).floatValue();
     }
     
     public float getMaxAchievedValue() {

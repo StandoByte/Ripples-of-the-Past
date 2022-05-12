@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.util.JojoModUtil;
 import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.entity.LivingEntity;
@@ -17,6 +18,7 @@ import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
 
@@ -55,17 +57,21 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
             }
         }
     }
+    
+    @Override
+    public float getMaxEnergyFactor(INonStandPower power) {
+        World world = power.getUser().level;
+        return JojoModUtil.getOrLast(
+                JojoModConfig.getCommonConfigInstance(world.isClientSide()).maxBloodMultiplier.get(), world.getDifficulty().getId())
+                .floatValue();
+    }
 
     @Override
     public float getEnergyTickInc(INonStandPower power) {
-        switch (power.getUser().level.getDifficulty()) {
-        case HARD:
-            return 0;
-        case NORMAL:
-            return -1F / 360F;
-        default:
-            return -1F / 72F;
-        }
+        World world = power.getUser().level;
+        return -JojoModUtil.getOrLast(
+                JojoModConfig.getCommonConfigInstance(world.isClientSide()).bloodTickDown.get(), world.getDifficulty().getId())
+                .floatValue();
     }
     
     @Override
@@ -188,7 +194,9 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
         if (entity.isAlive()) {
             INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
                 if (power.getType() == ModNonStandPowers.VAMPIRISM.get()) {
-                    float healCost = healCost(entity.level.getDifficulty());
+                    float healCost = JojoModUtil.getOrLast(
+                            JojoModConfig.getCommonConfigInstance(entity.level.isClientSide()).bloodHealCost.get(), 
+                            entity.level.getDifficulty().getId()).floatValue();
                     if (healCost > 0) {
                         float actualHeal = Math.min(event.getAmount(), power.getEnergy() / healCost);
                         actualHeal = Math.min(actualHeal, entity.getMaxHealth() - entity.getHealth());

@@ -11,7 +11,7 @@ import com.github.standobyte.jojo.client.model.pose.IModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseSided;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseTransition;
-import com.github.standobyte.jojo.client.model.pose.RigidModelPose;
+import com.github.standobyte.jojo.client.model.pose.ModelPoseTransitionMultiple;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
 import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -137,6 +137,11 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
                 .put(rightLowerLeg, part -> part.texOffs(32, 54).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false))
                 .build();
     }
+    
+    @Override
+    public void afterInit() {
+        super.afterInit();
+    }
 
     protected final void addHumanoidBaseBoxes(@Nullable Predicate<ModelRenderer> partPredicate) {
         for (Map.Entry<ModelRenderer, Consumer<ModelRenderer>> entry : baseHumanoidBoxes.entrySet()) {
@@ -181,21 +186,95 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
             }
         }
     }
-    
+
+    protected ModelPoseSided<T> barrageSwing;
     @Override
     protected void initActionPoses() {
         super.initActionPoses();
-        if (barrageSwing == null) barrageSwing = initArmSwingAnim();
         
-        IModelPose<T> armSwingPose = initArmSwingAnim();
+        
+        if (barrageSwing == null) barrageSwing = new ModelPoseSided<>(
+                initArmSwingPose(HandSide.LEFT, 1.0F, SwingPart.SWING), 
+                initArmSwingPose(HandSide.RIGHT, 1.0F, SwingPart.SWING));
+        
+        
+        
+        RotationAngle[] jabRightStart = new RotationAngle[] {
+                RotationAngle.fromDegrees(body, 0, -15, 0),
+                RotationAngle.fromDegrees(leftArm, -7.5F, 0, -15),
+                RotationAngle.fromDegrees(leftForeArm, -100, 15, 7.5F),
+                RotationAngle.fromDegrees(rightArm, 22.5F, 0, 22.5F),
+                RotationAngle.fromDegrees(rightForeArm, -105, 0, -15)
+        };
+        RotationAngle[] jabRight2 = new RotationAngle[] {
+                RotationAngle.fromDegrees(body, 0, -22.5F, 0),
+                RotationAngle.fromDegrees(leftArm, 30F, 0, -15F),
+                RotationAngle.fromDegrees(leftForeArm, -107.5F, 15, 7.5F),
+                RotationAngle.fromDegrees(rightArm, 5.941F, 8.4211F, 69.059F),
+                RotationAngle.fromDegrees(rightForeArm, -75, 0, 0)
+        };
+        RotationAngle[] jabRightImpact = new RotationAngle[] {
+                RotationAngle.fromDegrees(body, 0, -30, 0),
+                RotationAngle.fromDegrees(leftArm, 37.5F, 0, -15F),
+                RotationAngle.fromDegrees(leftForeArm, -115, 15, 7.5F),
+                RotationAngle.fromDegrees(rightArm, -81.9244F, 11.0311F, 70.2661F),
+                RotationAngle.fromDegrees(rightForeArm, 0, 0, 0)
+        };
+        RotationAngle[] jabRight4 = new RotationAngle[] {
+                RotationAngle.fromDegrees(body, 0, -7.5F, 0),
+                RotationAngle.fromDegrees(leftArm, 5.63F, 0, -20.62F),
+                RotationAngle.fromDegrees(leftForeArm, -103.75F, 3.75F, 13.13F),
+                RotationAngle.fromDegrees(rightArm, 5.941F, 8.4211F, 69.059F),
+                RotationAngle.fromDegrees(rightForeArm, -75, 0, 0)
+        };
+        
+        // FIXME (!!!!!!!!) jab animation x rotation
         actionAnim.putIfAbsent(StandPose.LIGHT_ATTACK, 
                 new StandActionAnimation.Builder<T>()
-                .addPose(StandEntityAction.Phase.WINDUP, armSwingPose)
-                .addPose(StandEntityAction.Phase.PERFORM, new RigidModelPose<T>(armSwingPose))
-                .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransition<T>(armSwingPose, idlePose)
-                        .setEasing(pr -> Math.max(4F * (pr - 1) + 1, 0F)))
+                
+                .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseSided<T>(
+                        new ModelPoseTransitionMultiple.Builder<T>(
+                                new ModelPose<T>(mirrorAngles(jabRightStart)))
+                        .addPose(0.5F, new ModelPose<T>(mirrorAngles(jabRight2)))
+                        .addPose(0.75F, new ModelPose<T>(mirrorAngles(jabRightImpact)).setEasing(x -> x * x * x))
+                        .build(new ModelPose<T>(mirrorAngles(jabRightImpact))),
+                        
+                        new ModelPoseTransitionMultiple.Builder<T>(
+                                new ModelPose<T>(jabRightStart))
+                        .addPose(0.5F, new ModelPose<T>(jabRight2))
+                        .addPose(0.75F, new ModelPose<T>(jabRightImpact).setEasing(x -> x * x * x))
+                        .build(new ModelPose<T>(jabRightImpact))
+                        ))
+                
+                .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseSided<T>(
+                        new ModelPoseTransitionMultiple.Builder<T>(
+                                new ModelPose<T>(mirrorAngles(jabRightImpact)))
+                        .addPose(0.25F, new ModelPose<T>(mirrorAngles(jabRightImpact)))
+                        .addPose(0.5F, new ModelPose<T>(mirrorAngles(jabRight4)).setEasing(x -> x * x * x))
+                        .build(new ModelPose<T>(jabRightStart)),
+                        
+                        new ModelPoseTransitionMultiple.Builder<T>(
+                                new ModelPose<T>(jabRightImpact))
+                        .addPose(0.25F, new ModelPose<T>(jabRightImpact))
+                        .addPose(0.5F, new ModelPose<T>(jabRight4).setEasing(x -> x * x * x))
+                        .build(new ModelPose<T>(mirrorAngles(jabRightStart)))
+                        ))
+                
+                .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseSided<T>(
+                        new ModelPoseTransitionMultiple.Builder<T>(
+                                new ModelPose<T>(jabRightStart))
+                        .addPose(0.75F, new ModelPose<T>(jabRightStart))
+                        .build(idlePose),
+
+                        new ModelPoseTransitionMultiple.Builder<T>(
+                                new ModelPose<T>(mirrorAngles(jabRightStart)))
+                        .addPose(0.75F, new ModelPose<T>(mirrorAngles(jabRightStart)))
+                        .build(idlePose)
+                        ))
                 .build(idlePose));
 
+        
+        
         float backSwing = 1.75F;
         StandActionAnimation<T> heavyAttackAnim = new StandActionAnimation.Builder<T>()
                 .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseSided<>(
@@ -208,6 +287,8 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         actionAnim.putIfAbsent(StandPose.HEAVY_ATTACK, heavyAttackAnim);
 
         actionAnim.putIfAbsent(StandPose.HEAVY_ATTACK_COMBO, heavyAttackAnim);
+        
+        
         
         actionAnim.putIfAbsent(StandPose.BLOCK, new StandActionAnimation.Builder<T>()
                 .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<T>(new RotationAngle[] {
@@ -228,10 +309,14 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
                 }))
                 .build(idlePose));
     }
-
-    protected ModelPoseSided<T> barrageSwing;
-    private ModelPoseSided<T> initArmSwingAnim() {
-        return initBarrageSwingAnim(1.0F);
+    
+    protected RotationAngle[] mirrorAngles(RotationAngle[] angles) {
+        RotationAngle[] mirrored = new RotationAngle[angles.length];
+        for (int i = 0; i < angles.length; i++) {
+            RotationAngle angle = angles[i];
+            mirrored[i] = new RotationAngle(getOppositeHandside(angle.modelRenderer), angle.angleX, -angle.angleY, -angle.angleZ);
+        }
+        return mirrored;
     }
     
     protected ModelPoseSided<T> initBarrageSwingAnim(float backSwing) {
@@ -334,23 +419,6 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         }
         return null;
     }
-    
-    @Override
-    public ModelRenderer getOppositeHandside(ModelRenderer modelRenderer) {
-        if (modelRenderer == leftArm) {
-            return rightArm;
-        }
-        if (modelRenderer == rightArm) {
-            return leftArm;
-        }
-        if (modelRenderer == leftForeArm) {
-            return rightForeArm;
-        }
-        if (modelRenderer == rightForeArm) {
-            return leftForeArm;
-        }
-        return super.getOppositeHandside(modelRenderer);
-    }
 
     @Override
     protected ModelPose<T> initPoseReset() {
@@ -399,5 +467,14 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
     @Override
     public ModelRenderer armModel(HandSide side) {
         return side == HandSide.LEFT ? leftArm : rightArm;
+    }
+    
+    @Override
+    protected void initOpposites() {
+        super.initOpposites();
+        oppositeHandside.put(leftArm, rightArm);
+        oppositeHandside.put(leftForeArm, rightForeArm);
+        oppositeHandside.put(leftLeg, rightLeg);
+        oppositeHandside.put(leftLowerLeg, rightLowerLeg);
     }
 }

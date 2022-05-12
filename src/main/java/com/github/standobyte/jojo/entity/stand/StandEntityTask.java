@@ -48,7 +48,7 @@ public class StandEntityTask {
         StandRelativeOffset offset = standEntity.hasEffect(ModEffects.STUN.get()) || !standEntity.hasUser() ? 
                 null
                 : action.getOffsetFromUser(standPower, standEntity, target);
-        if (!action.standTakesCrosshairTarget(target, standPower) || !canTarget(standEntity, target, standPower, action)) {
+        if (!action.standTakesCrosshairTarget(target, standEntity, standPower) || !canTarget(standEntity, target, standPower, action)) {
             target = ActionTarget.EMPTY;
         }
         

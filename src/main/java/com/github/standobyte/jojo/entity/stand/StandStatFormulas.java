@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.entity.stand;
 
+import java.util.Random;
+
 import javax.annotation.Nullable;
 
 import net.minecraft.entity.LivingEntity;
@@ -26,19 +28,23 @@ public class StandStatFormulas {
     
     
     public static float getLightAttackDamage(double strength) {
-        return 0.5F + (float) strength * 0.3F;
+        return 0.5F + (float) strength * 0.25F;
     }
     
+    private static final Random RANDOM = new Random();
     public static int getLightAttackWindup(double speed, float comboMeter) {
-        return Math.max((int) ((8 - speed * 0.25) * (1.0 - 0.4 * comboMeter) + 1.75F), 0);
+        double val = (24 - speed) / 4 * (1.0F - comboMeter * 0.4F);
+        if (val <= 0) return 0;
+        int ticks = MathHelper.floor(val);
+        if (RANDOM.nextDouble() < val - ticks) ticks++;
+        return ticks;
     }
     
-    public static int getLightAttackRecovery(double speed) {
-        return Math.round(lightAttackRecovery(speed));
-    }
-    
-    private static final float lightAttackRecovery(double speed) {
-        return Math.max((40.0F - (float) speed * 1.25F) / 3.0F, 0);
+    public static int getLightAttackRecovery(double speed, float comboMeter) {
+        double val = (24 - speed) / 2 * (1.0F - comboMeter * 0.4F);
+        if (val <= 1) return 1;
+        int ticks = MathHelper.floor(val);
+        return ticks;
     }
     
     public static float getParryTiming(double precision) {

@@ -49,6 +49,11 @@ public class JojoModConfig {
         public final ForgeConfigSpec.DoubleValue hamonPointsMultiplier;
         public final ForgeConfigSpec.DoubleValue breathingTechniqueMultiplier;
         public final ForgeConfigSpec.BooleanValue breathingTechniqueDeterioration;
+        
+        public final ForgeConfigSpec.ConfigValue<List<? extends Double>> maxBloodMultiplier;
+        public final ForgeConfigSpec.ConfigValue<List<? extends Double>> bloodDrainMultiplier;
+        public final ForgeConfigSpec.ConfigValue<List<? extends Double>> bloodTickDown;
+        public final ForgeConfigSpec.ConfigValue<List<? extends Double>> bloodHealCost;
 
         public final ForgeConfigSpec.BooleanValue prioritizeLeastTakenStands;
         public final ForgeConfigSpec.BooleanValue standTiers;
@@ -70,7 +75,6 @@ public class JojoModConfig {
         public final ForgeConfigSpec.DoubleValue hamonDamageMultiplier;
         
         private Common(ForgeConfigSpec.Builder builder) {
-            
             builder.push("Keep Powers After Death");
                 keepStandOnDeath = builder
                         .translation("jojo.config.keepStandOnDeath") 
@@ -114,6 +118,28 @@ public class JojoModConfig {
                         .comment(" Whether or not breathing technique deteriorates over time.")
                         .translation("jojo.config.breathingTechniqueDeterioration")
                         .define("breathingTechniqueDeterioration", true);
+            builder.pop();
+            
+            builder.push("Vampirism settings");
+                maxBloodMultiplier = builder
+                        .comment(" Max vampire energy multiplier on each difficulty level.")
+                        .translation("jojo.config.maxBloodMultiplier")
+                        .defineList("maxBloodMultiplier", Arrays.asList(1D, 1D, 1D, 1D), JojoModConfig::isElementPositiveFloat);
+
+                bloodDrainMultiplier = builder
+                        .comment(" Blood drain multiplier on each difficulty level.")
+                        .translation("jojo.config.bloodDrainMultiplier")
+                        .defineList("bloodDrainMultiplier", Arrays.asList(0D, 1D, 1.75D, 2.5D), JojoModConfig::isElementPositiveFloat);
+
+                bloodTickDown = builder
+                        .comment(" Vampire energy decrease per tick on each difficulty level.")
+                        .translation("jojo.config.bloodTickDown")
+                        .defineList("bloodTickDown", Arrays.asList(0.13889D, 0.00278D, 0.00278D, 0D), JojoModConfig::isElementPositiveFloat);
+
+                bloodHealCost = builder
+                        .comment(" Vampire energy cost per 1 hp of healing on each difficulty level.")
+                        .translation("jojo.config.bloodHealCost")
+                        .defineList("bloodHealCost", Arrays.asList(10D, 4D, 2D, 1D), JojoModConfig::isElementPositiveFloat);
             builder.pop();
             
             builder.comment(" Settings of Stand Arrow and the Stands pool.").push("Stand Arrow");
@@ -174,14 +200,7 @@ public class JojoModConfig {
                                 "  Decrease these values to make getting to each level easier.", 
                                 "  All values must be higher than 0.")
                         .translation("jojo.config.resolvePoints")
-                        .defineList("resolvePoints", Arrays.asList(ResolveCounter.DEFAULT_MAX_RESOLVE_VALUES), 
-                                pts -> {
-                                    if (pts instanceof Double) {
-                                        Double num = (Double) pts;
-                                        return num > 0 && Float.isFinite(num.floatValue());
-                                    }
-                                    return false;
-                                });
+                        .defineList("resolvePoints", Arrays.asList(ResolveCounter.DEFAULT_MAX_RESOLVE_VALUES), JojoModConfig::isElementPositiveFloat);
                 
                 soulAscension = builder
                         .translation("jojo.config.soulAscension")
@@ -264,6 +283,11 @@ public class JojoModConfig {
 //            private final double breathingTechniqueMultiplier;
             private final boolean breathingTechniqueDeterioration;
 
+            private final float[] maxBloodMultiplier;
+//            private final float[] bloodDrainMultiplier;
+            private final float[] bloodTickDown;
+//            private final float[] bloodHealCost;
+            
             private final boolean prioritizeLeastTakenStands;
             private final boolean standTiers;
             private final int[] standTierXpLevels;
@@ -282,6 +306,10 @@ public class JojoModConfig {
             public SyncedValues(PacketBuffer buf) {
 //                hamonPointsMultiplier = buf.readDouble();
 //                breathingTechniqueMultiplier = buf.readDouble();
+                maxBloodMultiplier = NetworkUtil.readFloatArray(buf);
+//                bloodDrainMultiplier = NetworkUtil.readFloatArray(buf);
+                bloodTickDown = NetworkUtil.readFloatArray(buf);
+//                bloodHealCost = NetworkUtil.readFloatArray(buf);
                 standTierXpLevels = buf.readVarIntArray();
                 bannedStands = NetworkUtil.readRegistryIdsSafe(buf, StandType.class);
 //                standDamageMultiplier = buf.readDouble();
@@ -306,6 +334,10 @@ public class JojoModConfig {
             public void writeToBuf(PacketBuffer buf) {
 //                buf.writeDouble(hamonPointsMultiplier);
 //                buf.writeDouble(breathingTechniqueMultiplier);
+                NetworkUtil.writeFloatArray(buf, maxBloodMultiplier);
+//                NetworkUtil.writeFloatArray(buf, bloodDrainMultiplier);
+                NetworkUtil.writeFloatArray(buf, bloodTickDown);
+//                NetworkUtil.writeFloatArray(buf, bloodHealCost);
                 buf.writeVarIntArray(standTierXpLevels);
                 NetworkUtil.writeRegistryIds(buf, bannedStands);
 //                buf.writeDouble(standDamageMultiplier);
@@ -338,6 +370,10 @@ public class JojoModConfig {
 //                hamonPointsMultiplier = config.standDamageMultiplier.get();
 //                breathingTechniqueMultiplier = config.breathingTechniqueMultiplier.get();
                 breathingTechniqueDeterioration = config.breathingTechniqueDeterioration.get();
+                maxBloodMultiplier = Floats.toArray(config.maxBloodMultiplier.get());
+//                bloodDrainMultiplier = Floats.toArray(config.bloodDrainMultiplier.get());
+                bloodTickDown = Floats.toArray(config.bloodTickDown.get());
+//                bloodHealCost = Floats.toArray(config.bloodHealCost.get());
                 prioritizeLeastTakenStands = config.prioritizeLeastTakenStands.get();
                 standTiers = config.standTiers.get();
                 standTierXpLevels = config.standTierXpLevels.get().stream().mapToInt(Integer::intValue).toArray();
@@ -363,6 +399,10 @@ public class JojoModConfig {
 //                COMMON_SYNCED_TO_CLIENT.hamonPointsMultiplier.set(hamonPointsMultiplier);
 //                COMMON_SYNCED_TO_CLIENT.breathingTechniqueMultiplier.set(breathingTechniqueMultiplier);
                 COMMON_SYNCED_TO_CLIENT.breathingTechniqueDeterioration.set(breathingTechniqueDeterioration);
+                COMMON_SYNCED_TO_CLIENT.maxBloodMultiplier.set(Floats.asList(maxBloodMultiplier).stream().map(Float::doubleValue).collect(Collectors.toList()));
+//                COMMON_SYNCED_TO_CLIENT.bloodDrainMultiplier.set(Floats.asList(bloodDrainMultiplier).stream().map(Float::doubleValue).collect(Collectors.toList()));
+                COMMON_SYNCED_TO_CLIENT.bloodTickDown.set(Floats.asList(bloodTickDown).stream().map(Float::doubleValue).collect(Collectors.toList()));
+//                COMMON_SYNCED_TO_CLIENT.bloodHealCost.set(Floats.asList(bloodHealCost).stream().map(Float::doubleValue).collect(Collectors.toList()));
                 COMMON_SYNCED_TO_CLIENT.prioritizeLeastTakenStands.set(prioritizeLeastTakenStands);
                 COMMON_SYNCED_TO_CLIENT.standTiers.set(standTiers);
                 COMMON_SYNCED_TO_CLIENT.standTierXpLevels.set(IntStream.of(standTierXpLevels).boxed().collect(Collectors.toList()));
@@ -388,6 +428,10 @@ public class JojoModConfig {
 //                COMMON_SYNCED_TO_CLIENT.hamonPointsMultiplier.clearCache();
 //                COMMON_SYNCED_TO_CLIENT.breathingTechniqueMultiplier.clearCache();
                 COMMON_SYNCED_TO_CLIENT.breathingTechniqueDeterioration.clearCache();
+                COMMON_SYNCED_TO_CLIENT.maxBloodMultiplier.clearCache();
+                COMMON_SYNCED_TO_CLIENT.bloodDrainMultiplier.clearCache();
+                COMMON_SYNCED_TO_CLIENT.bloodTickDown.clearCache();
+                COMMON_SYNCED_TO_CLIENT.bloodHealCost.clearCache();
                 COMMON_SYNCED_TO_CLIENT.prioritizeLeastTakenStands.clearCache();
                 COMMON_SYNCED_TO_CLIENT.standTiers.clearCache();
                 COMMON_SYNCED_TO_CLIENT.standTierXpLevels.clearCache();
@@ -413,6 +457,14 @@ public class JojoModConfig {
                 PacketManager.sendToClient(new ResetSyncedCommonConfigPacket(), player);
             }
         }
+    }
+    
+    private static boolean isElementPositiveFloat(Object num) {
+        if (num instanceof Double) {
+            Double numDouble = (Double) num;
+            return numDouble > 0 && Float.isFinite(numDouble.floatValue());
+        }
+        return false;
     }
     
     
