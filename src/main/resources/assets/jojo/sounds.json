@@ -305,8 +305,15 @@
     "subtitle": "jojo.subtitle.stand_unsummon",
     "sounds": [ "jojo:stand/stand_unsummon" ]
   },
-  "parry": {
-    "sounds": [ "jojo:parry" ]
+  "stand_damage_block": {
+    "subtitle": "jojo.subtitle.stand_damage_block",
+    "sounds": [ "jojo:stand/stand_damage_block" ]
+  },
+  "stand_barrage_clash": {
+    "sounds": [ "jojo:stand/stand_barrage_clash" ]
+  },
+  "stand_parry": {
+    "sounds": [ "jojo:stand/stand_parry" ]
   },
   
   "jotaro_star_platinum": {
@@ -422,6 +429,10 @@
   "dio_road_roller": {
     "subtitle": "jojo.subtitle.rodo_rolla_da",
     "sounds": [ "jojo:stand_user/dio_road_roller", "jojo:stand_user/dio_road_roller_2" ]
+  },
+  "jonathan_the_world": {
+    "subtitle": "jojo.subtitle.the_world_name",
+    "sounds": [ "jojo:stand_user/jonathan_the_world" ]
   },
   "the_world_summon": {
     "subtitle": "jojo.subtitle.stand_summon",

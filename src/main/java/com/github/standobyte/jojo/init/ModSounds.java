@@ -213,9 +213,15 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> STAND_UNSUMMON_DEFAULT = SOUNDS.register("stand_unsummon_default", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_unsummon_default")));
+
+    public static final RegistryObject<SoundEvent> STAND_DAMAGE_BLOCK = SOUNDS.register("stand_damage_block", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_damage_block")));
+
+    public static final RegistryObject<SoundEvent> STAND_BARRAGE_CLASH = SOUNDS.register("stand_barrage_clash", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_barrage_clash")));
     
-    public static final RegistryObject<SoundEvent> PARRY = SOUNDS.register("parry", 
-            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "parry")));
+    public static final RegistryObject<SoundEvent> STAND_PARRY = SOUNDS.register("stand_parry", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_parry")));
     
     
     public static final RegistryObject<SoundEvent> JOTARO_STAR_PLATINUM = SOUNDS.register("jotaro_star_platinum", 
@@ -326,6 +332,9 @@ public class ModSounds {
 
     public static final RegistryObject<SoundEvent> DIO_ROAD_ROLLER = SOUNDS.register("dio_road_roller", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "dio_road_roller")));
+
+    public static final RegistryObject<SoundEvent> JONATHAN_THE_WORLD = SOUNDS.register("jonathan_the_world", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "jonathan_the_world")));
 
     public static final RegistryObject<SoundEvent> THE_WORLD_SUMMON = SOUNDS.register("the_world_summon", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "the_world_summon")));

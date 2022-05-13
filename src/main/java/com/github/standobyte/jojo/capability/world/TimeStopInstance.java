@@ -170,9 +170,15 @@ public class TimeStopInstance {
             if (action != null) {
                 userPower.ifPresent(power -> {
                     statsOptional.ifPresent(stats -> {
-                        float cooldown = stats.cooldownPerTick * (float) ticksPassed;
-                        if (power.getUser() != null && power.getUser().hasEffect(ModEffects.RESOLVE.get())) {
-                            cooldown /= 3F;
+                        float cooldown;
+                        if (power.isUserCreative()) {
+                            cooldown = 0;
+                        }
+                        else {
+                            cooldown = stats.cooldownPerTick * ticksPassed;
+                            if (power.getUser() != null && power.getUser().hasEffect(ModEffects.RESOLVE.get())) {
+                                cooldown /= 3F;
+                            }
                         }
                         power.setCooldownTimer(action, (int) cooldown);
                     });

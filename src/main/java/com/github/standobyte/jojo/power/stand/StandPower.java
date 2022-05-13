@@ -499,7 +499,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public void onLeap() {
         super.onLeap();
-        consumeStamina(200);
+        consumeStamina(250);
     }
     
     @Override

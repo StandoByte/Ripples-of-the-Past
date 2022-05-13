@@ -156,11 +156,9 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
 
     @Override
     public void setCooldownTimer(Action<?> action, int value) {
-        if (value > 0) {
-            updateCooldownTimer(action, value, value);
-            if (!user.level.isClientSide()) {
-                PacketManager.sendToClientsTrackingAndSelf(new TrSyncCooldownPacket(user.getId(), getPowerClassification(), action, value), user);
-            }
+        updateCooldownTimer(action, value, value);
+        if (!user.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(new TrSyncCooldownPacket(user.getId(), getPowerClassification(), action, value), user);
         }
     }
 
@@ -386,7 +384,10 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             target = action.targetBeforePerform(world, user, getThis(), target);
             action.onPerform(world, user, getThis(), target);
             if (!world.isClientSide()) {
-                setCooldownTimer(action, action.getCooldown(getThis(), -1));
+                int cooldown = action.getCooldown(getThis(), -1);
+                if (cooldown > 0) {
+                    setCooldownTimer(action, cooldown);
+                }
             }
         }
     }
@@ -489,7 +490,10 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                 }
             }
             else {
-                setCooldownTimer(heldAction, heldAction.getCooldown(getThis(), ticksHeld));
+                int cooldown = heldAction.getCooldown(getThis(), ticksHeld);
+                if (cooldown > 0) {
+                    setCooldownTimer(heldAction, cooldown);
+                }
             }
             heldActionData = null;
             if (!user.level.isClientSide()) {

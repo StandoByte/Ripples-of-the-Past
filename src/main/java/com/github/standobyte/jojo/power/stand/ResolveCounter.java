@@ -2,8 +2,6 @@ package com.github.standobyte.jojo.power.stand;
 
 import java.util.Optional;
 
-import javax.annotation.Nullable;
-
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEffects;
@@ -14,19 +12,14 @@ import com.github.standobyte.jojo.network.packets.fromserver.SyncMaxAchievedReso
 import com.github.standobyte.jojo.network.packets.fromserver.SyncResolveBoostsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncResolveLevelPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncResolvePacket;
-import com.github.standobyte.jojo.power.IPower;
-import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.util.DiscardingSortedMultisetWrapper;
 import com.github.standobyte.jojo.util.JojoModUtil;
-import com.github.standobyte.jojo.util.damage.IStandDamageSource;
 import com.google.common.collect.BoundType;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.SortedMultiset;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityClassification;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -268,22 +261,10 @@ public class ResolveCounter {
     
     
 
-    public void onAttack(LivingEntity target, DamageSource dmgSource, @Nullable IStandDamageSource standDmgSource, float dmgAmount) {
-        if (stand.usesResolve() && target.getClassification(false) == EntityClassification.MONSTER || target.getType() == EntityType.PLAYER) {
+    public void addResolveOnAttack(float dmgAmount) {
+        if (stand.usesResolve()) {
             LivingEntity user = stand.getUser();
-            dmgAmount = Math.min(dmgAmount, target.getHealth());
             float points = dmgAmount * RESOLVE_FOR_DMG_POINT;
-            for (PowerClassification classification : PowerClassification.values()) {
-                points *= IPower.getPowerOptional(target, classification).map(power -> {
-                    if (power.hasPower()) {
-                        return power.getTargetResolveMultiplier();
-                    }
-                    return 1F;
-                }).orElse(1F);
-            }
-            if (standDmgSource == null) {
-                points *= 0.5F;
-            }
             addResolveValue(points);
             if (user.hasEffect(ModEffects.RESOLVE.get())) {
                 setResolveValue(Math.max(getMaxResolveValue() * 0.5F, getResolveValue()), 0);
@@ -380,7 +361,13 @@ public class ResolveCounter {
     }
     
     public void resetResolveValue() {
-        reset();
+        resolve = 0;
+        noResolveDecayTicks = 0;
+        nextRecord = 0;
+        resolveRecords.clear();
+        maxAchievedValue = 0;
+        setBoosts(1, 1, 1);
+        hpOnGettingAttacked = -1;
         serverPlayerUser.ifPresent(player -> {
             PacketManager.sendToClient(new ResetResolveValuePacket(), player);
         });
@@ -410,9 +397,9 @@ public class ResolveCounter {
     }
 
     void syncWithUser(ServerPlayerEntity player) {
+        PacketManager.sendToClient(new SyncResolveLevelPacket(getResolveLevel()), player);
         PacketManager.sendToClient(new SyncResolvePacket(getResolveValue(), noResolveDecayTicks), player);
         PacketManager.sendToClient(new SyncMaxAchievedResolvePacket(maxAchievedValue), player);
-        PacketManager.sendToClient(new SyncResolveLevelPacket(getResolveLevel()), player);
         PacketManager.sendToClient(new SyncResolveBoostsPacket(boostAttack, boostRemoteControl, boostChat, hpOnGettingAttacked), player);
     }
 

@@ -639,6 +639,7 @@
   
   "jojo.subtitle.stand_summon": "Stand summoned",
   "jojo.subtitle.stand_unsummon": "Stand unsummoned",
+  "jojo.subtitle.stand_damage_block": "Damage blocked",
   
   "jojo.attribute.name.stand_resistance": "Stand Resistance",
   "jojo.attribute.name.stand_precision": "Stand Precision",

@@ -220,15 +220,15 @@ public abstract class StandEntityAction extends StandAction {
     
     public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, int ticks) {}
     
-    public void playSound(StandEntity standEntity, IStandPower standPower, Phase phase) {
-        SoundEvent sound = getSound(standEntity, standPower, phase);
+    public void playSound(StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target) {
+        SoundEvent sound = getSound(standEntity, standPower, phase, target);
         if (sound != null) {
             playSoundAtStand(standEntity.level, standEntity, sound, standPower, phase);
         }
     }
     
     @Nullable
-    protected SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase) {
+    protected SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target) {
         Supplier<SoundEvent> standSoundSupplier = standSounds.get(phase);
         if (standSoundSupplier == null) {
             return null;

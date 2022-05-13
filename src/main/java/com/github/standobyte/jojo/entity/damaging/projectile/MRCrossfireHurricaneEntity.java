@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.util.JojoModUtil;
 import com.github.standobyte.jojo.util.damage.DamageUtil;
 import com.github.standobyte.jojo.util.damage.IndirectStandEntityDamageSource;
@@ -16,7 +17,6 @@ import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
 
 import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
@@ -151,13 +151,13 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
         }
     }
     
+    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! resolve
     public void onExplode(List<Entity> affectedEntities, List<BlockPos> affectedBlocks) {
         LivingEntity magiciansRed = getOwner();
         for (Entity entity : affectedEntities) {
             if (!entity.is(magiciansRed)) {
                 DamageUtil.setOnFire(entity, 10, true);
-                if (!level.isClientSide() && userStandPower != null && 
-                        (entity.getClassification(false) == EntityClassification.MONSTER || entity.getType() == EntityType.PLAYER)) {
+                if (!level.isClientSide() && userStandPower != null && StandUtil.worthyTarget(entity)) {
                     userStandPower.addLearningProgressPoints(ModActions.MAGICIANS_RED_CROSSFIRE_HURRICANE.get(), 0.0625F);
                 }
             }

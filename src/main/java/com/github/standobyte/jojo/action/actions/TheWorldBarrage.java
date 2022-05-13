@@ -25,8 +25,8 @@ public class TheWorldBarrage extends StandEntityMeleeBarrage {
     }
     
     @Override
-    protected SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase) {
+    protected SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target) {
         return null;
-//        return super.getSound(standEntity, standPower, phase);
+//        return super.getSound(standEntity, standPower, phase, target);
     }
 }
