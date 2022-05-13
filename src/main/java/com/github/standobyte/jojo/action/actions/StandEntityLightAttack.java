@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.PunchType;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
@@ -11,6 +12,7 @@ import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.util.Hand;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
 
 public class StandEntityLightAttack extends StandEntityAction {
@@ -58,6 +60,11 @@ public class StandEntityLightAttack extends StandEntityAction {
         double speed = standEntity.getAttackSpeed();
         return StandStatFormulas.getLightAttackRecovery(speed, standEntity.getComboMeter())
                 * (standEntity.isArmsOnlyMode() ? 2 : 4);
+    }
+    
+    @Override
+    protected SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target) {
+        return target.getType() != TargetType.ENTITY ? null : super.getSound(standEntity, standPower, phase, target);
     }
     
     @Override

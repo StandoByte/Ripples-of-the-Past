@@ -242,7 +242,7 @@ public class ModActions {
     
 
     public static final RegistryObject<StandEntityAction> THE_WORLD_PUNCH = ACTIONS.register("the_world_punch", 
-            () -> new StandEntityLightAttack(new StandEntityAction.Builder().shout(ModSounds.DIO_MUDA)));
+            () -> new StandEntityLightAttack(new StandEntityAction.Builder().standSound(Phase.WINDUP, ModSounds.DIO_MUDA)));
     
     public static final RegistryObject<StandEntityAction> THE_WORLD_BARRAGE = ACTIONS.register("the_world_barrage", 
             () -> new TheWorldBarrage(new StandEntityAction.Builder()

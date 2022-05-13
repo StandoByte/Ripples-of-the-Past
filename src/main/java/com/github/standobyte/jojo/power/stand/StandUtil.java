@@ -16,10 +16,16 @@ import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStandControlStatusPacket;
+import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityClassification;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.monster.MonsterEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.world.server.ServerWorld;
@@ -117,5 +123,37 @@ public class StandUtil {
     
     public static boolean standIgnoresStaminaDebuff(LivingEntity user) {
         return user == null || user.hasEffect(ModEffects.RESOLVE.get());
+    }
+    
+    public static LivingEntity getStandUser(LivingEntity standOrUser) {
+        return standOrUser instanceof StandEntity ? ((StandEntity) standOrUser).getUser() : standOrUser;
+    }
+    
+    public static void addResolve(IStandPower stand, LivingEntity target, float points) {
+        target = getStandUser(target);
+        if (StandUtil.worthyTarget(target)) {
+            for (PowerClassification classification : PowerClassification.values()) {
+                points *= IPower.getPowerOptional(target, classification).map(power -> {
+                    if (power.hasPower()) {
+                        return power.getTargetResolveMultiplier();
+                    }
+                    return 1F;
+                }).orElse(1F);
+            }
+            
+            float pts = points;
+            stand.getResolveCounter().addResolveOnAttack(pts);
+        }
+    }
+    
+    public static boolean worthyTarget(Entity target) {
+        if (target.getClassification(false) == EntityClassification.MONSTER || target.getType() == EntityType.PLAYER) {
+            return true;
+        }
+        if (target instanceof LivingEntity) {
+            LivingEntity livingEntity = (LivingEntity) target;
+            return livingEntity instanceof MonsterEntity || livingEntity instanceof StandEntity;
+        }
+        return false;
     }
 }

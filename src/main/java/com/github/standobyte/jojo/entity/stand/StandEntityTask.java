@@ -147,7 +147,7 @@ public class StandEntityTask {
             moveToPhase(phase.getNextPhase(), standPower, standEntity);
         }
         else {
-            action.playSound(standEntity, standPower, phase);
+            action.playSound(standEntity, standPower, phase, target);
         }
     }
     

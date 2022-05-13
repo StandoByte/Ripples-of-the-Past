@@ -45,6 +45,7 @@ import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
 import com.github.standobyte.jojo.power.nonstand.type.VampirismPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.type.EntityStandType;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.github.standobyte.jojo.tileentity.StoneMaskTileEntity;
@@ -356,20 +357,22 @@ public class GameplayEventHandler {
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onLivingAttack(LivingAttackEvent event) {
+    @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
+    public static void addResolveOnAttack(LivingAttackEvent event) {
+        LivingEntity target = event.getEntityLiving();
         DamageSource damageSrc = event.getSource();
+        float points = Math.min(event.getAmount(), target.getHealth());
+        
         if (damageSrc instanceof IStandDamageSource) {
             IStandDamageSource standDamageSrc = (IStandDamageSource) damageSrc;
             IStandPower attackerStand = standDamageSrc.getStandPower();
-            if (attackerStand.usesResolve()) {
-                attackerStand.getResolveCounter().onAttack(event.getEntityLiving(), damageSrc, standDamageSrc, event.getAmount());
-            }
+            StandUtil.addResolve(attackerStand, target, points);
         }
+        
         else if (damageSrc.getEntity() instanceof LivingEntity) {
-            IStandPower.getStandPowerOptional((LivingEntity) damageSrc.getEntity()).ifPresent(attackerStand -> {
-                if (attackerStand.usesResolve() && attackerStand.isActive()) {
-                    attackerStand.getResolveCounter().onAttack(event.getEntityLiving(), damageSrc, null, event.getAmount());
+            IStandPower.getStandPowerOptional(StandUtil.getStandUser((LivingEntity) damageSrc.getEntity())).ifPresent(attackerStand -> {
+                if (attackerStand.isActive()) {
+                    StandUtil.addResolve(attackerStand, target, points * 0.5F);
                 }
             });
         }

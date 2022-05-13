@@ -28,7 +28,7 @@ public class StandStatFormulas {
     
     
     public static float getLightAttackDamage(double strength) {
-        return 0.5F + (float) strength * 0.25F;
+        return (float) strength * 0.25F;
     }
     
     private static final Random RANDOM = new Random();
