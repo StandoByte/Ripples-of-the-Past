@@ -14,7 +14,7 @@ public class StandEntityBlock extends StandEntityAction {
 
     protected StandEntityBlock(StandEntityAction.Builder builder) {
         super(builder.standAutoSummonMode(AutoSummonMode.ARMS).holdType().standPose(StandPose.BLOCK)
-                .defaultStandOffsetFromUser().standUserSlowDownFactor(0.3F).standOffsetFromUser(0, 0.3));
+                .standOffsetFront().standUserSlowDownFactor(0.3F).standOffsetFromUser(0, 0.3));
     }
 
     @Override

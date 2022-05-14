@@ -205,7 +205,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 StandEntityAction action = task.getAction();
                 StandEntityAction.Phase phase = getCurrentTaskPhase();
                 action.playSound(this, userPower, phase, task.getTarget());
-                action.onTaskSet(level, this, userPower, phase, task.getTicksLeft());
+                action.onTaskSet(level, this, userPower, phase, task.getTarget(), task.getTicksLeft());
             }
             if (task != null || getStandPose() != StandPose.SUMMON) {
                 setStandPose(task != null ? task.getAction().getStandPose(userPower, this) : StandPose.IDLE);
@@ -883,15 +883,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
         rotatedTowardsTarget = false;
         
-        rangeEfficiency = user != null ? 
-                StandStatFormulas.rangeStrengthFactor(rangeEffective, getMaxRange(), distanceTo(user))
-                : 1;
-        
-        staminaCondition = StandUtil.standIgnoresStaminaDebuff(user) ? 
-                        1
-                        : 0.25 + Math.min((double) (userPower.getStamina() / userPower.getMaxStamina()) * 1.5, 0.75);
-
         updatePosition(user);
+        updateStrengthMultipliers(user);
         
         if (isManuallyControlled()) {
             Vector3d manualMovementVec = getManualMovement();
@@ -971,13 +964,22 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
 
 
+    public void updateStrengthMultipliers(LivingEntity user) {
+        rangeEfficiency = user != null ? 
+                StandStatFormulas.rangeStrengthFactor(rangeEffective, getMaxRange(), distanceTo(user))
+                : 1;
+        
+        staminaCondition = StandUtil.standIgnoresStaminaDebuff(user) ? 
+                        1
+                        : 0.25 + Math.min((double) (userPower.getStamina() / userPower.getMaxStamina()) * 1.5, 0.75);
+    }
 
     private void updatePosition(LivingEntity user) {
         if (user != null/* && (!level.isClientSide() || isArmsOnlyMode())*/) {
             if (isFollowingUser()) {
                 StandRelativeOffset relativeOffset = getOffsetFromUser();
                 if (relativeOffset != null) {
-                    Vector3d offset = relativeOffset.getAbsoluteVec(getDefaultOffsetFromUser(), yRot);
+                    Vector3d offset = relativeOffset.getAbsoluteVec(getDefaultOffsetFromUser(), yRot, xRot);
                     // FIXME (!) glitches when too close to the target entity
                     setPos(user.getX() + offset.x, 
                             user.getY() + (user.isShiftKeyDown() ? 0 : offset.y), 
@@ -1237,14 +1239,15 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
 
     public boolean punch(PunchType punch, ActionTarget target, StandEntityAction action) {
-        return punch(punch, target, action, 1);
+        return punch(punch, target, action, 1, null);
     }
 
     public boolean barrageTickPunches(ActionTarget target, StandEntityAction action, int barrageHits) {
-        return punch(PunchType.BARRAGE, target, action, barrageHits);
+        return punch(PunchType.BARRAGE, target, action, barrageHits, null);
     }
 
-    public boolean punch(PunchType punch, ActionTarget target, StandEntityAction action, int barrageHits) {
+    public boolean punch(PunchType punch, ActionTarget target, StandEntityAction action, int barrageHits, 
+            @Nullable Consumer<StandAttackProperties> entityAttackOverride) {
         if (punch == PunchType.BARRAGE) {
             if (!accumulateBarrageTickParry) {
                 accumulateBarrageTickParry = true;
@@ -1261,10 +1264,11 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             setTaskTarget(target);
         }
         
-        return attackTarget(target, punch, action, barrageHits);
+        return attackTarget(target, punch, action, barrageHits, entityAttackOverride);
     }
     
-    public boolean attackTarget(ActionTarget target, PunchType punch, StandEntityAction action, int barrageHits) {
+    public boolean attackTarget(ActionTarget target, PunchType punch, StandEntityAction action, int barrageHits, 
+            @Nullable Consumer<StandAttackProperties> entityAttackOverride) {
         boolean punched;
         switch (target.getType()) {
         case BLOCK:
@@ -1272,7 +1276,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             break;
         case ENTITY:
             Entity entity = target.getEntity(level);
-            punched = attackEntity(entity, punch, action, barrageHits);
+            punched = attackEntity(entity, punch, action, barrageHits, entityAttackOverride);
             break;
         default:
             punched = false;
@@ -1526,7 +1530,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return attackEntity(target, punch, action, barrageHits, null);
     }
 
-    public boolean attackEntity(Entity target, PunchType punch, StandEntityAction action, int barrageHits, @Nullable Consumer<StandAttackProperties> attackOverride) {
+    public boolean attackEntity(Entity target, PunchType punch, StandEntityAction action, int barrageHits,
+            @Nullable Consumer<StandAttackProperties> attackOverride) {
         if (!canHarm(target)) {
             return false;
         }
@@ -1548,7 +1553,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             attackOverride.accept(attack);
         }
 
+        attack.beforeAttack(target, this, getUserPower(), getUser());
         boolean attacked = doAttack(target, attack, dmgSource, StandAttackProperties::getDamage);
+        attack.afterAttack(target, this, getUserPower(), getUser(), attacked, !target.isAlive());
         
         if (attacked) {
             if (attack.isSweepingAttack()) {
@@ -1991,15 +1998,11 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         if (ticks > 0 && alphaTicks > 0) {
             alpha = (float) (alphaTicks - ticks) / (float) alphaTicks;
         }
-        else {
-            StandEntityTask currentTask = getCurrentTask();
-            if (currentTask != null) {
-                alpha = currentTask.getAction().getStandAlpha(this, currentTask.getTicksLeft(), partialTick);
-            }
+        StandEntityTask currentTask = getCurrentTask();
+        if (currentTask != null) {
+            alpha *= currentTask.getAction().getStandAlpha(this, currentTask.getTicksLeft(), partialTick);
         }
-        if (!isFollowingUser()) {
-            alpha *= rangeEfficiency; 
-        }
+        alpha *= rangeEfficiency; 
         return MathHelper.clamp(alpha, 0F, 1F);
     }
 

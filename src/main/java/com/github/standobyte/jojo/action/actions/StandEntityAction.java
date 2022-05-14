@@ -194,6 +194,7 @@ public abstract class StandEntityAction extends StandAction {
     protected final void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             invokeForStand(power, stand -> {
+                onTaskInit(power, stand, target);
                 int windupTicks = getStandWindupTicks(power, stand);
                 int ticks = windupTicks > 0 ? windupTicks : getStandActionTicks(power, stand);
                 Phase phase = windupTicks > 0 ? Phase.WINDUP : Phase.PERFORM;
@@ -201,6 +202,8 @@ public abstract class StandEntityAction extends StandAction {
             });
         }
     }
+    
+    protected void onTaskInit(IStandPower standPower, StandEntity standEntity, ActionTarget target) {}
     
     protected boolean allowArmsOnly() {
         return autoSummonMode == AutoSummonMode.ARMS || autoSummonMode == AutoSummonMode.ONE_ARM;
@@ -218,7 +221,7 @@ public abstract class StandEntityAction extends StandAction {
         return false;
     }
     
-    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, int ticks) {}
+    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target, int ticks) {}
     
     public void playSound(StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target) {
         SoundEvent sound = getSound(standEntity, standPower, phase, target);
@@ -339,7 +342,6 @@ public abstract class StandEntityAction extends StandAction {
         private boolean enablePhysics = true;
         private final Map<Phase, Supplier<SoundEvent>> standSounds = new HashMap<>();
 
-        @Deprecated
         @Override
         public T autoSummonStand() {
             return standAutoSummonMode(AutoSummonMode.FULL);
@@ -375,7 +377,7 @@ public abstract class StandEntityAction extends StandAction {
             this.crosshairTargetForStand = TargetRequirement.ANY;
             return getThis();
         }
-        
+
         public T standTakesCrosshairTarget(TargetType targetType) {
             switch (targetType) {
             case BLOCK:
@@ -402,30 +404,30 @@ public abstract class StandEntityAction extends StandAction {
             }
             return getThis();
         }
-        
-        public T defaultStandOffsetFromUser() {
+
+        public T standOffsetFront() {
             this.userOffset = StandRelativeOffset.noYOffset(0, 0.5);
             return getThis();
         }
-        
+
         public T standOffsetFromUser(double left, double forward) {
             return standOffsetFromUser(left, forward, false);
         }
-        
+
         public T standOffsetFromUser(double left, double forward, double y) {
             return standOffsetFromUser(left, forward, y, false);
         }
-        
+
         public T standOffsetFromUser(double left, double forward, boolean armsOnlyMode) {
             setStandOffset(StandRelativeOffset.noYOffset(left, forward), armsOnlyMode);
             return getThis();
         }
-        
+
         public T standOffsetFromUser(double left, double y, double forward, boolean armsOnlyMode) {
             setStandOffset(StandRelativeOffset.withYOffset(left, y, forward), armsOnlyMode);
             return getThis();
         }
-        
+
         private void setStandOffset(StandRelativeOffset offset, boolean armsOnlyMode) {
             if (armsOnlyMode) {
                 userOffsetArmsOnly = offset;
@@ -434,7 +436,7 @@ public abstract class StandEntityAction extends StandAction {
                 userOffset = offset;
             }
         }
-        
+
         public T stayInNoPhysics() {
             this.enablePhysics = false;
             return getThis();
