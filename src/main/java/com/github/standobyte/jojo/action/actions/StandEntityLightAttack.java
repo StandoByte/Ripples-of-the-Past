@@ -19,7 +19,7 @@ public class StandEntityLightAttack extends StandEntityAction {
 
     public StandEntityLightAttack(StandEntityAction.Builder builder) {
         super(builder.standAutoSummonMode(AutoSummonMode.ONE_ARM).staminaCost(10F).standUserSlowDownFactor(1.0F)
-                .defaultStandOffsetFromUser().standOffsetFromUser(-0.75, 0.75)
+                .standOffsetFront().standOffsetFromUser(-0.75, 0.75)
                 .standTakesCrosshairTarget().standPose(StandPose.LIGHT_ATTACK));
     }
 
@@ -29,7 +29,7 @@ public class StandEntityLightAttack extends StandEntityAction {
     }
     
     @Override
-    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, int ticks) {
+    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target, int ticks) {
         if (standEntity.isArmsOnlyMode() && standEntity.swingingArm == Hand.OFF_HAND) {
             standEntity.setArmsOnlyMode(true, true);
         }

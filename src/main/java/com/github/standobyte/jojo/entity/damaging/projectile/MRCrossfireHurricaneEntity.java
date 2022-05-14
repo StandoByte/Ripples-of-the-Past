@@ -151,7 +151,6 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
         }
     }
     
-    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! resolve
     public void onExplode(List<Entity> affectedEntities, List<BlockPos> affectedBlocks) {
         LivingEntity magiciansRed = getOwner();
         for (Entity entity : affectedEntities) {

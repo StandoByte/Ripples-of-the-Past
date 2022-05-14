@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -36,6 +37,14 @@ public class TimeStopInstant extends StandAction {
         this.baseTimeStop = baseTimeStop;
     }
     
+    @Override
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
+        if (TimeUtil.isTimeStopped(user.level, user.blockPosition())) {
+            return ActionConditionResult.NEGATIVE;
+        }
+        return super.checkSpecificConditions(user, power, target);
+    }
+
     @Override
     public Action<IStandPower> getVisibleAction(IStandPower power) {
         LivingEntity user = power.getUser();

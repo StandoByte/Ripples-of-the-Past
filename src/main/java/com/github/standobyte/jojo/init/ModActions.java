@@ -212,7 +212,7 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_STAR_FINGER = ACTIONS.register("star_platinum_star_finger", 
             () -> new StarPlatinumStarFinger(new StandEntityAction.Builder().standPerformDuration(20).staminaCost(250).cooldown(20, 60)
-                    .ignoresPerformerStun().resolveLevelToUnlock(2).defaultStandOffsetFromUser()
+                    .ignoresPerformerStun().resolveLevelToUnlock(2).standOffsetFront()
                     .standPose(StandPose.RANGED_ATTACK).shout(ModSounds.JOTARO_STAR_FINGER).standSound(Phase.PERFORM, ModSounds.STAR_PLATINUM_STAR_FINGER)
                     .xpRequirement(300)));
     
@@ -272,7 +272,8 @@ public class ModActions {
                     THE_WORLD_TIME_STOP, ModSounds.THE_WORLD_TIME_STOP_BLINK));
     
     public static final RegistryObject<StandEntityAction> THE_WORLD_TS_PUNCH = ACTIONS.register("the_world_ts_punch", 
-            () -> new TheWorldTSHeavyAttack(new StandEntityAction.Builder().resolveLevelToUnlock(3).standPose(TheWorldTSHeavyAttack.TS_PUNCH_POSE), 
+            () -> new TheWorldTSHeavyAttack(new StandEntityAction.Builder().resolveLevelToUnlock(3)
+                    .standTakesCrosshairTarget().standPose(TheWorldTSHeavyAttack.TS_PUNCH_POSE), 
                     THE_WORLD_HEAVY_PUNCH, THE_WORLD_TIME_STOP_BLINK));
     
 
@@ -287,14 +288,14 @@ public class ModActions {
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_EMERALD_SPLASH = ACTIONS.register("hierophant_green_emerald_splash", 
             () -> new HierophantGreenEmeraldSplash(new StandEntityAction.Builder()
                     .standPerformDuration(30).cooldown(30, 10).staminaCostTick(4)
-                    .resolveLevelToUnlock(1).isTrained().defaultStandOffsetFromUser()
+                    .resolveLevelToUnlock(1).isTrained().standOffsetFront()
                     .standPose(StandPose.RANGED_ATTACK).shout(ModSounds.KAKYOIN_EMERALD_SPLASH).standSound(ModSounds.HIEROPHANT_GREEN_EMERALD_SPLASH)
                     .xpRequirement(50)));
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED = ACTIONS.register("hierophant_green_es_concentrated", 
             () -> new HierophantGreenEmeraldSplash(new StandEntityAction.Builder()
                     .standPerformDuration(5).cooldown(5, 30).staminaCostTick(6)
-                    .resolveLevelToUnlock(-1).defaultStandOffsetFromUser()
+                    .resolveLevelToUnlock(-1).standOffsetFront()
                     .standPose(StandPose.RANGED_ATTACK).shout(ModSounds.KAKYOIN_EMERALD_SPLASH).standSound(ModSounds.HIEROPHANT_GREEN_EMERALD_SPLASH)
                     .shiftVariationOf(HIEROPHANT_GREEN_EMERALD_SPLASH)
                     .xpRequirement(400)));
@@ -329,7 +330,7 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_RAPIER_LAUNCH = ACTIONS.register("silver_chariot_rapier_launch", 
             () -> new SilverChariotRapierLaunch(new StandEntityAction.Builder().cooldown(0, 100)
-                    .ignoresPerformerStun().resolveLevelToUnlock(2).defaultStandOffsetFromUser()
+                    .ignoresPerformerStun().resolveLevelToUnlock(2).standOffsetFront()
                     .standPose(StandPose.RANGED_ATTACK).standSound(ModSounds.SILVER_CHARIOT_RAPIER_SHOT)
                     .xpRequirement(200)));
     
@@ -349,7 +350,7 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_FLAME_BURST = ACTIONS.register("magicians_red_flame_burst", 
             () -> new MagiciansRedFlameBurst(new StandEntityAction.Builder().staminaCostTick(3).holdType()
-                    .defaultStandOffsetFromUser().standPose(StandPose.RANGED_ATTACK)
+                    .standOffsetFront().standPose(StandPose.RANGED_ATTACK)
                     .xpRequirement(50)));
     
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_FIREBALL = ACTIONS.register("magicians_red_fireball", 

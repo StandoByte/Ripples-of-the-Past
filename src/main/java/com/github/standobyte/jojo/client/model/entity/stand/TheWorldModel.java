@@ -318,16 +318,6 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                     new RotationAngle(rightLeg, -0.4363F, 0.0F, 0.1745F),
                     new RotationAngle(rightLowerLeg, 1.0472F, 0.0F, 0.0F)
             },
-//            new RotationAngle[] {
-//                    new RotationAngle(body, 0.6981F, 0.5236F, 0.0F),
-//                    new RotationAngle(leftArm, -0.4363F, -0.6109F, -1.1345F),
-//                    new RotationAngle(leftForeArm, -1.0472F, 0.0F, 0.0F),
-//                    new RotationAngle(rightArm, 0.0F, 1.4835F, 1.5708F),
-//                    new RotationAngle(rightForeArm, -0.8727F, -0.3927F, -1.5708F),
-//                    new RotationAngle(leftLeg, -1.5708F, 0.0F, -0.1745F),
-//                    new RotationAngle(leftLowerLeg, 1.3963F, 0.0F, 0.0F),
-//                    new RotationAngle(rightLeg, 0.0F, 0.0F, 0.1745F)
-//            },
             new RotationAngle[] {
                     new RotationAngle(head, 0.0F, 1.3963F, 0.0F),
                     new RotationAngle(body, 0.0F, 1.8326F, 0.0F),

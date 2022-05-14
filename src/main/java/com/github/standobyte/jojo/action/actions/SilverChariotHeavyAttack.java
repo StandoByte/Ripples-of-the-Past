@@ -67,8 +67,8 @@ public class SilverChariotHeavyAttack extends StandEntityHeavyAttack {
     }
     
     @Override
-    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, int ticks) {
-        super.onTaskSet(world, standEntity, standPower, phase, ticks);
+    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target, int ticks) {
+        super.onTaskSet(world, standEntity, standPower, phase, target, ticks);
         if (!standEntity.isHeavyComboPunching() && ticks > 0) {
             if (standEntity.isFollowingUser() && standEntity.getAttackSpeed() < 24) {
                 LivingEntity user = standEntity.getUser();
@@ -94,7 +94,7 @@ public class SilverChariotHeavyAttack extends StandEntityHeavyAttack {
                     for (RayTraceResult rayTraceResult : JojoModUtil.rayTraceMultipleEntities(standEntity, 
                             standEntity.getAttributeValue(ForgeMod.REACH_DISTANCE.get()), 
                             standEntity.canTarget(), 0.25, standEntity.getPrecision())) {
-                        standEntity.attackTarget(ActionTarget.fromRayTraceResult(rayTraceResult), PunchType.HEAVY_NO_COMBO, this, 1);
+                        standEntity.attackTarget(ActionTarget.fromRayTraceResult(rayTraceResult), PunchType.HEAVY_NO_COMBO, this, 1, null);
                     }
                 }
                 else if (!Vector3d.ZERO.equals(standEntity.getDeltaMovement())) {

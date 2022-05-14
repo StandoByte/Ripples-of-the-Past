@@ -1,5 +1,11 @@
 package com.github.standobyte.jojo.entity.stand;
 
+import java.util.Optional;
+
+import com.github.standobyte.jojo.power.stand.IStandPower;
+
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
@@ -16,6 +22,8 @@ public class StandAttackProperties {
     private Vector3d sweepingAabb;
     private float sweepingDamage;
     private int standInvulTime = 0;
+    private Optional<BeforeAttackBehavior> beforeAttack = Optional.empty();
+    private Optional<AfterAttackBehavior> afterAttack = Optional.empty();
     
     
     
@@ -77,6 +85,16 @@ public class StandAttackProperties {
     
     public StandAttackProperties setStandInvulTime(int ticks) {
         this.standInvulTime = ticks;
+        return this;
+    }
+    
+    public StandAttackProperties callbackBeforeAttack(BeforeAttackBehavior callback) {
+        this.beforeAttack = Optional.ofNullable(callback);
+        return this;
+    }
+    
+    public StandAttackProperties callbackAfterAttack(AfterAttackBehavior callback) {
+        this.afterAttack = Optional.ofNullable(callback);
         return this;
     }
 
@@ -144,5 +162,23 @@ public class StandAttackProperties {
     
     public int getStandInvulTime() {
         return standInvulTime;
+    }
+
+    public void beforeAttack(Entity target, StandEntity stand, IStandPower power, LivingEntity user) {
+        beforeAttack.ifPresent(behavior -> behavior.beforeAttack(target, stand, power, user));
+    }
+    
+    public void afterAttack(Entity target, StandEntity stand, IStandPower power, LivingEntity user, boolean hurt, boolean killed) {
+        afterAttack.ifPresent(behavior -> behavior.afterAttack(target, stand, power, user, hurt, killed));
+    }
+    
+    
+    
+    public interface BeforeAttackBehavior {
+        void beforeAttack(Entity target, StandEntity stand, IStandPower power, LivingEntity user);
+    }
+    
+    public interface AfterAttackBehavior {
+        void afterAttack(Entity target, StandEntity stand, IStandPower power, LivingEntity user, boolean hurt, boolean killed);
     }
 }

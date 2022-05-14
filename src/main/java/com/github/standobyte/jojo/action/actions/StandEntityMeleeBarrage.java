@@ -11,13 +11,16 @@ import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class StandEntityMeleeBarrage extends StandEntityAction {
 
     public StandEntityMeleeBarrage(StandEntityAction.Builder builder) {
         super(builder.standAutoSummonMode(AutoSummonMode.ARMS).holdType().staminaCostTick(3F)
-                .standUserSlowDownFactor(0.3F).defaultStandOffsetFromUser());
+                .standUserSlowDownFactor(0.3F).standOffsetFront());
     }
 
     @Override
@@ -66,15 +69,26 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
         }
     }
     
-    // FIXME (!!!!) barrage offset
     @Override
     public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, ActionTarget target) {
-        if (target.getType() == TargetType.EMPTY || standEntity.isArmsOnlyMode()) {
+        if (standEntity.isArmsOnlyMode()) {
             return super.getOffsetFromUser(standPower, standEntity, target);
         }
-        LivingEntity user = standEntity.getUser();
-        double frontOffset = 0.5;
-        return StandRelativeOffset.noYOffset(0, frontOffset);
+        double maxVariation = standEntity.getAttributeValue(Attributes.MOVEMENT_SPEED) * 1.5 * standEntity.getStaminaCondition();
+        Vector3d targetPos = target.getTargetPos();
+        double offset = 0.5;
+        if (targetPos == null) {
+            return StandRelativeOffset.noYOffset(0, offset + maxVariation).withXRot();
+        }
+        else {
+            LivingEntity user = standEntity.getUser();
+            double backAway = 0.5 + (target.getType() == TargetType.ENTITY ? 
+                    target.getEntity(standEntity.level).getBoundingBox().getXsize() / 2
+                    : 0.5);
+            double offsetToTarget = targetPos.subtract(user.position()).multiply(1, 0, 1).length() - backAway;
+            offset = MathHelper.clamp(offsetToTarget, offset, offset + maxVariation);
+            return StandRelativeOffset.noYOffset(0, offset).withXRot();
+        }
     }
     
     private void swing(StandEntity standEntity) {

@@ -24,7 +24,7 @@ public class StandEntityHeavyAttack extends StandEntityAction {
     }
     
     @Override
-    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, int ticks) {
+    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target, int ticks) {
         standEntity.alternateHands();
         if (!world.isClientSide()) {
             standEntity.setHeavyPunchCombo();

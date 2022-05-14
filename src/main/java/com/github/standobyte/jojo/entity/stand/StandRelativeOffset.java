@@ -10,6 +10,7 @@ public class StandRelativeOffset {
     private double forward;
     private boolean doYOffset;
     private double y;
+    private boolean useXRot = false;
 //    private float yRotOffset;
     
     public static StandRelativeOffset noYOffset(double left, double forward) {
@@ -39,8 +40,20 @@ public class StandRelativeOffset {
         this.y = y;
     }
     
-    Vector3d getAbsoluteVec(StandRelativeOffset offsetDefault, float yRot) {
-        return MathUtil.relativeCoordsToAbsolute(left, doYOffset ? y : offsetDefault.y, forward, yRot);
+    public StandRelativeOffset withXRot() {
+        this.useXRot = true;
+        return this;
+    }
+    
+    Vector3d getAbsoluteVec(StandRelativeOffset offsetDefault, float yRot, float xRot) {
+        Vector3d vec;
+        if (useXRot) {
+            vec = new Vector3d(left, 0, forward).xRot(-xRot * MathUtil.DEG_TO_RAD).yRot(-yRot * MathUtil.DEG_TO_RAD);
+        }
+        else {
+            vec = MathUtil.relativeCoordsToAbsolute(left, doYOffset ? y : offsetDefault.y, forward, yRot);
+        }
+        return vec;
     }
     
     Vector3d toRelativeVec() {
