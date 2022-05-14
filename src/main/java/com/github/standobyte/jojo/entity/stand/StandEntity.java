@@ -988,7 +988,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             }
             else if (isBeingRetracted()) {
                 if (!isCloseToEntity(user)) {
-                    setDeltaMovement(new Vector3d(user.getX() - getX(), user.getY() - getY(), user.getZ() - getZ())
+                    setDeltaMovement(user.position().add(getDefaultOffsetFromUser().getAbsoluteVec(getDefaultOffsetFromUser(), yRot, xRot)).subtract(position())
                             .normalize().scale(getAttributeValue(Attributes.MOVEMENT_SPEED)));
                 }
                 else {

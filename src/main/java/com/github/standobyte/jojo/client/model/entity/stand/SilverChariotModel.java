@@ -13,6 +13,7 @@ import com.github.standobyte.jojo.client.model.pose.ModelPoseTransitionMultiple;
 import com.github.standobyte.jojo.client.model.pose.RigidModelPose;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
 import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
+import com.github.standobyte.jojo.client.model.pose.XRotationModelRenderer;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.util.MathUtil;
@@ -354,7 +355,7 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
 
     protected ModelPoseSided<SilverChariotEntity> rapierBarrageSwing;
     private ModelPoseTransition<SilverChariotEntity> initRapierBarrageSwing(HandSide swingingHand) {
-        ModelRenderer punchingArm = getArm(swingingHand);
+        XRotationModelRenderer punchingArm = getArm(swingingHand);
         ModelRenderer punchingForeArm = getForeArm(swingingHand);
         ModelRenderer otherArm = getArm(swingingHand.getOpposite());
         ModelRenderer otherForeArm = getForeArm(swingingHand.getOpposite());
@@ -382,7 +383,7 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
                 }).setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
                     leftArm.zRot *= -1.0F;
                     leftArm.yRot *= -1.0F;
-                    punchingArm.xRot += xRotation * MathUtil.DEG_TO_RAD;
+                    punchingArm.xRotSecond = xRotation * MathUtil.DEG_TO_RAD;
                 }))
                 .setEasing(sw -> {
                     float halfSwing = sw < 0.4F ? sw * 20 / 8 : sw > 0.6F ? (1 - sw) * 20 / 8 : 1F;
