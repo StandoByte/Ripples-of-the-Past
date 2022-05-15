@@ -13,6 +13,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.util.JojoModUtil;
 import com.github.standobyte.jojo.util.TimeUtil;
@@ -62,8 +63,10 @@ public class TimeStopInstant extends StandAction {
         }
         
         if (!world.isClientSide()) {
-            int timeStopTicks = Math.min(TimeStop.getTimeStopTicks(power, this), 
-                    MathHelper.floor(power.getStamina() / getStaminaCostTicking(power)));
+            int timeStopTicks = TimeStop.getTimeStopTicks(power, this);
+            if (!StandUtil.standIgnoresStaminaDebuff(user)) {
+                timeStopTicks = Math.min(timeStopTicks, MathHelper.floor(power.getStamina() / getStaminaCostTicking(power)));
+            }
             
             Vector3d blinkPos = null;
             double speed = user.getSpeed() * 2.1585;

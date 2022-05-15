@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncWorldTimeStopPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.util.JojoModUtil;
 import com.github.standobyte.jojo.util.TimeUtil;
@@ -88,11 +89,8 @@ public class TimeStopInstance {
                     float staminaCost = power.getStaminaTickGain();
                     if (action != null) {
                         staminaCost += action.getStaminaCostTicking(power);
-                        statsOptional.ifPresent(stats -> {
-                            power.addLearningProgressPoints(action, stats.maxDurationGrowthPerTick);
-                        });
                     }
-                    if (!power.consumeStamina(staminaCost) && !user.hasEffect(ModEffects.RESOLVE.get())) {
+                    if (!power.consumeStamina(staminaCost) && !StandUtil.standIgnoresStaminaDebuff(user)) {
                         power.setStamina(0);
                         return true;
                     }
@@ -181,6 +179,8 @@ public class TimeStopInstance {
                             }
                         }
                         power.setCooldownTimer(action, (int) cooldown);
+
+                        power.addLearningProgressPoints(action, stats.maxDurationGrowthPerTick * ticksPassed);
                     });
                 });
             }

@@ -211,7 +211,7 @@ public class ModActions {
                     .shiftVariationOf(STAR_PLATINUM_PUNCH).shiftVariationOf(STAR_PLATINUM_BARRAGE)));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_STAR_FINGER = ACTIONS.register("star_platinum_star_finger", 
-            () -> new StarPlatinumStarFinger(new StandEntityAction.Builder().standPerformDuration(20).staminaCost(250).cooldown(20, 60)
+            () -> new StarPlatinumStarFinger(new StandEntityAction.Builder().standPerformDuration(20).staminaCost(375).cooldown(20, 60)
                     .ignoresPerformerStun().resolveLevelToUnlock(2).standOffsetFront()
                     .standPose(StandPose.RANGED_ATTACK).shout(ModSounds.JOTARO_STAR_FINGER).standSound(Phase.PERFORM, ModSounds.STAR_PLATINUM_STAR_FINGER)
                     .xpRequirement(300)));

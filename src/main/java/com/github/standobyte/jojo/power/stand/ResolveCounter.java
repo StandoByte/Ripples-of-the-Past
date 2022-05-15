@@ -64,7 +64,7 @@ public class ResolveCounter {
     
     private DiscardingSortedMultisetWrapper<Float> resolveRecords = 
             new DiscardingSortedMultisetWrapper<>(99);
-    private float nextRecord;
+    private boolean saveNextRecord = true;
     private float maxAchievedValue;
     
     private float boostAttack = 1;
@@ -97,12 +97,16 @@ public class ResolveCounter {
             if (noResolveDecayTicks > 0) {
                 noResolveDecayTicks--;
                 if (noResolveDecayTicks == 0) {
-                    if (resolveRecords.isEmpty()) {
-                        saveResolveRecord(resolve, true);
+                    if (saveNextRecord) {
+                        saveNextRecord = false;
                     }
                     else {
-                        nextRecord = resolve;
+                        resolveRecords.discardMin();
                     }
+                    if (resolve > 0) {
+                        resolveRecords.add(resolve);
+                    }
+                    setMaxAchievedValue(resolveRecords.getMax());
                 }
             }
             else {
@@ -114,9 +118,7 @@ public class ResolveCounter {
                 if (hadValue && resolve == 0) {
                     boostChat = 1;
                     hpOnGettingAttacked = -1;
-                    if (nextRecord > 0) {
-                        saveResolveRecord(nextRecord, true);
-                    }
+                    saveNextRecord = true;
                 }
             }
         }
@@ -125,16 +127,6 @@ public class ResolveCounter {
     
     private float getResolveDecay() {
         return RESOLVE_DECAY;
-    }
-    
-    private void saveResolveRecord(float value, boolean syncMaxRecord) {
-        resolveRecords.add(nextRecord);
-        if (syncMaxRecord) {
-            setMaxAchievedValue(resolveRecords.getMax());
-        }
-        else {
-            this.maxAchievedValue = value;
-        }
     }
     
     
@@ -353,8 +345,8 @@ public class ResolveCounter {
         resolve = 0;
         resolveLevel = 0;
         noResolveDecayTicks = 0;
-        nextRecord = 0;
         resolveRecords.clear();
+        saveNextRecord = true;
         maxAchievedValue = 0;
         setBoosts(1, 1, 1);
         hpOnGettingAttacked = -1;
@@ -363,8 +355,8 @@ public class ResolveCounter {
     public void resetResolveValue() {
         resolve = 0;
         noResolveDecayTicks = 0;
-        nextRecord = 0;
         resolveRecords.clear();
+        saveNextRecord = true;
         maxAchievedValue = 0;
         setBoosts(1, 1, 1);
         hpOnGettingAttacked = -1;
@@ -377,7 +369,7 @@ public class ResolveCounter {
         this.resolve = previous.resolve;
         this.resolveLevel = previous.resolveLevel;
         this.noResolveDecayTicks = previous.noResolveDecayTicks;
-        this.nextRecord = previous.nextRecord;
+        this.saveNextRecord = previous.saveNextRecord;
         this.resolveRecords = previous.resolveRecords;
         this.maxAchievedValue = previous.maxAchievedValue;
         this.boostAttack = previous.boostAttack;
@@ -387,11 +379,14 @@ public class ResolveCounter {
     }
 
     void alwaysResetOnDeath() {
-        saveResolveRecord(resolve, false);
+        if (resolve > 0) {
+            resolveRecords.add(resolve);
+        }
+        this.maxAchievedValue = resolveRecords.getMax();
         
         resolve = 0;
         noResolveDecayTicks = 0;
-        nextRecord = 0;
+        saveNextRecord = true;
         setBoosts(1, 1, 1);
         hpOnGettingAttacked = -1;
     }
@@ -407,7 +402,7 @@ public class ResolveCounter {
         resolve = nbt.getFloat("Resolve");
         resolveLevel = nbt.getByte("ResolveLevel");
         noResolveDecayTicks = nbt.getInt("ResolveTicks");
-        nextRecord = nbt.getFloat("NextRecord");
+        saveNextRecord = nbt.getBoolean("SaveNextRecord");
         boostAttack = nbt.getFloat("BoostAttack");
         boostRemoteControl = nbt.getFloat("BoostRemoteControl");
         boostChat = nbt.getFloat("BoostChat");
@@ -426,7 +421,7 @@ public class ResolveCounter {
         resolveNbt.putFloat("Resolve", resolve);
         resolveNbt.putByte("ResolveLevel", (byte) resolveLevel);
         resolveNbt.putInt("ResolveTicks", noResolveDecayTicks);
-        resolveNbt.putFloat("NextRecord", nextRecord);
+        resolveNbt.putBoolean("SaveNextRecord", saveNextRecord);
         resolveNbt.putFloat("BoostAttack", boostAttack);
         resolveNbt.putFloat("BoostRemoteControl", boostRemoteControl);
         resolveNbt.putFloat("BoostChat", boostChat);

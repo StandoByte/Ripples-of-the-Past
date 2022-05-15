@@ -27,7 +27,7 @@ public class DiscardingSortedMultisetWrapper<E extends Comparable<? super E>> {
     
     public boolean add(E element) {
         while (wrappedMultiset.size() > maxCapacity) {
-            wrappedMultiset.pollFirstEntry();
+            discardMin();
         }
         if (wrappedMultiset.size() == maxCapacity) {
             E min = wrappedMultiset.firstEntry().getElement();
@@ -37,6 +37,10 @@ public class DiscardingSortedMultisetWrapper<E extends Comparable<? super E>> {
             wrappedMultiset.remove(min);
         }
         return wrappedMultiset.add(element);
+    }
+    
+    public void discardMin() {
+        wrappedMultiset.pollFirstEntry();
     }
     
     public int size() {

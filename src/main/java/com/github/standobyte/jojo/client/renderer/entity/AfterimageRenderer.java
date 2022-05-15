@@ -26,7 +26,7 @@ public class AfterimageRenderer<T extends AfterimageEntity> extends EntityRender
         Entity originEntity = entity.getOriginEntity();
         if (originEntity != null) {
             Minecraft mc = Minecraft.getInstance();
-            if (originEntity == mc.getCameraEntity() && mc.options.getCameraType().isFirstPerson()) {
+            if (!entity.shouldRender() || originEntity == mc.getCameraEntity() && mc.options.getCameraType().isFirstPerson()) {
                 return;
             }
             entityRenderDispatcher.getRenderer(originEntity).render(originEntity, yRotation, partialTick, matrixStack, buffer, packedLight);
