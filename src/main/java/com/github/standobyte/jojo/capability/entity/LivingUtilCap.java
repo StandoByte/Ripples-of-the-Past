@@ -12,6 +12,7 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.HamonCharge;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 
@@ -131,15 +132,19 @@ public class LivingUtilCap {
     
     public void addAfterimages(int count, int lifespan) {
         if (!entity.level.isClientSide()) {
-            count -= afterimages.size();
+            int i = 0;
             for (AfterimageEntity afterimage : afterimages) {
                 if (afterimage.isAlive()) {
                     afterimage.setLifeSpan(afterimage.tickCount + lifespan);
+                    i++;
                 }
             }
-            for (int i = 0; i < count; i++) {
+            double minSpeed = entity.getAttributeBaseValue(Attributes.MOVEMENT_SPEED);
+            double speed = entity.getAttributeValue(Attributes.MOVEMENT_SPEED);
+            for (; i < count; i++) {
                 AfterimageEntity afterimage = new AfterimageEntity(entity.level, entity, i);
                 afterimage.setLifeSpan(lifespan);
+                afterimage.setMinSpeed(minSpeed + (speed - minSpeed) * (double) (i + 1) / (double) count);
                 afterimages.add(afterimage);
                 entity.level.addFreshEntity(afterimage);
             }
