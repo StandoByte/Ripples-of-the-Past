@@ -33,24 +33,41 @@ public abstract class ClientTickingSoundsHelper {
         Minecraft mc = Minecraft.getInstance();
         
         PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(mc.player, soundEvent, category, volume, pitch);
-        if (event.isCanceled() || event.getSound() == null) return false;
+        if (event.isCanceled() || event.getSound() == null) {
+            voiceLineNotTriggered(entity);
+            return false;
+        }
         soundEvent = event.getSound();
         category = event.getCategory();
         volume = event.getVolume();
         pitch = event.getPitch();
-        
+
         ISound sound = new EntityTickableSound(soundEvent, category, volume, pitch, entity);
         if (entity instanceof AbstractClientPlayerEntity && entity.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).map(cap -> {
             boolean alreadyPlaying = cap.isVoiceLinePlaying();
-            if (!alreadyPlaying) {
+            if (alreadyPlaying) {
+                cap.lastVoiceLineTriggered = false;
+            }
+            else {
+                cap.lastVoiceLineTriggered = true;
                 cap.setCurrentVoiceLine(sound);
             }
-            return alreadyPlaying;
-        }).orElse(true)) {
+            return !alreadyPlaying;
+        }).orElse(false)) {
+            mc.getSoundManager().play(sound);
+            return true;
+        }
+        else {
             return false;
         }
-        mc.getSoundManager().play(sound);
-        return true;
+    }
+    
+    public static void voiceLineNotTriggered(Entity entity) {
+        if (entity instanceof AbstractClientPlayerEntity) {
+            entity.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                cap.lastVoiceLineTriggered = false;
+            });
+        }
     }
     
     public static void playStandEntityCancelableActionSound(StandEntity stand, SoundEvent sound, 

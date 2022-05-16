@@ -235,7 +235,6 @@ public class DamageUtil {
     public static void upwardsKnockback(LivingEntity target, float strength) {
         strength *= (1.0F - (float) target.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
         if (strength != 0) {
-            target.hasImpulse = true;
             target.setDeltaMovement(target.getDeltaMovement().add(0, strength, 0));
         }
         

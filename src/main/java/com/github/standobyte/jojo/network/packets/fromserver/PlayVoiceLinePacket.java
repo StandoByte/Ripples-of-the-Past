@@ -2,8 +2,6 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 
 import java.util.function.Supplier;
 
-import org.apache.commons.lang3.Validate;
-
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 
@@ -22,32 +20,47 @@ public class PlayVoiceLinePacket {
     private final float pitch;
 
     public PlayVoiceLinePacket(SoundEvent sound, SoundCategory source, int entityId, float volume, float pitch) {
-        Validate.notNull(sound, "sound");
         this.sound = sound;
         this.source = source;
         this.entityId = entityId;
         this.volume = volume;
         this.pitch = pitch;
     }
+    
+    public static PlayVoiceLinePacket notTriggered(int entityId) {
+        return new PlayVoiceLinePacket(null, null, entityId, 0, 0);
+    }
 
     public static void encode(PlayVoiceLinePacket msg, PacketBuffer buf) {
-        buf.writeRegistryIdUnsafe(ForgeRegistries.SOUND_EVENTS, msg.sound);
-        buf.writeEnum(msg.source);
+        boolean triggerVoiceLine = msg.sound != null;
+        buf.writeBoolean(triggerVoiceLine);
         buf.writeInt(msg.entityId);
-        buf.writeFloat(msg.volume);
-        buf.writeFloat(msg.pitch);
+        if (triggerVoiceLine) {
+            buf.writeRegistryIdUnsafe(ForgeRegistries.SOUND_EVENTS, msg.sound);
+            buf.writeEnum(msg.source);
+            buf.writeFloat(msg.volume);
+            buf.writeFloat(msg.pitch);
+        }
     }
 
     public static PlayVoiceLinePacket decode(PacketBuffer buf) {
-        return new PlayVoiceLinePacket(buf.readRegistryIdUnsafe(ForgeRegistries.SOUND_EVENTS), 
-                buf.readEnum(SoundCategory.class), buf.readInt(), buf.readFloat(), buf.readFloat());
+        boolean triggerVoiceLine = buf.readBoolean();
+        int entityId = buf.readInt();
+        return triggerVoiceLine ? new PlayVoiceLinePacket(buf.readRegistryIdUnsafe(ForgeRegistries.SOUND_EVENTS), 
+                buf.readEnum(SoundCategory.class), entityId, buf.readFloat(), buf.readFloat())
+                : notTriggered(entityId);
     }
 
     public static void handle(PlayVoiceLinePacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity != null) {
-                ClientTickingSoundsHelper.playVoiceLine(entity, msg.sound, msg.source, msg.volume, msg.pitch);
+                if (msg.sound != null) {
+                    ClientTickingSoundsHelper.playVoiceLine(entity, msg.sound, msg.source, msg.volume, msg.pitch);
+                }
+                else {
+                    ClientTickingSoundsHelper.voiceLineNotTriggered(entity);
+                }
             }
         });
         ctx.get().setPacketHandled(true);

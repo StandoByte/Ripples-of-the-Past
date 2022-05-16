@@ -340,36 +340,39 @@ public class JojoModUtil {
         sayVoiceLine(entity, voiceLine, 1.0F, 1.0F);
     }
 
-    public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine, float volume, float pitch) {
-        if (!entity.level.isClientSide() && canPlayVoiceLine(entity, voiceLine)) {
-            if (entity instanceof PlayerEntity) {
-                playVoiceLineSound(entity, voiceLine, SoundCategory.VOICE, volume, pitch);
+    public static void sayVoiceLine(LivingEntity entity, SoundEvent sound, float volume, float pitch) {
+        if (entity.level.isClientSide() || entity.hasEffect(Effects.INVISIBILITY)) {
+            return;
+        }
+        SoundCategory category = SoundCategory.VOICE;
+        if (entity instanceof PlayerEntity) {
+            PlayVoiceLinePacket packet;
+            if (!canPlayVoiceLine((PlayerEntity) entity, sound)) {
+                packet = PlayVoiceLinePacket.notTriggered(entity.getId());
             }
             else {
-                entity.level.playSound(null, entity, voiceLine, SoundCategory.VOICE, volume, pitch);
+                PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(null, sound, category, volume, pitch);
+                if (event.isCanceled() || event.getSound() == null) {
+                    packet = PlayVoiceLinePacket.notTriggered(entity.getId());
+                }
+                else {
+                    sound = event.getSound();
+                    category = event.getCategory();
+                    volume = event.getVolume();
+                    packet = new PlayVoiceLinePacket(sound, category, entity.getId(), volume, pitch);
+                }
             }
+            PacketManager.sendToNearby(packet, null, entity.getX(), entity.getY(), entity.getZ(), 
+                    volume > 1.0F ? (double) (16.0F * volume) : 16.0D, entity.level.dimension());
+        }
+        else {
+            entity.level.playSound(null, entity, sound, category, volume, pitch);
         }
     }
 
-    private static boolean canPlayVoiceLine(LivingEntity entity, SoundEvent voiceLine) {
-        if (entity.hasEffect(Effects.INVISIBILITY)) {
-            return false;
-        }
-        if (entity instanceof PlayerEntity) {
-            return ((PlayerEntity) entity).getCapability(PlayerUtilCapProvider.CAPABILITY)
-                    .map(cap -> cap.checkNotRepeatingVoiceLine(voiceLine)).orElse(true);
-        }
-        return true;
-    }
-
-    private static void playVoiceLineSound(Entity entity, SoundEvent sound, SoundCategory category, float volume, float pitch) {
-        PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(null, sound, category, volume, pitch);
-        if (event.isCanceled() || event.getSound() == null) return;
-        sound = event.getSound();
-        category = event.getCategory();
-        volume = event.getVolume();
-        PacketManager.sendToNearby(new PlayVoiceLinePacket(sound, category, entity.getId(), volume, pitch), null, 
-                entity.getX(), entity.getY(), entity.getZ(), volume > 1.0F ? (double) (16.0F * volume) : 16.0D, entity.level.dimension());
+    private static boolean canPlayVoiceLine(PlayerEntity entity, SoundEvent voiceLine) {
+        return entity.getCapability(PlayerUtilCapProvider.CAPABILITY)
+                .map(cap -> cap.checkNotRepeatingVoiceLine(voiceLine)).orElse(true);
     }
 
     public static void playSound(World world, @Nullable PlayerEntity clientHandled, BlockPos blockPos, 

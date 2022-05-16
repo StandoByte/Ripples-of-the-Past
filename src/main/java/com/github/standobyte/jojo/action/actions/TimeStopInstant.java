@@ -9,9 +9,7 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.init.ModActions;
-import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
@@ -105,15 +103,7 @@ public class TimeStopInstant extends StandAction {
                 power.addLearningProgressPoints(baseTimeStop.get(), learning);
             }
             
-            if (power.isActive()) {
-                IStandManifestation stand = power.getStandManifestation();
-                if (stand instanceof StandEntity) {
-                    StandEntity standEntity = (StandEntity) stand;
-                    standEntity.setStandPose(StandPose.IDLE);
-                    standEntity.summonLockTicks = Math.min(standEntity.summonLockTicks - timeStopTicks, 0);
-                    standEntity.gradualSummonWeaknessTicks = Math.min(standEntity.gradualSummonWeaknessTicks - timeStopTicks, 0);
-                }
-            }
+            skipTicksForStandAndUser(power, impliedTicks);
         }
     }
     
@@ -135,5 +125,25 @@ public class TimeStopInstant extends StandAction {
     @Override
     public boolean canUserSeeInStoppedTime(LivingEntity user, IStandPower power) {
         return true;
+    }
+    
+    public static void skipTicksForStandAndUser(IStandPower standPower, int ticks) {
+        if (standPower.getUser() != null) {
+            skipTicks(standPower.getUser(), ticks);
+        }
+        if (standPower.getStandManifestation() instanceof StandEntity) {
+            skipStandTicks((StandEntity) standPower.getStandManifestation(), ticks);
+        }
+    }
+    
+    private static void skipTicks(LivingEntity entity, int ticks) {
+        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        entity.tick();
+    }
+    
+    private static void skipStandTicks(StandEntity entity, int ticks) {
+        skipTicks(entity, ticks);
+        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        
     }
 }
