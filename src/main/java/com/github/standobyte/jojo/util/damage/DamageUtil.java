@@ -42,6 +42,7 @@ public class DamageUtil {
     public static final DamageSource HAMON = new DamageSource("hamon").bypassArmor();
     public static final DamageSource PILLAR_MAN_ABSORPTION = new DamageSource("pillarManAbsorption").setScalesWithDifficulty();
     public static final DamageSource STAND_VIRUS = new DamageSource("standVirus").bypassArmor();
+    public static final DamageSource SUFFOCATION = new DamageSource("suffocation").bypassArmor();
     public static final String ROAD_ROLLER_MSG = "roadRoller";
     
     public static float knockbackReduction(DamageSource source) {
@@ -131,7 +132,7 @@ public class DamageUtil {
                 float hamonMultiplier = INonStandPower.getNonStandPowerOptional(sourceLiving).map(power -> 
                 power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(hamon -> {
                     if (undeadTarget && !scarf && hamon.isSkillLearned(HamonSkill.HAMON_SPREAD)) {
-                        float effectStr = (hamon.getHamonDamageMultiplier() - 1) / (HamonData.MAX_HAMON_DAMAGE - 1);
+                        float effectStr = (hamon.getHamonDamageMultiplier() - 1) / (HamonData.MAX_HAMON_DAMAGE - 1) * hamon.getEfficiencyDecrease();
                         int effectDuration = 25 + MathHelper.floor(125F * effectStr);
                         int effectLvl = MathHelper.clamp(MathHelper.floor(1.5F * effectStr * dmgAmount * hamon.getEfficiencyDecrease()), 0, 3);
                         livingTarget.addEffect(new EffectInstance(ModEffects.HAMON_SPREAD.get(), effectDuration, effectLvl));

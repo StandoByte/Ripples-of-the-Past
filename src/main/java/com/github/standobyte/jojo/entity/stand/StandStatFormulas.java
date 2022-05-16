@@ -67,7 +67,7 @@ public class StandStatFormulas {
     }
     
     public static int getBarrageRecovery(double speed) {
-        return MathHelper.floor((40.0 - speed * 1.25) / 5.0);
+        return MathHelper.floor((40.0 - speed * 1.25) * 0.25);
     }
     
     public static int getBarrageMaxDuration(double durability) {

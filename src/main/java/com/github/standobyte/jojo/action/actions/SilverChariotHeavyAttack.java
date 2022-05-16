@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.action.actions;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -106,6 +108,19 @@ public class SilverChariotHeavyAttack extends StandEntityHeavyAttack {
             }
             standEntity.setDeltaMovement(moveForward ? ((SilverChariotEntity) standEntity).getDashVec().scale(completion * 8) : Vector3d.ZERO);
         }
+    }
+
+    @Override
+    public boolean isCancelable(IStandPower standPower, StandEntity standEntity, Phase phase, @Nullable StandEntityAction newAction) {
+        if (newAction == this && phase == Phase.RECOVERY && !standEntity.isHeavyComboPunching()) {
+            return true;
+        }
+        return super.isCancelable(standPower, standEntity, phase, newAction);
+    }
+    
+    @Override
+    public boolean standTakesCrosshairTarget(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
+        return !standEntity.isHeavyComboPunching() ? false : super.standTakesCrosshairTarget(target, standEntity, standPower);
     }
     
     @Override

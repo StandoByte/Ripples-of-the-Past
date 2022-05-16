@@ -1752,6 +1752,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public double getMaxRange() {
         return rangeMax;
     }
+
+    public double getMaxEffectiveRange() {
+        return rangeEffective;
+    }
     
     public double getRangeEfficiency() {
         return rangeEfficiency;

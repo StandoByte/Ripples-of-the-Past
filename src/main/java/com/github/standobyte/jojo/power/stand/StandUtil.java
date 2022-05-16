@@ -25,6 +25,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.monster.MonsterEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -152,7 +153,16 @@ public class StandUtil {
         }
         if (target instanceof LivingEntity) {
             LivingEntity livingEntity = (LivingEntity) target;
-            return livingEntity instanceof MonsterEntity || livingEntity instanceof StandEntity;
+            if (livingEntity instanceof StandEntity) {
+                return true;
+            }
+            if (livingEntity instanceof MobEntity) {
+                if (livingEntity instanceof MonsterEntity) {
+                    return true;
+                }
+                MobEntity mobEntity = (MobEntity) livingEntity;
+                return mobEntity.isAggressive();
+            }
         }
         return false;
     }

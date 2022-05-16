@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClHamonLearnButtonP
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonResetSkillsButtonPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonStartMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonWindowOpenedPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClHasInputPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHeldActionTargetPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnLeapPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnStandDashPacket;
@@ -34,7 +35,6 @@ import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartP
 import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandCancelManualMovementPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncCommonConfigPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncEnergyPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncHamonExercisesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncInputBufferPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncLeapCooldownPacket;
@@ -53,6 +53,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPac
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandOffsetPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntitySwingsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncCooldownPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrSyncEnergyPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncHamonStatsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncHeldActionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncKnivesCountPacket;
@@ -88,6 +89,11 @@ public class PacketManager {
                 .networkProtocolVersion(() -> PROTOCOL_VERSION)
                 .simpleChannel();
         int index = 0;
+        
+        channel.messageBuilder(ClHasInputPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+        .encoder(ClHasInputPacket::encode)
+        .decoder(ClHasInputPacket::decode)
+        .consumer(ClHasInputPacket::handle).add();
 
         channel.messageBuilder(ClToggleStandSummonPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
         .encoder(ClToggleStandSummonPacket::encode)

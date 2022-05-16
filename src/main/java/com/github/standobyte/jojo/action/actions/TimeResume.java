@@ -28,11 +28,12 @@ public class TimeResume extends StandAction {
                 }).orElse(false)).orElse(false);
     }
     
+    private static final int TICKS_FIRST_CLICK = TimeStopInstance.TIME_RESUME_SOUND_TICKS;
     @Override
     protected void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             userTimeStopInstance(world, user, instance -> 
-            instance.setTicksLeft(instance.wereTicksManuallySet() ? 0 : TimeStopInstance.TIME_RESUME_SOUND_TICKS));
+            instance.setTicksLeft(!instance.wereTicksManuallySet() && instance.getTicksLeft() > TICKS_FIRST_CLICK ? TICKS_FIRST_CLICK : 0));
         }
     }
     

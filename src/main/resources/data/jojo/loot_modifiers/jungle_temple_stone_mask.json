@@ -1,4 +1,5 @@
 {
+  "type": "jojo:additional_single_item",
   "conditions": [
     {
       "condition": "forge:loot_table_id",

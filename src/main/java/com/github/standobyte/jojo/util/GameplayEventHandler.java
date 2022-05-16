@@ -72,6 +72,7 @@ import net.minecraft.entity.ai.goal.PrioritizedGoal;
 import net.minecraft.entity.item.BoatEntity;
 import net.minecraft.entity.item.PaintingEntity;
 import net.minecraft.entity.item.PaintingType;
+import net.minecraft.entity.monster.StrayEntity;
 import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.entity.player.ChatVisibility;
 import net.minecraft.entity.player.PlayerEntity;
@@ -81,6 +82,7 @@ import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.network.play.server.SPlayEntityEffectPacket;
 import net.minecraft.network.play.server.SPlaySoundEffectPacket;
 import net.minecraft.network.play.server.SRemoveEntityEffectPacket;
@@ -123,6 +125,7 @@ import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingConversionEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
@@ -163,7 +166,8 @@ public class GameplayEventHandler {
             cap.tick();
         });
     }
-    
+
+    private static final int AFK_PARTICLE_SECONDS = 30;
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.START) {
@@ -180,7 +184,8 @@ public class GameplayEventHandler {
             if (player.tickCount % 60 == 0 && !player.isInvisible() && player instanceof ServerPlayerEntity) {
                 ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
                 long timeNotActive = Util.getMillis() - serverPlayer.getLastActionTime();
-                if (timeNotActive > 60000) {
+                if (timeNotActive > AFK_PARTICLE_SECONDS * 1000 &&
+                        serverPlayer.getCapability(PlayerUtilCapProvider.CAPABILITY).map(cap -> cap.getNoClientInputTimer() > AFK_PARTICLE_SECONDS * 20).orElse(true)) {
                     ((ServerWorld) player.level).sendParticles(ModParticles.MENACING.get(), player.getX(), player.getEyeY(), player.getZ(), 
                             0,  MathHelper.cos(player.yRot * MathUtil.DEG_TO_RAD), 0.5D, MathHelper.sin(player.yRot * MathUtil.DEG_TO_RAD), 0.005D);
                     ModCriteriaTriggers.AFK.get().trigger(serverPlayer);
@@ -229,6 +234,17 @@ public class GameplayEventHandler {
             }
         }
         return 0;
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void replaceStrayArrow(EntityJoinWorldEvent event) {
+        if (event.getEntity() instanceof ArrowEntity) {
+            ArrowEntity arrow = (ArrowEntity) event.getEntity();
+            if (arrow.getOwner() instanceof StrayEntity) {
+                arrow.setEffectsFromItem(new ItemStack(Items.ARROW));
+                arrow.addEffect(new EffectInstance(ModEffects.FREEZE.get(), 300));
+            }
+        }
     }
     
     @SubscribeEvent
@@ -332,6 +348,17 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingHeal(LivingHealEvent event) {
         VampirismPowerType.consumeEnergyOnHeal(event);
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void releaseStun(LivingConversionEvent.Post event) {
+        if (event.getOutcome() instanceof MobEntity) {
+            LivingEntity pre = event.getEntityLiving();
+            MobEntity converted = (MobEntity) event.getOutcome();
+            if (converted.isNoAi() && pre.hasEffect(ModEffects.STUN.get()) && !converted.hasEffect(ModEffects.STUN.get())) {
+                converted.setNoAi(false);
+            }
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)

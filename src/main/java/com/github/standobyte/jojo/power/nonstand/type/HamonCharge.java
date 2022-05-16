@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.util;
+package com.github.standobyte.jojo.power.nonstand.type;
 
 import java.util.List;
 import java.util.UUID;

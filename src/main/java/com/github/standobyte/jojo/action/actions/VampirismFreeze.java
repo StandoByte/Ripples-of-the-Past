@@ -14,7 +14,11 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.FlowingFluidBlock;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.monster.StrayEntity;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.Direction;
@@ -24,6 +28,7 @@ import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
@@ -60,22 +65,53 @@ public class VampirismFreeze extends VampirismAction {
                     int difficulty = world.getDifficulty().getId();
                     LivingEntity targetLiving = (LivingEntity) entityTarget;
                     if (DamageUtil.dealColdDamage(targetLiving, (float) Math.pow(2, difficulty), user, null)) {
-                        EffectInstance freezeInstance = targetLiving.getEffect(ModEffects.FREEZE.get());
-                        if (freezeInstance == null) {
-                            world.playSound(null, targetLiving, ModSounds.VAMPIRE_FREEZE.get(), targetLiving.getSoundSource(), 1.0F, 1.0F);
-                            targetLiving.addEffect(new EffectInstance(ModEffects.FREEZE.get(), (difficulty + 1) * 50, 0));
+                        if (targetLiving.getType() == EntityType.SKELETON && targetLiving.getHealth() <= 4F) {
+                            turnSkeletonIntoStray(targetLiving);
                         }
                         else {
-                            int additionalDuration = (difficulty - 1) * 5 + 1;
-                            int duration = freezeInstance.getDuration() + additionalDuration;
-                            int lvl = duration / 100;
-                            targetLiving.addEffect(new EffectInstance(ModEffects.FREEZE.get(), duration, lvl));
+                            EffectInstance freezeInstance = targetLiving.getEffect(ModEffects.FREEZE.get());
+                            if (freezeInstance == null) {
+                                world.playSound(null, targetLiving, ModSounds.VAMPIRE_FREEZE.get(), targetLiving.getSoundSource(), 1.0F, 1.0F);
+                                targetLiving.addEffect(new EffectInstance(ModEffects.FREEZE.get(), (difficulty + 1) * 50, 0));
+                            }
+                            else {
+                                int additionalDuration = (difficulty - 1) * 5 + 1;
+                                int duration = freezeInstance.getDuration() + additionalDuration;
+                                int lvl = duration / 100;
+                                targetLiving.addEffect(new EffectInstance(ModEffects.FREEZE.get(), duration, lvl));
+                            }
                         }
                     }
                 }
             }
             frostWalkerImitation(user, world, user.blockPosition(), 4);
         }
+    }
+    
+    public static boolean turnSkeletonIntoStray(LivingEntity skeleton) {
+        if (skeleton.level.isClientSide()) return false;
+        ServerWorld world = (ServerWorld) skeleton.level;
+        if ((world.getDifficulty() == Difficulty.NORMAL && skeleton.getRandom().nextBoolean() || world.getDifficulty() == Difficulty.HARD)) {
+            StrayEntity stray;
+            if (ForgeEventFactory.canLivingConvert(skeleton, EntityType.STRAY, (timer) -> {})) {
+                stray = ((MobEntity) skeleton).convertTo(EntityType.STRAY, true);
+            }
+            else {
+                return false;
+            }
+            stray.finalizeSpawn(
+                    world, 
+                    world.getCurrentDifficultyAt(stray.blockPosition()), 
+                    SpawnReason.CONVERSION, 
+                    null, 
+                    null);
+            ForgeEventFactory.onLivingConvert(skeleton, stray);
+            if (!skeleton.isSilent()) {
+                world.levelEvent(null, 1026, skeleton.blockPosition(), 0);
+            }
+            return true;
+        }
+        return false;
     }
     
     private void frostWalkerImitation(LivingEntity entity, World world, BlockPos entityPos, float radius) {

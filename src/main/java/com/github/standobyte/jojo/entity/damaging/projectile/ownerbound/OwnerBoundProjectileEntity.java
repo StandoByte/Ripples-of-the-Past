@@ -115,10 +115,14 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     protected boolean moveToEntityAttached() {
         LivingEntity bound = getEntityAttachedTo();
         if (bound != null) {
-            moveTo(bound.getX(), bound.getY(0.5D), bound.getZ(), bound.yRot, bound.xRot);
+            moveTo(bound.getX(), bound.getY(attachedTargetHeight()), bound.getZ(), bound.yRot, bound.xRot);
             return true;
         }
         return false;
+    }
+    
+    protected double attachedTargetHeight() {
+        return 0.5;
     }
     
     protected boolean moveToBlockAttached() {

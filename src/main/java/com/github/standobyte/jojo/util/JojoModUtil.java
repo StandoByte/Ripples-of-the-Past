@@ -93,6 +93,26 @@ public class JojoModUtil {
         return NBT_ID.getOrDefault(clazz, -1);
     }
     
+    public static CompoundNBT replaceNbtValues(CompoundNBT original, CompoundNBT replacedEntries, CompoundNBT replacingEntries) {
+        int compoundId = getNbtId(CompoundNBT.class);
+        for (String key : replacedEntries.getAllKeys()) {
+            if (replacedEntries.contains(key) && original.contains(key) && replacedEntries.contains(key)) {
+                INBT originalValue = original.get(key);
+                INBT replacedValue = replacedEntries.get(key);
+                INBT replacingValue = replacingEntries.get(key);
+                if (originalValue.getId() == compoundId) {
+                    if (replacedValue.getId() == compoundId && replacingValue.getId() == compoundId) {
+                        replaceNbtValues((CompoundNBT) originalValue, (CompoundNBT) replacedValue, (CompoundNBT) replacingValue);
+                    }
+                }
+                else if (originalValue.equals(replacedValue)) {
+                    original.put(key, replacingValue.copy());
+                }
+            }
+        }
+        return original;
+    }
+    
     public static <E> E getOrLast(List<E> list, int index) {
         return list.get(Math.min(index, list.size() - 1));
     }

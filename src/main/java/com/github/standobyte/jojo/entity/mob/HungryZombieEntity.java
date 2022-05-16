@@ -48,6 +48,7 @@ import net.minecraftforge.event.ForgeEventFactory;
 public class HungryZombieEntity extends ZombieEntity {
     protected static final DataParameter<Optional<UUID>> OWNER_UUID = EntityDataManager.defineId(HungryZombieEntity.class, DataSerializers.OPTIONAL_UUID);
     private double distanceFromOwner;
+    private boolean summonedFromAbility = false;
 
     public HungryZombieEntity(World world) {
         this(ModEntityTypes.HUNGRY_ZOMBIE.get(), world);
@@ -56,6 +57,10 @@ public class HungryZombieEntity extends ZombieEntity {
     public HungryZombieEntity(EntityType<? extends HungryZombieEntity> type, World world) {
         super(type, world);
         xpReward *= 1.5;
+    }
+    
+    public void setSummonedFromAbility() {
+        this.summonedFromAbility = true;
     }
     
     @Override
@@ -96,6 +101,7 @@ public class HungryZombieEntity extends ZombieEntity {
         if (getOwnerUUID() != null) {
             compound.putUUID("Owner", getOwnerUUID());
         }
+        compound.putBoolean("AbilitySummon", summonedFromAbility);
     }
 
     @Override
@@ -105,6 +111,7 @@ public class HungryZombieEntity extends ZombieEntity {
         if (ownerId != null) {
             setOwnerUUID(ownerId);
         }
+        summonedFromAbility = compound.getBoolean("AbilitySummon");
     }
 
     @Nullable
@@ -130,9 +137,13 @@ public class HungryZombieEntity extends ZombieEntity {
         }
     }
     
+    public boolean isEntityOwner(LivingEntity entity) {
+        return entityData.get(OWNER_UUID).map(owner -> entity.getUUID().equals(owner)).orElse(false);
+    }
+    
     @Override
     protected int getExperienceReward(PlayerEntity player) {
-        return getOwnerUUID() == null ? super.getExperienceReward(player) : 0;
+        return isEntityOwner(player) ? 0 : super.getExperienceReward(player);
     }
     
     @Override
@@ -150,7 +161,7 @@ public class HungryZombieEntity extends ZombieEntity {
 
     @Override
     public boolean canAttack(LivingEntity target) {
-        return target.is(getOwner()) ? false : super.canAttack(target);
+        return !isEntityOwner(target) && super.canAttack(target);
     }
 
     public boolean wantsToAttack(LivingEntity target, LivingEntity owner) {
@@ -214,7 +225,8 @@ public class HungryZombieEntity extends ZombieEntity {
             HungryZombieEntity zombie;
             if ((dead instanceof VillagerEntity || dead instanceof AbstractIllagerEntity) 
                     && ForgeEventFactory.canLivingConvert(dead, ModEntityTypes.HUNGRY_ZOMBIE.get(), (timer) -> {})) {
-                zombie = ((MobEntity) dead).convertTo(ModEntityTypes.HUNGRY_ZOMBIE.get(), true);
+                MobEntity deadMob = (MobEntity) dead;
+                zombie = deadMob.convertTo(ModEntityTypes.HUNGRY_ZOMBIE.get(), true);
             }
             else {
                 return false;

@@ -124,22 +124,22 @@ public class JojoModConfig {
                 maxBloodMultiplier = builder
                         .comment(" Max vampire energy multiplier on each difficulty level.")
                         .translation("jojo.config.maxBloodMultiplier")
-                        .defineList("maxBloodMultiplier", Arrays.asList(1D, 1D, 1D, 1D), JojoModConfig::isElementPositiveFloat);
+                        .defineList("maxBloodMultiplier", Arrays.asList(1D, 1D, 1D, 1D), e -> isElementNonNegativeFloat(e, true));
 
                 bloodDrainMultiplier = builder
                         .comment(" Blood drain multiplier on each difficulty level.")
                         .translation("jojo.config.bloodDrainMultiplier")
-                        .defineList("bloodDrainMultiplier", Arrays.asList(0D, 1D, 1.75D, 2.5D), JojoModConfig::isElementPositiveFloat);
+                        .defineList("bloodDrainMultiplier", Arrays.asList(0D, 1D, 1.75D, 2.5D), e -> isElementNonNegativeFloat(e, false));
 
                 bloodTickDown = builder
                         .comment(" Vampire energy decrease per tick on each difficulty level.")
                         .translation("jojo.config.bloodTickDown")
-                        .defineList("bloodTickDown", Arrays.asList(0.13889D, 0.00278D, 0.00278D, 0D), JojoModConfig::isElementPositiveFloat);
+                        .defineList("bloodTickDown", Arrays.asList(0.13889D, 0.00278D, 0.00278D, 0D), e -> isElementNonNegativeFloat(e, false));
 
                 bloodHealCost = builder
                         .comment(" Vampire energy cost per 1 hp of healing on each difficulty level.")
                         .translation("jojo.config.bloodHealCost")
-                        .defineList("bloodHealCost", Arrays.asList(10D, 4D, 2D, 1D), JojoModConfig::isElementPositiveFloat);
+                        .defineList("bloodHealCost", Arrays.asList(10D, 4D, 2D, 1D), e -> isElementNonNegativeFloat(e, false));
             builder.pop();
             
             builder.comment(" Settings of Stand Arrow and the Stands pool.").push("Stand Arrow");
@@ -200,7 +200,7 @@ public class JojoModConfig {
                                 "  Decrease these values to make getting to each level easier.", 
                                 "  All values must be higher than 0.")
                         .translation("jojo.config.resolvePoints")
-                        .defineList("resolvePoints", Arrays.asList(ResolveCounter.DEFAULT_MAX_RESOLVE_VALUES), JojoModConfig::isElementPositiveFloat);
+                        .defineList("resolvePoints", Arrays.asList(ResolveCounter.DEFAULT_MAX_RESOLVE_VALUES), e -> isElementNonNegativeFloat(e, true));
                 
                 soulAscension = builder
                         .translation("jojo.config.soulAscension")
@@ -459,10 +459,10 @@ public class JojoModConfig {
         }
     }
     
-    private static boolean isElementPositiveFloat(Object num) {
+    private static boolean isElementNonNegativeFloat(Object num, boolean moreThanZero) {
         if (num instanceof Double) {
             Double numDouble = (Double) num;
-            return numDouble > 0 && Float.isFinite(numDouble.floatValue());
+            return (numDouble > 0 || !moreThanZero && numDouble == 0) && Float.isFinite(numDouble.floatValue());
         }
         return false;
     }

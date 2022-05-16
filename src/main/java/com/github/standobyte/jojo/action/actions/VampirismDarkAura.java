@@ -49,7 +49,7 @@ public class VampirismDarkAura extends VampirismAction {
             }
             if (world.getDifficulty() == Difficulty.HARD) {
                 for (HungryZombieEntity zombie : JojoModUtil.entitiesAround(
-                        HungryZombieEntity.class, user, range, false, zombie -> user.is(zombie.getOwner()))) {
+                        HungryZombieEntity.class, user, range, false, zombie -> zombie.isEntityOwner(user))) {
                     zombie.addEffect(new EffectInstance(Effects.MOVEMENT_SPEED, 300, 1));
                     zombie.addEffect(new EffectInstance(Effects.DAMAGE_BOOST, 300, 0));
                     zombie.addEffect(new EffectInstance(Effects.DAMAGE_RESISTANCE, 300, 0));
