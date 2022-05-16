@@ -1,5 +1,9 @@
 package com.github.standobyte.jojo.entity.stand.stands;
 
+import java.util.function.Consumer;
+
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.entity.stand.StandAttackProperties;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -16,9 +20,10 @@ public class MagiciansRedEntity extends StandEntity {
     }
     
     @Override
-    public boolean attackEntity(Entity target, PunchType punch, StandEntityAction action, int barrageHits) {
+    public boolean attackEntity(Entity target, PunchType punch, StandEntityAction action, 
+            int barrageHits, @Nullable Consumer<StandAttackProperties> attackOverride) {
         return DamageUtil.dealDamageAndSetOnFire(target, 
-                entity -> super.attackEntity(target, punch, action, barrageHits), 10, true);
+                entity -> super.attackEntity(target, punch, action, barrageHits, attackOverride), 10, true);
     }
     
     @Override
