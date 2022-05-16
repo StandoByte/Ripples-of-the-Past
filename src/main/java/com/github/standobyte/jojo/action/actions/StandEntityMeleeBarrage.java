@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
+import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
@@ -78,7 +79,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
         Vector3d targetPos = target.getTargetPos();
         double offset = 0.5;
         if (targetPos == null) {
-            return StandRelativeOffset.noYOffset(0, offset + maxVariation).withXRot();
+            return StandRelativeOffset.noYOffset(0, Math.min(offset + maxVariation, standEntity.getMaxEffectiveRange())).withXRot();
         }
         else {
             LivingEntity user = standEntity.getUser();
@@ -112,6 +113,10 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
     
     @Override
     public int getHoldDurationMax(IStandPower standPower) {
+        LivingEntity user = standPower.getUser();
+        if (user != null && user.hasEffect(ModEffects.RESOLVE.get())) {
+            return Integer.MAX_VALUE;
+        }
         if (standPower.getStandManifestation() instanceof StandEntity) {
             return StandStatFormulas.getBarrageMaxDuration(((StandEntity) standPower.getStandManifestation()).getDurability());
         }
@@ -120,6 +125,10 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
     
     @Override
     public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
+        LivingEntity user = standPower.getUser();
+        if (user != null && user.hasEffect(ModEffects.RESOLVE.get())) {
+            return 0;
+        }
         return standEntity.isArmsOnlyMode() ? 0 : StandStatFormulas.getBarrageRecovery(standEntity.getSpeed());
     }
 }

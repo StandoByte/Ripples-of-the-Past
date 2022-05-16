@@ -41,6 +41,7 @@ public class VampirismZombieSummon extends VampirismAction {
             int zombiesToSummon = world.getDifficulty().getId();
             for (int i = 0; i < zombiesToSummon; i++) {
                 HungryZombieEntity zombie = new HungryZombieEntity(world);
+                zombie.setSummonedFromAbility();
                 zombie.copyPosition(user);
                 zombie.setOwner(user);
                 world.addFreshEntity(zombie);

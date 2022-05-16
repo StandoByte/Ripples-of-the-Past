@@ -26,6 +26,7 @@ import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonStartMeditationPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClHasInputPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHeldActionTargetPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnLeapPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnStandDashPacket;
@@ -98,6 +99,8 @@ public class InputHandler {
     private KeyBinding deselectAbility;
     
     private int leftClickBlockDelay;
+    
+    public boolean hasInput;
 
     private InputHandler(Minecraft mc) {
         this.mc = mc;
@@ -432,6 +435,13 @@ public class InputHandler {
     @SubscribeEvent(priority = EventPriority.LOW)
     public void onInputUpdate(InputUpdateEvent event) {
         MovementInput input = event.getMovementInput();
+        
+        boolean hasInput = input.up || input.down || input.left || input.right || input.jumping || input.shiftKeyDown;
+        if (this.hasInput != hasInput) {
+            PacketManager.sendToServer(new ClHasInputPacket(hasInput));
+            this.hasInput = hasInput;
+        }
+        
         if (standPower != null && nonStandPower != null) {
             boolean actionSlowedDown = slowDownFromHeldAction(mc.player, input, standPower);
             actionSlowedDown = slowDownFromHeldAction(mc.player, input, nonStandPower) || actionSlowedDown;

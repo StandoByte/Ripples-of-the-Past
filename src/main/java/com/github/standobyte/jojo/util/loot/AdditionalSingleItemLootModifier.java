@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.util;
+package com.github.standobyte.jojo.util.loot;
 
 import java.util.List;
 

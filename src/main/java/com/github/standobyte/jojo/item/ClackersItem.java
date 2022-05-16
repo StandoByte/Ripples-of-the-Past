@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.item;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.itemprojectile.ClackersEntity;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -56,10 +55,13 @@ public class ClackersItem extends Item {
         }
         else {
             playClackSound(world, player);
-            if (JojoMod.TEST_BUILD) {
-            }
+            ding(world, player);
             return ActionResult.fail(stack);
         }
+    }
+    
+    private void ding(World world, PlayerEntity player) {
+        
     }
 
     private static final float CHARGE_TICK_COST = 5;

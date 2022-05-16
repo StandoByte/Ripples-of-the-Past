@@ -24,6 +24,9 @@ public class PlayerUtilCap {
     private int knives;
     private int removeKnifeTime;
     
+    private boolean hasClientInput;
+    private int noClientInputTimer;
+    
     public PlayerUtilCap(PlayerEntity player) {
         this.player = player;
     }
@@ -33,6 +36,7 @@ public class PlayerUtilCap {
     public void tick() {
         tickKnivesRemoval();
         tickVoiceLines();
+        tickClientInputTimer();
     }
     
 
@@ -95,6 +99,29 @@ public class PlayerUtilCap {
     
     public void onTracking(ServerPlayerEntity tracking) {
         PacketManager.sendToClient(new TrSyncKnivesCountPacket(player.getId(), knives), tracking);
+    }
+    
+    
+    
+    public void setHasClientInput(boolean hasInput) {
+        this.hasClientInput = hasInput;
+        if (hasClientInput) {
+            noClientInputTimer = 0;
+        }
+    }
+    
+    private void tickClientInputTimer() {
+        if (!hasClientInput) {
+            noClientInputTimer++;
+        }
+    }
+    
+    public boolean hasClientInput() {
+        return hasClientInput;
+    }
+    
+    public int getNoClientInputTimer() {
+        return noClientInputTimer;
     }
     
     

@@ -63,6 +63,9 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
                     if (bound.getRemainingFireTicks() % 20 == 0 || bound.getRemainingFireTicks() <= 0) {
                         DamageUtil.setOnFire(bound, 3, true);
                     }
+                    if (isInKickCombo() && bound.getAirSupply() > 0) {
+                        bound.setAirSupply(-19);
+                    }
                 }
                 Vector3d vecToOwner = owner.position().subtract(bound.position());
                 if (vecToOwner.lengthSqr() > 4) {
@@ -101,6 +104,11 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
             }
         }
         return false;
+    }
+    
+    @Override
+    protected double attachedTargetHeight() {
+        return this.isInKickCombo() ? 0.75 : super.attachedTargetHeight();
     }
     
     @Override

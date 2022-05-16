@@ -21,7 +21,6 @@ import com.github.standobyte.jojo.command.JojoControlsCommand;
 import com.github.standobyte.jojo.command.JojoEnergyCommand;
 import com.github.standobyte.jojo.command.JojoPowerCommand;
 import com.github.standobyte.jojo.command.StandCommand;
-import com.github.standobyte.jojo.command.TestBuildCommand;
 import com.github.standobyte.jojo.init.ModStructures;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCachePacket;
@@ -69,7 +68,6 @@ public class ForgeBusEventSubscriber {
     private static final ResourceLocation CLIENT_PLAYER_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "client_player_util");
     private static final ResourceLocation LIVING_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "living_util");
     private static final ResourceLocation PROJECTILE_HAMON_CAP = new ResourceLocation(JojoMod.MOD_ID, "projectile_hamon");
-    private static final ResourceLocation ENTITY_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "entity_util");
     private static final ResourceLocation WORLD_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "world_util");
     private static final ResourceLocation SAVE_FILE_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "save_file_util");
     
@@ -82,7 +80,6 @@ public class ForgeBusEventSubscriber {
 //        StandXpCommand.register(dispatcher);
         JojoControlsCommand.register(dispatcher);
         HamonCommand.register(dispatcher);
-        TestBuildCommand.register(dispatcher);
     }
     
     @SubscribeEvent

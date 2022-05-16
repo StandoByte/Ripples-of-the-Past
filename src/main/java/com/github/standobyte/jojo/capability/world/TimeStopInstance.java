@@ -109,11 +109,11 @@ public class TimeStopInstance {
     }
     
     public void setTicksLeft(int ticks) {
-        this.ticksLeft = ticks;
-        ticksManuallySet = true;
-        if (ticks < TIME_RESUME_VOICELINE_TICKS) {
+        if (!ticksManuallySet && ticksLeft > TIME_RESUME_VOICELINE_TICKS && ticks < TIME_RESUME_VOICELINE_TICKS) {
             alwaysSayVoiceLine = true;
         }
+        this.ticksLeft = ticks;
+        ticksManuallySet = true;
     }
     
     public boolean wereTicksManuallySet() {
