@@ -21,6 +21,7 @@ import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.inventory.container.WorkbenchContainer;
+import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.gen.FlatGenerationSettings;
 import net.minecraft.world.gen.feature.StructureFeature;
@@ -99,5 +100,21 @@ public class CommonReflection {
     private static final Field WORKBENCH_CONTAINER_PLAYER = ObfuscationReflectionHelper.findField(WorkbenchContainer.class, "field_192390_i");
     public static PlayerEntity getPlayer(WorkbenchContainer container) {
         return ReflectionUtil.getFieldValue(WORKBENCH_CONTAINER_PLAYER, container);
+    }
+    
+    
+    
+    private static final Field FURNACE_TE_LIT_TIME = ObfuscationReflectionHelper.findField(AbstractFurnaceTileEntity.class, "field_214018_j");
+    public static int getFurnaceLitTime(AbstractFurnaceTileEntity tileEntity) {
+        return ReflectionUtil.getFieldValue(FURNACE_TE_LIT_TIME, tileEntity);
+    }
+    
+    public static void setFurnaceLitTime(AbstractFurnaceTileEntity tileEntity, int ticks) {
+        ReflectionUtil.setFieldValue(FURNACE_TE_LIT_TIME, tileEntity, ticks);
+    }
+    
+    private static final Field FURNACE_TE_LIT_DURATION = ObfuscationReflectionHelper.findField(AbstractFurnaceTileEntity.class, "field_214019_k");
+    public static void setFurnaceLitDuration(AbstractFurnaceTileEntity tileEntity, int ticks) {
+        ReflectionUtil.setFieldValue(FURNACE_TE_LIT_DURATION, tileEntity, ticks);
     }
 }

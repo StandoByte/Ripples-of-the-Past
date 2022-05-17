@@ -88,6 +88,11 @@ public class MRFireballEntity extends ModdedProjectileEntity implements IRenders
     }
     
     @Override
+    protected boolean isFiery() {
+        return true;
+    }
+    
+    @Override
     protected float getMaxHardnessBreakable() {
         return 5F;
     }

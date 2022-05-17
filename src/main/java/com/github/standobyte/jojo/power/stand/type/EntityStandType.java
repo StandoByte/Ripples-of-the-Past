@@ -161,7 +161,12 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
         if (!user.level.isClientSide()) {
             StandEntity standEntity = ((StandEntity) standPower.getStandManifestation());
             if (standEntity != null) {
-                standEntity.retractStand(true);
+                if (!standEntity.isBeingRetracted()) {
+                    standEntity.retractStand(true);
+                }
+                else {
+                    standEntity.stopRetraction();
+                }
             }
         }
     }

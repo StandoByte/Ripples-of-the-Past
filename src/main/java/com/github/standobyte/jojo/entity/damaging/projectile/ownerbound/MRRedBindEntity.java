@@ -93,6 +93,11 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
     }
     
     @Override
+    protected boolean isFiery() {
+        return true;
+    }
+    
+    @Override
     protected boolean hurtTarget(Entity target, LivingEntity owner) {
         if (getEntityAttachedTo() == null) {
             if (target instanceof LivingEntity && !target.isInvulnerableTo(getDamageSource(owner))) {

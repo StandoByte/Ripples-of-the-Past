@@ -36,7 +36,7 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
         head.texOffs(48, 0).addBox(-1.0F, -6.0F, -4.3F, 2.0F, 1.0F, 1.0F, 0.0F, false);
         head.texOffs(20, 0).addBox(-3.0F, -4.0F, -4.15F, 2.0F, 1.0F, 1.0F, 0.0F, false);
         head.texOffs(20, 0).addBox(1.0F, -4.0F, -4.15F, 2.0F, 1.0F, 1.0F, 0.0F, true);
-
+        
         torso.texOffs(30, 16).addBox(-1.0F, 3.0F, -2.8F, 2.0F, 1.0F, 1.0F, 0.0F, false);
         torso.texOffs(36, 16).addBox(-1.0F, 3.0F, 1.5F, 2.0F, 1.0F, 1.0F, 0.0F, false);
         torso.texOffs(0, 20).addBox(-2.0F, -0.5F, -2.5F, 4.0F, 4.0F, 5.0F, 0.0F, false);
@@ -46,37 +46,37 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
         bone7.setPos(-1.5F, 3.5F, 0.0F);
         torso.addChild(bone7);
         setRotationAngle(bone7, 0.0F, 0.0F, -0.5236F);
-        bone7.texOffs(18, 18).addBox(-0.5F, -4.5F, -2.5F, 1.0F, 5.0F, 5.0F, 0.0F, false);
+        bone7.texOffs(18, 19).addBox(-0.5F, -4.5F, -2.5F, 1.0F, 5.0F, 5.0F, 0.0F, false);
 
         bone8 = new ModelRenderer(this);
         bone8.setPos(1.5F, 3.5F, 0.0F);
         torso.addChild(bone8);
         setRotationAngle(bone8, 0.0F, 0.0F, 0.5236F);
-        bone8.texOffs(18, 18).addBox(-0.5F, -4.5F, -2.5F, 1.0F, 5.0F, 5.0F, 0.0F, true);
+        bone8.texOffs(18, 19).addBox(-0.5F, -4.5F, -2.5F, 1.0F, 5.0F, 5.0F, 0.0F, true);
 
         bone9 = new ModelRenderer(this);
         bone9.setPos(-1.5F, 3.5F, 0.0F);
         torso.addChild(bone9);
         setRotationAngle(bone9, 0.0F, 0.0F, -0.8727F);
-        bone9.texOffs(30, 21).addBox(-0.5F, -5.5F, -2.5F, 1.0F, 6.0F, 5.0F, 0.0F, false);
+        bone9.texOffs(30, 18).addBox(-0.5F, -5.5F, -2.5F, 1.0F, 6.0F, 5.0F, 0.0F, false);
 
         bone10 = new ModelRenderer(this);
         bone10.setPos(1.5F, 3.5F, 0.0F);
         torso.addChild(bone10);
         setRotationAngle(bone10, 0.0F, 0.0F, 0.8727F);
-        bone10.texOffs(30, 21).addBox(-0.5F, -5.5F, -2.5F, 1.0F, 6.0F, 5.0F, 0.0F, false);
+        bone10.texOffs(30, 18).addBox(-0.5F, -5.5F, -2.5F, 1.0F, 6.0F, 5.0F, 0.0F, false);
 
         bone11 = new ModelRenderer(this);
         bone11.setPos(-1.5F, 3.5F, -0.25F);
         torso.addChild(bone11);
         setRotationAngle(bone11, 0.0F, 0.0F, -2.5307F);
-        bone11.texOffs(42, 18).addBox(-0.5F, -4.5F, -2.5F, 1.0F, 5.0F, 5.0F, 0.0F, false);
+        bone11.texOffs(42, 18).addBox(-0.5F, -4.5F, -1.5F, 1.0F, 5.0F, 4.0F, 0.0F, false);
 
         bone12 = new ModelRenderer(this);
         bone12.setPos(1.5F, 3.5F, -0.25F);
         torso.addChild(bone12);
         setRotationAngle(bone12, 0.0F, 0.0F, 2.5307F);
-        bone12.texOffs(42, 18).addBox(-0.5F, -4.5F, -2.5F, 1.0F, 5.0F, 5.0F, 0.0F, true);
+        bone12.texOffs(42, 18).addBox(-0.5F, -4.5F, -1.5F, 1.0F, 5.0F, 4.0F, 0.0F, true);
     }
 
     @Override

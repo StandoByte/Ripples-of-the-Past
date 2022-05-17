@@ -93,6 +93,16 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
     }
     
     @Override
+    public boolean isOnFire() {
+        return false;
+    }
+    
+    @Override
+    protected boolean isFiery() {
+        return true;
+    }
+    
+    @Override
     public float getBaseDamage() {
         return small ? 2.0F : 6.0F;
     }
@@ -168,11 +178,6 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
                 }
             }
         }
-    }
-    
-    @Override
-    public boolean isOnFire() {
-        return false;
     }
     
     @Override
