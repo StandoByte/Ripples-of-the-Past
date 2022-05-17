@@ -200,15 +200,16 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             updateUserFromNetwork(entityData.get(USER_ID));
         }
         else if (CURRENT_TASK.equals(dataParameter)) {
-            StandEntityTask task = getCurrentTask();
-            if (task != null) {
+            Optional<StandEntityTask> taskOptional = getCurrentTask();
+            taskOptional.ifPresent(task -> {
                 StandEntityAction action = task.getAction();
-                StandEntityAction.Phase phase = getCurrentTaskPhase();
+                StandEntityAction.Phase phase = task.getPhase();
                 action.playSound(this, userPower, phase, task.getTarget());
                 action.onTaskSet(level, this, userPower, phase, task.getTarget(), task.getTicksLeft());
-            }
-            if (task != null || getStandPose() != StandPose.SUMMON) {
-                setStandPose(task != null ? task.getAction().getStandPose(userPower, this) : StandPose.IDLE);
+                setStandPose(action.getStandPose(userPower, this));
+            });
+            if (!taskOptional.isPresent() && getStandPose() != StandPose.SUMMON) {
+                setStandPose(StandPose.IDLE);
             }
         }
         else if (SWING_OFF_HAND.equals(dataParameter)) {
@@ -414,13 +415,12 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             entityData.set(ARMS_ONLY_MODE, (byte) 2);
             // scheduled stand task
 //            scheduledTask = null;
-            StandEntityTask currentTask = getCurrentTask();
-            if (currentTask != null) {
-                StandEntityAction action = currentTask.getAction();
+            getCurrentTask().ifPresent(task -> {
+                StandEntityAction action = task.getAction();
                 if (action == ModActions.STAND_ENTITY_UNSUMMON.get()) {
                     stopTask();
                 }
-            }
+            });
         }
     }
     
@@ -441,12 +441,13 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 else if (gradualSummonWeaknessTicks == 0) {
                     removeArmsOnlyModifiers();
                 }
-                StandEntityTask currentTask = getCurrentTask();
-                if (currentTask != null && hasUser()) {
-                    StandEntityAction action = currentTask.getAction();
-                    if (action != ModActions.STAND_ENTITY_UNSUMMON.get() || !hasEffect(ModEffects.STUN.get())) {
-                        currentTask.setOffsetFromUser(action.getOffsetFromUser(getUserPower(), this, currentTask.getTarget()));
-                    }
+                if (hasUser()) {
+                    getCurrentTask().ifPresent(task -> {
+                        StandEntityAction action = task.getAction();
+                        if (action != ModActions.STAND_ENTITY_UNSUMMON.get() || !hasEffect(ModEffects.STUN.get())) {
+                            task.setOffsetFromUser(action.getOffsetFromUser(getUserPower(), this, task.getTarget()));
+                        }
+                    });
                 }
             }
         }
@@ -695,7 +696,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     @Override
     protected void actuallyHurt(DamageSource dmgSource, float damageAmount) {
         boolean blockableAngle = canBlockOrParryFromAngle(dmgSource.getSourcePosition());
-        if (canBlockDamage(dmgSource) && blockableAngle && getCurrentTask() == null && canStartBlocking()) {
+        if (canBlockDamage(dmgSource) && blockableAngle && !getCurrentTask().isPresent() && canStartBlocking()) {
             setTask(ModActions.STAND_ENTITY_BLOCK.get(), 5, StandEntityAction.Phase.PERFORM, ActionTarget.EMPTY);
         }
         if (transfersDamage() && hasUser()) {
@@ -759,9 +760,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         if (entityData.get(NO_BLOCKING_TICKS) > 0) {
             return false;
         }
-        StandEntityTask currentTask = getCurrentTask();
-        return currentTask == null || currentTask.getAction().isCancelable(userPower, 
-                this, currentTask.getPhase(), ModActions.STAND_ENTITY_BLOCK.get());
+        return getCurrentTask().map(task -> task.getAction().isCancelable(userPower, 
+                this, task.getPhase(), ModActions.STAND_ENTITY_BLOCK.get())).orElse(true);
     }
 
     public boolean isStandBlocking() {
@@ -926,10 +926,11 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
         else {
             boolean stun = hasEffect(ModEffects.STUN.get());
-            StandEntityTask currentTask = getCurrentTask();
-            if (currentTask != null && (!stun || currentTask.getAction().ignoresPerformerStun())) {
-                currentTask.tick(userPower, this);
-            }
+            getCurrentTask().ifPresent(task -> {
+                if (!stun || task.getAction().ignoresPerformerStun()) {
+                    task.tick(userPower, this);
+                }
+            });
             
             if (!stun && gradualSummonWeaknessTicks > 0) {
                 gradualSummonWeaknessTicks--;
@@ -1004,15 +1005,13 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         if (Optional.ofNullable(getCurrentTaskAction()).map(action -> action.useDeltaMovement(userPower, this)).orElse(false)) {
             return null;
         }
-        StandRelativeOffset offset = getDefaultOffsetFromUser();
-        StandEntityTask currentTask = getCurrentTask();
-        if (currentTask != null) {
-            StandRelativeOffset taskOffset = currentTask.getOffsetFromUser();
+        return getCurrentTask().map(task -> {
+            StandRelativeOffset taskOffset = task.getOffsetFromUser();
             if (taskOffset != null) {
-                offset = taskOffset;
+                return taskOffset;
             }
-        }
-        return offset;
+            return getDefaultOffsetFromUser();
+        }).orElse(getDefaultOffsetFromUser());
     }
     
     public StandRelativeOffset getDefaultOffsetFromUser() {
@@ -1043,13 +1042,12 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     public void setTaskPosOffset(StandRelativeOffset offset, boolean sync) {
-        StandEntityTask currentTask = getCurrentTask();
-        if (currentTask != null) {
-            currentTask.setOffsetFromUser(offset);
+        getCurrentTask().ifPresent(task -> {
+            task.setOffsetFromUser(offset);
             if (sync && !level.isClientSide()) {
-                PacketManager.sendToClientsTracking(new TrSetStandOffsetPacket(getId(), currentTask.getOffsetFromUser()), this);
+                PacketManager.sendToClientsTracking(new TrSetStandOffsetPacket(getId(), task.getOffsetFromUser()), this);
             }
-        }
+        });
     }
 
     private boolean isInsideViewBlockingBlock() {
@@ -1076,7 +1074,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     protected boolean setTask(StandEntityTask task) {
         if (!level.isClientSide()) {
             Optional<StandRelativeOffset> offset = entityData.get(CURRENT_TASK).map(StandEntityTask::getOffsetFromUser);
-            if (stopTask(task.getAction(), false) && getCurrentTask() == null) {
+            if (stopTask(task.getAction(), false) && !getCurrentTask().isPresent()) {
                 offset.ifPresent(offsetPrevious -> task.setOffsetFromUser(offsetPrevious));
                 entityData.set(CURRENT_TASK, Optional.of(task));
                 if (task.getAction().enablePhysics) {
@@ -1103,15 +1101,14 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
     private boolean stopTask(@Nullable StandEntityAction newAction, boolean stopNonCancelable) {
         if (!level.isClientSide()) {
-            StandEntityTask currentTask = getCurrentTask();
-            if (currentTask == null) {
-                return true;
-            }
-            if (currentTask.getTicksLeft() <= 0 || stopNonCancelable
-                    || currentTask.getAction().isCancelable(userPower, this, currentTask.getPhase(), newAction)) {
-                clearTask(currentTask, newAction);
-                return true;
-            }
+            return getCurrentTask().map(task -> {
+                if (task.getTicksLeft() <= 0 || stopNonCancelable
+                        || task.getAction().isCancelable(userPower, this, task.getPhase(), newAction)) {
+                    clearTask(task, newAction);
+                    return true;
+                }
+                return false;
+            }).orElse(true);
         }
         return false;
     }
@@ -1124,10 +1121,11 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         entityData.set(CURRENT_TASK, Optional.empty());
         // isn't called on client
         if (userPower.clickQueuedAction()) {
-            StandEntityTask nextTask = getCurrentTask();
-            if (nextTask != null && clearedTask.getOffsetFromUser() != null) {
-                nextTask.setOffsetFromUser(clearedTask.getOffsetFromUser());
-            }
+            getCurrentTask().ifPresent(nextTask -> {
+                if (clearedTask.getOffsetFromUser() != null) {
+                    nextTask.setOffsetFromUser(clearedTask.getOffsetFromUser());
+                }
+            });
         }
         else if (newAction == null) {
             if (isArmsOnlyMode()) {
@@ -1142,53 +1140,33 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
 
     public void stopTaskWithRecovery() {
-        StandEntityTask currentTask = getCurrentTask();
-        if (currentTask != null) {
-            currentTask.moveToPhase(StandEntityAction.Phase.RECOVERY, userPower, this);
-        }
+        getCurrentTask().ifPresent(task -> {
+            task.moveToPhase(StandEntityAction.Phase.RECOVERY, userPower, this);
+        });
     }
     
-    public boolean hasTask() {
-        return getCurrentTask() != null;
+    public Optional<StandEntityTask> getCurrentTask() {
+        return entityData.get(CURRENT_TASK);
     }
     
-    @Nullable
-    public StandEntityTask getCurrentTask() {
-        return entityData.get(CURRENT_TASK).orElse(null);
+    public Optional<StandEntityAction> getCurrentTaskActionOptional() {
+        return getCurrentTask().map(StandEntityTask::getAction);
     }
     
-    @Nullable
     public StandEntityAction getCurrentTaskAction() {
-        StandEntityTask task = getCurrentTask();
-        if (task != null) {
-            return task.getAction();
-        }
-        return null;
+        return getCurrentTaskActionOptional().orElse(null);
     }
     
-    @Nullable
-    public StandEntityAction.Phase getCurrentTaskPhase() {
-        StandEntityTask task = getCurrentTask();
-        if (task != null) {
-            return task.getPhase();
-        }
-        return null;
+    public Optional<StandEntityAction.Phase> getCurrentTaskPhase() {
+        return getCurrentTask().map(StandEntityTask::getPhase);
     }
     
     public float getCurrentTaskCompletion(float partialTick) {
-        StandEntityTask task = getCurrentTask();
-        if (task != null) {
-            return task.getTaskCompletion(partialTick);
-        }
-        return 0;
+        return getCurrentTask().map(task -> task.getTaskCompletion(partialTick)).orElse(0F);
     }
 
     public float getUserMovementFactor() {
-        StandEntityAction currentAction = getCurrentTaskAction();
-        if (currentAction == null) {
-            return 1.0F;
-        }
-        return currentAction.getUserMovementFactor(userPower, this);
+        return getCurrentTaskActionOptional().map(action -> action.getUserMovementFactor(getUserPower(), this)).orElse(1F);
     }
 
 
@@ -1317,8 +1295,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
     public void setTaskTarget(ActionTarget target) {
         if (target != null) {
-            StandEntityTask task = getCurrentTask();
-            if (task != null) {
+            getCurrentTask().ifPresent(task -> {
                 boolean sendTarget = task.setTarget(this, target, userPower);
                 if (!level.isClientSide()) {
                     if (sendTarget) {
@@ -1328,7 +1305,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 else {
                     target.cacheEntity(level);
                 }
-            }
+            });
         }
     }
     
@@ -1625,7 +1602,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 if ((attack.canParryHeavyAttack() || attack.disablesBlocking())) {
                     if (attack.canParryHeavyAttack()) {
                         if (targetStand.getCurrentTaskAction() instanceof StandEntityHeavyAttack
-                                && targetStand.getCurrentTaskPhase() == StandEntityAction.Phase.WINDUP
+                                && targetStand.getCurrentTaskPhase().get() == StandEntityAction.Phase.WINDUP
                                 && targetStand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())
                                 && 1F - targetStand.getCurrentTaskCompletion(0) < attack.getHeavyAttackParryTiming()) {
                             targetStand.parryHeavyAttack();
@@ -2002,10 +1979,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         if (ticks > 0 && alphaTicks > 0) {
             alpha = (float) (alphaTicks - ticks) / (float) alphaTicks;
         }
-        StandEntityTask currentTask = getCurrentTask();
-        if (currentTask != null) {
-            alpha *= currentTask.getAction().getStandAlpha(this, currentTask.getTicksLeft(), partialTick);
-        }
+        alpha *= getCurrentTask().map(
+                task -> task.getAction().getStandAlpha(this, task.getTicksLeft(), partialTick)).orElse(1F);
         alpha *= rangeEfficiency; 
         return MathHelper.clamp(alpha, 0F, 1F);
     }
