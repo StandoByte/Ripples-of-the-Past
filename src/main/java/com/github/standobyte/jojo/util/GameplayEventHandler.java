@@ -420,8 +420,8 @@ public class GameplayEventHandler {
             LivingEntity entityLiving = (LivingEntity) entity;
             if (entity instanceof StandEntity) {
                 StandEntity entityStand = ((StandEntity) entity);
-                StandEntityAction attack = entityStand.getCurrentTaskAction();
-                if (attack != null) {
+                Optional<StandEntityAction> attack = entityStand.getCurrentTaskActionOptional();
+                if (attack.isPresent()) {
                     //
                 }
             }

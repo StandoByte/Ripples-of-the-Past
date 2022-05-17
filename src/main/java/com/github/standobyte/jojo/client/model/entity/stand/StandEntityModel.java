@@ -5,10 +5,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.actions.StandEntityAction.Phase;
 import com.github.standobyte.jojo.client.model.pose.IModelPose;
@@ -128,14 +127,14 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     }
 
     protected void poseStand(T entity, float ticks, float yRotationOffset, float xRotation, 
-            StandPose standPose, @Nullable Phase actionPhase, float actionCompletion, HandSide swingingHand) {
+            StandPose standPose, Optional<Phase> actionPhase, float actionCompletion, HandSide swingingHand) {
         if (actionAnim.containsKey(standPose)) {
             idlePose.poseModel(1.0F, entity, ticks, yRotationOffset, xRotation, swingingHand);
             onPose(entity, ticks);
             
             StandActionAnimation<T> anim = getActionAnim(entity, standPose);
             if (anim != null) {
-                anim.animate(actionPhase, actionCompletion, 
+                anim.animate(actionPhase.get(), actionCompletion, 
                         entity, ticks, yRotationOffset, xRotation, swingingHand);
             }
         }

@@ -86,7 +86,8 @@ public abstract class ClientTickingSoundsHelper {
         pitch = event.getPitch();
         
         mc.getSoundManager().play(new StoppableEntityTickableSound<StandEntity>(sound, category, 
-                volume, pitch, false, stand, e -> e.getCurrentTaskAction() != action || phase != null && e.getCurrentTaskPhase() != phase));
+                volume, pitch, false, stand, e -> e.getCurrentTaskAction() != action
+                        || phase != null && e.getCurrentTaskPhase().map(stPhase -> stPhase != phase).orElse(true)));
     }
     
     public static void playStandEntityUnsummonSound(StandEntity stand, SoundEvent sound, float volume, float pitch) {

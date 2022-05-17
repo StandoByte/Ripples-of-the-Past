@@ -64,8 +64,7 @@ public abstract class StandEntityAction extends StandAction {
         if (power.isActive()) {
             StandEntity stand = (StandEntity) power.getStandManifestation();
             if (canBeQueued(power, stand)) {
-                StandEntityAction currentAction = stand.getCurrentTaskAction();
-                if (currentAction != null && currentAction.canQueue(this, power, stand)) {
+                if (stand.getCurrentTaskActionOptional().map(action -> action.canQueue(this, power, stand)).orElse(false)) {
                     return ActionConditionResult.NEGATIVE_QUEUE_INPUT;
                 }
             }
@@ -266,7 +265,7 @@ public abstract class StandEntityAction extends StandAction {
     }
     
     protected boolean canQueue(StandEntityAction nextAction, IStandPower standPower, StandEntity standEntity) {
-        return nextAction != this && !isCancelable(standPower, standEntity, standEntity.getCurrentTaskPhase(), nextAction);
+        return nextAction != this && !isCancelable(standPower, standEntity, standEntity.getCurrentTaskPhase().get(), nextAction);
     }
 
     public boolean isCancelable(IStandPower standPower, StandEntity standEntity, Phase phase, @Nullable StandEntityAction newAction) {

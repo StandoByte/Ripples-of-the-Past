@@ -89,7 +89,7 @@ public class SilverChariotHeavyAttack extends StandEntityHeavyAttack {
     public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
         if (!standEntity.isHeavyComboPunching()) {
             float completion = standEntity.getCurrentTaskCompletion(1.0F);
-            boolean lastTick = standEntity.getCurrentTask().getTicksLeft() <= 1;
+            boolean lastTick = standEntity.getCurrentTask().get().getTicksLeft() <= 1;
             boolean moveForward = completion <= 0.5F;
             if (!world.isClientSide()) {
                 if (moveForward) {
