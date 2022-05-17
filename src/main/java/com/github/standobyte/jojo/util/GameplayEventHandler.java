@@ -54,6 +54,7 @@ import com.github.standobyte.jojo.util.damage.IModdedDamageSource;
 import com.github.standobyte.jojo.util.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.reflection.CommonReflection;
 
+import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -91,6 +92,7 @@ import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.scoreboard.Team;
+import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
@@ -611,7 +613,6 @@ public class GameplayEventHandler {
         if (headArmor.getItem() instanceof StoneMaskItem && applyStoneMask(entity, headArmor)) {
             dropped = true;
         }
-        if (entity.getType() == EntityType.ZOMBIE) return true;
         return dropped;
     }
 
@@ -744,7 +745,7 @@ public class GameplayEventHandler {
     }
     
     @SubscribeEvent(priority = EventPriority.LOW, receiveCanceled = true)
-    public static void onBlockRightClick(PlayerInteractEvent.RightClickBlock event) {
+    public static void tripwireInteract(PlayerInteractEvent.RightClickBlock event) {
         if (event.getHand() == Hand.MAIN_HAND && event.getUseBlock() != Event.Result.DENY) {
             PlayerEntity player = event.getPlayer();
             if (!player.isSpectator() && player.getMainHandItem().isEmpty()) {
@@ -762,6 +763,36 @@ public class GameplayEventHandler {
                             }
                         }
                     });
+                }
+            }
+        }
+    }
+    
+    private static final int LIT_TICKS = 12000;
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void furnaceInteract(PlayerInteractEvent.RightClickBlock event) {
+        if (event.getHand() == Hand.MAIN_HAND && event.getUseBlock() != Event.Result.DENY) {
+            PlayerEntity player = event.getPlayer();
+            if (!player.isSpectator()) {
+                World world = player.level;
+                BlockPos pos = event.getHitVec().getBlockPos();
+                BlockState blockState = world.getBlockState(pos);
+                if (blockState.getBlock() instanceof AbstractFurnaceBlock) {
+                    IStandPower power = IStandPower.getPlayerStandPower(event.getPlayer());
+                    if (power.isActive() && power.getType() == ModStandTypes.MAGICIANS_RED.get()) {
+                        TileEntity tileEntity = world.getBlockEntity(pos);
+                        if (tileEntity instanceof AbstractFurnaceTileEntity) {
+                            AbstractFurnaceTileEntity furnace = (AbstractFurnaceTileEntity) tileEntity;
+                            int timeLeft = CommonReflection.getFurnaceLitTime(furnace);
+                            if (timeLeft < LIT_TICKS) {
+                                CommonReflection.setFurnaceLitTime(furnace, LIT_TICKS);
+                                CommonReflection.setFurnaceLitDuration(furnace, LIT_TICKS);
+                                StandEntity magiciansRed = (StandEntity) power.getStandManifestation();
+                                magiciansRed.playSound(ModSounds.MAGICIANS_RED_FIRE_BLAST.get(), 1.0F, 1.0F, player);
+                                world.setBlock(pos, blockState.setValue(AbstractFurnaceBlock.LIT, true), 3);
+                            }
+                        }
+                    }
                 }
             }
         }

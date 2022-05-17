@@ -886,14 +886,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         updatePosition(user);
         updateStrengthMultipliers(user);
         
-        if (isManuallyControlled()) {
-            Vector3d manualMovementVec = getManualMovement();
-            if (!Vector3d.ZERO.equals(manualMovementVec)) {
-                move(MoverType.PLAYER, manualMovementVec);
-                setDeltaMovement(Vector3d.ZERO);
-            }
-        }
-        
         if (!level.isClientSide()) {
             swings.broadcastSwings(this);
             
@@ -1786,7 +1778,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             bit = (byte) (1 << ordinal());
         }
     }
-
+    
     public void retractStand(boolean toUnsummon) {
         LivingEntity user = getUser();
         if (user != null) {
@@ -1795,6 +1787,15 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 startStandUnsummon();
             }
         }
+    }
+    
+    public void stopRetraction() {
+        setStandFlag(StandFlag.BEING_RETRACTED, false);
+        getCurrentTask().ifPresent(task -> {
+            if (task.getAction() == ModActions.STAND_ENTITY_UNSUMMON.get()) {
+                this.stopTask();
+            }
+        });
     }
     
     private void startStandUnsummon() {
@@ -1874,9 +1875,11 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return isManuallyControlled();
     }
 
+    private boolean lastTickInput = false;
     public void moveStandManually(float strafe, float forward, boolean jumping, boolean sneaking) {
-        if (isManuallyControlled()) {
-            if (Optional.ofNullable(getCurrentTaskAction()).map(action -> !action.useDeltaMovement(userPower, this)).orElse(true)) {
+        if (isManuallyControlled() && canMoveManually()) {
+            boolean input = jumping || sneaking || forward != 0 || strafe != 0;
+            if (input) {
                 double speed = getAttributeValue(Attributes.MOVEMENT_SPEED);
                 double y = jumping ? speed : 0;
                 if (sneaking) {
@@ -1884,15 +1887,12 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                     strafe *= 0.5;
                     forward *= 0.5;
                 }
-                manualMovement = getAbsoluteMotion(new Vector3d((double)strafe, y, (double)forward), speed, this.yRot).scale(getUserMovementFactor());
-                // FIXME (!!!!!!!!!!!!) stop the uncontrollable floating in manual mode (after smth like an explosion)
-                if (strafe != 0 || forward != 0 || jumping || sneaking) {
-                    setDeltaMovement(Vector3d.ZERO);
-                }
+                setDeltaMovement(getAbsoluteMotion(new Vector3d((double)strafe, y, (double)forward), speed, this.yRot).scale(getUserMovementFactor()));
             }
-            else {
-                manualMovement = Vector3d.ZERO;
+            else if (lastTickInput) {
+                setDeltaMovement(Vector3d.ZERO);
             }
+            lastTickInput = input;
         }
     }
 
@@ -1906,6 +1906,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             float yRotCos = MathHelper.cos(facingYRot * ((float)Math.PI / 180F));
             return new Vector3d(vec3d.x * (double)yRotCos - vec3d.z * (double)yRotSin, vec3d.y, vec3d.z * (double)yRotCos + vec3d.x * (double)yRotSin);
         }
+    }
+    
+    protected boolean canMoveManually() {
+        return getCurrentTaskActionOptional().map(action -> !action.useDeltaMovement(getUserPower(), this)).orElse(true);
     }
 
     @Override
@@ -1942,17 +1946,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return false;
     }
     
-    private Vector3d manualMovement = Vector3d.ZERO;
     
-    private Vector3d getManualMovement() {
-        if (!isManuallyControlled()) {
-            return Vector3d.ZERO;
-        }
-        return manualMovement;
-    }
-
-
-
+    
     @Override
     protected void doPush(Entity entity) {
         if (!entity.is(getUser())) {

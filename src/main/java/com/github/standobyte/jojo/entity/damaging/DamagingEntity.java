@@ -12,6 +12,7 @@ import com.github.standobyte.jojo.util.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.damage.IndirectStandEntityDamageSource;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.block.TNTBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -23,6 +24,7 @@ import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.Direction;
 import net.minecraft.util.IndirectEntityDamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -193,7 +195,13 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     protected boolean destroyBlock(BlockRayTraceResult blockRayTraceResult) {
         BlockPos blockPos = blockRayTraceResult.getBlockPos();
         BlockState blockState = level.getBlockState(blockPos);
+        Direction face = blockRayTraceResult.getDirection();
         boolean brokenBlock = canBreakBlock(blockPos, blockState);
+        if (isFiery() && blockState.isFlammable(level, blockPos, face)) {
+            blockState.catchFire(level, blockPos, face, getOwner());
+            if (blockState.getBlock() instanceof TNTBlock) level.removeBlock(blockPos, false);
+            return false;
+        }
         if (brokenBlock) {
             LivingEntity ownerOrStandUser = getOwner();
             if (ownerOrStandUser instanceof StandEntity) {
@@ -211,6 +219,10 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     }
     
     protected void afterBlockHit(BlockRayTraceResult blockRayTraceResult, boolean blockDestroyed) {}
+    
+    protected boolean isFiery() {
+        return false;
+    }
     
     protected abstract int ticksLifespan();
 

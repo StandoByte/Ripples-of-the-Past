@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.client.model.pose.IModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
+import com.github.standobyte.jojo.client.model.pose.ModelPose.ModelAnim;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseSided;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseTransition;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseTransitionMultiple;
@@ -200,28 +201,28 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         
         
         
-        RotationAngle[] jabRightStart = new RotationAngle[] {
+        RotationAngle[] jabRightAngles1 = new RotationAngle[] {
                 RotationAngle.fromDegrees(body, 0, -15, 0),
                 RotationAngle.fromDegrees(leftArm, -7.5F, 0, -15),
                 RotationAngle.fromDegrees(leftForeArm, -100, 15, 7.5F),
                 RotationAngle.fromDegrees(rightArm, 22.5F, 0, 22.5F),
                 RotationAngle.fromDegrees(rightForeArm, -105, 0, -15)
         };
-        RotationAngle[] jabRight2 = new RotationAngle[] {
+        RotationAngle[] jabRightAngles2 = new RotationAngle[] {
                 RotationAngle.fromDegrees(body, 0, -22.5F, 0),
                 RotationAngle.fromDegrees(leftArm, 30F, 0, -15F),
                 RotationAngle.fromDegrees(leftForeArm, -107.5F, 15, 7.5F),
                 RotationAngle.fromDegrees(rightArm, 5.941F, 8.4211F, 69.059F),
                 RotationAngle.fromDegrees(rightForeArm, -75, 0, 0)
         };
-        RotationAngle[] jabRightImpact = new RotationAngle[] {
+        RotationAngle[] jabRightAngles3 = new RotationAngle[] {
                 RotationAngle.fromDegrees(body, 0, -30, 0),
                 RotationAngle.fromDegrees(leftArm, 37.5F, 0, -15F),
                 RotationAngle.fromDegrees(leftForeArm, -115, 15, 7.5F),
                 RotationAngle.fromDegrees(rightArm, -81.9244F, 11.0311F, 70.2661F),
                 RotationAngle.fromDegrees(rightForeArm, 0, 0, 0)
         };
-        RotationAngle[] jabRight4 = new RotationAngle[] {
+        RotationAngle[] jabRightAngles4 = new RotationAngle[] {
                 RotationAngle.fromDegrees(body, 0, -7.5F, 0),
                 RotationAngle.fromDegrees(leftArm, 5.63F, 0, -20.62F),
                 RotationAngle.fromDegrees(leftForeArm, -103.75F, 3.75F, 13.13F),
@@ -229,48 +230,48 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
                 RotationAngle.fromDegrees(rightForeArm, -75, 0, 0)
         };
         
+        ModelAnim<T> armsRotation = (rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
+            leftArm.xRotSecond = xRotation * MathUtil.DEG_TO_RAD;
+            rightArm.xRotSecond = xRotation * MathUtil.DEG_TO_RAD;
+        };
+        
+        IModelPose<T> jabStart = new ModelPoseSided<T>(
+                new ModelPose<T>(mirrorAngles(jabRightAngles1)),
+                new ModelPose<T>(jabRightAngles1));
+        
+        IModelPose<T> jabArmTurn = new ModelPoseSided<T>(
+                new ModelPose<T>(mirrorAngles(jabRightAngles2)).setAdditionalAnim(armsRotation),
+                new ModelPose<T>(jabRightAngles2).setAdditionalAnim(armsRotation));
+        
+        IModelPose<T> jabImpact = new ModelPoseSided<T>(
+                new ModelPose<T>(mirrorAngles(jabRightAngles3)).setAdditionalAnim(armsRotation),
+                new ModelPose<T>(jabRightAngles3).setAdditionalAnim(armsRotation)).setEasing(x -> x * x * x);
+        
+        IModelPose<T> jabArmTurnBack = new ModelPoseSided<T>(
+                new ModelPose<T>(mirrorAngles(jabRightAngles4)).setAdditionalAnim(armsRotation),
+                new ModelPose<T>(jabRightAngles4).setAdditionalAnim(armsRotation)).setEasing(x -> x * x * x);
+        
+        IModelPose<T> jabEnd = new ModelPoseSided<T>(
+                new ModelPose<T>(jabRightAngles1),
+                new ModelPose<T>(mirrorAngles(jabRightAngles1)));
+        
         actionAnim.putIfAbsent(StandPose.LIGHT_ATTACK, 
                 new StandActionAnimation.Builder<T>()
                 
-                .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseSided<T>(
-                        new ModelPoseTransitionMultiple.Builder<T>(
-                                new ModelPose<T>(mirrorAngles(jabRightStart)))
-                        .addPose(0.5F, new ModelPose<T>(mirrorAngles(jabRight2)))
-                        .addPose(0.75F, new ModelPose<T>(mirrorAngles(jabRightImpact)).setEasing(x -> x * x * x))
-                        .build(new ModelPose<T>(mirrorAngles(jabRightImpact))),
-                        
-                        new ModelPoseTransitionMultiple.Builder<T>(
-                                new ModelPose<T>(jabRightStart))
-                        .addPose(0.5F, new ModelPose<T>(jabRight2))
-                        .addPose(0.75F, new ModelPose<T>(jabRightImpact).setEasing(x -> x * x * x))
-                        .build(new ModelPose<T>(jabRightImpact))
-                        ))
+                .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransitionMultiple.Builder<T>(jabStart)
+                        .addPose(0.5F, jabArmTurn)
+                        .addPose(0.75F, jabImpact)
+                        .build(jabImpact))
                 
-                .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseSided<T>(
-                        new ModelPoseTransitionMultiple.Builder<T>(
-                                new ModelPose<T>(mirrorAngles(jabRightImpact)))
-                        .addPose(0.25F, new ModelPose<T>(mirrorAngles(jabRightImpact)))
-                        .addPose(0.5F, new ModelPose<T>(mirrorAngles(jabRight4)).setEasing(x -> x * x * x))
-                        .build(new ModelPose<T>(jabRightStart)),
-                        
-                        new ModelPoseTransitionMultiple.Builder<T>(
-                                new ModelPose<T>(jabRightImpact))
-                        .addPose(0.25F, new ModelPose<T>(jabRightImpact))
-                        .addPose(0.5F, new ModelPose<T>(jabRight4).setEasing(x -> x * x * x))
-                        .build(new ModelPose<T>(mirrorAngles(jabRightStart)))
-                        ))
+                .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransitionMultiple.Builder<T>(jabImpact)
+                        .addPose(0.25F, jabImpact)
+                        .addPose(0.5F, jabArmTurnBack)
+                        .build(jabEnd))
                 
-                .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseSided<T>(
-                        new ModelPoseTransitionMultiple.Builder<T>(
-                                new ModelPose<T>(jabRightStart))
-                        .addPose(0.75F, new ModelPose<T>(jabRightStart))
-                        .build(idlePose),
-
-                        new ModelPoseTransitionMultiple.Builder<T>(
-                                new ModelPose<T>(mirrorAngles(jabRightStart)))
-                        .addPose(0.75F, new ModelPose<T>(mirrorAngles(jabRightStart)))
-                        .build(idlePose)
-                        ))
+                .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransitionMultiple.Builder<T>(jabEnd)
+                        .addPose(0.75F, jabEnd)
+                        .build(idlePose))
+                
                 .build(idlePose));
 
         
