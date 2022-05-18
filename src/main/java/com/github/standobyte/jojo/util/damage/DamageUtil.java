@@ -6,6 +6,8 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModActions;
@@ -111,6 +113,11 @@ public class DamageUtil {
     public static boolean dealHamonDamage(Entity target, float amount, @Nullable Entity srcDirect, @Nullable Entity srcIndirect) {
         if (target instanceof LivingEntity) {
             LivingEntity livingTarget = (LivingEntity) target;
+            
+            if (livingTarget.getCapability(LivingUtilCapProvider.CAPABILITY).map(LivingUtilCap::hasHamonCharge).orElse(false)) {
+                return false;
+            }
+            
             boolean scarf = livingTarget.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.SATIPOROJA_SCARF.get();
             if (scarf) {
                 if (INonStandPower.getNonStandPowerOptional(livingTarget)
@@ -119,13 +126,16 @@ public class DamageUtil {
                 }
                 amount *= 0.25F;
             }
+            
             DamageSource dmgSource = srcDirect == null ? HAMON : 
                     srcIndirect == null ? new EntityDamageSource(HAMON.getMsgId() + ".entity", srcDirect).bypassArmor() : 
                     new IndirectEntityDamageSource(HAMON.getMsgId() + ".entity", srcDirect, srcIndirect).bypassArmor();
+                    
             boolean undeadTarget = JojoModUtil.isUndead(livingTarget);
             if (!undeadTarget) {
                 amount *= 0.1F;
             }
+            
             final float dmgAmount = amount;
             if (dmgSource.getEntity() instanceof LivingEntity) {
                 LivingEntity sourceLiving = (LivingEntity) dmgSource.getEntity();
@@ -142,6 +152,7 @@ public class DamageUtil {
                 amount *= hamonMultiplier;
             }
             amount *= JojoModConfig.getCommonConfigInstance(false).hamonDamageMultiplier.get().floatValue();
+            
             if (hurtThroughInvulTicks(target, dmgSource, amount)) {
                 HamonPowerType.createHamonSparkParticlesEmitter(target, amount / HamonData.MAX_HAMON_DAMAGE);
                 if (scarf && undeadTarget && livingTarget instanceof ServerPlayerEntity) {

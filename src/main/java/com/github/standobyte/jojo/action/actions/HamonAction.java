@@ -15,7 +15,6 @@ import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.text.TranslationTextComponent;
 
 public abstract class HamonAction extends NonStandAction {
     private final Map<HamonSkill.Technique, Supplier<SoundEvent>> voiceLines;
@@ -30,7 +29,7 @@ public abstract class HamonAction extends NonStandAction {
         if (power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(
                 hamon -> hamon.getEfficiencyDecrease() <= 0F)
                 .orElseThrow(() -> new IllegalStateException("Non-Hamon users can't have Hamon actions!"))) {
-            return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.hamon_full_freeze"));
+            return conditionMessage("hamon_full_freeze");
         }
         return super.checkConditions(user, power, target);
     }

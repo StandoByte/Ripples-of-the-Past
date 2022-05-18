@@ -32,6 +32,7 @@ import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonSkillType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.utils.ModInteractionUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attribute;
@@ -231,10 +232,14 @@ public class HamonData extends TypeSpecificData {
             efficiency *= healthRatio * 1.5F + 0.25F;
         }
         
-        EffectInstance freezeEffect = power.getUser().getEffect(ModEffects.FREEZE.get());
+        float freeze = 0;
+        EffectInstance freezeEffect = user.getEffect(ModEffects.FREEZE.get());
         if (freezeEffect != null) {
-            efficiency *= Math.max(1 - (freezeEffect.getAmplifier() + 1) * 0.25F, 0);
+            freeze = Math.min((freezeEffect.getAmplifier() + 1) * 0.25F, 1);
         }
+        freeze = Math.max(ModInteractionUtil.getEntityFreeze(user), freeze);
+        efficiency *= (1F - freeze);
+        
         return efficiency;
     }
     
