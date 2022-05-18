@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.power.stand;
 
 import java.util.Optional;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEffects;
@@ -14,7 +15,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.SyncResolveLevelPac
 import com.github.standobyte.jojo.network.packets.fromserver.SyncResolvePacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.util.DiscardingSortedMultisetWrapper;
-import com.github.standobyte.jojo.util.JojoModUtil;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 import com.google.common.collect.BoundType;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.SortedMultiset;
@@ -83,13 +84,14 @@ public class ResolveCounter {
     }
 
     void tick() {
-        if (stand.getUser() != null && stand.getUser().hasEffect(ModEffects.RESOLVE.get())) {
-            EffectInstance effect = stand.getUser().getEffect(ModEffects.RESOLVE.get());
+        LivingEntity user = stand.getUser();
+        if (user != null && user.hasEffect(ModEffects.RESOLVE.get())) {
+            EffectInstance effect = user.getEffect(ModEffects.RESOLVE.get());
             if (effect.getAmplifier() < RESOLVE_EFFECT_MIN.length) {
                 resolve = Math.max(resolve - getMaxResolveValue() / 
                         (float) RESOLVE_EFFECT_MIN[Math.min(effect.getAmplifier(), RESOLVE_EFFECT_MIN.length)], 0);
-                if (!stand.getUser().level.isClientSide() && resolve == 0) {
-                    stand.getUser().removeEffect(ModEffects.RESOLVE.get());
+                if (!user.level.isClientSide() && resolve == 0) {
+                    user.removeEffect(ModEffects.RESOLVE.get());
                 }
             }
         }
@@ -119,6 +121,9 @@ public class ResolveCounter {
                     boostChat = 1;
                     hpOnGettingAttacked = -1;
                     saveNextRecord = true;
+                }
+                else if (user != null && user.getHealth() == user.getMaxHealth()) {
+                    hpOnGettingAttacked = -1;
                 }
             }
         }

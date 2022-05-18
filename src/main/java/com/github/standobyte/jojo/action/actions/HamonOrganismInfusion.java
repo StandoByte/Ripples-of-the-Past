@@ -1,9 +1,11 @@
 package com.github.standobyte.jojo.action.actions;
 
+import java.util.Optional;
 import java.util.Set;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.entity.HamonBlockChargeEntity;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
@@ -61,6 +63,22 @@ public class HamonOrganismInfusion extends HamonAction {
             break;
         }
         return ActionConditionResult.POSITIVE;
+    }
+    
+    @Override
+    public ActionTarget targetBeforePerform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
+        if (target.getType() == TargetType.BLOCK) {
+            BlockPos blockPos = target.getBlockPos();
+            Optional<Entity> entityInside = world.getEntities(null, world.getBlockState(blockPos).getShape(world, blockPos).bounds())
+                    .stream()
+                    .filter(entity -> (entity instanceof AnimalEntity || entity instanceof AmbientEntity)
+                            && ((LivingEntity) entity).getCapability(LivingUtilCapProvider.CAPABILITY).map(cap -> cap.hasHamonCharge()).orElse(false))
+                    .findAny();
+            if (entityInside.isPresent()) {
+                return new ActionTarget(entityInside.get());
+            }
+        }
+        return super.targetBeforePerform(world, user, power, target);
     }
 
     @Override

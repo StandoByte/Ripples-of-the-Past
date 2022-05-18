@@ -13,8 +13,8 @@ import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
-import com.github.standobyte.jojo.util.JojoModUtil;
-import com.github.standobyte.jojo.util.TimeUtil;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.utils.TimeUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -137,16 +137,17 @@ public class TimeStopInstant extends StandAction {
     }
     
     private static void skipTicks(LivingEntity entity, int ticks) {
+        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!! doesn't work on server thread
         // FIXME (!!!!!!!!!!!!!!!!) ts skip entity ticks
-//        if (entity.canUpdate()) {
-//            for (int i = 0; i < ticks; i++) {
-//                entity.tickCount++;
-//                entity.tick();
-//            }
-//        }
-//        else {
-//            entity.tickCount += ticks;
-//        }
+        if (entity.canUpdate()) {
+            for (int i = 0; i < ticks; i++) {
+                entity.tickCount++;
+                entity.tick();
+            }
+        }
+        else {
+            entity.tickCount += ticks;
+        }
     }
     
     private static void skipStandTicks(StandEntity entity, int ticks) {

@@ -12,8 +12,8 @@ import com.github.standobyte.jojo.network.packets.fromserver.SyncWorldTimeStopPa
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
-import com.github.standobyte.jojo.util.JojoModUtil;
-import com.github.standobyte.jojo.util.TimeUtil;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.utils.TimeUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;

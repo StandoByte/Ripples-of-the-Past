@@ -9,8 +9,8 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.power.stand.StandUtil;
-import com.github.standobyte.jojo.util.JojoModUtil;
-import com.github.standobyte.jojo.util.MathUtil;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;

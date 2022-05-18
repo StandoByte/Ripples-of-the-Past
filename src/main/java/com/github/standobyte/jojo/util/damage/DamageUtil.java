@@ -17,8 +17,8 @@ import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
-import com.github.standobyte.jojo.util.JojoModUtil;
-import com.github.standobyte.jojo.util.MathUtil;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 
 import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.Entity;

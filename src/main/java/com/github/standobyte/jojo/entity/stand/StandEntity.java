@@ -40,12 +40,12 @@ import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
-import com.github.standobyte.jojo.util.JojoModUtil;
-import com.github.standobyte.jojo.util.MathUtil;
 import com.github.standobyte.jojo.util.damage.DamageUtil;
 import com.github.standobyte.jojo.util.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
 import com.github.standobyte.jojo.util.damage.StandLinkDamageSource;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 import com.google.common.collect.ImmutableList;
 
 import net.minecraft.block.BlockRenderType;

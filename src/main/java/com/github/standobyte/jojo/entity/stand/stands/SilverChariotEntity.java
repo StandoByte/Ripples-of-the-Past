@@ -11,7 +11,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModEntityAttributes;
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.util.JojoModUtil;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.attributes.AttributeModifier;

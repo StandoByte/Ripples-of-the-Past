@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.util;
+package com.github.standobyte.jojo.util.utils;
 
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector2f;

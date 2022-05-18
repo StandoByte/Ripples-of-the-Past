@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.client.renderer.entity.damaging.stretching;
 import com.github.standobyte.jojo.client.renderer.entity.SimpleEntityRenderer;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.OwnerBoundProjectileEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.util.MathUtil;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.renderer.IRenderTypeBuffer;

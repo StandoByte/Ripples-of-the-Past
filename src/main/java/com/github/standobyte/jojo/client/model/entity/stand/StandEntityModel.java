@@ -19,7 +19,7 @@ import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
 import com.github.standobyte.jojo.client.renderer.entity.stand.AdditionalArmSwing;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
-import com.github.standobyte.jojo.util.MathUtil;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.mojang.blaze3d.matrix.MatrixStack;

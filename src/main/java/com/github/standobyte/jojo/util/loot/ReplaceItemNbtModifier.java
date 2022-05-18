@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.util.loot;
 
 import java.util.List;
 
-import com.github.standobyte.jojo.util.JojoModUtil;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;

@@ -8,7 +8,7 @@ import java.util.function.UnaryOperator;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.util.MathUtil;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.util.HandSide;

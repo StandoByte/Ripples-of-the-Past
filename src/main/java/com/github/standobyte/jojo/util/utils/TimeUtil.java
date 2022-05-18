@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.util;
+package com.github.standobyte.jojo.util.utils;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;

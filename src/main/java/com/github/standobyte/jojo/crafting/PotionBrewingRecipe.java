@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.util;
+package com.github.standobyte.jojo.crafting;
 
 import java.util.function.Predicate;
 
