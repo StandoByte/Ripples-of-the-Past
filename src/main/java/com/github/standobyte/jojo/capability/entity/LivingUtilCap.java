@@ -128,6 +128,10 @@ public class LivingUtilCap {
         }
     }
     
+    public boolean hasHamonCharge() {
+        return hamonCharge != null && !hamonCharge.shouldBeRemoved();
+    }
+    
     
     
     public void addAfterimages(int count, int lifespan) {

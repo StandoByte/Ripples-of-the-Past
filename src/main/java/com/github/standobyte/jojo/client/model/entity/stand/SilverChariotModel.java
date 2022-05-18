@@ -16,7 +16,7 @@ import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
 import com.github.standobyte.jojo.client.model.pose.XRotationModelRenderer;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
-import com.github.standobyte.jojo.util.MathUtil;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.HandSide;

@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.init;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.util.PotionBrewingRecipe;
+import com.github.standobyte.jojo.crafting.PotionBrewingRecipe;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;

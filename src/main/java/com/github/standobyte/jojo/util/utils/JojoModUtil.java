@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.util;
+package com.github.standobyte.jojo.util.utils;
 
 import java.util.Comparator;
 import java.util.HashMap;

@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.client.model.pose;
 
-import com.github.standobyte.jojo.util.MathUtil;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
 

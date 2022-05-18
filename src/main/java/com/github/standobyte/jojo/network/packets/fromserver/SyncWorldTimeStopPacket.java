@@ -8,7 +8,7 @@ import com.github.standobyte.jojo.action.actions.TimeStop;
 import com.github.standobyte.jojo.capability.world.TimeStopInstance;
 import com.github.standobyte.jojo.client.ClientEventHandler;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.util.TimeUtil;
+import com.github.standobyte.jojo.util.utils.TimeUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;

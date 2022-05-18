@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.client.model.entity.ownerbound;
 import java.util.List;
 
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.ZoomPunchEntity;
-import com.github.standobyte.jojo.util.MathUtil;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
