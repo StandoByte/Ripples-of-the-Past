@@ -69,10 +69,10 @@ public class HamonOrganismInfusion extends HamonAction {
     public ActionTarget targetBeforePerform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (target.getType() == TargetType.BLOCK) {
             BlockPos blockPos = target.getBlockPos();
-            Optional<Entity> entityInside = world.getEntities(null, world.getBlockState(blockPos).getShape(world, blockPos).bounds())
+            Optional<Entity> entityInside = world.getEntities(null, world.getBlockState(blockPos).getShape(world, blockPos).bounds().move(blockPos))
                     .stream()
                     .filter(entity -> (entity instanceof AnimalEntity || entity instanceof AmbientEntity)
-                            && ((LivingEntity) entity).getCapability(LivingUtilCapProvider.CAPABILITY).map(cap -> cap.hasHamonCharge()).orElse(false))
+                            && ((LivingEntity) entity).getCapability(LivingUtilCapProvider.CAPABILITY).map(cap -> !cap.hasHamonCharge()).orElse(false))
                     .findAny();
             if (entityInside.isPresent()) {
                 return new ActionTarget(entityInside.get());
