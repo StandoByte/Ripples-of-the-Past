@@ -32,7 +32,6 @@ public class ModelPose<T extends Entity> implements IModelPose<T> {
         return this;
     }
 
-    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     public ModelPose<T> setAdditionalAnim(ModelAnim<T> anim) {
         this.additionalAnim = anim;
         return this;

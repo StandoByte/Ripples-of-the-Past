@@ -33,17 +33,23 @@ public class StandStatFormulas {
     
     private static final Random RANDOM = new Random();
     public static int getLightAttackWindup(double speed, float comboMeter) {
-        double val = (24 - speed) / 4 * (1.0F - comboMeter * 0.4F);
+        double val = (24 - speed) / 4;
         if (val <= 0) return 0;
+        if (val > 2) {
+            val = Math.max(val * (1.0F - comboMeter * 0.4F), 2);
+        }
         int ticks = MathHelper.floor(val);
         if (RANDOM.nextDouble() < val - ticks) ticks++;
         return ticks;
     }
     
     public static int getLightAttackRecovery(double speed, float comboMeter) {
-        double val = (24 - speed) / 2 * (1.0F - comboMeter * 0.4F);
+        double val = (24 - speed) / 2;
         if (val <= 1) return 1;
-        int ticks = MathHelper.floor(val);
+        if (val > 4) {
+            val = Math.max(val * (1.0F - comboMeter * 0.4F), 4);
+        }
+        int ticks = MathHelper.ceil(val);
         return ticks;
     }
     

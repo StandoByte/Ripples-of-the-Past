@@ -63,6 +63,13 @@ public class StandEntityLightAttack extends StandEntityAction {
     }
     
     @Override
+    public void standTickRecovery(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
+        if (ticks == 0) {
+            standEntity.clickQueuedAction(standEntity.getCurrentTask().get());
+        }
+    }
+    
+    @Override
     protected SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target) {
         return target.getType() != TargetType.ENTITY ? null : super.getSound(standEntity, standPower, phase, target);
     }
@@ -77,7 +84,7 @@ public class StandEntityLightAttack extends StandEntityAction {
     
     @Override
     protected boolean canQueue(StandEntityAction nextAction, IStandPower standPower, StandEntity standEntity) {
-        return false;
+        return true;
     }
     
     @Override

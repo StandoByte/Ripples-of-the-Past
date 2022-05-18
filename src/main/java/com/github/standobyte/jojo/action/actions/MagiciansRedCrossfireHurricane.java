@@ -30,7 +30,7 @@ public class MagiciansRedCrossfireHurricane extends StandEntityAction {
                 Vector2f rotOffsets = i == 0 ? Vector2f.ZERO
                         : MathUtil.xRotYRotOffsets(((double) i / (double) n + 0.5) * Math.PI, 1.5);
                 if (special && target.getType() != TargetType.EMPTY) {
-                    ankh.setSpecial(target.getTargetPos());
+                    ankh.setSpecial(target.getTargetPos(true));
                 }
                 ankh.shootFromRotation(standEntity, standEntity.xRot + rotOffsets.x, standEntity.yRot + rotOffsets.y, 
                         0, special ? 1.0F : 0.75F, 0.0F);

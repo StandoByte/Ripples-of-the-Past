@@ -105,8 +105,10 @@ public class ActionTarget {
         }
     }
     
-    public Vector3d getTargetPos() {
-        return type == TargetType.ENTITY && entity != null ? entity.getEyePosition(1.0F) : targetPos;
+    public Vector3d getTargetPos(boolean targetEntityEyeHeight) {
+        return type == TargetType.ENTITY && entity != null ? 
+                targetEntityEyeHeight ? entity.getEyePosition(1.0F) : entity.position()
+                        : targetPos;
     }
     
 

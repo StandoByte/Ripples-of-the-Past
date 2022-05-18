@@ -76,7 +76,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
             return super.getOffsetFromUser(standPower, standEntity, target);
         }
         double maxVariation = standEntity.getAttributeValue(Attributes.MOVEMENT_SPEED) * 1.5 * standEntity.getStaminaCondition();
-        Vector3d targetPos = target.getTargetPos();
+        Vector3d targetPos = target.getTargetPos(true);
         double offset = 0.5;
         if (targetPos == null) {
             return StandRelativeOffset.noYOffset(0, Math.min(offset + maxVariation, standEntity.getMaxEffectiveRange())).withXRot();

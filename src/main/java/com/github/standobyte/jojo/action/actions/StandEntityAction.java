@@ -64,7 +64,9 @@ public abstract class StandEntityAction extends StandAction {
         if (power.isActive()) {
             StandEntity stand = (StandEntity) power.getStandManifestation();
             if (canBeQueued(power, stand)) {
-                if (stand.getCurrentTaskActionOptional().map(action -> action.canQueue(this, power, stand)).orElse(false)) {
+                if (stand.getCurrentTask().map(
+                        task -> task.getAction().canQueue(this, power, stand)
+                        && !task.getAction().isCancelable(power, stand, task.getPhase(), this)).orElse(false)) {
                     return ActionConditionResult.NEGATIVE_QUEUE_INPUT;
                 }
             }
@@ -108,6 +110,8 @@ public abstract class StandEntityAction extends StandAction {
     public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {}
     
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {}
+    
+    public void standTickRecovery(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {}
     
     public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
         return standWindupDuration;
@@ -216,7 +220,15 @@ public abstract class StandEntityAction extends StandAction {
         return false;
     }
     
-    public boolean useDeltaMovement(IStandPower standPower, StandEntity standEntity) {
+    public boolean noAdheringToUserOffset(IStandPower standPower, StandEntity standEntity) {
+        return standMovesByItself(standPower, standEntity);
+    }
+    
+    public boolean lockStandManualMovement(IStandPower standPower, StandEntity standEntity) {
+        return standMovesByItself(standPower, standEntity);
+    }
+    
+    protected boolean standMovesByItself(IStandPower standPower, StandEntity standEntity) {
         return false;
     }
     
@@ -265,7 +277,7 @@ public abstract class StandEntityAction extends StandAction {
     }
     
     protected boolean canQueue(StandEntityAction nextAction, IStandPower standPower, StandEntity standEntity) {
-        return nextAction != this && !isCancelable(standPower, standEntity, standEntity.getCurrentTaskPhase().get(), nextAction);
+        return nextAction != this;
     }
 
     public boolean isCancelable(IStandPower standPower, StandEntity standEntity, Phase phase, @Nullable StandEntityAction newAction) {
