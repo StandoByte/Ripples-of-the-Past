@@ -60,40 +60,42 @@ public class TimeStopInstant extends StandAction {
                     sound, SoundCategory.AMBIENT, 5.0F, 1.0F, TimeUtil::canPlayerSeeInStoppedTime);
         }
         
+        int timeStopTicks = TimeStop.getTimeStopTicks(power, this);
+        if (!StandUtil.standIgnoresStaminaDebuff(user)) {
+            timeStopTicks = Math.min(timeStopTicks, MathHelper.floor(power.getStamina() / getStaminaCostTicking(power)));
+        }
+
+        Vector3d blinkPos = null;
+        double speed = user.getSpeed() * 2.1585;
+        if (target.getType() == TargetType.EMPTY) {
+            RayTraceResult rayTrace = JojoModUtil.rayTrace(user, Math.min(speed * timeStopTicks, 192), null);
+            if (rayTrace.getType() == RayTraceResult.Type.MISS) {
+                blinkPos = rayTrace.getLocation();
+            }
+            target = ActionTarget.fromRayTraceResult(rayTrace);
+        }
+        switch (target.getType()) {
+        case ENTITY:
+            blinkPos = target.getTargetPos(false);
+            break;
+        case BLOCK:
+            BlockPos blockPosTargeted = target.getBlockPos();
+            blinkPos = Vector3d.atBottomCenterOf(world.isEmptyBlock(blockPosTargeted.above()) ? blockPosTargeted.above() : blockPosTargeted.relative(target.getFace()));
+            break;
+        default:
+            Vector3d pos = blinkPos;
+            BlockPos blockPos = new BlockPos(pos);
+            while (world.isEmptyBlock(blockPos.below()) && blockPos.getY() > 0) {
+                blockPos = blockPos.below();
+            }
+            blinkPos = new Vector3d(pos.x, blockPos.getY() > 0 ? blockPos.getY() : user.position().y, pos.z);
+            break;
+        }
+
+        int impliedTicks = MathHelper.ceil(user.position().subtract(blinkPos).length() / speed);
+        skipTicksForStandAndUser(power, impliedTicks);
+        
         if (!world.isClientSide()) {
-            int timeStopTicks = TimeStop.getTimeStopTicks(power, this);
-            if (!StandUtil.standIgnoresStaminaDebuff(user)) {
-                timeStopTicks = Math.min(timeStopTicks, MathHelper.floor(power.getStamina() / getStaminaCostTicking(power)));
-            }
-            
-            Vector3d blinkPos = null;
-            double speed = user.getSpeed() * 2.1585;
-            if (target.getType() == TargetType.EMPTY) {
-                RayTraceResult rayTrace = JojoModUtil.rayTrace(user, speed * timeStopTicks, null);
-                if (rayTrace.getType() == RayTraceResult.Type.MISS) {
-                    blinkPos = rayTrace.getLocation();
-                }
-                target = ActionTarget.fromRayTraceResult(rayTrace);
-            }
-            switch (target.getType()) {
-            case ENTITY:
-                blinkPos = target.getTargetPos();
-                break;
-            case BLOCK:
-                BlockPos blockPosTargeted = target.getBlockPos();
-                blinkPos = Vector3d.atBottomCenterOf(world.isEmptyBlock(blockPosTargeted.above()) ? blockPosTargeted.above() : blockPosTargeted.relative(target.getFace()));
-                break;
-            default:
-                Vector3d pos = blinkPos;
-                BlockPos blockPos = new BlockPos(pos);
-                while (world.isEmptyBlock(blockPos.below()) && blockPos.getY() > 0) {
-                    blockPos = blockPos.below();
-                }
-                blinkPos = new Vector3d(pos.x, blockPos.getY() > 0 ? blockPos.getY() : user.position().y, pos.z);
-                break;
-            }
-            
-            int impliedTicks = MathHelper.ceil(user.position().subtract(blinkPos).length() / speed);
             power.consumeStamina(impliedTicks * getStaminaCostTicking(power));
             user.teleportTo(blinkPos.x, blinkPos.y, blinkPos.z);
             if (baseTimeStop.get() != null && power.hasPower()
@@ -102,8 +104,6 @@ public class TimeStopInstant extends StandAction {
                 float learning = stats.maxDurationGrowthPerTick * impliedTicks;
                 power.addLearningProgressPoints(baseTimeStop.get(), learning);
             }
-            
-            skipTicksForStandAndUser(power, impliedTicks);
         }
     }
     
@@ -137,13 +137,21 @@ public class TimeStopInstant extends StandAction {
     }
     
     private static void skipTicks(LivingEntity entity, int ticks) {
-        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        entity.tick();
+        // FIXME (!!!!!!!!!!!!!!!!) ts skip entity ticks
+//        if (entity.canUpdate()) {
+//            for (int i = 0; i < ticks; i++) {
+//                entity.tickCount++;
+//                entity.tick();
+//            }
+//        }
+//        else {
+//            entity.tickCount += ticks;
+//        }
     }
     
     private static void skipStandTicks(StandEntity entity, int ticks) {
         skipTicks(entity, ticks);
-        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // FIXME (!!!!!!!!!!!!!!!!) ts skip entity ticks
         
     }
 }

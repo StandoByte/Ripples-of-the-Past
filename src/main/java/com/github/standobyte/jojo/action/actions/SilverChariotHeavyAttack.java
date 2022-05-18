@@ -124,7 +124,7 @@ public class SilverChariotHeavyAttack extends StandEntityHeavyAttack {
     }
     
     @Override
-    public boolean useDeltaMovement(IStandPower standPower, StandEntity standEntity) {
+    protected boolean standMovesByItself(IStandPower standPower, StandEntity standEntity) {
         return !standEntity.isHeavyComboPunching();
     }
 }

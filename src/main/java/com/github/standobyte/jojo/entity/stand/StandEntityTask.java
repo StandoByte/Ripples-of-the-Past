@@ -115,6 +115,8 @@ public class StandEntityTask {
                     phaseTicks, standPower, target);
             break;
         case RECOVERY:
+            action.standTickRecovery(standEntity.level, standEntity, 
+                    phaseTicks, standPower, target);
             break;
         }
         
@@ -169,14 +171,14 @@ public class StandEntityTask {
     private void rotateStand(StandEntity standEntity, boolean limitBySpeed) {
         if (!standEntity.isManuallyControlled()) {
             standEntity.rotatedTowardsTarget = true;
-            Vector3d targetPos = target.getTargetPos();
+            Vector3d targetPos = target.getTargetPos(true);
             if (targetPos != null) {
                 standEntity.rotateTowards(targetPos, limitBySpeed);
             }
         }
     }
     
-    StandEntityAction getAction() {
+    public StandEntityAction getAction() {
         return action;
     }
     
@@ -188,11 +190,11 @@ public class StandEntityTask {
         return startingTicks;
     }
     
-    float getTaskCompletion(float partialTick) {
+    public float getTaskCompletion(float partialTick) {
         return Math.min(1F - ((float) ticksLeft - partialTick) / (float) startingTicks, 1F);
     }
     
-    StandEntityAction.Phase getPhase() {
+    public StandEntityAction.Phase getPhase() {
         return phase;
     }
     

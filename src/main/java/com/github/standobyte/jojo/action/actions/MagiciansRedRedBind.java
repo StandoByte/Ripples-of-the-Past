@@ -32,20 +32,18 @@ public class MagiciansRedRedBind extends StandEntityAction {
     public void stoppedHolding(World world, LivingEntity user, IStandPower power, int ticksHeld) {
         invokeForStand(power, stand -> {
             if (stand.getCurrentTaskAction() == this) {
-                if (stand.willHeavyPunchCombo()) {
-                    if (!world.isClientSide()) {
-                        if (getLandedRedBind(stand).map(redBind -> {
-                            stand.addComboMeter(0, 40);
-                            int ticks = Math.min(stand.getNoComboDecayTicks(), redBind.ticksLifespan() - redBind.tickCount);
-                            // FIXME (!!!!!!!!!!!!) (MR RB kick) adds a second RB entity
-                            setAction(power, stand, ticks, Phase.PERFORM, ActionTarget.EMPTY);
-                            return true;
-                        }).orElse(false)) {
-                            return;
-                        }
-                    }
+                if (stand.willHeavyPunchCombo() && getLandedRedBind(stand).map(redBind -> {
+                    stand.addComboMeter(0, 40);
+                    stand.getCurrentTask().ifPresent(task -> {
+                        task.addTicksToPhase(Math.max(stand.getNoComboDecayTicks(), redBind.ticksLifespan() - redBind.tickCount));
+                    });
+                    return true;
+                }).orElse(false)) {
+                    return;
                 }
-                stand.stopTaskWithRecovery();
+                else {
+                    stand.stopTaskWithRecovery();
+                }
             }
         });
     }

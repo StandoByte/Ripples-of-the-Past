@@ -258,7 +258,7 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     }
     
     @Nullable
-    protected LivingEntity getEntityAttachedTo() {
+    public LivingEntity getEntityAttachedTo() {
         if (attachedEntity == null) {
             int id = entityData.get(ENTITY_ATTACHED_TO);
             if (id == -1) {

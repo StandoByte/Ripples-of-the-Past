@@ -939,7 +939,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 setHealth(user.isAlive() ? user.getHealth() : 0);
             }
             else if (requiresUser()) {
-                setHealth(0);
+                remove();
             }
         }
         else {
@@ -994,7 +994,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
     @Nullable
     protected StandRelativeOffset getOffsetFromUser() {
-        if (Optional.ofNullable(getCurrentTaskAction()).map(action -> action.useDeltaMovement(userPower, this)).orElse(false)) {
+        if (Optional.ofNullable(getCurrentTaskAction()).map(action -> action.noAdheringToUserOffset(userPower, this)).orElse(false)) {
             return null;
         }
         return getCurrentTask().map(task -> {
@@ -1111,15 +1111,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         setStandPose(StandPose.IDLE);
         clearedTask.getAction().onClear(userPower, this);
         entityData.set(CURRENT_TASK, Optional.empty());
-        // isn't called on client
-        if (userPower.clickQueuedAction()) {
-            getCurrentTask().ifPresent(nextTask -> {
-                if (clearedTask.getOffsetFromUser() != null) {
-                    nextTask.setOffsetFromUser(clearedTask.getOffsetFromUser());
-                }
-            });
-        }
-        else if (newAction == null) {
+        if (!clickQueuedAction(clearedTask) && newAction == null) {
             if (isArmsOnlyMode()) {
                 StandEntityAction unsummon = ModActions.STAND_ENTITY_UNSUMMON.get();
                 setTask(StandEntityTask.makeServerSideTask(this, userPower, unsummon, unsummon.getStandActionTicks(userPower, this), 
@@ -1129,6 +1121,19 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 retractStand(false);
             }
         }
+    }
+
+    // isn't called on client
+    public boolean clickQueuedAction(StandEntityTask clearedTask) {
+        if (userPower.clickQueuedAction()) {
+            getCurrentTask().ifPresent(nextTask -> {
+                if (clearedTask.getOffsetFromUser() != null) {
+                    nextTask.setOffsetFromUser(clearedTask.getOffsetFromUser());
+                }
+            });
+            return true;
+        }
+        return false;
     }
 
     public void stopTaskWithRecovery() {
@@ -1171,7 +1176,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 aim = precisionRayTrace(user, reachDistance);
                 if (JojoModUtil.isAnotherEntityTargeted(aim, this)
                         || currentTarget.getType() == TargetType.EMPTY && aim.getType() != RayTraceResult.Type.MISS) {
-                    rotateTowards(ActionTarget.fromRayTraceResult(aim).getTargetPos(), true);
+                    rotateTowards(ActionTarget.fromRayTraceResult(aim).getTargetPos(true), true);
                 }
             }
         }
@@ -1486,7 +1491,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public boolean willHeavyPunchCombo() {
         return getComboMeter() >= 0.5F;
     }
-    
+
     public boolean isHeavyComboPunching() {
         return getLastHeavyPunchCombo() >= 0.5F;
     }
@@ -1909,7 +1914,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     protected boolean canMoveManually() {
-        return getCurrentTaskActionOptional().map(action -> !action.useDeltaMovement(getUserPower(), this)).orElse(true);
+        return getCurrentTaskActionOptional().map(action -> !action.lockStandManualMovement(getUserPower(), this)).orElse(true);
     }
 
     @Override

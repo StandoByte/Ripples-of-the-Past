@@ -58,7 +58,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
     protected void onTaskInit(IStandPower standPower, StandEntity standEntity, ActionTarget target) {
         LivingEntity user = standPower.getUser();
         if (user != null) {
-            Vector3d pos = target.getType() == TargetType.ENTITY ? target.getEntity(standEntity.level).position() : target.getTargetPos();
+            Vector3d pos = target.getTargetPos(false);
             if (pos != null) {
                 double offset = 0.5;
                 if (target.getType() == TargetType.ENTITY) {
@@ -104,7 +104,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
     }
     
     @Override
-    public boolean useDeltaMovement(IStandPower standPower, StandEntity standEntity) {
+    public boolean noAdheringToUserOffset(IStandPower standPower, StandEntity standEntity) {
         return true;
     }
     

@@ -72,7 +72,7 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
                     dragTarget(bound, vecToOwner.normalize().scale(0.2));
                     ticksTargetClose = 0;
                 }
-                else if (!level.isClientSide() && ticksTargetClose++ > 10) {
+                else if (!level.isClientSide() && !isInKickCombo() && ticksTargetClose++ > 10) {
                     remove();
                 }
             }
@@ -103,8 +103,8 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
             if (target instanceof LivingEntity && !target.isInvulnerableTo(getDamageSource(owner))) {
                 LivingEntity targetLiving = (LivingEntity) target;
                 attachToEntity(targetLiving);
-                stunEffect = new EffectInstance(ModEffects.STUN.get(), ticksLifespan() - tickCount);
-                targetLiving.addEffect(stunEffect);
+                targetLiving.addEffect(new EffectInstance(ModEffects.STUN.get(), ticksLifespan() - tickCount));
+                stunEffect = targetLiving.getEffect(ModEffects.STUN.get());
                 return true;
             }
         }
@@ -135,6 +135,11 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
     
     public void setKickCombo() {
         entityData.set(KICK_COMBO, true);
+        LivingEntity target = getEntityAttachedTo();
+        if (target != null) {
+            target.addEffect(new EffectInstance(ModEffects.STUN.get(), ticksLifespan() - tickCount));
+            stunEffect = target.getEffect(ModEffects.STUN.get());
+        }
     }
     
     public boolean isInKickCombo() {
@@ -173,9 +178,7 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
     @Override
     public int ticksLifespan() {
         return isAttachedToAnEntity() ? 
-                isInKickCombo() ? 
-                        Integer.MAX_VALUE
-                        : 100
+                isInKickCombo() ? 200 : 100
                 : 7;
     }
     
