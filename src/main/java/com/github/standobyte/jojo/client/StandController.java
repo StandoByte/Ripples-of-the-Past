@@ -101,7 +101,7 @@ public class StandController {
         if (isControllingStand()) {
             MovementInput input = event.getMovementInput();
             stand.moveStandManually(input.leftImpulse, input.forwardImpulse, input.jumping, input.shiftKeyDown);
-            PacketManager.sendToServer(new ClStandManualMovementPacket(stand.getX(), stand.getY(), stand.getZ()));
+            PacketManager.sendToServer(new ClStandManualMovementPacket(stand.getX(), stand.getY(), stand.getZ(), stand.wasDeltaMovementReset()));
         }
         else {
             if ((mc.getCameraEntity() == mc.player || mc.getCameraEntity() == null) && mc.player.hasEffect(ModEffects.STUN.get())) {

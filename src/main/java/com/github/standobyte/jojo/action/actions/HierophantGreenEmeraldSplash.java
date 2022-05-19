@@ -23,7 +23,9 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
             boolean shift = isShiftVariation();
             int emeralds = shift ? 2 : 1;
             for (int i = 0; i < emeralds; i++) {
-                standEntity.shootProjectile(new HGEmeraldEntity(standEntity, world, userPower), shift ? 1.5F : 1F, shift ? 2.0F : 8.0F);
+                HGEmeraldEntity emerald = new HGEmeraldEntity(standEntity, world, userPower);
+                emerald.setConcentrated(shift);
+                standEntity.shootProjectile(emerald, shift ? 1.5F : 1F, shift ? 2.0F : 8.0F);
             }
             
             HierophantGreenEntity hierophant = (HierophantGreenEntity) standEntity;

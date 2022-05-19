@@ -113,6 +113,8 @@ public class JojoModUtil {
         return original;
     }
     
+    
+    
     public static <E> E getOrLast(List<E> list, int index) {
         return list.get(Math.min(index, list.size() - 1));
     }

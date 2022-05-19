@@ -25,6 +25,9 @@ public class MagiciansRedRedBind extends StandEntityAction {
         if (!world.isClientSide()) {
             standEntity.addProjectile(new MRRedBindEntity(world, standEntity));
             standEntity.playSound(ModSounds.MAGICIANS_RED_RED_BIND.get(), 1.0F, 1.0F);
+            if (standEntity.willHeavyPunchCombo()) {
+                standEntity.addComboMeter(0, 40);
+            }
         }
     }
     

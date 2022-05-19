@@ -17,6 +17,7 @@ import net.minecraft.world.World;
 public class HGEmeraldEntity extends ModdedProjectileEntity {
     @Nullable
     private IStandPower userStandPower;
+    private boolean concentrated;
 
     public HGEmeraldEntity(LivingEntity shooter, World world, @Nullable IStandPower standPower) {
         super(ModEntityTypes.HG_EMERALD.get(), shooter, world);
@@ -39,12 +40,16 @@ public class HGEmeraldEntity extends ModdedProjectileEntity {
 
     @Override
     protected float getMaxHardnessBreakable() {
-        return 1.0F;
+        return concentrated ? 1.5F : 0.0F;
     }
 
     @Override
     protected int ticksLifespan() {
         return 100;
+    }
+    
+    public void setConcentrated(boolean concentrated) {
+        this.concentrated = concentrated;
     }
 
     @Override
