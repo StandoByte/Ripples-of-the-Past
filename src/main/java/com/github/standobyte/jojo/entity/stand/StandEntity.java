@@ -1881,7 +1881,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
 
     private boolean lastTickInput = false;
+    private boolean resetDeltaMovement = false;
     public void moveStandManually(float strafe, float forward, boolean jumping, boolean sneaking) {
+        resetDeltaMovement = false;
         if (isManuallyControlled() && canMoveManually()) {
             boolean input = jumping || sneaking || forward != 0 || strafe != 0;
             if (input) {
@@ -1895,10 +1897,15 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 setDeltaMovement(getAbsoluteMotion(new Vector3d((double)strafe, y, (double)forward), speed, this.yRot).scale(getUserMovementFactor()));
             }
             else if (lastTickInput) {
+                resetDeltaMovement = true;
                 setDeltaMovement(Vector3d.ZERO);
             }
             lastTickInput = input;
         }
+    }
+    
+    public boolean wasDeltaMovementReset() {
+        return resetDeltaMovement;
     }
 
     private static Vector3d getAbsoluteMotion(Vector3d relative, double speed, float facingYRot) {

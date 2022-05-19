@@ -80,9 +80,12 @@ public class StandRelativeOffset {
         buf.writeDouble(y);
         buf.writeDouble(forward);
         buf.writeBoolean(doYOffset);
+        buf.writeBoolean(useXRot);
     }
     
     public static StandRelativeOffset readFromBuf(PacketBuffer buf) {
-        return new StandRelativeOffset(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readBoolean());
+        StandRelativeOffset offset = new StandRelativeOffset(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readBoolean());
+        offset.useXRot = buf.readBoolean();
+        return offset;
     }
 }
