@@ -8,7 +8,7 @@ public class TimeStopperStandStats extends StandStats {
     private final int maxTimeStopTicks;
     private final int maxTimeStopTicksVampire;
     public final float maxDurationGrowthPerTick;
-    // FIXME (!!!!!!!!) ts decay
+    // FIXME (!!!!) ts decay
     public final float maxDurationDecayPerDay;
     public final float cooldownPerTick;
 

@@ -27,7 +27,7 @@ public class SilverChariotArmorLayerModel extends SilverChariotModel {
     protected void addLayerSpecificBoxes() {
         head.texOffs(24, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, 0.1F, false);
         head.texOffs(12, 10).addBox(-1.0F, -8.0F, -4.0F, 2.0F, 2.0F, 8.0F, 0.25F, false);
-        head.texOffs(32, 16).addBox(-2.0F, -9.0F, -4.375F, 4.0F, 4.0F, 1.0F, -0.75F, false);
+        head.texOffs(32, 16).addBox(-2.0F, -9.0F, -4.25F, 4.0F, 4.0F, 1.0F, -0.75F, false);
         head.texOffs(44, 56).addBox(-0.5F, -6.5F, -4.5F, 1.0F, 1.0F, 1.0F, 0.0F, false);
 
         torso.texOffs(0, 0).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 6.0F, 4.0F, 0.1F, false);

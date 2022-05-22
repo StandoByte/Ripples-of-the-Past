@@ -208,7 +208,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
                 ownerOrStandUser = ((StandEntity) ownerOrStandUser).getUser();
             }
             boolean dropItem = ownerOrStandUser instanceof PlayerEntity ? !((PlayerEntity) ownerOrStandUser).abilities.instabuild : true;
-            brokenBlock = level.destroyBlock(blockPos, dropItem);
+            brokenBlock = level.destroyBlock(blockPos, dropItem, getOwner());
         }
         return brokenBlock;
     }

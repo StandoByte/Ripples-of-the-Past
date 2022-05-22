@@ -86,7 +86,7 @@ public class HamonOrganismInfusion extends HamonAction {
         if (!world.isClientSide()) {
             HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
             int chargeTicks = 100 + MathHelper.floor((float) (1100 * hamon.getHamonStrengthLevel())
-                    / (float) HamonData.MAX_STAT_LEVEL * hamon.getEfficiencyDecrease());
+                    / (float) HamonData.MAX_STAT_LEVEL * hamon.getEfficiencyDecrease() * hamon.getEfficiencyDecrease());
             switch(target.getType()) {
             case BLOCK:
                 BlockPos blockPos = target.getBlockPos();

@@ -114,7 +114,7 @@ public class StandStatsManager extends JsonReloadListener {
                 }
             });
             savedStatsWorlds.add(folderPath);
-            // FIXME (!!!!) readme.txt
+            // FIXME (!) readme.txt
             try {
                 Files.write(
                         "{\n" + 

@@ -61,7 +61,6 @@ public class ClackersItem extends Item {
     }
     
     private void ding(World world, PlayerEntity player) {
-        
     }
 
     private static final float CHARGE_TICK_COST = 5;

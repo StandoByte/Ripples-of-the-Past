@@ -13,7 +13,6 @@ import com.github.standobyte.jojo.util.utils.JojoModUtil;
 import com.github.standobyte.jojo.util.utils.MathUtil;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -36,7 +35,7 @@ public class SilverChariotHeavyAttack extends StandEntityHeavyAttack {
     @Override
     public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
         return standEntity.willHeavyPunchCombo() ? 
-                Math.max(super.getStandWindupTicks(standPower, standEntity) - MathHelper.ceil(getStandActionTicks(standPower, standEntity) / 2F), 0)
+                Math.max(super.getStandWindupTicks(standPower, standEntity) - 2, 0)
                 : 0;
     }
     
@@ -69,9 +68,9 @@ public class SilverChariotHeavyAttack extends StandEntityHeavyAttack {
     }
     
     @Override
-    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target, int ticks) {
-        super.onTaskSet(world, standEntity, standPower, phase, target, ticks);
-        if (!standEntity.isHeavyComboPunching() && ticks > 0) {
+    public void onPhaseSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target, int ticks) {
+        super.onPhaseSet(world, standEntity, standPower, phase, target, ticks);
+        if (!standEntity.isHeavyComboPunching() && phase == Phase.PERFORM) {
             if (standEntity.isFollowingUser() && standEntity.getAttackSpeed() < 24) {
                 LivingEntity user = standEntity.getUser();
                 if (user != null) {

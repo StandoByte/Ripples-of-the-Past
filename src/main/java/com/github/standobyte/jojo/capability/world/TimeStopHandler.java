@@ -132,7 +132,7 @@ public class TimeStopHandler {
             }
         }
 
-        // FIXME (!!!!!!!!!!!!!!!!) wtf is going on with other players' stands
+        // FIXME (!!) (ts) wtf is going on with other players' stands
         
         canMove = canMove || checkEffect && entityToCheck instanceof LivingEntity && ((LivingEntity) entityToCheck).hasEffect(ModEffects.TIME_STOP.get()) || 
                 entityToCheck instanceof PlayerEntity && TimeUtil.canPlayerMoveInStoppedTime((PlayerEntity) entityToCheck, false)

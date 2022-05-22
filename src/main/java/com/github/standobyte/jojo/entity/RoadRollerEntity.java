@@ -149,7 +149,7 @@ public class RoadRollerEntity extends Entity {
                 Vector3d dmgVec = dmgPos.vectorTo(position()).normalize();
                 double cos = dmgVec.dot(UPWARDS_VECTOR);
                 Vector3d movement = getDeltaMovement();
-                // FIXME (!!!!) adjust road roller movement from attacks
+                // FIXME (!) adjust road roller movement from attacks
                 setDeltaMovement(movement.x, Math.min(movement.y + cos * amount * 0.04D, 0), movement.z);
             }
             if (!level.isClientSide()) {

@@ -116,7 +116,7 @@ public abstract class StandEntityAction extends StandAction {
     public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
         return standWindupDuration;
     }
-    
+
     public int getStandActionTicks(IStandPower standPower, StandEntity standEntity) {
         return standPerformDuration;
     }
@@ -233,6 +233,8 @@ public abstract class StandEntityAction extends StandAction {
     }
     
     public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target, int ticks) {}
+    
+    public void onPhaseSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target, int ticks) {}
     
     public void playSound(StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target) {
         SoundEvent sound = getSound(standEntity, standPower, phase, target);

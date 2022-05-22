@@ -264,7 +264,7 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
                         new RotationAngle(rapier, 0.829F, 0.0F, -1.1781F)
                 })).build(idlePose));
 
-        // FIXME (!!!!) fix SC barrage animation
+        // FIXME (!) fix SC barrage animation
         rapierBarrageSwing = new ModelPoseSided<>(
                 initRapierBarrageSwing(HandSide.LEFT), 
                 initRapierBarrageSwing(HandSide.RIGHT));

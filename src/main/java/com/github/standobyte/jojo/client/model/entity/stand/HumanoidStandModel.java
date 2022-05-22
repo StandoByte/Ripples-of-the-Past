@@ -231,8 +231,18 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         };
         
         ModelAnim<T> armsRotation = (rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
+            leftArm.xRotSecond = xRotation * MathUtil.DEG_TO_RAD * rotationAmount;
+            rightArm.xRotSecond = xRotation * MathUtil.DEG_TO_RAD * rotationAmount;
+        };
+        
+        ModelAnim<T> armsRotationFull = (rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
             leftArm.xRotSecond = xRotation * MathUtil.DEG_TO_RAD;
             rightArm.xRotSecond = xRotation * MathUtil.DEG_TO_RAD;
+        };
+        
+        ModelAnim<T> armsRotationBack = (rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
+            leftArm.xRotSecond = xRotation * MathUtil.DEG_TO_RAD * (1 - rotationAmount);
+            rightArm.xRotSecond = xRotation * MathUtil.DEG_TO_RAD * (1 - rotationAmount);
         };
         
         IModelPose<T> jabStart = new ModelPoseSided<T>(
@@ -244,12 +254,12 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
                 new ModelPose<T>(jabRightAngles2).setAdditionalAnim(armsRotation));
         
         IModelPose<T> jabImpact = new ModelPoseSided<T>(
-                new ModelPose<T>(mirrorAngles(jabRightAngles3)).setAdditionalAnim(armsRotation),
-                new ModelPose<T>(jabRightAngles3).setAdditionalAnim(armsRotation)).setEasing(x -> x * x * x);
+                new ModelPose<T>(mirrorAngles(jabRightAngles3)).setAdditionalAnim(armsRotationFull),
+                new ModelPose<T>(jabRightAngles3).setAdditionalAnim(armsRotationFull)).setEasing(x -> x * x * x);
         
         IModelPose<T> jabArmTurnBack = new ModelPoseSided<T>(
-                new ModelPose<T>(mirrorAngles(jabRightAngles4)).setAdditionalAnim(armsRotation),
-                new ModelPose<T>(jabRightAngles4).setAdditionalAnim(armsRotation)).setEasing(x -> x * x * x);
+                new ModelPose<T>(mirrorAngles(jabRightAngles4)).setAdditionalAnim(armsRotationBack),
+                new ModelPose<T>(jabRightAngles4).setAdditionalAnim(armsRotationBack)).setEasing(x -> x * x * x);
         
         IModelPose<T> jabEnd = new ModelPoseSided<T>(
                 new ModelPose<T>(jabRightAngles1),

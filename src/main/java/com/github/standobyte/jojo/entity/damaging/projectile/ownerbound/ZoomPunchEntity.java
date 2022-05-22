@@ -33,10 +33,10 @@ import net.minecraft.world.World;
 
 public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
     private HandSide side;
-    private int hamonControlLvl;
+    private float hamonControlLvl;
     private boolean gaveHamonPoints;
 
-    public ZoomPunchEntity(World world, LivingEntity entity, int hamonControlLvl) {
+    public ZoomPunchEntity(World world, LivingEntity entity, float hamonControlLvl) {
         super(ModEntityTypes.ZOOM_PUNCH.get(), entity, world);
         this.side = entity.getMainArm();
         this.hamonControlLvl = hamonControlLvl;
@@ -74,7 +74,7 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
     
     @Override
     protected float movementSpeed() {
-        return (4 + (float) hamonControlLvl * 0.05F) / 7F;
+        return (4 + hamonControlLvl * 0.05F) / 7F;
     }
     
     @Override
@@ -159,7 +159,7 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
     protected void addAdditionalSaveData(CompoundNBT nbt) {
         super.addAdditionalSaveData(nbt);
         nbt.putBoolean("LeftArm", side == HandSide.LEFT);
-        nbt.putInt("HamonControl", hamonControlLvl);
+        nbt.putFloat("HamonControl", hamonControlLvl);
         nbt.putBoolean("PointsGiven", gaveHamonPoints);
     }
 
@@ -167,7 +167,7 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
     protected void readAdditionalSaveData(CompoundNBT nbt) {
         super.readAdditionalSaveData(nbt);
         side = nbt.getBoolean("LeftArm") ? HandSide.LEFT : HandSide.RIGHT;
-        hamonControlLvl = nbt.getInt("HamonControl");
+        hamonControlLvl = nbt.getFloat("HamonControl");
         gaveHamonPoints = nbt.getBoolean("PointsGiven");
     }
 
@@ -175,14 +175,14 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
     public void writeSpawnData(PacketBuffer buffer) {
         super.writeSpawnData(buffer);
         buffer.writeBoolean(side == HandSide.LEFT);
-        buffer.writeVarInt(hamonControlLvl);
+        buffer.writeFloat(hamonControlLvl);
     }
 
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
         super.readSpawnData(additionalData);
         side = additionalData.readBoolean() ? HandSide.LEFT : HandSide.RIGHT;
-        hamonControlLvl = additionalData.readVarInt();
+        hamonControlLvl = additionalData.readFloat();
     }
 
 }
