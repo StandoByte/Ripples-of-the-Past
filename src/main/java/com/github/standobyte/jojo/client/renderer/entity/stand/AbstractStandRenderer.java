@@ -168,12 +168,12 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
             int packedOverlay = getOverlayCoords(entity, getWhiteOverlayProgress(entity, partialTick));
             float alpha = getAlpha(entity, partialTick);
             model.renderToBuffer(matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
+            model.renderArmSwings(entity, matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
             if (!entity.isSpectator()) {
                 for (LayerRenderer<T, M> layerRenderer : this.layers) {
                     layerRenderer.render(matrixStack, buffer, packedLight, entity, walkAnimPos, walkAnimSpeed, partialTick, ticks, f2, xRotation);
                 }
             }
-            model.renderArmSwings(entity, matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
         }
 
         matrixStack.popPose();
@@ -224,7 +224,7 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
         RenderType renderType = getRenderType(entity, getTextureLocation(entity));
         if (renderType != null) {
             renderSeparateLayerArm(getModel(), handSide, matrixStack, buffer.getBuffer(renderType), packedLight, entity, partialTick);
-            for (LayerRenderer<?, ?> layer : layers) {
+            for (LayerRenderer<T, M> layer : layers) {
                 if (layer instanceof StandModelLayerRenderer) {
                     StandModelLayerRenderer<T, M> standLayer = (StandModelLayerRenderer<T, M>) layer;
                     if (standLayer.shouldRender(entity)) {

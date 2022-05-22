@@ -206,6 +206,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 StandEntityAction.Phase phase = task.getPhase();
                 action.playSound(this, userPower, phase, task.getTarget());
                 action.onTaskSet(level, this, userPower, phase, task.getTarget(), task.getTicksLeft());
+                action.onPhaseSet(level, this, userPower, phase, task.getTarget(), task.getTicksLeft());
                 setStandPose(action.getStandPose(userPower, this));
             });
             if (!taskOptional.isPresent() && getStandPose() != StandPose.SUMMON) {
@@ -1487,11 +1488,12 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public float getLastHeavyPunchCombo() {
         return entityData.get(LAST_HEAVY_PUNCH_COMBO);
     }
-    
+
     public boolean willHeavyPunchCombo() {
         return getComboMeter() >= 0.5F;
     }
 
+    // FIXME (!!!!) set on heavy attack click?
     public boolean isHeavyComboPunching() {
         return getLastHeavyPunchCombo() >= 0.5F;
     }
@@ -1704,7 +1706,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         BlockState blockState = level.getBlockState(blockPos);
         if (canBreakBlock(blockPos, blockState)) {
             LivingEntity user = getUser();
-            level.destroyBlock(blockPos, !(user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild));
+            level.destroyBlock(blockPos, !(user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild), this);
             return true;
         }
         else {

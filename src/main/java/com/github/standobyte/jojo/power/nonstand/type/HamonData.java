@@ -222,7 +222,6 @@ public class HamonData extends TypeSpecificData {
         return hamonDamageFactor;
     }
     
-    // FIXME (!!!!) use this for all hamon actions
     public float getEfficiencyDecrease() {
         float efficiency = 1;
         LivingEntity user = power.getUser();
@@ -460,7 +459,7 @@ public class HamonData extends TypeSpecificData {
             float lvlInc = (2 * MathHelper.clamp(getAverageExercisePoints(), 0F, 1F)) - 1F;
             recalcAvgExercisePoints();
             JojoMod.LOGGER.debug(power.getUser().getDisplayName().getString() + ": Day " + day + " (from " + prevDay + "), Hamon exercise training: " + getAverageExercisePoints());
-            // FIXME breathing technique going down for offline players on servers
+            // FIXME (?) breathing technique going down for offline players on servers
             if (lvlInc < 0) {
                 if (!JojoModConfig.getCommonConfigInstance(false).breathingTechniqueDeterioration.get()) {
                     lvlInc = 0;

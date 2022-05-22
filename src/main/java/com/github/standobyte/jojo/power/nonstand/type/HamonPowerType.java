@@ -250,7 +250,8 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     public static boolean ropeTrap(LivingEntity user, BlockPos pos, BlockState blockState, World world, INonStandPower power, HamonData hamon) {
         if (hamon.isSkillLearned(HamonSkill.ROPE_TRAP)) {
             createChargedCobweb(user, pos, blockState, world, 64, null, power, 
-                    40 + (int) ((float) (160 * hamon.getHamonStrengthLevel()) / (float) HamonData.MAX_STAT_LEVEL), 0.02F * hamon.getHamonDamageMultiplier(), hamon);
+                    40 + (int) ((float) (160 * hamon.getHamonStrengthLevel()) / (float) HamonData.MAX_STAT_LEVEL * hamon.getEfficiencyDecrease()), 
+                    0.02F * hamon.getHamonDamageMultiplier() * hamon.getEfficiencyDecrease(), hamon);
             return true;
         }
         return false;

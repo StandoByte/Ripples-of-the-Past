@@ -38,13 +38,14 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
         return super.checkSpecificConditions(user, power, target);
     }
 
-    // FIXME (!!!!!!!!) (TW ts punch) no consecutive uses
+    // FIXME (!!) (TW ts punch) no consecutive uses
     @Override
     protected ActionConditionResult checkStandConditions(StandEntity stand, IStandPower power, ActionTarget target) {
-        return !stand.canAttackMelee() ? ActionConditionResult.NEGATIVE : super.checkStandConditions(stand, power, target);
+        return !stand.canAttackMelee() || !stand.isFollowingUser()
+        		? ActionConditionResult.NEGATIVE : super.checkStandConditions(stand, power, target);
     }
 
-    // FIXME (!!!!!!!!) (TW ts punch) doesn't always work in manual control mode
+    // FIXME (!!) (TW ts punch) doesn't always work in manual control mode
     @Override
     public ActionTarget targetBeforePerform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
         if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
@@ -60,7 +61,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
         if (user != null) {
             Vector3d pos = target.getTargetPos(false);
             if (pos != null) {
-                double offset = 0.5;
+                double offset = 0.5 + standEntity.getBbWidth();
                 if (target.getType() == TargetType.ENTITY) {
                     offset += target.getEntity(standEntity.level).getBoundingBox().getXsize() / 2;
                 }
@@ -69,10 +70,10 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
             else {
                 pos = user.position().add(standEntity.getLookAngle().scale(standEntity.getMaxRange()));
             }
-            // FIXME (!!!!!!!!) (TW ts punch) TW pos desync
-            // FIXME (!!!!!!!!) (TW ts punch) the attack is weak due to small effective range
-            // FIXME (!!!!!!!!) (TW ts punch) use stamina
-            standEntity.setPos(pos.x, pos.y, pos.z);
+            // FIXME (!!) (TW ts punch) TW pos desync
+            // FIXME (!!) (TW ts punch) the attack is weak due to small effective range
+            // FIXME (!!) (TW ts punch) use stamina
+            standEntity.teleportTo(pos.x, pos.y, pos.z);
         }
         standEntity.updateStrengthMultipliers(standEntity.getUser());
     }

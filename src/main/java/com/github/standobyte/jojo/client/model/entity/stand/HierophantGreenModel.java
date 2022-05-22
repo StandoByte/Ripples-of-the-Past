@@ -105,7 +105,8 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
                         new RotationAngle(rightForeArm, 0.7854F, 3.1416F, 0.0F),
                         new RotationAngle(leftLeg, 0.0F, 0.0F, -0.7418F),
                         new RotationAngle(leftLowerLeg, 0.0F, 0.0F, 2.0944F),
-                        new RotationAngle(rightLeg, 0.0F, 0.0F, 0.2618F)
+                        new RotationAngle(rightLeg, 0.0F, 0.0F, 0.2618F),
+                        new RotationAngle(rightLowerLeg, 0.0F, 0.0F, 0.0F)
                 }))
                 .build(idlePose));
 

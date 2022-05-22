@@ -1,14 +1,17 @@
 package com.github.standobyte.jojo.client.model.pose;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.util.utils.MathUtil;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.util.math.MathHelper;
 
 public class RotationAngle {
     public final ModelRenderer modelRenderer;
     public final float angleX;
     public final float angleY;
     public final float angleZ;
+    public boolean wrapDegrees = true;
     
     public RotationAngle(ModelRenderer modelRenderer, float angleX, float angleY, float angleZ) {
         this.modelRenderer = modelRenderer;
@@ -25,9 +28,28 @@ public class RotationAngle {
         return fromDegrees(modelRenderer, -angleX, -angleY, angleZ);
     }
     
+    public RotationAngle noDegreesWrapping() {
+    	wrapDegrees = false;
+    	return this;
+    }
+    
     public void applyRotation(float rotationAmount) {
-        modelRenderer.xRot = MathUtil.rotLerpRad(rotationAmount, modelRenderer.xRot, angleX);
-        modelRenderer.yRot = MathUtil.rotLerpRad(rotationAmount, modelRenderer.yRot, angleY);
-        modelRenderer.zRot = MathUtil.rotLerpRad(rotationAmount, modelRenderer.zRot, angleZ);
+    	TernaryOperator<Float> lerp = getLerp();
+    	if (!wrapDegrees()) JojoMod.LOGGER.debug("Pog " + modelRenderer.xRot + " -> " + angleX);
+        modelRenderer.xRot = lerp.apply(rotationAmount, modelRenderer.xRot, angleX);
+        modelRenderer.yRot = lerp.apply(rotationAmount, modelRenderer.yRot, angleY);
+        modelRenderer.zRot = lerp.apply(rotationAmount, modelRenderer.zRot, angleZ);
+    }
+    
+    private boolean wrapDegrees() {
+    	return wrapDegrees;
+    }
+    
+    private TernaryOperator<Float> getLerp() {
+    	return wrapDegrees() ? MathUtil::rotLerpRad : MathHelper::lerp;
+    }
+    
+    private static interface TernaryOperator<T> {
+    	T apply(T a, T b, T c);
     }
 }

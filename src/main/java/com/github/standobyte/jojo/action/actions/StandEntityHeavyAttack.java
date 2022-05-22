@@ -38,12 +38,12 @@ public class StandEntityHeavyAttack extends StandEntityAction {
             standEntity.punch(standEntity.isHeavyComboPunching() ? PunchType.HEAVY_COMBO : PunchType.HEAVY_NO_COMBO, target, this);
         }
     }
-    
+
     @Override
     public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
         return StandStatFormulas.getHeavyAttackWindup(standEntity.getAttackSpeed(), standEntity.getComboMeter());
     }
-    
+
     @Override
     public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
         return StandStatFormulas.getHeavyAttackRecovery(standEntity.getAttackSpeed());

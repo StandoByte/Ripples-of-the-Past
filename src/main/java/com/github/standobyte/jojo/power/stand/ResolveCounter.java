@@ -28,7 +28,6 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.GameRules;
 
 public class ResolveCounter {
     public static final float RESOLVE_DMG_REDUCTION = 0.6667F;
@@ -46,7 +45,6 @@ public class ResolveCounter {
     private static final float BOOST_MISSING_HP_MAX = 10F;
     private static final float BOOST_MIN_HP = 5F;
     private static final float BOOST_MAX_HP = 15F;
-    private static final float BOOST_NO_NATURAL_REGEN_MULTIPLIER = 2F;
     
     private static final float BOOST_REMOTE_MAX = 5F;
     private static final float BOOST_REMOTE_PER_TICK = 0.025F;
@@ -233,7 +231,6 @@ public class ResolveCounter {
         }
         hp = MathHelper.clamp(hp, BOOST_MIN_HP, BOOST_MAX_HP);
         float boost = MathHelper.clamp((BOOST_MAX_HP - hp) * (BOOST_MISSING_HP_MAX - 1) / (BOOST_MAX_HP - BOOST_MIN_HP) + 1, 0, BOOST_MAX_HP);
-        if (!user.level.getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION)) boost *= BOOST_NO_NATURAL_REGEN_MULTIPLIER;
         return boost;
     }
     

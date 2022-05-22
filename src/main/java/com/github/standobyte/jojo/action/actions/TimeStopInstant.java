@@ -93,6 +93,7 @@ public class TimeStopInstant extends StandAction {
         }
 
         int impliedTicks = MathHelper.ceil(user.position().subtract(blinkPos).length() / speed);
+        // FIXME (!!) (ts tp) clear user's movement input before tick skipping
         skipTicksForStandAndUser(power, impliedTicks);
         
         if (!world.isClientSide()) {
@@ -137,8 +138,8 @@ public class TimeStopInstant extends StandAction {
     }
     
     private static void skipTicks(LivingEntity entity, int ticks) {
-        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!! doesn't work on server thread
-        // FIXME (!!!!!!!!!!!!!!!!) ts skip entity ticks
+        // FIXME (!!) (ts tp) ts skip entity ticks
+        // FIXME (!!) (ts tp) doesn't work on server thread
         if (entity.canUpdate()) {
             for (int i = 0; i < ticks; i++) {
                 entity.tickCount++;
@@ -152,7 +153,7 @@ public class TimeStopInstant extends StandAction {
     
     private static void skipStandTicks(StandEntity entity, int ticks) {
         skipTicks(entity, ticks);
-        // FIXME (!!!!!!!!!!!!!!!!) ts skip entity ticks
+        // FIXME (!!) (ts tp) ts skip entity ticks
         
     }
 }

@@ -47,10 +47,6 @@ public class MathUtil {
         return new Vector2f((float) Math.toDegrees(angleYZ), (float) Math.toDegrees(angleXZ));
     }
     
-    public static float rotLerp(float lerp, float angleA, float angleB) {
-        return angleA + lerp * MathHelper.wrapDegrees(angleB - angleA);
-    }
-    
     public static float rotLerpRad(float lerp, float angleA, float angleB) {
         return angleA + lerp * wrapRadians(angleB - angleA);
     }

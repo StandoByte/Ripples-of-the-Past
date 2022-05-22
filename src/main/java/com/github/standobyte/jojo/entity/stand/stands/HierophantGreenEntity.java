@@ -54,7 +54,7 @@ public class HierophantGreenEntity extends StandEntity {
     
     public void shootEmeraldsFromBarriers(Vector3d pos, int multiplier) {
         if (canBarriersShoot && getUserPower() != null) {
-            // FIXME (!!!!) emeralds from barriers change
+            // FIXME (!) emeralds from barriers change
             float staminaCost = (ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED.get()).getStaminaCostTicking(getUserPower());
             int barrierEmeralds = Math.max(getPlacedBarriersCount() * multiplier / 10, 1);
             for (int i = 0; i < barrierEmeralds && getUserPower().consumeStamina(staminaCost); i++) {

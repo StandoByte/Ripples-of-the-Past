@@ -145,11 +145,12 @@ public class StandEntityTask {
         default:
             return;
         }
-        if (!setPhase(phase, ticks)) {
-            moveToPhase(phase.getNextPhase(), standPower, standEntity);
+        if (setPhase(phase, ticks)) {
+            action.playSound(standEntity, standPower, phase, target);
+            action.onPhaseSet(standEntity.level, standEntity, standPower, phase, target, ticks);
         }
         else {
-            action.playSound(standEntity, standPower, phase, target);
+            moveToPhase(phase.getNextPhase(), standPower, standEntity);
         }
     }
     
