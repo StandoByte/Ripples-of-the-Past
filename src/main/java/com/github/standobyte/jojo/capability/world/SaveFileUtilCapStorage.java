@@ -22,6 +22,9 @@ public class SaveFileUtilCapStorage implements IStorage<SaveFileUtilCap> {
             timesStandsTakenMap.putInt(ModStandTypes.Registry.getKeyAsString(entry.getKey()), entry.getValue());
         }
         cnbt.put("StandsTaken", timesStandsTakenMap);
+        
+        cnbt.put("TimeStopGameRules", instance.saveGamerules());
+        
         return cnbt;
     }
 
@@ -39,5 +42,7 @@ public class SaveFileUtilCapStorage implements IStorage<SaveFileUtilCap> {
             });
             instance.timesStandsTaken = stands;
         }
+        
+        instance.loadGamerules(cnbt.getCompound("TimeStopGameRules"));
     }
 }

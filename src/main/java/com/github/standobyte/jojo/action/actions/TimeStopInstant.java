@@ -102,7 +102,7 @@ public class TimeStopInstant extends StandAction {
             if (baseTimeStop.get() != null && power.hasPower()
                     && power.getType().getStats() instanceof TimeStopperStandStats) {
                 TimeStopperStandStats stats = (TimeStopperStandStats) power.getType().getStats();
-                float learning = stats.maxDurationGrowthPerTick * impliedTicks;
+                float learning = stats.timeStopLearningPerTick * impliedTicks;
                 power.addLearningProgressPoints(baseTimeStop.get(), learning);
             }
         }

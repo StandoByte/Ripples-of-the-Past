@@ -9,10 +9,26 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.power.stand.type.StandType;
 
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.GameRules;
+import net.minecraft.world.server.ServerWorld;
+
 public class SaveFileUtilCap {
+	private final ServerWorld overworld;
+	
     Map<StandType<?>, Integer> timesStandsTaken = new HashMap<>();
+    
+    private boolean gameruleDayLightCycle;
+    private boolean gameruleWeatherCycle;
+    
+    public SaveFileUtilCap(ServerWorld overworld) {
+    	this.overworld = overworld;
+    }
     
     public void addPlayerStand(StandType<?> type) {
         int prevValue = timesStandsTaken.containsKey(type) ? timesStandsTaken.get(type) : 0;
@@ -55,5 +71,53 @@ public class SaveFileUtilCap {
                     .filter(stand -> !st.contains(stand))
                     .collect(Collectors.toList());
         }
+    }
+    
+    
+    
+    public void setTimeStopGamerules(ServerWorld world) {
+    	if (noTimeStopInstances(world)) {
+	    	GameRules gameRules = overworld.getGameRules();
+	    	MinecraftServer server = overworld.getServer();
+	        gameruleDayLightCycle = gameRules.getBoolean(GameRules.RULE_DAYLIGHT);
+	        gameRules.getRule(GameRules.RULE_DAYLIGHT).set(false, server);
+	        gameruleWeatherCycle = gameRules.getBoolean(GameRules.RULE_WEATHER_CYCLE);
+	        gameRules.getRule(GameRules.RULE_WEATHER_CYCLE).set(false, server);
+    	}
+    }
+    
+    public void restoreTimeStopGamerules(ServerWorld world) {
+    	if (noTimeStopInstances(world)) {
+	    	GameRules gameRules = overworld.getGameRules();
+	    	MinecraftServer server = overworld.getServer();
+	    	gameRules.getRule(GameRules.RULE_DAYLIGHT).set(gameruleDayLightCycle, server);
+	    	gameRules.getRule(GameRules.RULE_WEATHER_CYCLE).set(gameruleWeatherCycle, server);
+    	}
+    }
+    
+    private boolean noTimeStopInstances(@Nullable ServerWorld except) {
+    	MinecraftServer server = overworld.getServer();
+    	for (ServerWorld world : server.getAllLevels()) {
+    		if (world != except && world.getCapability(WorldUtilCapProvider.CAPABILITY)
+    				.map(cap -> cap.getTimeStopHandler().hasTimeStopInstances()).orElse(false)) {
+    			return false;
+    		}
+    	}
+    	
+    	return true;
+    }
+    
+    CompoundNBT saveGamerules() {
+    	CompoundNBT nbt = new CompoundNBT();
+    	nbt.putBoolean("GameruleDayLightCycle", gameruleDayLightCycle);
+    	nbt.putBoolean("GameruleWeatherCycle", gameruleWeatherCycle);
+    	return nbt;
+    }
+    
+    void loadGamerules(CompoundNBT nbt) {
+    	GameRules gameRules = overworld.getGameRules();
+    	MinecraftServer server = overworld.getServer();
+    	gameRules.getRule(GameRules.RULE_DAYLIGHT).set(nbt.getBoolean("GameruleDayLightCycle"), server);
+    	gameRules.getRule(GameRules.RULE_WEATHER_CYCLE).set(nbt.getBoolean("GameruleWeatherCycle"), server);
     }
 }

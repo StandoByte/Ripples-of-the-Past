@@ -182,8 +182,12 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     @Override
-    public float getTargetResolveMultiplier(IStandPower power) {
-        return tier + 1;
+    public float getTargetResolveMultiplier(IStandPower power, IStandPower attackingStand) {
+    	float multiplier = tier + 1;
+    	if (attackingStand.hasPower()) {
+    		multiplier = Math.max(multiplier - attackingStand.getType().getTier(), 1);
+    	}
+        return multiplier;
     }
     
     @Override

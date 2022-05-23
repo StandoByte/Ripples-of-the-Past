@@ -583,7 +583,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     @Override
     public boolean isInvisible() {
-        return !isVisibleForAll() || underInvisibilityEffect();
+        return !isVisibleForAll() && !isGlowing() || underInvisibilityEffect();
     }
 
     public boolean underInvisibilityEffect() {
@@ -1817,7 +1817,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         else {
             Vector3d offsetVec = unsummonOffset.toRelativeVec();
             offsetVec = offsetVec.normalize().scale(Math.max(offsetVec.length() - 0.075, 0));
-            unsummonOffset.setFromRelativeVec(offsetVec);
+            unsummonOffset = unsummonOffset.withRelativeVec(offsetVec);
         }
         this.setTaskPosOffset(unsummonOffset, false);
     }

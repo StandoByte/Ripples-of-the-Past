@@ -23,6 +23,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.SyncLeapCooldownPac
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncHeldActionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSyncPowerTypePacket;
+import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -519,8 +520,8 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
     
     @Override
-    public float getTargetResolveMultiplier() {
-        return hasPower() ? getType().getTargetResolveMultiplier(getThis()) : 1F;
+    public float getTargetResolveMultiplier(IStandPower attackingStand) {
+        return hasPower() ? getType().getTargetResolveMultiplier(getThis(), attackingStand) : 1F;
     }
     
     @Override

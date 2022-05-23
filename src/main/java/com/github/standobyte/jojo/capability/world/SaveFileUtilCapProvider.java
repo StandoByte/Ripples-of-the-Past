@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.capability.world;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.INBT;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Direction;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.capabilities.Capability;
@@ -14,8 +15,8 @@ public class SaveFileUtilCapProvider implements ICapabilitySerializable<INBT>{
     public static Capability<SaveFileUtilCap> CAPABILITY = null;
     private LazyOptional<SaveFileUtilCap> instance;
     
-    public SaveFileUtilCapProvider() {
-        this.instance = LazyOptional.of(() -> new SaveFileUtilCap());
+    public SaveFileUtilCapProvider(ServerWorld overworld) {
+        this.instance = LazyOptional.of(() -> new SaveFileUtilCap(overworld));
     }
 
     @Override
@@ -35,12 +36,12 @@ public class SaveFileUtilCapProvider implements ICapabilitySerializable<INBT>{
                 () -> new IllegalArgumentException("Save file capability LazyOptional is not attached.")), null, nbt);
     }
     
-    public static SaveFileUtilCap getSaveFileCap(ServerWorld serverWorld) {
-        return serverWorld.getCapability(SaveFileUtilCapProvider.CAPABILITY).orElseThrow(
+    public static SaveFileUtilCap getSaveFileCap(MinecraftServer server) {
+        return server.overworld().getCapability(SaveFileUtilCapProvider.CAPABILITY).orElseThrow(
                 () -> new IllegalArgumentException("Save file capability LazyOptional is not attached."));
     }
     
     public static SaveFileUtilCap getSaveFileCap(ServerPlayerEntity serverPlayer) {
-        return getSaveFileCap(serverPlayer.server.overworld());
+        return getSaveFileCap(serverPlayer.server);
     }
 }

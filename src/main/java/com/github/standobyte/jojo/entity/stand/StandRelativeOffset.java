@@ -6,43 +6,35 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.vector.Vector3d;
 
 public class StandRelativeOffset {
-    private double left;
-    private double forward;
-    private boolean doYOffset;
-    private double y;
-    private boolean useXRot = false;
-//    private float yRotOffset;
+    private final double left;
+    private final double forward;
+    private final boolean doYOffset;
+    private final double y;
+    private final boolean useXRot;
+//    private final float yRotOffset;
     
     public static StandRelativeOffset noYOffset(double left, double forward) {
-        return new StandRelativeOffset(left, 0, forward, false);
+        return new StandRelativeOffset(left, 0, forward, false, false);
     }
     
     public static StandRelativeOffset withYOffset(double left, double y, double forward) {
-        return new StandRelativeOffset(left, y, forward, true);
+        return new StandRelativeOffset(left, y, forward, true, false);
+    }
+    
+    public static StandRelativeOffset withXRot(double left, double forward) {
+        return new StandRelativeOffset(left, 0, forward, false, true);
     }
     
     public StandRelativeOffset copy() {
-        return new StandRelativeOffset(this.left, this.y, this.forward, this.doYOffset);
+        return new StandRelativeOffset(this.left, this.y, this.forward, this.doYOffset, this.useXRot);
     }
     
-    public StandRelativeOffset copy(Double left, Double y, Double forward) {
-        return new StandRelativeOffset(
-                left == null ? this.left : left, 
-                y == null ? this.y : y, 
-                forward == null ? this.forward : forward, 
-                this.doYOffset || y != null);
-    }
-    
-    private StandRelativeOffset(double left, double y, double forward, boolean doYOffset) {
+    private StandRelativeOffset(double left, double y, double forward, boolean doYOffset, boolean useXRot) {
         this.left = left;
         this.forward = forward;
         this.doYOffset = doYOffset;
         this.y = y;
-    }
-    
-    public StandRelativeOffset withXRot() {
-        this.useXRot = true;
-        return this;
+        this.useXRot = useXRot;
     }
     
     Vector3d getAbsoluteVec(StandRelativeOffset offsetDefault, float yRot, float xRot) {
@@ -60,10 +52,8 @@ public class StandRelativeOffset {
         return new Vector3d(left, y, forward);
     }
     
-    void setFromRelativeVec(Vector3d vec) {
-        this.left = vec.x;
-        this.y = vec.y;
-        this.forward = vec.z;
+    StandRelativeOffset withRelativeVec(Vector3d vec) {
+    	return new StandRelativeOffset(vec.x, vec.y, vec.z, this.doYOffset, this.useXRot);
     }
     
     public double getLeft() {
@@ -84,8 +74,7 @@ public class StandRelativeOffset {
     }
     
     public static StandRelativeOffset readFromBuf(PacketBuffer buf) {
-        StandRelativeOffset offset = new StandRelativeOffset(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readBoolean());
-        offset.useXRot = buf.readBoolean();
+        StandRelativeOffset offset = new StandRelativeOffset(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readBoolean(), buf.readBoolean());
         return offset;
     }
 }

@@ -459,7 +459,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
     
     @Override
-    public int getTier() {
+    public int getUserTier() {
         return tier;
     }
     
@@ -583,7 +583,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         super.syncWithUserOnly();
         serverPlayerUser.ifPresent(player -> {
             if (hasPower()) {
-                // FIXME (!!!!) stamina isn't synced on login
                 if (usesStamina()) {
                     PacketManager.sendToClient(new SyncStaminaPacket(stamina), player);
                 }
