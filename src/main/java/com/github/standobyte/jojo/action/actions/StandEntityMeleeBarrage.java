@@ -79,7 +79,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
         Vector3d targetPos = target.getTargetPos(true);
         double offset = 0.5;
         if (targetPos == null) {
-            return StandRelativeOffset.noYOffset(0, Math.min(offset + maxVariation, standEntity.getMaxEffectiveRange())).withXRot();
+            return StandRelativeOffset.withXRot(0, Math.min(offset + maxVariation, standEntity.getMaxEffectiveRange()));
         }
         else {
             LivingEntity user = standEntity.getUser();
@@ -88,7 +88,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
                     : 0.5);
             double offsetToTarget = targetPos.subtract(user.position()).multiply(1, 0, 1).length() - backAway;
             offset = MathHelper.clamp(offsetToTarget, offset, offset + maxVariation);
-            return StandRelativeOffset.noYOffset(0, offset).withXRot();
+            return StandRelativeOffset.withXRot(0, offset);
         }
     }
     

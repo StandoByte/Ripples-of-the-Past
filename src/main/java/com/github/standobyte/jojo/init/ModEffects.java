@@ -68,7 +68,7 @@ public class ModEffects {
     public static final void afterEffectsRegister(RegistryEvent.Register<Effect> event) {
         VampirismPowerType.initVampiricEffectsMap();
         StandEntity.addSharedEffects(TIME_STOP.get(), Effects.BLINDNESS);
-        TRACKED_EFFECTS = ImmutableSet.of(RESOLVE.get(), STUN.get());
+        TRACKED_EFFECTS = ImmutableSet.of(RESOLVE.get(), TIME_STOP.get(), STUN.get());
     }
     
     public static boolean isEffectTracked(Effect effect) {

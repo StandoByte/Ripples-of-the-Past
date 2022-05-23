@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.ProjectileHamonChargeCapProvider;
@@ -67,6 +68,7 @@ public class ForgeBusEventSubscriber {
     private static final ResourceLocation PLAYER_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "player_util");
     private static final ResourceLocation CLIENT_PLAYER_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "client_player_util");
     private static final ResourceLocation LIVING_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "living_util");
+    private static final ResourceLocation ENTITY_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "entity_util");
     private static final ResourceLocation PROJECTILE_HAMON_CAP = new ResourceLocation(JojoMod.MOD_ID, "projectile_hamon");
     private static final ResourceLocation WORLD_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "world_util");
     private static final ResourceLocation SAVE_FILE_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "save_file_util");
@@ -87,13 +89,14 @@ public class ForgeBusEventSubscriber {
         World world = event.getObject();
         event.addCapability(WORLD_UTIL_CAP, new WorldUtilCapProvider(world));
         if (!world.isClientSide() && world.dimension() == World.OVERWORLD) {
-            event.addCapability(SAVE_FILE_UTIL_CAP, new SaveFileUtilCapProvider());
+            event.addCapability(SAVE_FILE_UTIL_CAP, new SaveFileUtilCapProvider((ServerWorld) world));
         }
     }
     
     @SubscribeEvent
     public static void onAttachCapabilitiesEntity(AttachCapabilitiesEvent<Entity> event) {
         Entity entity = event.getObject();
+        event.addCapability(ENTITY_UTIL_CAP, new EntityUtilCapProvider(entity));
         if (entity instanceof LivingEntity) {
             if (entity instanceof PlayerEntity) {
                 PlayerEntity player = (PlayerEntity) event.getObject();
@@ -117,10 +120,10 @@ public class ForgeBusEventSubscriber {
         if (entityTracked instanceof LivingEntity) {
             LivingEntity livingTracked = (LivingEntity) entityTracked;
             ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
-            IStandPower.getStandPowerOptional(livingTracked).ifPresent(power -> {
+            INonStandPower.getNonStandPowerOptional(livingTracked).ifPresent(power -> {
                 power.syncWithTrackingOrUser(player);
             });
-            INonStandPower.getNonStandPowerOptional(livingTracked).ifPresent(power -> {
+            IStandPower.getStandPowerOptional(livingTracked).ifPresent(power -> {
                 power.syncWithTrackingOrUser(player);
             });
             livingTracked.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
@@ -133,8 +136,8 @@ public class ForgeBusEventSubscriber {
     public static void onPlayerClone(PlayerEvent.Clone event) {
         PlayerEntity original = event.getOriginal();
         PlayerEntity player = event.getPlayer();
-        IStandPower.getPlayerStandPower(player).onClone(IStandPower.getPlayerStandPower(original), event.isWasDeath());
         INonStandPower.getPlayerNonStandPower(player).onClone(INonStandPower.getPlayerNonStandPower(original), event.isWasDeath());
+        IStandPower.getPlayerStandPower(player).onClone(IStandPower.getPlayerStandPower(original), event.isWasDeath());
         
         original.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(oldCap -> {
             player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(newCap -> {
@@ -160,8 +163,8 @@ public class ForgeBusEventSubscriber {
     }
     
     private static void syncPowerData(PlayerEntity player) {
-        IStandPower.getPlayerStandPower(player).syncWithUserOnly();
         INonStandPower.getPlayerNonStandPower(player).syncWithUserOnly();
+        IStandPower.getPlayerStandPower(player).syncWithUserOnly();
         PacketManager.sendToClient(new UpdateClientCapCachePacket(), (ServerPlayerEntity) player);
     }
     

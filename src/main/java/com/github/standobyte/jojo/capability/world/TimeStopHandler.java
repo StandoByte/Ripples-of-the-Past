@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -20,7 +21,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
@@ -28,8 +28,6 @@ public class TimeStopHandler {
     private final World world;
     private final Set<Entity> stoppedInTime = new HashSet<>();
     private final Map<Integer, TimeStopInstance> timeStopInstances = HashBiMap.create();
-    private boolean gameruleDayLightCycle;
-    private boolean gameruleWeatherCycle;
     
     public TimeStopHandler(World world) {
         this.world = world;
@@ -112,15 +110,16 @@ public class TimeStopHandler {
             });
             
             if (timeStopInstances.size() == 1) {
-                gameruleDayLightCycle = world.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT);
-                world.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(false, serverWorld.getServer());
-                gameruleWeatherCycle = world.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE);
-                world.getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(false, serverWorld.getServer());
+            	SaveFileUtilCapProvider.getSaveFileCap(serverWorld.getServer()).setTimeStopGamerules(serverWorld);
             }
             else {
                 timeStopInstances.values().forEach(existingInstance -> existingInstance.removeSoundsIfCrosses(instance));
             }
         }
+    }
+    
+    boolean hasTimeStopInstances() {
+    	return !timeStopInstances.isEmpty();
     }
 
     public void updateEntityTimeStop(Entity entity, boolean canMove, boolean checkEffect) {
@@ -131,18 +130,17 @@ public class TimeStopHandler {
                 entityToCheck = standEntity.getUser();
             }
         }
-
-        // FIXME (!!) (ts) wtf is going on with other players' stands
         
         canMove = canMove || checkEffect && entityToCheck instanceof LivingEntity && ((LivingEntity) entityToCheck).hasEffect(ModEffects.TIME_STOP.get()) || 
                 entityToCheck instanceof PlayerEntity && TimeUtil.canPlayerMoveInStoppedTime((PlayerEntity) entityToCheck, false)
                 || entityToCheck instanceof EndermanEntity; // for the lulz
         
-        if (!canMove) {
+        boolean stopInTime = !canMove;
+        entity.getCapability(EntityUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.updateEntityTimeStop(stopInTime));
+        
+        if (stopInTime) {
             stoppedInTime.add(entity);
         }
-        
-        entity.canUpdate(canMove); 
     }
     
     
@@ -170,10 +168,7 @@ public class TimeStopHandler {
                 }
             });
             if (timeStopInstances.isEmpty()) {
-                world.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                    world.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(gameruleDayLightCycle, serverWorld.getServer());
-                    world.getGameRules().getRule(GameRules.RULE_WEATHER_CYCLE).set(gameruleWeatherCycle, serverWorld.getServer());
-                });
+            	SaveFileUtilCapProvider.getSaveFileCap(serverWorld.getServer()).restoreTimeStopGamerules(serverWorld);
             }
         }
         

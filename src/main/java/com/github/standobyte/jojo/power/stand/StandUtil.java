@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
@@ -55,7 +56,7 @@ public class StandUtil {
             }
             
             if (JojoModConfig.getCommonConfigInstance(false).prioritizeLeastTakenStands.get()) {
-                filtered = SaveFileUtilCapProvider.getSaveFileCap((ServerWorld) entity.level).leastTakenStands(filtered);
+                filtered = SaveFileUtilCapProvider.getSaveFileCap(((ServerWorld) entity.level).getServer()).leastTakenStands(filtered);
             }
             
             if (!filtered.isEmpty()) {
@@ -133,14 +134,16 @@ public class StandUtil {
     public static void addResolve(IStandPower stand, LivingEntity target, float points) {
         target = getStandUser(target);
         if (StandUtil.worthyTarget(target)) {
+        	float ptsPrev = points;
             for (PowerClassification classification : PowerClassification.values()) {
                 points *= IPower.getPowerOptional(target, classification).map(power -> {
                     if (power.hasPower()) {
-                        return power.getTargetResolveMultiplier();
+                        return power.getTargetResolveMultiplier(stand);
                     }
                     return 1F;
                 }).orElse(1F);
             }
+            JojoMod.LOGGER.debug(points / ptsPrev);
             
             float pts = points;
             stand.getResolveCounter().addResolveOnAttack(pts);

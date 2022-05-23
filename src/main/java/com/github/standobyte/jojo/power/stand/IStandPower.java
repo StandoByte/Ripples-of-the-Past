@@ -67,7 +67,7 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     IStandManifestation getStandManifestation();
     void toggleSummon();
     
-    int getTier();
+    int getUserTier();
     
     void onDash();
     

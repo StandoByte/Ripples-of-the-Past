@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.power;
 
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -19,7 +20,7 @@ public interface IPowerType<P extends IPower<P, T>, T extends IPowerType<P, T>> 
     }
     Action<P>[] getAttacks();
     Action<P>[] getAbilities();
-    float getTargetResolveMultiplier(P power);
+    float getTargetResolveMultiplier(P power, IStandPower attackingStand);
     String getTranslationKey();
     ResourceLocation getIconTexture();
     String getEnergyString();

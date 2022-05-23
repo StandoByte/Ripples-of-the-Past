@@ -148,7 +148,7 @@ public class TimeUtil {
         LivingEntity entity = event.getEntityLiving();
         ChunkPos chunkPos = new ChunkPos(entity.blockPosition());
         if (event.getOldPotionEffect() == null && event.getPotionEffect().getEffect() == ModEffects.TIME_STOP.get() && isTimeStopped(entity.level, chunkPos)) {
-            entity.level.getCapability(WorldUtilCapProvider.CAPABILITY).resolve().get().getTimeStopHandler().updateEntityTimeStop(entity, false, false);
+            entity.level.getCapability(WorldUtilCapProvider.CAPABILITY).resolve().get().getTimeStopHandler().updateEntityTimeStop(entity, true, false);
             if (!entity.level.isClientSide()) {
                 ((ServerWorld) entity.level).getChunkSource().broadcast(entity, (new SPlayEntityEffectPacket(entity.getId(), event.getPotionEffect())));
                 PacketManager.sendToClientsTrackingAndSelf(new RefreshMovementInTimeStopPacket(entity.getId(), chunkPos, true), entity);

@@ -45,7 +45,7 @@ public class StandDiscItem extends Item {
                     StandType<?> stand = getStandFromStack(stack);
                     if (JojoModUtil.dispenseOnNearbyEntity(blockSource, stack, entity -> {
                         return IStandPower.getStandPowerOptional(entity).map(power -> {
-                            return standFitsTier(entity, power.getTier(), stand) && power.givePower(stand);
+                            return standFitsTier(entity, power.getUserTier(), stand) && power.givePower(stand);
                         }).orElse(false);
                     }, true)) {
                         return stack;
@@ -66,7 +66,7 @@ public class StandDiscItem extends Item {
                 if (JojoModConfig.getCommonConfigInstance(false).isStandBanned(stand)) {
                     return ActionResult.fail(stack);
                 }
-                if (!standFitsTier(player, power.getTier(), stand)) {
+                if (!standFitsTier(player, power.getUserTier(), stand)) {
                     player.displayClientMessage(new TranslationTextComponent("jojo.chat.message.low_tier"), true);
                     return ActionResult.fail(stack);
                 }

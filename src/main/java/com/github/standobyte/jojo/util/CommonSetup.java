@@ -3,6 +3,8 @@ package com.github.standobyte.jojo.util;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCap;
+import com.github.standobyte.jojo.capability.entity.EntityUtilCap;
+import com.github.standobyte.jojo.capability.entity.EntityUtilCapStorage;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapStorage;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
@@ -49,10 +51,11 @@ public class CommonSetup {
                 @Override public void readNBT(Capability<ClientPlayerUtilCap> capability, ClientPlayerUtilCap instance, Direction side, INBT nbt) {}
             }, () -> new ClientPlayerUtilCap(null));
             CapabilityManager.INSTANCE.register(LivingUtilCap.class, new LivingUtilCapStorage(), () -> new LivingUtilCap(null));
+            CapabilityManager.INSTANCE.register(EntityUtilCap.class, new EntityUtilCapStorage(), () -> new EntityUtilCap(null));
             CapabilityManager.INSTANCE.register(ProjectileHamonChargeCap.class, new ProjectileHamonChargeCapStorage(), () -> new ProjectileHamonChargeCap(null));
             
             CapabilityManager.INSTANCE.register(WorldUtilCap.class, new WorldUtilCapStorage(), () -> new WorldUtilCap(null));
-            CapabilityManager.INSTANCE.register(SaveFileUtilCap.class, new SaveFileUtilCapStorage(), () -> new SaveFileUtilCap());
+            CapabilityManager.INSTANCE.register(SaveFileUtilCap.class, new SaveFileUtilCapStorage(), () -> new SaveFileUtilCap(null));
             
             ArgumentTypes.register("stand", StandArgument.class, new ArgumentSerializer<>(StandArgument::new));
 

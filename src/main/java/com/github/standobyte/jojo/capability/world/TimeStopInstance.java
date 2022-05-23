@@ -173,14 +173,14 @@ public class TimeStopInstance {
                             cooldown = 0;
                         }
                         else {
-                            cooldown = stats.cooldownPerTick * ticksPassed;
+                            cooldown = stats.timeStopCooldownPerTick * ticksPassed;
                             if (power.getUser() != null && power.getUser().hasEffect(ModEffects.RESOLVE.get())) {
                                 cooldown /= 3F;
                             }
                         }
                         power.setCooldownTimer(action, (int) cooldown);
 
-                        power.addLearningProgressPoints(action, stats.maxDurationGrowthPerTick * ticksPassed);
+                        power.addLearningProgressPoints(action, stats.timeStopLearningPerTick * ticksPassed);
                     });
                 });
             }
