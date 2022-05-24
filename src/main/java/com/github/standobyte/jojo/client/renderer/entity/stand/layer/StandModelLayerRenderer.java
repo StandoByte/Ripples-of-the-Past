@@ -4,9 +4,9 @@ import com.github.standobyte.jojo.client.model.entity.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.renderer.entity.stand.AbstractStandRenderer;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.IEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.util.ResourceLocation;
@@ -30,8 +30,8 @@ public abstract class StandModelLayerRenderer<T extends StandEntity, M extends S
         return packedLight;
     }
     
-    public IVertexBuilder getBuffer(IRenderTypeBuffer buffer, T entity) {
-        return buffer.getBuffer(entityRenderer.getRenderType(entity, getLayerTexture()));
+    public RenderType getRenderType(T entity) {
+    	return entityRenderer.getRenderType(entity, getLayerTexture());
     }
 
     public M getLayerModel() {
@@ -45,10 +45,13 @@ public abstract class StandModelLayerRenderer<T extends StandEntity, M extends S
             T entity, float walkAnimPos, float walkAnimSpeed, float partialTick,
             float ticks, float headYRotation, float headXRotation) {
         if (shouldRender(entity)) {
-            entityRenderer.renderLayer(matrixStack, getBuffer(buffer, entity), getPackedLight(packedLight), 
-                    entity, walkAnimPos, walkAnimSpeed, partialTick, 
-                    ticks, headYRotation, headXRotation, 
-                    getLayerTexture(), getLayerModel());
+        	RenderType renderType = getRenderType(entity);
+        	if (renderType != null) {
+                entityRenderer.renderLayer(matrixStack, buffer.getBuffer(renderType), getPackedLight(packedLight), 
+                        entity, walkAnimPos, walkAnimSpeed, partialTick, 
+                        ticks, headYRotation, headXRotation, 
+                        getLayerTexture(), getLayerModel());
+        	}
         }
     }
 }

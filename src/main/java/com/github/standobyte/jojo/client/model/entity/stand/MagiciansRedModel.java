@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.client.model.entity.stand;
 
+import java.util.function.Function;
+
 import com.github.standobyte.jojo.action.actions.MagiciansRedRedBind;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
@@ -10,7 +12,9 @@ import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
 import com.github.standobyte.jojo.util.utils.MathUtil;
 
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.util.ResourceLocation;
 
 // Made with Blockbench 3.9.2
 
@@ -30,10 +34,10 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
     private ModelRenderer feather2;
 
     public MagiciansRedModel() {
-        this(64, 64);
+        this(RenderType::entityTranslucent, 64, 64);
     }
 
-    public MagiciansRedModel(int textureWidth, int textureHeight) {
+    public MagiciansRedModel(Function<ResourceLocation, RenderType> renderType, int textureWidth, int textureHeight) {
         super(textureWidth, textureHeight);
         addLayerSpecificBoxes();
     }

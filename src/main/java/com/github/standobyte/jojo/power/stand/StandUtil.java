@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
@@ -143,7 +142,6 @@ public class StandUtil {
                     return 1F;
                 }).orElse(1F);
             }
-            JojoMod.LOGGER.debug(points / ptsPrev);
             
             float pts = points;
             stand.getResolveCounter().addResolveOnAttack(pts);

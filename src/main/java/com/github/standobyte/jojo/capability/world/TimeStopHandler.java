@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -43,6 +44,7 @@ public class TimeStopHandler {
             
             else if (entity.invulnerableTime > 0 && entity instanceof LivingEntity && !entity.canUpdate()) {
                 entity.invulnerableTime--;
+                entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.lastHurtByStandTick());
             }
         }
         

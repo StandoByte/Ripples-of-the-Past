@@ -57,10 +57,9 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
                     dragTarget(bound, vecToOwner.normalize().scale(2));
                     bound.fallDistance = 0;
                 }
-                if (owner instanceof StandEntity && bound.is(((StandEntity) owner).getUser())) {
+                if (owner instanceof StandEntity) {
+                	// not always works
                     owner.setDeltaMovement(Vector3d.ZERO);
-                    // not always works
-                    ((StandEntity) owner).moveStandManually(0, 0, false, false);
                 }
             }
         }

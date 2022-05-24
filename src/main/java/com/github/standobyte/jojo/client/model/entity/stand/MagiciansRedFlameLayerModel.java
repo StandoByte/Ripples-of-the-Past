@@ -3,6 +3,8 @@ package com.github.standobyte.jojo.client.model.entity.stand;
 import com.github.standobyte.jojo.client.model.FlameModelRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.stand.MagiciansRedRenderer;
 
+import net.minecraft.client.renderer.Atlases;
+
 public class MagiciansRedFlameLayerModel extends MagiciansRedModel {
 
     public MagiciansRedFlameLayerModel() {
@@ -10,7 +12,7 @@ public class MagiciansRedFlameLayerModel extends MagiciansRedModel {
     }
 
     public MagiciansRedFlameLayerModel(int textureWidth, int textureHeight) {
-        super(textureWidth, textureHeight);
+        super(tex -> Atlases.translucentCullBlockSheet(), textureWidth, textureHeight);
     }
     
     @Override

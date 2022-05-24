@@ -583,7 +583,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     @Override
     public boolean isInvisible() {
-        return !isVisibleForAll() && !isGlowing() || underInvisibilityEffect();
+        return !isVisibleForAll() || underInvisibilityEffect();
     }
 
     public boolean underInvisibilityEffect() {
@@ -1493,7 +1493,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return getComboMeter() >= 0.5F;
     }
 
-    // FIXME (!!!!) set on heavy attack click?
     public boolean isHeavyComboPunching() {
         return getLastHeavyPunchCombo() >= 0.5F;
     }

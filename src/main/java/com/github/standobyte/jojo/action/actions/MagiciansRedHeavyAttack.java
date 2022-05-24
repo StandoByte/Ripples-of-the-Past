@@ -33,7 +33,7 @@ public class MagiciansRedHeavyAttack extends StandEntityHeavyAttack {
 
     @Override
     protected void setAction(IStandPower standPower, StandEntity standEntity, int ticks, Phase phase, ActionTarget target) {
-        if (standEntity.willHeavyPunchCombo()) {
+        if (standEntity.isHeavyComboPunching()) {
             MagiciansRedRedBind.getLandedRedBind(standEntity).ifPresent(redBind -> {
                 redBind.setKickCombo();
             });

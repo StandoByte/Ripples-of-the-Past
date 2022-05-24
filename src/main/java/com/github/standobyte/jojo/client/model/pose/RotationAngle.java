@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.client.model.pose;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.util.utils.MathUtil;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -35,7 +34,6 @@ public class RotationAngle {
     
     public void applyRotation(float rotationAmount) {
     	TernaryOperator<Float> lerp = getLerp();
-    	if (!wrapDegrees()) JojoMod.LOGGER.debug("Pog " + modelRenderer.xRot + " -> " + angleX);
         modelRenderer.xRot = lerp.apply(rotationAmount, modelRenderer.xRot, angleX);
         modelRenderer.yRot = lerp.apply(rotationAmount, modelRenderer.yRot, angleY);
         modelRenderer.zRot = lerp.apply(rotationAmount, modelRenderer.zRot, angleZ);

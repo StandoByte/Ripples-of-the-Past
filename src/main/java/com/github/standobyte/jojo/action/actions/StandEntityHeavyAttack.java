@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.World;
 
 public class StandEntityHeavyAttack extends StandEntityAction {
@@ -23,11 +24,16 @@ public class StandEntityHeavyAttack extends StandEntityAction {
         return !stand.canAttackMelee() ? ActionConditionResult.NEGATIVE : super.checkStandConditions(stand, power, target);
     }
     
+    public void onClick(World world, LivingEntity user, IStandPower power) {
+    	if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
+    		((StandEntity) power.getStandManifestation()).setHeavyPunchCombo();
+    	}
+    }
+    
     @Override
     public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target, int ticks) {
         standEntity.alternateHands();
         if (!world.isClientSide()) {
-            standEntity.setHeavyPunchCombo();
             standEntity.addComboMeter(-0.51F, 0);
         }
     }

@@ -34,8 +34,8 @@ public class SilverChariotHeavyAttack extends StandEntityHeavyAttack {
     
     @Override
     public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
-        return standEntity.willHeavyPunchCombo() ? 
-                Math.max(super.getStandWindupTicks(standPower, standEntity) - 2, 0)
+        return standEntity.isHeavyComboPunching() ? 
+                Math.max(super.getStandWindupTicks(standPower, standEntity) - getStandActionTicks(standPower, standEntity) / 2, 0)
                 : 0;
     }
     

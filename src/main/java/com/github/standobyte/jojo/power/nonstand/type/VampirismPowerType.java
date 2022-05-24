@@ -156,7 +156,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
         if (!vampirism.isVampireAtFullPower()) {
             leapStrength *= 0.25F;
         }
-        return leapStrength;
+        return leapStrength * 0.4F;
     }
     
     @Override
