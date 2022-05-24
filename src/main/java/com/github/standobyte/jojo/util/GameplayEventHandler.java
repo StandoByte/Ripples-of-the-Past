@@ -1042,7 +1042,7 @@ public class GameplayEventHandler {
                     INonStandPower.getNonStandPowerOptional(entity).map(power -> 
                     power.hasPower() && power.isLeapUnlocked() ? power.leapStrength() : 0).orElse(0F));
             if (leapStrength > 0) {
-                event.setDistance(Math.max(event.getDistance() - (leapStrength + 1) * 3, 0));
+                event.setDistance(Math.max(event.getDistance() - (leapStrength + 5) * 3, 0));
             }
         }
     }

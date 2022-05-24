@@ -116,8 +116,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     @Override
     public float getLeapStrength(INonStandPower power) {
         HamonData hamon = power.getTypeSpecificData(this).get();
-        float strength = (float) 1.5F + (float) hamon.getHamonControlLevel() / (float) HamonData.MAX_STAT_LEVEL * hamon.getEfficiencyDecrease();
-        return hamon.isSkillLearned(HamonSkill.AFTERIMAGES) ? strength + 1.5F : strength;
+        return hamon.isSkillLearned(HamonSkill.AFTERIMAGES) ? 2F : 1.25F;
     }
     
     @Override

@@ -57,9 +57,9 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
 
     protected RenderType renderType(T entity, ResourceLocation modelTexture, boolean isVisible, boolean isVisibleForSpectator, boolean isGlowing) {
         if (isVisible || isVisibleForSpectator) {
-            return isGlowing ? RenderType.outline(modelTexture) : getModel().renderType(modelTexture);
+            return getModel().renderType(modelTexture);
         }
-        return null;
+        return isGlowing ? RenderType.outline(modelTexture) : null;
     }
 
     @Deprecated
@@ -228,8 +228,11 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
                 if (layer instanceof StandModelLayerRenderer) {
                     StandModelLayerRenderer<T, M> standLayer = (StandModelLayerRenderer<T, M>) layer;
                     if (standLayer.shouldRender(entity)) {
-                        renderSeparateLayerArm(standLayer.getLayerModel(), handSide, matrixStack, 
-                                standLayer.getBuffer(buffer, entity), standLayer.getPackedLight(packedLight), entity, partialTick);
+                    	RenderType layerRenderType = standLayer.getRenderType(entity);
+                    	if (layerRenderType != null) {
+	                        renderSeparateLayerArm(standLayer.getLayerModel(), handSide, matrixStack, 
+	                        		buffer.getBuffer(layerRenderType), standLayer.getPackedLight(packedLight), entity, partialTick);
+                    	}
                     }
                 }
             }

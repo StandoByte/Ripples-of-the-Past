@@ -171,6 +171,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return baseVariation != null;
     }
     
+    public void onClick(World world, LivingEntity user, P power) {}
+    
     public ActionTarget targetBeforePerform(World world, LivingEntity user, P power, ActionTarget target) {
         return target;
     }
@@ -203,8 +205,6 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     public LivingEntity getPerformer(LivingEntity user, P power) {
         return user;
     }
-    
-    public void onClick(World world, LivingEntity user, P power) {}
     
     public int getCooldownTechnical(P power) {
         return cooldownTechnical;

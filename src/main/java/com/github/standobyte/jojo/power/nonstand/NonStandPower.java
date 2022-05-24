@@ -17,6 +17,8 @@ import com.github.standobyte.jojo.power.PowerBaseImpl;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
@@ -176,7 +178,14 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     
     @Override
     public float leapStrength() {
-        return type.getLeapStrength(this);
+    	float strength = type.getLeapStrength(this);
+    	if (user != null) {
+    		ModifiableAttributeInstance speedAttribute = user.getAttribute(Attributes.MOVEMENT_SPEED);
+    		if (speedAttribute != null) {
+    			strength *= speedAttribute.getValue() / speedAttribute.getBaseValue();
+    		}
+    	}
+    	return strength;
     }
     
     @Override

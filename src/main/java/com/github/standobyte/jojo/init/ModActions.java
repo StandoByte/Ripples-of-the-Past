@@ -225,7 +225,7 @@ public class ModActions {
     
     public static final RegistryObject<TimeStop> STAR_PLATINUM_TIME_STOP = ACTIONS.register("star_platinum_time_stop", 
             () -> new TimeStop(new StandAction.Builder().holdToFire(40, false)
-                    .staminaCost(250).staminaCostTick(5F)
+                    .staminaCost(250).staminaCostTick(7.5F)
                     .resolveLevelToUnlock(4).isTrained().ignoresPerformerStun().autoSummonStand().shout(ModSounds.JOTARO_STAR_PLATINUM_THE_WORLD)
                     .xpRequirement(950))
             .timeStopSound(ModSounds.STAR_PLATINUM_TIME_STOP)
@@ -257,7 +257,7 @@ public class ModActions {
     
     public static final RegistryObject<TimeStop> THE_WORLD_TIME_STOP = ACTIONS.register("the_world_time_stop", 
             () -> new TheWorldTimeStop(new StandAction.Builder().holdToFire(30, false)
-                    .staminaCost(250).staminaCostTick(5F)
+                    .staminaCost(250).staminaCostTick(7.5F)
                     .resolveLevelToUnlock(2).isTrained().ignoresPerformerStun().shout(ModSounds.DIO_THE_WORLD)
                     .xpRequirement(500))
             .voiceLineWithStandSummoned(ModSounds.DIO_TIME_STOP).timeStopSound(ModSounds.THE_WORLD_TIME_STOP)

@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.client.model.entity.stand;
 
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
@@ -22,8 +23,10 @@ import com.github.standobyte.jojo.util.utils.MathUtil;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.HandSide;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 
 // Made with Blockbench 3.9.2
@@ -51,9 +54,13 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
     public HumanoidStandModel() {
         this(64, 64);
     }
-
+    
     public HumanoidStandModel(int textureWidth, int textureHeight) {
-        super(true, 16.0F, 0.0F, 2.0F, 2.0F, 24.0F);
+    	this(RenderType::entityTranslucent, textureWidth, textureHeight);
+    }
+    
+    public HumanoidStandModel(Function<ResourceLocation, RenderType> renderType, int textureWidth, int textureHeight) {
+        super(renderType, true, 16.0F, 0.0F, 2.0F, 2.0F, 24.0F);
         this.texWidth = textureWidth;
         this.texHeight = textureHeight;
 
@@ -122,7 +129,7 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         rightLeg.addChild(rightLowerLeg);
         
         
-        baseHumanoidBoxes = ImmutableMap.<ModelRenderer, Consumer<ModelRenderer>>builder()
+        baseHumanoidBoxGenerators = ImmutableMap.<ModelRenderer, Consumer<ModelRenderer>>builder()
                 .put(head, part ->          part.texOffs(24, 0) .addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, 0.0F, false))
                 .put(torso, part ->         part.texOffs(0, 0)  .addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, 0.0F, false))
                 .put(leftArm, part ->       part.texOffs(16, 44).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false))
@@ -146,14 +153,14 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
     }
 
     protected final void addHumanoidBaseBoxes(@Nullable Predicate<ModelRenderer> partPredicate) {
-        for (Map.Entry<ModelRenderer, Consumer<ModelRenderer>> entry : baseHumanoidBoxes.entrySet()) {
+        for (Map.Entry<ModelRenderer, Consumer<ModelRenderer>> entry : baseHumanoidBoxGenerators.entrySet()) {
             if (partPredicate == null || partPredicate.test(entry.getKey())) {
                 entry.getValue().accept(entry.getKey());
             }
         }
     }
     
-    private final Map<ModelRenderer, Consumer<ModelRenderer>> baseHumanoidBoxes;
+    private final Map<ModelRenderer, Consumer<ModelRenderer>> baseHumanoidBoxGenerators;
 
     @Override
     protected void updatePartsVisibility(VisibilityMode mode) {
