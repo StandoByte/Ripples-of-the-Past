@@ -19,9 +19,8 @@ import net.minecraft.world.World;
 
 public class StandEntityMeleeBarrage extends StandEntityAction {
 
-    public StandEntityMeleeBarrage(StandEntityAction.Builder builder) {
-        super(builder.standAutoSummonMode(AutoSummonMode.ARMS).holdType().staminaCostTick(3F)
-                .standUserSlowDownFactor(0.3F).standOffsetFront());
+    public StandEntityMeleeBarrage(StandEntityMeleeBarrage.Builder builder) {
+        super(builder);
     }
 
     @Override
@@ -130,5 +129,21 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
             return 0;
         }
         return standEntity.isArmsOnlyMode() ? 0 : StandStatFormulas.getBarrageRecovery(standEntity.getSpeed());
+    }
+    
+    
+    
+    public static class Builder extends StandEntityAction.AbstractBuilder<StandEntityMeleeBarrage.Builder> {
+    	
+    	public Builder() {
+    		super();
+    		standAutoSummonMode(AutoSummonMode.ARMS).holdType().staminaCostTick(3F)
+            .standUserSlowDownFactor(0.3F).standOffsetFront();
+    	}
+
+		@Override
+		protected Builder getThis() {
+			return this;
+		}
     }
 }

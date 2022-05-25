@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.client.model.pose.IModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseTransition;
+import com.github.standobyte.jojo.client.model.pose.ModelPoseTransitionMultiple;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
 import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
@@ -543,6 +544,9 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
         actionAnim.put(StandPose.HEAVY_ATTACK_COMBO, new StandActionAnimation.Builder<StarPlatinumEntity>()
                 .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<StarPlatinumEntity>(idlePose, uppercutPose1))
                 .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransition<StarPlatinumEntity>(uppercutPose1, uppercutPose2))
+                .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransitionMultiple.Builder<StarPlatinumEntity>(uppercutPose2)
+                        .addPose(0.5F, uppercutPose2)
+                        .build(idlePose))
                 .build(idlePose));
         
         super.initActionPoses();

@@ -133,7 +133,6 @@ public class StandUtil {
     public static void addResolve(IStandPower stand, LivingEntity target, float points) {
         target = getStandUser(target);
         if (StandUtil.worthyTarget(target)) {
-        	float ptsPrev = points;
             for (PowerClassification classification : PowerClassification.values()) {
                 points *= IPower.getPowerOptional(target, classification).map(power -> {
                     if (power.hasPower()) {
@@ -166,5 +165,9 @@ public class StandUtil {
             }
         }
         return false;
+    }
+    
+    public static boolean isComboUnlocked(IStandPower power) {
+    	return power.getResolveLevel() >= 1;
     }
 }

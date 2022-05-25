@@ -1,5 +1,8 @@
 package com.github.standobyte.jojo.action.actions;
 
+import java.util.function.Supplier;
+
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
@@ -13,10 +16,18 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.World;
 
 public class StandEntityHeavyAttack extends StandEntityAction {
+	private final Supplier<StandEntityComboHeavyAttack> comboAttack;
 
-    public StandEntityHeavyAttack(StandEntityAction.Builder builder) {
-        super(builder.standPose(StandPose.HEAVY_ATTACK).staminaCost(50F)
-                .standOffsetFromUser(-0.75, 0.75).standTakesCrosshairTarget(TargetType.ENTITY));
+    public StandEntityHeavyAttack(StandEntityHeavyAttack.Builder builder, Supplier<StandEntityComboHeavyAttack> comboAttack) {
+        super(builder);
+        this.comboAttack = comboAttack;
+    }
+
+	@Override
+    public Action<IStandPower> getVisibleAction(IStandPower power) {
+    	return comboAttack != null && comboAttack.get() != null && comboAttack.get().isUnlocked(power)
+    			&& power.isActive() && ((StandEntity) power.getStandManifestation()).willHeavyPunchCombo()
+    			? comboAttack.get() : super.getVisibleAction(power);
     }
 
     @Override
@@ -42,7 +53,7 @@ public class StandEntityHeavyAttack extends StandEntityAction {
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {
         if (!world.isClientSide()) {
-            standEntity.punch(standEntity.isHeavyComboPunching() ? PunchType.HEAVY_COMBO : PunchType.HEAVY_NO_COMBO, target, this);
+            standEntity.punch(PunchType.HEAVY_NO_COMBO, target, this);
         }
     }
 
@@ -66,8 +77,18 @@ public class StandEntityHeavyAttack extends StandEntityAction {
         return true;
     }
     
-    @Override
-    public StandPose getStandPose(IStandPower standPower, StandEntity standEntity) {
-        return standEntity.isHeavyComboPunching() ? StandPose.HEAVY_ATTACK_COMBO : super.getStandPose(standPower, standEntity);
+    
+    
+    public static class Builder extends StandEntityAction.AbstractBuilder<StandEntityHeavyAttack.Builder> {
+    	
+    	public Builder() {
+    		standPose(StandPose.HEAVY_ATTACK).staminaCost(50F)
+            .standOffsetFromUser(-0.75, 0.75).standTakesCrosshairTarget(TargetType.ENTITY);
+    	}
+
+		@Override
+		protected Builder getThis() {
+			return this;
+		}
     }
 }
