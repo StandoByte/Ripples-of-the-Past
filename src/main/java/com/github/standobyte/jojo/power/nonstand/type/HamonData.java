@@ -222,7 +222,7 @@ public class HamonData extends TypeSpecificData {
         return hamonDamageFactor;
     }
     
-    public float getEfficiencyDecrease() {
+    public float getBloodstreamEfficiency() {
         float efficiency = 1;
         LivingEntity user = power.getUser();
         

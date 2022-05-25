@@ -249,8 +249,8 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     public static boolean ropeTrap(LivingEntity user, BlockPos pos, BlockState blockState, World world, INonStandPower power, HamonData hamon) {
         if (hamon.isSkillLearned(HamonSkill.ROPE_TRAP)) {
             createChargedCobweb(user, pos, blockState, world, 64, null, power, 
-                    40 + (int) ((float) (160 * hamon.getHamonStrengthLevel()) / (float) HamonData.MAX_STAT_LEVEL * hamon.getEfficiencyDecrease()), 
-                    0.02F * hamon.getHamonDamageMultiplier() * hamon.getEfficiencyDecrease(), hamon);
+                    40 + (int) ((float) (160 * hamon.getHamonStrengthLevel()) / (float) HamonData.MAX_STAT_LEVEL * hamon.getBloodstreamEfficiency()), 
+                    0.02F * hamon.getHamonDamageMultiplier() * hamon.getBloodstreamEfficiency(), hamon);
             return true;
         }
         return false;
@@ -299,7 +299,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     
     public static void snakeMuffler(LivingAttackEvent event) {
         LivingEntity target = event.getEntityLiving();
-        if (!target.level.isClientSide() && target.canUpdate()) {
+        if (!target.level.isClientSide() && target.canUpdate() && target.isOnGround()) {
             DamageSource dmgSource = event.getSource();
             Entity attacker = dmgSource.getEntity();
             if (attacker != null && dmgSource.getDirectEntity() == attacker && attacker instanceof LivingEntity
@@ -312,16 +312,19 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                     if (power.hasEnergy(energyCost)) {
                         power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
                             if (hamon.isSkillLearned(HamonSkill.SNAKE_MUFFLER)) {
-                                JojoModUtil.sayVoiceLine(target, ModSounds.LISA_LISA_SNAKE_MUFFLER.get());
-                                DamageUtil.dealHamonDamage(attacker, 0.75F, target, null);
-                                power.consumeEnergy(energyCost);
-                                livingAttacker.addEffect(new EffectInstance(Effects.GLOWING, 200));
-                                event.setCanceled(true);
-                                SnakeMufflerEntity snakeMuffler = new SnakeMufflerEntity(target.level, target);
-                                snakeMuffler.setEntityToJumpOver(attacker);
-                                target.level.addFreshEntity(snakeMuffler);
-                                snakeMuffler.attachToBlockPos(target.blockPosition());
-                                playerTarget.getCooldowns().addCooldown(ModItems.SATIPOROJA_SCARF.get(), 80);
+                            	float efficiency = hamon.getBloodstreamEfficiency();
+                            	if (efficiency == 1 || efficiency >= event.getAmount() / target.getMaxHealth()) {
+	                                JojoModUtil.sayVoiceLine(target, ModSounds.LISA_LISA_SNAKE_MUFFLER.get());
+	                                DamageUtil.dealHamonDamage(attacker, 0.75F, target, null);
+	                                power.consumeEnergy(energyCost);
+	                                livingAttacker.addEffect(new EffectInstance(Effects.GLOWING, 200));
+	                                event.setCanceled(true);
+	                                SnakeMufflerEntity snakeMuffler = new SnakeMufflerEntity(target.level, target);
+	                                snakeMuffler.setEntityToJumpOver(attacker);
+	                                target.level.addFreshEntity(snakeMuffler);
+	                                snakeMuffler.attachToBlockPos(target.blockPosition());
+	                                playerTarget.getCooldowns().addCooldown(ModItems.SATIPOROJA_SCARF.get(), 80);
+                            	}
                             }
                         });
                     }

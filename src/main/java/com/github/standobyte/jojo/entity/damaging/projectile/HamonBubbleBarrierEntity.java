@@ -16,6 +16,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.Direction.Axis;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -25,8 +26,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
-    private static final int MAX_BARRIER_TICKS = 100;
     private int barrierTicks;
+    private int barrierMaxTicks;
     private boolean barrier;
     private boolean shot;
     private INonStandPower power;
@@ -34,6 +35,8 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
     public HamonBubbleBarrierEntity(World world, LivingEntity shooter, INonStandPower power) {
         super(ModEntityTypes.HAMON_BUBBLE_BARRIER.get(), shooter, world);
         this.power = power;
+        barrierMaxTicks = (int) (100F * power.getTypeSpecificData(ModNonStandPowers.HAMON.get())
+        		.map(hamon -> hamon.getBloodstreamEfficiency()).orElse(1F));
     }
 
     public HamonBubbleBarrierEntity(EntityType<? extends HamonBubbleBarrierEntity> type, World world) {
@@ -44,7 +47,7 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
     public void tick() {
         super.tick();
         if (!level.isClientSide()) { 
-            if (barrier && (barrierTicks++ >= MAX_BARRIER_TICKS || !isVehicle()) || power == null) {
+            if (barrier && (barrierTicks++ >= barrierMaxTicks || !isVehicle()) || power == null) {
                 remove();
             }
             else if (!shot) {
@@ -71,11 +74,13 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
     @Override
     public void remove() {
         super.remove();
-        getPassengers().forEach(entity -> {
-            if (entity instanceof LivingEntity) {
-                ((LivingEntity) entity).removeEffect(ModEffects.STUN.get());
-            }
-        });
+        if (level.isClientSide()) {
+	        getPassengers().forEach(entity -> {
+	            if (entity instanceof LivingEntity) {
+	                ((LivingEntity) entity).removeEffect(ModEffects.STUN.get());
+	            }
+	        });
+        }
     }
     
     @Override
@@ -89,7 +94,7 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
             Entity target = entityRayTraceResult.getEntity();
             if (target instanceof LivingEntity && target.startRiding(this)) {
                 barrier = true;
-                ((LivingEntity) target).addEffect(new EffectInstance(ModEffects.STUN.get(), 100));
+                ((LivingEntity) target).addEffect(new EffectInstance(ModEffects.STUN.get(), barrierMaxTicks));
                 setDeltaMovement(new Vector3d(0, 0.05D, 0));
             }
             LivingEntity owner = getOwner();
@@ -164,6 +169,7 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
             nbt.putBoolean("Barrier", barrier);
             nbt.putInt("BarrierTicks", barrierTicks);
         }
+        nbt.putInt("BarrierTicksMax", barrierMaxTicks);
         nbt.putBoolean("Shot", shot);
     }
 
@@ -172,6 +178,7 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
         super.addAdditionalSaveData(nbt);
         this.barrier = nbt.getBoolean("Barrier");
         this.barrierTicks = nbt.getInt("BarrierTicks");
+        this.barrierMaxTicks = nbt.getInt("BarrierTicksMax");
         this.shot = nbt.getBoolean("Shot");
     }
 
@@ -182,6 +189,18 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
 
     @Override
     protected int ticksLifespan() {
-        return barrier ? 100 : 100 + MAX_BARRIER_TICKS;
+        return barrier ? 100 : 100 + barrierMaxTicks;
+    }
+
+    @Override
+    public void writeSpawnData(PacketBuffer buffer) {
+        super.writeSpawnData(buffer);
+        buffer.writeVarInt(barrierMaxTicks);
+    }
+
+    @Override
+    public void readSpawnData(PacketBuffer additionalData) {
+        super.readSpawnData(additionalData);
+        this.barrierMaxTicks = additionalData.readVarInt();
     }
 }

@@ -71,7 +71,8 @@ public class StandEntityLightAttack extends StandEntityAction {
     
     @Override
     protected SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target) {
-        return target.getType() != TargetType.ENTITY ? null : super.getSound(standEntity, standPower, phase, target);
+        return target.getType() != TargetType.ENTITY || standEntity.isArmsOnlyMode()
+        		? null : super.getSound(standEntity, standPower, phase, target);
     }
     
     @Override

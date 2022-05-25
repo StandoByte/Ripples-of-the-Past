@@ -69,7 +69,7 @@ public class DamageUtil {
     }
     
     public static DamageSource bloodDrainDamage(Entity srcDirect) {
-        return new EntityDamageSource(BLOOD_DRAIN_MSG, srcDirect);
+        return new EntityDamageSource(BLOOD_DRAIN_MSG, srcDirect).bypassArmor();
     }
 
     public static boolean dealUltravioletDamage(Entity target, float amount, @Nullable Entity srcDirect, @Nullable Entity srcIndirect, boolean sun) {
@@ -142,12 +142,12 @@ public class DamageUtil {
                 float hamonMultiplier = INonStandPower.getNonStandPowerOptional(sourceLiving).map(power -> 
                 power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(hamon -> {
                     if (undeadTarget && !scarf && hamon.isSkillLearned(HamonSkill.HAMON_SPREAD)) {
-                        float effectStr = (hamon.getHamonDamageMultiplier() - 1) / (HamonData.MAX_HAMON_DAMAGE - 1) * hamon.getEfficiencyDecrease();
+                        float effectStr = (hamon.getHamonDamageMultiplier() - 1) / (HamonData.MAX_HAMON_DAMAGE - 1) * hamon.getBloodstreamEfficiency();
                         int effectDuration = 25 + MathHelper.floor(125F * effectStr);
-                        int effectLvl = MathHelper.clamp(MathHelper.floor(1.5F * effectStr * dmgAmount * hamon.getEfficiencyDecrease()), 0, 3);
+                        int effectLvl = MathHelper.clamp(MathHelper.floor(1.5F * effectStr * dmgAmount * hamon.getBloodstreamEfficiency()), 0, 3);
                         livingTarget.addEffect(new EffectInstance(ModEffects.HAMON_SPREAD.get(), effectDuration, effectLvl));
                     }
-                    return hamon.getHamonDamageMultiplier() * hamon.getEfficiencyDecrease();
+                    return hamon.getHamonDamageMultiplier() * hamon.getBloodstreamEfficiency();
                 }).orElse(1F)).orElse(1F);
                 amount *= hamonMultiplier;
             }

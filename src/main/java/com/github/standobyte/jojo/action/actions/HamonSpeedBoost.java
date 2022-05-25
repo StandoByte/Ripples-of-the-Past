@@ -25,7 +25,7 @@ public class HamonSpeedBoost extends HamonAction {
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
-        float effectStr = (float) hamon.getHamonControlLevel() / (float) HamonData.MAX_STAT_LEVEL * hamon.getEfficiencyDecrease();
+        float effectStr = (float) hamon.getHamonControlLevel() / (float) HamonData.MAX_STAT_LEVEL * hamon.getBloodstreamEfficiency();
         int speedLvl = MathHelper.floor(1.5F * effectStr);
         int hasteLvl = MathHelper.floor(1.5F * effectStr);
         if (hamon.isSkillLearned(HamonSkill.AFTERIMAGES)) {

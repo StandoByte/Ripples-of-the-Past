@@ -68,16 +68,16 @@ public class VampirismBloodDrain extends VampirismAction {
                             world.getDifficulty().getId()).floatValue();
                     boolean isHuman = false;
                     if (targetEntity instanceof PlayerEntity) {
-                        bloodAndHealModifier *= 4F;
+                        bloodAndHealModifier *= 7.5F;
                         isHuman = true;
                     }
                     else if (targetEntity instanceof INPC || targetEntity instanceof AbstractIllagerEntity) {
-                        bloodAndHealModifier *= 3F;
+                        bloodAndHealModifier *= 5F;
                         isHuman = true;
                     }
                     if (INonStandPower.getNonStandPowerOptional(targetEntity).map(
                             p -> p.getType() == ModNonStandPowers.HAMON.get()).orElse(false)) {
-                        bloodAndHealModifier *= 5F;
+                        bloodAndHealModifier *= 4F;
                     }
                     EffectInstance freeze = targetEntity.getEffect(ModEffects.FREEZE.get());
                     if (freeze != null) {

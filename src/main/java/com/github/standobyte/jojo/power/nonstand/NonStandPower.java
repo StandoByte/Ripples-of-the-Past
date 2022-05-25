@@ -248,7 +248,6 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     
     @Override
     public void syncWithUserOnly() {
-        super.syncWithUserOnly();
         serverPlayerUser.ifPresent(player -> {
             if (hasPower()) {
                 getTypeSpecificData(null).ifPresent(data -> {
@@ -256,11 +255,11 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
                 });
             }
         });
+        super.syncWithUserOnly();
     }
     
     @Override
     public void syncWithTrackingOrUser(ServerPlayerEntity player) {
-        super.syncWithTrackingOrUser(player);
         if (hasPower()) {
             LivingEntity user = getUser();
             if (user != null) {
@@ -270,5 +269,6 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
                 });
             }
         }
+        super.syncWithTrackingOrUser(player);
     }
 }

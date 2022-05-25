@@ -25,6 +25,7 @@ public class StandEntityHeavyAttack extends StandEntityAction {
     }
     
     public void onClick(World world, LivingEntity user, IStandPower power) {
+    	super.onClick(world, user, power);
     	if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
     		((StandEntity) power.getStandManifestation()).setHeavyPunchCombo();
     	}
