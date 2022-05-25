@@ -55,11 +55,13 @@ public class SCRapierEntity extends ModdedProjectileEntity {
     }
     
     @Override
-    public void setDamageFactor(float damageFactor) {}
-    
-    @Override
     protected float getDamageFinalCalc(float damage) {
         return damage + (float) ricochetCount * 1F;
+    }
+    
+    @Override
+    protected boolean debuffsFromStand() {
+    	return false;
     }
 
     @Override

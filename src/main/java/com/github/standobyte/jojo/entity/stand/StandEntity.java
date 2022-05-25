@@ -1510,7 +1510,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     public float getComboMeter() {
-        if (userPower != null && !userPower.isComboUnlocked()) {
+        if (userPower != null && !StandUtil.isComboUnlocked(userPower)) {
             return 0;
         }
         return entityData.get(PUNCHES_COMBO);

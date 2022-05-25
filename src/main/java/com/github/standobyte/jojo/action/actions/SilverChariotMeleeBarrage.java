@@ -12,7 +12,7 @@ import net.minecraft.util.SoundEvent;
 
 public class SilverChariotMeleeBarrage extends StandEntityMeleeBarrage {
 
-    public SilverChariotMeleeBarrage(StandEntityAction.Builder builder) {
+    public SilverChariotMeleeBarrage(StandEntityMeleeBarrage.Builder builder) {
         super(builder);
     }
 
