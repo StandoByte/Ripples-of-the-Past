@@ -24,7 +24,7 @@ public class StarPlatinumEntity extends StandEntity {
             attack
             .addKnockback(0.5F + getLastHeavyPunchCombo())
             .knockbackXRot(-60F)
-            .disableBlocking((1 - (float) (distance / attackRange)) - 0.5F);
+            .disableBlocking((1 - (float) (distance / attackRange)) - 0.25F);
             break;
         default:
             break;

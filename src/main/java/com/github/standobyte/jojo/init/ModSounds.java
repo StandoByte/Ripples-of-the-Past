@@ -214,12 +214,18 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> STAND_UNSUMMON_DEFAULT = SOUNDS.register("stand_unsummon_default", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_unsummon_default")));
 
+    public static final RegistryObject<SoundEvent> STAND_LIGHT_ATTACK = SOUNDS.register("stand_light_attack", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_light_attack")));
+
+    public static final RegistryObject<SoundEvent> STAND_STRONG_ATTACK = SOUNDS.register("stand_strong_attack", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_strong_attack")));
+
+    public static final RegistryObject<SoundEvent> STAND_BARRAGE_ATTACK = SOUNDS.register("stand_barrage_attack", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_barrage_attack")));
+
     public static final RegistryObject<SoundEvent> STAND_DAMAGE_BLOCK = SOUNDS.register("stand_damage_block", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_damage_block")));
 
-    public static final RegistryObject<SoundEvent> STAND_BARRAGE_CLASH = SOUNDS.register("stand_barrage_clash", 
-            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_barrage_clash")));
-    
     public static final RegistryObject<SoundEvent> STAND_PARRY = SOUNDS.register("stand_parry", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_parry")));
     

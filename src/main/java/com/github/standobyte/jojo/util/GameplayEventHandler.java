@@ -13,6 +13,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.JojoModConfig.Common;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.action.actions.VampirismFreeze;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
@@ -26,11 +27,13 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModPaintings;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
@@ -73,6 +76,7 @@ import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
 import net.minecraft.entity.ai.goal.PrioritizedGoal;
 import net.minecraft.entity.item.BoatEntity;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.PaintingEntity;
 import net.minecraft.entity.item.PaintingType;
 import net.minecraft.entity.monster.StrayEntity;
@@ -132,6 +136,7 @@ import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingConversionEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
@@ -278,6 +283,20 @@ public class GameplayEventHandler {
         if (event.getPlayer().hasEffect(ModEffects.STUN.get())) {
             event.setCanceled(true);
         }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void addEntityDrops(LivingDropsEvent event) {
+    	Common config = JojoModConfig.getCommonConfigInstance(false);
+    	if (config.dropStandDisc.get() && !config.keepStandOnDeath.get()) {
+        	LivingEntity entity = event.getEntityLiving();
+    		IStandPower.getStandPowerOptional(entity).ifPresent(power -> {
+    			if (power.hasPower() && power.wasGivenByDisc()) {
+    				ItemStack disc = StandDiscItem.withStandType(new ItemStack(ModItems.STAND_DISC.get()), power.getType());
+    				event.getDrops().add(new ItemEntity(entity.level, entity.getX(), entity.getY(), entity.getZ(), disc));
+    			}
+    		});
+    	}
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
