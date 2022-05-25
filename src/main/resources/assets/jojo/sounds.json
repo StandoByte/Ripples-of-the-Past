@@ -307,12 +307,41 @@
   },
   "stand_damage_block": {
     "subtitle": "jojo.subtitle.stand_damage_block",
-    "sounds": [ "jojo:stand/stand_damage_block" ]
+    "sounds": [ "jojo:attack_block_1", "jojo:attack_block_2" ]
   },
-  "stand_barrage_clash": {
-    "sounds": [ "jojo:stand/stand_barrage_clash" ]
+  "stand_light_attack": {
+    "subtitle": "jojo.subtitle.stand_attack_light",
+    "sounds": [
+      {
+        "name": "minecraft:entity.player.attack.strong",
+        "type": "event"
+      }
+    ]
+  },
+  "stand_strong_attack": {
+    "subtitle": "jojo.subtitle.stand_attack_strong",
+    "sounds": [
+      {
+        "name": "minecraft:entity.player.attack.knockback",
+        "type": "event"
+      }
+    ]
+  },
+  "stand_barrage_attack": {
+    "subtitle": "jojo.subtitle.stand_attack_barrage",
+    "sounds": [
+      {
+        "name": "minecraft:entity.player.attack.weak",
+        "type": "event"
+      }
+    ]
+  },
+  "stand_crash": {
+    "subtitle": "jojo.subtitle.stand_crash",
+    "sounds": [ "jojo:stand/stand_parry" ]
   },
   "stand_parry": {
+    "subtitle": "jojo.subtitle.stand_attack_parried",
     "sounds": [ "jojo:stand/stand_parry" ]
   },
   
@@ -485,7 +514,7 @@
     "sounds": [ "jojo:stand/hierophant_green_barrier_ripped" ]
   },
   "hierophant_green_grapple_catch": {
-    "sounds": [ "jojo:stand/water_splash" ]
+    "sounds": [ "jojo:water_splash" ]
   },
   "polnareff_silver_chariot": {
     "subtitle": "jojo.subtitle.silver_chariot_name",

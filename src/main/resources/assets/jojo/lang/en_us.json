@@ -386,6 +386,8 @@
   "jojo.config.skipStandProgression.tooltip": "Whether or not all of the abilities are unlocked after gaining a Stand in Survival.",
   "jojo.config.standStamina": "Stand Stamina",
   "jojo.config.standStamina.tooltip": "Whether or not Stand stamina mechanic is enabled.",
+  "jojo.config.dropStandDisc": "Drop Stand Disc",
+  "jojo.config.dropStandDisc.tooltip": "If enabled, Stand users who got their Stand from a Disc drop their Stand Disc upon death.",
   "jojo.config.standDamageMultiplier": "Stand damage multiplier",
   "jojo.config.standDamageMultiplier.tooltip": "Damage multiplier applied to all Stands.",
   "jojo.config.soulAscension": "Soul Ascension",
@@ -643,7 +645,12 @@
   
   "jojo.subtitle.stand_summon": "Stand summoned",
   "jojo.subtitle.stand_unsummon": "Stand unsummoned",
+  "jojo.subtitle.stand_attack_light": "Attack",
+  "jojo.subtitle.stand_attack_strong": "Strong attack",
+  "jojo.subtitle.stand_attack_barrage": "Weak attack",
   "jojo.subtitle.stand_damage_block": "Damage blocked",
+  "jojo.subtitle.stand_crash": "Stand crashed",
+  "jojo.subtitle.stand_attack_parried": "Attack parried",
   
   "jojo.attribute.name.stand_resistance": "Stand Resistance",
   "jojo.attribute.name.stand_precision": "Stand Precision",

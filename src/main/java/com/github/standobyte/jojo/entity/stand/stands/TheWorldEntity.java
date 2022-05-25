@@ -30,7 +30,7 @@ public class TheWorldEntity extends StandEntity {
             attack
             .addKnockback(4)
             .knockbackYRotDeg(60)
-            .disableBlocking((1 - (float) (distance / attackRange)) - 0.5F)
+            .disableBlocking((1 - (float) (distance / attackRange)) - 0.25F)
             .sweepingAttack(0.5, 0, 0.5, attack.getDamage() * 0.5F);
             break;
         default:

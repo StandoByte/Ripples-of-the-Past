@@ -105,7 +105,7 @@ public class ResolveCounter {
                     if (resolve > 0) {
                         resolveRecords.add(resolve);
                     }
-                    setMaxAchievedValue(resolveRecords.getMax());
+                    setMaxAchievedValue(Optional.ofNullable(resolveRecords.getMax()).orElse(0F));
                 }
             }
             else {
@@ -383,7 +383,7 @@ public class ResolveCounter {
         if (resolve > 0) {
             resolveRecords.add(resolve);
         }
-        this.maxAchievedValue = resolveRecords.getMax();
+        this.maxAchievedValue = Optional.ofNullable(resolveRecords.getMax()).orElse(0F);
         
         resolve = 0;
         noResolveDecayTicks = 0;

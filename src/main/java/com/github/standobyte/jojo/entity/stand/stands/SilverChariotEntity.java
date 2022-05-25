@@ -23,6 +23,7 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeMod;
@@ -210,5 +211,19 @@ public class SilverChariotEntity extends StandEntity {
             factor += (1 - factor) * (hasArmor() ? 0.5F : 0.75F);
         }
         return factor;
+    }
+    
+    @Override
+    protected SoundEvent getPunchSound(PunchType punch) {
+    	if (hasRapier()) {
+	    	switch (punch) {
+	    	case HEAVY_NO_COMBO:
+	    	case HEAVY_COMBO:
+	    		return null;
+			default:
+				return super.getPunchSound(punch);
+	    	}
+    	}
+    	return super.getPunchSound(punch);
     }
 }

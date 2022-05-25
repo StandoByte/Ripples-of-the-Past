@@ -68,6 +68,7 @@ public class JojoModConfig {
         public final ForgeConfigSpec.DoubleValue standDamageMultiplier;
         public final ForgeConfigSpec.BooleanValue skipStandProgression;
         public final ForgeConfigSpec.BooleanValue standStamina;
+        public final ForgeConfigSpec.BooleanValue dropStandDisc;
         public final ForgeConfigSpec.ConfigValue<List<? extends Double>> resolvePoints;
         public final ForgeConfigSpec.BooleanValue soulAscension;
         public final ForgeConfigSpec.IntValue timeStopChunkRange;
@@ -194,6 +195,11 @@ public class JojoModConfig {
                         .comment(" Whether or not Stand stamina mechanic is enabled.")
                         .translation("jojo.config.standStamina")
                         .define("standStamina", true);
+            
+                dropStandDisc = builder
+                        .comment(" If enabled, Stand users who got their Stand from a Disc drop their Stand Disc upon death.")
+                        .translation("jojo.config.dropStandDisc")
+                        .define("dropStandDisc", false);
                 
                 resolvePoints = builder
                         .comment(" Max resolve points at each Resolve level (starting from 0).", 
@@ -297,6 +303,7 @@ public class JojoModConfig {
 //            private final double standDamageMultiplier;
             private final boolean skipStandProgression;
             private final boolean standStamina;
+            private final boolean dropStandDisc;
             private final float[] resolvePoints;
             private final boolean soulAscension;
             private final int timeStopChunkRange;
@@ -328,7 +335,8 @@ public class JojoModConfig {
                 abilitiesBreakBlocks =              (flags[1] & 2) > 0;
                 skipStandProgression =              (flags[1] & 4) > 0;
                 standStamina =                      (flags[1] & 8) > 0;
-                soulAscension =                     (flags[1] & 16) > 0;
+                dropStandDisc =                     (flags[1] & 16) > 0;
+                soulAscension =                     (flags[1] & 32) > 0;
             }
 
             public void writeToBuf(PacketBuffer buf) {
@@ -356,7 +364,8 @@ public class JojoModConfig {
                 if (abilitiesBreakBlocks)               flags[1] |= 2;
                 if (skipStandProgression)               flags[1] |= 4;
                 if (standStamina)                       flags[1] |= 8;
-                if (soulAscension)                      flags[1] |= 16;
+                if (dropStandDisc)                      flags[1] |= 16;
+                if (soulAscension)                      flags[1] |= 32;
                 buf.writeByteArray(flags);
             }
 
@@ -384,6 +393,7 @@ public class JojoModConfig {
 //                standDamageMultiplier = config.standDamageMultiplier.get()
                 skipStandProgression = config.skipStandProgression.get();
                 standStamina = config.standStamina.get();
+                dropStandDisc = config.dropStandDisc.get();
                 resolvePoints = Floats.toArray(config.resolvePoints.get());
                 soulAscension = config.soulAscension.get();
                 timeStopChunkRange = config.timeStopChunkRange.get();
@@ -411,6 +421,7 @@ public class JojoModConfig {
 //                COMMON_SYNCED_TO_CLIENT.standDamageMultiplier.set(standDamageMultiplier);
                 COMMON_SYNCED_TO_CLIENT.skipStandProgression.set(skipStandProgression);
                 COMMON_SYNCED_TO_CLIENT.standStamina.set(standStamina);
+                COMMON_SYNCED_TO_CLIENT.dropStandDisc.set(dropStandDisc);
                 COMMON_SYNCED_TO_CLIENT.resolvePoints.set(Floats.asList(resolvePoints).stream().map(Float::doubleValue).collect(Collectors.toList()));
                 COMMON_SYNCED_TO_CLIENT.soulAscension.set(soulAscension);
                 COMMON_SYNCED_TO_CLIENT.timeStopChunkRange.set(timeStopChunkRange);
@@ -440,6 +451,7 @@ public class JojoModConfig {
 //                COMMON_SYNCED_TO_CLIENT.standDamageMultiplier.clearCache();
                 COMMON_SYNCED_TO_CLIENT.skipStandProgression.clearCache();
                 COMMON_SYNCED_TO_CLIENT.standStamina.clearCache();
+                COMMON_SYNCED_TO_CLIENT.dropStandDisc.clearCache();
                 COMMON_SYNCED_TO_CLIENT.resolvePoints.clearCache();
                 COMMON_SYNCED_TO_CLIENT.soulAscension.clearCache();
                 COMMON_SYNCED_TO_CLIENT.timeStopChunkRange.clearCache();

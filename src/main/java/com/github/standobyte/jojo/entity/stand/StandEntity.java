@@ -620,12 +620,16 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     public void playSound(SoundEvent sound, float volume, float pitch, @Nullable PlayerEntity player) {
+        playSound(sound, volume, pitch, player, position());
+    }
+    
+    public void playSound(SoundEvent sound, float volume, float pitch, @Nullable PlayerEntity player, Vector3d pos) {
         if (!this.isSilent()) {
             if (!isVisibleForAll()) {
-                JojoModUtil.playSound(level, player, getX(), getY(), getZ(), sound, getSoundSource(), volume, pitch, StandUtil::isEntityStandUser);
+                JojoModUtil.playSound(level, player, pos.x, pos.y, pos.z, sound, getSoundSource(), volume, pitch, StandUtil::isEntityStandUser);
             }
             else {
-                level.playSound(player, getX(), getY(), getZ(), sound, getSoundSource(), volume, pitch);
+                level.playSound(player, pos.x, pos.y, pos.z, sound, getSoundSource(), volume, pitch);
             }
         }
     }
@@ -685,7 +689,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                     }
                     ((ServerWorld) level).sendParticles(ParticleTypes.CRIT, 
                             attackPos.x, attackPos.y, attackPos.z, 1, 0.5D, 0.25D, 0.5D, 0.2D);
-                    attacker.playSound(ModSounds.STAND_BARRAGE_CLASH.get(), 1.0F, 1.0F);
+                    if (attacker instanceof StandEntity) {
+                    	((StandEntity) attacker).playPunchSound = true;
+                    }
                     
                     if (punchesCanParry >= punchesIncoming) {
                         barrageParryCount -= punchesIncoming;
@@ -795,6 +801,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             }
             if (blockedRatio == 1) {
                 wasDamageBlocked = true;
+                if (damageSrc.getEntity() instanceof StandEntity) {
+                	((StandEntity) damageSrc.getEntity()).playPunchSound = false;
+                }
             }
             return damageAmount * (1 - getPhysicalResistance(blockedRatio));
         }
@@ -804,7 +813,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     @Override
     public SoundEvent getHurtSound(DamageSource damageSrc) {
         if (wasDamageBlocked) {
-            return ModSounds.STAND_DAMAGE_BLOCK.get();
+            return getAttackBlockSound();
         }
         return super.getHurtSound(damageSrc);
     }
@@ -1094,7 +1103,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             double z = pos.z + (double)(((float)((i >> 2) % 2) - 0.5F) * getBbWidth() * 0.8F);
             blockPos$mutable.set(x, y, z);
             BlockState blockState = level.getBlockState(blockPos$mutable);
-            if (blockState.getRenderShape() != BlockRenderType.INVISIBLE && blockState.isViewBlocking(level, blockPos$mutable)) {
+            if (blockState.getRenderShape() != BlockRenderType.INVISIBLE && blockState.isSuffocating(level, blockPos$mutable)) {
                 return true;
             }
         }
@@ -1290,8 +1299,16 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return attackTarget(target, punch, action, barrageHits, entityAttackOverride);
     }
     
+    public SoundEvent nextPunchSound;
+    private Vector3d punchSoundPos;
+    @Nullable
+    public Boolean playPunchSound;
     public boolean attackTarget(ActionTarget target, PunchType punch, StandEntityAction action, int barrageHits, 
             @Nullable Consumer<StandAttackProperties> entityAttackOverride) {
+        nextPunchSound = getPunchSound(punch);
+        playPunchSound = null;
+        punchSoundPos = position();
+        
         boolean punched;
         switch (target.getType()) {
         case BLOCK:
@@ -1305,7 +1322,30 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             punched = false;
             break;
         }
+        if (nextPunchSound != null && punchSoundPos != null && 
+        		(playPunchSound == null && punched || playPunchSound != null && playPunchSound.booleanValue())) {
+    		playSound(nextPunchSound, 1.0F, 1.0F, null, punchSoundPos);
+        }
         return punched;
+    }
+    
+    @Nullable
+    protected SoundEvent getPunchSound(PunchType punch) {
+    	switch (punch) {
+    	case LIGHT:
+    		return ModSounds.STAND_LIGHT_ATTACK.get();
+    	case HEAVY_NO_COMBO:
+    	case HEAVY_COMBO:
+    		return ModSounds.STAND_STRONG_ATTACK.get();
+    	case BARRAGE:
+    		return ModSounds.STAND_BARRAGE_ATTACK.get();
+		default:
+			return null;
+    	}
+    }
+    
+    protected SoundEvent getAttackBlockSound() {
+    	return ModSounds.STAND_DAMAGE_BLOCK.get();
     }
     
     public void rotateTowards(Vector3d target, boolean limitBySpeed) {
@@ -1592,6 +1632,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             if (!isManuallyControlled()) {
                 setLastHurtMob(target);
             }
+            
+            punchSoundPos = target.position();
         }
         return attacked;
     }
@@ -1753,6 +1795,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         if (canBreakBlock(blockPos, blockState)) {
             LivingEntity user = getUser();
             level.destroyBlock(blockPos, !(user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild), this);
+            punchSoundPos = Vector3d.atCenterOf(blockPos);
             return true;
         }
         else {
