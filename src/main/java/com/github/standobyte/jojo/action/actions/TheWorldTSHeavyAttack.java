@@ -75,7 +75,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
             // FIXME (!!) (TW ts punch) use stamina
             standEntity.teleportTo(pos.x, pos.y, pos.z);
         }
-        standEntity.updateStrengthMultipliers(standEntity.getUser());
+        standEntity.updateStrengthMultipliers();
     }
 
     @Override

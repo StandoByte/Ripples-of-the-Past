@@ -170,6 +170,7 @@ public class StandEntityTask {
     }
     
     private void rotateStand(StandEntity standEntity, boolean limitBySpeed) {
+    	limitBySpeed = false;
         if (!standEntity.isManuallyControlled()) {
             standEntity.rotatedTowardsTarget = true;
             Vector3d targetPos = target.getTargetPos(true);

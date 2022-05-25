@@ -126,6 +126,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     private IStandPower userPower;
     private StandRelativeOffset offsetDefault = StandRelativeOffset.withYOffset(-0.75, 0.2, -0.75);
     private StandRelativeOffset offsetDefaultArmsOnly = StandRelativeOffset.withYOffset(0, 0, 0.15);
+    private Vector3d lastOffsetPos = null;
 
     private static final DataParameter<Boolean> SWING_OFF_HAND = EntityDataManager.defineId(StandEntity.class, DataSerializers.BOOLEAN);
     private boolean alternateAdditionalSwing;
@@ -209,8 +210,17 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 action.onPhaseSet(level, this, userPower, phase, task.getTarget(), task.getTicksLeft());
                 setStandPose(action.getStandPose(userPower, this));
             });
-            if (!taskOptional.isPresent() && getStandPose() != StandPose.SUMMON) {
-                setStandPose(StandPose.IDLE);
+            if (!taskOptional.isPresent()) {
+                if (getStandPose() != StandPose.SUMMON) {
+                	setStandPose(StandPose.IDLE);
+                }
+            }
+            if (lastOffsetPos != null && taskOptional.map(task -> {
+            	ActionTarget target = task.getTarget();
+            	target.cacheEntity(level);
+            	return target.getType() == TargetType.EMPTY || !this.isTargetInReach(task.getTarget());
+            }).orElse(true)) {
+            	lastOffsetPos = null;
             }
         }
         else if (SWING_OFF_HAND.equals(dataParameter)) {
@@ -884,8 +894,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
         rotatedTowardsTarget = false;
         
-        updatePosition(user);
-        updateStrengthMultipliers(user);
+        updatePosition();
+        updateStrengthMultipliers();
         
         if (!level.isClientSide()) {
             swings.broadcastSwings(this);
@@ -944,7 +954,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             }
         }
         else {
-            if (user != null && isManuallyControlled() && !noPhysics && isInsideViewBlockingBlock()) {
+            if (user != null && isManuallyControlled() && !noPhysics && isInsideViewBlockingBlock(position())) {
                 Vector3d vecToUser = user.position().subtract(position());
                 if (vecToUser.lengthSqr() > 1) {
                     vecToUser = vecToUser.normalize();
@@ -958,7 +968,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
 
 
-    public void updateStrengthMultipliers(LivingEntity user) {
+    public void updateStrengthMultipliers() {
+    	LivingEntity user = getUser();
+    			
         rangeEfficiency = user != null ? 
                 StandStatFormulas.rangeStrengthFactor(rangeEffective, getMaxRange(), distanceTo(user))
                 : 1;
@@ -968,16 +980,24 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                         : 0.25 + Math.min((double) (userPower.getStamina() / userPower.getMaxStamina()) * 1.5, 0.75);
     }
 
-    private void updatePosition(LivingEntity user) {
-        if (user != null/* && (!level.isClientSide() || isArmsOnlyMode())*/) {
+    private void updatePosition() {
+    	LivingEntity user = getUser();
+    	if (user != null) {
             if (isFollowingUser()) {
                 StandRelativeOffset relativeOffset = getOffsetFromUser();
                 if (relativeOffset != null) {
-                    Vector3d offset = relativeOffset.getAbsoluteVec(getDefaultOffsetFromUser(), yRot, xRot);
-                    // FIXME (!) glitches when too close to the target entity
-                    setPos(user.getX() + offset.x, 
-                            user.getY() + (user.isShiftKeyDown() ? 0 : offset.y), 
-                            user.getZ() + offset.z);
+                	Vector3d pos;
+                	if (lastOffsetPos == null) {
+            			pos = taskOffsetPos(user, relativeOffset);
+            			if (checkCollision(pos)) {
+            				lastOffsetPos = pos;
+            			}
+                	}
+                	else {
+                		pos = lastOffsetPos;
+                	}
+                    
+                    setPos(pos.x, pos.y, pos.z);
                 }
             }
             else if (isBeingRetracted()) {
@@ -990,7 +1010,30 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                     setStandFlag(StandFlag.BEING_RETRACTED, false);
                 }
             }
-        }
+    	}
+    }
+    
+    private Vector3d taskOffsetPos(LivingEntity user, StandRelativeOffset relativeOffset) {
+    	Vector3d offset = relativeOffset.getAbsoluteVec(getDefaultOffsetFromUser(), yRot, xRot);
+    	if (user.isShiftKeyDown()) {
+    		offset = new Vector3d(offset.x, 0, offset.z);
+    	}
+    	return user.position().add(offset);
+    }
+    
+    private boolean checkCollision(Vector3d pos) {
+        boolean willOverlapWithTarget = getCurrentTask().map(task -> {
+        	if (task.getTarget().getType() == TargetType.ENTITY) {
+        		Entity entity = task.getTarget().getEntity(level);
+        		if (entity != null) {
+        			return entity.getBoundingBox().inflate(0.5)
+        					.intersects(this.getBoundingBox().move(pos.subtract(this.position())));
+        		}
+        	}
+        	return false;
+        }).orElse(false);
+        
+    	return !noPhysics && (willOverlapWithTarget || isInsideViewBlockingBlock(pos));
     }
     
     @Nullable
@@ -1043,12 +1086,12 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         });
     }
 
-    private boolean isInsideViewBlockingBlock() {
+    private boolean isInsideViewBlockingBlock(Vector3d pos) {
         BlockPos.Mutable blockPos$mutable = new BlockPos.Mutable();
         for (int i = 0; i < 8; ++i) {
-            double x = getX() + (double)(((float)((i >> 0) % 2) - 0.5F) * getBbWidth() * 0.8F);
-            double y = getEyeY() + (double)(((float)((i >> 1) % 2) - 0.5F) * 0.1F);
-            double z = getZ() + (double)(((float)((i >> 2) % 2) - 0.5F) * getBbWidth() * 0.8F);
+            double x = pos.x + (double)(((float)((i >> 0) % 2) - 0.5F) * getBbWidth() * 0.8F);
+            double y = pos.y + getEyeHeight() + (double)(((float)((i >> 1) % 2) - 0.5F) * 0.1F);
+            double z = pos.z + (double)(((float)((i >> 2) % 2) - 0.5F) * getBbWidth() * 0.8F);
             blockPos$mutable.set(x, y, z);
             BlockState blockState = level.getBlockState(blockPos$mutable);
             if (blockState.getRenderShape() != BlockRenderType.INVISIBLE && blockState.isViewBlocking(level, blockPos$mutable)) {
@@ -1130,6 +1173,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             getCurrentTask().ifPresent(nextTask -> {
                 if (clearedTask.getOffsetFromUser() != null) {
                     nextTask.setOffsetFromUser(clearedTask.getOffsetFromUser());
+                    if (clearedTask.getTarget().getType() != TargetType.EMPTY
+                    		&& nextTask.getTarget().getType() == TargetType.EMPTY) {
+                    	nextTask.setTarget(this, clearedTask.getTarget(), userPower);
+                    }
                 }
             });
             return true;

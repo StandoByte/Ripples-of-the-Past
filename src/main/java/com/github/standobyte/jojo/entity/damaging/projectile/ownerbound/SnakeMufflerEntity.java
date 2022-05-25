@@ -46,6 +46,7 @@ public class SnakeMufflerEntity extends OwnerBoundProjectileEntity {
             }
         }
         owner.setDeltaMovement(jumpVec);
+        owner.fallDistance = 0;
     }
 
     @Override

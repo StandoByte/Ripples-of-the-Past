@@ -23,7 +23,7 @@ public class HamonRepellingOverdrive extends HamonAction {
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
-            float effectStr = (float) hamon.getHamonControlLevel() / (float) HamonData.MAX_STAT_LEVEL * hamon.getEfficiencyDecrease();
+            float effectStr = (float) hamon.getHamonControlLevel() / (float) HamonData.MAX_STAT_LEVEL * hamon.getBloodstreamEfficiency();
             int resistDuration = 100 + MathHelper.floor(400F * effectStr);
             int resistLvl = MathHelper.floor(1.5F * effectStr);
             hamon.hamonPointsFromAction(HamonStat.CONTROL, getEnergyCost(power));

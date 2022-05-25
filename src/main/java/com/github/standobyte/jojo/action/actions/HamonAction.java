@@ -27,9 +27,9 @@ public abstract class HamonAction extends NonStandAction {
     @Override
     public ActionConditionResult checkConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
         if (power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(
-                hamon -> hamon.getEfficiencyDecrease() <= 0F)
+                hamon -> hamon.getBloodstreamEfficiency() <= 0F)
                 .orElseThrow(() -> new IllegalStateException("Non-Hamon users can't have Hamon actions!"))) {
-            return conditionMessage("hamon_full_freeze");
+            return conditionMessage("hamon_no_bloodstream");
         }
         return super.checkConditions(user, power, target);
     }

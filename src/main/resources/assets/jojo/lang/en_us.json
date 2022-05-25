@@ -305,7 +305,7 @@
   "jojo.chat.message.no_stand": "You do not have a Stand",
   "jojo.chat.message.no_entity_stand": "Your Stand can't be controlled remotely",
   "jojo.chat.message.already_have_stand": "You already have a Stand",
-  "jojo.chat.message.low_tier": "You are not strong enough to use this Stand",
+  "jojo.chat.message.low_tier": "You do not have enough experience to use this Stand",
   "jojo.chat.message.view_distance_stand": "Careful! A Stand cannot be manually controlled beyond view distance",
   "jojo.chat.message.no_hamon": "You do not know how to use Hamon",
   "jojo.chat.message.no_hamon_vampire": "You have rejected your humanity and can't learn Hamon anymore",
@@ -315,7 +315,7 @@
   "jojo.chat.message.cant_learn_hamon": "You already have a power incompatible with Hamon",
   "jojo.chat.message.stone_mask_peaceful": "You can't turn into a vampire on Peaceful difficulty",
   
-  "jojo.chat.message.tmp_not_enough_xp": "You are not strong enough to gain a Stand",
+  "jojo.chat.message.tmp_not_enough_xp": "You do not have enough experience to gain a Stand",
   
   "jojo.message.skip_soul_ascension": "Press %s to skip the soul ascension",
   
@@ -338,7 +338,7 @@
   "jojo.message.action_condition.target_too_many_health": "The target has too much health",
   "jojo.message.action_condition.hand": "This can only be performed with an empty hand",
   "jojo.message.action_condition.hands": "This can only be performed with both hands empty",
-  "jojo.message.action_condition.hamon_full_freeze": "Your bloodstream can't carry oxygen",
+  "jojo.message.action_condition.hamon_no_bloodstream": "Your bloodstream can't carry oxygen",
   "jojo.message.action_condition.animal_infusion": "You haven't learned a way to infuse animals with Hamon",
   "jojo.message.action_condition.animal": "Only animal mobs can be infused",
   "jojo.message.action_condition.living_plant": "Only blocks made of a living matter can be infused",
