@@ -202,6 +202,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
         else if (CURRENT_TASK.equals(dataParameter)) {
             Optional<StandEntityTask> taskOptional = getCurrentTask();
+            
             taskOptional.ifPresent(task -> {
                 StandEntityAction action = task.getAction();
                 StandEntityAction.Phase phase = task.getPhase();
@@ -1119,13 +1120,14 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     protected boolean setTask(StandEntityTask task) {
         if (!level.isClientSide()) {
             Optional<StandRelativeOffset> offset = entityData.get(CURRENT_TASK).map(StandEntityTask::getOffsetFromUser);
-            if (stopTask(task.getAction(), false) && !getCurrentTask().isPresent()) {
+            if (clearingAction || stopTask(task, false)) {
                 offset.ifPresent(offsetPrevious -> task.setOffsetFromUser(offsetPrevious));
                 entityData.set(CURRENT_TASK, Optional.of(task));
                 if (task.getAction().enablePhysics) {
                     setNoPhysics(false);
                 }
                 userPower.consumeStamina(task.getAction().getStaminaCost(userPower));
+                clearingAction = false;
                 return true;
             }
             // scheduled stand task
@@ -1144,12 +1146,23 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         stopTask(null, stopNonCancelable);
     }
     
-    private boolean stopTask(@Nullable StandEntityAction newAction, boolean stopNonCancelable) {
+    private boolean stopTask(@Nullable StandEntityTask newTask, boolean stopNonCancelable) {
         if (!level.isClientSide()) {
             return getCurrentTask().map(task -> {
+            	if (newTask != null) {
+            		if (task.getOffsetFromUser() != null) {
+            			newTask.setOffsetFromUser(task.getOffsetFromUser());
+            			if (task.getTarget().getType() != TargetType.EMPTY
+            					&& newTask.getTarget().getType() == TargetType.EMPTY) {
+            				newTask.setTarget(this, task.getTarget(), userPower);
+            			}
+            		}
+            	}
+                
+            	StandEntityAction action = newTask != null ? newTask.getAction() : null;
                 if (task.getTicksLeft() <= 0 || stopNonCancelable
-                        || task.getAction().isCancelable(userPower, this, task.getPhase(), newAction)) {
-                    clearTask(task, newAction);
+                        || task.getAction().isCancelable(userPower, this, task.getPhase(), action)) {
+                    clearTask(task, action);
                     return true;
                 }
                 return false;
@@ -1163,35 +1176,23 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         updateNoPhysics();
         setStandPose(StandPose.IDLE);
         clearedTask.getAction().onClear(userPower, this);
-        entityData.set(CURRENT_TASK, Optional.empty());
-        if (!clickQueuedAction(clearedTask) && newAction == null) {
+        clearingAction = true;
+        if (newAction == null && !userPower.clickQueuedAction()) {
             if (isArmsOnlyMode()) {
                 StandEntityAction unsummon = ModActions.STAND_ENTITY_UNSUMMON.get();
                 setTask(StandEntityTask.makeServerSideTask(this, userPower, unsummon, unsummon.getStandActionTicks(userPower, this), 
                         StandEntityAction.Phase.PERFORM, isArmsOnlyMode(), ActionTarget.EMPTY));
             }
-            else if (getUser() != null && !isCloseToEntity(getUser()) && isFollowingUser()) {
-                retractStand(false);
+            else {
+                entityData.set(CURRENT_TASK, Optional.empty());
+            	if (getUser() != null && !isCloseToEntity(getUser()) && isFollowingUser()) {
+            		retractStand(false);
+            	}
             }
         }
     }
-
-    // isn't called on client
-    public boolean clickQueuedAction(StandEntityTask clearedTask) {
-        if (userPower.clickQueuedAction()) {
-            getCurrentTask().ifPresent(nextTask -> {
-                if (clearedTask.getOffsetFromUser() != null) {
-                    nextTask.setOffsetFromUser(clearedTask.getOffsetFromUser());
-                    if (clearedTask.getTarget().getType() != TargetType.EMPTY
-                    		&& nextTask.getTarget().getType() == TargetType.EMPTY) {
-                    	nextTask.setTarget(this, clearedTask.getTarget(), userPower);
-                    }
-                }
-            });
-            return true;
-        }
-        return false;
-    }
+    
+    private boolean clearingAction = false;
 
     public void stopTaskWithRecovery() {
         getCurrentTask().ifPresent(task -> {
