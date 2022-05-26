@@ -126,7 +126,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     private IStandPower userPower;
     private StandRelativeOffset offsetDefault = StandRelativeOffset.withYOffset(-0.75, 0.2, -0.75);
     private StandRelativeOffset offsetDefaultArmsOnly = StandRelativeOffset.withYOffset(0, 0, 0.15);
-    private Vector3d lastOffsetPos = null;
 
     private static final DataParameter<Boolean> SWING_OFF_HAND = EntityDataManager.defineId(StandEntity.class, DataSerializers.BOOLEAN);
     private boolean alternateAdditionalSwing;
@@ -215,13 +214,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 if (getStandPose() != StandPose.SUMMON) {
                 	setStandPose(StandPose.IDLE);
                 }
-            }
-            if (lastOffsetPos != null && taskOptional.map(task -> {
-            	ActionTarget target = task.getTarget();
-            	target.cacheEntity(level);
-            	return target.getType() == TargetType.EMPTY || !this.isTargetInReach(task.getTarget());
-            }).orElse(true)) {
-            	lastOffsetPos = null;
             }
         }
         else if (SWING_OFF_HAND.equals(dataParameter)) {
@@ -997,15 +989,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 StandRelativeOffset relativeOffset = getOffsetFromUser();
                 if (relativeOffset != null) {
                 	Vector3d pos;
-                	if (lastOffsetPos == null) {
-            			pos = taskOffsetPos(user, relativeOffset);
-            			if (checkCollision(pos)) {
-            				lastOffsetPos = pos;
-            			}
-                	}
-                	else {
-                		pos = lastOffsetPos;
-                	}
+                	// FIXME (!) glitches when too close to the target
+                	pos = taskOffsetPos(user, relativeOffset);
+//            			if (checkCollision(pos)) {
+//            			}
                     
                     setPos(pos.x, pos.y, pos.z);
                 }
@@ -1177,6 +1164,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         setStandPose(StandPose.IDLE);
         clearedTask.getAction().onClear(userPower, this);
         clearingAction = true;
+		
         if (newAction == null && !userPower.clickQueuedAction()) {
             if (isArmsOnlyMode()) {
                 StandEntityAction unsummon = ModActions.STAND_ENTITY_UNSUMMON.get();

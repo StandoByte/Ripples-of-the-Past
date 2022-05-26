@@ -477,7 +477,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     public float leapStrength() {
         if (standManifestation instanceof StandEntity) {
             StandEntity standEntity = (StandEntity) standManifestation;
-            if (!standEntity.isArmsOnlyMode() && standEntity.isFollowingUser()) {
+            if (!standEntity.isArmsOnlyMode() && standEntity.isFollowingUser() && !standEntity.getCurrentTask().isPresent()) {
                 return standEntity.getLeapStrength();
             }
         }
