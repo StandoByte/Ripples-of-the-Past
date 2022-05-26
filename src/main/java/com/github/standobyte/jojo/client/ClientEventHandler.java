@@ -7,6 +7,7 @@ import java.util.Random;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.client.resources.CustomResourceManagers;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.ModActions;
@@ -75,7 +76,6 @@ public class ClientEventHandler {
     
     private Random random = new Random();
     private ResourceLocation resolveShader = null;
-    private int resolveShaderNum = random.nextInt(HueShiftShaders.SHADERS_HUE_SHIFT.length);
     private StandOstSound ost;
     
     private boolean resetShader;
@@ -217,6 +217,7 @@ public class ClientEventHandler {
             if (mc.gameRenderer.currentEffect() == null) {
                 ResourceLocation shader = getCurrentShader();
                 if (shader != null) {
+                	// FIXME (!) handle FileNotFoundException
                     mc.gameRenderer.loadEffect(shader);
                 }
             }
@@ -244,8 +245,8 @@ public class ClientEventHandler {
 
     public void onResolveEffectStart(int effectAmplifier) {
         if (resolveShader == null) {
-            resolveShaderNum = random.nextInt(HueShiftShaders.SHADERS_HUE_SHIFT.length);
-            resolveShader = HueShiftShaders.SHADERS_HUE_SHIFT[resolveShaderNum];
+            resolveShader = CustomResourceManagers.getResolveShadersListManager()
+            		.getRandomShader(IStandPower.getPlayerStandPower(mc.player), random);
         }
 
         startPlayingOst(effectAmplifier);
@@ -253,8 +254,11 @@ public class ClientEventHandler {
     
     private void tickResolveEffect() {
         if (mc.player.isAlive() && mc.player.hasEffect(ModEffects.RESOLVE.get())) {
+        	// FIXME (!) resolve shaders list may be empty
+        	JojoMod.LOGGER.debug(resolveShader);
             if (resolveShader == null) {
-                resolveShader = HueShiftShaders.SHADERS_HUE_SHIFT[resolveShaderNum];
+                resolveShader = CustomResourceManagers.getResolveShadersListManager()
+                		.getRandomShader(IStandPower.getPlayerStandPower(mc.player), random);
             }
             
             if (mc.player.getEffect(ModEffects.RESOLVE.get()).getDuration() == 100) {
@@ -288,7 +292,6 @@ public class ClientEventHandler {
         if (resolveShader != null) {
             resetShader = true;
             resolveShader = null;
-            resolveShaderNum = random.nextInt(HueShiftShaders.SHADERS_HUE_SHIFT.length);
         }
     }
     
