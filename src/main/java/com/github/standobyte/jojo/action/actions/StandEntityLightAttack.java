@@ -63,7 +63,7 @@ public class StandEntityLightAttack extends StandEntityAction {
     @Override
     public void standTickRecovery(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
         if (ticks == 0) {
-            standEntity.clickQueuedAction(standEntity.getCurrentTask().get());
+        	userPower.clickQueuedAction();
         }
     }
     
