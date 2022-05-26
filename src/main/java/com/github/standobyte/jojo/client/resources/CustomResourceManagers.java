@@ -1,17 +1,21 @@
-package com.github.standobyte.jojo.client.ui.sprites;
+package com.github.standobyte.jojo.client.resources;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.IReloadableResourceManager;
 
-public class SpriteUploaders {
+public class CustomResourceManagers {
     private static ActionSpriteUploader actionSprites;
     private static HamonSkillSpriteUploader hamonSkillSprites;
+    private static ResolveShadersListManager resolveShadersListManager;
 
-    public static void initSpriteUploaders(Minecraft mc) {
+    public static void initCustomResourceManagers(Minecraft mc) {
         actionSprites = new ActionSpriteUploader(mc.textureManager);
         ((IReloadableResourceManager) mc.getResourceManager()).registerReloadListener(actionSprites);
         hamonSkillSprites = new HamonSkillSpriteUploader(mc.textureManager);
         ((IReloadableResourceManager) mc.getResourceManager()).registerReloadListener(hamonSkillSprites);
+        
+        resolveShadersListManager = new ResolveShadersListManager();
+        ((IReloadableResourceManager) mc.getResourceManager()).registerReloadListener(resolveShadersListManager);
     }
 
     public static ActionSpriteUploader getActionSprites() {
@@ -20,6 +24,10 @@ public class SpriteUploaders {
 
     public static HamonSkillSpriteUploader getHamonSkillSprites() {
         return hamonSkillSprites;
+    }
+    
+    public static ResolveShadersListManager getResolveShadersListManager() {
+    	return resolveShadersListManager;
     }
 
 }

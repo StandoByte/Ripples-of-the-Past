@@ -5,7 +5,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.client.ui.sprites.SpriteUploaders;
+import com.github.standobyte.jojo.client.resources.CustomResourceManagers;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.IPowerType;
@@ -62,7 +62,7 @@ public class ActionToast implements IToast {
             ToastGui.blit(matrixStack, 3, 3, 0, 0, 16, 16, 16, 16);
             RenderSystem.popMatrix();
             matrixStack.popPose();
-            TextureAtlasSprite textureAtlasSprite = SpriteUploaders.getActionSprites().getSprite(action);
+            TextureAtlasSprite textureAtlasSprite = CustomResourceManagers.getActionSprites().getSprite(action);
             mc.getTextureManager().bind(textureAtlasSprite.atlas().location());
             ToastGui.blit(matrixStack, 8, 8, 0, 16, 16, textureAtlasSprite);
             return delta - this.lastChanged >= 5000L ? IToast.Visibility.HIDE : IToast.Visibility.SHOW;
