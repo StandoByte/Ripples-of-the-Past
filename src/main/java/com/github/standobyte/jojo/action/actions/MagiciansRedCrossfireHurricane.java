@@ -34,6 +34,7 @@ public class MagiciansRedCrossfireHurricane extends StandEntityAction {
                 }
                 ankh.shootFromRotation(standEntity, standEntity.xRot + rotOffsets.x, standEntity.yRot + rotOffsets.y, 
                         0, special ? 1.0F : 0.75F, 0.0F);
+                ankh.setScale((float) standEntity.getStandEfficiency());
                 world.addFreshEntity(ankh);
             }
             standEntity.playSound(ModSounds.MAGICIANS_RED_CROSSFIRE_HURRICANE.get(), 1.0F, 1.0F);

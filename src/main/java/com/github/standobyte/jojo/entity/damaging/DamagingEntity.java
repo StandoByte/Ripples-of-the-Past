@@ -245,6 +245,10 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
         this.damageFactor = damageFactor;
     }
     
+    public float getDamageFactor() {
+    	return damageFactor;
+    }
+    
     protected boolean debuffsFromStand() {
     	return true;
     }

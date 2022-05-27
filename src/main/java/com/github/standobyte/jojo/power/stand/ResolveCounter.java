@@ -8,10 +8,10 @@ import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.ResetResolveValuePacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncMaxAchievedResolvePacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncResolveBoostsPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncResolveLevelPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncResolvePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.MaxAchievedResolvePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ResolveBoostsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ResolveLevelPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ResolvePacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.util.DiscardingSortedMultisetWrapper;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
@@ -152,7 +152,7 @@ public class ResolveCounter {
         this.maxAchievedValue = value;
         if (send) {
             serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new SyncMaxAchievedResolvePacket(value), player);
+                PacketManager.sendToClient(new MaxAchievedResolvePacket(value), player);
             });
         }
     }
@@ -176,7 +176,7 @@ public class ResolveCounter {
         int ticks = noDecayTicks;
         if (send) {
             serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new SyncResolvePacket(getResolveValue(), ticks), player);
+                PacketManager.sendToClient(new ResolvePacket(getResolveValue(), ticks), player);
             });
         }
         
@@ -247,7 +247,7 @@ public class ResolveCounter {
         this.resolveLevel = level;
         if (send) {
             serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new SyncResolveLevelPacket(getResolveLevel()), player);
+                PacketManager.sendToClient(new ResolveLevelPacket(getResolveLevel()), player);
             });
         }
     }
@@ -266,7 +266,7 @@ public class ResolveCounter {
                 float boost = dmgAmount * BOOST_PER_DMG_DEALT;
                 boostAttack = Math.min(boostAttack + boost, BOOST_ATTACK_MAX);
                 if (user instanceof ServerPlayerEntity) {
-                    PacketManager.sendToClient(new SyncResolveBoostsPacket(boostAttack, boostRemoteControl, boostChat, hpOnGettingAttacked), (ServerPlayerEntity) user);
+                    PacketManager.sendToClient(new ResolveBoostsPacket(boostAttack, boostRemoteControl, boostChat, hpOnGettingAttacked), (ServerPlayerEntity) user);
                 }
             }
         }
@@ -281,7 +281,7 @@ public class ResolveCounter {
             }
             hpOnGettingAttacked = hp;
             if (user instanceof ServerPlayerEntity) {
-                PacketManager.sendToClient(new SyncResolveBoostsPacket(boostAttack, boostRemoteControl, boostChat, hpOnGettingAttacked), (ServerPlayerEntity) user);
+                PacketManager.sendToClient(new ResolveBoostsPacket(boostAttack, boostRemoteControl, boostChat, hpOnGettingAttacked), (ServerPlayerEntity) user);
             }
         }
     }
@@ -306,7 +306,7 @@ public class ResolveCounter {
             boostChat = Math.min(boostChat + length * BOOST_PER_CHARACTER, BOOST_CHAT_MAX);
             LivingEntity user = stand.getUser();
             if (user instanceof ServerPlayerEntity) {
-                PacketManager.sendToClient(new SyncResolveBoostsPacket(boostAttack, boostRemoteControl, boostChat, hpOnGettingAttacked), (ServerPlayerEntity) user);
+                PacketManager.sendToClient(new ResolveBoostsPacket(boostAttack, boostRemoteControl, boostChat, hpOnGettingAttacked), (ServerPlayerEntity) user);
             }
         }
     }
@@ -393,10 +393,10 @@ public class ResolveCounter {
     }
 
     void syncWithUser(ServerPlayerEntity player) {
-        PacketManager.sendToClient(new SyncResolveLevelPacket(getResolveLevel()), player);
-        PacketManager.sendToClient(new SyncResolvePacket(getResolveValue(), noResolveDecayTicks), player);
-        PacketManager.sendToClient(new SyncMaxAchievedResolvePacket(maxAchievedValue), player);
-        PacketManager.sendToClient(new SyncResolveBoostsPacket(boostAttack, boostRemoteControl, boostChat, hpOnGettingAttacked), player);
+        PacketManager.sendToClient(new ResolveLevelPacket(getResolveLevel()), player);
+        PacketManager.sendToClient(new ResolvePacket(getResolveValue(), noResolveDecayTicks), player);
+        PacketManager.sendToClient(new MaxAchievedResolvePacket(maxAchievedValue), player);
+        PacketManager.sendToClient(new ResolveBoostsPacket(boostAttack, boostRemoteControl, boostChat, hpOnGettingAttacked), player);
     }
 
     void readNbt(CompoundNBT nbt) {

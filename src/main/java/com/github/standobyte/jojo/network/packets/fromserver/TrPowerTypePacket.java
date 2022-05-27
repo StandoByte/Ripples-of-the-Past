@@ -17,22 +17,22 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-public class TrSyncPowerTypePacket<P extends IPower<P, T>, T extends IPowerType<P, T>> {
+public class TrPowerTypePacket<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     private final int entityId;
     private final PowerClassification classification;
     private final T powerType;
 
-    public TrSyncPowerTypePacket(int entityId, PowerClassification classification, T powerType) {
+    public TrPowerTypePacket(int entityId, PowerClassification classification, T powerType) {
         this.entityId = entityId;
         this.classification = classification;
         this.powerType = powerType;
     }
     
-    public static <P extends IPower<P, T>, T extends IPowerType<P, T>> TrSyncPowerTypePacket<P, T> noPowerType(int entityId, PowerClassification classification) {
-        return new TrSyncPowerTypePacket<>(entityId, classification, null);
+    public static <P extends IPower<P, T>, T extends IPowerType<P, T>> TrPowerTypePacket<P, T> noPowerType(int entityId, PowerClassification classification) {
+        return new TrPowerTypePacket<>(entityId, classification, null);
     }
 
-    public static <P extends IPower<P, T>, T extends IPowerType<P, T>> void encode(TrSyncPowerTypePacket<P, T> msg, PacketBuffer buf) {
+    public static <P extends IPower<P, T>, T extends IPowerType<P, T>> void encode(TrPowerTypePacket<P, T> msg, PacketBuffer buf) {
         boolean noPowerType = msg.powerType == null;
         buf.writeBoolean(noPowerType);
         buf.writeInt(msg.entityId);
@@ -40,15 +40,15 @@ public class TrSyncPowerTypePacket<P extends IPower<P, T>, T extends IPowerType<
         if (!noPowerType) buf.writeRegistryId(msg.powerType);
     }
 
-    public static <P extends IPower<P, T>, T extends IPowerType<P, T>> TrSyncPowerTypePacket<P, T> decode(PacketBuffer buf) {
+    public static <P extends IPower<P, T>, T extends IPowerType<P, T>> TrPowerTypePacket<P, T> decode(PacketBuffer buf) {
         boolean noPowerType = buf.readBoolean();
         if (noPowerType) {
             return noPowerType(buf.readInt(), buf.readEnum(PowerClassification.class));
         }
-        return new TrSyncPowerTypePacket<P, T>(buf.readInt(), buf.readEnum(PowerClassification.class), buf.readRegistryId());
+        return new TrPowerTypePacket<P, T>(buf.readInt(), buf.readEnum(PowerClassification.class), buf.readRegistryId());
     }
 
-    public static <P extends IPower<P, T>, T extends IPowerType<P, T>> void handle(TrSyncPowerTypePacket<P, T> msg, Supplier<NetworkEvent.Context> ctx) {
+    public static <P extends IPower<P, T>, T extends IPowerType<P, T>> void handle(TrPowerTypePacket<P, T> msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity instanceof LivingEntity) {

@@ -138,7 +138,7 @@ public class HungryZombieEntity extends ZombieEntity {
     }
     
     public boolean isEntityOwner(LivingEntity entity) {
-        return entityData.get(OWNER_UUID).map(owner -> entity.getUUID().equals(owner)).orElse(false);
+        return entityData.get(OWNER_UUID).map(ownerId -> entity.getUUID().equals(ownerId)).orElse(false);
     }
     
     @Override
@@ -190,6 +190,11 @@ public class HungryZombieEntity extends ZombieEntity {
             return owner.isAlliedTo(entity);
         }
         return super.isAlliedTo(entity);
+    }
+    
+    @Override
+    public boolean canBeLeashed(PlayerEntity player) {
+    	return !this.isLeashed() && isEntityOwner(player);
     }
 
     @Override

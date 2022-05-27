@@ -13,16 +13,16 @@ import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-public class SyncInputBufferPacket {
+public class InputBufferPacket {
     private final PowerClassification classification;
     @Nullable private final Action<?> action;
     
-    public SyncInputBufferPacket(PowerClassification classification, @Nullable Action<?> action) {
+    public InputBufferPacket(PowerClassification classification, @Nullable Action<?> action) {
         this.classification = classification;
         this.action = action;
     }
 
-    public static void encode(SyncInputBufferPacket msg, PacketBuffer buf) {
+    public static void encode(InputBufferPacket msg, PacketBuffer buf) {
         buf.writeEnum(msg.classification);
         buf.writeBoolean(msg.action != null);
         if (msg.action != null) {
@@ -30,12 +30,12 @@ public class SyncInputBufferPacket {
         }
     }
 
-    public static SyncInputBufferPacket decode(PacketBuffer buf) {
-        return new SyncInputBufferPacket(buf.readEnum(PowerClassification.class), 
+    public static InputBufferPacket decode(PacketBuffer buf) {
+        return new InputBufferPacket(buf.readEnum(PowerClassification.class), 
                 buf.readBoolean() ? buf.readRegistryIdUnsafe(ModActions.Registry.getRegistry()) : null);
     }
 
-    public static void handle(SyncInputBufferPacket msg, Supplier<NetworkEvent.Context> ctx) {
+    public static void handle(InputBufferPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             IPower.getPowerOptional(ClientUtil.getClientPlayer(), msg.classification).ifPresent(power -> {
                 queueNextAction(power, msg.action);;

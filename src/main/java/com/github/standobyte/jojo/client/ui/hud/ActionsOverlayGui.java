@@ -20,7 +20,7 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTargetContainer;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
-import com.github.standobyte.jojo.client.resources.CustomResourceManagers;
+import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.ui.hud.ActionsModeConfig.SelectedTargetIcon;
 import com.github.standobyte.jojo.client.ui.screen.HamonScreen;
 import com.github.standobyte.jojo.client.ui.screen.HamonStatsTabGui;
@@ -423,7 +423,7 @@ public class ActionsOverlayGui extends AbstractGui {
         P power = mode.getPower();
         
         if (action != null) {
-            TextureAtlasSprite textureAtlasSprite = CustomResourceManagers.getActionSprites().getSprite(action);
+            TextureAtlasSprite textureAtlasSprite = CustomResources.getActionSprites().getSprite(action);
             mc.getTextureManager().bind(textureAtlasSprite.atlas().location());
             
             if (!isActionAvaliable(action, mode, actionType, target, isSelected)) {

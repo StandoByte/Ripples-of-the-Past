@@ -8,19 +8,19 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-public class SyncStandActionLearningClearPacket {
+public class StandActionsClearLearningPacket {
     
-    public SyncStandActionLearningClearPacket() {
+    public StandActionsClearLearningPacket() {
     }
     
-    public static void encode(SyncStandActionLearningClearPacket msg, PacketBuffer buf) {
+    public static void encode(StandActionsClearLearningPacket msg, PacketBuffer buf) {
     }
 
-    public static SyncStandActionLearningClearPacket decode(PacketBuffer buf) {
-        return new SyncStandActionLearningClearPacket();
+    public static StandActionsClearLearningPacket decode(PacketBuffer buf) {
+        return new StandActionsClearLearningPacket();
     }
 
-    public static void handle(SyncStandActionLearningClearPacket msg, Supplier<NetworkEvent.Context> ctx) {
+    public static void handle(StandActionsClearLearningPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
                 power.clearActionLearning();

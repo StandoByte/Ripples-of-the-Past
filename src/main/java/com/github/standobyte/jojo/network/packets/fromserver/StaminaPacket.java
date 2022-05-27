@@ -8,22 +8,22 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-public class SyncStaminaPacket {
+public class StaminaPacket {
     private final float stamina;
     
-    public SyncStaminaPacket(float stamina) {
+    public StaminaPacket(float stamina) {
         this.stamina = stamina;
     }
     
-    public static void encode(SyncStaminaPacket msg, PacketBuffer buf) {
+    public static void encode(StaminaPacket msg, PacketBuffer buf) {
         buf.writeFloat(msg.stamina);
     }
     
-    public static SyncStaminaPacket decode(PacketBuffer buf) {
-        return new SyncStaminaPacket(buf.readFloat());
+    public static StaminaPacket decode(PacketBuffer buf) {
+        return new StaminaPacket(buf.readFloat());
     }
 
-    public static void handle(SyncStaminaPacket msg, Supplier<NetworkEvent.Context> ctx) {
+    public static void handle(StaminaPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
                 power.setStamina(msg.stamina);

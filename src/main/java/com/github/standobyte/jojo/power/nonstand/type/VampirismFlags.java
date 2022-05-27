@@ -7,8 +7,8 @@ import com.github.standobyte.jojo.action.actions.VampirismAction;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncNonStandFlagPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncNonStandFlagPacket.Flag;
+import com.github.standobyte.jojo.network.packets.fromserver.TrNonStandFlagPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrNonStandFlagPacket.Flag;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.TypeSpecificData;
 
@@ -46,7 +46,7 @@ public class VampirismFlags extends TypeSpecificData {
     public void setVampireHamonUser(boolean vampireHamonUser) {
         if (!this.vampireHamonUser == vampireHamonUser) {
             serverPlayer.ifPresent(player -> {
-                PacketManager.sendToClientsTrackingAndSelf(new TrSyncNonStandFlagPacket(
+                PacketManager.sendToClientsTrackingAndSelf(new TrNonStandFlagPacket(
                         player.getId(), Flag.VAMPIRE_HAMON_USER, vampireHamonUser), player);
             });
         }
@@ -71,7 +71,7 @@ public class VampirismFlags extends TypeSpecificData {
     public void setVampireFullPower(boolean vampireFullPower) {
         if (this.vampireFullPower != vampireFullPower) {
             serverPlayer.ifPresent(player -> {
-                PacketManager.sendToClientsTrackingAndSelf(new TrSyncNonStandFlagPacket(
+                PacketManager.sendToClientsTrackingAndSelf(new TrNonStandFlagPacket(
                         player.getId(), Flag.VAMPIRE_FULL_POWER, vampireFullPower), player);
             });
         }
@@ -108,9 +108,9 @@ public class VampirismFlags extends TypeSpecificData {
     
     @Override
     public void syncWithTrackingOrUser(LivingEntity user, ServerPlayerEntity entity) {
-        PacketManager.sendToClient(new TrSyncNonStandFlagPacket(
+        PacketManager.sendToClient(new TrNonStandFlagPacket(
                 user.getId(), Flag.VAMPIRE_HAMON_USER, vampireHamonUser), entity);
-        PacketManager.sendToClient(new TrSyncNonStandFlagPacket(
+        PacketManager.sendToClient(new TrNonStandFlagPacket(
                 user.getId(), Flag.VAMPIRE_FULL_POWER, vampireFullPower), entity);
     }
 }

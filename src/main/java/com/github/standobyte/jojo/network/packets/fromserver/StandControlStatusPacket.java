@@ -8,16 +8,16 @@ import com.github.standobyte.jojo.power.stand.StandUtil;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-public class SyncStandControlStatusPacket {
+public class StandControlStatusPacket {
     private final boolean manualControl;
     private final boolean keepPosition;
     
-    public SyncStandControlStatusPacket(boolean manualControl, boolean keepPosition) {
+    public StandControlStatusPacket(boolean manualControl, boolean keepPosition) {
         this.manualControl = manualControl;
         this.keepPosition = keepPosition;
     }
     
-    public static void encode(SyncStandControlStatusPacket msg, PacketBuffer buf) {
+    public static void encode(StandControlStatusPacket msg, PacketBuffer buf) {
         byte flags = 0;
         if (msg.manualControl) {
             flags |= 1;
@@ -28,12 +28,12 @@ public class SyncStandControlStatusPacket {
         buf.writeByte(flags);
     }
     
-    public static SyncStandControlStatusPacket decode(PacketBuffer buf) {
+    public static StandControlStatusPacket decode(PacketBuffer buf) {
         byte flags = buf.readByte();
-        return new SyncStandControlStatusPacket((flags & 1) > 0, (flags & 2) > 0);
+        return new StandControlStatusPacket((flags & 1) > 0, (flags & 2) > 0);
     }
 
-    public static void handle(SyncStandControlStatusPacket msg, Supplier<NetworkEvent.Context> ctx) {
+    public static void handle(StandControlStatusPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             StandUtil.setManualControl(ClientUtil.getClientPlayer(), msg.manualControl, msg.keepPosition); // FIXME (!) when i die with the stand summoned, throws "java.lang.IllegalStateException: Player's stand power capability is empty."
         });

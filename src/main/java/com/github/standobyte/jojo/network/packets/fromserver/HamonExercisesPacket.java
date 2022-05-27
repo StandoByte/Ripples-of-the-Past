@@ -12,7 +12,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-public class SyncHamonExercisesPacket {
+public class HamonExercisesPacket {
     private static final long MASK_MINING = (1L << MathHelper.log2(MathHelper.smallestEncompassingPowerOfTwo(Exercise.MINING.getMaxTicks(null)))) - 1L;
     private static final int BITS_RUNNING = MathHelper.log2(MathHelper.smallestEncompassingPowerOfTwo(Exercise.RUNNING.getMaxTicks(null)));
     private static final long MASK_RUNNING = (1L << BITS_RUNNING) - 1L;
@@ -27,7 +27,7 @@ public class SyncHamonExercisesPacket {
     private final int meditationTicks;
     private final float trainingBonus;
     
-    public SyncHamonExercisesPacket(HamonData hamon) {
+    public HamonExercisesPacket(HamonData hamon) {
         this(
                 hamon.getExerciseTicks(Exercise.MINING), 
                 hamon.getExerciseTicks(Exercise.RUNNING), 
@@ -36,7 +36,7 @@ public class SyncHamonExercisesPacket {
                 hamon.getTrainingBonus());
     }
 
-    private SyncHamonExercisesPacket(int miningTicks, int runningTicks, int swimmingTicks, int meditationTicks, float trainingBonus) {
+    private HamonExercisesPacket(int miningTicks, int runningTicks, int swimmingTicks, int meditationTicks, float trainingBonus) {
         this.miningTicks = miningTicks;
         this.runningTicks = runningTicks;
         this.swimmingTicks = swimmingTicks;
@@ -44,7 +44,7 @@ public class SyncHamonExercisesPacket {
         this.trainingBonus = trainingBonus;
     }
 
-    public static void encode(SyncHamonExercisesPacket msg, PacketBuffer buf) {
+    public static void encode(HamonExercisesPacket msg, PacketBuffer buf) {
         long l = msg.miningTicks;
         l <<= BITS_RUNNING;
         l |= msg.runningTicks;
@@ -56,7 +56,7 @@ public class SyncHamonExercisesPacket {
         buf.writeFloat(msg.trainingBonus);
     }
 
-    public static SyncHamonExercisesPacket decode(PacketBuffer buf) {
+    public static HamonExercisesPacket decode(PacketBuffer buf) {
         long l = buf.readLong();
         int meditation = (int) (l & MASK_MEDITATION);
         l >>= BITS_MEDITATION;
@@ -65,10 +65,10 @@ public class SyncHamonExercisesPacket {
         int running = (int) (l & MASK_RUNNING);
         l >>= BITS_RUNNING;
         int mining = (int) (l & MASK_MINING);
-        return new SyncHamonExercisesPacket(mining, running, swimming, meditation, buf.readFloat());
+        return new HamonExercisesPacket(mining, running, swimming, meditation, buf.readFloat());
     }
 
-    public static void handle(SyncHamonExercisesPacket msg, Supplier<NetworkEvent.Context> ctx) {
+    public static void handle(HamonExercisesPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             INonStandPower.getNonStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
                 power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {

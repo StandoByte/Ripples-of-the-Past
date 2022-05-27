@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncCooldownPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrCooldownPacket;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -85,7 +85,7 @@ public class ActionCooldownTracker {
     void syncWithTrackingOrUser(int userId, PowerClassification classification, ServerPlayerEntity player) {
         for (Entry<Action<?>, ActionCooldownTracker.Cooldown> entry : cooldowns.entrySet()) {
             Cooldown cooldown = entry.getValue();
-            PacketManager.sendToClient(new TrSyncCooldownPacket(userId, classification, entry.getKey(), 
+            PacketManager.sendToClient(new TrCooldownPacket(userId, classification, entry.getKey(), 
                     cooldown.endTime - tickCount, cooldown.endTime - cooldown.startTime), player);
         }
     }

@@ -15,7 +15,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncStandControlStatusPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.StandControlStatusPacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.stand.type.StandType;
@@ -110,7 +110,7 @@ public class StandUtil {
             if (!standEntity.isArmsOnlyMode()) {
                 if (!player.level.isClientSide()) {
                     standEntity.setManualControl(manualControl, keepPosition);
-                    PacketManager.sendToClient(new SyncStandControlStatusPacket(manualControl, keepPosition), (ServerPlayerEntity) player);
+                    PacketManager.sendToClient(new StandControlStatusPacket(manualControl, keepPosition), (ServerPlayerEntity) player);
                 }
                 else {
                     Minecraft.getInstance().setCameraEntity(manualControl ? standEntity : player);

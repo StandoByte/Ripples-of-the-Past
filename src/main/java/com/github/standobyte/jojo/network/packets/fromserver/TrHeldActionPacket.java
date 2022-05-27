@@ -16,24 +16,24 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-public class TrSyncHeldActionPacket {
+public class TrHeldActionPacket {
     private final int userId;
     private final PowerClassification classification;
     @Nullable private final Action<?> action;
     private final boolean requirementsFulfilled;
     
-    public TrSyncHeldActionPacket(int userId, PowerClassification classification, Action<?> action, boolean requirementsFulfilled) {
+    public TrHeldActionPacket(int userId, PowerClassification classification, Action<?> action, boolean requirementsFulfilled) {
         this.userId = userId;
         this.classification = classification;
         this.action = action;
         this.requirementsFulfilled = requirementsFulfilled;
     }
     
-    public static TrSyncHeldActionPacket actionStopped(int userId, PowerClassification classification) {
-        return new TrSyncHeldActionPacket(userId, classification, null, false);
+    public static TrHeldActionPacket actionStopped(int userId, PowerClassification classification) {
+        return new TrHeldActionPacket(userId, classification, null, false);
     }
 
-    public static void encode(TrSyncHeldActionPacket msg, PacketBuffer buf) {
+    public static void encode(TrHeldActionPacket msg, PacketBuffer buf) {
         boolean stopHeld = msg.action == null;
         buf.writeBoolean(stopHeld);
         buf.writeInt(msg.userId);
@@ -44,15 +44,15 @@ public class TrSyncHeldActionPacket {
         }
     }
 
-    public static TrSyncHeldActionPacket decode(PacketBuffer buf) {
+    public static TrHeldActionPacket decode(PacketBuffer buf) {
         boolean stopHeld = buf.readBoolean();
         if (stopHeld) {
             return actionStopped(buf.readInt(), buf.readEnum(PowerClassification.class));
         }
-        return new TrSyncHeldActionPacket(buf.readInt(), buf.readEnum(PowerClassification.class), buf.readRegistryIdUnsafe(ModActions.Registry.getRegistry()), buf.readBoolean());
+        return new TrHeldActionPacket(buf.readInt(), buf.readEnum(PowerClassification.class), buf.readRegistryIdUnsafe(ModActions.Registry.getRegistry()), buf.readBoolean());
     }
 
-    public static void handle(TrSyncHeldActionPacket msg, Supplier<NetworkEvent.Context> ctx) {
+    public static void handle(TrHeldActionPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             Entity user = ClientUtil.getEntityById(msg.userId);
             if (user instanceof LivingEntity) {

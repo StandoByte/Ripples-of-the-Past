@@ -102,6 +102,9 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         if (!itemCheck.isPositive()) {
             return itemCheck;
         }
+        if (!user.canUpdate() && !canBeUsedByStoppedInTime(user, power)) {
+        	return ActionConditionResult.NEGATIVE;
+        }
         return checkSpecificConditions(user, power, target);
     }
     
@@ -318,7 +321,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return false;
     }
     
-    public boolean canBeUsedInStoppedTime(LivingEntity user, P power) {
+    public boolean canBeUsedByStoppedInTime(LivingEntity user, P power) {
         return canUserSeeInStoppedTime(user, power);
     }
     

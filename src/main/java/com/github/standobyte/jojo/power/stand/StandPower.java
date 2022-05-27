@@ -17,9 +17,9 @@ import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncStaminaPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncStandActionLearningClearPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncStandActionLearningPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.StaminaPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.StandActionsClearLearningPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.StandActionLearningPacket;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.PowerBaseImpl;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
@@ -214,7 +214,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         this.stamina = amount;
         if (send) {
             serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new SyncStaminaPacket(getStamina()), player);
+                PacketManager.sendToClient(new StaminaPacket(getStamina()), player);
             });
         }
     }
@@ -407,7 +407,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         float pts = points;
         if (actionLearningProgressMap.setLearningProgressPoints(action, points, this)) {
             serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new SyncStandActionLearningPacket(action, pts, true), player);
+                PacketManager.sendToClient(new StandActionLearningPacket(action, pts, true), player);
             });
             
             if (user != null && !user.level.isClientSide()) {
@@ -433,7 +433,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         ActionLearningProgressMap<IStandPower> previousMap = actionLearningProgressMap;
         this.actionLearningProgressMap = new ActionLearningProgressMap<>();
         serverPlayerUser.ifPresent(player -> {
-            PacketManager.sendToClient(new SyncStandActionLearningClearPacket(), player);
+            PacketManager.sendToClient(new StandActionsClearLearningPacket(), player);
         });
         return previousMap;
     }
@@ -584,14 +584,14 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         serverPlayerUser.ifPresent(player -> {
             if (hasPower()) {
                 if (usesStamina()) {
-                    PacketManager.sendToClient(new SyncStaminaPacket(stamina), player);
+                    PacketManager.sendToClient(new StaminaPacket(stamina), player);
                 }
                 if (usesResolve()) {
                     resolveCounter.syncWithUser(player);
                 }
             }
             actionLearningProgressMap.forEach((action, progress) -> {
-                PacketManager.sendToClient(new SyncStandActionLearningPacket(action, progress, false), player);
+                PacketManager.sendToClient(new StandActionLearningPacket(action, progress, false), player);
             });
             if (skippedProgression) {
                 PacketManager.sendToClient(new SkippedStandProgressionPacket(), player);

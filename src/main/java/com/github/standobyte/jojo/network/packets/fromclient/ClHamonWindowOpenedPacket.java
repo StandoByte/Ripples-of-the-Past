@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonTeachersSkillsPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncHamonExercisesPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
@@ -30,7 +30,7 @@ public class ClHamonWindowOpenedPacket {
             ServerPlayerEntity player = ctx.get().getSender();
             INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
                 power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
-                    PacketManager.sendToClient(new SyncHamonExercisesPacket(hamon), player);
+                    PacketManager.sendToClient(new HamonExercisesPacket(hamon), player);
                     EnumSet<HamonSkill> skills = HamonPowerType.nearbyTeachersSkills(player);
                     PacketManager.sendToClient(skills.isEmpty() ? new HamonTeachersSkillsPacket() : new HamonTeachersSkillsPacket(HamonTeachersSkillsPacket.encodeSkills(skills)), player);
                 });

@@ -13,18 +13,18 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-public class TrSyncCooldownPacket {
+public class TrCooldownPacket {
     private final int entityId;
     private final PowerClassification classification;
     private final Action<?> action;
     private final int value;
     private final int totalCooldown;
 
-    public TrSyncCooldownPacket(int entityId, PowerClassification classification, Action<?> action, int value) {
+    public TrCooldownPacket(int entityId, PowerClassification classification, Action<?> action, int value) {
         this(entityId, classification, action, value, value);
     }
 
-    public TrSyncCooldownPacket(int entityId, PowerClassification classification, Action<?> action, int value, int totalCooldown) {
+    public TrCooldownPacket(int entityId, PowerClassification classification, Action<?> action, int value, int totalCooldown) {
         this.entityId = entityId;
         this.classification = classification;
         this.action = action;
@@ -32,7 +32,7 @@ public class TrSyncCooldownPacket {
         this.totalCooldown = totalCooldown;
     }
 
-    public static void encode(TrSyncCooldownPacket msg, PacketBuffer buf) {
+    public static void encode(TrCooldownPacket msg, PacketBuffer buf) {
         buf.writeInt(msg.entityId);
         buf.writeEnum(msg.classification);
         buf.writeRegistryIdUnsafe(ModActions.Registry.getRegistry(), msg.action);
@@ -40,12 +40,12 @@ public class TrSyncCooldownPacket {
         buf.writeVarInt(msg.totalCooldown);
     }
 
-    public static TrSyncCooldownPacket decode(PacketBuffer buf) {
-        return new TrSyncCooldownPacket(buf.readInt(), buf.readEnum(PowerClassification.class), 
+    public static TrCooldownPacket decode(PacketBuffer buf) {
+        return new TrCooldownPacket(buf.readInt(), buf.readEnum(PowerClassification.class), 
                 buf.readRegistryIdUnsafe(ModActions.Registry.getRegistry()), buf.readVarInt(), buf.readVarInt());
     }
 
-    public static void handle(TrSyncCooldownPacket msg, Supplier<NetworkEvent.Context> ctx) {
+    public static void handle(TrCooldownPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity instanceof LivingEntity) {

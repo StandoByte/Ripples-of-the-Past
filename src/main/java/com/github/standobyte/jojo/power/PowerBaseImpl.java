@@ -18,11 +18,11 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.command.JojoControlsCommand;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncInputBufferPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncLeapCooldownPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncCooldownPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncHeldActionPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncPowerTypePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.InputBufferPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.LeapCooldownPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrCooldownPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHeldActionPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrPowerTypePacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.block.Blocks;
@@ -73,7 +73,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         leapCooldown = getLeapCooldownPeriod();
 
         serverPlayerUser.ifPresent(player -> {
-            PacketManager.sendToClientsTrackingAndSelf(new TrSyncPowerTypePacket<P, T>(player.getId(), getPowerClassification(), getType()), player);
+            PacketManager.sendToClientsTrackingAndSelf(new TrPowerTypePacket<P, T>(player.getId(), getPowerClassification(), getType()), player);
             player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                 cap.sendNotification(OneTimeNotification.POWER_CONTROLS, 
                         new TranslationTextComponent("jojo.chat.controls.message", 
@@ -103,7 +103,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         attacks = new ArrayList<>();
         abilities = new ArrayList<>();
         serverPlayerUser.ifPresent(player -> {
-            PacketManager.sendToClientsTrackingAndSelf(TrSyncPowerTypePacket.noPowerType(player.getId(), getPowerClassification()), player);
+            PacketManager.sendToClientsTrackingAndSelf(TrPowerTypePacket.noPowerType(player.getId(), getPowerClassification()), player);
         });
         return true;
     }
@@ -159,7 +159,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     public void setCooldownTimer(Action<?> action, int value) {
         updateCooldownTimer(action, value, value);
         if (!user.level.isClientSide()) {
-            PacketManager.sendToClientsTrackingAndSelf(new TrSyncCooldownPacket(user.getId(), getPowerClassification(), action, value), user);
+            PacketManager.sendToClientsTrackingAndSelf(new TrCooldownPacket(user.getId(), getPowerClassification(), action, value), user);
         }
     }
 
@@ -249,7 +249,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     public void queueNextAction(Action<P> action) {
         this.inputBuffer = action;
         serverPlayerUser.ifPresent(player -> {
-            PacketManager.sendToClient(new SyncInputBufferPacket(getPowerClassification(), action), player);
+            PacketManager.sendToClient(new InputBufferPacket(getPowerClassification(), action), player);
         });
     }
     
@@ -397,7 +397,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     public void setHeldAction(Action<P> action) {
         heldActionData = new HeldActionData<P>(action);
         if (!user.level.isClientSide() && action.isHeldSentToTracking()) {
-            PacketManager.sendToClientsTracking(new TrSyncHeldActionPacket(user.getId(), getPowerClassification(), action, false), user);
+            PacketManager.sendToClientsTracking(new TrHeldActionPacket(user.getId(), getPowerClassification(), action, false), user);
         }
     }
 
@@ -459,7 +459,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                 heldAction.onHoldTickClientEffect(user, getThis(), heldActionData.getTicks(), requirementsFulfilled, true);
             }
             else {
-                TrSyncHeldActionPacket packet = new TrSyncHeldActionPacket(user.getId(), getPowerClassification(), heldAction, requirementsFulfilled);
+                TrHeldActionPacket packet = new TrHeldActionPacket(user.getId(), getPowerClassification(), heldAction, requirementsFulfilled);
                 if (heldAction.isHeldSentToTracking()) {
                     PacketManager.sendToClientsTrackingAndSelf(packet, user);
                 }
@@ -498,7 +498,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             }
             heldActionData = null;
             if (!user.level.isClientSide()) {
-                TrSyncHeldActionPacket packet = TrSyncHeldActionPacket.actionStopped(user.getId(), getPowerClassification());
+                TrHeldActionPacket packet = TrHeldActionPacket.actionStopped(user.getId(), getPowerClassification());
                 if (heldAction.isHeldSentToTracking()) {
                     PacketManager.sendToClientsTrackingAndSelf(packet, user);
                 }
@@ -545,7 +545,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         this.leapCooldown = cooldown;
         if (send) {
             serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new SyncLeapCooldownPacket(getPowerClassification(), leapCooldown), player);
+                PacketManager.sendToClient(new LeapCooldownPacket(getPowerClassification(), leapCooldown), player);
             });
         }
     }
@@ -581,7 +581,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     public void syncWithUserOnly() {
         serverPlayerUser.ifPresent(player -> {
             if (hasPower()) {
-                PacketManager.sendToClient(new SyncLeapCooldownPacket(getPowerClassification(), leapCooldown), player);
+                PacketManager.sendToClient(new LeapCooldownPacket(getPowerClassification(), leapCooldown), player);
                 ModCriteriaTriggers.GET_POWER.get().trigger(player, getPowerClassification(), this);
                 syncWithTrackingOrUser(player);
             }
@@ -593,7 +593,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         if (hasPower()) {
             LivingEntity user = getUser();
             if (user != null) {
-                PacketManager.sendToClient(new TrSyncPowerTypePacket<P, T>(user.getId(), getPowerClassification(), getType()), player);
+                PacketManager.sendToClient(new TrPowerTypePacket<P, T>(user.getId(), getPowerClassification(), getType()), player);
                 cooldowns.syncWithTrackingOrUser(user.getId(), getPowerClassification(), player);
             }
         }

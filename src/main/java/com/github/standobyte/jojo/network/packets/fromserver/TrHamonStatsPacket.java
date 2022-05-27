@@ -20,7 +20,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-public class TrSyncHamonStatsPacket {
+public class TrHamonStatsPacket {
     private final int entityId;
     private final boolean showToasts;
     private Stat stat;
@@ -28,7 +28,7 @@ public class TrSyncHamonStatsPacket {
     private int control;
     private float breathing;
 
-    public TrSyncHamonStatsPacket(int entityId, boolean showToasts, int strength, int control, float breathing) {
+    public TrHamonStatsPacket(int entityId, boolean showToasts, int strength, int control, float breathing) {
         this.entityId = entityId;
         this.showToasts = showToasts;
         this.stat = Stat.ALL;
@@ -37,7 +37,7 @@ public class TrSyncHamonStatsPacket {
         this.breathing = breathing;
     }
 
-    public TrSyncHamonStatsPacket(int entityId, boolean showToasts, HamonSkill.HamonStat stat, int value) {
+    public TrHamonStatsPacket(int entityId, boolean showToasts, HamonSkill.HamonStat stat, int value) {
         this.entityId = entityId;
         this.showToasts = showToasts;
         switch (stat) {
@@ -52,14 +52,14 @@ public class TrSyncHamonStatsPacket {
         }
     }
 
-    public TrSyncHamonStatsPacket(int entityId, boolean showToasts, float breathing) {
+    public TrHamonStatsPacket(int entityId, boolean showToasts, float breathing) {
         this.entityId = entityId;
         this.showToasts = showToasts;
         this.stat = Stat.BREATHING;
         this.breathing = breathing;
     }
 
-    public static void encode(TrSyncHamonStatsPacket msg, PacketBuffer buf) {
+    public static void encode(TrHamonStatsPacket msg, PacketBuffer buf) {
         buf.writeEnum(msg.stat);
         buf.writeInt(msg.entityId);
         buf.writeBoolean(msg.showToasts);
@@ -81,21 +81,21 @@ public class TrSyncHamonStatsPacket {
         }
     }
 
-    public static TrSyncHamonStatsPacket decode(PacketBuffer buf) {
+    public static TrHamonStatsPacket decode(PacketBuffer buf) {
         Stat stat = buf.readEnum(Stat.class);
         switch (stat) {
         case BREATHING:
-            return new TrSyncHamonStatsPacket(buf.readInt(), buf.readBoolean(), buf.readFloat());
+            return new TrHamonStatsPacket(buf.readInt(), buf.readBoolean(), buf.readFloat());
         case STRENGTH:
-            return new TrSyncHamonStatsPacket(buf.readInt(), buf.readBoolean(), HamonSkill.HamonStat.STRENGTH, buf.readShort());
+            return new TrHamonStatsPacket(buf.readInt(), buf.readBoolean(), HamonSkill.HamonStat.STRENGTH, buf.readShort());
         case CONTROL:
-            return new TrSyncHamonStatsPacket(buf.readInt(), buf.readBoolean(), HamonSkill.HamonStat.CONTROL, buf.readShort());
+            return new TrHamonStatsPacket(buf.readInt(), buf.readBoolean(), HamonSkill.HamonStat.CONTROL, buf.readShort());
         default:
-            return new TrSyncHamonStatsPacket(buf.readInt(), buf.readBoolean(), buf.readShort(), buf.readShort(), buf.readFloat());
+            return new TrHamonStatsPacket(buf.readInt(), buf.readBoolean(), buf.readShort(), buf.readShort(), buf.readFloat());
         }
     }
 
-    public static void handle(TrSyncHamonStatsPacket msg, Supplier<NetworkEvent.Context> ctx) {
+    public static void handle(TrHamonStatsPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity instanceof LivingEntity) {
