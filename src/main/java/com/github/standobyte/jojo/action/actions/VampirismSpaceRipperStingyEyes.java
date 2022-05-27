@@ -23,11 +23,7 @@ public class VampirismSpaceRipperStingyEyes extends VampirismAction {
 
     @Override
     public int getCooldownAdditional(INonStandPower power, int ticksHeld) {
-        int cd = super.getCooldownAdditional(power, ticksHeld);
-        if (getHoldDurationMax(power) > 0) {
-            cd = (int) ((float) (cd * ticksHeld) / (float) getHoldDurationMax(power));
-        }
-        return cd;
+    	return cooldownFromHoldDuration(super.getCooldownAdditional(power, ticksHeld), power, ticksHeld);
     }
 
 }

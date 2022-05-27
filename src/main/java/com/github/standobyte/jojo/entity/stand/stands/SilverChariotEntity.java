@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModEntityAttributes;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.entity.Entity;
@@ -225,5 +226,10 @@ public class SilverChariotEntity extends StandEntity {
 	    	}
     	}
     	return super.getPunchSound(punch);
+    }
+    
+    @Override
+    protected SoundEvent getAttackBlockSound() {
+    	return hasRapier() ? ModSounds.SILVER_CHARIOT_BLOCK.get() : super.getAttackBlockSound();
     }
 }

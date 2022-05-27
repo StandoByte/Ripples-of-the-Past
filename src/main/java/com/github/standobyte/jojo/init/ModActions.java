@@ -51,6 +51,7 @@ import com.github.standobyte.jojo.action.actions.StandEntityLightAttack;
 import com.github.standobyte.jojo.action.actions.StandEntityMeleeBarrage;
 import com.github.standobyte.jojo.action.actions.StandEntityUnsummon;
 import com.github.standobyte.jojo.action.actions.StarPlatinumBarrage;
+import com.github.standobyte.jojo.action.actions.StarPlatinumInhale;
 import com.github.standobyte.jojo.action.actions.StarPlatinumStarFinger;
 import com.github.standobyte.jojo.action.actions.StarPlatinumZoom;
 import com.github.standobyte.jojo.action.actions.TheWorldBarrage;
@@ -218,7 +219,7 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_STAR_FINGER = ACTIONS.register("star_platinum_star_finger", 
             () -> new StarPlatinumStarFinger(new StandEntityAction.Builder().standPerformDuration(20).staminaCost(375).cooldown(20, 60)
-                    .ignoresPerformerStun().resolveLevelToUnlock(2).standOffsetFront()
+                    .ignoresPerformerStun().resolveLevelToUnlock(3).standOffsetFront()
                     .standPose(StandPose.RANGED_ATTACK).shout(ModSounds.JOTARO_STAR_FINGER).standSound(Phase.PERFORM, ModSounds.STAR_PLATINUM_STAR_FINGER)
                     .xpRequirement(300)));
     
@@ -228,6 +229,10 @@ public class ModActions {
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_ZOOM = ACTIONS.register("star_platinum_zoom", 
             () -> new StarPlatinumZoom(new StandEntityAction.Builder().holdType().ignoresPerformerStun()
                     .standOffsetFromUser(-0.25, -0.25, -0.3)));
+    
+    public static final RegistryObject<StandEntityAction> STAR_PLATINUM_INHALE = ACTIONS.register("star_platinum_inhale", 
+            () -> new StarPlatinumInhale(new StandEntityAction.Builder().holdType(100).cooldown(0, 50).staminaCostTick(2F)
+            		.ignoresPerformerStun().resolveLevelToUnlock(2).standOffsetFront()));
     
     public static final RegistryObject<TimeStop> STAR_PLATINUM_TIME_STOP = ACTIONS.register("star_platinum_time_stop", 
             () -> new TimeStop(new StandAction.Builder().holdToFire(40, false)

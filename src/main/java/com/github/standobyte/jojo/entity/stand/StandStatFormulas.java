@@ -117,7 +117,7 @@ public class StandStatFormulas {
     }
     
     public static int leapCooldown(double movementSpeed) {
-        return dashCooldown(movementSpeed) + 10;
+        return dashCooldown(movementSpeed) * 2 + 10;
     }
     
     public static int dashCooldown(double movementSpeed) {

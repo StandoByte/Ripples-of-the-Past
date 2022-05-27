@@ -256,4 +256,16 @@ public class DamageUtil {
             }
         }
     }
+    
+    public static void suffocateTick(LivingEntity entity, float speed) {
+    	if (entity.canBreatheUnderwater() || entity instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) entity)) return;
+    	
+    	if (entity.getAirSupply() > 0) {
+    		int airReduction = (int) ((float) entity.getMaxAirSupply() * MathHelper.clamp(speed, 0F, 1F));
+    		entity.setAirSupply(Math.max(entity.getAirSupply() - airReduction, -19));
+    	}
+    	else {
+    		entity.hurt(SUFFOCATION, 1F);
+    	}
+    }
 }
