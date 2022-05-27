@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.client.ui.toasts;
 
 import java.util.List;
 
-import com.github.standobyte.jojo.client.resources.CustomResourceManagers;
+import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -50,7 +50,7 @@ public class HamonSkillToast implements IToast {
             mc.font.draw(matrixStack, NAME, 30.0F, 7.0F, -11534256);
             mc.font.draw(matrixStack, description, 30.0F, 18.0F, -16777216);
             HamonSkill skill = skills.get((int)(delta / Math.max(1L, 5000L / (long)skills.size()) % (long)skills.size()));
-            TextureAtlasSprite textureAtlasSprite = CustomResourceManagers.getHamonSkillSprites().getSprite(skill);
+            TextureAtlasSprite textureAtlasSprite = CustomResources.getHamonSkillSprites().getSprite(skill);
             mc.getTextureManager().bind(textureAtlasSprite.atlas().location());
             ToastGui.blit(matrixStack, 8, 8, 0, 16, 16, textureAtlasSprite);
             return delta - this.lastChanged >= 5000L ? IToast.Visibility.HIDE : IToast.Visibility.SHOW;

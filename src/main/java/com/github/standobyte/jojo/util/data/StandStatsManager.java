@@ -19,8 +19,8 @@ import org.apache.logging.log4j.Logger;
 
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncStandStatsDataPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncStandStatsDataPacket.StandStatsDataEntry;
+import com.github.standobyte.jojo.network.packets.fromserver.StandStatsDataPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.StandStatsDataPacket.StandStatsDataEntry;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.google.common.base.Charsets;
@@ -157,7 +157,7 @@ public class StandStatsManager extends JsonReloadListener {
     }
     
     public void syncToClient(ServerPlayerEntity player) {
-        PacketManager.sendToClient(new SyncStandStatsDataPacket(overridenStats), player);
+        PacketManager.sendToClient(new StandStatsDataPacket(overridenStats), player);
     }
     
     public void clSetStats(Iterable<StandStatsDataEntry> stats) {

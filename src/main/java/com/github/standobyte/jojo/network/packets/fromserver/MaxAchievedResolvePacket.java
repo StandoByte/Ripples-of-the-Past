@@ -8,22 +8,22 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-public class SyncMaxAchievedResolvePacket {
+public class MaxAchievedResolvePacket {
     private final float value;
     
-    public SyncMaxAchievedResolvePacket(float value) {
+    public MaxAchievedResolvePacket(float value) {
         this.value = value;
     }
     
-    public static void encode(SyncMaxAchievedResolvePacket msg, PacketBuffer buf) {
+    public static void encode(MaxAchievedResolvePacket msg, PacketBuffer buf) {
         buf.writeFloat(msg.value);
     }
     
-    public static SyncMaxAchievedResolvePacket decode(PacketBuffer buf) {
-        return new SyncMaxAchievedResolvePacket(buf.readFloat());
+    public static MaxAchievedResolvePacket decode(PacketBuffer buf) {
+        return new MaxAchievedResolvePacket(buf.readFloat());
     }
 
-    public static void handle(SyncMaxAchievedResolvePacket msg, Supplier<NetworkEvent.Context> ctx) {
+    public static void handle(MaxAchievedResolvePacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
                 power.getResolveCounter().setMaxAchievedValue(msg.value);

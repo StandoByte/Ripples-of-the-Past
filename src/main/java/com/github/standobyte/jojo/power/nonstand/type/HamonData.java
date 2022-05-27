@@ -24,8 +24,8 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillLearnPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillsResetPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncHamonExercisesPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncHamonStatsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHamonStatsPacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.TypeSpecificData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonSkillType;
@@ -143,7 +143,7 @@ public class HamonData extends TypeSpecificData {
         }
         if (oldPoints != newPoints) {
             serverPlayer.ifPresent(player -> {
-                PacketManager.sendToClientsTrackingAndSelf(new TrSyncHamonStatsPacket(player.getId(), true, stat, newPoints), player);
+                PacketManager.sendToClientsTrackingAndSelf(new TrHamonStatsPacket(player.getId(), true, stat, newPoints), player);
                 ModCriteriaTriggers.HAMON_STATS.get().trigger(player, hamonStrengthLevel, hamonControlLevel, breathingTechniqueLevel);
             });
             if (oldLevel != getStatLevel(stat)) {
@@ -282,7 +282,7 @@ public class HamonData extends TypeSpecificData {
         if (oldLevel != breathingTechniqueLevel) {
             recalcHamonDamage();
             serverPlayer.ifPresent(player -> {
-                PacketManager.sendToClientsTrackingAndSelf(new TrSyncHamonStatsPacket(player.getId(), true, getBreathingLevel()), player);
+                PacketManager.sendToClientsTrackingAndSelf(new TrHamonStatsPacket(player.getId(), true, getBreathingLevel()), player);
                 ModCriteriaTriggers.HAMON_STATS.get().trigger(player, hamonStrengthLevel, hamonControlLevel, breathingTechniqueLevel);
             });
         }
@@ -353,7 +353,7 @@ public class HamonData extends TypeSpecificData {
         }
         if (incExerciseLastTick && !incExerciseThisTick || exerciseCompleted) {
             serverPlayer.ifPresent(player -> {
-                PacketManager.sendToClient(new SyncHamonExercisesPacket(this), player);
+                PacketManager.sendToClient(new HamonExercisesPacket(this), player);
             });
         }
         incExerciseLastTick = incExerciseThisTick;
@@ -745,13 +745,13 @@ public class HamonData extends TypeSpecificData {
                 onSkillAdded(skill);
             }
         }
-        PacketManager.sendToClient(new SyncHamonExercisesPacket(this), user);
+        PacketManager.sendToClient(new HamonExercisesPacket(this), user);
         ModCriteriaTriggers.HAMON_STATS.get().trigger(user, hamonStrengthLevel, hamonControlLevel, breathingTechniqueLevel);
     }
 
     @Override
     public void syncWithTrackingOrUser(LivingEntity user, ServerPlayerEntity entity) {
-        PacketManager.sendToClient(new TrSyncHamonStatsPacket(
+        PacketManager.sendToClient(new TrHamonStatsPacket(
                 user.getId(), false, getHamonStrengthPoints(), getHamonControlPoints(), getBreathingLevel()), entity);
     }
 

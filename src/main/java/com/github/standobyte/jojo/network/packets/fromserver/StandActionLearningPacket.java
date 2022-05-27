@@ -15,29 +15,29 @@ import net.minecraft.client.gui.toasts.ToastGui;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-public class SyncStandActionLearningPacket {
+public class StandActionLearningPacket {
     private final Action<?> action;
     private final float progress;
     private final boolean showToast;
     
-    public SyncStandActionLearningPacket(Action<?> action, float progress, boolean showToast) {
+    public StandActionLearningPacket(Action<?> action, float progress, boolean showToast) {
         this.action = action;
         this.progress = progress;
         this.showToast = showToast;
     }
     
-    public static void encode(SyncStandActionLearningPacket msg, PacketBuffer buf) {
+    public static void encode(StandActionLearningPacket msg, PacketBuffer buf) {
         buf.writeRegistryIdUnsafe(ModActions.Registry.getRegistry(), msg.action);
         buf.writeFloat(msg.progress);
         buf.writeBoolean(msg.showToast);
     }
 
-    public static SyncStandActionLearningPacket decode(PacketBuffer buf) {
-        return new SyncStandActionLearningPacket(buf.readRegistryIdUnsafe(ModActions.Registry.getRegistry()), 
+    public static StandActionLearningPacket decode(PacketBuffer buf) {
+        return new StandActionLearningPacket(buf.readRegistryIdUnsafe(ModActions.Registry.getRegistry()), 
                 buf.readFloat(), buf.readBoolean());
     }
 
-    public static void handle(SyncStandActionLearningPacket msg, Supplier<NetworkEvent.Context> ctx) {
+    public static void handle(StandActionLearningPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             if (msg.action instanceof StandAction) {
                 Action<IStandPower> standAction = (StandAction) msg.action;

@@ -92,27 +92,27 @@ public class StandEntityTask {
             }
         }
         
-        if (phase == StandEntityAction.Phase.PERFORM) {
-            if (!standEntity.level.isClientSide()) {
-                standPower.consumeStamina(action.getStaminaCostTicking(standPower));
-            }
-            if (ticksLeft == startingTicks) {
-                action.standPerform(standEntity.level, standEntity, standPower, target);
-            }
-        }
         int phaseTicks = startingTicks - ticksLeft;
         switch (phase) {
         case BUTTON_HOLD:
-            action.standTickButtonHold(standEntity.level, standEntity, 
-                    phaseTicks, standPower, target);
+            action.standTickButtonHold(standEntity.level, standEntity, phaseTicks, standPower, target);
             break;
         case WINDUP:
-            action.standTickWindup(standEntity.level, standEntity, 
-                    phaseTicks, standPower, target);
+            action.standTickWindup(standEntity.level, standEntity, phaseTicks, standPower, target);
             break;
         case PERFORM:
-            action.standTickPerform(standEntity.level, standEntity, 
-                    phaseTicks, standPower, target);
+            if (phaseTicks == 0) {
+            	action.standPerform(standEntity.level, standEntity, standPower, target);
+            }
+            
+            action.standTickPerform(standEntity.level, standEntity, phaseTicks, standPower, target);
+            
+            if (!standEntity.level.isClientSide()) {
+                standPower.consumeStamina(action.getStaminaCostTicking(standPower));
+                if (phaseTicks == 0) {
+                	standPower.consumeStamina(action.getStaminaCost(standPower));
+                }
+            }
             break;
         case RECOVERY:
             action.standTickRecovery(standEntity.level, standEntity, 

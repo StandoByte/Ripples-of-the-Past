@@ -32,6 +32,7 @@ import net.minecraftforge.event.ForgeEventFactory;
 
 public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
     private boolean small;
+    private float scale = 1F;
     private Vector3d targetPos;
     @Nullable
     private IStandPower userStandPower;
@@ -48,6 +49,14 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
     
     public void setSpecial(Vector3d targetPos) {
         this.targetPos = targetPos;
+    }
+    
+    public void setScale(float scale) {
+    	this.scale = scale;
+    }
+    
+    public float getScale() {
+    	return scale;
     }
 
     @Override
@@ -104,7 +113,7 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
     
     @Override
     public float getBaseDamage() {
-        return small ? 2.0F : 6.0F;
+        return (small ? 2.0F : 6.0F) * scale;
     }
     
     @Override
@@ -143,7 +152,7 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
             if (small) {
                 dmgSource.setBypassInvulTicksInEvent();
             }
-            level.explode(this, dmgSource.setExplosion(), null, getX(), getY(), getZ(), small ? 0.5F : 3.0F, false, Explosion.Mode.NONE);
+            level.explode(this, dmgSource.setExplosion(), null, getX(), getY(), getZ(), (small ? 0.5F : 3.0F) * getScale(), false, Explosion.Mode.NONE);
         }
     }
     
@@ -194,6 +203,7 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
             buffer.writeDouble(targetPos.y);
             buffer.writeDouble(targetPos.z);
         }
+        buffer.writeFloat(scale);
     }
 
     @Override
@@ -202,5 +212,6 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
         if (additionalData.readBoolean()) {
             targetPos = new Vector3d(additionalData.readDouble(), additionalData.readDouble(), additionalData.readDouble());
         }
+        scale = additionalData.readFloat();
     }
 }

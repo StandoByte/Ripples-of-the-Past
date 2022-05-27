@@ -35,7 +35,7 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandOffsetPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncStandTargetPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntityTargetPacket;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
@@ -339,17 +339,17 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
     public double getAttackDamage() {
         double damage = getAttributeValue(Attributes.ATTACK_DAMAGE);
-        return damage * rangeEfficiency * staminaCondition;
+        return damage * getStandEfficiency();
     }
     
     public double getAttackSpeed() {
         double speed = getAttributeValue(Attributes.ATTACK_SPEED);
-        return speed * rangeEfficiency * staminaCondition;
+        return speed * getStandEfficiency();
     }
     
     public double getAttackKnockback() {
         double damage = getAttributeValue(Attributes.ATTACK_KNOCKBACK);
-        return damage * rangeEfficiency * staminaCondition;
+        return damage * getStandEfficiency();
     }
     
     public double getDurability() {
@@ -359,11 +359,11 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
     public double getPrecision() {
         double precision = getAttributeValue(ModEntityAttributes.STAND_PRECISION.get());
-        return precision * rangeEfficiency * staminaCondition;
+        return precision * getStandEfficiency();
     }
     
     public float getLeapStrength() {
-        return StandStatFormulas.getLeapStrength(leapBaseStrength() * rangeEfficiency * staminaCondition);
+        return StandStatFormulas.getLeapStrength(leapBaseStrength() * getStandEfficiency());
     }
     
     protected double leapBaseStrength() {
@@ -372,6 +372,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
     public double getStaminaCondition() {
         return staminaCondition;
+    }
+    
+    public double getStandEfficiency() {
+    	return staminaCondition * rangeEfficiency;
     }
     
 
@@ -1113,7 +1117,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 if (task.getAction().enablePhysics) {
                     setNoPhysics(false);
                 }
-                userPower.consumeStamina(task.getAction().getStaminaCost(userPower));
                 clearingAction = false;
                 return true;
             }
@@ -1373,7 +1376,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 boolean sendTarget = task.setTarget(this, target, userPower);
                 if (!level.isClientSide()) {
                     if (sendTarget) {
-                        PacketManager.sendToClientsTracking(new TrSyncStandTargetPacket(getId(), target), this);
+                        PacketManager.sendToClientsTracking(new TrStandEntityTargetPacket(getId(), target), this);
                     }
                 }
                 else {

@@ -11,28 +11,28 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-public class TrSyncNonStandFlagPacket {
+public class TrNonStandFlagPacket {
     private final int entityId;
     private final Flag flag;
     private final boolean value;
     
-    public TrSyncNonStandFlagPacket(int entityId, Flag flag, boolean value) {
+    public TrNonStandFlagPacket(int entityId, Flag flag, boolean value) {
         this.entityId = entityId;
         this.flag = flag;
         this.value = value;
     }
     
-    public static void encode(TrSyncNonStandFlagPacket msg, PacketBuffer buf) {
+    public static void encode(TrNonStandFlagPacket msg, PacketBuffer buf) {
         buf.writeInt(msg.entityId);
         buf.writeEnum(msg.flag);
         buf.writeBoolean(msg.value);
     }
     
-    public static TrSyncNonStandFlagPacket decode(PacketBuffer buf) {
-        return new TrSyncNonStandFlagPacket(buf.readInt(), buf.readEnum(Flag.class), buf.readBoolean());
+    public static TrNonStandFlagPacket decode(PacketBuffer buf) {
+        return new TrNonStandFlagPacket(buf.readInt(), buf.readEnum(Flag.class), buf.readBoolean());
     }
 
-    public static void handle(TrSyncNonStandFlagPacket msg, Supplier<NetworkEvent.Context> ctx) {
+    public static void handle(TrNonStandFlagPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity instanceof LivingEntity) {

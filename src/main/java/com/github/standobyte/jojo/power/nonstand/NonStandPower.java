@@ -11,7 +11,7 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTargetContainer;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncEnergyPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrEnergyPacket;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.PowerBaseImpl;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
@@ -93,7 +93,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
         ActionConditionResult result = super.checkRequirements(action, targetContainer, checkTargetType);
         if (!result.isPositive()) {
             serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new TrSyncEnergyPacket(player.getId(), getEnergy()), player);
+                PacketManager.sendToClient(new TrEnergyPacket(player.getId(), getEnergy()), player);
             });
         }
         return result;
@@ -146,7 +146,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
         this.energy = amount;
         if (send) {
             serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClientsTrackingAndSelf(new TrSyncEnergyPacket(player.getId(), getEnergy()), player);
+                PacketManager.sendToClientsTrackingAndSelf(new TrEnergyPacket(player.getId(), getEnergy()), player);
             });
         }
     }
@@ -264,7 +264,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
         if (hasPower()) {
             LivingEntity user = getUser();
             if (user != null) {
-                PacketManager.sendToClient(new TrSyncEnergyPacket(user.getId(), energy), player);
+                PacketManager.sendToClient(new TrEnergyPacket(user.getId(), energy), player);
                 getTypeSpecificData(null).ifPresent(data -> {
                     data.syncWithTrackingOrUser(user, player);
                 });

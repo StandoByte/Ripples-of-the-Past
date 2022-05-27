@@ -58,7 +58,7 @@ import com.github.standobyte.jojo.client.renderer.entity.stand.StarPlatinumRende
 import com.github.standobyte.jojo.client.renderer.entity.stand.TheWorldRenderer;
 import com.github.standobyte.jojo.client.renderer.player.layer.KnifeLayer;
 import com.github.standobyte.jojo.client.renderer.player.layer.TornadoOverdriveEffectLayer;
-import com.github.standobyte.jojo.client.resources.CustomResourceManagers;
+import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEntityTypes;
@@ -259,7 +259,7 @@ public class ClientSetup {
         mc.particleEngine.register(ModParticles.SOUL_CLOUD.get(), SoulCloudParticleFactory::new);
         mc.particleEngine.register(ModParticles.FLAME_ONE_TICK.get(), OneTickFlameParticle.Factory::new);
         // yep...
-        CustomResourceManagers.initCustomResourceManagers(mc);
+        CustomResources.initCustomResourceManagers(mc);
     }
 
     private static class SoulCloudParticleFactory extends CloudParticle.Factory {

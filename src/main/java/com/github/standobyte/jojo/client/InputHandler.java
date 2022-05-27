@@ -53,6 +53,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.RayTraceResult.Type;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.InputEvent.ClickInputEvent;
 import net.minecraftforge.client.event.InputEvent.MouseScrollEvent;
 import net.minecraftforge.client.event.InputUpdateEvent;
@@ -219,6 +220,7 @@ public class InputHandler {
                     actionsOverlay.scrollAction(ActionType.ABILITY, mc.player.isShiftKeyDown());
                 }
 
+                // otherwise it's not triggered when no block is selected
                 while (mc.options.keyPickItem.consumeClick()) {
                     handleMouseClickPowerHud(null, ActionKey.STAND_BLOCK);
                 }
@@ -376,9 +378,7 @@ public class InputHandler {
         boolean actionClick = !actionsOverlay.noActionSelected(actionType)
                 || key == ActionKey.STAND_BLOCK && power != null && !power.getAbilities().isEmpty();
         if (!actionClick) {
-            if (event != null && mc.player.hasEffect(ModEffects.STUN.get())) {
-                event.setCanceled(true);
-            }
+        	handleStun(event);
             return;
         }
 
@@ -413,13 +413,17 @@ public class InputHandler {
             }
         }
         else {
-            if (event != null && mc.player.hasEffect(ModEffects.STUN.get())) {
-                event.setCanceled(true);
-            }
+        	handleStun(event);
         }
         if (leftClickedBlock) {
             leftClickBlockDelay = 4;
         }
+    }
+    
+    private void handleStun(InputEvent event) {
+    	if (event != null && event.isCancelable() && (mc.player.hasEffect(ModEffects.STUN.get()) || !mc.player.canUpdate())) {
+    		event.setCanceled(true);
+    	}
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)

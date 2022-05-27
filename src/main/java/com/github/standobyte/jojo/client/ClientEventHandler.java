@@ -7,7 +7,7 @@ import java.util.Random;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
-import com.github.standobyte.jojo.client.resources.CustomResourceManagers;
+import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.ModActions;
@@ -27,6 +27,7 @@ import net.minecraft.client.audio.ISound.AttenuationType;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.DeathScreen;
+import net.minecraft.client.gui.screen.MainMenuScreen;
 import net.minecraft.client.renderer.FirstPersonRenderer;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.EntityModel;
@@ -47,6 +48,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
+import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderHandEvent;
@@ -239,7 +241,7 @@ public class ClientEventHandler {
 
     public void onResolveEffectStart(int effectAmplifier) {
         if (resolveShader == null) {
-            resolveShader = CustomResourceManagers.getResolveShadersListManager()
+            resolveShader = CustomResources.getResolveShadersListManager()
             		.getRandomShader(IStandPower.getPlayerStandPower(mc.player), random);
         }
 
@@ -250,7 +252,7 @@ public class ClientEventHandler {
         if (mc.player.isAlive() && mc.player.hasEffect(ModEffects.RESOLVE.get())) {
         	// FIXME (!) resolve shaders list may be empty
             if (resolveShader == null) {
-                resolveShader = CustomResourceManagers.getResolveShadersListManager()
+                resolveShader = CustomResources.getResolveShadersListManager()
                 		.getRandomShader(IStandPower.getPlayerStandPower(mc.player), random);
             }
             
@@ -374,6 +376,19 @@ public class ClientEventHandler {
             event.getGui().blit(event.getMatrixStack(), x, y, 0, 0, 130, 25);
             AbstractGui.drawCenteredString(event.getMatrixStack(), mc.font, new TranslationTextComponent("jojo.to_be_continued"), x + 61, y + 8, 0x525544);
         }
+    }
+    
+    @SubscribeEvent
+    public void onScreenOpened(GuiOpenEvent event) {
+    	if (event.getGui() instanceof MainMenuScreen) {
+    		String splash = null;
+    		if (random.nextInt(420) < CustomResources.getModSplashes().getSplashesCount()) {
+    			splash = CustomResources.getModSplashes().getSplash();
+    		}
+    		if (splash != null) {
+    			ClientReflection.setSplash((MainMenuScreen) event.getGui(), splash);
+    		}
+    	}
     }
     
 //    @SubscribeEvent(priority = EventPriority.LOWEST)

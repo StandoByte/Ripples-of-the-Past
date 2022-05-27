@@ -9,25 +9,25 @@ import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-public class TrSyncKnivesCountPacket {
+public class TrKnivesCountPacket {
     private final int entityId;
     private final int knives;
 
-    public TrSyncKnivesCountPacket(int entityId, int knives) {
+    public TrKnivesCountPacket(int entityId, int knives) {
         this.entityId = entityId;
         this.knives = knives;
     }
 
-    public static void encode(TrSyncKnivesCountPacket msg, PacketBuffer buf) {
+    public static void encode(TrKnivesCountPacket msg, PacketBuffer buf) {
         buf.writeInt(msg.entityId);
         buf.writeVarInt(msg.knives);
     }
 
-    public static TrSyncKnivesCountPacket decode(PacketBuffer buf) {
-        return new TrSyncKnivesCountPacket(buf.readInt(), buf.readVarInt());
+    public static TrKnivesCountPacket decode(PacketBuffer buf) {
+        return new TrKnivesCountPacket(buf.readInt(), buf.readVarInt());
     }
 
-    public static void handle(TrSyncKnivesCountPacket msg, Supplier<NetworkEvent.Context> ctx) {
+    public static void handle(TrKnivesCountPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             entity.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.setKnives(msg.knives));

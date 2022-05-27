@@ -8,7 +8,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncKnivesCountPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -72,7 +72,7 @@ public class PlayerUtilCap {
         if (this.knives != knives) {
             this.knives = knives;
             if (!player.level.isClientSide()) {
-                PacketManager.sendToClientsTrackingAndSelf(new TrSyncKnivesCountPacket(player.getId(), knives), player);
+                PacketManager.sendToClientsTrackingAndSelf(new TrKnivesCountPacket(player.getId(), knives), player);
             }
         }
     }
@@ -98,7 +98,7 @@ public class PlayerUtilCap {
     }
     
     public void onTracking(ServerPlayerEntity tracking) {
-        PacketManager.sendToClient(new TrSyncKnivesCountPacket(player.getId(), knives), tracking);
+        PacketManager.sendToClient(new TrKnivesCountPacket(player.getId(), knives), tracking);
     }
     
     

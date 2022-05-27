@@ -10,25 +10,25 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-public class TrSyncEnergyPacket {
+public class TrEnergyPacket {
     private final int entityId;
     private final float energy;
     
-    public TrSyncEnergyPacket(int entityId, float energy) {
+    public TrEnergyPacket(int entityId, float energy) {
         this.entityId = entityId;
         this.energy = energy;
     }
     
-    public static void encode(TrSyncEnergyPacket msg, PacketBuffer buf) {
+    public static void encode(TrEnergyPacket msg, PacketBuffer buf) {
         buf.writeInt(msg.entityId);
         buf.writeFloat(msg.energy);
     }
     
-    public static TrSyncEnergyPacket decode(PacketBuffer buf) {
-        return new TrSyncEnergyPacket(buf.readInt(), buf.readFloat());
+    public static TrEnergyPacket decode(PacketBuffer buf) {
+        return new TrEnergyPacket(buf.readInt(), buf.readFloat());
     }
 
-    public static void handle(TrSyncEnergyPacket msg, Supplier<NetworkEvent.Context> ctx) {
+    public static void handle(TrEnergyPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity instanceof LivingEntity) {

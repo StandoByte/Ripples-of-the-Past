@@ -34,19 +34,19 @@ import com.github.standobyte.jojo.network.packets.fromserver.ResetSyncedCommonCo
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandCancelManualMovementPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncCommonConfigPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncHamonExercisesPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncInputBufferPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncLeapCooldownPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncMaxAchievedResolvePacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncResolveBoostsPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncResolveLevelPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncResolvePacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncStaminaPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncStandActionLearningClearPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncStandActionLearningPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncStandControlStatusPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncStandStatsDataPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.CommonConfigPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.InputBufferPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.LeapCooldownPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.MaxAchievedResolvePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ResolveBoostsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ResolveLevelPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ResolvePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.StaminaPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.StandActionsClearLearningPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.StandActionLearningPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.StandControlStatusPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.StandStatsDataPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopInstancePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerJoinPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerStatePacket;
@@ -54,14 +54,14 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrHamonParticlesPac
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandOffsetPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntitySwingsPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncCooldownPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncEnergyPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncHamonStatsPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncHeldActionPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncKnivesCountPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncNonStandFlagPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncPowerTypePacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncStandTargetPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrCooldownPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrEnergyPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHamonStatsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHeldActionPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrNonStandFlagPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrPowerTypePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntityTargetPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCachePacket;
 
 import net.minecraft.entity.Entity;
@@ -174,45 +174,45 @@ public class PacketManager {
         
         
 
-        channel.registerMessage(index++, TrSyncPowerTypePacket.class, 
-                TrSyncPowerTypePacket::encode, 
-                TrSyncPowerTypePacket::decode, 
-                TrSyncPowerTypePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        channel.registerMessage(index++, TrPowerTypePacket.class, 
+                TrPowerTypePacket::encode, 
+                TrPowerTypePacket::decode, 
+                TrPowerTypePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(TrSyncHeldActionPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(TrSyncHeldActionPacket::encode)
-        .decoder(TrSyncHeldActionPacket::decode)
-        .consumer(TrSyncHeldActionPacket::handle).add();
+        channel.messageBuilder(TrHeldActionPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(TrHeldActionPacket::encode)
+        .decoder(TrHeldActionPacket::decode)
+        .consumer(TrHeldActionPacket::handle).add();
         
-        channel.messageBuilder(SyncInputBufferPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(SyncInputBufferPacket::encode)
-        .decoder(SyncInputBufferPacket::decode)
-        .consumer(SyncInputBufferPacket::handle).add();
+        channel.messageBuilder(InputBufferPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(InputBufferPacket::encode)
+        .decoder(InputBufferPacket::decode)
+        .consumer(InputBufferPacket::handle).add();
         
-        channel.messageBuilder(TrSyncEnergyPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(TrSyncEnergyPacket::encode)
-        .decoder(TrSyncEnergyPacket::decode)
-        .consumer(TrSyncEnergyPacket::handle).add();
+        channel.messageBuilder(TrEnergyPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(TrEnergyPacket::encode)
+        .decoder(TrEnergyPacket::decode)
+        .consumer(TrEnergyPacket::handle).add();
         
-        channel.messageBuilder(TrSyncCooldownPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(TrSyncCooldownPacket::encode)
-        .decoder(TrSyncCooldownPacket::decode)
-        .consumer(TrSyncCooldownPacket::handle).add();
+        channel.messageBuilder(TrCooldownPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(TrCooldownPacket::encode)
+        .decoder(TrCooldownPacket::decode)
+        .consumer(TrCooldownPacket::handle).add();
         
         channel.messageBuilder(BloodParticlesPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(BloodParticlesPacket::encode)
         .decoder(BloodParticlesPacket::decode)
         .consumer(BloodParticlesPacket::handle).add();
         
-        channel.messageBuilder(TrSyncHamonStatsPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(TrSyncHamonStatsPacket::encode)
-        .decoder(TrSyncHamonStatsPacket::decode)
-        .consumer(TrSyncHamonStatsPacket::handle).add();
+        channel.messageBuilder(TrHamonStatsPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(TrHamonStatsPacket::encode)
+        .decoder(TrHamonStatsPacket::decode)
+        .consumer(TrHamonStatsPacket::handle).add();
         
-        channel.messageBuilder(SyncHamonExercisesPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(SyncHamonExercisesPacket::encode)
-        .decoder(SyncHamonExercisesPacket::decode)
-        .consumer(SyncHamonExercisesPacket::handle).add();
+        channel.messageBuilder(HamonExercisesPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(HamonExercisesPacket::encode)
+        .decoder(HamonExercisesPacket::decode)
+        .consumer(HamonExercisesPacket::handle).add();
         
         channel.messageBuilder(HamonTeachersSkillsPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(HamonTeachersSkillsPacket::encode)
@@ -234,40 +234,40 @@ public class PacketManager {
         .decoder(TrHamonParticlesPacket::decode)
         .consumer(TrHamonParticlesPacket::handle).add();
         
-        channel.messageBuilder(TrSyncNonStandFlagPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(TrSyncNonStandFlagPacket::encode)
-        .decoder(TrSyncNonStandFlagPacket::decode)
-        .consumer(TrSyncNonStandFlagPacket::handle).add();
+        channel.messageBuilder(TrNonStandFlagPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(TrNonStandFlagPacket::encode)
+        .decoder(TrNonStandFlagPacket::decode)
+        .consumer(TrNonStandFlagPacket::handle).add();
         
-        channel.messageBuilder(SyncStaminaPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(SyncStaminaPacket::encode)
-        .decoder(SyncStaminaPacket::decode)
-        .consumer(SyncStaminaPacket::handle).add();
+        channel.messageBuilder(StaminaPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(StaminaPacket::encode)
+        .decoder(StaminaPacket::decode)
+        .consumer(StaminaPacket::handle).add();
         
-        channel.messageBuilder(SyncResolvePacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(SyncResolvePacket::encode)
-        .decoder(SyncResolvePacket::decode)
-        .consumer(SyncResolvePacket::handle).add();
+        channel.messageBuilder(ResolvePacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(ResolvePacket::encode)
+        .decoder(ResolvePacket::decode)
+        .consumer(ResolvePacket::handle).add();
         
         channel.messageBuilder(ResetResolveValuePacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(ResetResolveValuePacket::encode)
         .decoder(ResetResolveValuePacket::decode)
         .consumer(ResetResolveValuePacket::handle).add();
         
-        channel.messageBuilder(SyncResolveLevelPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(SyncResolveLevelPacket::encode)
-        .decoder(SyncResolveLevelPacket::decode)
-        .consumer(SyncResolveLevelPacket::handle).add();
+        channel.messageBuilder(ResolveLevelPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(ResolveLevelPacket::encode)
+        .decoder(ResolveLevelPacket::decode)
+        .consumer(ResolveLevelPacket::handle).add();
         
-        channel.messageBuilder(SyncResolveBoostsPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(SyncResolveBoostsPacket::encode)
-        .decoder(SyncResolveBoostsPacket::decode)
-        .consumer(SyncResolveBoostsPacket::handle).add();
+        channel.messageBuilder(ResolveBoostsPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(ResolveBoostsPacket::encode)
+        .decoder(ResolveBoostsPacket::decode)
+        .consumer(ResolveBoostsPacket::handle).add();
         
-        channel.messageBuilder(SyncMaxAchievedResolvePacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(SyncMaxAchievedResolvePacket::encode)
-        .decoder(SyncMaxAchievedResolvePacket::decode)
-        .consumer(SyncMaxAchievedResolvePacket::handle).add();
+        channel.messageBuilder(MaxAchievedResolvePacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(MaxAchievedResolvePacket::encode)
+        .decoder(MaxAchievedResolvePacket::decode)
+        .consumer(MaxAchievedResolvePacket::handle).add();
         
         channel.messageBuilder(SkippedStandProgressionPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(SkippedStandProgressionPacket::encode)
@@ -279,40 +279,40 @@ public class PacketManager {
         .decoder(ResolveEffectStartPacket::decode)
         .consumer(ResolveEffectStartPacket::handle).add();
         
-        channel.messageBuilder(SyncStandActionLearningPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(SyncStandActionLearningPacket::encode)
-        .decoder(SyncStandActionLearningPacket::decode)
-        .consumer(SyncStandActionLearningPacket::handle).add();
+        channel.messageBuilder(StandActionLearningPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(StandActionLearningPacket::encode)
+        .decoder(StandActionLearningPacket::decode)
+        .consumer(StandActionLearningPacket::handle).add();
         
-        channel.messageBuilder(SyncStandActionLearningClearPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(SyncStandActionLearningClearPacket::encode)
-        .decoder(SyncStandActionLearningClearPacket::decode)
-        .consumer(SyncStandActionLearningClearPacket::handle).add();
+        channel.messageBuilder(StandActionsClearLearningPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(StandActionsClearLearningPacket::encode)
+        .decoder(StandActionsClearLearningPacket::decode)
+        .consumer(StandActionsClearLearningPacket::handle).add();
         
         channel.messageBuilder(TrSetStandEntityPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(TrSetStandEntityPacket::encode)
         .decoder(TrSetStandEntityPacket::decode)
         .consumer(TrSetStandEntityPacket::handle).add();
         
-        channel.messageBuilder(SyncStandStatsDataPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(SyncStandStatsDataPacket::encode)
-        .decoder(SyncStandStatsDataPacket::decode)
-        .consumer(SyncStandStatsDataPacket::handle).add();
+        channel.messageBuilder(StandStatsDataPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(StandStatsDataPacket::encode)
+        .decoder(StandStatsDataPacket::decode)
+        .consumer(StandStatsDataPacket::handle).add();
         
-        channel.messageBuilder(SyncStandControlStatusPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(SyncStandControlStatusPacket::encode)
-        .decoder(SyncStandControlStatusPacket::decode)
-        .consumer(SyncStandControlStatusPacket::handle).add();
+        channel.messageBuilder(StandControlStatusPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(StandControlStatusPacket::encode)
+        .decoder(StandControlStatusPacket::decode)
+        .consumer(StandControlStatusPacket::handle).add();
         
         channel.messageBuilder(StandCancelManualMovementPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(StandCancelManualMovementPacket::encode)
         .decoder(StandCancelManualMovementPacket::decode)
         .consumer(StandCancelManualMovementPacket::handle).add();
         
-        channel.messageBuilder(TrSyncStandTargetPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(TrSyncStandTargetPacket::encode)
-        .decoder(TrSyncStandTargetPacket::decode)
-        .consumer(TrSyncStandTargetPacket::handle).add();
+        channel.messageBuilder(TrStandEntityTargetPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(TrStandEntityTargetPacket::encode)
+        .decoder(TrStandEntityTargetPacket::decode)
+        .consumer(TrStandEntityTargetPacket::handle).add();
         
         channel.messageBuilder(TrSetStandOffsetPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(TrSetStandOffsetPacket::encode)
@@ -329,15 +329,15 @@ public class PacketManager {
         .decoder(UpdateClientCapCachePacket::decode)
         .consumer(UpdateClientCapCachePacket::handle).add();
         
-        channel.messageBuilder(TrSyncKnivesCountPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(TrSyncKnivesCountPacket::encode)
-        .decoder(TrSyncKnivesCountPacket::decode)
-        .consumer(TrSyncKnivesCountPacket::handle).add();
+        channel.messageBuilder(TrKnivesCountPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(TrKnivesCountPacket::encode)
+        .decoder(TrKnivesCountPacket::decode)
+        .consumer(TrKnivesCountPacket::handle).add();
         
-        channel.messageBuilder(SyncLeapCooldownPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(SyncLeapCooldownPacket::encode)
-        .decoder(SyncLeapCooldownPacket::decode)
-        .consumer(SyncLeapCooldownPacket::handle).add();
+        channel.messageBuilder(LeapCooldownPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(LeapCooldownPacket::encode)
+        .decoder(LeapCooldownPacket::decode)
+        .consumer(LeapCooldownPacket::handle).add();
         
         channel.messageBuilder(PlayVoiceLinePacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(PlayVoiceLinePacket::encode)
@@ -369,10 +369,10 @@ public class PacketManager {
         .decoder(RefreshMovementInTimeStopPacket::decode)
         .consumer(RefreshMovementInTimeStopPacket::handle).add();
         
-        channel.messageBuilder(SyncCommonConfigPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(SyncCommonConfigPacket::encode)
-        .decoder(SyncCommonConfigPacket::decode)
-        .consumer(SyncCommonConfigPacket::handle).add();
+        channel.messageBuilder(CommonConfigPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(CommonConfigPacket::encode)
+        .decoder(CommonConfigPacket::decode)
+        .consumer(CommonConfigPacket::handle).add();
         
         channel.messageBuilder(ResetSyncedCommonConfigPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(ResetSyncedCommonConfigPacket::encode)

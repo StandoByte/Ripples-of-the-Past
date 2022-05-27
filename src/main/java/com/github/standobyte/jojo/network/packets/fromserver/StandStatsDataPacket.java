@@ -15,35 +15,35 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-public class SyncStandStatsDataPacket {
+public class StandStatsDataPacket {
     private final List<StandStatsDataEntry> stats;
     
-    public SyncStandStatsDataPacket(Map<StandType<?>, StandStats> statsMap) {
+    public StandStatsDataPacket(Map<StandType<?>, StandStats> statsMap) {
         this(statsMap.entrySet()
                 .stream()
                 .map(entry -> new StandStatsDataEntry(entry.getKey().getRegistryName(), entry.getValue()))
                 .collect(Collectors.toList()));
     }
     
-    private SyncStandStatsDataPacket(List<StandStatsDataEntry> stats) {
+    private StandStatsDataPacket(List<StandStatsDataEntry> stats) {
         this.stats = stats;
     }
     
-    public static void encode(SyncStandStatsDataPacket msg, PacketBuffer buf) {
+    public static void encode(StandStatsDataPacket msg, PacketBuffer buf) {
         buf.writeVarInt(msg.stats.size());
         msg.stats.forEach(entry -> entry.write(buf));
     }
     
-    public static SyncStandStatsDataPacket decode(PacketBuffer buf) {
+    public static StandStatsDataPacket decode(PacketBuffer buf) {
         int size = buf.readVarInt();
         List<StandStatsDataEntry> stats = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             stats.add(StandStatsDataEntry.read(buf));
         }
-        return new SyncStandStatsDataPacket(stats);
+        return new StandStatsDataPacket(stats);
     }
 
-    public static void handle(SyncStandStatsDataPacket msg, Supplier<NetworkEvent.Context> ctx) {
+    public static void handle(StandStatsDataPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             StandStatsManager.getInstance().clSetStats(msg.stats);
         });

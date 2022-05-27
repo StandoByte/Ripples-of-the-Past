@@ -16,7 +16,7 @@ import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.ResetSyncedCommonConfigPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncCommonConfigPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.CommonConfigPacket;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.stand.ResolveCounter;
 import com.github.standobyte.jojo.power.stand.type.StandType;
@@ -462,7 +462,7 @@ public class JojoModConfig {
             
             
             public static void syncWithClient(ServerPlayerEntity player) {
-                PacketManager.sendToClient(new SyncCommonConfigPacket(new SyncedValues(COMMON_FROM_FILE)), player);
+                PacketManager.sendToClient(new CommonConfigPacket(new SyncedValues(COMMON_FROM_FILE)), player);
             }
             
             public static void onPlayerLogout(ServerPlayerEntity player) {
