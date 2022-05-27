@@ -110,16 +110,10 @@ public class ClientEventHandler {
         return mc.level != null && TimeUtil.isTimeStopped(mc.level, chunkPos);
     }
     
-    public void setTimeStopClientState(int ticks, ChunkPos chunkPos, boolean canSee, boolean canMove) {
-        if (ticks > 0) {
-            canSeeInStoppedTime = canSee;
-            canMoveInStoppedTime = canSee && canMove;
-            partialTickStoppedAt = canMove ? mc.getFrameTime() : 0.0F;
-        }
-        else {
-            canSeeInStoppedTime = true;
-            canMoveInStoppedTime = true;
-        }
+    public void setTimeStopClientState(boolean canSee, boolean canMove) {
+        canSeeInStoppedTime = canSee;
+        canMoveInStoppedTime = canSee && canMove;
+        partialTickStoppedAt = canMove ? mc.getFrameTime() : 0.0F;
         resetShader = true;
     }
     
@@ -255,7 +249,6 @@ public class ClientEventHandler {
     private void tickResolveEffect() {
         if (mc.player.isAlive() && mc.player.hasEffect(ModEffects.RESOLVE.get())) {
         	// FIXME (!) resolve shaders list may be empty
-        	JojoMod.LOGGER.debug(resolveShader);
             if (resolveShader == null) {
                 resolveShader = CustomResourceManagers.getResolveShadersListManager()
                 		.getRandomShader(IStandPower.getPlayerStandPower(mc.player), random);

@@ -8,7 +8,7 @@ import com.github.standobyte.jojo.action.actions.TimeStop;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncWorldTimeStopPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TimeStopInstancePacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
@@ -199,15 +199,12 @@ public class TimeStopInstance {
     }
     
     public void syncToClient(ServerPlayerEntity player) {
-        SyncWorldTimeStopPacket packet;
+        TimeStopInstancePacket packet;
         if (ticksLeft > 0) {
-            boolean canMove = TimeUtil.canPlayerMoveInStoppedTime(player, true);
-            boolean canSee = TimeUtil.canPlayerSeeInStoppedTime(canMove, TimeUtil.hasTimeStopAbility(player));
-            packet = new SyncWorldTimeStopPacket(ticksLeft, id, centerPos, 
-                    canSee, canMove, user == null ? -1 : user.getId(), action);
+            packet = new TimeStopInstancePacket(ticksLeft, id, centerPos, user == null ? -1 : user.getId(), action);
         }
         else {
-            packet = SyncWorldTimeStopPacket.timeResumed(id);
+            packet = TimeStopInstancePacket.timeResumed(id);
         }
         PacketManager.sendToClient(packet, player);
     }

@@ -12,7 +12,8 @@ import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncWorldTimeStopPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TimeStopInstancePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerStatePacket;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 import com.github.standobyte.jojo.util.utils.TimeUtil;
 import com.google.common.collect.HashBiMap;
@@ -21,6 +22,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -80,10 +82,7 @@ public class TimeStopHandler {
     
     
     public void addTimeStop(TimeStopInstance instance) {
-        if (timeStopInstances.containsKey(instance.getId())) {
-            throw new IllegalStateException("A time stop instance with the id " + instance.getId() + " exists already!");
-        }
-        if (!userStoppedTime(instance.user).isPresent()) {
+        if (!timeStopInstances.containsKey(instance.getId()) && !userStoppedTime(instance.user).isPresent()) {
             timeStopInstances.put(instance.getId(), instance);
             onAddedTimeStop(instance);
         }
@@ -108,6 +107,7 @@ public class TimeStopHandler {
             serverWorld.players().forEach(player -> {
                 if (player.level == world) {
                     instance.syncToClient(player);
+                    sendPlayerState(player);
                 }
             });
             
@@ -154,6 +154,13 @@ public class TimeStopHandler {
         }
     }
     
+    public void reset() {
+    	timeStopInstances.clear();
+        JojoModUtil.getAllEntities(world).forEach(entity -> {
+            updateEntityTimeStop(entity, true, true);
+        });
+    }
+    
     private void onRemovedTimeStop(TimeStopInstance instance) {
         JojoModUtil.getAllEntities(world).forEach(entity -> {
             ChunkPos pos = TimeStopHandler.getChunkPos(entity);
@@ -166,7 +173,8 @@ public class TimeStopHandler {
             ServerWorld serverWorld = (ServerWorld) world;
             serverWorld.players().forEach(player -> {
                 if (player.level == world) {
-                    PacketManager.sendToClient(SyncWorldTimeStopPacket.timeResumed(instance.getId()), player);
+                    PacketManager.sendToClient(TimeStopInstancePacket.timeResumed(instance.getId()), player);
+                    sendPlayerState(player);
                 }
             });
             if (timeStopInstances.isEmpty()) {
@@ -179,6 +187,12 @@ public class TimeStopHandler {
     
     public TimeStopInstance getById(int id) {
         return timeStopInstances.get(id);
+    }
+    
+    public void sendPlayerState(ServerPlayerEntity player) {
+        boolean canMove = TimeUtil.canPlayerMoveInStoppedTime(player, true);
+        boolean canSee = TimeUtil.canPlayerSeeInStoppedTime(canMove, TimeUtil.hasTimeStopAbility(player));
+        PacketManager.sendToClient(new TimeStopPlayerStatePacket(canSee, canMove), player);
     }
     
 

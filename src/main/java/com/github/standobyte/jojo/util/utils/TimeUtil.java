@@ -11,6 +11,8 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.RefreshMovementInTimeStopPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerJoinPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerJoinPacket.Phase;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -98,8 +100,14 @@ public class TimeUtil {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onEntityJoinWorld(EntityJoinWorldEvent event) {
         Entity entity = event.getEntity();
-        if (isTimeStopped(event.getWorld(), entity.blockPosition())) {
-            event.getWorld().getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> 
+        if (!(entity instanceof PlayerEntity)) {
+        	stopNewEntityInTime(entity, event.getWorld());
+        }
+    }
+    
+    public static void stopNewEntityInTime(Entity entity, World world) {
+        if (isTimeStopped(world, entity.blockPosition())) {
+            world.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> 
             cap.getTimeStopHandler().updateEntityTimeStop(entity, false, true));
         }
     }
@@ -123,9 +131,15 @@ public class TimeUtil {
     
     private static void sendWorldTimeStopData(ServerPlayerEntity player) {
         player.level.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+        	PacketManager.sendToClient(new TimeStopPlayerJoinPacket(Phase.PRE), player);
             cap.getTimeStopHandler().getInstancesInPos(new ChunkPos(player.blockPosition())).forEach(instance -> {
                 instance.syncToClient(player);
             });
+            
+            cap.getTimeStopHandler().sendPlayerState(player);
+            
+        	TimeUtil.stopNewEntityInTime(player, player.level);
+        	PacketManager.sendToClient(new TimeStopPlayerJoinPacket(Phase.POST), player);
         });
     }
 
