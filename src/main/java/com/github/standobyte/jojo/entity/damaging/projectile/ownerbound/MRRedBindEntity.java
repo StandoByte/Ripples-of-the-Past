@@ -63,8 +63,8 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
                     if (bound.getRemainingFireTicks() % 20 == 0 || bound.getRemainingFireTicks() <= 0) {
                         DamageUtil.setOnFire(bound, 3, true);
                     }
-                    if (isInKickCombo() && bound.getAirSupply() > 0) {
-                        bound.setAirSupply(-19);
+                    if (isInKickCombo()) {
+                    	DamageUtil.suffocateTick(bound, 1);
                     }
                 }
                 Vector3d vecToOwner = owner.position().subtract(bound.position());
@@ -103,8 +103,8 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
             if (target instanceof LivingEntity && !target.isInvulnerableTo(getDamageSource(owner))) {
                 LivingEntity targetLiving = (LivingEntity) target;
                 attachToEntity(targetLiving);
-                targetLiving.addEffect(new EffectInstance(ModEffects.STUN.get(), ticksLifespan() - tickCount));
-                stunEffect = targetLiving.getEffect(ModEffects.STUN.get());
+                stunEffect = new EffectInstance(ModEffects.STUN.get(), ticksLifespan() - tickCount);
+                targetLiving.addEffect(stunEffect);
                 return true;
             }
         }
@@ -137,8 +137,8 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
         entityData.set(KICK_COMBO, true);
         LivingEntity target = getEntityAttachedTo();
         if (target != null) {
-            target.addEffect(new EffectInstance(ModEffects.STUN.get(), ticksLifespan() - tickCount));
-            stunEffect = target.getEffect(ModEffects.STUN.get());
+            stunEffect = new EffectInstance(ModEffects.STUN.get(), ticksLifespan() - tickCount);
+            target.addEffect(stunEffect);
         }
     }
     

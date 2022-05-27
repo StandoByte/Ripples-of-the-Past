@@ -269,6 +269,9 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> STAR_PLATINUM_ZOOM_CLICK = SOUNDS.register("star_platinum_zoom_click", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "star_platinum_zoom_click")));
 
+    public static final RegistryObject<SoundEvent> STAR_PLATINUM_INHALE = SOUNDS.register("star_platinum_inhale", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "star_platinum_inhale")));
+
     public static final RegistryObject<SoundEvent> STAR_PLATINUM_TIME_STOP = SOUNDS.register("star_platinum_time_stop", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "star_platinum_time_stop")));
 
@@ -378,6 +381,9 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> SILVER_CHARIOT_UNSUMMON = SOUNDS.register("silver_chariot_unsummon",
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "silver_chariot_unsummon")));
+
+    public static final RegistryObject<SoundEvent> SILVER_CHARIOT_BLOCK = SOUNDS.register("silver_chariot_block", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "silver_chariot_block")));
     
     public static final RegistryObject<SoundEvent> SILVER_CHARIOT_RAPIER_SHOT = SOUNDS.register("silver_chariot_rapier_shot",
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "silver_chariot_rapier_shot")));

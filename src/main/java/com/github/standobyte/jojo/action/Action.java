@@ -214,6 +214,13 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return power.isUserCreative() ? 0 : cooldownAdditional;
     }
     
+    protected final int cooldownFromHoldDuration(int cooldown, P power, int ticksHeld) {
+        if (getHoldDurationMax(power) > 0) {
+            cooldown = (int) ((float) (cooldown * ticksHeld) / (float) getHoldDurationMax(power));
+        }
+        return cooldown;
+    }
+    
     public int getCooldown(P power, int ticksHeld) {
         return getCooldownTechnical(power) + getCooldownAdditional(power, ticksHeld);
     }

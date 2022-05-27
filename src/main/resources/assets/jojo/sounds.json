@@ -398,6 +398,10 @@
   "star_platinum_zoom_click": {
     "sounds": [ "jojo:stand/star_platinum_zoom_click" ]
   },
+  "star_platinum_inhale": {
+    "subtitle": "jojo.subtitle.inhale",
+    "sounds": [ "jojo:stand/star_platinum_inhale" ]
+  },
   "star_platinum_time_stop": {
     "sounds": [ "jojo:stand/star_platinum_time_stop" ]
   },
@@ -539,6 +543,10 @@
   "silver_chariot_unsummon": {
     "subtitle": "jojo.subtitle.stand_unsummon",
     "sounds": [ "jojo:stand/silver_chariot_unsummon", "jojo:stand/silver_chariot_unsummon_2" ]
+  },
+  "silver_chariot_block": {
+    "subtitle": "jojo.subtitle.stand_damage_block",
+    "sounds": [ "jojo:stand/silver_chariot_block" ]
   },
   "silver_chariot_rapier_shot": {
     "sounds": [ "jojo:stand/silver_chariot_rapier_shot" ]
