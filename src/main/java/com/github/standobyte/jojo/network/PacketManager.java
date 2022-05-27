@@ -47,7 +47,9 @@ import com.github.standobyte.jojo.network.packets.fromserver.SyncStandActionLear
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStandActionLearningPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStandControlStatusPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SyncStandStatsDataPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncWorldTimeStopPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TimeStopInstancePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerJoinPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerStatePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandOffsetPacket;
@@ -347,10 +349,20 @@ public class PacketManager {
         .decoder(PlaySoundAtClientPacket::decode)
         .consumer(PlaySoundAtClientPacket::handle).add();
         
-        channel.messageBuilder(SyncWorldTimeStopPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(SyncWorldTimeStopPacket::encode)
-        .decoder(SyncWorldTimeStopPacket::decode)
-        .consumer(SyncWorldTimeStopPacket::handle).add();
+        channel.messageBuilder(TimeStopInstancePacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(TimeStopInstancePacket::encode)
+        .decoder(TimeStopInstancePacket::decode)
+        .consumer(TimeStopInstancePacket::handle).add();
+        
+        channel.messageBuilder(TimeStopPlayerStatePacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(TimeStopPlayerStatePacket::encode)
+        .decoder(TimeStopPlayerStatePacket::decode)
+        .consumer(TimeStopPlayerStatePacket::handle).add();
+        
+        channel.messageBuilder(TimeStopPlayerJoinPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(TimeStopPlayerJoinPacket::encode)
+        .decoder(TimeStopPlayerJoinPacket::decode)
+        .consumer(TimeStopPlayerJoinPacket::handle).add();
         
         channel.messageBuilder(RefreshMovementInTimeStopPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(RefreshMovementInTimeStopPacket::encode)
