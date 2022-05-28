@@ -163,7 +163,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
         if (!world.isClientSide()) {
             hamon.tick();
             int air = user.getAirSupply();
-            if (air < user.getMaxAirSupply() && user.tickCount % 200 < (int) breathing * 2 - 1) {
+            if (air < user.getMaxAirSupply() && user.tickCount % 100 < (int) breathing - 1) {
                 user.setAirSupply(air + 1);
             }
             if (user instanceof PlayerEntity) {

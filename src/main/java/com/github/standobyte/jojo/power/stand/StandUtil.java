@@ -127,7 +127,11 @@ public class StandUtil {
     }
     
     public static LivingEntity getStandUser(LivingEntity standOrUser) {
-        return standOrUser instanceof StandEntity ? ((StandEntity) standOrUser).getUser() : standOrUser;
+    	if (standOrUser instanceof StandEntity) {
+    		LivingEntity user = ((StandEntity) standOrUser).getUser();
+    		if (user != null) standOrUser = user;
+    	}
+        return standOrUser;
     }
     
     public static void addResolve(IStandPower stand, LivingEntity target, float points) {

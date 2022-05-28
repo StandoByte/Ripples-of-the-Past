@@ -730,6 +730,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                     }
                     damageAfterAbsorption = ForgeHooks.onLivingDamage(this, dmgSource, damageAfterAbsorption);
                     if (damageAfterAbsorption != 0.0F) {
+                    	if (wasDamageBlocked) {
+                        	// FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! cancel user hurt sound
+                    	}
                         DamageUtil.hurtThroughInvulTicks(user, new StandLinkDamageSource(this, dmgSource), damageAmount);
                     }
                 }

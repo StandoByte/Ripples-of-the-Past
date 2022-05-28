@@ -129,6 +129,9 @@ public class ForgeBusEventSubscriber {
             livingTracked.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                 cap.onTracking(player);
             });
+            livingTracked.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                cap.onTracking(player);
+            });
         }
     }
 

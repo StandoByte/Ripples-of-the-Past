@@ -106,6 +106,7 @@ import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.EntityRayTraceResult;
@@ -410,21 +411,23 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
     public static void addResolveOnAttack(LivingAttackEvent event) {
         LivingEntity target = event.getEntityLiving();
-        DamageSource damageSrc = event.getSource();
-        float points = Math.min(event.getAmount(), target.getHealth());
-        
-        if (damageSrc instanceof IStandDamageSource) {
-            IStandDamageSource standDamageSrc = (IStandDamageSource) damageSrc;
-            IStandPower attackerStand = standDamageSrc.getStandPower();
-            StandUtil.addResolve(attackerStand, target, points);
-        }
-        
-        else if (damageSrc.getEntity() instanceof LivingEntity) {
-            IStandPower.getStandPowerOptional(StandUtil.getStandUser((LivingEntity) damageSrc.getEntity())).ifPresent(attackerStand -> {
-                if (attackerStand.isActive()) {
-                    StandUtil.addResolve(attackerStand, target, points * 0.5F);
-                }
-            });
+        if (!target.level.isClientSide()) {
+	        DamageSource damageSrc = event.getSource();
+	        float points = Math.min(event.getAmount(), target.getHealth());
+	        
+	        if (damageSrc instanceof IStandDamageSource) {
+	            IStandDamageSource standDamageSrc = (IStandDamageSource) damageSrc;
+	            IStandPower attackerStand = standDamageSrc.getStandPower();
+	            StandUtil.addResolve(attackerStand, target, points);
+	        }
+	        
+	        else if (damageSrc.getEntity() instanceof LivingEntity) {
+	            IStandPower.getStandPowerOptional(StandUtil.getStandUser((LivingEntity) damageSrc.getEntity())).ifPresent(attackerStand -> {
+	                if (attackerStand.isActive()) {
+	                    StandUtil.addResolve(attackerStand, target, points * 0.5F);
+	                }
+	            });
+	        }
         }
     }
     
@@ -658,6 +661,15 @@ public class GameplayEventHandler {
             }
         }
         return false;
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void onSoundPlay(PlaySoundAtEntityEvent event) {
+    	Entity player = event.getEntity();
+    	
+    	if (player != null && event.getSound() == SoundEvents.PLAYER_HURT) {
+    		
+    	}
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
