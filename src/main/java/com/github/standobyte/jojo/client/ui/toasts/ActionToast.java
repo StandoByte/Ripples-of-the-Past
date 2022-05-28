@@ -20,7 +20,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
-@SuppressWarnings("deprecation")
 public class ActionToast implements IToast {
     private static final ITextComponent NAME = new TranslationTextComponent("jojo.action.toast.title");
     private final ITextComponent description;

@@ -23,7 +23,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.text.TranslationTextComponent;
 
-@SuppressWarnings("deprecation")
 public abstract class HamonSkillsTabGui extends HamonTabGui {
     private final List<IReorderingProcessor> creativeResetButtonTooltip;
     

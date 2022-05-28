@@ -17,7 +17,6 @@ import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 
-@SuppressWarnings("deprecation")
 public class HamonSkillToast implements IToast {
     private static final ITextComponent NAME = new TranslationTextComponent("hamon_skill.toast.title");
     private final Type type;

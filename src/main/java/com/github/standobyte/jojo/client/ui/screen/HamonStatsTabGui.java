@@ -21,7 +21,6 @@ import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
-@SuppressWarnings("deprecation")
 public class HamonStatsTabGui extends HamonTabGui {
     private final List<IReorderingProcessor> strengthDescLines;
     private final List<IReorderingProcessor> controlDescLines;
