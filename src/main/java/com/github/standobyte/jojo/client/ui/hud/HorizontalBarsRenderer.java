@@ -10,7 +10,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.gui.AbstractGui;
 
-@SuppressWarnings("deprecation")
 public class HorizontalBarsRenderer extends BarsRenderer {
     private static final int BAR_LENGTH = 200;
     private static final int BAR_LENGTH_SHORTENED = 150;

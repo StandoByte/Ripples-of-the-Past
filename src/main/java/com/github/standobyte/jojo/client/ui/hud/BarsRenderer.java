@@ -24,7 +24,6 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 
-@SuppressWarnings("deprecation")
 public abstract class BarsRenderer {
     static final int BARS_WIDTH_PX = 28;
     

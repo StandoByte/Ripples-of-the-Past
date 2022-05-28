@@ -23,7 +23,6 @@ import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
 
-@SuppressWarnings("deprecation")
 public class HamonScreen extends Screen {
     static final int WINDOW_WIDTH = 230;
     static final int WINDOW_HEIGHT = 228;

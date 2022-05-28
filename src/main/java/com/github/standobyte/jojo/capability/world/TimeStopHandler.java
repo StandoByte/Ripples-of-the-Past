@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.capability.world;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -193,6 +195,10 @@ public class TimeStopHandler {
         boolean canMove = TimeUtil.canPlayerMoveInStoppedTime(player, true);
         boolean canSee = TimeUtil.canPlayerSeeInStoppedTime(canMove, TimeUtil.hasTimeStopAbility(player));
         PacketManager.sendToClient(new TimeStopPlayerStatePacket(canSee, canMove), player);
+    }
+    
+    public Collection<TimeStopInstance> getAllTimeStopInstances() {
+    	return Collections.unmodifiableCollection(timeStopInstances.values());
     }
     
 

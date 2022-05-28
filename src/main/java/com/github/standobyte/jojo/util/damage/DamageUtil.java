@@ -216,9 +216,16 @@ public class DamageUtil {
     
     public static boolean hurtThroughInvulTicks(Entity target, DamageSource dmgSource, float amount) {
         int invulTime = target.invulnerableTime;
+        LivingEntity targetLiving = target instanceof LivingEntity ? (LivingEntity) target : null;
+        float lastHurt = targetLiving != null ? targetLiving.lastHurt : 0;
+        
         target.invulnerableTime = 0;
         boolean dealtDamage = target.hurt(dmgSource, amount);
+        
         target.invulnerableTime = invulTime;
+        if (targetLiving != null) {
+        	targetLiving.lastHurt = lastHurt;
+        }
         return dealtDamage;
     }
     

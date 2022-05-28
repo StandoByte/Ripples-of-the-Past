@@ -381,10 +381,7 @@ public class ClientEventHandler {
     @SubscribeEvent
     public void onScreenOpened(GuiOpenEvent event) {
     	if (event.getGui() instanceof MainMenuScreen) {
-    		String splash = null;
-    		if (random.nextInt(420) < CustomResources.getModSplashes().getSplashesCount()) {
-    			splash = CustomResources.getModSplashes().getSplash();
-    		}
+    		String splash = CustomResources.getModSplashes().overrideSplash();
     		if (splash != null) {
     			ClientReflection.setSplash((MainMenuScreen) event.getGui(), splash);
     		}

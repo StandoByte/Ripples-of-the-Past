@@ -35,6 +35,7 @@ import net.minecraftforge.event.entity.living.PotionEvent.PotionExpiryEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerChangedDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerRespawnEvent;
 import net.minecraftforge.event.world.BlockEvent.CreateFluidSourceEvent;
 import net.minecraftforge.event.world.BlockEvent.CropGrowEvent;
@@ -141,6 +142,30 @@ public class TimeUtil {
         	TimeUtil.stopNewEntityInTime(player, player.level);
         	PacketManager.sendToClient(new TimeStopPlayerJoinPacket(Phase.POST), player);
         });
+    }
+    
+    
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void onPlayerLogout(PlayerLoggedOutEvent event) {
+    	PlayerEntity player = event.getPlayer();
+    	if (player instanceof ServerPlayerEntity) {
+    		ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
+    		if (serverPlayer.getServer().getPlayerList().getPlayerCount() <= 1) {
+    			serverPlayer.getServer().getAllLevels().forEach(world -> {
+        	    	world.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+        	    		TimeStopHandler handler = cap.getTimeStopHandler();
+        	    		handler.getAllTimeStopInstances().forEach(instance -> handler.removeTimeStop(instance));
+        	    	});
+    			});
+    		}
+    		else {
+    			player.level.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+    				TimeStopHandler handler = cap.getTimeStopHandler();
+    				handler.userStoppedTime(player).ifPresent(instance -> handler.removeTimeStop(instance));
+    			});
+    		}
+    	}
     }
 
 
