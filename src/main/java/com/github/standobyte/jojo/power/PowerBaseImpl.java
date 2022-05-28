@@ -232,6 +232,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                     action.playVoiceLine(user, getThis(), target, wasActive, shift);
                 }
                 performAction(action, target);
+            	stopHeldAction(false);
                 return true;
             }
             else if (result.queueInput()) {

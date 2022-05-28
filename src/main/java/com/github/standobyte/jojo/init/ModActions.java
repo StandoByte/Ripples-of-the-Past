@@ -50,7 +50,6 @@ import com.github.standobyte.jojo.action.actions.StandEntityHeavyAttack;
 import com.github.standobyte.jojo.action.actions.StandEntityLightAttack;
 import com.github.standobyte.jojo.action.actions.StandEntityMeleeBarrage;
 import com.github.standobyte.jojo.action.actions.StandEntityUnsummon;
-import com.github.standobyte.jojo.action.actions.StarPlatinumBarrage;
 import com.github.standobyte.jojo.action.actions.StarPlatinumInhale;
 import com.github.standobyte.jojo.action.actions.StarPlatinumStarFinger;
 import com.github.standobyte.jojo.action.actions.StarPlatinumZoom;
@@ -208,7 +207,7 @@ public class ModActions {
             () -> new StandEntityLightAttack(new StandEntityLightAttack.Builder().standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_ORA)));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_BARRAGE = ACTIONS.register("star_platinum_barrage", 
-            () -> new StarPlatinumBarrage(new StandEntityMeleeBarrage.Builder().standSound(ModSounds.STAR_PLATINUM_ORA_ORA_ORA)));
+            () -> new StandEntityMeleeBarrage(new StandEntityMeleeBarrage.Builder().standSound(ModSounds.STAR_PLATINUM_ORA_ORA_ORA)));
     
     public static final RegistryObject<StandEntityComboHeavyAttack> STAR_PLATINUM_UPPERCUT = ACTIONS.register("star_platinum_uppercut", 
             () -> new StandEntityComboHeavyAttack(new StandEntityComboHeavyAttack.Builder().standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_ORA_LONG)));
@@ -231,7 +230,7 @@ public class ModActions {
                     .standOffsetFromUser(-0.25, -0.25, -0.3)));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_INHALE = ACTIONS.register("star_platinum_inhale", 
-            () -> new StarPlatinumInhale(new StandEntityAction.Builder().holdType(100).cooldown(0, 50).staminaCostTick(2F)
+            () -> new StarPlatinumInhale(new StandEntityAction.Builder().holdType(100).cooldown(0, 200).staminaCostTick(2F)
             		.ignoresPerformerStun().resolveLevelToUnlock(2).standOffsetFront()));
     
     public static final RegistryObject<TimeStop> STAR_PLATINUM_TIME_STOP = ACTIONS.register("star_platinum_time_stop", 

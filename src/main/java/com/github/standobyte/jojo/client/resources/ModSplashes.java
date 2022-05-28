@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -12,8 +13,6 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
-
-import com.google.common.collect.Lists;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.ReloadListener;
@@ -25,7 +24,7 @@ import net.minecraft.util.Session;
 
 public class ModSplashes extends ReloadListener<List<String>> {
 	private static final Random RANDOM = new Random();
-	private final List<String> splashes = Lists.newArrayList();
+	private final List<String> splashes = new ArrayList<>();
 	@SuppressWarnings("unused")
 	private final Session user;
 	private final ResourceLocation location;
