@@ -102,12 +102,14 @@ public class TimeStopInstant extends StandAction {
         
         if (!world.isClientSide()) {
             power.consumeStamina(impliedTicks * getStaminaCostTicking(power));
+            	
             user.teleportTo(blinkPos.x, blinkPos.y, blinkPos.z);
             if (baseTimeStop.get() != null && power.hasPower()
                     && power.getType().getStats() instanceof TimeStopperStandStats) {
                 TimeStopperStandStats stats = (TimeStopperStandStats) power.getType().getStats();
                 float learning = stats.timeStopLearningPerTick * impliedTicks;
                 power.addLearningProgressPoints(baseTimeStop.get(), learning);
+            	power.setCooldownTimer(this, (int) (((TimeStopperStandStats) stats).timeStopCooldownPerTick * impliedTicks / 6F));
             }
         }
     }

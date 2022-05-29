@@ -88,7 +88,7 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
     }
     
     @Override
-    protected boolean isBodyPart() {
+	public boolean isBodyPart() {
         return true;
     }
     

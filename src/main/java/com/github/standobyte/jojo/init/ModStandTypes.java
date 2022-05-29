@@ -36,7 +36,7 @@ public class ModStandTypes {
             (Class<StandType<?>>) ((Class<?>) StandType.class), JojoMod.MOD_ID);
     
     public static final RegistryObject<StandType<TimeStopperStandStats>> STAR_PLATINUM = STANDS.register("star_platinum", 
-            () -> new EntityStandType<>(6, 0xB000B0, PART_3_NAME,
+            () -> new EntityStandType<>(6, 0x8E45FF, PART_3_NAME,
                     new StandAction[] {ModActions.STAR_PLATINUM_PUNCH.get(), ModActions.STAR_PLATINUM_BARRAGE.get(), ModActions.STAR_PLATINUM_STAR_FINGER.get()},
                     new StandAction[] {ModActions.STAR_PLATINUM_BLOCK.get(), ModActions.STAR_PLATINUM_ZOOM.get(), ModActions.STAR_PLATINUM_INHALE.get(), ModActions.STAR_PLATINUM_TIME_STOP.get()},
                     TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
@@ -55,7 +55,7 @@ public class ModStandTypes {
             .addOst(ModSounds.STAR_PLATINUM_OST));
     
     public static final RegistryObject<StandType<TimeStopperStandStats>> THE_WORLD = STANDS.register("the_world", 
-            () -> new EntityStandType<>(6, 0xFFD000, PART_3_NAME,
+            () -> new EntityStandType<>(6, 0xFFD800, PART_3_NAME,
                     new StandAction[] {ModActions.THE_WORLD_PUNCH.get(), ModActions.THE_WORLD_BARRAGE.get(), ModActions.THE_WORLD_TS_PUNCH.get()},
                     new StandAction[] {ModActions.THE_WORLD_BLOCK.get(), ModActions.THE_WORLD_TIME_STOP.get()},
                     TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
@@ -75,7 +75,7 @@ public class ModStandTypes {
             .addItemOnResolveLevel(4, new ItemStack(ModItems.ROAD_ROLLER.get())));
     
     public static final RegistryObject<StandType<StandStats>> HIEROPHANT_GREEN = STANDS.register("hierophant_green", 
-            () -> new EntityStandType<>(5, 0x00B000, PART_3_NAME,
+            () -> new EntityStandType<>(5, 0x00B319, PART_3_NAME,
                     new StandAction[] {ModActions.HIEROPHANT_GREEN_STRING_ATTACK.get(), ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get()},
                     new StandAction[] {ModActions.HIEROPHANT_GREEN_BLOCK.get(), ModActions.HIEROPHANT_GREEN_GRAPPLE.get(), ModActions.HIEROPHANT_GREEN_BARRIER.get()},
                     StandStats.class, new StandStats.Builder()
@@ -105,7 +105,7 @@ public class ModStandTypes {
             .addOst(ModSounds.SILVER_CHARIOT_OST));
     
     public static final RegistryObject<StandType<StandStats>> MAGICIANS_RED = STANDS.register("magicians_red", 
-            () -> new EntityStandType<>(5, 0xFF6A00, PART_3_NAME,
+            () -> new EntityStandType<>(5, 0xDE203A, PART_3_NAME,
                     new StandAction[] {ModActions.MAGICIANS_RED_PUNCH.get(), ModActions.MAGICIANS_RED_FLAME_BURST.get(), ModActions.MAGICIANS_RED_FIREBALL.get(), ModActions.MAGICIANS_RED_CROSSFIRE_HURRICANE.get()},
                     new StandAction[] {ModActions.MAGICIANS_RED_BLOCK.get(), ModActions.MAGICIANS_RED_RED_BIND.get(), ModActions.MAGICIANS_RED_DETECTOR.get()},
                     StandStats.class, new StandStats.Builder()

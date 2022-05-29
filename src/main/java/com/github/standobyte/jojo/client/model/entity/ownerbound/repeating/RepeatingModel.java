@@ -67,11 +67,11 @@ public abstract class RepeatingModel<T extends Entity> extends EntityModel<T> {
             if (squareModelRandomRotation()) {
                 repeatingPart.zRot = RANDOM.nextInt(4) * 90F * MathUtil.DEG_TO_RAD;
             }
-            repeatingPart.render(matrixStack, buffer, packedLight, packedOverlay);
+            repeatingPart.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
             modelLength -= repeatingLength;
             matrixStack.translate(0, 0, repeatingLength);
         }
-        repeatingPart.render(matrixStack, buffer, packedLight, packedOverlay);
+        repeatingPart.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
         
         matrixStack.mulPose(Vector3f.XP.rotationDegrees(-xRotation));
         matrixStack.mulPose(Vector3f.YP.rotationDegrees(-yRotation));

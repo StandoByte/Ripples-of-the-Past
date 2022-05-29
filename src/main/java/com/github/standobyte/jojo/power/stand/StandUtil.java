@@ -113,8 +113,14 @@ public class StandUtil {
                     PacketManager.sendToClient(new StandControlStatusPacket(manualControl, keepPosition), (ServerPlayerEntity) player);
                 }
                 else {
-                    Minecraft.getInstance().setCameraEntity(manualControl ? standEntity : player);
+                	Minecraft mc = Minecraft.getInstance();
+                    mc.setCameraEntity(manualControl ? standEntity : player);
                     if (manualControl) {
+                    	// FIXME clear player input to prevent player from constant jumping
+                    	// (these don't work)
+                    	mc.player.input.jumping = false;
+                    	mc.player.input.forwardImpulse = 0;
+                    	mc.player.input.leftImpulse = 0;
                         StandController.setStartedControllingStand();
                     }
                 }

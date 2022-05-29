@@ -90,7 +90,7 @@ public class HGStringEntity extends OwnerBoundProjectileEntity {
     }
     
     @Override
-    protected boolean isBodyPart() {
+	public boolean isBodyPart() {
         return true;
     }
 

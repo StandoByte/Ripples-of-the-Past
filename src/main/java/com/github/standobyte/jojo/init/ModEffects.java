@@ -60,6 +60,9 @@ public class ModEffects {
     public static final RegistryObject<Effect> SUN_RESISTANCE = EFFECTS.register("sun_resistance", 
             () -> new StatusEffect(EffectType.BENEFICIAL, 0xFFD54A));
     
+    public static final RegistryObject<Effect> SPIRIT_VISION = EFFECTS.register("spirit_vision", 
+            () -> new StatusEffect(EffectType.BENEFICIAL, 0x8E45FF));
+    
 //    public static final RegistryObject<Effect> STAND_SEALING = EFFECTS.register("stand_sealing", 
 //            () -> new StatusEffect(EffectType.HARMFUL, 0xCACAD8)); // TODO Stand Sealing effect
     
