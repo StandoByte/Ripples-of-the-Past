@@ -51,8 +51,8 @@ public class SilverChariotArmorLayerModel extends SilverChariotModel {
         setRotationAngle(leftTorsoTube, 0.0F, 0.0F, 0.3491F);
         leftTorsoTube.texOffs(52, 30).addBox(-1.5F, -3.0F, -0.5F, 3.0F, 6.0F, 1.0F, 0.0F, true);
 
-        leftArm.texOffs(16, 44).addBox(-2.0F, -2.1F, -2.0F, 4.0F, 6.0F, 4.0F, 0.1F, false);
-        leftArm.texOffs(0, 46).addBox(2.0F, 2.9F, -0.5F, 1.0F, 1.0F, 1.0F, 0.1F, true);
+		leftArm.texOffs(16, 44).addBox(-2.0F, -2.1F, -2.0F, 4.0F, 6.0F, 4.0F, 0.1F, false);
+		leftArm.texOffs(0, 46).addBox(2.0F, 2.9F, -0.5F, 1.0F, 1.0F, 1.0F, 0.1F, true);
 
         leftShoulder = new ModelRenderer(this);
         leftShoulder.setPos(2.0F, 0.1F, 0.0F);

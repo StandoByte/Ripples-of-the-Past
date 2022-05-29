@@ -1,7 +1,9 @@
 package com.github.standobyte.jojo.power.stand.stats;
 
 import com.github.standobyte.jojo.action.actions.TimeStop;
+import com.github.standobyte.jojo.power.stand.IStandPower;
 
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
 
 public class TimeStopperStandStats extends StandStats {
@@ -42,6 +44,17 @@ public class TimeStopperStandStats extends StandStats {
         buf.writeFloat(timeStopLearningPerTick);
         buf.writeFloat(timeStopDecayPerDay);
         buf.writeFloat(timeStopCooldownPerTick);
+    }
+    
+    @Override
+    public void onNewDay(LivingEntity user, IStandPower power) {
+    	if (!user.level.isClientSide() && timeStopDecayPerDay > 0) {
+    		power.getAbilities().forEach(ability -> {
+    			if (ability.isUnlocked(power) && ability instanceof TimeStop) {
+    				power.setLearningProgressPoints(ability, power.getLearningProgressPoints(ability) - timeStopDecayPerDay, true, false);
+    			}
+    		});
+    	}
     }
     
     static {

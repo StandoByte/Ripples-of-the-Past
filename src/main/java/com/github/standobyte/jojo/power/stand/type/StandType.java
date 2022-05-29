@@ -117,6 +117,11 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     @Override
+    public void onNewDay(LivingEntity user, IStandPower power, long prevDay, long day) {
+    	getStats().onNewDay(user, power);
+    }
+    
+    @Override
     public StandAction[] getAttacks() {
         return attacks;
     }

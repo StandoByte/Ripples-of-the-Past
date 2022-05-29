@@ -86,7 +86,7 @@ public class HGStringEntity extends OwnerBoundProjectileEntity {
     
     @Override
     protected float movementSpeed() {
-        return isBinding ? 1.28F : 3.2F;
+        return isBinding ? 0.9F : 2.25F;
     }
     
     @Override

@@ -122,7 +122,7 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
     
     @Override
     protected float movementSpeed() {
-        return 2.0F;
+        return 2F;
     }
     
     @Override

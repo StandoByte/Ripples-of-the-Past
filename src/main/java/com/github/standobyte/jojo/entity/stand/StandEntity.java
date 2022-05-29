@@ -731,7 +731,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                     damageAfterAbsorption = ForgeHooks.onLivingDamage(this, dmgSource, damageAfterAbsorption);
                     if (damageAfterAbsorption != 0.0F) {
                     	if (wasDamageBlocked) {
-                        	// FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! cancel user hurt sound
+                        	// FIXME cancel user hurt sound
                     	}
                         DamageUtil.hurtThroughInvulTicks(user, new StandLinkDamageSource(this, dmgSource), damageAmount);
                     }
@@ -1192,6 +1192,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         getCurrentTask().ifPresent(task -> {
             task.moveToPhase(StandEntityAction.Phase.RECOVERY, userPower, this);
         });
+    }
+    
+    public boolean isClearingAction() {
+    	return clearingAction;
     }
     
     public Optional<StandEntityTask> getCurrentTask() {
@@ -1826,6 +1830,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public void addProjectile(DamagingEntity projectile) {
         if (!level.isClientSide() && !projectile.isAddedToWorld()) {
             projectile.setDamageFactor((float) getAttackDamage() / 8);
+            projectile.setSpeedFactor((float) getAttackSpeed() / 8);
             level.addFreshEntity(projectile);
         }
     }

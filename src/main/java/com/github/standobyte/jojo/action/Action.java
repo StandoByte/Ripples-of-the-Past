@@ -11,7 +11,6 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -104,7 +103,6 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
             return itemCheck;
         }
         if (!user.canUpdate() && !canBeUsedByStoppedInTime(user, power)) {
-        	JojoMod.LOGGER.debug("!!");
         	return ActionConditionResult.NEGATIVE;
         }
         return checkSpecificConditions(user, power, target);

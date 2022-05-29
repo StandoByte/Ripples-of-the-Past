@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.actions.HamonAction;
@@ -237,8 +238,16 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
         }
         if (user instanceof PlayerEntity) {
             hamon.tickExercises((PlayerEntity) user);
-            hamon.newDayCheck(user.level);
         }
+    }
+    
+    @Override
+    public void onNewDay(LivingEntity user, INonStandPower power, long prevDay, long day) {
+    	if (user instanceof PlayerEntity) {
+    		HamonData hamon = power.getTypeSpecificData(this).get();
+            JojoMod.LOGGER.debug(power.getUser().getDisplayName().getString() + ": Day " + day + " (from " + prevDay + "), Hamon exercise training: " + hamon.getAverageExercisePoints());
+    		hamon.breathingTrainingDay((PlayerEntity) user);
+    	}
     }
 
     @Override

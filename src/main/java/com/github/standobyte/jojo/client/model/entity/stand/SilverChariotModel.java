@@ -91,8 +91,8 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
         torso.texOffs(0, 33).addBox(1.5F, -0.1F, -2.0F, 1.0F, 2.0F, 4.0F, -0.2F, false);
         torso.texOffs(33, 37).addBox(-3.0F, 10.0F, -2.0F, 6.0F, 2.0F, 4.0F, 0.1F, false);
 
-        leftArm.texOffs(52, 59).addBox(-2.0F, 2.0F, -1.5F, 3.0F, 2.0F, 3.0F, 0.0F, true);
-        leftArm.texOffs(14, 47).addBox(-2.0F, -2.0F, -2.0F, 3.0F, 4.0F, 4.0F, 0.0F, true);
+		leftArm.texOffs(52, 59).addBox(-2.0F, 2.0F, -1.5F, 3.0F, 2.0F, 3.0F, 0.0F, true);
+		leftArm.texOffs(14, 47).addBox(-2.0F, -2.0F, -2.0F, 3.0F, 4.0F, 4.0F, 0.0F, true);
 
         leftArmJoint.setPos(-0.5F, 4.0F, 0.0F);
         leftArmJoint.texOffs(2, 39).addBox(-1.0F, -1.5F, -1.0F, 2.0F, 3.0F, 2.0F, -0.1F, true);

@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.util.utils.MathUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.Entity;
@@ -19,6 +20,10 @@ public abstract class RepeatingModel<T extends Entity> extends EntityModel<T> {
     private float length;
     private float yRotation;
     private float xRotation;
+
+    protected RepeatingModel() {
+    	super(RenderType::entityTranslucent);
+    }
 
     @Nullable
     protected abstract ModelRenderer getMainPart();

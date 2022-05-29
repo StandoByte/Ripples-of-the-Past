@@ -11,7 +11,6 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
@@ -22,9 +21,9 @@ import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillLearnPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillsResetPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonStatsPacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.TypeSpecificData;
@@ -73,7 +72,6 @@ public class HamonData extends TypeSpecificData {
     private float hamonDamageFactor = 1F;
     private HamonSkillSet hamonSkills;
     private EnumMap<Exercise, Integer> exerciseTicks = new EnumMap<Exercise, Integer>(Exercise.class);
-    private long lastTickedDay = -1;
     private boolean isMeditating;
     private Vector3d meditationPosition;
     private float meditationYRot;
@@ -448,18 +446,11 @@ public class HamonData extends TypeSpecificData {
         this.breathingTrainingBonus = trainingBonus;
     }
 
-    public void newDayCheck(World world) {
-        long day = world.getDayTime() / 24000;
-        long prevDay = lastTickedDay;
-        lastTickedDay = day;
-        if (prevDay == -1 || prevDay == day) {
-            return;
-        }
+    public void breathingTrainingDay(PlayerEntity user) {
+    	World world = user.level;
         if (!world.isClientSide()) {
             float lvlInc = (2 * MathHelper.clamp(getAverageExercisePoints(), 0F, 1F)) - 1F;
             recalcAvgExercisePoints();
-            JojoMod.LOGGER.debug(power.getUser().getDisplayName().getString() + ": Day " + day + " (from " + prevDay + "), Hamon exercise training: " + getAverageExercisePoints());
-            // FIXME (?) breathing technique going down for offline players on servers
             if (lvlInc < 0) {
                 if (!JojoModConfig.getCommonConfigInstance(false).breathingTechniqueDeterioration.get()) {
                     lvlInc = 0;
@@ -704,7 +695,6 @@ public class HamonData extends TypeSpecificData {
             exercises.putInt(exercise.toString(), exerciseTicks.get(exercise));
         }
         nbt.put("Exercises", exercises);
-        nbt.putLong("LastDay", lastTickedDay);
         nbt.putFloat("TrainingBonus", breathingTrainingBonus);
         return nbt;
     }
@@ -724,7 +714,6 @@ public class HamonData extends TypeSpecificData {
             exercisesNbt[exercise.ordinal()] = exercises.getInt(exercise.toString());
         }
         setExerciseTicks(exercisesNbt[0], exercisesNbt[1], exercisesNbt[2], exercisesNbt[3], false);
-        lastTickedDay = nbt.getLong("LastDay");
         breathingTrainingBonus = nbt.getFloat("TrainingBonus");
     }
 
