@@ -156,7 +156,7 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
         return partialTick == 1.0F ? position() : getPosition(partialTick);
     }
     
-    protected boolean isBodyPart() {
+    public boolean isBodyPart() {
         return false;
     }
     

@@ -151,7 +151,7 @@ public class MRRedBindRenderer extends ExtendingEntityRenderer<MRRedBindEntity, 
     @Override
     protected void doRender(MRRedBindEntity entity, MRRedBindModel model, 
             float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
-        renderModel(entity, model, partialTick, matrixStack, buffer.getBuffer(Atlases.cutoutBlockSheet()), packedLight);
+        renderModel(entity, model, partialTick, matrixStack, buffer.getBuffer(Atlases.translucentCullBlockSheet()), packedLight);
     }
 
 }

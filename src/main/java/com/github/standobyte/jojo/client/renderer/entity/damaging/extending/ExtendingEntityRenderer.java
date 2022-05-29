@@ -6,9 +6,11 @@ import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.OwnerBou
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.util.utils.MathUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
@@ -55,5 +57,10 @@ public abstract class ExtendingEntityRenderer<T extends OwnerBoundProjectileEnti
             packedLight = entityRenderDispatcher.getPackedLightCoords(entity.getOwner(), partialTick);
         }
         super.doRender(entity, model, partialTick, matrixStack, buffer, packedLight);
+    }
+    
+    @Override
+    protected void renderModel(T entity, M model, float partialTick, MatrixStack matrixStack, IVertexBuilder vertexBuilder, int packedLight) {
+        model.renderToBuffer(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, getAlpha(entity, partialTick));
     }
 }

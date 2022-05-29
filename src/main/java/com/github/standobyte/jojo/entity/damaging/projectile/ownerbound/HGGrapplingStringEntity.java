@@ -105,7 +105,7 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
     }
     
     @Override
-    protected boolean isBodyPart() {
+	public boolean isBodyPart() {
         return true;
     }
 

@@ -27,12 +27,6 @@ public class ModPotions {
     public static final RegistryObject<Potion> FREEZE_STRONG_POTION = POTIONS.register("strong_freeze", 
             () -> new Potion(new EffectInstance(ModEffects.FREEZE.get(), 450, 1)));
     
-    public static final RegistryObject<Potion> SUN_RESISTANCE_POTION = POTIONS.register("sun_resistance", 
-            () -> new Potion(new EffectInstance(ModEffects.SUN_RESISTANCE.get(), 3600, 0)));
-    
-    public static final RegistryObject<Potion> SUN_RESISTANCE_LONG_POTION = POTIONS.register("long_sun_resistance", 
-            () -> new Potion(new EffectInstance(ModEffects.SUN_RESISTANCE.get(), 9600, 0)));
-    
     
     public static void registerRecipes() {
         registerRecipes(Potions.AWKWARD, Items.BLUE_ICE, FREEZE_POTION.get(), FREEZE_LONG_POTION.get(), FREEZE_STRONG_POTION.get());
