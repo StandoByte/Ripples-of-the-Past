@@ -39,6 +39,7 @@ import net.minecraftforge.fml.network.NetworkHooks;
 public abstract class DamagingEntity extends ProjectileEntity implements IEntityAdditionalSpawnData {
     protected static final Vector3d DEFAULT_POS_OFFSET = new Vector3d(0.0D, -0.3D, 0.0D);
     private float damageFactor = 1F;
+    protected float speedFactor = 1F;
     private LivingEntity livingEntityOwner = null;
 
     public DamagingEntity(EntityType<? extends DamagingEntity> entityType, @Nullable LivingEntity owner, World world) {
@@ -249,6 +250,14 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     	return damageFactor;
     }
     
+    public void setSpeedFactor(float speedFactor) {
+        this.speedFactor = speedFactor;
+    }
+    
+    public float getSpeedFactor() {
+    	return speedFactor;
+    }
+    
     protected boolean debuffsFromStand() {
     	return true;
     }
@@ -311,6 +320,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     protected void addAdditionalSaveData(CompoundNBT nbt) {
         super.addAdditionalSaveData(nbt);
         nbt.putFloat("DamageFactor", damageFactor);
+        nbt.putFloat("SpeedFactor", speedFactor);
         nbt.putInt("Age", tickCount);
     }
 
@@ -318,6 +328,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     protected void readAdditionalSaveData(CompoundNBT nbt) {
         super.readAdditionalSaveData(nbt);
         damageFactor = nbt.getFloat("DamageFactor");
+        speedFactor = nbt.getFloat("SpeedFactor");
         tickCount = nbt.getInt("Age");
     }
 
@@ -327,11 +338,13 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     @Override
     public void writeSpawnData(PacketBuffer buffer) {
         buffer.writeInt(tickCount);
+        buffer.writeFloat(speedFactor);
     }
 
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
         tickCount = additionalData.readInt();
+        speedFactor = additionalData.readFloat();
     }
 
     @Override

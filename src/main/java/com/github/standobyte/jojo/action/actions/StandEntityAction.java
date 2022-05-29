@@ -64,7 +64,7 @@ public abstract class StandEntityAction extends StandAction {
         if (power.isActive()) {
             StandEntity stand = (StandEntity) power.getStandManifestation();
             if (canBeQueued(power, stand)) {
-                if (stand.getCurrentTask().map(
+                if (!stand.isClearingAction() && stand.getCurrentTask().map(
                         task -> task.getAction().canQueue(this, power, stand)
                         && !task.getAction().isCancelable(power, stand, task.getPhase(), this)).orElse(false)) {
                     return ActionConditionResult.NEGATIVE_QUEUE_INPUT;

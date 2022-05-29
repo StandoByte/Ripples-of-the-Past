@@ -138,7 +138,7 @@ public class TimeStop extends StandAction {
     @Override
     public void onTrainingPoints(IStandPower power, float points) {
         if (hasShiftVariation()) {
-            power.setLearningProgressPoints(super.getShiftVariationIfPresent(), points, false, false);
+            power.setLearningProgressPoints(getShiftVariationIfPresent(), points, false, false);
         }
     }
     

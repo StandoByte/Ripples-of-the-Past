@@ -174,10 +174,10 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     
     protected float updateDistance() {
         if (isMovingForward()) {
-            return getDistance() + movementSpeed();
+            return getDistance() + movementSpeed() * speedFactor;
         }
         if (isRetracting()) {
-            return getDistance() - retractSpeed();
+            return getDistance() - retractSpeed() * speedFactor;
         }
         return getDistance();
     }

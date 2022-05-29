@@ -51,7 +51,6 @@ public class LivingUtilCap {
     }
     
     
-    
     public float onStandAttack(float damage) {
         this.lastStandDamage = damage;
         return standInvulnerableTime > 0 ? Math.max(damage - lastStandDamage, 0) : damage;

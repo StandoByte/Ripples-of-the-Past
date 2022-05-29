@@ -4,7 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
+import com.github.standobyte.jojo.power.stand.IStandPower;
 
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
 
 public class StandStats {
@@ -41,6 +43,8 @@ public class StandStats {
         buf.writeDouble(rangeEffective);
         buf.writeDouble(rangeMax);
     }
+    
+    public void onNewDay(LivingEntity user, IStandPower power) {}
     
     
     

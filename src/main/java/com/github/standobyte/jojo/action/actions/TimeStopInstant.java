@@ -41,6 +41,10 @@ public class TimeStopInstant extends StandAction {
         if (TimeUtil.isTimeStopped(user.level, user.blockPosition())) {
             return ActionConditionResult.NEGATIVE;
         }
+        if (power.isActive() && power.getStandManifestation() instanceof StandEntity
+        		&& ((StandEntity) power.getStandManifestation()).getCurrentTask().isPresent()) {
+            return ActionConditionResult.NEGATIVE;
+        }
         return super.checkSpecificConditions(user, power, target);
     }
 
@@ -145,7 +149,7 @@ public class TimeStopInstant extends StandAction {
                 entity.tickCount++;
                 entity.tick();
             }
-        }
+	        }
         else {
             entity.tickCount += ticks;
         }
