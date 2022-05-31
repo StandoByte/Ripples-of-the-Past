@@ -285,7 +285,7 @@ public class ModActions {
                     THE_WORLD_TIME_STOP, ModSounds.THE_WORLD_TIME_STOP_BLINK));
     
     public static final RegistryObject<StandEntityAction> THE_WORLD_TS_PUNCH = ACTIONS.register("the_world_ts_punch", 
-            () -> new TheWorldTSHeavyAttack(new StandEntityAction.Builder().resolveLevelToUnlock(3)
+            () -> new TheWorldTSHeavyAttack(new StandEntityAction.Builder().resolveLevelToUnlock(3).standUserSlowDownFactor(1.0F)
                     .standTakesCrosshairTarget().standPose(TheWorldTSHeavyAttack.TS_PUNCH_POSE), 
                     THE_WORLD_HEAVY_PUNCH, THE_WORLD_TIME_STOP_BLINK));
     

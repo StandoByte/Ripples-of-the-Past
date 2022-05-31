@@ -2050,7 +2050,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     
-    
+
     @Override
     protected void doPush(Entity entity) {
         if (!entity.is(getUser())) {
@@ -2174,6 +2174,14 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public void addAdditionalSaveData(CompoundNBT nbt) {
         super.addAdditionalSaveData(nbt);
     }
+    
+    @Override
+    public void lerpTo(double lerpX, double lerpY, double lerpZ, float lerpYRot, float lerpXRot, int lerpSteps, boolean teleport) {
+    	if (lerpX == getX()) lerpX = this.lerpX;
+    	if (lerpY == getY()) lerpY = this.lerpY;
+    	if (lerpZ == getZ()) lerpZ = this.lerpZ;
+    	super.lerpTo(lerpX, lerpY, lerpZ, lerpYRot, lerpXRot, lerpSteps, teleport);
+    }
 
     private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
     @Override
@@ -2199,4 +2207,5 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     @Override
     public boolean startRiding(Entity entity, boolean force) { return false; }
+    
 }

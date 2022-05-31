@@ -41,7 +41,7 @@
       {
         "name": "minecraft:random/anvil_land",
         "pitch" : 2.0
-      } 
+      }
     ]
   },
   "tommy_gun_shot": {
@@ -400,7 +400,12 @@
   },
   "star_platinum_inhale": {
     "subtitle": "jojo.subtitle.inhale",
-    "sounds": [ "jojo:stand/star_platinum_inhale" ]
+    "sounds": [ 
+      {
+        "name": "item/elytra/elytra_loop",
+        "pitch" : 2.0
+      }
+    ]
   },
   "star_platinum_time_stop": {
     "sounds": [ "jojo:stand/star_platinum_time_stop" ]
@@ -454,6 +459,14 @@
   "dio_zero": {
     "subtitle": "jojo.subtitle.zero",
     "sounds": [ "jojo:stand_user/dio_zero" ]
+  },
+  "dio_5_seconds": {
+    "subtitle": "jojo.subtitle.5_seconds",
+    "sounds": [ "jojo:stand_user/dio_5_seconds" ]
+  },
+  "dio_one_more": {
+    "subtitle": "jojo.subtitle.one_more",
+    "sounds": [ "jojo:stand_user/dio_one_more" ]
   },
   "dio_cant_move": {
     "subtitle": "jojo.subtitle.cant_move",

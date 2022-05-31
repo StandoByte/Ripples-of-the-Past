@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.power.stand.StandUtil;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 import com.github.standobyte.jojo.util.utils.MathUtil;
 
@@ -85,6 +86,11 @@ public class MRDetectorEntity extends Entity implements IEntityAdditionalSpawnDa
                 .and(entity -> entity.getType() != EntityType.ARMOR_STAND && 
                 (owner == null || !entity.isAlliedTo(owner) && entity.distanceToSqr(owner) > 4)));
         Optional<LivingEntity> closestDetected = entities.stream().min((e1, e2) -> (int) (e1.distanceToSqr(this) - e2.distanceToSqr(this)));
+        closestDetected.ifPresent(entity -> {
+        	if (this.getBoundingBox().intersects(entity.getBoundingBox())) {
+        		DamageUtil.setOnFire(entity, 4, true);
+        	}
+        });
         return closestDetected.isPresent() ? closestDetected.get().position().subtract(position()) : null;
     }
     

@@ -30,6 +30,7 @@ public class TimeStopInstance {
     private final World world;
     private final int id;
     private final TimeStop action;
+    private final int startingTicks;
     
     private int ticksLeft;
     private int ticksPassed = 0;
@@ -56,6 +57,7 @@ public class TimeStopInstance {
     
     public TimeStopInstance(World world, int ticks, ChunkPos pos, int chunkRange, LivingEntity user, TimeStop action, int id) {
         this.world = world;
+        this.startingTicks = ticks;
         this.ticksLeft = ticks;
         this.centerPos = pos;
         this.chunkRange = chunkRange;
@@ -118,6 +120,10 @@ public class TimeStopInstance {
     
     public boolean wereTicksManuallySet() {
         return ticksManuallySet;
+    }
+    
+    public int getStartingTicks() {
+    	return startingTicks;
     }
 
     public int getTicksLeft() {

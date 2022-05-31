@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.actions;
 
 import java.util.function.Supplier;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
@@ -38,44 +39,46 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
         return super.checkSpecificConditions(user, power, target);
     }
 
-    // FIXME (!!) (TW ts punch) no consecutive uses
     @Override
     protected ActionConditionResult checkStandConditions(StandEntity stand, IStandPower power, ActionTarget target) {
-        return !stand.canAttackMelee() || !stand.isFollowingUser()
+        return !stand.canAttackMelee() || stand.isBeingRetracted()
         		? ActionConditionResult.NEGATIVE : super.checkStandConditions(stand, power, target);
     }
 
-    // FIXME (!!) (TW ts punch) doesn't always work in manual control mode
+    // FIXME (!!) (TW ts punch) better aim (+ hitbox expansion higher with distance?)
     @Override
     public ActionTarget targetBeforePerform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
         if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
             StandEntity stand = (StandEntity) power.getStandManifestation();
-            return ActionTarget.fromRayTraceResult(stand.aimWithStandOrUser(stand.getMaxRange(), target));
+            return ActionTarget.fromRayTraceResult(stand.precisionRayTrace(stand.isManuallyControlled() ? stand : user, stand.getMaxRange()));
         }
         return super.targetBeforePerform(world, user, power, target);
     }
     
     @Override
     protected void onTaskInit(IStandPower standPower, StandEntity standEntity, ActionTarget target) {
-        LivingEntity user = standPower.getUser();
-        if (user != null) {
-            Vector3d pos = target.getTargetPos(false);
-            if (pos != null) {
-                double offset = 0.5 + standEntity.getBbWidth();
-                if (target.getType() == TargetType.ENTITY) {
-                    offset += target.getEntity(standEntity.level).getBoundingBox().getXsize() / 2;
-                }
-                pos = pos.subtract(pos.subtract(user.getEyePosition(1.0F)).normalize().scale(offset));
-            }
-            else {
-                pos = user.position().add(standEntity.getLookAngle().scale(standEntity.getMaxRange()));
-            }
-            // FIXME (!!) (TW ts punch) TW pos desync
-            // FIXME (!!) (TW ts punch) the attack is weak due to small effective range
-            // FIXME (!!) (TW ts punch) use stamina
-            standEntity.teleportTo(pos.x, pos.y, pos.z);
-        }
-        standEntity.updateStrengthMultipliers();
+    	LivingEntity user = standPower.getUser();
+    	if (user != null) {
+    		Vector3d pos = target.getTargetPos(false);
+    		if (pos != null) {
+    			double offset = 0.5 + standEntity.getBbWidth();
+    			if (target.getType() == TargetType.ENTITY) {
+    				offset += target.getEntity(standEntity.level).getBoundingBox().getXsize() / 2;
+    			}
+    			pos = pos.subtract(pos.subtract(user.getEyePosition(1.0F)).normalize().scale(offset));
+    		}
+    		else {
+    			pos = user.position().add(standEntity.getLookAngle().scale(standEntity.getMaxRange()));
+    		}
+    		if (!standEntity.isManuallyControlled()) {
+//    			pos = pos.subtract(0, standEntity.getEyeHeight() * MathHelper.cos(-user.xRot * MathUtil.DEG_TO_RAD), 0);
+    		}
+    		// FIXME (!!) (TW ts punch) tp in manual control mode
+    		standEntity.moveTo(pos);
+    		// FIXME (!!) (TW ts punch) the attack is weak due to small effective range
+    		// FIXME (!!) (TW ts punch) use stamina, upgrade ts, cooldown
+    	}
+    	standEntity.updateStrengthMultipliers();
     }
 
     @Override

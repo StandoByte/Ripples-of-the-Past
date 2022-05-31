@@ -86,6 +86,7 @@ public class JojoModConfig {
                         .define("keepHamonOnDeath", false);
                 
                 keepVampirismOnDeath = builder
+                		.comment(" The weak vampirism version from the 'Blood Gift' ability will not be kept.")
                         .translation("jojo.config.keepVampirismOnDeath")
                         .define("keepVampirismOnDeath", false);
             builder.pop();

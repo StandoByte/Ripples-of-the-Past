@@ -94,7 +94,7 @@ public class HamonBubbleCutterEntity extends ModdedProjectileEntity { // TODO bu
     }
     
     @Override
-    protected int ticksLifespan() {
+	public int ticksLifespan() {
         return 100;
     }
 

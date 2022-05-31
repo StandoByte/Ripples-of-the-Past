@@ -188,7 +188,7 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
     }
 
     @Override
-    protected int ticksLifespan() {
+	public int ticksLifespan() {
         return barrier ? 100 : 100 + barrierMaxTicks;
     }
 

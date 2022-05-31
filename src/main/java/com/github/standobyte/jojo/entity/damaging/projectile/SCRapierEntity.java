@@ -75,7 +75,7 @@ public class SCRapierEntity extends ModdedProjectileEntity {
     }
     
     @Override
-    protected int ticksLifespan() {
+	public int ticksLifespan() {
         return Integer.MAX_VALUE;
     }
 

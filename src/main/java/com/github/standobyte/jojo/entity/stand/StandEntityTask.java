@@ -83,6 +83,7 @@ public class StandEntityTask {
 //            if (!standEntity.isManuallyControlled() && target.getType() == TargetType.BLOCK) {
 //                setTarget(ActionTarget.EMPTY);
 //            }
+
             rotateStand(standEntity, true);
         }
         if (!standEntity.level.isClientSide() && target.getType() == TargetType.ENTITY) {

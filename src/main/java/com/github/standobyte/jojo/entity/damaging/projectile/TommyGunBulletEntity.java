@@ -23,7 +23,7 @@ public class TommyGunBulletEntity extends ModdedProjectileEntity {
     }
 
     @Override
-    protected int ticksLifespan() {
+	public int ticksLifespan() {
         return 100;
     }
 

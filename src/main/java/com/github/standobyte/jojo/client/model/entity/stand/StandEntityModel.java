@@ -100,6 +100,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         headParts().forEach(part -> {
             setRotationAngle(part, 0, 0, 0);
         });
+        
 
 //        initPoses();
 //        initActionPoses();
@@ -117,7 +118,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         else {
             poseStand(entity, ticks, yRotationOffset, xRotation, 
                     poseType, entity.getCurrentTaskPhase(), 
-                    entity.getCurrentTaskCompletion(MathHelper.frac(ticks)), swingingHand);
+                    entity.getCurrentTaskCompletion(ticks - entity.tickCount), swingingHand);
         }
         this.yRotation = yRotationOffset;
         this.xRotation = xRotation;
