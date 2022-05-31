@@ -221,11 +221,11 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     
     protected void afterBlockHit(BlockRayTraceResult blockRayTraceResult, boolean blockDestroyed) {}
     
-    protected boolean isFiery() {
+    public boolean isFiery() {
         return false;
     }
     
-    protected abstract int ticksLifespan();
+    public abstract int ticksLifespan();
 
     protected abstract float getBaseDamage();
     

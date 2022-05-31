@@ -145,7 +145,7 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
     protected void onHitEntity(EntityRayTraceResult entityRayTraceResult) {
         if (getBlockPosAttachedTo().isPresent()) {
             Entity target = entityRayTraceResult.getEntity();
-            target.setDeltaMovement(target.getDeltaMovement().scale(0.1D));
+            target.setDeltaMovement(Vector3d.ZERO);
             if (!level.isClientSide()) {
                 super.onHitEntity(entityRayTraceResult);
                 entityData.set(WAS_RIPPED, true);
@@ -178,7 +178,7 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
     }
 
     @Override
-    protected int ticksLifespan() {
+	public int ticksLifespan() {
         return Integer.MAX_VALUE;
     }
     

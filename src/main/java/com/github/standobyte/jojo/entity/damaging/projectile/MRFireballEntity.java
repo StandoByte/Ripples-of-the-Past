@@ -88,7 +88,7 @@ public class MRFireballEntity extends ModdedProjectileEntity implements IRenders
     }
     
     @Override
-    protected boolean isFiery() {
+    public boolean isFiery() {
         return true;
     }
     
@@ -98,7 +98,7 @@ public class MRFireballEntity extends ModdedProjectileEntity implements IRenders
     }
     
     @Override
-    protected int ticksLifespan() {
+	public int ticksLifespan() {
         return 100;
     }
 }

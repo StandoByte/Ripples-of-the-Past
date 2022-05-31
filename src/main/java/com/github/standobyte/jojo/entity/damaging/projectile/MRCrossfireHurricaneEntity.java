@@ -107,7 +107,7 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
     }
     
     @Override
-    protected boolean isFiery() {
+    public boolean isFiery() {
         return true;
     }
     
@@ -122,7 +122,7 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
     }
     
     @Override
-    protected int ticksLifespan() {
+	public int ticksLifespan() {
         return 100;
     }
     

@@ -24,6 +24,8 @@ public class PlayerUtilCap {
     private int knives;
     private int removeKnifeTime;
     
+    public int knivesThrewTicks = 0;
+    
     private boolean hasClientInput;
     private int noClientInputTimer;
     
@@ -37,6 +39,10 @@ public class PlayerUtilCap {
         tickKnivesRemoval();
         tickVoiceLines();
         tickClientInputTimer();
+        
+        if (knivesThrewTicks > 0) {
+        	knivesThrewTicks--;
+        }
     }
     
 

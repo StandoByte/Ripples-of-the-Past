@@ -93,7 +93,7 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
     }
     
     @Override
-    protected boolean isFiery() {
+    public boolean isFiery() {
         return true;
     }
     

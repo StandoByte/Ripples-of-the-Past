@@ -115,7 +115,7 @@ public class MRFlameEntity extends ModdedProjectileEntity {
     }
     
     @Override
-    protected boolean isFiery() {
+    public boolean isFiery() {
         return true;
     }
     
@@ -125,7 +125,7 @@ public class MRFlameEntity extends ModdedProjectileEntity {
     }
     
     @Override
-    protected int ticksLifespan() {
+	public int ticksLifespan() {
         return 8;
     }
     

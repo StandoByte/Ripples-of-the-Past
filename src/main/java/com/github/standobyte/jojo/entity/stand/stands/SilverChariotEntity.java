@@ -2,8 +2,12 @@ package com.github.standobyte.jojo.entity.stand.stands;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
+
+import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
+import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
 import com.github.standobyte.jojo.entity.stand.StandAttackProperties;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -12,6 +16,7 @@ import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModEntityAttributes;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.entity.Entity;
@@ -51,8 +56,10 @@ public class SilverChariotEntity extends StandEntity {
     
     private static final DataParameter<Boolean> HAS_RAPIER = EntityDataManager.defineId(SilverChariotEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> HAS_ARMOR = EntityDataManager.defineId(SilverChariotEntity.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> RAPIER_ON_FIRE = EntityDataManager.defineId(SilverChariotEntity.class, DataSerializers.BOOLEAN);
     
     private int ticksAfterArmorRemoval;
+    private int swordFireTicks = 0;
     private Vector3d dashVec = Vector3d.ZERO;
 
     public SilverChariotEntity(StandEntityType<SilverChariotEntity> type, World world) {
@@ -65,6 +72,7 @@ public class SilverChariotEntity extends StandEntity {
         super.defineSynchedData();
         entityData.define(HAS_RAPIER, true);
         entityData.define(HAS_ARMOR, true);
+        entityData.define(RAPIER_ON_FIRE, false);
     }
 
     @Override
@@ -91,6 +99,9 @@ public class SilverChariotEntity extends StandEntity {
         updateModifier(getAttribute(Attributes.ATTACK_DAMAGE), NO_RAPIER_DAMAGE_DECREASE, !rapier);
         updateModifier(getAttribute(Attributes.ATTACK_SPEED), NO_RAPIER_ATTACK_SPEED_DECREASE, !rapier);
         updateModifier(getAttribute(ForgeMod.REACH_DISTANCE.get()), NO_RAPIER_ATTACK_RANGE_DECREASE, !rapier);
+        if (!rapier) {
+        	entityData.set(RAPIER_ON_FIRE, false);
+        }
     }
 
     public boolean hasArmor() {
@@ -104,6 +115,23 @@ public class SilverChariotEntity extends StandEntity {
         updateModifier(getAttribute(Attributes.ARMOR), NO_ARMOR, !armor);
         updateModifier(getAttribute(Attributes.ARMOR_TOUGHNESS), NO_ARMOR_TOUGHNESS, !armor);
         updateModifier(getAttribute(ModEntityAttributes.STAND_DURABILITY.get()), NO_ARMOR_DURABILITY_DECREASE, !armor);
+    }
+    
+    // FIXME (!!) render rapier on fire
+    public boolean isRapierOnFire() {
+    	return entityData.get(RAPIER_ON_FIRE);
+    }
+    
+    @Override
+    public boolean attackEntity(Entity target, PunchType punch, StandEntityAction action, 
+            int barrageHits, @Nullable Consumer<StandAttackProperties> attackOverride) {
+    	if (hasRapier() && isRapierOnFire()) {
+            return DamageUtil.dealDamageAndSetOnFire(target, 
+                    entity -> super.attackEntity(target, punch, action, barrageHits, attackOverride), 4, true);
+    	}
+    	else {
+    		return super.attackEntity(target, punch, action, barrageHits);
+    	}
     }
     
     @Override
@@ -126,6 +154,13 @@ public class SilverChariotEntity extends StandEntity {
                 if (entity.isAlive() && entity.getType() == ModEntityTypes.SC_RAPIER.get()) {
                     ((SCRapierEntity) entity).takeRapier(this);
                 }
+            }
+            
+            if (swordFireTicks > 0) {
+            	swordFireTicks--;
+            	if (swordFireTicks == 0) {
+            		entityData.set(RAPIER_ON_FIRE, false);
+            	}
             }
         }
     }
@@ -157,9 +192,13 @@ public class SilverChariotEntity extends StandEntity {
 
     @Override
     public boolean attackEntity(Entity target, PunchType punch, StandEntityAction action, int barrageHits) {
-        if (target instanceof ProjectileEntity) {
+        if (hasRapier() && target instanceof ProjectileEntity) {
             if (target.getType() != ModEntityTypes.SPACE_RIPPER_STINGY_EYES.get()) {
                 JojoModUtil.deflectProjectile(target, getLookAngle());
+                if (target instanceof DamagingEntity && ((DamagingEntity) target).isFiery()) {
+                	entityData.set(RAPIER_ON_FIRE, true);
+                	swordFireTicks = 300;
+                }
                 return true;
             }
             return false;

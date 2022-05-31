@@ -336,6 +336,12 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> DIO_TIMES_UP = SOUNDS.register("dio_times_up", 
             () -> new MultiSoundEvent(new ResourceLocation(JojoMod.MOD_ID, "dio_time_resumes"), new ResourceLocation(JojoMod.MOD_ID, "dio_times_up"), new ResourceLocation(JojoMod.MOD_ID, "dio_zero")));
 
+    public static final RegistryObject<SoundEvent> DIO_5_SECONDS = SOUNDS.register("dio_5_seconds", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "dio_5_seconds")));
+    
+    public static final RegistryObject<SoundEvent> DIO_ONE_MORE = SOUNDS.register("dio_one_more", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "dio_one_more")));
+    
     public static final RegistryObject<SoundEvent> DIO_CANT_MOVE = SOUNDS.register("dio_cant_move", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "dio_cant_move")));
 
