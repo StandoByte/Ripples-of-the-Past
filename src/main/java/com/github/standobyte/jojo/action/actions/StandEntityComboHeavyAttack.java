@@ -27,6 +27,11 @@ public class StandEntityComboHeavyAttack extends StandEntityHeavyAttack {
         return StandUtil.isComboUnlocked(power);
     }
     
+    @Override
+    protected boolean playsVoiceLineOnShift() {
+    	return isShiftVariation();
+    }
+    
     
     
     public static class Builder extends StandEntityHeavyAttack.Builder {

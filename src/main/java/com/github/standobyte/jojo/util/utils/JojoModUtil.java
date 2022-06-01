@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
@@ -315,7 +316,7 @@ public class JojoModUtil {
 
     public static void extinguishFieryStandEntity(Entity entity, ServerWorld world) {
         JojoModUtil.playSound(world, null, entity.getX(), entity.getY(), entity.getZ(), 
-                SoundEvents.FIRE_EXTINGUISH, entity.getSoundSource(), 1.0F, 1.0F, StandUtil::isEntityStandUser);
+                SoundEvents.FIRE_EXTINGUISH, entity.getSoundSource(), 1.0F, 1.0F, StandUtil::shouldHearStands);
         world.sendParticles(ParticleTypes.LARGE_SMOKE, entity.getX(), entity.getY(), entity.getZ(), 
                 8, entity.getBbWidth() / 2F, entity.getBbHeight() / 2F, entity.getBbWidth() / 2F, 0);
         entity.remove();
@@ -417,5 +418,22 @@ public class JojoModUtil {
         else if (clientHandled != null && condition.test(clientHandled)) {
             world.playSound(clientHandled, entity, sound, category, volume, pitch);
         }
+    }
+    
+    
+    
+    public static boolean doFractionTimes(Runnable action, double times) {
+    	if (times < 0) {
+    		return false;
+    	}
+    	int timesInt = MathHelper.floor(times);
+    	for (int i = 0; i < timesInt; i++) {
+    		action.run();
+    	}
+    	if (Math.random() < times - (double) timesInt) {
+    		action.run();
+    		return true;
+    	}
+    	return timesInt > 0;
     }
 }

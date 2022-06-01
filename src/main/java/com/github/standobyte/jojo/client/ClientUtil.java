@@ -5,9 +5,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ui.screen.HamonScreen;
-import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModParticles;
-import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
@@ -57,10 +55,6 @@ public class ClientUtil {
     public static boolean playerHasClientInput(PlayerEntity player) {
         return player.level.isClientSide() ? InputHandler.getInstance().hasInput
                 : player.getCapability(PlayerUtilCapProvider.CAPABILITY).map(PlayerUtilCap::hasClientInput).orElse(false);
-    }
-
-    public static boolean shouldStandsRender(PlayerEntity player) {
-        return StandUtil.isEntityStandUser(player) || player.hasEffect(ModEffects.SPIRIT_VISION.get());
     }
 
     public static void openHamonTeacherUi() {

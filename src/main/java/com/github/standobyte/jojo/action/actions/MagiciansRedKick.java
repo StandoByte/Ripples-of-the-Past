@@ -78,4 +78,13 @@ public class MagiciansRedKick extends StandEntityComboHeavyAttack {
     	return phase == Phase.WINDUP && standEntity.getCurrentTask().map(StandEntityTask::getTicksLeft).get() <= 2
     			|| phase == Phase.PERFORM || phase == Phase.RECOVERY;
     }
+    
+    @Override
+    public String getTranslationKey(IStandPower power, ActionTarget target) {
+        String key = super.getTranslationKey(power, target);
+        if (power.isActive() && MagiciansRedRedBind.getLandedRedBind((StandEntity) power.getStandManifestation()).isPresent()) {
+        	key += "_bind";
+        }
+        return key;
+    }
 }

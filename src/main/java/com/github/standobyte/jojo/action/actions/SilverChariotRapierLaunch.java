@@ -29,7 +29,7 @@ public class SilverChariotRapierLaunch extends StandEntityAction {
         	SilverChariotEntity chariot = (SilverChariotEntity) standEntity;
         	SCRapierEntity rapier = new SCRapierEntity(standEntity, world);
         	if (chariot.isRapierOnFire()) {
-        		rapier.setSecondsOnFire(rapier.ticksLifespan());
+        		rapier.setSecondsOnFire(rapier.ticksLifespan() / 20);
         	}
             standEntity.shootProjectile(rapier, 1F, 0);
             if (!userPower.isUserCreative()) {

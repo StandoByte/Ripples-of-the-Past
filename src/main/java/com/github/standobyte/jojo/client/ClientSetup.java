@@ -69,6 +69,7 @@ import com.github.standobyte.jojo.item.ClackersItem;
 import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
+import com.github.standobyte.jojo.power.stand.StandUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.CloudParticle;
@@ -102,7 +103,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 public class ClientSetup {
 
     private static final IItemPropertyGetter STAND_ITEM_INVISIBLE = (itemStack, clientWorld, livingEntity) -> {
-        return !ClientUtil.shouldStandsRender(Minecraft.getInstance().player) ? 1 : 0;
+        return !StandUtil.shouldStandsRender(Minecraft.getInstance().player) ? 1 : 0;
     };
     
     @SubscribeEvent

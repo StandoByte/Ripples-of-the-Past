@@ -56,6 +56,7 @@ import com.github.standobyte.jojo.action.actions.StarPlatinumZoom;
 import com.github.standobyte.jojo.action.actions.TheWorldBarrage;
 import com.github.standobyte.jojo.action.actions.TheWorldTSHeavyAttack;
 import com.github.standobyte.jojo.action.actions.TheWorldTimeStop;
+import com.github.standobyte.jojo.action.actions.TheWorldTimeStopInstant;
 import com.github.standobyte.jojo.action.actions.TimeResume;
 import com.github.standobyte.jojo.action.actions.TimeStop;
 import com.github.standobyte.jojo.action.actions.TimeStopInstant;
@@ -231,7 +232,7 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_INHALE = ACTIONS.register("star_platinum_inhale", 
             () -> new StarPlatinumInhale(new StandEntityAction.Builder().holdType(100).cooldown(0, 200).staminaCostTick(2F)
-            		.ignoresPerformerStun().resolveLevelToUnlock(2).standOffsetFront()));
+            		.ignoresPerformerStun().resolveLevelToUnlock(2).standOffsetFront().standSound(ModSounds.STAR_PLATINUM_INHALE)));
     
     public static final RegistryObject<TimeStop> STAR_PLATINUM_TIME_STOP = ACTIONS.register("star_platinum_time_stop", 
             () -> new TimeStop(new StandAction.Builder().holdToFire(40, false)
@@ -278,7 +279,7 @@ public class ModActions {
             .timeResumeSound(ModSounds.THE_WORLD_TIME_RESUME));
     
     public static final RegistryObject<TimeStopInstant> THE_WORLD_TIME_STOP_BLINK = ACTIONS.register("the_world_ts_blink", 
-            () -> new TimeStopInstant(new StandAction.Builder()
+            () -> new TheWorldTimeStopInstant(new StandAction.Builder()
                     .resolveLevelToUnlock(2).isTrained().ignoresPerformerStun()
                     .shiftVariationOf(THE_WORLD_TIME_STOP)
                     .xpRequirement(500), 

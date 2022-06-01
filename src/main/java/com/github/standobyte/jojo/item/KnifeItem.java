@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.GameplayEventHandler;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.utils.TimeUtil;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableMultimap.Builder;
 import com.google.common.collect.Multimap;
@@ -89,7 +90,8 @@ public class KnifeItem extends Item {
             }
             
             int cooldown = knivesToThrow * 3;
-            if (standPower.getType() == ModStandTypes.THE_WORLD.get() && knivesToThrow > 1) {
+            if (standPower.getType() == ModStandTypes.THE_WORLD.get() && knivesToThrow > 1
+            		&& TimeUtil.isTimeStopped(player.level, player.blockPosition())) {
             	player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
             		cap.knivesThrewTicks = 80;
             	});
@@ -109,7 +111,7 @@ public class KnifeItem extends Item {
             	
             	world.getCapability(WorldUtilCapProvider.CAPABILITY).map(cap -> 
             	cap.getTimeStopHandler().userStoppedTime(player)).get().ifPresent(timeStop -> {
-            		if (timeStop.getStartingTicks() == 100 && timeStop.getTicksLeft() > 60 && timeStop.getTicksLeft() <= 80) {
+            		if (timeStop.getStartingTicks() == 100 && timeStop.getTicksLeft() > 50 && timeStop.getTicksLeft() <= 80) {
             			JojoModUtil.sayVoiceLine(player, ModSounds.DIO_5_SECONDS.get());
             		}
             	});

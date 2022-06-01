@@ -14,8 +14,10 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 import com.github.standobyte.jojo.util.utils.TimeUtil;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.SoundCategory;
@@ -80,7 +82,10 @@ public class TimeStopInstant extends StandAction {
         }
         switch (target.getType()) {
         case ENTITY:
-            blinkPos = target.getTargetPos(false);
+            blinkPos = getEntityTargetTeleportPos(user, target.getEntity(world));
+    		Vector3d toTarget = target.getEntity(world).position().subtract(blinkPos);
+    		user.yRot = MathUtil.yRotDegFromVec(toTarget);
+    		user.yRotO = user.yRot;
             break;
         case BLOCK:
             BlockPos blockPosTargeted = target.getBlockPos();
@@ -97,12 +102,11 @@ public class TimeStopInstant extends StandAction {
         }
 
         int impliedTicks = MathHelper.ceil(user.position().subtract(blinkPos).length() / speed);
-        // FIXME (!!) (ts tp) clear user's movement input before tick skipping
         skipTicksForStandAndUser(power, impliedTicks);
         
         if (!world.isClientSide()) {
             power.consumeStamina(impliedTicks * getStaminaCostTicking(power));
-            	
+
             user.teleportTo(blinkPos.x, blinkPos.y, blinkPos.z);
             if (baseTimeStop.get() != null && power.hasPower()
                     && power.getType().getStats() instanceof TimeStopperStandStats) {
@@ -112,6 +116,10 @@ public class TimeStopInstant extends StandAction {
             	power.setCooldownTimer(this, (int) (((TimeStopperStandStats) stats).timeStopCooldownPerTick * impliedTicks / 6F));
             }
         }
+    }
+    
+    protected Vector3d getEntityTargetTeleportPos(Entity user, Entity target) {
+    	return target.position().subtract(user.getLookAngle().scale(target.getBbWidth() + user.getBbWidth()));
     }
     
     @Override
@@ -144,22 +152,19 @@ public class TimeStopInstant extends StandAction {
     }
     
     private static void skipTicks(LivingEntity entity, int ticks) {
-        // FIXME (!!) (ts tp) ts skip entity ticks
-        // FIXME (!!) (ts tp) doesn't work on server thread
-        if (entity.canUpdate()) {
-            for (int i = 0; i < ticks; i++) {
-                entity.tickCount++;
-                entity.tick();
-            }
-	        }
-        else {
-            entity.tickCount += ticks;
-        }
+        // also clear user's movement input before tick skipping
+//    	if (entity.canUpdate()) {
+//    		for (int i = 0; i < ticks; i++) {
+//    			entity.tickCount++;
+//    			entity.tick();
+//    		}
+//    	}
+//        else {
+//            entity.tickCount += ticks;
+//        }
     }
     
     private static void skipStandTicks(StandEntity entity, int ticks) {
         skipTicks(entity, ticks);
-        // FIXME (!!) (ts tp) ts skip entity ticks
-        
     }
 }
