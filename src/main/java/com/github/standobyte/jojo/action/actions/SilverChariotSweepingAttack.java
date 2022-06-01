@@ -8,7 +8,6 @@ import com.github.standobyte.jojo.entity.stand.StandEntity.PunchType;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.power.stand.StandUtil;
 
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.vector.Vector3d;
@@ -36,7 +35,7 @@ public class SilverChariotSweepingAttack extends StandEntityComboHeavyAttack {
     
     @Override
     public void standTickWindup(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
-    	if (world.isClientSide() && StandUtil.isEntityStandUser(ClientUtil.getClientPlayer())) {
+    	if (world.isClientSide()) {
     		StandEntityTask attack = standEntity.getCurrentTask().get();
 	    	if (attack.getTicksLeft() == 1) {
 	    	    standEntity.playSound(SoundEvents.PLAYER_ATTACK_SWEEP, 1.0F, 1.0F, ClientUtil.getClientPlayer());

@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModStandTypes;
@@ -111,7 +112,7 @@ public class SCRapierEntity extends ModdedProjectileEntity {
                 k = (blockVec.z - pos.z) / movementVec.z;
                 break;
             default:
-                k = 1337;
+                return;
             }
             setPos(
                     getX() + movementVec.x * k, 
@@ -138,9 +139,25 @@ public class SCRapierEntity extends ModdedProjectileEntity {
             default:
                 return false;
             }
-            if (level.clip(new RayTraceContext(position(), position().add(motionNew.normalize().scale(16)), 
+            Vector3d clipStart = position();
+            Vector3d clipEnd = clipStart.add(motionNew.normalize().scale(16));
+            if (level.clip(new RayTraceContext(clipStart, clipEnd, 
                     RayTraceContext.BlockMode.OUTLINE, RayTraceContext.FluidMode.NONE, this)).getType() == RayTraceResult.Type.MISS) {
-                return false;
+                LivingEntity owner = getOwner();
+                if (owner == null) {
+                	return false;
+                }
+                if (!owner.getBoundingBox().clip(clipStart, clipEnd).isPresent()) {
+                	if (owner instanceof StandEntity) {
+                		LivingEntity user = ((StandEntity) owner).getUser();
+                		if (user == null || !user.getBoundingBox().clip(clipStart, clipEnd).isPresent()) {
+                			return false;
+                		}
+                	}
+                	else {
+                		return false;
+                	}
+                }
             }
             setDeltaMovement(motionNew);
             rotateTowardsMovement(1.0F);

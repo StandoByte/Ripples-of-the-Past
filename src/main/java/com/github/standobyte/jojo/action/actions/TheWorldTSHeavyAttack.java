@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.action.actions;
 
 import java.util.function.Supplier;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
@@ -98,6 +97,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
                 attack
                 .armorPiercing(0)
                 .addKnockback(4)
+                .disableBlocking(1.0F)
                 .callbackAfterAttack((t, stand, power, user, hurt, killed) -> {
                     if (killed) {
                         JojoModUtil.sayVoiceLine(user, ModSounds.DIO_THIS_IS_THE_WORLD.get());

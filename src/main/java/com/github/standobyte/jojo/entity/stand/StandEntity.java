@@ -599,7 +599,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
     @Override
     public boolean isInvisibleTo(PlayerEntity player) {
-        return !player.isSpectator() && (!isVisibleForAll() && !ClientUtil.shouldStandsRender(player) || underInvisibilityEffect());
+        return !player.isSpectator() && (!isVisibleForAll() && !StandUtil.shouldStandsRender(player) || underInvisibilityEffect());
     }
 
     @Override
@@ -623,7 +623,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public void playSound(SoundEvent sound, float volume, float pitch, @Nullable PlayerEntity player, Vector3d pos) {
         if (!this.isSilent()) {
             if (!isVisibleForAll()) {
-                JojoModUtil.playSound(level, player, pos.x, pos.y, pos.z, sound, getSoundSource(), volume, pitch, StandUtil::isEntityStandUser);
+                JojoModUtil.playSound(level, player, pos.x, pos.y, pos.z, sound, getSoundSource(), volume, pitch, StandUtil::shouldHearStands);
             }
             else {
                 level.playSound(player, pos.x, pos.y, pos.z, sound, getSoundSource(), volume, pitch);
@@ -1006,7 +1006,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             }
             else if (isBeingRetracted()) {
                 if (!isCloseToEntity(user)) {
-                    setDeltaMovement(user.position().add(getDefaultOffsetFromUser().getAbsoluteVec(getDefaultOffsetFromUser(), yRot, xRot)).subtract(position())
+                    setDeltaMovement(user.position().add(getDefaultOffsetFromUser().getAbsoluteVec(getDefaultOffsetFromUser(), user.yRot, user.xRot)).subtract(position())
                             .normalize().scale(getAttributeValue(Attributes.MOVEMENT_SPEED)));
                 }
                 else {
@@ -1018,7 +1018,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     private Vector3d taskOffsetPos(LivingEntity user, StandRelativeOffset relativeOffset) {
-    	Vector3d offset = relativeOffset.getAbsoluteVec(getDefaultOffsetFromUser(), yRot, xRot);
+    	Vector3d offset = relativeOffset.getAbsoluteVec(getDefaultOffsetFromUser(), user.yRot, user.xRot);
     	if (user.isShiftKeyDown()) {
     		offset = new Vector3d(offset.x, 0, offset.z);
     	}
@@ -1316,14 +1316,14 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         case ENTITY:
             Entity entity = target.getEntity(level);
             punched = attackEntity(entity, punch, action, barrageHits, entityAttackOverride);
+            if (nextPunchSound != null && punchSoundPos != null && 
+            		(playPunchSound == null && punched || playPunchSound != null && playPunchSound.booleanValue())) {
+        		playSound(nextPunchSound, 1.0F, 1.0F, null, punchSoundPos);
+            }
             break;
         default:
             punched = false;
             break;
-        }
-        if (nextPunchSound != null && punchSoundPos != null && 
-        		(playPunchSound == null && punched || playPunchSound != null && playPunchSound.booleanValue())) {
-    		playSound(nextPunchSound, 1.0F, 1.0F, null, punchSoundPos);
         }
         return punched;
     }
@@ -2061,7 +2061,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     @Override
     public boolean isPickable() {
         return super.isPickable() && 
-                !(level.isClientSide() && (ClientUtil.getClientPlayer().is(getUser()) || !StandUtil.isEntityStandUser(ClientUtil.getClientPlayer())));
+                !(level.isClientSide() && (ClientUtil.getClientPlayer().is(getUser()) || !StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())));
     }
 
     @Override

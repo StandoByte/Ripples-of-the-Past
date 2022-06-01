@@ -102,6 +102,8 @@ public class InputHandler {
     private int leftClickBlockDelay;
     
     public boolean hasInput;
+    
+    private boolean canLeap;
 
     private InputHandler(Minecraft mc) {
         this.mc = mc;
@@ -455,30 +457,51 @@ public class InputHandler {
                 IPower<?, ?> power = actionsOverlay.getCurrentPower();
                 if (power != null) {
                     if (power.canLeap() && !actionSlowedDown && !standSlowedDown) {
-                        if (input.shiftKeyDown && input.jumping) {
+                    	boolean onGround = mc.player.isOnGround();
+                    	boolean atWall = mc.player.horizontalCollision && !mc.player.abilities.flying && false;
+                    	
+                        if ((input.shiftKeyDown || !onGround && atWall) && input.jumping) {
                             float leapStrength = power.leapStrength();
                             if (leapStrength > 0) {
                                 input.shiftKeyDown = false;
                                 input.jumping = false;
-                                PacketManager.sendToServer(new ClOnLeapPacket(power.getPowerClassification()));
-                                leap(mc.player, input, leapStrength);
+                                if (onGround || atWall) {
+	                                PacketManager.sendToServer(new ClOnLeapPacket(power.getPowerClassification()));
+	                                if (onGround) {
+	                                	leap(mc.player, leapStrength);
+	                                }
+	                                else {
+	                                	wallLeap(mc.player, input, leapStrength);
+	                                }
+                                }
                             }
                         }
-                        if (power.getPowerClassification() == PowerClassification.STAND) {
+//                        if (onGround && power.getPowerClassification() == PowerClassification.STAND) {
 //                            leftDash.inputUpdate(input.left, input.right || input.down, mc.player);
 //                            rightDash.inputUpdate(input.right, input.left || input.down, mc.player);
 //                            backDash.inputUpdate(input.down, input.left || input.right, mc.player);
-                        }
+//                        }
+                        canLeap = onGround || atWall;
+                    }
+                    else {
+                    	canLeap = false;
                     }
                 }
                 return;
             }
+        }
+        else {
+        	canLeap = false;
         }
         
         Entity vehicle = mc.player.getVehicle();
         if (vehicle instanceof LeavesGliderEntity) {
             ((LeavesGliderEntity) vehicle).setInput(input.left, input.right);
         }
+    }
+    
+    public boolean canPlayerLeap() {
+    	return canLeap;
     }
     
     private boolean slowDownFromStandEntity(PlayerEntity player, MovementInput input) {
@@ -509,13 +532,15 @@ public class InputHandler {
         return false;
     }
     
-    private void leap(ClientPlayerEntity player, MovementInput input, float strength) {
-        input.shiftKeyDown = false;
-        input.jumping = false;
+    private void leap(ClientPlayerEntity player, float strength) {
         player.setOnGround(false);
         player.hasImpulse = true;
         Vector3d leap = Vector3d.directionFromRotation(Math.min(player.xRot, -30F), player.yRot).scale(strength);
         player.setDeltaMovement(leap.x, leap.y * 0.5, leap.z);
+    }
+    
+    // FIXME wall leap
+    private void wallLeap(ClientPlayerEntity player, MovementInput input, float strength) {
     }
 
     private final DashTrigger leftDash = new DashTrigger(-90F);

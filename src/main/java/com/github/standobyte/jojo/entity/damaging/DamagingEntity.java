@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.util.damage.DamageUtil;
 import com.github.standobyte.jojo.util.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.damage.IndirectStandEntityDamageSource;
@@ -277,7 +278,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
 
     @Override
     public boolean isInvisibleTo(PlayerEntity player) {
-        return !player.isSpectator() && (standVisibility() && !ClientUtil.shouldStandsRender(player) || super.isInvisible());
+        return !player.isSpectator() && (standVisibility() && !StandUtil.shouldStandsRender(player) || super.isInvisible());
     }
     
     @Override

@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -238,16 +239,21 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     @Nullable
     protected SoundEvent getShout(LivingEntity user, P power, ActionTarget target, boolean wasActive) {
+    	JojoMod.LOGGER.debug(shoutSupplier.get() != null ? shoutSupplier.get().getRegistryName() : "null");
         return shoutSupplier.get();
     }
     
     public void playVoiceLine(LivingEntity user, P power, ActionTarget target, boolean wasActive, boolean shift) {
-        if (!shift || isShiftVariation()) {
+        if (!shift || playsVoiceLineOnShift()) {
             SoundEvent shout = getShout(user, power, target, wasActive);
             if (shout != null) {
                 JojoModUtil.sayVoiceLine(user, shout);
             }
         }
+    }
+    
+    protected boolean playsVoiceLineOnShift() {
+    	return isShiftVariation();
     }
     
     public float getHeldSlowDownFactor() {

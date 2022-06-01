@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRemovePlayerSoulEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClSoulRotationPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.command.arguments.EntityAnchorArgument;
@@ -177,7 +178,7 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
     
     @Override
     public boolean isInvisibleTo(PlayerEntity player) {
-        return !player.isSpectator() && !player.is(originEntity) && (!ClientUtil.shouldStandsRender(player) || invisibleFlag());
+        return !player.isSpectator() && !player.is(originEntity) && (!StandUtil.shouldStandsRender(player) || invisibleFlag());
     }
 
     @Override

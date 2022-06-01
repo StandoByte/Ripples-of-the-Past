@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.util.damage.DamageUtil;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
@@ -37,9 +38,9 @@ public class MRDetectorEntity extends Entity implements IEntityAdditionalSpawnDa
     private static final DataParameter<Float> DETECTED_X = EntityDataManager.defineId(MRDetectorEntity.class, DataSerializers.FLOAT);
     private static final DataParameter<Float> DETECTED_Y = EntityDataManager.defineId(MRDetectorEntity.class, DataSerializers.FLOAT);
     private static final DataParameter<Float> DETECTED_Z = EntityDataManager.defineId(MRDetectorEntity.class, DataSerializers.FLOAT);
-    private Entity owner;
+    private LivingEntity owner;
     
-    public MRDetectorEntity(Entity owner, World world) {
+    public MRDetectorEntity(LivingEntity owner, World world) {
         this(ModEntityTypes.MR_DETECTOR.get(), world);
         this.owner = owner;
     }
@@ -83,8 +84,9 @@ public class MRDetectorEntity extends Entity implements IEntityAdditionalSpawnDa
         AxisAlignedBB aabb = new AxisAlignedBB(position(), position()).inflate(DETECTION_RADIUS);
         List<LivingEntity> entities = level.getEntitiesOfClass(LivingEntity.class, aabb, 
                 EntityPredicates.LIVING_ENTITY_STILL_ALIVE
-                .and(entity -> entity.getType() != EntityType.ARMOR_STAND && 
-                (owner == null || !entity.isAlliedTo(owner) && entity.distanceToSqr(owner) > 4)));
+                .and(entity -> entity.getType() != EntityType.ARMOR_STAND && entity != owner && 
+                (owner == null || 
+                !(entity.isAlliedTo(owner) || IStandPower.getStandPowerOptional(owner).map(stand -> entity == stand.getStandManifestation()).orElse(false)))));
         Optional<LivingEntity> closestDetected = entities.stream().min((e1, e2) -> (int) (e1.distanceToSqr(this) - e2.distanceToSqr(this)));
         closestDetected.ifPresent(entity -> {
         	if (this.getBoundingBox().intersects(entity.getBoundingBox())) {
@@ -108,7 +110,8 @@ public class MRDetectorEntity extends Entity implements IEntityAdditionalSpawnDa
     
     @Override
     public void onSyncedDataUpdated(DataParameter<?> parameter) {
-        if (level.isClientSide() && ENTITY_DETECTED.equals(parameter) && isEntityDetected() && StandUtil.isEntityStandUser(ClientUtil.getClientPlayer())) {
+        if (level.isClientSide() && ENTITY_DETECTED.equals(parameter) && isEntityDetected()
+        		&& StandUtil.shouldHearStands(ClientUtil.getClientPlayer())) {
             ClientTickingSoundsHelper.playMagiciansRedDetectorSound(this);
         }
         super.onSyncedDataUpdated(parameter);
@@ -121,7 +124,7 @@ public class MRDetectorEntity extends Entity implements IEntityAdditionalSpawnDa
 
     @Override
     public boolean isInvisibleTo(PlayerEntity player) {
-        return !player.isSpectator() && (!ClientUtil.shouldStandsRender(player) || super.isInvisible());
+        return !player.isSpectator() && (!StandUtil.shouldStandsRender(player) || super.isInvisible());
     }
 
     @Override
@@ -161,7 +164,10 @@ public class MRDetectorEntity extends Entity implements IEntityAdditionalSpawnDa
     
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
-        owner = level.getEntity(additionalData.readInt());
+        Entity owner = level.getEntity(additionalData.readInt());
+        if (owner instanceof LivingEntity) {
+        	this.owner = (LivingEntity) owner;
+        }
     }
 
     @Override

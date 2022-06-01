@@ -764,7 +764,7 @@ public class ActionsOverlayGui extends AbstractGui {
             
             float iconFill = power.getLeapCooldownPeriod() != 0 ? 
                     1F - (float) power.getLeapCooldown() / (float) power.getLeapCooldownPeriod() : 1;
-            boolean translucent = !power.canLeap();
+            boolean translucent = !InputHandler.getInstance().canPlayerLeap();
             
             renderFilledIcon(matrixStack, iconX, iconY, translucent, iconFill, 96, 238, 18, 18, 0xFFFFFF);
         }

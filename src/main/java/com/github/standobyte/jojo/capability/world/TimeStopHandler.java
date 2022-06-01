@@ -192,8 +192,12 @@ public class TimeStopHandler {
     }
     
     public void sendPlayerState(ServerPlayerEntity player) {
-        boolean canMove = TimeUtil.canPlayerMoveInStoppedTime(player, true);
-        boolean canSee = TimeUtil.canPlayerSeeInStoppedTime(canMove, TimeUtil.hasTimeStopAbility(player));
+    	boolean canMove = true;
+    	boolean canSee = true;
+    	if (TimeUtil.isTimeStopped(player.level, player.blockPosition())) {
+        	canMove = TimeUtil.canPlayerMoveInStoppedTime(player, true);
+        	canSee = TimeUtil.canPlayerSeeInStoppedTime(canMove, TimeUtil.hasTimeStopAbility(player));
+    	}
         PacketManager.sendToClient(new TimeStopPlayerStatePacket(canSee, canMove), player);
     }
     

@@ -106,7 +106,6 @@ import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.SoundEvents;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.EntityRayTraceResult;
@@ -661,15 +660,6 @@ public class GameplayEventHandler {
             }
         }
         return false;
-    }
-    
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onSoundPlay(PlaySoundAtEntityEvent event) {
-    	Entity player = event.getEntity();
-    	
-    	if (player != null && event.getSound() == SoundEvents.PLAYER_HURT) {
-    		
-    	}
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)

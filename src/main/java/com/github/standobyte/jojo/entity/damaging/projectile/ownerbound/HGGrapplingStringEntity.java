@@ -19,6 +19,7 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
     private IStandPower userStandPower;
     private boolean bindEntities;
     private StandEntity stand;
+    private boolean placedBarrier = false;
 
     public HGGrapplingStringEntity(World world, StandEntity entity, IStandPower userStand) {
         super(ModEntityTypes.HG_GRAPPLING_STRING.get(), entity, world);
@@ -91,6 +92,13 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
                     }
                 }
             }
+            else if (!level.isClientSide() && !placedBarrier && owner instanceof HierophantGreenEntity) {
+                HierophantGreenEntity hierophant = (HierophantGreenEntity) owner;
+                if (hierophant.hasBarrierAttached()) {
+                    hierophant.attachBarrier(blockPosition());
+                }
+                placedBarrier = true;
+            }
             return true;
         }
         return false;
@@ -142,14 +150,6 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
         if (!brokenBlock && !bindEntities) {
             if (!getBlockPosAttachedTo().isPresent()) {
                 playSound(ModSounds.HIEROPHANT_GREEN_GRAPPLE_CATCH.get(), 1.0F, 1.0F);
-                
-                LivingEntity owner = getOwner();
-                if (!level.isClientSide() && owner instanceof HierophantGreenEntity) {
-                    HierophantGreenEntity hierophant = (HierophantGreenEntity) owner;
-                    if (hierophant.hasBarrierAttached()) {
-                        hierophant.attachBarrier(blockPosition());
-                    }
-                }
             }
             attachToBlockPos(blockRayTraceResult.getBlockPos());
         }

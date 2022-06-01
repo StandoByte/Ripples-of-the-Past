@@ -101,6 +101,14 @@ public class StandUtil {
     public static boolean isEntityStandUser(LivingEntity entity) {
         return entity.getCapability(StandCapProvider.STAND_CAP).map(cap -> cap.hasPower()).orElse(false);
     }
+
+    public static boolean shouldStandsRender(PlayerEntity player) {
+        return isEntityStandUser(player) || player.hasEffect(ModEffects.SPIRIT_VISION.get());
+    }
+    
+    public static boolean shouldHearStands(PlayerEntity player) {
+    	return shouldStandsRender(player);
+    }
     
     public static void setManualControl(PlayerEntity player, boolean manualControl, boolean keepPosition) {
         IStandPower standPower = IStandPower.getPlayerStandPower(player);
