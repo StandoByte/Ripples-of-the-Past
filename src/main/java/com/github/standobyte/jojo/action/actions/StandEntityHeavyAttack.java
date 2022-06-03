@@ -2,6 +2,8 @@ package com.github.standobyte.jojo.action.actions;
 
 import java.util.function.Supplier;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
@@ -18,16 +20,16 @@ import net.minecraft.world.World;
 public class StandEntityHeavyAttack extends StandEntityAction {
 	private final Supplier<StandEntityComboHeavyAttack> comboAttack;
 
-    public StandEntityHeavyAttack(StandEntityHeavyAttack.Builder builder, Supplier<StandEntityComboHeavyAttack> comboAttack) {
+    public StandEntityHeavyAttack(StandEntityHeavyAttack.Builder builder, @Nullable Supplier<StandEntityComboHeavyAttack> comboAttack) {
         super(builder);
         this.comboAttack = comboAttack;
     }
 
 	@Override
-    public Action<IStandPower> getVisibleAction(IStandPower power) {
-    	return comboAttack != null && comboAttack.get() != null && comboAttack.get().isUnlocked(power)
+    protected Action<IStandPower> replaceAction(IStandPower power) {
+    	return comboAttack != null && comboAttack.get() != null
     			&& power.isActive() && ((StandEntity) power.getStandManifestation()).willHeavyPunchCombo()
-    			? comboAttack.get() : super.getVisibleAction(power);
+    			? comboAttack.get() : this;
     }
 
     @Override
@@ -68,7 +70,7 @@ public class StandEntityHeavyAttack extends StandEntityAction {
     }
     
     @Override
-    public boolean isCombatAction() {
+    public boolean noComboDecay() {
         return true;
     }
     

@@ -117,4 +117,15 @@ public class CommonReflection {
     public static void setFurnaceLitDuration(AbstractFurnaceTileEntity tileEntity, int ticks) {
         ReflectionUtil.setFieldValue(FURNACE_TE_LIT_DURATION, tileEntity, ticks);
     }
+    
+    
+    
+    private static final Field LIVING_ENTITY_LERP_STEPS = ObfuscationReflectionHelper.findField(LivingEntity.class, "field_70716_bi");
+    public static int getLerpSteps(LivingEntity entity) {
+        return ReflectionUtil.getFieldValue(LIVING_ENTITY_LERP_STEPS, entity);
+    }
+    
+    public static void setLerpSteps(LivingEntity entity, int steps) {
+        ReflectionUtil.setFieldValue(LIVING_ENTITY_LERP_STEPS, entity, steps);
+    }
 }

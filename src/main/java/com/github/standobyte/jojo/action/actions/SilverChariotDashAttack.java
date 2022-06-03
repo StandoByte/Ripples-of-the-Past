@@ -85,11 +85,11 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
     }
 
     @Override
-    public boolean isCancelable(IStandPower standPower, StandEntity standEntity, Phase phase, @Nullable StandEntityAction newAction) {
+	protected boolean isCancelable(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction, Phase phase) {
         if (newAction == this && phase == Phase.RECOVERY) {
             return true;
         }
-        return super.isCancelable(standPower, standEntity, phase, newAction);
+        return super.isCancelable(standPower, standEntity, newAction, phase);
     }
     
     @Override

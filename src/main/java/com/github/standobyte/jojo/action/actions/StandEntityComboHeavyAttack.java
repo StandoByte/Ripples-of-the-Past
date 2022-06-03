@@ -29,7 +29,7 @@ public class StandEntityComboHeavyAttack extends StandEntityHeavyAttack {
     
     @Override
     protected boolean playsVoiceLineOnShift() {
-    	return isShiftVariation();
+    	return true;
     }
     
     

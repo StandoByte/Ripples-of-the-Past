@@ -11,7 +11,6 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -149,9 +148,18 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     public abstract boolean isUnlocked(P power);
     
+    // FIXME make two separate classes for HamonPlantInfusion and HamonOrganismInfusion
     @Nullable
-    public Action<P> getVisibleAction(P power) {
-        return isUnlocked(power) ? this : null;
+    public final Action<P> getVisibleAction(P power) {
+    	if (isUnlocked(power)) {
+    		Action<P> replacingVariation = replaceAction(power);
+    		return replacingVariation.isUnlocked(power) ? replacingVariation : this;
+    	}
+        return null;
+    }
+    
+    protected Action<P> replaceAction(P power) {
+    	return this;
     }
     
     protected static ActionConditionResult conditionMessage(String postfix) {
@@ -239,7 +247,6 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     @Nullable
     protected SoundEvent getShout(LivingEntity user, P power, ActionTarget target, boolean wasActive) {
-    	JojoMod.LOGGER.debug(shoutSupplier.get() != null ? shoutSupplier.get().getRegistryName() : "null");
         return shoutSupplier.get();
     }
     

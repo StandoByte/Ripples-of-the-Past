@@ -84,7 +84,6 @@ public class StandEntityTask {
 //                setTarget(ActionTarget.EMPTY);
 //            }
 
-        	// FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             rotateStand(standEntity, true);
         }
         if (!standEntity.level.isClientSide() && target.getType() == TargetType.ENTITY) {

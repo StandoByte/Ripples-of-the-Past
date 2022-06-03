@@ -7,7 +7,6 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
@@ -251,7 +250,6 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             }
         }
         else {
-        	JojoMod.LOGGER.debug(action.getRegistryName() + ", " + result.isPositive());
             if (result.isPositive()) {
                 if (!user.level.isClientSide()) {
                     action.playVoiceLine(user, getThis(), target, wasActive, shift);

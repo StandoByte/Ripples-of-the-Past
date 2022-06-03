@@ -385,13 +385,6 @@ public class InputHandler {
         }
 
         boolean leftClickedBlock = actionType == ActionType.ATTACK && mc.hitResult.getType() == Type.BLOCK;
-        if (leftClickedBlock && leftClickBlockDelay > 0) {
-            if (event != null) {
-                event.setSwingHand(false);
-                event.setCanceled(true);
-            }
-            return;
-        }
         boolean shift = mc.player.isShiftKeyDown();
         
         boolean click;
@@ -399,7 +392,7 @@ public class InputHandler {
             click = actionsOverlay.onClick(actionType, shift, 0);
         }
         else {
-            click = actionsOverlay.onClick(actionType, shift);
+            click = !(leftClickedBlock && leftClickBlockDelay > 0) && actionsOverlay.onClick(actionType, shift);
         }
         if (click) {
             Action<?> action = key != ActionKey.STAND_BLOCK ? actionsOverlay.getSelectedAction(actionType) : power.getAction(actionType, 0, shift);
@@ -417,7 +410,7 @@ public class InputHandler {
         else {
         	handleStun(event);
         }
-        if (leftClickedBlock) {
+        if (leftClickedBlock && leftClickBlockDelay <= 0) {
             leftClickBlockDelay = 4;
         }
     }

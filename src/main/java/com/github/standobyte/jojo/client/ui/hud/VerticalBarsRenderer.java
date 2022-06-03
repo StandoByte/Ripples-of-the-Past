@@ -29,14 +29,14 @@ public class VerticalBarsRenderer extends BarsRenderer {
     protected void renderBarWithIcon(MatrixStack matrixStack, BarType barType, NonStandPowerType<?> powerType, 
             boolean highlight, int color, float iconFill, 
             float value, float maxValue, float attackCostValue, float abilityCostValue, float tranclucentBarValue, 
-            int ticks, float partialTick) {
+            float alpha, int ticks, float partialTick) {
         int barHeight = highlight ? BAR_HEIGHT : BAR_HEIGHT_SHORTENED;
         int fill = (int) ((float) barHeight * (value / maxValue));
         int texX = barType == BarType.STAMINA ? 48 : 32;
         
         if (highlight) {
             renderBar(matrixStack, x, y, null, 
-                    texX, 0, 8, barHeight, fill, color, alphaMultiplier(barType), 
+                    texX, 0, 8, barHeight, fill, color, alpha, 
                     0, 0, 17, 1, 
                     (int) ((float) barHeight * (tranclucentBarValue / maxValue)), 
                     (int) (attackCostValue / maxValue), (int) (attackCostValue / maxValue), 
@@ -54,7 +54,7 @@ public class VerticalBarsRenderer extends BarsRenderer {
             ElementTransparency transparency = barTransparencies.get(barType);
             if (transparency.shouldRender()) {
                 renderBar(matrixStack, x, y + BAR_HEIGHT - BAR_HEIGHT_SHORTENED, null, 
-                        texX + 8, 0, 5, barHeight, fill, color, transparency.getAlpha(partialTick) * alphaMultiplier(barType), 
+                        texX + 8, 0, 5, barHeight, fill, color, transparency.getAlpha(partialTick) * alpha, 
                         8, 0, 25, 1, 
                         0, 0, 0, 0);
             }

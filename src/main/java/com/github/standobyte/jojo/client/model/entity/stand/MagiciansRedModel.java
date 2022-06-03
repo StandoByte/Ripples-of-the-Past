@@ -222,7 +222,7 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
                 RotationAngle.fromDegrees(head, -45F, -10F, 0F), 
                 RotationAngle.fromDegrees(body, -59.3179F, -27.034F, 37.4537F),
                 RotationAngle.fromDegrees(leftArm, -135F, -15F, 30F),
-                // FIXME (!!!!) change rotation direction to and from the angle (don't forget about RB rotations)
+                // FIXME (!!) change rotation direction to and from the angle (don't forget about RB rotations)
                 RotationAngle.fromDegrees(rightArm, -180F, 30F, -45F).noDegreesWrapping(),
                 RotationAngle.fromDegrees(rightForeArm, 0F, 0F, -45F),
                 RotationAngle.fromDegrees(leftLeg, 50F, 45F, 0F),

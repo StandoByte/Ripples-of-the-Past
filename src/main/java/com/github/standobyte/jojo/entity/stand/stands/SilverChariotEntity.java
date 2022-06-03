@@ -117,23 +117,6 @@ public class SilverChariotEntity extends StandEntity {
         updateModifier(getAttribute(ModEntityAttributes.STAND_DURABILITY.get()), NO_ARMOR_DURABILITY_DECREASE, !armor);
     }
     
-    // FIXME (!!) render rapier on fire
-    public boolean isRapierOnFire() {
-    	return entityData.get(RAPIER_ON_FIRE);
-    }
-    
-    @Override
-    public boolean attackEntity(Entity target, PunchType punch, StandEntityAction action, 
-            int barrageHits, @Nullable Consumer<StandAttackProperties> attackOverride) {
-    	if (hasRapier() && isRapierOnFire()) {
-            return DamageUtil.dealDamageAndSetOnFire(target, 
-                    entity -> super.attackEntity(target, punch, action, barrageHits, attackOverride), 4, true);
-    	}
-    	else {
-    		return super.attackEntity(target, punch, action, barrageHits);
-    	}
-    }
-    
     @Override
     protected float getPhysicalResistance(float blockedRatio) {
         return StandStatFormulas.getPhysicalResistance(0, 0, blockedRatio);
@@ -189,9 +172,26 @@ public class SilverChariotEntity extends StandEntity {
         }
         return super.canBreakBlock(blockHardness, blockHarvestLevel);
     }
-
+    
+    // FIXME (!!) render rapier on fire
+    public boolean isRapierOnFire() {
+    	return entityData.get(RAPIER_ON_FIRE);
+    }
+    
     @Override
-    public boolean attackEntity(Entity target, PunchType punch, StandEntityAction action, int barrageHits) {
+    public boolean attackEntity(Entity target, PunchType punch, StandEntityAction action, 
+            int barrageHits, @Nullable Consumer<StandAttackProperties> attackOverride) {
+    	if (hasRapier() && isRapierOnFire()) {
+            return DamageUtil.dealDamageAndSetOnFire(target, 
+                    entity -> attackOrDeflect(target, punch, action, barrageHits, attackOverride), 4, true);
+    	}
+    	else {
+    		return attackOrDeflect(target, punch, action, barrageHits, attackOverride);
+    	}
+    }
+
+    private boolean attackOrDeflect(Entity target, PunchType punch, StandEntityAction action, int barrageHits,
+            @Nullable Consumer<StandAttackProperties> attackOverride) {
         if (hasRapier() && target instanceof ProjectileEntity) {
             if (target.getType() != ModEntityTypes.SPACE_RIPPER_STINGY_EYES.get()) {
                 JojoModUtil.deflectProjectile(target, getLookAngle());
@@ -204,7 +204,7 @@ public class SilverChariotEntity extends StandEntity {
             return false;
         }
         else {
-            return super.attackEntity(target, punch, action, barrageHits);
+            return super.attackEntity(target, punch, action, barrageHits, attackOverride);
         }
     }
     

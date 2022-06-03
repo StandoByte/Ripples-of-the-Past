@@ -92,7 +92,7 @@ public class TimeStopInstance {
                     if (action != null) {
                         staminaCost += action.getStaminaCostTicking(power);
                     }
-                    if (!power.consumeStamina(staminaCost) && !StandUtil.standIgnoresStaminaDebuff(user)) {
+                    if (!power.consumeStamina(staminaCost) && !StandUtil.standIgnoresStaminaDebuff(power)) {
                         power.setStamina(0);
                         return true;
                     }
@@ -173,21 +173,23 @@ public class TimeStopInstance {
         if (!world.isClientSide()) {
             if (action != null) {
                 userPower.ifPresent(power -> {
-                    statsOptional.ifPresent(stats -> {
-                        float cooldown;
-                        if (power.isUserCreative()) {
-                            cooldown = 0;
-                        }
-                        else {
-                            cooldown = stats.timeStopCooldownPerTick * ticksPassed;
-                            if (power.getUser() != null && power.getUser().hasEffect(ModEffects.RESOLVE.get())) {
-                                cooldown /= 3F;
-                            }
-                        }
-                        power.setCooldownTimer(action, (int) cooldown);
-
-                        power.addLearningProgressPoints(action, stats.timeStopLearningPerTick * ticksPassed);
-                    });
+                	if (power.hasPower()) {
+	                    statsOptional.ifPresent(stats -> {
+	                        float cooldown;
+	                        if (power.isUserCreative()) {
+	                            cooldown = 0;
+	                        }
+	                        else {
+	                            cooldown = stats.timeStopCooldownPerTick * ticksPassed;
+	                            if (power.getUser() != null && power.getUser().hasEffect(ModEffects.RESOLVE.get())) {
+	                                cooldown /= 3F;
+	                            }
+	                        }
+	                        power.setCooldownTimer(action, (int) cooldown);
+	
+	                        power.addLearningProgressPoints(action, stats.timeStopLearningPerTick * ticksPassed);
+	                    });
+                	}
                 });
             }
             if (user != null && statusEffectInstance != null) {

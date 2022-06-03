@@ -288,7 +288,7 @@ public class HamonData extends TypeSpecificData {
     }
 
     private static final AttributeModifier ATTACK_DAMAGE = new AttributeModifier(
-            UUID.fromString("8dcb2ad7-6067-4615-b7b6-af5256537c10"), "Attack damage from Hamon Training", 0.01D, AttributeModifier.Operation.ADDITION);
+            UUID.fromString("8dcb2ad7-6067-4615-b7b6-af5256537c10"), "Attack damage from Hamon Training", 0.03D, AttributeModifier.Operation.ADDITION);
     private static final AttributeModifier ATTACK_SPEED = new AttributeModifier(
             UUID.fromString("995b2915-9053-472c-834c-f94251e81659"), "Attack speed from Hamon Training", 0.03D, AttributeModifier.Operation.ADDITION);
     private static final AttributeModifier MOVEMENT_SPEED = new AttributeModifier(

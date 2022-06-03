@@ -185,7 +185,7 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
     protected final Map<StandPose, StandActionAnimation<SilverChariotEntity>> rapierAnim = new HashMap<>();
     @Override
     protected void initActionPoses() {
-        // FIXME (!!!!) SC attack animation
+        // FIXME (!!) SC attack animation
 //        rapierAnim.put(StandPose.LIGHT_ATTACK, initLightAttackAnim());
         
         IModelPose<SilverChariotEntity> armSwingPose = new ModelPoseSided<>(

@@ -18,7 +18,6 @@ import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.util.text.ITextComponent;
@@ -53,7 +52,7 @@ public abstract class BarsRenderer {
                     currentMode == PowerClassification.NON_STAND, nonStandPower.getType().getColor(), 1, 
                     nonStandPower.getEnergy(), nonStandPower.getMaxEnergy(), 
                     250f, 450f, 0, 
-                    tickCounter, partialTick); 
+                    1F, tickCounter, partialTick); 
         }
         if (standPower != null && standPower.hasPower()) {
             if (standPower.usesStamina() && !standPower.isStaminaInfinite()) {
@@ -62,7 +61,7 @@ public abstract class BarsRenderer {
                         currentMode == PowerClassification.STAND, 0xFFFFFF, 1, 
                         standPower.getStamina(), standPower.getMaxStamina(), 
                         750f, 350f, 0, 
-                        tickCounter, partialTick);
+                        StandUtil.standIgnoresStaminaDebuff(standPower) ? 0.3F : 1F, tickCounter, partialTick);
             }
             if (standPower.usesResolve()) {
                 int color = standPower.getType().getColor();
@@ -70,8 +69,7 @@ public abstract class BarsRenderer {
                         currentMode == PowerClassification.STAND, color, (float) standPower.getResolveLevel() / (float) standPower.getMaxResolveLevel(), 
                         standPower.getResolve(), standPower.getMaxResolve(), 
                         0, 0, standPower.getResolveCounter().getMaxAchievedValue(), 
-                        tickCounter, partialTick);
-                
+                        1F, tickCounter, partialTick);
                 setResolveBonusTextPos(x, y, alignment);
             }
         }
@@ -100,7 +98,7 @@ public abstract class BarsRenderer {
             boolean highlight, int color, 
             float value, float maxValue, float iconFill, 
             float attackCostValue, float abilityCostValue, float tranclucentBarValue, 
-            int ticks, float partialTick);
+            float alpha, int ticks, float partialTick);
     
     protected final void renderBar(MatrixStack matrixStack, int x, int y, Alignment alignment, 
             int texX, int texY, int width, int length, int fill, int barColor, float barAlpha, 
@@ -182,13 +180,6 @@ public abstract class BarsRenderer {
         if (scale > 1) {
             matrixStack.popPose();
         }
-    }
-    
-    protected final float alphaMultiplier(BarType barType) {
-        if (barType == BarType.STAMINA && StandUtil.standIgnoresStaminaDebuff(Minecraft.getInstance().player)) {
-            return 0.3F;
-        }
-        return 1F;
     }
     
     protected enum BarType {

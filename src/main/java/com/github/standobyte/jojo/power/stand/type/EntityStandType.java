@@ -172,18 +172,6 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
     }
 
     @Override
-    public void tickUser(LivingEntity user, IStandPower power) {
-        super.tickUser(user, power);
-        IStandManifestation stand = power.getStandManifestation();
-        if (stand instanceof StandEntity) {
-            StandEntity standEntity = (StandEntity) stand;
-            if (standEntity.level != user.level) {
-                forceUnsummon(user, power);
-            }
-        }
-    }
-
-    @Override
     public void forceUnsummon(LivingEntity user, IStandPower standPower) {
         if (!user.level.isClientSide()) {
             IStandManifestation stand = standPower.getStandManifestation();
@@ -192,6 +180,18 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
                 standPower.setStandManifestation(null);
                 PacketManager.sendToClientsTrackingAndSelf(new TrSetStandEntityPacket(user.getId(), -1), user);
                 standEntity.remove();
+            }
+        }
+    }
+
+    @Override
+    public void tickUser(LivingEntity user, IStandPower power) {
+        super.tickUser(user, power);
+        IStandManifestation stand = power.getStandManifestation();
+        if (stand instanceof StandEntity) {
+            StandEntity standEntity = (StandEntity) stand;
+            if (standEntity.level != user.level) {
+                forceUnsummon(user, power);
             }
         }
     }

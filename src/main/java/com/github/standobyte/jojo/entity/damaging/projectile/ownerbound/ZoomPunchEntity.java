@@ -129,7 +129,7 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
     @Override
     protected boolean hurtTarget(Entity target, LivingEntity owner) {
         boolean regularAttack = super.hurtTarget(target, owner);
-        boolean hamonAttack = DamageUtil.dealHamonDamage(target, 0.125F, this, owner);
+        boolean hamonAttack = DamageUtil.dealHamonDamage(target, 0.1F, this, owner);
         return regularAttack || hamonAttack;
     }
 

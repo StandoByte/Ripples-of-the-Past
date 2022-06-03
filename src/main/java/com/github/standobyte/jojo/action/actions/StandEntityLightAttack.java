@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.PunchType;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
+import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
@@ -74,20 +75,20 @@ public class StandEntityLightAttack extends StandEntityAction {
     }
     
     @Override
-    public boolean isCancelable(IStandPower standPower, StandEntity standEntity, Phase phase, @Nullable StandEntityAction newAction) {
+	protected boolean isCancelable(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction, Phase phase) {
         if (phase == Phase.RECOVERY) {
             return true;
         }
-        return super.isCancelable(standPower, standEntity, phase, newAction);
+        return super.isCancelable(standPower, standEntity, newAction, phase);
     }
     
     @Override
-    protected boolean canQueue(StandEntityAction nextAction, IStandPower standPower, StandEntity standEntity) {
+    protected boolean canClickDuringTask(StandEntityAction nextAction, IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
         return true;
     }
     
     @Override
-    public boolean isCombatAction() {
+    public boolean noComboDecay() {
         return true;
     }
     

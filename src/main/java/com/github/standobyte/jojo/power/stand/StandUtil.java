@@ -136,8 +136,8 @@ public class StandUtil {
         }
     }
     
-    public static boolean standIgnoresStaminaDebuff(LivingEntity user) {
-        return user == null || user.hasEffect(ModEffects.RESOLVE.get());
+    public static boolean standIgnoresStaminaDebuff(IStandPower power) {
+        return power.getUser() == null || power.getUser().hasEffect(ModEffects.RESOLVE.get()) || power.isUserCreative();
     }
     
     public static LivingEntity getStandUser(LivingEntity standOrUser) {

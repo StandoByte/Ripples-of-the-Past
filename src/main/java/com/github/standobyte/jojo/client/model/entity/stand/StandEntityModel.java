@@ -40,7 +40,6 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     protected float xRotation;
     protected float ticks;
 
-    protected StandPose poseType = StandPose.SUMMON;
     public float idleLoopTickStamp = 0;
     private ModelPose<T> poseReset;
     protected IModelPose<T> idlePose;
@@ -82,32 +81,19 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     protected abstract void updatePartsVisibility(VisibilityMode mode);
 
     @Override
-    public void prepareMobModel(T entity, float walkAnimPos, float walkAnimSpeed, float partialTick) {
-        StandPose currentPose = entity.getStandPose();
-//        if (currentPose != poseType) {
-//            resetPose(entity);
-//        }
-        poseType = currentPose;
-    }
-
-    public StandPose getPose() {
-        return poseType;
-    }
-
-    @Override
     public void setupAnim(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
         HandSide swingingHand = entity.getSwingingHand();
         headParts().forEach(part -> {
             setRotationAngle(part, 0, 0, 0);
         });
-        
 
 //        initPoses();
 //        initActionPoses();
 
-        if (poseType == StandPose.SUMMON && (ticks > SUMMON_ANIMATION_LENGTH || entity.isArmsOnlyMode())) {
+        StandPose pose = entity.getStandPose();
+        if (pose == StandPose.SUMMON && (ticks > SUMMON_ANIMATION_LENGTH || entity.isArmsOnlyMode())) {
             entity.setStandPose(StandPose.IDLE);
-            poseType = StandPose.IDLE;
+            pose = StandPose.IDLE;
         }
 
         if (attackTime > 0.0F) {
@@ -117,7 +103,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         }
         else {
             poseStand(entity, ticks, yRotationOffset, xRotation, 
-                    poseType, entity.getCurrentTaskPhase(), 
+                    pose, entity.getCurrentTaskPhase(), 
                     entity.getCurrentTaskCompletion(ticks - entity.tickCount), swingingHand);
         }
         this.yRotation = yRotationOffset;

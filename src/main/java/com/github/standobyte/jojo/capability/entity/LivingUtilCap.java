@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.entity.AfterimageEntity;
 import com.github.standobyte.jojo.power.nonstand.type.HamonCharge;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.util.reflection.CommonReflection;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
@@ -33,6 +34,8 @@ public class LivingUtilCap {
     
     private final List<AfterimageEntity> afterimages = new ArrayList<>();
     
+    private int noLerpTicks = 0;
+    
     public LivingUtilCap(LivingEntity entity) {
         this.entity = entity;
     }
@@ -40,6 +43,7 @@ public class LivingUtilCap {
     public void tick() {
         lastHurtByStandTick();
         hamonChargeTick();
+        tickNoLerp();
         
         Iterator<AfterimageEntity> it = afterimages.iterator();
         while (it.hasNext()) {
@@ -157,5 +161,18 @@ public class LivingUtilCap {
     
     
     public void onTracking(ServerPlayerEntity tracking) {
+    }
+    
+    
+    
+    public void setNoLerpTicks(int ticks) {
+    	this.noLerpTicks = ticks;
+    }
+    
+    private void tickNoLerp() {
+    	if (noLerpTicks > 0 && CommonReflection.getLerpSteps(entity) > 1) {
+    		CommonReflection.setLerpSteps(entity, 1);
+    		noLerpTicks--;
+    	}
     }
 }

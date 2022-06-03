@@ -18,7 +18,7 @@ public final class StandEntityUnsummon extends StandEntityAction {
     @Override
     public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
         LivingEntity user = standEntity.getUser();
-        if (user != null && standEntity.isCloseToEntity(user)) {
+        if (user != null && standEntity.isCloseToUser()) {
             int maxTicks = getUnsummonDuration(standEntity);
             if (standEntity.unsummonTicks == maxTicks) {
                 if (!world.isClientSide()) {
@@ -46,7 +46,7 @@ public final class StandEntityUnsummon extends StandEntityAction {
     }
     
     @Override
-    public boolean isCancelable(IStandPower standPower, StandEntity standEntity, Phase phase, StandEntityAction newAction) {
+	protected boolean isCancelable(IStandPower standPower, StandEntity standEntity, StandEntityAction newAction, Phase phase) {
         return !standEntity.isArmsOnlyMode() && newAction != this;
     }
     

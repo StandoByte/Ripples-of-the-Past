@@ -57,7 +57,7 @@ public class HamonOverdriveBarrage extends HamonAction {
 //                                dropItem = false;
                             }
                         }
-                        if (digDuration >= 0 && digDuration <= 2.5F * user.getAttributeValue(Attributes.ATTACK_DAMAGE)) {
+                        if (digDuration >= 0 && digDuration <= 2.5F * Math.sqrt(user.getAttributeValue(Attributes.ATTACK_DAMAGE))) {
                             world.destroyBlock(pos, dropItem);
                             power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get().hamonPointsFromAction(HamonStat.STRENGTH, getHeldTickEnergyCost());
                         }

@@ -30,7 +30,9 @@ public class TrKnivesCountPacket {
     public static void handle(TrKnivesCountPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
-            entity.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.setKnives(msg.knives));
+            if (entity != null) {
+            	entity.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.setKnives(msg.knives));
+            }
         });
         ctx.get().setPacketHandled(true);
     }

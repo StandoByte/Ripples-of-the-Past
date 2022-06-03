@@ -1,10 +1,10 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
-import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
@@ -16,17 +16,17 @@ import net.minecraft.entity.monster.SkeletonEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
+import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class SCRapierEntity extends ModdedProjectileEntity {
-    private static final int MAX_RICOCHETS = 12;
+    private static final int MAX_RICOCHETS = 100;
     private int ricochetCount;
     
     public SCRapierEntity(LivingEntity shooter, World world) {
@@ -57,7 +57,7 @@ public class SCRapierEntity extends ModdedProjectileEntity {
     
     @Override
     protected float getDamageFinalCalc(float damage) {
-        return damage + (float) ricochetCount * 1F;
+        return damage + (float) ricochetCount * 0.5F;
     }
     
     @Override
@@ -139,25 +139,9 @@ public class SCRapierEntity extends ModdedProjectileEntity {
             default:
                 return false;
             }
-            Vector3d clipStart = position();
-            Vector3d clipEnd = clipStart.add(motionNew.normalize().scale(16));
-            if (level.clip(new RayTraceContext(clipStart, clipEnd, 
-                    RayTraceContext.BlockMode.OUTLINE, RayTraceContext.FluidMode.NONE, this)).getType() == RayTraceResult.Type.MISS) {
-                LivingEntity owner = getOwner();
-                if (owner == null) {
-                	return false;
-                }
-                if (!owner.getBoundingBox().clip(clipStart, clipEnd).isPresent()) {
-                	if (owner instanceof StandEntity) {
-                		LivingEntity user = ((StandEntity) owner).getUser();
-                		if (user == null || !user.getBoundingBox().clip(clipStart, clipEnd).isPresent()) {
-                			return false;
-                		}
-                	}
-                	else {
-                		return false;
-                	}
-                }
+            if (JojoModUtil.rayTrace(position(), motionNew, 16, level, this, 
+            		EntityPredicates.NO_SPECTATORS, 1.0, 0).getType() == RayTraceResult.Type.MISS) {
+            	return false;
             }
             setDeltaMovement(motionNew);
             rotateTowardsMovement(1.0F);

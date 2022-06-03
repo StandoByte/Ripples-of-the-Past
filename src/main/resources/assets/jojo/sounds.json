@@ -569,7 +569,11 @@
   },
   "avdol_magicians_red": {
     "subtitle": "jojo.subtitle.magicians_red_name",
-    "sounds": [ "jojo:stand_user/avdol_magicians_red" ]
+    "sounds": [ "jojo:stand_user/avdol_magicians_red", "jojo:stand_user/avdol_magicians_red_2", "jojo:stand_user/avdol_magicians_red_3", "jojo:stand_user/avdol_magicians_red_4" ]
+  },
+  "avdol_hell_2_u": {
+    "subtitle": "jojo.subtitle.hell_2_u",
+    "sounds": [ "jojo:stand_user/avdol_hell_2_u" ]
   },
   "avdol_crossfire_hurricane": {
     "subtitle": "jojo.subtitle.crossfire_hurricane_name",
@@ -581,7 +585,7 @@
   },
   "avdol_red_bind": {
     "subtitle": "jojo.subtitle.red_bind_name",
-    "sounds": [ "jojo:stand_user/avdol_red_bind" ]
+    "sounds": [ "jojo:stand_user/avdol_red_bind", "jojo:stand_user/avdol_red_bind_2" ]
   },
   "magicians_red_summon": {
     "subtitle": "jojo.subtitle.stand_summon",

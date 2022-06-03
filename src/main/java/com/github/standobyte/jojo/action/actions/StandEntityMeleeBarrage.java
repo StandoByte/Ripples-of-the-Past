@@ -98,15 +98,15 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
     }
     
     @Override
-    public boolean isCancelable(IStandPower standPower, StandEntity standEntity, Phase phase, @Nullable StandEntityAction newAction) {
+	protected boolean isCancelable(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction, Phase phase) {
         if (phase == Phase.RECOVERY) {
             return newAction != null && newAction.canFollowUpBarrage();
         }
-        return super.isCancelable(standPower, standEntity, phase, newAction);
+        return super.isCancelable(standPower, standEntity, newAction, phase);
     }
     
     @Override
-    public boolean isCombatAction() {
+    public boolean noComboDecay() {
         return true;
     }
     
