@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
 
 public class MagiciansRedRedBind extends StandEntityAction {
@@ -25,9 +26,6 @@ public class MagiciansRedRedBind extends StandEntityAction {
         if (!world.isClientSide()) {
             standEntity.addProjectile(new MRRedBindEntity(world, standEntity));
             standEntity.playSound(ModSounds.MAGICIANS_RED_RED_BIND.get(), 1.0F, 1.0F);
-            if (standEntity.willHeavyPunchCombo()) {
-                standEntity.addComboMeter(0, 40);
-            }
         }
     }
     
@@ -36,7 +34,6 @@ public class MagiciansRedRedBind extends StandEntityAction {
         invokeForStand(power, stand -> {
             if (stand.getCurrentTaskAction() == this) {
                 if (stand.willHeavyPunchCombo() && getLandedRedBind(stand).map(redBind -> {
-                    stand.addComboMeter(0, 40);
                     stand.getCurrentTask().ifPresent(task -> {
                         task.addTicksToPhase(Math.max(stand.getNoComboDecayTicks(), redBind.ticksLifespan() - redBind.tickCount));
                     });
@@ -55,5 +52,18 @@ public class MagiciansRedRedBind extends StandEntityAction {
         List<MRRedBindEntity> redBindLanded = stand.level.getEntitiesOfClass(MRRedBindEntity.class, 
                 stand.getBoundingBox().inflate(16), redBind -> stand.is(redBind.getOwner()) && redBind.isAttachedToAnEntity());
         return !redBindLanded.isEmpty() ? Optional.of(redBindLanded.get(0)) : Optional.empty();
+    }
+    
+    @Override
+    protected SoundEvent getShout(LivingEntity user, IStandPower power, ActionTarget target, boolean wasActive) {
+    	if (power.isActive() && ((StandEntity) power.getStandManifestation()).willHeavyPunchCombo()) {
+    		return null;
+    	}
+    	return super.getShout(user, power, target, wasActive);
+    }
+    
+    @Override
+    public boolean noComboDecay() {
+        return true;
     }
 }

@@ -777,7 +777,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         if (entityData.get(NO_BLOCKING_TICKS) > 0) {
             return false;
         }
-        return getCurrentTask().map(task -> task.getAction().isCancelable(userPower, 
+        return getCurrentTask().map(task -> task.getAction().canBeCanceled(userPower, 
                 this, task.getPhase(), ModActions.STAND_ENTITY_BLOCK.get())).orElse(true);
     }
 
@@ -793,7 +793,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 if (userPower.usesStamina()) {
                     float staminaCost = StandStatFormulas.getBlockStaminaCost(damageAmount);
                     float stamina = userPower.getStamina();
-                    if (!userPower.consumeStamina(staminaCost) && !StandUtil.standIgnoresStaminaDebuff(getUser())) {
+                    if (!userPower.consumeStamina(staminaCost) && !StandUtil.standIgnoresStaminaDebuff(userPower)) {
                         blockedRatio = stamina / staminaCost;
                         standCrash();
                     }
@@ -914,7 +914,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             }
             else {
                 StandEntityAction currentAction = getCurrentTaskAction();
-                if (currentAction == null || !currentAction.isCombatAction()) {
+                if (currentAction == null || !currentAction.noComboDecay()) {
                     float decay = COMBO_DECAY;
                     float combo = entityData.get(PUNCHES_COMBO);
                     if (combo < 0.5F) {
@@ -984,7 +984,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 StandStatFormulas.rangeStrengthFactor(rangeEffective, getMaxRange(), distanceTo(user))
                 : 1;
         
-        staminaCondition = StandUtil.standIgnoresStaminaDebuff(user) ? 
+        staminaCondition = StandUtil.standIgnoresStaminaDebuff(userPower) ? 
                         1
                         : 0.25 + Math.min((double) (userPower.getStamina() / userPower.getMaxStamina()) * 1.5, 0.75);
     }
@@ -1005,7 +1005,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 }
             }
             else if (isBeingRetracted()) {
-                if (!isCloseToEntity(user)) {
+                if (!isCloseToUser()) {
                     setDeltaMovement(user.position().add(getDefaultOffsetFromUser().getAbsoluteVec(getDefaultOffsetFromUser(), user.yRot, user.xRot)).subtract(position())
                             .normalize().scale(getAttributeValue(Attributes.MOVEMENT_SPEED)));
                 }
@@ -1154,7 +1154,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 
             	StandEntityAction action = newTask != null ? newTask.getAction() : null;
                 if (task.getTicksLeft() <= 0 || stopNonCancelable
-                        || task.getAction().isCancelable(userPower, this, task.getPhase(), action)) {
+                        || task.getAction().canBeCanceled(userPower, this, task.getPhase(), action)) {
                     clearTask(task, action);
                     return true;
                 }
@@ -1179,7 +1179,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             }
             else {
                 entityData.set(CURRENT_TASK, Optional.empty());
-            	if (getUser() != null && !isCloseToEntity(getUser()) && isFollowingUser()) {
+            	if (getUser() != null && !isCloseToUser() && isFollowingUser()) {
             		retractStand(false);
             	}
             }
@@ -1587,7 +1587,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return noComboDecayTicks;
     }
     
-    public boolean attackEntity(Entity target, PunchType punch, StandEntityAction action, int barrageHits) {
+    public final boolean attackEntity(Entity target, PunchType punch, StandEntityAction action, int barrageHits) {
         return attackEntity(target, punch, action, barrageHits, null);
     }
 
@@ -1915,8 +1915,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return getStandFlag(StandFlag.BEING_RETRACTED);
     }
 
-    public boolean isCloseToEntity(Entity entity) {
-        return distanceToSqr(entity) < 2.25;
+    public boolean isCloseToUser() {
+    	LivingEntity user = getUser();
+        return user != null ? distanceToSqr(user) < 2.25 : false;
     }
 
     public boolean isFollowingUser() {
@@ -1932,7 +1933,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         fixRemotePosition = !manualControl && fixRemotePosition;
         setStandFlag(StandFlag.FIXED_REMOTE_POSITION, fixRemotePosition);
         if (!manualControl && !fixRemotePosition) {
-            retractStand(false);
+        	if (!isCloseToUser()) {
+        		retractStand(false);
+        	}
         }
         else {
             setStandFlag(StandFlag.BEING_RETRACTED, false);
@@ -2152,6 +2155,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public void writeSpawnData(PacketBuffer buffer) {
         buffer.writeInt(entityData.get(USER_ID));
         buffer.writeVarInt(summonPoseRandomByte);
+        buffer.writeInt(tickCount);
     }
     
     protected void beforeClientSpawn(FMLPlayMessages.SpawnEntity packet, World world) {
@@ -2162,6 +2166,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
         summonPoseRandomByte = additionalData.readVarInt();
+        tickCount = additionalData.readInt();
     }
 
     // TODO nbt write/read for stands which will have save enabled
@@ -2173,14 +2178,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     @Override
     public void addAdditionalSaveData(CompoundNBT nbt) {
         super.addAdditionalSaveData(nbt);
-    }
-    
-    @Override
-    public void lerpTo(double lerpX, double lerpY, double lerpZ, float lerpYRot, float lerpXRot, int lerpSteps, boolean teleport) {
-    	if (lerpX == getX()) lerpX = this.lerpX;
-    	if (lerpY == getY()) lerpY = this.lerpY;
-    	if (lerpZ == getZ()) lerpZ = this.lerpZ;
-    	super.lerpTo(lerpX, lerpY, lerpZ, lerpYRot, lerpXRot, lerpSteps, teleport);
     }
 
     private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);

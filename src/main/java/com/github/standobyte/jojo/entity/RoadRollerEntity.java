@@ -2,6 +2,8 @@ package com.github.standobyte.jojo.entity;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -23,13 +25,16 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 public class RoadRollerEntity extends Entity {
     private static final DataParameter<Float> HEALTH = EntityDataManager.defineId(RoadRollerEntity.class, DataSerializers.FLOAT);
     private static final float MAX_HEALTH = 50;
-    private int explosionTimeStamp = -1;
+    private int ticksBeforeExplosion = -1;
     private int ticksInAir = 0;
+    @Nullable
+    private Entity owner;
 
     public RoadRollerEntity(World world) {
         this(ModEntityTypes.ROAD_ROLLER.get(), world);
@@ -37,6 +42,10 @@ public class RoadRollerEntity extends Entity {
 
     public RoadRollerEntity(EntityType<RoadRollerEntity> type, World world) {
         super(type, world);
+    }
+    
+    public void setOwner(Entity entity) {
+    	this.owner = entity;
     }
 
     @Override
@@ -110,12 +119,17 @@ public class RoadRollerEntity extends Entity {
                 xRot = Math.min(xRot + 6, 0);
             }
         }
-        int ticksExpl = getTicksBeforeExplosion();
-        if (ticksExpl == 0) {
+        
+        if (ticksBeforeExplosion > 0) {
+        	ticksBeforeExplosion--;
+        }
+        else if (ticksBeforeExplosion == 0) {
             remove();
-            if (!level.isClientSide()) {
-                explode();
-            }
+        }
+        if (!level.isClientSide() && (ticksBeforeExplosion == 0 || 
+        		(ticksBeforeExplosion > 0 && ticksBeforeExplosion < 40 && owner != null && distanceToSqr(owner) > 100))) {
+        	explode();
+        	remove();
         }
     }
 
@@ -174,18 +188,14 @@ public class RoadRollerEntity extends Entity {
     public void onSyncedDataUpdated(DataParameter<?> dataParameter) {
         super.onSyncedDataUpdated(dataParameter);
         if (HEALTH.equals(dataParameter) && getHealth() == 0.0F) {
-            explosionTimeStamp = tickCount;
+        	ticksBeforeExplosion = 60;
         }
     }
     
     public int getTicksBeforeExplosion() {
-        return explosionTimeStamp == -1 ? -1 : Math.max(getTicksToExplode() + explosionTimeStamp - tickCount , 0);
+        return ticksBeforeExplosion;
     }
     
-    private int getTicksToExplode() {
-        return 60;
-    }
-
     @Override
     protected void defineSynchedData() {
         entityData.define(HEALTH, MAX_HEALTH);
@@ -194,19 +204,25 @@ public class RoadRollerEntity extends Entity {
     @Override
     protected void readAdditionalSaveData(CompoundNBT nbt) {
         if (nbt.contains("Health")) {
-            setHealth(nbt.getFloat("Health"));
-        }
-        if (nbt.contains("ExplosionTime")) {
-            explosionTimeStamp = nbt.getInt("ExplosionTime");
+        	setHealth(nbt.getFloat("Health"));
         }
         tickCount = nbt.getInt("Age");
+        if (nbt.contains("ExplosionTime")) {
+        	ticksBeforeExplosion = nbt.getInt("ExplosionTime");
+        }
+        if (nbt.hasUUID("Owner")) {
+        	owner = ((ServerWorld) level).getEntity(nbt.getUUID("Owner"));
+        }
     }
 
     @Override
     protected void addAdditionalSaveData(CompoundNBT nbt) {
         nbt.putFloat("Health", getHealth());
         nbt.putInt("Age", tickCount);
-        nbt.putInt("ExplosionTime", explosionTimeStamp);
+        nbt.putInt("ExplosionTime", ticksBeforeExplosion);
+        if (owner != null) {
+        	nbt.putUUID("Owner", owner.getUUID());
+        }
     }
 
     @Override

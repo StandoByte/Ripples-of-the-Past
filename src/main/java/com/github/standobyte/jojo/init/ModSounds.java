@@ -402,6 +402,9 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> AVDOL_MAGICIANS_RED = SOUNDS.register("avdol_magicians_red", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "avdol_magicians_red")));
 
+    public static final RegistryObject<SoundEvent> AVDOL_HELL_2_U = SOUNDS.register("avdol_hell_2_u", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "avdol_hell_2_u")));
+
     public static final RegistryObject<SoundEvent> AVDOL_CROSSFIRE_HURRICANE = SOUNDS.register("avdol_crossfire_hurricane", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "avdol_crossfire_hurricane")));
 

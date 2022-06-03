@@ -14,6 +14,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
+import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.type.EntityStandType;
@@ -61,25 +62,44 @@ public abstract class StandEntityAction extends StandAction {
     
     @Override
     public ActionConditionResult checkConditions(LivingEntity user, IStandPower power, ActionTarget target) {
-        if (power.isActive()) {
-            StandEntity stand = (StandEntity) power.getStandManifestation();
-            if (canBeQueued(power, stand)) {
-                if (!stand.isClearingAction() && stand.getCurrentTask().map(
-                        task -> task.getAction().canQueue(this, power, stand)
-                        && !task.getAction().isCancelable(power, stand, task.getPhase(), this)).orElse(false)) {
-                    return ActionConditionResult.NEGATIVE_QUEUE_INPUT;
-                }
-            }
+    	StandEntity stand = power.isActive() ? (StandEntity) power.getStandManifestation() : null;
+        if (stand != null) {
             ActionConditionResult checkStand = checkStandConditions(stand, power, target);
             if (!checkStand.isPositive()) {
                 return checkStand;
             }
         }
-        return super.checkConditions(user, power, target);
+        
+        ActionConditionResult checkGeneral = super.checkConditions(user, power, target);
+        if (!checkGeneral.isPositive()) {
+            return checkGeneral;
+        }
+        
+        if (stand != null) {
+            ActionConditionResult checkTask = checkTaskCancelling(stand, power);
+            if (!checkTask.isPositive()) {
+                return checkTask;
+            }
+        }
+
+        return ActionConditionResult.POSITIVE;
     }
     
     protected ActionConditionResult checkStandConditions(StandEntity stand, IStandPower power, ActionTarget target) {
         return ActionConditionResult.POSITIVE;
+    }
+    
+    private ActionConditionResult checkTaskCancelling(StandEntity standEntity, IStandPower standPower) {
+    	if (!standEntity.isClearingAction() && standEntity.getCurrentTask().isPresent() && standPower.getHeldAction() != this) {
+    		StandEntityTask task = standEntity.getCurrentTask().get();
+    		if (!task.getAction().canClickDuringTask(this, standPower, standEntity, task)) {
+    			return ActionConditionResult.NEGATIVE;
+    		}
+    		if (!task.getAction().canBeCanceled(standPower, standEntity, task.getPhase(), this)) {
+            	return this.canBeQueued(standPower, standEntity) ? ActionConditionResult.NEGATIVE_QUEUE_INPUT : ActionConditionResult.NEGATIVE;
+    		}
+    	}
+    	return ActionConditionResult.POSITIVE;
     }
     
     public boolean canStandTarget(StandEntity standEntity, ActionTarget target, IStandPower standPower) {
@@ -195,18 +215,18 @@ public abstract class StandEntityAction extends StandAction {
 
     @Override
     protected final void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
-        if (!world.isClientSide()) {
-            invokeForStand(power, stand -> {
-                onTaskInit(power, stand, target);
-                int windupTicks = getStandWindupTicks(power, stand);
-                int ticks = windupTicks > 0 ? windupTicks : getStandActionTicks(power, stand);
-                Phase phase = windupTicks > 0 ? Phase.WINDUP : Phase.PERFORM;
-                setAction(power, stand, ticks, phase, target);
-            });
-        }
+    	invokeForStand(power, stand -> {
+    		onTaskInit(world, power, stand, target);
+    		if (!world.isClientSide()) {
+    			int windupTicks = getStandWindupTicks(power, stand);
+    			int ticks = windupTicks > 0 ? windupTicks : getStandActionTicks(power, stand);
+    			Phase phase = windupTicks > 0 ? Phase.WINDUP : Phase.PERFORM;
+    			setAction(power, stand, ticks, phase, target);
+    		}
+    	});
     }
     
-    protected void onTaskInit(IStandPower standPower, StandEntity standEntity, ActionTarget target) {}
+    protected void onTaskInit(World world, IStandPower standPower, StandEntity standEntity, ActionTarget target) {}
     
     protected boolean allowArmsOnly() {
         return autoSummonMode == AutoSummonMode.ARMS || autoSummonMode == AutoSummonMode.ONE_ARM;
@@ -254,7 +274,7 @@ public abstract class StandEntityAction extends StandAction {
     
     protected void playSoundAtStand(World world, StandEntity standEntity, SoundEvent sound, IStandPower standPower, Phase phase) {
         if (world.isClientSide()) {
-            if (isCancelable(standPower, standEntity, phase, null)) {
+            if (canBeCanceled(standPower, standEntity, phase, null)) {
                 ClientTickingSoundsHelper.playStandEntityCancelableActionSound(standEntity, sound, this, phase, 1.0F, 1.0F);
             }
             else {
@@ -278,13 +298,21 @@ public abstract class StandEntityAction extends StandAction {
         return getHoldDurationMax(standPower) == 0;
     }
     
-    protected boolean canQueue(StandEntityAction nextAction, IStandPower standPower, StandEntity standEntity) {
-        return nextAction != this;
+    protected boolean canClickDuringTask(StandEntityAction clickedAction, IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
+        return clickedAction != this;
     }
-
-    public boolean isCancelable(IStandPower standPower, StandEntity standEntity, Phase phase, @Nullable StandEntityAction newAction) {
+    
+    public final boolean canBeCanceled(IStandPower standPower, StandEntity standEntity, Phase phase, @Nullable StandEntityAction newAction) {
+    	return isCancelable(standPower, standEntity, newAction, phase) || newAction != null && newAction.cancels(this, standPower, standEntity, phase);
+    }
+    
+    protected boolean isCancelable(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction, Phase phase) {
         return getHoldDurationMax(standPower) > 0 && phase != Phase.RECOVERY
                 && (newAction == null || getStandRecoveryTicks(standPower, standEntity) == 0);
+    }
+    
+    protected boolean cancels(StandEntityAction currentAction, IStandPower standPower, StandEntity standEntity, Phase currentPhase) {
+        return false;
     }
     
     @Override
@@ -292,7 +320,7 @@ public abstract class StandEntityAction extends StandAction {
         return getHoldDurationToFire(standPower) == 0;
     }
     
-    public boolean isCombatAction() {
+    public boolean noComboDecay() {
         return false;
     }
     

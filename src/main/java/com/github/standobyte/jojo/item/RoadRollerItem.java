@@ -34,6 +34,7 @@ public class RoadRollerItem extends Item {
             roadRoller.copyPosition(player);
             world.addFreshEntity(roadRoller);
             player.startRiding(roadRoller);
+            roadRoller.setOwner(player);
             if (IStandPower.getStandPowerOptional(player)
                     .map(stand -> stand.getType() == ModStandTypes.THE_WORLD.get())
                     .orElse(false)) {

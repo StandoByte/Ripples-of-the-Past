@@ -6,9 +6,11 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.MRRedBindEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -86,5 +88,13 @@ public class MagiciansRedKick extends StandEntityComboHeavyAttack {
         	key += "_bind";
         }
         return key;
+    }
+    
+    @Override
+    protected SoundEvent getShout(LivingEntity user, IStandPower power, ActionTarget target, boolean wasActive) {
+    	if (power.isActive() && MagiciansRedRedBind.getLandedRedBind((StandEntity) power.getStandManifestation()).isPresent()) {
+    		return ModSounds.AVDOL_HELL_2_U.get();
+    	}
+    	return super.getShout(user, power, target, wasActive);
     }
 }

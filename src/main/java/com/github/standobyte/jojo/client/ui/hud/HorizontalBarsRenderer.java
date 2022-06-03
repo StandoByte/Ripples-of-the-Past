@@ -32,7 +32,7 @@ public class HorizontalBarsRenderer extends BarsRenderer {
     protected void renderBarWithIcon(MatrixStack matrixStack, BarType barType, NonStandPowerType<?> powerType, 
             boolean highlight, int color, float iconFill, 
             float value, float maxValue, float attackCostValue, float abilityCostValue, float tranclucentBarValue, 
-            int ticks, float partialTick) {
+            float alpha, int ticks, float partialTick) {
         int barLength = highlight ? BAR_LENGTH : BAR_LENGTH_SHORTENED;
         int fill = (int) ((float) barLength * (value / maxValue));
         int texY = barType == BarType.STAMINA ? 176 : 160;
@@ -44,7 +44,7 @@ public class HorizontalBarsRenderer extends BarsRenderer {
         
         if (highlight) {
             renderBar(matrixStack, barX, y, alignment, 
-                    0, texY, 8, barLength, fill, color, alphaMultiplier(barType), 
+                    0, texY, 8, barLength, fill, color, alpha, 
                     0, 128, 1, 145, 
                     (int) ((float) barLength * (tranclucentBarValue / maxValue)), 
                     (int) (attackCostValue / maxValue), (int) (attackCostValue / maxValue), 
@@ -71,7 +71,7 @@ public class HorizontalBarsRenderer extends BarsRenderer {
             if (transparency.shouldRender()) {
                 int xOffset = alignment == Alignment.RIGHT ? BAR_LENGTH - BAR_LENGTH_SHORTENED : 0;
                 renderBar(matrixStack, barX + xOffset, y, alignment, 
-                        0, texY + 8, 5, barLength, fill, color, transparency.getAlpha(partialTick) * alphaMultiplier(barType), 
+                        0, texY + 8, 5, barLength, fill, color, transparency.getAlpha(partialTick) * alpha, 
                         0, 136, 1, 153, 
                         0, 0, 0, 0);
             }

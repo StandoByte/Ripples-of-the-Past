@@ -10,6 +10,8 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModActions;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.TrNoMotionLerpPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
@@ -19,6 +21,7 @@ import com.github.standobyte.jojo.util.utils.TimeUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
@@ -51,28 +54,24 @@ public class TimeStopInstant extends StandAction {
     }
 
     @Override
-    public Action<IStandPower> getVisibleAction(IStandPower power) {
+    protected Action<IStandPower> replaceAction(IStandPower power) {
         LivingEntity user = power.getUser();
         return user != null && TimeResume.userTimeStopInstance(user.level, user, null)
-                ? ModActions.TIME_RESUME.get() : super.getVisibleAction(power);
+                ? ModActions.TIME_RESUME.get() : this;
     }
     
     
     @Override
     protected void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
-        SoundEvent sound = blinkSound.get();
-        if (sound != null) {
-            JojoModUtil.playSound(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, user.getX(), user.getY(), user.getZ(), 
-                    sound, SoundCategory.AMBIENT, 5.0F, 1.0F, TimeUtil::canPlayerSeeInStoppedTime);
-        }
+    	playSound(world, user);
         
         int timeStopTicks = TimeStop.getTimeStopTicks(power, this);
-        if (!StandUtil.standIgnoresStaminaDebuff(user)) {
-            timeStopTicks = Math.min(timeStopTicks, MathHelper.floor(power.getStamina() / getStaminaCostTicking(power)));
+        if (!StandUtil.standIgnoresStaminaDebuff(power)) {
+            timeStopTicks = MathHelper.clamp(MathHelper.floor((power.getStamina() - getStaminaCost(power)) / getStaminaCostTicking(power)), 5, timeStopTicks);
         }
 
         Vector3d blinkPos = null;
-        double speed = user.getSpeed() * 2.1585;
+        double speed = getDistancePerTick(user);
         if (target.getType() == TargetType.EMPTY) {
             RayTraceResult rayTrace = JojoModUtil.rayTrace(user, Math.min(speed * timeStopTicks, 192), null);
             if (rayTrace.getType() == RayTraceResult.Type.MISS) {
@@ -118,18 +117,35 @@ public class TimeStopInstant extends StandAction {
         }
     }
     
+    public static double getDistancePerTick(LivingEntity entity) {
+    	return entity.getAttributeValue(Attributes.MOVEMENT_SPEED) * 2.1585;
+    }
+    
+    void playSound(World world, Entity entity) {
+        SoundEvent sound = blinkSound.get();
+        if (sound != null) {
+            JojoModUtil.playSound(world, entity instanceof PlayerEntity ? (PlayerEntity) entity : null, entity.getX(), entity.getY(), entity.getZ(), 
+                    sound, SoundCategory.AMBIENT, 5.0F, 1.0F, TimeUtil::canPlayerSeeInStoppedTime);
+        }
+    }
+    
+    TimeStop getBaseTimeStop() {
+    	return baseTimeStop.get();
+    }
+    
     protected Vector3d getEntityTargetTeleportPos(Entity user, Entity target) {
-    	return target.position().subtract(user.getLookAngle().scale(target.getBbWidth() + user.getBbWidth()));
+    	double distance = target.getBbWidth() + user.getBbWidth();
+    	return user.distanceToSqr(target) > distance * distance ? target.position().subtract(user.getLookAngle().scale(distance)) : user.position();
     }
     
     @Override
     public float getStaminaCost(IStandPower stand) {
-        return baseTimeStop.get() != null ? baseTimeStop.get().getStaminaCost(stand) : super.getStaminaCost(stand);
+        return baseTimeStop.get() != null ? baseTimeStop.get().getStaminaCost(stand) * 0.8F : super.getStaminaCost(stand);
     }
     
     @Override
     public float getStaminaCostTicking(IStandPower stand) {
-        return baseTimeStop.get() != null ? baseTimeStop.get().getStaminaCostTicking(stand) : super.getStaminaCostTicking(stand);
+        return baseTimeStop.get() != null ? baseTimeStop.get().getStaminaCostTicking(stand) * 0.8F : super.getStaminaCostTicking(stand);
     }
 
     @Override
@@ -152,6 +168,9 @@ public class TimeStopInstant extends StandAction {
     }
     
     private static void skipTicks(LivingEntity entity, int ticks) {
+    	if (!entity.level.isClientSide()) {
+    		PacketManager.sendToClientsTracking(new TrNoMotionLerpPacket(entity.getId(), 3), entity);
+    	}
         // also clear user's movement input before tick skipping
 //    	if (entity.canUpdate()) {
 //    		for (int i = 0; i < ticks; i++) {
@@ -160,11 +179,14 @@ public class TimeStopInstant extends StandAction {
 //    		}
 //    	}
 //        else {
-//            entity.tickCount += ticks;
+            entity.tickCount += ticks;
 //        }
     }
     
     private static void skipStandTicks(StandEntity entity, int ticks) {
         skipTicks(entity, ticks);
+        
+        // FIXME (!!!) do this for tracking too
+        entity.overlayTickCount += ticks;
     }
 }

@@ -10,11 +10,18 @@ import com.github.standobyte.jojo.entity.stand.StandEntity.PunchType;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.TrDirectEntityPosPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandUtil;
+import com.github.standobyte.jojo.power.stand.stats.StandStats;
+import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 import com.github.standobyte.jojo.util.utils.TimeUtil;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
@@ -43,46 +50,95 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
         return !stand.canAttackMelee() || stand.isBeingRetracted()
         		? ActionConditionResult.NEGATIVE : super.checkStandConditions(stand, power, target);
     }
+    
+    @Override
+    protected boolean canBeQueued(IStandPower standPower, StandEntity standEntity) {
+        return false;
+    }
 
-    // FIXME (!!) (TW ts punch) better aim (+ hitbox expansion higher with distance?)
     @Override
     public ActionTarget targetBeforePerform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
         if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
-            StandEntity stand = (StandEntity) power.getStandManifestation();
-            return ActionTarget.fromRayTraceResult(stand.precisionRayTrace(stand.isManuallyControlled() ? stand : user, stand.getMaxRange()));
+        	StandEntity stand = (StandEntity) power.getStandManifestation();
+        	return ActionTarget.fromRayTraceResult(
+        			JojoModUtil.rayTrace(stand.isManuallyControlled() ? stand : user, 
+        					stand.getMaxRange(), stand.canTarget(), stand.getPrecision() / 16F, stand.getPrecision()));
         }
         return super.targetBeforePerform(world, user, power, target);
     }
     
     @Override
-    protected void onTaskInit(IStandPower standPower, StandEntity standEntity, ActionTarget target) {
-    	LivingEntity user = standPower.getUser();
-    	if (user != null) {
-    		Vector3d pos = target.getTargetPos(false);
-    		if (pos != null) {
-    			double offset = 0.5 + standEntity.getBbWidth();
-    			if (target.getType() == TargetType.ENTITY) {
-    				offset += target.getEntity(standEntity.level).getBoundingBox().getXsize() / 2;
-    			}
-    			pos = pos.subtract(pos.subtract(user.getEyePosition(1.0F)).normalize().scale(offset));
-    		}
-    		else {
-    			pos = user.position().add(standEntity.getLookAngle().scale(standEntity.getMaxRange()));
-    		}
-    		if (!standEntity.isManuallyControlled()) {
-//    			pos = pos.subtract(0, standEntity.getEyeHeight() * MathHelper.cos(-user.xRot * MathUtil.DEG_TO_RAD), 0);
-    		}
-    		// FIXME (!!) (TW ts punch) tp in manual control mode
-    		standEntity.moveTo(pos);
-    		// FIXME (!!) (TW ts punch) the attack is weak due to small effective range
-    		// FIXME (!!) (TW ts punch) use stamina, upgrade ts, cooldown
-    	}
-    	standEntity.updateStrengthMultipliers();
-    }
+    protected void onTaskInit(World world, IStandPower standPower, StandEntity standEntity, ActionTarget target) {
+    	if (!world.isClientSide() || standEntity.isManuallyControlled()) {
+	    	LivingEntity aimingEntity = standEntity.isManuallyControlled() ? standEntity : standPower.getUser();
+	    	if (aimingEntity != null) {
+    			TimeStopInstant blink = theWorldTimeStopBlink.get();
+    			TimeStop timeStop = blink.getBaseTimeStop();
 
+	            int timeStopTicks = TimeStop.getTimeStopTicks(standPower, timeStop);
+	            if (!StandUtil.standIgnoresStaminaDebuff(standPower) && blink != null) {
+	                timeStopTicks = MathHelper.clamp(MathHelper.floor(
+	                		(standPower.getStamina() - blink.getStaminaCost(standPower)) / blink.getStaminaCostTicking(standPower)
+	                		), 0, timeStopTicks);
+	            }
+
+	            int ticksForWindup = 10;
+	            if (standEntity.getCurrentTask().isPresent()) {
+	            	ticksForWindup += 10;
+	            }
+	    		if (standEntity.getAttributeValue(Attributes.MOVEMENT_SPEED) > 0) {
+	    			Vector3d pos = target.getTargetPos(true);
+	    			if (pos != null) {
+	    				double offset = 0.5 + standEntity.getBbWidth();
+	    				if (target.getType() == TargetType.ENTITY) {
+	    					offset += target.getEntity(standEntity.level).getBoundingBox().getXsize() / 2;
+	    				}
+	    				pos = pos.subtract(pos.subtract(aimingEntity.getEyePosition(1.0F)).normalize().scale(offset)).subtract(0, standEntity.getEyeHeight(), 0);
+	    			}
+	    			else {
+	    				pos = aimingEntity.position().add(standEntity.getLookAngle().scale(standEntity.getMaxRange()));
+	    			}
+	    			
+
+		            double ticksForDistance = pos.subtract(standEntity.position()).length() / TimeStopInstant.getDistancePerTick(standEntity);
+		            
+		            if (timeStopTicks < ticksForDistance + ticksForWindup) {
+		            	pos = timeStopTicks > ticksForWindup ? pos.subtract(standEntity.position()).scale((double) timeStopTicks - ticksForWindup / ticksForDistance).add(standEntity.position()) : standEntity.position();
+		            }
+		            else {
+		            	timeStopTicks = MathHelper.ceil(ticksForDistance) + ticksForWindup;
+		            }
+		    		
+//		    		if (!world.isClientSide() ^ standEntity.isManuallyControlled()) {
+		    			standEntity.moveTo(pos);
+		    			if (standEntity.tickCount == 0 && !world.isClientSide()) {
+		    				PacketManager.sendToClientsTracking(new TrDirectEntityPosPacket(standEntity.getId(), pos), standEntity);
+		    			}
+//		    		}
+	    		}
+	    		else {
+	    			timeStopTicks = ticksForWindup;
+	    		}
+
+	    		TimeStopInstant.skipTicksForStandAndUser(standPower, timeStopTicks);
+	    		if (!world.isClientSide()) {
+    				blink.playSound(world, standEntity);
+	    			standPower.consumeStamina(blink.getStaminaCost(standPower) * 0.5F + timeStopTicks * blink.getStaminaCostTicking(standPower) * 2F);
+	    			if (standPower.hasPower()) {
+		    			StandStats stats = standPower.getType().getStats();
+		    			if (stats instanceof TimeStopperStandStats) {
+		    				standPower.addLearningProgressPoints(theWorldTimeStopBlink.get().getBaseTimeStop(), 
+		    						(int) (((TimeStopperStandStats) stats).timeStopLearningPerTick * timeStopTicks));
+		    			}
+	    			}
+	    		}
+	    	}
+    	}
+    }
+    
     @Override
-    public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
-        return 5;
+    public float getStaminaCost(IStandPower stand) {
+        return theWorldHeavyAttack.get().getStaminaCost(stand);
     }
     
     @Override
@@ -99,7 +155,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
                 .addKnockback(4)
                 .disableBlocking(1.0F)
                 .callbackAfterAttack((t, stand, power, user, hurt, killed) -> {
-                    if (killed) {
+                    if (killed && user != null && stand.distanceToSqr(user) > 16) {
                         JojoModUtil.sayVoiceLine(user, ModSounds.DIO_THIS_IS_THE_WORLD.get());
                     }
                 });
@@ -113,12 +169,17 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
     }
     
     @Override
-    public boolean isCombatAction() {
+    public boolean noComboDecay() {
         return true;
     }
     
+//    @Override
+//    public boolean canFollowUpBarrage() {
+//        return true;
+//    }
+    
     @Override
-    public boolean canFollowUpBarrage() {
-        return true;
+	protected boolean cancels(StandEntityAction currentAction, IStandPower standPower, StandEntity standEntity, Phase currentPhase) {
+        return currentAction != this && currentPhase == Phase.RECOVERY;
     }
 }

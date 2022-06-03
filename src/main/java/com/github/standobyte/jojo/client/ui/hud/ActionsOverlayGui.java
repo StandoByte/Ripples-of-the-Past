@@ -16,6 +16,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTargetContainer;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -125,6 +126,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 element.tick();
             }
         }
+        
         INonStandPower power = nonStandUiMode.getPower();
         if (power != null) {
             if (power.getEnergy() < power.getMaxEnergy()) {
@@ -140,6 +142,9 @@ public class ActionsOverlayGui extends AbstractGui {
                 resolveBarTransparency.reset();
             }
         }
+        
+        tickStandUnsummonCheck();
+        
         tickCount++;
     }
     
@@ -487,12 +492,12 @@ public class ActionsOverlayGui extends AbstractGui {
         if (isSelected) {
             boolean rightTarget = power.checkTargetType(action, targetContainer).isPositive();
             mode.getTargetIcon(hotbar).update(action.getTargetRequirement(), rightTarget);
-            boolean available = rightTarget && power.checkRequirements(action, targetContainer, false).isPositive();
-            return available;
+            if (!rightTarget) {
+                return false;
+            }
         }
-        else {
-            return power.checkRequirements(action, targetContainer, true).isPositive();
-        }
+    	ActionConditionResult result = power.checkRequirements(action, targetContainer, false);
+    	return result.isPositive() || result.queueInput();
     }
     
     private void fillRect(BufferBuilder bufferBuilder, int x, double y, int width, double height, int red, int green, int blue, int alpha) {
@@ -953,10 +958,24 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
 
+    private boolean switchOffStandHud = false;
     public void onStandUnsummon() {
-        if (currentMode == standUiMode && !standUiMode.chosenManually) {
-            setMode(null, false);
-        }
+    	switchOffStandHud = true;
+    }
+    
+    private void tickStandUnsummonCheck() {
+    	if (currentMode == standUiMode && !standUiMode.chosenManually) {
+    		IStandPower standPower = standUiMode.getPower();
+    		if (standPower == null || !standPower.hasPower() || !standPower.isActive()) {
+    			if (switchOffStandHud) {
+    				setMode(null, false);
+    			}
+                switchOffStandHud = false;
+    		}
+    	}
+    	else {
+    		switchOffStandHud = false;
+    	}
     }
     
     

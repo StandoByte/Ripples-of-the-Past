@@ -39,7 +39,7 @@ public class StarPlatinumInhale extends StandEntityAction {
     				}
     			});
     	if (world.isClientSide()) {
-    		// FIXME (!!!) (inhale) particles
+    		// FIXME (!!) (inhale) particles
     	}
     }
 

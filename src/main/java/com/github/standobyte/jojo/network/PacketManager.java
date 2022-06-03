@@ -51,11 +51,13 @@ import com.github.standobyte.jojo.network.packets.fromserver.TimeStopInstancePac
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerJoinPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerStatePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrCooldownPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrDirectEntityPosPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrEnergyPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonStatsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHeldActionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrNoMotionLerpPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrNonStandFlagPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrPowerTypePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
@@ -368,6 +370,16 @@ public class PacketManager {
         .encoder(RefreshMovementInTimeStopPacket::encode)
         .decoder(RefreshMovementInTimeStopPacket::decode)
         .consumer(RefreshMovementInTimeStopPacket::handle).add();
+        
+        channel.messageBuilder(TrNoMotionLerpPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(TrNoMotionLerpPacket::encode)
+        .decoder(TrNoMotionLerpPacket::decode)
+        .consumer(TrNoMotionLerpPacket::handle).add();
+        
+        channel.messageBuilder(TrDirectEntityPosPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+        .encoder(TrDirectEntityPosPacket::encode)
+        .decoder(TrDirectEntityPosPacket::decode)
+        .consumer(TrDirectEntityPosPacket::handle).add();
         
         channel.messageBuilder(CommonConfigPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
         .encoder(CommonConfigPacket::encode)

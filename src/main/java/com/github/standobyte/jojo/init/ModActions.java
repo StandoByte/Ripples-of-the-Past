@@ -37,6 +37,7 @@ import com.github.standobyte.jojo.action.actions.MagiciansRedKick;
 import com.github.standobyte.jojo.action.actions.MagiciansRedRedBind;
 import com.github.standobyte.jojo.action.actions.NonStandAction;
 import com.github.standobyte.jojo.action.actions.SilverChariotDashAttack;
+import com.github.standobyte.jojo.action.actions.SilverChariotLightAttack;
 import com.github.standobyte.jojo.action.actions.SilverChariotMeleeBarrage;
 import com.github.standobyte.jojo.action.actions.SilverChariotRapierLaunch;
 import com.github.standobyte.jojo.action.actions.SilverChariotSweepingAttack;
@@ -287,7 +288,7 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> THE_WORLD_TS_PUNCH = ACTIONS.register("the_world_ts_punch", 
             () -> new TheWorldTSHeavyAttack(new StandEntityAction.Builder().resolveLevelToUnlock(3).standUserSlowDownFactor(1.0F)
-                    .standTakesCrosshairTarget().standPose(TheWorldTSHeavyAttack.TS_PUNCH_POSE), 
+                    .standTakesCrosshairTarget().standPose(TheWorldTSHeavyAttack.TS_PUNCH_POSE).standWindupDuration(5).cooldown(0, 50), 
                     THE_WORLD_HEAVY_PUNCH, THE_WORLD_TIME_STOP_BLINK));
     
 
@@ -333,8 +334,11 @@ public class ModActions {
                     .xpRequirement(700)));
 
     
-    public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_ATTACK = ACTIONS.register("silver_chariot_attack", 
+    public static final RegistryObject<StandEntityLightAttack> SILVER_CHARIOT_NO_RAPIER_ATTACK = ACTIONS.register("silver_chariot_no_rapier_attack", 
             () -> new StandEntityLightAttack(new StandEntityLightAttack.Builder()));
+    
+    public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_ATTACK = ACTIONS.register("silver_chariot_attack", 
+            () -> new SilverChariotLightAttack(new StandEntityLightAttack.Builder(), SILVER_CHARIOT_NO_RAPIER_ATTACK));
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_BARRAGE = ACTIONS.register("silver_chariot_barrage", 
             () -> new SilverChariotMeleeBarrage(new StandEntityMeleeBarrage.Builder().shout(ModSounds.POLNAREFF_HORA_HORA_HORA)));

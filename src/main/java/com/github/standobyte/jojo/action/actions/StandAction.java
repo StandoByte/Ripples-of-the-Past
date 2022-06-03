@@ -37,7 +37,7 @@ public abstract class StandAction extends Action<IStandPower> {
     
     @Override
     public boolean isUnlocked(IStandPower power) {
-        return power.getLearningProgressPoints(this) >= 0;
+        return power.getLearningProgressPoints(this) >= 0 || isUnlockedByDefault();
     }
     
     @Override
@@ -50,8 +50,8 @@ public abstract class StandAction extends Action<IStandPower> {
     }
     
     public boolean canBeUnlocked(IStandPower power) {
-        return isUnlockedByDefault() || power.isUserCreative() || 
-                resolveLevelToUnlock > -1 && power.getResolveLevel() >= resolveLevelToUnlock;
+        return !isUnlockedByDefault() && (power.isUserCreative() || 
+                resolveLevelToUnlock > -1 && power.getResolveLevel() >= resolveLevelToUnlock);
     }
     
     private boolean isUnlockedByDefault() {
