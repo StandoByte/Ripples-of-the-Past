@@ -48,7 +48,7 @@ public class StandEntityTask {
         StandRelativeOffset offset = standEntity.hasEffect(ModEffects.STUN.get()) || !standEntity.hasUser() ? 
                 null
                 : action.getOffsetFromUser(standPower, standEntity, target);
-        if (!action.standTakesCrosshairTarget(target, standEntity, standPower) || !canTarget(standEntity, target, standPower, action)) {
+        if (!canTarget(standEntity, target, standPower, action)) {
             target = ActionTarget.EMPTY;
         }
         
@@ -65,10 +65,9 @@ public class StandEntityTask {
         }
         return false;
     }
-    
+
     private static boolean canTarget(StandEntity standEntity, ActionTarget target, IStandPower standPower, StandEntityAction action) {
-        return target != null && 
-                (standEntity == null || target.getType() == TargetType.EMPTY || action.canStandTarget(standEntity, target, standPower));
+        return target != null && action.canStandKeepTarget(target, standEntity, standPower);
     }
     
     void tick(IStandPower standPower, StandEntity standEntity) {

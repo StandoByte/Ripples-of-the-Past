@@ -39,9 +39,6 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     private final float heldSlowDownFactor;
     private final int cooldownTechnical;
     private final int cooldownAdditional;
-    private final TargetRequirement targetRequirement;
-    private final double maxRangeSqEntityTarget;
-    private final double maxRangeSqBlockTarget;
     private final Map<Hand, Function<ItemStack, String>> itemChecks;
     private final boolean ignoresPerformerStun;
     private final boolean swingHand;
@@ -58,9 +55,6 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         this.heldSlowDownFactor = builder.heldSlowDownFactor;
         this.cooldownTechnical = builder.cooldownTechnical;
         this.cooldownAdditional = builder.cooldownAdditional;
-        this.targetRequirement = builder.needsBlockTarget ? builder.needsEntityTarget ? TargetRequirement.ANY : TargetRequirement.BLOCK : builder.needsEntityTarget ? TargetRequirement.ENTITY : TargetRequirement.NONE;
-        this.maxRangeSqEntityTarget = builder.maxRangeSqEntityTarget;
-        this.maxRangeSqBlockTarget = builder.maxRangeSqBlockTarget;
         this.itemChecks = builder.itemChecks;
         this.ignoresPerformerStun = builder.ignoresPerformerStun;
         this.swingHand = builder.swingHand;
@@ -113,19 +107,19 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     public TargetRequirement getTargetRequirement() {
-        return targetRequirement;
+        return TargetRequirement.NONE;
     }
     
     public boolean appropriateTarget(ActionTarget.TargetType targetType) {
-        return targetRequirement.checkTargetType(targetType);
+        return getTargetRequirement().checkTargetType(targetType);
     }
     
     public double getMaxRangeSqEntityTarget() {
-        return maxRangeSqEntityTarget;
+        return 36;
     }
     
     public double getMaxRangeSqBlockTarget() {
-        return maxRangeSqBlockTarget;
+        return 64;
     }
     
     protected ActionConditionResult checkHeldItems(LivingEntity user, P power) {
@@ -148,7 +142,6 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     public abstract boolean isUnlocked(P power);
     
-    // FIXME make two separate classes for HamonPlantInfusion and HamonOrganismInfusion
     @Nullable
     public final Action<P> getVisibleAction(P power) {
     	if (isUnlocked(power)) {
@@ -389,12 +382,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         private int cooldownTechnical;
         private int cooldownAdditional;
         
-        private boolean needsEntityTarget = false;
-        private boolean needsBlockTarget = false;
-        private static final double MAX_RANGE_ENTITY_TARGET = 6.0D;
-        private static final double MAX_RANGE_BLOCK_TARGET = 8.0D;
-        private double maxRangeSqEntityTarget = MAX_RANGE_ENTITY_TARGET * MAX_RANGE_ENTITY_TARGET;
-        private double maxRangeSqBlockTarget = MAX_RANGE_BLOCK_TARGET * MAX_RANGE_BLOCK_TARGET;
+//        private static final double MAX_RANGE_ENTITY_TARGET = 6.0D;
+//        private static final double MAX_RANGE_BLOCK_TARGET = 8.0D;
+//        private double maxRangeSqEntityTarget = MAX_RANGE_ENTITY_TARGET * MAX_RANGE_ENTITY_TARGET;
+//        private double maxRangeSqBlockTarget = MAX_RANGE_BLOCK_TARGET * MAX_RANGE_BLOCK_TARGET;
         
         private Map<Hand, Function<ItemStack, String>> itemChecks = new EnumMap<>(Hand.class);
         private boolean ignoresPerformerStun = false;
@@ -406,28 +397,6 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         public T cooldown(int technical, int additional) {
             this.cooldownTechnical = technical;
             this.cooldownAdditional = additional;
-            return getThis();
-        }
-        
-        public T needsEntityTarget() {
-            this.needsEntityTarget = true;
-            return getThis();
-        }
-        
-        public T needsBlockTarget() {
-            this.needsBlockTarget = true;
-            return getThis();
-        }
-        
-        public T maxRangeEntityTarget(double maxRangeEntityTarget) {
-            maxRangeEntityTarget = MathHelper.clamp(maxRangeEntityTarget, 0, MAX_RANGE_ENTITY_TARGET);
-            this.maxRangeSqEntityTarget = maxRangeEntityTarget * maxRangeEntityTarget;
-            return getThis();
-        }
-        
-        public T maxRangeBlockTarget(double maxRangeBlockTarget) {
-            maxRangeBlockTarget = MathHelper.clamp(maxRangeBlockTarget, 0, MAX_RANGE_BLOCK_TARGET);
-            this.maxRangeSqBlockTarget = maxRangeBlockTarget * maxRangeBlockTarget;
             return getThis();
         }
         

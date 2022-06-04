@@ -16,6 +16,7 @@ import com.github.standobyte.jojo.action.actions.HamonLifeMagnetism;
 import com.github.standobyte.jojo.action.actions.HamonOrganismInfusion;
 import com.github.standobyte.jojo.action.actions.HamonOverdrive;
 import com.github.standobyte.jojo.action.actions.HamonOverdriveBarrage;
+import com.github.standobyte.jojo.action.actions.HamonPlantInfusion;
 import com.github.standobyte.jojo.action.actions.HamonProjectileShield;
 import com.github.standobyte.jojo.action.actions.HamonRepellingOverdrive;
 import com.github.standobyte.jojo.action.actions.HamonScarletOverdrive;
@@ -103,7 +104,7 @@ public class ModActions {
                     .shiftVariationOf(HAMON_OVERDRIVE)));
     
     public static final RegistryObject<HamonAction> HAMON_SENDO_OVERDRIVE = ACTIONS.register("hamon_sendo_overdrive", 
-            () -> new HamonSendoOverdrive(new HamonAction.Builder().energyCost(1000F).emptyMainHand().swingHand().needsBlockTarget()
+            () -> new HamonSendoOverdrive(new HamonAction.Builder().energyCost(1000F).emptyMainHand().swingHand()
                     .shout(Technique.JONATHAN, ModSounds.JONATHAN_SENDO_OVERDRIVE)));
     
     public static final RegistryObject<HamonAction> HAMON_ZOOM_PUNCH = ACTIONS.register("hamon_zoom_punch", 
@@ -116,10 +117,10 @@ public class ModActions {
             () -> new HamonSpeedBoost(new HamonAction.Builder().energyCost(600F)));
     
     public static final RegistryObject<HamonAction> HAMON_PLANT_INFUSION = ACTIONS.register("hamon_plant_infusion", 
-            () -> new HamonOrganismInfusion(new HamonAction.Builder().energyCost(200F).emptyMainHand().swingHand().needsBlockTarget()));
+            () -> new HamonPlantInfusion(new HamonAction.Builder().energyCost(200F).emptyMainHand().swingHand()));
     
     public static final RegistryObject<HamonAction> HAMON_ORGANISM_INFUSION = ACTIONS.register("hamon_organism_infusion", 
-            () -> new HamonOrganismInfusion(new HamonAction.Builder().energyCost(200F).emptyMainHand().swingHand().needsBlockTarget().needsEntityTarget()));
+            () -> new HamonOrganismInfusion(new HamonAction.Builder().energyCost(200F).emptyMainHand().swingHand()));
     
     public static final RegistryObject<HamonAction> HAMON_HEALING = ACTIONS.register("hamon_healing", 
             () -> new HamonHealing(new HamonAction.Builder().energyCost(670F).emptyMainHand().swingHand()));
@@ -169,11 +170,10 @@ public class ModActions {
     
 
     public static final RegistryObject<VampirismAction> VAMPIRISM_BLOOD_DRAIN = ACTIONS.register("vampirism_blood_drain", 
-            () -> new VampirismBloodDrain(new NonStandAction.Builder().needsEntityTarget()
-                    .maxRangeEntityTarget(2.0D).emptyMainHand().holdType()));
+            () -> new VampirismBloodDrain(new NonStandAction.Builder().emptyMainHand().holdType()));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_FREEZE = ACTIONS.register("vampirism_freeze", 
-            () -> new VampirismFreeze(new NonStandAction.Builder().maxRangeEntityTarget(2.0D).emptyMainHand()
+            () -> new VampirismFreeze(new NonStandAction.Builder().emptyMainHand()
                     .holdType().holdEnergyCost(0.5F).heldSlowDownFactor(0.75F)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_SPACE_RIPPER_STINGY_EYES = ACTIONS.register("vampirism_space_ripper_stingy_eyes", 
@@ -181,7 +181,7 @@ public class ModActions {
                     .holdType(20).holdEnergyCost(20F).cooldown(0, 50).heldSlowDownFactor(0.3F)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_BLOOD_GIFT = ACTIONS.register("vampirism_blood_gift", 
-            () -> new VampirismBloodGift(new NonStandAction.Builder().needsEntityTarget().maxRangeEntityTarget(1.0D).emptyMainHand()
+            () -> new VampirismBloodGift(new NonStandAction.Builder().emptyMainHand()
                     .holdToFire(60, false).holdEnergyCost(5F).heldSlowDownFactor(0.3F)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_ZOMBIE_SUMMON = ACTIONS.register("vampirism_zombie_summon", 
@@ -288,7 +288,7 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> THE_WORLD_TS_PUNCH = ACTIONS.register("the_world_ts_punch", 
             () -> new TheWorldTSHeavyAttack(new StandEntityAction.Builder().resolveLevelToUnlock(3).standUserSlowDownFactor(1.0F)
-                    .standTakesCrosshairTarget().standPose(TheWorldTSHeavyAttack.TS_PUNCH_POSE).standWindupDuration(5).cooldown(0, 50), 
+                    .standKeepsTarget().standPose(TheWorldTSHeavyAttack.TS_PUNCH_POSE).standWindupDuration(5).cooldown(0, 50), 
                     THE_WORLD_HEAVY_PUNCH, THE_WORLD_TIME_STOP_BLINK));
     
 
@@ -330,7 +330,7 @@ public class ModActions {
                     .xpRequirement(100)));
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_BARRIER = ACTIONS.register("hierophant_green_barrier", 
-            () -> new HierophantGreenBarrier(new StandEntityAction.Builder().needsBlockTarget().resolveLevelToUnlock(3)
+            () -> new HierophantGreenBarrier(new StandEntityAction.Builder().resolveLevelToUnlock(3)
                     .xpRequirement(700)));
 
     

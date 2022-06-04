@@ -54,4 +54,14 @@ public class VampirismBloodGift extends VampirismAction {
             }
         }
     }
+    
+    @Override
+    public TargetRequirement getTargetRequirement() {
+        return TargetRequirement.ENTITY;
+    }
+    
+    @Override
+    public double getMaxRangeSqEntityTarget() {
+    	return 4;
+    }
 }

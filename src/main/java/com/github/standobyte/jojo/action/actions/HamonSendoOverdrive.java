@@ -59,4 +59,9 @@ public class HamonSendoOverdrive extends HamonAction {
             }
         }
     }
+    
+    @Override
+    public TargetRequirement getTargetRequirement() {
+        return TargetRequirement.BLOCK;
+    }
 }
