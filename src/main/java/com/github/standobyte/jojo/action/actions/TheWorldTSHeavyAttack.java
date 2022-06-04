@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.PunchType;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
+import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -68,7 +69,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
     }
     
     @Override
-    protected void onTaskInit(World world, IStandPower standPower, StandEntity standEntity, ActionTarget target) {
+    protected void preTaskInit(World world, IStandPower standPower, StandEntity standEntity, ActionTarget target) {
     	if (!world.isClientSide() || standEntity.isManuallyControlled()) {
 	    	LivingEntity aimingEntity = standEntity.isManuallyControlled() ? standEntity : standPower.getUser();
 	    	if (aimingEntity != null) {
@@ -84,7 +85,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
 
 	            int ticksForWindup = 10;
 	            if (standEntity.getCurrentTask().isPresent()) {
-	            	ticksForWindup += 10;
+	            	ticksForWindup += 20;
 	            }
 	    		if (standEntity.getAttributeValue(Attributes.MOVEMENT_SPEED) > 0) {
 	    			Vector3d pos = target.getTargetPos(true);
@@ -109,6 +110,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
 		            	timeStopTicks = MathHelper.ceil(ticksForDistance) + ticksForWindup;
 		            }
 		    		
+		            pos = standEntity.collideNextPos(pos);
 //		    		if (!world.isClientSide() ^ standEntity.isManuallyControlled()) {
 		    			standEntity.moveTo(pos);
 		    			if (standEntity.tickCount == 0 && !world.isClientSide()) {
@@ -147,9 +149,9 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
     }
     
     @Override
-    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {
+    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
-            standEntity.punch(PunchType.HEAVY_NO_COMBO, target, this, 1, attack -> {
+            standEntity.punch(PunchType.HEAVY_NO_COMBO, task.getTarget(), this, 1, attack -> {
                 attack
                 .armorPiercing(0)
                 .addKnockback(4)

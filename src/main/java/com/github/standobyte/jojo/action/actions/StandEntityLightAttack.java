@@ -36,9 +36,9 @@ public class StandEntityLightAttack extends StandEntityAction {
     }
     
     @Override
-    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {
+    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
-            standEntity.punch(PunchType.LIGHT, target, this);
+            standEntity.punch(PunchType.LIGHT, task.getTarget(), this);
         }
     }
     
@@ -62,8 +62,8 @@ public class StandEntityLightAttack extends StandEntityAction {
     }
     
     @Override
-    public void standTickRecovery(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
-        if (ticks == 0) {
+    public void standTickRecovery(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
+        if (task.getTick() == 0) {
         	userPower.clickQueuedAction();
         }
     }

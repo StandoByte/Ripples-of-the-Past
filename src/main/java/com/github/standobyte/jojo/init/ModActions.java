@@ -374,7 +374,7 @@ public class ModActions {
             () -> new StandEntityHeavyAttack(new StandEntityHeavyAttack.Builder().shiftVariationOf(MAGICIANS_RED_PUNCH), MAGICIANS_RED_KICK));
     
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_FLAME_BURST = ACTIONS.register("magicians_red_flame_burst", 
-            () -> new MagiciansRedFlameBurst(new StandEntityAction.Builder().staminaCostTick(5).holdType()
+            () -> new MagiciansRedFlameBurst(new StandEntityAction.Builder().staminaCostTick(3).holdType()
                     .standOffsetFront().standPose(StandPose.RANGED_ATTACK)
                     .xpRequirement(50)));
     

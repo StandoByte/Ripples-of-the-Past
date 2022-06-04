@@ -171,6 +171,11 @@ public class SCRapierEntity extends ModdedProjectileEntity {
         }
     }
     
+    @Override
+    public boolean displayFireAnimation() {
+    	return false;
+    }
+    
     
     private static final Vector3d OFFSET_YROT = new Vector3d(0.0, -0.29, 0.375);
     private static final Vector3d OFFSET_XROT = new Vector3d(0, 0.0, 1.375);

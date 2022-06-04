@@ -34,11 +34,12 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
     private ModelRenderer feather2;
 
     public MagiciansRedModel() {
-        this(RenderType::entityTranslucent, 64, 64);
+        super(64, 64);
+        addLayerSpecificBoxes();
     }
 
-    public MagiciansRedModel(Function<ResourceLocation, RenderType> renderType, int textureWidth, int textureHeight) {
-        super(textureWidth, textureHeight);
+    protected MagiciansRedModel(Function<ResourceLocation, RenderType> renderType, int textureWidth, int textureHeight) {
+        super(renderType, textureWidth, textureHeight);
         addLayerSpecificBoxes();
     }
 

@@ -1,9 +1,9 @@
 package com.github.standobyte.jojo.action.actions;
 
-import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.PunchType;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
+import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 
@@ -16,9 +16,9 @@ public class StandEntityComboHeavyAttack extends StandEntityHeavyAttack {
 	}
     
     @Override
-    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {
+    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
-            standEntity.punch(PunchType.HEAVY_COMBO, target, this);
+            standEntity.punch(PunchType.HEAVY_COMBO, task.getTarget(), this);
         }
     }
     

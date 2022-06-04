@@ -71,10 +71,6 @@ public class StandEntityTask {
                 (standEntity == null || target.getType() == TargetType.EMPTY || action.canStandTarget(standEntity, target, standPower));
     }
     
-    ActionTarget getTarget() {
-        return target;
-    }
-
     void tick(IStandPower standPower, StandEntity standEntity) {
         if (target.getType() != TargetType.EMPTY) {
 //            if (!standEntity.level.isClientSide() && ticksLeft < startingTicks) {
@@ -96,17 +92,17 @@ public class StandEntityTask {
         int phaseTicks = startingTicks - ticksLeft;
         switch (phase) {
         case BUTTON_HOLD:
-            action.standTickButtonHold(standEntity.level, standEntity, phaseTicks, standPower, target);
+            action.standTickButtonHold(standEntity.level, standEntity, standPower, this);
             break;
         case WINDUP:
-            action.standTickWindup(standEntity.level, standEntity, phaseTicks, standPower, target);
+            action.standTickWindup(standEntity.level, standEntity, standPower, this);
             break;
         case PERFORM:
             if (phaseTicks == 0) {
-            	action.standPerform(standEntity.level, standEntity, standPower, target);
+            	action.standPerform(standEntity.level, standEntity, standPower, this);
             }
             
-            action.standTickPerform(standEntity.level, standEntity, phaseTicks, standPower, target);
+            action.standTickPerform(standEntity.level, standEntity, standPower, this);
             
             if (!standEntity.level.isClientSide()) {
                 standPower.consumeStamina(action.getStaminaCostTicking(standPower));
@@ -116,8 +112,7 @@ public class StandEntityTask {
             }
             break;
         case RECOVERY:
-            action.standTickRecovery(standEntity.level, standEntity, 
-                    phaseTicks, standPower, target);
+            action.standTickRecovery(standEntity.level, standEntity, standPower, this);
             break;
         }
         
@@ -167,7 +162,6 @@ public class StandEntityTask {
     
     public void addTicksToPhase(int ticks) {
         this.startingTicks += ticks;
-        this.ticksLeft += ticks;
     }
     
     private void rotateStand(StandEntity standEntity, boolean limitBySpeed) {
@@ -193,12 +187,20 @@ public class StandEntityTask {
         return startingTicks;
     }
     
+    public int getTick() {
+    	return startingTicks - ticksLeft;
+    }
+    
     public float getTaskCompletion(float partialTick) {
         return Math.min(1F - ((float) ticksLeft - partialTick) / (float) startingTicks, 1F);
     }
     
     public StandEntityAction.Phase getPhase() {
         return phase;
+    }
+    
+    public ActionTarget getTarget() {
+    	return target;
     }
     
     void setOffsetFromUser(StandRelativeOffset offset) {

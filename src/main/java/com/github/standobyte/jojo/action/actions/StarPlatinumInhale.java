@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.action.actions;
 
-import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.damage.DamageUtil;
 import com.github.standobyte.jojo.util.utils.MathUtil;
@@ -17,7 +17,7 @@ public class StarPlatinumInhale extends StandEntityAction {
 	}
 
     @Override
-    public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
+    public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
     	Vector3d mouthPos = standEntity.position()
     			.add(0, standEntity.getBbHeight() * 0.75F, 0)
     			.add(new Vector3d(0, standEntity.getBbHeight() / 16F, standEntity.getBbWidth() * 0.5F)

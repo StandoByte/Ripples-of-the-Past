@@ -87,12 +87,12 @@ public abstract class ModdedProjectileEntity extends DamagingEntity {
     @Override
     public void tick() {
         Entity owner = getOwner();
-        if (tickCount <= ticksLifespan() && (owner == null || owner.isAlive())) {
-            super.tick();
-            moveProjectile();
-        } else if (!level.isClientSide()) {
-            remove();
+        if (!level.isClientSide() && (tickCount > ticksLifespan() || owner != null && !owner.isAlive())) {
+        	remove();
+        	return;
         }
+        super.tick();
+        moveProjectile();
     }
     
     protected void moveProjectile() {

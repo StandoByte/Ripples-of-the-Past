@@ -11,6 +11,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -87,13 +88,17 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.ReuseableStream;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.shapes.IBooleanFunction;
+import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.GameRules;
@@ -995,11 +1000,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             if (isFollowingUser()) {
                 StandRelativeOffset relativeOffset = getOffsetFromUser();
                 if (relativeOffset != null) {
-                	Vector3d pos;
-                	// FIXME (!) glitches when too close to the target
-                	pos = taskOffsetPos(user, relativeOffset);
-//            			if (checkCollision(pos)) {
-//            			}
+                	Vector3d pos = user.position().add(taskOffset(user, relativeOffset));
+                	pos = collideNextPos(pos);
                     
                     setPos(pos.x, pos.y, pos.z);
                 }
@@ -1017,27 +1019,49 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     	}
     }
     
-    private Vector3d taskOffsetPos(LivingEntity user, StandRelativeOffset relativeOffset) {
+    public Vector3d collideNextPos(Vector3d pos) {
+    	return position().add(collide(pos.subtract(position())));
+    }
+
+    // yeah...
+    private Vector3d collide(Vector3d offsetVec) {
+    	AxisAlignedBB axisalignedbb = this.getBoundingBox();
+    	ISelectionContext iselectioncontext = ISelectionContext.of(this);
+    	VoxelShape voxelshape = this.level.getWorldBorder().getCollisionShape();
+    	Stream<VoxelShape> stream = VoxelShapes.joinIsNotEmpty(voxelshape, VoxelShapes.create(axisalignedbb.deflate(1.0E-7D)), IBooleanFunction.AND) ? Stream.empty() : Stream.of(voxelshape);
+    	Stream<VoxelShape> stream1 = this.level.getEntityCollisions(this, axisalignedbb.expandTowards(offsetVec), (p_233561_0_) -> {
+    		return true;
+    	});
+    	ReuseableStream<VoxelShape> reuseablestream = new ReuseableStream<>(Stream.concat(stream1, stream));
+    	Vector3d vector3d = offsetVec.lengthSqr() == 0.0D ? offsetVec : collideBoundingBoxHeuristically(this, offsetVec, axisalignedbb, this.level, iselectioncontext, reuseablestream);
+    	boolean flag = offsetVec.x != vector3d.x;
+    	boolean flag1 = offsetVec.y != vector3d.y;
+    	boolean flag2 = offsetVec.z != vector3d.z;
+    	boolean flag3 = this.onGround || flag1 && offsetVec.y < 0.0D;
+    	if (this.maxUpStep > 0.0F && flag3 && (flag || flag2)) {
+    		Vector3d vector3d1 = collideBoundingBoxHeuristically(this, new Vector3d(offsetVec.x, (double)this.maxUpStep, offsetVec.z), axisalignedbb, this.level, iselectioncontext, reuseablestream);
+    		Vector3d vector3d2 = collideBoundingBoxHeuristically(this, new Vector3d(0.0D, (double)this.maxUpStep, 0.0D), axisalignedbb.expandTowards(offsetVec.x, 0.0D, offsetVec.z), this.level, iselectioncontext, reuseablestream);
+    		if (vector3d2.y < (double)this.maxUpStep) {
+    			Vector3d vector3d3 = collideBoundingBoxHeuristically(this, new Vector3d(offsetVec.x, 0.0D, offsetVec.z), axisalignedbb.move(vector3d2), this.level, iselectioncontext, reuseablestream).add(vector3d2);
+    			if (getHorizontalDistanceSqr(vector3d3) > getHorizontalDistanceSqr(vector3d1)) {
+    				vector3d1 = vector3d3;
+    			}
+    		}
+
+    		if (getHorizontalDistanceSqr(vector3d1) > getHorizontalDistanceSqr(vector3d)) {
+    			return vector3d1.add(collideBoundingBoxHeuristically(this, new Vector3d(0.0D, -vector3d1.y + offsetVec.y, 0.0D), axisalignedbb.move(vector3d1), this.level, iselectioncontext, reuseablestream));
+    		}
+    	}
+
+    	return vector3d;
+    }
+    
+    private Vector3d taskOffset(LivingEntity user, StandRelativeOffset relativeOffset) {
     	Vector3d offset = relativeOffset.getAbsoluteVec(getDefaultOffsetFromUser(), user.yRot, user.xRot);
     	if (user.isShiftKeyDown()) {
     		offset = new Vector3d(offset.x, 0, offset.z);
     	}
-    	return user.position().add(offset);
-    }
-    
-    private boolean checkCollision(Vector3d pos) {
-        boolean willOverlapWithTarget = getCurrentTask().map(task -> {
-        	if (task.getTarget().getType() == TargetType.ENTITY) {
-        		Entity entity = task.getTarget().getEntity(level);
-        		if (entity != null) {
-        			return entity.getBoundingBox().inflate(0.5)
-        					.intersects(this.getBoundingBox().move(pos.subtract(this.position())));
-        		}
-        	}
-        	return false;
-        }).orElse(false);
-        
-    	return !noPhysics && (willOverlapWithTarget || isInsideViewBlockingBlock(pos));
+    	return offset;
     }
     
     @Nullable

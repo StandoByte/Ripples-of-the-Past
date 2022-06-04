@@ -5,6 +5,7 @@ import com.github.standobyte.jojo.client.ClientEventHandler;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
@@ -35,8 +36,9 @@ public class StarPlatinumZoom extends StandEntityAction {
     }
 
     @Override
-    public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
+    public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (world.isClientSide) {
+        	int ticks = task.getTick();
             if (ticks % 16 == 3 && ticks > 32 && ticks < 80) {
                 PlayerEntity player = ClientUtil.getClientPlayer();
                 if (player.is(standEntity.getUser())) {

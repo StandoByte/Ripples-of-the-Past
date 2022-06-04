@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.client.model.entity.stand;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.client.model.pose.ConditionalModelPose;
@@ -18,18 +19,20 @@ import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.util.utils.MathUtil;
 
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.HandSide;
+import net.minecraft.util.ResourceLocation;
 
 // Made with Blockbench 3.9.2
 
 
 public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> {
-    private ModelRenderer backCord;
-    private ModelRenderer bone1;
-    private ModelRenderer bone2;
-    private ModelRenderer rapier;
-    private ModelRenderer rapierBlade;
+	protected ModelRenderer backCord;
+    protected ModelRenderer bone1;
+    protected ModelRenderer bone2;
+    protected ModelRenderer rapier;
+    protected ModelRenderer rapierBlade;
 
     public SilverChariotModel() {
         this(64, 64);
@@ -37,6 +40,11 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
 
     public SilverChariotModel(int textureWidth, int textureHeight) {
         super(textureWidth, textureHeight);
+        addLayerSpecificBoxes();
+    }
+
+    protected SilverChariotModel(Function<ResourceLocation, RenderType> renderType, int textureWidth, int textureHeight) {
+    	super(renderType, textureWidth, textureHeight);
         addLayerSpecificBoxes();
     }
 
