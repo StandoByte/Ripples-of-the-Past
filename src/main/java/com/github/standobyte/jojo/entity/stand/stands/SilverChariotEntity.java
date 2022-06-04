@@ -59,7 +59,7 @@ public class SilverChariotEntity extends StandEntity {
     private static final DataParameter<Boolean> RAPIER_ON_FIRE = EntityDataManager.defineId(SilverChariotEntity.class, DataSerializers.BOOLEAN);
     
     private int ticksAfterArmorRemoval;
-    private int swordFireTicks = 0;
+    private int rapierFireTicks = 0;
     private Vector3d dashVec = Vector3d.ZERO;
 
     public SilverChariotEntity(StandEntityType<SilverChariotEntity> type, World world) {
@@ -139,9 +139,9 @@ public class SilverChariotEntity extends StandEntity {
                 }
             }
             
-            if (swordFireTicks > 0) {
-            	swordFireTicks--;
-            	if (swordFireTicks == 0) {
+            if (rapierFireTicks > 0) {
+            	rapierFireTicks--;
+            	if (rapierFireTicks == 0) {
             		entityData.set(RAPIER_ON_FIRE, false);
             	}
             }
@@ -173,7 +173,6 @@ public class SilverChariotEntity extends StandEntity {
         return super.canBreakBlock(blockHardness, blockHarvestLevel);
     }
     
-    // FIXME (!!) render rapier on fire
     public boolean isRapierOnFire() {
     	return entityData.get(RAPIER_ON_FIRE);
     }
@@ -197,7 +196,7 @@ public class SilverChariotEntity extends StandEntity {
                 JojoModUtil.deflectProjectile(target, getLookAngle());
                 if (target instanceof DamagingEntity && ((DamagingEntity) target).isFiery()) {
                 	entityData.set(RAPIER_ON_FIRE, true);
-                	swordFireTicks = 300;
+                	rapierFireTicks = 300;
                 }
                 return true;
             }
@@ -206,6 +205,13 @@ public class SilverChariotEntity extends StandEntity {
         else {
             return super.attackEntity(target, punch, action, barrageHits, attackOverride);
         }
+    }
+    
+    public void removeRapierFire() {
+    	if (!level.isClientSide()) {
+    		rapierFireTicks = 0;
+        	entityData.set(RAPIER_ON_FIRE, false);
+    	}
     }
     
     @Override

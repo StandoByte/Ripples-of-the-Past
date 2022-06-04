@@ -1,8 +1,8 @@
 package com.github.standobyte.jojo.action.actions;
 
-import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.damaging.projectile.HGEmeraldEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
@@ -18,7 +18,7 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
     }
     
     @Override
-    public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
+    public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
             boolean shift = isShiftVariation();
             double fireRate = standEntity.getAttackSpeed() / userPower.getType().getDefaultStats().getBaseAttackSpeed();

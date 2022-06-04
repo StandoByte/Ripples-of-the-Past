@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.util.ResourceLocation;
 
+// FIXME (!!) render rapier on fire
 public class SCRapierRenderer extends SimpleEntityRenderer<SCRapierEntity, SCRapierModel> {
 
     public SCRapierRenderer(EntityRendererManager renderManager) {

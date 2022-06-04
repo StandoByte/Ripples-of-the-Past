@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.action.actions;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.entity.damaging.projectile.SCFlameSwingEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.PunchType;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
@@ -34,17 +35,14 @@ public class SilverChariotSweepingAttack extends StandEntityComboHeavyAttack {
     }
     
     @Override
-    public void standTickWindup(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
-    	if (world.isClientSide()) {
-    		StandEntityTask attack = standEntity.getCurrentTask().get();
-	    	if (attack.getTicksLeft() == 1) {
-	    	    standEntity.playSound(SoundEvents.PLAYER_ATTACK_SWEEP, 1.0F, 1.0F, ClientUtil.getClientPlayer());
-	    	}
+    public void standTickWindup(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
+    	if (world.isClientSide() && task.getTicksLeft() == 1) {
+    	    standEntity.playSound(SoundEvents.PLAYER_ATTACK_SWEEP, 1.0F, 1.0F, ClientUtil.getClientPlayer());
     	}
     }
     
     @Override
-    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {
+    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
             double reach = standEntity.getAttributeValue(ForgeMod.REACH_DISTANCE.get());
             world.getEntities(standEntity, standEntity.getBoundingBox().inflate(reach, 0, reach), 
@@ -62,5 +60,19 @@ public class SilverChariotSweepingAttack extends StandEntityComboHeavyAttack {
                         }
                     });
         }
+    }
+    
+    @Override
+    public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
+    	if (!world.isClientSide() && task.getTick() == 0
+    			&& standEntity instanceof SilverChariotEntity) {
+    		SilverChariotEntity chariot = (SilverChariotEntity) standEntity;
+    		if (chariot.isRapierOnFire()) {
+    			SCFlameSwingEntity flame = new SCFlameSwingEntity(standEntity, world);
+                flame.shootFromRotation(standEntity, 1.5F, 0.0F);
+                standEntity.addProjectile(flame);
+                chariot.removeRapierFire();
+    		}
+    	}
     }
 }

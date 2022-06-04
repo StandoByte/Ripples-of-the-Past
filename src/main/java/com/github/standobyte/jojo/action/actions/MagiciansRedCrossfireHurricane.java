@@ -4,6 +4,7 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRCrossfireHurricaneEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.utils.MathUtil;
@@ -18,10 +19,11 @@ public class MagiciansRedCrossfireHurricane extends StandEntityAction {
     }
 
     @Override
-    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {
+    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
             boolean special = isShiftVariation();
             int n = special ? 8 : 1;
+            ActionTarget target = task.getTarget();
             if (special && target.getType() == TargetType.EMPTY) {
                 target = ActionTarget.fromRayTraceResult(standEntity.aimWithStandOrUser(32, target));
             }

@@ -19,6 +19,7 @@ import com.github.standobyte.jojo.entity.damaging.projectile.HamonCutterEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRCrossfireHurricaneEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRFireballEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRFlameEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.SCFlameSwingEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.TommyGunBulletEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGBarrierEntity;
@@ -184,6 +185,10 @@ public class ModEntityTypes {
     public static final RegistryObject<EntityType<SCRapierEntity>> SC_RAPIER = ENTITIES.register("sc_rapier", 
             () -> EntityType.Builder.<SCRapierEntity>of(SCRapierEntity::new, EntityClassification.MISC).sized(0.125F, 0.125F).noSummon().noSave().setUpdateInterval(10)
             .build(new ResourceLocation(JojoMod.MOD_ID, "sc_rapier").toString()));
+    
+    public static final RegistryObject<EntityType<SCFlameSwingEntity>> SC_FLAME = ENTITIES.register("sc_flame", 
+            () -> EntityType.Builder.<SCFlameSwingEntity>of(SCFlameSwingEntity::new, EntityClassification.MISC).sized(0.0625F, 0.0625F).noSummon().noSave().setUpdateInterval(10)
+            .build(new ResourceLocation(JojoMod.MOD_ID, "sc_flame").toString()));
     
     public static final RegistryObject<EntityType<RoadRollerEntity>> ROAD_ROLLER = ENTITIES.register("road_roller", 
             () -> EntityType.Builder.<RoadRollerEntity>of(RoadRollerEntity::new, EntityClassification.MISC).sized(4.0F, 2.0F).setUpdateInterval(10)

@@ -254,6 +254,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
                 getTypeSpecificData(null).ifPresent(data -> {
                     data.syncWithUserOnly(player);
                 });
+                PacketManager.sendToClient(new TrEnergyPacket(player.getId(), energy), player);
             }
         });
     }

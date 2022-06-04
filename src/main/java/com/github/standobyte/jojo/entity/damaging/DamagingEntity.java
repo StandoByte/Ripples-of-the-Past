@@ -40,6 +40,7 @@ import net.minecraftforge.fml.network.NetworkHooks;
 public abstract class DamagingEntity extends ProjectileEntity implements IEntityAdditionalSpawnData {
     protected static final Vector3d DEFAULT_POS_OFFSET = new Vector3d(0.0D, -0.3D, 0.0D);
     private float damageFactor = 1F;
+    // only used for OwnerBoundProjectileEntity
     protected float speedFactor = 1F;
     private LivingEntity livingEntityOwner = null;
 
@@ -183,6 +184,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
 
     @Override
     protected void onHitBlock(BlockRayTraceResult blockRayTraceResult) {
+        super.onHitBlock(blockRayTraceResult);
         if (!level.isClientSide()) {
             BlockPos blockPos = blockRayTraceResult.getBlockPos();
             LivingEntity owner = getOwner();
@@ -191,7 +193,6 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
                     : destroyBlock(blockRayTraceResult);
             afterBlockHit(blockRayTraceResult, brokenBlock);
         }
-        super.onHitBlock(blockRayTraceResult);
     }
     
     protected boolean destroyBlock(BlockRayTraceResult blockRayTraceResult) {

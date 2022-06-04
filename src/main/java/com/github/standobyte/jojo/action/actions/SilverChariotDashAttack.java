@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.PunchType;
+import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -62,9 +63,9 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
     }
 
     @Override
-    public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
-        float completion = standEntity.getCurrentTaskCompletion(1.0F);
-        boolean lastTick = standEntity.getCurrentTask().get().getTicksLeft() <= 1;
+    public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
+        float completion = task.getTaskCompletion(1.0F);
+        boolean lastTick = task.getTicksLeft() <= 1;
         boolean moveForward = completion <= 0.5F;
         if (!world.isClientSide()) {
             if (moveForward) {
@@ -75,7 +76,7 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
                 }
             }
             else if (!Vector3d.ZERO.equals(standEntity.getDeltaMovement())) {
-                standEntity.punch(PunchType.HEAVY_NO_COMBO, target, this);
+                standEntity.punch(PunchType.HEAVY_NO_COMBO, task.getTarget(), this);
             }
             if (lastTick && standEntity.isFollowingUser()) {
                 standEntity.retractStand(false);
@@ -90,6 +91,16 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
             return true;
         }
         return super.isCancelable(standPower, standEntity, newAction, phase);
+    }
+    
+    @Override
+    protected boolean canClickDuringTask(StandEntityAction clickedAction, IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
+        return true;
+    }
+    
+    @Override
+    protected boolean canBeQueued(IStandPower standPower, StandEntity standEntity) {
+        return false;
     }
     
     @Override

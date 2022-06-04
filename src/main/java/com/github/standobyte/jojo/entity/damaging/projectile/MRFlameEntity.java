@@ -29,6 +29,10 @@ public class MRFlameEntity extends ModdedProjectileEntity {
     public MRFlameEntity(LivingEntity shooter, World world) {
         super(ModEntityTypes.MR_FLAME.get(), shooter, world);
     }
+    
+    protected MRFlameEntity(EntityType<? extends MRFlameEntity> type, LivingEntity shooter, World world) {
+        super(type, shooter, world);
+    }
 
     public MRFlameEntity(EntityType<? extends MRFlameEntity> type, World world) {
         super(type, world);
@@ -42,6 +46,12 @@ public class MRFlameEntity extends ModdedProjectileEntity {
     @Override
     public float getBaseDamage() {
         return 1.0F;
+    }
+    
+    @Override
+    public void shoot(double x, double y, double z, float velocity, float inaccuracy) {
+    	super.shoot(x, y, z, velocity, inaccuracy);
+    	startingPos = position();
     }
     
     @Override
@@ -145,8 +155,25 @@ public class MRFlameEntity extends ModdedProjectileEntity {
     }
 
     @Override
+    public void writeSpawnData(PacketBuffer buffer) {
+    	super.writeSpawnData(buffer);
+    	boolean hasStartingPos = startingPos != null;
+    	buffer.writeBoolean(hasStartingPos);
+    	if (hasStartingPos) {
+    		buffer.writeDouble(startingPos.x);
+    		buffer.writeDouble(startingPos.y);
+    		buffer.writeDouble(startingPos.z);
+    	}
+    }
+
+    @Override
     public void readSpawnData(PacketBuffer additionalData) {
         super.readSpawnData(additionalData);
-        startingPos = position();
+        if (additionalData.readBoolean()) {
+        	startingPos = new Vector3d(additionalData.readDouble(), additionalData.readDouble(), additionalData.readDouble());
+        }
+        else {
+        	startingPos = position();
+        }
     }
 }

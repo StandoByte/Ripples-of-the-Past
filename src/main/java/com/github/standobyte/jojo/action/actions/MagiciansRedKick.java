@@ -43,10 +43,10 @@ public class MagiciansRedKick extends StandEntityComboHeavyAttack {
     
     private static final double SLIDE_DISTANCE = 3;
     @Override
-    public void standTickWindup(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
-    	int ticksLeft = standEntity.getCurrentTask().map(StandEntityTask::getTicksLeft).get();
+    public void standTickWindup(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
+    	int ticksLeft = task.getTicksLeft();
     	if (ticksLeft == 2) {
-    		Vector3d targetPos = target.getTargetPos(true);
+    		Vector3d targetPos = task.getTarget().getTargetPos(true);
     		Vector3d slideVec;
     		if (targetPos != null) {
     			slideVec = targetPos.subtract(standEntity.getEyePosition(1.0F));
@@ -63,7 +63,7 @@ public class MagiciansRedKick extends StandEntityComboHeavyAttack {
     }
     
     @Override
-    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {
+    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
             MagiciansRedRedBind.getLandedRedBind(standEntity).ifPresent(redBind -> {
                 if (redBind.isInKickCombo()) {
@@ -71,7 +71,7 @@ public class MagiciansRedKick extends StandEntityComboHeavyAttack {
                 }
             });
         }
-        super.standPerform(world, standEntity, userPower, target);
+        super.standPerform(world, standEntity, userPower, task);
     }
     
     @Override

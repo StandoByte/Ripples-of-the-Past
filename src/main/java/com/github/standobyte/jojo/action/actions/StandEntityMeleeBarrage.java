@@ -6,6 +6,7 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModEffects;
@@ -29,7 +30,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
     }
 
     @Override
-    public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {
+    public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         int hitsThisTick = 0;
         int hitsPerSecond = StandStatFormulas.getBarrageHitsPerSecond(standEntity.getAttackSpeed());
         int extraTickSwings = hitsPerSecond / 20;
@@ -46,7 +47,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
         else if (hitsPerSecond > 0) {
             double ticksInterval = 20D / hitsPerSecond;
             int intTicksInterval = (int) ticksInterval;
-            if ((getStandActionTicks(userPower, standEntity) - ticks + standEntity.barrageDelayedPunches) % intTicksInterval == 0) {
+            if ((getStandActionTicks(userPower, standEntity) - task.getTick() + standEntity.barrageDelayedPunches) % intTicksInterval == 0) {
                 if (!world.isClientSide()) {
                     double delayProb = ticksInterval - intTicksInterval;
                     if (standEntity.getRandom().nextDouble() < delayProb) {
@@ -62,7 +63,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
         }
         if (!world.isClientSide()) {
 //            boolean attacked = 
-                    standEntity.barrageTickPunches(target, this, hitsThisTick);
+                    standEntity.barrageTickPunches(task.getTarget(), this, hitsThisTick);
 //            if (!attacked && !standEntity.isArmsOnlyMode()) {
 //                standEntity.addBarrageOffset();
 //            }

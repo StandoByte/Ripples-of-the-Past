@@ -736,6 +736,7 @@
   
   "entity.jojo.silver_chariot": "Silver Chariot",
   "entity.jojo.sc_rapier": "Silver Chariot's Rapier",
+  "entity.jojo.sc_flame": "Flame",
   "stand.jojo.silver_chariot": "Silver Chariot",
   "action.jojo.silver_chariot_attack": "Attack",
   "action.jojo.silver_chariot_no_rapier_attack": "Punch",

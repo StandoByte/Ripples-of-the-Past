@@ -123,15 +123,15 @@ public abstract class StandEntityAction extends StandAction {
         return false;
     }
     
-    public void standTickButtonHold(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {}
+    public void standTickButtonHold(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
     
-    public void standTickWindup(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {}
+    public void standTickWindup(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
     
-    public void standTickPerform(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {}
+    public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
     
-    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, ActionTarget target) {}
+    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
     
-    public void standTickRecovery(World world, StandEntity standEntity, int ticks, IStandPower userPower, ActionTarget target) {}
+    public void standTickRecovery(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
     
     public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
         return standWindupDuration;
@@ -216,7 +216,7 @@ public abstract class StandEntityAction extends StandAction {
     @Override
     protected final void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
     	invokeForStand(power, stand -> {
-    		onTaskInit(world, power, stand, target);
+    		preTaskInit(world, power, stand, target);
     		if (!world.isClientSide()) {
     			int windupTicks = getStandWindupTicks(power, stand);
     			int ticks = windupTicks > 0 ? windupTicks : getStandActionTicks(power, stand);
@@ -226,7 +226,7 @@ public abstract class StandEntityAction extends StandAction {
     	});
     }
     
-    protected void onTaskInit(World world, IStandPower standPower, StandEntity standEntity, ActionTarget target) {}
+    protected void preTaskInit(World world, IStandPower standPower, StandEntity standEntity, ActionTarget target) {}
     
     protected boolean allowArmsOnly() {
         return autoSummonMode == AutoSummonMode.ARMS || autoSummonMode == AutoSummonMode.ONE_ARM;
