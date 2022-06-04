@@ -11,7 +11,6 @@ import com.github.standobyte.jojo.entity.HamonBlockChargeEntity;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
-import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
 import com.google.common.collect.ImmutableSet;
 
 import net.minecraft.block.Block;
@@ -43,17 +42,10 @@ public class HamonOrganismInfusion extends HamonAction {
             if (!(entity instanceof AnimalEntity || entity instanceof AmbientEntity)) {
                 return conditionMessage("animal");
             }
-            if (!power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get().isSkillLearned(HamonSkill.ANIMAL_INFUSION)) {
-                return conditionMessage("animal_infusion");
-            }
             break;
         case BLOCK:
             BlockPos blockPos = target.getBlockPos();
             BlockState blockState = user.level.getBlockState(blockPos);
-            if (blockState.getMaterial() == Material.EGG && 
-                    !power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get().isSkillLearned(HamonSkill.ANIMAL_INFUSION)) {
-                return conditionMessage("animal_infusion");
-            }
             Block block = blockState.getBlock();
             if (!(isBlockLiving(blockState) || block instanceof FlowerPotBlock && blockState.getBlock() != Blocks.FLOWER_POT)) {
                 return conditionMessage("living_plant");
@@ -63,6 +55,10 @@ public class HamonOrganismInfusion extends HamonAction {
             break;
         }
         return ActionConditionResult.POSITIVE;
+    }
+    
+    public TargetRequirement getTargetRequirement() {
+        return TargetRequirement.ANY;
     }
     
     @Override

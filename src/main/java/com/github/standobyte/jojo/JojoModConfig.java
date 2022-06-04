@@ -146,7 +146,8 @@ public class JojoModConfig {
             
             builder.comment(" Settings of Stand Arrow and the Stands pool.").push("Stand Arrow");
                 prioritizeLeastTakenStands = builder
-                        .comment(" Whether or not random Stand gain effects (Stand Arrow, /stand random) give Stands that less players already have.")
+                        .comment(" If enabled, random Stand gain effects (Stand Arrow, /stand random) give Stands that less players already have.", 
+                        		"  Otherwise the Stand selection is random.")
                         .translation("jojo.config.prioritizeLeastTakenStands")
                         .define("prioritizeLeastTakenStands", false);
                 

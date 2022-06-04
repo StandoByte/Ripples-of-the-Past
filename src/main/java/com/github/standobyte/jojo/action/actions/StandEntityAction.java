@@ -30,7 +30,7 @@ public abstract class StandEntityAction extends StandAction {
     protected final int standPerformDuration;
     protected final int standRecoveryDuration;
     private final AutoSummonMode autoSummonMode;
-    private final TargetRequirement crosshairTargetForStand;
+    private final TargetRequirement keepStandTarget;
     private final float userMovementFactor;
     private final StandPose standPose;
     @Nullable
@@ -46,7 +46,7 @@ public abstract class StandEntityAction extends StandAction {
         this.standPerformDuration = builder.standPerformDuration;
         this.standRecoveryDuration = builder.standRecoveryDuration;
         this.autoSummonMode = builder.autoSummonMode;
-        this.crosshairTargetForStand = builder.crosshairTargetForStand;
+        this.keepStandTarget = builder.keepStandTarget;
         this.userMovementFactor = builder.userMovementFactor;
         this.standPose = builder.standPose;
         this.userOffset = builder.userOffset;
@@ -101,26 +101,30 @@ public abstract class StandEntityAction extends StandAction {
     	}
     	return ActionConditionResult.POSITIVE;
     }
-    
-    public boolean canStandTarget(StandEntity standEntity, ActionTarget target, IStandPower standPower) {
-        if (target.getType() != TargetType.EMPTY) {
-            Entity targetEntity = target.getEntity(standEntity.level);
-            if (targetEntity instanceof LivingEntity && !standEntity.canAttack((LivingEntity) targetEntity)) {
-                return false;
-            }
-        }
-        return true;
+
+    public final boolean canStandKeepTarget(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
+    	if (target.getType() == TargetType.EMPTY) {
+    		return true;
+		}
+    	
+    	if (target.getType() == TargetType.ENTITY && !canTargetEntity(target.getEntity(standEntity.level), standEntity, standPower)) {
+    		return false;
+    	}
+
+    	if (getTargetRequirement() != null && !getTargetRequirement().checkTargetType(TargetType.EMPTY)
+    			&& !getTargetRequirement().checkTargetType(target.getType())) {
+    		return false;
+    	}
+    	
+    	return lastTargetCheck(target, standEntity, standPower);
     }
     
-    public boolean standTakesCrosshairTarget(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
-        if (getTargetRequirement() != null && !getTargetRequirement().checkTargetType(TargetType.EMPTY)
-                && getTargetRequirement().checkTargetType(target.getType())) {
-            return true;
-        }
-        if (crosshairTargetForStand != null) {
-            return crosshairTargetForStand.checkTargetType(target.getType());
-        }
-        return false;
+    protected boolean canTargetEntity(Entity target, StandEntity standEntity, IStandPower standPower) {
+    	return !(target instanceof LivingEntity && standEntity.canAttack(standEntity));
+    }
+    
+    protected boolean lastTargetCheck(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
+		return keepStandTarget != null ? keepStandTarget.checkTargetType(target.getType()) : false;
     }
     
     public void standTickButtonHold(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
@@ -373,7 +377,7 @@ public abstract class StandEntityAction extends StandAction {
         private int standPerformDuration = 1;
         private int standRecoveryDuration = 0;
         private AutoSummonMode autoSummonMode = AutoSummonMode.FULL;
-        private TargetRequirement crosshairTargetForStand = null;
+        private TargetRequirement keepStandTarget = null;
         private float userMovementFactor = 0.5F;
         private StandPose standPose = StandPose.IDLE;
         @Nullable
@@ -413,22 +417,22 @@ public abstract class StandEntityAction extends StandAction {
             this.standRecoveryDuration = Math.max(ticks, 0);
             return getThis();
         }
-        
-        public T standTakesCrosshairTarget() {
-            this.crosshairTargetForStand = TargetRequirement.ANY;
+
+        public T standKeepsTarget() {
+            this.keepStandTarget = TargetRequirement.ANY;
             return getThis();
         }
 
-        public T standTakesCrosshairTarget(TargetType targetType) {
+        public T standKeepsTarget(TargetType targetType) {
             switch (targetType) {
             case BLOCK:
-                this.crosshairTargetForStand = TargetRequirement.BLOCK;
+                this.keepStandTarget = TargetRequirement.BLOCK;
                 break;
             case ENTITY:
-                this.crosshairTargetForStand = TargetRequirement.ENTITY;
+                this.keepStandTarget = TargetRequirement.ENTITY;
                 break;
             default:
-                this.crosshairTargetForStand = null;
+                this.keepStandTarget = null;
                 break;
             }
             return getThis();

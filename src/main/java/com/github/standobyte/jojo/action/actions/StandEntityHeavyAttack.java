@@ -86,7 +86,7 @@ public class StandEntityHeavyAttack extends StandEntityAction {
     	
     	public Builder() {
     		standPose(StandPose.HEAVY_ATTACK).staminaCost(50F)
-            .standOffsetFromUser(-0.75, 0.75).standTakesCrosshairTarget(TargetType.ENTITY);
+            .standOffsetFromUser(-0.75, 0.75).standKeepsTarget(TargetType.ENTITY);
     	}
 
 		@Override

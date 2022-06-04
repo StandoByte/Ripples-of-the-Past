@@ -135,6 +135,16 @@ public class VampirismBloodDrain extends VampirismAction {
     }
     
     @Override
+    public TargetRequirement getTargetRequirement() {
+        return TargetRequirement.ENTITY;
+    }
+    
+    @Override
+    public double getMaxRangeSqEntityTarget() {
+    	return 4;
+    }
+    
+    @Override
     public boolean isHeldSentToTracking() {
         return true;
     }

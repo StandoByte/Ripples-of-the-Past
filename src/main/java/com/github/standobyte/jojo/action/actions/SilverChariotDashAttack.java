@@ -102,10 +102,9 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
     protected boolean canBeQueued(IStandPower standPower, StandEntity standEntity) {
         return false;
     }
-    
-    @Override
-    public boolean standTakesCrosshairTarget(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
-        return false;
+
+    protected boolean lastTargetCheck(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
+		return false;
     }
     
     @Override

@@ -99,7 +99,7 @@ public class StandEntityLightAttack extends StandEntityAction {
     	public Builder() {
     		standAutoSummonMode(AutoSummonMode.ONE_ARM).staminaCost(10F).standUserSlowDownFactor(1.0F)
             .standOffsetFront().standOffsetFromUser(-0.75, 0.75)
-            .standTakesCrosshairTarget().standPose(StandPose.LIGHT_ATTACK);
+            .standKeepsTarget().standPose(StandPose.LIGHT_ATTACK);
     	}
 
 		@Override

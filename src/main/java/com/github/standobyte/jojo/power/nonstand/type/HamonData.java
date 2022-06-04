@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -588,13 +587,6 @@ public class HamonData extends TypeSpecificData {
                     }
                 }
             }
-            else if (skill == HamonSkill.ANIMAL_INFUSION) {
-                List<Action<INonStandPower>> attacks = power.getAttacks();
-                int index = attacks.indexOf(HamonSkill.PLANT_INFUSION.getRewardAction());
-                if (index > -1) {
-                    attacks.set(index, HamonSkill.ANIMAL_INFUSION.getRewardAction());
-                }
-            }
         }
     }
     
@@ -622,13 +614,6 @@ public class HamonData extends TypeSpecificData {
                     break;
                 default:
                     break;
-                }
-            }
-            else if (skill == HamonSkill.ANIMAL_INFUSION) {
-                List<Action<INonStandPower>> attacks = power.getAttacks();
-                int index = attacks.indexOf(HamonSkill.ANIMAL_INFUSION.getRewardAction());
-                if (index > -1) {
-                    attacks.set(index, HamonSkill.PLANT_INFUSION.getRewardAction());
                 }
             }
         }

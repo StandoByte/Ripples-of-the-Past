@@ -154,6 +154,11 @@ public class VampirismFreeze extends VampirismAction {
         }
         return false;
     }
+    
+    @Override
+    public double getMaxRangeSqEntityTarget() {
+    	return 4;
+    }
 
     @Override
     public boolean isHeldSentToTracking() {

@@ -48,5 +48,10 @@ public class HierophantGreenBarrier extends StandEntityAction {
         int barriers = stand instanceof HierophantGreenEntity ? ((HierophantGreenEntity) stand).getPlacedBarriersCount() : 0;
         return new TranslationTextComponent(key, barriers, getMaxBarriersPlaceable(power));
     }
+    
+    @Override
+    public TargetRequirement getTargetRequirement() {
+        return TargetRequirement.BLOCK;
+    }
 
 }

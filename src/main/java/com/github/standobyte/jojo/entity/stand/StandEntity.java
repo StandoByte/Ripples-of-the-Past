@@ -1315,9 +1315,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         
         ActionTarget finalTarget = ActionTarget.fromRayTraceResult(aimWithStandOrUser(getAimDistance(getUser()), target));
         target = finalTarget.getType() != TargetType.EMPTY && isTargetInReach(finalTarget) ? finalTarget : ActionTarget.EMPTY;
-        if (action.standTakesCrosshairTarget(target, this, userPower)) {
-            setTaskTarget(target);
-        }
+        setTaskTarget(target);
         
         return attackTarget(target, punch, action, barrageHits, entityAttackOverride);
     }
