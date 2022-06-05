@@ -343,7 +343,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         boolean targetTooFar = false;
         switch (target.getType()) {
         case ENTITY:
-            Entity targetEntity = target.getEntity(user.level);
+            Entity targetEntity = target.getEntity();
             if (targetEntity == null) {
                 target = ActionTarget.EMPTY;
             }
@@ -537,7 +537,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     public void onUserGettingAttacked(DamageSource dmgSource, float dmgAmount) {
         if (dmgSource.getDirectEntity() != null) {
             Action<P> heldAction = getHeldAction();
-            if (heldAction != null && heldAction.cancelHeldOnGettingAttacked(getThis())) {
+            if (heldAction != null && heldAction.cancelHeldOnGettingAttacked(getThis(), dmgSource, dmgAmount)) {
                 stopHeldAction(false);
             }
         }

@@ -45,7 +45,7 @@ public class StandEntityLightAttack extends StandEntityAction {
     @Override
     public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
         double speed = standEntity.getAttackSpeed();
-        return StandStatFormulas.getLightAttackWindup(speed, standEntity.getComboMeter());
+        return StandStatFormulas.getLightAttackWindup(speed, standEntity.getComboMeter(), standEntity.getDamageReceivedWhileBlocking());
     }
     
     @Override

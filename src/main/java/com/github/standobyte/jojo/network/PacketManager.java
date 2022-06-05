@@ -94,85 +94,85 @@ public class PacketManager {
                 .simpleChannel();
         int index = 0;
         
-        channel.messageBuilder(ClHasInputPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
-        .encoder(ClHasInputPacket::encode)
-        .decoder(ClHasInputPacket::decode)
-        .consumer(ClHasInputPacket::handle).add();
+        channel.registerMessage(index++, ClHasInputPacket.class,
+                ClHasInputPacket::encode,
+                ClHasInputPacket::decode,
+                ClHasInputPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
 
-        channel.messageBuilder(ClToggleStandSummonPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
-        .encoder(ClToggleStandSummonPacket::encode)
-        .decoder(ClToggleStandSummonPacket::decode)
-        .consumer(ClToggleStandSummonPacket::handle).add();
+        channel.registerMessage(index++, ClToggleStandSummonPacket.class,
+                ClToggleStandSummonPacket::encode,
+                ClToggleStandSummonPacket::decode,
+                ClToggleStandSummonPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
         
-        channel.messageBuilder(ClToggleStandManualControlPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
-        .encoder(ClToggleStandManualControlPacket::encode)
-        .decoder(ClToggleStandManualControlPacket::decode)
-        .consumer(ClToggleStandManualControlPacket::handle).add();
+        channel.registerMessage(index++, ClToggleStandManualControlPacket.class,
+                ClToggleStandManualControlPacket::encode,
+                ClToggleStandManualControlPacket::decode,
+                ClToggleStandManualControlPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
         
-        channel.messageBuilder(ClClickActionPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
-        .encoder(ClClickActionPacket::encode)
-        .decoder(ClClickActionPacket::decode)
-        .consumer(ClClickActionPacket::handle).add();
+        channel.registerMessage(index++, ClClickActionPacket.class,
+                ClClickActionPacket::encode,
+                ClClickActionPacket::decode,
+                ClClickActionPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
         
-        channel.messageBuilder(ClHeldActionTargetPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
-        .encoder(ClHeldActionTargetPacket::encode)
-        .decoder(ClHeldActionTargetPacket::decode)
-        .consumer(ClHeldActionTargetPacket::handle).add();
+        channel.registerMessage(index++, ClHeldActionTargetPacket.class,
+                ClHeldActionTargetPacket::encode,
+                ClHeldActionTargetPacket::decode,
+                ClHeldActionTargetPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
         
-        channel.messageBuilder(ClStopHeldActionPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
-        .encoder(ClStopHeldActionPacket::encode)
-        .decoder(ClStopHeldActionPacket::decode)
-        .consumer(ClStopHeldActionPacket::handle).add();
+        channel.registerMessage(index++, ClStopHeldActionPacket.class,
+                ClStopHeldActionPacket::encode,
+                ClStopHeldActionPacket::decode,
+                ClStopHeldActionPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
         
-        channel.messageBuilder(ClHamonWindowOpenedPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
-        .encoder(ClHamonWindowOpenedPacket::encode)
-        .decoder(ClHamonWindowOpenedPacket::decode)
-        .consumer(ClHamonWindowOpenedPacket::handle).add();
+        channel.registerMessage(index++, ClHamonWindowOpenedPacket.class,
+                ClHamonWindowOpenedPacket::encode,
+                ClHamonWindowOpenedPacket::decode,
+                ClHamonWindowOpenedPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
         
-        channel.messageBuilder(ClHamonLearnButtonPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
-        .encoder(ClHamonLearnButtonPacket::encode)
-        .decoder(ClHamonLearnButtonPacket::decode)
-        .consumer(ClHamonLearnButtonPacket::handle).add();
+        channel.registerMessage(index++, ClHamonLearnButtonPacket.class,
+                ClHamonLearnButtonPacket::encode,
+                ClHamonLearnButtonPacket::decode,
+                ClHamonLearnButtonPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
         
-        channel.messageBuilder(ClHamonResetSkillsButtonPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
-        .encoder(ClHamonResetSkillsButtonPacket::encode)
-        .decoder(ClHamonResetSkillsButtonPacket::decode)
-        .consumer(ClHamonResetSkillsButtonPacket::handle).add();
+        channel.registerMessage(index++, ClHamonResetSkillsButtonPacket.class,
+                ClHamonResetSkillsButtonPacket::encode,
+                ClHamonResetSkillsButtonPacket::decode,
+                ClHamonResetSkillsButtonPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
         
-        channel.messageBuilder(ClHamonStartMeditationPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
-        .encoder(ClHamonStartMeditationPacket::encode)
-        .decoder(ClHamonStartMeditationPacket::decode)
-        .consumer(ClHamonStartMeditationPacket::handle).add();
+        channel.registerMessage(index++, ClHamonStartMeditationPacket.class,
+                ClHamonStartMeditationPacket::encode,
+                ClHamonStartMeditationPacket::decode,
+                ClHamonStartMeditationPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
         
-        channel.messageBuilder(ClRunAwayPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
-        .encoder(ClRunAwayPacket::encode)
-        .decoder(ClRunAwayPacket::decode)
-        .consumer(ClRunAwayPacket::handle).add();
+        channel.registerMessage(index++, ClRunAwayPacket.class,
+                ClRunAwayPacket::encode,
+                ClRunAwayPacket::decode,
+                ClRunAwayPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
         
-        channel.messageBuilder(ClStandManualMovementPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
-        .encoder(ClStandManualMovementPacket::encode)
-        .decoder(ClStandManualMovementPacket::decode)
-        .consumer(ClStandManualMovementPacket::handle).add();
+        channel.registerMessage(index++, ClStandManualMovementPacket.class,
+                ClStandManualMovementPacket::encode,
+                ClStandManualMovementPacket::decode,
+                ClStandManualMovementPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
         
-        channel.messageBuilder(ClOnLeapPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
-        .encoder(ClOnLeapPacket::encode)
-        .decoder(ClOnLeapPacket::decode)
-        .consumer(ClOnLeapPacket::handle).add();
+        channel.registerMessage(index++, ClOnLeapPacket.class,
+                ClOnLeapPacket::encode,
+                ClOnLeapPacket::decode,
+                ClOnLeapPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
         
-        channel.messageBuilder(ClOnStandDashPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
-        .encoder(ClOnStandDashPacket::encode)
-        .decoder(ClOnStandDashPacket::decode)
-        .consumer(ClOnStandDashPacket::handle).add();
+        channel.registerMessage(index++, ClOnStandDashPacket.class,
+                ClOnStandDashPacket::encode,
+                ClOnStandDashPacket::decode,
+                ClOnStandDashPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
         
-        channel.messageBuilder(ClSoulRotationPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
-        .encoder(ClSoulRotationPacket::encode)
-        .decoder(ClSoulRotationPacket::decode)
-        .consumer(ClSoulRotationPacket::handle).add();
+        channel.registerMessage(index++, ClSoulRotationPacket.class,
+                ClSoulRotationPacket::encode,
+                ClSoulRotationPacket::decode,
+                ClSoulRotationPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
         
-        channel.messageBuilder(ClRemovePlayerSoulEntityPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
-        .encoder(ClRemovePlayerSoulEntityPacket::encode)
-        .decoder(ClRemovePlayerSoulEntityPacket::decode)
-        .consumer(ClRemovePlayerSoulEntityPacket::handle).add();
+        channel.registerMessage(index++, ClRemovePlayerSoulEntityPacket.class,
+                ClRemovePlayerSoulEntityPacket::encode,
+                ClRemovePlayerSoulEntityPacket::decode,
+                ClRemovePlayerSoulEntityPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
         
         
 
@@ -181,215 +181,215 @@ public class PacketManager {
                 TrPowerTypePacket::decode, 
                 TrPowerTypePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(TrHeldActionPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(TrHeldActionPacket::encode)
-        .decoder(TrHeldActionPacket::decode)
-        .consumer(TrHeldActionPacket::handle).add();
+        channel.registerMessage(index++, TrHeldActionPacket.class,
+                TrHeldActionPacket::encode,
+                TrHeldActionPacket::decode,
+                TrHeldActionPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(InputBufferPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(InputBufferPacket::encode)
-        .decoder(InputBufferPacket::decode)
-        .consumer(InputBufferPacket::handle).add();
+        channel.registerMessage(index++, InputBufferPacket.class,
+                InputBufferPacket::encode,
+                InputBufferPacket::decode,
+                InputBufferPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(TrEnergyPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(TrEnergyPacket::encode)
-        .decoder(TrEnergyPacket::decode)
-        .consumer(TrEnergyPacket::handle).add();
+        channel.registerMessage(index++, TrEnergyPacket.class,
+                TrEnergyPacket::encode,
+                TrEnergyPacket::decode,
+                TrEnergyPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(TrCooldownPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(TrCooldownPacket::encode)
-        .decoder(TrCooldownPacket::decode)
-        .consumer(TrCooldownPacket::handle).add();
+        channel.registerMessage(index++, TrCooldownPacket.class,
+                TrCooldownPacket::encode,
+                TrCooldownPacket::decode,
+                TrCooldownPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(BloodParticlesPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(BloodParticlesPacket::encode)
-        .decoder(BloodParticlesPacket::decode)
-        .consumer(BloodParticlesPacket::handle).add();
+        channel.registerMessage(index++, BloodParticlesPacket.class,
+                BloodParticlesPacket::encode,
+                BloodParticlesPacket::decode,
+                BloodParticlesPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(TrHamonStatsPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(TrHamonStatsPacket::encode)
-        .decoder(TrHamonStatsPacket::decode)
-        .consumer(TrHamonStatsPacket::handle).add();
+        channel.registerMessage(index++, TrHamonStatsPacket.class,
+                TrHamonStatsPacket::encode,
+                TrHamonStatsPacket::decode,
+                TrHamonStatsPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(HamonExercisesPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(HamonExercisesPacket::encode)
-        .decoder(HamonExercisesPacket::decode)
-        .consumer(HamonExercisesPacket::handle).add();
+        channel.registerMessage(index++, HamonExercisesPacket.class,
+                HamonExercisesPacket::encode,
+                HamonExercisesPacket::decode,
+                HamonExercisesPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(HamonTeachersSkillsPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(HamonTeachersSkillsPacket::encode)
-        .decoder(HamonTeachersSkillsPacket::decode)
-        .consumer(HamonTeachersSkillsPacket::handle).add();
+        channel.registerMessage(index++, HamonTeachersSkillsPacket.class,
+                HamonTeachersSkillsPacket::encode,
+                HamonTeachersSkillsPacket::decode,
+                HamonTeachersSkillsPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(HamonSkillLearnPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(HamonSkillLearnPacket::encode)
-        .decoder(HamonSkillLearnPacket::decode)
-        .consumer(HamonSkillLearnPacket::handle).add();
+        channel.registerMessage(index++, HamonSkillLearnPacket.class,
+                HamonSkillLearnPacket::encode,
+                HamonSkillLearnPacket::decode,
+                HamonSkillLearnPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(HamonSkillsResetPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(HamonSkillsResetPacket::encode)
-        .decoder(HamonSkillsResetPacket::decode)
-        .consumer(HamonSkillsResetPacket::handle).add();
+        channel.registerMessage(index++, HamonSkillsResetPacket.class,
+                HamonSkillsResetPacket::encode,
+                HamonSkillsResetPacket::decode,
+                HamonSkillsResetPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(TrHamonParticlesPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(TrHamonParticlesPacket::encode)
-        .decoder(TrHamonParticlesPacket::decode)
-        .consumer(TrHamonParticlesPacket::handle).add();
+        channel.registerMessage(index++, TrHamonParticlesPacket.class,
+                TrHamonParticlesPacket::encode,
+                TrHamonParticlesPacket::decode,
+                TrHamonParticlesPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(TrNonStandFlagPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(TrNonStandFlagPacket::encode)
-        .decoder(TrNonStandFlagPacket::decode)
-        .consumer(TrNonStandFlagPacket::handle).add();
+        channel.registerMessage(index++, TrNonStandFlagPacket.class,
+                TrNonStandFlagPacket::encode,
+                TrNonStandFlagPacket::decode,
+                TrNonStandFlagPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(StaminaPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(StaminaPacket::encode)
-        .decoder(StaminaPacket::decode)
-        .consumer(StaminaPacket::handle).add();
+        channel.registerMessage(index++, StaminaPacket.class,
+                StaminaPacket::encode,
+                StaminaPacket::decode,
+                StaminaPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(ResolvePacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(ResolvePacket::encode)
-        .decoder(ResolvePacket::decode)
-        .consumer(ResolvePacket::handle).add();
+        channel.registerMessage(index++, ResolvePacket.class,
+                ResolvePacket::encode,
+                ResolvePacket::decode,
+                ResolvePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(ResetResolveValuePacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(ResetResolveValuePacket::encode)
-        .decoder(ResetResolveValuePacket::decode)
-        .consumer(ResetResolveValuePacket::handle).add();
+        channel.registerMessage(index++, ResetResolveValuePacket.class,
+                ResetResolveValuePacket::encode,
+                ResetResolveValuePacket::decode,
+                ResetResolveValuePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(ResolveLevelPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(ResolveLevelPacket::encode)
-        .decoder(ResolveLevelPacket::decode)
-        .consumer(ResolveLevelPacket::handle).add();
+        channel.registerMessage(index++, ResolveLevelPacket.class,
+                ResolveLevelPacket::encode,
+                ResolveLevelPacket::decode,
+                ResolveLevelPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(ResolveBoostsPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(ResolveBoostsPacket::encode)
-        .decoder(ResolveBoostsPacket::decode)
-        .consumer(ResolveBoostsPacket::handle).add();
+        channel.registerMessage(index++, ResolveBoostsPacket.class,
+                ResolveBoostsPacket::encode,
+                ResolveBoostsPacket::decode,
+                ResolveBoostsPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(MaxAchievedResolvePacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(MaxAchievedResolvePacket::encode)
-        .decoder(MaxAchievedResolvePacket::decode)
-        .consumer(MaxAchievedResolvePacket::handle).add();
+        channel.registerMessage(index++, MaxAchievedResolvePacket.class,
+                MaxAchievedResolvePacket::encode,
+                MaxAchievedResolvePacket::decode,
+                MaxAchievedResolvePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(SkippedStandProgressionPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(SkippedStandProgressionPacket::encode)
-        .decoder(SkippedStandProgressionPacket::decode)
-        .consumer(SkippedStandProgressionPacket::handle).add();
+        channel.registerMessage(index++, SkippedStandProgressionPacket.class,
+                SkippedStandProgressionPacket::encode,
+                SkippedStandProgressionPacket::decode,
+                SkippedStandProgressionPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(ResolveEffectStartPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(ResolveEffectStartPacket::encode)
-        .decoder(ResolveEffectStartPacket::decode)
-        .consumer(ResolveEffectStartPacket::handle).add();
+        channel.registerMessage(index++, ResolveEffectStartPacket.class,
+                ResolveEffectStartPacket::encode,
+                ResolveEffectStartPacket::decode,
+                ResolveEffectStartPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(StandActionLearningPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(StandActionLearningPacket::encode)
-        .decoder(StandActionLearningPacket::decode)
-        .consumer(StandActionLearningPacket::handle).add();
+        channel.registerMessage(index++, StandActionLearningPacket.class,
+                StandActionLearningPacket::encode,
+                StandActionLearningPacket::decode,
+                StandActionLearningPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(StandActionsClearLearningPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(StandActionsClearLearningPacket::encode)
-        .decoder(StandActionsClearLearningPacket::decode)
-        .consumer(StandActionsClearLearningPacket::handle).add();
+        channel.registerMessage(index++, StandActionsClearLearningPacket.class,
+                StandActionsClearLearningPacket::encode,
+                StandActionsClearLearningPacket::decode,
+                StandActionsClearLearningPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(TrSetStandEntityPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(TrSetStandEntityPacket::encode)
-        .decoder(TrSetStandEntityPacket::decode)
-        .consumer(TrSetStandEntityPacket::handle).add();
+        channel.registerMessage(index++, TrSetStandEntityPacket.class,
+                TrSetStandEntityPacket::encode,
+                TrSetStandEntityPacket::decode,
+                TrSetStandEntityPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(StandStatsDataPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(StandStatsDataPacket::encode)
-        .decoder(StandStatsDataPacket::decode)
-        .consumer(StandStatsDataPacket::handle).add();
+        channel.registerMessage(index++, StandStatsDataPacket.class,
+                StandStatsDataPacket::encode,
+                StandStatsDataPacket::decode,
+                StandStatsDataPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(StandControlStatusPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(StandControlStatusPacket::encode)
-        .decoder(StandControlStatusPacket::decode)
-        .consumer(StandControlStatusPacket::handle).add();
+        channel.registerMessage(index++, StandControlStatusPacket.class,
+                StandControlStatusPacket::encode,
+                StandControlStatusPacket::decode,
+                StandControlStatusPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(StandCancelManualMovementPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(StandCancelManualMovementPacket::encode)
-        .decoder(StandCancelManualMovementPacket::decode)
-        .consumer(StandCancelManualMovementPacket::handle).add();
+        channel.registerMessage(index++, StandCancelManualMovementPacket.class,
+                StandCancelManualMovementPacket::encode,
+                StandCancelManualMovementPacket::decode,
+                StandCancelManualMovementPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(TrStandEntityTargetPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(TrStandEntityTargetPacket::encode)
-        .decoder(TrStandEntityTargetPacket::decode)
-        .consumer(TrStandEntityTargetPacket::handle).add();
+        channel.registerMessage(index++, TrStandEntityTargetPacket.class,
+                TrStandEntityTargetPacket::encode,
+                TrStandEntityTargetPacket::decode,
+                TrStandEntityTargetPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(TrSetStandOffsetPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(TrSetStandOffsetPacket::encode)
-        .decoder(TrSetStandOffsetPacket::decode)
-        .consumer(TrSetStandOffsetPacket::handle).add();
+        channel.registerMessage(index++, TrSetStandOffsetPacket.class,
+                TrSetStandOffsetPacket::encode,
+                TrSetStandOffsetPacket::decode,
+                TrSetStandOffsetPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(TrStandEntitySwingsPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(TrStandEntitySwingsPacket::encode)
-        .decoder(TrStandEntitySwingsPacket::decode)
-        .consumer(TrStandEntitySwingsPacket::handle).add();
+        channel.registerMessage(index++, TrStandEntitySwingsPacket.class,
+                TrStandEntitySwingsPacket::encode,
+                TrStandEntitySwingsPacket::decode,
+                TrStandEntitySwingsPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(UpdateClientCapCachePacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(UpdateClientCapCachePacket::encode)
-        .decoder(UpdateClientCapCachePacket::decode)
-        .consumer(UpdateClientCapCachePacket::handle).add();
+        channel.registerMessage(index++, UpdateClientCapCachePacket.class,
+                UpdateClientCapCachePacket::encode,
+                UpdateClientCapCachePacket::decode,
+                UpdateClientCapCachePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(TrKnivesCountPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(TrKnivesCountPacket::encode)
-        .decoder(TrKnivesCountPacket::decode)
-        .consumer(TrKnivesCountPacket::handle).add();
+        channel.registerMessage(index++, TrKnivesCountPacket.class,
+                TrKnivesCountPacket::encode,
+                TrKnivesCountPacket::decode,
+                TrKnivesCountPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(LeapCooldownPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(LeapCooldownPacket::encode)
-        .decoder(LeapCooldownPacket::decode)
-        .consumer(LeapCooldownPacket::handle).add();
+        channel.registerMessage(index++, LeapCooldownPacket.class,
+                LeapCooldownPacket::encode,
+                LeapCooldownPacket::decode,
+                LeapCooldownPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(PlayVoiceLinePacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(PlayVoiceLinePacket::encode)
-        .decoder(PlayVoiceLinePacket::decode)
-        .consumer(PlayVoiceLinePacket::handle).add();
+        channel.registerMessage(index++, PlayVoiceLinePacket.class,
+                PlayVoiceLinePacket::encode,
+                PlayVoiceLinePacket::decode,
+                PlayVoiceLinePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(PlaySoundAtClientPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(PlaySoundAtClientPacket::encode)
-        .decoder(PlaySoundAtClientPacket::decode)
-        .consumer(PlaySoundAtClientPacket::handle).add();
+        channel.registerMessage(index++, PlaySoundAtClientPacket.class,
+                PlaySoundAtClientPacket::encode,
+                PlaySoundAtClientPacket::decode,
+                PlaySoundAtClientPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(TimeStopInstancePacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(TimeStopInstancePacket::encode)
-        .decoder(TimeStopInstancePacket::decode)
-        .consumer(TimeStopInstancePacket::handle).add();
+        channel.registerMessage(index++, TimeStopInstancePacket.class,
+                TimeStopInstancePacket::encode,
+                TimeStopInstancePacket::decode,
+                TimeStopInstancePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(TimeStopPlayerStatePacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(TimeStopPlayerStatePacket::encode)
-        .decoder(TimeStopPlayerStatePacket::decode)
-        .consumer(TimeStopPlayerStatePacket::handle).add();
+        channel.registerMessage(index++, TimeStopPlayerStatePacket.class,
+                TimeStopPlayerStatePacket::encode,
+                TimeStopPlayerStatePacket::decode,
+                TimeStopPlayerStatePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(TimeStopPlayerJoinPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(TimeStopPlayerJoinPacket::encode)
-        .decoder(TimeStopPlayerJoinPacket::decode)
-        .consumer(TimeStopPlayerJoinPacket::handle).add();
+        channel.registerMessage(index++, TimeStopPlayerJoinPacket.class,
+                TimeStopPlayerJoinPacket::encode,
+                TimeStopPlayerJoinPacket::decode,
+                TimeStopPlayerJoinPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(RefreshMovementInTimeStopPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(RefreshMovementInTimeStopPacket::encode)
-        .decoder(RefreshMovementInTimeStopPacket::decode)
-        .consumer(RefreshMovementInTimeStopPacket::handle).add();
+        channel.registerMessage(index++, RefreshMovementInTimeStopPacket.class,
+                RefreshMovementInTimeStopPacket::encode,
+                RefreshMovementInTimeStopPacket::decode,
+                RefreshMovementInTimeStopPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(TrNoMotionLerpPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(TrNoMotionLerpPacket::encode)
-        .decoder(TrNoMotionLerpPacket::decode)
-        .consumer(TrNoMotionLerpPacket::handle).add();
+        channel.registerMessage(index++, TrNoMotionLerpPacket.class,
+                TrNoMotionLerpPacket::encode,
+                TrNoMotionLerpPacket::decode,
+                TrNoMotionLerpPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(TrDirectEntityPosPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(TrDirectEntityPosPacket::encode)
-        .decoder(TrDirectEntityPosPacket::decode)
-        .consumer(TrDirectEntityPosPacket::handle).add();
+        channel.registerMessage(index++, TrDirectEntityPosPacket.class,
+                TrDirectEntityPosPacket::encode,
+                TrDirectEntityPosPacket::decode,
+                TrDirectEntityPosPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(CommonConfigPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(CommonConfigPacket::encode)
-        .decoder(CommonConfigPacket::decode)
-        .consumer(CommonConfigPacket::handle).add();
+        channel.registerMessage(index++, CommonConfigPacket.class,
+                CommonConfigPacket::encode,
+                CommonConfigPacket::decode,
+                CommonConfigPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.messageBuilder(ResetSyncedCommonConfigPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-        .encoder(ResetSyncedCommonConfigPacket::encode)
-        .decoder(ResetSyncedCommonConfigPacket::decode)
-        .consumer(ResetSyncedCommonConfigPacket::handle).add();
+        channel.registerMessage(index++, ResetSyncedCommonConfigPacket.class,
+                ResetSyncedCommonConfigPacket::encode,
+                ResetSyncedCommonConfigPacket::decode,
+                ResetSyncedCommonConfigPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
     }
 
     public static void sendToServer(Object msg) {

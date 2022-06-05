@@ -26,7 +26,7 @@ public class VampirismBloodGift extends VampirismAction {
         if (!user.getMainHandItem().isEmpty()) {
             return conditionMessage("hand");
         }
-        Entity targetEntity = target.getEntity(user.level);
+        Entity targetEntity = target.getEntity();
         if (!(targetEntity instanceof PlayerEntity)) {
             return conditionMessage("player_target");
         }
@@ -46,7 +46,7 @@ public class VampirismBloodGift extends VampirismAction {
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
-            PlayerEntity targetPlayer = (PlayerEntity) target.getEntity(world);
+            PlayerEntity targetPlayer = (PlayerEntity) target.getEntity();
             if (INonStandPower.getNonStandPowerOptional(targetPlayer).map(
                     targetPower -> targetPower.givePower(ModNonStandPowers.VAMPIRISM.get())).orElse(false)) {
                 user.hurt(new DamageSource("blood_gift").bypassArmor(), 10.0F);

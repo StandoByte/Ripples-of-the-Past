@@ -90,7 +90,7 @@ public abstract class StandEntityAction extends StandAction {
     }
     
     private ActionConditionResult checkTaskCancelling(StandEntity standEntity, IStandPower standPower) {
-    	if (!standEntity.isClearingAction() && standEntity.getCurrentTask().isPresent() && standPower.getHeldAction() != this) {
+    	if (standEntity.getCurrentTask().isPresent() && standPower.getHeldAction() != this) {
     		StandEntityTask task = standEntity.getCurrentTask().get();
     		if (!task.getAction().canClickDuringTask(this, standPower, standEntity, task)) {
     			return ActionConditionResult.NEGATIVE;
@@ -107,12 +107,12 @@ public abstract class StandEntityAction extends StandAction {
     		return true;
 		}
     	
-    	if (target.getType() == TargetType.ENTITY && !canTargetEntity(target.getEntity(standEntity.level), standEntity, standPower)) {
+    	if (target.getType() == TargetType.ENTITY && !canTargetEntity(target.getEntity(), standEntity, standPower)) {
     		return false;
     	}
 
-    	if (getTargetRequirement() != null && !getTargetRequirement().checkTargetType(TargetType.EMPTY)
-    			&& !getTargetRequirement().checkTargetType(target.getType())) {
+    	if (getTargetRequirement() != null && !appropriateTarget(TargetType.EMPTY)
+    			&& !appropriateTarget(target.getType())) {
     		return false;
     	}
     	
@@ -292,6 +292,10 @@ public abstract class StandEntityAction extends StandAction {
         return standEntity.isArmsOnlyMode() ? userOffsetArmsOnly : userOffset;
     }
     
+    public boolean transfersPreviousOffset(IStandPower standPower, StandEntity standEntity, StandEntityTask previousTask) {
+    	return true;
+    }
+    
     protected final void invokeForStand(IStandPower power, Consumer<StandEntity> consumer) {
         if (power.isActive()) {
             consumer.accept(((StandEntity) power.getStandManifestation()));
@@ -332,7 +336,8 @@ public abstract class StandEntityAction extends StandAction {
         return false;
     }
     
-    public void onClear(IStandPower standPower, StandEntity standEntity) {}
+    public void onClear(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction) {
+    }
     
     public float getStandAlpha(StandEntity standEntity, int ticksLeft, float partialTick) {
         return 1F;

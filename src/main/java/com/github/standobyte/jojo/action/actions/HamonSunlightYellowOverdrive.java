@@ -26,7 +26,7 @@ public class HamonSunlightYellowOverdrive extends HamonAction {
         if (!hamon.isSkillLearned(HamonSkill.SUNLIGHT_YELLOW_OVERDRIVE)) {
             return ActionConditionResult.NEGATIVE;
         }
-        Entity entity = target.getEntity(user.level);
+        Entity entity = target.getEntity();
         if (entity instanceof LivingEntity) {
             LivingEntity targetEntity = (LivingEntity) entity;
             if (!targetEntity.isInvulnerableTo(DamageUtil.HAMON) && targetEntity.getBoundingBox()
@@ -54,7 +54,7 @@ public class HamonSunlightYellowOverdrive extends HamonAction {
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
-            Entity entity = target.getEntity(world);
+            Entity entity = target.getEntity();
             if (entity instanceof LivingEntity) {
                 LivingEntity targetEntity = (LivingEntity) entity;
                 HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();

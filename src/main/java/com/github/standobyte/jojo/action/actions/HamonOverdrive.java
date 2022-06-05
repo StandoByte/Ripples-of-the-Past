@@ -71,7 +71,7 @@ public class HamonOverdrive extends HamonAction {
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
-            Entity entity = target.getEntity(world);
+            Entity entity = target.getEntity();
             if (entity instanceof LivingEntity) {
                 LivingEntity targetEntity = (LivingEntity) entity;
                 HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();

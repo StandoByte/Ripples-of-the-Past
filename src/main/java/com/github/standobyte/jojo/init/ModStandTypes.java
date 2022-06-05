@@ -59,7 +59,7 @@ public class ModStandTypes {
                     new StandAction[] {ModActions.THE_WORLD_PUNCH.get(), ModActions.THE_WORLD_BARRAGE.get(), ModActions.THE_WORLD_TS_PUNCH.get()},
                     new StandAction[] {ModActions.THE_WORLD_BLOCK.get(), ModActions.THE_WORLD_TIME_STOP.get()},
                     TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
-                    .power(16.5)
+                    .power(16.0)
                     .speed(16.0)
                     .range(2.0, 10.0)
                     .durability(16.0)
@@ -110,7 +110,7 @@ public class ModStandTypes {
                     new StandAction[] {ModActions.MAGICIANS_RED_BLOCK.get(), ModActions.MAGICIANS_RED_RED_BIND.get(), ModActions.MAGICIANS_RED_DETECTOR.get()},
                     StandStats.class, new StandStats.Builder()
                     .power(12.0)
-                    .speed(11.0)
+                    .speed(12.0)
                     .range(5.0)
                     .durability(12.0)
                     .precision(8.0)

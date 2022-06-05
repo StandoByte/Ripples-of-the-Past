@@ -69,7 +69,7 @@ public class HamonOverdriveBarrage extends HamonAction {
                 }
                 break;
             case ENTITY:
-                Entity targetEntity = target.getEntity(world);
+                Entity targetEntity = target.getEntity();
                 if (user instanceof PlayerEntity) {
                     int invulTicks = targetEntity.invulnerableTime;
                     ((PlayerEntity) user).attack(targetEntity);

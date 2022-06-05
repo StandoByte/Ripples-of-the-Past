@@ -32,12 +32,17 @@ public class StandStatFormulas {
     }
     
     private static final Random RANDOM = new Random();
-    public static int getLightAttackWindup(double speed, float comboMeter) {
+    public static int getLightAttackWindup(double speed, float comboMeter, float damageInBlock) {
         double val = (24 - speed) / 4;
         if (val <= 0) return 0;
+        
         if (val > 2) {
             val = Math.max(val * (1.0F - comboMeter * 0.4F), 2);
         }
+        if (damageInBlock > 0) {
+        	val *= Math.max(4 - damageInBlock, 0);
+        }
+        
         int ticks = MathHelper.floor(val);
         if (RANDOM.nextDouble() < val - ticks) ticks++;
         return ticks;
