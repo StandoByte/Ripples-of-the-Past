@@ -328,6 +328,7 @@ public class InputHandler {
         else {
             keyHeld = mc.options.keyAttack.isDown() || mc.options.keyUse.isDown() || mc.options.keyPickItem.isDown();
         }
+        
         Action<?> heldAction = power.getHeldAction();
         if (heldAction != null) {
             if (!keyHeld) {
@@ -377,10 +378,13 @@ public class InputHandler {
         ActionType actionType = key == ActionKey.ATTACK ? ActionType.ATTACK : ActionType.ABILITY;
 
         IPower<?, ?> power = actionsOverlay.getCurrentPower();
+        
         boolean actionClick = !actionsOverlay.noActionSelected(actionType)
                 || key == ActionKey.STAND_BLOCK && power != null && !power.getAbilities().isEmpty();
         if (!actionClick) {
-        	handleStun(event);
+        	if (handleStun(event)) {
+        		event.setSwingHand(false);
+        	}
             return;
         }
 
@@ -408,17 +412,25 @@ public class InputHandler {
             }
         }
         else {
-        	handleStun(event);
+        	if (heldKeys.get(power) == key) {
+                event.setSwingHand(false);
+            	event.setCanceled(true);
+            }
+        	else if (handleStun(event)) {
+        		event.setSwingHand(false);
+        	}
         }
         if (leftClickedBlock && leftClickBlockDelay <= 0) {
             leftClickBlockDelay = 4;
         }
     }
     
-    private void handleStun(InputEvent event) {
+    private boolean handleStun(InputEvent event) {
     	if (event != null && event.isCancelable() && (mc.player.hasEffect(ModEffects.STUN.get()) || !mc.player.canUpdate())) {
     		event.setCanceled(true);
+    		return true;
     	}
+    	return false;
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)

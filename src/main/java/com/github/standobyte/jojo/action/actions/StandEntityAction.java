@@ -96,7 +96,13 @@ public abstract class StandEntityAction extends StandAction {
     			return ActionConditionResult.NEGATIVE;
     		}
     		if (!task.getAction().canBeCanceled(standPower, standEntity, task.getPhase(), this)) {
-            	return this.canBeQueued(standPower, standEntity) ? ActionConditionResult.NEGATIVE_QUEUE_INPUT : ActionConditionResult.NEGATIVE;
+    			if (this.canBeQueued(standPower, standEntity)) {
+    				if (!standEntity.level.isClientSide()) {
+    					standEntity.queueNextAction(this);
+    				}
+    				return ActionConditionResult.NEGATIVE_HIGHLIGHTED;
+    			}
+            	return ActionConditionResult.NEGATIVE;
     		}
     	}
     	return ActionConditionResult.POSITIVE;

@@ -13,7 +13,7 @@ import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
-// FIXME (!!!!!!!) more knockback depending on 'blockDamage' (when !isBinding)
+// FIXME (!!) more knockback depending on 'blockDamage' (when !isBinding)
 public class HGStringEntity extends OwnerBoundProjectileEntity {
     private float yRotOffset;
     private float xRotOffset;

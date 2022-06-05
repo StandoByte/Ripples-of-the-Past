@@ -62,13 +62,6 @@ public class StandEntityLightAttack extends StandEntityAction {
     }
     
     @Override
-    public void standTickRecovery(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-        if (task.getTick() == 0) {
-        	userPower.clickQueuedAction();
-        }
-    }
-    
-    @Override
     protected SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target) {
         return target.getType() != TargetType.ENTITY || standEntity.isArmsOnlyMode() || standEntity.getComboMeter() > 0
         		? null : super.getSound(standEntity, standPower, phase, target);

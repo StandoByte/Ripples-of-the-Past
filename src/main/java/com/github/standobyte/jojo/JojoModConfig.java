@@ -62,7 +62,7 @@ public class JojoModConfig {
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> bannedStands;
         private List<StandType<?>> bannedStandsSynced = null;
         private List<ResourceLocation> bannedStandsResLocs;
-        private boolean[] tiersAvaliable = new boolean[7];
+        private boolean[] tiersAvailable = new boolean[7];
 
         public final ForgeConfigSpec.BooleanValue abilitiesBreakBlocks;
         public final ForgeConfigSpec.DoubleValue standDamageMultiplier;
@@ -260,13 +260,13 @@ public class JojoModConfig {
                     .collect(Collectors.toList());
             
             
-            tiersAvaliable = new boolean[7];
+            tiersAvailable = new boolean[7];
             registry.getValues()
             .stream()
             .filter(stand -> !bannedStandsResLocs.contains(stand.getRegistryName()))
             .map(StandType::getTier)
             .distinct()
-            .forEach(tier -> tiersAvaliable[tier] = true);
+            .forEach(tier -> tiersAvailable[tier] = true);
         }
         
         public boolean isStandBanned(StandType<?> stand) {
@@ -274,7 +274,7 @@ public class JojoModConfig {
         }
         
         public boolean tierHasUnbannedStands(int tier) {
-            return tiersAvaliable[tier];
+            return tiersAvailable[tier];
         }
         
         

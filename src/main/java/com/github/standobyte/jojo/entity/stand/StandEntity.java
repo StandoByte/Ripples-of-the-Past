@@ -156,6 +156,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     // scheduled stand task
 //    @Nullable
 //    private StandEntityTask scheduledTask;
+    private StandEntityAction inputBuffer;
     
     protected StandPose standPose = StandPose.SUMMON;
     public int gradualSummonWeaknessTicks;
@@ -184,7 +185,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             this.summonPoseRandomByte = random.nextInt(128);
         }
     }
-
+    
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
@@ -932,6 +933,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         accumulateBarrageTickParry = false;
         LivingEntity user = getUser();
         
+        checkInputBuffer();
+        
         Optional<StandEntityTask> currentTask = getCurrentTask();
         
         if (!currentTask.map(task -> task.rotateStand(this, false)).orElse(false)
@@ -1250,7 +1253,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         updateNoPhysics();
         setStandPose(StandPose.IDLE);
 		
-        if (newAction == null && !userPower.clickQueuedAction()) {
+        if (newAction == null && !checkInputBuffer()) {
             if (isArmsOnlyMode()) {
                 StandEntityAction unsummon = ModActions.STAND_ENTITY_UNSUMMON.get();
                 setTask(StandEntityTask.makeServerSideTask(this, userPower, unsummon, unsummon.getStandActionTicks(userPower, this), 
@@ -1293,6 +1296,23 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     public float getUserMovementFactor() {
         return getCurrentTaskActionOptional().map(action -> action.getUserMovementFactor(getUserPower(), this)).orElse(1F);
+    }
+    
+    public void queueNextAction(StandEntityAction action) {
+    	if (!level.isClientSide()) {
+    		this.inputBuffer = action;
+    	}
+    }
+    
+    public boolean checkInputBuffer() {
+    	if (inputBuffer != null) {
+    		LivingEntity user = getUser();
+    		if (userPower.onClickAction(inputBuffer, user != null && user.isShiftKeyDown(), ActionTarget.EMPTY)) {
+    			inputBuffer = null;
+    			return true;
+    		}
+    	}
+    	return false;
     }
 
 
@@ -1699,7 +1719,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         StandAttackProperties attack = new StandAttackProperties();
         
         switch (punchType) {
-        // FIXME (!!!!!!!) more knockback depending on 'blockDamage'
+        // FIXME (!!) more knockback depending on 'blockDamage'
         case LIGHT:
             attack
             .damage(StandStatFormulas.getLightAttackDamage(strength))
