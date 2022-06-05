@@ -29,9 +29,9 @@ import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 public class CommonReflection {
-    private static final Field GOAL_SELECTOR_AVALIABLE_GOALS = ObfuscationReflectionHelper.findField(GoalSelector.class, "field_220892_d");
+    private static final Field GOAL_SELECTOR_AVAILABLE_GOALS = ObfuscationReflectionHelper.findField(GoalSelector.class, "field_220892_d");
     public static Set<PrioritizedGoal> getGoalsSet(GoalSelector targetGoals) {
-        return ReflectionUtil.getFieldValue(GOAL_SELECTOR_AVALIABLE_GOALS, targetGoals);
+        return ReflectionUtil.getFieldValue(GOAL_SELECTOR_AVAILABLE_GOALS, targetGoals);
     }
 
     private static final Field NEAREST_TARGET_GOAL_TARGET_TYPE = ObfuscationReflectionHelper.findField(NearestAttackableTargetGoal.class, "field_75307_b");

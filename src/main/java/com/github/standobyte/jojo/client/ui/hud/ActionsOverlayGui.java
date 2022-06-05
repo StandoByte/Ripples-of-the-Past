@@ -430,8 +430,14 @@ public class ActionsOverlayGui extends AbstractGui {
             TextureAtlasSprite textureAtlasSprite = CustomResources.getActionSprites().getSprite(action);
             mc.getTextureManager().bind(textureAtlasSprite.atlas().location());
             
-            if (!isActionAvaliable(action, mode, actionType, target, isSelected)) {
-                RenderSystem.color4f(0.2F, 0.2F, 0.2F, 0.5F * hotbarAlpha);
+            ActionConditionResult result = actionAvailability(action, mode, actionType, target, isSelected);
+            if (!result.isPositive()) {
+            	if (!result.isHighlighted()) {
+            		RenderSystem.color4f(0.2F, 0.2F, 0.2F, 0.5F * hotbarAlpha);
+            	}
+            	else {
+            		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 0.75F * hotbarAlpha);
+            	}
                 blit(matrixStack, x, y, 0, 16, 16, textureAtlasSprite);
                 // cooldown
                 float ratio = power.getCooldownRatio(action, partialTick);
@@ -485,19 +491,18 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private <P extends IPower<P, ?>> boolean isActionAvaliable(Action<P> action, ActionsModeConfig<P> mode, 
+    private <P extends IPower<P, ?>> ActionConditionResult actionAvailability(Action<P> action, ActionsModeConfig<P> mode, 
             ActionType hotbar, ActionTarget mouseTarget, boolean isSelected) {
         P power = mode.getPower();
         ActionTargetContainer targetContainer = new ActionTargetContainer(mouseTarget);
         if (isSelected) {
-            boolean rightTarget = power.checkTargetType(action, targetContainer).isPositive();
-            mode.getTargetIcon(hotbar).update(action.getTargetRequirement(), rightTarget);
-            if (!rightTarget) {
-                return false;
+        	ActionConditionResult targetCheck = power.checkTargetType(action, targetContainer);
+            mode.getTargetIcon(hotbar).update(action.getTargetRequirement(), targetCheck.isPositive());
+            if (!targetCheck.isPositive()) {
+                return targetCheck;
             }
         }
-    	ActionConditionResult result = power.checkRequirements(action, targetContainer, false);
-    	return result.isPositive() || result.queueInput();
+    	return power.checkRequirements(action, targetContainer, false);
     }
     
     private void fillRect(BufferBuilder bufferBuilder, int x, double y, int width, double height, int red, int green, int blue, int alpha) {

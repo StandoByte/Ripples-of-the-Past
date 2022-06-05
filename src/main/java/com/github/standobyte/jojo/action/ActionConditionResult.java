@@ -7,13 +7,13 @@ import net.minecraft.util.text.ITextComponent;
 public class ActionConditionResult {
     private final boolean positive;
     private final boolean stopHeldAction;
-    private final boolean queueInput;
+    private final boolean highlight;
     private final ITextComponent warning;
     
     public static final ActionConditionResult POSITIVE = new ActionConditionResult(true, false, false, null);
     public static final ActionConditionResult NEGATIVE = new ActionConditionResult(false, true, false, null);
     public static final ActionConditionResult NEGATIVE_CONTINUE_HOLD = new ActionConditionResult(false, false, false, null);
-    public static final ActionConditionResult NEGATIVE_QUEUE_INPUT = new ActionConditionResult(false, true, true, null);
+    public static final ActionConditionResult NEGATIVE_HIGHLIGHTED = new ActionConditionResult(false, true, true, null);
     
     public static ActionConditionResult createNegative(ITextComponent warning) {
         return new ActionConditionResult(false, true, false, warning);
@@ -23,10 +23,10 @@ public class ActionConditionResult {
         return new ActionConditionResult(false, false, false, warning);
     }
     
-    private ActionConditionResult(boolean positive, boolean stopHeldAction, boolean queueInput, ITextComponent warning) {
+    private ActionConditionResult(boolean positive, boolean stopHeldAction, boolean highlight, ITextComponent warning) {
         this.positive = positive;
         this.stopHeldAction = stopHeldAction;
-        this.queueInput = queueInput;
+        this.highlight = highlight;
         this.warning = warning;
     }
     
@@ -38,8 +38,8 @@ public class ActionConditionResult {
         return !isPositive() && stopHeldAction;
     }
     
-    public boolean queueInput() {
-        return queueInput;
+    public boolean isHighlighted() {
+        return highlight;
     }
     
     @Nullable

@@ -28,7 +28,6 @@ import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacke
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillLearnPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillsResetPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonTeachersSkillsPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.InputBufferPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.LeapCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.MaxAchievedResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
@@ -185,11 +184,6 @@ public class PacketManager {
                 TrHeldActionPacket::encode,
                 TrHeldActionPacket::decode,
                 TrHeldActionPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        
-        channel.registerMessage(index++, InputBufferPacket.class,
-                InputBufferPacket::encode,
-                InputBufferPacket::decode,
-                InputBufferPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
         channel.registerMessage(index++, TrEnergyPacket.class,
                 TrEnergyPacket::encode,

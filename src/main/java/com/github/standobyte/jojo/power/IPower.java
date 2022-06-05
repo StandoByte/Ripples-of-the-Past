@@ -54,8 +54,6 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
         }
         return false;
     }
-    void queueNextAction(Action<P> action);
-    boolean clickQueuedAction();
     ActionConditionResult checkRequirements(Action<P> action, ActionTargetContainer targetContainer, boolean checkTargetType);
     ActionConditionResult checkTargetType(Action<P> action, ActionTargetContainer targetContainer);
     boolean canUsePower();
