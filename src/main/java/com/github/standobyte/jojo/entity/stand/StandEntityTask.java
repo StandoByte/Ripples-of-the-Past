@@ -17,7 +17,6 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.IDataSerializer;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.registries.DataSerializerEntry;
 
 public class StandEntityTask {
@@ -57,8 +56,8 @@ public class StandEntityTask {
         return task;
     }
     
-    boolean setTarget(StandEntity standEntity, ActionTarget target, IStandPower standPower) {
-        if (canTarget(standEntity, target, standPower, action)) {
+    boolean setTarget(StandEntity standEntity, ActionTarget target, IStandPower standPower, boolean targetCheck) {
+        if (!targetCheck || canTarget(standEntity, target, standPower, action)) {
             boolean targetChanged = !target.sameTarget(this.target);
             this.target = target;
             return targetChanged;
@@ -67,22 +66,20 @@ public class StandEntityTask {
     }
 
     private static boolean canTarget(StandEntity standEntity, ActionTarget target, IStandPower standPower, StandEntityAction action) {
-        return target != null && action.canStandKeepTarget(target, standEntity, standPower);
+        return action.canStandKeepTarget(target, standEntity, standPower);
     }
     
     void tick(IStandPower standPower, StandEntity standEntity) {
-        if (target.getType() != TargetType.EMPTY) {
+//        if (target.getType() != TargetType.EMPTY) {
 //            if (!standEntity.level.isClientSide() && ticksLeft < startingTicks) {
 //                double angleCos = standEntity.getLookAngle().dot(target.getTargetPos().subtract(standEntity.getEyePosition(1.0F)).normalize());
 //            }
 //            if (!standEntity.isManuallyControlled() && target.getType() == TargetType.BLOCK) {
 //                setTarget(ActionTarget.EMPTY);
 //            }
-
-            rotateStand(standEntity, true);
-        }
+//        }
         if (!standEntity.level.isClientSide() && target.getType() == TargetType.ENTITY) {
-            Entity targetEntity = target.getEntity(standEntity.level);
+            Entity targetEntity = target.getEntity();
             if (targetEntity == null || !targetEntity.isAlive() || targetEntity.is(standEntity)) {
                 standEntity.setTaskTarget(ActionTarget.EMPTY);
             }
@@ -163,15 +160,12 @@ public class StandEntityTask {
         this.startingTicks += ticks;
     }
     
-    private void rotateStand(StandEntity standEntity, boolean limitBySpeed) {
-    	limitBySpeed = false;
-        if (!standEntity.isManuallyControlled()) {
-            standEntity.rotatedTowardsTarget = true;
-            Vector3d targetPos = target.getTargetPos(true);
-            if (targetPos != null) {
-                standEntity.rotateTowards(targetPos, limitBySpeed);
-            }
+    boolean rotateStand(StandEntity standEntity, boolean limitBySpeed) {
+        if (target.getType() != TargetType.EMPTY && !standEntity.isManuallyControlled()) {
+    		standEntity.rotateTowards(target, limitBySpeed);
+    		return true;
         }
+        return false;
     }
     
     public StandEntityAction getAction() {
@@ -267,12 +261,6 @@ public class StandEntityTask {
                 StandEntityTask task = value.get();
                 StandEntityTask taskNew = new StandEntityTask(task.action, task.startingTicks, task.phase, false, task.target, task.offsetFromUser);
                 taskNew.ticksLeft = task.ticksLeft;
-                if (taskNew.target.getType() == TargetType.ENTITY) {
-                    Entity entity = taskNew.target.getEntity(null);
-                    if (entity != null) {
-                        taskNew.target = new ActionTarget(entity.getId());
-                    }
-                }
                 taskNew.offsetFromUser = task.offsetFromUser;
                 return Optional.of(taskNew);
             }

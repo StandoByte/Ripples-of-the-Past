@@ -14,6 +14,7 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -84,7 +85,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
         else {
             LivingEntity user = standEntity.getUser();
             double backAway = 0.5 + (target.getType() == TargetType.ENTITY ? 
-                    target.getEntity(standEntity.level).getBoundingBox().getXsize() / 2
+                    target.getEntity().getBoundingBox().getXsize() / 2
                     : 0.5);
             double offsetToTarget = targetPos.subtract(user.position()).multiply(1, 0, 1).length() - backAway;
             offset = MathHelper.clamp(offsetToTarget, offset, offset + maxVariation);
@@ -100,10 +101,35 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
     
     @Override
 	protected boolean isCancelable(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction, Phase phase) {
+    	if (standEntity.barrageClashOpponent().isPresent()) {
+    		return true;
+    	}
         if (phase == Phase.RECOVERY) {
             return newAction != null && newAction.canFollowUpBarrage();
         }
-        return super.isCancelable(standPower, standEntity, newAction, phase);
+        else {
+        	return super.isCancelable(standPower, standEntity, newAction, phase);
+        }
+    }
+    
+    @Override
+    public void onClear(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction) {
+    	if (newAction != this) {
+    		standEntity.barrageClashStopped();
+    	}
+    }
+
+    @Override
+    public boolean cancelHeldOnGettingAttacked(IStandPower power, DamageSource dmgSource, float dmgAmount) {
+        return dmgAmount >= 4F && "healthLink".equals(dmgSource.msgId);
+    }
+    
+    @Override
+    protected boolean lastTargetCheck(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
+		return target.getType() == TargetType.ENTITY && standEntity.barrageClashOpponent().map(otherStand -> {
+			return otherStand == target.getEntity();
+		}).orElse(false)
+				|| super.lastTargetCheck(target, standEntity, standPower);
     }
     
     @Override

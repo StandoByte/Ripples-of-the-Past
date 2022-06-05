@@ -81,8 +81,8 @@ public class TimeStopInstant extends StandAction {
         }
         switch (target.getType()) {
         case ENTITY:
-            blinkPos = getEntityTargetTeleportPos(user, target.getEntity(world));
-    		Vector3d toTarget = target.getEntity(world).position().subtract(blinkPos);
+            blinkPos = getEntityTargetTeleportPos(user, target.getEntity());
+    		Vector3d toTarget = target.getEntity().position().subtract(blinkPos);
     		user.yRot = MathUtil.yRotDegFromVec(toTarget);
     		user.yRotO = user.yRot;
             break;

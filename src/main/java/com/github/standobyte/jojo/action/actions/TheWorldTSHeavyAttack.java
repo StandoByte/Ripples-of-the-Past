@@ -92,7 +92,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
 	    			if (pos != null) {
 	    				double offset = 0.5 + standEntity.getBbWidth();
 	    				if (target.getType() == TargetType.ENTITY) {
-	    					offset += target.getEntity(standEntity.level).getBoundingBox().getXsize() / 2;
+	    					offset += target.getEntity().getBoundingBox().getXsize() / 2;
 	    				}
 	    				pos = pos.subtract(pos.subtract(aimingEntity.getEyePosition(1.0F)).normalize().scale(offset)).subtract(0, standEntity.getEyeHeight(), 0);
 	    			}

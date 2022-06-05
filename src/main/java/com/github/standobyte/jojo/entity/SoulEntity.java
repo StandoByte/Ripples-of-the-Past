@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.SoulController;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -98,16 +99,16 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
         else {
             level.getEntitiesOfClass(LivingEntity.class, 
                     new AxisAlignedBB(getBoundingBox().getCenter(), getBoundingBox().getCenter()).inflate(24), 
-                    entity -> originEntity.isAlliedTo(entity)).forEach(entity -> {
+                    entity -> !entity.is(originEntity) && originEntity.isAlliedTo(entity)).forEach(entity -> {
                         IStandPower.getStandPowerOptional(entity).ifPresent(stand -> 
                         stand.getResolveCounter().soulAddResolveTeammate());
                     });
-            RayTraceResult rayTrace = JojoModUtil.rayTrace(this, 32, null, 1.0);
+            RayTraceResult rayTrace = JojoModUtil.rayTrace(this, 32, entity -> !entity.is(originEntity), 1.0);
             if (rayTrace.getType() == RayTraceResult.Type.ENTITY) {
                 Entity lookEntity = ((EntityRayTraceResult) rayTrace).getEntity();
                 if (lookEntity instanceof LivingEntity) {
-                    IStandPower.getStandPowerOptional((LivingEntity) lookEntity).ifPresent(stand -> 
-                    stand.getResolveCounter().soulAddResolveLook());
+                    IStandPower.getStandPowerOptional(lookEntity instanceof StandEntity ? ((StandEntity) lookEntity).getUser() : (LivingEntity) lookEntity)
+                    .ifPresent(stand -> stand.getResolveCounter().soulAddResolveLook());
                 }
             }
         }

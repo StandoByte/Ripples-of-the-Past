@@ -60,7 +60,7 @@ public class VampirismFreeze extends VampirismAction {
     protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (!world.isClientSide() && requirementsFulfilled) {
             if (target.getType() == TargetType.ENTITY) {
-                Entity entityTarget = target.getEntity(world);
+                Entity entityTarget = target.getEntity();
                 if (entityTarget instanceof LivingEntity && !entityTarget.isOnFire()) {
                     int difficulty = world.getDifficulty().getId();
                     LivingEntity targetLiving = (LivingEntity) entityTarget;

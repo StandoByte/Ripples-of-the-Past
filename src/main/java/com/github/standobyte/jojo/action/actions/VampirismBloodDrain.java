@@ -44,7 +44,7 @@ public class VampirismBloodDrain extends VampirismAction {
         if (!user.getMainHandItem().isEmpty()) {
             return conditionMessage("hand");
         }
-        Entity entityTarget = target.getEntity(user.level);
+        Entity entityTarget = target.getEntity();
         if (entityTarget instanceof LivingEntity) {
             LivingEntity livingTarget = (LivingEntity) entityTarget;
             if (!JojoModUtil.canBleed(livingTarget) || JojoModUtil.isUndead(livingTarget)) {
@@ -60,8 +60,8 @@ public class VampirismBloodDrain extends VampirismAction {
     @Override
     protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
-            if (!world.isClientSide() && target.getEntity(world) instanceof LivingEntity) {
-                LivingEntity targetEntity = (LivingEntity) target.getEntity(world);
+            if (!world.isClientSide() && target.getEntity() instanceof LivingEntity) {
+                LivingEntity targetEntity = (LivingEntity) target.getEntity();
                 if (!targetEntity.isDeadOrDying()) {
                     float bloodAndHealModifier = JojoModUtil.getOrLast(
                             JojoModConfig.getCommonConfigInstance(false).bloodDrainMultiplier.get(), 

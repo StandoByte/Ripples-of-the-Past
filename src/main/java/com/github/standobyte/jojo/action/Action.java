@@ -21,6 +21,7 @@ import com.github.standobyte.jojo.util.utils.JojoModUtil;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
@@ -272,7 +273,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return holdDurationToFire == 0 && holdDurationMax > 0;
     }
     
-    public boolean cancelHeldOnGettingAttacked(P power) {
+    public boolean cancelHeldOnGettingAttacked(P power, DamageSource dmgSource, float dmgAmount) {
         return false;
     }
     

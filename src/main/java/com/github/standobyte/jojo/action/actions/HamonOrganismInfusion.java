@@ -38,7 +38,7 @@ public class HamonOrganismInfusion extends HamonAction {
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
         switch (target.getType()) {
         case ENTITY:
-            Entity entity = target.getEntity(user.level);
+            Entity entity = target.getEntity();
             if (!(entity instanceof AnimalEntity || entity instanceof AmbientEntity)) {
                 return conditionMessage("animal");
             }
@@ -93,7 +93,7 @@ public class HamonOrganismInfusion extends HamonAction {
                 world.addFreshEntity(charge);
                 break;
             case ENTITY:
-                LivingEntity entity = (LivingEntity) target.getEntity(world);
+                LivingEntity entity = (LivingEntity) target.getEntity();
                 entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> 
                 cap.setHamonCharge(0.2F * hamon.getHamonDamageMultiplier() * hamon.getBloodstreamEfficiency(), chargeTicks, user, getEnergyCost(power)));
                 break;

@@ -24,7 +24,7 @@ public class HamonScarletOverdrive extends HamonAction {
         if (!world.isClientSide()) {
             if (target.getType() == TargetType.ENTITY) {
                 HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
-                Entity targetEntity = target.getEntity(user.level);
+                Entity targetEntity = target.getEntity();
                 if (DamageUtil.dealDamageAndSetOnFire(targetEntity, 
                         entity -> DamageUtil.dealHamonDamage(entity, 0.1F, user, null), 
                         MathHelper.floor(2 + 8F * (float) hamon.getHamonStrengthLevel() / (float) HamonData.MAX_STAT_LEVEL * hamon.getBloodstreamEfficiency()), false)) {

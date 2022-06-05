@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
 
 public class TheWorldTimeStop extends TimeStop {
@@ -42,7 +43,7 @@ public class TheWorldTimeStop extends TimeStop {
     }
     
     @Override
-    public boolean cancelHeldOnGettingAttacked(IStandPower power) {
+    public boolean cancelHeldOnGettingAttacked(IStandPower power, DamageSource dmgSource, float dmgAmount) {
         return true;
     }
 }
