@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.entity;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -103,8 +104,9 @@ public class RoadRollerEntity extends Entity {
         
         DamageSource dmgSource = DamageUtil.roadRollerDamage(this);
         float damage = (float) -getDeltaMovement().y * 10F;
+        JojoMod.LOGGER.debug(damage);
         if (damage > 0) {
-        	AxisAlignedBB aabb = getBoundingBox().contract(0, getBbHeight() * 0.75, 0).move(0, -getBbHeight() * 0.25, 0);
+        	AxisAlignedBB aabb = getBoundingBox().contract(0, getBbHeight() * 0.75, 0).expandTowards(0, -getBbHeight() * 0.25, 0);
         	level.getEntitiesOfClass(LivingEntity.class, aabb, 
         			EntityPredicates.LIVING_ENTITY_STILL_ALIVE.and(entity -> !this.is(entity.getVehicle()))).forEach(entity -> {
         				if (!entity.isInvulnerableTo(dmgSource)) {

@@ -249,6 +249,12 @@ public class DamageUtil {
             target.level.broadcastEntityEvent(target, (byte) 30);
         }
     }
+    
+    public static void knockback(LivingEntity target, float strength, float yRot) {
+    	target.knockback(strength, 
+                (double) MathHelper.sin(yRot * MathUtil.DEG_TO_RAD), 
+                (double) (-MathHelper.cos(yRot * MathUtil.DEG_TO_RAD)));
+    }
 
     public static void upwardsKnockback(LivingEntity target, float strength) {
         strength *= (1.0F - (float) target.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));

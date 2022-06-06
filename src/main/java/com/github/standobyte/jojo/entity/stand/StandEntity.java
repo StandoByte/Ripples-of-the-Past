@@ -144,6 +144,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     private Optional<Entity> barrageClashOpponent = Optional.empty();
     
     private float blockDamage = 0;
+    private float prevBlockDamage = 0;
     
     private static final DataParameter<Float> PUNCHES_COMBO = EntityDataManager.defineId(StandEntity.class, DataSerializers.FLOAT);
     private static final DataParameter<Float> LAST_HEAVY_PUNCH_COMBO = EntityDataManager.defineId(StandEntity.class, DataSerializers.FLOAT);
@@ -776,8 +777,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
     }
     
-    public float getDamageReceivedWhileBlocking() {
-    	return blockDamage;
+    public float guardCounter() {
+    	return Math.min((isStandBlocking() ? blockDamage : prevBlockDamage) / 5F, 1F);
     }
 
     @Override
@@ -1251,7 +1252,14 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         clearedTask.getAction().onClear(userPower, this, newAction);
         
         barrageParryCount = 0;
-    	blockDamage = 0;
+        if (blockDamage > 0) {
+        	prevBlockDamage += blockDamage;
+        	blockDamage = 0;
+        }
+        else {
+        	prevBlockDamage = 0;
+        }
+        
         updateNoPhysics();
         setStandPose(StandPose.IDLE);
 		
@@ -1725,6 +1733,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         case LIGHT:
             attack
             .damage(StandStatFormulas.getLightAttackDamage(strength))
+            .addKnockback(guardCounter())
             .addCombo(0.15F);
             if (getComboMeter() == 0) {
                 attack.parryTiming(StandStatFormulas.getParryTiming(precision));
@@ -1804,10 +1813,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                     float knockbackXRot = attack.getKnockbackXRot();
                     float knockbackStrength = attack.getAdditionalKnockback() * 0.5F;
                     if (Math.abs(knockbackXRot) < 90) {
-                        targetLiving.knockback(
-                                knockbackStrength * MathHelper.cos(knockbackXRot * MathUtil.DEG_TO_RAD), 
-                                (double) MathHelper.sin(knockbackYRot * MathUtil.DEG_TO_RAD), 
-                                (double) (-MathHelper.cos(knockbackYRot * MathUtil.DEG_TO_RAD)));
+                    	DamageUtil.knockback(targetLiving, knockbackStrength * MathHelper.cos(knockbackXRot * MathUtil.DEG_TO_RAD), knockbackYRot);
                     }
                     if (knockbackXRot != 0) {
                         DamageUtil.upwardsKnockback(targetLiving, -knockbackStrength * MathHelper.sin(knockbackXRot * MathUtil.DEG_TO_RAD));
