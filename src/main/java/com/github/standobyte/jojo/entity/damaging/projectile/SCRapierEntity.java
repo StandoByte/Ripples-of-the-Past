@@ -4,6 +4,7 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.util.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.block.BlockState;
@@ -163,8 +164,9 @@ public class SCRapierEntity extends ModdedProjectileEntity {
         }
     }
     
+    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! was picked up instantly when shot downwards
     public void takeRapier(SilverChariotEntity stand) {
-        if (stand.is(getOwner())) {
+        if (stand.is(getOwner()) && CommonReflection.getProjectileLeftOwner(this)) {
             stand.playSound(SoundEvents.ITEM_PICKUP, 1.0F, 1.0F);
             stand.setRapier(true);
             remove();

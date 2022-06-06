@@ -1043,14 +1043,16 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 if (relativeOffset != null) {
                 	Vector3d pos = user.position().add(taskOffset(user, relativeOffset, 
                 			getCurrentTask().map(task -> task.getTarget()).orElse(ActionTarget.EMPTY)));
-                	pos = collideNextPos(pos);
+                	if (!isArmsOnlyMode()) {
+                		pos = collideNextPos(pos);
+                	}
                     
                     setPos(pos.x, pos.y, pos.z);
                 }
             }
             else if (isBeingRetracted()) {
                 if (!isCloseToUser()) {
-                    setDeltaMovement(user.position().add(getDefaultOffsetFromUser().getAbsoluteVec(getDefaultOffsetFromUser(), user.yRot, user.xRot)).subtract(position())
+                    setDeltaMovement(user.position().add(taskOffset(user, getDefaultOffsetFromUser(), ActionTarget.EMPTY)).subtract(position())
                             .normalize().scale(getAttributeValue(Attributes.MOVEMENT_SPEED)));
                 }
                 else {
@@ -1112,7 +1114,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     		xRot = user.xRot;
     	}
     		
-    	Vector3d offset = relativeOffset.getAbsoluteVec(getDefaultOffsetFromUser(), yRot, xRot);
+    	Vector3d offset = relativeOffset.getAbsoluteVec(getDefaultOffsetFromUser(), yRot, xRot, this, user);
     	if (user.isShiftKeyDown()) {
     		offset = new Vector3d(offset.x, 0, offset.z);
     	}

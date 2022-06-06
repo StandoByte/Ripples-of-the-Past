@@ -2,6 +2,8 @@ package com.github.standobyte.jojo.entity.stand;
 
 import com.github.standobyte.jojo.util.utils.MathUtil;
 
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.Pose;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.vector.Vector3d;
 
@@ -37,13 +39,17 @@ public class StandRelativeOffset {
         this.useXRot = useXRot;
     }
     
-    Vector3d getAbsoluteVec(StandRelativeOffset offsetDefault, float yRot, float xRot) {
+    Vector3d getAbsoluteVec(StandRelativeOffset offsetDefault, float yRot, float xRot, StandEntity standEntity, LivingEntity user) {
+    	double yOffset = 0;
+    	if (standEntity.isArmsOnlyMode() && user.getPose() != Pose.STANDING) {
+    		yOffset = user.getEyeHeight(user.getPose()) - user.getEyeHeight(Pose.STANDING);
+    	}
         Vector3d vec;
         if (useXRot) {
             vec = new Vector3d(left, 0, forward).xRot(-xRot * MathUtil.DEG_TO_RAD).yRot(-yRot * MathUtil.DEG_TO_RAD);
         }
         else {
-            vec = MathUtil.relativeCoordsToAbsolute(left, doYOffset ? y : offsetDefault.y, forward, yRot);
+            vec = MathUtil.relativeCoordsToAbsolute(left, (doYOffset ? y : offsetDefault.y) + yOffset, forward, yRot);
         }
         return vec;
     }

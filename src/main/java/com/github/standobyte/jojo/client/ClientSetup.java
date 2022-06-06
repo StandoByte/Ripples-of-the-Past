@@ -24,6 +24,7 @@ import com.github.standobyte.jojo.client.renderer.entity.PillarmanTempleEngravin
 import com.github.standobyte.jojo.client.renderer.entity.RoadRollerRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.SoulRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.MRFlameRenderer;
+import com.github.standobyte.jojo.client.renderer.entity.damaging.SCFlameRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.beam.LightBeamRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.beam.SpaceRipperStingyEyesRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.extending.HGBarrierRenderer;
@@ -136,6 +137,7 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HG_GRAPPLING_STRING.get(), HGGrapplingStringRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HG_BARRIER.get(), HGBarrierRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SC_RAPIER.get(), SCRapierRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SC_FLAME.get(), SCFlameRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.ROAD_ROLLER.get(), RoadRollerRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.MR_FLAME.get(), MRFlameRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.MR_FIREBALL.get(), MRFireballRenderer::new);

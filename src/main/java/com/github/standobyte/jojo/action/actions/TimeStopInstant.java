@@ -186,7 +186,7 @@ public class TimeStopInstant extends StandAction {
     private static void skipStandTicks(StandEntity entity, int ticks) {
         skipTicks(entity, ticks);
         
-        // FIXME (!!) do this for tracking too
+        // FIXME (!!) (stand ticks skip) do this for tracking too
         entity.overlayTickCount += ticks;
     }
 }

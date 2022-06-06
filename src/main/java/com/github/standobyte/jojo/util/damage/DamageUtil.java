@@ -48,7 +48,7 @@ public class DamageUtil {
     public static final String ROAD_ROLLER_MSG = "roadRoller";
     
     public static float knockbackReduction(DamageSource source) {
-        if (source instanceof StandLinkDamageSource) {
+        if (source instanceof StandLinkDamageSource || ROAD_ROLLER_MSG.equals(source.msgId)) {
             return 0;
         }
         if (source instanceof EntityDamageSource) {

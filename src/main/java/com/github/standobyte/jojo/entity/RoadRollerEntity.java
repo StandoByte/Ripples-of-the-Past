@@ -1,7 +1,5 @@
 package com.github.standobyte.jojo.entity;
 
-import java.util.List;
-
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -35,6 +33,8 @@ public class RoadRollerEntity extends Entity {
     private int ticksInAir = 0;
     @Nullable
     private Entity owner;
+    private double tickDamageMotion = 0;
+    private boolean punchedFromBelow = false;
 
     public RoadRollerEntity(World world) {
         this(ModEntityTypes.ROAD_ROLLER.get(), world);
@@ -83,11 +83,13 @@ public class RoadRollerEntity extends Entity {
             tickCount--;
         }
         Vector3d movement = getDeltaMovement();
-        if (!isNoGravity()) {
+        if (!isNoGravity() && !punchedFromBelow) {
             setDeltaMovement(movement.add(-movement.x, -0.0467D, -movement.z));
         }
+        
+        tickDamageMotion = 0;
+        punchedFromBelow = false;
         boolean wasOnGround = onGround;
-        move(MoverType.SELF, getDeltaMovement());
         if (level.isClientSide()) {
             if (!wasOnGround) {
                 ticksInAir++;
@@ -98,18 +100,23 @@ public class RoadRollerEntity extends Entity {
                 }
             }
         }
-        if (!level.isClientSide()) {
-            float damage = (float) -movement.y * 10F;
-            if (damage > 0) {
-                AxisAlignedBB aabb = getBoundingBox().contract(0, getBbHeight() * 3 / 4, 0);
-                List<LivingEntity> entities = level.getEntitiesOfClass(LivingEntity.class, aabb, EntityPredicates.LIVING_ENTITY_STILL_ALIVE);
-                for (LivingEntity entity : entities) {
-                    if (!this.is(entity.getVehicle())) {
-                        entity.hurt(DamageUtil.roadRollerDamage(this), damage);
-                    }
-                }
-            }
+        
+        DamageSource dmgSource = DamageUtil.roadRollerDamage(this);
+        float damage = (float) -getDeltaMovement().y * 10F;
+        if (damage > 0) {
+        	AxisAlignedBB aabb = getBoundingBox().contract(0, getBbHeight() * 0.75, 0).move(0, -getBbHeight() * 0.25, 0);
+        	level.getEntitiesOfClass(LivingEntity.class, aabb, 
+        			EntityPredicates.LIVING_ENTITY_STILL_ALIVE.and(entity -> !this.is(entity.getVehicle()))).forEach(entity -> {
+        				if (!entity.isInvulnerableTo(dmgSource)) {
+	            			if (!level.isClientSide()) {
+	            				entity.hurt(dmgSource, damage);
+	            			}
+	            			entity.setDeltaMovement(Vector3d.ZERO);
+        				}
+        			});
         }
+        
+        move(MoverType.SELF, getDeltaMovement());
         if (onGround) {
             setDeltaMovement(movement.x, 0, movement.z);
             if (xRot > 0) {
@@ -158,16 +165,21 @@ public class RoadRollerEntity extends Entity {
         if (isInvulnerableTo(dmgSource)) {
             return false;
         } else {
-            Vector3d dmgPos = dmgSource.getSourcePosition();
-            if (dmgPos != null) {
-                Vector3d dmgVec = dmgPos.vectorTo(position()).normalize();
-                double cos = dmgVec.dot(UPWARDS_VECTOR);
-                Vector3d movement = getDeltaMovement();
-                // FIXME (!) adjust road roller movement from attacks
-                setDeltaMovement(movement.x, Math.min(movement.y + cos * amount * 0.04D, 0), movement.z);
-            }
             if (!level.isClientSide()) {
-                setHealth(getHealth() - amount);
+                Vector3d dmgPos = dmgSource.getSourcePosition();
+                double cos = -1;
+                if (dmgPos != null) {
+                    Vector3d dmgVec = dmgPos.vectorTo(position()).normalize();
+                    cos = dmgVec.dot(UPWARDS_VECTOR);
+                    double damageMotion = cos * amount * 0.08D;
+                    if (damageMotion > 0) {
+                    	damageMotion = Math.min(-this.tickDamageMotion, damageMotion);
+                    	punchedFromBelow = true;
+                    }
+                    setDeltaMovement(getDeltaMovement().add(0, damageMotion, 0));
+                    this.tickDamageMotion += damageMotion;
+                }
+                setHealth(cos < 0 ? getHealth() - amount : getHealth() + amount);
                 markHurt();
                 level.playSound(null, getX(), getY(), getZ(), ModSounds.ROAD_ROLLER_HIT.get(), 
                         getSoundSource(), amount * 0.25F, 1.0F + (random.nextFloat() - 0.5F) * 0.3F);

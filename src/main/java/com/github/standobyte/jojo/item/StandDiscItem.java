@@ -70,7 +70,7 @@ public class StandDiscItem extends Item {
                     player.displayClientMessage(new TranslationTextComponent("jojo.chat.message.low_tier"), true);
                     return ActionResult.fail(stack);
                 }
-                if (power.wasGivenByDisc()) {
+                if (!player.abilities.instabuild && power.wasGivenByDisc()) {
                     StandType<?> previousDiscStand = power.putOutStand();
                     if (previousDiscStand != null) {
                         player.drop(withStandType(new ItemStack(this), previousDiscStand), false);
