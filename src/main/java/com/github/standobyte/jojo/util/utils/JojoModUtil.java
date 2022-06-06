@@ -10,7 +10,9 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.NetworkUtil;
@@ -288,6 +290,13 @@ public class JojoModUtil {
 
     public static ResourceLocation makeTextureLocation(String folderName, String namespace, String path) {
         return new ResourceLocation(namespace, "textures/"+ folderName + "/" + path + ".png");
+    }
+    
+    
+    
+    public static boolean playerHasClientInput(PlayerEntity player) {
+        return player.level.isClientSide() ? InputHandler.getInstance().hasInput
+                : player.getCapability(PlayerUtilCapProvider.CAPABILITY).map(PlayerUtilCap::hasClientInput).orElse(false);
     }
 
 
