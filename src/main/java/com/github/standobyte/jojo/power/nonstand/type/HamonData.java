@@ -13,7 +13,6 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
-import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
@@ -321,7 +320,7 @@ public class HamonData extends TypeSpecificData {
         if (user.swinging) {
             incExerciseTicks(Exercise.MINING, multiplier, user.level.isClientSide());
         }
-        if (user.isSwimming() && ClientUtil.playerHasClientInput(user)) {
+        if (user.isSwimming() && JojoModUtil.playerHasClientInput(user)) {
             incExerciseTicks(Exercise.SWIMMING, multiplier, user.level.isClientSide());
         }
         else if (user.isSprinting() && user.isOnGround() && !user.isSwimming()) {
