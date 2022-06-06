@@ -31,7 +31,7 @@ public abstract class StandModelLayerRenderer<T extends StandEntity, M extends S
     }
     
     public RenderType getRenderType(T entity) {
-    	return entityRenderer.getRenderType(entity, getLayerTexture());
+    	return entityRenderer.getRenderType(entity, model, getLayerTexture());
     }
 
     public M getLayerModel() {

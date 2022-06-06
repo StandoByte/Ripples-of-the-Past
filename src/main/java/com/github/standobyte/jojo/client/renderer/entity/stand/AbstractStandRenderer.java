@@ -51,13 +51,17 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
         return entity.underInvisibilityEffect() && Minecraft.getInstance().player.isSpectator();
     }
 
-    public RenderType getRenderType(T entity, ResourceLocation modelTexture) {
-        return renderType(entity, modelTexture, isBodyVisible(entity), visibleForSpectator(entity), Minecraft.getInstance().shouldEntityAppearGlowing(entity));
+    protected RenderType getRenderType(T entity, ResourceLocation modelTexture) {
+        return renderType(entity, getModel(), modelTexture, isBodyVisible(entity), visibleForSpectator(entity), Minecraft.getInstance().shouldEntityAppearGlowing(entity));
     }
 
-    protected RenderType renderType(T entity, ResourceLocation modelTexture, boolean isVisible, boolean isVisibleForSpectator, boolean isGlowing) {
+    public RenderType getRenderType(T entity, M model, ResourceLocation modelTexture) {
+        return renderType(entity, model, modelTexture, isBodyVisible(entity), visibleForSpectator(entity), Minecraft.getInstance().shouldEntityAppearGlowing(entity));
+    }
+
+    protected RenderType renderType(T entity, M model, ResourceLocation modelTexture, boolean isVisible, boolean isVisibleForSpectator, boolean isGlowing) {
         if (isVisible || isVisibleForSpectator) {
-            return getModel().renderType(modelTexture);
+            return model.renderType(modelTexture);
         }
         return isGlowing ? RenderType.outline(modelTexture) : null;
     }
@@ -65,7 +69,7 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
     @Deprecated
     @Override
     public RenderType getRenderType(T entity, boolean isVisible, boolean isVisibleForSpectator, boolean isGlowing) {
-        return renderType(entity, getTextureLocation(entity), isVisible, isVisibleForSpectator, isGlowing);
+        return renderType(entity, getModel(), getTextureLocation(entity), isVisible, isVisibleForSpectator, isGlowing);
     }
     
     protected float getAlpha(T entity, float partialTick) {
