@@ -19,7 +19,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.TieredItem;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public class HamonOverdrive extends HamonAction {
@@ -96,9 +95,7 @@ public class HamonOverdrive extends HamonAction {
                 if (DamageUtil.dealHamonDamage(targetEntity, damage, user, null)) {
                     hamon.hamonPointsFromAction(HamonStat.STRENGTH, getEnergyCost(power) * dmgScale);
                     if (knockback > 0) {
-                        targetEntity.knockback(knockback, 
-                                (double) MathHelper.sin(user.yRot * ((float) Math.PI / 180F)), 
-                                (double) (-MathHelper.cos(user.yRot * ((float) Math.PI / 180F))));
+                    	DamageUtil.knockback(targetEntity, knockback, user.yRot);
                     }
                 }
             }

@@ -164,7 +164,6 @@ public class SCRapierEntity extends ModdedProjectileEntity {
         }
     }
     
-    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! was picked up instantly when shot downwards
     public void takeRapier(SilverChariotEntity stand) {
         if (stand.is(getOwner()) && CommonReflection.getProjectileLeftOwner(this)) {
             stand.playSound(SoundEvents.ITEM_PICKUP, 1.0F, 1.0F);

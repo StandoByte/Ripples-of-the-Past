@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -19,6 +20,7 @@ public class HGStringEntity extends OwnerBoundProjectileEntity {
     private float xRotOffset;
     private boolean isBinding;
     private boolean dealtDamage;
+    private float knockback = 0;
 
     public HGStringEntity(World world, LivingEntity entity, float angleXZ, float angleYZ, boolean isBinding) {
         super(ModEntityTypes.HG_STRING.get(), entity, world);
@@ -45,6 +47,10 @@ public class HGStringEntity extends OwnerBoundProjectileEntity {
         return isBinding ? 0.5F : 1F;
     }
     
+    public void addKnockback(float knockback) {
+    	this.knockback = knockback;
+    }
+    
     @Override
     protected boolean hurtTarget(Entity target, LivingEntity owner) {
         return !dealtDamage ? super.hurtTarget(target, owner) : false;
@@ -59,8 +65,8 @@ public class HGStringEntity extends OwnerBoundProjectileEntity {
     protected void afterEntityHit(EntityRayTraceResult entityRayTraceResult, boolean entityHurt) {
         if (entityHurt) {
             dealtDamage = true;
+            Entity target = entityRayTraceResult.getEntity();
             if (isBinding) {
-                Entity target = entityRayTraceResult.getEntity();
                 if (target instanceof LivingEntity) {
                     LivingEntity livingTarget = (LivingEntity) target;
                     attachToEntity(livingTarget);
@@ -68,6 +74,9 @@ public class HGStringEntity extends OwnerBoundProjectileEntity {
                 }
             }
             else {
+                if (target instanceof LivingEntity) {
+                	DamageUtil.knockback((LivingEntity) target, knockback, yRot);
+                }
                 setIsRetracting(true);
             }
         }
