@@ -3,14 +3,15 @@
   "conditions": [
     {
       "condition": "forge:loot_table_id",
-      "loot_table_id": "minecraft:chests/desert_pyramid"
+      "loot_table_id": "minecraft:chests/village/village_weaponsmith"
     },
     {
       "condition": "random_chance",
-      "chance": 0.02
+      "chance": 0.05
     }
   ],
   "additional_item": {
-    "name": "jojo:stand_arrow_beetle"
+    "name": "jojo:tommy_gun",
+    "nbt": "{Ammo:50}"
   }
 }

@@ -31,6 +31,8 @@
         0.05
       ]
     }
-  ], 
-  "additional_item": "jojo:aja_stone"
+  ],
+  "additional_item": {
+    "name": "jojo:aja_stone"
+  }
 }

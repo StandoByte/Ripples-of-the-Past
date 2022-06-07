@@ -32,5 +32,7 @@
       ]
     }
   ],
-  "additional_item": "jojo:super_aja_stone"
+  "additional_item": {
+    "name": "jojo:super_aja_stone"
+  }
 }
