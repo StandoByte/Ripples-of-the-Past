@@ -6,6 +6,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
@@ -126,14 +127,22 @@ public class StandDiscItem extends Item {
     
     @Override
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
-        if (validStandDisc(stack)) {
-            String standRegistryName = stack.getTag().getString(STAND_TAG);
-            StandType<?> stand = ModStandTypes.Registry.getRegistry().getValue(new ResourceLocation(standRegistryName));
-            tooltip.add(new TranslationTextComponent(stand.getTranslationKey()));
-            tooltip.add(stand.getPartName());
-            if (JojoModConfig.getCommonConfigInstance(true).standTiers.get()) {
-                tooltip.add(new TranslationTextComponent("jojo.disc.tier", stand.getTier()).withStyle(TextFormatting.GRAY));
-            }
+        PlayerEntity player = ClientUtil.getClientPlayer();
+        if (player != null) {
+        	if (validStandDisc(stack)) {
+        		String standRegistryName = stack.getTag().getString(STAND_TAG);
+        		StandType<?> stand = ModStandTypes.Registry.getRegistry().getValue(new ResourceLocation(standRegistryName));
+        		tooltip.add(new TranslationTextComponent(stand.getTranslationKey()));
+        		tooltip.add(stand.getPartName());
+        		if (JojoModConfig.getCommonConfigInstance(true).standTiers.get()) {
+        			int standTier = stand.getTier();
+        			int playerXpLevel = ClientUtil.getClientPlayer().experienceLevel;
+        			int xpForTier = JojoModUtil.getOrLast(JojoModConfig.getCommonConfigInstance(true).standTierXpLevels.get(), standTier).intValue();
+        			tooltip.add(new TranslationTextComponent("jojo.disc.tier", standTier, 
+        					new TranslationTextComponent("jojo.disc.tier_level", xpForTier)
+        					.withStyle(playerXpLevel < xpForTier ? TextFormatting.RED : TextFormatting.GREEN)).withStyle(TextFormatting.GRAY));
+        		}
+        	}
         }
     }
     

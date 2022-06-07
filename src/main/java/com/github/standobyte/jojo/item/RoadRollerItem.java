@@ -47,10 +47,9 @@ public class RoadRollerItem extends Item {
         return ActionResult.consume(handStack);
     }
     
-    private static final ITextComponent DESC = new TranslationTextComponent("item.jojo.road_roller_2");
     @Override
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
-        tooltip.add(DESC);
+        tooltip.add(new TranslationTextComponent("item.jojo.road_roller_2"));
     }
 
 }

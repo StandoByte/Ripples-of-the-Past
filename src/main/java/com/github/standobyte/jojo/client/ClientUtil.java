@@ -10,6 +10,7 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.resources.I18n;
@@ -40,6 +41,10 @@ public class ClientUtil {
     
     public static boolean isLocalServer() {
         return Minecraft.getInstance().isLocalServer();
+    }
+    
+    public static boolean isShiftPressed() {
+    	return Screen.hasShiftDown();
     }
 
     public static Entity getEntityById(int entityId) {

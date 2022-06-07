@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
@@ -19,6 +21,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.StandControlStatusP
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.stand.type.StandType;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -39,30 +42,36 @@ public class StandUtil {
     }
     
     public static StandType<?> randomStand(LivingEntity entity, Random random) {
-        return randomStandFromTiers(new int[0], entity, random);
+        return randomStandFromTiers(null, entity, random);
     }
     
-    public static StandType<?> randomStandFromTiers(int[] tiers, LivingEntity entity, Random random) {
+    public static StandType<?> randomStandFromTiers(@Nullable int[] tiers, LivingEntity entity, Random random) {
         if (!entity.level.isClientSide()) {
-            Collection<StandType<?>> stands = ModStandTypes.Registry.getRegistry().getValues();
-            List<StandType<?>> filtered = 
-                    stands.stream()
-                    .filter(stand -> (tiers.length == 0 || Arrays.stream(tiers).anyMatch(tier -> tier == stand.getTier())) && !JojoModConfig.getCommonConfigInstance(false).isStandBanned(stand))
-                    .collect(Collectors.toList());
-            
-            if (filtered.isEmpty()) {
+        	List<StandType<?>> stands = availableStands(tiers, entity);
+
+            if (stands.isEmpty()) {
                 return null;
             }
             
             if (JojoModConfig.getCommonConfigInstance(false).prioritizeLeastTakenStands.get()) {
-                filtered = SaveFileUtilCapProvider.getSaveFileCap(((ServerWorld) entity.level).getServer()).leastTakenStands(filtered);
+                stands = SaveFileUtilCapProvider.getSaveFileCap(((ServerWorld) entity.level).getServer()).leastTakenStands(stands);
             }
             
-            if (!filtered.isEmpty()) {
-                return filtered.get(random.nextInt(filtered.size()));
+            if (!stands.isEmpty()) {
+                return stands.get(random.nextInt(stands.size()));
             }
         }
         return null;
+    }
+    
+    public static List<StandType<?>> availableStands(int[] tiers, LivingEntity entity) {
+    	Collection<StandType<?>> stands = ModStandTypes.Registry.getRegistry().getValues();
+    	return stands.stream()
+    			.filter(stand -> (
+    					tiers == null ||
+    					Arrays.stream(tiers).anyMatch(tier -> tier == stand.getTier()))
+    					&& !JojoModConfig.getCommonConfigInstance(entity.level.isClientSide()).isStandBanned(stand))
+    			.collect(Collectors.toList());
     }
     
     public static int[] standTiersFromXp(int playerXpLvl, boolean withConfigBans, boolean isClientSide) {
@@ -95,7 +104,7 @@ public class StandUtil {
     
     public static int tierLowerBorder(int tier, boolean isClientSide) {
         List<? extends Integer> xpBorders = JojoModConfig.getCommonConfigInstance(isClientSide).standTierXpLevels.get();
-        return xpBorders.get(Math.min(tier, xpBorders.size() - 1));
+        return JojoModUtil.getOrLast(xpBorders, tier).intValue();
     }
     
     public static boolean isEntityStandUser(LivingEntity entity) {
