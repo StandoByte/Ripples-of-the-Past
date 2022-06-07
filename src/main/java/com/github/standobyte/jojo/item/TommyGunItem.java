@@ -267,10 +267,9 @@ public class TommyGunItem extends Item {
         return super.getAttributeModifiers(slot, stack);
     }
     
-    private static final ITextComponent DESC = new TranslationTextComponent("item.jojo.tommy_gun.reload_prompt", 
-    		new KeybindTextComponent("key.sneak"), new KeybindTextComponent("key.use")).withStyle(TextFormatting.DARK_GRAY);
     @Override
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
-        tooltip.add(DESC);
+        tooltip.add(new TranslationTextComponent("item.jojo.tommy_gun.reload_prompt", 
+        		new KeybindTextComponent("key.sneak"), new KeybindTextComponent("key.use")).withStyle(TextFormatting.DARK_GRAY));
     }
 }

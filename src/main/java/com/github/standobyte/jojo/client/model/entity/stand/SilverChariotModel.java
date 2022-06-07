@@ -35,11 +35,7 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
     protected ModelRenderer rapierBlade;
 
     public SilverChariotModel() {
-        this(64, 64);
-    }
-
-    public SilverChariotModel(int textureWidth, int textureHeight) {
-        super(textureWidth, textureHeight);
+        super();
         addLayerSpecificBoxes();
     }
 
@@ -49,97 +45,93 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
     }
 
     protected void addLayerSpecificBoxes() {
-        head.texOffs(22, 0).addBox(-4.0F, -5.1F, -4.0F, 8.0F, 3.0F, 3.0F, -0.1F, false);
-        head.texOffs(0, 8).addBox(-4.0F, -4.25F, -1.05F, 8.0F, 2.0F, 5.0F, -0.05F, false);
-        head.texOffs(18, 18).addBox(-4.0F, -4.85F, -4.0F, 8.0F, 3.0F, 1.0F, 0.25F, false);
-        head.texOffs(38, 10).addBox(-3.5F, -3.1F, -2.75F, 7.0F, 3.0F, 6.0F, 0.0F, false);
-        head.texOffs(50, 6).addBox(-1.0F, -2.15F, -4.0F, 2.0F, 2.0F, 2.0F, 0.0F, false);
-        head.texOffs(58, 4).addBox(-4.5F, -4.25F, -3.0F, 1.0F, 2.0F, 2.0F, 0.1F, false);
-        head.texOffs(58, 14).addBox(-3.5F, -1.5F, -3.0F, 1.0F, 1.0F, 1.0F, 0.25F, false);
-        head.texOffs(58, 12).addBox(2.5F, -1.5F, -3.0F, 1.0F, 1.0F, 1.0F, 0.25F, false);
-        head.texOffs(58, 8).addBox(3.5F, -4.25F, -3.0F, 1.0F, 2.0F, 2.0F, 0.1F, false);
-        head.texOffs(9, 16).addBox(-0.5F, -7.85F, -3.5F, 1.0F, 4.0F, 7.0F, 0.2F, false);
-        head.texOffs(22, 6).addBox(-2.5F, -6.9F, -4.4F, 5.0F, 1.0F, 1.0F, -0.333F, false);
-        head.texOffs(22, 8).addBox(-2.5F, -6.4F, -4.4F, 5.0F, 1.0F, 1.0F, -0.333F, false);
-        head.texOffs(26, 10).addBox(1.5F, -6.9F, -4.07F, 1.0F, 1.0F, 3.0F, -0.333F, false);
-        head.texOffs(26, 10).addBox(1.5F, -6.4F, -4.07F, 1.0F, 1.0F, 3.0F, -0.333F, false);
-        head.texOffs(26, 10).addBox(-2.5F, -6.9F, -4.07F, 1.0F, 1.0F, 3.0F, -0.333F, false);
-        head.texOffs(26, 10).addBox(-2.5F, -6.4F, -4.07F, 1.0F, 1.0F, 3.0F, -0.333F, false);
-        head.texOffs(48, 0).addBox(-3.5F, -1.5F, -4.25F, 7.0F, 1.0F, 1.0F, -0.333F, false);
-        head.texOffs(54, 2).addBox(2.5F, -1.5F, -3.917F, 1.0F, 1.0F, 2.0F, -0.333F, false);
-        head.texOffs(48, 2).addBox(-3.5F, -1.5F, -3.917F, 1.0F, 1.0F, 2.0F, -0.333F, false);
-        head.texOffs(34, 6).addBox(-2.0F, -8.3F, -0.5F, 4.0F, 1.0F, 1.0F, -0.333F, false);
-        head.texOffs(38, 8).addBox(1.0F, -7.967F, -0.5F, 1.0F, 2.0F, 1.0F, -0.333F, false);
-        head.texOffs(34, 8).addBox(-2.0F, -7.967F, -0.5F, 1.0F, 2.0F, 1.0F, -0.333F, false);
+		head.texOffs(26, 22).addBox(-4.0F, -5.1F, -4.0F, 8.0F, 3.0F, 3.0F, -0.2F, false);
+		head.texOffs(0, 21).addBox(-4.0F, -4.25F, -1.05F, 8.0F, 2.0F, 5.0F, -0.15F, false);
+		head.texOffs(28, 28).addBox(-4.0F, -4.85F, -4.0F, 8.0F, 3.0F, 1.0F, 0.15F, false);
+		head.texOffs(0, 28).addBox(-3.5F, -3.1F, -2.75F, 7.0F, 3.0F, 6.0F, -0.1F, false);
+		head.texOffs(2, 37).addBox(-1.0F, -2.15F, -4.0F, 2.0F, 2.0F, 2.0F, -0.1F, false);
+		head.texOffs(26, 32).addBox(-4.5F, -4.25F, -2.9F, 1.0F, 2.0F, 2.0F, 0.0F, false);
+		head.texOffs(0, 37).addBox(-3.5F, -1.5F, -3.0F, 1.0F, 1.0F, 1.0F, 0.15F, false);
+		head.texOffs(8, 37).addBox(2.5F, -1.5F, -3.0F, 1.0F, 1.0F, 1.0F, 0.15F, false);
+		head.texOffs(32, 32).addBox(3.5F, -4.25F, -2.9F, 1.0F, 2.0F, 2.0F, 0.0F, false);
+		head.texOffs(16, 10).addBox(-0.5F, -7.85F, -3.5F, 1.0F, 4.0F, 7.0F, 0.1F, false);
+		head.texOffs(7, 0).addBox(-2.5F, -6.9F, -4.2F, 5.0F, 1.0F, 1.0F, -0.433F, false);
+		head.texOffs(7, 6).addBox(-2.5F, -6.4F, -4.2F, 5.0F, 1.0F, 1.0F, -0.433F, false);
+		head.texOffs(15, 2).addBox(1.5F, -6.9F, -4.07F, 1.0F, 1.0F, 3.0F, -0.433F, false);
+		head.texOffs(16, 8).addBox(1.5F, -6.4F, -4.07F, 1.0F, 1.0F, 3.0F, -0.433F, false);
+		head.texOffs(7, 2).addBox(-2.5F, -6.9F, -4.07F, 1.0F, 1.0F, 3.0F, -0.433F, false);
+		head.texOffs(7, 8).addBox(-2.5F, -6.4F, -4.07F, 1.0F, 1.0F, 3.0F, -0.433F, false);
+		head.texOffs(12, 37).addBox(-3.5F, -1.5F, -4.25F, 7.0F, 1.0F, 1.0F, -0.433F, false);
+		head.texOffs(18, 39).addBox(2.5F, -1.5F, -4.117F, 1.0F, 1.0F, 2.0F, -0.433F, false);
+		head.texOffs(12, 39).addBox(-3.5F, -1.5F, -4.117F, 1.0F, 1.0F, 2.0F, -0.433F, false);
+		head.texOffs(13, 12).addBox(-2.0F, -8.3F, -0.5F, 4.0F, 1.0F, 1.0F, -0.433F, false);
+		head.texOffs(17, 14).addBox(1.0F, -8.167F, -0.5F, 1.0F, 2.0F, 1.0F, -0.433F, false);
+		head.texOffs(13, 14).addBox(-2.0F, -8.167F, -0.5F, 1.0F, 2.0F, 1.0F, -0.433F, false);
 
         backCord = new ModelRenderer(this);
         backCord.setPos(0.0F, -4.0F, 2.55F);
         head.addChild(backCord);
         setRotationAngle(backCord, 0.0873F, 0.0F, 0.0F);
-        backCord.texOffs(26, 16).addBox(-2.5F, -2.75F, -0.5F, 5.0F, 1.0F, 1.0F, -0.333F, false);
-        backCord.texOffs(36, 12).addBox(1.5F, -2.417F, -0.5F, 1.0F, 3.0F, 1.0F, -0.333F, false);
-        backCord.texOffs(40, 12).addBox(-2.5F, -2.417F, -0.5F, 1.0F, 3.0F, 1.0F, -0.333F, false);
+		backCord.texOffs(25, 11).addBox(-2.5F, -2.55F, -0.5F, 5.0F, 1.0F, 1.0F, -0.433F, false);
+		backCord.texOffs(29, 13).addBox(1.5F, -2.417F, -0.5F, 1.0F, 3.0F, 1.0F, -0.433F, false);
+		backCord.texOffs(25, 13).addBox(-2.5F, -2.417F, -0.5F, 1.0F, 3.0F, 1.0F, -0.433F, false);
 
         bone1 = new ModelRenderer(this);
         bone1.setPos(4.25F, -4.45F, -0.25F);
         head.addChild(bone1);
         setRotationAngle(bone1, 0.0F, 0.0F, -0.1309F);
-        bone1.texOffs(0, 15).addBox(-4.0F, -3.25F, -2.0F, 4.0F, 4.0F, 4.0F, -0.25F, true);
+        bone1.texOffs(32, 13).addBox(-4.0F, -3.25F, -2.0F, 4.0F, 4.0F, 4.0F, -0.35F, true);
 
         bone2 = new ModelRenderer(this);
         bone2.setPos(-4.25F, -4.45F, -0.25F);
         head.addChild(bone2);
         setRotationAngle(bone2, 0.0F, 0.0F, 0.1309F);
-        bone2.texOffs(0, 15).addBox(0.0F, -3.25F, -2.0F, 4.0F, 4.0F, 4.0F, -0.25F, false);
+        bone2.texOffs(0, 13).addBox(0.0F, -3.25F, -2.0F, 4.0F, 4.0F, 4.0F, -0.35F, false);
 
-        torso.texOffs(0, 0).addBox(-4.0F, 1.0F, -1.5F, 8.0F, 5.0F, 3.0F, 0.0F, false);
-        torso.texOffs(33, 29).addBox(-1.5F, 0.5F, -2.5F, 3.0F, 3.0F, 5.0F, -0.6F, false);
-        torso.texOffs(29, 30).addBox(-0.5F, -0.1F, -0.5F, 1.0F, 12.0F, 1.0F, 0.1F, false);
-        torso.texOffs(0, 27).addBox(-2.5F, -0.1F, -2.0F, 1.0F, 2.0F, 4.0F, -0.2F, false);
-        torso.texOffs(0, 33).addBox(1.5F, -0.1F, -2.0F, 1.0F, 2.0F, 4.0F, -0.2F, false);
-        torso.texOffs(33, 37).addBox(-3.0F, 10.0F, -2.0F, 6.0F, 2.0F, 4.0F, 0.1F, false);
+		torso.texOffs(0, 64).addBox(-4.0F, 1.0F, -1.5F, 8.0F, 5.0F, 3.0F, 0.0F, false);
+		torso.texOffs(4, 72).addBox(-1.5F, 0.5F, -2.5F, 3.0F, 3.0F, 5.0F, -0.6F, false);
+		torso.texOffs(0, 72).addBox(-0.5F, -0.1F, -0.5F, 1.0F, 12.0F, 1.0F, 0.1F, false);
+		torso.texOffs(0, 58).addBox(-2.5F, -0.1F, -2.0F, 1.0F, 2.0F, 4.0F, -0.2F, false);
+		torso.texOffs(11, 58).addBox(1.5F, -0.1F, -2.0F, 1.0F, 2.0F, 4.0F, -0.2F, false);
+		torso.texOffs(0, 85).addBox(-3.0F, 10.0F, -2.0F, 6.0F, 2.0F, 4.0F, 0.1F, false);
+        
+		leftArm.texOffs(32, 114).addBox(-2.0F, 2.0F, -1.5F, 3.0F, 2.0F, 3.0F, 0.0F, true);
+		leftArm.texOffs(32, 106).addBox(-2.0F, -2.0F, -2.0F, 3.0F, 4.0F, 4.0F, 0.0F, true);
 
-		leftArm.texOffs(52, 59).addBox(-2.0F, 2.0F, -1.5F, 3.0F, 2.0F, 3.0F, 0.0F, true);
-		leftArm.texOffs(14, 47).addBox(-2.0F, -2.0F, -2.0F, 3.0F, 4.0F, 4.0F, 0.0F, true);
+		leftArmJoint.texOffs(32, 101).addBox(-1.0F, -1.5F, -1.0F, 2.0F, 3.0F, 2.0F, -0.1F, true);
 
-        leftArmJoint.setPos(-0.5F, 4.0F, 0.0F);
-        leftArmJoint.texOffs(2, 39).addBox(-1.0F, -1.5F, -1.0F, 2.0F, 3.0F, 2.0F, -0.1F, true);
+		leftForeArm.texOffs(32, 119).addBox(-2.0F, 0.0F, -1.5F, 3.0F, 6.0F, 3.0F, 0.0F, true);
 
-        leftForeArm.texOffs(12, 55).addBox(-2.0F, 0.0F, -1.5F, 3.0F, 6.0F, 3.0F, 0.0F, true);
+		rightArm.texOffs(0, 114).addBox(-1.0F, 2.0F, -1.5F, 3.0F, 2.0F, 3.0F, 0.0F, false);
+		rightArm.texOffs(0, 106).addBox(-1.0F, -2.0F, -2.0F, 3.0F, 4.0F, 4.0F, 0.0F, false);
 
-        rightArm.texOffs(52, 54).addBox(-1.0F, 2.0F, -1.5F, 3.0F, 2.0F, 3.0F, 0.0F, false);
-        rightArm.texOffs(0, 47).addBox(-1.0F, -2.0F, -2.0F, 3.0F, 4.0F, 4.0F, 0.0F, false);
+		rightArmJoint.texOffs(0, 101).addBox(-1.0F, -1.5F, -1.0F, 2.0F, 3.0F, 2.0F, -0.1F, false);
 
-        rightArmJoint.setPos(0.5F, 4.0F, 0.0F);
-        rightArmJoint.texOffs(2, 39).addBox(-1.0F, -1.5F, -1.0F, 2.0F, 3.0F, 2.0F, -0.1F, false);
+		rightForeArm.texOffs(0, 119).addBox(-1.0F, 0.0F, -1.5F, 3.0F, 6.0F, 3.0F, 0.0F, false);
 
-        rightForeArm.texOffs(0, 55).addBox(-1.0F, 0.0F, -1.5F, 3.0F, 6.0F, 3.0F, 0.0F, false);
-
-        rapier = new ModelRenderer(this);
-        rapier.setPos(0.25F, 4.5F, 0.0F);
-        rightForeArm.addChild(rapier);
+		rapier = new ModelRenderer(this);
+		rapier.setPos(0.25F, 4.5F, 0.0F);
+		rightForeArm.addChild(rapier);
         setRotationAngle(rapier, 0.7854F, 0.0F, 0.0F);
-        rapier.texOffs(11, 35).addBox(-1.5F, -1.5F, -3.0F, 3.0F, 3.0F, 5.0F, 0.25F, false);
-        rapier.texOffs(13, 28).addBox(-0.5F, -0.5F, -3.25F, 1.0F, 1.0F, 6.0F, 0.0F, false);
+		rapier.texOffs(31, 79).addBox(-1.5F, -1.5F, -3.0F, 3.0F, 3.0F, 5.0F, 0.25F, false);
+		rapier.texOffs(49, 80).addBox(-0.5F, -0.5F, -3.25F, 1.0F, 1.0F, 6.0F, 0.0F, false);
 
-        rapierBlade = new ModelRenderer(this);
-        rapierBlade.setPos(0.0F, 0.0F, 0.0F);
-        rapier.addChild(rapierBlade);
-        rapierBlade.texOffs(12, 28).addBox(-0.5F, -0.5F, -17.0F, 1.0F, 1.0F, 15.0F, -0.3F, false);
+		rapierBlade = new ModelRenderer(this);
+		rapierBlade.setPos(0.0F, 0.0F, 0.0F);
+		rapier.addChild(rapierBlade);
+		rapierBlade.texOffs(32, 72).addBox(-0.5F, -0.5F, -17.0F, 1.0F, 1.0F, 15.0F, -0.3F, false);
 
-        leftLeg.setPos(1.4F, 12.0F, 0.0F);
-        leftLeg.texOffs(40, 46).addBox(-1.5F, 0.0F, -1.5F, 3.0F, 6.0F, 3.0F, 0.0F, false);
+		leftLeg.texOffs(96, 110).addBox(-1.5F, 0.0F, -1.5F, 3.0F, 6.0F, 3.0F, 0.0F, false);
 
-        leftLegJoint.texOffs(54, 39).addBox(-1.0F, -1.5F, -1.0F, 2.0F, 3.0F, 2.0F, -0.1F, true);
+		leftLegJoint.texOffs(96, 105).addBox(-1.0F, -1.5F, -1.0F, 2.0F, 3.0F, 2.0F, -0.1F, true);
 
-        leftLowerLeg.texOffs(36, 55).addBox(-1.5F, 0.0F, -1.5F, 3.0F, 6.0F, 3.0F, 0.0F, false);
+		leftLowerLeg.texOffs(96, 119).addBox(-1.5F, 0.0F, -1.5F, 3.0F, 6.0F, 3.0F, 0.0F, false);
 
-        rightLeg.setPos(-1.4F, 12.0F, 0.0F);
-        rightLeg.texOffs(28, 46).addBox(-1.5F, 0.0F, -1.5F, 3.0F, 6.0F, 3.0F, 0.0F, false);
+		rightLeg.texOffs(64, 110).addBox(-1.5F, 0.0F, -1.5F, 3.0F, 6.0F, 3.0F, 0.0F, false);
 
-        rightLegJoint.texOffs(54, 39).addBox(-1.0F, -1.5F, -1.0F, 2.0F, 3.0F, 2.0F, -0.1F, false);
+		rightLegJoint.texOffs(64, 105).addBox(-1.0F, -1.5F, -1.0F, 2.0F, 3.0F, 2.0F, -0.1F, false);
 
-        rightLowerLeg.texOffs(24, 55).addBox(-1.5F, 0.0F, -1.5F, 3.0F, 6.0F, 3.0F, 0.0F, false);
+		rightLowerLeg.texOffs(64, 119).addBox(-1.5F, 0.0F, -1.5F, 3.0F, 6.0F, 3.0F, 0.0F, false);
     }
 
     @Override
