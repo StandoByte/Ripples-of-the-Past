@@ -10,5 +10,7 @@
       "chance": 0.08
     }
   ],
-  "additional_item": "jojo:stone_mask"
+  "additional_item": {
+    "name": "jojo:stone_mask"
+  }
 }

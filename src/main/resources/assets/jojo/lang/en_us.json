@@ -12,6 +12,7 @@
   "item.jojo.satiporoja_scarf": "Satiporoja Beetle Cloth Scarf",
   "item.jojo.clackers": "Clackers",
   "item.jojo.tommy_gun": "Tommy Gun",
+  "item.jojo.tommy_gun.reload_prompt": "%s+%s to reload (consumes iron nuggets and gunpowder)",
   "block.jojo.slumbering_pillarman": "Slumbering Pillar Man",
   "item.jojo.knife": "Knife",
   "item.jojo.road_roller": "Road Roller",
