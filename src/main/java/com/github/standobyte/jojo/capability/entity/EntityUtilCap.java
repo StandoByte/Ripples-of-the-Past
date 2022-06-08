@@ -23,7 +23,7 @@ public class EntityUtilCap {
     	}
     }
     
-    boolean wasStoppedInTime() {
+    public boolean wasStoppedInTime() {
     	return stoppedInTime;
     }
     

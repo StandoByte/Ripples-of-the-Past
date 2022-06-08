@@ -43,23 +43,21 @@ public class SilverChariotSweepingAttack extends StandEntityComboHeavyAttack {
     
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-        if (!world.isClientSide()) {
-            double reach = standEntity.getAttributeValue(ForgeMod.REACH_DISTANCE.get());
-            world.getEntities(standEntity, standEntity.getBoundingBox().inflate(reach, 0, reach), 
-                    e -> !e.isSpectator() && e.isPickable() && standEntity.canHarm(e)).forEach(targetEntity -> {
-                        Vector3d standLookVec = standEntity.getLookAngle();
-                        Vector3d targetVec = targetEntity.position().subtract(standEntity.position()).normalize();
-                        double cos = standLookVec.dot(targetVec);
-                        if (cos > -0.5) {
-                            standEntity.attackEntity(targetEntity, PunchType.HEAVY_COMBO, this, 1, attack -> {
-                                if (cos < 0.5) {
-                                    attack.damage(attack.getDamage() * 0.5F);
-                                }
-                                attack.addKnockback(1);
-                            });
-                        }
-                    });
-        }
+    	double reach = standEntity.getAttributeValue(ForgeMod.REACH_DISTANCE.get());
+    	world.getEntities(standEntity, standEntity.getBoundingBox().inflate(reach, 0, reach), 
+    			e -> !e.isSpectator() && e.isPickable() && standEntity.canHarm(e)).forEach(targetEntity -> {
+    				Vector3d standLookVec = standEntity.getLookAngle();
+    				Vector3d targetVec = targetEntity.position().subtract(standEntity.position()).normalize();
+    				double cos = standLookVec.dot(targetVec);
+    				if (cos > -0.5) {
+    					standEntity.attackEntity(targetEntity, PunchType.HEAVY_COMBO, this, 1, attack -> {
+    						if (cos < 0.5) {
+    							attack.damage(attack.getDamage() * 0.5F);
+    						}
+    						attack.addKnockback(1);
+    					});
+    				}
+    			});
     }
     
     @Override

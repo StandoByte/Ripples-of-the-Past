@@ -62,13 +62,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
                 swing(standEntity);
             }
         }
-        if (!world.isClientSide()) {
-//            boolean attacked = 
-                    standEntity.barrageTickPunches(task.getTarget(), this, hitsThisTick);
-//            if (!attacked && !standEntity.isArmsOnlyMode()) {
-//                standEntity.addBarrageOffset();
-//            }
-        }
+        standEntity.barrageTickPunches(task.getTarget(), this, hitsThisTick);
     }
     
     @Override

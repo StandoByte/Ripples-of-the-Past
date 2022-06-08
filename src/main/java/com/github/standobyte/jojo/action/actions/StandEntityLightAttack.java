@@ -37,9 +37,7 @@ public class StandEntityLightAttack extends StandEntityAction {
     
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-        if (!world.isClientSide()) {
-            standEntity.punch(PunchType.LIGHT, task.getTarget(), this);
-        }
+        standEntity.punch(PunchType.LIGHT, task.getTarget(), this);
     }
     
     @Override

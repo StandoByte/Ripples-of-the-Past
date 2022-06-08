@@ -34,6 +34,8 @@ public class LivingUtilCap {
     
     private final List<AfterimageEntity> afterimages = new ArrayList<>();
     
+    public boolean hasUsedTimeStopToday = false;
+    
     private int noLerpTicks = 0;
     
     public LivingUtilCap(LivingEntity entity) {

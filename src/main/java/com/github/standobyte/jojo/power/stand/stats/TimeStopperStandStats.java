@@ -1,6 +1,8 @@
 package com.github.standobyte.jojo.power.stand.stats;
 
 import com.github.standobyte.jojo.action.actions.TimeStop;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
@@ -47,12 +49,16 @@ public class TimeStopperStandStats extends StandStats {
     
     @Override
     public void onNewDay(LivingEntity user, IStandPower power) {
-    	if (!user.level.isClientSide() && timeStopDecayPerDay > 0) {
-    		power.getAbilities().forEach(ability -> {
-    			if (ability.isUnlocked(power) && ability instanceof TimeStop) {
-    				power.setLearningProgressPoints(ability, power.getLearningProgressPoints(ability) - timeStopDecayPerDay, true, false);
-    			}
-    		});
+    	if (!user.level.isClientSide()) {
+    		LivingUtilCap cap = user.getCapability(LivingUtilCapProvider.CAPABILITY).resolve().get();
+    		if (!cap.hasUsedTimeStopToday && timeStopDecayPerDay > 0) {
+    			power.getAbilities().forEach(ability -> {
+    				if (ability.isUnlocked(power) && ability instanceof TimeStop) {
+    					power.setLearningProgressPoints(ability, power.getLearningProgressPoints(ability) - timeStopDecayPerDay, true, false);
+    				}
+    			});
+    		}
+    		cap.hasUsedTimeStopToday = false;
     	}
     }
     

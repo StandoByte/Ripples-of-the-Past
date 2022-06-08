@@ -17,9 +17,7 @@ public class StandEntityComboHeavyAttack extends StandEntityHeavyAttack {
     
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-        if (!world.isClientSide()) {
-            standEntity.punch(PunchType.HEAVY_COMBO, task.getTarget(), this);
-        }
+        standEntity.punch(PunchType.HEAVY_COMBO, task.getTarget(), this);
     }
     
     @Override

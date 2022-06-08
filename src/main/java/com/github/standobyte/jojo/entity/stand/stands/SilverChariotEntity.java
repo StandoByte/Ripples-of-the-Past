@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
@@ -18,6 +19,7 @@ import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.util.damage.DamageUtil;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -30,6 +32,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeMod;
@@ -191,20 +194,44 @@ public class SilverChariotEntity extends StandEntity {
 
     private boolean attackOrDeflect(Entity target, PunchType punch, StandEntityAction action, int barrageHits,
             @Nullable Consumer<StandAttackProperties> attackOverride) {
-        if (hasRapier() && target instanceof ProjectileEntity) {
-            if (target.getType() != ModEntityTypes.SPACE_RIPPER_STINGY_EYES.get()) {
-                JojoModUtil.deflectProjectile(target, getLookAngle());
-                if (target instanceof DamagingEntity && ((DamagingEntity) target).isFiery()) {
-                	entityData.set(RAPIER_ON_FIRE, true);
-                	rapierFireTicks = 300;
-                }
-                return true;
-            }
-            return false;
+        if (canDeflectProjectiles() && hasRapier() && target instanceof ProjectileEntity) {
+        	return deflectProjectile(target);
         }
         else {
             return super.attackEntity(target, punch, action, barrageHits, attackOverride);
         }
+    }
+    
+    @Override
+    public boolean attackTarget(ActionTarget target, PunchType punch, StandEntityAction action, int barrageHits, 
+            @Nullable Consumer<StandAttackProperties> entityAttackOverride) {
+    	if (canDeflectProjectiles()) {
+    		level.getEntitiesOfClass(ProjectileEntity.class, getBoundingBox().inflate(getAttributeValue(ForgeMod.REACH_DISTANCE.get())), 
+    				entity -> entity.isAlive() && !entity.isPickable()).forEach(projectile -> {
+    					if (this.getLookAngle().dot(projectile.getDeltaMovement().reverse().normalize())
+    							>= MathHelper.cos((float) (30.0 + MathHelper.clamp(getPrecision(), 0, 16) * 30.0 / 16.0) * MathUtil.DEG_TO_RAD)) {
+    						deflectProjectile(projectile);
+    					}
+    				});
+    	}
+    	
+    	return super.attackTarget(target, punch, action, barrageHits, entityAttackOverride);
+    }
+    
+    private boolean canDeflectProjectiles() {
+    	return getUserPower() == null || getUserPower().getResolveLevel() >= 4;
+    }
+    
+    private boolean deflectProjectile(Entity projectile) {
+        if (projectile.getType() != ModEntityTypes.SPACE_RIPPER_STINGY_EYES.get()) {
+            JojoModUtil.deflectProjectile(projectile, getLookAngle());
+            if (projectile instanceof DamagingEntity && ((DamagingEntity) projectile).isFiery()) {
+            	entityData.set(RAPIER_ON_FIRE, true);
+            	rapierFireTicks = 300;
+            }
+            return true;
+        }
+        return false;
     }
     
     public void removeRapierFire() {
@@ -254,7 +281,7 @@ public class SilverChariotEntity extends StandEntity {
     public float getUserMovementFactor() {
         float factor = super.getUserMovementFactor();
         if (getUserPower() != null && getUserPower().getResolveLevel() >= 4) {
-            factor += (1 - factor) * (hasArmor() ? 0.5F : 0.75F);
+            factor += (1 - factor) * (hasArmor() ? 0.5F : 1F);
         }
         return factor;
     }

@@ -72,6 +72,7 @@ public class JojoModConfig {
         public final ForgeConfigSpec.ConfigValue<List<? extends Double>> resolvePoints;
         public final ForgeConfigSpec.BooleanValue soulAscension;
         public final ForgeConfigSpec.IntValue timeStopChunkRange;
+        public final ForgeConfigSpec.DoubleValue timeStopDamageMultiplier;
 
         public final ForgeConfigSpec.DoubleValue hamonDamageMultiplier;
         
@@ -221,6 +222,11 @@ public class JojoModConfig {
                                 "  Defaults to 12.")
                         .translation("jojo.config.timeStopChunkRange")
                         .defineInRange("timeStopChunkRange", 12, 0, Integer.MAX_VALUE);
+                
+                timeStopDamageMultiplier = builder
+                        .comment(" Damage multiplier for entities frozen in time.")
+                        .translation("jojo.config.timeStopDamageMultiplier")
+                        .defineInRange("timeStopDamageMultiplier", 1.0, 0.0, 1000000.0);
             builder.pop();
             
             hamonDamageMultiplier = builder
