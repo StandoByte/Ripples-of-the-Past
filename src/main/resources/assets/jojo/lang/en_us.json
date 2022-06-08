@@ -392,6 +392,8 @@
   "jojo.config.hamonDamageMultiplier.tooltip": "Damage multiplier applied to all Hamon attacks.",
   "jojo.config.timeStopChunkRange": "Time Stop chunk range",
   "jojo.config.timeStopChunkRange.tooltip": "Range of Time Stop ability in chunks. If set to 0, the whole dimension is frozen in time.",
+  "jojo.config.timeStopDamageMultiplier": "Time Stop damage multiplier",
+  "jojo.config.timeStopDamageMultiplier.tooltip": "Damage multiplier for entities frozen in time.",
   
   "jojo.config.client.barsPosition": "Bars position",
   "jojo.config.client.barsPosition.tooltip": "Position of Energy, Stamina and Resolve bars in the HUD.",

@@ -14,7 +14,6 @@ import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.block.DispenserBlock;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.dispenser.IPosition;
 import net.minecraft.dispenser.ProjectileDispenseBehavior;
@@ -130,8 +129,10 @@ public class StandArrowItem extends ArrowItem {
         PlayerEntity player = ClientUtil.getClientPlayer();
         if (player != null) {
         	IFormattableTextComponent mainText = null;
+        	int[] currentTiers = null;
+        	boolean canBeUsed = false;
         	if (JojoModConfig.getCommonConfigInstance(true).standTiers.get()) {
-        		int[] currentTiers = StandUtil.standTiersFromXp(player.experienceLevel, true, true);
+        		currentTiers = StandUtil.standTiersFromXp(player.experienceLevel, true, true);
         		int minTier = IntStream.of(currentTiers).min().orElse(-1);
         		int maxTier = IntStream.of(currentTiers).max().orElse(-1);
         		int nextTier = StandUtil.arrowPoolNextTier(maxTier + 1, true);
@@ -156,16 +157,7 @@ public class StandArrowItem extends ArrowItem {
         			}
 
         			tooltip.add(mainText);
-        			boolean shift = ClientUtil.isShiftPressed();
-        			if (shift) {
-        				tooltip.add(new TranslationTextComponent("jojo.arrow.stands_list").withStyle(TextFormatting.GRAY));
-        				StandUtil.availableStands(currentTiers, player).forEach(
-        						stand -> tooltip.add(new TranslationTextComponent(stand.getTranslationKey())));
-        			}
-        			else {
-        				tooltip.add(new TranslationTextComponent("jojo.arrow.stands_hint", new KeybindTextComponent("key.sneak"))
-        						.withStyle(TextFormatting.DARK_GRAY));
-        			}
+        			canBeUsed = true;
         		}
         		else {
         			if (nextTier > -1) {
@@ -181,14 +173,29 @@ public class StandArrowItem extends ArrowItem {
             else {
             	for (int i = 0; i < StandUtil.getMaxTier(true); i++) {
             		if (JojoModConfig.getCommonConfigInstance(true).tierHasUnbannedStands(i)) {
-            			return;
+            			canBeUsed = true;
             		}
             	}
-            	mainText = new TranslationTextComponent("jojo.arrow.no_stands").withStyle(TextFormatting.OBFUSCATED);
-            	tooltip.add(mainText);
+            	if (!canBeUsed) {
+            		mainText = new TranslationTextComponent("jojo.arrow.no_stands").withStyle(TextFormatting.OBFUSCATED);
+            		tooltip.add(mainText);
+            	}
             }
             if (mainText != null) {
             	mainText.withStyle(TextFormatting.ITALIC, TextFormatting.GRAY);
+            }
+
+            if (canBeUsed) {
+    			boolean shift = ClientUtil.isShiftPressed();
+    			if (shift) {
+    				tooltip.add(new TranslationTextComponent("jojo.arrow.stands_list").withStyle(TextFormatting.DARK_GRAY));
+    				StandUtil.availableStands(currentTiers, player).forEach(
+    						stand -> tooltip.add(new TranslationTextComponent(stand.getTranslationKey())));
+    			}
+    			else {
+    				tooltip.add(new TranslationTextComponent("jojo.arrow.stands_hint", new KeybindTextComponent("key.sneak"))
+    						.withStyle(TextFormatting.DARK_GRAY));
+    			}
             }
         }
     }
@@ -196,5 +203,11 @@ public class StandArrowItem extends ArrowItem {
     @Override
     public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
         return super.canApplyAtEnchantingTable(stack, enchantment) || enchantment.equals(Enchantments.LOYALTY);
+    }
+    
+    public enum StandGivingMode {
+    	RANDOM,
+    	LEAST_TAKEN,
+    	UNIQUE
     }
 }

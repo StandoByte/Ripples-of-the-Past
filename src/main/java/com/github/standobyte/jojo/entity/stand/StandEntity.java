@@ -1382,19 +1382,21 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     public boolean punch(PunchType punch, ActionTarget target, StandEntityAction action, int barrageHits, 
             @Nullable Consumer<StandAttackProperties> entityAttackOverride) {
-        if (punch == PunchType.BARRAGE) {
-            if (!accumulateBarrageTickParry) {
-                accumulateBarrageTickParry = true;
-                barrageParryCount = barrageHits + 1;
-            }
-            else {
-                barrageParryCount += barrageHits;
-            }
-        }
-        
-        ActionTarget finalTarget = ActionTarget.fromRayTraceResult(aimWithStandOrUser(getAimDistance(getUser()), target));
-        target = finalTarget.getType() != TargetType.EMPTY && isTargetInReach(finalTarget) ? finalTarget : ActionTarget.EMPTY;
-        setTaskTarget(target);
+    	if (!level.isClientSide()) {
+	        if (punch == PunchType.BARRAGE) {
+	            if (!accumulateBarrageTickParry) {
+	                accumulateBarrageTickParry = true;
+	                barrageParryCount = barrageHits + 1;
+	            }
+	            else {
+	                barrageParryCount += barrageHits;
+	            }
+	        }
+	        
+	        ActionTarget finalTarget = ActionTarget.fromRayTraceResult(aimWithStandOrUser(getAimDistance(getUser()), target));
+	        target = finalTarget.getType() != TargetType.EMPTY && isTargetInReach(finalTarget) ? finalTarget : ActionTarget.EMPTY;
+	        setTaskTarget(target);
+    	}
         
         return attackTarget(target, punch, action, barrageHits, entityAttackOverride);
     }
@@ -1676,7 +1678,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     public boolean attackEntity(Entity target, PunchType punch, StandEntityAction action, int barrageHits,
             @Nullable Consumer<StandAttackProperties> attackOverride) {
-        if (!canHarm(target)) {
+        if (level.isClientSide() || !canHarm(target)) {
             return false;
         }
         StandEntityDamageSource dmgSource = new StandEntityDamageSource("stand", this, getUserPower());
@@ -1729,7 +1731,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         StandAttackProperties attack = new StandAttackProperties();
         
         switch (punchType) {
-        // FIXME (!!) more knockback depending on 'blockDamage'
         case LIGHT:
             attack
             .damage(StandStatFormulas.getLightAttackDamage(strength))
@@ -1873,9 +1874,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
 
     protected boolean breakBlock(BlockPos blockPos) {
-        if (!JojoModUtil.canEntityDestroy(level, blockPos, this)) {
+        if (level.isClientSide() || !JojoModUtil.canEntityDestroy(level, blockPos, this)) {
             return false;
         }
+        
         BlockState blockState = level.getBlockState(blockPos);
         if (canBreakBlock(blockPos, blockState)) {
             LivingEntity user = getUser();

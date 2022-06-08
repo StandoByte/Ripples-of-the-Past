@@ -71,11 +71,16 @@ public class StandDiscItem extends Item {
                     player.displayClientMessage(new TranslationTextComponent("jojo.chat.message.low_tier"), true);
                     return ActionResult.fail(stack);
                 }
-                if (!player.abilities.instabuild && power.wasGivenByDisc()) {
-                    StandType<?> previousDiscStand = power.putOutStand();
-                    if (previousDiscStand != null) {
-                        player.drop(withStandType(new ItemStack(this), previousDiscStand), false);
-                    }
+                if (power.wasGivenByDisc()) {
+                	if (!player.abilities.instabuild) {
+	                    StandType<?> previousDiscStand = power.putOutStand();
+	                    if (previousDiscStand != null) {
+	                        player.drop(withStandType(new ItemStack(this), previousDiscStand), false);
+	                    }
+                	}
+                	else {
+                		power.clear();
+                	}
                 }
                 if (power.givePower(stand, !stack.getTag().getBoolean(WS_TAG))) {
                     power.setGivenByDisc();
@@ -99,10 +104,11 @@ public class StandDiscItem extends Item {
     private static boolean standFitsTier(LivingEntity entity, int playerTier, StandType<?> stand) {
         if (entity instanceof PlayerEntity) {
             PlayerEntity player = (PlayerEntity) entity;
-            return player.abilities.instabuild || !JojoModConfig.getCommonConfigInstance(entity.level.isClientSide()).standTiers.get()
+            return player.abilities.instabuild
+            		|| !JojoModConfig.getCommonConfigInstance(entity.level.isClientSide()).standTiers.get()
+                    || playerTier >= stand.getTier()
                     || Arrays.stream(StandUtil.standTiersFromXp(player.experienceLevel, false, entity.level.isClientSide()))
-                    .anyMatch(tier -> tier >= stand.getTier())
-                    || playerTier >= stand.getTier();
+                    .anyMatch(tier -> tier >= stand.getTier());
         }
         return false;
     }

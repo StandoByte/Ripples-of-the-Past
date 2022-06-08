@@ -5,6 +5,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.actions.TimeStop;
+import com.github.standobyte.jojo.action.actions.TimeStopInstant;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
@@ -175,17 +176,11 @@ public class TimeStopInstance {
                 userPower.ifPresent(power -> {
                 	if (power.hasPower()) {
 	                    statsOptional.ifPresent(stats -> {
-	                        float cooldown;
-	                        if (power.isUserCreative()) {
-	                            cooldown = 0;
-	                        }
-	                        else {
-	                            cooldown = stats.timeStopCooldownPerTick * ticksPassed;
-	                            if (power.getUser() != null && power.getUser().hasEffect(ModEffects.RESOLVE.get())) {
-	                                cooldown /= 3F;
-	                            }
-	                        }
+	                    	float cooldown = getTimeStopCooldown(power, stats, ticksPassed);
 	                        power.setCooldownTimer(action, (int) cooldown);
+	                        if (action.hasShiftVariation()) {
+	                            power.setCooldownTimer(action.getShiftVariationIfPresent(), (int) (cooldown * TimeStopInstant.COOLDOWN_RATIO));
+	                        }
 	
 	                        power.addLearningProgressPoints(action, stats.timeStopLearningPerTick * ticksPassed);
 	                    });
@@ -196,6 +191,20 @@ public class TimeStopInstance {
                 JojoModUtil.removeEffectInstance(user, statusEffectInstance);
             }
         }
+    }
+    
+    public static float getTimeStopCooldown(IStandPower power, TimeStopperStandStats stats, int ticks) {
+        float cooldown;
+        if (power.isUserCreative()) {
+            cooldown = 0;
+        }
+        else {
+            cooldown = stats.timeStopCooldownPerTick * ticks;
+            if (power.getUser() != null && power.getUser().hasEffect(ModEffects.RESOLVE.get())) {
+                cooldown /= 3F;
+            }
+        }
+        return cooldown;
     }
     
     public SoundEvent getTimeResumeSound() {

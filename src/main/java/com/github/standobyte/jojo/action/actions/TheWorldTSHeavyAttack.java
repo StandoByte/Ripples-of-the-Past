@@ -150,19 +150,17 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
     
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-        if (!world.isClientSide()) {
-            standEntity.punch(PunchType.HEAVY_NO_COMBO, task.getTarget(), this, 1, attack -> {
-                attack
-                .armorPiercing(0)
-                .addKnockback(4)
-                .disableBlocking(1.0F)
-                .callbackAfterAttack((t, stand, power, user, hurt, killed) -> {
-                    if (killed && user != null && stand.distanceToSqr(user) > 16) {
-                        JojoModUtil.sayVoiceLine(user, ModSounds.DIO_THIS_IS_THE_WORLD.get());
-                    }
-                });
-            });
-        }
+    	standEntity.punch(PunchType.HEAVY_NO_COMBO, task.getTarget(), this, 1, attack -> {
+    		attack
+    		.armorPiercing(0)
+    		.addKnockback(4)
+    		.disableBlocking(1.0F)
+    		.callbackAfterAttack((t, stand, power, user, hurt, killed) -> {
+    			if (killed && user != null && stand.distanceToSqr(user) > 16) {
+    				JojoModUtil.sayVoiceLine(user, ModSounds.DIO_THIS_IS_THE_WORLD.get());
+    			}
+    		});
+    	});
     }
     
     @Override

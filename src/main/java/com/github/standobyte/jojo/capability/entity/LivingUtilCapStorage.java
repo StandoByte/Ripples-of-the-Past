@@ -16,6 +16,7 @@ public class LivingUtilCapStorage implements IStorage<LivingUtilCap> {
         if (instance.hamonCharge != null) {
             cnbt.put("HamonCharge", instance.hamonCharge.writeNBT());
         }
+        cnbt.putBoolean("UsedTimeStop", instance.hasUsedTimeStopToday);
         return cnbt;
     }
 
@@ -25,5 +26,6 @@ public class LivingUtilCapStorage implements IStorage<LivingUtilCap> {
         if (cnbt.contains("HamonCharge", 10)) {
             instance.hamonCharge = new HamonCharge(cnbt.getCompound("HamonCharge"));
         }
+        instance.hasUsedTimeStopToday = cnbt.getBoolean("UsedTimeStop");
     }
 }

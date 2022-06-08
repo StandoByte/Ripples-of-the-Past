@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.capability.world.TimeStopInstance;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -112,10 +113,15 @@ public class TimeStopInstant extends StandAction {
                 TimeStopperStandStats stats = (TimeStopperStandStats) power.getType().getStats();
                 float learning = stats.timeStopLearningPerTick * impliedTicks;
                 power.addLearningProgressPoints(baseTimeStop.get(), learning);
-            	power.setCooldownTimer(this, (int) (((TimeStopperStandStats) stats).timeStopCooldownPerTick * impliedTicks / 6F));
+                
+                float cooldown = TimeStopInstance.getTimeStopCooldown(power, stats, impliedTicks);
+            	power.setCooldownTimer(this, (int) cooldown);
+            	power.setCooldownTimer(baseTimeStop.get(), (int) (cooldown * COOLDOWN_RATIO));
             }
         }
     }
+    
+    public static final float COOLDOWN_RATIO = 1F / 6F;
     
     public static double getDistancePerTick(LivingEntity entity) {
     	return entity.getAttributeValue(Attributes.MOVEMENT_SPEED) * 2.1585;

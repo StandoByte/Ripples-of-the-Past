@@ -18,6 +18,7 @@ import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.action.actions.VampirismFreeze;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.block.StoneMaskBlock;
+import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.ProjectileHamonChargeCapProvider;
@@ -387,14 +388,15 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onLivingHurtStart(LivingAttackEvent event) {
         DamageSource dmgSource = event.getSource();
-        if (event.getEntity().invulnerableTime > 0 && dmgSource instanceof IModdedDamageSource && 
+        LivingEntity target = event.getEntityLiving();
+        if (target.invulnerableTime > 0 && dmgSource instanceof IModdedDamageSource && 
                 ((IModdedDamageSource) dmgSource).bypassInvulTicks()) {
             event.setCanceled(true);
-            DamageUtil.hurtThroughInvulTicks(event.getEntity(), dmgSource, event.getAmount());
+            DamageUtil.hurtThroughInvulTicks(target, dmgSource, event.getAmount());
             return;
         }
         
-        standBlockUserAttack(dmgSource, event.getEntityLiving(), stand -> {
+        standBlockUserAttack(dmgSource, target, stand -> {
             if (!stand.isInvulnerableTo(dmgSource)) {
                 stand.hurt(dmgSource, event.getAmount());
                 event.setCanceled(true);
@@ -471,6 +473,16 @@ public class GameplayEventHandler {
         if (event.isCanceled() && event.getSource().isExplosion()) {
             event.getEntityLiving().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(util -> util.popLatestExplosionPos());
         }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void onLivingHurt(LivingHurtEvent event) {
+    	LivingEntity target = event.getEntityLiving();
+    	if (!target.canUpdate() && target.getCapability(EntityUtilCapProvider.CAPABILITY)
+    			.map(cap -> cap.wasStoppedInTime()).orElse(false)) {
+    		event.setAmount(event.getAmount() * JojoModConfig.getCommonConfigInstance(false)
+    				.timeStopDamageMultiplier.get().floatValue());
+    	}
     }
     
     @SubscribeEvent(priority = EventPriority.HIGH)
