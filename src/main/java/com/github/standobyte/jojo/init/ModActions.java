@@ -296,20 +296,20 @@ public class ModActions {
             () -> new HierophantGreenStringAttack(new StandEntityAction.Builder().staminaCost(75).standPerformDuration(10)));
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_STRING_BIND = ACTIONS.register("hierophant_green_attack_binding", 
-            () -> new HierophantGreenStringAttack(new StandEntityAction.Builder().staminaCost(75).standPerformDuration(25).cooldown(25, 20)
+            () -> new HierophantGreenStringAttack(new StandEntityAction.Builder().staminaCost(75).standPerformDuration(25).cooldown(25, 60)
                     .shiftVariationOf(HIEROPHANT_GREEN_STRING_ATTACK)
                     .xpRequirement(200)));
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_EMERALD_SPLASH = ACTIONS.register("hierophant_green_emerald_splash", 
             () -> new HierophantGreenEmeraldSplash(new StandEntityAction.Builder()
-                    .standPerformDuration(30).cooldown(30, 10).staminaCostTick(4)
+                    .standPerformDuration(30).cooldown(30, 10).staminaCostTick(3)
                     .resolveLevelToUnlock(1).isTrained().standOffsetFront()
                     .standPose(StandPose.RANGED_ATTACK).shout(ModSounds.KAKYOIN_EMERALD_SPLASH).standSound(ModSounds.HIEROPHANT_GREEN_EMERALD_SPLASH)
                     .xpRequirement(50)));
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED = ACTIONS.register("hierophant_green_es_concentrated", 
             () -> new HierophantGreenEmeraldSplash(new StandEntityAction.Builder()
-                    .standPerformDuration(5).cooldown(5, 30).staminaCostTick(6)
+                    .standPerformDuration(5).cooldown(5, 30).staminaCostTick(5)
                     .resolveLevelToUnlock(-1).standOffsetFront()
                     .standPose(StandPose.RANGED_ATTACK).shout(ModSounds.KAKYOIN_EMERALD_SPLASH).standSound(ModSounds.HIEROPHANT_GREEN_EMERALD_SPLASH)
                     .shiftVariationOf(HIEROPHANT_GREEN_EMERALD_SPLASH)
@@ -320,12 +320,12 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_GRAPPLE = ACTIONS.register("hierophant_green_grapple", 
             () -> new HierophantGreenGrapple(new StandEntityAction.Builder().staminaCostTick(0).resolveLevelToUnlock(2)
-                    .holdType().standUserSlowDownFactor(0.5F).standPose(HierophantGreenGrapple.GRAPPLE_POSE)
+                    .holdType().standUserSlowDownFactor(1.0F).standPose(HierophantGreenGrapple.GRAPPLE_POSE)
                     .xpRequirement(100)));
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_GRAPPLE_ENTITY = ACTIONS.register("hierophant_green_grapple_entity", 
             () -> new HierophantGreenGrapple(new StandEntityAction.Builder().staminaCostTick(0).resolveLevelToUnlock(2)
-                    .holdType().standUserSlowDownFactor(0.0F).standPose(HierophantGreenGrapple.GRAPPLE_POSE)
+                    .holdType().standUserSlowDownFactor(1.0F).standPose(HierophantGreenGrapple.GRAPPLE_POSE)
                     .shiftVariationOf(HIEROPHANT_GREEN_GRAPPLE)
                     .xpRequirement(100)));
     

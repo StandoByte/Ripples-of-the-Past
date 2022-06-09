@@ -14,7 +14,6 @@ import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
-import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.util.utils.TimeUtil;
@@ -179,11 +178,6 @@ public class TimeStop extends StandAction {
     }
     
     public static boolean vampireTimeStopDuration(LivingEntity entity) {
-        return INonStandPower.getNonStandPowerOptional(entity).map(power -> {
-            if (power.getType() == ModNonStandPowers.VAMPIRISM.get()) {
-                return power.getEnergy() / power.getMaxEnergy() >= 0.8F;
-            }
-            return false;
-        }).orElse(false);
+        return ModNonStandPowers.VAMPIRISM.get().isHighOnBlood(entity);
     }
 }

@@ -8,7 +8,6 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.util.HGBarriersNet;
-import com.github.standobyte.jojo.util.HGBarriersNet.PointsChoice;
 
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
@@ -17,7 +16,6 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class HierophantGreenEntity extends StandEntity {
@@ -28,7 +26,6 @@ public class HierophantGreenEntity extends StandEntity {
     private HGBarrierEntity stringToUser;
     private HGBarrierEntity stringFromStand;
     private HGBarriersNet placedBarriers = new HGBarriersNet();
-    private boolean canBarriersShoot;
     
     public HierophantGreenEntity(StandEntityType<HierophantGreenEntity> type, World world) {
         super(type, world);
@@ -39,16 +36,8 @@ public class HierophantGreenEntity extends StandEntity {
         if (!level.isClientSide()) {
         	placedBarriers.tick();
             setPlacedBarriersCount(placedBarriers.getSize());
-            canBarriersShoot = true;
         }
         super.tick();
-    }
-    
-    public void shootEmeraldsFromBarriers(Vector3d pos, int tick) {
-        if (canBarriersShoot && getUserPower() != null) {
-        	placedBarriers.shootEmeraldsFromBarriers(getUserPower(), this, pos, tick, 20, PointsChoice.RANDOM);
-            canBarriersShoot = false;
-        }
     }
     
     public HGBarriersNet getBarriersNet() {

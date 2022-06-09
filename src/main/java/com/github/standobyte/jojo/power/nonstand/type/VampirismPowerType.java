@@ -17,7 +17,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
@@ -194,9 +193,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
         if (entity.isAlive()) {
             INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
                 if (power.getType() == ModNonStandPowers.VAMPIRISM.get()) {
-                    float healCost = JojoModUtil.getOrLast(
-                            JojoModConfig.getCommonConfigInstance(entity.level.isClientSide()).bloodHealCost.get(), 
-                            entity.level.getDifficulty().getId()).floatValue();
+                    float healCost = healCost(entity.level);
                     if (healCost > 0) {
                         float actualHeal = Math.min(event.getAmount(), power.getEnergy() / healCost);
                         actualHeal = Math.min(actualHeal, entity.getMaxHealth() - entity.getHealth());
@@ -213,8 +210,16 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
         }
     }
     
-    public static float healCost(Difficulty difficulty) {
-        return 2.0F / difficulty.getId();
+    public boolean isHighOnBlood(LivingEntity entity) {
+    	return INonStandPower.getNonStandPowerOptional(entity).map(power -> {
+        	return power.getType() == this && power.getEnergy() / power.getMaxEnergy() >= 0.8F;
+        }).orElse(false);
+    }
+    
+    public static float healCost(World world) {
+    	return JojoModUtil.getOrLast(
+                JojoModConfig.getCommonConfigInstance(world.isClientSide()).bloodHealCost.get(), 
+                world.getDifficulty().getId()).floatValue();
     }
     
     // TODO smite enchantment damage

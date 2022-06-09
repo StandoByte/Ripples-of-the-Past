@@ -63,6 +63,7 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
                 ((ServerPlayerEntity) entity).displayClientMessage(
                         new TranslationTextComponent("jojo.message.skip_soul_ascension", new KeybindTextComponent("key.jump")), true);
             }
+            entity.setRemainingFireTicks(-20);
         }
     }
     

@@ -1,8 +1,11 @@
 package com.github.standobyte.jojo.action.actions;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGStringEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.utils.MathUtil;
 
@@ -34,5 +37,12 @@ public class HierophantGreenStringAttack extends StandEntityAction {
     		string.addKnockback(standEntity.guardCounter());
     	}
     	standEntity.addProjectile(string);
+    }
+    
+    protected boolean isCancelable(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction, Phase phase) {
+    	return !this.hasShiftVariation() && 
+    			(newAction == ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get()
+    			|| newAction == ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED.get())
+    			|| super.isCancelable(standPower, standEntity, newAction, phase);
     }
 }
