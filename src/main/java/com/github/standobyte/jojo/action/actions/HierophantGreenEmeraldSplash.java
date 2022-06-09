@@ -4,6 +4,7 @@ import com.github.standobyte.jojo.entity.damaging.projectile.HGEmeraldEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
+import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
@@ -40,7 +41,7 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
         	JojoModUtil.doFractionTimes(() -> {
                 HGEmeraldEntity emerald = new HGEmeraldEntity(standEntity, world, userPower);
                 emerald.setConcentrated(shift);
-                standEntity.shootProjectile(emerald, shift ? 1.5F : 1F, shift ? 2.0F : 8.0F);
+                standEntity.shootProjectile(emerald, shift ? 2F : 1.5F, shift ? 2.0F : 8.0F);
         	}, fireRate);
             
             HierophantGreenEntity hierophant = (HierophantGreenEntity) standEntity;
@@ -48,7 +49,9 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
             if (barriers > 0) {
                 RayTraceResult rayTrace = aimForBarriers(hierophant);
                 if (rayTrace.getType() != RayTraceResult.Type.MISS) {
-                    hierophant.shootEmeraldsFromBarriers(rayTrace.getLocation(), task.getTick());
+                    hierophant.getBarriersNet().shootEmeraldsFromBarriers(userPower, hierophant, rayTrace.getLocation(), task.getTick(), 
+                    		Math.min((hierophant.getPlacedBarriersCount() / 5), 9) * hierophant.getStaminaCondition(), 
+                    		ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED.get().getStaminaCostTicking(userPower) * 0.5F, 8);
                 }
             }
         }

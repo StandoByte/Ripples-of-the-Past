@@ -32,6 +32,7 @@ import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModDataSerializers;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityAttributes;
+import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
@@ -368,6 +369,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
     public double getDurability() {
         double durability = getAttributeValue(ModEntityAttributes.STAND_DURABILITY.get());
+        if (ModNonStandPowers.VAMPIRISM.get().isHighOnBlood(getUser())) {
+        	durability *= 2;
+        }
         return durability * rangeEfficiency;
     }
     
@@ -1027,13 +1031,12 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public void updateStrengthMultipliers() {
     	LivingEntity user = getUser();
     			
-        rangeEfficiency = user != null ? 
-                StandStatFormulas.rangeStrengthFactor(rangeEffective, getMaxRange(), distanceTo(user))
-                : 1;
+        rangeEfficiency = user != null ? StandStatFormulas.rangeStrengthFactor(rangeEffective, getMaxRange(), distanceTo(user)) : 1;
         
-        staminaCondition = StandUtil.standIgnoresStaminaDebuff(userPower) ? 
-                        1
-                        : 0.25 + Math.min((double) (userPower.getStamina() / userPower.getMaxStamina()) * 1.5, 0.75);
+        if (userPower != null) {
+	        staminaCondition = StandUtil.standIgnoresStaminaDebuff(userPower) ? 1
+	        		: 0.25 + Math.min((double) (userPower.getStamina() / userPower.getMaxStamina()) * 1.5, 0.75);
+        }
     }
 
     private void updatePosition() {
@@ -2229,7 +2232,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     @Override
     public void startSeenByPlayer(ServerPlayerEntity player) {
         super.startSeenByPlayer(player);
-        if (player.is(getUser())) {
+        if (player.is(getUser()) && player.isAlive()) {
             StandUtil.setManualControl(player, false, false);
         }
     }

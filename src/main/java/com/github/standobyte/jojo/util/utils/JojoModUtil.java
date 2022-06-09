@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
@@ -436,18 +437,28 @@ public class JojoModUtil {
     
     
     
-    public static boolean doFractionTimes(Runnable action, double times) {
+    public static int doFractionTimes(Runnable action, double times) {
+    	return doFractionTimes(action, times, null);
+    }
+    
+    public static int doFractionTimes(Runnable action, double times, @Nullable Supplier<Boolean> breakCondition) {
     	if (times < 0) {
-    		return false;
+    		return 0;
     	}
     	int timesInt = MathHelper.floor(times);
     	for (int i = 0; i < timesInt; i++) {
+    		if (breakCondition != null && breakCondition.get()) {
+    			return i;
+    		}
     		action.run();
     	}
+		if (breakCondition != null && breakCondition.get()) {
+			return timesInt;
+		}
     	if (Math.random() < times - (double) timesInt) {
     		action.run();
-    		return true;
+    		return timesInt + 1;
     	}
-    	return timesInt > 0;
+    	return timesInt;
     }
 }

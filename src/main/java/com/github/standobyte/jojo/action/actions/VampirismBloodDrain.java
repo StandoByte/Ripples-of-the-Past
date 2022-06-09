@@ -88,7 +88,7 @@ public class VampirismBloodDrain extends VampirismAction {
                     if (drainBlood(user, targetEntity, 4, bloodAndHealModifier * 0.5F)) {
                         healed = user.getHealth() - healed;
                         if (healed > 0) {
-                            power.addEnergy(healed * VampirismPowerType.healCost(world.getDifficulty()));
+                            power.addEnergy(healed * VampirismPowerType.healCost(world));
                         }
                         if (targetEntity.isDeadOrDying()) {
                             boolean zombieCreated = HungryZombieEntity.createZombie((ServerWorld) world, user, targetEntity, false);

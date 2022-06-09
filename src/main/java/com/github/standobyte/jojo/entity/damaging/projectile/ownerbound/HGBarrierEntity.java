@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
+import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.StandUtil;
@@ -150,7 +151,9 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
                 entityData.set(WAS_RIPPED, true);
                 if (getOwner() instanceof HierophantGreenEntity) {
                     HierophantGreenEntity stand = (HierophantGreenEntity) getOwner();
-                    stand.shootEmeraldsFromBarriers(entityRayTraceResult.getLocation(), 0);
+                    stand.getBarriersNet().shootEmeraldsFromBarriers(stand.getUserPower(), stand, 
+                    		target.getBoundingBox().getCenter(), 0, 20 * stand.getStaminaCondition(), 
+                    		ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get().getStaminaCostTicking(stand.getUserPower()) * 0.5F, 4);
                     if (stand.getUser() != null) {
                         stand.getUser().hurt(DamageSource.GENERIC, 0.1F);
                     }
