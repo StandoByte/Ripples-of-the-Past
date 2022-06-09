@@ -1,7 +1,6 @@
 package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.entity.damaging.projectile.HGEmeraldEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
@@ -95,7 +94,7 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
     @Override
     public Vector3d getOriginPoint(float partialTick) {
         return originBlockPos == null
-                ? !level.isClientSide() || standUser == null ? position() : standUser.getPosition(partialTick)
+                ? standUser == null ? position() : standUser.getPosition(partialTick)
                         : Vector3d.atCenterOf(originBlockPos);
     }
 
@@ -151,7 +150,7 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
                 entityData.set(WAS_RIPPED, true);
                 if (getOwner() instanceof HierophantGreenEntity) {
                     HierophantGreenEntity stand = (HierophantGreenEntity) getOwner();
-                    stand.shootEmeraldsFromBarriers(entityRayTraceResult.getLocation(), 3);
+                    stand.shootEmeraldsFromBarriers(entityRayTraceResult.getLocation(), 0);
                     if (stand.getUser() != null) {
                         stand.getUser().hurt(DamageSource.GENERIC, 0.1F);
                     }
@@ -159,21 +158,6 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
                 JojoModUtil.playSound(level, null, target.getX(), target.getY(), target.getZ(), 
                         ModSounds.HIEROPHANT_GREEN_BARRIER_RIPPED.get(), getSoundSource(), 1.0F, 1.0F, StandUtil::shouldHearStands);
             }
-        }
-    }
-    
-    public void shootEmeralds(Vector3d targetPos, int count) {
-        Vector3d barrierMiddle = position().add(getOriginPoint()).scale(0.5);
-        for (int i = 0; i < count; i++) {
-            HGEmeraldEntity emeraldEntity = new HGEmeraldEntity(getOwner(), level, null);
-            emeraldEntity.setPos(barrierMiddle.x, barrierMiddle.y, barrierMiddle.z);
-            emeraldEntity.setConcentrated(true);
-            Vector3d shootVec = targetPos.subtract(barrierMiddle);
-            emeraldEntity.shoot(shootVec.x, shootVec.y, shootVec.z, 1F, 2.0F);
-            level.addFreshEntity(emeraldEntity);
-//            JojoModUtil.playSound(level, null, barrierMiddle.x, barrierMiddle.y, barrierMiddle.z, 
-//                    ModEntityTypes.HIEROPHANT_GREEN.get().getSound(StandSoundType.RANGED_ATTACK), 
-//                    getOwner().getSoundSource(), 1.0F, 1.0F, StandUtil::isPlayerStandUser);
         }
     }
 

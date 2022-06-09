@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.PunchType;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
@@ -161,6 +162,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
     			}
     		});
     	});
+    	userPower.getUser().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.hasUsedTimeStopToday = true);
     }
     
     @Override
