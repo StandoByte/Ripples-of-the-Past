@@ -57,10 +57,6 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
                     dragTarget(bound, vecToOwner.normalize().scale(2));
                     bound.fallDistance = 0;
                 }
-                if (owner instanceof StandEntity) {
-                	// not always works
-                    owner.setDeltaMovement(Vector3d.ZERO);
-                }
             }
         }
     }
@@ -122,7 +118,7 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
     
     @Override
     protected float movementSpeed() {
-        return 2F;
+        return 4F;
     }
     
     @Override

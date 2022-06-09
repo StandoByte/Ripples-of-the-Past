@@ -25,7 +25,7 @@ public class TheWorldBarrage extends StandEntityMeleeBarrage {
     }
     
     @Override
-    protected SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target) {
+    public SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target) {
         if (Optional.ofNullable(standPower.getUser()).map(
                 user -> user.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).map(
                         cap -> cap.lastVoiceLineTriggered).orElse(false))

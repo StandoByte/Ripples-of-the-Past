@@ -117,9 +117,8 @@ public abstract class StandEntityAction extends StandAction {
     		return false;
     	}
 
-    	if (getTargetRequirement() != null && !appropriateTarget(TargetType.EMPTY)
-    			&& !appropriateTarget(target.getType())) {
-    		return false;
+    	if (getTargetRequirement() != null && !appropriateTarget(TargetType.EMPTY)) {
+    		return appropriateTarget(target.getType());
     	}
     	
     	return lastTargetCheck(target, standEntity, standPower);
@@ -274,7 +273,7 @@ public abstract class StandEntityAction extends StandAction {
     }
     
     @Nullable
-    protected SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target) {
+    public SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target) {
         Supplier<SoundEvent> standSoundSupplier = standSounds.get(phase);
         if (standSoundSupplier == null) {
             return null;

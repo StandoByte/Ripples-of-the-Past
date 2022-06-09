@@ -47,6 +47,14 @@
           "name": "jojo:the_world_ts_blink"
         }
       }
+    },
+    "tw_ts_punch": {
+      "trigger": "jojo:action_perform",
+      "conditions": {
+        "action": {
+          "name": "jojo:the_world_ts_punch"
+        }
+      }
     }
   },
   "requirements": [
@@ -54,7 +62,8 @@
       "sp_ts",
       "sp_ts_blink",
       "tw_ts",
-      "tw_ts_blink"
+      "tw_ts_blink",
+      "tw_ts_punch"
     ]
   ]
 }

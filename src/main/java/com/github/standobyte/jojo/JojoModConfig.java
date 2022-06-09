@@ -78,10 +78,6 @@ public class JojoModConfig {
         
         private Common(ForgeConfigSpec.Builder builder) {
             builder.push("Keep Powers After Death");
-                keepStandOnDeath = builder
-                        .translation("jojo.config.keepStandOnDeath") 
-                        .define("keepStandOnDeath", false);
-                
                 keepHamonOnDeath = builder
                         .translation("jojo.config.keepHamonOnDeath")
                         .define("keepHamonOnDeath", false);
@@ -90,6 +86,16 @@ public class JojoModConfig {
                 		.comment(" The weak vampirism version from the 'Blood Gift' ability will not be kept.")
                         .translation("jojo.config.keepVampirismOnDeath")
                         .define("keepVampirismOnDeath", false);
+                
+                keepStandOnDeath = builder
+                        .translation("jojo.config.keepStandOnDeath") 
+                        .define("keepStandOnDeath", false);
+            
+                dropStandDisc = builder
+                        .comment(" If enabled, Stand users who got their Stand from a Disc drop their Stand Disc upon death.", 
+                        		"  Works only when keepStandOnDeath is set to false.")
+                        .translation("jojo.config.dropStandDisc")
+                        .define("dropStandDisc", false);
             builder.pop();
             
             builder.push("Structures Spawn");
@@ -179,6 +185,34 @@ public class JojoModConfig {
             builder.pop();
             
             builder.push("Stand settings");
+            	builder.push("Stand Progression");
+	                skipStandProgression = builder
+	                        .comment(" Whether or not all of the abilities are unlocked after gaining a Stand in Survival.")
+	                        .translation("jojo.config.skipStandProgression")
+	                        .define("skipStandProgression", false);
+	                
+	                resolvePoints = builder
+	                        .comment(" Max resolve points at each Resolve level (starting from 0).", 
+	                                "  Decrease these values to make getting to each level easier.", 
+	                                "  All values must be higher than 0.")
+	                        .translation("jojo.config.resolvePoints")
+	                        .defineList("resolvePoints", Arrays.asList(ResolveCounter.DEFAULT_MAX_RESOLVE_VALUES), e -> isElementNonNegativeFloat(e, true));
+	            builder.pop();
+
+            	builder.push("Time Stop");
+	                timeStopChunkRange = builder
+	                        .comment(" Range of Time Stop ability in chunks.",
+	                                "  If set to 0, the whole dimension is frozen in time.",
+	                                "  Defaults to 12.")
+	                        .translation("jojo.config.timeStopChunkRange")
+	                        .defineInRange("timeStopChunkRange", 12, 0, Integer.MAX_VALUE);
+	                
+	                timeStopDamageMultiplier = builder
+	                        .comment(" Damage multiplier for entities frozen in time.")
+	                        .translation("jojo.config.timeStopDamageMultiplier")
+	                        .defineInRange("timeStopDamageMultiplier", 1.0, 0.0, 1000000.0);
+	            builder.pop();
+	            
                 abilitiesBreakBlocks = builder
                         .comment(" Whether or not Stands and abilities can break blocks.")
                         .translation("jojo.config.abilitiesBreakBlocks")
@@ -189,44 +223,14 @@ public class JojoModConfig {
                         .translation("jojo.config.standPowerMultiplier")
                         .defineInRange("standPowerMultiplier", 1.0, 0.0, 128.0);
             
-                skipStandProgression = builder
-                        .comment(" Whether or not all of the abilities are unlocked after gaining a Stand in Survival.")
-                        .translation("jojo.config.skipStandProgression")
-                        .define("skipStandProgression", false);
-            
                 standStamina = builder
                         .comment(" Whether or not Stand stamina mechanic is enabled.")
                         .translation("jojo.config.standStamina")
                         .define("standStamina", true);
-            
-                dropStandDisc = builder
-                        .comment(" If enabled, Stand users who got their Stand from a Disc drop their Stand Disc upon death.", 
-                        		"  Works only when keepStandOnDeath is set to false.")
-                        .translation("jojo.config.dropStandDisc")
-                        .define("dropStandDisc", false);
-                
-                resolvePoints = builder
-                        .comment(" Max resolve points at each Resolve level (starting from 0).", 
-                                "  Decrease these values to make getting to each level easier.", 
-                                "  All values must be higher than 0.")
-                        .translation("jojo.config.resolvePoints")
-                        .defineList("resolvePoints", Arrays.asList(ResolveCounter.DEFAULT_MAX_RESOLVE_VALUES), e -> isElementNonNegativeFloat(e, true));
                 
                 soulAscension = builder
                         .translation("jojo.config.soulAscension")
                         .define("soulAscension", true);
-                
-                timeStopChunkRange = builder
-                        .comment(" Range of Time Stop ability in chunks.",
-                                "  If set to 0, the whole dimension is frozen in time.",
-                                "  Defaults to 12.")
-                        .translation("jojo.config.timeStopChunkRange")
-                        .defineInRange("timeStopChunkRange", 12, 0, Integer.MAX_VALUE);
-                
-                timeStopDamageMultiplier = builder
-                        .comment(" Damage multiplier for entities frozen in time.")
-                        .translation("jojo.config.timeStopDamageMultiplier")
-                        .defineInRange("timeStopDamageMultiplier", 1.0, 0.0, 1000000.0);
             builder.pop();
             
             hamonDamageMultiplier = builder

@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.util.HGBarriersNet;
+import com.github.standobyte.jojo.util.HGBarriersNet.PointsChoice;
 
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
@@ -35,19 +36,23 @@ public class HierophantGreenEntity extends StandEntity {
     
     @Override
     public void tick() {
-        super.tick();
         if (!level.isClientSide()) {
         	placedBarriers.tick();
             setPlacedBarriersCount(placedBarriers.getSize());
             canBarriersShoot = true;
         }
+        super.tick();
     }
     
-    public void shootEmeraldsFromBarriers(Vector3d pos, int multiplier) {
+    public void shootEmeraldsFromBarriers(Vector3d pos, int tick) {
         if (canBarriersShoot && getUserPower() != null) {
-        	placedBarriers.shootEmeraldsFromBarriers(getUserPower(), this, pos, multiplier);
+        	placedBarriers.shootEmeraldsFromBarriers(getUserPower(), this, pos, tick, 20, PointsChoice.RANDOM);
             canBarriersShoot = false;
         }
+    }
+    
+    public HGBarriersNet getBarriersNet() {
+    	return placedBarriers;
     }
     
     @Override

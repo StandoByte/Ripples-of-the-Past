@@ -16,6 +16,20 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
     public HierophantGreenEmeraldSplash(StandEntityAction.Builder builder) {
         super(builder);
     }
+//    
+//    @Override
+//    protected SoundEvent getShout(LivingEntity user, IStandPower power, ActionTarget target, boolean wasActive) {
+//    	if (power.getStandManifestation() instanceof HierophantGreenEntity) {
+//    		HierophantGreenEntity stand = (HierophantGreenEntity) power.getStandManifestation();
+//    		if (stand.getPlacedBarriersCount() > 0) {
+//    			RayTraceResult aimTarget = aimForBarriers(stand);
+//				if (aimTarget.getType() == RayTraceResult.Type.ENTITY && stand.getBarriersNet().doBarriersSurround(aimTarget.getLocation())) {
+//		    		return ModSounds.KAKYOIN_20M_EMERALD_SPLASH.get();
+//				}
+//    		}
+//    	}
+//    	return super.getShout(user, power, target, wasActive);
+//    }
     
     @Override
     public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
@@ -32,13 +46,17 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
             HierophantGreenEntity hierophant = (HierophantGreenEntity) standEntity;
             int barriers = hierophant.getPlacedBarriersCount();
             if (barriers > 0) {
-                RayTraceResult rayTrace = JojoModUtil.rayTrace(hierophant.isManuallyControlled() ? standEntity : hierophant.getUser(), 
-                        standEntity.getMaxRange(), entity -> entity instanceof LivingEntity && hierophant.canAttack((LivingEntity) entity));
+                RayTraceResult rayTrace = aimForBarriers(hierophant);
                 if (rayTrace.getType() != RayTraceResult.Type.MISS) {
-                    hierophant.shootEmeraldsFromBarriers(rayTrace.getLocation(), 1);
+                    hierophant.shootEmeraldsFromBarriers(rayTrace.getLocation(), task.getTick());
                 }
             }
         }
+    }
+    
+    private RayTraceResult aimForBarriers(HierophantGreenEntity stand) {
+    	return JojoModUtil.rayTrace(stand.isManuallyControlled() ? stand : stand.getUser(), 
+    			stand.getMaxRange(), entity -> entity instanceof LivingEntity && stand.canAttack((LivingEntity) entity));
     }
     
     @Override
