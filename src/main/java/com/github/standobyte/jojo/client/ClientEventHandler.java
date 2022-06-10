@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.client;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.AIR;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.FOOD;
 
+import java.io.IOException;
 import java.util.Random;
 
 import com.github.standobyte.jojo.JojoMod;
@@ -19,6 +20,7 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.reflection.ClientReflection;
 import com.github.standobyte.jojo.util.utils.TimeUtil;
 import com.google.common.base.MoreObjects;
+import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
@@ -33,6 +35,7 @@ import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.client.shader.ShaderGroup;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Hand;
@@ -78,6 +81,7 @@ public class ClientEventHandler {
     
     private Random random = new Random();
     private ResourceLocation resolveShader = null;
+    private static final ResourceLocation DUMMY = new ResourceLocation("dummy", "dummy");
     private StandOstSound ost;
     
     private boolean resetShader;
@@ -212,8 +216,7 @@ public class ClientEventHandler {
             
             if (mc.gameRenderer.currentEffect() == null) {
                 ResourceLocation shader = getCurrentShader();
-                if (shader != null) {
-                	// FIXME (!) handle FileNotFoundException
+                if (shader != null && shader != DUMMY) {
                     mc.gameRenderer.loadEffect(shader);
                 }
             }
@@ -241,8 +244,7 @@ public class ClientEventHandler {
 
     public void onResolveEffectStart(int effectAmplifier) {
         if (resolveShader == null) {
-            resolveShader = CustomResources.getResolveShadersListManager()
-            		.getRandomShader(IStandPower.getPlayerStandPower(mc.player), random);
+            setResolveShader();
         }
 
         startPlayingOst(effectAmplifier);
@@ -250,10 +252,8 @@ public class ClientEventHandler {
     
     private void tickResolveEffect() {
         if (mc.player.isAlive() && mc.player.hasEffect(ModEffects.RESOLVE.get())) {
-        	// FIXME (!) resolve shaders list may be empty
             if (resolveShader == null) {
-                resolveShader = CustomResources.getResolveShadersListManager()
-                		.getRandomShader(IStandPower.getPlayerStandPower(mc.player), random);
+            	setResolveShader();
             }
             
             if (mc.player.getEffect(ModEffects.RESOLVE.get()).getDuration() == 100) {
@@ -280,6 +280,26 @@ public class ClientEventHandler {
                     }
                 }
             });
+        }
+    }
+    
+    private void setResolveShader() {
+        resolveShader = CustomResources.getResolveShadersListManager()
+        		.getRandomShader(IStandPower.getPlayerStandPower(mc.player), random);
+        if (resolveShader == null) {
+        	resolveShader = DUMMY;
+        }
+        else {
+	    	try {
+				@SuppressWarnings("unused")
+				ShaderGroup tryLoadShader = new ShaderGroup(mc.getTextureManager(), mc.getResourceManager(), mc.getMainRenderTarget(), resolveShader);
+			} catch (JsonSyntaxException e) {
+				JojoMod.getLogger().warn("Failed to load shader: {}", resolveShader, e);
+				resolveShader = DUMMY;
+			} catch (IOException e) {
+				JojoMod.getLogger().warn("Failed to parse shader: {}", resolveShader, e);
+				resolveShader = DUMMY;
+			}
         }
     }
     
