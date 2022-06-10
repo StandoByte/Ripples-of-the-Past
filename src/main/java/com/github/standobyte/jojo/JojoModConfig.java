@@ -1,7 +1,9 @@
 package com.github.standobyte.jojo;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -15,10 +17,11 @@ import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.ResetSyncedCommonConfigPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.CommonConfigPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ResetSyncedCommonConfigPacket;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.stand.ResolveCounter;
+import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Floats;
@@ -248,9 +251,12 @@ public class JojoModConfig {
             initBannedStands();
         }
         
+        public void onStatsDataPackLoad() {
+        	initAvailableTiers();
+        }
+        
         private void initBannedStands() {
             IForgeRegistry<StandType<?>> registry = ModStandTypes.Registry.getRegistry();
-
             
             Stream<ResourceLocation> resLocs = bannedStandsSynced != null ? 
                     bannedStandsSynced.stream()
@@ -268,15 +274,15 @@ public class JojoModConfig {
             
             bannedStandsResLocs = resLocs
                     .collect(Collectors.toList());
+
+            initAvailableTiers();
+        }
+
+        private void initAvailableTiers() {
+            Set<Integer> tiers = StandUtil.getAvailableTiers(this);
             
-            
-            tiersAvailable = new boolean[7];
-            registry.getValues()
-            .stream()
-            .filter(stand -> !bannedStandsResLocs.contains(stand.getRegistryName()))
-            .map(StandType::getTier)
-            .distinct()
-            .forEach(tier -> tiersAvailable[tier] = true);
+            tiersAvailable = new boolean[Collections.max(tiers) + 1];
+            tiers.forEach(tier -> tiersAvailable[tier] = true);
         }
         
         public boolean isStandBanned(StandType<?> stand) {

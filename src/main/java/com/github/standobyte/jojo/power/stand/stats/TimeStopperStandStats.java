@@ -68,7 +68,7 @@ public class TimeStopperStandStats extends StandStats {
     
     
 
-    public static class Builder extends AbstractBuilder<Builder> {
+    public static class Builder extends AbstractBuilder<Builder, TimeStopperStandStats> {
         private int timeStopMaxTicks = 100;
         private int timeStopMaxTicksVampire = 180;
         private float timeStopLearningPerTick = 0.1F;
@@ -103,8 +103,9 @@ public class TimeStopperStandStats extends StandStats {
             return this;
         }
         
-        public TimeStopperStandStats build() {
-            return new TimeStopperStandStats(this);
+        @Override
+        protected TimeStopperStandStats createStats() {
+        	return new TimeStopperStandStats(this);
         }
     }
 }

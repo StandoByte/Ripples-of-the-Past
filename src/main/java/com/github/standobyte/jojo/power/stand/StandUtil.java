@@ -3,8 +3,10 @@ package com.github.standobyte.jojo.power.stand;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -35,10 +37,8 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.world.server.ServerWorld;
 
 public class StandUtil {
-//    public static final int MAX_TIER = 6;
-//    public static final int[] TIER_XP_LEVELS = {0, 1, 10, 20, 30, 40, 55};
     public static final int getMaxTier(boolean isClientSide) {
-        return Math.max(JojoModConfig.getCommonConfigInstance(isClientSide).standTierXpLevels.get().size() - 1, 6);
+        return Collections.max(getAvailableTiers(JojoModConfig.getCommonConfigInstance(isClientSide)));
     }
     
     public static StandType<?> randomStand(LivingEntity entity, Random random) {
@@ -105,6 +105,14 @@ public class StandUtil {
     public static int tierLowerBorder(int tier, boolean isClientSide) {
         List<? extends Integer> xpBorders = JojoModConfig.getCommonConfigInstance(isClientSide).standTierXpLevels.get();
         return JojoModUtil.getOrLast(xpBorders, tier).intValue();
+    }
+    
+    public static Set<Integer> getAvailableTiers(JojoModConfig.Common config) {
+    	return ModStandTypes.Registry.getRegistry().getValues()
+                .stream()
+                .filter(stand -> !config.isStandBanned(stand))
+                .map(StandType::getTier)
+                .collect(Collectors.toSet());
     }
     
     public static boolean isEntityStandUser(LivingEntity entity) {
