@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.stand.type.StandType;
@@ -46,6 +47,7 @@ public class StandStatsDataPacket {
     public static void handle(StandStatsDataPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             StandStatsManager.getInstance().clSetStats(msg.stats);
+            JojoModConfig.getCommonConfigInstance(true).onStatsDataPackLoad();
         });
         ctx.get().setPacketHandled(true);
     }

@@ -25,7 +25,7 @@ import net.minecraft.util.math.vector.Vector3d;
 public class HGBarriersNet {
 	private Map<HGBarrierEntity, ShootingPoints> placedBarriers = new HashMap<>();
 	private GraphAdjacencyList<Vector3d> closePoints = new GraphAdjacencyList<>();
-	private boolean isDirty = true;
+	private double lastShotGap = -1;
     private boolean canShoot;
 
 	public void tick() {
@@ -74,9 +74,9 @@ public class HGBarriersNet {
 	}
 	
 	private void onUpdate() {
-		if (!isDirty) {
+		if (lastShotGap > -1) {
 			closePoints.clear();
-			isDirty = true;
+			lastShotGap = -1;
 		}
 	}
 	
@@ -89,9 +89,9 @@ public class HGBarriersNet {
     	if (!canShoot) return;
     	List<Vector3d> shootingPoints = placedBarriers.values().stream().flatMap(points -> 
     	points.shootingPoints.stream()).collect(Collectors.toCollection(LinkedList::new));
-    	if (isDirty) {
+    	if (lastShotGap != minGap) {
     		closePoints.create((pointA, pointB) -> pointA.distanceToSqr(pointB) < minGap * minGap, shootingPoints);
-    		isDirty = false;
+    		lastShotGap = minGap;
     	}
 
     	Set<Vector3d> pointsToShootThisTick = new HashSet<>();

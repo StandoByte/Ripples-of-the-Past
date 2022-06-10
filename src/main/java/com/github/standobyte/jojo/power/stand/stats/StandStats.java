@@ -14,12 +14,14 @@ public class StandStats {
     private final UpgradeableStats statsDevPotential;
     private final double rangeEffective;
     private final double rangeMax;
+    private final int tier;
 
-    protected StandStats(AbstractBuilder<?> builder) {
+    protected StandStats(AbstractBuilder<?, ?> builder) {
         this.statsBase = new UpgradeableStats(builder.powerBase, builder.speedBase, builder.durabilityBase, builder.precisionBase);
         this.statsDevPotential = new UpgradeableStats(builder.powerMax, builder.speedMax, builder.durabilityMax, builder.precisionMax);
         this.rangeEffective = builder.rangeEffective;
         this.rangeMax = builder.rangeMax;
+        this.tier = builder.tier;
     }
     
     protected StandStats(PacketBuffer buf) {
@@ -27,6 +29,7 @@ public class StandStats {
         this.statsDevPotential = new UpgradeableStats(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble());
         this.rangeEffective = buf.readDouble();
         this.rangeMax = buf.readDouble();
+        this.tier = buf.readVarInt();
     }
     
     public void write(PacketBuffer buf) {
@@ -42,6 +45,8 @@ public class StandStats {
         
         buf.writeDouble(rangeEffective);
         buf.writeDouble(rangeMax);
+        
+        buf.writeVarInt(tier);
     }
     
     public void onNewDay(LivingEntity user, IStandPower power) {}
@@ -117,17 +122,26 @@ public class StandStats {
         return rangeMax;
     }
     
+    public int getTier() {
+    	return tier;
+    }
     
     
-    public static class Builder extends AbstractBuilder<Builder> {
+    
+    public static class Builder extends AbstractBuilder<Builder, StandStats> {
 
         @Override
         protected Builder getThis() {
             return this;
         }
+        
+        @Override
+        protected StandStats createStats() {
+        	return new StandStats(this);
+        }
     }
     
-    protected abstract static class AbstractBuilder<T extends AbstractBuilder<T>> {
+    protected abstract static class AbstractBuilder<B extends AbstractBuilder<B, S>, S extends StandStats> {
         private double powerBase = 8.0;
         private double powerMax = 8.0;
         private double speedBase = 8.0;
@@ -138,67 +152,82 @@ public class StandStats {
         private double durabilityMax = 8.0;
         private double precisionBase = 8.0;
         private double precisionMax = 8.0;
+        private int tier = -1;
         
-        public T power(double power) {
+        public B tier(int tier) {
+        	this.tier = tier;
+        	return getThis();
+        }
+        
+        public B power(double power) {
             return power(power, power);
         }
         
-        public T power(double powerBase, double powerMax) {
+        public B power(double powerBase, double powerMax) {
             powerBase = Math.max(powerBase, 0);
             this.powerBase = powerBase;
             this.powerMax = Math.max(powerBase, powerMax);
             return getThis();
         }
         
-        public T speed(double speed) {
+        public B speed(double speed) {
             return speed(speed, speed);
         }
         
-        public T speed(double speedBase, double speedMax) {
+        public B speed(double speedBase, double speedMax) {
             speedBase = Math.max(speedBase, 0);
             this.speedBase = speedBase;
             this.speedMax = Math.max(speedBase, speedMax);
             return getThis();
         }
         
-        public T durability(double durability) {
+        public B durability(double durability) {
             return durability(durability, durability);
         }
         
-        public T durability(double durabilityBase, double durabilityMax) {
+        public B durability(double durabilityBase, double durabilityMax) {
             durabilityBase = Math.max(durabilityBase, 0);
             this.durabilityBase = durabilityBase;
             this.durabilityMax = Math.max(durabilityBase, durabilityMax);
             return getThis();
         }
         
-        public T precision(double precision) {
+        public B precision(double precision) {
             return precision(precision, precision);
         }
         
-        public T precision(double precisionBase, double precisionMax) {
+        public B precision(double precisionBase, double precisionMax) {
             precisionBase = Math.max(precisionBase, 0);
             this.precisionBase = precisionBase;
             this.precisionMax = Math.max(precisionBase, precisionMax);
             return getThis();
         }
         
-        public T range(double range) {
+        public B range(double range) {
             return range(range, range * 2);
         }
         
-        public T range(double rangeEffective, double rangeMax) {
+        public B range(double rangeEffective, double rangeMax) {
             rangeEffective = Math.max(rangeEffective, 1.0D);
             this.rangeEffective = rangeEffective;
             this.rangeMax = Math.max(rangeEffective, rangeMax);
             return getThis();
         }
         
-        protected abstract T getThis();
+        protected abstract B getThis();
         
-        public StandStats build() {
-            return new StandStats(this);
+        public S build() {
+        	return build("A stand");
         }
+        
+        public S build(String standName) {
+        	if (tier < 0) {
+        		throw new IllegalStateException(standName + "'s tier has not beed initialized!");
+        	}
+            return createStats();
+        }
+        
+        protected abstract S createStats();
     }
     
     private static class UpgradeableStats {

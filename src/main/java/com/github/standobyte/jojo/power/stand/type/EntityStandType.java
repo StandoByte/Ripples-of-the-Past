@@ -31,11 +31,11 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
     private final boolean hasHeavyAttack;
     private final boolean hasFastAttack;
 
-    public EntityStandType(int tier, int color, ITextComponent partName, 
+    public EntityStandType(int color, ITextComponent partName, 
             StandAction[] attacks, StandAction[] abilities, 
             Class<T> statsClass, T defaultStats, 
             Supplier<? extends StandEntityType<? extends StandEntity>> entityTypeSupplier) {
-        super(tier, color, partName, attacks, abilities, statsClass, defaultStats);
+        super(color, partName, attacks, abilities, statsClass, defaultStats);
         this.entityTypeSupplier = entityTypeSupplier;
         
         hasHeavyAttack = Arrays.stream(attacks).anyMatch(

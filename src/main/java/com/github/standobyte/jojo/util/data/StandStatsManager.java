@@ -17,6 +17,7 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.StandStatsDataPacket;
@@ -89,6 +90,8 @@ public class StandStatsManager extends JsonReloadListener {
         });
         
         this.overridenStats = stats;
+        
+        JojoModConfig.getCommonConfigInstance(false).onStatsDataPackLoad();
     }
 
     private static final FolderName OUTPUT_DIR = new FolderName("standstats");

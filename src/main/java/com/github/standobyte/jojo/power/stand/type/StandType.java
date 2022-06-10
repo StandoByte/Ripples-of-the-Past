@@ -36,7 +36,6 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
 public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry<StandType<?>> implements IPowerType<IStandPower, StandType<?>> {
-    private final int tier;
     private final int color;
     private final ITextComponent partName;
     private final StandAction[] attacks;
@@ -49,10 +48,9 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     private Map<Integer, List<ItemStack>> resolveLevelItems = new HashMap<>();
     private ResourceLocation iconTexture;
     
-    public StandType(int tier, int color, ITextComponent partName, 
+    public StandType(int color, ITextComponent partName, 
             StandAction[] attacks, StandAction[] abilities, 
             Class<T> statsClass, T defaultStats) {
-        this.tier = tier;
         this.color = color;
         this.partName = partName;
         this.attacks = attacks;
@@ -88,7 +86,8 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     public T getStats() {
-        return StandStatsManager.getInstance().getStats(this);
+    	StandStatsManager statsManager = StandStatsManager.getInstance();
+        return statsManager != null ? statsManager.getStats(this) : getDefaultStats();
     }
     
     public T getDefaultStats() {
@@ -188,7 +187,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     
     @Override
     public float getTargetResolveMultiplier(IStandPower power, IStandPower attackingStand) {
-    	float multiplier = tier + 1;
+    	float multiplier = getTier() + 1;
     	if (attackingStand.hasPower()) {
     		multiplier = Math.max(multiplier - attackingStand.getType().getTier(), 1);
     	}
@@ -221,7 +220,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
 
     public int getTier() {
-        return tier;
+        return getStats().getTier();
     }
     
     public void toggleSummon(IStandPower standPower) {
