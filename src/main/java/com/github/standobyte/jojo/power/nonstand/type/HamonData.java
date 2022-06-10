@@ -257,7 +257,7 @@ public class HamonData extends TypeSpecificData {
         return (1F + getHamonControlLevel() * 0.033F) * (1F + (int) getBreathingLevel() * 0.08F);
     }
 
-    private static final float ENERGY_PER_POINT = 500F;
+    private static final float ENERGY_PER_POINT = 750F;
     public void hamonPointsFromAction(HamonStat stat, float energyCost) {
         if (isSkillLearned(HamonSkill.NATURAL_TALENT)) {
             energyCost *= 2;

@@ -27,6 +27,7 @@ public class StarPlatinumInhale extends StandEntityAction {
     	world.getEntities(standEntity, standEntity.getBoundingBox().inflate(10, 10, 10), 
     			entity -> spLookVec.dot(entity.position().subtract(standEntity.position()).normalize()) > 0.5 && standEntity.canSee(entity)
     			&& entity.distanceToSqr(standEntity) > 0.5
+        		// FIXME (!!) free flight
     			&& (standEntity.isManuallyControlled() || !entity.is(standEntity.getUser()))).forEach(entity -> {
     				double distance = entity.distanceTo(standEntity);
     				Vector3d suctionVec = mouthPos.subtract(entity.getBoundingBox().getCenter())
