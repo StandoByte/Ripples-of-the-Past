@@ -293,7 +293,7 @@ public abstract class StandEntityAction extends StandAction {
     }
     
     @Nullable
-    public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, ActionTarget target) {
+    public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, ActionTarget aimTarget) {
         return standEntity.isArmsOnlyMode() ? userOffsetArmsOnly : userOffset;
     }
     
@@ -312,11 +312,17 @@ public abstract class StandEntityAction extends StandAction {
     }
     
     protected boolean canClickDuringTask(StandEntityAction clickedAction, IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
-        return clickedAction != this;
+        return clickedAction != this || isChainable(standPower, standEntity);
+    }
+    
+    public boolean isChainable(IStandPower standPower, StandEntity standEntity) {
+    	return false;
     }
     
     public final boolean canBeCanceled(IStandPower standPower, StandEntity standEntity, Phase phase, @Nullable StandEntityAction newAction) {
-    	return isCancelable(standPower, standEntity, newAction, phase) || newAction != null && newAction.cancels(this, standPower, standEntity, phase);
+    	return isCancelable(standPower, standEntity, newAction, phase)
+    			|| newAction != null && newAction.cancels(this, standPower, standEntity, phase)
+    			|| isChainable(standPower, standEntity) && phase == Phase.RECOVERY && newAction == this;
     }
     
     protected boolean isCancelable(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction, Phase phase) {
@@ -409,18 +415,14 @@ public abstract class StandEntityAction extends StandAction {
             return getThis();
         }
         
-        public T standWindupPerformDuration(int windupTicks, int performTicks) {
-            this.standWindupDuration = Math.max(windupTicks, 0);
-            this.standPerformDuration = Math.max(performTicks, 1);
+        public T standWindupDuration(int ticks) {
+            this.standWindupDuration = Math.max(ticks, 0);
             return getThis();
         }
         
-        public T standWindupDuration(int ticks) {
-            return standWindupPerformDuration(ticks, 1);
-        }
-        
         public T standPerformDuration(int ticks) {
-            return standWindupPerformDuration(0, ticks);
+            this.standPerformDuration = Math.max(ticks, 1);
+            return getThis();
         }
         
         public T standRecoveryTicks(int ticks) {

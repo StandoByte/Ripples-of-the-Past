@@ -23,7 +23,7 @@ public class SkippedStandProgressionPacket {
     public static void handle(SkippedStandProgressionPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
-                power.skipProgression(null);
+                power.setProgressionSkipped();
             });
         });
         ctx.get().setPacketHandled(true);

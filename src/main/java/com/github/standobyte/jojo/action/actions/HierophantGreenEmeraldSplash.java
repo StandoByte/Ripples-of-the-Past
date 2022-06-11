@@ -1,10 +1,16 @@
 package com.github.standobyte.jojo.action.actions;
 
+import javax.annotation.Nullable;
+
+import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.damaging.projectile.HGEmeraldEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
+import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 import com.github.standobyte.jojo.init.ModActions;
+import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
@@ -34,10 +40,11 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
     
     @Override
     public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
+    	task.setOffsetFromUser(super.getOffsetFromUser(userPower, standEntity, task.getTarget()));
         if (!world.isClientSide()) {
             boolean shift = isShiftVariation();
             double fireRate = standEntity.getAttackSpeed() / userPower.getType().getDefaultStats().getBaseAttackSpeed();
-            if (shift) fireRate *= 2;
+            if (shift) fireRate *= 2.5;
         	JojoModUtil.doFractionTimes(() -> {
                 HGEmeraldEntity emerald = new HGEmeraldEntity(standEntity, world, userPower);
                 emerald.setConcentrated(shift);
@@ -57,6 +64,11 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
         }
     }
     
+    @Override
+    public void standTickRecovery(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
+    	task.setOffsetFromUser(null);
+    }
+    
     private RayTraceResult aimForBarriers(HierophantGreenEntity stand) {
     	return JojoModUtil.rayTrace(stand.isManuallyControlled() ? stand : stand.getUser(), 
     			stand.getMaxRange(), entity -> entity instanceof LivingEntity && stand.canAttack((LivingEntity) entity));
@@ -66,4 +78,38 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
     public void onMaxTraining(IStandPower power) {
         power.unlockAction(getShiftVariationIfPresent());
     }
+    
+    @Override
+    public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
+    	return noPhases(standPower, standEntity) || (standEntity.getCurrentTaskAction() != null
+    			&& standEntity.getCurrentTaskAction().getShiftVariationIfPresent() == this.getShiftVariationIfPresent()) ?
+    			0 : StandStatFormulas.getHeavyAttackWindup(standEntity.getAttackSpeed(), 0);
+    }
+
+    @Override
+    public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
+        return noPhases(standPower, standEntity) ? 
+        		0 : super.getStandRecoveryTicks(standPower, standEntity) * 2;
+    }
+    
+    private boolean noPhases(IStandPower standPower, StandEntity standEntity) {
+        return standPower.getResolveLevel() > 2
+        		|| standPower.getUser() != null && standPower.getUser().hasEffect(ModEffects.RESOLVE.get());
+    }
+    
+    @Override
+    public boolean isChainable(IStandPower standPower, StandEntity standEntity) {
+    	return true;
+    }
+    
+    @Override
+    protected boolean isCancelable(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction, Phase phase) {
+    	return phase == Phase.RECOVERY && newAction != null && newAction.getShiftVariationIfPresent() == this.getShiftVariationIfPresent();
+    }
+
+    @Override
+    public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, ActionTarget target) {
+        return null;
+    }
+    
 }

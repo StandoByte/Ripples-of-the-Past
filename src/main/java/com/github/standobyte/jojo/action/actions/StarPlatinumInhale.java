@@ -5,6 +5,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.damage.DamageUtil;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 import com.github.standobyte.jojo.util.utils.MathUtil;
 
 import net.minecraft.entity.LivingEntity;
@@ -42,18 +43,20 @@ public class StarPlatinumInhale extends StandEntityAction {
     				}
     			});
     	if (world.isClientSide()) {
-    		Vector3d particlePos = mouthPos.add(spLookVec.scale(RANGE)
-    				.xRot((float) ((Math.random() * 2 - 1) * Math.PI / 6))
-    				.yRot((float) ((Math.random() * 2 - 1) * Math.PI / 6)));
-    		Vector3d vecToStand = mouthPos.subtract(particlePos).normalize().scale(0.75);
-    		world.addParticle(ModParticles.AIR_STREAM.get(), particlePos.x, particlePos.y, particlePos.z, vecToStand.x, vecToStand.y, vecToStand.z);
+    		JojoModUtil.doFractionTimes(() -> {
+        		Vector3d particlePos = mouthPos.add(spLookVec.scale(RANGE)
+        				.xRot((float) ((Math.random() * 2 - 1) * Math.PI / 6))
+        				.yRot((float) ((Math.random() * 2 - 1) * Math.PI / 6)));
+        		Vector3d vecToStand = mouthPos.subtract(particlePos).normalize().scale(0.75);
+        		world.addParticle(ModParticles.AIR_STREAM.get(), particlePos.x, particlePos.y, particlePos.z, vecToStand.x, vecToStand.y, vecToStand.z);
+    		}, 2.5);
     	}
     }
 
     @Override
     public int getCooldownAdditional(IStandPower power, int ticksHeld) {
     	int cooldown = super.getCooldownAdditional(power, ticksHeld);
-    	return cooldown / 2 + cooldownFromHoldDuration(cooldown / 2, power, ticksHeld);
+    	return cooldown / 4 + cooldownFromHoldDuration(cooldown * 3 / 4, power, ticksHeld);
     }
 
 }

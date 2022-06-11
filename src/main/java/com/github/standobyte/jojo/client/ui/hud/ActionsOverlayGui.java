@@ -436,7 +436,7 @@ public class ActionsOverlayGui extends AbstractGui {
             		RenderSystem.color4f(0.2F, 0.2F, 0.2F, 0.5F * hotbarAlpha);
             	}
             	else {
-            		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 0.75F * hotbarAlpha);
+            		RenderSystem.color4f(0.75F, 0.75F, 0.75F, 0.75F * hotbarAlpha);
             	}
                 blit(matrixStack, x, y, 0, 16, 16, textureAtlasSprite);
                 // cooldown

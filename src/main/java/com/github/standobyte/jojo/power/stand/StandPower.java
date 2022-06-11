@@ -69,6 +69,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 });
             }
             standType.unlockNewActions(this);
+            setStamina(getMaxStamina() * 0.5F);
             return true;
         }
         return false;
@@ -340,8 +341,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     
     @Override
-    public void skipProgression(@Nullable StandType<?> standType) {
-        this.skippedProgression = true;
+    public void skipProgression(StandType<?> standType) {
         resolveCounter.setResolveLevel(getMaxResolveLevel());
         if (standType != null) {
             Stream.concat(
@@ -353,6 +353,11 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 actionLearningProgressMap.setLearningProgressPoints(action, action.getMaxTrainingPoints(this), this);
             });
         }
+    }
+    
+    @Override
+    public void setProgressionSkipped() {
+        this.skippedProgression = true;
     }
     
     @Override

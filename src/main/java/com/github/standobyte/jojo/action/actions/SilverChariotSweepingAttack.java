@@ -9,8 +9,11 @@ import com.github.standobyte.jojo.entity.stand.StandEntity.PunchType;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.SoundEvents;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeMod;
@@ -36,8 +39,15 @@ public class SilverChariotSweepingAttack extends StandEntityComboHeavyAttack {
     
     @Override
     public void standTickWindup(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-    	if (world.isClientSide() && task.getTicksLeft() == 1) {
-    	    standEntity.playSound(SoundEvents.PLAYER_ATTACK_SWEEP, 1.0F, 1.0F, ClientUtil.getClientPlayer());
+    	if (world.isClientSide()) {
+    		if (task.getTicksLeft() == 1) {
+    			standEntity.playSound(SoundEvents.PLAYER_ATTACK_SWEEP, 1.0F, 1.0F, ClientUtil.getClientPlayer());
+    			
+    		      double d0 = -MathHelper.sin(standEntity.yRot * MathUtil.DEG_TO_RAD);
+    		      double d1 = MathHelper.cos(standEntity.yRot * MathUtil.DEG_TO_RAD);
+    		      world.addParticle(ParticleTypes.SWEEP_ATTACK, standEntity.getX() + d0, standEntity.getY(0.5), standEntity.getZ() + d1, 
+    		    		  d0, 0.0D, d1);
+    		}
     	}
     }
     

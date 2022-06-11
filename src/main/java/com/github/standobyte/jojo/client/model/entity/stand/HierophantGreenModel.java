@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.client.model.entity.stand;
 import com.github.standobyte.jojo.action.actions.HierophantGreenGrapple;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
+import com.github.standobyte.jojo.client.model.pose.ModelPoseTransitionMultiple;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
 import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
@@ -93,17 +94,45 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
     
     @Override
     protected void initActionPoses() {
+    	ModelPose<HierophantGreenEntity> esPose1 = new ModelPose<HierophantGreenEntity>(new RotationAngle[] {
+                RotationAngle.fromDegrees(leftArm, -55, 0, 15),
+                RotationAngle.fromDegrees(leftForeArm, 0, -90, 45),
+                RotationAngle.fromDegrees(rightArm, -90, 0, 75),
+                RotationAngle.fromDegrees(rightForeArm, -52.5F, 0, 0)
+    	});
+    	ModelPose<HierophantGreenEntity> esPose2 = new ModelPose<HierophantGreenEntity>(new RotationAngle[] {
+                RotationAngle.fromDegrees(leftArm, -90, 0, 0),
+                RotationAngle.fromDegrees(leftForeArm, 0, 0, 42.5F),
+                RotationAngle.fromDegrees(rightArm, -90, 0, 0),
+                RotationAngle.fromDegrees(rightForeArm, 0, 0, -42.5F)
+    	});
+    	ModelPose<HierophantGreenEntity> esPose3 = new ModelPose<HierophantGreenEntity>(new RotationAngle[] {
+                RotationAngle.fromDegrees(body, 0, 52.5F, 0),
+                RotationAngle.fromDegrees(upperPart, 0, 22.5F, 0),
+                RotationAngle.fromDegrees(leftArm, -90, 0, -56.25F),
+                RotationAngle.fromDegrees(leftForeArm, -39.38F, 0, 10.62F),
+                RotationAngle.fromDegrees(rightArm, -63.75F, 0, -11.25F),
+                RotationAngle.fromDegrees(rightForeArm, 0, 67.5F, -44.37F),
+                new RotationAngle(leftLeg, 0.0F, 0.0F, -0.7418F),
+                new RotationAngle(leftLowerLeg, 0.0F, 0.0F, 2.0944F),
+                new RotationAngle(rightLeg, 0.0F, 0.0F, 0.2618F),
+                new RotationAngle(rightLowerLeg, 0.0F, 0.0F, 0.0F)
+    	});
+    	ModelPose<HierophantGreenEntity> esPose4 = new ModelPose<HierophantGreenEntity>(new RotationAngle[] {
+                RotationAngle.fromDegrees(body, 0, 0, 0),
+                RotationAngle.fromDegrees(upperPart, 0, 0, 0),
+                RotationAngle.fromDegrees(leftArm, -90, 0, -75),
+                RotationAngle.fromDegrees(rightForeArm, -52.5F, 0, 0),
+                RotationAngle.fromDegrees(rightArm, -55, 0, -15),
+                RotationAngle.fromDegrees(rightForeArm, 0, 90, -45)
+    			
+    	});
         actionAnim.put(StandPose.RANGED_ATTACK, new StandActionAnimation.Builder<HierophantGreenEntity>()
-                .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<HierophantGreenEntity>(new RotationAngle[] {
-                        new RotationAngle(leftArm, -1.5708F, 0.0F, -1.309F),
-                        new RotationAngle(leftForeArm, -0.9163F, 0.0F, 0.0F),
-                        new RotationAngle(rightArm, -1.5708F, -0.6109F, 1.309F),
-                        new RotationAngle(rightForeArm, 0.7854F, 3.1416F, 0.0F),
-                        new RotationAngle(leftLeg, 0.0F, 0.0F, -0.7418F),
-                        new RotationAngle(leftLowerLeg, 0.0F, 0.0F, 2.0944F),
-                        new RotationAngle(rightLeg, 0.0F, 0.0F, 0.2618F),
-                        new RotationAngle(rightLowerLeg, 0.0F, 0.0F, 0.0F)
-                }))
+        		.addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransitionMultiple.Builder<HierophantGreenEntity>(esPose1)
+        				.addPose(0.6F, esPose2)
+        				.addPose(0.85F, esPose3)
+        				.addPose(0.9F, esPose3)
+        				.build(esPose4))
                 .build(idlePose));
 
         actionAnim.put(HierophantGreenGrapple.GRAPPLE_POSE, new StandActionAnimation.Builder<HierophantGreenEntity>()

@@ -7,8 +7,8 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.ResetResolveValuePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.MaxAchievedResolvePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ResetResolveValuePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveBoostsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveLevelPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolvePacket;
@@ -235,7 +235,7 @@ public class ResolveCounter {
     }
     
     public float getBoostVisible(LivingEntity user) {
-        float boost = boostFromAttack() * boostFromGettingAttacked(user) * boostChat;
+        float boost = boostFromAttack() * boostFromGettingAttacked(user) * boostChat * boostRemoteControl;
 //        if (getMaxAchievedValue() > getResolveValue()) {
 //            boost *= BOOST_ALREADY_ACHIEVED;
 //        }

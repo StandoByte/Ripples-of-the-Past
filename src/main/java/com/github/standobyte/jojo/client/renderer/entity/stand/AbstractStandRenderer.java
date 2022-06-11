@@ -83,7 +83,7 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
                 if (mc.player.is(user)) {
                     Vector3d diffVec = entity.getPosition(partialTick).subtract(user.getPosition(partialTick));
                     if (diffVec.lengthSqr() < 0.09 || diffVec.lengthSqr() < 1 && user.getViewVector(partialTick).dot(diffVec) > diffVec.lengthSqr() / 2) {
-                        return 0.25F;
+                        return 0.1F;
                     }
                 }
             }

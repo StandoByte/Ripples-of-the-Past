@@ -102,7 +102,7 @@ public class AirStreamParticle extends SpriteTexturedParticle {
         public Particle createParticle(BasicParticleType type, ClientWorld world, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
             AirStreamParticle particle = new AirStreamParticle(world, x, y, z, xSpeed, ySpeed, zSpeed);
             particle.pickSprite(spriteSet);
-            particle.scale(5);
+            particle.scale(1.5F);
             particle.setLifetime(12);
             particle.hasPhysics = false;
             return particle;

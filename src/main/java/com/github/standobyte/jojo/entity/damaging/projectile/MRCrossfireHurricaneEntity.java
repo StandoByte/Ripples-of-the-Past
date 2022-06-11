@@ -176,7 +176,7 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
             if (!entity.is(magiciansRed)) {
                 DamageUtil.setOnFire(entity, 10, true);
                 if (!level.isClientSide() && userStandPower != null && StandUtil.worthyTarget(entity)) {
-                    userStandPower.addLearningProgressPoints(ModActions.MAGICIANS_RED_CROSSFIRE_HURRICANE.get(), 0.0625F);
+                    userStandPower.addLearningProgressPoints(ModActions.MAGICIANS_RED_CROSSFIRE_HURRICANE.get(), 0.03125F);
                 }
             }
         }
