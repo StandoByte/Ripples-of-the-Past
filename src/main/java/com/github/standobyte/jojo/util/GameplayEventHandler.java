@@ -162,7 +162,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 @EventBusSubscriber(modid = JojoMod.MOD_ID)
 public class GameplayEventHandler {
-    
+	
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingTick(LivingUpdateEvent event) {
         LivingEntity entity = event.getEntityLiving();
@@ -752,7 +752,7 @@ public class GameplayEventHandler {
             });
         }
     }
-
+    
     @SubscribeEvent(priority = EventPriority.LOW, receiveCanceled = true)
     public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
         if (event.getCancellationResult() == ActionResultType.PASS && event.getHand() == Hand.MAIN_HAND && !event.getPlayer().isShiftKeyDown()) {

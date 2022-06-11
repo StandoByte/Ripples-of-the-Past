@@ -121,10 +121,17 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
         return 4F;
     }
     
-    // FIXME (!!!!) can grapple the user even if not manually controlled
     @Override
     protected boolean canHitEntity(Entity entity) {
-        return !entity.is(getOwner());
+    	LivingEntity owner = getOwner();
+    	if (entity.is(owner) || !(entity instanceof LivingEntity)) {
+    		return false;
+    	}
+    	if (owner instanceof StandEntity) {
+    		StandEntity stand = (StandEntity) getOwner();
+    		return !entity.is(stand.getUser()) || stand.isManuallyControlled();
+    	}
+        return true;
     }
     
     @Override

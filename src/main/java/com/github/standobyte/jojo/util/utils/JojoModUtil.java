@@ -299,7 +299,7 @@ public class JojoModUtil {
         return player.level.isClientSide() ? InputHandler.getInstance().hasInput
                 : player.getCapability(PlayerUtilCapProvider.CAPABILITY).map(PlayerUtilCap::hasClientInput).orElse(false);
     }
-
+    
 
 
     public static <T extends Entity> List<T> entitiesAround(Class<? extends T> clazz, Entity centerEntity, double radius, boolean includeSelf, @Nullable Predicate<? super T> filter) {

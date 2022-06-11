@@ -46,6 +46,10 @@ public class ClientUtil {
     public static boolean isShiftPressed() {
     	return Screen.hasShiftDown();
     }
+    
+    public static boolean isDestroyingBlock() {
+    	return Minecraft.getInstance().gameMode.isDestroying();
+    }
 
     public static Entity getEntityById(int entityId) {
         return Minecraft.getInstance().level.getEntity(entityId);

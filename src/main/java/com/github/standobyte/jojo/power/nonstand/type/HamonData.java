@@ -729,10 +729,10 @@ public class HamonData extends TypeSpecificData {
     }
 
     public enum Exercise {
-        MINING(210),
-        RUNNING(150),
-        SWIMMING(150),
-        MEDITATION(90);
+        MINING(150),
+        RUNNING(135),
+        SWIMMING(135),
+        MEDITATION(60);
 
         private final float maxTicks;
 

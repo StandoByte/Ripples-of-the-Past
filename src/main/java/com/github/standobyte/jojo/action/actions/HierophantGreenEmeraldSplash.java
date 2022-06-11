@@ -41,7 +41,7 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
         	JojoModUtil.doFractionTimes(() -> {
                 HGEmeraldEntity emerald = new HGEmeraldEntity(standEntity, world, userPower);
                 emerald.setConcentrated(shift);
-                standEntity.shootProjectile(emerald, shift ? 2F : 1.5F, shift ? 2.0F : 8.0F);
+                standEntity.shootProjectile(emerald, shift ? 2.5F : 1.5F, shift ? 1.0F : 8.0F);
         	}, fireRate);
             
             HierophantGreenEntity hierophant = (HierophantGreenEntity) standEntity;

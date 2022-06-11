@@ -86,7 +86,7 @@ public class JojoModConfig {
                         .define("keepHamonOnDeath", false);
                 
                 keepVampirismOnDeath = builder
-                		.comment(" The weak vampirism version from the 'Blood Gift' ability will not be kept.")
+                		.comment("    The weak vampirism version from the 'Blood Gift' ability will not be kept.")
                         .translation("jojo.config.keepVampirismOnDeath")
                         .define("keepVampirismOnDeath", false);
                 
@@ -95,8 +95,8 @@ public class JojoModConfig {
                         .define("keepStandOnDeath", false);
             
                 dropStandDisc = builder
-                        .comment(" If enabled, Stand users who got their Stand from a Disc drop their Stand Disc upon death.", 
-                        		"  Works only when keepStandOnDeath is set to false.")
+                        .comment("    If enabled, Stand users who got their Stand from a Disc drop their Stand Disc upon death.", 
+                        		 "    Works only when keepStandOnDeath is set to false.")
                         .translation("jojo.config.dropStandDisc")
                         .define("dropStandDisc", false);
             builder.pop();
@@ -117,70 +117,70 @@ public class JojoModConfig {
             
             builder.comment(" Settings which affect the speed of Hamon training.").push("Hamon training");
                 hamonPointsMultiplier = builder
-                        .comment(" Hamon Strength and Control levels growth multiplier.")
+                        .comment("    Hamon Strength and Control levels growth multiplier.")
                         .translation("jojo.config.hamonPointsMultiplier")
                         .defineInRange("hamonPointsMultiplier", 1.0, 0.0, 5000.0);
                 
                 breathingTechniqueMultiplier = builder
-                        .comment(" Breathing technique growth multiplier.")
+                        .comment("    Breathing technique growth multiplier.")
                         .translation("jojo.config.breathingTechniqueMultiplier")
                         .defineInRange("breathingTechniqueMultiplier", 1.0, 0.0, HamonData.MAX_BREATHING_LEVEL);
                 
                 breathingTechniqueDeterioration = builder
-                        .comment(" Whether or not breathing technique deteriorates over time.")
+                        .comment("    Whether or not breathing technique deteriorates over time.")
                         .translation("jojo.config.breathingTechniqueDeterioration")
                         .define("breathingTechniqueDeterioration", true);
             builder.pop();
             
             builder.push("Vampirism settings");
                 maxBloodMultiplier = builder
-                        .comment(" Max vampire energy multiplier on each difficulty level.")
+                        .comment("    Max vampire energy multiplier on each difficulty level.")
                         .translation("jojo.config.maxBloodMultiplier")
                         .defineList("maxBloodMultiplier", Arrays.asList(1D, 1D, 1D, 1D), e -> isElementNonNegativeFloat(e, true));
 
                 bloodDrainMultiplier = builder
-                        .comment(" Blood drain multiplier on each difficulty level.")
+                        .comment("    Blood drain multiplier on each difficulty level.")
                         .translation("jojo.config.bloodDrainMultiplier")
                         .defineList("bloodDrainMultiplier", Arrays.asList(0D, 1D, 1.75D, 2.5D), e -> isElementNonNegativeFloat(e, false));
 
                 bloodTickDown = builder
-                        .comment(" Vampire energy decrease per tick on each difficulty level.")
+                        .comment("    Vampire energy decrease per tick on each difficulty level.")
                         .translation("jojo.config.bloodTickDown")
                         .defineList("bloodTickDown", Arrays.asList(0.13889D, 0.00278D, 0.00278D, 0D), e -> isElementNonNegativeFloat(e, false));
 
                 bloodHealCost = builder
-                        .comment(" Vampire energy cost per 1 hp of healing on each difficulty level.")
+                        .comment("    Vampire energy cost per 1 hp of healing on each difficulty level.")
                         .translation("jojo.config.bloodHealCost")
                         .defineList("bloodHealCost", Arrays.asList(10D, 4D, 2D, 1D), e -> isElementNonNegativeFloat(e, false));
             builder.pop();
             
             builder.comment(" Settings of Stand Arrow and the Stands pool.").push("Stand Arrow");
                 prioritizeLeastTakenStands = builder
-                        .comment(" If enabled, random Stand gain effects (Stand Arrow, /stand random) give Stands that less players already have.", 
-                        		"  Otherwise the Stand selection is random.")
+                        .comment("    If enabled, random Stand gain effects (Stand Arrow, /stand random) give Stands that less players already have.", 
+                        		 "    Otherwise the Stand selection is random.")
                         .translation("jojo.config.prioritizeLeastTakenStands")
                         .define("prioritizeLeastTakenStands", false);
                 
                 bannedStands = builder
-                        .comment(" List of Stands excluded from Stand Arrow and /stand random pool.",
-                                "  These stands will still be available via /stand give command",
-                                "  Their Discs won't be added to the mod's Creative tab, but they can still be found in the Search tab (although they can't be used to gain a banned Stand).\"",
-                                "  The format is the same as for /stand give command (e.g., \"jojo:star_platinum\").")
+                        .comment("    List of Stands excluded from Stand Arrow and /stand random pool.",
+                                 "    These stands will still be available via /stand give command",
+                                 "    Their Discs won't be added to the mod's Creative tab, but they can still be found in the Search tab (although they can't be used to gain a banned Stand).\"",
+                                 "    The format is the same as for /stand give command (e.g., \"jojo:star_platinum\").")
                         .translation("jojo.config.bannedStands")
                         .defineListAllowEmpty(Lists.newArrayList("bannedStands"), 
                                 () -> Arrays.asList("jojo:example_1", "jojo:example_2"), 
                                 s -> s instanceof String && ResourceLocation.tryParse((String) s) != null);
                 
                 standTiers = builder
-                        .comment(" Whether or not the Stand tiers mechanic is enabled.")
+                        .comment("    Whether or not the Stand tiers mechanic is enabled.")
                         .translation("jojo.config.standTiers")
                         .define("standTiers", true);
                 
                 standTierXpLevels = builder
-                        .comment(" Experience levels nesessary to get a Stand from each tier.", 
-                                "  If the list is shorter than the default, next tiers use the last value.",
-                                "  For example, if the list only contains number 15, you'll be able to get any Stand as long as you have 15 experience levels.", 
-                                "  Making a value lower that the previous one might lead to an unexpected result.")
+                        .comment("    Experience levels nesessary to get a Stand from each tier.", 
+                                 "    If the list is shorter than the default, next tiers use the last value.",
+                                 "    For example, if the list only contains number 15, you'll be able to get any Stand as long as you have 15 experience levels.", 
+                                 "    Making a value lower that the previous one might lead to an unexpected result.")
                         .translation("jojo.config.standTierXpLevels")
                         .defineList(Lists.newArrayList("standTierXpLevels"), 
                                 () -> Arrays.asList(0, 1, 10, 20, 30, 40, 55), 
@@ -190,44 +190,44 @@ public class JojoModConfig {
             builder.push("Stand settings");
             	builder.push("Stand Progression");
 	                skipStandProgression = builder
-	                        .comment(" Whether or not all of the abilities are unlocked after gaining a Stand in Survival.")
+	                        .comment("    Whether or not all of the abilities are unlocked after gaining a Stand in Survival.")
 	                        .translation("jojo.config.skipStandProgression")
 	                        .define("skipStandProgression", false);
 	                
 	                resolvePoints = builder
-	                        .comment(" Max resolve points at each Resolve level (starting from 0).", 
-	                                "  Decrease these values to make getting to each level easier.", 
-	                                "  All values must be higher than 0.")
+	                        .comment("    Max resolve points at each Resolve level (starting from 0).", 
+	                                 "    Decrease these values to make getting to each level easier.", 
+	                                 "    All values must be higher than 0.")
 	                        .translation("jojo.config.resolvePoints")
 	                        .defineList("resolvePoints", Arrays.asList(ResolveCounter.DEFAULT_MAX_RESOLVE_VALUES), e -> isElementNonNegativeFloat(e, true));
 	            builder.pop();
 
             	builder.push("Time Stop");
 	                timeStopChunkRange = builder
-	                        .comment(" Range of Time Stop ability in chunks.",
-	                                "  If set to 0, the whole dimension is frozen in time.",
-	                                "  Defaults to 12.")
+	                        .comment("    Range of Time Stop ability in chunks.",
+	                                 "     If set to 0, the whole dimension is frozen in time.",
+	                                 "     Defaults to 12.")
 	                        .translation("jojo.config.timeStopChunkRange")
 	                        .defineInRange("timeStopChunkRange", 12, 0, Integer.MAX_VALUE);
 	                
 	                timeStopDamageMultiplier = builder
-	                        .comment(" Damage multiplier for entities frozen in time.")
+	                        .comment("    Damage multiplier for entities frozen in time.")
 	                        .translation("jojo.config.timeStopDamageMultiplier")
 	                        .defineInRange("timeStopDamageMultiplier", 1.0, 0.0, 1000000.0);
 	            builder.pop();
 	            
                 abilitiesBreakBlocks = builder
-                        .comment(" Whether or not Stands and abilities can break blocks.")
+                        .comment("    Whether or not Stands and abilities can break blocks.")
                         .translation("jojo.config.abilitiesBreakBlocks")
                         .define("abilitiesBreakBlocks", true);
             
                 standDamageMultiplier = builder
-                        .comment(" Damage multiplier applied to all Stands.")
+                        .comment("    Damage multiplier applied to all Stands.")
                         .translation("jojo.config.standPowerMultiplier")
                         .defineInRange("standPowerMultiplier", 1.0, 0.0, 128.0);
             
                 standStamina = builder
-                        .comment(" Whether or not Stand stamina mechanic is enabled.")
+                        .comment("    Whether or not Stand stamina mechanic is enabled.")
                         .translation("jojo.config.standStamina")
                         .define("standStamina", true);
                 
@@ -237,7 +237,7 @@ public class JojoModConfig {
             builder.pop();
             
             hamonDamageMultiplier = builder
-                    .comment(" Damage multiplier applied to all Hamon attacks.")
+                    .comment("    Damage multiplier applied to all Hamon attacks.")
                     .translation("jojo.config.hamonDamageMultiplier")
                     .defineInRange("hamonDamageMultiplier", 1.0, 0.0, 128.0);
         }
