@@ -309,7 +309,7 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED = ACTIONS.register("hierophant_green_es_concentrated", 
             () -> new HierophantGreenEmeraldSplash(new StandEntityAction.Builder()
-                    .standPerformDuration(5).cooldown(5, 30).staminaCostTick(5)
+                    .standPerformDuration(5).cooldown(5, 60).staminaCostTick(5)
                     .resolveLevelToUnlock(-1).standOffsetFront()
                     .standPose(StandPose.RANGED_ATTACK).shout(ModSounds.KAKYOIN_EMERALD_SPLASH).standSound(ModSounds.HIEROPHANT_GREEN_EMERALD_SPLASH)
                     .shiftVariationOf(HIEROPHANT_GREEN_EMERALD_SPLASH)

@@ -559,7 +559,12 @@
   },
   "silver_chariot_block": {
     "subtitle": "jojo.subtitle.stand_damage_block",
-    "sounds": [ "jojo:stand/silver_chariot_block" ]
+    "sounds": [
+      {
+        "name": "minecraft:entity.player.hurt",
+        "type": "event"
+      }
+    ]
   },
   "silver_chariot_rapier_shot": {
     "sounds": [ "jojo:stand/silver_chariot_rapier_shot" ]

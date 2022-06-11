@@ -216,28 +216,31 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                 }
             });
         }
-        if (hamon.getTechnique() == Technique.JOSEPH) {
-            if (user.isSprinting()) {
-                Vector3d vecBehind = Vector3d.directionFromRotation(0, 180F + user.yRot).scale(8D);
-                AxisAlignedBB aabb = new AxisAlignedBB(user.position().subtract(0, 2D, 0), user.position().add(vecBehind.x, 2D, vecBehind.z));
-                List<LivingEntity> entitiesBehind = world.getEntitiesOfClass(LivingEntity.class, aabb, entity -> entity != user)
-                        .stream().filter(entity -> !(entity instanceof StandEntity)).collect(Collectors.toList());
-                if (!entitiesBehind.isEmpty()) {
-                    if (world.isClientSide()) {
-                        if (user instanceof ClientPlayerEntity && ((ClientPlayerEntity) user).sprintTime == 0) {
-                            PacketManager.sendToServer(new ClRunAwayPacket());
-                        }
-                    }
-                    else {
-                        EffectInstance speed = user.getEffect(Effects.MOVEMENT_SPEED);
-                        int speedAmplifier = speed != null && speed.getDuration() > 100 ? speed.getAmplifier() + 2 : 1;
-                        user.addEffect(new EffectInstance(Effects.MOVEMENT_SPEED, 100, speedAmplifier, false, false, true));
-                    }
-                }
-            }
-        }
-        if (user instanceof PlayerEntity) {
-            hamon.tickExercises((PlayerEntity) user);
+        
+        if (!world.isClientSide() || user.is(ClientUtil.getClientPlayer())) {
+	        if (hamon.getTechnique() == Technique.JOSEPH) {
+	            if (user.isSprinting()) {
+	                Vector3d vecBehind = Vector3d.directionFromRotation(0, 180F + user.yRot).scale(8D);
+	                AxisAlignedBB aabb = new AxisAlignedBB(user.position().subtract(0, 2D, 0), user.position().add(vecBehind.x, 2D, vecBehind.z));
+	                List<LivingEntity> entitiesBehind = world.getEntitiesOfClass(LivingEntity.class, aabb, entity -> entity != user)
+	                        .stream().filter(entity -> !(entity instanceof StandEntity)).collect(Collectors.toList());
+	                if (!entitiesBehind.isEmpty()) {
+	                    if (world.isClientSide()) {
+	                        if (user instanceof ClientPlayerEntity && ((ClientPlayerEntity) user).sprintTime == 0) {
+	                            PacketManager.sendToServer(new ClRunAwayPacket());
+	                        }
+	                    }
+	                    else {
+	                        EffectInstance speed = user.getEffect(Effects.MOVEMENT_SPEED);
+	                        int speedAmplifier = speed != null && speed.getDuration() > 100 ? speed.getAmplifier() + 2 : 1;
+	                        user.addEffect(new EffectInstance(Effects.MOVEMENT_SPEED, 100, speedAmplifier, false, false, true));
+	                    }
+	                }
+	            }
+	        }
+	        if (user instanceof PlayerEntity) {
+	            hamon.tickExercises((PlayerEntity) user);
+	        }
         }
     }
     

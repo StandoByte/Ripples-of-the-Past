@@ -2173,7 +2173,13 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
         alpha *= getCurrentTask().map(
                 task -> task.getAction().getStandAlpha(this, task.getTicksLeft(), partialTick)).orElse(1F);
-        alpha *= rangeEfficiency; 
+        alpha *= rangeEfficiency;
+        
+        LivingEntity user = getUser();
+        if (user != null) {
+        	alpha *= Math.min(user.getHealth() / 5F, 1F);
+        }
+        	
         return MathHelper.clamp(alpha, 0F, 1F);
     }
 

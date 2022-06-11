@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.actions;
 
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.damage.DamageUtil;
 import com.github.standobyte.jojo.util.utils.MathUtil;
@@ -16,6 +17,7 @@ public class StarPlatinumInhale extends StandEntityAction {
 		super(builder);
 	}
 
+	private static final double RANGE = 10;
     @Override
     public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
     	Vector3d mouthPos = standEntity.position()
@@ -24,8 +26,8 @@ public class StarPlatinumInhale extends StandEntityAction {
     					.xRot(-standEntity.xRot * MathUtil.DEG_TO_RAD).yRot((-standEntity.yRot) * MathUtil.DEG_TO_RAD));
     	
     	Vector3d spLookVec = standEntity.getLookAngle();
-    	world.getEntities(standEntity, standEntity.getBoundingBox().inflate(10, 10, 10), 
-    			entity -> spLookVec.dot(entity.position().subtract(standEntity.position()).normalize()) > 0.5 && standEntity.canSee(entity)
+    	world.getEntities(standEntity, standEntity.getBoundingBox().inflate(RANGE, RANGE, RANGE), 
+    			entity -> spLookVec.dot(entity.position().subtract(standEntity.position()).normalize()) > 0.886 && standEntity.canSee(entity)
     			&& entity.distanceToSqr(standEntity) > 0.5
         		// FIXME (!!) free flight
     			&& (standEntity.isManuallyControlled() || !entity.is(standEntity.getUser()))).forEach(entity -> {
@@ -40,7 +42,11 @@ public class StarPlatinumInhale extends StandEntityAction {
     				}
     			});
     	if (world.isClientSide()) {
-    		// FIXME (!!) (inhale) particles
+    		Vector3d particlePos = mouthPos.add(spLookVec.scale(RANGE)
+    				.xRot((float) ((Math.random() * 2 - 1) * Math.PI / 6))
+    				.yRot((float) ((Math.random() * 2 - 1) * Math.PI / 6)));
+    		Vector3d vecToStand = mouthPos.subtract(particlePos).normalize().scale(0.75);
+    		world.addParticle(ModParticles.AIR_STREAM.get(), particlePos.x, particlePos.y, particlePos.z, vecToStand.x, vecToStand.y, vecToStand.z);
     	}
     }
 

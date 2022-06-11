@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.client.model.armor.BreathControlMaskModel;
 import com.github.standobyte.jojo.client.model.armor.SatiporojaScarfArmorModel;
 import com.github.standobyte.jojo.client.model.armor.StoneMaskModel;
 import com.github.standobyte.jojo.client.model.item.RoadRollerBakedModel;
+import com.github.standobyte.jojo.client.particle.AirStreamParticle;
 import com.github.standobyte.jojo.client.particle.BloodParticle;
 import com.github.standobyte.jojo.client.particle.MeteoriteVirusParticle;
 import com.github.standobyte.jojo.client.particle.OneTickFlameParticle;
@@ -260,6 +261,7 @@ public class ClientSetup {
         mc.particleEngine.register(ModParticles.MENACING.get(), OnomatopoeiaParticle.GoFactory::new);
         mc.particleEngine.register(ModParticles.RESOLVE.get(), OnomatopoeiaParticle.DoFactory::new);
         mc.particleEngine.register(ModParticles.SOUL_CLOUD.get(), SoulCloudParticleFactory::new);
+        mc.particleEngine.register(ModParticles.AIR_STREAM.get(), AirStreamParticle.Factory::new);
         mc.particleEngine.register(ModParticles.FLAME_ONE_TICK.get(), OneTickFlameParticle.Factory::new);
         // yep...
         CustomResources.initCustomResourceManagers(mc);
