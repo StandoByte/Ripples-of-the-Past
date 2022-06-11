@@ -252,7 +252,7 @@ public class JojoModConfig {
         }
         
         public void onStatsDataPackLoad() {
-        	initAvailableTiers();
+        	initBannedStands();
         }
         
         private void initBannedStands() {

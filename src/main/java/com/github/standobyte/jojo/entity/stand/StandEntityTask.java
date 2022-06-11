@@ -96,15 +96,14 @@ public class StandEntityTask {
         case PERFORM:
             if (phaseTicks == 0) {
             	action.standPerform(standEntity.level, standEntity, standPower, this);
+                if (!standEntity.level.isClientSide()) {
+                	standPower.consumeStamina(action.getStaminaCost(standPower));
+                }
             }
             
             action.standTickPerform(standEntity.level, standEntity, standPower, this);
-            
             if (!standEntity.level.isClientSide()) {
-                standPower.consumeStamina(action.getStaminaCostTicking(standPower));
-                if (phaseTicks == 0) {
-                	standPower.consumeStamina(action.getStaminaCost(standPower));
-                }
+            	standPower.consumeStamina(action.getStaminaCostTicking(standPower));
             }
             break;
         case RECOVERY:
@@ -196,12 +195,12 @@ public class StandEntityTask {
     	return target;
     }
     
-    void setOffsetFromUser(StandRelativeOffset offset) {
+    public void setOffsetFromUser(StandRelativeOffset offset) {
         this.offsetFromUser = offset;
     }
     
     @Nullable
-    StandRelativeOffset getOffsetFromUser() {
+    public StandRelativeOffset getOffsetFromUser() {
         return offsetFromUser;
     }
     

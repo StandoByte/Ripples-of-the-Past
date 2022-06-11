@@ -42,7 +42,7 @@ public class StandRelativeOffset {
     Vector3d getAbsoluteVec(StandRelativeOffset offsetDefault, float yRot, float xRot, StandEntity standEntity, LivingEntity user) {
     	double yOffset = 0;
     	if (standEntity.isArmsOnlyMode() && user.getPose() != Pose.STANDING) {
-    		yOffset = user.getEyeHeight(user.getPose()) - user.getEyeHeight(Pose.STANDING);
+    		yOffset = (user.getDimensions(user.getPose()).height - user.getDimensions(Pose.STANDING).height) * 0.85F;
     	}
         Vector3d vec;
         if (useXRot) {

@@ -232,7 +232,7 @@ public class ModActions {
                     .standOffsetFromUser(-0.25, -0.25, -0.3)));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_INHALE = ACTIONS.register("star_platinum_inhale", 
-            () -> new StarPlatinumInhale(new StandEntityAction.Builder().holdType(100).cooldown(0, 200).staminaCostTick(2F)
+            () -> new StarPlatinumInhale(new StandEntityAction.Builder().holdType(80).cooldown(0, 200).staminaCostTick(2F)
             		.ignoresPerformerStun().resolveLevelToUnlock(2).standOffsetFront().standSound(ModSounds.STAR_PLATINUM_INHALE)));
     
     public static final RegistryObject<TimeStop> STAR_PLATINUM_TIME_STOP = ACTIONS.register("star_platinum_time_stop", 
@@ -296,20 +296,20 @@ public class ModActions {
             () -> new HierophantGreenStringAttack(new StandEntityAction.Builder().staminaCost(75).standPerformDuration(10)));
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_STRING_BIND = ACTIONS.register("hierophant_green_attack_binding", 
-            () -> new HierophantGreenStringAttack(new StandEntityAction.Builder().staminaCost(75).standPerformDuration(25).cooldown(25, 60)
+            () -> new HierophantGreenStringAttack(new StandEntityAction.Builder().staminaCost(75).standPerformDuration(25).cooldown(25, 100, 0.5F)
                     .shiftVariationOf(HIEROPHANT_GREEN_STRING_ATTACK)
                     .xpRequirement(200)));
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_EMERALD_SPLASH = ACTIONS.register("hierophant_green_emerald_splash", 
             () -> new HierophantGreenEmeraldSplash(new StandEntityAction.Builder()
-                    .standPerformDuration(30).cooldown(30, 10).staminaCostTick(3)
+            		.standPerformDuration(30).standRecoveryTicks(20).staminaCostTick(3)
                     .resolveLevelToUnlock(1).isTrained().standOffsetFront()
                     .standPose(StandPose.RANGED_ATTACK).shout(ModSounds.KAKYOIN_EMERALD_SPLASH).standSound(ModSounds.HIEROPHANT_GREEN_EMERALD_SPLASH)
                     .xpRequirement(50)));
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED = ACTIONS.register("hierophant_green_es_concentrated", 
             () -> new HierophantGreenEmeraldSplash(new StandEntityAction.Builder()
-                    .standPerformDuration(5).cooldown(5, 60).staminaCostTick(5)
+                    .standPerformDuration(5).standRecoveryTicks(20).cooldown(5, 60).staminaCostTick(6)
                     .resolveLevelToUnlock(-1).standOffsetFront()
                     .standPose(StandPose.RANGED_ATTACK).shout(ModSounds.KAKYOIN_EMERALD_SPLASH).standSound(ModSounds.HIEROPHANT_GREEN_EMERALD_SPLASH)
                     .shiftVariationOf(HIEROPHANT_GREEN_EMERALD_SPLASH)

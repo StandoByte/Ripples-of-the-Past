@@ -74,7 +74,7 @@ public class StandEntityLightAttack extends StandEntityAction {
     }
     
     @Override
-    protected boolean canClickDuringTask(StandEntityAction nextAction, IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
+    public boolean isChainable(IStandPower standPower, StandEntity standEntity) {
         return true;
     }
     

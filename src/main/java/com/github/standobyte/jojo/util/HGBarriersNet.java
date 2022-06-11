@@ -123,6 +123,7 @@ public class HGBarriersNet {
     		emeraldEntity.setConcentrated(true);
     		Vector3d shootVec = targetPos.subtract(shootingPos);
     		emeraldEntity.shoot(shootVec.x, shootVec.y, shootVec.z, 1F, stand.getProjectileInaccuracy(2.0F));
+    		emeraldEntity.setDamageFactor(0.75F);
     		stand.addProjectile(emeraldEntity);
     		if (playSound) {
     			JojoModUtil.playSound(stand.level, null, shootingPos.x, shootingPos.y, shootingPos.z, 

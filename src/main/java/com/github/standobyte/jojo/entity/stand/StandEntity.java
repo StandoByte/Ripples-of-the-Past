@@ -1920,8 +1920,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     public void addProjectile(DamagingEntity projectile) {
         if (!level.isClientSide() && !projectile.isAddedToWorld()) {
-            projectile.setDamageFactor((float) getAttackDamage() / 8);
-            projectile.setSpeedFactor((float) getAttackSpeed() / 8);
+            projectile.setDamageFactor(projectile.getDamageFactor() * (float) getAttackDamage() / 8);
+            projectile.setSpeedFactor(projectile.getSpeedFactor() * (float) getAttackSpeed() / 8);
             level.addFreshEntity(projectile);
         }
     }
@@ -2176,7 +2176,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         alpha *= rangeEfficiency;
         
         LivingEntity user = getUser();
-        if (user != null) {
+        if (user != null && !user.hasEffect(ModEffects.RESOLVE.get())) {
         	alpha *= Math.min(user.getHealth() / 5F, 1F);
         }
         	

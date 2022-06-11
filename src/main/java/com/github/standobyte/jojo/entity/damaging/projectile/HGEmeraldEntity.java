@@ -6,10 +6,12 @@ import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
+import com.github.standobyte.jojo.util.damage.IModdedDamageSource;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -35,7 +37,14 @@ public class HGEmeraldEntity extends ModdedProjectileEntity {
 
     @Override
     public float getBaseDamage() {
-        return 0.75F;
+        return 1F;
+    }
+    
+    @Override
+    protected DamageSource getDamageSource(LivingEntity owner) {
+    	DamageSource dmgSource = super.getDamageSource(owner);
+    	((IModdedDamageSource) dmgSource).setKnockbackReduction(0.25F);
+    	return dmgSource;
     }
 
     @Override
@@ -57,7 +66,7 @@ public class HGEmeraldEntity extends ModdedProjectileEntity {
         if (!level.isClientSide() && entityHurt && userStandPower != null) {
             Entity target = entityRayTraceResult.getEntity();
             if (StandUtil.worthyTarget(target)) {
-                userStandPower.addLearningProgressPoints(ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get(), 0.004F);
+                userStandPower.addLearningProgressPoints(ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get(), 0.002F);
             }
         }
     }
