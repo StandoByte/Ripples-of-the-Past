@@ -1075,7 +1075,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     public Vector3d collideNextPos(Vector3d pos) {
-    	return position().add(collide(pos.subtract(position())));
+    	return noPhysics ? pos : position().add(collide(pos.subtract(position())));
     }
 
     // yeah...

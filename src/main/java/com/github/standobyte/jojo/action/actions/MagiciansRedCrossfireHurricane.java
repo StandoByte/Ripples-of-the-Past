@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.utils.MathUtil;
 
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.world.World;
 
@@ -17,12 +18,38 @@ public class MagiciansRedCrossfireHurricane extends StandEntityAction {
     public MagiciansRedCrossfireHurricane(StandEntityAction.Builder builder) {
         super(builder);
     }
+    
+    @Override
+    public void onPhaseSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task, int ticks) {
+        super.onPhaseSet(world, standEntity, standPower, phase, task, ticks);
+        if (!world.isClientSide() && phase == Phase.BUTTON_HOLD) {
+        	task.getAdditionalData().push(Integer.class, 0);
+        }
+    }
+    
+    @Override
+    public void standTickButtonHold(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
+    	if (!world.isClientSide()) {
+    		if (false) {
+    			task.getAdditionalData().push(Integer.class, task.getAdditionalData().pop(Integer.class) + 1);
+    		}
+    		if (task.getTicksLeft() == 1) {
+    			task.getAdditionalData().push(Integer.class, task.getStartingTicks());
+    		}
+    	}
+    }
 
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
+        	int chargeTicks = task.getAdditionalData().isEmply(Integer.class) ? 0 : 
+        		task.getAdditionalData().pop(Integer.class);
+        	int fireBlocksConsumed = task.getAdditionalData().isEmply(Integer.class) ? 0 : 
+        		task.getAdditionalData().pop(Integer.class);
+        	float fireConsumed = fireBlocksConsumed > 0 && chargeTicks > 0 ? (float) fireBlocksConsumed / (float) chargeTicks : 0;
+        	
             boolean special = isShiftVariation();
-            int n = special ? 8 : 1;
+            int n = special ? MathHelper.floor(8 * (fireConsumed + 1)) : 1;
             ActionTarget target = task.getTarget();
             if (special && target.getType() == TargetType.EMPTY) {
                 target = ActionTarget.fromRayTraceResult(standEntity.aimWithStandOrUser(32, target));
@@ -37,6 +64,9 @@ public class MagiciansRedCrossfireHurricane extends StandEntityAction {
                 ankh.shootFromRotation(standEntity, standEntity.xRot + rotOffsets.x, standEntity.yRot + rotOffsets.y, 
                         0, special ? 1.0F : 0.75F, 0.0F);
                 ankh.setScale((float) standEntity.getStandEfficiency());
+                if (!special) {
+                	ankh.setScale(ankh.getScale() * (fireConsumed + 1));
+                }
                 world.addFreshEntity(ankh);
             }
             standEntity.playSound(ModSounds.MAGICIANS_RED_CROSSFIRE_HURRICANE.get(), 1.0F, 1.0F);

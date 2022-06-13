@@ -20,4 +20,8 @@ public class StacksTHC {
 	public <T> T peek(Class<T> stackType) {
 		return ((Stack<T>) store.get(stackType)).peek();
 	}
+	
+	public <T> boolean isEmply(Class<T> stackType) {
+		return store.containsKey(stackType) ? store.get(stackType).isEmpty() : true;
+	}
 }

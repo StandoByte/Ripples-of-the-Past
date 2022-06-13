@@ -46,8 +46,10 @@ public class TimeStopHandler {
                 entityIter.remove();
             }
             
-            else if (entity.invulnerableTime > 0 && entity instanceof LivingEntity && !entity.canUpdate()) {
-                entity.invulnerableTime--;
+            else if (entity instanceof LivingEntity && !entity.canUpdate()) {
+            	if (entity.invulnerableTime > 0) {
+            		entity.invulnerableTime--;
+            	}
                 entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.lastHurtByStandTick());
             }
         }

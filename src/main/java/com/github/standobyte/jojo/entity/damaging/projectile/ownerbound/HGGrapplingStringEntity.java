@@ -64,7 +64,7 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
                 }
             }
             else {
-                // KEKW FIXME (!!) free flight
+                // FIXME (!!) fast run
                 Vector3d vecToOwner = owner.position().subtract(bound.position());
                 if (vecToOwner.lengthSqr() > 4) {
                     dragTarget(bound, vecToOwner.normalize().scale(2));
@@ -98,7 +98,7 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
                     	entity = user;
                     }
                 }
-                // FIXME (!!!) when i let go, hierophant sometimes lags behind for a while
+                // FIXME (!!) when i let go, hierophant sometimes lags behind for a while
                 entity.setDeltaMovement(grappleVec);
                 entity.fallDistance = 0;
             }

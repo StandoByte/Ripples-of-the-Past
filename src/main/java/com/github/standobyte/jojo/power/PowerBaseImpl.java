@@ -481,19 +481,27 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             Action<P> heldAction = heldActionData.action;
             ActionTarget target = heldActionData.getActionTarget();
             int ticksHeld = getHeldActionTicks();
-            heldAction.stoppedHolding(user.level, user, getThis(), ticksHeld);
-            if (!heldAction.holdOnly()) {
-                ActionTargetContainer targetContainer = new ActionTargetContainer(target);
-                if (shouldFire && heldActionData.getTicks() >= heldAction.getHoldDurationToFire(getThis()) && 
-                        checkRequirements(heldAction, targetContainer, true).isPositive()) {
-                    target = targetContainer.getTarget();
-                    performAction(heldAction, target);
-                }
-            }
-            else {
+            
+            
+            
+            if (heldAction.holdOnly()) {
+                heldAction.stoppedHolding(user.level, user, getThis(), ticksHeld, false);
+                
                 int cooldown = heldAction.getCooldown(getThis(), ticksHeld);
                 if (cooldown > 0) {
                     setCooldownTimer(heldAction, cooldown);
+                }
+            }
+            else {
+                ActionTargetContainer targetContainer = new ActionTargetContainer(target);
+                boolean fire = shouldFire && heldActionData.getTicks() >= heldAction.getHoldDurationToFire(getThis()) && 
+                        checkRequirements(heldAction, targetContainer, true).isPositive();
+
+                heldAction.stoppedHolding(user.level, user, getThis(), ticksHeld, fire);
+                
+                if (fire) {
+                    target = targetContainer.getTarget();
+                    performAction(heldAction, target);
                 }
             }
             heldActionData = null;
