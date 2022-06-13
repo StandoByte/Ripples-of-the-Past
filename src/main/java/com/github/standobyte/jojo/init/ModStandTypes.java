@@ -12,7 +12,6 @@ import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.power.stand.type.EntityStandType;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -74,7 +73,7 @@ public class ModStandTypes {
                     ModEntityTypes.THE_WORLD)
             .addSummonShout(ModSounds.DIO_THE_WORLD)
             .addOst(ModSounds.THE_WORLD_OST)
-            .addItemOnResolveLevel(4, new ItemStack(ModItems.ROAD_ROLLER.get())));
+            /*.addItemOnResolveLevel(4, new ItemStack(ModItems.ROAD_ROLLER.get()))*/);
     
     public static final RegistryObject<StandType<StandStats>> HIEROPHANT_GREEN = STANDS.register("hierophant_green", 
             () -> new EntityStandType<>(0x00B319, PART_3_NAME,
@@ -85,7 +84,7 @@ public class ModStandTypes {
                     .power(8.0)
                     .speed(12.0)
                     .range(50.0)
-                    .durability(12.0)
+                    .durability(10.0)
                     .precision(8.0)
                     .build("Hierophant Green"), 
                     ModEntityTypes.HIEROPHANT_GREEN)

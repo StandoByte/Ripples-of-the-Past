@@ -46,7 +46,7 @@ public class StandEntityHeavyAttack extends StandEntityAction {
     }
     
     @Override
-    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target, int ticks) {
+    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task, int ticks) {
         standEntity.alternateHands();
         if (!world.isClientSide()) {
             standEntity.addComboMeter(-0.51F, 0);

@@ -94,21 +94,22 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
     
     @Override
     protected void initActionPoses() {
-    	ModelPose<HierophantGreenEntity> esPose1 = new ModelPose<HierophantGreenEntity>(new RotationAngle[] {
+    	ModelPose<HierophantGreenEntity> esPose1 = new ModelPose<>(new RotationAngle[] {
                 RotationAngle.fromDegrees(leftArm, -55, 0, 15),
                 RotationAngle.fromDegrees(leftForeArm, 0, -90, 45),
                 RotationAngle.fromDegrees(rightArm, -90, 0, 75),
                 RotationAngle.fromDegrees(rightForeArm, -52.5F, 0, 0)
     	});
-    	ModelPose<HierophantGreenEntity> esPose2 = new ModelPose<HierophantGreenEntity>(new RotationAngle[] {
+    	ModelPose<HierophantGreenEntity> esPose2 = new ModelPose<>(new RotationAngle[] {
                 RotationAngle.fromDegrees(leftArm, -90, 0, 0),
                 RotationAngle.fromDegrees(leftForeArm, 0, 0, 42.5F),
                 RotationAngle.fromDegrees(rightArm, -90, 0, 0),
                 RotationAngle.fromDegrees(rightForeArm, 0, 0, -42.5F)
     	});
-    	ModelPose<HierophantGreenEntity> esPose3 = new ModelPose<HierophantGreenEntity>(new RotationAngle[] {
-                RotationAngle.fromDegrees(body, 0, 52.5F, 0),
-                RotationAngle.fromDegrees(upperPart, 0, 22.5F, 0),
+    	ModelPose<HierophantGreenEntity> esPose3 = new ModelPose<>(new RotationAngle[] {
+                RotationAngle.fromDegrees(head, 0, 22.5F, 0),
+                RotationAngle.fromDegrees(body, 0, 60F, 0),
+                RotationAngle.fromDegrees(upperPart, 0, 30F, 0),
                 RotationAngle.fromDegrees(leftArm, -90, 0, -56.25F),
                 RotationAngle.fromDegrees(leftForeArm, -39.38F, 0, 10.62F),
                 RotationAngle.fromDegrees(rightArm, -63.75F, 0, -11.25F),
@@ -118,7 +119,8 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
                 new RotationAngle(rightLeg, 0.0F, 0.0F, 0.2618F),
                 new RotationAngle(rightLowerLeg, 0.0F, 0.0F, 0.0F)
     	});
-    	ModelPose<HierophantGreenEntity> esPose4 = new ModelPose<HierophantGreenEntity>(new RotationAngle[] {
+    	ModelPose<HierophantGreenEntity> esPose4 = new ModelPose<>(new RotationAngle[] {
+                RotationAngle.fromDegrees(head, 0, 0, 0),
                 RotationAngle.fromDegrees(body, 0, 0, 0),
                 RotationAngle.fromDegrees(upperPart, 0, 0, 0),
                 RotationAngle.fromDegrees(leftArm, -90, 0, -75),
@@ -128,15 +130,16 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
     			
     	});
         actionAnim.put(StandPose.RANGED_ATTACK, new StandActionAnimation.Builder<HierophantGreenEntity>()
-        		.addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransitionMultiple.Builder<HierophantGreenEntity>(esPose1)
+        		.addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransitionMultiple.Builder<>(esPose1)
         				.addPose(0.6F, esPose2)
         				.addPose(0.85F, esPose3)
         				.addPose(0.9F, esPose3)
         				.build(esPose4))
+        		.addPose(StandEntityAction.Phase.RECOVERY, idlePose)
                 .build(idlePose));
 
         actionAnim.put(HierophantGreenGrapple.GRAPPLE_POSE, new StandActionAnimation.Builder<HierophantGreenEntity>()
-                .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<HierophantGreenEntity>(new RotationAngle[] {
+                .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<>(new RotationAngle[] {
                         new RotationAngle(rightArm, -1.5708F, 0.0F, 0.0F), 
                         new RotationAngle(rightForeArm, 0.0F, 0.0F, 0.0F), 
                         new RotationAngle(body, 0.0F, 0.0F, 0.0F), 
@@ -149,7 +152,7 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
     
     @Override
     protected ModelPose<HierophantGreenEntity> initIdlePose() {
-        return new ModelPose<HierophantGreenEntity>(new RotationAngle[] {
+        return new ModelPose<>(new RotationAngle[] {
                 new RotationAngle(body, 0.0F, 0.3491F, 0.0F),
                 new RotationAngle(upperPart, 0.0F, 0.0F, 0.0F),
                 new RotationAngle(leftArm, 0.0F, 0.0F, -0.2182F),
@@ -165,7 +168,7 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
 
     @Override
     protected ModelPose<HierophantGreenEntity> initIdlePose2Loop() {
-        return new ModelPose<HierophantGreenEntity>(new RotationAngle[] {
+        return new ModelPose<>(new RotationAngle[] {
                 new RotationAngle(leftArm, 0.0873F, 0.0F, -0.2182F),
                 new RotationAngle(leftForeArm, -0.5236F, 0.0F, 0.0F),
                 new RotationAngle(rightArm, 0.0698F, 0.0F, 0.7854F),

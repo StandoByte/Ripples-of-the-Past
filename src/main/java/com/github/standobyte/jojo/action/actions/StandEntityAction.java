@@ -261,19 +261,19 @@ public abstract class StandEntityAction extends StandAction {
         return false;
     }
     
-    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target, int ticks) {}
+    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task, int ticks) {}
     
-    public void onPhaseSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target, int ticks) {}
+    public void onPhaseSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task, int ticks) {}
     
-    public void playSound(StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target) {
-        SoundEvent sound = getSound(standEntity, standPower, phase, target);
+    public void playSound(StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task) {
+        SoundEvent sound = getSound(standEntity, standPower, phase, task);
         if (sound != null) {
             playSoundAtStand(standEntity.level, standEntity, sound, standPower, phase);
         }
     }
     
     @Nullable
-    public SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target) {
+    public SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task) {
         Supplier<SoundEvent> standSoundSupplier = standSounds.get(phase);
         if (standSoundSupplier == null) {
             return null;
@@ -312,17 +312,22 @@ public abstract class StandEntityAction extends StandAction {
     }
     
     protected boolean canClickDuringTask(StandEntityAction clickedAction, IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
-        return clickedAction != this || isChainable(standPower, standEntity);
+        return clickedAction != this || isChainable(standPower, standEntity) || isChainable(standPower, standEntity);
     }
     
-    public boolean isChainable(IStandPower standPower, StandEntity standEntity) {
+    protected boolean isChainable(IStandPower standPower, StandEntity standEntity) {
+    	return false;
+    }
+    
+    protected boolean isFreeRecovery(IStandPower standPower, StandEntity standEntity) {
     	return false;
     }
     
     public final boolean canBeCanceled(IStandPower standPower, StandEntity standEntity, Phase phase, @Nullable StandEntityAction newAction) {
     	return isCancelable(standPower, standEntity, newAction, phase)
     			|| newAction != null && newAction.cancels(this, standPower, standEntity, phase)
-    			|| isChainable(standPower, standEntity) && phase == Phase.RECOVERY && newAction == this;
+    			|| phase == Phase.RECOVERY && (newAction == this && isChainable(standPower, standEntity)
+    			|| isFreeRecovery(standPower, standEntity));
     }
     
     protected boolean isCancelable(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction, Phase phase) {
@@ -354,8 +359,8 @@ public abstract class StandEntityAction extends StandAction {
         return 1F;
     }
     
-    public float getUserMovementFactor(IStandPower standPower, StandEntity standEntity) {
-        return userMovementFactor;
+    public float getUserMovementFactor(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
+        return task.getPhase() == Phase.RECOVERY && isFreeRecovery(standPower, standEntity) ? 1F : userMovementFactor;
     }
     
     public StandPose getStandPose(IStandPower standPower, StandEntity standEntity) {

@@ -122,7 +122,8 @@ public class HGBarriersNet {
     	if (!stand.level.isClientSide()) {
     		HGEmeraldEntity emeraldEntity = new HGEmeraldEntity(stand, stand.level, null);
     		emeraldEntity.setPos(shootingPos.x, shootingPos.y, shootingPos.z);
-    		emeraldEntity.setConcentrated(breakBlocks);
+    		emeraldEntity.setBreakBlocks(breakBlocks);
+    		emeraldEntity.setLowerKnockback(true);
     		Vector3d shootVec = targetPos.subtract(shootingPos);
     		emeraldEntity.shoot(shootVec.x, shootVec.y, shootVec.z, 1F, stand.getProjectileInaccuracy(2.0F));
     		emeraldEntity.setDamageFactor(0.75F);

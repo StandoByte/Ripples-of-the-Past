@@ -28,7 +28,7 @@ public class StandEntityLightAttack extends StandEntityAction {
     }
     
     @Override
-    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target, int ticks) {
+    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task, int ticks) {
         if (standEntity.isArmsOnlyMode() && standEntity.swingingArm == Hand.OFF_HAND) {
             standEntity.setArmsOnlyMode(true, true);
         }
@@ -60,22 +60,24 @@ public class StandEntityLightAttack extends StandEntityAction {
     }
     
     @Override
-    public SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target) {
-        return target.getType() != TargetType.ENTITY || standEntity.isArmsOnlyMode() || standEntity.getComboMeter() > 0
-        		? null : super.getSound(standEntity, standPower, phase, target);
+    public SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task) {
+        return task.getTarget().getType() != TargetType.ENTITY || standEntity.isArmsOnlyMode() || standEntity.getComboMeter() > 0
+        		? null : super.getSound(standEntity, standPower, phase, task);
     }
     
     @Override
 	protected boolean isCancelable(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction, Phase phase) {
-        if (phase == Phase.RECOVERY) {
-            return true;
-        }
-        return super.isCancelable(standPower, standEntity, newAction, phase);
+        return phase == Phase.RECOVERY || super.isCancelable(standPower, standEntity, newAction, phase);
     }
     
     @Override
-    public boolean isChainable(IStandPower standPower, StandEntity standEntity) {
-        return true;
+    protected boolean isChainable(IStandPower standPower, StandEntity standEntity) {
+    	return true;
+    }
+    
+    @Override
+    public boolean isFreeRecovery(IStandPower standPower, StandEntity standEntity) {
+    	return true;
     }
     
     @Override

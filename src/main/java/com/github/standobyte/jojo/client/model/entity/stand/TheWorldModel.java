@@ -331,7 +331,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
     
     @Override
     protected void initActionPoses() {
-        ModelPose<TheWorldEntity> donutPose1 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+        ModelPose<TheWorldEntity> donutPose1 = new ModelPose<>(new RotationAngle[] {
                 new RotationAngle(leftArm, 0.0F, 0.0F, -0.5236F),
                 new RotationAngle(leftForeArm, 0.0F, 0.0F, 0.5672F),
                 new RotationAngle(rightArm, 0.2182F, 0.8727F, 1.3963F),
@@ -339,7 +339,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                 new RotationAngle(leftLeg, 0.0F, 0.0436F, -0.1309F),
                 new RotationAngle(rightLeg, 0.2618F, 0.2618F, 0.1309F)
         });
-        ModelPose<TheWorldEntity> donutPose2 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+        ModelPose<TheWorldEntity> donutPose2 = new ModelPose<>(new RotationAngle[] {
                 new RotationAngle(head, -0.2182F, 0.0F, 0.0F), 
                 new RotationAngle(body, 0.2182F, 0.2618F, 0.0F),
                 new RotationAngle(upperPart, 0.0F, 0.1745F, 0.0F),
@@ -350,7 +350,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                 new RotationAngle(leftLeg, 0.1745F, 0.0F, 0.0F),
                 new RotationAngle(rightLeg, 0.2618F, 0.2618F, 0.1309F)
         });
-        ModelPose<TheWorldEntity> donutPose3 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+        ModelPose<TheWorldEntity> donutPose3 = new ModelPose<>(new RotationAngle[] {
                 new RotationAngle(body, 0.2182F, -0.5236F, 0.0F),
                 new RotationAngle(upperPart, 0.0F, -0.5236F, 0.0F),
                 new RotationAngle(leftArm, 0.0F, 0.4363F, -1.5708F),
@@ -361,7 +361,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                 new RotationAngle(leftLowerLeg, 1.8326F, 0.0F, 0.0F),
                 new RotationAngle(rightLeg, 0.2618F, 0.2618F, 0.1309F)
         });
-        ModelPose<TheWorldEntity> donutPose4 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+        ModelPose<TheWorldEntity> donutPose4 = new ModelPose<>(new RotationAngle[] {
                 new RotationAngle(body, 0.2182F, -0.0873F, 0.0F),
                 new RotationAngle(upperPart, 0.0F, -0.0873F, 0.0F),
                 new RotationAngle(leftArm, 0.0F, 0.4363F, -0.7854F),
@@ -373,16 +373,16 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                 new RotationAngle(rightLeg, 0.2618F, 0.2618F, 0.1309F)
         });
         actionAnim.put(StandPose.HEAVY_ATTACK, new StandActionAnimation.Builder<TheWorldEntity>()
-                .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<TheWorldEntity>(donutPose1, donutPose2).setEasing(pr -> Math.max(pr * 3F - 2F, 0F)))
-                .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransition<TheWorldEntity>(donutPose2, donutPose3))
-                .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransitionMultiple.Builder<TheWorldEntity>(donutPose3)
+                .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<>(donutPose1, donutPose2).setEasing(pr -> Math.max(pr * 3F - 2F, 0F)))
+                .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransition<>(donutPose2, donutPose3))
+                .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransitionMultiple.Builder<>(donutPose3)
                         .addPose(0.5F, donutPose3)
                         .addPose(0.7F, donutPose4)
                         .addPose(0.8F, donutPose4)
                         .build(idlePose))
                 .build(idlePose));
         
-        ModelPose<TheWorldEntity> kickPose1 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+        ModelPose<TheWorldEntity> kickPose1 = new ModelPose<>(new RotationAngle[] {
                 RotationAngle.fromDegrees(head, -7.5F, 153.33F, 0F), 
                 RotationAngle.fromDegrees(body, 0F, 153.33F, 0F),
                 RotationAngle.fromDegrees(leftArm, 0F, 0F, -30F),
@@ -393,7 +393,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                 RotationAngle.fromDegrees(rightLeg, -10F, 0F, 20F),
                 RotationAngle.fromDegrees(rightLowerLeg, 50F, 0F, 0F)
         });
-        ModelPose<TheWorldEntity> kickPose2 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+        ModelPose<TheWorldEntity> kickPose2 = new ModelPose<>(new RotationAngle[] {
                 RotationAngle.fromDegrees(head, -11.25F, 230F, 0F), 
                 RotationAngle.fromDegrees(body, 0F, 230F, 0F),
                 RotationAngle.fromDegrees(leftArm, 0F, 0F, -45F),
@@ -403,7 +403,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                 RotationAngle.fromDegrees(rightLeg, -15F, 0F, 30F),
                 RotationAngle.fromDegrees(rightLowerLeg, 75F, 0F, 0F)
         });
-        ModelPose<TheWorldEntity> kickPose3 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+        ModelPose<TheWorldEntity> kickPose3 = new ModelPose<>(new RotationAngle[] {
                 RotationAngle.fromDegrees(head, -15F, 360F, 0F), 
                 RotationAngle.fromDegrees(body, -43.00306F, 308.28988F, 36.20399F),
                 RotationAngle.fromDegrees(leftArm, 0F, 0F, -60F),
@@ -415,13 +415,13 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                 RotationAngle.fromDegrees(rightLowerLeg, 0F, 0F, 0F)
         });
         actionAnim.put(StandPose.HEAVY_ATTACK_COMBO, new StandActionAnimation.Builder<TheWorldEntity>()
-                .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransitionMultiple.Builder<TheWorldEntity>(idlePose)
+                .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransitionMultiple.Builder<>(idlePose)
                         .addPose(0.5F, kickPose1)
                         .addPose(0.75F, kickPose2)
                         .build(kickPose3))
                 .build(idlePose));
 
-        ModelPose<TheWorldEntity> punchPose1 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+        ModelPose<TheWorldEntity> punchPose1 = new ModelPose<>(new RotationAngle[] {
                 RotationAngle.fromDegrees(head, 0.0F, 0.0F, 0F), 
                 RotationAngle.fromDegrees(body, 40F, 45F, 0F),
                 RotationAngle.fromDegrees(upperPart, 0F, 0F, 0F),
@@ -434,7 +434,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                 RotationAngle.fromDegrees(rightLeg, 0F, 0F, 10F),
                 RotationAngle.fromDegrees(rightLowerLeg, 0F, 0F, 0F)
         });
-        ModelPose<TheWorldEntity> punchPose2 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+        ModelPose<TheWorldEntity> punchPose2 = new ModelPose<>(new RotationAngle[] {
                 RotationAngle.fromDegrees(head, 0.0F, 22.5F, 0.0F), 
                 RotationAngle.fromDegrees(body, 40F, 60F, 0F),
                 RotationAngle.fromDegrees(leftArm, -10F, -35F, -65F),
@@ -443,7 +443,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                 RotationAngle.fromDegrees(rightForeArm, -50.4689F, -48.3643F, -73.6793F),
                 RotationAngle.fromDegrees(rightLeg, 10F, 0F, 10F)
         });
-        ModelPose<TheWorldEntity> punchPose3 = new ModelPose<TheWorldEntity>(new RotationAngle[] {
+        ModelPose<TheWorldEntity> punchPose3 = new ModelPose<>(new RotationAngle[] {
                 RotationAngle.fromDegrees(head, 0.0F, 0.0F, 0F), 
                 RotationAngle.fromDegrees(body, 30F, -30F, 0F),
                 RotationAngle.fromDegrees(leftArm, 5F, -25F, -45F),
@@ -456,9 +456,9 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                 RotationAngle.fromDegrees(rightLowerLeg, 45F, 0F, 0F)
         });
         actionAnim.put(TheWorldTSHeavyAttack.TS_PUNCH_POSE, new StandActionAnimation.Builder<TheWorldEntity>()
-                .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<TheWorldEntity>(punchPose1, punchPose2))
-                .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransition<TheWorldEntity>(punchPose2, punchPose3))
-                .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransitionMultiple.Builder<TheWorldEntity>(punchPose3)
+                .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<>(punchPose1, punchPose2))
+                .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransition<>(punchPose2, punchPose3))
+                .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransitionMultiple.Builder<>(punchPose3)
                         .addPose(0.5F, punchPose3)
                         .build(idlePose))
                 .build(idlePose));
@@ -468,7 +468,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
     
     @Override
     protected ModelPose<TheWorldEntity> initIdlePose() {
-        return new ModelPose<TheWorldEntity>(new RotationAngle[] {
+        return new ModelPose<>(new RotationAngle[] {
                 new RotationAngle(upperPart, 0.0F, 0.0F, 0.0F),
                 new RotationAngle(body, 0.0F, 0.2618F, 0.0F),
                 new RotationAngle(leftArm, -0.1309F, 0.0F, -0.5236F),
@@ -484,7 +484,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
 
     @Override
     protected ModelPose<TheWorldEntity> initIdlePose2Loop() {
-        return new ModelPose<TheWorldEntity>(new RotationAngle[] {
+        return new ModelPose<>(new RotationAngle[] {
                 new RotationAngle(leftArm, -0.1309F, 0.0F, -0.6109F),
                 new RotationAngle(leftForeArm, -0.3491F, 0.0873F, 0.5236F),
                 new RotationAngle(rightArm, 0.3491F, 0.0F, 0.0873F),

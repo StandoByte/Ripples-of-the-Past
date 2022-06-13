@@ -160,6 +160,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 //    private StandEntityTask scheduledTask;
     private StandEntityAction inputBuffer;
     
+    static final DataParameter<Byte> MANUAL_MOVEMENT_LOCK = EntityDataManager.defineId(StandEntity.class, DataSerializers.BYTE);
+    private ManualStandMovementLock manualMovementLocks = new ManualStandMovementLock(this);
+    
     protected StandPose standPose = StandPose.SUMMON;
     public int gradualSummonWeaknessTicks;
     public int unsummonTicks;
@@ -200,6 +203,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         entityData.define(LAST_HEAVY_PUNCH_COMBO, 0F);
         entityData.define(NO_BLOCKING_TICKS, 0);
         entityData.define(CURRENT_TASK, Optional.empty());
+        entityData.define(MANUAL_MOVEMENT_LOCK, (byte) 0);
     }
 
     @Override
@@ -217,9 +221,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             taskOptional.ifPresent(task -> {
                 StandEntityAction action = task.getAction();
                 StandEntityAction.Phase phase = task.getPhase();
-                action.playSound(this, userPower, phase, task.getTarget());
-                action.onTaskSet(level, this, userPower, phase, task.getTarget(), task.getTicksLeft());
-                action.onPhaseSet(level, this, userPower, phase, task.getTarget(), task.getTicksLeft());
+                action.playSound(this, userPower, phase, task);
+                action.onTaskSet(level, this, userPower, phase, task, task.getTicksLeft());
+                action.onPhaseSet(level, this, userPower, phase, task, task.getTicksLeft());
                 setStandPose(action.getStandPose(userPower, this));
             });
             if (!taskOptional.isPresent()) {
@@ -236,6 +240,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
         else if (BARRAGE_CLASH_OPPONENT_ID.equals(dataParameter)) {
         	barrageClashOpponent = Optional.ofNullable(level.getEntity(entityData.get(BARRAGE_CLASH_OPPONENT_ID)));
+        }
+        else if (MANUAL_MOVEMENT_LOCK.equals(dataParameter)) {
+        	this.manualMovementLocks.onEntityDataUpdated(this);
         }
     }
 
@@ -1039,7 +1046,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
     }
 
-    private void updatePosition() {
+    public void updatePosition() {
     	LivingEntity user = getUser();
     	if (user != null) {
             if (isFollowingUser()) {
@@ -1308,7 +1315,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
 
     public float getUserMovementFactor() {
-        return getCurrentTaskActionOptional().map(action -> action.getUserMovementFactor(getUserPower(), this)).orElse(1F);
+    	return getCurrentTask().map(task -> task.getAction().getUserMovementFactor(getUserPower(), this, task)).orElse(1F);
     }
     
     public void queueNextAction(StandEntityAction action) {
@@ -2070,6 +2077,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public void moveStandManually(float strafe, float forward, boolean jumping, boolean sneaking) {
         resetDeltaMovement = false;
         if (isManuallyControlled() && canMoveManually()) {
+        	strafe = manualMovementLocks.strafe(strafe);
+        	forward = manualMovementLocks.forward(forward);
+        	jumping = manualMovementLocks.up(jumping);
+        	sneaking = manualMovementLocks.down(sneaking);
             boolean input = jumping || sneaking || forward != 0 || strafe != 0;
             if (input) {
                 double speed = getAttributeValue(Attributes.MOVEMENT_SPEED);
@@ -2107,6 +2118,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
     protected boolean canMoveManually() {
         return getCurrentTaskActionOptional().map(action -> !action.lockStandManualMovement(getUserPower(), this)).orElse(true);
+    }
+    
+    public ManualStandMovementLock getManualMovementLocks() {
+    	return manualMovementLocks;
     }
 
     @Override

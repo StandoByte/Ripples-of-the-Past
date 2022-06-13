@@ -98,6 +98,12 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
             double nextX = originPoint.x + nextOriginOffset.x;
             double nextY = originPoint.y + nextOriginOffset.y;
             double nextZ = originPoint.z + nextOriginOffset.z;
+            if (!level.getChunkSource().hasChunk(MathHelper.floor(nextX / 16), MathHelper.floor(nextZ / 16))) {
+            	if (level.isClientSide()) {
+            		remove();
+            	}
+            	return false;
+            }
             setDeltaMovement(new Vector3d(nextX - getX(), nextY - getY(), nextZ - getZ()));
     
             xo = x;

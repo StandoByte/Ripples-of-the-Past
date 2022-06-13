@@ -13,6 +13,7 @@ import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.util.StacksTHC;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;
@@ -30,6 +31,7 @@ public class StandEntityTask {
     private StandEntityAction.Phase phase;
     @Nullable
     private StandRelativeOffset offsetFromUser;
+    private StacksTHC additionalData = new StacksTHC();
     
     private StandEntityTask(StandEntityAction action, int ticks, 
             StandEntityAction.Phase phase, boolean armsOnlyMode, ActionTarget target, 
@@ -137,8 +139,8 @@ public class StandEntityTask {
             return;
         }
         if (setPhase(phase, ticks)) {
-            action.playSound(standEntity, standPower, phase, target);
-            action.onPhaseSet(standEntity.level, standEntity, standPower, phase, target, ticks);
+            action.playSound(standEntity, standPower, phase, this);
+            action.onPhaseSet(standEntity.level, standEntity, standPower, phase, this, ticks);
         }
         else {
             moveToPhase(phase.getNextPhase(), standPower, standEntity);
@@ -203,6 +205,13 @@ public class StandEntityTask {
     public StandRelativeOffset getOffsetFromUser() {
         return offsetFromUser;
     }
+    
+    
+    
+    public StacksTHC getAdditionalData() {
+    	return additionalData;
+    }
+    
     
 
     public static final Supplier<DataSerializerEntry> SERIALIZER = () -> new DataSerializerEntry(
