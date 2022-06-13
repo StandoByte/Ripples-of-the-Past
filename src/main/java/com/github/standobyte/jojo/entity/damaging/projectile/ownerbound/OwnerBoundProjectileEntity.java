@@ -277,12 +277,15 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     }
     
     protected void dragTarget(Entity entity, Vector3d vec) {
-        // FIXME (!!) bumpy movement
-        entity.move(MoverType.PLAYER, vec);
+        entity.setDeltaMovement(vec);
+        entity.move(MoverType.PLAYER, entity.getDeltaMovement());
+        entity.setDeltaMovement(Vector3d.ZERO);
         if (entity instanceof StandEntity) {
             LivingEntity standUser = ((StandEntity) entity).getUser();
             if (standUser != null) {
-                standUser.move(MoverType.PLAYER, vec);
+            	standUser.setDeltaMovement(vec);
+                standUser.move(MoverType.PLAYER, entity.getDeltaMovement());
+                standUser.setDeltaMovement(Vector3d.ZERO);
             }
         }
     }

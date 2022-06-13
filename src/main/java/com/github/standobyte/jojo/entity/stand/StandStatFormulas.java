@@ -4,6 +4,8 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.power.stand.IStandPower;
+
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.MathHelper;
 
@@ -160,5 +162,9 @@ public class StandStatFormulas {
         }
         float f = (float) ((rangeMax - rangeEffective) / (2 * rangeEffective - rangeMax - distance));
         return f * f;
+    }
+    
+    public static double projectileFireRateScaling(StandEntity standEntity, IStandPower standPower) {
+    	return standEntity.getAttackSpeed() / standPower.getType().getDefaultStats().getBaseAttackSpeed();
     }
 }
