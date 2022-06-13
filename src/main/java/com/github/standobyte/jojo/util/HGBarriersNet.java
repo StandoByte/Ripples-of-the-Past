@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import com.github.standobyte.jojo.entity.damaging.projectile.HGEmeraldEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGBarrierEntity;
+import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -85,7 +86,7 @@ public class HGBarriersNet {
 	}
 
     public void shootEmeraldsFromBarriers(IStandPower standPower, HierophantGreenEntity stand, 
-    		Vector3d targetPos, int tick, double maxEmeralds, float staminaPerEmerald, double minGap) {
+    		Vector3d targetPos, int tick, double maxEmeralds, float staminaPerEmerald, double minGap, boolean breakBlocks) {
     	if (!canShoot) return;
     	List<Vector3d> shootingPoints = placedBarriers.values().stream().flatMap(points -> 
     	points.shootingPoints.stream()).collect(Collectors.toCollection(LinkedList::new));
@@ -106,7 +107,8 @@ public class HGBarriersNet {
     		if (!standPower.consumeStamina(staminaPerEmerald)) {
     			break;
     		}
-    		shootEmerald(stand, point, targetPos, tick == 0);
+    		JojoModUtil.doFractionTimes(() -> shootEmerald(stand, point, targetPos, tick == 0, breakBlocks), 
+    				StandStatFormulas.projectileFireRateScaling(stand, standPower));
     	}
     	canShoot = false;
     }
@@ -116,11 +118,11 @@ public class HGBarriersNet {
     	CLOSEST
     }
     
-    private void shootEmerald(HierophantGreenEntity stand, Vector3d shootingPos, Vector3d targetPos, boolean playSound) {
+    private void shootEmerald(HierophantGreenEntity stand, Vector3d shootingPos, Vector3d targetPos, boolean playSound, boolean breakBlocks) {
     	if (!stand.level.isClientSide()) {
     		HGEmeraldEntity emeraldEntity = new HGEmeraldEntity(stand, stand.level, null);
     		emeraldEntity.setPos(shootingPos.x, shootingPos.y, shootingPos.z);
-    		emeraldEntity.setConcentrated(true);
+    		emeraldEntity.setConcentrated(breakBlocks);
     		Vector3d shootVec = targetPos.subtract(shootingPos);
     		emeraldEntity.shoot(shootVec.x, shootVec.y, shootVec.z, 1F, stand.getProjectileInaccuracy(2.0F));
     		emeraldEntity.setDamageFactor(0.75F);

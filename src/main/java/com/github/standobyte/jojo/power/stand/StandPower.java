@@ -342,6 +342,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     @Override
     public void skipProgression(StandType<?> standType) {
+    	setProgressionSkipped();
         resolveCounter.setResolveLevel(getMaxResolveLevel());
         if (standType != null) {
             Stream.concat(

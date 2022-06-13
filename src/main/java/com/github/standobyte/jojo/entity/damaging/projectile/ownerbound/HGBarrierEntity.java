@@ -153,7 +153,7 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
                     HierophantGreenEntity stand = (HierophantGreenEntity) getOwner();
                     stand.getBarriersNet().shootEmeraldsFromBarriers(stand.getUserPower(), stand, 
                     		target.getBoundingBox().getCenter(), 0, 20 * stand.getStaminaCondition(), 
-                    		ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get().getStaminaCostTicking(stand.getUserPower()) * 0.5F, 2);
+                    		ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get().getStaminaCostTicking(stand.getUserPower()) * 0.5F, 2, false);
                     if (stand.getUser() != null) {
                         stand.getUser().hurt(DamageSource.GENERIC, 0.1F);
                     }

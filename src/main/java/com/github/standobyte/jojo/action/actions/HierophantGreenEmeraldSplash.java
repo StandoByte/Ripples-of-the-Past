@@ -43,13 +43,13 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
     	task.setOffsetFromUser(super.getOffsetFromUser(userPower, standEntity, task.getTarget()));
         if (!world.isClientSide()) {
             boolean shift = isShiftVariation();
-            double fireRate = standEntity.getAttackSpeed() / userPower.getType().getDefaultStats().getBaseAttackSpeed();
+            double fireRate = StandStatFormulas.projectileFireRateScaling(standEntity, userPower);
             if (shift) fireRate *= 2.5;
         	JojoModUtil.doFractionTimes(() -> {
                 HGEmeraldEntity emerald = new HGEmeraldEntity(standEntity, world, userPower);
                 emerald.setConcentrated(shift);
                 standEntity.shootProjectile(emerald, shift ? 2.5F : 1.5F, shift ? 1.0F : 8.0F);
-        	}, fireRate);
+        	}, shift ? fireRate * 2.5 : fireRate);
             
             HierophantGreenEntity hierophant = (HierophantGreenEntity) standEntity;
             int barriers = hierophant.getPlacedBarriersCount();
@@ -58,7 +58,7 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
                 if (rayTrace.getType() != RayTraceResult.Type.MISS) {
                     hierophant.getBarriersNet().shootEmeraldsFromBarriers(userPower, hierophant, rayTrace.getLocation(), task.getTick(), 
                     		Math.min((hierophant.getPlacedBarriersCount() / 5), 9) * hierophant.getStaminaCondition(), 
-                    		ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED.get().getStaminaCostTicking(userPower) * 0.5F, 8);
+                    		ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED.get().getStaminaCostTicking(userPower) * 0.5F, 8, true);
                 }
             }
         }
