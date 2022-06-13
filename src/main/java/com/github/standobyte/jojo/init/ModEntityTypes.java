@@ -244,16 +244,16 @@ public class ModEntityTypes {
             .summonSound(ModSounds.THE_WORLD_SUMMON));
     
     public static final RegistryObject<StandEntityType<HierophantGreenEntity>> HIEROPHANT_GREEN = ENTITIES.register("hierophant_green", 
-            () -> new StandEntityType<HierophantGreenEntity>(HierophantGreenEntity::new, ModStandTypes.HIEROPHANT_GREEN, false, 0.55F, 1.75F)
+            () -> new StandEntityType<HierophantGreenEntity>(HierophantGreenEntity::new, ModStandTypes.HIEROPHANT_GREEN, false, 0.6F, 1.9F)
             .summonSound(ModSounds.HIEROPHANT_GREEN_SUMMON));
     
     public static final RegistryObject<StandEntityType<SilverChariotEntity>> SILVER_CHARIOT = ENTITIES.register("silver_chariot", 
-            () -> new StandEntityType<SilverChariotEntity>(SilverChariotEntity::new, ModStandTypes.SILVER_CHARIOT, false, 0.6F, 1.8F)
+            () -> new StandEntityType<SilverChariotEntity>(SilverChariotEntity::new, ModStandTypes.SILVER_CHARIOT, false, 0.6F, 1.95F)
             .summonSound(ModSounds.SILVER_CHARIOT_SUMMON)
             .unsummonSound(ModSounds.SILVER_CHARIOT_UNSUMMON));
     
     public static final RegistryObject<StandEntityType<MagiciansRedEntity>> MAGICIANS_RED = ENTITIES.register("magicians_red", 
-            () -> new StandEntityType<MagiciansRedEntity>(MagiciansRedEntity::new, ModStandTypes.MAGICIANS_RED, false, 0.6F, 1.8F)
+            () -> new StandEntityType<MagiciansRedEntity>(MagiciansRedEntity::new, ModStandTypes.MAGICIANS_RED, false, 0.65F, 1.95F)
             .summonSound(ModSounds.MAGICIANS_RED_SUMMON));
 
     

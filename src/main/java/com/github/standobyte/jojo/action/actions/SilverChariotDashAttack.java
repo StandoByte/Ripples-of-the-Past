@@ -44,8 +44,8 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
     }
     
     @Override
-    public void onPhaseSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target, int ticks) {
-        super.onPhaseSet(world, standEntity, standPower, phase, target, ticks);
+    public void onPhaseSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task, int ticks) {
+        super.onPhaseSet(world, standEntity, standPower, phase, task, ticks);
         if (phase == Phase.PERFORM) {
             if (standEntity.isFollowingUser() && standEntity.getAttackSpeed() < 24) {
                 LivingEntity user = standEntity.getUser();
@@ -56,7 +56,7 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
                             user.getZ() + vec.z);
                 }
             }
-            ((SilverChariotEntity) standEntity).setDashVec(standEntity.getLookAngle().scale(10D / (double) ticks));
+            task.getAdditionalData().push(Vector3d.class, standEntity.getLookAngle().scale(10D / (double) ticks));
         }
     }
 
@@ -78,7 +78,7 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
         if (!world.isClientSide() && lastTick && standEntity.isFollowingUser()) {
         	standEntity.retractStand(false);
         }
-        standEntity.setDeltaMovement(moveForward ? ((SilverChariotEntity) standEntity).getDashVec().scale(completion * 8) : Vector3d.ZERO);
+        standEntity.setDeltaMovement(moveForward ? task.getAdditionalData().peek(Vector3d.class) : Vector3d.ZERO);
     }
     
     @Override

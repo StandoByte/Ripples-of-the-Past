@@ -33,7 +33,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeMod;
 
@@ -63,7 +62,6 @@ public class SilverChariotEntity extends StandEntity {
     
     private int ticksAfterArmorRemoval;
     private int rapierFireTicks = 0;
-    private Vector3d dashVec = Vector3d.ZERO;
 
     public SilverChariotEntity(StandEntityType<SilverChariotEntity> type, World world) {
         super(type, world);
@@ -153,14 +151,6 @@ public class SilverChariotEntity extends StandEntity {
     
     public int getTicksAfterArmorRemoval() {
         return ticksAfterArmorRemoval;
-    }
-    
-    public void setDashVec(Vector3d dashVec) {
-        this.dashVec = dashVec;
-    }
-    
-    public Vector3d getDashVec() {
-        return dashVec;
     }
     
     @Override

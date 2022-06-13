@@ -1,5 +1,8 @@
 package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 
+import java.util.UUID;
+
+import com.github.standobyte.jojo.entity.stand.ManualStandMovementLock.InputDirection;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 import com.github.standobyte.jojo.init.ModActions;
@@ -15,13 +18,16 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
+	private static final UUID MANUAL_MOVEMENT_LOCK = UUID.fromString("ccf94bd5-8f0f-4d1e-b606-ba0773d963f3");
     private IStandPower userStandPower;
     private boolean bindEntities;
     private StandEntity stand;
     private boolean placedBarrier = false;
+    private boolean caughtAnEntity = false;
 
     public HGGrapplingStringEntity(World world, StandEntity entity, IStandPower userStand) {
         super(ModEntityTypes.HG_GRAPPLING_STRING.get(), entity, world);
+        this.stand = entity;
         this.userStandPower = userStand;
     }
     
@@ -30,16 +36,24 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
     }
     
     @Override
+    public void remove() {
+    	super.remove();
+    	if (!level.isClientSide() && stand != null && caughtAnEntity) {
+    		stand.getManualMovementLocks().removeLock(MANUAL_MOVEMENT_LOCK);
+    	}
+    }
+    
+    @Override
     public void tick() {
         super.tick();
         if (!isAlive()) {
             return;
         }
-        if (!level.isClientSide()) {
-            if (userStandPower == null || userStandPower.getHeldAction() != (bindEntities ? ModActions.HIEROPHANT_GREEN_GRAPPLE_ENTITY.get() : ModActions.HIEROPHANT_GREEN_GRAPPLE.get())) {
-                remove();
-                return;
-            }
+        if (!level.isClientSide() && (userStandPower == null || userStandPower.getHeldAction() != (
+        		bindEntities ? ModActions.HIEROPHANT_GREEN_GRAPPLE_ENTITY.get() : 
+        			ModActions.HIEROPHANT_GREEN_GRAPPLE.get()))) {
+        	remove();
+        	return;
         }
         LivingEntity bound = getEntityAttachedTo();
         if (bound != null) {
@@ -56,6 +70,9 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
                     dragTarget(bound, vecToOwner.normalize().scale(2));
                     bound.fallDistance = 0;
                 }
+                else if (!level.isClientSide()) {
+                	remove();
+                }
             }
         }
     }
@@ -71,18 +88,19 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
             Vector3d vecFromOwner = position().subtract(owner.position());
             if (vecFromOwner.lengthSqr() > 4) {
                 Vector3d grappleVec = vecFromOwner.normalize().scale(2);
-                owner.setDeltaMovement(grappleVec);
-                owner.fallDistance = 0;
+                LivingEntity entity = owner;
                 if (stand == null && owner instanceof StandEntity) {
-                    stand = (StandEntity) owner;
+                	stand = (StandEntity) owner;
                 }
                 if (stand != null && stand.isFollowingUser()) {
                     LivingEntity user = stand.getUser();
                     if (user != null) {
-                    	user.setDeltaMovement(grappleVec);
-                        user.fallDistance = 0;
+                    	entity = user;
                     }
                 }
+                // FIXME (!!!) when i let go, hierophant sometimes lags behind for a while
+                entity.setDeltaMovement(grappleVec);
+                entity.fallDistance = 0;
             }
             else if (!level.isClientSide()) {
             	remove();
@@ -121,7 +139,7 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
     	}
     	if (owner instanceof StandEntity) {
     		StandEntity stand = (StandEntity) getOwner();
-    		return !entity.is(stand.getUser()) || stand.isManuallyControlled();
+    		return !entity.is(stand.getUser()) || !stand.isFollowingUser();
     	}
         return true;
     }
@@ -132,6 +150,10 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
             if (target instanceof LivingEntity) {
                 attachToEntity((LivingEntity) target);
                 playSound(ModSounds.HIEROPHANT_GREEN_GRAPPLE_CATCH.get(), 1.0F, 1.0F);
+            	caughtAnEntity = true;
+                if (stand != null/* && (target.isVehicle() || target.getType() == EntityType.PLAYER*/) {
+                	stand.getManualMovementLocks().addLock(MANUAL_MOVEMENT_LOCK, InputDirection.RIGHT, InputDirection.FORWARD);
+                }
                 return true;
             }
         }

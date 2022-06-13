@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.action.actions;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
@@ -75,7 +74,7 @@ public final class StandEntityUnsummon extends StandEntityAction {
     }
     
     @Override
-    public SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target) {
+    public SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task) {
         return standEntity.getStandUnsummonSound();
     }
     

@@ -17,8 +17,10 @@ import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.Pose;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
@@ -57,6 +59,11 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
     
     public float getScale() {
     	return scale;
+    }
+
+    @Override
+    public EntitySize getDimensions(Pose pose) {
+    	return super.getDimensions(pose).scale(scale);
     }
 
     @Override

@@ -19,7 +19,8 @@ import net.minecraft.world.World;
 public class HGEmeraldEntity extends ModdedProjectileEntity {
     @Nullable
     private IStandPower userStandPower;
-    private boolean concentrated;
+    private boolean lowerKnockback;
+    private boolean breakBlocks;
 
     public HGEmeraldEntity(LivingEntity shooter, World world, @Nullable IStandPower standPower) {
         super(ModEntityTypes.HG_EMERALD.get(), shooter, world);
@@ -43,13 +44,15 @@ public class HGEmeraldEntity extends ModdedProjectileEntity {
     @Override
     protected DamageSource getDamageSource(LivingEntity owner) {
     	DamageSource dmgSource = super.getDamageSource(owner);
-    	((IModdedDamageSource) dmgSource).setKnockbackReduction(0.25F);
+    	if (lowerKnockback) {
+    		((IModdedDamageSource) dmgSource).setKnockbackReduction(0.5F);
+    	}
     	return dmgSource;
     }
 
     @Override
     protected float getMaxHardnessBreakable() {
-        return concentrated ? 1.5F : 0.0F;
+        return breakBlocks ? 1.5F : 0.0F;
     }
 
     @Override
@@ -57,8 +60,12 @@ public class HGEmeraldEntity extends ModdedProjectileEntity {
         return 100;
     }
     
-    public void setConcentrated(boolean concentrated) {
-        this.concentrated = concentrated;
+    public void setLowerKnockback(boolean lowerKnockback) {
+    	this.lowerKnockback = lowerKnockback;
+    }
+    
+    public void setBreakBlocks(boolean breakBlocks) {
+        this.breakBlocks = breakBlocks;
     }
 
     @Override

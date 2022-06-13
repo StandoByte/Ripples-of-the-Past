@@ -39,15 +39,21 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
 //    }
     
     @Override
-    public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
+    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
     	task.setOffsetFromUser(super.getOffsetFromUser(userPower, standEntity, task.getTarget()));
+    	standEntity.updatePosition();
+    }
+    
+    @Override
+    public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
             boolean shift = isShiftVariation();
             double fireRate = StandStatFormulas.projectileFireRateScaling(standEntity, userPower);
             if (shift) fireRate *= 2.5;
         	JojoModUtil.doFractionTimes(() -> {
                 HGEmeraldEntity emerald = new HGEmeraldEntity(standEntity, world, userPower);
-                emerald.setConcentrated(shift);
+                emerald.setBreakBlocks(shift);
+                emerald.setLowerKnockback(!shift);
                 standEntity.shootProjectile(emerald, shift ? 2.5F : 1.5F, shift ? 1.0F : 8.0F);
         	}, shift ? fireRate * 2.5 : fireRate);
             
@@ -98,13 +104,18 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
     }
     
     @Override
-    public boolean isChainable(IStandPower standPower, StandEntity standEntity) {
+    protected boolean isChainable(IStandPower standPower, StandEntity standEntity) {
+    	return true;
+    }
+    
+    @Override
+    public boolean isFreeRecovery(IStandPower standPower, StandEntity standEntity) {
     	return true;
     }
     
     @Override
     protected boolean isCancelable(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction, Phase phase) {
-    	return phase == Phase.RECOVERY && newAction != null && newAction.getShiftVariationIfPresent() == this.getShiftVariationIfPresent();
+    	return phase == Phase.RECOVERY || super.isCancelable(standPower, standEntity, newAction, phase);
     }
 
     @Override

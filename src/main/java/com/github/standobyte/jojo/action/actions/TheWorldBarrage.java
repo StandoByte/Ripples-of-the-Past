@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
@@ -25,13 +26,13 @@ public class TheWorldBarrage extends StandEntityMeleeBarrage {
     }
     
     @Override
-    public SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase, ActionTarget target) {
+    public SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task) {
         if (Optional.ofNullable(standPower.getUser()).map(
                 user -> user.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).map(
                         cap -> cap.lastVoiceLineTriggered).orElse(false))
                 .orElse(false)) {
             return null;
         }
-        return super.getSound(standEntity, standPower, phase, target);
+        return super.getSound(standEntity, standPower, phase, task);
     }
 }
