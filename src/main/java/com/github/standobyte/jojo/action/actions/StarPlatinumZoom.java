@@ -50,8 +50,8 @@ public class StarPlatinumZoom extends StandEntityAction {
     }
     
     @Override
-    public void stoppedHolding(World world, LivingEntity user, IStandPower power, int ticksHeld) {
-        super.stoppedHolding(world, user, power, ticksHeld);
+    public void stoppedHolding(World world, LivingEntity user, IStandPower power, int ticksHeld, boolean willFire) {
+        super.stoppedHolding(world, user, power, ticksHeld, willFire);
         if (world.isClientSide) {
             ClientEventHandler.getInstance().isZooming = false;
         }

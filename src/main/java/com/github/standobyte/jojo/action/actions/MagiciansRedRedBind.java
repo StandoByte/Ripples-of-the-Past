@@ -31,7 +31,7 @@ public class MagiciansRedRedBind extends StandEntityAction {
     }
     
     @Override
-    public void stoppedHolding(World world, LivingEntity user, IStandPower power, int ticksHeld) {
+    public void stoppedHolding(World world, LivingEntity user, IStandPower power, int ticksHeld, boolean willFire) {
         invokeForStand(power, stand -> {
             if (stand.getCurrentTaskAction() == this) {
                 if (stand.willHeavyPunchCombo() && getLandedRedBind(stand).isPresent()) {

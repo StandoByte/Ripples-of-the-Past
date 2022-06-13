@@ -159,7 +159,7 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
             if (small) {
                 dmgSource.setBypassInvulTicksInEvent();
             }
-            level.explode(this, dmgSource.setExplosion(), null, getX(), getY(), getZ(), (small ? 0.5F : 3.0F) * getScale(), false, Explosion.Mode.NONE);
+            level.explode(this, dmgSource.setExplosion(), null, getX(), getY(), getZ(), (small ? 1.0F : 3.0F) * getScale(), false, Explosion.Mode.NONE);
         }
     }
     

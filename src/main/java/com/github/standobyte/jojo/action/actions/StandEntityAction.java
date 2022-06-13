@@ -197,11 +197,16 @@ public abstract class StandEntityAction extends StandAction {
     
     @Override
     public void startedHolding(World world, LivingEntity user, IStandPower power, ActionTarget target, boolean requirementsFulfilled) {
-        if (!world.isClientSide() && requirementsFulfilled) {
-            invokeForStand(power, stand -> setAction(power, stand, 
-                    !holdOnly() ? getHoldDurationToFire(power) : getHoldDurationMax(power), 
-                    !holdOnly() ? Phase.BUTTON_HOLD : Phase.PERFORM, 
-                    target));
+        if (requirementsFulfilled) {
+            invokeForStand(power, stand -> {
+	    		preTaskInit(world, power, stand, target);
+	    		if (!world.isClientSide()) {
+		    		setAction(power, stand, 
+	                    !holdOnly() ? getHoldDurationToFire(power) : getHoldDurationMax(power), 
+	                    !holdOnly() ? Phase.BUTTON_HOLD : Phase.PERFORM, 
+	                    target);
+	    		}
+            });
         }
     }
     
@@ -212,25 +217,35 @@ public abstract class StandEntityAction extends StandAction {
     public boolean isHeldSentToTracking() {
         return true;
     }
-    
+
     @Override
-    public void stoppedHolding(World world, LivingEntity user, IStandPower power, int ticksHeld) {
-        invokeForStand(power, stand -> {
-            if (stand.getCurrentTaskAction() == this) {
-                stand.stopTaskWithRecovery();
-            }
-        });
+    public void stoppedHolding(World world, LivingEntity user, IStandPower power, int ticksHeld, boolean willFire) {
+    	if (!willFire) {
+	        invokeForStand(power, stand -> {
+	            if (stand.getCurrentTaskAction() == this) {
+	                stand.stopTaskWithRecovery();
+	            }
+	        });
+    	}
     }
 
     @Override
     protected final void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
     	invokeForStand(power, stand -> {
-    		preTaskInit(world, power, stand, target);
-    		if (!world.isClientSide()) {
-    			int windupTicks = getStandWindupTicks(power, stand);
-    			int ticks = windupTicks > 0 ? windupTicks : getStandActionTicks(power, stand);
-    			Phase phase = windupTicks > 0 ? Phase.WINDUP : Phase.PERFORM;
-    			setAction(power, stand, ticks, phase, target);
+    		if (stand.getCurrentTask().map(task -> {
+    			if (task.getPhase() == Phase.BUTTON_HOLD) {
+    				task.moveToPhase(Phase.WINDUP, power, stand);
+    				return false;
+    			}
+    			return true;
+    		}).orElse(true)) {
+	    		preTaskInit(world, power, stand, target);
+	    		if (!world.isClientSide()) {
+	    			int windupTicks = getStandWindupTicks(power, stand);
+	    			int ticks = windupTicks > 0 ? windupTicks : getStandActionTicks(power, stand);
+	    			Phase phase = windupTicks > 0 ? Phase.WINDUP : Phase.PERFORM;
+	    			setAction(power, stand, ticks, phase, target);
+	    		}
     		}
     	});
     }

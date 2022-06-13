@@ -200,7 +200,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     protected void holdTick(World world, LivingEntity user, P power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {}
     
-    public void stoppedHolding(World world, LivingEntity user, P power, int ticksHeld) {}
+    public void stoppedHolding(World world, LivingEntity user, P power, int ticksHeld, boolean willFire) {}
     
     public boolean isHeldSentToTracking() {
         return false;

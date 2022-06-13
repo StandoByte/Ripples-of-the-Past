@@ -114,7 +114,7 @@ public class StandEntityTask {
         }
         
         ticksLeft--;
-        if (ticksLeft <= 0) {
+        if (ticksLeft <= 0 && phase != StandEntityAction.Phase.BUTTON_HOLD) {
             moveToPhase(phase.getNextPhase(), standPower, standEntity);
         }
     }
@@ -124,8 +124,11 @@ public class StandEntityTask {
             standEntity.stopTask();
             return;
         }
+        
         int ticks;
         switch (phase) {
+        case BUTTON_HOLD:
+        	return;
         case WINDUP:
             ticks = action.getStandWindupTicks(standPower, standEntity);
             break;
