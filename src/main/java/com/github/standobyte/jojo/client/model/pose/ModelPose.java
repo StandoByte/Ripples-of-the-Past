@@ -13,7 +13,7 @@ public class ModelPose<T extends Entity> implements IModelPose<T> {
     private UnaryOperator<Float> easingFunc = x -> x;
     private ModelAnim<T> additionalAnim = null;
 
-    public ModelPose(RotationAngle[] rotations) {
+    public ModelPose(RotationAngle... rotations) {
         for (RotationAngle rotation : rotations) {
             putRotation(rotation);
         }
@@ -58,6 +58,14 @@ public class ModelPose<T extends Entity> implements IModelPose<T> {
         if (additionalAnim != null) {
             additionalAnim.setupAnim(rotationAmount, entity, ticks, yRotationOffset, xRotation);
         }
+    }
+    
+    public ModelPose<T> copy() {
+    	ModelPose<T> pose = new ModelPose<T>();
+    	this.rotations.forEach((key, value) -> pose.rotations.put(key, value));
+    	pose.easingFunc = this.easingFunc;
+    	pose.additionalAnim = this.additionalAnim;
+    	return pose;
     }
     
     

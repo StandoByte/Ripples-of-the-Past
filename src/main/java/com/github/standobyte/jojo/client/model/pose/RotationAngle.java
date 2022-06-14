@@ -39,12 +39,8 @@ public class RotationAngle {
         modelRenderer.zRot = lerp.apply(rotationAmount, modelRenderer.zRot, angleZ);
     }
     
-    private boolean wrapDegrees() {
-    	return wrapDegrees;
-    }
-    
     private TernaryOperator<Float> getLerp() {
-    	return wrapDegrees() ? MathUtil::rotLerpRad : MathHelper::lerp;
+    	return wrapDegrees ? MathUtil::rotLerpRad : MathHelper::lerp;
     }
     
     private static interface TernaryOperator<T> {
