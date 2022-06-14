@@ -213,7 +213,7 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
                 new RotationAngle(beakLower, 0.5236F, 0.0F, 0.0F),
                 RotationAngle.fromDegrees(leftArm, -60F, 0.0F, -45F),
                 RotationAngle.fromDegrees(leftForeArm, 0.0F, 0.0F, 50F),
-                RotationAngle.fromDegrees(rightArm, 45F, -10F, 10F).noDegreesWrapping(),
+                RotationAngle.fromDegrees(rightArm, 45F, -10F, 10F),
                 RotationAngle.fromDegrees(rightForeArm, 0F, 0F, 0F),
                 RotationAngle.fromDegrees(leftLeg, 45F, 45F, 0F),
                 RotationAngle.fromDegrees(rightLeg, -105F, 30F, 30F),
@@ -223,17 +223,18 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
                 RotationAngle.fromDegrees(head, -45F, -10F, 0F), 
                 RotationAngle.fromDegrees(body, -59.3179F, -27.034F, 37.4537F),
                 RotationAngle.fromDegrees(leftArm, -135F, -15F, 30F),
-                // FIXME (!!) change rotation direction to and from the angle (don't forget about RB rotations)
                 RotationAngle.fromDegrees(rightArm, -180F, 30F, -45F).noDegreesWrapping(),
                 RotationAngle.fromDegrees(rightForeArm, 0F, 0F, -45F),
                 RotationAngle.fromDegrees(leftLeg, 50F, 45F, 0F),
                 RotationAngle.fromDegrees(rightLeg, -42.6168F, 9.6867F, 44.9391F),
                 RotationAngle.fromDegrees(rightLowerLeg, 0F, 0F, 0F)
         });
+        ModelPose<MagiciansRedEntity> kickRecoveryArmHackyFix = ((ModelPose<MagiciansRedEntity>) idlePose).copy()
+        		.putRotation(new RotationAngle(rightArm, 0.1309F, 0.0F, 0.4363F).noDegreesWrapping());
         actionAnim.put(StandPose.HEAVY_ATTACK_COMBO, new StandActionAnimation.Builder<MagiciansRedEntity>()
                 .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<>(kickPose1, kickPose2))
                 .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransition<>(kickPose2, kickPose3))
-                .build(idlePose));
+                .build(kickRecoveryArmHackyFix));
         
         actionAnim.put(MagiciansRedRedBind.RED_BIND_POSE, new StandActionAnimation.Builder<MagiciansRedEntity>()
                 .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<>(new RotationAngle[] {

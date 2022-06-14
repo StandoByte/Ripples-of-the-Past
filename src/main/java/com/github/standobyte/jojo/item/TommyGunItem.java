@@ -69,7 +69,7 @@ public class TommyGunItem extends Item {
                     bullet.shootFromRotation(entity, 20F, 0);
                     world.addFreshEntity(bullet);
                     consumeAmmo(stack);
-                    // FIXME (!) gun shot visual effect
+                    // TODO gun shot visual effect
                 }
             }
             else {

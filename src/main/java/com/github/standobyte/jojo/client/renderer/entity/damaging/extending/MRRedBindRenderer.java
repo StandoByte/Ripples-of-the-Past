@@ -35,7 +35,6 @@ public class MRRedBindRenderer extends ExtendingEntityRenderer<MRRedBindEntity, 
         }
     }
     
-    // FIXME (!) fix the RB rotations code
     private static final Vector3f bodyWindup = scale(new Vector3f(-49.1066F, -20.7048F, 22.2077F), MathUtil.DEG_TO_RAD);
     private static final Vector3f leftArmWindup = new Vector3f(0.3054F, 0.0F, -0.2182F);
     private static final Vector3f leftForeArmWindup = new Vector3f(-2.0944F, -0.2618F, 1.0472F);

@@ -1534,6 +1534,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return hand;
     }
 
+    // FIXME rewrite the swing animation code
     @Override
     public void swing(Hand hand) {
         if (tickCount - lastSwingTick > 1) {
@@ -1639,8 +1640,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
 
     private int getCurrentSwingDuration() {
-        double attackSpeed = getAttackSpeed();
-        return attackSpeed < 10D ? (int) (20D / attackSpeed) : 2;
+//        double attackSpeed = getAttackSpeed();
+//        return attackSpeed < 10D ? (int) (20D / attackSpeed) : 2;
+    	return 2;
     }
     
     public float getComboMeter() {

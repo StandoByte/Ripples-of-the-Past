@@ -178,7 +178,7 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
     @Override
     public int ticksLifespan() {
         return isAttachedToAnEntity() ? 
-                isInKickCombo() ? 200 : 100
+                isInKickCombo() ? Integer.MAX_VALUE : 100
                 : 7;
     }
     

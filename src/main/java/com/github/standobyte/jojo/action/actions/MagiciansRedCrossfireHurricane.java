@@ -30,6 +30,7 @@ public class MagiciansRedCrossfireHurricane extends StandEntityAction {
     @Override
     public void standTickButtonHold(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
     	if (!world.isClientSide()) {
+    		// FIXME consume fire blocks around the stand
     		if (false) {
     			task.getAdditionalData().push(Integer.class, task.getAdditionalData().pop(Integer.class) + 1);
     		}
