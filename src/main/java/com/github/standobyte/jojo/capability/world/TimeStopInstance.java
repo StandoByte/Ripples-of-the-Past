@@ -11,7 +11,6 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopInstancePacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 import com.github.standobyte.jojo.util.utils.TimeUtil;
@@ -93,7 +92,7 @@ public class TimeStopInstance {
                     if (action != null) {
                         staminaCost += action.getStaminaCostTicking(power);
                     }
-                    if (!power.consumeStamina(staminaCost) && !StandUtil.standIgnoresStaminaDebuff(power)) {
+                    if (!power.consumeStamina(staminaCost)) {
                         power.setStamina(0);
                         return true;
                     }

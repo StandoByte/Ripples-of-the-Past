@@ -842,7 +842,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 if (userPower.usesStamina()) {
                     float staminaCost = StandStatFormulas.getBlockStaminaCost(damageAmount);
                     float stamina = userPower.getStamina();
-                    if (!userPower.consumeStamina(staminaCost) && !StandUtil.standIgnoresStaminaDebuff(userPower)) {
+                    if (!userPower.consumeStamina(staminaCost)) {
                         blockedRatio = stamina / staminaCost;
                         standCrash();
                     }
