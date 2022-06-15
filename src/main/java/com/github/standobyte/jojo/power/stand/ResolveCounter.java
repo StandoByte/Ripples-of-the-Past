@@ -33,7 +33,7 @@ public class ResolveCounter {
     public static final float RESOLVE_DMG_REDUCTION = 0.6667F;
     public static final Double[] DEFAULT_MAX_RESOLVE_VALUES = {2500.0, 5000.0, 10000.0, 20000.0, 15000.0};
     private static final float RESOLVE_DECAY = 2F;
-    private static final int RESOLVE_NO_DECAY_TICKS = 200;
+    private static final int RESOLVE_NO_DECAY_TICKS = 400;
     private static final float RESOLVE_FOR_DMG_POINT = 1F;
     private static final int[] RESOLVE_EFFECT_MIN = {300, 400, 500, 600, 600};
     private static final int[] RESOLVE_EFFECT_MAX = {600, 1200, 1500, 1800, 2400};
@@ -95,7 +95,12 @@ public class ResolveCounter {
         else {
             if (noResolveDecayTicks > 0) {
                 noResolveDecayTicks--;
-                if (noResolveDecayTicks == 0) {
+                if (noResolveDecayTicks > 0) {
+                	if (!stand.isActive()) {
+                		noResolveDecayTicks--;
+                	}
+                }
+                else {
                     if (saveNextRecord) {
                         saveNextRecord = false;
                     }
@@ -187,8 +192,11 @@ public class ResolveCounter {
         }
     }
 
-    public void addResolveValue(float resolve) {
+    public void addResolveValue(float resolve, LivingEntity user) {
         setResolveValue(getResolveValue() + boostAddedValue(resolve, stand.getUser()), RESOLVE_NO_DECAY_TICKS);
+        if (user.hasEffect(ModEffects.RESOLVE.get())) {
+            setResolveValue(Math.max(getMaxResolveValue() * 0.5F, getResolveValue()), 0);
+        }
     }
     
     
@@ -258,10 +266,7 @@ public class ResolveCounter {
         if (stand.usesResolve()) {
             LivingEntity user = stand.getUser();
             float points = dmgAmount * RESOLVE_FOR_DMG_POINT;
-            addResolveValue(points);
-            if (user.hasEffect(ModEffects.RESOLVE.get())) {
-                setResolveValue(Math.max(getMaxResolveValue() * 0.5F, getResolveValue()), 0);
-            }
+            addResolveValue(points, user);
             if (!user.level.isClientSide() && boostAttack < BOOST_ATTACK_MAX) {
                 float boost = dmgAmount * BOOST_PER_DMG_DEALT;
                 boostAttack = Math.min(boostAttack + boost, BOOST_ATTACK_MAX);
@@ -280,8 +285,13 @@ public class ResolveCounter {
                 hp = Math.min(hp, hpOnGettingAttacked);
             }
             hpOnGettingAttacked = hp;
+            
             if (user instanceof ServerPlayerEntity) {
                 PacketManager.sendToClient(new ResolveBoostsPacket(boostAttack, boostRemoteControl, boostChat, hpOnGettingAttacked), (ServerPlayerEntity) user);
+            }
+            
+            if (dmgAmount >= user.getMaxHealth() * 0.4F) {
+                addResolveValue(dmgAmount * BOOST_PER_DMG_DEALT * 2, user);
             }
         }
     }

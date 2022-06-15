@@ -12,7 +12,7 @@ import com.github.standobyte.jojo.power.IPower.PowerClassification;
 public class ActionsModeConfig<P extends IPower<P, ?>> {
     final PowerClassification powerClassification;
     private P power;
-    boolean chosenManually;
+    boolean autoOpened;
     
     private int selectedAttack = 0;
     private int selectedAbility = 0;
