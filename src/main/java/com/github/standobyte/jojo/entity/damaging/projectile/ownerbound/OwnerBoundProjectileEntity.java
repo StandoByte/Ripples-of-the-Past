@@ -159,7 +159,7 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
                     useBodyRotation ? MathHelper.lerp(partialTick, owner.yBodyRotO, owner.yBodyRot) : MathHelper.lerp(partialTick, owner.yRotO, owner.yRot), 
                             MathHelper.lerp(partialTick, owner.xRotO, owner.xRot));
         }
-        return partialTick == 1.0F ? position() : getPosition(partialTick);
+        return JojoModUtil.getEntityPosition(this, partialTick);
     }
     
     public boolean isBodyPart() {

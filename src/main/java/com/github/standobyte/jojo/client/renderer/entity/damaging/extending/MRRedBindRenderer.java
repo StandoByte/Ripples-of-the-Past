@@ -6,6 +6,7 @@ import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.client.model.entity.ownerbound.repeating.MRRedBindModel;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.MRRedBindEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 import com.github.standobyte.jojo.util.utils.MathUtil;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -108,7 +109,7 @@ public class MRRedBindRenderer extends ExtendingEntityRenderer<MRRedBindEntity, 
             if (magiciansRed.getCurrentTask().isPresent()) {
                 StandEntityAction.Phase phase = magiciansRed.getCurrentTaskPhase().get();
                 float anim = magiciansRed.getCurrentTaskCompletion(partialTick);
-                originPos = entity.getOwner().getPosition(partialTick).add(0, entity.getOwner().getBbHeight() * 0.75F, 0);
+                originPos = JojoModUtil.getEntityPosition(entity.getOwner(), partialTick).add(0, entity.getOwner().getBbHeight() * 0.75F, 0);
                 Vector3d shoulder = new Vector3d(0, -0.234375, 0);
                 Vector3d foreArm = new Vector3d(0, -0.234375, 0);
                 float yRot = 180F - MathHelper.lerp(partialTick, entity.getOwner().yRotO, entity.getOwner().yRot);

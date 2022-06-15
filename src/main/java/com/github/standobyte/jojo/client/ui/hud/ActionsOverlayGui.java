@@ -896,7 +896,7 @@ public class ActionsOverlayGui extends AbstractGui {
     
     public boolean setMode(@Nullable PowerClassification power) {
         if (power == null) {
-            return setMode(null, true);
+            return setPowerMode(null);
         }
         else {
             ActionsModeConfig<?> chosenMode = null;
@@ -908,7 +908,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 chosenMode = standUiMode;
                 break;
             }
-            return setMode(chosenMode, true);
+            return setPowerMode(chosenMode);
         }
     }
     
@@ -924,10 +924,9 @@ public class ActionsOverlayGui extends AbstractGui {
         for (int i = 1; i <= modes || !setMode(modesOrder[(iCurrent + i) % modes]); i++);
     }
     
-    private boolean setMode(@Nullable ActionsModeConfig<?> mode, boolean chosenManually) {
+    private boolean setPowerMode(@Nullable ActionsModeConfig<?> mode) {
         if (mode != null && currentMode != mode) {
             if (mode.getPower().hasPower()) {
-                mode.chosenManually = chosenManually;
                 modeSelectorTransparency.reset();
                 if (currentMode != null) {
                     if (mode != nonStandUiMode) {
@@ -959,7 +958,8 @@ public class ActionsOverlayGui extends AbstractGui {
 
     public void onStandSummon() {
         if (currentMode != standUiMode) {
-            setMode(standUiMode, false);
+            setPowerMode(standUiMode);
+            standUiMode.autoOpened = true;
         }
     }
 
@@ -969,11 +969,12 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     private void tickStandUnsummonCheck() {
-    	if (currentMode == standUiMode && !standUiMode.chosenManually) {
+    	if (currentMode == standUiMode && standUiMode.autoOpened) {
     		IStandPower standPower = standUiMode.getPower();
     		if (standPower == null || !standPower.hasPower() || !standPower.isActive()) {
     			if (switchOffStandHud) {
-    				setMode(null, false);
+    				setMode(null);
+    				standUiMode.autoOpened = true;
     			}
                 switchOffStandHud = false;
     		}
@@ -1058,7 +1059,7 @@ public class ActionsOverlayGui extends AbstractGui {
     
     
     public void updatePowersCache() {
-        setMode(null, true);
+        setMode(null);
         standUiMode.setPower(IStandPower.getPlayerStandPower(mc.player));
         nonStandUiMode.setPower(INonStandPower.getPlayerNonStandPower(mc.player));
     }

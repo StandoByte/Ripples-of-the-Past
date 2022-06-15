@@ -124,6 +124,12 @@ public class JojoModUtil {
     
     
     
+    public static Vector3d getEntityPosition(Entity entity, float partialTick) {
+    	return partialTick == 1.0F ? entity.position() : entity.getPosition(partialTick);
+    }
+    
+    
+    
     public static RayTraceResult rayTrace(Entity entity, double reachDistance, @Nullable Predicate<Entity> entityFilter) {
         return rayTrace(entity, reachDistance, entityFilter, 0);
     }

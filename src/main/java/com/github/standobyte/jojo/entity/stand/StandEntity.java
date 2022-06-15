@@ -767,7 +767,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                     float damageAfterAbsorption = Math.max(damageAmount - getAbsorptionAmount(), 0.0F);
                     setAbsorptionAmount(getAbsorptionAmount() - (damageAmount - damageAfterAbsorption));
                     float absorbedDamage = damageAmount - damageAfterAbsorption;
-                    if (absorbedDamage > 0.0F && absorbedDamage < 3.4028235E37F && dmgSource.getEntity() instanceof ServerPlayerEntity) {
+                    if (absorbedDamage > 0.0F && absorbedDamage < Float.MAX_VALUE / 10F && dmgSource.getEntity() instanceof ServerPlayerEntity) {
                         ((ServerPlayerEntity) dmgSource.getEntity()).awardStat(Stats.DAMAGE_DEALT_ABSORBED, Math.round(absorbedDamage * 10.0F));
                     }
                     damageAmount = damageAfterAbsorption;

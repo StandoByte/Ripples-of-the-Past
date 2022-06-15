@@ -95,7 +95,7 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
     @Override
     public Vector3d getOriginPoint(float partialTick) {
         return originBlockPos == null
-                ? standUser == null ? position() : standUser.getPosition(partialTick)
+                ? standUser == null ? position() : JojoModUtil.getEntityPosition(standUser, partialTick)
                         : Vector3d.atCenterOf(originBlockPos);
     }
 
