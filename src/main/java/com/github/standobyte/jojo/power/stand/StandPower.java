@@ -195,7 +195,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             return true;
         }
         setStamina(0);
-        return false;
+        return StandUtil.standIgnoresStaminaDebuff(this);
     }
     
     @Override
