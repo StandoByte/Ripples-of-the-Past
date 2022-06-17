@@ -6,6 +6,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRFlameEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
@@ -33,7 +34,7 @@ public class MagiciansRedFlameBurst extends StandEntityAction {
                         standEntity.yRot + (random.nextFloat() - 0.5F) * 10F, 
                         0, velocity, 0.0F);
                 standEntity.addProjectile(flame);
-        	}, standEntity.getAttackSpeed() / userPower.getType().getDefaultStats().getBaseAttackSpeed());
+        	}, StandStatFormulas.projectileFireRateScaling(standEntity, userPower));
         }
         else {
             standEntity.playSound(ModSounds.MAGICIANS_RED_FIRE_BLAST.get(), 0.5F, 0.3F + random.nextFloat() * 0.4F, ClientUtil.getClientPlayer());

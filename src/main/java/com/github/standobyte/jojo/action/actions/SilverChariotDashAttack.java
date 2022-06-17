@@ -5,7 +5,6 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.entity.stand.StandEntity.PunchType;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
@@ -69,11 +68,11 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
         	for (RayTraceResult rayTraceResult : JojoModUtil.rayTraceMultipleEntities(standEntity, 
         			standEntity.getAttributeValue(ForgeMod.REACH_DISTANCE.get()), 
         			standEntity.canTarget(), 0.25, standEntity.getPrecision())) {
-        		standEntity.attackTarget(ActionTarget.fromRayTraceResult(rayTraceResult), PunchType.HEAVY_NO_COMBO, this, 1, null);
+            	standEntity.punch(this, getPunch(), ActionTarget.fromRayTraceResult(rayTraceResult));
         	}
         }
         else if (!Vector3d.ZERO.equals(standEntity.getDeltaMovement())) {
-        	standEntity.punch(PunchType.HEAVY_NO_COMBO, task.getTarget(), this);
+        	standEntity.punch(this, getPunch(), task.getTarget());
         }
         if (!world.isClientSide() && lastTick && standEntity.isFollowingUser()) {
         	standEntity.retractStand(false);

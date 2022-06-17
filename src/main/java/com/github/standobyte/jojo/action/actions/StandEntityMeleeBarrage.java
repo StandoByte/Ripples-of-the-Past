@@ -5,11 +5,13 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.entity.stand.StandAttackProperties;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
@@ -62,7 +64,12 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
                 swing(standEntity);
             }
         }
-        standEntity.barrageTickPunches(task.getTarget(), this, hitsThisTick);
+        int barrageHits = hitsThisTick;
+        standEntity.addBarrageParryCount(barrageHits);
+        standEntity.punch(this, 
+        		getPunch()
+        		.doFirst((punch, stand, target) -> punch.get().barrageHits(barrageHits)), 
+        		task.getTarget());
     }
     
     @Override
@@ -159,9 +166,17 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
     	public Builder() {
     		super();
     		standAutoSummonMode(AutoSummonMode.ARMS).holdType().staminaCostTick(3F)
-            .standUserSlowDownFactor(0.3F).standOffsetFront();
+            .standUserSlowDownFactor(0.3F).standOffsetFront()
+            .targetPunchProperties((p, stand, target) -> {
+            	StandAttackProperties punch = p.get();
+            	return punch
+            			.damage(StandStatFormulas.getBarrageHitDamage(stand.getAttackDamage(), stand.getPrecision()) * punch.getBarrageHits())
+            			.addCombo(0.005F)
+            			.reduceKnockback(0.1F)
+            			.setPunchSound(ModSounds.STAND_BARRAGE_ATTACK.get());
+            });
     	}
-
+        
 		@Override
 		protected Builder getThis() {
 			return this;

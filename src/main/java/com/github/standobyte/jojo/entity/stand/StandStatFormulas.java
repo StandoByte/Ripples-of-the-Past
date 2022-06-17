@@ -2,16 +2,13 @@ package com.github.standobyte.jojo.entity.stand;
 
 import java.util.Random;
 
-import javax.annotation.Nullable;
-
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.MathHelper;
 
 public class StandStatFormulas {
 
-    public static float getHeavyAttackDamage(double strength, @Nullable LivingEntity armoredTarget) {
+    public static float getHeavyAttackDamage(double strength) {
         float damage = Math.max((float) strength, 1F);
         return damage;
     }

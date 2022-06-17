@@ -9,10 +9,10 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.entity.stand.StandEntity.PunchType;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
@@ -55,7 +55,7 @@ public class StandEntityHeavyAttack extends StandEntityAction {
     
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-        standEntity.punch(PunchType.HEAVY_NO_COMBO, task.getTarget(), this);
+        standEntity.punch(this, getPunch(), task.getTarget());
     }
 
     @Override
@@ -84,7 +84,15 @@ public class StandEntityHeavyAttack extends StandEntityAction {
     	
     	public Builder() {
     		standPose(StandPose.HEAVY_ATTACK).staminaCost(50F)
-            .standOffsetFromUser(-0.75, 0.75).standKeepsTarget(TargetType.ENTITY);
+            .standOffsetFromUser(-0.75, 0.75).standKeepsTarget(TargetType.ENTITY)
+            .targetPunchProperties((punch, stand, target) -> {
+            	double strength = stand.getAttackDamage();
+            	return punch.get()
+            			.damage(StandStatFormulas.getHeavyAttackDamage(strength))
+                        .addKnockback(1 + (float) strength / 4 * stand.getLastHeavyPunchCombo())
+                        .setStandInvulTime(10)
+                        .setPunchSound(ModSounds.STAND_STRONG_ATTACK.get());
+            });
     	}
 
 		@Override

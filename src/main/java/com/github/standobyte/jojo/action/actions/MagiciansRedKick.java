@@ -17,7 +17,7 @@ import net.minecraft.world.World;
 
 public class MagiciansRedKick extends StandEntityComboHeavyAttack {
 
-    public MagiciansRedKick(Builder builder) {
+    public MagiciansRedKick(StandEntityHeavyAttack.Builder builder) {
         super(builder);
     }
 

@@ -1,11 +1,10 @@
 package com.github.standobyte.jojo.entity.stand;
 
-import java.util.Optional;
-
-import com.github.standobyte.jojo.power.stand.IStandPower;
+import java.util.Objects;
+import java.util.function.Supplier;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
@@ -13,6 +12,7 @@ import net.minecraft.util.math.vector.Vector3d;
 public class StandAttackProperties {
     private float damage;
     private float addCombo;
+    private int barrageHits = -1;
     private float knockback = 1.0F;
     private float knockbackYRot = 0;
     private float knockbackXRot = 0;
@@ -22,8 +22,7 @@ public class StandAttackProperties {
     private Vector3d sweepingAabb;
     private float sweepingDamage;
     private int standInvulTime = 0;
-    private Optional<BeforeAttackBehavior> beforeAttack = Optional.empty();
-    private Optional<AfterAttackBehavior> afterAttack = Optional.empty();
+    private SoundEvent punchSound = null;
     
     
     
@@ -34,6 +33,11 @@ public class StandAttackProperties {
     
     public StandAttackProperties addCombo(float combo) {
         this.addCombo = combo;
+        return this;
+    }
+    
+    public StandAttackProperties barrageHits(int hits) {
+        this.barrageHits = hits;
         return this;
     }
     
@@ -88,16 +92,11 @@ public class StandAttackProperties {
         return this;
     }
     
-    public StandAttackProperties callbackBeforeAttack(BeforeAttackBehavior callback) {
-        this.beforeAttack = Optional.ofNullable(callback);
+    public StandAttackProperties setPunchSound(SoundEvent sound) {
+        this.punchSound = sound;
         return this;
     }
     
-    public StandAttackProperties callbackAfterAttack(AfterAttackBehavior callback) {
-        this.afterAttack = Optional.ofNullable(callback);
-        return this;
-    }
-
     
     
     public float getDamage() {
@@ -106,6 +105,14 @@ public class StandAttackProperties {
     
     public float getAddCombo() {
         return addCombo;
+    }
+    
+    public boolean isBarrage() {
+        return barrageHits >= 0;
+    }
+    
+    public int getBarrageHits() {
+        return barrageHits;
     }
     
     public boolean reducesKnockback() {
@@ -163,22 +170,25 @@ public class StandAttackProperties {
     public int getStandInvulTime() {
         return standInvulTime;
     }
-
-    public void beforeAttack(Entity target, StandEntity stand, IStandPower power, LivingEntity user) {
-        beforeAttack.ifPresent(behavior -> behavior.beforeAttack(target, stand, power, user));
-    }
     
-    public void afterAttack(Entity target, StandEntity stand, IStandPower power, LivingEntity user, boolean hurt, boolean killed) {
-        afterAttack.ifPresent(behavior -> behavior.afterAttack(target, stand, power, user, hurt, killed));
+    public SoundEvent getPunchSound() {
+        return punchSound;
     }
     
     
     
-    public interface BeforeAttackBehavior {
-        void beforeAttack(Entity target, StandEntity stand, IStandPower power, LivingEntity user);
-    }
-    
-    public interface AfterAttackBehavior {
-        void afterAttack(Entity target, StandEntity stand, IStandPower power, LivingEntity user, boolean hurt, boolean killed);
+    @FunctionalInterface
+    public interface Factory {
+    	StandAttackProperties createPunch(Supplier<StandAttackProperties> newPunch, StandEntity stand, Entity punchTarget);
+    	
+    	default Factory doFirst(Factory first) {
+    		Objects.requireNonNull(first);
+    		return (punch, stand, punchTarget) -> createPunch(() -> first.createPunch(punch, stand, punchTarget), stand, punchTarget);
+    	}
+    	
+    	default Factory applyAfter(Factory after) {
+    		Objects.requireNonNull(after);
+    		return (punch, stand, punchTarget) -> after.createPunch(() -> createPunch(punch, stand, punchTarget), stand, punchTarget);
+    	}
     }
 }

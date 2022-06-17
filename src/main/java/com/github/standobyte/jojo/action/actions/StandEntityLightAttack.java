@@ -6,10 +6,10 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.entity.stand.StandEntity.PunchType;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.util.Hand;
@@ -37,7 +37,7 @@ public class StandEntityLightAttack extends StandEntityAction {
     
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-        standEntity.punch(PunchType.LIGHT, task.getTarget(), this);
+        standEntity.punch(this, getPunch(), task.getTarget());
     }
     
     @Override
@@ -92,7 +92,15 @@ public class StandEntityLightAttack extends StandEntityAction {
     	public Builder() {
     		standAutoSummonMode(AutoSummonMode.ONE_ARM).staminaCost(10F).standUserSlowDownFactor(1.0F)
             .standOffsetFront().standOffsetFromUser(-0.75, 0.75)
-            .standKeepsTarget().standPose(StandPose.LIGHT_ATTACK);
+            .standKeepsTarget().standPose(StandPose.LIGHT_ATTACK)
+            .targetPunchProperties((punch, stand, target) -> {
+            	return punch.get()
+            			.damage(StandStatFormulas.getLightAttackDamage(stand.getAttackDamage()))
+                        .addKnockback(stand.guardCounter())
+                        .addCombo(0.15F)
+                        .parryTiming(stand.getComboMeter() == 0 ? StandStatFormulas.getParryTiming(stand.getPrecision()) : 0)
+                        .setPunchSound(ModSounds.STAND_LIGHT_ATTACK.get());
+            });
     	}
 
 		@Override

@@ -6,8 +6,8 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.entity.stand.StandAttackProperties;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.entity.stand.StandEntity.PunchType;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
@@ -21,6 +21,7 @@ import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 import com.github.standobyte.jojo.util.utils.TimeUtil;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.util.math.MathHelper;
@@ -140,6 +141,13 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
     }
     
     @Override
+    public void afterAttack(Entity target, StandAttackProperties punch, StandEntity stand, IStandPower power, LivingEntity user, boolean hurt, boolean killed) {
+		if (killed && user != null && stand.distanceToSqr(user) > 16) {
+			JojoModUtil.sayVoiceLine(user, ModSounds.DIO_THIS_IS_THE_WORLD.get());
+		}
+    }
+    
+    @Override
     public float getStaminaCost(IStandPower stand) {
         return theWorldHeavyAttack.get().getStaminaCost(stand);
     }
@@ -151,17 +159,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
     
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-    	standEntity.punch(PunchType.HEAVY_NO_COMBO, task.getTarget(), this, 1, attack -> {
-    		attack
-    		.armorPiercing(0)
-    		.addKnockback(4)
-    		.disableBlocking(1.0F)
-    		.callbackAfterAttack((t, stand, power, user, hurt, killed) -> {
-    			if (killed && user != null && stand.distanceToSqr(user) > 16) {
-    				JojoModUtil.sayVoiceLine(user, ModSounds.DIO_THIS_IS_THE_WORLD.get());
-    			}
-    		});
-    	});
+    	standEntity.punch(this, getPunch(), task.getTarget());
     	userPower.getUser().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.hasUsedTimeStopToday = true);
     }
     
@@ -174,11 +172,6 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
     public boolean noComboDecay() {
         return true;
     }
-    
-//    @Override
-//    public boolean canFollowUpBarrage() {
-//        return true;
-//    }
     
     @Override
 	protected boolean cancels(StandEntityAction currentAction, IStandPower standPower, StandEntity standEntity, Phase currentPhase) {

@@ -70,14 +70,19 @@ import com.github.standobyte.jojo.action.actions.VampirismFreeze;
 import com.github.standobyte.jojo.action.actions.VampirismHamonSuicide;
 import com.github.standobyte.jojo.action.actions.VampirismSpaceRipperStingyEyes;
 import com.github.standobyte.jojo.action.actions.VampirismZombieSummon;
+import com.github.standobyte.jojo.entity.stand.StandAttackProperties;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
+import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 
+import net.minecraft.entity.monster.SkeletonEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -212,7 +217,13 @@ public class ModActions {
             () -> new StandEntityMeleeBarrage(new StandEntityMeleeBarrage.Builder().standSound(ModSounds.STAR_PLATINUM_ORA_ORA_ORA)));
     
     public static final RegistryObject<StandEntityComboHeavyAttack> STAR_PLATINUM_UPPERCUT = ACTIONS.register("star_platinum_uppercut", 
-            () -> new StandEntityComboHeavyAttack(new StandEntityComboHeavyAttack.Builder().standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_ORA_LONG)));
+    		() -> new StandEntityComboHeavyAttack(new StandEntityComboHeavyAttack.Builder().standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_ORA_LONG)
+    				.targetPunchProperties((punch, stand, punchTarget) -> {
+    					return punch.get()
+    					.addKnockback(0.5F + stand.getLastHeavyPunchCombo())
+    					.knockbackXRot(-60F)
+    					.disableBlocking((float) stand.getProximityRatio(punchTarget) - 0.25F);
+    				})));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_HEAVY_PUNCH = ACTIONS.register("star_platinum_heavy_punch", 
             () -> new StandEntityHeavyAttack(new StandEntityHeavyAttack.Builder().standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_ORA_LONG)
@@ -259,13 +270,24 @@ public class ModActions {
     public static final RegistryObject<StandEntityAction> THE_WORLD_BARRAGE = ACTIONS.register("the_world_barrage", 
             () -> new TheWorldBarrage(new StandEntityMeleeBarrage.Builder()
                     .standSound(ModSounds.THE_WORLD_MUDA_MUDA_MUDA).shout(ModSounds.DIO_MUDA_MUDA), ModSounds.DIO_WRY));
-    
+
     public static final RegistryObject<StandEntityComboHeavyAttack> THE_WORLD_KICK = ACTIONS.register("the_world_kick", 
-            () -> new StandEntityComboHeavyAttack(new StandEntityComboHeavyAttack.Builder().shout(ModSounds.DIO_DIE)));
+    		() -> new StandEntityComboHeavyAttack(new StandEntityComboHeavyAttack.Builder().shout(ModSounds.DIO_DIE)
+    				.targetPunchProperties((punch, stand, punchTarget) -> {
+    					StandAttackProperties kick = punch.get();
+    					return kick
+    							.addKnockback(4)
+    							.knockbackYRotDeg(60)
+    							.disableBlocking((float) stand.getProximityRatio(punchTarget) - 0.25F)
+    							.sweepingAttack(0.5, 0, 0.5, kick.getDamage() * 0.5F);
+			})));
     
     public static final RegistryObject<StandEntityHeavyAttack> THE_WORLD_HEAVY_PUNCH = ACTIONS.register("the_world_heavy_punch", 
-            () -> new StandEntityHeavyAttack(new StandEntityHeavyAttack.Builder().shout(ModSounds.DIO_DIE)
-                    .shiftVariationOf(THE_WORLD_PUNCH).shiftVariationOf(THE_WORLD_BARRAGE), THE_WORLD_KICK));
+            () -> new StandEntityHeavyAttack(new StandEntityHeavyAttack.Builder().shout(ModSounds.DIO_DIE).targetPunchProperties((punch, stand, punchTarget) -> {
+				return punch.get()
+						.armorPiercing((float) stand.getAttackDamage() * 0.01F)
+						.addKnockback(6);
+			}).shiftVariationOf(THE_WORLD_PUNCH).shiftVariationOf(THE_WORLD_BARRAGE), THE_WORLD_KICK));
     
     public static final RegistryObject<StandEntityAction> THE_WORLD_BLOCK = ACTIONS.register("the_world_block", 
             () -> new StandEntityBlock());
@@ -288,8 +310,15 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> THE_WORLD_TS_PUNCH = ACTIONS.register("the_world_ts_punch", 
             () -> new TheWorldTSHeavyAttack(new StandEntityAction.Builder().resolveLevelToUnlock(3).standUserSlowDownFactor(1.0F)
-                    .standKeepsTarget().standPose(TheWorldTSHeavyAttack.TS_PUNCH_POSE).standWindupDuration(5).cooldown(0, 50), 
-                    THE_WORLD_HEAVY_PUNCH, THE_WORLD_TIME_STOP_BLINK));
+                    .standKeepsTarget().standPose(TheWorldTSHeavyAttack.TS_PUNCH_POSE).standWindupDuration(5).cooldown(0, 50)
+                    .targetPunchProperties((punch, stand, punchTarget) -> {
+                    	return punch.get()
+                    			.damage(StandStatFormulas.getHeavyAttackDamage(stand.getAttackDamage()))
+                    			.addKnockback(4)
+                    			.disableBlocking(1.0F)
+                                .setStandInvulTime(10)
+                                .setPunchSound(ModSounds.STAND_STRONG_ATTACK.get());
+                    }), THE_WORLD_HEAVY_PUNCH, THE_WORLD_TIME_STOP_BLINK));
     
 
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_STRING_ATTACK = ACTIONS.register("hierophant_green_attack", 
@@ -341,14 +370,42 @@ public class ModActions {
             () -> new SilverChariotLightAttack(new StandEntityLightAttack.Builder(), SILVER_CHARIOT_NO_RAPIER_ATTACK));
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_BARRAGE = ACTIONS.register("silver_chariot_barrage", 
-            () -> new SilverChariotMeleeBarrage(new StandEntityMeleeBarrage.Builder().shout(ModSounds.POLNAREFF_HORA_HORA_HORA)));
+            () -> new SilverChariotMeleeBarrage(new StandEntityMeleeBarrage.Builder().shout(ModSounds.POLNAREFF_HORA_HORA_HORA).targetPunchProperties((punch, stand, punchTarget) -> {
+            	StandAttackProperties stabBarrage = punch.get();
+            	if (punchTarget instanceof SkeletonEntity) {
+            		stabBarrage.damage(stabBarrage.getDamage() * 0.75F);
+            	}
+				return stabBarrage;
+			})));
     
     public static final RegistryObject<StandEntityComboHeavyAttack> SILVER_CHARIOT_SWEEPING_ATTACK = ACTIONS.register("silver_chariot_sweeping_attack", 
-            () -> new SilverChariotSweepingAttack(new StandEntityComboHeavyAttack.Builder().standPerformDuration(3)));
+            () -> new SilverChariotSweepingAttack(new StandEntityComboHeavyAttack.Builder().standPerformDuration(3).targetPunchProperties((punch, stand, punchTarget) -> {
+            	return punch.get()
+            			.setPunchSound(null)
+            			.addKnockback(1);
+			})));
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_DASH_ATTACK = ACTIONS.register("silver_chariot_dash_attack", 
-            () -> new SilverChariotDashAttack(new StandEntityHeavyAttack.Builder()
-            		.shiftVariationOf(SILVER_CHARIOT_ATTACK).shiftVariationOf(SILVER_CHARIOT_BARRAGE), SILVER_CHARIOT_SWEEPING_ATTACK));
+    		() -> new SilverChariotDashAttack(new StandEntityHeavyAttack.Builder()
+    				.shiftVariationOf(SILVER_CHARIOT_ATTACK).shiftVariationOf(SILVER_CHARIOT_BARRAGE).targetPunchProperties((punch, stand, punchTarget) -> {
+    					StandAttackProperties stab = punch.get();
+    					stab.setPunchSound(null);
+    					if (stand.getAttackSpeed() < 24) {
+    						boolean left = MathHelper.wrapDegrees(
+    								MathUtil.yRotDegFromVec(stand.getLookAngle())
+    								- MathUtil.yRotDegFromVec(punchTarget.position().subtract(stand.position())))
+    								< 0;
+    						return stab
+    								.addKnockback(1.5F)
+    								.knockbackYRotDeg((60F + stand.getRandom().nextFloat() * 30F) * (left ? 1 : -1));
+    					}
+    					else {
+    						return stab
+    								.addKnockback(0.25F)
+    								.knockbackXRot(-90F)
+    								.setPunchSound(null);
+    					}
+    				}), SILVER_CHARIOT_SWEEPING_ATTACK));
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_RAPIER_LAUNCH = ACTIONS.register("silver_chariot_rapier_launch", 
             () -> new SilverChariotRapierLaunch(new StandEntityAction.Builder().cooldown(0, 100)
@@ -368,7 +425,10 @@ public class ModActions {
             () -> new StandEntityLightAttack(new StandEntityLightAttack.Builder()));
 
     public static final RegistryObject<StandEntityComboHeavyAttack> MAGICIANS_RED_KICK = ACTIONS.register("magicians_red_kick", 
-            () -> new MagiciansRedKick(new StandEntityComboHeavyAttack.Builder()));
+            () -> new MagiciansRedKick(new StandEntityComboHeavyAttack.Builder().targetPunchProperties((punch, stand, punchTarget) -> {
+				return punch.get()
+						.addKnockback(4);
+			})));
 
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_HEAVY_PUNCH = ACTIONS.register("magicians_red_heavy_punch", 
             () -> new StandEntityHeavyAttack(new StandEntityHeavyAttack.Builder().shiftVariationOf(MAGICIANS_RED_PUNCH), MAGICIANS_RED_KICK));
