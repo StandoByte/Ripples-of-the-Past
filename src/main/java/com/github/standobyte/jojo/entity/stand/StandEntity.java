@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -385,6 +384,15 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public double getPrecision() {
         double precision = getAttributeValue(ModEntityAttributes.STAND_PRECISION.get());
         return precision * getStandEfficiency();
+    }
+    
+    public double getAttackRange() {
+    	return getAttributeValue(ForgeMod.REACH_DISTANCE.get());
+    }
+    
+    public double getProximityRatio(Entity target) {
+    	double attackRange = getAttackRange();
+    	return attackRange > 0 ? 1 - JojoModUtil.getDistance(this, target.getBoundingBox()) / attackRange : 0;
     }
     
     public float getLeapStrength() {
@@ -1382,45 +1390,31 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return getAttackSpeed() > 0 && getAttributeValue(ForgeMod.REACH_DISTANCE.get()) > 0 ;
     }
 
-    public boolean punch(PunchType punch, ActionTarget target, StandEntityAction action) {
-        return punch(punch, target, action, 1, null);
-    }
-
-    public boolean barrageTickPunches(ActionTarget target, StandEntityAction action, int barrageHits) {
-        return punch(PunchType.BARRAGE, target, action, barrageHits, null);
-    }
-
-    public boolean punch(PunchType punch, ActionTarget target, StandEntityAction action, int barrageHits, 
-            @Nullable Consumer<StandAttackProperties> entityAttackOverride) {
+    public boolean punch(StandEntityAction attack, StandAttackProperties.Factory createPunch, ActionTarget target) {
     	if (!level.isClientSide()) {
-	        if (punch == PunchType.BARRAGE) {
-	            if (!accumulateBarrageTickParry) {
-	                accumulateBarrageTickParry = true;
-	                barrageParryCount = barrageHits + 1;
-	            }
-	            else {
-	                barrageParryCount += barrageHits;
-	            }
-	        }
-	        
 	        ActionTarget finalTarget = ActionTarget.fromRayTraceResult(aimWithStandOrUser(getAimDistance(getUser()), target));
 	        target = finalTarget.getType() != TargetType.EMPTY && isTargetInReach(finalTarget) ? finalTarget : ActionTarget.EMPTY;
 	        setTaskTarget(target);
     	}
         
-        return attackTarget(target, punch, action, barrageHits, entityAttackOverride);
+        return attackTarget(target, createPunch, attack);
+    }
+    
+    public void addBarrageParryCount(int hits) {
+        if (!accumulateBarrageTickParry) {
+            accumulateBarrageTickParry = true;
+            barrageParryCount = hits + 1;
+        }
+        else {
+            barrageParryCount += hits;
+        }
     }
     
     public SoundEvent nextPunchSound;
     private Vector3d punchSoundPos;
     @Nullable
     public Boolean playPunchSound;
-    public boolean attackTarget(ActionTarget target, PunchType punch, StandEntityAction action, int barrageHits, 
-            @Nullable Consumer<StandAttackProperties> entityAttackOverride) {
-        nextPunchSound = getPunchSound(punch);
-        playPunchSound = null;
-        punchSoundPos = position();
-        
+    public boolean attackTarget(ActionTarget target, StandAttackProperties.Factory createPunch, StandEntityAction action) {
         boolean punched;
         switch (target.getType()) {
         case BLOCK:
@@ -1428,7 +1422,14 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             break;
         case ENTITY:
             Entity entity = target.getEntity();
-            punched = attackEntity(entity, punch, action, barrageHits, entityAttackOverride);
+            
+        	StandAttackProperties punch = createPunch.createPunch(StandAttackProperties::new, this, entity);
+        	
+            nextPunchSound = punch.getPunchSound();
+            playPunchSound = null;
+            punchSoundPos = position();
+            
+            punched = attackEntity(entity, punch, action);
             if (nextPunchSound != null && punchSoundPos != null && 
             		(playPunchSound == null && punched || playPunchSound != null && playPunchSound.booleanValue())) {
         		playSound(nextPunchSound, 1.0F, 1.0F, null, punchSoundPos);
@@ -1439,21 +1440,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             break;
         }
         return punched;
-    }
-    
-    @Nullable
-    protected SoundEvent getPunchSound(PunchType punch) {
-    	switch (punch) {
-    	case LIGHT:
-    		return ModSounds.STAND_LIGHT_ATTACK.get();
-    	case HEAVY_NO_COMBO:
-    	case HEAVY_COMBO:
-    		return ModSounds.STAND_STRONG_ATTACK.get();
-    	case BARRAGE:
-    		return ModSounds.STAND_BARRAGE_ATTACK.get();
-		default:
-			return null;
-    	}
     }
     
     protected SoundEvent getAttackBlockSound() {
@@ -1486,13 +1472,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 }
             });
         }
-    }
-    
-    public enum PunchType {
-        HEAVY_NO_COMBO,
-        HEAVY_COMBO,
-        LIGHT,
-        BARRAGE
     }
     
     @Override
@@ -1684,48 +1663,31 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return noComboDecayTicks;
     }
     
-    public final boolean attackEntity(Entity target, PunchType punch, StandEntityAction action, int barrageHits) {
-        return attackEntity(target, punch, action, barrageHits, null);
-    }
-
-    public boolean attackEntity(Entity target, PunchType punch, StandEntityAction action, int barrageHits,
-            @Nullable Consumer<StandAttackProperties> attackOverride) {
+    public boolean attackEntity(Entity target, StandAttackProperties punch, StandEntityAction action) {
         if (level.isClientSide() || !canHarm(target)) {
             return false;
         }
         StandEntityDamageSource dmgSource = new StandEntityDamageSource("stand", this, getUserPower());
         
-        if (punch == PunchType.BARRAGE) {
-            dmgSource.setBarrageHitsCount(barrageHits);
+        if (punch.isBarrage()) {
+            dmgSource.setBarrageHitsCount(punch.getBarrageHits());
         }
-
-        double strength = getAttackDamage();
-        double precision = getPrecision();
-        double attackRange = getAttributeValue(ForgeMod.REACH_DISTANCE.get());
-        double distance = JojoModUtil.getDistance(this, target.getBoundingBox());
-        double knockback = getAttackKnockback();
         
-        StandAttackProperties attack = standAttackProperties(punch, target, action, strength, precision, attackRange, distance, knockback, barrageHits);
-        
-        if (attackOverride != null) {
-            attackOverride.accept(attack);
-        }
-
-        attack.beforeAttack(target, this, getUserPower(), getUser());
-        boolean attacked = doAttack(target, attack, dmgSource, StandAttackProperties::getDamage);
-        attack.afterAttack(target, this, getUserPower(), getUser(), attacked, !target.isAlive());
+        action.beforeAttack(target, punch, this, getUserPower(), getUser());
+        boolean attacked = doAttack(target, punch, dmgSource, StandAttackProperties::getDamage);
+        action.afterAttack(target, punch, this, getUserPower(), getUser(), attacked, !target.isAlive());
         
         if (attacked) {
-            if (attack.isSweepingAttack()) {
-                for (LivingEntity sweepingTarget : level.getEntitiesOfClass(LivingEntity.class, attack.sweepingAttackAabb(target.getBoundingBox()), 
+            if (punch.isSweepingAttack()) {
+                for (LivingEntity sweepingTarget : level.getEntitiesOfClass(LivingEntity.class, punch.sweepingAttackAabb(target.getBoundingBox()), 
                         e -> !e.isSpectator() && e.isPickable()
                         && JojoModUtil.getDistance(this, e.getBoundingBox()) < getAttributeValue(ForgeMod.REACH_DISTANCE.get()) && this.canHarm(e))) {
-                    doAttack(sweepingTarget, attack, dmgSource, StandAttackProperties::getSweepingDamage);
+                    doAttack(sweepingTarget, punch, dmgSource, StandAttackProperties::getSweepingDamage);
                 }
             }
             
-            float addCombo = attack.getAddCombo();
-            if (punch == PunchType.BARRAGE) {
+            float addCombo = punch.getAddCombo();
+            if (punch.isBarrage()) {
             	addCombo *= dmgSource.getBarrageHitsCount();
             }
             addComboMeter(addCombo, COMBO_TICKS);
@@ -1736,40 +1698,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             punchSoundPos = target.position();
         }
         return attacked;
-    }
-    
-    protected StandAttackProperties standAttackProperties(PunchType punchType, Entity target, StandEntityAction action,
-            double strength, double precision, double attackRange, double distance, double knockback, int barrageHits) {
-        StandAttackProperties attack = new StandAttackProperties();
-        
-        switch (punchType) {
-        case LIGHT:
-            attack
-            .damage(StandStatFormulas.getLightAttackDamage(strength))
-            .addKnockback(guardCounter())
-            .addCombo(0.15F);
-            if (getComboMeter() == 0) {
-                attack.parryTiming(StandStatFormulas.getParryTiming(precision));
-            }
-            break;
-        case HEAVY_NO_COMBO:
-        case HEAVY_COMBO:
-            float heavyAttackCombo = getLastHeavyPunchCombo();
-//          float targetProximityRatio = 1 - (float) (distance / attackRange);
-            
-            attack
-            .damage(StandStatFormulas.getHeavyAttackDamage(strength, target instanceof LivingEntity ? (LivingEntity) target : null))
-            .addKnockback(1 + (float) strength / 4 * heavyAttackCombo)
-            .setStandInvulTime(10);
-            break;
-        case BARRAGE:
-            attack
-            .damage(StandStatFormulas.getBarrageHitDamage(strength, precision) * barrageHits)
-            .addCombo(0.005F)
-            .reduceKnockback(0.1F);
-            break;
-        }
-        return attack;
     }
     
     protected final boolean doAttack(Entity target, StandAttackProperties attack, StandEntityDamageSource dmgSource, Function<StandAttackProperties, Float> damageMethod) {

@@ -974,7 +974,7 @@ public class ActionsOverlayGui extends AbstractGui {
     		if (standPower == null || !standPower.hasPower() || !standPower.isActive()) {
     			if (switchOffStandHud) {
     				setMode(null);
-    				standUiMode.autoOpened = true;
+    				standUiMode.autoOpened = false;
     			}
                 switchOffStandHud = false;
     		}
@@ -1061,7 +1061,9 @@ public class ActionsOverlayGui extends AbstractGui {
     public void updatePowersCache() {
         setMode(null);
         standUiMode.setPower(IStandPower.getPlayerStandPower(mc.player));
+        standUiMode.autoOpened = false;
         nonStandUiMode.setPower(INonStandPower.getPlayerNonStandPower(mc.player));
+        nonStandUiMode.autoOpened = false;
     }
 
     

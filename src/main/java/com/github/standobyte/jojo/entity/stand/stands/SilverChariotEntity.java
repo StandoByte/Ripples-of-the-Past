@@ -2,9 +2,6 @@ package com.github.standobyte.jojo.entity.stand.stands;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Consumer;
-
-import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
@@ -24,7 +21,6 @@ import com.github.standobyte.jojo.util.utils.MathUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.monster.SkeletonEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
@@ -171,30 +167,27 @@ public class SilverChariotEntity extends StandEntity {
     }
     
     @Override
-    public boolean attackEntity(Entity target, PunchType punch, StandEntityAction action, 
-            int barrageHits, @Nullable Consumer<StandAttackProperties> attackOverride) {
+    public boolean attackEntity(Entity target, StandAttackProperties punch, StandEntityAction action) {
     	if (hasRapier() && isRapierOnFire()) {
             return DamageUtil.dealDamageAndSetOnFire(target, 
-                    entity -> attackOrDeflect(target, punch, action, barrageHits, attackOverride), 4, true);
+                    entity -> attackOrDeflect(target, punch, action), 4, true);
     	}
     	else {
-    		return attackOrDeflect(target, punch, action, barrageHits, attackOverride);
+    		return attackOrDeflect(target, punch, action);
     	}
     }
 
-    private boolean attackOrDeflect(Entity target, PunchType punch, StandEntityAction action, int barrageHits,
-            @Nullable Consumer<StandAttackProperties> attackOverride) {
+    private boolean attackOrDeflect(Entity target, StandAttackProperties punch, StandEntityAction action) {
         if (canDeflectProjectiles() && hasRapier() && target instanceof ProjectileEntity) {
         	return deflectProjectile(target);
         }
         else {
-            return super.attackEntity(target, punch, action, barrageHits, attackOverride);
+            return super.attackEntity(target, punch, action);
         }
     }
     
     @Override
-    public boolean attackTarget(ActionTarget target, PunchType punch, StandEntityAction action, int barrageHits, 
-            @Nullable Consumer<StandAttackProperties> entityAttackOverride) {
+    public boolean attackTarget(ActionTarget target, StandAttackProperties.Factory createPunch, StandEntityAction action) {
     	if (canDeflectProjectiles()) {
     		level.getEntitiesOfClass(ProjectileEntity.class, getBoundingBox().inflate(getAttributeValue(ForgeMod.REACH_DISTANCE.get())), 
     				entity -> entity.isAlive() && !entity.isPickable()).forEach(projectile -> {
@@ -205,7 +198,7 @@ public class SilverChariotEntity extends StandEntity {
     				});
     	}
     	
-    	return super.attackTarget(target, punch, action, barrageHits, entityAttackOverride);
+    	return super.attackTarget(target, createPunch, action);
     }
     
     private boolean canDeflectProjectiles() {
@@ -232,37 +225,6 @@ public class SilverChariotEntity extends StandEntity {
     }
     
     @Override
-    protected StandAttackProperties standAttackProperties(PunchType punchType, Entity target, StandEntityAction action,
-            double strength, double precision, double attackRange, double distance, double knockback, int barrageHits) {
-        StandAttackProperties attack = super.standAttackProperties(punchType, target, action, 
-                strength, precision, attackRange, distance, knockback, barrageHits);
-        
-        switch (punchType) {
-        case HEAVY_NO_COMBO:
-            if (hasRapier()) {
-                if (getAttackSpeed() < 24) {
-                    attack
-                    .addKnockback(1.5F)
-                    .knockbackYRotDeg((75F + random.nextFloat() * 30F) * (random.nextBoolean() ? -1 : 1));
-                }
-                else {
-                    attack
-                    .addKnockback(0.25F)
-                    .knockbackXRot(-90F);
-                }
-            }
-            break;
-        case BARRAGE:
-            if (hasRapier() && target instanceof SkeletonEntity) {
-                attack.damage(attack.getDamage() * 0.75F);
-            }
-        default:
-            break;
-        }
-        return attack;
-    }
-    
-    @Override
     protected double leapBaseStrength() {
         return getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
     }
@@ -274,20 +236,6 @@ public class SilverChariotEntity extends StandEntity {
             factor += (1 - factor) * (hasArmor() ? 0.5F : 1F);
         }
         return factor;
-    }
-    
-    @Override
-    protected SoundEvent getPunchSound(PunchType punch) {
-    	if (hasRapier()) {
-	    	switch (punch) {
-	    	case HEAVY_NO_COMBO:
-	    	case HEAVY_COMBO:
-	    		return null;
-			default:
-				return super.getPunchSound(punch);
-	    	}
-    	}
-    	return super.getPunchSound(punch);
     }
     
     @Override

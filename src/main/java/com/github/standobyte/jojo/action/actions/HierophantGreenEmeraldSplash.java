@@ -55,7 +55,7 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
                 emerald.setBreakBlocks(shift);
                 emerald.setLowerKnockback(!shift);
                 standEntity.shootProjectile(emerald, shift ? 2.5F : 1.5F, shift ? 1.0F : 8.0F);
-        	}, shift ? fireRate * 2.5 : fireRate);
+        	}, fireRate);
             
             HierophantGreenEntity hierophant = (HierophantGreenEntity) standEntity;
             int barriers = hierophant.getPlacedBarriersCount();
