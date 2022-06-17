@@ -502,7 +502,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 return targetCheck;
             }
         }
-    	return power.checkRequirements(action, targetContainer, false);
+    	return power.checkRequirements(action, targetContainer, !isSelected);
     }
     
     private void fillRect(BufferBuilder bufferBuilder, int x, double y, int width, double height, int red, int green, int blue, int alpha) {

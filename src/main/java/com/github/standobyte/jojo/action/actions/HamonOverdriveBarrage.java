@@ -18,6 +18,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.ForgeHooks;
 
 public class HamonOverdriveBarrage extends HamonAction {
@@ -40,7 +41,7 @@ public class HamonOverdriveBarrage extends HamonAction {
             switch (target.getType()) {
             case BLOCK:
                 BlockPos pos = target.getBlockPos();
-                if (!world.isClientSide() && JojoModUtil.canEntityDestroy(world, pos, user)) {
+                if (!world.isClientSide() && JojoModUtil.canEntityDestroy((ServerWorld) world, pos, user)) {
                     if (!world.isEmptyBlock(pos)) {
                         BlockState blockState = world.getBlockState(pos);
                         float digDuration = blockState.getDestroySpeed(world, pos);

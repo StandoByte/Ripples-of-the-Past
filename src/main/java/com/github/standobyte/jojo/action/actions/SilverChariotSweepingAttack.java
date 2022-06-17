@@ -53,22 +53,24 @@ public class SilverChariotSweepingAttack extends StandEntityComboHeavyAttack {
     
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-    	double reach = standEntity.getAttributeValue(ForgeMod.REACH_DISTANCE.get());
-    	world.getEntities(standEntity, standEntity.getBoundingBox().inflate(reach, 0, reach), 
-    			e -> !e.isSpectator() && e.isPickable() && standEntity.canHarm(e)).forEach(targetEntity -> {
-    				Vector3d standLookVec = standEntity.getLookAngle();
-    				Vector3d targetVec = targetEntity.position().subtract(standEntity.position()).normalize();
-    				double cos = standLookVec.dot(targetVec);
-    				if (cos > -0.5) {
-    					standEntity.attackEntity(targetEntity, getPunch().applyAfter((punch, stand, punchTarget) -> {
-    						StandAttackProperties slash = punch.get();
-    						if (cos < 0.5) {
-    							slash.damage(slash.getDamage() * 0.5F);
-    						}
-    						return slash;
-    					}).createPunch(StandAttackProperties::new, standEntity, targetEntity), this);
-    				}
-    			});
+    	if (!world.isClientSide()) {
+    		double reach = standEntity.getAttributeValue(ForgeMod.REACH_DISTANCE.get());
+    		world.getEntities(standEntity, standEntity.getBoundingBox().inflate(reach, 0, reach), 
+    				e -> !e.isSpectator() && e.isPickable() && standEntity.canHarm(e)).forEach(targetEntity -> {
+    					Vector3d standLookVec = standEntity.getLookAngle();
+    					Vector3d targetVec = targetEntity.position().subtract(standEntity.position()).normalize();
+    					double cos = standLookVec.dot(targetVec);
+    					if (cos > -0.5) {
+    						standEntity.attackEntity(targetEntity, getPunch().applyAfter((punch, stand, punchTarget) -> {
+    							StandAttackProperties slash = punch.get();
+    							if (cos < 0.5) {
+    								slash.damage(slash.getDamage() * 0.5F);
+    							}
+    							return slash;
+    						}).createPunch(StandAttackProperties::new, standEntity, targetEntity), this);
+    					}
+    				});
+    	}
     }
     
     @Override

@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -287,10 +288,24 @@ public class JojoModUtil {
 
 
 
-    public static boolean canEntityDestroy(World world, BlockPos pos, LivingEntity entity) {
+    public static boolean canEntityDestroy(ServerWorld world, BlockPos pos, LivingEntity entity) {
         BlockState state = world.getBlockState(pos);
-        return JojoModConfig.getCommonConfigInstance(world.isClientSide()).abilitiesBreakBlocks.get()
-                && state.canEntityDestroy(world, pos, entity) && ForgeEventFactory.onEntityDestroyBlock(entity, pos, state);
+        if (JojoModConfig.getCommonConfigInstance(world.isClientSide()).abilitiesBreakBlocks.get()
+                && state.canEntityDestroy(world, pos, entity)
+                && ForgeEventFactory.onEntityDestroyBlock(entity, pos, state)) {
+        	PlayerEntity player = null;
+        	if (entity instanceof PlayerEntity) {
+        		player = (PlayerEntity) entity;
+        	}
+        	else if (entity instanceof StandEntity) {
+        		LivingEntity standUser = ((StandEntity) entity).getUser();
+            	if (standUser instanceof PlayerEntity) {
+            		player = (PlayerEntity) standUser;
+            	}
+        	}
+        	return player == null || world.mayInteract(player, pos);
+        }
+        return false;
     }
 
 

@@ -116,11 +116,11 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     public double getMaxRangeSqEntityTarget() {
-        return 36;
+        return 64;
     }
     
     public double getMaxRangeSqBlockTarget() {
-        return 64;
+        return 100;
     }
     
     protected ActionConditionResult checkHeldItems(LivingEntity user, P power) {

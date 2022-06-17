@@ -374,6 +374,11 @@ public class InputHandler {
         }
         
         ActionType actionType = key == ActionKey.ATTACK ? ActionType.ATTACK : ActionType.ABILITY;
+        
+        if (key == ActionKey.ATTACK && leftClickBlockDelay > 0) {
+        	event.setCanceled(true);
+        	return;
+        }
 
         IPower<?, ?> power = actionsOverlay.getCurrentPower();
         
@@ -408,6 +413,9 @@ public class InputHandler {
             if (actionsOverlay.isSelectedActionHeld(actionType)) {
                 heldKeys.put(power, key);
             }
+            if (leftClickedBlock && leftClickBlockDelay <= 0) {
+                leftClickBlockDelay = 4;
+            }
         }
         else {
         	if (heldKeys.get(power) == key) {
@@ -417,9 +425,6 @@ public class InputHandler {
         	else if (handleStun(event)) {
         		event.setSwingHand(false);
         	}
-        }
-        if (leftClickedBlock && leftClickBlockDelay <= 0) {
-            leftClickBlockDelay = 4;
         }
     }
     
