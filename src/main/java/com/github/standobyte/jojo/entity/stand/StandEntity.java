@@ -1484,11 +1484,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         LivingEntity user = getUser();
         if (target instanceof LivingEntity) {
             LivingEntity targetLiving = (LivingEntity) target;
-            if (!user.canAttack(targetLiving)) {
-                return false;
-            }
-            if (user instanceof PlayerEntity && targetLiving instanceof PlayerEntity && !((PlayerEntity) user).canHarmPlayer((PlayerEntity) targetLiving)) {
-                return false;
+            if (user != null) {
+            	return user.canAttack(targetLiving) && !(
+            			user instanceof PlayerEntity && targetLiving instanceof PlayerEntity
+            			&& !((PlayerEntity) user).canHarmPlayer((PlayerEntity) targetLiving));
             }
             return canAttack(targetLiving);
         }
@@ -1814,7 +1813,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
 
     protected boolean breakBlock(BlockPos blockPos) {
-        if (level.isClientSide() || !JojoModUtil.canEntityDestroy(level, blockPos, this)) {
+        if (level.isClientSide() || !JojoModUtil.canEntityDestroy((ServerWorld) level, blockPos, this)) {
             return false;
         }
         
@@ -2002,7 +2001,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return isManuallyControlled();
     }
 
-    private boolean lastTickInput = false;
+    private boolean prevTickInput = false;
     private boolean resetDeltaMovement = false;
     public void moveStandManually(float strafe, float forward, boolean jumping, boolean sneaking) {
         resetDeltaMovement = false;
@@ -2021,12 +2020,17 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                     forward *= 0.5;
                 }
                 setDeltaMovement(getAbsoluteMotion(new Vector3d((double)strafe, y, (double)forward), speed, this.yRot).scale(getUserMovementFactor()));
+                
+                if (!prevTickInput) {
+                    resetDeltaMovement = true;
+                    setDeltaMovement(Vector3d.ZERO);
+                }
             }
-            else if (lastTickInput) {
+            else if (prevTickInput) {
                 resetDeltaMovement = true;
                 setDeltaMovement(Vector3d.ZERO);
             }
-            lastTickInput = input;
+            prevTickInput = input;
         }
     }
     

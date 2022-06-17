@@ -28,7 +28,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class KnifeEntity extends ItemProjectileEntity {
-    private boolean timeStop;
+    private boolean timeStop = false;
     private Vector3d timeStopHitMotion;
 
     public KnifeEntity(World world, LivingEntity shooter) {
@@ -123,7 +123,7 @@ public class KnifeEntity extends ItemProjectileEntity {
                 setDeltaMovement(timeStopHitMotion);
             }
         }
-        else if (tickCount == 0) {
+        else if (tickCount == 0 && !timeStop) {
             timeStop = true;
         }
         else {
