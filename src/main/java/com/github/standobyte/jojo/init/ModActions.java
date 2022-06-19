@@ -244,7 +244,7 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_INHALE = ACTIONS.register("star_platinum_inhale", 
             () -> new StarPlatinumInhale(new StandEntityAction.Builder().holdType(80).cooldown(0, 200).staminaCostTick(2F)
-            		.ignoresPerformerStun().resolveLevelToUnlock(2).standOffsetFront().standSound(ModSounds.STAR_PLATINUM_INHALE)));
+            		.ignoresPerformerStun().resolveLevelToUnlock(2).standOffsetFromUser(0, -0.25).standSound(ModSounds.STAR_PLATINUM_INHALE)));
     
     public static final RegistryObject<TimeStop> STAR_PLATINUM_TIME_STOP = ACTIONS.register("star_platinum_time_stop", 
             () -> new TimeStop(new StandAction.Builder().holdToFire(40, false)
@@ -409,7 +409,7 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_RAPIER_LAUNCH = ACTIONS.register("silver_chariot_rapier_launch", 
             () -> new SilverChariotRapierLaunch(new StandEntityAction.Builder().cooldown(0, 100)
-                    .ignoresPerformerStun().resolveLevelToUnlock(2).standOffsetFront()
+                    .ignoresPerformerStun().resolveLevelToUnlock(2).standOffsetFromUser(0, 0.25)
                     .standPose(StandPose.RANGED_ATTACK).standSound(ModSounds.SILVER_CHARIOT_RAPIER_SHOT)
                     .xpRequirement(200)));
     

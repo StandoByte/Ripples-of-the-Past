@@ -8,6 +8,8 @@ import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.World;
 
 public class SilverChariotRapierLaunch extends StandEntityAction {
@@ -29,10 +31,18 @@ public class SilverChariotRapierLaunch extends StandEntityAction {
         if (!world.isClientSide()) {
         	SilverChariotEntity chariot = (SilverChariotEntity) standEntity;
         	SCRapierEntity rapier = new SCRapierEntity(standEntity, world);
+        	Entity aimingEntity = chariot;
+        	if (chariot.isFollowingUser()) {
+	        	LivingEntity user = userPower.getUser();
+	        	if (user != null) {
+	        		aimingEntity = user;
+	        	}
+        	}
+        	rapier.setPos(aimingEntity.getX(), aimingEntity.getEyeY(), aimingEntity.getZ());
         	if (chariot.isRapierOnFire()) {
         		rapier.setSecondsOnFire(rapier.ticksLifespan() / 20);
         	}
-            standEntity.shootProjectile(rapier, 1F, 0);
+            standEntity.shootProjectile(rapier, 2F, 0);
             if (!userPower.isUserCreative()) {
             	chariot.setRapier(false);
             }

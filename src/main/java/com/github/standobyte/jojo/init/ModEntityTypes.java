@@ -217,22 +217,8 @@ public class ModEntityTypes {
     public static final RegistryObject<EntityType<MRDetectorEntity>> MR_DETECTOR = ENTITIES.register("mr_detector", 
             () -> EntityType.Builder.<MRDetectorEntity>of(MRDetectorEntity::new, EntityClassification.MISC).sized(0.5F, 0.5F).noSummon().noSave().setUpdateInterval(Integer.MAX_VALUE).setShouldReceiveVelocityUpdates(false)
             .build(new ResourceLocation(JojoMod.MOD_ID, "mr_detector").toString()));
-
-    /*
-     * default stand stats:
-     * .damage(5.0)                         // 0.0 ~ 2048.0
-     * .attackKnockback(1.0)                // 0.0 ~ 5.0
-     * .movementSpeed(0.6)                  // 0.0 ~ 1024.0
-     * .attackSpeed(10.0)                   // 0.0 ~ 1024.0
-     * .summonTicks(10)                     // 0 ~ 20
-     * .maxRange(4.0)                       // 4.0 ~ 1000.0
-     * .armor(0)                            // 0.0 ~ 30.0
-     * .armorToughness(0)                   // 0.0 ~ 20.0
-     * .knockbackResistance(0)              // 0.0 ~ 1.0
-     * .blockDmgFactor(0.5)                 // 0.0 ~ 1.0
-     * .blockStaminaCostForDmgPoint(10.0)   // 0.0 ~ 100.0
-     * .precision(0.0)                      // 0.0 ~ 1.0 
-     */
+    
+    
     
     public static final RegistryObject<StandEntityType<StarPlatinumEntity>> STAR_PLATINUM = ENTITIES.register("star_platinum", 
             () -> new StandEntityType<StarPlatinumEntity>(StarPlatinumEntity::new, ModStandTypes.STAR_PLATINUM, false, 0.7F, 2.1F)

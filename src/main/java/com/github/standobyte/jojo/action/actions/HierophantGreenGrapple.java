@@ -25,4 +25,9 @@ public class HierophantGreenGrapple extends StandEntityAction {
             world.addFreshEntity(string);
         }
     }
+    
+    @Override
+    public boolean standRetractsAfterTask(IStandPower standPower, StandEntity standEntity) {
+    	return isShiftVariation();
+    }
 }
