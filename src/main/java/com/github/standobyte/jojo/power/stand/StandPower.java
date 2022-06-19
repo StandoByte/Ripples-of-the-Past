@@ -68,8 +68,14 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                     SaveFileUtilCapProvider.getSaveFileCap(player).addPlayerStand(standType);
                 });
             }
-            standType.unlockNewActions(this);
             setStamina(getMaxStamina() * 0.5F);
+            if (user != null && (JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).skipStandProgression.get()
+                    || user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild)) {
+                skipProgression(standType);
+            }
+            else {
+                standType.unlockNewActions(this);
+            }
             return true;
         }
         return false;
@@ -136,10 +142,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     protected void afterTypeInit(StandType<?> standType) {
         attacks = Arrays.asList(standType.getAttacks());
         abilities = Arrays.asList(standType.getAbilities());
-        if (user != null && (JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).skipStandProgression.get()
-                || user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild)) {
-            skipProgression(standType);
-        }
         if (usesStamina()) {
             stamina = isUserCreative() ? getMaxStamina() : 0;
         }
