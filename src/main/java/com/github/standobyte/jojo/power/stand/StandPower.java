@@ -222,7 +222,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     private void tickStamina() {
         if (usesStamina()) {
-            
             addStamina(getStaminaTickGain(), false);
         }
     }
@@ -582,7 +581,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     protected void keepPower(IStandPower oldPower, boolean wasDeath) {
         super.keepPower(oldPower, wasDeath);
         this.xp = oldPower.getXp();
-        this.stamina = oldPower.getStamina();
         this.setResolveCounter(oldPower.getResolveCounter());
         if (wasDeath) {
             this.resolveCounter.alwaysResetOnDeath();
@@ -590,6 +588,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         this.skippedProgression = oldPower.wasProgressionSkipped();
         this.givenByDisc = oldPower.wasGivenByDisc();
         this.actionLearningProgressMap = ((StandPower) oldPower).actionLearningProgressMap; // FIXME can i remove this cast?
+        this.stamina = getMaxStamina();
     }
     
     @Override

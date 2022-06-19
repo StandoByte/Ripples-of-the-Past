@@ -1267,7 +1267,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     protected void clearTask(StandEntityTask clearedTask, @Nullable StandEntityAction newAction) {
-        clearedTask.getAction().onClear(userPower, this, newAction);
+    	StandEntityAction oldAction = clearedTask.getAction();
+        oldAction.onClear(userPower, this, newAction);
         
         barrageParryCount = 0;
         if (blockDamage > 0) {
@@ -1288,8 +1289,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                         StandEntityAction.Phase.PERFORM, isArmsOnlyMode(), ActionTarget.EMPTY));
             }
             else {
+            	boolean retractStand = oldAction.standRetractsAfterTask(getUserPower(), this) && getUser() != null && !isCloseToUser() && isFollowingUser();
                 entityData.set(CURRENT_TASK, Optional.empty());
-            	if (getUser() != null && !isCloseToUser() && isFollowingUser()) {
+            	if (retractStand) {
             		retractStand(false);
             	}
             }
@@ -2002,9 +2004,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
 
     private boolean prevTickInput = false;
-    private boolean resetDeltaMovement = false;
     public void moveStandManually(float strafe, float forward, boolean jumping, boolean sneaking) {
-        resetDeltaMovement = false;
         if (isManuallyControlled() && canMoveManually()) {
         	strafe = manualMovementLocks.strafe(strafe);
         	forward = manualMovementLocks.forward(forward);
@@ -2022,22 +2022,20 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 setDeltaMovement(getAbsoluteMotion(new Vector3d((double)strafe, y, (double)forward), speed, this.yRot).scale(getUserMovementFactor()));
                 
                 if (!prevTickInput) {
-                    resetDeltaMovement = true;
                     setDeltaMovement(Vector3d.ZERO);
                 }
             }
             else if (prevTickInput) {
-                resetDeltaMovement = true;
                 setDeltaMovement(Vector3d.ZERO);
             }
             prevTickInput = input;
         }
     }
     
-    public boolean wasDeltaMovementReset() {
-        return resetDeltaMovement;
+    public boolean hadInput() {
+    	return prevTickInput;
     }
-
+    
     private static Vector3d getAbsoluteMotion(Vector3d relative, double speed, float facingYRot) {
         double d0 = relative.lengthSqr();
         if (d0 < 1.0E-7D) {

@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.util.data;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -17,6 +18,7 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -117,7 +119,6 @@ public class StandStatsManager extends JsonReloadListener {
                 }
             });
             savedStatsWorlds.add(folderPath);
-            // FIXME (!!) readme.txt
             try {
                 Files.write(
                         "{\n" + 
@@ -126,9 +127,19 @@ public class StandStatsManager extends JsonReloadListener {
                         "    \"description\": \"Stand stats for Ripples of the Past mod\"\n" + 
                         "  }\n" + 
                         "}", 
-                        folderPath.resolve("pack.mcmeta").toFile(), StandardCharsets.UTF_8);
+                        folderPath.resolve("pack.mcmeta").toFile(), 
+                        StandardCharsets.UTF_8);
             } catch (IOException e) {
                 LOGGER.error("Couldn't write pack.mcmeta file for Stand stats", e);
+            }
+
+            try {
+            	InputStream inputStream = JojoMod.class.getResourceAsStream("/statsreadme.txt");
+            	File dataPackFile = folderPath.resolve("readme.txt").toFile();
+            	Files.asByteSink(dataPackFile).writeFrom(inputStream);
+            	inputStream.close();
+            } catch (IOException e) {
+                LOGGER.error("Couldn't write readme.txt file for Stand stats", e);
             }
         }
     }

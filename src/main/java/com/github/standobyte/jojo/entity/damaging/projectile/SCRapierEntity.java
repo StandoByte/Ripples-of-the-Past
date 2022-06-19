@@ -141,7 +141,7 @@ public class SCRapierEntity extends ModdedProjectileEntity {
                 return false;
             }
             if (JojoModUtil.rayTrace(position(), motionNew, 16, level, this, 
-            		EntityPredicates.NO_SPECTATORS, 1.0, 0).getType() == RayTraceResult.Type.MISS) {
+            		EntityPredicates.NO_SPECTATORS.and(EntityPredicates.ENTITY_STILL_ALIVE), 1.0, 0).getType() == RayTraceResult.Type.MISS) {
             	return false;
             }
             setDeltaMovement(motionNew);

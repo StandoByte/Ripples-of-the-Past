@@ -96,7 +96,7 @@ public class StandArrowItem extends ArrowItem {
                         stand = StandUtil.randomStandFromTiers(tiers, player, random);
                     }
                     else {
-                        player.displayClientMessage(new TranslationTextComponent("jojo.chat.message.tmp_not_enough_xp"), true); // TODO remove the message after adding stands for each tier
+                        player.displayClientMessage(new TranslationTextComponent("jojo.chat.message.stand_not_enough_xp"), true);
                         return false;
                     }
                 }

@@ -279,6 +279,10 @@ public abstract class StandEntityAction extends StandAction {
         return false;
     }
     
+    public boolean standRetractsAfterTask(IStandPower standPower, StandEntity standEntity) {
+        return true;
+    }
+    
     public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task, int ticks) {}
     
     public void onPhaseSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task, int ticks) {}
@@ -496,7 +500,8 @@ public abstract class StandEntityAction extends StandAction {
         }
 
         public T standOffsetFront() {
-            this.userOffset = StandRelativeOffset.noYOffset(0, 0.5);
+        	// FIXME (!) barrage-like offset
+        	setStandOffset(StandRelativeOffset.noYOffset(0, 0.5), false);
             return getThis();
         }
 

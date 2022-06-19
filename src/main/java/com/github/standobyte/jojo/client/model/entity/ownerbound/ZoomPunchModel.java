@@ -14,10 +14,12 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 public class ZoomPunchModel extends EntityModel<ZoomPunchEntity> {
     private final ModelRenderer mobPunchRight;
     private final ModelRenderer mobPunchLeft;
+    
     private final ModelRenderer playerPunchRight;
     private final ModelRenderer playerPunchLeft;
     private final ModelRenderer playerPunchRightSlim;
     private final ModelRenderer playerPunchLeftSlim;
+    
     private final ModelRenderer playerSleeveRight;
     private final ModelRenderer playerSleeveLeft;
     private final ModelRenderer playerSleeveRightSlim;
@@ -39,7 +41,9 @@ public class ZoomPunchModel extends EntityModel<ZoomPunchEntity> {
         mobPunchLeft.setPos(0.0F, -2.0F, 0.0F);
         mobPunchLeft.texOffs(40, 16).addBox(-2.0F, -10.0F, -2.0F, 4.0F, 12.0F, 4.0F, 0.0F, true);
         
+        
         texHeight = 64;
+        
 
         playerPunchRight = new ModelRenderer(this);
         playerPunchRight.xRot = -1.5708F;
@@ -60,6 +64,7 @@ public class ZoomPunchModel extends EntityModel<ZoomPunchEntity> {
         playerPunchLeftSlim.xRot = -1.5708F;
         playerPunchLeftSlim.setPos(0.0F, -2.0F, 0.0F);
         playerPunchLeftSlim.texOffs(32, 48).addBox(-2.0F, -10.0F, -2.0F, 3.0F, 12.0F, 4.0F, 0.0F, false);
+        
 
         playerSleeveRight = new ModelRenderer(this);
         playerSleeveRight.xRot = -1.5708F;
@@ -80,6 +85,7 @@ public class ZoomPunchModel extends EntityModel<ZoomPunchEntity> {
         playerSleeveLeftSlim.xRot = -1.5708F;
         playerSleeveLeftSlim.setPos(0.0F, -2.0F, 0.0F);
         playerSleeveLeftSlim.texOffs(48, 48).addBox(-2.0F, -10.0F, -2.0F, 3.0F, 12.0F, 4.0F, 0.25F, false);
+        
         
         armVariants = ImmutableList.of(
                 mobPunchRight, 
