@@ -25,6 +25,7 @@ import com.github.standobyte.jojo.command.StandCommand;
 import com.github.standobyte.jojo.init.ModStructures;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCachePacket;
+import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.data.StandStatsManager;
@@ -45,6 +46,7 @@ import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.gen.settings.DimensionStructuresSettings;
 import net.minecraft.world.gen.settings.StructureSeparationSettings;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
@@ -139,14 +141,26 @@ public class ForgeBusEventSubscriber {
     public static void onPlayerClone(PlayerEvent.Clone event) {
         PlayerEntity original = event.getOriginal();
         PlayerEntity player = event.getPlayer();
-        INonStandPower.getPlayerNonStandPower(player).onClone(INonStandPower.getPlayerNonStandPower(original), event.isWasDeath());
-        IStandPower.getPlayerStandPower(player).onClone(IStandPower.getPlayerStandPower(original), event.isWasDeath());
+        
+        cloneCap(INonStandPower.getNonStandPowerOptional(original), INonStandPower.getNonStandPowerOptional(player), 
+        		event.isWasDeath(), "Stand capability");
+        cloneCap(IStandPower.getStandPowerOptional(original), IStandPower.getStandPowerOptional(player), 
+        		event.isWasDeath(), "non-Stand capability");
         
         original.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(oldCap -> {
             player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(newCap -> {
                 newCap.moveNotificationsSet(oldCap);
             });
         });
+    }
+    
+    private static <T extends IPower<T, ?>> void cloneCap(LazyOptional<T> oldCap, LazyOptional<T> newCap, boolean wasDeath, String warning) {
+    	if (oldCap.isPresent() && newCap.isPresent()) {
+    		newCap.resolve().get().onClone(oldCap.resolve().get(), wasDeath);
+    	}
+    	else {
+    		JojoMod.getLogger().warn("Failed to copy " + " data!");
+    	}
     }
 
     @SubscribeEvent
