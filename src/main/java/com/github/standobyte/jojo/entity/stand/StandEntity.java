@@ -1478,20 +1478,21 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
     @Override
     public boolean canAttack(LivingEntity entity) {
+        if (entity.is(this) || !super.canAttack(entity)) return false;
+        
         LivingEntity user = getUser();
-        return super.canAttack(entity) && !entity.is(this) && ((user == null || !entity.is(user) && user.canAttack(entity)));
+        if (user != null) {
+        	return !entity.is(user) && user.canAttack(entity)
+        			&& !(user instanceof PlayerEntity && entity instanceof PlayerEntity
+        					&& !((PlayerEntity) user).canHarmPlayer((PlayerEntity) entity));
+        }
+        
+        return true;
     }
     
     public boolean canHarm(Entity target) {
-        LivingEntity user = getUser();
         if (target instanceof LivingEntity) {
-            LivingEntity targetLiving = (LivingEntity) target;
-            if (user != null) {
-            	return user.canAttack(targetLiving) && !(
-            			user instanceof PlayerEntity && targetLiving instanceof PlayerEntity
-            			&& !((PlayerEntity) user).canHarmPlayer((PlayerEntity) targetLiving));
-            }
-            return canAttack(targetLiving);
+        	return canAttack((LivingEntity) target);
         }
         return true;
     }

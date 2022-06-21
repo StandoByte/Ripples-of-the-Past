@@ -25,6 +25,7 @@ public class SaveFileUtilCap {
     
     private boolean gameruleDayLightCycle;
     private boolean gameruleWeatherCycle;
+    private boolean usedTimeStop = false;
     
     public SaveFileUtilCap(ServerWorld overworld) {
     	this.overworld = overworld;
@@ -83,15 +84,17 @@ public class SaveFileUtilCap {
 	        gameRules.getRule(GameRules.RULE_DAYLIGHT).set(false, server);
 	        gameruleWeatherCycle = gameRules.getBoolean(GameRules.RULE_WEATHER_CYCLE);
 	        gameRules.getRule(GameRules.RULE_WEATHER_CYCLE).set(false, server);
+	        usedTimeStop = true;
     	}
     }
     
     public void restoreTimeStopGamerules(ServerWorld world) {
-    	if (noTimeStopInstances(world)) {
-	    	GameRules gameRules = overworld.getGameRules();
-	    	MinecraftServer server = overworld.getServer();
-	    	gameRules.getRule(GameRules.RULE_DAYLIGHT).set(gameruleDayLightCycle, server);
-	    	gameRules.getRule(GameRules.RULE_WEATHER_CYCLE).set(gameruleWeatherCycle, server);
+    	if (usedTimeStop && noTimeStopInstances(world)) {
+    		GameRules gameRules = overworld.getGameRules();
+    		MinecraftServer server = overworld.getServer();
+    		gameRules.getRule(GameRules.RULE_DAYLIGHT).set(gameruleDayLightCycle, server);
+    		gameRules.getRule(GameRules.RULE_WEATHER_CYCLE).set(gameruleWeatherCycle, server);
+    		usedTimeStop = false;
     	}
     }
     
@@ -111,13 +114,16 @@ public class SaveFileUtilCap {
     	CompoundNBT nbt = new CompoundNBT();
     	nbt.putBoolean("GameruleDayLightCycle", gameruleDayLightCycle);
     	nbt.putBoolean("GameruleWeatherCycle", gameruleWeatherCycle);
+    	nbt.putBoolean("UsedTimeStop", usedTimeStop);
     	return nbt;
     }
     
     void loadGamerules(CompoundNBT nbt) {
-    	GameRules gameRules = overworld.getGameRules();
-    	MinecraftServer server = overworld.getServer();
-    	gameRules.getRule(GameRules.RULE_DAYLIGHT).set(nbt.getBoolean("GameruleDayLightCycle"), server);
-    	gameRules.getRule(GameRules.RULE_WEATHER_CYCLE).set(nbt.getBoolean("GameruleWeatherCycle"), server);
+    	if (nbt.getBoolean("UsedTimeStop")) {
+	    	GameRules gameRules = overworld.getGameRules();
+	    	MinecraftServer server = overworld.getServer();
+	    	gameRules.getRule(GameRules.RULE_DAYLIGHT).set(nbt.getBoolean("GameruleDayLightCycle"), server);
+	    	gameRules.getRule(GameRules.RULE_WEATHER_CYCLE).set(nbt.getBoolean("GameruleWeatherCycle"), server);
+    	}
     }
 }
