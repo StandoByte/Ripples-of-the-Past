@@ -15,7 +15,13 @@ import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
 import net.minecraft.entity.ai.goal.PrioritizedGoal;
 import net.minecraft.entity.ai.goal.TargetGoal;
 import net.minecraft.entity.monster.CreeperEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.inventory.CraftingInventory;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.PlayerContainer;
+import net.minecraft.inventory.container.WorkbenchContainer;
+import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.gen.FlatGenerationSettings;
 import net.minecraft.world.gen.feature.StructureFeature;
@@ -23,9 +29,9 @@ import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 public class CommonReflection {
-    private static final Field GOAL_SELECTOR_AVALIABLE_GOALS = ObfuscationReflectionHelper.findField(GoalSelector.class, "field_220892_d");
+    private static final Field GOAL_SELECTOR_AVAILABLE_GOALS = ObfuscationReflectionHelper.findField(GoalSelector.class, "field_220892_d");
     public static Set<PrioritizedGoal> getGoalsSet(GoalSelector targetGoals) {
-        return ReflectionUtil.getFieldValue(GOAL_SELECTOR_AVALIABLE_GOALS, targetGoals);
+        return ReflectionUtil.getFieldValue(GOAL_SELECTOR_AVAILABLE_GOALS, targetGoals);
     }
 
     private static final Field NEAREST_TARGET_GOAL_TARGET_TYPE = ObfuscationReflectionHelper.findField(NearestAttackableTargetGoal.class, "field_75307_b");
@@ -77,5 +83,49 @@ public class CommonReflection {
             FlatGenerationSettings.class, "field_202247_j");
     public static Map<Structure<?>, StructureFeature<?, ?>> flatGenSettingsStructures() {
         return ReflectionUtil.getFieldValue(FLAT_GENERATION_SETTING_STRUCTURE_FEATURES, null);
+    }
+    
+    
+    
+    private static final Field CRAFTING_INVENTORY_MENU = ObfuscationReflectionHelper.findField(CraftingInventory.class, "field_70465_c");
+    public static Container getCraftingInventoryMenu(CraftingInventory inventory) {
+        return ReflectionUtil.getFieldValue(CRAFTING_INVENTORY_MENU, inventory);
+    }
+    
+    private static final Field PLAYER_CONTAINER_OWNER = ObfuscationReflectionHelper.findField(PlayerContainer.class, "field_82862_h");
+    public static PlayerEntity getPlayer(PlayerContainer container) {
+        return ReflectionUtil.getFieldValue(PLAYER_CONTAINER_OWNER, container);
+    }
+    
+    private static final Field WORKBENCH_CONTAINER_PLAYER = ObfuscationReflectionHelper.findField(WorkbenchContainer.class, "field_192390_i");
+    public static PlayerEntity getPlayer(WorkbenchContainer container) {
+        return ReflectionUtil.getFieldValue(WORKBENCH_CONTAINER_PLAYER, container);
+    }
+    
+    
+    
+    private static final Field FURNACE_TE_LIT_TIME = ObfuscationReflectionHelper.findField(AbstractFurnaceTileEntity.class, "field_214018_j");
+    public static int getFurnaceLitTime(AbstractFurnaceTileEntity tileEntity) {
+        return ReflectionUtil.getFieldValue(FURNACE_TE_LIT_TIME, tileEntity);
+    }
+    
+    public static void setFurnaceLitTime(AbstractFurnaceTileEntity tileEntity, int ticks) {
+        ReflectionUtil.setFieldValue(FURNACE_TE_LIT_TIME, tileEntity, ticks);
+    }
+    
+    private static final Field FURNACE_TE_LIT_DURATION = ObfuscationReflectionHelper.findField(AbstractFurnaceTileEntity.class, "field_214019_k");
+    public static void setFurnaceLitDuration(AbstractFurnaceTileEntity tileEntity, int ticks) {
+        ReflectionUtil.setFieldValue(FURNACE_TE_LIT_DURATION, tileEntity, ticks);
+    }
+    
+    
+    
+    private static final Field LIVING_ENTITY_LERP_STEPS = ObfuscationReflectionHelper.findField(LivingEntity.class, "field_70716_bi");
+    public static int getLerpSteps(LivingEntity entity) {
+        return ReflectionUtil.getFieldValue(LIVING_ENTITY_LERP_STEPS, entity);
+    }
+    
+    public static void setLerpSteps(LivingEntity entity, int steps) {
+        ReflectionUtil.setFieldValue(LIVING_ENTITY_LERP_STEPS, entity, steps);
     }
 }

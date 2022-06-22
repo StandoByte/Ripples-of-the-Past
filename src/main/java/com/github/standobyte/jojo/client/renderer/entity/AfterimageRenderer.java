@@ -9,7 +9,6 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3d;
 
 public class AfterimageRenderer<T extends AfterimageEntity> extends EntityRenderer<T> {
 
@@ -27,11 +26,8 @@ public class AfterimageRenderer<T extends AfterimageEntity> extends EntityRender
         Entity originEntity = entity.getOriginEntity();
         if (originEntity != null) {
             Minecraft mc = Minecraft.getInstance();
-            if (originEntity == mc.getCameraEntity() && mc.options.getCameraType().isFirstPerson()) {
-                Vector3d diff = entity.getPosition(partialTick).subtract(originEntity.getPosition(partialTick));
-                if (diff.lengthSqr() < 0.25D) {
-                    return;
-                }
+            if (!entity.shouldRender() || originEntity == mc.getCameraEntity() && mc.options.getCameraType().isFirstPerson()) {
+                return;
             }
             entityRenderDispatcher.getRenderer(originEntity).render(originEntity, yRotation, partialTick, matrixStack, buffer, packedLight);
         }

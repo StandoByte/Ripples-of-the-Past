@@ -1,8 +1,8 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
-import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.util.JojoModUtil;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.block.BlockState;
@@ -29,6 +29,10 @@ public class MRFlameEntity extends ModdedProjectileEntity {
     public MRFlameEntity(LivingEntity shooter, World world) {
         super(ModEntityTypes.MR_FLAME.get(), shooter, world);
     }
+    
+    protected MRFlameEntity(EntityType<? extends MRFlameEntity> type, LivingEntity shooter, World world) {
+        super(type, shooter, world);
+    }
 
     public MRFlameEntity(EntityType<? extends MRFlameEntity> type, World world) {
         super(type, world);
@@ -40,23 +44,25 @@ public class MRFlameEntity extends ModdedProjectileEntity {
     }
     
     @Override
+    public float getBaseDamage() {
+        return 1.0F;
+    }
+    
+    @Override
+    public void shoot(double x, double y, double z, float velocity, float inaccuracy) {
+    	super.shoot(x, y, z, velocity, inaccuracy);
+    	startingPos = position();
+    }
+    
+    @Override
     protected boolean hurtTarget(Entity target, LivingEntity owner) {
-        if (super.hurtTarget(target, owner)) {
-            int seconds = 3;
-            if (target instanceof StandEntity) {
-                ((StandEntity) target).setFireFromStand(seconds);
-            }
-            else {
-                target.setSecondsOnFire(seconds);
-            }
-            return true;
-        }
-        return false;
+        return DamageUtil.dealDamageAndSetOnFire(target, 
+                entity -> super.hurtTarget(entity, owner), 5, true);
     }
 
     @Override
-    protected RayTraceResult rayTrace() {
-        return JojoModUtil.getHitResult(this, this::canHitEntity, RayTraceContext.BlockMode.OUTLINE);
+    protected RayTraceResult[] rayTrace() {
+        return new RayTraceResult[] { JojoModUtil.getHitResult(this, this::canHitEntity, RayTraceContext.BlockMode.OUTLINE) };
     }
     
     @Override
@@ -114,8 +120,13 @@ public class MRFlameEntity extends ModdedProjectileEntity {
     }
     
     @Override
-    public float getBaseDamage() {
-        return 1.0F;
+    public boolean isOnFire() {
+        return false;
+    }
+    
+    @Override
+    public boolean isFiery() {
+        return true;
     }
     
     @Override
@@ -124,7 +135,7 @@ public class MRFlameEntity extends ModdedProjectileEntity {
     }
     
     @Override
-    protected int ticksLifespan() {
+	public int ticksLifespan() {
         return 8;
     }
     
@@ -144,8 +155,25 @@ public class MRFlameEntity extends ModdedProjectileEntity {
     }
 
     @Override
+    public void writeSpawnData(PacketBuffer buffer) {
+    	super.writeSpawnData(buffer);
+    	boolean hasStartingPos = startingPos != null;
+    	buffer.writeBoolean(hasStartingPos);
+    	if (hasStartingPos) {
+    		buffer.writeDouble(startingPos.x);
+    		buffer.writeDouble(startingPos.y);
+    		buffer.writeDouble(startingPos.z);
+    	}
+    }
+
+    @Override
     public void readSpawnData(PacketBuffer additionalData) {
         super.readSpawnData(additionalData);
-        startingPos = position();
+        if (additionalData.readBoolean()) {
+        	startingPos = new Vector3d(additionalData.readDouble(), additionalData.readDouble(), additionalData.readDouble());
+        }
+        else {
+        	startingPos = position();
+        }
     }
 }

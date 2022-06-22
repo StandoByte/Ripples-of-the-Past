@@ -2,15 +2,18 @@ package com.github.standobyte.jojo.entity.damaging;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.util.JojoModUtil;
-import com.github.standobyte.jojo.util.MathUtil;
+import com.github.standobyte.jojo.power.stand.StandUtil;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 import com.github.standobyte.jojo.util.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.damage.IndirectStandEntityDamageSource;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.block.TNTBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -22,21 +25,24 @@ import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.Direction;
 import net.minecraft.util.IndirectEntityDamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.EntityRayTraceResult;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 public abstract class DamagingEntity extends ProjectileEntity implements IEntityAdditionalSpawnData {
     protected static final Vector3d DEFAULT_POS_OFFSET = new Vector3d(0.0D, -0.3D, 0.0D);
-    protected float damageFactor = 1.0F;
+    private float damageFactor = 1F;
+    // only used for OwnerBoundProjectileEntity
+    protected float speedFactor = 1F;
     private LivingEntity livingEntityOwner = null;
 
     public DamagingEntity(EntityType<? extends DamagingEntity> entityType, @Nullable LivingEntity owner, World world) {
@@ -85,14 +91,20 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     public void tick() {
         super.tick();
         checkInsideBlocks();
-        RayTraceResult rayTraceResult = rayTrace();
-        if (rayTraceResult.getType() != RayTraceResult.Type.MISS && !ForgeEventFactory.onProjectileImpact(this, rayTraceResult)) {
-            onHit(rayTraceResult);
+        checkHit();
+    }
+    
+    protected final void checkHit() {
+        RayTraceResult[] rayTrace = rayTrace();
+        for (RayTraceResult result : rayTrace) {
+            if (result.getType() != RayTraceResult.Type.MISS && !ForgeEventFactory.onProjectileImpact(this, result)) {
+                onHit(result);
+            }
         }
     }
 
-    protected RayTraceResult rayTrace() {
-        return ProjectileHelper.getHitResult(this, this::canHitEntity);
+    protected RayTraceResult[] rayTrace() {
+        return new RayTraceResult[] { ProjectileHelper.getHitResult(this, this::canHitEntity) };
     }
     
     @Override
@@ -100,42 +112,42 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
         if (!level.isClientSide()) {
             Entity target = entityRayTraceResult.getEntity();
             LivingEntity owner = getOwner();
-            boolean entityHurt;
-            if (checkPvpRules() && 
-                    owner instanceof StandEntity && !((StandEntity) owner).canHarm(target) || 
-                    owner instanceof PlayerEntity && target instanceof PlayerEntity && !((PlayerEntity) owner).canHarmPlayer((PlayerEntity) target)) {
-                    entityHurt = false;
-            }
-            else {
-                entityHurt = hurtTarget(target, owner);
+            boolean entityHurt = hurtTarget(target, owner);
+            int prevTargetFireTimer = target.getRemainingFireTicks();
+            if (isOnFire()) {
+                target.setSecondsOnFire(5);
             }
             if (entityHurt) {
                 if (owner instanceof StandEntity && target instanceof LivingEntity) {
                     LivingEntity standUser = ((StandEntity) owner).getUser();
-                    if (standUser instanceof PlayerEntity) {
+                    if (standUser != null) {
                         LivingEntity livingTarget = (LivingEntity) target;
-                        livingTarget.setLastHurtByPlayer((PlayerEntity) standUser);
-                        livingTarget.lastHurtByPlayerTime = 100;
+                        if (standUser instanceof PlayerEntity) {
+                            livingTarget.setLastHurtByPlayer((PlayerEntity) standUser);
+                            livingTarget.lastHurtByPlayerTime = 100;
+                        }
+                        livingTarget.setLastHurtByMob(standUser);
                     }
                 }
-                if (isOnFire()) {
-                    target.setSecondsOnFire(5);
-                }
+            }
+            else {
+                target.setRemainingFireTicks(prevTargetFireTimer);
             }
             afterEntityHit(entityRayTraceResult, entityHurt);
         }
+        super.onHitEntity(entityRayTraceResult);
     }
     
     protected boolean checkPvpRules() {
         return true;
     }
     
-    protected boolean hurtTarget(Entity target, LivingEntity owner) {
-        return hurtTarget(target, getDamageSource(owner), getBaseDamage() * getDamageFactor());
+    protected boolean hurtTarget(Entity target, @Nullable LivingEntity owner) {
+        return hurtTarget(target, getDamageSource(owner), getDamageAmount());
     }
     
     protected boolean hurtTarget(Entity target, DamageSource dmgSource, float dmgAmount) {
-        return ModDamageSources.hurtThroughInvulTicks(target, dmgSource, dmgAmount);
+        return DamageUtil.hurtThroughInvulTicks(target, DamageUtil.enderDragonDamageHack(dmgSource, target), dmgAmount);
     }
     
     protected DamageSource getDamageSource(LivingEntity owner) { // TODO damage sources/death messages
@@ -148,19 +160,21 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     @Override
     protected boolean canHitEntity(Entity entity) {
         if (super.canHitEntity(entity)) {
+            LivingEntity owner = getOwner();
+            if (owner == null) {
+                return true;
+            }
             if (entity instanceof LivingEntity) {
-                LivingEntity owner = getOwner();
-                if (owner == null) {
-                    return true;
-                }
-                if (entity.is(owner)) {
+                if (entity.is(owner) || owner instanceof StandEntity && entity.is(((StandEntity) owner).getUser())) {
                     return canHitOwner();
                 }
                 else {
                     return owner.canAttack((LivingEntity) entity);
                 }
             }
-            return true;
+            return !(checkPvpRules() && 
+                    owner instanceof StandEntity && !((StandEntity) owner).canHarm(entity) || 
+                    owner instanceof PlayerEntity && entity instanceof PlayerEntity && !((PlayerEntity) owner).canHarmPlayer((PlayerEntity) entity));
         }
         return false;
     }
@@ -171,10 +185,11 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
 
     @Override
     protected void onHitBlock(BlockRayTraceResult blockRayTraceResult) {
+        super.onHitBlock(blockRayTraceResult);
         if (!level.isClientSide()) {
             BlockPos blockPos = blockRayTraceResult.getBlockPos();
             LivingEntity owner = getOwner();
-            boolean brokenBlock = owner != null && !JojoModUtil.canEntityDestroy(level, blockPos, owner) ? 
+            boolean brokenBlock = owner != null && !JojoModUtil.canEntityDestroy((ServerWorld) level, blockPos, owner) ? 
                     false
                     : destroyBlock(blockRayTraceResult);
             afterBlockHit(blockRayTraceResult, brokenBlock);
@@ -184,14 +199,20 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     protected boolean destroyBlock(BlockRayTraceResult blockRayTraceResult) {
         BlockPos blockPos = blockRayTraceResult.getBlockPos();
         BlockState blockState = level.getBlockState(blockPos);
+        Direction face = blockRayTraceResult.getDirection();
         boolean brokenBlock = canBreakBlock(blockPos, blockState);
+        if (isFiery() && blockState.isFlammable(level, blockPos, face)) {
+            blockState.catchFire(level, blockPos, face, getOwner());
+            if (blockState.getBlock() instanceof TNTBlock) level.removeBlock(blockPos, false);
+            return false;
+        }
         if (brokenBlock) {
             LivingEntity ownerOrStandUser = getOwner();
             if (ownerOrStandUser instanceof StandEntity) {
                 ownerOrStandUser = ((StandEntity) ownerOrStandUser).getUser();
             }
             boolean dropItem = ownerOrStandUser instanceof PlayerEntity ? !((PlayerEntity) ownerOrStandUser).abilities.instabuild : true;
-            brokenBlock = level.destroyBlock(blockPos, dropItem);
+            brokenBlock = level.destroyBlock(blockPos, dropItem, getOwner());
         }
         return brokenBlock;
     }
@@ -203,17 +224,46 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     
     protected void afterBlockHit(BlockRayTraceResult blockRayTraceResult, boolean blockDestroyed) {}
     
-    protected float getDamageFactor() {
-        return damageFactor;
+    public boolean isFiery() {
+        return false;
+    }
+    
+    public abstract int ticksLifespan();
+
+    protected abstract float getBaseDamage();
+    
+    protected final float getDamageAmount() {
+        float configMultiplier = standDamage() || getOwner() instanceof StandEntity ? JojoModConfig.getCommonConfigInstance(false).standDamageMultiplier.get().floatValue() : 1;
+        float damage = getBaseDamage() * configMultiplier;
+        if (debuffsFromStand()) {
+        	damage *= damageFactor;
+        }
+        return damage;
+    }
+    
+    protected float getDamageFinalCalc(float damage) {
+        return damage;
     }
     
     public void setDamageFactor(float damageFactor) {
-        this.damageFactor = MathHelper.clamp(damageFactor, 0.0F, 1.0F);
+        this.damageFactor = damageFactor;
     }
     
-    protected abstract int ticksLifespan();
+    public float getDamageFactor() {
+    	return damageFactor;
+    }
     
-    public abstract float getBaseDamage();
+    public void setSpeedFactor(float speedFactor) {
+        this.speedFactor = speedFactor;
+    }
+    
+    public float getSpeedFactor() {
+    	return speedFactor;
+    }
+    
+    protected boolean debuffsFromStand() {
+    	return true;
+    }
     
     protected abstract float getMaxHardnessBreakable();
     
@@ -230,7 +280,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
 
     @Override
     public boolean isInvisibleTo(PlayerEntity player) {
-        return !player.isSpectator() && (standVisibility() && !ClientUtil.shouldStandsRender(player) || super.isInvisible());
+        return !player.isSpectator() && (standVisibility() && !StandUtil.shouldStandsRender(player) || super.isInvisible());
     }
     
     @Override
@@ -273,6 +323,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     protected void addAdditionalSaveData(CompoundNBT nbt) {
         super.addAdditionalSaveData(nbt);
         nbt.putFloat("DamageFactor", damageFactor);
+        nbt.putFloat("SpeedFactor", speedFactor);
         nbt.putInt("Age", tickCount);
     }
 
@@ -280,6 +331,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     protected void readAdditionalSaveData(CompoundNBT nbt) {
         super.readAdditionalSaveData(nbt);
         damageFactor = nbt.getFloat("DamageFactor");
+        speedFactor = nbt.getFloat("SpeedFactor");
         tickCount = nbt.getInt("Age");
     }
 
@@ -289,11 +341,13 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     @Override
     public void writeSpawnData(PacketBuffer buffer) {
         buffer.writeInt(tickCount);
+        buffer.writeFloat(speedFactor);
     }
 
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
         tickCount = additionalData.readInt();
+        speedFactor = additionalData.readFloat();
     }
 
     @Override

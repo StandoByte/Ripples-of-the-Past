@@ -43,12 +43,17 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser 
                 hamon.learnHamonSkill(skill, false);
             }
         }
-        hamonPower.setMana(hamonPower.getMaxMana());
+        hamonPower.setEnergy(hamonPower.getMaxEnergy());
         setPersistenceRequired();
     }
 
     @Override
-    public boolean requiresCustomPersistence() { // if he somehow despawns again, i swear...
+    public boolean removeWhenFarAway(double distanceFromPlayer) {
+        return false;
+    }
+
+    @Override
+    public boolean requiresCustomPersistence() {
         return true;
     }
 
@@ -86,8 +91,9 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser 
         }
     }
 
+    // FIXME liquid walking
     @Override
-    public boolean canStandOnFluid(Fluid fluid) { // TODO Forge PR to add LivingStandOnFluidEvent or smth
+    public boolean canStandOnFluid(Fluid fluid) {
         return hamon.isSkillLearned(HamonSkill.LAVA_WALKING) || hamon.isSkillLearned(HamonSkill.WATER_WALKING) && fluid.is(FluidTags.WATER);
     }
 

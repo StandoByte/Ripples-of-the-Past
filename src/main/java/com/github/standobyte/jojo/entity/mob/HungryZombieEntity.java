@@ -7,19 +7,31 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.actions.VampirismBloodDrain;
 import com.github.standobyte.jojo.entity.ai.ZombieFollowOwnerGoal;
+import com.github.standobyte.jojo.entity.ai.ZombieNearestAttackableTargetGoal;
 import com.github.standobyte.jojo.entity.ai.ZombieOwnerHurtByTargetGoal;
 import com.github.standobyte.jojo.entity.ai.ZombieOwnerHurtTargetGoal;
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.util.JojoModUtil;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.goal.HurtByTargetGoal;
+import net.minecraft.entity.ai.goal.MoveThroughVillageGoal;
+import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
+import net.minecraft.entity.ai.goal.WaterAvoidingRandomWalkingGoal;
+import net.minecraft.entity.ai.goal.ZombieAttackGoal;
+import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
 import net.minecraft.entity.merchant.villager.VillagerEntity;
+import net.minecraft.entity.monster.AbstractIllagerEntity;
 import net.minecraft.entity.monster.ZombieEntity;
+import net.minecraft.entity.monster.ZombifiedPiglinEntity;
+import net.minecraft.entity.passive.IronGolemEntity;
+import net.minecraft.entity.passive.TurtleEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -35,7 +47,8 @@ import net.minecraftforge.event.ForgeEventFactory;
 
 public class HungryZombieEntity extends ZombieEntity {
     protected static final DataParameter<Optional<UUID>> OWNER_UUID = EntityDataManager.defineId(HungryZombieEntity.class, DataSerializers.OPTIONAL_UUID);
-    private boolean isOwnerNearby;
+    private double distanceFromOwner;
+    private boolean summonedFromAbility = false;
 
     public HungryZombieEntity(World world) {
         this(ModEntityTypes.HUNGRY_ZOMBIE.get(), world);
@@ -44,6 +57,10 @@ public class HungryZombieEntity extends ZombieEntity {
     public HungryZombieEntity(EntityType<? extends HungryZombieEntity> type, World world) {
         super(type, world);
         xpReward *= 1.5;
+    }
+    
+    public void setSummonedFromAbility() {
+        this.summonedFromAbility = true;
     }
     
     @Override
@@ -67,11 +84,24 @@ public class HungryZombieEntity extends ZombieEntity {
         this.targetSelector.addGoal(2, new ZombieOwnerHurtTargetGoal(this));
     }
 
+    @Override
+    protected void addBehaviourGoals() {
+        this.goalSelector.addGoal(2, new ZombieAttackGoal(this, 1.0D, false));
+        this.goalSelector.addGoal(6, new MoveThroughVillageGoal(this, 1.0D, true, 4, this::canBreakDoors));
+        this.goalSelector.addGoal(7, new WaterAvoidingRandomWalkingGoal(this, 1.0D));
+        this.targetSelector.addGoal(1, (new HurtByTargetGoal(this)).setAlertOthers(ZombifiedPiglinEntity.class));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, PlayerEntity.class, true));
+        this.targetSelector.addGoal(3, new ZombieNearestAttackableTargetGoal<>(this, AbstractVillagerEntity.class, false));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolemEntity.class, true));
+        this.targetSelector.addGoal(5, new NearestAttackableTargetGoal<>(this, TurtleEntity.class, 10, true, false, TurtleEntity.BABY_ON_LAND_SELECTOR));
+    }
+
     public void addAdditionalSaveData(CompoundNBT compound) {
         super.addAdditionalSaveData(compound);
         if (getOwnerUUID() != null) {
             compound.putUUID("Owner", getOwnerUUID());
         }
+        compound.putBoolean("AbilitySummon", summonedFromAbility);
     }
 
     @Override
@@ -81,6 +111,7 @@ public class HungryZombieEntity extends ZombieEntity {
         if (ownerId != null) {
             setOwnerUUID(ownerId);
         }
+        summonedFromAbility = compound.getBoolean("AbilitySummon");
     }
 
     @Nullable
@@ -106,9 +137,13 @@ public class HungryZombieEntity extends ZombieEntity {
         }
     }
     
+    public boolean isEntityOwner(LivingEntity entity) {
+        return entityData.get(OWNER_UUID).map(ownerId -> entity.getUUID().equals(ownerId)).orElse(false);
+    }
+    
     @Override
     protected int getExperienceReward(PlayerEntity player) {
-        return getOwnerUUID() == null ? super.getExperienceReward(player) : 0;
+        return isEntityOwner(player) ? 0 : super.getExperienceReward(player);
     }
     
     @Override
@@ -116,17 +151,17 @@ public class HungryZombieEntity extends ZombieEntity {
         super.tick();
         if (!level.isClientSide()) {
             LivingEntity owner = getOwner();
-            isOwnerNearby = owner != null && distanceToSqr(owner) <= 144;
+            distanceFromOwner = owner != null ? distanceToSqr(owner) : -1;
         }
     }
     
-    public boolean isOwnerNearby() {
-        return isOwnerNearby;
+    public boolean farFromOwner(double distance) {
+        return distanceFromOwner > Math.pow(distance, 2);
     }
 
     @Override
     public boolean canAttack(LivingEntity target) {
-        return target.is(getOwner()) ? false : super.canAttack(target);
+        return !isEntityOwner(target) && super.canAttack(target);
     }
 
     public boolean wantsToAttack(LivingEntity target, LivingEntity owner) {
@@ -155,6 +190,11 @@ public class HungryZombieEntity extends ZombieEntity {
             return owner.isAlliedTo(entity);
         }
         return super.isAlliedTo(entity);
+    }
+    
+    @Override
+    public boolean canBeLeashed(PlayerEntity player) {
+    	return !this.isLeashed() && isEntityOwner(player);
     }
 
     @Override
@@ -185,10 +225,17 @@ public class HungryZombieEntity extends ZombieEntity {
         createZombie(world, getOwner(), entityDead, isPersistenceRequired());
     }
     
-    public static void createZombie(ServerWorld world, LivingEntity owner, LivingEntity dead, boolean makePersistent) {
-        if ((world.getDifficulty() == Difficulty.NORMAL && dead.getRandom().nextBoolean() || world.getDifficulty() == Difficulty.HARD)
-                && dead instanceof VillagerEntity && ForgeEventFactory.canLivingConvert(dead, ModEntityTypes.HUNGRY_ZOMBIE.get(), (timer) -> {})) {
-            HungryZombieEntity zombie = ((VillagerEntity) dead).convertTo(ModEntityTypes.HUNGRY_ZOMBIE.get(), true);
+    public static boolean createZombie(ServerWorld world, LivingEntity owner, LivingEntity dead, boolean makePersistent) {
+        if ((world.getDifficulty() == Difficulty.NORMAL && dead.getRandom().nextBoolean() || world.getDifficulty() == Difficulty.HARD)) {
+            HungryZombieEntity zombie;
+            if ((dead instanceof VillagerEntity || dead instanceof AbstractIllagerEntity) 
+                    && ForgeEventFactory.canLivingConvert(dead, ModEntityTypes.HUNGRY_ZOMBIE.get(), (timer) -> {})) {
+                MobEntity deadMob = (MobEntity) dead;
+                zombie = deadMob.convertTo(ModEntityTypes.HUNGRY_ZOMBIE.get(), true);
+            }
+            else {
+                return false;
+            }
             zombie.finalizeSpawn(
                     world, 
                     world.getCurrentDifficultyAt(zombie.blockPosition()), 
@@ -200,6 +247,8 @@ public class HungryZombieEntity extends ZombieEntity {
             if (!dead.isSilent()) {
                 world.levelEvent(null, 1026, dead.blockPosition(), 0);
             }
+            return true;
         }
+        return false;
     }
 }

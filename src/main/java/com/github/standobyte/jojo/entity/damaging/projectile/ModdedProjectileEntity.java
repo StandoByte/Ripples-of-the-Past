@@ -2,13 +2,16 @@ package com.github.standobyte.jojo.entity.damaging.projectile;
 
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
-import com.github.standobyte.jojo.util.MathUtil;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -18,6 +21,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public abstract class ModdedProjectileEntity extends DamagingEntity {
+    private static final DataParameter<Boolean> IS_DEFLECTED = EntityDataManager.defineId(ModdedProjectileEntity.class, DataSerializers.BOOLEAN);
     private int ownerId = -1;
     
     protected ModdedProjectileEntity(EntityType<? extends ModdedProjectileEntity> type, LivingEntity shooter, World world) {
@@ -83,12 +87,12 @@ public abstract class ModdedProjectileEntity extends DamagingEntity {
     @Override
     public void tick() {
         Entity owner = getOwner();
-        if (tickCount < ticksLifespan() && (owner == null || owner.isAlive())) {
-            super.tick();
-            moveProjectile();
-        } else {
-            remove();
+        if (!level.isClientSide() && (tickCount > ticksLifespan() || owner != null && !owner.isAlive())) {
+        	remove();
+        	return;
         }
+        super.tick();
+        moveProjectile();
     }
     
     protected void moveProjectile() {
@@ -183,6 +187,15 @@ public abstract class ModdedProjectileEntity extends DamagingEntity {
     }
     
     @Override
+    protected boolean canHitOwner() {
+        return entityData.get(IS_DEFLECTED);
+    }
+    
+    public void setIsDeflected() {
+        entityData.set(IS_DEFLECTED, true);
+    }
+    
+    @Override
     protected void onHitEntity(EntityRayTraceResult entityRayTraceResult) {
         super.onHitEntity(entityRayTraceResult);
         breakProjectile(TargetType.ENTITY);
@@ -254,6 +267,12 @@ public abstract class ModdedProjectileEntity extends DamagingEntity {
         }
         d0 = d0 * 64.0D * getViewScale();
         return distance < d0 * d0;
+    }
+
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        entityData.define(IS_DEFLECTED, false);
     }
 
     @Override

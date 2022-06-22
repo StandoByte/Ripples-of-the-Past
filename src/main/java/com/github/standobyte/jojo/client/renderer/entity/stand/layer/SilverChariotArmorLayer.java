@@ -10,19 +10,13 @@ import net.minecraft.util.ResourceLocation;
 
 public class SilverChariotArmorLayer extends StandModelLayerRenderer<SilverChariotEntity, SilverChariotModel> {
     private static final ResourceLocation LAYER_TEXTURE = new ResourceLocation(JojoMod.MOD_ID, "textures/entity/stand/silver_chariot_armor.png");
-    private final SilverChariotArmorLayerModel model = new SilverChariotArmorLayerModel();
 
     public SilverChariotArmorLayer(SilverChariotRenderer entityRenderer) {
-        super(entityRenderer);
+        super(entityRenderer, new SilverChariotArmorLayerModel());
     }
     
     public boolean shouldRender(SilverChariotEntity entity) {
         return entity.hasArmor();
-    }
-
-    @Override
-    public SilverChariotModel getLayerModel() {
-        return model;
     }
 
     @Override

@@ -4,31 +4,29 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.TypeSpecificData;
-import com.github.standobyte.jojo.util.JojoModUtil;
+import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
-public abstract class NonStandPowerType<T extends TypeSpecificData> extends ForgeRegistryEntry<NonStandPowerType<?>> implements IPowerType<NonStandPowerType<?>> {
+public abstract class NonStandPowerType<T extends TypeSpecificData> extends ForgeRegistryEntry<NonStandPowerType<?>> implements IPowerType<INonStandPower, NonStandPowerType<?>> {
     private final int color;
-    protected final Action[] attacks;
-    protected final Action[] abilities;
+    protected final Action<INonStandPower>[] attacks;
+    protected final Action<INonStandPower>[] abilities;
     private final Supplier<T> dataFactory;
     private String translationKey;
-    private final float manaRegenPoints;
     private ResourceLocation iconTexture;
     
-    public NonStandPowerType(int color, Action[] startingAttacks, Action[] startingAbilities, float manaRegenPoints, Supplier<T> dataFactory) {
+    public NonStandPowerType(int color, Action<INonStandPower>[] startingAttacks, Action<INonStandPower>[] startingAbilities, Supplier<T> dataFactory) {
         this.color = color;
         this.attacks = startingAttacks;
         this.abilities = startingAbilities;
-        this.manaRegenPoints = manaRegenPoints;
         this.dataFactory = dataFactory;
     }
     
@@ -39,10 +37,7 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
     
     public void onClear(INonStandPower power) {}
     
-    @Override
-    public boolean canTickMana(LivingEntity user, IPower<?> power) {
-        return true;
-    }
+    public void afterClear(INonStandPower power) {}
     
     @Override
     public String getTranslationKey() {
@@ -61,26 +56,36 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
     }
     
     @Override
-    public String getManaString() {
+    public String getEnergyString() {
         return getRegistryName().getPath();
     }
     
     @Override
-    public Action[] getAttacks() {
+    public Action<INonStandPower>[] getAttacks() {
         return attacks;
     }
 
     @Override
-    public Action[] getAbilities() {
+    public Action<INonStandPower>[] getAbilities() {
         return abilities;
     }
 
-    public float getStartingManaRegenPoints() {
-        return manaRegenPoints;
+    public float getMaxEnergyFactor(INonStandPower power) {
+        return 1;
     }
     
-    public float reduceManaConsumed(float amount, INonStandPower power, LivingEntity user) {
+    public abstract float getEnergyTickInc(INonStandPower power);
+    
+    public float reduceEnergyConsumed(float amount, INonStandPower power, LivingEntity user) {
         return amount;
+    }
+    
+    public float getMaxStaminaFactor(INonStandPower power, IStandPower standPower) {
+        return 1;
+    }
+    
+    public float getStaminaRegenFactor(INonStandPower power, IStandPower standPower) {
+        return 1;
     }
     
     public boolean isLeapUnlocked(INonStandPower power) {
@@ -97,7 +102,7 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
         return 0;
     }
     
-    public float getLeapManaCost() {
+    public float getLeapEnergyCost() {
         return 0;
     }
 

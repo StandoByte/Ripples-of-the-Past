@@ -31,6 +31,12 @@ import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 public class BladeHatEntity extends ItemNbtProjectileEntity implements IEntityAdditionalSpawnData {
     private static final DataParameter<Boolean> RETURNING_TO_OWNER = EntityDataManager.defineId(BladeHatEntity.class, DataSerializers.BOOLEAN);
 
+    public BladeHatEntity(World world, double x, double y, double z, ItemStack thrownStack) {
+        super(ModEntityTypes.BLADE_HAT.get(), world, x, y, z, thrownStack);
+        this.setNoGravity(true);
+        this.setBaseDamage(6.0F);
+    }
+
     public BladeHatEntity(World world, LivingEntity thrower, ItemStack thrownStack) {
         super(ModEntityTypes.BLADE_HAT.get(), world, thrower, thrownStack);
         this.setNoGravity(true);

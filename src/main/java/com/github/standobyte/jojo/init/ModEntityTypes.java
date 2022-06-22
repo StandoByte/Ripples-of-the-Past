@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.entity.MRDetectorEntity;
 import com.github.standobyte.jojo.entity.PillarmanTempleEngravingEntity;
 import com.github.standobyte.jojo.entity.RoadRollerEntity;
+import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.damaging.LightBeamEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.HGEmeraldEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.HamonBubbleBarrierEntity;
@@ -18,7 +19,9 @@ import com.github.standobyte.jojo.entity.damaging.projectile.HamonCutterEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRCrossfireHurricaneEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRFireballEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRFlameEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.SCFlameSwingEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.TommyGunBulletEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGBarrierEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGGrapplingStringEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGStringEntity;
@@ -35,22 +38,25 @@ import com.github.standobyte.jojo.entity.itemprojectile.KnifeEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.StandArrowEntity;
 import com.github.standobyte.jojo.entity.mob.HamonMasterEntity;
 import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
-import com.github.standobyte.jojo.entity.stand.StandEntityStats;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.entity.stand.stands.StarPlatinumEntity;
 import com.github.standobyte.jojo.entity.stand.stands.TheWorldEntity;
-import com.github.standobyte.jojo.network.packets.fromserver.TrStandSoundPacket.StandSoundType;
 
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
+@EventBusSubscriber(modid = JojoMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public class ModEntityTypes {
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITIES, JojoMod.MOD_ID);
     
@@ -63,7 +69,7 @@ public class ModEntityTypes {
             .build(new ResourceLocation(JojoMod.MOD_ID, "hungry_zombie").toString()));
     
     public static final RegistryObject<EntityType<HamonMasterEntity>> HAMON_MASTER = ENTITIES.register("hamon_master", 
-            () -> EntityType.Builder.<HamonMasterEntity>of(HamonMasterEntity::new, EntityClassification.MISC).sized(0.6F, 1.95F)
+            () -> EntityType.Builder.<HamonMasterEntity>of(HamonMasterEntity::new, EntityClassification.MISC).sized(0.6F, /*1.35F*/1.95F)
             .build(new ResourceLocation(JojoMod.MOD_ID, "hamon_teacher").toString()));
 
     public static final RegistryObject<EntityType<BladeHatEntity>> BLADE_HAT = ENTITIES.register("blade_hat", 
@@ -71,19 +77,19 @@ public class ModEntityTypes {
             .build(new ResourceLocation(JojoMod.MOD_ID, "blade_hat").toString()));
     
     public static final RegistryObject<EntityType<SpaceRipperStingyEyesEntity>> SPACE_RIPPER_STINGY_EYES = ENTITIES.register("space_ripper_stingy_eyes", 
-            () -> EntityType.Builder.<SpaceRipperStingyEyesEntity>of(SpaceRipperStingyEyesEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon()
+            () -> EntityType.Builder.<SpaceRipperStingyEyesEntity>of(SpaceRipperStingyEyesEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().setUpdateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "space_ripper_stingy_eyes").toString()));
     
     public static final RegistryObject<EntityType<ZoomPunchEntity>> ZOOM_PUNCH = ENTITIES.register("zoom_punch", 
-            () -> EntityType.Builder.<ZoomPunchEntity>of(ZoomPunchEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon()
+            () -> EntityType.Builder.<ZoomPunchEntity>of(ZoomPunchEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().setUpdateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "zoom_punch").toString()));
     
     public static final RegistryObject<EntityType<AfterimageEntity>> AFTERIMAGE = ENTITIES.register("afterimage", 
-            () -> EntityType.Builder.<AfterimageEntity>of(AfterimageEntity::new, EntityClassification.MISC).sized(0.6F, 1.8F).noSummon()
+            () -> EntityType.Builder.<AfterimageEntity>of(AfterimageEntity::new, EntityClassification.MISC).sized(0.6F, 1.8F).noSummon().setUpdateInterval(Integer.MAX_VALUE).setShouldReceiveVelocityUpdates(false)
             .build(new ResourceLocation(JojoMod.MOD_ID, "afterimage").toString()));
     
     public static final RegistryObject<EntityType<HamonProjectileShieldEntity>> HAMON_PROJECTILE_SHIELD = ENTITIES.register("hamon_projectile_shield", 
-            () -> EntityType.Builder.<HamonProjectileShieldEntity>of(HamonProjectileShieldEntity::new, EntityClassification.MISC).sized(3.0F, 3.0F).noSummon().noSave()
+            () -> EntityType.Builder.<HamonProjectileShieldEntity>of(HamonProjectileShieldEntity::new, EntityClassification.MISC).sized(3.0F, 3.0F).setUpdateInterval(Integer.MAX_VALUE).setShouldReceiveVelocityUpdates(false).noSummon().noSave()
             .build(new ResourceLocation(JojoMod.MOD_ID, "hamon_projectile_shield").toString()));
     
     public static final RegistryObject<EntityType<LeavesGliderEntity>> LEAVES_GLIDER = ENTITIES.register("leaves_glider", 
@@ -134,6 +140,10 @@ public class ModEntityTypes {
             () -> EntityType.Builder.<SnakeMufflerEntity>of(SnakeMufflerEntity::new, EntityClassification.MISC).sized(0.5F, 0.5F).noSummon()
             .build(new ResourceLocation(JojoMod.MOD_ID, "snake_muffler").toString()));
     
+    public static final RegistryObject<EntityType<TommyGunBulletEntity>> TOMMY_GUN_BULLET = ENTITIES.register("tommy_gun_bullet", 
+            () -> EntityType.Builder.<TommyGunBulletEntity>of(TommyGunBulletEntity::new, EntityClassification.MISC).sized(0.0625F, 0.0625F).clientTrackingRange(4).setUpdateInterval(20)
+            .build(new ResourceLocation(JojoMod.MOD_ID, "tommy_gun_bullet").toString()));
+    
     public static final RegistryObject<EntityType<KnifeEntity>> KNIFE = ENTITIES.register("knife", 
             () -> EntityType.Builder.<KnifeEntity>of(KnifeEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).setUpdateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "knife").toString()));
@@ -142,16 +152,22 @@ public class ModEntityTypes {
             () -> EntityType.Builder.<StandArrowEntity>of(StandArrowEntity::new, EntityClassification.MISC).sized(0.75F, 0.75F).clientTrackingRange(4).updateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "stand_arrow").toString()));
     
+    public static final RegistryObject<EntityType<SoulEntity>> SOUL = ENTITIES.register("soul", 
+            () -> EntityType.Builder.<SoulEntity>of(SoulEntity::new, EntityClassification.MISC).sized(0.6F, 1.8F).noSummon()
+            .build(new ResourceLocation(JojoMod.MOD_ID, "soul").toString()));
+    
+    
+    
     public static final RegistryObject<EntityType<PillarmanTempleEngravingEntity>> PILLARMAN_TEMPLE_ENGRAVING = ENTITIES.register("pillarman_temple_engraving", 
             () -> EntityType.Builder.<PillarmanTempleEngravingEntity>of(PillarmanTempleEngravingEntity::new, EntityClassification.MISC).sized(0.5F, 0.5F).noSummon().setUpdateInterval(Integer.MAX_VALUE).setShouldReceiveVelocityUpdates(false)
             .build(new ResourceLocation(JojoMod.MOD_ID, "pillarman_temple_engraving").toString()));
     
     public static final RegistryObject<EntityType<SPStarFingerEntity>> SP_STAR_FINGER = ENTITIES.register("sp_star_finger", 
-            () -> EntityType.Builder.<SPStarFingerEntity>of(SPStarFingerEntity::new, EntityClassification.MISC).sized(0.125F, 0.125F).noSummon().noSave()
+            () -> EntityType.Builder.<SPStarFingerEntity>of(SPStarFingerEntity::new, EntityClassification.MISC).sized(0.125F, 0.125F).noSummon().noSave().setUpdateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "sp_star_finger").toString()));
     
     public static final RegistryObject<EntityType<HGStringEntity>> HG_STRING = ENTITIES.register("hg_string", 
-            () -> EntityType.Builder.<HGStringEntity>of(HGStringEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().noSave()
+            () -> EntityType.Builder.<HGStringEntity>of(HGStringEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().noSave().setUpdateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "hg_string").toString()));
     
     public static final RegistryObject<EntityType<HGEmeraldEntity>> HG_EMERALD = ENTITIES.register("hg_emerald", 
@@ -159,16 +175,20 @@ public class ModEntityTypes {
             .build(new ResourceLocation(JojoMod.MOD_ID, "hg_emerald").toString()));
     
     public static final RegistryObject<EntityType<HGGrapplingStringEntity>> HG_GRAPPLING_STRING = ENTITIES.register("hg_grappling_string", 
-            () -> EntityType.Builder.<HGGrapplingStringEntity>of(HGGrapplingStringEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().noSave()
+            () -> EntityType.Builder.<HGGrapplingStringEntity>of(HGGrapplingStringEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().noSave().setUpdateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "hg_grappling_string").toString()));
     
     public static final RegistryObject<EntityType<HGBarrierEntity>> HG_BARRIER = ENTITIES.register("hg_barrier", 
-            () -> EntityType.Builder.<HGBarrierEntity>of(HGBarrierEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().noSave()
+            () -> EntityType.Builder.<HGBarrierEntity>of(HGBarrierEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().noSave().setShouldReceiveVelocityUpdates(false).setUpdateInterval(Integer.MAX_VALUE)
             .build(new ResourceLocation(JojoMod.MOD_ID, "hg_barrier").toString()));
     
     public static final RegistryObject<EntityType<SCRapierEntity>> SC_RAPIER = ENTITIES.register("sc_rapier", 
             () -> EntityType.Builder.<SCRapierEntity>of(SCRapierEntity::new, EntityClassification.MISC).sized(0.125F, 0.125F).noSummon().noSave().setUpdateInterval(10)
             .build(new ResourceLocation(JojoMod.MOD_ID, "sc_rapier").toString()));
+    
+    public static final RegistryObject<EntityType<SCFlameSwingEntity>> SC_FLAME = ENTITIES.register("sc_flame", 
+            () -> EntityType.Builder.<SCFlameSwingEntity>of(SCFlameSwingEntity::new, EntityClassification.MISC).sized(0.0625F, 0.0625F).noSummon().noSave().setUpdateInterval(10)
+            .build(new ResourceLocation(JojoMod.MOD_ID, "sc_flame").toString()));
     
     public static final RegistryObject<EntityType<RoadRollerEntity>> ROAD_ROLLER = ENTITIES.register("road_roller", 
             () -> EntityType.Builder.<RoadRollerEntity>of(RoadRollerEntity::new, EntityClassification.MISC).sized(4.0F, 2.0F).setUpdateInterval(10)
@@ -191,91 +211,48 @@ public class ModEntityTypes {
             .build(new ResourceLocation(JojoMod.MOD_ID, "mr_crossfire_hurricane_special").toString()));
     
     public static final RegistryObject<EntityType<MRRedBindEntity>> MR_RED_BIND = ENTITIES.register("mr_red_bind", 
-            () -> EntityType.Builder.<MRRedBindEntity>of(MRRedBindEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().noSave()
+            () -> EntityType.Builder.<MRRedBindEntity>of(MRRedBindEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().noSave().setUpdateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "mr_red_bind").toString()));
     
     public static final RegistryObject<EntityType<MRDetectorEntity>> MR_DETECTOR = ENTITIES.register("mr_detector", 
-            () -> EntityType.Builder.<MRDetectorEntity>of(MRDetectorEntity::new, EntityClassification.MISC).sized(0.5F, 0.5F).noSummon().noSave().setUpdateInterval(2)
+            () -> EntityType.Builder.<MRDetectorEntity>of(MRDetectorEntity::new, EntityClassification.MISC).sized(0.5F, 0.5F).noSummon().noSave().setUpdateInterval(Integer.MAX_VALUE).setShouldReceiveVelocityUpdates(false)
             .build(new ResourceLocation(JojoMod.MOD_ID, "mr_detector").toString()));
-
-    /*
-     * default stand stats:
-     * .damage(5.0)                         // 0.0 ~ 2048.0
-     * .attackKnockback(1.0)                // 0.0 ~ 5.0
-     * .movementSpeed(0.6)                  // 0.0 ~ 1024.0
-     * .attackSpeed(10.0)                   // 0.0 ~ 1024.0
-     * .summonTicks(10)                     // 0 ~ 20
-     * .maxRange(4.0)                       // 4.0 ~ 1000.0
-     * .armor(0)                            // 0.0 ~ 30.0
-     * .armorToughness(0)                   // 0.0 ~ 20.0
-     * .knockbackResistance(0)              // 0.0 ~ 1.0
-     * .blockDmgFactor(0.5)                 // 0.0 ~ 1.0
-     * .blockStaminaCostForDmgPoint(10.0)   // 0.0 ~ 100.0
-     * .precision(0.0)                      // 0.0 ~ 1.0 
-     */
+    
+    
     
     public static final RegistryObject<StandEntityType<StarPlatinumEntity>> STAR_PLATINUM = ENTITIES.register("star_platinum", 
-            () -> new StandEntityType<StarPlatinumEntity>(StarPlatinumEntity::new, false, 0.7F, 2.1F, 
-                    new StandEntityStats.Builder()
-                    .damage(10)
-                    .attackSpeed(100)
-                    .summonTicks(0)
-                    .armor(20)
-                    .knockbackResistance(0.2)
-                    .precision(1.0)
-                    .build())
-            .addStandSound(StandSoundType.SUMMON, ModSounds.STAR_PLATINUM_SUMMON)
-            .addStandSound(StandSoundType.UNSUMMON, ModSounds.STAR_PLATINUM_UNSUMMON)
-            .addStandSound(StandSoundType.MELEE_ATTACK, ModSounds.STAR_PLATINUM_ORA)
-            .addStandSound(StandSoundType.MELEE_BARRAGE, ModSounds.STAR_PLATINUM_ORA_ORA_ORA)
-            .addStandSound(StandSoundType.RANGED_ATTACK, ModSounds.STAR_PLATINUM_STAR_FINGER));
+            () -> new StandEntityType<StarPlatinumEntity>(StarPlatinumEntity::new, ModStandTypes.STAR_PLATINUM, false, 0.7F, 2.1F)
+            .summonSound(ModSounds.STAR_PLATINUM_SUMMON)
+            .unsummonSound(ModSounds.STAR_PLATINUM_UNSUMMON));
     
     public static final RegistryObject<StandEntityType<TheWorldEntity>> THE_WORLD = ENTITIES.register("the_world", 
-            () -> new StandEntityType<TheWorldEntity>(TheWorldEntity::new, false, 0.7F, 2.1F,
-                    new StandEntityStats.Builder()
-                    .damage(10.5)
-                    .attackSpeed(100)
-                    .summonTicks(0)
-                    .maxRange(10)
-                    .armor(20)
-                    .knockbackResistance(0.2)
-                    .precision(0.6)
-                    .build())
-            .addStandSound(StandSoundType.SUMMON, ModSounds.THE_WORLD_SUMMON)
-            .addStandSound(StandSoundType.MELEE_ATTACK, ModSounds.THE_WORLD_MUDA)
-            .addStandSound(StandSoundType.MELEE_BARRAGE, ModSounds.THE_WORLD_MUDA_MUDA_MUDA));
+            () -> new StandEntityType<TheWorldEntity>(TheWorldEntity::new, ModStandTypes.THE_WORLD, false, 0.7F, 2.1F)
+            .summonSound(ModSounds.THE_WORLD_SUMMON));
     
     public static final RegistryObject<StandEntityType<HierophantGreenEntity>> HIEROPHANT_GREEN = ENTITIES.register("hierophant_green", 
-            () -> new StandEntityType<HierophantGreenEntity>(HierophantGreenEntity::new, false, 0.55F, 1.75F, 
-                    new StandEntityStats.Builder()
-                    .damage(1.25)
-                    .maxRange(100)
-                    .build())
-            .addStandSound(StandSoundType.SUMMON, ModSounds.HIEROPHANT_GREEN_SUMMON)
-            .addStandSound(StandSoundType.RANGED_ATTACK, ModSounds.HIEROPHANT_GREEN_EMERALD_SPLASH));
+            () -> new StandEntityType<HierophantGreenEntity>(HierophantGreenEntity::new, ModStandTypes.HIEROPHANT_GREEN, false, 0.6F, 1.9F)
+            .summonSound(ModSounds.HIEROPHANT_GREEN_SUMMON));
     
     public static final RegistryObject<StandEntityType<SilverChariotEntity>> SILVER_CHARIOT = ENTITIES.register("silver_chariot", 
-            () -> new StandEntityType<SilverChariotEntity>(SilverChariotEntity::new, false, 0.6F, 1.8F, 
-                    new StandEntityStats.Builder()
-                    .damage(8)
-                    .attackKnockback(0.1)
-                    .attackSpeed(75)
-                    .summonTicks(3)
-                    .maxRange(10)
-                    .armor(15)
-                    .armorToughness(8)
-                    .precision(1.0)
-                    .build())
-            .addStandSound(StandSoundType.SUMMON, ModSounds.SILVER_CHARIOT_SUMMON)
-            .addStandSound(StandSoundType.UNSUMMON, ModSounds.SILVER_CHARIOT_UNSUMMON)
-            .addStandSound(StandSoundType.RANGED_ATTACK, ModSounds.SILVER_CHARIOT_RAPIER_SHOT));
+            () -> new StandEntityType<SilverChariotEntity>(SilverChariotEntity::new, ModStandTypes.SILVER_CHARIOT, false, 0.6F, 1.95F)
+            .summonSound(ModSounds.SILVER_CHARIOT_SUMMON)
+            .unsummonSound(ModSounds.SILVER_CHARIOT_UNSUMMON));
     
     public static final RegistryObject<StandEntityType<MagiciansRedEntity>> MAGICIANS_RED = ENTITIES.register("magicians_red", 
-            () -> new StandEntityType<MagiciansRedEntity>(MagiciansRedEntity::new, false, 0.6F, 1.8F,
-                    new StandEntityStats.Builder()
-                    .damage(7)
-                    .maxRange(8)
-                    .armor(7)
-                    .build())
-            .addStandSound(StandSoundType.SUMMON, ModSounds.MAGICIANS_RED_SUMMON));
+            () -> new StandEntityType<MagiciansRedEntity>(MagiciansRedEntity::new, ModStandTypes.MAGICIANS_RED, false, 0.65F, 1.95F)
+            .summonSound(ModSounds.MAGICIANS_RED_SUMMON));
+
+    
+    
+    @SubscribeEvent
+    public static void onEntityAttributeCreation(EntityAttributeCreationEvent event) {
+        event.put(ModEntityTypes.HAMON_MASTER.get(), HamonMasterEntity.createAttributes().build());
+        event.put(ModEntityTypes.HUNGRY_ZOMBIE.get(), HungryZombieEntity.createAttributes().build());
+        
+        event.put(ModEntityTypes.STAR_PLATINUM.get(), StandEntity.createAttributes().build());
+        event.put(ModEntityTypes.THE_WORLD.get(), StandEntity.createAttributes().build());
+        event.put(ModEntityTypes.HIEROPHANT_GREEN.get(), StandEntity.createAttributes().build());
+        event.put(ModEntityTypes.SILVER_CHARIOT.get(), StandEntity.createAttributes().build());
+        event.put(ModEntityTypes.MAGICIANS_RED.get(), StandEntity.createAttributes().build());
+    }
 }

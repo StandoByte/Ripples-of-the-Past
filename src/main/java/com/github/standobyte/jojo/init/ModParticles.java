@@ -11,6 +11,9 @@ import net.minecraftforge.registries.ForgeRegistries;
 public class ModParticles {
     public static final DeferredRegister<ParticleType<?>> PARTICLES = DeferredRegister.create(ForgeRegistries.PARTICLE_TYPES, JojoMod.MOD_ID);
     
+    public static final RegistryObject<BasicParticleType> BLOOD = PARTICLES.register("blood", 
+            () -> new BasicParticleType(false));
+    
     public static final RegistryObject<BasicParticleType> HAMON_SPARK = PARTICLES.register("hamon_spark", 
             () -> new BasicParticleType(false));
     
@@ -18,6 +21,15 @@ public class ModParticles {
             () -> new BasicParticleType(false));
     
     public static final RegistryObject<BasicParticleType> MENACING = PARTICLES.register("menacing", 
+            () -> new BasicParticleType(false));
+    
+    public static final RegistryObject<BasicParticleType> RESOLVE = PARTICLES.register("resolve", 
+            () -> new BasicParticleType(false));
+    
+    public static final RegistryObject<BasicParticleType> SOUL_CLOUD = PARTICLES.register("soul_cloud", 
+            () -> new BasicParticleType(false));
+    
+    public static final RegistryObject<BasicParticleType> AIR_STREAM = PARTICLES.register("air_stream", 
             () -> new BasicParticleType(false));
     
     public static final RegistryObject<BasicParticleType> FLAME_ONE_TICK = PARTICLES.register("flame", 

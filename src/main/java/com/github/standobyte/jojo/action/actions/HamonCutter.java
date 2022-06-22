@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.action.actions;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.damaging.projectile.HamonCutterEntity;
-import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -14,20 +14,25 @@ import net.minecraft.world.World;
 
 public class HamonCutter extends HamonAction {
 
-    public HamonCutter(Builder builder) {
+    public HamonCutter(HamonAction.Builder builder) {
         super(builder);
     }
-
+    
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IPower<?> power, ActionTarget target) {
+    protected ActionConditionResult checkHeldItems(LivingEntity user, INonStandPower power) {
         if (!(user.getMainHandItem().getItem() instanceof PotionItem || user.getOffhandItem().getItem() instanceof PotionItem)) {
             return conditionMessage("potion");
         }
         return ActionConditionResult.POSITIVE;
     }
 
+//    @Override
+//    public boolean cancelHandRender(LivingEntity user, Hand hand) {
+//        return hand == Hand.OFF_HAND ? !(user.getOffhandItem().getItem() instanceof PotionItem) : false;
+//    }
+
     @Override
-    public void perform(World world, LivingEntity user, IPower<?> power, ActionTarget target) {
+    protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             ItemStack potionItem = user.getMainHandItem();
             if (!(potionItem.getItem() instanceof PotionItem)) {

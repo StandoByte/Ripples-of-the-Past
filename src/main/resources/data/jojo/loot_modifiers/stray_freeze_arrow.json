@@ -1,0 +1,18 @@
+{
+  "type": "jojo:replace_item_nbt",
+  "conditions":
+  [
+    {
+      "condition": "minecraft:entity_properties",
+      "predicate": {
+        "type": "minecraft:stray"
+      },
+      "entity": "this"
+    }
+  ],
+  "replace_nbt": {
+    "item": "minecraft:tipped_arrow",
+    "to_replace": "{Potion:\"minecraft:slowness\"}",
+    "replace_with": "{Potion:\"jojo:freeze\"}"
+  }
+}

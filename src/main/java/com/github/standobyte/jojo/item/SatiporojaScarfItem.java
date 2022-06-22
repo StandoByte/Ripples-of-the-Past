@@ -7,7 +7,7 @@ import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -26,7 +26,7 @@ public class SatiporojaScarfItem extends CustomModelArmorItem {
         super(material, slot, builder);
     }
 
-    public static final float SCARF_SWING_MANA_COST = 600;
+    public static final float SCARF_SWING_ENERGY_COST = 600;
     @Override
     public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         ItemStack stack = player.getItemInHand(hand);
@@ -34,7 +34,7 @@ public class SatiporojaScarfItem extends CustomModelArmorItem {
         if (power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(hamon -> {
             if (hamon.isSkillLearned(HamonSkill.SATIPOROJA_SCARF)) {
                 if (!world.isClientSide()) {
-                    if (power.consumeMana(SCARF_SWING_MANA_COST)) {
+                    if (power.consumeEnergy(SCARF_SWING_ENERGY_COST)) {
                         SatiporojaScarfEntity scarf = new SatiporojaScarfEntity(world, player, 
                                 hand == Hand.MAIN_HAND ? player.getMainArm() : player.getMainArm() == HandSide.RIGHT ? HandSide.LEFT : HandSide.RIGHT);
                         world.addFreshEntity(scarf);
@@ -43,7 +43,7 @@ public class SatiporojaScarfItem extends CustomModelArmorItem {
                     }
                     return false;
                 }
-                return power.hasMana(SCARF_SWING_MANA_COST);
+                return power.hasEnergy(SCARF_SWING_ENERGY_COST);
             }
             return false;
         }).orElse(false)) {
@@ -60,8 +60,8 @@ public class SatiporojaScarfItem extends CustomModelArmorItem {
         return INonStandPower.getNonStandPowerOptional(user).map(power -> 
         power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(hamon -> {
             if (!user.level.isClientSide()) {
-                if (power.consumeMana(500) && ModDamageSources.dealHamonDamage(target, 0.6F, user, null)) {
-                    if (user.isShiftKeyDown() && hamon.isSkillLearned(HamonSkill.SNAKE_MUFFLER) && power.consumeMana(100)) {
+                if (power.consumeEnergy(500) && DamageUtil.dealHamonDamage(target, 0.6F, user, null)) {
+                    if (user.isShiftKeyDown() && hamon.isSkillLearned(HamonSkill.SNAKE_MUFFLER) && power.consumeEnergy(100)) {
                         SatiporojaScarfBindingEntity scarf = new SatiporojaScarfBindingEntity(user.level, user);
                         scarf.attachToEntity(target);
                         target.addEffect(new EffectInstance(ModEffects.STUN.get(), scarf.ticksLifespan()));

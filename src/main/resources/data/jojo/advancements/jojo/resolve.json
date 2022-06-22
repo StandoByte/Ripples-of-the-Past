@@ -1,0 +1,37 @@
+{
+  "parent": "jojo:jojo/summon_stand",
+  "display": {
+    "icon": {
+      "item": "jojo:meteoric_scrap",
+      "nbt": "{Icon:6}"
+    },
+    "title": {
+      "translate": "advancements.jojo.resolve.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.resolve.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "rewards": {
+    "experience": 100
+  },
+  "criteria": {
+    "resolve_effect": {
+      "trigger": "minecraft:effects_changed",
+      "conditions": {
+        "effects": {
+          "jojo:resolve": {}
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "resolve_effect"
+    ]
+  ]
+}

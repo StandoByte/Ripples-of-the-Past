@@ -1,25 +1,47 @@
 package com.github.standobyte.jojo.util;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.JojoModConfig.Common;
+import com.github.standobyte.jojo.action.actions.StandEntityAction;
 import com.github.standobyte.jojo.action.actions.VampirismFreeze;
+import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.block.StoneMaskBlock;
+import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.ProjectileHamonChargeCapProvider;
+import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRCrossfireHurricaneEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.ModPaintings;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartPacket;
+import com.github.standobyte.jojo.potion.IApplicableEffect;
+import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
@@ -27,13 +49,18 @@ import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
 import com.github.standobyte.jojo.power.nonstand.type.VampirismPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.type.EntityStandType;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.github.standobyte.jojo.tileentity.StoneMaskTileEntity;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
+import com.github.standobyte.jojo.util.damage.IModdedDamageSource;
+import com.github.standobyte.jojo.util.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.reflection.CommonReflection;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 
-import net.minecraft.block.AbstractFireBlock;
+import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -44,10 +71,16 @@ import net.minecraft.entity.EntityPredicate;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
 import net.minecraft.entity.ai.goal.PrioritizedGoal;
 import net.minecraft.entity.item.BoatEntity;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.item.PaintingEntity;
+import net.minecraft.entity.item.PaintingType;
+import net.minecraft.entity.monster.StrayEntity;
 import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.entity.player.ChatVisibility;
 import net.minecraft.entity.player.PlayerEntity;
@@ -57,15 +90,20 @@ import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.network.play.server.SPlayEntityEffectPacket;
 import net.minecraft.network.play.server.SPlaySoundEffectPacket;
+import net.minecraft.network.play.server.SRemoveEntityEffectPacket;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.scoreboard.Team;
+import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
@@ -74,6 +112,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.LanguageMap;
@@ -82,8 +121,10 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
@@ -93,17 +134,22 @@ import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.living.LivingConversionEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionApplicableEvent;
+import net.minecraftforge.event.entity.living.PotionEvent.PotionExpiryEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerWakeUpEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
@@ -114,23 +160,25 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
+//FIXME move all event handlers to their respective classes, leave the method links here
 @EventBusSubscriber(modid = JojoMod.MOD_ID)
 public class GameplayEventHandler {
-    
+	
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingTick(LivingUpdateEvent event) {
         LivingEntity entity = event.getEntityLiving();
         if (!entity.level.isClientSide() && entity.invulnerableTime <= 10) {
             float sunDamage = getSunDamage(entity);
             if (sunDamage > 0) {
-                ModDamageSources.dealUltravioletDamage(entity, sunDamage, null, null, true);
+                DamageUtil.dealUltravioletDamage(entity, sunDamage, null, null, true);
             }
         }
         entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
             cap.tick();
         });
     }
-    
+
+    private static final int AFK_PARTICLE_SECONDS = 30;
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.START) {
@@ -144,11 +192,14 @@ public class GameplayEventHandler {
             player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                 cap.tick();
             });
-            if (player.tickCount % 60 == 0 && !player.isInvisible() && player.xxa == 0 && player.zza == 0 && player instanceof ServerPlayerEntity) {
-                long timeNotActive = Util.getMillis() - ((ServerPlayerEntity) player).getLastActionTime();
-                if (timeNotActive > 60000) {
+            if (player.tickCount % 60 == 0 && !player.isInvisible() && player instanceof ServerPlayerEntity) {
+                ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
+                long timeNotActive = Util.getMillis() - serverPlayer.getLastActionTime();
+                if (timeNotActive > AFK_PARTICLE_SECONDS * 1000 &&
+                        serverPlayer.getCapability(PlayerUtilCapProvider.CAPABILITY).map(cap -> cap.getNoClientInputTimer() > AFK_PARTICLE_SECONDS * 20).orElse(true)) {
                     ((ServerWorld) player.level).sendParticles(ModParticles.MENACING.get(), player.getX(), player.getEyeY(), player.getZ(), 
                             0,  MathHelper.cos(player.yRot * MathUtil.DEG_TO_RAD), 0.5D, MathHelper.sin(player.yRot * MathUtil.DEG_TO_RAD), 0.005D);
+                    ModCriteriaTriggers.AFK.get().trigger(serverPlayer);
                 }
             }
         }
@@ -196,6 +247,17 @@ public class GameplayEventHandler {
         return 0;
     }
     
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void replaceStrayArrow(EntityJoinWorldEvent event) {
+        if (event.getEntity() instanceof ArrowEntity) {
+            ArrowEntity arrow = (ArrowEntity) event.getEntity();
+            if (arrow.getOwner() instanceof StrayEntity) {
+                arrow.setEffectsFromItem(new ItemStack(Items.ARROW));
+                arrow.addEffect(new EffectInstance(ModEffects.FREEZE.get(), 300));
+            }
+        }
+    }
+    
     @SubscribeEvent
     public static void onWorldTick(WorldTickEvent event) {
         if (event.side == LogicalSide.SERVER && event.phase == TickEvent.Phase.END) {
@@ -226,6 +288,20 @@ public class GameplayEventHandler {
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
+    public static void addEntityDrops(LivingDropsEvent event) {
+    	Common config = JojoModConfig.getCommonConfigInstance(false);
+    	if (config.dropStandDisc.get() && !config.keepStandOnDeath.get()) {
+        	LivingEntity entity = event.getEntityLiving();
+    		IStandPower.getStandPowerOptional(entity).ifPresent(power -> {
+    			if (power.hasPower() && power.wasGivenByDisc()) {
+    				ItemStack disc = StandDiscItem.withStandType(new ItemStack(ModItems.STAND_DISC.get()), power.getType());
+    				event.getDrops().add(new ItemEntity(entity.level, entity.getX(), entity.getY(), entity.getZ(), disc));
+    			}
+    		});
+    	}
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOW)
     public static void onEntityJoinWorld(EntityJoinWorldEvent event) {
         Entity entity = event.getEntity();
         if (entity instanceof MobEntity) {
@@ -237,6 +313,9 @@ public class GameplayEventHandler {
                 mob.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(mob, PlayerEntity.class, 5, false, false, 
                         target -> target instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) target)));
             }
+        }
+        else if (entity.getType() == EntityType.PAINTING) {
+            cutOutHands((PaintingEntity) event.getEntity());
         }
     }
 
@@ -259,35 +338,243 @@ public class GameplayEventHandler {
             }
         }
     }
+    
+    private static void cutOutHands(PaintingEntity painting) {
+        if (!painting.level.isClientSide()) {
+            boolean monaLisaFull = painting.motive == ModPaintings.MONA_LISA.get();
+            boolean monaLisaHands = painting.motive == ModPaintings.MONA_LISA_HANDS.get();
+            if (monaLisaFull || monaLisaHands) {
+                List<LivingEntity> KQUsers = painting.level.getEntitiesOfClass(
+                        LivingEntity.class, painting.getBoundingBox().expandTowards(painting.getLookAngle().scale(3)).inflate(1), 
+                            entity -> IStandPower.getStandPowerOptional(entity).map(
+                                    stand -> stand.hasPower() && stand.getType() == ModStandTypes.KILLER_QUEEN.get())
+                            .orElse(false));
+                if (!KQUsers.isEmpty()) {
+                    if (monaLisaFull) {
+                        painting.motive = ModPaintings.MONA_LISA_HANDS.get();
+                        double x = painting.getX();
+                        double z = painting.getZ();
+                        if (x - (int) x != 0 && (int) (x + 0.04) != (int) x) {
+                            z -= 1;
+                        }
+                        if (z - (int) z != 0 && (int) (z - 0.04) != (int) z) {
+                            x -= 1;
+                        }
+                        painting.setPos(x, painting.getY(), z);
+                    }
+                }
+                else if (monaLisaHands) {
+                    painting.motive = PaintingType.KEBAB;
+                }
+            }
+        }
+    }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingHeal(LivingHealEvent event) {
-        VampirismPowerType.consumeManaOnHeal(event);
+        VampirismPowerType.consumeEnergyOnHeal(event);
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void releaseStun(LivingConversionEvent.Post event) {
+        if (event.getOutcome() instanceof MobEntity) {
+            LivingEntity pre = event.getEntityLiving();
+            MobEntity converted = (MobEntity) event.getOutcome();
+            if (converted.isNoAi() && pre.hasEffect(ModEffects.STUN.get()) && !converted.hasEffect(ModEffects.STUN.get())) {
+                converted.setNoAi(false);
+            }
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onLivingHurtStart(LivingAttackEvent event) {
+        DamageSource dmgSource = event.getSource();
+        LivingEntity target = event.getEntityLiving();
+        if (target.invulnerableTime > 0 && dmgSource instanceof IModdedDamageSource && 
+                ((IModdedDamageSource) dmgSource).bypassInvulTicks()) {
+            event.setCanceled(true);
+            DamageUtil.hurtThroughInvulTicks(target, dmgSource, event.getAmount());
+            return;
+        }
+        
+        standBlockUserAttack(dmgSource, target, stand -> {
+            if (!stand.isInvulnerableTo(dmgSource)) {
+                stand.hurt(dmgSource, event.getAmount());
+                event.setCanceled(true);
+            };
+        });
+        
         HamonPowerType.cancelCactusDamage(event);
         if (VampirismFreeze.onUserAttacked(event)) {
             event.setCanceled(true);
         }
     }
 
+    @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
+    public static void addResolveOnAttack(LivingAttackEvent event) {
+        LivingEntity target = event.getEntityLiving();
+        if (!target.level.isClientSide()) {
+	        DamageSource damageSrc = event.getSource();
+	        float points = Math.min(event.getAmount(), target.getHealth());
+	        
+	        if (damageSrc instanceof IStandDamageSource) {
+	            IStandDamageSource standDamageSrc = (IStandDamageSource) damageSrc;
+	            IStandPower attackerStand = standDamageSrc.getStandPower();
+	            StandUtil.addResolve(attackerStand, target, points);
+	        }
+	        
+	        else if (damageSrc.getEntity() instanceof LivingEntity) {
+	            IStandPower.getStandPowerOptional(StandUtil.getStandUser((LivingEntity) damageSrc.getEntity())).ifPresent(attackerStand -> {
+	                if (attackerStand.isActive()) {
+	                    StandUtil.addResolve(attackerStand, target, points * 0.5F);
+	                }
+	            });
+	        }
+        }
+    }
+    
+    // TODO unsummoned stand auto-block
+    @SuppressWarnings("unused")
+    private double getAttackSpeed(DamageSource damageSrc) {
+        Entity entity = damageSrc.getDirectEntity();
+        if (entity == null) {
+            return -1;
+        }
+        if (entity instanceof ProjectileEntity) {
+            double velocity = entity.getDeltaMovement().length();
+            //
+        }
+        if (entity instanceof LivingEntity) {
+            LivingEntity entityLiving = (LivingEntity) entity;
+            if (entity instanceof StandEntity) {
+                StandEntity entityStand = ((StandEntity) entity);
+                Optional<StandEntityAction> attack = entityStand.getCurrentTaskActionOptional();
+                if (attack.isPresent()) {
+                    //
+                }
+            }
+            ModifiableAttributeInstance attackSpeedAttribute = entityLiving.getAttribute(Attributes.ATTACK_SPEED);
+            if (attackSpeedAttribute != null) {
+                double attackSpeed = ((LivingEntity) entity).getAttributeValue(Attributes.ATTACK_SPEED);
+                //
+            }
+            //
+        }
+        //
+        return 1234;
+    }
+
     @SubscribeEvent(priority = EventPriority.LOW)
-    public static void onLivingAttack(LivingAttackEvent event) {
+    public static void cancelLivingAttack(LivingAttackEvent event) {
         HamonPowerType.snakeMuffler(event);
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
+    public static void inCaseOfExplosionCancel(LivingAttackEvent event) {
+        if (event.isCanceled() && event.getSource().isExplosion()) {
+            event.getEntityLiving().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(util -> util.popLatestExplosionPos());
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void onLivingHurt(LivingHurtEvent event) {
+    	LivingEntity target = event.getEntityLiving();
+    	if (!target.canUpdate() && target.getCapability(EntityUtilCapProvider.CAPABILITY)
+    			.map(cap -> cap.wasStoppedInTime()).orElse(false)) {
+    		event.setAmount(event.getAmount() * JojoModConfig.getCommonConfigInstance(false)
+    				.timeStopDamageMultiplier.get().floatValue());
+    	}
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void blockDamageWithStand(LivingHurtEvent event) {
+        DamageSource dmgSource = event.getSource();
+        LivingEntity target = event.getEntityLiving();
+        if (dmgSource.isExplosion()) {
+            target.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(util -> {
+                Vector3d explosionPos = util.popLatestExplosionPos();
+                if (explosionPos != null) {
+                    StandEntity stand = getTargetStand(target);
+                    if (stand != null && stand.isFollowingUser() && stand.isStandBlocking()) {
+                        double standDurability = stand.getDurability();
+                        if (standDurability > 4) {
+                            double cos = explosionPos.subtract(target.position()).normalize().dot(stand.getLookAngle());
+                            if (cos > 0) {
+                                float multiplier = Math.max((1F - (float) cos), 4F / (float) standDurability);
+                                event.setAmount(event.getAmount() * multiplier);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        else {
+            standBlockUserAttack(dmgSource, target, stand -> {
+                if (stand.isInvulnerableTo(dmgSource)) {
+                    double standDurability = stand.getDurability();
+                    if (standDurability > 0) {
+                        event.setAmount(Math.max(event.getAmount() - (float) standDurability / 2F, 0));
+                    }
+                }
+            });
+        }
+    }
+
+    @Nullable
+    private static StandEntity getTargetStand(LivingEntity target) {
+        return IStandPower.getStandPowerOptional(target).map(stand -> {
+            return Optional.ofNullable(stand.getStandManifestation() instanceof StandEntity ? (StandEntity) stand.getStandManifestation() : null);
+        }).orElse(Optional.empty()).orElse(null);
+    }
+    
+    private static void standBlockUserAttack(DamageSource dmgSource, LivingEntity target, Consumer<StandEntity> standBehavior) {
+        if (dmgSource.getDirectEntity() != null && dmgSource.getSourcePosition() != null) {
+            StandEntity stand = getTargetStand(target);
+            if (stand != null && stand.isFollowingUser() && stand.isStandBlocking()
+                    && stand.canBlockDamage(dmgSource) && stand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())) {
+                standBehavior.accept(stand);
+            }
+        }
+    }
+    
+
+    @SubscribeEvent(priority = EventPriority.NORMAL)
+    public static void resolveOnTakingDamage(LivingDamageEvent event) {
+        IStandPower.getStandPowerOptional(event.getEntityLiving()).ifPresent(stand -> {
+            if (stand.usesResolve()) {
+                stand.getResolveCounter().onGettingAttacked(event.getSource(), event.getAmount(), event.getEntityLiving());
+            }
+        });
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void reduceDamageFromResolve(LivingDamageEvent event) {
+        if (event.getSource() == DamageSource.OUT_OF_WORLD) {
+            return;
+        }
+        float dmgReduction = IStandPower.getStandPowerOptional(event.getEntityLiving()).map(stand -> {
+            return stand.getResolveDmgReduction();
+        }).orElse(0F);
+        if (dmgReduction > 0F) {
+            event.setAmount(event.getAmount() * (1 - dmgReduction));
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingDamage(LivingDamageEvent event) {
-        activateStoneMasks(event);
-        StandType.setLastHurtByStand(event);
+        dropBlood(event.getSource(), event.getAmount(), event.getEntityLiving());
+        StandType.onHurtByStand(event.getSource(), event.getAmount(), event.getEntityLiving());
+        
+        for (PowerClassification powerClassification : PowerClassification.values()) {
+            IPower.getPowerOptional(event.getEntityLiving(), powerClassification).ifPresent(power -> 
+            power.onUserGettingAttacked(event.getSource(), event.getAmount()));
+        }
     }
 
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void prepareToReduceKnockback(LivingDamageEvent event) {
-        float knockbackReduction = ModDamageSources.knockbackReduction(event.getSource());
+        float knockbackReduction = DamageUtil.knockbackReduction(event.getSource());
         if (knockbackReduction >= 0 && knockbackReduction < 1) {
             event.getEntityLiving().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(util -> {
                 util.setFutureKnockbackFactor(knockbackReduction);
@@ -306,22 +593,25 @@ public class GameplayEventHandler {
         });
     }
 
-    private static void activateStoneMasks(LivingDamageEvent event) {
-        DamageSource dmgSource = event.getSource();
-        if (event.getAmount() >= 0.98F && 
+    private static void dropBlood(DamageSource dmgSource, float dmgAmount, LivingEntity target) {
+        World world = target.level;
+        if (world.isClientSide()) return;
+        if (dmgAmount >= 0.98F && 
                 (!dmgSource.isBypassArmor() && !dmgSource.isFire() && !dmgSource.isMagic() && !dmgSource.isBypassMagic() || dmgSource == DamageSource.FALL)) {
-            LivingEntity target = event.getEntityLiving();
-            if (!JojoModUtil.canBleed(target)) {
+            if (!JojoModUtil.canBleed(target) || dmgSource.getMsgId().startsWith(DamageUtil.PILLAR_MAN_ABSORPTION.getMsgId())) {
                 return;
             }
             double radius = 2;
             BlockPos entityPos = target.blockPosition();
-            World world = target.level;
-            List<LivingEntity> entitiesAround = JojoModUtil.entitiesAround(LivingEntity.class, target, radius, true,
-                    entity -> entity.getItemBySlot(EquipmentSlotType.HEAD).getItem() instanceof StoneMaskItem);
-            for (LivingEntity entity : entitiesAround) {
-                applyStoneMask(entity, entity.getItemBySlot(EquipmentSlotType.HEAD));
-            }
+            
+            List<Vector3d> particlePos = new ArrayList<>();
+            List<LivingEntity> entitiesAround = JojoModUtil.entitiesAround(LivingEntity.class, target, radius, true, EntityPredicates.NO_SPECTATORS);
+            entitiesAround.forEach(entity -> {
+                if (dropBloodOnEntity(dmgSource, entity)) {
+                    particlePos.add(entity.getEyePosition(1.0F));
+                }
+            });
+            
             BlockPos.betweenClosedStream(entityPos.offset(-radius, -radius, -radius), entityPos.offset(radius, radius, radius))
             .filter(pos -> world.getBlockState(pos).getBlock() == ModBlocks.STONE_MASK.get())
             .forEach(pos -> {
@@ -333,26 +623,50 @@ public class GameplayEventHandler {
                     if (tileEntity instanceof StoneMaskTileEntity) {
                         ((StoneMaskTileEntity) tileEntity).activate();
                     }
+                    particlePos.add(Vector3d.atBottomCenterOf(pos));
                     break;
                 default:
                     Block.popResource(world, pos, StoneMaskBlock.getItemFromBlock(world, pos, blockState));
                     world.removeBlock(pos, false);
+                    particlePos.add(Vector3d.atCenterOf(pos));
                     break;
                 }
             });
+            
+            if (!particlePos.isEmpty()) {
+                Vector3d particleSource = target.getBoundingBox().getCenter();
+                int count = Math.min((int) (dmgAmount * 5), 50);
+                particlePos.forEach(pos -> {
+                    PacketManager.sendToClientsTracking(new BloodParticlesPacket(particleSource, pos, count), target);
+                });
+            }
         }
+    }
+    
+    private static boolean dropBloodOnEntity(DamageSource dmgSource, LivingEntity entity) {
+        boolean dropped = false;
+        ItemStack headArmor = entity.getItemBySlot(EquipmentSlotType.HEAD);
+        if (headArmor.getItem() instanceof StoneMaskItem && applyStoneMask(entity, headArmor)) {
+            dropped = true;
+        }
+        return dropped;
     }
 
     public static boolean applyStoneMask(LivingEntity entity, ItemStack headStack) {
         if (entity.level.getDifficulty() == Difficulty.PEACEFUL) {
+            if (entity instanceof ServerPlayerEntity) {
+                ((ServerPlayerEntity) entity).displayClientMessage(
+                        new TranslationTextComponent("jojo.chat.message.stone_mask_peaceful"), true);
+            }
             return false;
         }
         if (entity instanceof PlayerEntity) {
             PlayerEntity player = (PlayerEntity) entity;
             INonStandPower power = INonStandPower.getPlayerNonStandPower(player);
-            if (power.givePower(ModNonStandPowers.VAMPIRISM.get())) {
+            VampirismPowerType vampirism = ModNonStandPowers.VAMPIRISM.get();
+            if (power.getTypeSpecificData(vampirism).map(vamp -> !vamp.isVampireAtFullPower()).orElse(false) || power.givePower(vampirism)) {
                 entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.STONE_MASK_ACTIVATION_ENTITY.get(), entity.getSoundSource(), 1.0F, 1.0F);
-                power.getTypeSpecificData(ModNonStandPowers.VAMPIRISM.get()).get().setVampireFullPower(true);
+                power.getTypeSpecificData(vampirism).get().setVampireFullPower(true);
                 StoneMaskItem.setActivatedArmorTexture(headStack); // TODO light beams on stone mask activation
                 headStack.hurtAndBreak(1, entity, stack -> {});
                 return true;
@@ -365,17 +679,11 @@ public class GameplayEventHandler {
     public static void onPotionApply(PotionApplicableEvent event) {
         LivingEntity entity = event.getEntityLiving();
         Effect effect = event.getPotionEffect().getEffect();
-        if (JojoModUtil.isUndead(entity)) {
-            if (entity instanceof PlayerEntity) {
-                if (effect == Effects.POISON || effect == Effects.HUNGER || effect == Effects.REGENERATION) {
-                    event.setResult(Result.DENY);
-                }
-            }
-        }
-        else if (effect == ModEffects.UNDEAD_REGENERATION.get() || effect == ModEffects.HAMON_SPREAD.get()) {
+        if ((effect == Effects.POISON || effect == Effects.HUNGER || effect == Effects.REGENERATION)
+                && entity instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) entity)) {
             event.setResult(Result.DENY);
         }
-        if (effect == ModEffects.FREEZE.get() && ModDamageSources.isImmuneToCold(entity)) {
+        else if (effect instanceof IApplicableEffect && !((IApplicableEffect) effect).isApplicable(entity)) {
             event.setResult(Result.DENY);
         }
     }
@@ -383,11 +691,54 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onPotionAdded(PotionAddedEvent event) {
         EntityStandType.giveSharedEffectsFromUser(event);
+        
+        Entity entity = event.getEntity();
+        EffectInstance effectInstance = event.getPotionEffect();
+        if (!entity.level.isClientSide()) {
+            if (ModEffects.isEffectTracked(effectInstance.getEffect())) {
+                ((ServerChunkProvider) entity.getCommandSenderWorld().getChunkSource()).broadcast(entity, 
+                        new SPlayEntityEffectPacket(entity.getId(), effectInstance));
+            }
+            if (effectInstance.getEffect() == ModEffects.RESOLVE.get() && entity instanceof ServerPlayerEntity) {
+                PacketManager.sendToClient(new ResolveEffectStartPacket(effectInstance.getAmplifier()), (ServerPlayerEntity) entity);
+            }
+        }
     }
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onPotionRemoved(PotionRemoveEvent event) {
         VampirismPowerType.cancelVampiricEffectRemoval(event);
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void trackedPotionRemoved(PotionRemoveEvent event) {
+        Entity entity = event.getEntity();
+        if (!entity.level.isClientSide() && event.getPotionEffect() != null && ModEffects.isEffectTracked(event.getPotionEffect().getEffect())) {
+            ((ServerChunkProvider) entity.getCommandSenderWorld().getChunkSource()).broadcast(entity, 
+                    new SRemoveEntityEffectPacket(entity.getId(), event.getPotion()));
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void trackedPotionExpired(PotionExpiryEvent event) {
+        Entity entity = event.getEntity();
+        if (!entity.level.isClientSide() && event.getPotionEffect() != null && ModEffects.isEffectTracked(event.getPotionEffect().getEffect())) {
+            ((ServerChunkProvider) entity.getCommandSenderWorld().getChunkSource()).broadcast(entity, 
+                    new SRemoveEntityEffectPacket(entity.getId(), event.getPotionEffect().getEffect()));
+        }
+    }
+    
+    @SubscribeEvent
+    public static void syncTrackedEffects(PlayerEvent.StartTracking event) {
+        if (event.getTarget() instanceof LivingEntity) {
+            ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
+            LivingEntity tracked = (LivingEntity) event.getTarget();
+            for (Map.Entry<Effect, EffectInstance> effectEntry : tracked.getActiveEffectsMap().entrySet()) {
+                if (ModEffects.isEffectTracked(effectEntry.getKey())) {
+                    player.connection.send(new SPlayEntityEffectPacket(tracked.getId(), effectEntry.getValue()));
+                }
+            }
+        }
     }
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -402,7 +753,7 @@ public class GameplayEventHandler {
             });
         }
     }
-
+    
     @SubscribeEvent(priority = EventPriority.LOW, receiveCanceled = true)
     public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
         if (event.getCancellationResult() == ActionResultType.PASS && event.getHand() == Hand.MAIN_HAND && !event.getPlayer().isShiftKeyDown()) {
@@ -410,15 +761,16 @@ public class GameplayEventHandler {
             if (target instanceof PlayerEntity) {
                 PlayerEntity targetPlayer = (PlayerEntity) target;
                 INonStandPower targetPower = INonStandPower.getPlayerNonStandPower(targetPlayer);
-                if (targetPower.getType() == ModNonStandPowers.HAMON.get()) {
+                INonStandPower playerPower = INonStandPower.getPlayerNonStandPower(event.getPlayer());
+                if (targetPower.getType() == ModNonStandPowers.HAMON.get()
+                        && (!playerPower.hasPower() || playerPower.getType().isReplaceableWith(ModNonStandPowers.HAMON.get()))) {
                     HamonPowerType.interactWithHamonTeacher(target.level, event.getPlayer(), targetPlayer, 
                             targetPower.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get());
                     event.setCanceled(true);
                     event.setCancellationResult(ActionResultType.sidedSuccess(target.level.isClientSide));
                 }
                 else {
-                    INonStandPower.getPlayerNonStandPower(event.getPlayer())
-                    .getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
+                    playerPower.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
                         hamon.interactWithNewLearner(targetPlayer);
                         event.setCanceled(true);
                         event.setCancellationResult(ActionResultType.sidedSuccess(target.level.isClientSide));
@@ -429,7 +781,7 @@ public class GameplayEventHandler {
     }
     
     @SubscribeEvent(priority = EventPriority.LOW, receiveCanceled = true)
-    public static void onBlockRightClick(PlayerInteractEvent.RightClickBlock event) {
+    public static void tripwireInteract(PlayerInteractEvent.RightClickBlock event) {
         if (event.getHand() == Hand.MAIN_HAND && event.getUseBlock() != Event.Result.DENY) {
             PlayerEntity player = event.getPlayer();
             if (!player.isSpectator() && player.getMainHandItem().isEmpty()) {
@@ -451,13 +803,92 @@ public class GameplayEventHandler {
             }
         }
     }
+    
+    private static final int LIT_TICKS = 12000;
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void furnaceInteract(PlayerInteractEvent.RightClickBlock event) {
+        if (event.getHand() == Hand.MAIN_HAND && event.getUseBlock() != Event.Result.DENY) {
+            PlayerEntity player = event.getPlayer();
+            if (!player.isSpectator()) {
+                World world = player.level;
+                BlockPos pos = event.getHitVec().getBlockPos();
+                BlockState blockState = world.getBlockState(pos);
+                if (blockState.getBlock() instanceof AbstractFurnaceBlock) {
+                    IStandPower power = IStandPower.getPlayerStandPower(event.getPlayer());
+                    if (power.isActive() && power.getType() == ModStandTypes.MAGICIANS_RED.get()) {
+                        TileEntity tileEntity = world.getBlockEntity(pos);
+                        if (tileEntity instanceof AbstractFurnaceTileEntity) {
+                            AbstractFurnaceTileEntity furnace = (AbstractFurnaceTileEntity) tileEntity;
+                            int timeLeft = CommonReflection.getFurnaceLitTime(furnace);
+                            if (timeLeft < LIT_TICKS) {
+                                CommonReflection.setFurnaceLitTime(furnace, LIT_TICKS);
+                                CommonReflection.setFurnaceLitDuration(furnace, LIT_TICKS);
+                                StandEntity magiciansRed = (StandEntity) power.getStandManifestation();
+                                magiciansRed.playSound(ModSounds.MAGICIANS_RED_FIRE_BLAST.get(), 1.0F, 1.0F, player);
+                                world.setBlock(pos, blockState.setValue(AbstractFurnaceBlock.LIT, true), 3);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingDeath(LivingDeathEvent event) {
-        if (!event.getEntity().level.isClientSide()) {
-            StandType.giveStandExp(event);
-            HamonPowerType.hamonPerksOnDeath(event);
+        LivingEntity dead = event.getEntityLiving();
+        DamageSource dmgSource = event.getSource();
+        if (!dead.level.isClientSide()) {
+            HamonPowerType.hamonPerksOnDeath(dead);
+            Entity killer = dmgSource.getEntity();
+            if (killer instanceof StandEntity) {
+                StandEntity killerStand = (StandEntity) killer;
+                if (killerStand.getUser() != null) {
+                    killer = killerStand.getUser();
+                }
+            }
+            if (killer instanceof ServerPlayerEntity) {
+                ModCriteriaTriggers.PLAYER_KILLED_ENTITY.get().trigger((ServerPlayerEntity) killer, dead, dmgSource);
+            }
+            if (dead instanceof ServerPlayerEntity && killer != null) {
+                ModCriteriaTriggers.ENTITY_KILLED_PLAYER.get().trigger((ServerPlayerEntity) dead, killer, dmgSource);
+            }
+            summonSoul(dead, dmgSource);
         }
+    }
+    
+    private static void summonSoul(LivingEntity entity, DamageSource dmgSource) {
+        LazyOptional<IStandPower> standOptional = IStandPower.getStandPowerOptional(entity);
+        int ticks = standOptional.map(power -> getSoulAscensionTicks(entity, power)).orElse(0);
+        
+        if (ticks > 0) {
+            if (entity instanceof ServerPlayerEntity) {
+                ModCriteriaTriggers.SOUL_ASCENSION.get().trigger((ServerPlayerEntity) entity, standOptional.orElse(null), ticks);
+            }
+            SoulEntity soulEntity = new SoulEntity(entity.level, entity, ticks);
+            entity.level.addFreshEntity(soulEntity);
+        }
+    }
+    
+    public static int getSoulAscensionTicks(LivingEntity user, IStandPower stand) {
+        if (!stand.usesResolve() || stand.getResolveLevel() == 0 ||
+                !JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).soulAscension.get() || JojoModUtil.isUndead(user) || 
+                user instanceof PlayerEntity && user.level.getGameRules().getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN)) {
+            return 0;
+        }
+        boolean hardcore = user.level.getLevelData().isHardcore();
+        if (user instanceof PlayerEntity && (
+                stand.wasProgressionSkipped() || 
+                JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).keepStandOnDeath.get() && !hardcore)) {
+            return 0;
+        }
+        
+        float resolveRatio = user.hasEffect(ModEffects.RESOLVE.get()) ? 1 : stand.getResolveRatio();
+        int ticks = (int) (60 * (stand.getResolveLevel() + resolveRatio));
+        if (hardcore) {
+            ticks += ticks / 2;
+        }
+        return ticks;
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -469,7 +900,7 @@ public class GameplayEventHandler {
 
     private static void cheatDeath(LivingDeathEvent event) {
         LivingEntity dead = event.getEntityLiving();
-        if (event.getSource().getEntity() != null && dead.hasEffect(ModEffects.CHEAT_DEATH.get())) {
+        if (dead.hasEffect(ModEffects.CHEAT_DEATH.get())) {
             event.setCanceled(true);
             dead.setHealth(dead.getMaxHealth() / 2F);
             dead.removeEffect(ModEffects.CHEAT_DEATH.get());
@@ -547,14 +978,14 @@ public class GameplayEventHandler {
                     if (shooter instanceof LivingEntity) {
                         INonStandPower.getNonStandPowerOptional((LivingEntity) shooter).ifPresent(power -> {
                             power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
-                                float manaCost = -1;
+                                float energyCost = -1;
                                 HamonSkill requiredSkill;
                                 float hamonBaseDmg = 0;
                                 int maxChargeTicks = 0;
                                 boolean water = false;
                                 if (projectile instanceof AbstractArrowEntity && !alreadyHasHamon(projectile)) {
                                     requiredSkill = HamonSkill.ARROW_INFUSION;
-                                    manaCost = 1000;
+                                    energyCost = 1000;
                                     hamonBaseDmg = 0.25F;
                                     maxChargeTicks = 10;
                                     water = projectile.getType() == EntityType.ARROW && ((ArrowEntity) projectile).getColor() != -1;
@@ -563,28 +994,28 @@ public class GameplayEventHandler {
                                     EntityType<?> type = projectile.getType();
                                     requiredSkill = HamonSkill.THROWABLES_INFUSION;
                                     if (type == EntityType.SNOWBALL) {
-                                        manaCost = 600;
+                                        energyCost = 600;
                                         hamonBaseDmg = 0.125F;
                                         maxChargeTicks = 25;
                                         water = true;
                                     }
                                     else if (type == EntityType.EGG) {
-                                        manaCost = 600;
+                                        energyCost = 600;
                                         hamonBaseDmg = 0.125F;
                                         maxChargeTicks = 100;
                                     }
                                     else if (type == EntityType.POTION) {
-                                        manaCost = 800;
+                                        energyCost = 800;
                                         hamonBaseDmg = 0.15F; 
                                         maxChargeTicks = 20;
                                         water = true;
                                     }
                                 }
-                                if (manaCost > -1 && hamon.isSkillLearned(requiredSkill) && power.consumeMana(manaCost)) {
+                                if (energyCost > -1 && hamon.isSkillLearned(requiredSkill) && power.consumeEnergy(energyCost)) {
                                     projCap.hamonBaseDmg = hamonBaseDmg;
                                     projCap.maxChargeTicks = maxChargeTicks;
                                     projCap.water = water;
-                                    projCap.spentMana = manaCost;
+                                    projCap.spentEnergy = energyCost;
                                 }
                             });
                         });
@@ -612,14 +1043,14 @@ public class GameplayEventHandler {
                 if (cap.hamonBaseDmg > 0 && entity instanceof ProjectileEntity) {
                     ProjectileEntity projectile = (ProjectileEntity) entity;
                     addHamonDamageToProjectile((EntityRayTraceResult) rayTrace, 
-                            projectile.getOwner(), projectile, cap.getHamonDamage(), cap.water, cap.spentMana);
+                            projectile.getOwner(), projectile, cap.getHamonDamage(), cap.water, cap.spentEnergy);
                 }
             });
         }
     }
     
     private static void addHamonDamageToProjectile(EntityRayTraceResult rayTrace, Entity thrower, Entity thrown, 
-            float damage, boolean waterProjectile, float spentMana) {
+            float damage, boolean waterProjectile, float spentEnergy) {
         if (thrown.level.isClientSide() || damage <= 0 || !(thrower instanceof LivingEntity)) {
             return;
         }
@@ -629,8 +1060,8 @@ public class GameplayEventHandler {
                 if (waterProjectile && hamon.isSkillLearned(HamonSkill.TURQUOISE_BLUE_OVERDRIVE)) {
                     dmgCheckWater *= 1.25;
                 }
-                ModDamageSources.dealHamonDamage(rayTrace.getEntity(), dmgCheckWater, thrown, thrower);
-                hamon.hamonPointsFromAction(HamonStat.STRENGTH, spentMana);
+                DamageUtil.dealHamonDamage(rayTrace.getEntity(), dmgCheckWater, thrown, thrower);
+                hamon.hamonPointsFromAction(HamonStat.STRENGTH, spentEnergy);
             });
         });
     }
@@ -645,7 +1076,7 @@ public class GameplayEventHandler {
                     INonStandPower.getNonStandPowerOptional(entity).map(power -> 
                     power.hasPower() && power.isLeapUnlocked() ? power.leapStrength() : 0).orElse(0F));
             if (leapStrength > 0) {
-                event.setDistance(Math.max(event.getDistance() - leapStrength * 3, 0));
+                event.setDistance(Math.max(event.getDistance() - (leapStrength + 5) * 3, 0));
             }
         }
     }
@@ -671,32 +1102,35 @@ public class GameplayEventHandler {
                 }
             }
         }
+        
+        IStandPower.getStandPowerOptional(event.getPlayer()).ifPresent(stand -> stand.getResolveCounter().onChatMessage(event.getMessage()));
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void explosionFilterEntities(ExplosionEvent.Detonate event) {
+        Explosion explosion = event.getExplosion();
+        
+        if (explosion.getExploder() instanceof MRCrossfireHurricaneEntity) {
+            ((MRCrossfireHurricaneEntity) explosion.getExploder())
+            .explosionFilterEntities(event.getAffectedEntities());
+        }
     }
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onExplosionDetonate(ExplosionEvent.Detonate event) {
         Explosion explosion = event.getExplosion();
+        
+        event.getAffectedEntities().forEach(entity -> {
+            if (entity instanceof LivingEntity) {
+                ((LivingEntity) entity).getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(util -> {
+                    util.setLatestExplosionPos(explosion.getPosition());
+                });
+            }
+        });
+        
         if (explosion.getExploder() instanceof MRCrossfireHurricaneEntity) {
-            LivingEntity magiciansRed = explosion.getSourceMob();
-            for (Entity entity : event.getAffectedEntities()) {
-                if (!entity.is(magiciansRed)) {
-                    int seconds = 6;
-                    if (entity instanceof StandEntity) {
-                        ((StandEntity) entity).setFireFromStand(seconds);
-                    }
-                    else {
-                        entity.setSecondsOnFire(seconds);
-                    }
-                }
-            }
-            World world = event.getWorld();
-            if (magiciansRed != null && ForgeEventFactory.getMobGriefingEvent(world, magiciansRed)) {
-                for (BlockPos pos : event.getAffectedBlocks()) {
-                    if (world.isEmptyBlock(pos)) {
-                        world.setBlockAndUpdate(pos, AbstractFireBlock.getState(world, pos));
-                    }
-                }
-            }
+            ((MRCrossfireHurricaneEntity) explosion.getExploder())
+            .onExplode(event.getAffectedEntities(), event.getAffectedBlocks());
         }
     }
     
@@ -705,7 +1139,7 @@ public class GameplayEventHandler {
         if (!event.wakeImmediately() && !event.updateWorld()) {
             IStandPower stand = IStandPower.getPlayerStandPower(event.getPlayer());
             if (stand.hasPower()) {
-                stand.setMana(stand.getMaxMana());
+                stand.setStamina(stand.getMaxStamina());
             }
         }
     }

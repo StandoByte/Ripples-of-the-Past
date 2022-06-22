@@ -1,12 +1,27 @@
 package com.github.standobyte.jojo.client.model.entity.stand;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import com.github.standobyte.jojo.action.actions.StandEntityAction.Phase;
+import com.github.standobyte.jojo.client.model.pose.IModelPose;
+import com.github.standobyte.jojo.client.model.pose.ModelPose;
+import com.github.standobyte.jojo.client.model.pose.ModelPose.ModelAnim;
+import com.github.standobyte.jojo.client.model.pose.ModelPoseTransition;
+import com.github.standobyte.jojo.client.model.pose.RotationAngle;
+import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
 import com.github.standobyte.jojo.client.renderer.entity.stand.AdditionalArmSwing;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
-import com.github.standobyte.jojo.util.MathUtil;
+import com.github.standobyte.jojo.util.utils.MathUtil;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
@@ -14,14 +29,23 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.model.AgeableModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
 
 public abstract class StandEntityModel<T extends StandEntity> extends AgeableModel<T> {
     protected VisibilityMode visibilityMode = VisibilityMode.ALL;
-    protected StandPose poseType = StandPose.SUMMON;
-    private float xRotation;
+    protected float yRotation;
+    protected float xRotation;
+    protected float ticks;
+
+    public float idleLoopTickStamp = 0;
+    private ModelPose<T> poseReset;
+    protected IModelPose<T> idlePose;
+    protected IModelPose<T> idleLoop;
+    private List<IModelPose<T>> summonPoses;
+    protected final Map<StandPose, StandActionAnimation<T>> actionAnim = new HashMap<>();
 
     protected StandEntityModel(boolean scaleHead, float yHeadOffset, float zHeadOffset) {
         this(scaleHead, yHeadOffset, zHeadOffset, 2.0F, 2.0F, 24.0F);
@@ -29,12 +53,18 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
 
     protected StandEntityModel(boolean scaleHead, float yHeadOffset, float zHeadOffset, 
             float babyHeadScale, float babyBodyScale, float bodyYOffset) {
-        super(texture -> RenderType.entityTranslucent(texture), scaleHead, yHeadOffset, zHeadOffset, babyHeadScale, babyBodyScale, bodyYOffset);
+        this(RenderType::entityTranslucent, scaleHead, yHeadOffset, zHeadOffset, babyHeadScale, babyBodyScale, bodyYOffset);
     }
 
     protected StandEntityModel(Function<ResourceLocation, RenderType> renderType, boolean scaleHead, float yHeadOffset, float zHeadOffset, 
             float babyHeadScale, float babyBodyScale, float bodyYOffset) {
         super(renderType, scaleHead, yHeadOffset, zHeadOffset, babyHeadScale, babyBodyScale, bodyYOffset);
+    }
+
+    public void afterInit() {
+        initOpposites();
+        initPoses();
+        initActionPoses();
     }
 
     protected final void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
@@ -43,109 +73,147 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         modelRenderer.zRot = z;
     }
 
-    protected void setSummonPoseRotationAngle(ModelRenderer modelRenderer, float x, float y, float z, float factor, 
-            float xIdle, float yIdle, float zIdle) {
-        setRotationAngle(modelRenderer, 
-                isHead(modelRenderer) 
-                ? modelRenderer.xRot + xIdle + (x - xIdle) * factor
-                : xIdle + (x - xIdle) * factor, 
-                yIdle + (y - yIdle) * factor, 
-                zIdle + (z - zIdle) * factor);
-    }
-
-    protected void setSummonPoseRotationAngle(ModelRenderer modelRenderer, float x, float y, float z, float factor) {
-        setRotationAngle(modelRenderer, 
-                isHead(modelRenderer)
-                ? modelRenderer.xRot + x * factor 
-                : x * factor, 
-                y * factor, 
-                z * factor);
-    }
-    
-    protected abstract boolean isHead(ModelRenderer modelRenderer);
-    
-    public void setVisibilityMode(VisibilityMode mode, boolean forearmOnly) {
+    public void setVisibilityMode(VisibilityMode mode) {
         this.visibilityMode = mode;
-        updatePartsVisibility(mode, forearmOnly);
+        updatePartsVisibility(mode);
     }
 
-    protected abstract void updatePartsVisibility(VisibilityMode mode, boolean forearmOnly);
-
-    @Override
-    public void prepareMobModel(T entity, float walkAnimPos, float walkAnimSpeed, float partialTick) {
-        StandPose currentPose = entity.getStandPose();
-        if (currentPose != poseType) {
-            resetPose();
-        }
-        poseType = currentPose;
-    }
-
-    public StandPose getPose() {
-        return poseType;
-    }
+    protected abstract void updatePartsVisibility(VisibilityMode mode);
 
     @Override
     public void setupAnim(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
+        HandSide swingingHand = entity.getSwingingHand();
         headParts().forEach(part -> {
-            part.yRot = yRotationOffset * MathUtil.DEG_TO_RAD;
-            part.xRot = xRotation * MathUtil.DEG_TO_RAD;
-            part.zRot = 0;
+            setRotationAngle(part, 0, 0, 0);
         });
-        if (this.attackTime > 0.0F) {
-            swingArm(entity, xRotation, entity.swingingArm == Hand.MAIN_HAND ? entity.getMainArm() : entity.getMainArm().getOpposite());
+
+//        initPoses();
+//        initActionPoses();
+
+        StandPose pose = entity.getStandPose();
+        if (pose == StandPose.SUMMON && (ticks > SUMMON_ANIMATION_LENGTH || entity.isArmsOnlyMode())) {
+            entity.setStandPose(StandPose.IDLE);
+            pose = StandPose.IDLE;
+        }
+
+        if (attackTime > 0.0F) {
+            idlePose.poseModel(1.0F, entity, ticks, yRotationOffset, xRotation, swingingHand);
+            swingArmBarrage(entity, this.attackTime, yRotationOffset, xRotation, ticks, 
+                    swingingHand, 0);
         }
         else {
-            switch (poseType) {
-            case SUMMON:
-                if (ticks > SUMMON_ANIMATION_LENGTH || entity.isArmsOnlyMode()) {
-                    entity.setStandPose(StandPose.NONE);
-                }
-                else {
-                    entity.setYBodyRot(entity.yRot);
-                    summonAnimation(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
-                }
-                break;
-            case NONE:
-                resetPose();
-                break;
-            case BLOCK:
-                blockingPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
-                break;
-            case RANGED_ATTACK:
-                rangedAttackPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
-                break;
-            case ABILITY:
-                specialAbilityPose(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
-                break;
-            }
+            poseStand(entity, ticks, yRotationOffset, xRotation, 
+                    pose, entity.getCurrentTaskPhase(), 
+                    entity.getCurrentTaskCompletion(ticks - entity.tickCount), swingingHand);
         }
+        this.yRotation = yRotationOffset;
         this.xRotation = xRotation;
-        /*if (!Minecraft.getInstance().isPaused())*/ entity.clUpdateSwings(Minecraft.getInstance().getDeltaFrameTime());
-    }
-    
-    private static final float SUMMON_ANIMATION_LENGTH = 20.0F;
-    private static final float SUMMON_ANIMATION_POSE_REVERSE_POINT = 0.75F;
-    protected void summonAnimation(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
-        summonPose(ticks > SUMMON_ANIMATION_LENGTH * SUMMON_ANIMATION_POSE_REVERSE_POINT ? 
-                (SUMMON_ANIMATION_LENGTH - ticks) / (SUMMON_ANIMATION_LENGTH * (1 - SUMMON_ANIMATION_POSE_REVERSE_POINT))
-                : 1.0F, entity.getSummonPoseRandomByte() % getSummonPosesCount());
+        this.ticks = ticks;
+        if (!Minecraft.getInstance().isPaused())
+        entity.clUpdateSwings(Minecraft.getInstance().getDeltaFrameTime());
     }
 
-    protected abstract void resetPose();
-    protected void summonPose(float animationFactor, int poseVariant) {
-        resetPose();
+    protected void poseStand(T entity, float ticks, float yRotationOffset, float xRotation, 
+            StandPose standPose, Optional<Phase> actionPhase, float actionCompletion, HandSide swingingHand) {
+        if (actionAnim.containsKey(standPose)) {
+            idlePose.poseModel(1.0F, entity, ticks, yRotationOffset, xRotation, swingingHand);
+            onPose(entity, ticks);
+            
+            StandActionAnimation<T> anim = getActionAnim(entity, standPose);
+            if (anim != null) {
+                anim.animate(actionPhase.get(), actionCompletion, 
+                        entity, ticks, yRotationOffset, xRotation, swingingHand);
+            }
+        }
+        else if (standPose == StandPose.SUMMON && summonPoses.size() > 0) {
+            poseSummon(entity, ticks, yRotationOffset, xRotation, swingingHand);
+        }
+        else {
+            poseIdleLoop(entity, ticks, yRotationOffset, xRotation, swingingHand);
+        }
     }
-    protected int getSummonPosesCount() {
-        return 1;
+
+    protected StandActionAnimation<T> getActionAnim(T entity, StandPose poseType) {
+        return actionAnim.get(poseType);
     }
-    protected abstract void blockingPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation);
-    protected void rangedAttackPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
-        resetPose();
+
+    private void onPose(T entity, float ticks) {
+        entity.setYBodyRot(entity.yRot);
+        idleLoopTickStamp = ticks;
     }
-    protected void specialAbilityPose(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
-        resetPose();
+
+    protected final ModelAnim<T> HEAD_ROTATION = (rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
+        headParts().forEach(part -> {
+            part.yRot = MathUtil.rotLerpRad(rotationAmount, part.yRot, yRotationOffset * MathUtil.DEG_TO_RAD);
+            part.xRot = MathUtil.rotLerpRad(rotationAmount, part.xRot, xRotation * MathUtil.DEG_TO_RAD);
+            part.zRot = 0;
+        });
+    };
+    
+    protected void poseSummon(T entity, float ticks, float yRotationOffset, float xRotation, HandSide swingingHand) {
+        resetPose(entity);
+        onPose(entity, ticks);
+        
+        summonPoses.get(entity.getSummonPoseRandomByte() % summonPoses.size())
+        .poseModel(1.0F, entity, ticks, yRotationOffset, xRotation, swingingHand);
+
+        idlePose.poseModel(summonPoseRotation(ticks), entity, ticks, yRotationOffset, xRotation, swingingHand);
     }
-    protected abstract void swingArm(T entity, float xRotation, HandSide swingingHand);
+    
+    private static float summonPoseRotation(float ticks) {
+        return MathHelper.clamp(
+                (ticks - SUMMON_ANIMATION_LENGTH) / (SUMMON_ANIMATION_LENGTH * (1 - SUMMON_ANIMATION_POSE_REVERSE_POINT)) + 1, 
+                0F, 1F);
+    }
+    
+    protected void poseIdleLoop(T entity, float ticks, float yRotationOffset, float xRotation, HandSide swingingHand) {
+        idleLoop.poseModel(ticks - idleLoopTickStamp, entity, ticks, yRotationOffset, xRotation, swingingHand);
+    }
+    
+    protected void initPoses() {
+        if (poseReset == null)
+            poseReset = initPoseReset();
+
+        if (idlePose == null)
+            idlePose = initBaseIdlePose();
+        if (idleLoop == null)
+            idleLoop = new ModelPoseTransition<T>(idlePose, initIdlePose2Loop()).setEasing(ticks -> MathHelper.sin(ticks / 20));
+
+        if (summonPoses == null)
+            summonPoses = initSummonPoses();
+    }
+
+    protected void initActionPoses() {}
+
+
+
+    protected abstract ModelPose<T> initPoseReset();
+
+    protected IModelPose<T> initBaseIdlePose() {
+        return initIdlePose().setAdditionalAnim(HEAD_ROTATION);
+    }
+
+    protected ModelPose<T> initIdlePose() {
+        return initPoseReset();
+    }
+
+    protected IModelPose<T> initIdlePose2Loop() {
+        return initIdlePose();
+    }
+
+    private static final float SUMMON_ANIMATION_LENGTH = 20.0F;
+    private static final float SUMMON_ANIMATION_POSE_REVERSE_POINT = 0.75F;
+    protected List<IModelPose<T>> initSummonPoses() {
+        return Arrays.stream(initSummonPoseRotations())
+                .map(rotationAngles -> new ModelPose<T>(rotationAngles))
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    protected RotationAngle[][] initSummonPoseRotations() {
+        return new RotationAngle[0][0];
+    }
+
+    protected abstract void swingArmBarrage(T entity, float swingAmount, float yRotation, float xRotation, float ticks, HandSide swingingHand, float recovery);
 
     public void renderFirstPersonArms(HandSide handSide, MatrixStack matrixStack, 
             IVertexBuilder buffer, int packedLight, T entity, float partialTick, 
@@ -156,34 +224,35 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
             int packedOverlay, float red, float green, float blue, float alpha) {}
 
     public abstract ModelRenderer armModel(HandSide side);
-    
+
     public void renderArmSwings(T entity, MatrixStack matrixStack, IVertexBuilder buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
         List<AdditionalArmSwing> swings = entity.getSwingsWithOffsets();
         if (!swings.isEmpty()) {
-            resetPose();
+            resetPose(entity);
             for (AdditionalArmSwing swing : swings) {
                 matrixStack.pushPose();
-                setVisibilityMode(swing.getSide() == HandSide.LEFT ? VisibilityMode.LEFT_ARM_ONLY : VisibilityMode.RIGHT_ARM_ONLY, true);
-                matrixStack.translate(swing.offset.x, swing.offset.y, swing.offset.z);
-                float anim = swing.getAnim();
-                HandSide swingingHand;
-                if (anim <= 1) {
-                    attackTime = anim;
-                    swingingHand = swing.getSide();
-                }
-                else {
-                    attackTime = anim - 1;
-                    swingingHand = swing.getSide().getOpposite();
-                }
-                swingArm(entity, xRotation, swingingHand);
-                rotateAdditionalArmSwings();
+                setVisibilityMode(swing.getSide() == HandSide.LEFT ? VisibilityMode.LEFT_ARM_ONLY : VisibilityMode.RIGHT_ARM_ONLY);
+                Vector3d offset = new Vector3d(swing.offset.x, -swing.offset.y, swing.offset.z).xRot(xRotation * MathUtil.DEG_TO_RAD);
+                matrixStack.translate(offset.x, offset.y, -offset.z);
+                attackTime = swing.getAnim() / AdditionalArmSwing.MAX_ANIM_DURATION;
+                HandSide swingingHand = swing.getSide();
+                swingArmBarrage(entity, attackTime, yRotation, xRotation, ticks, swingingHand, 0F);
                 renderToBuffer(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha * 0.5F);
                 matrixStack.popPose();
             }
         }
     }
+
+    private void resetPose(T entity) {
+        poseReset.poseModel(1, entity, 0, 0, 0, entity.getSwingingHand());
+    }
     
-    protected abstract void rotateAdditionalArmSwings();
+    protected void initOpposites() {}
+    
+    protected final BiMap<ModelRenderer, ModelRenderer> oppositeHandside = HashBiMap.create();
+    public final ModelRenderer getOppositeHandside(ModelRenderer modelRenderer) {
+        return oppositeHandside.computeIfAbsent(modelRenderer, k -> oppositeHandside.inverse().getOrDefault(modelRenderer, modelRenderer));
+    }
 
     public enum VisibilityMode {
         ALL,

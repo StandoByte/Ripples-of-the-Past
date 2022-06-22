@@ -1,27 +1,34 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
+import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.util.reflection.CommonReflection;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.monster.SkeletonEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
+import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class SCRapierEntity extends ModdedProjectileEntity {
-    private static final int MAX_RICOCHETS = 12;
-    private int ricochet;
+    private static final int MAX_RICOCHETS = 100;
+    private int ricochetCount;
     
     public SCRapierEntity(LivingEntity shooter, World world) {
         super(ModEntityTypes.SC_RAPIER.get(), shooter, world);
@@ -37,9 +44,26 @@ public class SCRapierEntity extends ModdedProjectileEntity {
     }
     
     @Override
-    public float getBaseDamage() {
-        float standDamage = (float) ModEntityTypes.SILVER_CHARIOT.get().getStats().getDamage();
-        return standDamage + ricochet;
+    protected float getBaseDamage() {
+        LivingEntity owner = getOwner();
+        float damage;
+        if (owner != null) {
+            damage = (float) owner.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
+        }
+        else {
+            damage = (float) ModStandTypes.SILVER_CHARIOT.get().getStats().getBasePower();
+        }
+        return damage * 1.5F;
+    }
+    
+    @Override
+    protected float getDamageFinalCalc(float damage) {
+        return damage + (float) ricochetCount * 0.5F;
+    }
+    
+    @Override
+    protected boolean debuffsFromStand() {
+    	return false;
     }
 
     @Override
@@ -53,34 +77,26 @@ public class SCRapierEntity extends ModdedProjectileEntity {
     }
     
     @Override
-    protected int ticksLifespan() {
+	public int ticksLifespan() {
         return Integer.MAX_VALUE;
+    }
+
+    @Override
+    protected void breakProjectile(TargetType targetType) {
     }
     
     @Override
     protected void onHitBlock(BlockRayTraceResult blockRayTraceResult) {
-        if (ricochet < MAX_RICOCHETS) {
+        boolean ricochet = false;
+        if (ricochetCount < MAX_RICOCHETS) {
             BlockPos blockPos = blockRayTraceResult.getBlockPos();
             BlockState blockState = level.getBlockState(blockPos);
             SoundType soundType = blockState.getSoundType(level, blockPos, this);
             level.playSound(null, blockPos, soundType.getHitSound(), SoundCategory.BLOCKS, (soundType.getVolume() + 1.0F) / 8.0F, soundType.getPitch() * 0.5F);
-            Vector3d motion = getDeltaMovement();
             Direction hitFace = blockRayTraceResult.getDirection();
-            switch (hitFace.getAxis()) {
-            case X:
-                setDeltaMovement(-motion.x, motion.y, motion.z);
-                break;
-            case Y:
-                setDeltaMovement(motion.x, -motion.y, motion.z);
-                break;
-            case Z:
-                setDeltaMovement(motion.x, motion.y, -motion.z);
-                break;
-            }
-            rotateTowardsMovement(1.0F);
-            ricochet++;
+            ricochet = ricochet(hitFace);
         }
-        else {
+        if (!ricochet) {
             Vector3d pos = position();
             Vector3d movementVec = getDeltaMovement();
             Direction hitFace = blockRayTraceResult.getDirection();
@@ -97,7 +113,7 @@ public class SCRapierEntity extends ModdedProjectileEntity {
                 k = (blockVec.z - pos.z) / movementVec.z;
                 break;
             default:
-                k = 1337;
+                return;
             }
             setPos(
                     getX() + movementVec.x * k, 
@@ -105,6 +121,35 @@ public class SCRapierEntity extends ModdedProjectileEntity {
                     getZ() + movementVec.z * k);
             setDeltaMovement(Vector3d.ZERO);
         }
+    }
+    
+    private boolean ricochet(Direction hitSurfaceDirection) {
+        if (hitSurfaceDirection != null) {
+            Vector3d motion = getDeltaMovement();
+            Vector3d motionNew;
+            switch (hitSurfaceDirection.getAxis()) {
+            case X:
+                motionNew = new Vector3d(-motion.x, motion.y, motion.z);
+                break;
+            case Y:
+                motionNew = new Vector3d(motion.x, -motion.y, motion.z);
+                break;
+            case Z:
+                motionNew = new Vector3d(motion.x, motion.y, -motion.z);
+                break;
+            default:
+                return false;
+            }
+            if (JojoModUtil.rayTrace(position(), motionNew, 16, level, this, 
+            		EntityPredicates.NO_SPECTATORS.and(EntityPredicates.ENTITY_STILL_ALIVE), 1.0, 0).getType() == RayTraceResult.Type.MISS) {
+            	return false;
+            }
+            setDeltaMovement(motionNew);
+            rotateTowardsMovement(1.0F);
+            ricochetCount++;
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -120,11 +165,16 @@ public class SCRapierEntity extends ModdedProjectileEntity {
     }
     
     public void takeRapier(SilverChariotEntity stand) {
-        if (stand.is(getOwner())) {
+        if (stand.is(getOwner()) && CommonReflection.getProjectileLeftOwner(this)) {
             stand.playSound(SoundEvents.ITEM_PICKUP, 1.0F, 1.0F);
             stand.setRapier(true);
             remove();
         }
+    }
+    
+    @Override
+    public boolean displayFireAnimation() {
+    	return false;
     }
     
     
@@ -143,13 +193,13 @@ public class SCRapierEntity extends ModdedProjectileEntity {
     @Override
     protected void addAdditionalSaveData(CompoundNBT nbt) {
         super.addAdditionalSaveData(nbt);
-        nbt.putInt("Ricochets", ricochet);
+        nbt.putInt("Ricochets", ricochetCount);
     }
 
     @Override
     protected void readAdditionalSaveData(CompoundNBT nbt) {
         super.readAdditionalSaveData(nbt);
-        ricochet = nbt.getInt("Ricochets");
+        ricochetCount = nbt.getInt("Ricochets");
     }
 
 }

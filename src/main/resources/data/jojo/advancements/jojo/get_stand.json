@@ -1,0 +1,34 @@
+{
+  "parent": "jojo:jojo/stand_arrow",
+  "display": {
+    "icon": {
+      "item": "jojo:meteoric_scrap",
+      "nbt": "{Icon:8}"
+    },
+    "title": {
+      "translate": "advancements.jojo.get_stand.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.get_stand.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "get_stand": {
+      "trigger": "jojo:get_power",
+      "conditions": {
+        "jojopower": {
+          "classification": "stand"
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "get_stand"
+    ]
+  ]
+}

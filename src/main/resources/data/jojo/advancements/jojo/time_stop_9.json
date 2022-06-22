@@ -1,0 +1,41 @@
+{
+  "parent": "jojo:jojo/time_ability",
+  "display": {
+    "icon": {
+      "item": "jojo:meteoric_scrap",
+      "nbt": "{Icon:7}"
+    },
+    "title": {
+      "translate": "advancements.jojo.time_stop_9.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.time_stop_9.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": true
+  },
+  "rewards": {
+    "experience": 100
+  },
+  "criteria": {
+    "time_stop_effect": {
+      "trigger": "minecraft:effects_changed",
+      "conditions": {
+        "effects": {
+          "jojo:time_stop": {
+            "duration": {
+              "min": 180
+            }
+          }
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "time_stop_effect"
+    ]
+  ]
+}

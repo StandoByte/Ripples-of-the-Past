@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.client.ui.screen;
 import java.util.Collections;
 import java.util.List;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -43,7 +44,7 @@ public abstract class HamonTabGui extends AbstractGui {
         this.tabIndex = index;
         this.title = new TranslationTextComponent(title);
         this.descLines = minecraft.font.split(createTabDescription(title + ".desc"), 200);
-        this.background = new ResourceLocation("textures/gui/advancements/backgrounds/stone.png");
+        this.background = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/advancements/jojo.png");
         this.maxX = scrollWidth;
         this.maxY = scrollHeight;
     }

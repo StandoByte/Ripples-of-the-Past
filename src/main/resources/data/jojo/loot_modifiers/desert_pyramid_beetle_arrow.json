@@ -1,4 +1,5 @@
 {
+  "type": "jojo:additional_single_item",
   "conditions": [
     {
       "condition": "forge:loot_table_id",
@@ -9,5 +10,7 @@
       "chance": 0.02
     }
   ],
-  "additional_item": "jojo:stand_arrow_beetle"
+  "additional_item": {
+    "name": "jojo:stand_arrow_beetle"
+  }
 }

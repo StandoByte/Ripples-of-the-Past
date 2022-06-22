@@ -6,7 +6,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.ui.sprites.SpriteUploaders;
+import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonLearnButtonPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonResetSkillsButtonPacket;
@@ -40,7 +40,7 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
 
     @Override
     void addButtons() {
-        learnButton = new Button(screen.windowPosX() + 150, screen.windowPosY() + 87, 64, 20, new TranslationTextComponent("hamon.learnButton"), button -> {
+        learnButton = new Button(screen.windowPosX() + 150, screen.windowPosY() + 86, 64, 20, new TranslationTextComponent("hamon.learnButton"), button -> {
             if (selectedSkill != null) {
                 PacketManager.sendToServer(new ClHamonLearnButtonPacket(selectedSkill.skill));
                 screen.clickedOnSkill = true;
@@ -48,7 +48,7 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
         });
         screen.addButton(learnButton);
 
-        creativeResetButton = new Button(screen.windowPosX() + 16, screen.windowPosY() + 87, 64, 20, new TranslationTextComponent("hamon.resetButton"), button -> {
+        creativeResetButton = new Button(screen.windowPosX() + 16, screen.windowPosY() + 86, 64, 20, new TranslationTextComponent("hamon.resetButton"), button -> {
             PacketManager.sendToServer(new ClHamonResetSkillsButtonPacket(getSkillsType()));
         });
         screen.addButton(creativeResetButton);
@@ -86,14 +86,14 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
             int texY = selectedSkill.isFinal() ? 190 : 164;
             blit(matrixStack, selectedSkill.x + intScrollX, selectedSkill.y + intScrollY + yOffset, 
                     selectedSkill.getState().getTextureX(), texY, 26, 26);
-            TextureAtlasSprite textureAtlasSprite = SpriteUploaders.getHamonSkillSprites().getSprite(selectedSkill.skill);
+            TextureAtlasSprite textureAtlasSprite = CustomResources.getHamonSkillSprites().getSprite(selectedSkill.skill);
             minecraft.getTextureManager().bind(textureAtlasSprite.atlas().location());
             blit(matrixStack, intScrollX + 4, intScrollY + 4, 0, 16, 16, textureAtlasSprite);
         }
         // skill icons
         for (HamonSkillGuiElement[] skillLine : skillArrays) {
             for (HamonSkillGuiElement skillElement : skillLine) {
-                TextureAtlasSprite textureAtlasSprite = SpriteUploaders.getHamonSkillSprites().getSprite(skillElement.skill);
+                TextureAtlasSprite textureAtlasSprite = CustomResources.getHamonSkillSprites().getSprite(skillElement.skill);
                 minecraft.getTextureManager().bind(textureAtlasSprite.atlas().location());
                 blit(matrixStack, skillElement.x + intScrollX + 5, skillElement.y + intScrollY + 5 + yOffset, 0, 16, 16, textureAtlasSprite);
             }

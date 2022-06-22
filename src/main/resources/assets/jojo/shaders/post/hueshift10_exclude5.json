@@ -1,0 +1,39 @@
+{
+  "targets": [
+    "swap"
+  ],
+  "passes": [
+    {
+      "name": "jojo:hue_shift",
+      "intarget": "minecraft:main",
+      "outtarget": "swap",
+      "uniforms": [
+        {
+          "name": "ShiftAmount",
+          "values": [ 0.8333 ]
+        }
+      ]
+    },
+    {
+      "name": "color_convolve",
+      "intarget": "swap",
+      "outtarget": "minecraft:main",
+      "uniforms": [
+        { "name": "Saturation", "values": [ 1.4 ] }
+      ]
+    },
+    {
+      "name": "jojo:hue_exclude_half",
+      "intarget": "minecraft:main",
+      "outtarget": "swap",
+      "uniforms": [
+        { "name": "ExclusionCenter", "values": [ 0.7500 ] }
+      ]
+    },
+    {
+      "name": "blit",
+      "intarget": "swap",
+      "outtarget": "minecraft:main"
+    }
+  ]
+}

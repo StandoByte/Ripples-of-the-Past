@@ -1,0 +1,41 @@
+{
+  "parent": "jojo:jojo/get_hamon",
+  "display": {
+    "icon": {
+      "item": "jojo:satiporoja_scarf"
+    },
+    "title": {
+      "translate": "advancements.jojo.hamon_mastery.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.hamon_mastery.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "rewards": {
+    "experience": 250
+  },
+  "criteria": {
+    "max_stats": {
+      "trigger": "jojo:hamon_stats",
+      "conditions": {
+        "hamon_stats": {
+          "strength_level": {
+            "min": 60
+          },
+          "control_level": {
+            "min": 60
+          }
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "max_stats"
+    ]
+  ]
+}

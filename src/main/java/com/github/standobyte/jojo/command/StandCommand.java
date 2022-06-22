@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.command;
 
 import java.util.Collection;
 
+import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.type.StandType;
@@ -35,14 +36,14 @@ public class StandCommand {
                         .executes(ctx -> giveStands(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), StandArgument.getStandType(ctx, "stand"))))))
                 .then(Commands.literal("random").then(Commands.argument("targets", EntityArgument.players()) // /stand random <player(s)>
                         .executes(ctx -> giveRandomStands(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets")))))
-                .then(Commands.literal("remove").then(Commands.argument("targets", EntityArgument.players())
+                .then(Commands.literal("clear").then(Commands.argument("targets", EntityArgument.players())
                         .executes(ctx -> removeStands(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets")))))
                 .then(Commands.literal("name").then(Commands.argument("targets", EntityArgument.player())
                         .executes(ctx -> queryStand(ctx.getSource(), EntityArgument.getPlayer(ctx, "targets")))))
                 );
     }
 
-    private static int giveStands(CommandSource source, Collection<ServerPlayerEntity> targets, StandType standType) throws CommandSyntaxException {
+    private static int giveStands(CommandSource source, Collection<ServerPlayerEntity> targets, StandType<?> standType) throws CommandSyntaxException {
         int i = 0;
         for (ServerPlayerEntity player : targets) {
             IStandPower power = IStandPower.getStandPowerOptional(player).orElse(null);
@@ -79,12 +80,12 @@ public class StandCommand {
     
     private static int giveRandomStands(CommandSource source, Collection<ServerPlayerEntity> targets) throws CommandSyntaxException {
         int i = 0;
-        StandType stand = null;
+        StandType<?> stand = null;
         if (!targets.isEmpty()) {
             for (ServerPlayerEntity player : targets) {
                 IStandPower power = IStandPower.getStandPowerOptional(player).orElse(null);
                 if (power != null) {
-                    stand = StandUtil.randomStandByTier(-1, player, player.getRandom());
+                    stand = StandUtil.randomStand(player, player.getRandom());
                     if (stand == null) {
                         if (targets.size() == 1) {
                             throw GIVE_SINGLE_EXCEPTION_RANDOM.create(targets.iterator().next().getName());
@@ -125,12 +126,13 @@ public class StandCommand {
 
     private static int removeStands(CommandSource source, Collection<ServerPlayerEntity> targets) throws CommandSyntaxException {
         int i = 0;
-        StandType removedStand = null;
+        StandType<?> removedStand = null;
         for (ServerPlayerEntity player : targets) {
             IStandPower power = IStandPower.getStandPowerOptional(player).orElse(null);
             if (power != null) {
-                StandType toBeRemoved = power.getType();
+                StandType<?> toBeRemoved = power.getType();
                 if (power.clear()) {
+                    power.clearActionLearning();
                     i++;
                     removedStand = toBeRemoved;
                 }
@@ -158,8 +160,9 @@ public class StandCommand {
         IStandPower power = IStandPower.getStandPowerOptional(player).orElse(null);
         if (power != null) {
             if (power.hasPower()) {
-                source.sendSuccess(new TranslationTextComponent("commands.stand.query.success", player.getDisplayName(), new TranslationTextComponent(power.getType().getTranslationKey())), false);
-                return 1;
+                StandType<?> type = power.getType();
+                source.sendSuccess(new TranslationTextComponent("commands.stand.query.success", player.getDisplayName(), new TranslationTextComponent(type.getTranslationKey())), false);
+                return ModStandTypes.Registry.getNumericId(type.getRegistryName());
             }
         }
         throw QUERY_SINGLE_FAILED_EXCEPTION.create(player.getName());

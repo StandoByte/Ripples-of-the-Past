@@ -1,8 +1,25 @@
 {
+  "type": "jojo:additional_single_item",
   "conditions": [
     {
       "condition": "block_state_property",
       "block": "minecraft:redstone_ore"
+    },
+    {
+      "condition": "minecraft:inverted",
+      "term": {
+        "condition": "minecraft:match_tool",
+        "predicate": {
+          "enchantments": [
+            {
+              "enchantment": "minecraft:silk_touch",
+              "levels": {
+                "min": 1
+              }
+            }
+          ]
+        }
+      }
     },
     {
       "condition": "minecraft:table_bonus",
@@ -14,6 +31,8 @@
         0.05
       ]
     }
-  ], 
-  "additional_item": "jojo:aja_stone"
+  ],
+  "additional_item": {
+    "name": "jojo:aja_stone"
+  }
 }

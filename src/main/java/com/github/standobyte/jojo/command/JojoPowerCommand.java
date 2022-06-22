@@ -30,7 +30,7 @@ public class JojoPowerCommand {
                 .then(Commands.literal("give").then(Commands.argument("targets", EntityArgument.players())
                         .then(Commands.literal("hamon").executes(ctx -> giveNonStandPowers(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), ModNonStandPowers.HAMON.get())))
                         .then(Commands.literal("vampirism").executes(ctx -> giveNonStandPowers(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), ModNonStandPowers.VAMPIRISM.get())))))
-                .then(Commands.literal("remove").then(Commands.argument("targets", EntityArgument.players())
+                .then(Commands.literal("clear").then(Commands.argument("targets", EntityArgument.players())
                         .executes(ctx -> removeNonStandPowers(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets")))))
                 );
     }
@@ -40,8 +40,9 @@ public class JojoPowerCommand {
         for (ServerPlayerEntity player : targets) {
             INonStandPower power = INonStandPower.getNonStandPowerOptional(player).orElse(null);
             if (power != null) {
-                if (power.givePower(powerType)) {
+                if (!power.hasPower() && power.givePower(powerType)) {
                     i++;
+                    power.getTypeSpecificData(ModNonStandPowers.VAMPIRISM.get()).ifPresent(vampirism -> vampirism.setVampireFullPower(true));
                 }
                 else if (targets.size() == 1) {
                     throw GIVE_SINGLE_EXCEPTION.create(targets.iterator().next().getName());

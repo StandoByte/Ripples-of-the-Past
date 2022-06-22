@@ -10,8 +10,6 @@ import net.minecraft.util.SoundEvent;
 public class StoppableEntityTickableSound<T extends Entity> extends TickableSound {
     protected final T entity;
     protected final Predicate<T> stopCondition;
-    protected final float volume;
-    protected final float pitch;
 
     public StoppableEntityTickableSound(SoundEvent sound, SoundCategory category, T entity, 
             Predicate<T> stopCondition) {

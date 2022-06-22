@@ -5,25 +5,24 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.action.HeldActionData;
+import com.github.standobyte.jojo.action.ActionTargetContainer;
+import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.command.JojoControlsCommand;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncLeapCooldownPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncManaLimitFactorPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncManaPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncManaRegenPointsPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncCooldownPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncHeldActionPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncPowerTypePacket;
-import com.github.standobyte.jojo.network.packets.fromserver.UnfulfilledActionConditionPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.LeapCooldownPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrCooldownPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHeldActionPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrPowerTypePacket;
+import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -31,9 +30,9 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -42,18 +41,17 @@ import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.World;
 
-public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T> {
+public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType<P, T>> implements IPower<P, T> {
     @Nonnull
     protected final LivingEntity user;
     protected final Optional<ServerPlayerEntity> serverPlayerUser;
-    protected List<Action> attacks = new ArrayList<Action>();
-    protected List<Action> abilities = new ArrayList<Action>();
-    private float mana = 0;
-    protected float manaRegenPoints = 1;
-    protected float manaLimitFactor = 1;
+    protected T type;
+    protected List<Action<P>> attacks = new ArrayList<>();
+    protected List<Action<P>> abilities = new ArrayList<>();
     private ActionCooldownTracker cooldowns = new ActionCooldownTracker();
     private int leapCooldown;
-    protected HeldActionData heldActionData;
+    protected HeldActionData<P> heldActionData;
+    private long lastTickedDay = -1;
 
     public PowerBaseImpl(LivingEntity user) {
         this.user = user;
@@ -70,15 +68,11 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
         if (type == null || hasPower() && !getType().isReplaceableWith(type)) {
             return false;
         }
-        mana = 0;
-        onTypeInit(type);
-        if (user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild) {
-            mana = getMaxMana();
-        }
+        setType(type);
         leapCooldown = getLeapCooldownPeriod();
 
         serverPlayerUser.ifPresent(player -> {
-            PacketManager.sendToClientsTrackingAndSelf(new TrSyncPowerTypePacket<T>(player.getId(), getPowerClassification(), getType()), player);
+            PacketManager.sendToClientsTrackingAndSelf(new TrPowerTypePacket<P, T>(player.getId(), getPowerClassification(), getType()), player);
             player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                 cap.sendNotification(OneTimeNotification.POWER_CONTROLS, 
                         new TranslationTextComponent("jojo.chat.controls.message", 
@@ -88,24 +82,34 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
                                         .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/" + JojoControlsCommand.LITERAL))
                                         .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslationTextComponent("jojo.chat.controls.tooltip"))))));
             });
+            ModCriteriaTriggers.GET_POWER.get().trigger(player, getPowerClassification(), this);
         });
         return true;
     }
 
-    protected abstract void onTypeInit(T type);
+    protected abstract void afterTypeInit(T type);
+    
+    protected void setType(T type) {
+        this.type = type;
+        afterTypeInit(type);
+    }
 
     @Override
     public boolean clear() {
         if (!hasPower()) {
             return false;
         }
-        mana = 0;
-        attacks = new ArrayList<Action>();
-        abilities = new ArrayList<Action>();
+        attacks = new ArrayList<>();
+        abilities = new ArrayList<>();
         serverPlayerUser.ifPresent(player -> {
-            PacketManager.sendToClientsTrackingAndSelf(TrSyncPowerTypePacket.noPowerType(player.getId(), getPowerClassification()), player);
+            PacketManager.sendToClientsTrackingAndSelf(TrPowerTypePacket.noPowerType(player.getId(), getPowerClassification()), player);
         });
         return true;
+    }
+
+    @Override
+    public T getType() {
+        return type;
     }
 
     @Override
@@ -114,214 +118,170 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
     }
 
     @Override
-    public final void tick() {
+    public boolean isUserCreative() {
+        return user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild;
+    }
+
+    @Override
+    public void tick() {
         if (hasPower()) {
-            tickMana();
             tickHeldAction();
             tickCooldown();
             if (leapCooldown > 0) {
                 leapCooldown--;
             }
-            getType().tickUser(getUser(), this);
+            getType().tickUser(getUser(), getThis());
         }
-    }
-    
-    protected void tickMana() {
-        if (getType().canTickMana(getUser(), this)) {
-            mana = MathHelper.clamp(mana + manaRegenPoints, 0, getMaxMana());
-        }
+        newDayCheck();
     }
 
+    private void newDayCheck() {
+    	if (user != null) {
+	        long day = user.level.getDayTime() / 24000;
+	        long prevDay = lastTickedDay;
+	        lastTickedDay = day;
+	        if (prevDay == -1) {
+	        	return;
+	        }
+	        // FIXME (?) ticks for offline players on servers?
+	        if (prevDay != day) {
+	        	onNewDay(prevDay, day);
+	        }
+    	}
+    }
+    
+    protected void onNewDay(long prevDay, long day) {
+    	if (hasPower()) {
+    		getType().onNewDay(user, getThis(), prevDay, day);
+    	}
+    }
+    
     @Override
-    public List<Action> getAttacks() {
+    public List<Action<P>> getAttacks() {
         return attacks;
     }
 
     @Override
-    public List<Action> getAbilities() {
+    public List<Action<P>> getAbilities() {
         return abilities;
     }
-
-    @Override
-    public final float getMana() {
-        return mana;
-    }
-
-    @Override
-    public float getMaxMana() {
-        return 1000 * manaLimitFactor;
-    }
     
     @Override
-    public final boolean hasMana(float mana) {
-        return getMana() >= mana || infiniteMana();
-    }
-
-    @Override
-    public final void addMana(float amount) {
-        setMana(MathHelper.clamp(mana + amount, 0, getMaxMana()));
-    }
-
-    @Override
-    public final boolean consumeMana(float amount) {
-        if (infiniteMana()) {
-            return true;
-        }
-        if (mana >= amount) {
-            amount = reduceManaConsumed(amount);
-            setMana(mana - amount);
-            return true;
-        }
-        return false;
-    }
-    
-    protected float reduceManaConsumed(float amount) {
-        return amount;
-    }
-
-    @Override
-    public boolean infiniteMana() {
-        return user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild;
-    }
-
-    @Override
-    public final void setMana(float amount) {
-        amount = MathHelper.clamp(amount, 0, getMaxMana());
-        boolean send = mana != amount;
-        mana = amount;
-        if (send) {
-            serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new SyncManaPacket(getPowerClassification(), getMana()), player);
-            });
-        }
-    }
-
-    @Override
-    public final float getManaRegenPoints() {
-        return manaRegenPoints;
-    }
-
-    @Override
-    public final void setManaRegenPoints(float points) {
-        boolean send = points != manaRegenPoints;
-        manaRegenPoints = points;
-        if (send) {
-            serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new SyncManaRegenPointsPacket(getPowerClassification(), getManaRegenPoints()), player);
-            });
-        }
-    }
-
-    @Override
-    public final float getManaLimitFactor() {
-        return manaLimitFactor;
-    }
-
-    @Override
-    public final void setManaLimitFactor(float factor) {
-        boolean send = factor != manaLimitFactor;
-        manaLimitFactor = Math.max(factor, 1);
-        if (send) {
-            serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new SyncManaLimitFactorPacket(getPowerClassification(), getManaLimitFactor()), player);
-            });
-        }
-    }
-    
-    @Override
-    public final boolean isActionOnCooldown(Action action) {
+    public final boolean isActionOnCooldown(Action<?> action) {
         return cooldowns.isOnCooldown(action);
     }
 
     @Override
-    public final float getCooldownRatio(Action action, float partialTick) {
+    public final float getCooldownRatio(Action<?> action, float partialTick) {
         return cooldowns.getCooldownPercent(action, partialTick);
     }
 
-    private void setCooldownTimer(Action action, int value) {
-        if (value > 0) {
-            setCooldownTimer(action, value, value);
-            if (!user.level.isClientSide()) {
-                PacketManager.sendToClientsTrackingAndSelf(new TrSyncCooldownPacket(user.getId(), getPowerClassification(), action, value), user);
-            }
+    @Override
+    public void setCooldownTimer(Action<?> action, int value) {
+        updateCooldownTimer(action, value, value);
+        if (!user.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(new TrCooldownPacket(user.getId(), getPowerClassification(), action, value), user);
         }
     }
 
     @Override
-    public final void setCooldownTimer(Action action, int value, int totalCooldown) {
+    public final void updateCooldownTimer(Action<?> action, int value, int totalCooldown) {
         cooldowns.addCooldown(action, value, totalCooldown);
+    }
+    
+    @Override
+    public ActionCooldownTracker getCooldowns() {
+        return cooldowns;
     }
 
     private void tickCooldown() {
         cooldowns.tick();
     }
 
+    
 
-
+    @Nullable   
     @Override
-    public final boolean onClickAction(ActionType type, int index, boolean shift, ActionTarget target) {
-        if (heldActionData == null) {
-            List<Action> actions = getActions(type);
-            if (index >= actions.size()) {
-                return false;
-            }
-            Action action = actions.get(index);
-            if (shift && isActionUnlocked(action.getShiftVariationIfPresent())) {
-                action = action.getShiftVariationIfPresent();
-            }
-            boolean wasActive = isActive();
-            action.updatePerformer(user.level, user, this);
-            ActionConditionResult result = checkRequirements(action, action.getPerformer(user, this), target, true);
-            serverPlayerUser.ifPresent(player -> {
-                player.resetLastActionTime();
-            });
-            if (action.getHoldDurationMax() > 0) {
-                action.onStartedHolding(user.level, user, this, target, result.isPositive());
-                if (result.isPositive() || !result.shouldStopHeldAction()) {
-                    if (!user.level.isClientSide()) {
-                        action.playVoiceLine(user, this, target, wasActive, shift);
-                    }
-                    setHeldAction(action);
-                    setHeldActionTarget(target);
-                    return true;
-                }
-                else {
-                    sendMessage(result);
-                    return false;
-                }
-            }
-            else {
-                if (result.isPositive()) {
-                    if (!user.level.isClientSide()) {
-                        action.playVoiceLine(user, this, target, wasActive, shift);
-                    }
-                    performAction(action, target);
-                    return true;
-                }
-                else {
-                    sendMessage(result);
-                    return false;
-                }
+    public final Action<P> getAction(ActionType type, int index, boolean shift) {
+        List<Action<P>> actions = getActions(type);
+        if (index < 0 || index >= actions.size()) {
+            return null;
+        }
+        Action<P> action = actions.get(index).getVisibleAction(getThis());
+        Action<P> held = getHeldAction();
+        if (action == held) {
+            return action;
+        }
+        if (action != null && action.hasShiftVariation()) {
+            Action<P> shiftVar = action.getShiftVariationIfPresent().getVisibleAction(getThis());
+            if (shiftVar != null && (shift || shiftVar == held)) {
+                action = shiftVar;
             }
         }
-        return false;
+        return action;
     }
-
-    private void sendMessage(ActionConditionResult result) {
-        if (!user.level.isClientSide()) {
+    
+    @Override
+    public final boolean onClickAction(Action<P> action, boolean shift, ActionTarget target) {
+        if (action == null || getHeldAction() == action) return false;
+        boolean wasActive = isActive();
+        action.onClick(user.level, user, getThis());
+        ActionTargetContainer targetContainer = new ActionTargetContainer(target);
+        ActionConditionResult result = checkRequirements(action, targetContainer, true);
+        target = targetContainer.getTarget();
+        serverPlayerUser.ifPresent(player -> {
+            player.resetLastActionTime();
+        });
+        if (action.getHoldDurationMax(getThis()) > 0) {
+            action.startedHolding(user.level, user, getThis(), target, result.isPositive());
+            if (result.isPositive() || !result.shouldStopHeldAction()) {
+                if (!user.level.isClientSide()) {
+                    action.playVoiceLine(user, getThis(), target, wasActive, shift);
+                }
+                setHeldAction(action);
+                setHeldActionTarget(target);
+                return true;
+            }
+            else {
+                sendMessage(action, result);
+                return false;
+            }
+        }
+        else {
+            if (result.isPositive()) {
+                if (!user.level.isClientSide()) {
+                    action.playVoiceLine(user, getThis(), target, wasActive, shift);
+                }
+                performAction(action, target);
+            	stopHeldAction(false);
+                return true;
+            }
+            else {
+                sendMessage(action, result);
+                return false;
+            }
+        }
+    }
+    
+    private void sendMessage(Action<P> action, ActionConditionResult result) {
+        if (!user.level.isClientSide() && action.sendsConditionMessage()) {
             ITextComponent message = result.getWarning();
             
             if (message != null) {
                 serverPlayerUser.ifPresent(player -> {
-                    PacketManager.sendToClient(new UnfulfilledActionConditionPacket(message), player);
+                    player.displayClientMessage(message, true);
                 });
             }
         }
     }
 
     @Override
-    public ActionConditionResult checkRequirements(Action action, LivingEntity performer, ActionTarget target, boolean checkTargetType) {
-        if (!canUsePower() || heldActionData != null && heldActionData.action != action) {
+    public ActionConditionResult checkRequirements(Action<P> action, ActionTargetContainer targetContainer, boolean checkTargetType) {
+        if (!canUsePower()) {
+            return ActionConditionResult.NEGATIVE;
+        }
+        
+        if (heldActionData != null && !heldActionData.action.heldAllowsOtherActions(getThis()) && heldActionData.action != action) {
             return ActionConditionResult.NEGATIVE;
         }
 
@@ -329,44 +289,37 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
             return ActionConditionResult.NEGATIVE;
         }
 
-        if (!infiniteMana()) {
-            if (getMana() < action.getManaNeeded(getHeldActionTicks(), this)) {
-                serverPlayerUser.ifPresent(player -> {
-                    PacketManager.sendToClient(new SyncManaPacket(getPowerClassification(), getMana()), player);
-                });
-                ITextComponent message = new TranslationTextComponent("jojo.message.action_condition.no_mana_" + getType().getManaString());
-                return ActionConditionResult.createNegative(message);
-            }
-        }
-
+        LivingEntity performer = action.getPerformer(user, getThis());
         if (!action.ignoresPerformerStun() && performer != null && performer.getEffect(ModEffects.STUN.get()) != null) {
             return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition.stun"));
         }
 
         if (checkTargetType) {
-            ActionConditionResult targetCheckResult = checkTargetType(action, performer, target);
+            ActionConditionResult targetCheckResult = checkTargetType(action, targetContainer);
             if (!targetCheckResult.isPositive()) {
                 return targetCheckResult;
             }
         }
 
-        ActionConditionResult condition = action.checkConditions(user, performer, this, target);
+        ActionConditionResult condition = action.checkConditions(user, getThis(), targetContainer.getTarget());
         if (!condition.isPositive()) {
             return condition;
         }
 
-        if (!isActionUnlocked(action)) {
+        if (!action.isUnlocked(getThis())) {
             return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition.not_unlocked"));
         }
         return ActionConditionResult.POSITIVE;
     }
 
     @Override
-    public ActionConditionResult checkTargetType(Action action, LivingEntity performer, ActionTarget target) {
+    public ActionConditionResult checkTargetType(Action<P> action, ActionTargetContainer targetContainer) {
+        ActionTarget target = targetContainer.getTarget();
+        LivingEntity performer = action.getPerformer(user, getThis());
         boolean targetTooFar = false;
         switch (target.getType()) {
         case ENTITY:
-            Entity targetEntity = target.getEntity(user.level);
+            Entity targetEntity = target.getEntity();
             if (targetEntity == null) {
                 target = ActionTarget.EMPTY;
             }
@@ -401,6 +354,7 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
             break;
         }
 
+        targetContainer.setNewTarget(target);
         if (!action.appropriateTarget(target.getType())) {
             if (targetTooFar) {
                 return ActionConditionResult.createNegativeContinueHold(new TranslationTextComponent("jojo.message.action_condition.target_too_far"));
@@ -414,28 +368,41 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
     public boolean canUsePower() {
         return !user.isSpectator();
     }
+
+    @Override
+    public float getLearningProgressPoints(Action<P> action) {
+        return action.isUnlocked(getThis()) ? 1 : -1;
+    }
     
-    protected void performAction(Action action, ActionTarget target) {
+    @Override
+    public float getLearningProgressRatio(Action<P> action) {
+        return getLearningProgressPoints(action) / action.getMaxTrainingPoints(getThis());
+    }
+    
+    protected void performAction(Action<P> action, ActionTarget target) {
         if (!action.holdOnly()) {
             World world = user.level;
-            action.perform(world, user, this, target);
+            target = action.targetBeforePerform(world, user, getThis(), target);
+            action.onPerform(world, user, getThis(), target);
             if (!world.isClientSide()) {
-                consumeMana(action.getManaCost());
-                setCooldownTimer(action, action.getCooldown(this, -1));
+                int cooldown = action.getCooldown(getThis(), -1);
+                if (cooldown > 0) {
+                    setCooldownTimer(action, cooldown);
+                }
             }
         }
     }
 
     @Override
-    public void setHeldAction(Action action) {
-        heldActionData = new HeldActionData(action);
+    public void setHeldAction(Action<P> action) {
+        heldActionData = new HeldActionData<P>(action);
         if (!user.level.isClientSide() && action.isHeldSentToTracking()) {
-            PacketManager.sendToClientsTracking(new TrSyncHeldActionPacket(user.getId(), getPowerClassification(), action, false), user);
+            PacketManager.sendToClientsTracking(new TrHeldActionPacket(user.getId(), getPowerClassification(), action, false), user);
         }
     }
 
     @Override
-    public Action getHeldAction(boolean checkRequirements) {
+    public Action<P> getHeldAction(boolean checkRequirements) {
         if (heldActionData == null || checkRequirements && !heldActionData.lastTickWentOff()) {
             return null;
         }
@@ -452,32 +419,31 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
 
     private void tickHeldAction() {
         if (heldActionData != null) {
-            Action heldAction = heldActionData.action;
+            Action<P> heldAction = heldActionData.action;
             World world = user.level;
             heldActionData.incTicks();
             if (user.level.isClientSide()) {
-                heldAction.onHoldTickClientEffect(user, this, heldActionData.getTicks(), heldActionData.lastTickWentOff(), false);
+                heldAction.onHoldTickClientEffect(user, getThis(), heldActionData.getTicks(), heldActionData.lastTickWentOff(), false);
             }
             if (!world.isClientSide() || user.is(ClientUtil.getClientPlayer())) {
                 if (!canUsePower()) {
                     stopHeldAction(false);
                     return;
                 }
-                if (heldActionData.getTicks() >= heldAction.getHoldDurationMax()) {
+                if (heldActionData.getTicks() >= heldAction.getHoldDurationMax(getThis())) {
                     stopHeldAction(true);
                     return;
                 }
                 ActionTarget target = heldActionData.getActionTarget();
-                ActionConditionResult result = checkRequirements(heldActionData.action, heldAction.getPerformer(user, this), target, true);
+                ActionTargetContainer targetContainer = new ActionTargetContainer(target);
+                ActionConditionResult result = checkRequirements(heldActionData.action, targetContainer, true);
+                target = targetContainer.getTarget();
                 if (!result.isPositive() && result.shouldStopHeldAction()) {
                     stopHeldAction(false);
-                    sendMessage(result);
+                    sendMessage(heldAction, result);
                     return;
                 }
-                if (result.isPositive()) {
-                    consumeMana(heldAction.getHeldTickManaCost());
-                }
-                heldAction.onHoldTickUser(world, user, this, heldActionData.getTicks(), target, result.isPositive());
+                heldAction.onHoldTick(world, user, getThis(), heldActionData.getTicks(), target, result.isPositive());
                 if (!world.isClientSide()) {
                     refreshHeldActionTickState(result.isPositive());
                 }
@@ -488,12 +454,12 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
     @Override
     public void refreshHeldActionTickState(boolean requirementsFulfilled) {
         if (heldActionData != null && heldActionData.refreshConditionCheckTick(requirementsFulfilled)) {
-            Action heldAction = heldActionData.action;
+            Action<P> heldAction = heldActionData.action;
             if (user.level.isClientSide()) {
-                heldAction.onHoldTickClientEffect(user, this, heldActionData.getTicks(), requirementsFulfilled, true);
+                heldAction.onHoldTickClientEffect(user, getThis(), heldActionData.getTicks(), requirementsFulfilled, true);
             }
             else {
-                TrSyncHeldActionPacket packet = new TrSyncHeldActionPacket(user.getId(), getPowerClassification(), heldAction, requirementsFulfilled);
+                TrHeldActionPacket packet = new TrHeldActionPacket(user.getId(), getPowerClassification(), heldAction, requirementsFulfilled);
                 if (heldAction.isHeldSentToTracking()) {
                     PacketManager.sendToClientsTrackingAndSelf(packet, user);
                 }
@@ -512,22 +478,35 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
     @Override
     public void stopHeldAction(boolean shouldFire) {
         if (heldActionData != null) {
-            Action heldAction = heldActionData.action;
+            Action<P> heldAction = heldActionData.action;
             ActionTarget target = heldActionData.getActionTarget();
             int ticksHeld = getHeldActionTicks();
-            if (!heldAction.holdOnly()) {
-                if (shouldFire && heldActionData.getTicks() >= heldAction.getHoldDurationToFire(this) && 
-                        checkRequirements(heldAction, heldAction.getPerformer(user, this), target, true).isPositive()) {
-                    performAction(heldAction, target);
+            
+            
+            
+            if (heldAction.holdOnly()) {
+                heldAction.stoppedHolding(user.level, user, getThis(), ticksHeld, false);
+                
+                int cooldown = heldAction.getCooldown(getThis(), ticksHeld);
+                if (cooldown > 0) {
+                    setCooldownTimer(heldAction, cooldown);
                 }
             }
             else {
-                setCooldownTimer(heldAction, heldAction.getCooldown(this, ticksHeld));
+                ActionTargetContainer targetContainer = new ActionTargetContainer(target);
+                boolean fire = shouldFire && heldActionData.getTicks() >= heldAction.getHoldDurationToFire(getThis()) && 
+                        checkRequirements(heldAction, targetContainer, true).isPositive();
+
+                heldAction.stoppedHolding(user.level, user, getThis(), ticksHeld, fire);
+                
+                if (fire) {
+                    target = targetContainer.getTarget();
+                    performAction(heldAction, target);
+                }
             }
-            heldAction.onStoppedHolding(user.level, user, this, ticksHeld);
             heldActionData = null;
             if (!user.level.isClientSide()) {
-                TrSyncHeldActionPacket packet = TrSyncHeldActionPacket.actionStopped(user.getId(), getPowerClassification());
+                TrHeldActionPacket packet = TrHeldActionPacket.actionStopped(user.getId(), getPowerClassification());
                 if (heldAction.isHeldSentToTracking()) {
                     PacketManager.sendToClientsTrackingAndSelf(packet, user);
                 }
@@ -539,14 +518,30 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
     }
     
     @Override
+    public void onUserGettingAttacked(DamageSource dmgSource, float dmgAmount) {
+        if (dmgSource.getDirectEntity() != null) {
+            Action<P> heldAction = getHeldAction();
+            if (heldAction != null && heldAction.cancelHeldOnGettingAttacked(getThis(), dmgSource, dmgAmount)) {
+                stopHeldAction(false);
+            }
+        }
+    }
+    
+    @Override
+    public float getTargetResolveMultiplier(IStandPower attackingStand) {
+        return hasPower() ? getType().getTargetResolveMultiplier(getThis(), attackingStand) : 1F;
+    }
+    
+    @Override
     public boolean canLeap() {
-        return hasPower() && user.isOnGround() && hasMana(getLeapManaCost()) && getLeapCooldown() == 0 && isLeapUnlocked() && leapStrength() > 0;
+        return hasPower() && getLeapCooldown() == 0 && isLeapUnlocked() && leapStrength() > 0;
     }
     
     @Override
     public void onLeap() {
-        consumeMana(getLeapManaCost());
-        setLeapCooldown(getLeapCooldownPeriod());
+    	if (!isUserCreative()) {
+    		setLeapCooldown(getLeapCooldownPeriod());
+    	}
     }
     
     @Override
@@ -560,19 +555,15 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
         this.leapCooldown = cooldown;
         if (send) {
             serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new SyncLeapCooldownPacket(getPowerClassification(), leapCooldown), player);
+                PacketManager.sendToClient(new LeapCooldownPacket(getPowerClassification(), leapCooldown), player);
             });
         }
     }
     
-    abstract protected float getLeapManaCost();
-    
     @Override
     public CompoundNBT writeNBT() {
         CompoundNBT cnbt = new CompoundNBT();
-        cnbt.putFloat("Mana", getMana());
-        cnbt.putFloat("ManaRegen", getManaRegenPoints());
-        cnbt.putFloat("ManaLimitFactor", getManaLimitFactor());
+        cnbt.putLong("LastDay", lastTickedDay);
         cnbt.put("Cooldowns", cooldowns.writeNBT());
         cnbt.putInt("LeapCd", leapCooldown);
         return cnbt;
@@ -580,35 +571,31 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
 
     @Override
     public void readNBT(CompoundNBT nbt) {
-        mana = nbt.getFloat("Mana");
-        manaRegenPoints = nbt.getFloat("ManaRegen");
-        manaLimitFactor = nbt.getFloat("ManaLimitFactor");
+    	lastTickedDay = nbt.getLong("LastDay");
         cooldowns = new ActionCooldownTracker(nbt.getCompound("Cooldowns"));
         leapCooldown = nbt.getInt("LeapCd");
     }
 
     @Override
-    public void onClone(IPower<T> oldPower, boolean wasDeath, boolean keep) {
-        if (keep && oldPower.hasPower()) {
-            onTypeInit(oldPower.getType());
-//            if (!wasDeath) {
-                mana = oldPower.getMana();
-                leapCooldown = oldPower.getLeapCooldown();
-//            }
-            manaRegenPoints = oldPower.getManaRegenPoints();
-            manaLimitFactor = oldPower.getManaLimitFactor();
-            cooldowns = ((PowerBaseImpl<T>) oldPower).cooldowns;
-        }      
+    public void onClone(P oldPower, boolean wasDeath) {
+        if (oldPower.hasPower() && (!wasDeath || oldPower.getType().keepOnDeath(oldPower))) {
+            keepPower(oldPower, wasDeath);
+        }
+    }
+    
+    protected void keepPower(P oldPower, boolean wasDeath) {
+        setType(oldPower.getType());
+        this.leapCooldown = oldPower.getLeapCooldown();
+        this.cooldowns = oldPower.getCooldowns();
     }
 
     @Override
     public void syncWithUserOnly() {
         serverPlayerUser.ifPresent(player -> {
             if (hasPower()) {
+                PacketManager.sendToClient(new LeapCooldownPacket(getPowerClassification(), leapCooldown), player);
+                ModCriteriaTriggers.GET_POWER.get().trigger(player, getPowerClassification(), this);
                 syncWithTrackingOrUser(player);
-                PacketManager.sendToClient(new SyncManaPacket(getPowerClassification(), getMana()), player);
-                PacketManager.sendToClient(new SyncManaRegenPointsPacket(getPowerClassification(), getManaRegenPoints()), player);
-                PacketManager.sendToClient(new SyncManaLimitFactorPacket(getPowerClassification(), getManaLimitFactor()), player);
             }
         });
     }
@@ -618,9 +605,13 @@ public abstract class PowerBaseImpl<T extends IPowerType<T>> implements IPower<T
         if (hasPower()) {
             LivingEntity user = getUser();
             if (user != null) {
-                PacketManager.sendToClient(new TrSyncPowerTypePacket<T>(user.getId(), getPowerClassification(), getType()), player);
+                PacketManager.sendToClient(new TrPowerTypePacket<P, T>(user.getId(), getPowerClassification(), getType()), player);
                 cooldowns.syncWithTrackingOrUser(user.getId(), getPowerClassification(), player);
             }
         }
+    }
+    
+    private P getThis() {
+        return (P) this;
     }
 }

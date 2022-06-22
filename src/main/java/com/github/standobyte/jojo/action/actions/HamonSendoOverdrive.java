@@ -3,15 +3,13 @@ package com.github.standobyte.jojo.action.actions;
 import java.util.List;
 import java.util.Random;
 
-import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -25,27 +23,21 @@ import net.minecraft.world.World;
 
 public class HamonSendoOverdrive extends HamonAction {
 
-    public HamonSendoOverdrive(Builder builder) {
+    public HamonSendoOverdrive(HamonAction.Builder builder) {
         super(builder);
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IPower<?> power, ActionTarget target) {
-        if (!performer.getMainHandItem().isEmpty()) {
-            return conditionMessage("hand");
-        }
-        return ActionConditionResult.POSITIVE;
-    }
-    
-    @Override
-    public void perform(World world, LivingEntity user, IPower<?> power, ActionTarget target) {
+    protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
-            HamonData hamon = ((INonStandPower) power).getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
+            HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
             BlockPos pos = target.getBlockPos();
             Direction face = target.getFace();
-            double diameter = 2 + (double) (hamon.getHamonStrengthLevel() * 6) / (double) HamonData.MAX_STAT_LEVEL;
+            double diameter = 2 + (double) (hamon.getHamonStrengthLevel() * 6) / (double) HamonData.MAX_STAT_LEVEL
+                    * hamon.getBloodstreamEfficiency();
             double radiusMinus1 = (diameter - 1) / 2;
-            AxisAlignedBB aabb = new AxisAlignedBB(pos).inflate(radiusMinus1).move(Vector3d.atLowerCornerOf(face.getNormal()).scale(-radiusMinus1));
+            AxisAlignedBB aabb = new AxisAlignedBB(pos).inflate(radiusMinus1).expandTowards(Vector3d.atLowerCornerOf(face.getNormal()))
+                    .move(Vector3d.atLowerCornerOf(face.getNormal()).scale(-radiusMinus1));
             Random random = user.getRandom();
             int sparksCount = Math.max(MathHelper.floor(diameter * diameter * diameter / 16), 1);
             for (int i = 0; i < sparksCount; i++) {
@@ -58,13 +50,18 @@ public class HamonSendoOverdrive extends HamonAction {
             List<Entity> entities = world.getEntitiesOfClass(LivingEntity.class, aabb, EntityPredicates.NO_CREATIVE_OR_SPECTATOR);
             boolean givePoints = false;
             for (Entity entity : entities) {
-                if (!entity.is(user) && ModDamageSources.dealHamonDamage(entity, 0.25F, user, null)) {
+                if (!entity.is(user) && DamageUtil.dealHamonDamage(entity, 0.25F, user, null)) {
                     givePoints = true;
                 }
             }
             if (givePoints) {
-                hamon.hamonPointsFromAction(HamonStat.STRENGTH, getManaCost());
+                hamon.hamonPointsFromAction(HamonStat.STRENGTH, getEnergyCost(power));
             }
         }
+    }
+    
+    @Override
+    public TargetRequirement getTargetRequirement() {
+        return TargetRequirement.BLOCK;
     }
 }

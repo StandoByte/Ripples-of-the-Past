@@ -10,25 +10,18 @@ import net.minecraft.util.ResourceLocation;
 
 public class HierophantGreenGlowLayer extends StandModelLayerRenderer<HierophantGreenEntity, HierophantGreenModel> {
     private static final ResourceLocation LAYER_TEXTURE = new ResourceLocation(JojoMod.MOD_ID, "textures/entity/stand/hierophant_green_glow.png");
-    private final HierophantGreenModel model = new HierophantGreenModel();
 
     public HierophantGreenGlowLayer(HierophantGreenRenderer entityRenderer) {
-        super(entityRenderer);
+        super(entityRenderer, new HierophantGreenModel());
     }
     
     @Override
     public int getPackedLight(int packedLight) {
         return ClientUtil.MAX_MODEL_LIGHT;
     }
-    
-    @Override
-    public HierophantGreenModel getLayerModel() {
-        return model;
-    }
 
     @Override
     public ResourceLocation getLayerTexture() {
         return LAYER_TEXTURE;
     }
-
 }

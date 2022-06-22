@@ -5,8 +5,8 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.power.nonstand.type.HamonCharge;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
-import com.github.standobyte.jojo.util.HamonCharge;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -45,8 +45,8 @@ public class HamonBlockChargeEntity extends Entity {
         setNoGravity(true);
     }
     
-    public void setCharge(float charge, int chargeTicks, @Nullable LivingEntity hamonUser, float manaSpent) {
-        this.hamonCharge = new HamonCharge(charge, chargeTicks, hamonUser, manaSpent);
+    public void setCharge(float charge, int chargeTicks, @Nullable LivingEntity hamonUser, float energySpent) {
+        this.hamonCharge = new HamonCharge(charge, chargeTicks, hamonUser, energySpent);
     }
     
     private static final int CACTUS_EXPLOSION_RANGE = 4;
@@ -62,7 +62,7 @@ public class HamonBlockChargeEntity extends Entity {
                 return;
             }
             Vector3d pos = Vector3d.atCenterOf(blockPos);
-            hamonCharge.tick(null, level, getBoundingBox().inflate(0.1D));
+            hamonCharge.tick(null, blockPos, level, getBoundingBox().inflate(0.1D));
             if (tickCount == 60) {
                 Block block = level.getBlockState(blockPos).getBlock();
                 if (block == Blocks.CACTUS || block == Blocks.POTTED_CACTUS) {

@@ -38,7 +38,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 
 public class StoneMaskItem extends CustomModelArmorItem {
-    private static final String NBT_ACTIVATION_KEY = "Activated";
+    public static final String NBT_ACTIVATION_KEY = "Activated";
     private final StoneMaskBlock block;
     private String textureActivatedStr;
 

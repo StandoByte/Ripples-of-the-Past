@@ -1,11 +1,11 @@
 package com.github.standobyte.jojo.entity;
 
-import java.util.List;
+import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -23,13 +23,18 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 public class RoadRollerEntity extends Entity {
     private static final DataParameter<Float> HEALTH = EntityDataManager.defineId(RoadRollerEntity.class, DataSerializers.FLOAT);
-    private static final float MAX_HEALTH = 100;
-    private int explosionTimeStamp = -1;
+    private static final float MAX_HEALTH = 50;
+    private int ticksBeforeExplosion = -1;
     private int ticksInAir = 0;
+    @Nullable
+    private Entity owner;
+    private double tickDamageMotion = 0;
+    private boolean punchedFromBelow = false;
 
     public RoadRollerEntity(World world) {
         this(ModEntityTypes.ROAD_ROLLER.get(), world);
@@ -37,6 +42,10 @@ public class RoadRollerEntity extends Entity {
 
     public RoadRollerEntity(EntityType<RoadRollerEntity> type, World world) {
         super(type, world);
+    }
+    
+    public void setOwner(Entity entity) {
+    	this.owner = entity;
     }
 
     @Override
@@ -74,11 +83,13 @@ public class RoadRollerEntity extends Entity {
             tickCount--;
         }
         Vector3d movement = getDeltaMovement();
-        if (!isNoGravity()) {
-            setDeltaMovement(movement.add(-movement.x, -0.04D, -movement.z));
+        if (!isNoGravity() && !punchedFromBelow) {
+            setDeltaMovement(movement.add(-movement.x, -0.0467D, -movement.z));
         }
+        
+        tickDamageMotion = 0;
+        punchedFromBelow = false;
         boolean wasOnGround = onGround;
-        move(MoverType.SELF, getDeltaMovement());
         if (level.isClientSide()) {
             if (!wasOnGround) {
                 ticksInAir++;
@@ -89,18 +100,23 @@ public class RoadRollerEntity extends Entity {
                 }
             }
         }
-        if (!level.isClientSide()) {
-            float damage = (float) -movement.y * 20F;
-            if (damage > 0) {
-                AxisAlignedBB aabb = getBoundingBox().contract(0, getBbHeight() * 3 / 4, 0);
-                List<LivingEntity> entities = level.getEntitiesOfClass(LivingEntity.class, aabb, EntityPredicates.LIVING_ENTITY_STILL_ALIVE);
-                for (LivingEntity entity : entities) {
-                    if (!this.is(entity.getVehicle())) {
-                        entity.hurt(ModDamageSources.roadRollerDamage(this), damage);
-                    }
-                }
-            }
+        
+        DamageSource dmgSource = DamageUtil.roadRollerDamage(this);
+        float damage = (float) -getDeltaMovement().y * 10F;
+        if (damage > 0) {
+        	AxisAlignedBB aabb = getBoundingBox().contract(0, getBbHeight() * 0.75, 0).expandTowards(0, -getBbHeight() * 0.25, 0);
+        	level.getEntitiesOfClass(LivingEntity.class, aabb, 
+        			EntityPredicates.LIVING_ENTITY_STILL_ALIVE.and(entity -> !this.is(entity.getVehicle()))).forEach(entity -> {
+        				if (!entity.isInvulnerableTo(dmgSource)) {
+	            			if (!level.isClientSide()) {
+	            				entity.hurt(dmgSource, damage);
+	            			}
+	            			entity.setDeltaMovement(Vector3d.ZERO);
+        				}
+        			});
         }
+        
+        move(MoverType.SELF, getDeltaMovement());
         if (onGround) {
             setDeltaMovement(movement.x, 0, movement.z);
             if (xRot > 0) {
@@ -110,12 +126,17 @@ public class RoadRollerEntity extends Entity {
                 xRot = Math.min(xRot + 6, 0);
             }
         }
-        int ticksExpl = getTicksBeforeExplosion();
-        if (ticksExpl == 0) {
+        
+        if (ticksBeforeExplosion > 0) {
+        	ticksBeforeExplosion--;
+        }
+        else if (ticksBeforeExplosion == 0) {
             remove();
-            if (!level.isClientSide()) {
-                explode();
-            }
+        }
+        if (!level.isClientSide() && (ticksBeforeExplosion == 0 || 
+        		(ticksBeforeExplosion > 0 && ticksBeforeExplosion < 40 && owner != null && distanceToSqr(owner) > 100))) {
+        	explode();
+        	remove();
         }
     }
 
@@ -144,15 +165,21 @@ public class RoadRollerEntity extends Entity {
         if (isInvulnerableTo(dmgSource)) {
             return false;
         } else {
-            Vector3d dmgPos = dmgSource.getSourcePosition();
-            if (dmgPos != null) {
-                Vector3d dmgVec = dmgPos.vectorTo(position()).normalize();
-                double cos = dmgVec.dot(UPWARDS_VECTOR);
-                Vector3d movement = getDeltaMovement();
-                setDeltaMovement(movement.x, Math.min(movement.y + cos * amount * 0.04D, 0), movement.z);
-            }
             if (!level.isClientSide()) {
-                setHealth(getHealth() - amount);
+                Vector3d dmgPos = dmgSource.getSourcePosition();
+                double cos = -1;
+                if (dmgPos != null) {
+                    Vector3d dmgVec = dmgPos.vectorTo(position()).normalize();
+                    cos = dmgVec.dot(UPWARDS_VECTOR);
+                    double damageMotion = cos * amount * 0.08D;
+                    if (damageMotion > 0) {
+                    	damageMotion = Math.min(-this.tickDamageMotion, damageMotion);
+                    	punchedFromBelow = true;
+                    }
+                    setDeltaMovement(getDeltaMovement().add(0, damageMotion, 0));
+                    this.tickDamageMotion += damageMotion;
+                }
+                setHealth(cos < 0 ? getHealth() - amount : getHealth() + amount);
                 markHurt();
                 level.playSound(null, getX(), getY(), getZ(), ModSounds.ROAD_ROLLER_HIT.get(), 
                         getSoundSource(), amount * 0.25F, 1.0F + (random.nextFloat() - 0.5F) * 0.3F);
@@ -173,18 +200,14 @@ public class RoadRollerEntity extends Entity {
     public void onSyncedDataUpdated(DataParameter<?> dataParameter) {
         super.onSyncedDataUpdated(dataParameter);
         if (HEALTH.equals(dataParameter) && getHealth() == 0.0F) {
-            explosionTimeStamp = tickCount;
+        	ticksBeforeExplosion = 60;
         }
     }
     
     public int getTicksBeforeExplosion() {
-        return explosionTimeStamp == -1 ? -1 : Math.max(getTicksToExplode() + explosionTimeStamp - tickCount , 0);
+        return ticksBeforeExplosion;
     }
     
-    private int getTicksToExplode() {
-        return 60;
-    }
-
     @Override
     protected void defineSynchedData() {
         entityData.define(HEALTH, MAX_HEALTH);
@@ -193,19 +216,25 @@ public class RoadRollerEntity extends Entity {
     @Override
     protected void readAdditionalSaveData(CompoundNBT nbt) {
         if (nbt.contains("Health")) {
-            setHealth(nbt.getFloat("Health"));
-        }
-        if (nbt.contains("ExplosionTime")) {
-            explosionTimeStamp = nbt.getInt("ExplosionTime");
+        	setHealth(nbt.getFloat("Health"));
         }
         tickCount = nbt.getInt("Age");
+        if (nbt.contains("ExplosionTime")) {
+        	ticksBeforeExplosion = nbt.getInt("ExplosionTime");
+        }
+        if (nbt.hasUUID("Owner")) {
+        	owner = ((ServerWorld) level).getEntity(nbt.getUUID("Owner"));
+        }
     }
 
     @Override
     protected void addAdditionalSaveData(CompoundNBT nbt) {
         nbt.putFloat("Health", getHealth());
         nbt.putInt("Age", tickCount);
-        nbt.putInt("ExplosionTime", explosionTimeStamp);
+        nbt.putInt("ExplosionTime", ticksBeforeExplosion);
+        if (owner != null) {
+        	nbt.putUUID("Owner", owner.getUUID());
+        }
     }
 
     @Override

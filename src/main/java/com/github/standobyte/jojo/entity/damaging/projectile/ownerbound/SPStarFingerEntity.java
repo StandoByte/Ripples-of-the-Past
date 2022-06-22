@@ -5,7 +5,6 @@ import com.github.standobyte.jojo.init.ModEntityTypes;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
@@ -26,9 +25,7 @@ public class SPStarFingerEntity extends OwnerBoundProjectileEntity {
     
     @Override
     public float getBaseDamage() {
-        LivingEntity owner = getOwner();
-        return owner != null ? (float) owner.getAttributeValue(Attributes.ATTACK_DAMAGE) : 
-            (float) ModEntityTypes.STAR_PLATINUM.get().getStats().getDamage();
+        return 4.5F;
     }
     
     @Override
@@ -37,13 +34,18 @@ public class SPStarFingerEntity extends OwnerBoundProjectileEntity {
     }
 
     @Override
-    protected int ticksLifespan() {
-        return ModActions.STAR_PLATINUM_STAR_FINGER.get().getCooldownValue();
+	public int ticksLifespan() {
+        return ModActions.STAR_PLATINUM_STAR_FINGER.get().getStandActionTicks(null, null);
     }
     
     @Override
     protected float movementSpeed() {
-        return 0.4F;
+        return 0.3F;
+    }
+    
+    @Override
+    protected int timeAtFullLength() {
+        return 4;
     }
     
     @Override
@@ -52,7 +54,7 @@ public class SPStarFingerEntity extends OwnerBoundProjectileEntity {
     }
     
     @Override
-    protected boolean isBodyPart() {
+	public boolean isBodyPart() {
         return true;
     }
 

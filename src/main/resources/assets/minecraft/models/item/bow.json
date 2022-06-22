@@ -29,7 +29,7 @@
         {
             "predicate": {
                 "pulling": 1,
-                "stand_arrow": 0
+                "jojo:stand_arrow": 0
             },
             "model": "item/bow_pulling_0"
         },
@@ -37,7 +37,7 @@
             "predicate": {
                 "pulling": 1,
                 "pull": 0.65,
-                "stand_arrow": 0
+                "jojo:stand_arrow": 0
             },
             "model": "item/bow_pulling_1"
         },
@@ -45,14 +45,14 @@
             "predicate": {
                 "pulling": 1,
                 "pull": 0.9,
-                "stand_arrow": 0
+                "jojo:stand_arrow": 0
             },
             "model": "item/bow_pulling_2"
         },
         {
             "predicate": {
                 "pulling": 1,
-                "stand_arrow": 1
+                "jojo:stand_arrow": 1
             },
             "model": "jojo:item/bow_pulling_stand_arrow_0"
         },
@@ -60,7 +60,7 @@
             "predicate": {
                 "pulling": 1,
                 "pull": 0.65,
-                "stand_arrow": 1
+                "jojo:stand_arrow": 1
             },
             "model": "jojo:item/bow_pulling_stand_arrow_1"
         },
@@ -68,7 +68,7 @@
             "predicate": {
                 "pulling": 1,
                 "pull": 0.9,
-                "stand_arrow": 1
+                "jojo:stand_arrow": 1
             },
             "model": "jojo:item/bow_pulling_stand_arrow_2"
         }

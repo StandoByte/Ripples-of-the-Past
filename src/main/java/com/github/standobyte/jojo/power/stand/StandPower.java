@@ -1,69 +1,136 @@
 package com.github.standobyte.jojo.power.stand;
 
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.action.ActionConditionResult;
-import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.actions.StandAction;
+import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
+import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncManaLimitFactorPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncManaRegenPointsPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncStandExpPacket;
-import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.StaminaPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.StandActionsClearLearningPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.StandActionLearningPacket;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.PowerBaseImpl;
+import com.github.standobyte.jojo.power.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.stand.type.StandType;
+import com.github.standobyte.jojo.util.utils.LegacyUtil;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 
-public class StandPower extends PowerBaseImpl<StandType> implements IStandPower {
-    private StandType standType = null;
+public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> implements IStandPower {
     private int tier = 0;
     @Nullable
     private IStandManifestation standManifestation = null;
-    private int exp = 0;
+    private float stamina;
+    
+    private final ResolveCounter resolveCounter;
+    @Deprecated
+    private int xp = 0;
+    private boolean skippedProgression;
+    private boolean givenByDisc;
+    
+    private ActionLearningProgressMap<IStandPower> actionLearningProgressMap = new ActionLearningProgressMap<>();
+    
     
     public StandPower(LivingEntity user) {
         super(user);
+        resolveCounter = new ResolveCounter(this, serverPlayerUser);
     }
 
     @Override
-    public boolean givePower(StandType type) {
-        if (super.givePower(type)) {
-            serverPlayerUser.ifPresent(player -> {
-                SaveFileUtilCapProvider.getSaveFileCap(player).addPlayerStand(type);
-            });
+    public boolean givePower(StandType<?> standType) {
+        return givePower(standType, true);
+    }
+
+    @Override
+    public boolean givePower(StandType<?> standType, boolean countTaken) {
+        if (super.givePower(standType)) {
+            if (countTaken) {
+                serverPlayerUser.ifPresent(player -> {
+                    SaveFileUtilCapProvider.getSaveFileCap(player).addPlayerStand(standType);
+                });
+            }
+            setStamina(getMaxStamina() * 0.5F);
+            if (user != null && (JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).skipStandProgression.get()
+                    || user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild)) {
+                skipProgression(standType);
+            }
+            else {
+                standType.unlockNewActions(this);
+            }
             return true;
         }
         return false;
     }
-
+    
     @Override
     public boolean clear() {
-        StandType type = getType();
+        return clear(true);
+    }
+    
+    @Override
+    public StandType<?> putOutStand() {
+        StandType<?> standType = getType();
+        return clear(false) ? standType : null;
+    }
+    
+    private boolean clear(boolean countTaken) {
+        StandType<?> standType = getType();
         if (super.clear()) {
             if (isActive()) {
                 standType.forceUnsummon(user, this);
             }
-            exp = 0;
-            standType = null;
-            serverPlayerUser.ifPresent(player -> {
-                SaveFileUtilCapProvider.getSaveFileCap(player).removePlayerStand(type);
-            });
+            type = null;
+            stamina = 0;
+            resolveCounter.reset();
+            xp = 0;
+            skippedProgression = false;
+            givenByDisc = false;
+            if (countTaken) {
+                serverPlayerUser.ifPresent(player -> {
+                    SaveFileUtilCapProvider.getSaveFileCap(player).removePlayerStand(standType);
+                });
+            }
             return true;
         }
         return false;
+    }
+    
+    @Override
+    public void setGivenByDisc() {
+        givenByDisc = true;
+    }
+    
+    @Override
+    public boolean wasGivenByDisc() {
+        return givenByDisc;
+    }
+    
+    @Override
+    public void tick() {
+        super.tick();
+        if (hasPower()) {
+            tickStamina();
+            tickResolve();
+        }
     }
     
     @Override
@@ -72,58 +139,317 @@ public class StandPower extends PowerBaseImpl<StandType> implements IStandPower 
     }
     
     @Override
-    protected void tickMana() {
-        serverPlayerUser.ifPresent(player -> {
-            if (getMana() < getMaxMana()) {
-                player.causeFoodExhaustion(0.005F);
-            }
-        });
-        super.tickMana();
-    }
-    
-    @Override
-    protected void onTypeInit(StandType standType) {
-        this.standType = standType;
+    protected void afterTypeInit(StandType<?> standType) {
         attacks = Arrays.asList(standType.getAttacks());
         abilities = Arrays.asList(standType.getAbilities());
-        if (user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild) {
-            exp = StandPower.MAX_EXP;
+        if (usesStamina()) {
+            stamina = isUserCreative() ? getMaxStamina() : 0;
+        }
+        if (usesResolve()) {
+            resolveCounter.onStandAcquired();
         }
         tier = Math.max(tier, standType.getTier());
-    }
-
-    @Override
-    public StandType getType() {
-        return standType;
     }
     
     @Override
     public boolean isActive() {
         return hasPower() && getType().isStandSummoned(user, this);
     }
-    
-    
-    public int getExp() {
-        return exp;
+
+
+    @Override
+    public boolean usesStamina() {
+        return hasPower() && getType().usesStamina();
     }
     
-    public void setExp(int exp) {
-        exp = MathHelper.clamp(exp, 0, MAX_EXP);
-        boolean send = this.exp != exp;
-        this.exp = exp;
+    @Override
+    public float getStamina() {
+        return isStaminaInfinite() ? getMaxStamina() : stamina;
+    }
+
+    @Override
+    public float getMaxStamina() {
+        if (!usesStamina()) {
+            return 0;
+        }
+        float maxAmount = getType().getMaxStamina(this);
+        maxAmount *= INonStandPower.getNonStandPowerOptional(getUser()).map(power -> {
+            if (power.hasPower()) {
+                return power.getType().getMaxStaminaFactor(power, this);
+            }
+            return 1F;
+        }).orElse(1F);
+        return maxAmount * getStaminaDurabilityModifier();
+    }
+    
+    @Override
+    public void addStamina(float amount, boolean sendToClient) {
+        setStamina(MathHelper.clamp(this.stamina + amount, 0, getMaxStamina()), sendToClient);
+    }
+
+    @Override
+    public boolean consumeStamina(float amount) {
+        if (isStaminaInfinite()) {
+            return true;
+        }
+        if (getStamina() >= amount) {
+            setStamina(this.stamina - amount);
+            return true;
+        }
+        setStamina(0);
+        return StandUtil.standIgnoresStaminaDebuff(this);
+    }
+    
+    @Override
+    public boolean isStaminaInfinite() {
+        return user == null || isUserCreative() || 
+                !JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).standStamina.get();
+    }
+
+    @Override
+    public void setStamina(float amount) {
+        setStamina(amount, true);
+    }
+    
+    private void setStamina(float amount, boolean sendToClient) {
+        amount = MathHelper.clamp(amount, 0, getMaxStamina());
+        boolean send = sendToClient && this.stamina != amount;
+        this.stamina = amount;
         if (send) {
             serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new SyncStandExpPacket(getExp(), true), player);
+                PacketManager.sendToClient(new StaminaPacket(getStamina()), player);
             });
         }
+    }
+    
+    private void tickStamina() {
+        if (usesStamina()) {
+            addStamina(getStaminaTickGain(), false);
+        }
+    }
+    
+    @Override
+    public float getStaminaTickGain() {
+        float staminaRegen = getType().getStaminaRegen(this);
+        staminaRegen *= INonStandPower.getNonStandPowerOptional(getUser()).map(power -> {
+            if (power.hasPower()) {
+                return power.getType().getStaminaRegenFactor(power, this);
+            }
+            return 1F;
+        }).orElse(1F);
+        
+        if (getUser() instanceof PlayerEntity) {
+            PlayerEntity player = (PlayerEntity) getUser();
+            if (player.getFoodData().getFoodLevel() > 17) {
+                staminaRegen *= 1.25F;
+            }
+        }
+        return staminaRegen * getStaminaDurabilityModifier();
+    }
+    
+    private float getStaminaDurabilityModifier() {
+        if (hasPower()) {
+            StandStats stats = getType().getStats();
+            return StandStatFormulas.getStaminaMultiplier(stats.getBaseDurability() + stats.getDevDurability(getStatsDevelopment()));
+        }
+        return 1F;
+    }
+    
+    
+
+    @Override
+    public ResolveCounter getResolveCounter() {
+        return resolveCounter;
+    }
+    
+    @Override
+    public void setResolveCounter(ResolveCounter resolve) {
+        this.resolveCounter.clone(resolve);
+    }
+    
+    @Override
+    public boolean usesResolve() {
+        return hasPower() && getType().usesResolve();
+    }
+    
+    @Override
+    public float getResolve() {
+        if (!usesResolve()) {
+            return 0;
+        }
+        return resolveCounter.getResolveValue();
+    }
+
+    @Override
+    public float getMaxResolve() {
+        if (!usesResolve()) {
+            return 0;
+        }
+        return resolveCounter.getMaxResolveValue();
+    }
+
+    @Override
+    public int getResolveLevel() {
+        if (!usesResolve()) {
+            return 0;
+        }
+        return resolveCounter.getResolveLevel();
+    }
+    
+    @Override
+    public void setResolveLevel(int level) {
+        if (usesResolve()) {
+            resolveCounter.setResolveLevel(level);
+            if (!user.level.isClientSide() && hasPower()) {
+                getType().onNewResolveLevel(this);
+                if (level >= getType().getMaxResolveLevel()) {
+                    serverPlayerUser.ifPresent(player -> {
+                        ModCriteriaTriggers.STAND_MAX.get().trigger(player);
+                    });
+                }
+            }
+        }
+    }
+
+    @Override
+    public int getMaxResolveLevel() {
+        if (!usesResolve()) {
+            return 0;
+        }
+        return getType().getMaxResolveLevel();
+    }
+
+    @Override
+    public float getResolveDmgReduction() {
+        if (INonStandPower.getNonStandPowerOptional(user).map(power -> 
+        power.getType() == ModNonStandPowers.VAMPIRISM.get()).orElse(false)) {
+            return 0;
+        }
+        if (user.hasEffect(ModEffects.RESOLVE.get())) {
+            return ResolveCounter.RESOLVE_DMG_REDUCTION;
+        }
+        if (usesResolve()) {
+            return getResolveRatio() * ResolveCounter.RESOLVE_DMG_REDUCTION;
+        }
+        return 0;
+    }
+
+    private void tickResolve() {
+        if (usesResolve()) {
+            resolveCounter.tick();
+        }
+    }
+    
+    
+    @Override
+    public void skipProgression(StandType<?> standType) {
+    	setProgressionSkipped();
+        resolveCounter.setResolveLevel(getMaxResolveLevel());
+        if (standType != null) {
+            Stream.concat(
+                    Arrays.stream(standType.getAttacks()), 
+                    Arrays.stream(standType.getAbilities()))
+            .flatMap(action -> action.hasShiftVariation() && action.getShiftVariationIfPresent() instanceof StandAction
+                    ? Stream.of(action, (StandAction) action.getShiftVariationIfPresent()) : Stream.of(action))
+            .forEach(action -> {
+                actionLearningProgressMap.setLearningProgressPoints(action, action.getMaxTrainingPoints(this), this);
+            });
+        }
+    }
+    
+    @Override
+    public void setProgressionSkipped() {
+        this.skippedProgression = true;
+    }
+    
+    @Override
+    public boolean wasProgressionSkipped() {
+        return skippedProgression;
+    }
+    
+    @Override
+    public float getStatsDevelopment() {
+        return usesResolve() ? (float) getResolveLevel() / (float) getMaxResolveLevel() : 0;
+    }
+    
+
+    @Deprecated
+    @Override
+    public int getXp() {
+        return xp;
+    }
+
+    @Deprecated
+    @Override
+    public void setXp(int xp) {
+        xp = MathHelper.clamp(xp, 0, MAX_EXP);
+        this.xp = xp;
+    }
+
+    @Override
+    public boolean unlockAction(Action<IStandPower> action) {
+        if (!action.isUnlocked(this)) {
+            setLearningProgressPoints(action, 
+                    isUserCreative() || !action.isTrained() ? 
+                            action.getMaxTrainingPoints(this)
+                            : 0F, false, false);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public float getLearningProgressPoints(Action<IStandPower> action) {
+        return actionLearningProgressMap.getLearningProgressPoints(action, this, true);
+    }
+
+    @Override
+    public void setLearningProgressPoints(Action<IStandPower> action, float points, boolean clamp, boolean notLess) {
+        if (clamp) {
+            points = MathHelper.clamp(points, 0, action.getMaxTrainingPoints(this));
+        }
+        if (notLess) {
+            points = Math.max(points, actionLearningProgressMap.getLearningProgressPoints(action, this, false));
+        }
+        float pts = points;
+        if (actionLearningProgressMap.setLearningProgressPoints(action, points, this)) {
+            serverPlayerUser.ifPresent(player -> {
+                PacketManager.sendToClient(new StandActionLearningPacket(action, pts, true), player);
+            });
+            
+            if (user != null && !user.level.isClientSide()) {
+                action.onTrainingPoints(this, actionLearningProgressMap.getLearningProgressPoints(action, this, false));
+                if (actionLearningProgressMap.getLearningProgressPoints(action, this, true)
+                        == action.getMaxTrainingPoints(this)) {
+                    action.onMaxTraining(this);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void addLearningProgressPoints(Action<IStandPower> action, float points) {
+        if (user != null && user.hasEffect(ModEffects.RESOLVE.get())) {
+            points *= 4;
+        }
+        setLearningProgressPoints(action, getLearningProgressPoints(action) + points, true, true);
+    }
+    
+    @Override
+    public ActionLearningProgressMap<IStandPower> clearActionLearning() {
+        ActionLearningProgressMap<IStandPower> previousMap = actionLearningProgressMap;
+        this.actionLearningProgressMap = new ActionLearningProgressMap<>();
+        serverPlayerUser.ifPresent(player -> {
+            PacketManager.sendToClient(new StandActionsClearLearningPacket(), player);
+        });
+        return previousMap;
     }
     
     @Override
     public void setStandManifestation(IStandManifestation standManifestation) {
         this.standManifestation = standManifestation;
         if (standManifestation != null) {
-            standManifestation.setUser(getUser());
-            standManifestation.setUserPower(this);
+            standManifestation.setUserAndPower(getUser(), this);
         }
     }
     
@@ -134,22 +460,14 @@ public class StandPower extends PowerBaseImpl<StandType> implements IStandPower 
     
     @Override
     public void toggleSummon() {
-        if (!isActive()) {
-            getType().summon(user, this, false);
-        }
-        else {
-            getType().unsummon(user, this);
+        if (hasPower()) {
+            getType().toggleSummon(this);
         }
     }
     
     @Override
-    public int getTier() {
+    public int getUserTier() {
         return tier;
-    }
-    
-    @Override
-    public boolean isActionUnlocked(Action action) {
-        return getExp() >= ((StandAction) action).getExpRequirement();
     }
     
 //    @Override // TODO Stand Sealing effect
@@ -158,42 +476,78 @@ public class StandPower extends PowerBaseImpl<StandType> implements IStandPower 
 //    }
     
     @Override
-    public ActionConditionResult checkRequirements(Action action, LivingEntity performer, ActionTarget target, boolean checkTargetType) {
-        serverPlayerUser.ifPresent(player -> {
-            PacketManager.sendToClient(new SyncStandExpPacket(getExp(), false), player);
-        });
-        return super.checkRequirements(action, performer, target, checkTargetType);
-    }
-    
-    @Override
     public boolean isLeapUnlocked() {
-        return standManifestation instanceof StandEntity && !((StandEntity) standManifestation).isArmsOnlyMode();
+        return leapStrength() >= 1.5;
     }
     
     @Override
     public float leapStrength() {
-        StandEntity standEntity = (StandEntity) standManifestation;
-        if (standEntity.isFollowingUser()) {
-            return (float) standEntity.getStats().getDamage() / 3F;
+        if (standManifestation instanceof StandEntity) {
+            StandEntity standEntity = (StandEntity) standManifestation;
+            if (!standEntity.isArmsOnlyMode() && standEntity.isFollowingUser()) {
+                return standEntity.getLeapStrength();
+            }
         }
         return 0;
     }
     
     @Override
+    public boolean canLeap() {
+    	if (super.canLeap()) {
+    		return !(standManifestation instanceof StandEntity && ((StandEntity) standManifestation).getCurrentTask().isPresent());
+    	}
+        return false;
+    }
+    
+    @Override
     public int getLeapCooldownPeriod() {
+        if (standManifestation instanceof StandEntity) {
+            StandEntity standEntity = (StandEntity) standManifestation;
+            if (!standEntity.isArmsOnlyMode() && standEntity.isFollowingUser()) {
+                double speed = standEntity.getAttributeValue(Attributes.MOVEMENT_SPEED);
+                return StandStatFormulas.leapCooldown(speed);
+            }
+        }
         return 0;
     }
     
     @Override
-    protected float getLeapManaCost() {
-        return 200;
+    public void onLeap() {
+        super.onLeap();
+        consumeStamina(250);
+    }
+    
+    @Override
+    public void onDash() {
+        setLeapCooldown(getDashCooldownPeriod());
+        consumeStamina(25);
+    }
+    
+    private int getDashCooldownPeriod() {
+        if (standManifestation instanceof StandEntity) {
+            StandEntity standEntity = (StandEntity) standManifestation;
+            if (!standEntity.isArmsOnlyMode() && standEntity.isFollowingUser()) {
+                double speed = standEntity.getAttributeValue(Attributes.MOVEMENT_SPEED);
+                return StandStatFormulas.dashCooldown(speed);
+            }
+        }
+        return 0;
     }
 
     @Override
     public CompoundNBT writeNBT() {
         CompoundNBT cnbt = super.writeNBT();
         cnbt.putString("StandType", ModStandTypes.Registry.getKeyAsString(getType()));
-        cnbt.putInt("Exp", getExp());
+        if (usesStamina()) {
+            cnbt.putFloat("Stamina", stamina);
+        }
+        if (usesResolve()) {
+            cnbt.put("Resolve", resolveCounter.writeNBT());
+        }
+        cnbt.putInt("Xp", getXp());
+        cnbt.putBoolean("Skipped", skippedProgression);
+        cnbt.putBoolean("Disc", givenByDisc);
+        actionLearningProgressMap.writeToNbt(cnbt);
         return cnbt;
     }
 
@@ -201,25 +555,42 @@ public class StandPower extends PowerBaseImpl<StandType> implements IStandPower 
     public void readNBT(CompoundNBT nbt) {
         String standName = nbt.getString("StandType");
         if (standName != IPowerType.NO_POWER_NAME) {
-            StandType stand = ModStandTypes.Registry.getRegistry().getValue(new ResourceLocation(standName));
+            StandType<?> stand = ModStandTypes.Registry.getRegistry().getValue(new ResourceLocation(standName));
             if (stand != null) {
-                onTypeInit(stand);
-                exp = nbt.getInt("Exp");
+                setType(stand);
+                if (nbt.contains("Exp")) {
+                    xp = nbt.getInt("Exp");
+                    LegacyUtil.readNbtStandXp(this, xp, actionLearningProgressMap);
+                }
+                else {
+                    xp = nbt.getInt("Xp");
+                }
             }
         }
+        if (usesStamina()) {
+            stamina = nbt.getFloat("Stamina");
+        }
+        if (usesResolve()) {
+            resolveCounter.readNbt(nbt.getCompound("Resolve"));
+        }
+        skippedProgression = nbt.getBoolean("Skipped");
+        givenByDisc = nbt.getBoolean("Disc");
+        actionLearningProgressMap.readFromNbt(nbt);
         super.readNBT(nbt);
     }
     
     @Override
-    public void onClone(IPower<StandType> oldPower, boolean wasDeath, boolean keep) {
-        super.onClone(oldPower, wasDeath, keep);
-        if (oldPower.hasPower()) {
-            exp = ((IStandPower) oldPower).getExp();
+    protected void keepPower(IStandPower oldPower, boolean wasDeath) {
+        super.keepPower(oldPower, wasDeath);
+        this.xp = oldPower.getXp();
+        this.setResolveCounter(oldPower.getResolveCounter());
+        if (wasDeath) {
+            this.resolveCounter.alwaysResetOnDeath();
         }
-        else {
-            manaRegenPoints = oldPower.getManaRegenPoints();
-            manaLimitFactor = oldPower.getManaLimitFactor();
-        }
+        this.skippedProgression = oldPower.wasProgressionSkipped();
+        this.givenByDisc = oldPower.wasGivenByDisc();
+        this.actionLearningProgressMap = ((StandPower) oldPower).actionLearningProgressMap; // FIXME can i remove this cast?
+        this.stamina = getMaxStamina();
     }
     
     @Override
@@ -227,11 +598,18 @@ public class StandPower extends PowerBaseImpl<StandType> implements IStandPower 
         super.syncWithUserOnly();
         serverPlayerUser.ifPresent(player -> {
             if (hasPower()) {
-                PacketManager.sendToClient(new SyncStandExpPacket(getExp(), false), player);
+                if (usesStamina()) {
+                    PacketManager.sendToClient(new StaminaPacket(stamina), player);
+                }
+                if (usesResolve()) {
+                    resolveCounter.syncWithUser(player);
+                }
             }
-            else {
-                PacketManager.sendToClient(new SyncManaRegenPointsPacket(getPowerClassification(), getManaRegenPoints()), player);
-                PacketManager.sendToClient(new SyncManaLimitFactorPacket(getPowerClassification(), getManaLimitFactor()), player);
+            actionLearningProgressMap.forEach((action, progress) -> {
+                PacketManager.sendToClient(new StandActionLearningPacket(action, progress, false), player);
+            });
+            if (skippedProgression) {
+                PacketManager.sendToClient(new SkippedStandProgressionPacket(), player);
             }
         });
     }
@@ -239,8 +617,10 @@ public class StandPower extends PowerBaseImpl<StandType> implements IStandPower 
     @Override
     public void syncWithTrackingOrUser(ServerPlayerEntity player) {
         super.syncWithTrackingOrUser(player);
-        if (hasPower() && standManifestation != null) {
-            standManifestation.syncWithTrackingOrUser(player);
+        if (hasPower()) {
+            if (standManifestation != null) {
+                standManifestation.syncWithTrackingOrUser(player);
+            }
         }
     }
 }

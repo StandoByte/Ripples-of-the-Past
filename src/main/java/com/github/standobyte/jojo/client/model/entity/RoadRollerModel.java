@@ -173,7 +173,6 @@ public class RoadRollerModel extends EntityModel<RoadRollerEntity> {
 
     @Override
     public void setupAnim(RoadRollerEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
-        roadRoller.setPos(0.0F, -20.0F, 0.0F);
         roadRoller.yRot = yRotationOffset * ((float)Math.PI / 180F);
         roadRoller.xRot = xRotation * ((float)Math.PI / 180F);
     }

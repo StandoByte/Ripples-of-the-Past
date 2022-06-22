@@ -1,0 +1,33 @@
+{
+  "type": "jojo:crafting_shaped_stand",
+  "pattern": [
+    "idl",
+    "btb",
+    "bib"
+  ],
+  "key": {
+    "b": {
+      "item": "minecraft:iron_block"
+    },
+    "i": {
+      "tag": "forge:ingots/iron"
+    },
+    "t": {
+      "item": "minecraft:tnt"
+    },
+    "d": {
+      "tag": "forge:dyes/yellow"
+    },
+    "l": {
+      "item": "minecraft:lever"
+    }
+  },
+  "stand": [
+    {
+      "name": "jojo:the_world"
+    }
+  ],
+  "result": {
+    "item": "jojo:road_roller"
+  }
+}

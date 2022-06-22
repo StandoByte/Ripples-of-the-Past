@@ -3,40 +3,65 @@ package com.github.standobyte.jojo.entity.stand.stands;
 import java.util.List;
 import java.util.UUID;
 
+import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.actions.StandEntityAction;
+import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
+import com.github.standobyte.jojo.entity.stand.StandAttackProperties;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
+import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
+import com.github.standobyte.jojo.init.ModEntityAttributes;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.MoverType;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
-import net.minecraft.entity.monster.SkeletonEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.Hand;
+import net.minecraft.util.HandSide;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeMod;
 
 public class SilverChariotEntity extends StandEntity {
-    private static final UUID NO_ARMOR_MOVEMENT_SPEED_BOOST_ID = UUID.fromString("a31ffbee-5a26-4022-a298-59c839e5048d");
-    private static final UUID NO_ARMOR_ATTACK_SPEED_BOOST_ID = UUID.fromString("c3e4ddb0-daa9-4cbb-acb9-dbc7eecad3f1");
-    private static final UUID NO_RAPIER_DAMAGE_DECREASE_ID = UUID.fromString("84331a3b-73f1-4461-b240-6d688897e3f4");
-    private static final UUID NO_RAPIER_ATTACK_SPEED_DECREASE_ID = UUID.fromString("485642f9-5475-4d74-8b54-dea9c53fe62e");
-    private static final AttributeModifier NO_ARMOR_MOVEMENT_SPEED_BOOST = new AttributeModifier(NO_ARMOR_MOVEMENT_SPEED_BOOST_ID, "Movement speed boost with no armor", 2D, AttributeModifier.Operation.MULTIPLY_BASE);
-    private static final AttributeModifier NO_ARMOR_ATTACK_SPEED_BOOST = new AttributeModifier(NO_ARMOR_ATTACK_SPEED_BOOST_ID, "Attack speed boost with no armor", 1D, AttributeModifier.Operation.MULTIPLY_BASE);
-    private static final AttributeModifier NO_RAPIER_DAMAGE_DECREASE = new AttributeModifier(NO_RAPIER_DAMAGE_DECREASE_ID, "Attack damage decrease without rapier", -0.25D, AttributeModifier.Operation.MULTIPLY_BASE);
-    private static final AttributeModifier NO_RAPIER_ATTACK_SPEED_DECREASE = new AttributeModifier(NO_RAPIER_ATTACK_SPEED_DECREASE_ID, "Attack speed decrease without rapier", -0.75D, AttributeModifier.Operation.MULTIPLY_BASE);
+    private static final AttributeModifier NO_ARMOR_MOVEMENT_SPEED_BOOST = new AttributeModifier(
+            UUID.fromString("a31ffbee-5a26-4022-a298-59c839e5048d"), "Movement speed boost with no armor", 1.5, AttributeModifier.Operation.MULTIPLY_BASE);
+    private static final AttributeModifier NO_ARMOR_ATTACK_SPEED_BOOST = new AttributeModifier(
+            UUID.fromString("c3e4ddb0-daa9-4cbb-acb9-dbc7eecad3f1"), "Attack speed boost with no armor", 1, AttributeModifier.Operation.MULTIPLY_BASE);
+    private static final AttributeModifier NO_ARMOR = new AttributeModifier(
+            UUID.fromString("d4987f5f-55e8-45db-9a5e-b2fd0a98c2ec"), "No armor", -1, AttributeModifier.Operation.MULTIPLY_TOTAL);
+    private static final AttributeModifier NO_ARMOR_TOUGHNESS = new AttributeModifier(
+            UUID.fromString("8dfd5e42-a578-4f4a-aafd-b86ef965b9f3"), "No armor toughness", -1, AttributeModifier.Operation.MULTIPLY_TOTAL);
+    private static final AttributeModifier NO_ARMOR_DURABILITY_DECREASE = new AttributeModifier(
+            UUID.fromString("47c93a42-b04f-44f3-97be-5f542d97c000"), "No durability without armor", -1, AttributeModifier.Operation.MULTIPLY_TOTAL);
+    
+    public static final AttributeModifier NO_RAPIER_DAMAGE_DECREASE = new AttributeModifier(
+            UUID.fromString("84331a3b-73f1-4461-b240-6d688897e3f4"), "Attack damage decrease without rapier", -0.25, AttributeModifier.Operation.MULTIPLY_BASE);
+    private static final AttributeModifier NO_RAPIER_ATTACK_SPEED_DECREASE = new AttributeModifier(
+            UUID.fromString("485642f9-5475-4d74-8b54-dea9c53fe62e"), "Attack speed decrease without rapier", -0.75, AttributeModifier.Operation.MULTIPLY_BASE);
+    private static final double RAPIER_RANGE = 1;
+    private static final AttributeModifier NO_RAPIER_ATTACK_RANGE_DECREASE = new AttributeModifier(
+            UUID.fromString("ba319644-fab3-4d4c-bcdf-26fd05dd62f5"), "Attack range decrease without rapier", -RAPIER_RANGE, AttributeModifier.Operation.ADDITION);
+    
     private static final DataParameter<Boolean> HAS_RAPIER = EntityDataManager.defineId(SilverChariotEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> HAS_ARMOR = EntityDataManager.defineId(SilverChariotEntity.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> RAPIER_ON_FIRE = EntityDataManager.defineId(SilverChariotEntity.class, DataSerializers.BOOLEAN);
     
     private int ticksAfterArmorRemoval;
+    private int rapierFireTicks = 0;
 
     public SilverChariotEntity(StandEntityType<SilverChariotEntity> type, World world) {
         super(type, world);
+        getAttribute(Attributes.ARMOR).setBaseValue(15);
     }
 
     @Override
@@ -44,21 +69,12 @@ public class SilverChariotEntity extends StandEntity {
         super.defineSynchedData();
         entityData.define(HAS_RAPIER, true);
         entityData.define(HAS_ARMOR, true);
+        entityData.define(RAPIER_ON_FIRE, false);
     }
 
     @Override
-    public void rangedAttackTick(int ticks, boolean shift) {
-        if (!level.isClientSide() && hasRapier()) {
-            SCRapierEntity rapierEntity = new SCRapierEntity(this, level);
-            rapierEntity.shootFromRotation(this, 1F, 0.0F);
-            level.addFreshEntity(rapierEntity);
-            setRapier(false);
-        }
-    }
-
-    @Override
-    public double getMeleeAttackRange() {
-        return hasRapier() ? super.getMeleeAttackRange() + 1 : super.getMeleeAttackRange();
+    public double getDefaultMeleeAttackRange() {
+        return super.getDefaultMeleeAttackRange() + RAPIER_RANGE;
     }
 
     @Override
@@ -77,24 +93,12 @@ public class SilverChariotEntity extends StandEntity {
 
     public void setRapier(boolean rapier) {
         entityData.set(HAS_RAPIER, rapier);
-        ModifiableAttributeInstance attackDamage = getAttribute(Attributes.ATTACK_DAMAGE);
-        ModifiableAttributeInstance attackSpeed = getAttribute(Attributes.ATTACK_SPEED);
-        if (attackDamage.getModifier(NO_RAPIER_DAMAGE_DECREASE_ID) != null) {
-            attackDamage.removeModifier(NO_RAPIER_DAMAGE_DECREASE_ID);
-        }
-        if (attackSpeed.getModifier(NO_RAPIER_ATTACK_SPEED_DECREASE_ID) != null) {
-            attackSpeed.removeModifier(NO_RAPIER_ATTACK_SPEED_DECREASE_ID);
-        }
-
+        updateModifier(getAttribute(Attributes.ATTACK_DAMAGE), NO_RAPIER_DAMAGE_DECREASE, !rapier);
+        updateModifier(getAttribute(Attributes.ATTACK_SPEED), NO_RAPIER_ATTACK_SPEED_DECREASE, !rapier);
+        updateModifier(getAttribute(ForgeMod.REACH_DISTANCE.get()), NO_RAPIER_ATTACK_RANGE_DECREASE, !rapier);
         if (!rapier) {
-            attackDamage.addPermanentModifier(NO_RAPIER_DAMAGE_DECREASE);
-            attackSpeed.addPermanentModifier(NO_RAPIER_ATTACK_SPEED_DECREASE);
+        	entityData.set(RAPIER_ON_FIRE, false);
         }
-    }
-    
-    @Override
-    public boolean canAttackRanged() {
-        return hasRapier();
     }
 
     public boolean hasArmor() {
@@ -103,19 +107,16 @@ public class SilverChariotEntity extends StandEntity {
 
     public void setArmor(boolean armor) {
         entityData.set(HAS_ARMOR, armor);
-        ModifiableAttributeInstance movementSpeed = getAttribute(Attributes.MOVEMENT_SPEED);
-        ModifiableAttributeInstance attackSpeed = getAttribute(Attributes.ATTACK_SPEED);
-        if (movementSpeed.getModifier(NO_ARMOR_MOVEMENT_SPEED_BOOST_ID) != null) {
-            movementSpeed.removeModifier(NO_ARMOR_MOVEMENT_SPEED_BOOST_ID);
-        }
-        if (attackSpeed.getModifier(NO_ARMOR_ATTACK_SPEED_BOOST_ID) != null) {
-            attackSpeed.removeModifier(NO_ARMOR_ATTACK_SPEED_BOOST_ID);
-        }
-
-        if (!armor) {
-            movementSpeed.addPermanentModifier(NO_ARMOR_MOVEMENT_SPEED_BOOST);
-            attackSpeed.addPermanentModifier(NO_ARMOR_ATTACK_SPEED_BOOST);
-        }
+        updateModifier(getAttribute(Attributes.MOVEMENT_SPEED), NO_ARMOR_MOVEMENT_SPEED_BOOST, !armor);
+        updateModifier(getAttribute(Attributes.ATTACK_SPEED), NO_ARMOR_ATTACK_SPEED_BOOST, !armor);
+        updateModifier(getAttribute(Attributes.ARMOR), NO_ARMOR, !armor);
+        updateModifier(getAttribute(Attributes.ARMOR_TOUGHNESS), NO_ARMOR_TOUGHNESS, !armor);
+        updateModifier(getAttribute(ModEntityAttributes.STAND_DURABILITY.get()), NO_ARMOR_DURABILITY_DECREASE, !armor);
+    }
+    
+    @Override
+    protected float getPhysicalResistance(float blockedRatio) {
+        return StandStatFormulas.getPhysicalResistance(0, 0, blockedRatio);
     }
     
     @Override
@@ -134,15 +135,23 @@ public class SilverChariotEntity extends StandEntity {
                     ((SCRapierEntity) entity).takeRapier(this);
                 }
             }
+            
+            if (rapierFireTicks > 0) {
+            	rapierFireTicks--;
+            	if (rapierFireTicks == 0) {
+            		entityData.set(RAPIER_ON_FIRE, false);
+            	}
+            }
         }
     }
     
     public int getTicksAfterArmorRemoval() {
         return ticksAfterArmorRemoval;
     }
-
-    public int getArmorValue() {
-        return hasArmor() ? super.getArmorValue() : 0;
+    
+    @Override
+    public HandSide getSwingingHand() {
+        return hasRapier() ? HandSide.RIGHT : super.getSwingingHand();
     }
     
     @Override
@@ -152,25 +161,85 @@ public class SilverChariotEntity extends StandEntity {
         }
         return super.canBreakBlock(blockHardness, blockHarvestLevel);
     }
-
+    
+    public boolean isRapierOnFire() {
+    	return entityData.get(RAPIER_ON_FIRE);
+    }
+    
     @Override
-    public boolean attackEntity(Entity target, boolean strongAttack, double attackDistance) {
-        if (target instanceof ProjectileEntity) {
-            target.setDeltaMovement(target.getDeltaMovement().reverse());
-            target.move(MoverType.SELF, target.getDeltaMovement());
-            return true;
+    public boolean attackEntity(Entity target, StandAttackProperties punch, StandEntityAction action) {
+    	if (hasRapier() && isRapierOnFire()) {
+            return DamageUtil.dealDamageAndSetOnFire(target, 
+                    entity -> attackOrDeflect(target, punch, action), 4, true);
+    	}
+    	else {
+    		return attackOrDeflect(target, punch, action);
+    	}
+    }
+
+    private boolean attackOrDeflect(Entity target, StandAttackProperties punch, StandEntityAction action) {
+        if (canDeflectProjectiles() && hasRapier() && target instanceof ProjectileEntity) {
+        	return deflectProjectile(target);
         }
         else {
-            return super.attackEntity(target, strongAttack, attackDistance);
+            return super.attackEntity(target, punch, action);
         }
     }
     
     @Override
-    protected double getAttackDamage(Entity target, boolean strongAttack, double rangeFactor, double attackDistance, double precision) {
-        double damage = super.getAttackDamage(target, strongAttack, rangeFactor, attackDistance, precision);
-        if (hasRapier() && target instanceof SkeletonEntity) {
-            damage *= 0.6;
+    public boolean attackTarget(ActionTarget target, StandAttackProperties.Factory createPunch, StandEntityAction action) {
+    	if (canDeflectProjectiles()) {
+    		level.getEntitiesOfClass(ProjectileEntity.class, getBoundingBox().inflate(getAttributeValue(ForgeMod.REACH_DISTANCE.get())), 
+    				entity -> entity.isAlive() && !entity.isPickable()).forEach(projectile -> {
+    					if (this.getLookAngle().dot(projectile.getDeltaMovement().reverse().normalize())
+    							>= MathHelper.cos((float) (30.0 + MathHelper.clamp(getPrecision(), 0, 16) * 30.0 / 16.0) * MathUtil.DEG_TO_RAD)) {
+    						deflectProjectile(projectile);
+    					}
+    				});
+    	}
+    	
+    	return super.attackTarget(target, createPunch, action);
+    }
+    
+    private boolean canDeflectProjectiles() {
+    	return getUserPower() == null || getUserPower().getResolveLevel() >= 4;
+    }
+    
+    private boolean deflectProjectile(Entity projectile) {
+        if (projectile.getType() != ModEntityTypes.SPACE_RIPPER_STINGY_EYES.get()) {
+            JojoModUtil.deflectProjectile(projectile, getLookAngle());
+            if (projectile instanceof DamagingEntity && ((DamagingEntity) projectile).isFiery()) {
+            	entityData.set(RAPIER_ON_FIRE, true);
+            	rapierFireTicks = 300;
+            }
+            return true;
         }
-        return damage;
+        return false;
+    }
+    
+    public void removeRapierFire() {
+    	if (!level.isClientSide()) {
+    		rapierFireTicks = 0;
+        	entityData.set(RAPIER_ON_FIRE, false);
+    	}
+    }
+    
+    @Override
+    protected double leapBaseStrength() {
+        return getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
+    }
+    
+    @Override
+    public float getUserMovementFactor() {
+        float factor = super.getUserMovementFactor();
+        if (getUserPower() != null && getUserPower().getResolveLevel() >= 4) {
+            factor += (1 - factor) * (hasArmor() ? 0.5F : 1F);
+        }
+        return factor;
+    }
+    
+    @Override
+    protected SoundEvent getAttackBlockSound() {
+    	return hasRapier() ? ModSounds.SILVER_CHARIOT_BLOCK.get() : super.getAttackBlockSound();
     }
 }

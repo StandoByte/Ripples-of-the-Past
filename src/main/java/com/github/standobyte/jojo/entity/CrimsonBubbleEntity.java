@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.entity;
 import java.util.List;
 import java.util.Optional;
 
+import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -11,15 +12,17 @@ import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
-import com.github.standobyte.jojo.util.JojoModUtil;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.DoubleNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.util.DamageSource;
@@ -120,11 +123,14 @@ public class CrimsonBubbleEntity extends Entity {
             if (hamon.getTechnique() == Technique.JOSEPH) {
                 JojoModUtil.sayVoiceLine(entity, ModSounds.JOSEPH_CRIMSON_BUBBLE_REACTION.get());
             }
+            if (entity instanceof ServerPlayerEntity) {
+                ModCriteriaTriggers.LAST_HAMON.get().trigger((ServerPlayerEntity) entity, this);
+            }
             hamonStrengthPoints = 0;
             hamonControlPoints = 0;
         }
         else {
-            ModDamageSources.dealHamonDamage(entity, getDamage(), this, null);
+            DamageUtil.dealHamonDamage(entity, getDamage(), this, null);
             hamonStrengthPoints = Math.max(hamonStrengthPoints - 1, 0);
             hamonControlPoints = Math.max(hamonControlPoints - 1, 0);
         }
@@ -141,7 +147,7 @@ public class CrimsonBubbleEntity extends Entity {
         }
         else {
             if (dmgSource.getDirectEntity() instanceof LivingEntity) {
-                ModDamageSources.dealHamonDamage((LivingEntity) dmgSource.getDirectEntity(), getDamage(), this, null);
+                DamageUtil.dealHamonDamage((LivingEntity) dmgSource.getDirectEntity(), getDamage(), this, null);
             }
             hamonStrengthPoints = Math.max(hamonStrengthPoints - (int) amount, 0);
             hamonControlPoints = Math.max(hamonControlPoints - (int) amount, 0);
@@ -160,9 +166,11 @@ public class CrimsonBubbleEntity extends Entity {
     protected void readAdditionalSaveData(CompoundNBT compound) {
         this.hamonStrengthPoints = compound.getInt("StrengthPoints");
         this.hamonControlPoints = compound.getInt("ControlPoints");
-        if (compound.contains("InitialPoint", 9)) {
-            ListNBT listNBT = compound.getList("InitialPoint", 6);
-            this.initialPoint = new Vector3d(listNBT.getDouble(0), listNBT.getDouble(1), listNBT.getDouble(2));
+        if (compound.contains("InitialPoint", JojoModUtil.getNbtId(ListNBT.class))) {
+            ListNBT listNBT = compound.getList("InitialPoint", JojoModUtil.getNbtId(DoubleNBT.class));
+            if (listNBT.size() >= 3) {
+                this.initialPoint = new Vector3d(listNBT.getDouble(0), listNBT.getDouble(1), listNBT.getDouble(2));
+            }
         }
     }
 

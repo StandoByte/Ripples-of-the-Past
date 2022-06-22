@@ -1,13 +1,21 @@
 package com.github.standobyte.jojo.action;
 
+import java.util.Optional;
+
 import javax.annotation.Nonnull;
 
+import com.github.standobyte.jojo.client.ClientUtil;
+
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Direction;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
@@ -45,7 +53,7 @@ public class ActionTarget {
             this.blockPos = null;
             this.face = null;
             this.entity = entity;
-            this.entityId = -1;
+            this.entityId = entity.getId();
             this.targetPos = null;
         }
         else {
@@ -58,13 +66,8 @@ public class ActionTarget {
         }
     }
     
-    public ActionTarget(int entityId) {
-        type = TargetType.ENTITY;
-        this.blockPos = null;
-        this.face = null;
-        this.entity = null;
-        this.entityId = entityId;
-        this.targetPos = null;
+    public ActionTarget(int entityId, World world) {
+    	this(world.getEntity(entityId));
     }
     
     public static ActionTarget fromRayTraceResult(RayTraceResult result) {
@@ -90,18 +93,85 @@ public class ActionTarget {
     public Direction getFace() {
         return face;
     }
-    
-    public Entity getEntity(World world) {
-        if (entity == null) {
-            entity = world.getEntity(entityId);
-        }
+
+    public Entity getEntity() {
         return entity;
     }
-    
-    public Vector3d getTargetPos() {
-        return type == TargetType.ENTITY ? entity.getBoundingBox().getCenter() : targetPos;
-    }
 
+    public Vector3d getTargetPos(boolean targetEntityEyeHeight) {
+        return type == TargetType.ENTITY && entity != null ? 
+                targetEntityEyeHeight ? entity.getEyePosition(1.0F) : entity.position()
+                        : targetPos;
+    }
+    
+    public Optional<AxisAlignedBB> getBoundingBox(World world) {
+    	AxisAlignedBB aabb = null;
+    	switch (type) {
+    	case ENTITY:
+            aabb = getEntity().getBoundingBox();
+    		break;
+    	case BLOCK:
+            BlockState blockState = world.getBlockState(blockPos);
+            VoxelShape blockShape = blockState.getCollisionShape(world, blockPos);
+            if (!blockShape.isEmpty()) {
+                aabb = blockShape.bounds().move(blockPos);
+            }
+    		break;
+		default:
+			break;
+    	}
+    	return Optional.ofNullable(aabb);
+    }
+    
+
+    public void writeToBuf(PacketBuffer buf) {
+        TargetType type = getType();
+        buf.writeEnum(type);
+        switch (type) {
+        case ENTITY:
+            buf.writeInt(entityId);
+            break;
+        case BLOCK:
+            buf.writeBlockPos(getBlockPos());
+            buf.writeEnum(getFace());
+            break;
+        default:
+        }
+    }
+    
+    public static ActionTarget readFromBuf(PacketBuffer buf) {
+        TargetType type = buf.readEnum(TargetType.class);
+        switch (type) {
+        case ENTITY:
+            return new ActionTarget(buf.readInt(), ClientUtil.getClientWorld());
+        case BLOCK:
+            return new ActionTarget(buf.readBlockPos(), buf.readEnum(Direction.class));
+        default:
+            return ActionTarget.EMPTY;
+        }
+    }
+    
+    @Override
+    public boolean equals(Object object) {
+        return this == object || object instanceof ActionTarget && this.sameTarget((ActionTarget) object);
+    }
+    
+    public boolean sameTarget(ActionTarget target) {
+        if (target != null && this.type == target.type) {
+            switch (type) {
+            case BLOCK:
+                return this.blockPos.equals(target.blockPos);
+            case ENTITY:
+                int idThis = this.entity != null ? this.entity.getId() : this.entityId;
+                int idThat = target.entity != null ? target.entity.getId() : target.entityId;
+                return idThis == idThat;
+            default:
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public static enum TargetType {
         EMPTY,
         BLOCK,

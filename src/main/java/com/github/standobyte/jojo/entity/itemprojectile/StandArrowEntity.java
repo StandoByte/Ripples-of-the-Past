@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.entity.itemprojectile;
 
 import java.util.Arrays;
 
+import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.item.StandArrowItem;
@@ -34,14 +35,23 @@ public class StandArrowEntity extends AbstractArrowEntity {
     private ItemStack arrowItem = new ItemStack(ModItems.STAND_ARROW.get());
     private boolean dealtDamage;
     
+    public StandArrowEntity(World world, double x, double y, double z, ItemStack arrowItem) {
+        super(ModEntityTypes.STAND_ARROW.get(), x, y, z, world);
+        setArrowStack(arrowItem);
+    }
+    
     public StandArrowEntity(World world, LivingEntity thrower, ItemStack arrowItem) {
         super(ModEntityTypes.STAND_ARROW.get(), thrower, world);
-        this.arrowItem = arrowItem.copy();
-        this.entityData.set(LOYALTY, (byte) EnchantmentHelper.getLoyalty(arrowItem));
+        setArrowStack(arrowItem);
     }
     
     public StandArrowEntity(EntityType<? extends AbstractArrowEntity> type, World world) {
         super(type, world);
+    }
+    
+    private void setArrowStack(ItemStack arrowItem) {
+        this.arrowItem = arrowItem.copy();
+        this.entityData.set(LOYALTY, (byte) EnchantmentHelper.getLoyalty(arrowItem));
     }
 
     @Override
@@ -52,7 +62,12 @@ public class StandArrowEntity extends AbstractArrowEntity {
 
     @Override
     protected void doPostHurtEffects(LivingEntity target) {
-        StandArrowItem.onPiercedByArrow(target, arrowItem, level);
+        if (!level.isClientSide()) {
+            boolean gaveStand = StandArrowItem.onPiercedByArrow(target, arrowItem, level);
+            if (getOwner() instanceof ServerPlayerEntity) {
+                ModCriteriaTriggers.STAND_ARROW_HIT.get().trigger((ServerPlayerEntity) getOwner(), this, target, gaveStand);
+            }
+        }
     }
 
     @Override

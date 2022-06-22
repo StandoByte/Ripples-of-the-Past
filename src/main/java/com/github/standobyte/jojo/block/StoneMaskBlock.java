@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.block;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.init.ModTileEntities;
 import com.github.standobyte.jojo.tileentity.StoneMaskTileEntity;
 
@@ -12,6 +13,7 @@ import net.minecraft.block.HorizontalBlock;
 import net.minecraft.block.HorizontalFaceBlock;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.DirectionProperty;
@@ -115,5 +117,16 @@ public class StoneMaskBlock extends HorizontalFaceBlock { // TODO allow harvesti
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world) {
         return ModTileEntities.STONE_MASK.get().create();
+    }
+
+    @Override
+    public void playerDestroy(World world, PlayerEntity player, BlockPos blockPos, BlockState blockState, @Nullable TileEntity tileEntity, ItemStack itemUsed) {
+        super.playerDestroy(world, player, blockPos, blockState, tileEntity, itemUsed);
+        if (!world.isClientSide && tileEntity instanceof StoneMaskTileEntity) {
+            StoneMaskTileEntity stoneMask = (StoneMaskTileEntity) tileEntity;
+
+            ModCriteriaTriggers.STONE_MASK_DESTROYED.get().trigger((ServerPlayerEntity) player, 
+                    blockState.getBlock(), itemUsed, stoneMask.getStack());
+        }
     }
 }

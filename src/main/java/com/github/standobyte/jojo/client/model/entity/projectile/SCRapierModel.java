@@ -11,11 +11,11 @@ public class SCRapierModel extends EntityModel<SCRapierEntity> {
     private final ModelRenderer rapier;
 
     public SCRapierModel() {
-        texWidth = 64;
-        texHeight = 64;
+        texWidth = 128;
+        texHeight = 128;
         rapier = new ModelRenderer(this);
         rapier.setPos(-0.5F, 0.0F, 0.0F);
-        rapier.texOffs(12, 28).addBox(-0.5F, -1.5F, -0.5F, 1.0F, 1.0F, 15.0F, -0.3F, false);
+        rapier.texOffs(32, 72).addBox(-0.5F, -1.5F, -0.5F, 1.0F, 1.0F, 15.0F, -0.3F, false);
     }
 
     @Override

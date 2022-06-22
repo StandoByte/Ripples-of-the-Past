@@ -1,7 +1,10 @@
 package com.github.standobyte.jojo.util;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCap;
+import com.github.standobyte.jojo.capability.entity.EntityUtilCap;
+import com.github.standobyte.jojo.capability.entity.EntityUtilCapStorage;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapStorage;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
@@ -15,15 +18,13 @@ import com.github.standobyte.jojo.capability.world.SaveFileUtilCapStorage;
 import com.github.standobyte.jojo.capability.world.WorldUtilCap;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapStorage;
 import com.github.standobyte.jojo.command.StandArgument;
-import com.github.standobyte.jojo.entity.mob.HamonMasterEntity;
-import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
-import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.ModPotions;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandPower;
+import com.github.standobyte.jojo.util.data.StandStatsManager;
 
 import net.minecraft.command.arguments.ArgumentSerializer;
 import net.minecraft.command.arguments.ArgumentTypes;
@@ -32,7 +33,6 @@ import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.Capability.IStorage;
 import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -51,26 +51,20 @@ public class CommonSetup {
                 @Override public void readNBT(Capability<ClientPlayerUtilCap> capability, ClientPlayerUtilCap instance, Direction side, INBT nbt) {}
             }, () -> new ClientPlayerUtilCap(null));
             CapabilityManager.INSTANCE.register(LivingUtilCap.class, new LivingUtilCapStorage(), () -> new LivingUtilCap(null));
+            CapabilityManager.INSTANCE.register(EntityUtilCap.class, new EntityUtilCapStorage(), () -> new EntityUtilCap(null));
             CapabilityManager.INSTANCE.register(ProjectileHamonChargeCap.class, new ProjectileHamonChargeCapStorage(), () -> new ProjectileHamonChargeCap(null));
             
             CapabilityManager.INSTANCE.register(WorldUtilCap.class, new WorldUtilCapStorage(), () -> new WorldUtilCap(null));
-            CapabilityManager.INSTANCE.register(SaveFileUtilCap.class, new SaveFileUtilCapStorage(), () -> new SaveFileUtilCap());
+            CapabilityManager.INSTANCE.register(SaveFileUtilCap.class, new SaveFileUtilCapStorage(), () -> new SaveFileUtilCap(null));
             
             ArgumentTypes.register("stand", StandArgument.class, new ArgumentSerializer<>(StandArgument::new));
+
+            ModCriteriaTriggers.CriteriaTriggerSupplier.registerAll();
             
             PacketManager.init();
+            StandStatsManager.init();
+            
+            ModPotions.registerRecipes();
         });
-    }
-
-    @SubscribeEvent
-    public static void onEntityAttributeCreation(EntityAttributeCreationEvent event) {
-        event.put(ModEntityTypes.HAMON_MASTER.get(), HamonMasterEntity.createAttributes().build());
-        event.put(ModEntityTypes.HUNGRY_ZOMBIE.get(), HungryZombieEntity.createAttributes().build());
-        
-        event.put(ModEntityTypes.STAR_PLATINUM.get(), StandEntity.createAttributes().build());
-        event.put(ModEntityTypes.THE_WORLD.get(), StandEntity.createAttributes().build());
-        event.put(ModEntityTypes.HIEROPHANT_GREEN.get(), StandEntity.createAttributes().build());
-        event.put(ModEntityTypes.SILVER_CHARIOT.get(), StandEntity.createAttributes().build());
-        event.put(ModEntityTypes.MAGICIANS_RED.get(), StandEntity.createAttributes().build());
     }
 }

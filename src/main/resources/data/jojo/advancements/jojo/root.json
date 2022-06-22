@@ -1,0 +1,30 @@
+{
+  "display": {
+    "icon": {
+      "item": "jojo:stone_mask"
+    },
+    "title": {
+      "translate": "advancements.jojo.root.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.root.description"
+    },
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": false,
+    "background": "jojo:textures/gui/advancements/jojo.png"
+  },
+  "criteria": {
+    "do_nothing": {
+      "trigger": "minecraft:tick",
+      "conditions": {
+      }
+    }
+  },
+  "requirements": [
+    [
+      "do_nothing"
+    ]
+  ]
+}

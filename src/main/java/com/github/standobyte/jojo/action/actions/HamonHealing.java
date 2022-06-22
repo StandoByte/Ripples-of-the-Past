@@ -1,16 +1,14 @@
 package com.github.standobyte.jojo.action.actions;
 
-import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.util.JojoModUtil;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -28,30 +26,22 @@ import net.minecraft.world.World;
 
 public class HamonHealing extends HamonAction {
 
-    public HamonHealing(Builder builder) {
+    public HamonHealing(HamonAction.Builder builder) {
         super(builder);
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IPower<?> power, ActionTarget target) {
-        if (!performer.getMainHandItem().isEmpty()) {
-            return conditionMessage("hand");
-        }
-        return ActionConditionResult.POSITIVE;
-    }
-    
-    @Override
-    public void perform(World world, LivingEntity user, IPower<?> power, ActionTarget target) {
-        HamonData hamon = ((INonStandPower) power).getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
-        float effectStr = (float) hamon.getHamonControlLevel() / (float) HamonData.MAX_STAT_LEVEL;
+    protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
+        HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
+        float effectStr = (float) hamon.getHamonControlLevel() / (float) HamonData.MAX_STAT_LEVEL * hamon.getBloodstreamEfficiency();
         if (!world.isClientSide()) {
-            Entity targetEntity = target.getType() == TargetType.ENTITY && hamon.isSkillLearned(HamonSkill.HEALING_TOUCH) ? target.getEntity(world) : null;
+            Entity targetEntity = target.getType() == TargetType.ENTITY && hamon.isSkillLearned(HamonSkill.HEALING_TOUCH) ? target.getEntity() : null;
             LivingEntity targetLiving = targetEntity instanceof LivingEntity ? (LivingEntity) targetEntity : null;
-            LivingEntity entityToHeal = targetEntity != null && !JojoModUtil.isUndead(targetLiving) ? targetLiving : user;
-            int regenDuration = 80 + MathHelper.floor(220F * effectStr);
-            int regenLvl = MathHelper.floor(3.5F * effectStr);
+            LivingEntity entityToHeal = targetEntity != null && canBeHealed(targetLiving, user) ? targetLiving : user;
+            int regenDuration = 80 + MathHelper.floor(120F * effectStr);
+            int regenLvl = MathHelper.floor(2.9F * effectStr);
 //            if (entityToHeal.getHealth() < entityToHeal.getMaxHealth()) {
-                hamon.hamonPointsFromAction(HamonStat.CONTROL, getManaCost());
+                hamon.hamonPointsFromAction(HamonStat.CONTROL, getEnergyCost(power));
 //            }
             entityToHeal.addEffect(new EffectInstance(Effects.REGENERATION, regenDuration, regenLvl));
             if (hamon.isSkillLearned(HamonSkill.EXPEL_VENOM)) {
@@ -60,20 +50,17 @@ public class HamonHealing extends HamonAction {
                 entityToHeal.removeEffect(Effects.HUNGER);
                 entityToHeal.removeEffect(Effects.CONFUSION);
             }
-            if (hamon.isSkillLearned(HamonSkill.PLANTS_GROWTH) && user instanceof PlayerEntity) {
-                BlockPos pos = target.getType() == TargetType.BLOCK ? target.getBlockPos() : user.isOnGround() ? user.blockPosition().below() : null;
-                if (pos != null) {
-                    Direction face = target.getType() == TargetType.BLOCK ? target.getFace() : Direction.UP;
-                    bonemealEffect(user.level, (PlayerEntity) user, pos, face);
-                }
+            if (hamon.isSkillLearned(HamonSkill.PLANTS_GROWTH) && user instanceof PlayerEntity && target.getType() == TargetType.BLOCK) {
+                Direction face = target.getType() == TargetType.BLOCK ? target.getFace() : Direction.UP;
+                bonemealEffect(user.level, (PlayerEntity) user, target.getBlockPos(), face);
             }
+            Vector3d sparksPos = new Vector3d(entityToHeal.getX(), entityToHeal.getY(0.5), entityToHeal.getZ());
+            HamonPowerType.createHamonSparkParticles(world, null, sparksPos, Math.max(0.5F * effectStr, 0.1F));
         }
-        Vector3d pos = target.getTargetPos();
-        if (pos == null) {
-            pos = new Vector3d(user.getX(), user.getY(0.5), user.getZ());
-        }
-        HamonPowerType.createHamonSparkParticles(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, 
-                pos, Math.max(0.5F * effectStr, 0.1F));
+    }
+    
+    private boolean canBeHealed(LivingEntity targetEntity, LivingEntity user) {
+        return user.isShiftKeyDown() && !JojoModUtil.isUndead(targetEntity);
     }
 
     public static boolean bonemealEffect(World world, PlayerEntity applyingPlayer, BlockPos pos, Direction face) {
@@ -94,5 +81,19 @@ public class HamonHealing extends HamonAction {
                 return false;
             }
         }
+    }
+    
+    @Override
+    public String getTranslationKey(INonStandPower power, ActionTarget target) {
+        String key = super.getTranslationKey(power, target);
+        if (power.getTypeSpecificData(ModNonStandPowers.HAMON.get())
+                .map(hamon -> hamon.isSkillLearned(HamonSkill.HEALING_TOUCH)).orElse(false)
+                && target.getType() == TargetType.ENTITY) {
+            Entity targetEntity = target.getEntity();
+            if (targetEntity instanceof LivingEntity && canBeHealed((LivingEntity) targetEntity, power.getUser())) {
+                key += "_touch";
+            }
+        }
+        return key;
     }
 }

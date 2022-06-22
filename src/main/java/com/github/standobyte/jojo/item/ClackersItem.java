@@ -7,8 +7,8 @@ import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.util.JojoModUtil;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableMultimap.Builder;
 import com.google.common.collect.Multimap;
@@ -29,14 +29,14 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class ClackersItem extends Item {
-    public static final int TICKS_MAX_POWER = 100;
+    public static final int TICKS_MAX_POWER = 80;
     
     private final Multimap<Attribute, AttributeModifier> attributeModifiers;
 
     public ClackersItem(Properties properties) {
         super(properties);
         Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
-        builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", 6.0D, AttributeModifier.Operation.ADDITION));
+        builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, "Weapon modifier", 6.0, AttributeModifier.Operation.ADDITION));
         this.attributeModifiers = builder.build();
     }
 
@@ -55,15 +55,19 @@ public class ClackersItem extends Item {
         }
         else {
             playClackSound(world, player);
+            ding(world, player);
             return ActionResult.fail(stack);
         }
+    }
+    
+    private void ding(World world, PlayerEntity player) {
     }
 
     private static final float CHARGE_TICK_COST = 5;
     private static final float UPKEEP_TICK_COST = CHARGE_TICK_COST / 5;
     @Override
-    public void onUseTick(World world, LivingEntity entity, ItemStack stack, int count) {
-        int ticksUsed = getUseDuration(stack) - count;
+    public void onUseTick(World world, LivingEntity entity, ItemStack stack, int remainingTicks) {
+        int ticksUsed = getUseDuration(stack) - remainingTicks;
         int ticksMaxPower = TICKS_MAX_POWER;
         if (clackersTexVariant(ticksUsed, ticksMaxPower) > 0) {
             playClackSound(world, entity);
@@ -76,7 +80,7 @@ public class ClackersItem extends Item {
         }
         if (!world.isClientSide()) {
             if (!INonStandPower.getNonStandPowerOptional(entity).map(power -> 
-            power.consumeMana(ticksUsed <= ticksMaxPower ? CHARGE_TICK_COST : UPKEEP_TICK_COST)).orElse(false)) {
+            power.consumeEnergy(ticksUsed <= ticksMaxPower ? CHARGE_TICK_COST : UPKEEP_TICK_COST)).orElse(false)) {
                 entity.releaseUsingItem();
                 return;
             }
@@ -110,7 +114,7 @@ public class ClackersItem extends Item {
             }
             else if (!world.isClientSide() && power > 0.5) {
                 ClackersEntity clackers = new ClackersEntity(world, entity);
-                float projectileSpeed = power == 1.0F ? 4 : power * 3;
+                float projectileSpeed = power == 1.0F ? 3 : power * 2;
                 float hamonDmg = projectileSpeed * 0.5F;
                 clackers.setHamonDamage(hamonDmg);
                 clackers.setHamonEnergySpent(Math.min(ticksUsed, TICKS_MAX_POWER) * CHARGE_TICK_COST + Math.max(ticksUsed - TICKS_MAX_POWER, 0) * UPKEEP_TICK_COST);
@@ -139,7 +143,7 @@ public class ClackersItem extends Item {
         power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(hamon -> {
             if (hamon.isSkillLearned(HamonSkill.CLACKER_VOLLEY)) {
                 if (!user.level.isClientSide()) {
-                    if (power.consumeMana(200) && ModDamageSources.dealHamonDamage(target, 0.15F, user, null)) {
+                    if (power.consumeEnergy(200) && DamageUtil.dealHamonDamage(target, 0.15F, user, null)) {
                         target.invulnerableTime = 0;
                         hamon.hamonPointsFromAction(HamonStat.STRENGTH, 200);
                         return true;

@@ -4,13 +4,13 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ui.screen.HamonScreen;
 import com.github.standobyte.jojo.init.ModParticles;
-import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.resources.I18n;
@@ -38,6 +38,18 @@ public class ClientUtil {
     public static World getClientWorld() {
         return Minecraft.getInstance().level;
     }
+    
+    public static boolean isLocalServer() {
+        return Minecraft.getInstance().isLocalServer();
+    }
+    
+    public static boolean isShiftPressed() {
+    	return Screen.hasShiftDown();
+    }
+    
+    public static boolean isDestroyingBlock() {
+    	return Minecraft.getInstance().gameMode.isDestroying();
+    }
 
     public static Entity getEntityById(int entityId) {
         return Minecraft.getInstance().level.getEntity(entityId);
@@ -45,10 +57,6 @@ public class ClientUtil {
     
     public static Entity getCrosshairPickEntity() {
         return Minecraft.getInstance().crosshairPickEntity;
-    }
-
-    public static boolean shouldStandsRender(PlayerEntity player) {
-        return StandUtil.isPlayerStandUser(player);
     }
 
     public static void openHamonTeacherUi() {
@@ -106,6 +114,21 @@ public class ClientUtil {
         Minecraft.getInstance().particleEngine.createTrackingEmitter(entity, ModParticles.HAMON_SPARK.get(), ticks);
     }
     
+    public static float[] rgb(int color) {
+        int red = (color & 0xFF0000) >> 16;
+        int green = (color & 0x00FF00) >> 8;
+        int blue = color & 0x0000FF;
+        return new float[] {
+                (float) red / 255F,
+                (float) green / 255F,
+                (float) blue / 255F
+        };
+    }
+    
+    public static int discColor(int color) {
+        return (((0xFFFFFF - color) & 0xFEFEFE) >> 1) + color;
+    }
+    
     public static void vertex(MatrixStack.Entry matrixEntry, IVertexBuilder vertexBuilder, 
             int packedLight, int packedOverlay, float red, float green, float blue, float alpha, 
             float x, float y, float z, float texU, float texV) {
@@ -132,5 +155,12 @@ public class ClientUtil {
         .uv2(packedLight)
         .normal(normals, normalX, normalZ, normalY)
         .endVertex();
+    }
+
+    public static float getHighlightAlpha(float ticks, float cycleTicks, float maxAlphaTicks, float minAlpha, float maxAlpha) {
+        ticks %= cycleTicks;
+        float coeff = maxAlpha / maxAlphaTicks;
+        float alpha = ticks <= cycleTicks / 2 ? coeff * ticks : coeff * (cycleTicks - ticks);
+        return Math.min(alpha, maxAlpha - minAlpha) + minAlpha;
     }
 }

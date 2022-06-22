@@ -21,21 +21,24 @@ public class ClStandManualMovementPacket {
     private final double x;
     private final double y;
     private final double z;
+    private final boolean resetDeltaMovement;
 
-    public ClStandManualMovementPacket(double x, double y, double z) {
+    public ClStandManualMovementPacket(double x, double y, double z, boolean resetDeltaMovement) {
         this.x = x;
         this.y = y;
         this.z = z;
+        this.resetDeltaMovement = resetDeltaMovement;
     }
 
     public static void encode(ClStandManualMovementPacket msg, PacketBuffer buf) {
         buf.writeDouble(msg.x);
         buf.writeDouble(msg.y);
         buf.writeDouble(msg.z);
+        buf.writeBoolean(msg.resetDeltaMovement);
     }
 
     public static ClStandManualMovementPacket decode(PacketBuffer buf) {
-        return new ClStandManualMovementPacket(buf.readDouble(), buf.readDouble(), buf.readDouble());
+        return new ClStandManualMovementPacket(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readBoolean());
     }
 
     public static void handle(ClStandManualMovementPacket msg, Supplier<NetworkEvent.Context> ctx) {
@@ -64,7 +67,7 @@ public class ClStandManualMovementPacket {
                     double motionSq = stand.getDeltaMovement().lengthSqr(); // d9
                     double diffSq = diffX * diffX + diffY * diffY + diffZ * diffZ; // d10
                     if (diffSq - motionSq > 100.0D) {
-                        JojoMod.LOGGER.warn("{} ({}'s stand) moved too quickly! {},{},{}", stand.getName().getString(), player.getName().getString(), diffX, diffY, diffZ);
+                        JojoMod.getLogger().warn("{} ({}'s stand) moved too quickly! {},{},{}", stand.getName().getString(), player.getName().getString(), diffX, diffY, diffZ);
                         PacketManager.sendToClient(new StandCancelManualMovementPacket(stand.getX(), stand.getY(), stand.getZ()), player);
                         return;
                     }
@@ -95,6 +98,9 @@ public class ClStandManualMovementPacket {
 //                    lastGoodX = stand.getX();
 //                    lastGoodY = stand.getY();
 //                    lastGoodZ = stand.getZ();
+                    if (msg.resetDeltaMovement) {
+                        stand.setDeltaMovement(Vector3d.ZERO);
+                    }
                 }
             });
         });

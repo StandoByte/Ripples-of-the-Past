@@ -102,7 +102,7 @@ public class ClClickActionPacket {
     public static void handle(ClClickActionPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             PlayerEntity player = ctx.get().getSender();
-            if (!player.isSpectator()) {
+            if (!player.isSpectator() && player.isAlive()) {
                 IPower.getPowerOptional(player, msg.classification).ifPresent(power -> {
                     Entity targetEntity = msg.targetEntityId != -1 ? player.level.getEntity(msg.targetEntityId) : null;
                     ActionTarget target = targetEntity == null ? msg.targetBlock == null ? 

@@ -8,6 +8,9 @@ import com.github.standobyte.jojo.init.ModEntityTypes;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
@@ -18,14 +21,15 @@ import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 public class AfterimageEntity extends Entity implements IEntityAdditionalSpawnData {
-    private Entity originEntity;
+    private LivingEntity originEntity;
     private UUID originUuid;
     private int ticksDelayed;
     private int delay;
     private int lifeSpan;
+    private double speedLowerLimit;
     private Queue<PosData> originPosQueue = new LinkedList<PosData>();
     
-    public AfterimageEntity(World world, Entity originEntity, int delay) {
+    public AfterimageEntity(World world, LivingEntity originEntity, int delay) {
         this(ModEntityTypes.AFTERIMAGE.get(), world);
         setOriginEntity(originEntity);
         this.delay = delay;
@@ -37,7 +41,7 @@ public class AfterimageEntity extends Entity implements IEntityAdditionalSpawnDa
         noPhysics = true;
     }
     
-    private void setOriginEntity(Entity entity) {
+    private void setOriginEntity(LivingEntity entity) {
         this.originEntity = entity;
         if (entity != null) {
             copyPosition(entity);
@@ -50,6 +54,14 @@ public class AfterimageEntity extends Entity implements IEntityAdditionalSpawnDa
     
     public void setLifeSpan(int lifeSpan) {
         this.lifeSpan = lifeSpan;
+    }
+    
+    public void setMinSpeed(double speed) {
+        this.speedLowerLimit = speed;
+    }
+    
+    public boolean shouldRender() {
+        return originEntity != null && originEntity.getAttributeValue(Attributes.MOVEMENT_SPEED) >= speedLowerLimit;
     }
     
     @Override
@@ -65,6 +77,15 @@ public class AfterimageEntity extends Entity implements IEntityAdditionalSpawnDa
             PosData posData = originPosQueue.remove();
             moveTo(posData.pos.x, posData.pos.y, posData.pos.z, posData.yRot, posData.xRot);
         }
+        
+        if (!level.isClientSide() && originEntity.isSprinting() && shouldRender()) {
+            level.getEntitiesOfClass(MobEntity.class, this.getBoundingBox().inflate(8), mob -> 
+            mob.getTarget() == originEntity && mob.canSee(this)).forEach(mob -> {
+                if (mob.getRandom().nextDouble() < 0.01) {
+                    mob.setTarget(null);
+                }
+            });
+        }
     }
 
     @Override
@@ -75,6 +96,7 @@ public class AfterimageEntity extends Entity implements IEntityAdditionalSpawnDa
         this.delay = nbt.getInt("Delay");
         this.tickCount = nbt.getInt("Age");
         this.lifeSpan = nbt.getInt("LifeSpan");
+        this.speedLowerLimit = nbt.getDouble("Speed");
         if (nbt.hasUUID("Origin")) {
             this.originUuid = nbt.getUUID("Origin");
         }
@@ -85,6 +107,7 @@ public class AfterimageEntity extends Entity implements IEntityAdditionalSpawnDa
         nbt.putInt("Delay", delay);
         nbt.putInt("Age", tickCount);
         nbt.putInt("LifeSpan", lifeSpan);
+        nbt.putDouble("Speed", speedLowerLimit);
         if (originUuid != null) {
             nbt.putUUID("Origin", originEntity.getUUID());
         }
@@ -98,16 +121,26 @@ public class AfterimageEntity extends Entity implements IEntityAdditionalSpawnDa
     @Override
     public void writeSpawnData(PacketBuffer buffer) {
         if (originUuid != null) {
-            setOriginEntity(((ServerWorld) level).getEntity(originUuid));
+            Entity entity = ((ServerWorld) level).getEntity(originUuid);
+            if (entity instanceof LivingEntity) {
+                setOriginEntity((LivingEntity) entity);
+            }
         }
         buffer.writeInt(originEntity == null ? -1 : originEntity.getId());
-        buffer.writeInt(delay);
+        buffer.writeVarInt(delay);
+        buffer.writeInt(lifeSpan);
+        buffer.writeDouble(speedLowerLimit);
     }
 
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
-        setOriginEntity(level.getEntity(additionalData.readInt()));
-        delay = additionalData.readInt();
+        Entity entity = level.getEntity(additionalData.readInt());
+        if (entity instanceof LivingEntity) {
+            setOriginEntity((LivingEntity) entity);
+        }
+        delay = additionalData.readVarInt();
+        lifeSpan = additionalData.readInt();
+        speedLowerLimit = additionalData.readDouble();
     }
 
     private static class PosData {

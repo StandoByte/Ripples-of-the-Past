@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screen.MainMenuScreen;
 import net.minecraft.client.renderer.FirstPersonRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.util.HandSide;
@@ -26,6 +27,7 @@ public class ClientReflection {
                         MatrixStack.class, IRenderTypeBuffer.class, int.class, float.class, float.class, HandSide.class);
                 MINECRAFT_PAUSE = ObfuscationReflectionHelper.findField(Minecraft.class, "field_71445_n");
                 MINECRAFT_TIMER = ObfuscationReflectionHelper.findField(Minecraft.class, "field_71428_T");
+                MAIN_MENU_SCREEN_SPLASH = ObfuscationReflectionHelper.findField(MainMenuScreen.class, "field_73975_c");
             }
         });
     }
@@ -56,5 +58,11 @@ public class ClientReflection {
     private static Field MINECRAFT_TIMER;
     public static Timer getTimer(Minecraft minecraft) {
         return ReflectionUtil.getFieldValue(MINECRAFT_TIMER, minecraft);
+    }
+    
+    
+    private static Field MAIN_MENU_SCREEN_SPLASH;
+    public static void setSplash(MainMenuScreen screen, String splash) {
+    	ReflectionUtil.setFieldValue(MAIN_MENU_SCREEN_SPLASH, screen, splash);
     }
 }

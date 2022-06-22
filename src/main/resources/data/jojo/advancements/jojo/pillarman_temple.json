@@ -1,0 +1,33 @@
+{
+  "parent": "jojo:jojo/root",
+  "display": {
+    "icon": {
+      "item": "jojo:slumbering_pillarman"
+    },
+    "title": {
+      "translate": "advancements.jojo.pillarman_temple.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.pillarman_temple.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "in_temple": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "location": {
+          "feature": "jojo:pillarman_temple"
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "in_temple"
+    ]
+  ]
+}

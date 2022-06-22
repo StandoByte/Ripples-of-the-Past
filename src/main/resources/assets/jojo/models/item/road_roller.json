@@ -1,0 +1,42 @@
+{
+  "textures": {
+    "particle": "jojo:item/road_roller"
+  },
+  "display": {
+    "thirdperson_righthand": {
+      "rotation": [ 90, 180, 0 ],
+      "translation": [ 3, 5, -8 ],
+      "scale": [ 1, 1, 1 ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [ 90, 180, 0 ],
+      "translation": [ 19, 5, -8 ],
+      "scale": [ 1, 1, 1 ]
+    },
+    "firstperson_righthand": {
+      "rotation": [ 0, -90, 0 ],
+      "translation": [ -3, 25, 1],
+      "scale": [ 1, 1, 1 ]
+    },
+    "firstperson_lefthand": {
+      "rotation": [ 0, 90, 0 ],
+      "translation": [ 13, 25, 1],
+      "scale": [ 1, 1, 1 ]
+    },
+    "gui": {
+      "rotation": [ 15, -25, -5 ],
+      "translation": [ 1, -3, 0 ],
+      "scale": [ 0.25, 0.25, 0.25 ]
+    },
+    "fixed": {
+      "rotation": [ 0, 90, 0 ],
+      "translation": [ 2.5, -1, 0],
+      "scale":[ 0.25, 0.25, 0.25]
+    },
+    "ground": {
+      "rotation": [ 0, 0, 0 ],
+      "translation": [ 8, 4, 8],
+      "scale":[ 1, 1, 1]
+    }
+  }
+}

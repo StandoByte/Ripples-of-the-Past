@@ -1,0 +1,31 @@
+{
+  "parent": "jojo:jojo/resolve",
+  "display": {
+    "icon": {
+      "item": "jojo:meteoric_scrap",
+      "nbt": "{Icon:10}"
+    },
+    "title": {
+      "translate": "advancements.jojo.soul.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.soul.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": true
+  },
+  "criteria": {
+    "soul_ascension": {
+      "trigger": "jojo:soul_ascension",
+      "conditions": {
+      }
+    }
+  },
+  "requirements": [
+    [
+      "soul_ascension"
+    ]
+  ]
+}
