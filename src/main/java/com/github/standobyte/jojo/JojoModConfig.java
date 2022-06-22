@@ -183,7 +183,7 @@ public class JojoModConfig {
                                  "    Making a value lower that the previous one might lead to an unexpected result.")
                         .translation("jojo.config.standTierXpLevels")
                         .defineList(Lists.newArrayList("standTierXpLevels"), 
-                                () -> Arrays.asList(0, 1, 10, 20, 30, 40, 55), 
+                                () -> Arrays.asList(0, 1, 5, 10, 20, 30, 45), 
                                 s -> s instanceof Integer && (Integer) s >= 0);
             builder.pop();
             

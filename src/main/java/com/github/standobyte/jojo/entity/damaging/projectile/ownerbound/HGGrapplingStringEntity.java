@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 
 import java.util.UUID;
 
-import com.github.standobyte.jojo.entity.stand.ManualStandMovementLock.InputDirection;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 import com.github.standobyte.jojo.init.ModActions;
@@ -65,12 +64,15 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
             }
             else {
                 Vector3d vecToOwner = owner.position().subtract(bound.position());
-                if (vecToOwner.lengthSqr() > 4) {
-                    dragTarget(bound, vecToOwner.normalize().scale(2));
-                    bound.fallDistance = 0;
+                double length = vecToOwner.length();
+                if (length < 2) {
+                	if (!level.isClientSide()) {
+                		remove();
+                	}
                 }
-                else if (!level.isClientSide()) {
-                	remove();
+                else {
+                	dragTarget(bound, vecToOwner.normalize().scale(2));
+                	bound.fallDistance = 0;
                 }
             }
         }
@@ -149,9 +151,6 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
                 attachToEntity((LivingEntity) target);
                 playSound(ModSounds.HIEROPHANT_GREEN_GRAPPLE_CATCH.get(), 1.0F, 1.0F);
             	caughtAnEntity = true;
-                if (stand != null/* && (target.isVehicle() || target.getType() == EntityType.PLAYER*/) {
-                	stand.getManualMovementLocks().addLock(MANUAL_MOVEMENT_LOCK, InputDirection.RIGHT, InputDirection.FORWARD);
-                }
                 return true;
             }
         }

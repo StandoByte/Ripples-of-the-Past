@@ -2,7 +2,8 @@
   "parent": "minecraft:recipes/root",
   "rewards": {
     "recipes": [
-      "jojo:stand_arrow"
+      "jojo:stand_arrow",
+      "jojo:stand_arrow_from_arrow"
     ]
   },
   "criteria": {
@@ -21,12 +22,19 @@
       "conditions": {
         "recipe": "jojo:stand_arrow"
       }
+    },
+    "has_the_recipe_2": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "jojo:stand_arrow_from_arrow"
+      }
     }
   },
   "requirements": [
     [
       "has_meteoric_ingot",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_the_recipe_2"
     ]
   ]
 }

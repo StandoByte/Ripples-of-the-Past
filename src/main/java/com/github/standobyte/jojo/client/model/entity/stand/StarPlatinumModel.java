@@ -527,7 +527,7 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
                 RotationAngle.fromDegrees(rightForeArm, -90F, -30F, -90F)
         });
         IModelPose<StarPlatinumEntity> uppercutPose2 = new ModelPose<>(new RotationAngle[] {
-                RotationAngle.fromDegrees(upperPart, 0F, -45F, 0F), 
+                RotationAngle.fromDegrees(upperPart, 0F, -30F, 0F), 
                 RotationAngle.fromDegrees(leftArm, 0F, 0F, -90F),
                 RotationAngle.fromDegrees(leftForeArm, -105F, 0F, 0F),
                 RotationAngle.fromDegrees(rightArm, -135F, 45F, 0F), 

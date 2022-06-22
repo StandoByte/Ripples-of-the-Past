@@ -1,6 +1,8 @@
 package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
@@ -10,6 +12,7 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.entity.Entity;
@@ -68,7 +71,15 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
                 attachedEntityUUID = null;
             }
         }
+        dragged.forEach(entity -> entity.setDeltaMovement(Vector3d.ZERO));
+        dragged.clear();
         super.tick();
+    }
+    
+    @Override
+    public void remove() {
+        dragged.forEach(entity -> entity.setDeltaMovement(Vector3d.ZERO));
+    	super.remove();
     }
     
     @Override
@@ -282,18 +293,25 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
         return entityData.get(ENTITY_ATTACHED_TO) > -1;
     }
     
+    private final Set<Entity> dragged = new HashSet<>();
     protected void dragTarget(Entity entity, Vector3d vec) {
-        entity.setDeltaMovement(vec);
-        entity.move(MoverType.PLAYER, entity.getDeltaMovement());
-        entity.setDeltaMovement(Vector3d.ZERO);
+        doDragEntity(entity, vec);
         if (entity instanceof StandEntity) {
             LivingEntity standUser = ((StandEntity) entity).getUser();
             if (standUser != null) {
-            	standUser.setDeltaMovement(vec);
-                standUser.move(MoverType.PLAYER, entity.getDeltaMovement());
-                standUser.setDeltaMovement(Vector3d.ZERO);
+                doDragEntity(entity, vec);
             }
         }
+    }
+    
+    private void doDragEntity(Entity entity, Vector3d vec) {
+    	if (entity instanceof LivingEntity && ((LivingEntity) entity).hasEffect(ModEffects.STUN.get())) {
+    		entity.move(MoverType.PLAYER, vec);
+    	}
+    	else {
+            entity.setDeltaMovement(vec);
+            dragged.add(entity);
+    	}
     }
     
     public void attachToBlockPos(BlockPos blockPos) {

@@ -59,6 +59,7 @@ public class ResolveCounter {
     private int noResolveDecayTicks = 0;
     
     private int resolveLevel = 0;
+    private int extraLevel = 0;
     
     private DiscardingSortedMultisetWrapper<Float> resolveRecords = 
             new DiscardingSortedMultisetWrapper<>(99);
@@ -322,7 +323,13 @@ public class ResolveCounter {
     }
 
     public void onResolveEffectStarted(int amplifier) {
-        stand.setResolveLevel(Math.min(amplifier + 1, stand.getMaxResolveLevel()));
+    	int newLevel = amplifier + 1;
+    	if (newLevel <= stand.getMaxResolveLevel()) {
+    		stand.setResolveLevel(newLevel);
+    	}
+    	else {
+    		extraLevel++;
+    	}
         setResolveValue(stand.getMaxResolve(), 0);
     }
 
@@ -412,6 +419,7 @@ public class ResolveCounter {
     void readNbt(CompoundNBT nbt) {
         resolve = nbt.getFloat("Resolve");
         resolveLevel = nbt.getByte("ResolveLevel");
+        extraLevel = nbt.getInt("ExtraLevel");
         noResolveDecayTicks = nbt.getInt("ResolveTicks");
         saveNextRecord = nbt.getBoolean("SaveNextRecord");
         boostAttack = nbt.getFloat("BoostAttack");
@@ -431,6 +439,7 @@ public class ResolveCounter {
         CompoundNBT resolveNbt = new CompoundNBT();
         resolveNbt.putFloat("Resolve", resolve);
         resolveNbt.putByte("ResolveLevel", (byte) resolveLevel);
+        resolveNbt.putInt("ExtraLevel", extraLevel);
         resolveNbt.putInt("ResolveTicks", noResolveDecayTicks);
         resolveNbt.putBoolean("SaveNextRecord", saveNextRecord);
         resolveNbt.putFloat("BoostAttack", boostAttack);
