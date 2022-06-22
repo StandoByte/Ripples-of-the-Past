@@ -27,6 +27,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.boss.dragon.EnderDragonEntity;
+import net.minecraft.entity.boss.dragon.EnderDragonPartEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -227,6 +229,13 @@ public class DamageUtil {
         	targetLiving.lastHurt = lastHurt;
         }
         return dealtDamage;
+    }
+    
+    public static DamageSource enderDragonDamageHack(DamageSource damageSource, Entity target) {
+    	if (target instanceof EnderDragonEntity || target instanceof EnderDragonPartEntity) {
+    		damageSource.setExplosion();
+    	}
+    	return damageSource;
     }
     
     public static float addArmorPiercing(float damage, float armorPiercing, @Nullable LivingEntity armoredTarget) {

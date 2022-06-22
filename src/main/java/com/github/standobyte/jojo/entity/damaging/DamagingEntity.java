@@ -147,7 +147,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     }
     
     protected boolean hurtTarget(Entity target, DamageSource dmgSource, float dmgAmount) {
-        return DamageUtil.hurtThroughInvulTicks(target, dmgSource, dmgAmount);
+        return DamageUtil.hurtThroughInvulTicks(target, DamageUtil.enderDragonDamageHack(dmgSource, target), dmgAmount);
     }
     
     protected DamageSource getDamageSource(LivingEntity owner) { // TODO damage sources/death messages
