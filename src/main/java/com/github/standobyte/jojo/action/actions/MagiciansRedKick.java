@@ -59,19 +59,15 @@ public class MagiciansRedKick extends StandEntityComboHeavyAttack {
     	}
     	else if (ticksLeft == 1) {
     		standEntity.setDeltaMovement(Vector3d.ZERO);
+    		
+            if (!world.isClientSide()) {
+                MagiciansRedRedBind.getLandedRedBind(standEntity).ifPresent(redBind -> {
+                    if (redBind.isInKickCombo()) {
+                        redBind.remove();
+                    }
+                });
+            }
     	}
-    }
-    
-    @Override
-    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-        if (!world.isClientSide()) {
-            MagiciansRedRedBind.getLandedRedBind(standEntity).ifPresent(redBind -> {
-                if (redBind.isInKickCombo()) {
-                    redBind.remove();
-                }
-            });
-        }
-        super.standPerform(world, standEntity, userPower, task);
     }
     
     @Override

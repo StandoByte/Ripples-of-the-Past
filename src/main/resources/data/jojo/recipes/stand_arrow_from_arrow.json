@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:arrow"
+    },
+    {
+      "item": "jojo:meteoric_ingot"
+    }
+  ],
+  "result": {
+    "item": "jojo:stand_arrow"
+  }
+}

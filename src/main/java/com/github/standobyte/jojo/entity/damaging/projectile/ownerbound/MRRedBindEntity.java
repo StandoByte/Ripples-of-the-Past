@@ -103,8 +103,13 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
             if (target instanceof LivingEntity && !target.isInvulnerableTo(getDamageSource(owner))) {
                 LivingEntity targetLiving = (LivingEntity) target;
                 attachToEntity(targetLiving);
-                stunEffect = new EffectInstance(ModEffects.STUN.get(), ticksLifespan() - tickCount);
-                targetLiving.addEffect(stunEffect);
+                if (!level.isClientSide()) {
+                	boolean thisEffect = stunEffect == targetLiving.getEffect(ModEffects.STUN.get());
+                	targetLiving.addEffect(new EffectInstance(ModEffects.STUN.get(), ticksLifespan() - tickCount));
+                	if (thisEffect) {
+                		stunEffect = targetLiving.getEffect(ModEffects.STUN.get());
+                	}
+                }
                 return true;
             }
         }
@@ -118,13 +123,13 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
     
     @Override
     public void remove() {
-        super.remove();
         if (!level.isClientSide() && stunEffect != null) {
             LivingEntity bound = getEntityAttachedTo();
             if (bound != null) {
                 JojoModUtil.removeEffectInstance(bound, stunEffect);
             }
         }
+        super.remove();
     }
 
     @Override
@@ -137,8 +142,11 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
         entityData.set(KICK_COMBO, true);
         LivingEntity target = getEntityAttachedTo();
         if (target != null) {
-            stunEffect = new EffectInstance(ModEffects.STUN.get(), ticksLifespan() - tickCount);
-            target.addEffect(stunEffect);
+        	boolean thisEffect = stunEffect == target.getEffect(ModEffects.STUN.get());
+        	target.addEffect(new EffectInstance(ModEffects.STUN.get(), ticksLifespan() - tickCount));
+        	if (thisEffect) {
+        		stunEffect = target.getEffect(ModEffects.STUN.get());
+        	}
         }
     }
     
