@@ -4,12 +4,11 @@ import java.util.List;
 
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -21,16 +20,16 @@ import net.minecraftforge.common.ForgeMod;
 
 public class HamonTornadoOverdrive extends HamonAction {
 
-    public HamonTornadoOverdrive(Builder builder) {
+    public HamonTornadoOverdrive(HamonAction.Builder builder) {
         super(builder);
     }
      
     @Override
-    public void onHoldTickUser(World world, LivingEntity user, IPower<?> power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
+    protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
             user.fallDistance = 0;
             Vector3d movement = user.getDeltaMovement();
-            HamonData hamon = ((INonStandPower) power).getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
+            HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
             if (!world.isClientSide()) {
                 AxisAlignedBB aabb = user.getBoundingBox().expandTowards(movement).inflate(1.0D);
                 float damage = 0.1F;
@@ -41,12 +40,12 @@ public class HamonTornadoOverdrive extends HamonAction {
                 List<Entity> targets = user.level.getEntities(user, aabb);
                 boolean points = false;
                 for (Entity entity : targets) {
-                    if (ModDamageSources.dealHamonDamage(entity, damage, user, null)) {
+                    if (DamageUtil.dealHamonDamage(entity, damage, user, null)) {
                         points = true;
                     }
                 }
                 if (points) {
-                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, getHeldTickManaCost());
+                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, getHeldTickEnergyCost());
                 }
             }
             if (user.isShiftKeyDown()) {

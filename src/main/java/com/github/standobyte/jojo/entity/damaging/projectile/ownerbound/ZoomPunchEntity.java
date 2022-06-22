@@ -9,7 +9,7 @@ import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 import com.google.common.collect.Multimap;
 
 import net.minecraft.entity.Entity;
@@ -33,10 +33,10 @@ import net.minecraft.world.World;
 
 public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
     private HandSide side;
-    private int hamonControlLvl;
+    private float hamonControlLvl;
     private boolean gaveHamonPoints;
 
-    public ZoomPunchEntity(World world, LivingEntity entity, int hamonControlLvl) {
+    public ZoomPunchEntity(World world, LivingEntity entity, float hamonControlLvl) {
         super(ModEntityTypes.ZOOM_PUNCH.get(), entity, world);
         this.side = entity.getMainArm();
         this.hamonControlLvl = hamonControlLvl;
@@ -63,18 +63,18 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
     }
 
     @Override
-    protected boolean isBodyPart() {
+	public boolean isBodyPart() {
         return true;
     }
 
     @Override
-    protected int ticksLifespan() {
-        return ModActions.HAMON_ZOOM_PUNCH.get().getCooldownValue();
+	public int ticksLifespan() {
+        return ModActions.HAMON_ZOOM_PUNCH.get().getCooldownTechnical(null);
     }
     
     @Override
     protected float movementSpeed() {
-        return (4 + (float) hamonControlLvl * 0.05F) / 7F;
+        return (4 + hamonControlLvl * 0.05F) / 7F;
     }
     
     @Override
@@ -90,7 +90,7 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
         super.remove();
         if (tickCount < ticksLifespan()) {
             INonStandPower.getNonStandPowerOptional(getOwner()).ifPresent(power -> {
-                power.setCooldownTimer(ModActions.HAMON_ZOOM_PUNCH.get(), 0, ModActions.HAMON_ZOOM_PUNCH.get().getCooldownValue());
+                power.updateCooldownTimer(ModActions.HAMON_ZOOM_PUNCH.get(), 0, ModActions.HAMON_ZOOM_PUNCH.get().getCooldownTechnical(null));
             });
         }
     }
@@ -103,6 +103,9 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
     @Override
     public float getBaseDamage() {
         LivingEntity owner = getOwner();
+        if (owner == null) {
+            return (float) Attributes.ATTACK_DAMAGE.getDefaultValue();
+        }
         ItemStack heldItem = owner.getMainHandItem();
         if (!heldItem.isEmpty()) {
             Multimap<Attribute, AttributeModifier> itemModifiers = heldItem.getAttributeModifiers(EquipmentSlotType.MAINHAND);
@@ -126,7 +129,7 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
     @Override
     protected boolean hurtTarget(Entity target, LivingEntity owner) {
         boolean regularAttack = super.hurtTarget(target, owner);
-        boolean hamonAttack = ModDamageSources.dealHamonDamage(target, 0.125F, this, owner);
+        boolean hamonAttack = DamageUtil.dealHamonDamage(target, 0.1F, this, owner);
         return regularAttack || hamonAttack;
     }
 
@@ -141,7 +144,7 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
             INonStandPower.getNonStandPowerOptional(getOwner()).ifPresent(power -> {
                 power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
                     gaveHamonPoints = true;
-                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, ModActions.HAMON_ZOOM_PUNCH.get().getManaCost());
+                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, ModActions.HAMON_ZOOM_PUNCH.get().getEnergyCost(power));
                 });
             });
         }
@@ -149,14 +152,14 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
 
     @Override
     public boolean isOnFire() {
-        return getOwner().isOnFire();
+        return getOwner() == null ? super.isOnFire() : getOwner().isOnFire();
     }
 
     @Override
     protected void addAdditionalSaveData(CompoundNBT nbt) {
         super.addAdditionalSaveData(nbt);
         nbt.putBoolean("LeftArm", side == HandSide.LEFT);
-        nbt.putInt("HamonControl", hamonControlLvl);
+        nbt.putFloat("HamonControl", hamonControlLvl);
         nbt.putBoolean("PointsGiven", gaveHamonPoints);
     }
 
@@ -164,7 +167,7 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
     protected void readAdditionalSaveData(CompoundNBT nbt) {
         super.readAdditionalSaveData(nbt);
         side = nbt.getBoolean("LeftArm") ? HandSide.LEFT : HandSide.RIGHT;
-        hamonControlLvl = nbt.getInt("HamonControl");
+        hamonControlLvl = nbt.getFloat("HamonControl");
         gaveHamonPoints = nbt.getBoolean("PointsGiven");
     }
 
@@ -172,14 +175,14 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
     public void writeSpawnData(PacketBuffer buffer) {
         super.writeSpawnData(buffer);
         buffer.writeBoolean(side == HandSide.LEFT);
-        buffer.writeVarInt(hamonControlLvl);
+        buffer.writeFloat(hamonControlLvl);
     }
 
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
         super.readSpawnData(additionalData);
         side = additionalData.readBoolean() ? HandSide.LEFT : HandSide.RIGHT;
-        hamonControlLvl = additionalData.readVarInt();
+        hamonControlLvl = additionalData.readFloat();
     }
 
 }

@@ -1,0 +1,31 @@
+{
+  "parent": "jojo:jojo/get_stand",
+  "display": {
+    "icon": {
+      "item": "jojo:meteoric_scrap",
+      "nbt": "{Icon:9}"
+    },
+    "title": {
+      "translate": "advancements.jojo.summon_stand.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.summon_stand.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "summon_stand": {
+      "trigger": "jojo:summon_stand",
+      "conditions": {
+      }
+    }
+  },
+  "requirements": [
+    [
+      "summon_stand"
+    ]
+  ]
+}

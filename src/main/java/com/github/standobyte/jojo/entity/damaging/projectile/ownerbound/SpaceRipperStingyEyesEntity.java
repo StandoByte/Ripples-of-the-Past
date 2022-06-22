@@ -3,16 +3,19 @@ package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.DoubleNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -48,11 +51,17 @@ public class SpaceRipperStingyEyesEntity extends OwnerBoundProjectileEntity {
             }
         }
     }
+    
+    @Override
+    public boolean isInvulnerableTo(DamageSource damageSource) {
+        return damageSource != DamageSource.OUT_OF_WORLD && !damageSource.isCreativePlayer();
+    }
 
     @Override
     public void onSyncedDataUpdated(DataParameter<?> dataParameter) {
         if (IS_BOUND_TO_OWNER.equals(dataParameter) && !isBoundToOwner() && getOwner() != null) {
             detachedOriginPos = getOriginPoint();
+            setLength((float) position().subtract(detachedOriginPos).length());
         }
         super.onSyncedDataUpdated(dataParameter);
     }
@@ -98,11 +107,11 @@ public class SpaceRipperStingyEyesEntity extends OwnerBoundProjectileEntity {
     }
 
     @Override
-    protected int ticksLifespan() {
+	public int ticksLifespan() {
         if (isBoundToOwner()) {
             return 50;
         }
-        return MathHelper.floor(getLength() / (float) movementSpeed() * 2F) + 20;
+        return MathHelper.floor(getLength() / (float) movementSpeed() * 20F) + 20;
     }
     
     @Override
@@ -111,7 +120,7 @@ public class SpaceRipperStingyEyesEntity extends OwnerBoundProjectileEntity {
     }
     
     @Override
-    protected void checkRetract() {}
+    protected void updateMotionFlags() {}
 
     @Override
     public boolean standDamage() {
@@ -151,9 +160,11 @@ public class SpaceRipperStingyEyesEntity extends OwnerBoundProjectileEntity {
 
     @Override
     protected void readAdditionalSaveData(CompoundNBT nbt) {
-        if (nbt.contains("DetachedOrigin", 9)) {
-            ListNBT detachedPosList = nbt.getList("DetachedOrigin", 6);
-            detachedOriginPos = new Vector3d(detachedPosList.getDouble(0), detachedPosList.getDouble(1), detachedPosList.getDouble(2));
+        if (nbt.contains("DetachedOrigin", JojoModUtil.getNbtId(ListNBT.class))) {
+            ListNBT detachedPosList = nbt.getList("DetachedOrigin", JojoModUtil.getNbtId(DoubleNBT.class));
+            if (detachedPosList.size() >= 3) {
+                detachedOriginPos = new Vector3d(detachedPosList.getDouble(0), detachedPosList.getDouble(1), detachedPosList.getDouble(2));
+            }
         }
         super.readAdditionalSaveData(nbt);
         setLength(nbt.getFloat("Length"));

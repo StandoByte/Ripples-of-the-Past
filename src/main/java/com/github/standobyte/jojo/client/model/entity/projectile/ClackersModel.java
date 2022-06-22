@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.client.model.entity.projectile;
 
 import com.github.standobyte.jojo.entity.itemprojectile.ClackersEntity;
-import com.github.standobyte.jojo.util.MathUtil;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 

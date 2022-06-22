@@ -1,4 +1,5 @@
 {
+  "type": "jojo:additional_single_item",
   "conditions": [
     {
       "condition": "forge:loot_table_id",
@@ -9,5 +10,7 @@
       "chance": 0.08
     }
   ],
-  "additional_item": "jojo:stone_mask"
+  "additional_item": {
+    "name": "jojo:stone_mask"
+  }
 }

@@ -40,7 +40,7 @@ public class StandCancelManualMovementPacket {
                 if (standManifestation != null && standManifestation instanceof StandEntity) {
                     StandEntity stand = (StandEntity) standManifestation;
                     stand.absMoveTo(msg.x, msg.y, msg.z);
-                    PacketManager.sendToServer(new ClStandManualMovementPacket(stand.getX(), stand.getY(), stand.getZ()));
+                    PacketManager.sendToServer(new ClStandManualMovementPacket(stand.getX(), stand.getY(), stand.getZ(), false));
                 }
             });
         });

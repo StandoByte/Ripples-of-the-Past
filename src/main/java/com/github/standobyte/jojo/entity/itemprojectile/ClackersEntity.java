@@ -6,8 +6,8 @@ import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.util.JojoModUtil;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -33,8 +33,8 @@ public class ClackersEntity extends ItemProjectileEntity {
         super(ModEntityTypes.CLACKERS.get(), thrower, world);
     }
     
-    public void setHamonEnergySpent(float mana) {
-        this.hamonEnergySpent = mana;
+    public void setHamonEnergySpent(float energy) {
+        this.hamonEnergySpent = energy;
     }
     
     @Override
@@ -50,7 +50,7 @@ public class ClackersEntity extends ItemProjectileEntity {
     @Override
     protected boolean hurtTarget(Entity target, Entity thrower) {
         boolean projectileAttack = super.hurtTarget(target, thrower);
-        boolean hamonAttack = ModDamageSources.dealHamonDamage(target, hamonDmg, this, thrower);
+        boolean hamonAttack = DamageUtil.dealHamonDamage(target, hamonDmg, this, thrower);
         boolean hitTarget = projectileAttack || hamonAttack;
         if (!level.isClientSide() && hitTarget) {
             Entity owner = getOwner();

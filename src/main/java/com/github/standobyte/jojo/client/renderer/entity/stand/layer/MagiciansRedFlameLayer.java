@@ -4,39 +4,26 @@ import com.github.standobyte.jojo.client.model.entity.stand.MagiciansRedFlameLay
 import com.github.standobyte.jojo.client.model.entity.stand.MagiciansRedModel;
 import com.github.standobyte.jojo.client.renderer.entity.stand.MagiciansRedRenderer;
 import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
 
-import net.minecraft.client.renderer.Atlases;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.ResourceLocation;
 
 public class MagiciansRedFlameLayer extends StandModelLayerRenderer<MagiciansRedEntity, MagiciansRedModel> {
-    private final MagiciansRedFlameLayerModel model = new MagiciansRedFlameLayerModel();
 
     public MagiciansRedFlameLayer(MagiciansRedRenderer entityRenderer) {
-        super(entityRenderer);
+        super(entityRenderer, new MagiciansRedFlameLayerModel());
     }
     
     @Override
     public int getPackedLight(int packedLight) {
         return LightTexture.pack(15, 15);
     }
-    
-    @Override
-    public MagiciansRedFlameLayerModel getLayerModel() {
-        return model;
-    }
-    
-    @Override
-    public IVertexBuilder getBuffer(IRenderTypeBuffer buffer, MagiciansRedEntity entity) {
-        return buffer.getBuffer(Atlases.translucentCullBlockSheet());
-    }
 
     @Deprecated
     @Override
     protected ResourceLocation getLayerTexture() {
-        return null;
+        return PlayerContainer.BLOCK_ATLAS;
     }
 
     @Override

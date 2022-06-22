@@ -1,0 +1,37 @@
+{
+  "parent": "jojo:jojo/root",
+  "display": {
+    "icon": {
+      "item": "minecraft:netherite_sword"
+    },
+    "title": {
+      "translate": "advancements.jojo.no_stand_kill_stand.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.no_stand_kill_stand.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "stand_user_killed": {
+      "trigger": "jojo:player_killed_entity",
+      "conditions": {
+        "power": {
+          "classification": "stand",
+          "type": "none"
+        },
+        "killed_power": {
+          "classification": "stand"
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "stand_user_killed"
+    ]
+  ]
+}

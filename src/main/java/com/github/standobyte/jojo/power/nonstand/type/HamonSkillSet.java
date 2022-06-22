@@ -5,11 +5,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.actions.HamonAction;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
 
 public class HamonSkillSet {
     final Set<HamonSkill> wrappedSkillSet;
-    Set<Action> unlockedActions;
+    Set<Action<?>> unlockedActions;
     int spentStrengthPoints = 0;
     int spentControlPoints = 0;
     HamonSkill.Technique technique = null;
@@ -17,7 +18,7 @@ public class HamonSkillSet {
     
     public HamonSkillSet() {
         wrappedSkillSet = EnumSet.noneOf(HamonSkill.class);
-        unlockedActions = new HashSet<Action>();
+        unlockedActions = new HashSet<>();
     }
     
     public boolean isSkillLearned(HamonSkill skill) {
@@ -48,7 +49,7 @@ public class HamonSkillSet {
                 }
             }
             wrappedSkillSet.add(skill);
-            Action action = skill.getRewardAction();
+            HamonAction action = skill.getRewardAction();
             if (action != null) {
                 unlockedActions.add(action);
                 if (action.getShiftVariationIfPresent() != action) {
@@ -78,7 +79,7 @@ public class HamonSkillSet {
                 }
             }
             wrappedSkillSet.remove(skill);
-            Action action = skill.getRewardAction();
+            HamonAction action = skill.getRewardAction();
             if (action != null) {
                 unlockedActions.remove(action);
                 if (action.getShiftVariationIfPresent() != action) {

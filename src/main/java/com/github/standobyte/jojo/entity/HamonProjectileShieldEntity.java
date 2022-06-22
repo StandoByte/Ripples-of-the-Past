@@ -10,18 +10,20 @@ import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MoverType;
-import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.entity.projectile.ProjectileHelper;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.math.EntityRayTraceResult;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
@@ -50,10 +52,23 @@ public class HamonProjectileShieldEntity extends Entity implements IEntityAdditi
         super.tick();
         if (user == null || !user.isAlive() || !level.isClientSide() && 
                 (power == null || power.getHeldAction() != ModActions.HAMON_PROJECTILE_SHIELD.get() || hamon == null)) {
-            remove();
+            if (!level.isClientSide()) remove();
             return;
         }
-        copyPosition(user);
+        setPos(user.getX(), user.getY() - 0.25, user.getZ());
+        level.getEntitiesOfClass(ProjectileEntity.class, getBoundingBox().inflate(4), 
+                entity -> entity.isAlive()).forEach(projectile -> {
+                    if (getBoundingBox().contains(projectile.position().add(projectile.getDeltaMovement()))) {
+                        deflectProjectile(projectile);
+                    }
+                    else {
+                        RayTraceResult rayTrace = ProjectileHelper.getHitResult(projectile, 
+                                target -> !target.isSpectator() && target.isAlive() && !target.is(projectile.getOwner()));
+                        if (rayTrace.getType() == RayTraceResult.Type.ENTITY && ((EntityRayTraceResult) rayTrace).getEntity() == this) {
+                            deflectProjectile(projectile);
+                        }
+                    }
+                });
     }
     
     @Override
@@ -61,7 +76,7 @@ public class HamonProjectileShieldEntity extends Entity implements IEntityAdditi
 
     @Override
     public boolean isPickable() {
-        return true;
+        return false;
     }
 
     @Override
@@ -73,30 +88,33 @@ public class HamonProjectileShieldEntity extends Entity implements IEntityAdditi
     public boolean hurt(DamageSource dmgSource, float amount) {
         Entity projectile = dmgSource.getDirectEntity();
         if (projectile instanceof ProjectileEntity) {
-            if (!level.isClientSide()) {
-                if (power != null && hamon != null) {
-                    float manaCost = amount * 30;
-                    if (power.consumeMana(manaCost)) {
-                        if (projectile != null) {
-                            ModDamageSources.dealHamonDamage(projectile, 0.1F, this, user);
-                            if (!(projectile instanceof AbstractArrowEntity)) {
-                                projectile.setDeltaMovement(projectile.getDeltaMovement().reverse());
-                                projectile.move(MoverType.SELF, projectile.getDeltaMovement());
-                            }
-                        }
-                        hamon.hamonPointsFromAction(HamonStat.CONTROL, manaCost);
-                    }
-                    else {
-                        power.setMana(0);
-                        remove();
-                    }
-                }
-            }
-            else {
-                HamonPowerType.createHamonSparkParticles(level, ClientUtil.getClientPlayer(), projectile.position(), amount / 5F);
-            }
+            deflectProjectile((ProjectileEntity) projectile);
         }
         return false;
+    }
+    
+    private void deflectProjectile(ProjectileEntity projectile) {
+        if (projectile == null) return;
+        float speed = (float) projectile.getDeltaMovement().length();
+        if (power != null && hamon != null) {
+            float energyCost = speed * 60;
+            if (power.hasEnergy(energyCost)) {
+                JojoModUtil.deflectProjectile(projectile, null);
+            }
+            if (!level.isClientSide()) {
+                if (power.consumeEnergy(energyCost)) {
+                    DamageUtil.dealHamonDamage(projectile, 0.1F, this, user);
+                    hamon.hamonPointsFromAction(HamonStat.CONTROL, energyCost);
+                }
+                else {
+                    power.setEnergy(0);
+                    remove();
+                }
+            }
+        }
+        if (level.isClientSide()) {
+            HamonPowerType.createHamonSparkParticles(level, ClientUtil.getClientPlayer(), projectile.position(), speed / 2.5F);
+        }
     }
 
     @Override
@@ -127,6 +145,10 @@ public class HamonProjectileShieldEntity extends Entity implements IEntityAdditi
         Entity entity = level.getEntity(additionalData.readInt());
         if (entity instanceof LivingEntity) {
             user = (LivingEntity) entity;
+            this.power = INonStandPower.getNonStandPowerOptional(user).orElse(null);
+            if (power != null) {
+                hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).orElse(null);
+            }
         }
     }
 

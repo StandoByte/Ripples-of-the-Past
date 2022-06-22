@@ -11,12 +11,15 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
-public class StandEntityDamageSource extends EntityDamageSource implements IStandDamageSource {
+public class StandEntityDamageSource extends EntityDamageSource implements IStandDamageSource, IModdedDamageSource {
     protected final IStandPower stand;
 //    @Nullable
 //    protected final Entity standUser;
     private float knockbackFactor = 1;
+    private boolean bypassInvulTicks = false;
     protected boolean showStandUserName;
+    private int barrageHits = 0;
+    private int standInvulTicks = 0;
 
     public StandEntityDamageSource(String msgId, Entity damagingEntity, IStandPower stand) {
         super(msgId, damagingEntity);
@@ -28,6 +31,7 @@ public class StandEntityDamageSource extends EntityDamageSource implements IStan
         this.stand = stand;
     }
     
+    @Override
     public IStandPower getStandPower() {
         return stand;
     }
@@ -45,14 +49,46 @@ public class StandEntityDamageSource extends EntityDamageSource implements IStan
         }
         return false;
     }
+    
+    public StandEntityDamageSource setBarrageHitsCount(int hits) {
+        this.barrageHits = hits;
+        return this;
+    }
+    
+    public int getBarrageHitsCount() {
+        return barrageHits;
+    }
 
+    @Override
     public StandEntityDamageSource setKnockbackReduction(float factor) {
         this.knockbackFactor = MathHelper.clamp(factor, 0, 1);
         return this;
     }
 
+    @Override
     public float getKnockbackFactor() {
         return knockbackFactor;
+    }
+
+    @Override
+    public StandEntityDamageSource setBypassInvulTicksInEvent() {
+        this.bypassInvulTicks = true;
+        return this;
+    }
+
+    @Override
+    public boolean bypassInvulTicks() {
+        return bypassInvulTicks;
+    }
+
+    public StandEntityDamageSource setStandInvulTicks(int ticks) {
+        this.standInvulTicks = ticks;
+        return this;
+    }
+
+    @Override
+    public int getStandInvulTicks() {
+        return standInvulTicks;
     }
 
     public StandEntityDamageSource setShowStandUserName() {

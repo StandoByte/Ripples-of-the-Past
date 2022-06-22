@@ -1,15 +1,19 @@
 package com.github.standobyte.jojo.init;
 
+import java.util.Set;
+
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.potion.FreezeEffect;
 import com.github.standobyte.jojo.potion.HamonSpreadEffect;
+import com.github.standobyte.jojo.potion.ResolveEffect;
 import com.github.standobyte.jojo.potion.StaminaRegenEffect;
 import com.github.standobyte.jojo.potion.StatusEffect;
 import com.github.standobyte.jojo.potion.StunEffect;
 import com.github.standobyte.jojo.potion.UncurableEffect;
 import com.github.standobyte.jojo.potion.UndeadRegenerationEffect;
 import com.github.standobyte.jojo.power.nonstand.type.VampirismPowerType;
+import com.google.common.collect.ImmutableSet;
 
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectType;
@@ -46,22 +50,31 @@ public class ModEffects {
     
     public static final RegistryObject<StaminaRegenEffect> STAMINA_REGEN = EFFECTS.register("stamina_regen", 
             () -> new StaminaRegenEffect(EffectType.BENEFICIAL, 0x149900));
-    
+
     public static final RegistryObject<UncurableEffect> TIME_STOP = EFFECTS.register("time_stop", 
             () -> new UncurableEffect(EffectType.BENEFICIAL, 0x707070));
     
     public static final RegistryObject<UncurableEffect> RESOLVE = EFFECTS.register("resolve", 
-            () -> new UncurableEffect(EffectType.BENEFICIAL, 0xC6151F));
+            () -> new ResolveEffect(EffectType.BENEFICIAL, 0xC6151F));
     
     public static final RegistryObject<Effect> SUN_RESISTANCE = EFFECTS.register("sun_resistance", 
             () -> new StatusEffect(EffectType.BENEFICIAL, 0xFFD54A));
     
+    public static final RegistryObject<Effect> SPIRIT_VISION = EFFECTS.register("spirit_vision", 
+            () -> new StatusEffect(EffectType.BENEFICIAL, 0x8E45FF));
+    
 //    public static final RegistryObject<Effect> STAND_SEALING = EFFECTS.register("stand_sealing", 
 //            () -> new StatusEffect(EffectType.HARMFUL, 0xCACAD8)); // TODO Stand Sealing effect
     
+    private static Set<Effect> TRACKED_EFFECTS;
     @SubscribeEvent(priority = EventPriority.LOW)
     public static final void afterEffectsRegister(RegistryEvent.Register<Effect> event) {
         VampirismPowerType.initVampiricEffectsMap();
         StandEntity.addSharedEffects(TIME_STOP.get(), Effects.BLINDNESS);
+        TRACKED_EFFECTS = ImmutableSet.of(RESOLVE.get(), TIME_STOP.get(), STUN.get());
+    }
+    
+    public static boolean isEffectTracked(Effect effect) {
+        return TRACKED_EFFECTS.contains(effect);
     }
 }

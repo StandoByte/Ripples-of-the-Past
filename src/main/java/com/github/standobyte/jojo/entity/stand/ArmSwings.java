@@ -6,9 +6,9 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntitySwings
 import net.minecraft.util.HandSide;
 
 public class ArmSwings {
-    private static final int LIMIT = 32;
+    private static final int LIMIT = 64;
     private int swings;
-    private int handSideBits;
+    private long handSideBits;
     
     void addSwing(HandSide side) {
         if (swings < LIMIT) {
@@ -21,11 +21,13 @@ public class ArmSwings {
     }
     
     void broadcastSwings(StandEntity entity) {
-        PacketManager.sendToClientsTracking(new TrStandEntitySwingsPacket(entity.getId(), swings, handSideBits), entity);
-        reset();
+        if (swings > 0) {
+            PacketManager.sendToClientsTracking(new TrStandEntitySwingsPacket(entity.getId(), swings, handSideBits), entity);
+            reset();
+        }
     }
     
-    public void clAddValues(int swings, int handSideBits) {
+    public void clAddValues(int swings, long handSideBits) {
         swings = Math.min(LIMIT - this.swings, swings);
         this.swings += swings;
         this.handSideBits <<= swings;
@@ -36,7 +38,7 @@ public class ArmSwings {
         return swings;
     }
     
-    public int getHandSideBits() {
+    public long getHandSideBits() {
         return handSideBits;
     }
     

@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.client;
 
 import java.util.Map;
+import java.util.function.UnaryOperator;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.model.ArmorModelRegistry;
@@ -8,9 +9,12 @@ import com.github.standobyte.jojo.client.model.armor.BladeHatArmorModel;
 import com.github.standobyte.jojo.client.model.armor.BreathControlMaskModel;
 import com.github.standobyte.jojo.client.model.armor.SatiporojaScarfArmorModel;
 import com.github.standobyte.jojo.client.model.armor.StoneMaskModel;
-import com.github.standobyte.jojo.client.particle.MenacingParticle;
+import com.github.standobyte.jojo.client.model.item.RoadRollerBakedModel;
+import com.github.standobyte.jojo.client.particle.AirStreamParticle;
+import com.github.standobyte.jojo.client.particle.BloodParticle;
 import com.github.standobyte.jojo.client.particle.MeteoriteVirusParticle;
 import com.github.standobyte.jojo.client.particle.OneTickFlameParticle;
+import com.github.standobyte.jojo.client.particle.OnomatopoeiaParticle;
 import com.github.standobyte.jojo.client.renderer.entity.AfterimageRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.CrimsonBubbleRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.HamonBlockChargeRenderer;
@@ -19,7 +23,9 @@ import com.github.standobyte.jojo.client.renderer.entity.LeavesGliderRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.MRDetectorRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.PillarmanTempleEngravingRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.RoadRollerRenderer;
+import com.github.standobyte.jojo.client.renderer.entity.SoulRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.MRFlameRenderer;
+import com.github.standobyte.jojo.client.renderer.entity.damaging.SCFlameRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.beam.LightBeamRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.beam.SpaceRipperStingyEyesRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.extending.HGBarrierRenderer;
@@ -39,6 +45,7 @@ import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.MRC
 import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.MRCrossfireHurricaneSpecialRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.MRFireballRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.SCRapierRenderer;
+import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.TommyGunBulletRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.stretching.ZoomPunchRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.itemprojectile.BladeHatRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.itemprojectile.ClackersRenderer;
@@ -53,28 +60,40 @@ import com.github.standobyte.jojo.client.renderer.entity.stand.StarPlatinumRende
 import com.github.standobyte.jojo.client.renderer.entity.stand.TheWorldRenderer;
 import com.github.standobyte.jojo.client.renderer.player.layer.KnifeLayer;
 import com.github.standobyte.jojo.client.renderer.player.layer.TornadoOverdriveEffectLayer;
-import com.github.standobyte.jojo.client.ui.ActionsOverlayGui;
-import com.github.standobyte.jojo.client.ui.sprites.SpriteUploaders;
+import com.github.standobyte.jojo.client.resources.CustomResources;
+import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModParticles;
+import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.item.ClackersItem;
 import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
+import com.github.standobyte.jojo.item.StoneMaskItem;
+import com.github.standobyte.jojo.power.stand.StandUtil;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.CloudParticle;
 import net.minecraft.client.particle.CritParticle;
+import net.minecraft.client.particle.IAnimatedSprite;
+import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
+import net.minecraft.client.renderer.model.IBakedModel;
+import net.minecraft.client.renderer.model.ModelResourceLocation;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.CrossbowItem;
+import net.minecraft.item.IItemPropertyGetter;
 import net.minecraft.item.ItemModelsProperties;
 import net.minecraft.item.Items;
+import net.minecraft.particles.BasicParticleType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ColorHandlerEvent;
+import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -85,6 +104,10 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 @EventBusSubscriber(modid = JojoMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ClientSetup {
 
+    private static final IItemPropertyGetter STAND_ITEM_INVISIBLE = (itemStack, clientWorld, livingEntity) -> {
+        return !StandUtil.shouldStandsRender(Minecraft.getInstance().player) ? 1 : 0;
+    };
+    
     @SubscribeEvent
     public static void onFMLClientSetup(FMLClientSetupEvent event) {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.BLADE_HAT.get(), BladeHatRenderer::new);
@@ -104,8 +127,10 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SATIPOROJA_SCARF.get(), SatiporojaScarfRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SATIPOROJA_SCARF_BINDING.get(), SatiporojaScarfBindingRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SNAKE_MUFFLER.get(), SnakeMufflerRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.TOMMY_GUN_BULLET.get(), TommyGunBulletRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.KNIFE.get(), KnifeRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STAND_ARROW.get(), StandArrowRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SOUL.get(), SoulRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.PILLARMAN_TEMPLE_ENGRAVING.get(), PillarmanTempleEngravingRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SP_STAR_FINGER.get(), SPStarFingerRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HG_STRING.get(), HGStringRenderer::new);
@@ -113,6 +138,7 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HG_GRAPPLING_STRING.get(), HGGrapplingStringRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HG_BARRIER.get(), HGBarrierRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SC_RAPIER.get(), SCRapierRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SC_FLAME.get(), SCFlameRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.ROAD_ROLLER.get(), RoadRollerRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.MR_FLAME.get(), MRFlameRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.MR_FIREBALL.get(), MRFireballRenderer::new);
@@ -137,8 +163,14 @@ public class ClientSetup {
         event.enqueueWork(() -> {
             Minecraft mc = event.getMinecraftSupplier().get();
 
+            ItemModelsProperties.register(ModItems.METEORIC_SCRAP.get(), new ResourceLocation(JojoMod.MOD_ID, "icon"), (itemStack, clientWorld, livingEntity) -> {
+                return itemStack.getOrCreateTag().getInt("Icon");
+            });
             ItemModelsProperties.register(ModItems.KNIFE.get(), new ResourceLocation(JojoMod.MOD_ID, "count"), (itemStack, clientWorld, livingEntity) -> {
                 return livingEntity != null ? itemStack.getCount() : 1;
+            });
+            ItemModelsProperties.register(ModItems.STONE_MASK.get(), new ResourceLocation(JojoMod.MOD_ID, "stone_mask_activated"), (itemStack, clientWorld, livingEntity) -> {
+                return itemStack.getTag().getByte(StoneMaskItem.NBT_ACTIVATION_KEY) > 0 ? 1 : 0;
             });
             ItemModelsProperties.register(ModItems.CLACKERS.get(), new ResourceLocation(JojoMod.MOD_ID, "clackers_spin"), (itemStack, clientWorld, livingEntity) -> {
                 if (livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack) {
@@ -147,22 +179,30 @@ public class ClientSetup {
                 }
                 return 0;
             });
-            ItemModelsProperties.register(Items.BOW, new ResourceLocation("stand_arrow"), (itemStack, clientWorld, livingEntity) -> {
+            ItemModelsProperties.register(ModItems.TOMMY_GUN.get(), new ResourceLocation(JojoMod.MOD_ID, "swing"), (itemStack, clientWorld, livingEntity) -> {
+                return livingEntity != null && livingEntity.swinging && livingEntity.getItemInHand(livingEntity.swingingArm) == itemStack ? 1 : 0;
+            });
+            ItemModelsProperties.register(Items.BOW, new ResourceLocation(JojoMod.MOD_ID, "stand_arrow"), (itemStack, clientWorld, livingEntity) -> {
                 return livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack
                         && livingEntity.getProjectile(itemStack).getItem() instanceof StandArrowItem ? 1 : 0;
             });
-            ItemModelsProperties.register(Items.CROSSBOW, new ResourceLocation("stand_arrow"), (itemStack, clientWorld, livingEntity) -> {
+            ItemModelsProperties.register(Items.CROSSBOW, new ResourceLocation(JojoMod.MOD_ID, "stand_arrow"), (itemStack, clientWorld, livingEntity) -> {
                 return livingEntity != null && CrossbowItem.isCharged(itemStack) && (
                         CrossbowItem.containsChargedProjectile(itemStack, ModItems.STAND_ARROW.get()) || 
                         CrossbowItem.containsChargedProjectile(itemStack, ModItems.STAND_ARROW_BEETLE.get())) ? 1 : 0;
             });
+            ItemModelsProperties.register(ModItems.STAND_DISC.get(), new ResourceLocation(JojoMod.MOD_ID, "stand_id"), (itemStack, clientWorld, livingEntity) -> {
+                return StandDiscItem.validStandDisc(itemStack) ? ModStandTypes.Registry.getNumericId(StandDiscItem.getStandResLocFromStack(itemStack)) : -1;
+            });
+//            ItemModelsProperties.register(ModItems.EMPEROR.get(), new ResourceLocation(JojoMod.MOD_ID, "stand_invisible"), STAND_ITEM_INVISIBLE);
 
             RenderTypeLookup.setRenderLayer(ModBlocks.STONE_MASK.get(), RenderType.cutoutMipped());
             RenderTypeLookup.setRenderLayer(ModBlocks.SLUMBERING_PILLARMAN.get(), RenderType.cutoutMipped());
 
             ClientEventHandler.init(mc);
             ActionsOverlayGui.init(mc);
-            StandControlHandler.init(mc);
+            StandController.init(mc);
+            SoulController.init(mc);
             InputHandler.init(mc);
             InputHandler.getInstance().setActionsOverlay(ActionsOverlayGui.getInstance());
 
@@ -187,18 +227,57 @@ public class ClientSetup {
     @SubscribeEvent
     public static void registerItemColoring(ColorHandlerEvent.Item event) {
         ItemColors itemColors = event.getItemColors();
-        itemColors.register((stack, tintIndex) -> StandDiscItem.brightenColor(StandDiscItem.getColor(stack)), 
-                ModItems.STAND_DISC.get());
+        itemColors.register((stack, layer) -> layer == 0 ? -1 : 
+            ClientUtil.discColor(StandDiscItem.getColor(stack)), ModItems.STAND_DISC.get());
+    }
+    
+    @SubscribeEvent
+    public static void onModelBake(ModelBakeEvent event) {
+        registerCustomBakedModel(ModItems.ROAD_ROLLER.get().getRegistryName(), event.getModelRegistry(), 
+                model -> new RoadRollerBakedModel(model));
+    }
+    
+    private static void registerCustomBakedModel(ResourceLocation resLoc, 
+            Map<ResourceLocation, IBakedModel> modelRegistry, UnaryOperator<IBakedModel> newModel) {
+        ModelResourceLocation modelResLoc = new ModelResourceLocation(resLoc, "inventory");
+        IBakedModel existingModel = modelRegistry.get(modelResLoc);
+        if (existingModel == null) {
+            throw new RuntimeException("Did not find original model in registry");
+        }
+        else if (existingModel.isCustomRenderer()) {
+            throw new RuntimeException("Tried to replace model twice");
+        }
+        else {
+            modelRegistry.put(modelResLoc, newModel.apply(existingModel));
+        }
     }
 
     @SubscribeEvent
     public static void onMcConstructor(ParticleFactoryRegisterEvent event) {
         Minecraft mc = Minecraft.getInstance();
+        mc.particleEngine.register(ModParticles.BLOOD.get(), BloodParticle.Factory::new);
         mc.particleEngine.register(ModParticles.HAMON_SPARK.get(), CritParticle.Factory::new);
         mc.particleEngine.register(ModParticles.METEORITE_VIRUS.get(), MeteoriteVirusParticle.Factory::new);
-        mc.particleEngine.register(ModParticles.MENACING.get(), MenacingParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.MENACING.get(), OnomatopoeiaParticle.GoFactory::new);
+        mc.particleEngine.register(ModParticles.RESOLVE.get(), OnomatopoeiaParticle.DoFactory::new);
+        mc.particleEngine.register(ModParticles.SOUL_CLOUD.get(), SoulCloudParticleFactory::new);
+        mc.particleEngine.register(ModParticles.AIR_STREAM.get(), AirStreamParticle.Factory::new);
         mc.particleEngine.register(ModParticles.FLAME_ONE_TICK.get(), OneTickFlameParticle.Factory::new);
         // yep...
-        SpriteUploaders.initSpriteUploaders(mc);
+        CustomResources.initCustomResourceManagers(mc);
+    }
+
+    private static class SoulCloudParticleFactory extends CloudParticle.Factory {
+
+        public SoulCloudParticleFactory(IAnimatedSprite sprite) {
+            super(sprite);
+        }
+
+        @Override
+        public Particle createParticle(BasicParticleType type, ClientWorld world, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+           Particle particle = super.createParticle(type, world, x, y, z, xSpeed, ySpeed, zSpeed);
+           particle.setColor(1.0F, 1.0F, 0.25F);
+           return particle;
+        }
     }
 }

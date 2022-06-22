@@ -40,6 +40,7 @@ public class ClOnLeapPacket {
                 if (power.canLeap()) {
                     float leapStrength = power.leapStrength();
                     if (leapStrength > 0) {
+                        player.setShiftKeyDown(false);
                         player.hasImpulse = true;
                         power.onLeap();
                         BlockPos posOn = getOnPos(player);

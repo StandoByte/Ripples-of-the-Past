@@ -9,7 +9,7 @@ import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -56,7 +56,7 @@ public class HamonCutterEntity extends ModdedProjectileEntity {
     @Override
     protected boolean hurtTarget(Entity target, LivingEntity owner) {
         boolean projectileAttack = super.hurtTarget(target, owner);
-        boolean hamonAttack = ModDamageSources.dealHamonDamage(target, 0.075F, this, owner);
+        boolean hamonAttack = DamageUtil.dealHamonDamage(target, 0.075F, this, owner);
         return projectileAttack || hamonAttack;
     }
 
@@ -71,9 +71,9 @@ public class HamonCutterEntity extends ModdedProjectileEntity {
                     for (EffectInstance effectInstance : effects) {
                         Effect effect = effectInstance.getEffect();
                         if (effect.isInstantenous()) {
-                            effect.applyInstantenousEffect(this, getOwner(), target, effectInstance.getAmplifier(), getEffectDurationFactor());
+                            effect.applyInstantenousEffect(this, getOwner(), target, effectInstance.getAmplifier(), 3 / 16);
                         } else {
-                            target.addEffect(new EffectInstance(effect, MathHelper.floor(effectInstance.getDuration() * getEffectDurationFactor()), 
+                            target.addEffect(new EffectInstance(effect, MathHelper.floor(effectInstance.getDuration()), 
                                     effectInstance.getAmplifier(), effectInstance.isAmbient(), effectInstance.isVisible()));
                         }
                     }
@@ -84,15 +84,11 @@ public class HamonCutterEntity extends ModdedProjectileEntity {
             if (owner != null) {
                 INonStandPower.getNonStandPowerOptional(owner).ifPresent(power -> {
                     power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
-                        hamon.hamonPointsFromAction(HamonStat.STRENGTH, ModActions.ZEPPELI_HAMON_CUTTER.get().getManaCost() / 6F);
+                        hamon.hamonPointsFromAction(HamonStat.STRENGTH, ModActions.ZEPPELI_HAMON_CUTTER.get().getEnergyCost(null) / 8F);
                     });
                 });
             }
         }
-    }
-
-    private float getEffectDurationFactor() {
-        return 0.75F;
     }
 
     @Override
@@ -111,7 +107,7 @@ public class HamonCutterEntity extends ModdedProjectileEntity {
     }
     
     @Override
-    protected int ticksLifespan() {
+	public int ticksLifespan() {
         return 100;
     }
     

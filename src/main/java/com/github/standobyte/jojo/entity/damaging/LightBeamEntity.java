@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.entity.damaging;
 
-import com.github.standobyte.jojo.util.JojoModUtil;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -37,7 +37,7 @@ public class LightBeamEntity extends DamagingEntity {
         this.length = length;
         LivingEntity shooter = getOwner();
         if (shooter != null) {
-            target = rayTrace();
+            target = rayTrace()[0];
             if (target.getType() != RayTraceResult.Type.MISS) {
                 length = MathHelper.sqrt(shooter.distanceToSqr(target.getLocation()));
             }
@@ -45,8 +45,8 @@ public class LightBeamEntity extends DamagingEntity {
     }
 
     @Override
-    public RayTraceResult rayTrace() {
-        return JojoModUtil.rayTrace(this, length, e -> e != getOwner());
+    public RayTraceResult[] rayTrace() {
+        return new RayTraceResult[] { JojoModUtil.rayTrace(this, length, e -> e != getOwner()) };
     }
     
     @Override
@@ -62,7 +62,7 @@ public class LightBeamEntity extends DamagingEntity {
         if (!level.isClientSide()) {
             Entity target = entityRayTraceResult.getEntity();
             target.setSecondsOnFire((int) damage / 2);
-            ModDamageSources.dealUltravioletDamage(target, damage, this, getOwner(), false);
+            DamageUtil.dealUltravioletDamage(target, damage, this, getOwner(), false);
         }
     }
 
@@ -146,7 +146,7 @@ public class LightBeamEntity extends DamagingEntity {
     protected void defineSynchedData() {}
 
     @Override
-    protected int ticksLifespan() {
+	public int ticksLifespan() {
         return 1;
     }
 

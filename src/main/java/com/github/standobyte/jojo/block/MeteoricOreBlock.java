@@ -5,7 +5,8 @@ import java.util.Random;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.init.ModParticles;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.power.stand.StandUtil;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.OreBlock;
@@ -45,8 +46,8 @@ public class MeteoricOreBlock extends OreBlock {
         double y = pos.getY();
         double z = pos.getZ();
         for (LivingEntity entity : world.getEntitiesOfClass(LivingEntity.class, (new AxisAlignedBB(x, y, z, x, y, z)).inflate(2.0D, 2.0D, 2.0D))) {
-            if (entity.getMobType() != CreatureAttribute.UNDEAD && entity.getHealth() < entity.getMaxHealth()) {
-                entity.hurt(ModDamageSources.STAND_VIRUS, 4.0F);
+            if (entity.getMobType() != CreatureAttribute.UNDEAD && entity.getHealth() < entity.getMaxHealth() && !StandUtil.isEntityStandUser(entity)) {
+                entity.hurt(DamageUtil.STAND_VIRUS, 4.0F);
             }
         }
         world.getBlockTicks().scheduleTick(pos, this, 10);
@@ -75,7 +76,7 @@ public class MeteoricOreBlock extends OreBlock {
     public void playerDestroy(World world, PlayerEntity player, BlockPos pos, BlockState state, @Nullable TileEntity tileEntity, ItemStack stack) {
         super.playerDestroy(world, player, pos, state, tileEntity, stack);
         if (player.getHealth() < player.getMaxHealth()) {
-            player.hurt(ModDamageSources.STAND_VIRUS, 10.0F);
+            player.hurt(DamageUtil.STAND_VIRUS, 10.0F);
         }
     }
 }

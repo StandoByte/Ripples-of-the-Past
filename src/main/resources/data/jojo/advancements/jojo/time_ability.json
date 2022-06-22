@@ -1,0 +1,69 @@
+{
+  "parent": "jojo:jojo/summon_stand",
+  "display": {
+    "icon": {
+      "item": "minecraft:clock"
+    },
+    "title": {
+      "translate": "advancements.jojo.time_ability.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.time_ability.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "sp_ts": {
+      "trigger": "jojo:action_perform",
+      "conditions": {
+        "action": {
+          "name": "jojo:star_platinum_time_stop"
+        }
+      }
+    },
+    "sp_ts_blink": {
+      "trigger": "jojo:action_perform",
+      "conditions": {
+        "action": {
+          "name": "jojo:star_platinum_ts_blink"
+        }
+      }
+    },
+    "tw_ts": {
+      "trigger": "jojo:action_perform",
+      "conditions": {
+        "action": {
+          "name": "jojo:the_world_time_stop"
+        }
+      }
+    },
+    "tw_ts_blink": {
+      "trigger": "jojo:action_perform",
+      "conditions": {
+        "action": {
+          "name": "jojo:the_world_ts_blink"
+        }
+      }
+    },
+    "tw_ts_punch": {
+      "trigger": "jojo:action_perform",
+      "conditions": {
+        "action": {
+          "name": "jojo:the_world_ts_punch"
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "sp_ts",
+      "sp_ts_blink",
+      "tw_ts",
+      "tw_ts_blink",
+      "tw_ts_punch"
+    ]
+  ]
+}

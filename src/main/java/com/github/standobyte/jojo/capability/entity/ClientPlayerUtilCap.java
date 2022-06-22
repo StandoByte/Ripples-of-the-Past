@@ -9,6 +9,7 @@ public class ClientPlayerUtilCap {
 //    private final AbstractClientPlayerEntity player;
     private final SoundHandler soundManager;
     private ISound currentVoiceLine;
+    public boolean lastVoiceLineTriggered;
     public boolean syoSound;
     
     public ClientPlayerUtilCap(AbstractClientPlayerEntity player) {

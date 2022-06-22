@@ -1,43 +1,120 @@
 package com.github.standobyte.jojo.power.stand.type;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.action.actions.StandAction;
+import com.github.standobyte.jojo.action.actions.StandEntityHeavyAttack;
+import com.github.standobyte.jojo.action.actions.StandEntityLightAttack;
+import com.github.standobyte.jojo.action.actions.StandEntityMeleeBarrage;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.power.stand.StandPower;
+import com.github.standobyte.jojo.power.stand.stats.StandStats;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent;
 
-public class EntityStandType extends StandType {
+public class EntityStandType<T extends StandStats> extends StandType<T> {
     private final Supplier<? extends StandEntityType<? extends StandEntity>> entityTypeSupplier;
+    private final boolean hasHeavyAttack;
+    private final boolean hasFastAttack;
 
-    public EntityStandType(int tier, int color, ITextComponent partName, StandAction[] attacks, StandAction[] abilities, 
-            Supplier<SoundEvent> summonShoutSupplier, Supplier<? extends StandEntityType<? extends StandEntity>> entityTypeSupplier) {
-        super(tier, color, partName, attacks, abilities, summonShoutSupplier);
+    public EntityStandType(int color, ITextComponent partName, 
+            StandAction[] attacks, StandAction[] abilities, 
+            Class<T> statsClass, T defaultStats, 
+            Supplier<? extends StandEntityType<? extends StandEntity>> entityTypeSupplier) {
+        super(color, partName, attacks, abilities, statsClass, defaultStats);
         this.entityTypeSupplier = entityTypeSupplier;
+        
+        hasHeavyAttack = Arrays.stream(attacks).anyMatch(
+                attack -> attack instanceof StandEntityHeavyAttack || attack.getShiftVariationIfPresent() instanceof StandEntityHeavyAttack);
+        hasFastAttack = Arrays.stream(attacks).anyMatch(
+                attack -> attack instanceof StandEntityLightAttack || attack instanceof StandEntityMeleeBarrage);
     }
 
     public StandEntityType<? extends StandEntity> getEntityType() {
         return entityTypeSupplier.get();
     }
+    
+    @Override
+    public RayTraceResult clientHitResult(IStandPower power, Entity cameraEntity, RayTraceResult vanillaHitResult) {
+        if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
+            StandEntity stand = (StandEntity) power.getStandManifestation();
+            if (JojoModUtil.isAnotherEntityTargeted(vanillaHitResult, stand)) {
+                return super.clientHitResult(power, cameraEntity, vanillaHitResult);
+            }
+
+            RayTraceResult standHitResult = stand.precisionRayTrace(cameraEntity);
+
+            if (JojoModUtil.isAnotherEntityTargeted(standHitResult, stand)) {
+                return standHitResult;
+            }
+        }
+        return super.clientHitResult(power, cameraEntity, vanillaHitResult);
+    }
+    
+    @Override
+    public boolean usesStamina() {
+        return true;
+    }
+    
+    @Override
+    public float getStaminaRegen(IStandPower power) {
+        if (power.isActive()) {
+            StandEntity stand = (StandEntity) power.getStandManifestation();
+            return stand.getCurrentTaskActionOptional()
+                    .map(action -> action.canStaminaRegen(power, stand))
+                    .orElse(true) ? 1F : 0;
+        }
+        return super.getStaminaRegen(power);
+    }
 
     @Override
-    public boolean canTickMana(LivingEntity user, IPower<?> power) {
-        return !power.isActive() || user.tickCount % 20 == 0 && user instanceof PlayerEntity && ((PlayerEntity) user).getFoodData().getFoodLevel() > 17;
+    public boolean usesResolve() {
+        return true;
+    }
+    
+    @Override
+    public void onNewResolveLevel(IStandPower power) {
+        super.onNewResolveLevel(power);
+        if (power.isActive()) {
+            StandEntity stand = (StandEntity) power.getStandManifestation();
+            stand.modifiersFromResolveLevel(power.getStatsDevelopment());
+        }
+    }
+    
+    @Override
+    public boolean usesStandComboMechanic() {
+        return hasHeavyAttack && hasFastAttack;
+    }
+    
+    @Override
+    public void toggleSummon(IStandPower standPower) {
+        if (!standPower.isActive()) {
+            summon(standPower.getUser(), standPower, false);
+        }
+        else {
+            StandEntity standEntity = (StandEntity) standPower.getStandManifestation();
+            if (standEntity.isArmsOnlyMode()) {
+                standEntity.fullSummonFromArms();
+                triggerAdvancement(standPower, standPower.getStandManifestation());
+            }
+            else {
+                unsummon(standPower.getUser(), standPower);
+            }
+        }
     }
 
     @Override
@@ -63,9 +140,20 @@ public class EntityStandType extends StandType {
                     standEntity.addEffect(new EffectInstance(userEffectInstance));
                 }
             }
+            
+            standEntity.playStandSummonSound();
+            
             PacketManager.sendToClientsTrackingAndSelf(new TrSetStandEntityPacket(user.getId(), standEntity.getId()), user);
+            
+            triggerAdvancement(standPower, standPower.getStandManifestation());
         }
         return true;
+    }
+    
+    protected void triggerAdvancement(IStandPower standPower, IStandManifestation stand) {
+        if (stand instanceof StandEntity && !((StandEntity) stand).isArmsOnlyMode()) {
+            super.triggerAdvancement(standPower, stand);
+        }
     }
 
     @Override
@@ -73,19 +161,12 @@ public class EntityStandType extends StandType {
         if (!user.level.isClientSide()) {
             StandEntity standEntity = ((StandEntity) standPower.getStandManifestation());
             if (standEntity != null) {
-                standEntity.retractStand(true);
-            }
-        }
-    }
-
-    @Override
-    public void tickUser(LivingEntity user, IPower<?> power) {
-        super.tickUser(user, power);
-        IStandManifestation stand = ((StandPower) power).getStandManifestation();
-        if (stand instanceof StandEntity) {
-            StandEntity standEntity = (StandEntity) stand;
-            if (standEntity.level != user.level) {
-                forceUnsummon(user, (IStandPower) power);
+                if (!standEntity.isBeingRetracted()) {
+                    standEntity.retractStand(true);
+                }
+                else {
+                    standEntity.stopRetraction();
+                }
             }
         }
     }
@@ -99,6 +180,18 @@ public class EntityStandType extends StandType {
                 standPower.setStandManifestation(null);
                 PacketManager.sendToClientsTrackingAndSelf(new TrSetStandEntityPacket(user.getId(), -1), user);
                 standEntity.remove();
+            }
+        }
+    }
+
+    @Override
+    public void tickUser(LivingEntity user, IStandPower power) {
+        super.tickUser(user, power);
+        IStandManifestation stand = power.getStandManifestation();
+        if (stand instanceof StandEntity) {
+            StandEntity standEntity = (StandEntity) stand;
+            if (standEntity.level != user.level) {
+                forceUnsummon(user, power);
             }
         }
     }

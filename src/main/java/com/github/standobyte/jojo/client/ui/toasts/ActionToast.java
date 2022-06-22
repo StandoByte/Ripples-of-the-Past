@@ -2,8 +2,12 @@ package com.github.standobyte.jojo.client.ui.toasts;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.client.ui.sprites.SpriteUploaders;
+import com.github.standobyte.jojo.client.resources.CustomResources;
+import com.github.standobyte.jojo.power.IPower.ActionType;
+import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -20,14 +24,14 @@ public class ActionToast implements IToast {
     private static final ITextComponent NAME = new TranslationTextComponent("jojo.action.toast.title");
     private final ITextComponent description;
     private final Type type;
-    private final List<Action> actions = Lists.newArrayList();
-    private IPowerType<?> powerType;
+    private final List<Action<?>> actions = Lists.newArrayList();
+    private IPowerType<?, ?> powerType;
     private long lastChanged;
     private boolean changed;
 
-    private ActionToast(Type type, Action action, IPowerType<?> powerType) {
+    private ActionToast(Type type, Action<?> action, IPowerType<?, ?> powerType) {
         this.type = type;
-        this.description = new TranslationTextComponent("jojo.action.toast." + type.powerType + type.actionType + "description");
+        this.description = new TranslationTextComponent("jojo.action.toast." + type.name + "description");
         this.powerType = powerType;
         this.actions.add(action);
     }
@@ -48,7 +52,7 @@ public class ActionToast implements IToast {
             toastGui.blit(matrixStack, 0, 0, 0, 32, 160, 32);
             mc.font.draw(matrixStack, NAME, 30.0F, 7.0F, -11534256);
             mc.font.draw(matrixStack, description, 30.0F, 18.0F, -16777216);
-            Action action = actions.get((int)(delta / Math.max(1L, 5000L / (long)actions.size()) % (long)actions.size()));
+            Action<?> action = actions.get((int)(delta / Math.max(1L, 5000L / (long)actions.size()) % (long)actions.size()));
             RenderSystem.pushMatrix();
             RenderSystem.scalef(0.6F, 0.6F, 1.0F);
             matrixStack.pushPose();
@@ -57,21 +61,21 @@ public class ActionToast implements IToast {
             ToastGui.blit(matrixStack, 3, 3, 0, 0, 16, 16, 16, 16);
             RenderSystem.popMatrix();
             matrixStack.popPose();
-            TextureAtlasSprite textureAtlasSprite = SpriteUploaders.getActionSprites().getSprite(action);
+            TextureAtlasSprite textureAtlasSprite = CustomResources.getActionSprites().getSprite(action);
             mc.getTextureManager().bind(textureAtlasSprite.atlas().location());
             ToastGui.blit(matrixStack, 8, 8, 0, 16, 16, textureAtlasSprite);
             return delta - this.lastChanged >= 5000L ? IToast.Visibility.HIDE : IToast.Visibility.SHOW;
         }
     }
 
-    protected void addAction(Action action, IPowerType<?> powerType) {
+    protected void addAction(Action<?> action, IPowerType<?, ?> powerType) {
         if (actions.add(action)) {
             this.powerType = powerType;
             changed = true;
         }
     }
 
-    public static void addOrUpdate(ToastGui toastGui, Type type, Action action, IPowerType<?> powerType) {
+    public static void addOrUpdate(ToastGui toastGui, Type type, Action<?> action, IPowerType<?, ?> powerType) {
         ActionToast toast = toastGui.getToast(ActionToast.class, type);
         if (toast == null) {
             toastGui.addToast(new ActionToast(type, action, powerType));
@@ -87,19 +91,35 @@ public class ActionToast implements IToast {
     }
 
     public static enum Type {
-        NON_STAND_ATTACK("non_stand.", "attack."),
-        NON_STAND_ABILITY("non_stand.", "ability."),
-        STAND_ATTACK("stand.", "attack."),
-        STAND_ABILITY("stand.", "ability."),
-        STAND_ATTACK_VARIATION("stand.", "attack.shift."),
-        STAND_ABILITY_VARIATION("stand.", "ability.shift.");
+//        NON_STAND_ATTACK("non_stand.attack.", PowerClassification.NON_STAND, ActionType.ATTACK, false),
+//        NON_STAND_ABILITY("non_stand.ability.", PowerClassification.NON_STAND, ActionType.ABILITY, false),
+        STAND_ATTACK("stand.attack.", PowerClassification.STAND, ActionType.ATTACK, false),
+        STAND_ABILITY("stand.ability.", PowerClassification.STAND, ActionType.ABILITY, false),
+        STAND_ATTACK_VARIATION("stand.attack.shift.", PowerClassification.STAND, ActionType.ATTACK, true),
+        STAND_ABILITY_VARIATION("stand.ability.shift.", PowerClassification.STAND, ActionType.ABILITY, true);
         
-        private final String powerType;
-        private final String actionType;
+        private final String name;
+        private final PowerClassification classification;
+        private final ActionType actionType;
+        private final boolean shiftVariation;
         
-        private Type(String powerType, String actionType) {
-            this.powerType = powerType;
+        private Type(String name, PowerClassification classification, ActionType actionType, boolean shiftVariation) {
+            this.name = name;
+            this.classification = classification;
             this.actionType = actionType;
+            this.shiftVariation = shiftVariation;
+        }
+        
+        @Nullable
+        public static Type getToastType(PowerClassification classification, ActionType actionType, boolean shiftVariation) {
+            for (Type toastType : Type.values()) {
+                if (toastType.classification == classification
+                        && toastType.actionType == actionType
+                        && toastType.shiftVariation == shiftVariation) {
+                    return toastType;
+                }
+            }
+            return null;
         }
     }
 }

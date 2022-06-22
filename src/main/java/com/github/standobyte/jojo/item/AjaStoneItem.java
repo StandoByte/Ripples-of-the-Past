@@ -13,7 +13,7 @@ import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.util.JojoModUtil;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -38,15 +38,15 @@ public class AjaStoneItem extends Item {
     @Override
     public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (player.isShiftKeyDown()) {
+//        if (player.isShiftKeyDown()) {
             INonStandPower power = INonStandPower.getPlayerNonStandPower(player);
-            if (power.hasMana(getHamonChargeCost())) {
+            if (power.hasEnergy(getHamonChargeCost())) {
                 Optional<HamonData> hamonOptional = power.getTypeSpecificData(ModNonStandPowers.HAMON.get());
                 if (hamonOptional.isPresent()) {
                     HamonData hamon = hamonOptional.get();
-                    if (hamon.isSkillLearned(HamonSkill.AJA_STONE_KEEPER) && power.consumeMana(getHamonChargeCost())) {
+                    if (hamon.isSkillLearned(HamonSkill.AJA_STONE_KEEPER) && power.consumeEnergy(getHamonChargeCost())) {
                         if (!world.isClientSide()) {
-                            useStone(world, player, stack, 0.75F * hamon.getHamonDamageMultiplier(), true, false);
+                            useStone(world, player, stack, 0.75F * hamon.getHamonDamageMultiplier() * hamon.getBloodstreamEfficiency(), true, false);
                             hamon.hamonPointsFromAction(HamonStat.STRENGTH, getHamonChargeCost());
                             JojoModUtil.sayVoiceLine(player, getHamonChargeVoiceLine());
                         }
@@ -58,7 +58,7 @@ public class AjaStoneItem extends Item {
                     }
                 }
             }
-        }
+//        }
         if (sufficientLight(world, player)) {
             player.startUsingItem(hand);
             return ActionResult.consume(stack);
@@ -93,9 +93,10 @@ public class AjaStoneItem extends Item {
     }
 
     @Override
-    public void onUseTick(World world, LivingEntity entity, ItemStack stack, int count) {
-        if (world.isClientSide() && count == getUseDuration(stack)) {
-            ClientTickingSoundsHelper.playAjaStoneChargingSound(entity, stack);
+    public void onUseTick(World world, LivingEntity entity, ItemStack stack, int remainingTicks) {
+        if (world.isClientSide() && remainingTicks == getUseDuration(stack)) {
+            ClientTickingSoundsHelper.playItemUseSound(entity, ModSounds.AJA_STONE_CHARGING.get(), 
+                    0.25F, 1.0F + (random.nextFloat() - random.nextFloat()) * 0.05F, false, stack);
         }
     }
     

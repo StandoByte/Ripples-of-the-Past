@@ -1,12 +1,15 @@
 package com.github.standobyte.jojo.init;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.client.renderer.RoadRollerISTER;
 import com.github.standobyte.jojo.item.AjaStoneItem;
 import com.github.standobyte.jojo.item.BladeHatItem;
 import com.github.standobyte.jojo.item.ClackersItem;
 import com.github.standobyte.jojo.item.CustomModelArmorItem;
+import com.github.standobyte.jojo.item.GumItem;
 import com.github.standobyte.jojo.item.KnifeItem;
 import com.github.standobyte.jojo.item.ModArmorMaterials;
+import com.github.standobyte.jojo.item.RoadRollerItem;
 import com.github.standobyte.jojo.item.SatiporojaScarfItem;
 import com.github.standobyte.jojo.item.SledgehammerItem;
 import com.github.standobyte.jojo.item.StandArrowItem;
@@ -14,9 +17,11 @@ import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StandRemoverItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
 import com.github.standobyte.jojo.item.SuperAjaStoneItem;
+import com.github.standobyte.jojo.item.TommyGunItem;
 
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.Food;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemTier;
 import net.minecraft.item.Rarity;
@@ -30,6 +35,7 @@ public class ModItems {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, JojoMod.MOD_ID);
 
 
+    
     public static final RegistryObject<SledgehammerItem> IRON_SLEDGEHAMMER = ITEMS.register("sledgehammer", 
             () -> new SledgehammerItem(ItemTier.IRON, 9, -3.3F, new Item.Properties().tab(JojoMod.MAIN_TAB)));
 
@@ -60,11 +66,18 @@ public class ModItems {
     public static final RegistryObject<ClackersItem> CLACKERS = ITEMS.register("clackers",
             () -> new ClackersItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1)));
 
+    public static final RegistryObject<TommyGunItem> TOMMY_GUN = ITEMS.register("tommy_gun",
+            () -> new TommyGunItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1)));
+
     public static final RegistryObject<BlockItem> SLUMBERING_PILLARMAN = ITEMS.register("slumbering_pillarman", 
             () -> new BlockItem(ModBlocks.SLUMBERING_PILLARMAN.get(), new Item.Properties().rarity(Rarity.EPIC)));
 
     public static final RegistryObject<KnifeItem> KNIFE = ITEMS.register("knife", 
             () -> new KnifeItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(16)));
+
+    public static final RegistryObject<RoadRollerItem> ROAD_ROLLER = ITEMS.register("road_roller", 
+            () -> new RoadRollerItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1)
+                    .setISTER(() -> RoadRollerISTER::new)));
 
     public static final RegistryObject<BlockItem> METEORIC_IRON = ITEMS.register("meteoric_iron", 
             () -> new BlockItem(ModBlocks.METEORIC_IRON.get(), new Item.Properties().tab(JojoMod.MAIN_TAB)));
@@ -89,5 +102,8 @@ public class ModItems {
 
     public static final RegistryObject<StandRemoverItem> STAND_REMOVER = ITEMS.register("stand_remover",
             () -> new StandRemoverItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1)));
+
+    public static final RegistryObject<Item> COCOA_GUM = ITEMS.register("cocoa_gum", 
+            () -> new GumItem(new Item.Properties()/*.tab(JojoMod.MAIN_TAB)*/.food(new Food.Builder().nutrition(2).saturationMod(0.1F).build())));
 
 }

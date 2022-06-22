@@ -13,8 +13,8 @@ import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.util.MathUtil;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -41,7 +41,7 @@ import net.minecraftforge.fml.network.NetworkHooks;
 
 public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawnData {
     private static final double GRAVITY = -0.05D;
-    private static final float MAX_ENERGY = ModActions.HAMON_LIFE_MAGNETISM.get().getManaNeeded(0, null);
+    private static final float MAX_ENERGY = ModActions.HAMON_LIFE_MAGNETISM.get().getEnergyNeeded(0, null);
     private static final float MAX_HEALTH = 4F;
 
     private static final DataParameter<Boolean> IS_FLYING = EntityDataManager.defineId(LeavesGliderEntity.class, DataSerializers.BOOLEAN);
@@ -98,29 +98,29 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
         
         if (!level.isClientSide()) {
             Iterator<INonStandPower> iter = passengerPowers.iterator();
-            boolean infiniteMana = false;
+            boolean infiniteEnergy = false;
             while (iter.hasNext()) {
                 INonStandPower power = iter.next();
                 if (power.getType() != ModNonStandPowers.HAMON.get()) {
                     iter.remove();
                 }
-                else if (!infiniteMana && power.infiniteMana()) {
-                    infiniteMana = true;
+                else if (!infiniteEnergy && power.isUserCreative()) {
+                    infiniteEnergy = true;
                 }
             }
-            if (infiniteMana) {
+            if (infiniteEnergy) {
                 setEnergy(MAX_ENERGY);
             }
             else {
                 setEnergy(Math.max(getEnergy() - 2, 0));
                 float energyToReplenish = MAX_ENERGY - getEnergy();
-                int hamonUsersWithMana = passengerPowers.size();
-                while (energyToReplenish > 0 && hamonUsersWithMana > 0) {
-                    float energyFromEach = energyToReplenish / hamonUsersWithMana;
+                int hamonUsersWithEnergy = passengerPowers.size();
+                while (energyToReplenish > 0 && hamonUsersWithEnergy > 0) {
+                    float energyFromEach = energyToReplenish / hamonUsersWithEnergy;
                     for (INonStandPower power : passengerPowers) {
                         float energyConsumed = consumeEnergy(power, energyFromEach);
                         if (energyConsumed < energyFromEach) {
-                            hamonUsersWithMana--;
+                            hamonUsersWithEnergy--;
                         }
                         energyToReplenish -= energyConsumed;
                     }
@@ -150,9 +150,9 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
     }
     
     private float consumeEnergy(INonStandPower power, float energy) {
-        energy = Math.min(energy, power.getMana());
+        energy = Math.min(energy, power.getEnergy());
         power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get().hamonPointsFromAction(HamonStat.CONTROL, energy);
-        power.consumeMana(energy);
+        power.consumeEnergy(energy);
         return energy;
     }
 
@@ -324,7 +324,7 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
         if (!level.isClientSide && isAlive()) {
             if (source instanceof LivingEntity) {
                 float energy = Math.min(getEnergy(), 100);
-                ModDamageSources.dealHamonDamage((LivingEntity) source, energy * 0.04F, this, null);
+                DamageUtil.dealHamonDamage((LivingEntity) source, energy * 0.04F, this, null);
                 setEnergy(getEnergy() - energy);
             }
             setHealth(getHealth() - amount);

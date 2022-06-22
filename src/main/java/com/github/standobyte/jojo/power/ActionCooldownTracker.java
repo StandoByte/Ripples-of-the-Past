@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncCooldownPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrCooldownPacket;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -17,7 +17,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 
 public class ActionCooldownTracker {
-    private final Map<Action, ActionCooldownTracker.Cooldown> cooldowns = new HashMap<>();
+    private final Map<Action<?>, ActionCooldownTracker.Cooldown> cooldowns = new HashMap<>();
     private int tickCount;
 
     public ActionCooldownTracker() {}
@@ -27,7 +27,7 @@ public class ActionCooldownTracker {
         for (String key : nbt.getAllKeys()) {
             int[] array = nbt.getIntArray(key);
             if (array.length == 2) {
-                Action action = ModActions.Registry.getRegistry().getValue(new ResourceLocation(key));
+                Action<?> action = ModActions.Registry.getRegistry().getValue(new ResourceLocation(key));
                 if (action != null) {
                     cooldowns.put(action, new ActionCooldownTracker.Cooldown(array[0], array[1]));
                 }
@@ -37,17 +37,17 @@ public class ActionCooldownTracker {
     
     public CompoundNBT writeNBT() {
         CompoundNBT nbt = new CompoundNBT();
-        for (Entry<Action, ActionCooldownTracker.Cooldown> entry : cooldowns.entrySet()) {
+        for (Entry<Action<?>, ActionCooldownTracker.Cooldown> entry : cooldowns.entrySet()) {
             nbt.putIntArray(entry.getKey().getRegistryName().toString(), new int[]{ entry.getValue().startTime - tickCount, entry.getValue().endTime - tickCount });
         }
         return nbt;
     }
 
-    public boolean isOnCooldown(Action action) {
+    public boolean isOnCooldown(Action<?> action) {
         return getCooldownPercent(action, 0.0F) > 0.0F;
     }
 
-    public float getCooldownPercent(Action action, float partialTick) {
+    public float getCooldownPercent(Action<?> action, float partialTick) {
         ActionCooldownTracker.Cooldown cooldown = cooldowns.get(action);
         if (cooldown != null) {
             float cooldownTotal = (float) (cooldown.endTime - cooldown.startTime);
@@ -60,9 +60,9 @@ public class ActionCooldownTracker {
     public void tick() {
         ++tickCount;
         if (!cooldowns.isEmpty()) {
-            Iterator<Entry<Action, ActionCooldownTracker.Cooldown>> iterator = cooldowns.entrySet().iterator();
+            Iterator<Entry<Action<?>, ActionCooldownTracker.Cooldown>> iterator = cooldowns.entrySet().iterator();
             while (iterator.hasNext()) {
-                Entry<Action, ActionCooldownTracker.Cooldown> entry = iterator.next();
+                Entry<Action<?>, ActionCooldownTracker.Cooldown> entry = iterator.next();
                 if (entry.getValue().endTime <= tickCount) {
                     iterator.remove();
                 }
@@ -70,22 +70,22 @@ public class ActionCooldownTracker {
         }
     }
 
-    public void addCooldown(Action action, int ticks) {
+    public void addCooldown(Action<?> action, int ticks) {
         addCooldown(action, ticks, ticks);
     }
     
-    public void addCooldown(Action action, int ticks, int totalTicks) {
+    public void addCooldown(Action<?> action, int ticks, int totalTicks) {
         cooldowns.put(action, new ActionCooldownTracker.Cooldown(tickCount + ticks - totalTicks, tickCount + ticks));
     }
 
-    public boolean removeCooldown(Action action) {
+    public boolean removeCooldown(Action<?> action) {
         return cooldowns.remove(action) != null;
     }
     
     void syncWithTrackingOrUser(int userId, PowerClassification classification, ServerPlayerEntity player) {
-        for (Entry<Action, ActionCooldownTracker.Cooldown> entry : cooldowns.entrySet()) {
+        for (Entry<Action<?>, ActionCooldownTracker.Cooldown> entry : cooldowns.entrySet()) {
             Cooldown cooldown = entry.getValue();
-            PacketManager.sendToClient(new TrSyncCooldownPacket(userId, classification, entry.getKey(), 
+            PacketManager.sendToClient(new TrCooldownPacket(userId, classification, entry.getKey(), 
                     cooldown.endTime - tickCount, cooldown.endTime - cooldown.startTime), player);
         }
     }

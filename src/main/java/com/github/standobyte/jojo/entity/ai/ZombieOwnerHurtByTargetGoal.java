@@ -23,7 +23,7 @@ public class ZombieOwnerHurtByTargetGoal extends TargetGoal {
     @Override
     public boolean canUse() {
         LivingEntity owner = zombie.getOwner();
-        if (!zombie.isOwnerNearby() || owner == null) {
+        if (owner == null || zombie.farFromOwner(12)) {
             return false;
         } else {
             attacker = owner.getLastHurtByMob();

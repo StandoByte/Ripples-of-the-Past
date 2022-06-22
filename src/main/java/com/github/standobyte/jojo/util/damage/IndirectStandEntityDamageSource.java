@@ -1,8 +1,8 @@
 package com.github.standobyte.jojo.util.damage;
 
 import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
-import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -15,11 +15,9 @@ public class IndirectStandEntityDamageSource extends StandEntityDamageSource {
     private ITextComponent standName = null;
     
     public IndirectStandEntityDamageSource(String msgId, DamagingEntity damagingEntity, LivingEntity owner) {
-        super(msgId, damagingEntity, (owner instanceof StandEntity) ? 
-                        IStandPower.getStandPowerOptional(((StandEntity) owner).getUser()).orElse(null)
-                        : IStandPower.getStandPowerOptional(owner).orElse(null));
+        super(msgId, damagingEntity, IStandPower.getStandPowerOptional(StandUtil.getStandUser(owner)).orElse(null));
         this.standName = null;
-        this.owner = (Entity)owner;
+        this.owner = owner;
     }
     
     public IndirectStandEntityDamageSource(String msgId, Entity damagingEntity, Entity owner, IStandPower stand) {

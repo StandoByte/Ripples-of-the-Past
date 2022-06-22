@@ -1,0 +1,36 @@
+{
+  "parent": "jojo:jojo/create_zombie",
+  "display": {
+    "icon": {
+      "item": "minecraft:bread"
+    },
+    "title": {
+      "translate": "advancements.jojo.drain_humans.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.drain_humans.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "rewards": {
+    "experience": 100
+  },
+  "criteria": {
+    "people_drained": {
+      "trigger": "jojo:vampire_people_drained",
+      "conditions": {
+        "people_drained": {
+          "min": 64
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "people_drained"
+    ]
+  ]
+}

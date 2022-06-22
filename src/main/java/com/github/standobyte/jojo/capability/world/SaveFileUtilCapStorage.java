@@ -18,10 +18,13 @@ public class SaveFileUtilCapStorage implements IStorage<SaveFileUtilCap> {
     public INBT writeNBT(Capability<SaveFileUtilCap> capability, SaveFileUtilCap instance, Direction side) {
         CompoundNBT cnbt = new CompoundNBT();
         CompoundNBT timesStandsTakenMap = new CompoundNBT();
-        for (Map.Entry<StandType, Integer> entry : instance.timesStandsTaken.entrySet()) {
+        for (Map.Entry<StandType<?>, Integer> entry : instance.timesStandsTaken.entrySet()) {
             timesStandsTakenMap.putInt(ModStandTypes.Registry.getKeyAsString(entry.getKey()), entry.getValue());
         }
         cnbt.put("StandsTaken", timesStandsTakenMap);
+        
+        cnbt.put("TimeStopGameRules", instance.saveGamerules());
+        
         return cnbt;
     }
 
@@ -29,7 +32,7 @@ public class SaveFileUtilCapStorage implements IStorage<SaveFileUtilCap> {
     public void readNBT(Capability<SaveFileUtilCap> capability, SaveFileUtilCap instance, Direction side, INBT nbt) {
         CompoundNBT cnbt = (CompoundNBT) nbt;
         if (cnbt.contains("StandsTaken", 10)) {
-            Map<StandType, Integer> stands = new HashMap<>();
+            Map<StandType<?>, Integer> stands = new HashMap<>();
             CompoundNBT timesStandsTakenNBT = cnbt.getCompound("StandsTaken");
             ModStandTypes.Registry.getRegistry().forEach(stand -> {
                 int timesTaken = timesStandsTakenNBT.getInt(ModStandTypes.Registry.getKeyAsString(stand));
@@ -39,5 +42,7 @@ public class SaveFileUtilCapStorage implements IStorage<SaveFileUtilCap> {
             });
             instance.timesStandsTaken = stands;
         }
+        
+        instance.loadGamerules(cnbt.getCompound("TimeStopGameRules"));
     }
 }

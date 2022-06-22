@@ -14,7 +14,7 @@ public class ProjectileHamonChargeCapStorage implements IStorage<ProjectileHamon
         cnbt.putFloat("HamonDamage", instance.hamonBaseDmg);
         cnbt.putInt("ChargeTicks", instance.maxChargeTicks);
         cnbt.putBoolean("Water", instance.water);
-        cnbt.putFloat("SpentMana", instance.spentMana);
+        cnbt.putFloat("SpentEnergy", instance.spentEnergy);
         return cnbt;
     }
 
@@ -24,6 +24,6 @@ public class ProjectileHamonChargeCapStorage implements IStorage<ProjectileHamon
         instance.hamonBaseDmg = cnbt.getFloat("HamonDamage");
         instance.maxChargeTicks = cnbt.getInt("ChargeTicks");
         instance.water = cnbt.getBoolean("Water");
-        instance.spentMana = cnbt.getFloat("SpentMana");
+        instance.spentEnergy = cnbt.getFloat("SpentEnergy");
     }
 }

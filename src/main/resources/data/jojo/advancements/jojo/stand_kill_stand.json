@@ -1,0 +1,37 @@
+{
+  "parent": "jojo:jojo/summon_stand",
+  "display": {
+    "icon": {
+      "item": "jojo:meteoric_scrap",
+      "nbt": "{Icon:4}"
+    },
+    "title": {
+      "translate": "advancements.jojo.stand_kill_stand.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.stand_kill_stand.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "stand_user_killed": {
+      "trigger": "jojo:player_killed_entity",
+      "conditions": {
+        "power": {
+          "classification": "stand"
+        },
+        "killed_power": {
+          "classification": "stand"
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "stand_user_killed"
+    ]
+  ]
+}

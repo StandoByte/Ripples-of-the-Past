@@ -2,9 +2,9 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 
 import java.util.function.Supplier;
 
+import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientEventHandler;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.util.TimeHandler;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;
@@ -37,7 +37,8 @@ public class RefreshMovementInTimeStopPacket {
         ctx.get().enqueueWork(() -> {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity != null) {
-                TimeHandler.updateEntityTimeStop(entity, msg.canMove, false);
+                entity.level.getCapability(WorldUtilCapProvider.CAPABILITY).orElseThrow(() -> new IllegalStateException("World util capability is empty."))
+                .getTimeStopHandler().updateEntityTimeStop(entity, msg.canMove, false);
                 if (entity.is(ClientUtil.getClientPlayer())) {
                     ClientEventHandler.getInstance().updateCanMoveInStoppedTime(msg.canMove, msg.chunkPos);
                 }

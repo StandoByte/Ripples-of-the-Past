@@ -1,0 +1,38 @@
+{
+  "parent": "jojo:jojo/get_hamon",
+  "display": {
+    "icon": {
+      "item": "minecraft:iron_sword"
+    },
+    "title": {
+      "translate": "advancements.jojo.hamon_kill_vampire.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.hamon_kill_vampire.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "vampire_killed": {
+      "trigger": "jojo:player_killed_entity",
+      "conditions": {
+        "power": {
+          "classification": "non_stand",
+          "type": "jojo:hamon"
+        },
+        "killed_power": {
+          "classification": "non_stand",
+          "type": "jojo:vampirism"
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "vampire_killed"
+    ]
+  ]
+}

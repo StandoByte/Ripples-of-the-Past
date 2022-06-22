@@ -7,12 +7,15 @@ import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModDataSerializers;
 import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModEntityAttributes;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModLootModifierSerializers;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.ModPaintings;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModPotions;
+import com.github.standobyte.jojo.init.ModRecipeSerializers;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.init.ModStructures;
@@ -31,6 +34,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 public class JojoMod {
 	public static final String MOD_ID = "jojo";
 	public static final Logger LOGGER = LogManager.getLogger();
+    
 	public static final ItemGroup MAIN_TAB = new ItemGroup("jojo_tab") {
 	    @Override
         public ItemStack makeIcon() {
@@ -38,8 +42,13 @@ public class JojoMod {
         }
 	};
 	
+	public static Logger getLogger() {
+	    return LOGGER;
+	}
+	
     public JojoMod() {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, JojoModConfig.commonSpec);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, JojoModConfig.clientSpec);
         
         final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         ModBlocks.BLOCKS.register(modEventBus);
@@ -52,12 +61,15 @@ public class JojoMod {
         ModStandTypes.Registry.initRegistry();
         ModStandTypes.STANDS.register(modEventBus);
         
+        ModEntityAttributes.ATTRIBUTES.register(modEventBus);
         ModDataSerializers.DATA_SERIALIZERS.register(modEventBus);
         ModEffects.EFFECTS.register(modEventBus);
         ModEntityTypes.ENTITIES.register(modEventBus);
         ModLootModifierSerializers.LOOT_MODIFIER_SERIALIZERS.register(modEventBus);
+        ModPaintings.PAINTINGS.register(modEventBus);
         ModParticles.PARTICLES.register(modEventBus);
         ModPotions.POTIONS.register(modEventBus);
+        ModRecipeSerializers.SERIALIZERS.register(modEventBus);
         ModSounds.SOUNDS.register(modEventBus);
         ModStructures.STRUCTURES.register(modEventBus);
         ModTileEntities.TILE_ENTITIES.register(modEventBus);

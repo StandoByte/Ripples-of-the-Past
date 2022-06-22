@@ -4,11 +4,13 @@ import com.github.standobyte.jojo.client.model.entity.ownerbound.repeating.Repea
 import com.github.standobyte.jojo.client.renderer.entity.SimpleEntityRenderer;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.OwnerBoundProjectileEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.util.MathUtil;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
@@ -21,13 +23,18 @@ public abstract class ExtendingEntityRenderer<T extends OwnerBoundProjectileEnti
     }
     
     protected float getAlpha(T entity, float partialTick) {
-        LivingEntity owner = entity.getOwner();
-        return owner instanceof StandEntity ? ((StandEntity) entity.getOwner()).getAlpha(partialTick) : 1.0F;
+        if (entity.standDamage()) {
+            LivingEntity owner = entity.getOwner();
+            if (owner instanceof StandEntity) {
+                return ((StandEntity) owner).getAlpha(partialTick);
+            }
+        }
+        return 1.0F;
     }
 
     @Override
     protected void rotateModel(M model, T entity, float partialTick, float yRotation, float xRotation, MatrixStack matrixStack) {
-        Vector3d originPos = entity.getOriginPoint(partialTick);
+        Vector3d originPos = getOriginPos(entity, partialTick);
         Vector3d entityPos = new Vector3d(
                 MathHelper.lerp((double) partialTick, entity.xo, entity.getX()), 
                 MathHelper.lerp((double) partialTick, entity.yo, entity.getY()), 
@@ -39,6 +46,10 @@ public abstract class ExtendingEntityRenderer<T extends OwnerBoundProjectileEnti
         model.setupAnim(entity, 0, 0, entity.tickCount + partialTick, yRotation, xRotation);
     }
     
+    protected Vector3d getOriginPos(T entity, float partialTick) {
+        return entity.getOriginPoint(partialTick);
+    }
+    
     @Override
     protected void doRender(T entity, M model, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
         LivingEntity owner = entity.getOwner();
@@ -46,5 +57,10 @@ public abstract class ExtendingEntityRenderer<T extends OwnerBoundProjectileEnti
             packedLight = entityRenderDispatcher.getPackedLightCoords(entity.getOwner(), partialTick);
         }
         super.doRender(entity, model, partialTick, matrixStack, buffer, packedLight);
+    }
+    
+    @Override
+    protected void renderModel(T entity, M model, float partialTick, MatrixStack matrixStack, IVertexBuilder vertexBuilder, int packedLight) {
+        model.renderToBuffer(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, getAlpha(entity, partialTick));
     }
 }

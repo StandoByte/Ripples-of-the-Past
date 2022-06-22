@@ -62,7 +62,7 @@
         {
             "predicate": {
                 "charged": 1,
-                "stand_arrow": 1
+                "jojo:stand_arrow": 1
             },
             "model": "jojo:item/crossbow_stand_arrow"
         }

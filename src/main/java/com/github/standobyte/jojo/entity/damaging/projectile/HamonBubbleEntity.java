@@ -5,7 +5,7 @@ import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -27,7 +27,7 @@ public class HamonBubbleEntity extends ModdedProjectileEntity {
     
     @Override
     protected boolean hurtTarget(Entity target, LivingEntity owner) {
-        return ModDamageSources.dealHamonDamage(target, 0.015F, this, owner);
+        return DamageUtil.dealHamonDamage(target, 0.015F, this, owner);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class HamonBubbleEntity extends ModdedProjectileEntity {
             if (owner != null) {
                 INonStandPower.getNonStandPowerOptional(owner).ifPresent(power -> {
                     power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
-                        hamon.hamonPointsFromAction(HamonStat.STRENGTH, ModActions.CAESAR_BUBBLE_LAUNCHER.get().getHeldTickManaCost() / 4F);
+                        hamon.hamonPointsFromAction(HamonStat.STRENGTH, ModActions.CAESAR_BUBBLE_LAUNCHER.get().getHeldTickEnergyCost() / 4F);
                     });
                 });
             }
@@ -60,7 +60,7 @@ public class HamonBubbleEntity extends ModdedProjectileEntity {
     }
     
     @Override
-    protected int ticksLifespan() {
+	public int ticksLifespan() {
         return 100;
     }
 

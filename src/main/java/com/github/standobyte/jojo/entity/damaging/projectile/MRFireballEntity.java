@@ -1,8 +1,8 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
-import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.util.JojoModUtil;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.entity.Entity;
@@ -36,19 +36,14 @@ public class MRFireballEntity extends ModdedProjectileEntity implements IRenders
     }
     
     @Override
+    public float getBaseDamage() {
+        return 2.0F;
+    }
+    
+    @Override
     protected boolean hurtTarget(Entity target, LivingEntity owner) {
-        if (super.hurtTarget(target, owner)) {
-            hurtTarget(target, getDamageSource(owner).setIsFire(), getBaseDamage() * getDamageFactor());
-            int seconds = 3;
-            if (target instanceof StandEntity) {
-                ((StandEntity) target).setFireFromStand(seconds);
-            }
-            else {
-                target.setSecondsOnFire(seconds);
-            }
-            return true;
-        }
-        return false;
+        return DamageUtil.dealDamageAndSetOnFire(target, 
+                entity -> super.hurtTarget(entity, owner), 5, true);
     }
     
     @Override
@@ -93,8 +88,8 @@ public class MRFireballEntity extends ModdedProjectileEntity implements IRenders
     }
     
     @Override
-    public float getBaseDamage() {
-        return 2.0F;
+    public boolean isFiery() {
+        return true;
     }
     
     @Override
@@ -103,7 +98,7 @@ public class MRFireballEntity extends ModdedProjectileEntity implements IRenders
     }
     
     @Override
-    protected int ticksLifespan() {
+	public int ticksLifespan() {
         return 100;
     }
 }

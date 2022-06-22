@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.client.model;
 
+import java.util.function.Supplier;
+
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -15,9 +17,17 @@ import net.minecraft.util.math.vector.Vector3f;
 
 public class FlameModelRenderer extends ModelRenderer {
     private final ObjectList<FlameModelRenderer.Flame> flames = new ObjectArrayList<>();
+    private Supplier<TextureAtlasSprite> spriteFire0 = () -> ModelBakery.FIRE_0.sprite();
+    private Supplier<TextureAtlasSprite> spriteFire1 = () -> ModelBakery.FIRE_1.sprite();
 
     public FlameModelRenderer(Model model) {
         super(model);
+    }
+    
+    public FlameModelRenderer setFireSprites(Supplier<TextureAtlasSprite> spriteFire0, Supplier<TextureAtlasSprite> spriteFire1) {
+        this.spriteFire0 = spriteFire0;
+        this.spriteFire1 = spriteFire1;
+        return this;
     }
 
     public ModelRenderer addFlame(float bottomY, float width, float height) {
@@ -75,8 +85,6 @@ public class FlameModelRenderer extends ModelRenderer {
             break;
         }
         
-        TextureAtlasSprite spriteFire0 = ModelBakery.FIRE_0.sprite();
-        TextureAtlasSprite spriteFire1 = ModelBakery.FIRE_1.sprite();
         for (int yRot = 0; yRot < 4; yRot++) {
             matrixStack.pushPose();
             float f0 = width * 1.4F;
@@ -90,7 +98,7 @@ public class FlameModelRenderer extends ModelRenderer {
             float f5 = 0.0F;
             int i = 0;
             for (MatrixStack.Entry matrixstack$entry = matrixStack.last(); f3 > 0.0F; ++i) {
-                TextureAtlasSprite sprite = i % 2 == 0 ? spriteFire0 : spriteFire1;
+                TextureAtlasSprite sprite = i % 2 == 0 ? spriteFire0.get() : spriteFire1.get();
                 float texU0 = sprite.getU0();
                 float texV0 = sprite.getV0();
                 float texU1 = sprite.getU1();

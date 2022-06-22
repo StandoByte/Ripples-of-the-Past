@@ -19,7 +19,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 public enum HamonSkill {
     OVERDRIVE("overdrive", null, null, 
             HamonStat.STRENGTH, null, 
-            RewardType.ATTACK, null),
+            RewardType.PASSIVE, null),
     SENDO_OVERDRIVE("sendo_overdrive", OVERDRIVE, null, 
             HamonStat.STRENGTH, null, 
             RewardType.ATTACK, ModActions.HAMON_SENDO_OVERDRIVE),
@@ -28,7 +28,7 @@ public enum HamonSkill {
             RewardType.PASSIVE, null),
     SUNLIGHT_YELLOW_OVERDRIVE("sunlight_yellow_overdrive", SENDO_OVERDRIVE, TURQUOISE_BLUE_OVERDRIVE, 
             HamonStat.STRENGTH, null, 
-            RewardType.ATTACK, null),
+            RewardType.PASSIVE, null),
     
     PLANT_INFUSION("plant_infusion", null, null, 
             HamonStat.STRENGTH, null, 
@@ -90,10 +90,10 @@ public enum HamonSkill {
             RewardType.ABILITY, ModActions.HAMON_PROJECTILE_SHIELD),
     WATER_WALKING("water_walking", REPELLING_OVERDRIVE, null, 
             HamonStat.CONTROL, null, 
-            RewardType.PASSIVE, null), // TODO liquid walking (water)
+            RewardType.PASSIVE, null), // FIXME liquid walking (water)
     LAVA_WALKING("lava_walking", REPELLING_OVERDRIVE, WATER_WALKING, 
             HamonStat.CONTROL, null, 
-            RewardType.PASSIVE, null), // TODO liquid walking (lava)
+            RewardType.PASSIVE, null), // FIXME liquid walking (lava)
     
 
     NATURAL_TALENT("natural_talent", null, null, 

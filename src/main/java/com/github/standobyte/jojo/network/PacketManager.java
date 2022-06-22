@@ -11,39 +11,58 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClHamonLearnButtonP
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonResetSkillsButtonPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonStartMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonWindowOpenedPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClHasInputPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHeldActionTargetPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnLeapPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClOnStandDashPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClRemovePlayerSoulEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRunAwayPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClSoulRotationPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClStandManualMovementPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClStopHeldActionPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandManualControlPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandSummonPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.CommonConfigPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillLearnPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillsResetPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonTeachersSkillsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.LeapCooldownPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.MaxAchievedResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.RefreshMovementInTimeStopPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ResetResolveValuePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ResetSyncedCommonConfigPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ResolveBoostsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ResolveLevelPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ResolvePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.StaminaPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.StandActionLearningPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.StandActionsClearLearningPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandCancelManualMovementPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncHamonExercisesPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncLeapCooldownPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncManaLimitFactorPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncManaPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncManaRegenPointsPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncStandControlStatusPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncStandExpPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.SyncWorldTimeStopPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.StandControlStatusPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.StandStatsDataPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TimeStopInstancePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerJoinPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerStatePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrCooldownPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrDirectEntityPosPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrEnergyPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonParticlesPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHamonStatsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHeldActionPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrNoMotionLerpPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrNonStandFlagPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrPowerTypePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandOffsetPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntitySwingsPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrStandSoundPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncCooldownPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncHamonStatsPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncHeldActionPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncKnivesCountPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncNonStandFlagPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSyncPowerTypePacket;
-import com.github.standobyte.jojo.network.packets.fromserver.UnfulfilledActionConditionPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntityTargetPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCachePacket;
 
 import net.minecraft.entity.Entity;
@@ -73,47 +92,298 @@ public class PacketManager {
                 .networkProtocolVersion(() -> PROTOCOL_VERSION)
                 .simpleChannel();
         int index = 0;
+        
+        channel.registerMessage(index++, ClHasInputPacket.class,
+                ClHasInputPacket::encode,
+                ClHasInputPacket::decode,
+                ClHasInputPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
 
-        channel.registerMessage(index++, ClToggleStandSummonPacket.class, ClToggleStandSummonPacket::encode, ClToggleStandSummonPacket::decode, ClToggleStandSummonPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        channel.registerMessage(index++, ClToggleStandManualControlPacket.class, ClToggleStandManualControlPacket::encode, ClToggleStandManualControlPacket::decode, ClToggleStandManualControlPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        channel.registerMessage(index++, ClClickActionPacket.class, ClClickActionPacket::encode, ClClickActionPacket::decode, ClClickActionPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        channel.registerMessage(index++, ClHeldActionTargetPacket.class, ClHeldActionTargetPacket::encode, ClHeldActionTargetPacket::decode, ClHeldActionTargetPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        channel.registerMessage(index++, ClStopHeldActionPacket.class, ClStopHeldActionPacket::encode, ClStopHeldActionPacket::decode, ClStopHeldActionPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        channel.registerMessage(index++, ClHamonWindowOpenedPacket.class, ClHamonWindowOpenedPacket::encode, ClHamonWindowOpenedPacket::decode, ClHamonWindowOpenedPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        channel.registerMessage(index++, ClHamonLearnButtonPacket.class, ClHamonLearnButtonPacket::encode, ClHamonLearnButtonPacket::decode, ClHamonLearnButtonPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        channel.registerMessage(index++, ClHamonResetSkillsButtonPacket.class, ClHamonResetSkillsButtonPacket::encode, ClHamonResetSkillsButtonPacket::decode, ClHamonResetSkillsButtonPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        channel.registerMessage(index++, ClHamonStartMeditationPacket.class, ClHamonStartMeditationPacket::encode, ClHamonStartMeditationPacket::decode, ClHamonStartMeditationPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        channel.registerMessage(index++, ClRunAwayPacket.class, ClRunAwayPacket::encode, ClRunAwayPacket::decode, ClRunAwayPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        channel.registerMessage(index++, ClStandManualMovementPacket.class, ClStandManualMovementPacket::encode, ClStandManualMovementPacket::decode, ClStandManualMovementPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        channel.registerMessage(index++, ClOnLeapPacket.class, ClOnLeapPacket::encode, ClOnLeapPacket::decode, ClOnLeapPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        channel.registerMessage(index++, ClToggleStandSummonPacket.class,
+                ClToggleStandSummonPacket::encode,
+                ClToggleStandSummonPacket::decode,
+                ClToggleStandSummonPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        
+        channel.registerMessage(index++, ClToggleStandManualControlPacket.class,
+                ClToggleStandManualControlPacket::encode,
+                ClToggleStandManualControlPacket::decode,
+                ClToggleStandManualControlPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        
+        channel.registerMessage(index++, ClClickActionPacket.class,
+                ClClickActionPacket::encode,
+                ClClickActionPacket::decode,
+                ClClickActionPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        
+        channel.registerMessage(index++, ClHeldActionTargetPacket.class,
+                ClHeldActionTargetPacket::encode,
+                ClHeldActionTargetPacket::decode,
+                ClHeldActionTargetPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        
+        channel.registerMessage(index++, ClStopHeldActionPacket.class,
+                ClStopHeldActionPacket::encode,
+                ClStopHeldActionPacket::decode,
+                ClStopHeldActionPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        
+        channel.registerMessage(index++, ClHamonWindowOpenedPacket.class,
+                ClHamonWindowOpenedPacket::encode,
+                ClHamonWindowOpenedPacket::decode,
+                ClHamonWindowOpenedPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        
+        channel.registerMessage(index++, ClHamonLearnButtonPacket.class,
+                ClHamonLearnButtonPacket::encode,
+                ClHamonLearnButtonPacket::decode,
+                ClHamonLearnButtonPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        
+        channel.registerMessage(index++, ClHamonResetSkillsButtonPacket.class,
+                ClHamonResetSkillsButtonPacket::encode,
+                ClHamonResetSkillsButtonPacket::decode,
+                ClHamonResetSkillsButtonPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        
+        channel.registerMessage(index++, ClHamonStartMeditationPacket.class,
+                ClHamonStartMeditationPacket::encode,
+                ClHamonStartMeditationPacket::decode,
+                ClHamonStartMeditationPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        
+        channel.registerMessage(index++, ClRunAwayPacket.class,
+                ClRunAwayPacket::encode,
+                ClRunAwayPacket::decode,
+                ClRunAwayPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        
+        channel.registerMessage(index++, ClStandManualMovementPacket.class,
+                ClStandManualMovementPacket::encode,
+                ClStandManualMovementPacket::decode,
+                ClStandManualMovementPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        
+        channel.registerMessage(index++, ClOnLeapPacket.class,
+                ClOnLeapPacket::encode,
+                ClOnLeapPacket::decode,
+                ClOnLeapPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        
+        channel.registerMessage(index++, ClOnStandDashPacket.class,
+                ClOnStandDashPacket::encode,
+                ClOnStandDashPacket::decode,
+                ClOnStandDashPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        
+        channel.registerMessage(index++, ClSoulRotationPacket.class,
+                ClSoulRotationPacket::encode,
+                ClSoulRotationPacket::decode,
+                ClSoulRotationPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        
+        channel.registerMessage(index++, ClRemovePlayerSoulEntityPacket.class,
+                ClRemovePlayerSoulEntityPacket::encode,
+                ClRemovePlayerSoulEntityPacket::decode,
+                ClRemovePlayerSoulEntityPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        
+        
 
-        channel.registerMessage(index++, TrSyncPowerTypePacket.class, TrSyncPowerTypePacket::encode, TrSyncPowerTypePacket::decode, TrSyncPowerTypePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, TrSyncHeldActionPacket.class, TrSyncHeldActionPacket::encode, TrSyncHeldActionPacket::decode, TrSyncHeldActionPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, SyncManaPacket.class, SyncManaPacket::encode, SyncManaPacket::decode, SyncManaPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, SyncManaRegenPointsPacket.class, SyncManaRegenPointsPacket::encode, SyncManaRegenPointsPacket::decode, SyncManaRegenPointsPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, SyncManaLimitFactorPacket.class, SyncManaLimitFactorPacket::encode, SyncManaLimitFactorPacket::decode, SyncManaLimitFactorPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, TrSyncCooldownPacket.class, TrSyncCooldownPacket::encode, TrSyncCooldownPacket::decode, TrSyncCooldownPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, UnfulfilledActionConditionPacket.class, UnfulfilledActionConditionPacket::encode, UnfulfilledActionConditionPacket::decode, UnfulfilledActionConditionPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, TrSyncHamonStatsPacket.class, TrSyncHamonStatsPacket::encode, TrSyncHamonStatsPacket::decode, TrSyncHamonStatsPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, SyncHamonExercisesPacket.class, SyncHamonExercisesPacket::encode, SyncHamonExercisesPacket::decode, SyncHamonExercisesPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, HamonTeachersSkillsPacket.class, HamonTeachersSkillsPacket::encode, HamonTeachersSkillsPacket::decode, HamonTeachersSkillsPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, HamonSkillLearnPacket.class, HamonSkillLearnPacket::encode, HamonSkillLearnPacket::decode, HamonSkillLearnPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, HamonSkillsResetPacket.class, HamonSkillsResetPacket::encode, HamonSkillsResetPacket::decode, HamonSkillsResetPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, TrHamonParticlesPacket.class, TrHamonParticlesPacket::encode, TrHamonParticlesPacket::decode, TrHamonParticlesPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, TrSyncNonStandFlagPacket.class, TrSyncNonStandFlagPacket::encode, TrSyncNonStandFlagPacket::decode, TrSyncNonStandFlagPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, SyncStandExpPacket.class, SyncStandExpPacket::encode, SyncStandExpPacket::decode, SyncStandExpPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, TrSetStandEntityPacket.class, TrSetStandEntityPacket::encode, TrSetStandEntityPacket::decode, TrSetStandEntityPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, SyncStandControlStatusPacket.class, SyncStandControlStatusPacket::encode, SyncStandControlStatusPacket::decode, SyncStandControlStatusPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, StandCancelManualMovementPacket.class, StandCancelManualMovementPacket::encode, StandCancelManualMovementPacket::decode, StandCancelManualMovementPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, TrStandEntitySwingsPacket.class, TrStandEntitySwingsPacket::encode, TrStandEntitySwingsPacket::decode, TrStandEntitySwingsPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, TrStandSoundPacket.class, TrStandSoundPacket::encode, TrStandSoundPacket::decode, TrStandSoundPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, UpdateClientCapCachePacket.class, UpdateClientCapCachePacket::encode, UpdateClientCapCachePacket::decode, UpdateClientCapCachePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, TrSyncKnivesCountPacket.class, TrSyncKnivesCountPacket::encode, TrSyncKnivesCountPacket::decode, TrSyncKnivesCountPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, SyncLeapCooldownPacket.class, SyncLeapCooldownPacket::encode, SyncLeapCooldownPacket::decode, SyncLeapCooldownPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, PlayVoiceLinePacket.class, PlayVoiceLinePacket::encode, PlayVoiceLinePacket::decode, PlayVoiceLinePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, PlaySoundAtClientPacket.class, PlaySoundAtClientPacket::encode, PlaySoundAtClientPacket::decode, PlaySoundAtClientPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, SyncWorldTimeStopPacket.class, SyncWorldTimeStopPacket::encode, SyncWorldTimeStopPacket::decode, SyncWorldTimeStopPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        channel.registerMessage(index++, RefreshMovementInTimeStopPacket.class, RefreshMovementInTimeStopPacket::encode, RefreshMovementInTimeStopPacket::decode, RefreshMovementInTimeStopPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        channel.registerMessage(index++, TrPowerTypePacket.class, 
+                TrPowerTypePacket::encode, 
+                TrPowerTypePacket::decode, 
+                TrPowerTypePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, TrHeldActionPacket.class,
+                TrHeldActionPacket::encode,
+                TrHeldActionPacket::decode,
+                TrHeldActionPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, TrEnergyPacket.class,
+                TrEnergyPacket::encode,
+                TrEnergyPacket::decode,
+                TrEnergyPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, TrCooldownPacket.class,
+                TrCooldownPacket::encode,
+                TrCooldownPacket::decode,
+                TrCooldownPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, BloodParticlesPacket.class,
+                BloodParticlesPacket::encode,
+                BloodParticlesPacket::decode,
+                BloodParticlesPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, TrHamonStatsPacket.class,
+                TrHamonStatsPacket::encode,
+                TrHamonStatsPacket::decode,
+                TrHamonStatsPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, HamonExercisesPacket.class,
+                HamonExercisesPacket::encode,
+                HamonExercisesPacket::decode,
+                HamonExercisesPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, HamonTeachersSkillsPacket.class,
+                HamonTeachersSkillsPacket::encode,
+                HamonTeachersSkillsPacket::decode,
+                HamonTeachersSkillsPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, HamonSkillLearnPacket.class,
+                HamonSkillLearnPacket::encode,
+                HamonSkillLearnPacket::decode,
+                HamonSkillLearnPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, HamonSkillsResetPacket.class,
+                HamonSkillsResetPacket::encode,
+                HamonSkillsResetPacket::decode,
+                HamonSkillsResetPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, TrHamonParticlesPacket.class,
+                TrHamonParticlesPacket::encode,
+                TrHamonParticlesPacket::decode,
+                TrHamonParticlesPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, TrNonStandFlagPacket.class,
+                TrNonStandFlagPacket::encode,
+                TrNonStandFlagPacket::decode,
+                TrNonStandFlagPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, StaminaPacket.class,
+                StaminaPacket::encode,
+                StaminaPacket::decode,
+                StaminaPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, ResolvePacket.class,
+                ResolvePacket::encode,
+                ResolvePacket::decode,
+                ResolvePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, ResetResolveValuePacket.class,
+                ResetResolveValuePacket::encode,
+                ResetResolveValuePacket::decode,
+                ResetResolveValuePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, ResolveLevelPacket.class,
+                ResolveLevelPacket::encode,
+                ResolveLevelPacket::decode,
+                ResolveLevelPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, ResolveBoostsPacket.class,
+                ResolveBoostsPacket::encode,
+                ResolveBoostsPacket::decode,
+                ResolveBoostsPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, MaxAchievedResolvePacket.class,
+                MaxAchievedResolvePacket::encode,
+                MaxAchievedResolvePacket::decode,
+                MaxAchievedResolvePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, SkippedStandProgressionPacket.class,
+                SkippedStandProgressionPacket::encode,
+                SkippedStandProgressionPacket::decode,
+                SkippedStandProgressionPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, ResolveEffectStartPacket.class,
+                ResolveEffectStartPacket::encode,
+                ResolveEffectStartPacket::decode,
+                ResolveEffectStartPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, StandActionLearningPacket.class,
+                StandActionLearningPacket::encode,
+                StandActionLearningPacket::decode,
+                StandActionLearningPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, StandActionsClearLearningPacket.class,
+                StandActionsClearLearningPacket::encode,
+                StandActionsClearLearningPacket::decode,
+                StandActionsClearLearningPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, TrSetStandEntityPacket.class,
+                TrSetStandEntityPacket::encode,
+                TrSetStandEntityPacket::decode,
+                TrSetStandEntityPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, StandStatsDataPacket.class,
+                StandStatsDataPacket::encode,
+                StandStatsDataPacket::decode,
+                StandStatsDataPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, StandControlStatusPacket.class,
+                StandControlStatusPacket::encode,
+                StandControlStatusPacket::decode,
+                StandControlStatusPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, StandCancelManualMovementPacket.class,
+                StandCancelManualMovementPacket::encode,
+                StandCancelManualMovementPacket::decode,
+                StandCancelManualMovementPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, TrStandEntityTargetPacket.class,
+                TrStandEntityTargetPacket::encode,
+                TrStandEntityTargetPacket::decode,
+                TrStandEntityTargetPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, TrSetStandOffsetPacket.class,
+                TrSetStandOffsetPacket::encode,
+                TrSetStandOffsetPacket::decode,
+                TrSetStandOffsetPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, TrStandEntitySwingsPacket.class,
+                TrStandEntitySwingsPacket::encode,
+                TrStandEntitySwingsPacket::decode,
+                TrStandEntitySwingsPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, UpdateClientCapCachePacket.class,
+                UpdateClientCapCachePacket::encode,
+                UpdateClientCapCachePacket::decode,
+                UpdateClientCapCachePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, TrKnivesCountPacket.class,
+                TrKnivesCountPacket::encode,
+                TrKnivesCountPacket::decode,
+                TrKnivesCountPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, LeapCooldownPacket.class,
+                LeapCooldownPacket::encode,
+                LeapCooldownPacket::decode,
+                LeapCooldownPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, PlayVoiceLinePacket.class,
+                PlayVoiceLinePacket::encode,
+                PlayVoiceLinePacket::decode,
+                PlayVoiceLinePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, PlaySoundAtClientPacket.class,
+                PlaySoundAtClientPacket::encode,
+                PlaySoundAtClientPacket::decode,
+                PlaySoundAtClientPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, TimeStopInstancePacket.class,
+                TimeStopInstancePacket::encode,
+                TimeStopInstancePacket::decode,
+                TimeStopInstancePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, TimeStopPlayerStatePacket.class,
+                TimeStopPlayerStatePacket::encode,
+                TimeStopPlayerStatePacket::decode,
+                TimeStopPlayerStatePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, TimeStopPlayerJoinPacket.class,
+                TimeStopPlayerJoinPacket::encode,
+                TimeStopPlayerJoinPacket::decode,
+                TimeStopPlayerJoinPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, RefreshMovementInTimeStopPacket.class,
+                RefreshMovementInTimeStopPacket::encode,
+                RefreshMovementInTimeStopPacket::decode,
+                RefreshMovementInTimeStopPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, TrNoMotionLerpPacket.class,
+                TrNoMotionLerpPacket::encode,
+                TrNoMotionLerpPacket::decode,
+                TrNoMotionLerpPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, TrDirectEntityPosPacket.class,
+                TrDirectEntityPosPacket::encode,
+                TrDirectEntityPosPacket::decode,
+                TrDirectEntityPosPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, CommonConfigPacket.class,
+                CommonConfigPacket::encode,
+                CommonConfigPacket::decode,
+                CommonConfigPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, ResetSyncedCommonConfigPacket.class,
+                ResetSyncedCommonConfigPacket::encode,
+                ResetSyncedCommonConfigPacket::decode,
+                ResetSyncedCommonConfigPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
     }
 
     public static void sendToServer(Object msg) {

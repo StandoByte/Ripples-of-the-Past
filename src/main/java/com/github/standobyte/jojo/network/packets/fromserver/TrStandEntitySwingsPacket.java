@@ -12,9 +12,9 @@ import net.minecraftforge.fml.network.NetworkEvent;
 public class TrStandEntitySwingsPacket {
     private final int standEntityId;
     private final int swings;
-    private final int handSideBits;
+    private final long handSideBits;
     
-    public TrStandEntitySwingsPacket(int standEntityId, int swings, int handSideBits) {
+    public TrStandEntitySwingsPacket(int standEntityId, int swings, long handSideBits) {
         this.standEntityId = standEntityId;
         this.swings = swings;
         this.handSideBits = handSideBits;
@@ -23,11 +23,11 @@ public class TrStandEntitySwingsPacket {
     public static void encode(TrStandEntitySwingsPacket msg, PacketBuffer buf) {
         buf.writeInt(msg.standEntityId);
         buf.writeVarInt(msg.swings);
-        buf.writeVarInt(msg.handSideBits);
+        buf.writeVarLong(msg.handSideBits);
     }
     
     public static TrStandEntitySwingsPacket decode(PacketBuffer buf) {
-        return new TrStandEntitySwingsPacket(buf.readInt(), buf.readVarInt(), buf.readVarInt());
+        return new TrStandEntitySwingsPacket(buf.readInt(), buf.readVarInt(), buf.readVarLong());
     }
 
     public static void handle(TrStandEntitySwingsPacket msg, Supplier<NetworkEvent.Context> ctx) {

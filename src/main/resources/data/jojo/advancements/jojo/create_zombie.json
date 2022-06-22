@@ -1,0 +1,33 @@
+{
+  "parent": "jojo:jojo/get_vampirism",
+  "display": {
+    "icon": {
+      "item": "minecraft:zombie_head"
+    },
+    "title": {
+      "translate": "advancements.jojo.create_zombie.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.create_zombie.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "zombie_created": {
+      "trigger": "jojo:vampire_people_drained",
+      "conditions": {
+        "zombies_created": {
+          "min": 1
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "zombie_created"
+    ]
+  ]
+}

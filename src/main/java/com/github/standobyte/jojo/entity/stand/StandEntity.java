@@ -3,41 +3,50 @@ package com.github.standobyte.jojo.entity.stand;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.action.actions.StandEntityAction;
+import com.github.standobyte.jojo.action.actions.StandEntityHeavyAttack;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.renderer.entity.stand.AdditionalArmSwing;
-import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
+import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
 import com.github.standobyte.jojo.entity.mob.IMobStandUser;
-import com.github.standobyte.jojo.entity.stand.task.BlockTask;
-import com.github.standobyte.jojo.entity.stand.task.StandEntityTask;
-import com.github.standobyte.jojo.entity.stand.task.SummonLockTask;
-import com.github.standobyte.jojo.entity.stand.task.UnsummonTask;
+import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModDataSerializers;
 import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModEntityAttributes;
+import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrStandSoundPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrStandSoundPacket.StandSoundType;
+import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandOffsetPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntityTargetPacket;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
-import com.github.standobyte.jojo.util.EntityDistanceRayTraceResult;
-import com.github.standobyte.jojo.util.JojoModUtil;
+import com.github.standobyte.jojo.power.stand.stats.StandStats;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 import com.github.standobyte.jojo.util.damage.IStandDamageSource;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
 import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
 import com.github.standobyte.jojo.util.damage.StandLinkDamageSource;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 import com.google.common.collect.ImmutableList;
 
 import net.minecraft.block.BlockRenderType;
@@ -47,11 +56,16 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MoverType;
+import net.minecraft.entity.ai.attributes.Attribute;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.AttributeModifier.Operation;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.effect.LightningBoltEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -64,20 +78,27 @@ import net.minecraft.network.datasync.IDataSerializer;
 import net.minecraft.network.play.server.SAnimateHandPacket;
 import net.minecraft.network.play.server.SPlayEntityEffectPacket;
 import net.minecraft.network.play.server.SRemoveEntityEffectPacket;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.Effects;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.ReuseableStream;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.shapes.IBooleanFunction;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.GameRules;
@@ -85,66 +106,103 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
+import net.minecraftforge.fml.network.FMLPlayMessages;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 abstract public class StandEntity extends LivingEntity implements IStandManifestation, IEntityAdditionalSpawnData {
-    private static List<Effect> SHARED_EFFECTS = new ArrayList<>();
+    private static final List<Effect> SHARED_EFFECTS = new ArrayList<>();
 
     protected static final DataParameter<Byte> STAND_FLAGS = EntityDataManager.defineId(StandEntity.class, DataSerializers.BYTE);
-    private static final DataParameter<Float> USER_MOVEMENT_FACTOR = EntityDataManager.defineId(StandEntity.class, DataSerializers.FLOAT);
-    private static final DataParameter<StandPose> STAND_POSE = EntityDataManager.defineId(StandEntity.class, (IDataSerializer<StandPose>) ModDataSerializers.STAND_POSE.get().getSerializer());
 
-    private static final DataParameter<Float> ALPHA = EntityDataManager.defineId(StandEntity.class, DataSerializers.FLOAT);
-    private float alphaOld;
-    private float alpha;
-    
     private final StandEntityType<?> type;
-    private final double maxRange;
-    private double basePrecision;
+    private final double rangeEffective;
+    private final double rangeMax;
+    private double rangeEfficiency = 1;
+    private double staminaCondition = 1;
 
     private int summonPoseRandomByte;
-    private boolean armsOnlyMode;
-    public boolean showMainArm;
-    public boolean showOffArm;
+    private static final DataParameter<Byte> ARMS_ONLY_MODE = EntityDataManager.defineId(StandEntity.class, DataSerializers.BYTE);
     
     private static final DataParameter<Integer> USER_ID = EntityDataManager.defineId(StandEntity.class, DataSerializers.INT);
     private WeakReference<LivingEntity> userRef = new WeakReference<LivingEntity>(null);
     private IStandPower userPower;
-    protected StandRelativeOffset relativePos = new StandRelativeOffset(-0.5, -0.2, 0.2);
+    private StandRelativeOffset offsetDefault = StandRelativeOffset.withYOffset(-0.75, 0.2, -0.75);
+    private StandRelativeOffset offsetDefaultArmsOnly = StandRelativeOffset.withYOffset(0, 0, 0.15);
 
-    private boolean accumulateTickParry;
-    private int parryCount;
-    private boolean alternateSwing;
+    private static final DataParameter<Boolean> SWING_OFF_HAND = EntityDataManager.defineId(StandEntity.class, DataSerializers.BOOLEAN);
     private boolean alternateAdditionalSwing;
     private int lastSwingTick = -2;
-    private ArmSwings swings = new ArmSwings();
-
-    private static final DataParameter<ActionTarget> TASK_TARGET = (DataParameter<ActionTarget>) EntityDataManager.defineId(StandEntity.class, (IDataSerializer<ActionTarget>) ModDataSerializers.TASK_TARGET.get().getSerializer());
-    private StandEntityTask currentTask;
-    private StandEntityTask scheduledTask;
+    private final ArmSwings swings = new ArmSwings();
+    public boolean barragePunchDelayed = false;
+    public int barrageDelayedPunches = 0;
+    private boolean accumulateBarrageTickParry;
+    private int barrageParryCount;
+    private static final DataParameter<Integer> BARRAGE_CLASH_OPPONENT_ID = EntityDataManager.defineId(StandEntity.class, DataSerializers.INT);
+    private Optional<Entity> barrageClashOpponent = Optional.empty();
+    
+    private float blockDamage = 0;
+    private float prevBlockDamage = 0;
+    
+    private static final DataParameter<Float> PUNCHES_COMBO = EntityDataManager.defineId(StandEntity.class, DataSerializers.FLOAT);
+    private static final DataParameter<Float> LAST_HEAVY_PUNCH_COMBO = EntityDataManager.defineId(StandEntity.class, DataSerializers.FLOAT);
+    private int noComboDecayTicks;
+    private static final int COMBO_TICKS = 40;
+    private static final float COMBO_DECAY = 0.025F;
+    
+    private static final DataParameter<Optional<StandEntityTask>> CURRENT_TASK = EntityDataManager.defineId(StandEntity.class, 
+            (IDataSerializer<Optional<StandEntityTask>>) ModDataSerializers.STAND_ENTITY_TASK.get().getSerializer());
+    // scheduled stand task
+//    @Nullable
+//    private StandEntityTask scheduledTask;
+    private StandEntityAction inputBuffer;
+    
+    static final DataParameter<Byte> MANUAL_MOVEMENT_LOCK = EntityDataManager.defineId(StandEntity.class, DataSerializers.BYTE);
+    private ManualStandMovementLock manualMovementLocks = new ManualStandMovementLock(this);
+    
+    protected StandPose standPose = StandPose.SUMMON;
+    public int gradualSummonWeaknessTicks;
+    public int unsummonTicks;
+    public StandRelativeOffset unsummonOffset = offsetDefault.copy();
+    public int summonLockTicks;
+    private static final DataParameter<Integer> NO_BLOCKING_TICKS = EntityDataManager.defineId(StandEntity.class, DataSerializers.INT);
+    
+    public int overlayTickCount = 0;
+    private int alphaTicks;
 
     public StandEntity(StandEntityType<? extends StandEntity> type, World world) {
         super(type, world);
         this.type = type;
         setNoGravity(standHasNoGravity());
         setNoPhysics(standCanHaveNoPhysics());
-        StandEntityStats stats = type.getStats();
+        StandStats stats = type.getStats();
         initStandAttributes(stats);
-        this.maxRange = stats.getMaxRange();
-        this.basePrecision = stats.getPrecision();
-        this.summonPoseRandomByte = random.nextInt(128);
+        this.rangeEffective = stats.getEffectiveRange();
+        this.rangeMax = stats.getMaxRange();
+        this.summonLockTicks = StandStatFormulas.getSummonLockTicks(stats.getBaseAttackSpeed());
+        if (level.isClientSide()) {
+            this.alphaTicks = this.summonLockTicks;
+        }
+        else {
+            this.summonPoseRandomByte = random.nextInt(128);
+        }
     }
-
+    
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         entityData.define(USER_ID, -1);
-        entityData.define(ALPHA, 1F);
-        entityData.define(USER_MOVEMENT_FACTOR, 1F);
         entityData.define(STAND_FLAGS, (byte) 0);
-        entityData.define(STAND_POSE, StandPose.SUMMON);
-        entityData.define(TASK_TARGET, ActionTarget.EMPTY);
+        entityData.define(ARMS_ONLY_MODE, (byte) 0);
+        entityData.define(SWING_OFF_HAND, false);
+        entityData.define(BARRAGE_CLASH_OPPONENT_ID, -1);
+        entityData.define(PUNCHES_COMBO, 0F);
+        entityData.define(LAST_HEAVY_PUNCH_COMBO, 0F);
+        entityData.define(NO_BLOCKING_TICKS, 0);
+        entityData.define(CURRENT_TASK, Optional.empty());
+        entityData.define(MANUAL_MOVEMENT_LOCK, (byte) 0);
     }
 
     @Override
@@ -154,16 +212,36 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             noPhysics = getStandFlag(StandFlag.NO_PHYSICS);
         }
         else if (USER_ID.equals(dataParameter)) {
-            userRef = lookupUser();
-            if (level.isClientSide()) {
-                LivingEntity user = getUser();
-                if (user != null) {
-                    IStandPower standPower = IStandPower.getStandPowerOptional(user).resolve().get();
-                    if (standPower.getStandManifestation() != this) {
-                        standPower.setStandManifestation(this);
-                    }
+            updateUserFromNetwork(entityData.get(USER_ID));
+        }
+        else if (CURRENT_TASK.equals(dataParameter)) {
+            Optional<StandEntityTask> taskOptional = getCurrentTask();
+            
+            taskOptional.ifPresent(task -> {
+                StandEntityAction action = task.getAction();
+                StandEntityAction.Phase phase = task.getPhase();
+                action.playSound(this, userPower, phase, task);
+                action.onTaskSet(level, this, userPower, phase, task, task.getTicksLeft());
+                action.onPhaseSet(level, this, userPower, phase, task, task.getTicksLeft());
+                setStandPose(action.getStandPose(userPower, this));
+            });
+            if (!taskOptional.isPresent()) {
+                if (getStandPose() != StandPose.SUMMON) {
+                	setStandPose(StandPose.IDLE);
                 }
             }
+        }
+        else if (SWING_OFF_HAND.equals(dataParameter)) {
+            swingingArm = entityData.get(SWING_OFF_HAND) ? Hand.OFF_HAND : Hand.MAIN_HAND;
+        }
+        else if (ARMS_ONLY_MODE.equals(dataParameter)) {
+            onArmsOnlyModeUpdated();
+        }
+        else if (BARRAGE_CLASH_OPPONENT_ID.equals(dataParameter)) {
+        	barrageClashOpponent = Optional.ofNullable(level.getEntity(entityData.get(BARRAGE_CLASH_OPPONENT_ID)));
+        }
+        else if (MANUAL_MOVEMENT_LOCK.equals(dataParameter)) {
+        	this.manualMovementLocks.onEntityDataUpdated(this);
         }
     }
 
@@ -191,50 +269,232 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return LivingEntity.createLivingAttributes()
                 .add(Attributes.ATTACK_DAMAGE)
                 .add(Attributes.ATTACK_KNOCKBACK)
-                .add(Attributes.ATTACK_SPEED);
+                .add(Attributes.ATTACK_SPEED)
+                .add(ForgeMod.REACH_DISTANCE.get())
+                .add(ModEntityAttributes.STAND_DURABILITY.get())
+                .add(ModEntityAttributes.STAND_PRECISION.get());
     }
 
-    private void initStandAttributes(StandEntityStats stats) {
-        getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(stats.getDamage());
-        getAttribute(Attributes.ATTACK_KNOCKBACK).setBaseValue(stats.getAttackKnockback());
-        getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(stats.getMovementSpeed());
-        getAttribute(Attributes.ATTACK_SPEED).setBaseValue(stats.getAttackSpeed());
-        getAttribute(Attributes.ARMOR).setBaseValue(stats.getArmor());
-        getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(stats.getArmorToughness());
-        getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(stats.getKnockbackResistance());
+    private void initStandAttributes(StandStats stats) {
+        getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(stats.getBasePower());
+        getAttribute(Attributes.ATTACK_SPEED).setBaseValue(stats.getBaseAttackSpeed());
+        getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(stats.getBaseMovementSpeed());
+        getAttribute(ForgeMod.REACH_DISTANCE.get()).setBaseValue(getDefaultMeleeAttackRange());
+        getAttribute(ModEntityAttributes.STAND_DURABILITY.get()).setBaseValue(stats.getBaseDurability());
+        getAttribute(ModEntityAttributes.STAND_PRECISION.get()).setBaseValue(stats.getBasePrecision());
+    }
+
+    protected double getDefaultMeleeAttackRange() {
+        return 2.5D;
     }
     
-    public StandEntityStats getStats() {
-        return type.getStats();
+    public void modifiersFromResolveLevel(float ratio) {
+        if (!level.isClientSide()) {
+            StandStats stats = type.getStats();
+            applyAttributeModifier(Attributes.ATTACK_DAMAGE, UUID.fromString("532a6cb6-0df0-44ea-a769-dba2db506545"), 
+                    "Stand attack damage from experience", stats.getDevPower(ratio), Operation.ADDITION);
+            
+            applyAttributeModifier(Attributes.ATTACK_SPEED, UUID.fromString("51f253cd-b440-48b1-aa60-89913963df51"), 
+                    "Stand attack speed from experience", stats.getDevAttackSpeed(ratio), Operation.ADDITION);
+            
+            applyAttributeModifier(Attributes.MOVEMENT_SPEED, UUID.fromString("cbb892a6-3390-4e75-b0a3-04cd253033e3"), 
+                    "Stand movement speed from experience", stats.getDevMovementSpeed(ratio), Operation.ADDITION);
+            
+            applyAttributeModifier(ModEntityAttributes.STAND_DURABILITY.get(), UUID.fromString("d6979cd9-1481-49a0-bd5d-6922049448b4"), 
+                    "Stand durability from experience", stats.getDevDurability(ratio), Operation.ADDITION);
+            
+            applyAttributeModifier(ModEntityAttributes.STAND_PRECISION.get(), UUID.fromString("1dcdb98e-00fa-42d0-8867-242165e49832"), 
+                    "Stand precision from experience", stats.getDevPrecision(ratio), Operation.ADDITION);
+        }
     }
+    
+    private void applyAttributeModifier(Attribute attribute, UUID modifierId, String name, double value, Operation operation) {
+        ModifiableAttributeInstance attributeInstance = getAttribute(attribute);
+        if (attributeInstance != null) {
+            attributeInstance.removeModifier(modifierId);
+            if (value > 0) {
+                attributeInstance.addTransientModifier(new AttributeModifier(modifierId, name, value, operation));
+            }
+        }
+    }
+    
+    private static final AttributeModifier ATTACK_DAMAGE_ARMS_ONLY = new AttributeModifier(
+            UUID.fromString("aaa82f0e-f1a7-47d1-9066-e1a025be02df"), "Stand attack damage with only arms", -0.25, Operation.MULTIPLY_TOTAL);
+//    private static final AttributeModifier ATTACK_SPEED_ARMS_ONLY = new AttributeModifier(
+//            UUID.fromString("5b26b3d1-405c-402b-aee6-d5a0657386fe"), "Stand attack speed with only arms", -0.25, Operation.MULTIPLY_TOTAL);
+    private static final AttributeModifier DURABILITY_ARMS_ONLY = new AttributeModifier(
+            UUID.fromString("244dd41c-aa40-4604-91f9-a788a40227ca"), "Stand durability with only arms", -0.25, Operation.MULTIPLY_TOTAL);
+    private static final AttributeModifier PRECISION_ARMS_ONLY = new AttributeModifier(
+            UUID.fromString("f2d493e2-830a-4891-b756-65cc2be6f14f"), "Stand precision with only arms", -1, Operation.MULTIPLY_TOTAL);
+    
+    private void addArmsOnlyModifiers() {
+        addModifier(getAttribute(Attributes.ATTACK_DAMAGE), ATTACK_DAMAGE_ARMS_ONLY);
+//        addModifier(getAttribute(Attributes.ATTACK_SPEED), ATTACK_SPEED_ARMS_ONLY);
+        addModifier(getAttribute(ModEntityAttributes.STAND_DURABILITY.get()), DURABILITY_ARMS_ONLY);
+        addModifier(getAttribute(ModEntityAttributes.STAND_PRECISION.get()), PRECISION_ARMS_ONLY);
+    }
+    
+    private void removeArmsOnlyModifiers() {
+        updateModifier(getAttribute(Attributes.ATTACK_DAMAGE), ATTACK_DAMAGE_ARMS_ONLY, false);
+//        updateModifier(getAttribute(Attributes.ATTACK_SPEED), ATTACK_SPEED_ARMS_ONLY, false);
+        updateModifier(getAttribute(ModEntityAttributes.STAND_DURABILITY.get()), DURABILITY_ARMS_ONLY, false);
+        updateModifier(getAttribute(ModEntityAttributes.STAND_PRECISION.get()), PRECISION_ARMS_ONLY, false);
+    }
+    
+    protected final void addModifier(ModifiableAttributeInstance attribute, AttributeModifier modifier) {
+        if (!attribute.hasModifier(modifier)) {
+            attribute.addPermanentModifier(modifier);
+        }
+    }
+    
+    protected final void updateModifier(ModifiableAttributeInstance attribute, AttributeModifier modifier, boolean setModifier) {
+        if (attribute.hasModifier(modifier)) {
+            attribute.removeModifier(modifier);
+        }
+        if (setModifier) {
+            attribute.addPermanentModifier(modifier);
+        }
+    }
+    
+    
+    
+    public double getAttackDamage() {
+        double damage = getAttributeValue(Attributes.ATTACK_DAMAGE);
+        return damage * getStandEfficiency();
+    }
+    
+    public double getAttackSpeed() {
+        double speed = getAttributeValue(Attributes.ATTACK_SPEED);
+        return speed * getStandEfficiency();
+    }
+    
+    public double getAttackKnockback() {
+        double damage = getAttributeValue(Attributes.ATTACK_KNOCKBACK);
+        return damage * getStandEfficiency();
+    }
+    
+    public double getDurability() {
+        double durability = getAttributeValue(ModEntityAttributes.STAND_DURABILITY.get());
+        if (ModNonStandPowers.VAMPIRISM.get().isHighOnBlood(getUser())) {
+        	durability *= 2;
+        }
+        return durability * rangeEfficiency;
+    }
+    
+    public double getPrecision() {
+        double precision = getAttributeValue(ModEntityAttributes.STAND_PRECISION.get());
+        return precision * getStandEfficiency();
+    }
+    
+    public double getAttackRange() {
+    	return getAttributeValue(ForgeMod.REACH_DISTANCE.get());
+    }
+    
+    public double getProximityRatio(Entity target) {
+    	double attackRange = getAttackRange();
+    	return attackRange > 0 ? 1 - JojoModUtil.getDistance(this, target.getBoundingBox()) / attackRange : 0;
+    }
+    
+    public float getLeapStrength() {
+        return StandStatFormulas.getLeapStrength(leapBaseStrength() * getStandEfficiency());
+    }
+    
+    protected double leapBaseStrength() {
+        return getAttributeValue(Attributes.ATTACK_DAMAGE);
+    }
+    
+    public double getStaminaCondition() {
+        return staminaCondition;
+    }
+    
+    public double getStandEfficiency() {
+    	return staminaCondition * rangeEfficiency;
+    }
+    
 
-
+    
     public void setArmsOnlyMode() {
         setArmsOnlyMode(true, true);
     }
 
     public void setArmsOnlyMode(boolean showMainArm, boolean showOffArm) {
-        if (level.isClientSide() || !isAddedToWorld()) {
-            this.armsOnlyMode = true;
-            this.showMainArm = showMainArm;
-            this.showOffArm = showOffArm;
-            scheduledTask = new UnsummonTask(this, getUser());
+        if (!level.isClientSide()) {
+            byte b = 3;
+            if (showMainArm) {
+                b |= 4;
+            }
+            if (showOffArm) {
+                b |= 8;
+            }
+            entityData.set(ARMS_ONLY_MODE, b);
+            
+            addArmsOnlyModifiers();
         }
     }
 
     public boolean isArmsOnlyMode() {
-        return armsOnlyMode;
+        return (entityData.get(ARMS_ONLY_MODE) & 1) > 0;
     }
-
-    @Override
-    public void onAddedToWorld() {
-        super.onAddedToWorld();
-        if (!level.isClientSide()) {
-            if (!isArmsOnlyMode()) {
-                setTask(new SummonLockTask(this));
+    
+    public boolean wasSummonedAsArms() {
+        return (entityData.get(ARMS_ONLY_MODE) & 2) > 0;
+    }
+    
+    public boolean showArm(Hand hand) {
+        switch (hand) {
+        case MAIN_HAND:
+            return (entityData.get(ARMS_ONLY_MODE) & 4) > 0;
+        case OFF_HAND:
+            return (entityData.get(ARMS_ONLY_MODE) & 8) > 0;
+        default:
+            return false;
+        }
+    }
+    
+    public void fullSummonFromArms() {
+        if (!level.isClientSide() && isArmsOnlyMode()) {
+            entityData.set(ARMS_ONLY_MODE, (byte) 2);
+            // scheduled stand task
+//            scheduledTask = null;
+            getCurrentTask().ifPresent(task -> {
+                StandEntityAction action = task.getAction();
+                if (action == ModActions.STAND_ENTITY_UNSUMMON.get()) {
+                    stopTask();
+                }
+            });
+        }
+    }
+    
+    private void onArmsOnlyModeUpdated() {
+        if (isArmsOnlyMode()) {
+            summonLockTicks = 0;
+        }
+        else {
+            if (level.isClientSide()) {
+                overlayTickCount = 0;
+                addSummonParticles();
+            }
+            if ((entityData.get(ARMS_ONLY_MODE) & 2) > 0) {
+                gradualSummonWeaknessTicks = StandStatFormulas.getSummonLockTicks(getAttackSpeed());
+                if (level.isClientSide()) {
+                    alphaTicks = gradualSummonWeaknessTicks;
+                }
+                else if (gradualSummonWeaknessTicks == 0) {
+                    removeArmsOnlyModifiers();
+                }
+                if (hasUser()) {
+                    getCurrentTask().ifPresent(task -> {
+                        StandEntityAction action = task.getAction();
+                        if (action != ModActions.STAND_ENTITY_UNSUMMON.get() || !hasEffect(ModEffects.STUN.get())) {
+                            task.setOffsetFromUser(action.getOffsetFromUser(getUserPower(), this, task.getTarget()));
+                        }
+                    });
+                }
             }
         }
     }
+    
+    protected void addSummonParticles() {}
 
 
 
@@ -243,15 +503,28 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     @Override
-    public void setUser(LivingEntity user) {
+    public void setUserAndPower(LivingEntity user, IStandPower power) {
         if (!level.isClientSide()) {
             entityData.set(USER_ID, user.getId());
         }
+
+        this.userPower = power;
+        if (!level.isClientSide() && power != null) {
+            modifiersFromResolveLevel(power.getStatsDevelopment());
+        }
     }
     
-    @Override
-    public void setUserPower(IStandPower power) {
-        this.userPower = power;
+    private void updateUserFromNetwork(int userId) {
+        userRef = lookupUser(userId);
+        if (level.isClientSide()) {
+            LivingEntity user = getUser();
+            if (user != null) {
+                IStandPower standPower = IStandPower.getStandPowerOptional(user).resolve().get();
+                if (standPower.getStandManifestation() != this) {
+                    standPower.setStandManifestation(this);
+                }
+            }
+        }
     }
     
     @Nullable
@@ -272,8 +545,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
 
     @Nullable
-    private WeakReference<LivingEntity> lookupUser() {
-        Entity user = level.getEntity(entityData.get(USER_ID));
+    private WeakReference<LivingEntity> lookupUser(int userId) {
+        Entity user = level.getEntity(userId);
         if (user instanceof LivingEntity) {
             return new WeakReference<LivingEntity>((LivingEntity) user);
         }
@@ -314,23 +587,36 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
 
     public void setStandPose(StandPose pose) {
-        entityData.set(STAND_POSE, pose);
+        this.standPose = pose;
     }
 
     public StandPose getStandPose() {
-        return entityData.get(STAND_POSE);
+        return standPose;
     }
 
     public int getSummonPoseRandomByte() {
         return summonPoseRandomByte;
     }
 
-    public static enum StandPose {
-        NONE,
-        SUMMON,
-        BLOCK,
-        RANGED_ATTACK,
-        ABILITY
+    public static class StandPose {
+        private final String name;
+        
+        public StandPose(String name) {
+            this.name = name;
+        }
+        
+        @Override
+        public String toString() {
+            return name;
+        }
+        
+        public static final StandPose IDLE = new StandPose("IDLE");
+        public static final StandPose SUMMON = new StandPose("SUMMON");
+        public static final StandPose BLOCK = new StandPose("BLOCK");
+        public static final StandPose LIGHT_ATTACK = new StandPose("LIGHT_ATTACK");
+        public static final StandPose HEAVY_ATTACK = new StandPose("HEAVY_ATTACK");
+        public static final StandPose HEAVY_ATTACK_COMBO = new StandPose("HEAVY_ATTACK_COMBO");
+        public static final StandPose RANGED_ATTACK = new StandPose("RANGED_ATTACK");
     }
 
 
@@ -346,7 +632,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
     @Override
     public boolean isInvisibleTo(PlayerEntity player) {
-        return !player.isSpectator() && (!isVisibleForAll() && !ClientUtil.shouldStandsRender(player) || underInvisibilityEffect());
+        return !player.isSpectator() && (!isVisibleForAll() && !StandUtil.shouldStandsRender(player) || underInvisibilityEffect());
     }
 
     @Override
@@ -363,13 +649,17 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         playSound(sound, volume, pitch, null);
     }
     
-    private void playSound(SoundEvent sound, float volume, float pitch, @Nullable PlayerEntity player) {
+    public void playSound(SoundEvent sound, float volume, float pitch, @Nullable PlayerEntity player) {
+        playSound(sound, volume, pitch, player, position());
+    }
+    
+    public void playSound(SoundEvent sound, float volume, float pitch, @Nullable PlayerEntity player, Vector3d pos) {
         if (!this.isSilent()) {
             if (!isVisibleForAll()) {
-                JojoModUtil.playSound(level, player, getX(), getY(), getZ(), sound, getSoundSource(), volume, pitch, StandUtil::isPlayerStandUser);
+                JojoModUtil.playSound(level, player, pos.x, pos.y, pos.z, sound, getSoundSource(), volume, pitch, StandUtil::shouldHearStands);
             }
             else {
-                level.playSound(player, getX(), getY(), getZ(), sound, getSoundSource(), volume, pitch);
+                level.playSound(player, pos.x, pos.y, pos.z, sound, getSoundSource(), volume, pitch);
             }
         }
     }
@@ -388,87 +678,150 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
     }
     
-    public void playStandSound(StandSoundType soundType) {
+    public void playStandSummonSound() {
         if (!level.isClientSide()) {
-            PacketManager.sendToClientsTracking(new TrStandSoundPacket(getId(), soundType), this);
-        }
-        else {
-            clientHandleStandSound(soundType, false);
-        }
-    }
-    
-    public void stopStandSound(StandSoundType soundType) {
-        if (!level.isClientSide()) {
-            PacketManager.sendToClientsTracking(TrStandSoundPacket.stopSound(getId(), soundType), this);
-        }
-        else {
-            clientHandleStandSound(soundType, true);
-        }
-    }
-    
-    private final Set<StandSoundType> soundsToStop = EnumSet.noneOf(StandSoundType.class);
-    protected void clientHandleStandSound(StandSoundType soundType, boolean stopTheSound) {
-        if (stopTheSound) {
-            soundsToStop.add(soundType);
-        }
-        else {
-            soundsToStop.remove(soundType);
-            SoundEvent sound = type.getSound(soundType);
+            SoundEvent sound = type.getSummonSound();
             if (sound != null) {
-                ClientTickingSoundsHelper.playStandEntitySound(this, sound, soundType, 1.0F, 1.0F);
+                playSound(sound, 1.0F, 1.0F);
             }
         }
     }
     
-    public boolean checkSoundStop(StandSoundType soundType) {
-        return soundsToStop.remove(soundType);
+    public SoundEvent getStandUnsummonSound() {
+        return type.getUnsummonSound();
     }
+    
 
 
-
+    private boolean wasDamageBlocked;
     @Override
-    protected void actuallyHurt(DamageSource damageSrc, float damageAmount) {
-        if (!damageSrc.isBypassArmor() && canBlockOrParryFromAngle(damageSrc)) {
-            if (parryCount > 0) {
-                parryCount--;
-                return;
+    public boolean hurt(DamageSource dmgSource, float dmgAmount) {
+        wasDamageBlocked = false;
+        if (!level.isClientSide() && barrageParryCount > 0
+                && !isInvulnerableTo(dmgSource) && !isDeadOrDying() 
+                && !(dmgSource.isFire() && hasEffect(Effects.FIRE_RESISTANCE))
+                && canBlockDamage(dmgSource) && canBlockOrParryFromAngle(dmgSource.getSourcePosition())
+                && dmgSource instanceof StandEntityDamageSource) {
+            StandEntityDamageSource standDmgSource = (StandEntityDamageSource) dmgSource;
+            int punchesIncoming = standDmgSource.getBarrageHitsCount();
+            if (punchesIncoming > 0) {
+                float parriableProportion = Math.min(StandStatFormulas.getMaxBarrageParryTickDamage(getDurability()) / dmgAmount, 1);
+                int punchesCanParry = MathHelper.floor(parriableProportion * barrageParryCount);
+                
+                if (punchesCanParry > 0) {
+                    Vector3d attackPos = this.getEyePosition(1.0F);
+                    Entity attacker = dmgSource.getDirectEntity();
+                    if (attacker != null) {
+                        attackPos = attackPos.scale(0.5).add(attacker.getEyePosition(1.0F).scale(0.5));
+                    }
+                    else {
+                        attackPos = attackPos.add(this.getLookAngle().scale(1.0));
+                    }
+                    ((ServerWorld) level).sendParticles(ParticleTypes.CRIT, 
+                            attackPos.x, attackPos.y, attackPos.z, 1, 0.5D, 0.25D, 0.5D, 0.2D);
+                    if (attacker instanceof StandEntity) {
+                    	((StandEntity) attacker).playPunchSound = true;
+                    }
+                    
+                    punchesCanParry = Math.min(punchesCanParry, punchesIncoming);
+                    standDmgSource.setBarrageHitsCount(punchesIncoming - punchesCanParry);
+                    barrageParryCount -= punchesCanParry;
+                    addComboMeter(0.0125F, COMBO_TICKS);
+                    setBarrageClashOpponent(attacker);
+                    
+                    if (punchesCanParry == punchesIncoming) {
+                        StandUtil.addResolve(standDmgSource.getStandPower(), this, dmgAmount);
+                        return false;
+                    }
+                    else {
+                        float damageParried = dmgAmount * (float) punchesCanParry / (float) punchesIncoming;
+                        dmgAmount -= damageParried;
+                        StandUtil.addResolve(standDmgSource.getStandPower(), this, damageParried);
+                    }
+                }
             }
-            if (currentTask == null) {
-                setTask(new BlockTask(5, this));
-            }
+        }
+        return super.hurt(dmgSource, dmgAmount);
+    }
+    
+    public Optional<Entity> barrageClashOpponent() {
+    	return barrageClashOpponent;
+    }
+    
+    public void barrageClashStopped() {
+    	setBarrageClashOpponent(null);
+    }
+    
+    private void setBarrageClashOpponent(@Nullable Entity opponent) {
+    	entityData.set(BARRAGE_CLASH_OPPONENT_ID, opponent != null ? opponent.getId() : -1);
+    }
+    
+    @Override
+    protected void actuallyHurt(DamageSource dmgSource, float damageAmount) {
+        boolean blockableAngle = canBlockOrParryFromAngle(dmgSource.getSourcePosition());
+        if (!isManuallyControlled() && canBlockDamage(dmgSource) && blockableAngle && !getCurrentTask().isPresent() && canStartBlocking()) {
+            setTask(ModActions.STAND_ENTITY_BLOCK.get(), 5, StandEntityAction.Phase.PERFORM, ActionTarget.EMPTY);
         }
         if (transfersDamage() && hasUser()) {
             LivingEntity user = getUser();
             if (user != null && user.isAlive()) {
-                if (!isInvulnerableTo(damageSrc)) {
-                    damageAmount = ForgeHooks.onLivingHurt(this, damageSrc, damageAmount);
+                if (!isInvulnerableTo(dmgSource)) {
+                    damageAmount = ForgeHooks.onLivingHurt(this, dmgSource, damageAmount);
                     if (damageAmount <= 0) return;
-                    damageAmount = getDamageAfterArmorAbsorb(damageSrc, damageAmount);
-                    damageAmount = getDamageAfterMagicAbsorb(damageSrc, damageAmount);
-                    if (isStandBlocking()) {
-                        damageAmount = onBlockedAttack(damageAmount);
-                    }
+                    damageAmount = getDamageAfterArmorAbsorb(dmgSource, damageAmount);
+                    damageAmount = getDamageAfterMagicAbsorb(dmgSource, damageAmount);
+                    damageAmount = standDamageResistance(dmgSource, damageAmount, blockableAngle);
+                    
                     float damageAfterAbsorption = Math.max(damageAmount - getAbsorptionAmount(), 0.0F);
                     setAbsorptionAmount(getAbsorptionAmount() - (damageAmount - damageAfterAbsorption));
                     float absorbedDamage = damageAmount - damageAfterAbsorption;
-                    if (absorbedDamage > 0.0F && absorbedDamage < 3.4028235E37F && damageSrc.getEntity() instanceof ServerPlayerEntity) {
-                        ((ServerPlayerEntity) damageSrc.getEntity()).awardStat(Stats.DAMAGE_DEALT_ABSORBED, Math.round(absorbedDamage * 10.0F));
+                    if (absorbedDamage > 0.0F && absorbedDamage < Float.MAX_VALUE / 10F && dmgSource.getEntity() instanceof ServerPlayerEntity) {
+                        ((ServerPlayerEntity) dmgSource.getEntity()).awardStat(Stats.DAMAGE_DEALT_ABSORBED, Math.round(absorbedDamage * 10.0F));
                     }
-                    damageAfterAbsorption = ForgeHooks.onLivingDamage(this, damageSrc, damageAfterAbsorption);
-                    if (damageAfterAbsorption != 0.0F) {
-                        ModDamageSources.hurtThroughInvulTicks(user, new StandLinkDamageSource(this, damageSrc), damageAmount);
+                    damageAmount = damageAfterAbsorption;
+                    
+                    damageAmount = ForgeHooks.onLivingDamage(this, dmgSource, damageAmount);
+                    if (damageAmount != 0.0F) {
+                    	if (wasDamageBlocked) {
+                    		blockDamage += damageAmount;
+                        	// FIXME cancel user hurt sound
+                    	}
+                        DamageUtil.hurtThroughInvulTicks(user, new StandLinkDamageSource(this, dmgSource), damageAmount);
                     }
                 }
             }
         }
         else {
-            super.actuallyHurt(damageSrc, damageAmount);
+            super.actuallyHurt(dmgSource, damageAmount);
         }
+    }
+    
+    public float guardCounter() {
+    	return Math.min((isStandBlocking() ? blockDamage : prevBlockDamage) / 5F, 1F);
     }
 
     @Override
     public void knockback(float strength, double xRatio, double zRatio) {
-        super.knockback(strength, xRatio, zRatio);
+        LivingKnockBackEvent event = ForgeHooks.onLivingKnockBack(this, strength, xRatio, zRatio);
+        if (event.isCanceled()) return;
+        strength = event.getStrength();
+        xRatio = event.getRatioX();
+        zRatio = event.getRatioZ();
+        strength *= 1.0F - (float) getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
+        if (isStandBlocking() && canBlockOrParryFromAngle(position().add(new Vector3d(xRatio, 0, zRatio)))) {
+            strength *= 0.2F;
+        }
+        
+        if (strength > 0) {
+            hasImpulse = true;
+            Vector3d motionVec = getDeltaMovement();
+            Vector3d knockbackVec = new Vector3d(xRatio, 0.0D, zRatio).normalize().scale(strength);
+            setDeltaMovement(
+                    motionVec.x / 2.0D - knockbackVec.x, 
+                    onGround ? Math.min(0.4D, motionVec.y / 2.0D + (double) strength) : motionVec.y, 
+                    motionVec.z / 2.0D - knockbackVec.z);
+        }
+
         LivingEntity user = getUser();
         if (user != null && user.isAlive()) {
             user.knockback(strength, xRatio, zRatio);
@@ -478,46 +831,76 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
 
     public boolean canStartBlocking() {
-        return currentTask == null || currentTask.canClearMidway();
-    }
-
-    public void blockTaskManual() {
-        if (canStartBlocking()) {
-            setTask(new BlockTask(Integer.MAX_VALUE, this));
-            if (isArmsOnlyMode()) {
-                setRelativePos(0, 0.1);
-                setRelativeY(0);
-            }
-            else {
-                setRelativePos(0, 0.3);
-            }
+        if (entityData.get(NO_BLOCKING_TICKS) > 0) {
+            return false;
         }
+        return getCurrentTask().map(task -> task.getAction().canBeCanceled(userPower, 
+                this, task.getPhase(), ModActions.STAND_ENTITY_BLOCK.get())).orElse(true);
     }
 
     public boolean isStandBlocking() {
         return StandPose.BLOCK.equals(getStandPose());
     }
-
-    protected float onBlockedAttack(float initialDamageAmount) {
-        boolean reduceDamage = true;
-        if (userPower != null) {
-            reduceDamage = userPower.consumeMana(initialDamageAmount * type.getStats().getBlockStaminaCostForDmgPoint());
+    
+    protected float standDamageResistance(DamageSource damageSrc, float damageAmount, boolean blockableAngle) {
+        if (canBlockDamage(damageSrc)) {
+            float blockedRatio = 0;
+            if (blockableAngle && isStandBlocking() && userPower != null) {
+                blockedRatio = 1F;
+                if (userPower.usesStamina()) {
+                    float staminaCost = StandStatFormulas.getBlockStaminaCost(damageAmount);
+                    float stamina = userPower.getStamina();
+                    if (!userPower.consumeStamina(staminaCost)) {
+                        blockedRatio = stamina / staminaCost;
+                        standCrash();
+                    }
+                }
+            }
+            if (blockedRatio == 1) {
+                wasDamageBlocked = true;
+                if (damageSrc.getEntity() instanceof StandEntity) {
+                	((StandEntity) damageSrc.getEntity()).playPunchSound = false;
+                }
+            }
+            return damageAmount * (1 - getPhysicalResistance(blockedRatio));
         }
-        return reduceDamage ? initialDamageAmount * type.getStats().getBlockDmgFactor() : initialDamageAmount;
+        return damageAmount;
+    }
+    
+    @Override
+    public SoundEvent getHurtSound(DamageSource damageSrc) {
+        if (wasDamageBlocked) {
+            return getAttackBlockSound();
+        }
+        return super.getHurtSound(damageSrc);
     }
 
-    protected boolean canBlockOrParryFromAngle(DamageSource damageSrc) {
+    @Override
+    public float getSoundVolume() {
+        return super.getSoundVolume();
+    }
+
+    @Override
+    public float getVoicePitch() {
+        return super.getVoicePitch();
+    }
+    
+    protected float getPhysicalResistance(float blockedRatio) {
+        return StandStatFormulas.getPhysicalResistance(getDurability(), getAttackDamage(), blockedRatio);
+    }
+
+    public boolean canBlockOrParryFromAngle(Vector3d dmgPosition) {
         if (!canUpdate()) {
             return false;
         }
-        Vector3d dmgPosition = damageSrc.getSourcePosition();
         if (dmgPosition == null) {
             return false;
         }
         Vector3d viewVec = getViewVector(1.0F);
         Vector3d diffVec = dmgPosition.subtract(position()).normalize();
-        return diffVec.dot(viewVec) > 0.866D;
+        return diffVec.dot(viewVec) > 0.7071D;
     }
+    
 
 
 
@@ -535,9 +918,16 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     @Override
     public boolean isInvulnerableTo(DamageSource damageSrc) {
-        return this.is(damageSrc.getEntity()) || damageSrc != DamageSource.OUT_OF_WORLD && (isInvulnerable() 
+        return this.is(damageSrc.getEntity()) || damageSrc != DamageSource.OUT_OF_WORLD 
+                && !damageSrc.getMsgId().contains("stand")
+                && (isInvulnerable() 
                 || !(damageSrc instanceof IStandDamageSource) && damageSrc != DamageSource.ON_FIRE 
-                || damageSrc.isFire() && !level.getGameRules().getBoolean(GameRules.RULE_FIRE_DAMAGE));
+                || damageSrc.isFire() && !level.getGameRules().getBoolean(GameRules.RULE_FIRE_DAMAGE))
+                || getUser() instanceof PlayerEntity && ((PlayerEntity) getUser()).abilities.invulnerable && !damageSrc.isBypassInvul();
+    }
+    
+    public boolean canBlockDamage(DamageSource dmgSource) {
+        return dmgSource.getDirectEntity() != null && !dmgSource.isBypassArmor() && canUpdate() && !hasEffect(ModEffects.STUN.get());
     }
 
     @Override
@@ -560,27 +950,74 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     @Override
     public void tick() {
         super.tick();
-        accumulateTickParry = false;
+        accumulateBarrageTickParry = false;
         LivingEntity user = getUser();
-
-        ActionTarget target = getTaskTarget();
-        if (target.getType() == TargetType.ENTITY) {
-            Entity targetEntity = target.getEntity(level);
-            if (targetEntity == null || !targetEntity.isAlive()) {
-                setTaskTarget(ActionTarget.EMPTY);
-            }
-        }
-        target = getTaskTarget();
-        if (target.getType() != TargetType.EMPTY && !isManuallyControlled()) {
-            JojoModUtil.rotateTowards(this, target.getTargetPos());
-            if (target.getType() == TargetType.BLOCK) {
-                setTaskTarget(ActionTarget.EMPTY);
-            }
-        }
-        else if (user != null && !isRemotePositionFixed()) {
+        
+        checkInputBuffer();
+        
+        Optional<StandEntityTask> currentTask = getCurrentTask();
+        
+        if (!currentTask.map(task -> task.rotateStand(this, false)).orElse(false)
+        		&& user != null && !isRemotePositionFixed()) {
             float yRotSet = user.yRot;
             setRot(yRotSet, user.xRot);
             setYHeadRot(yRotSet);
+        }
+        
+        updatePosition();
+        updateStrengthMultipliers();
+        
+        if (!level.isClientSide()) {
+            swings.broadcastSwings(this);
+            
+            if (noComboDecayTicks > 0) {
+                noComboDecayTicks--;
+            }
+            else {
+                StandEntityAction currentAction = getCurrentTaskAction();
+                if (currentAction == null || !currentAction.noComboDecay()) {
+                    float decay = COMBO_DECAY;
+                    float combo = entityData.get(PUNCHES_COMBO);
+                    if (combo < 0.5F) {
+                        decay *= 0.5F;
+                    }
+                    if (user != null && user.hasEffect(ModEffects.RESOLVE.get())) {
+                        decay *= 0.5F;
+                    }
+                    setComboMeter(Math.max(combo - decay, 0));
+                }
+            }
+            
+            int noBlockingTicks = entityData.get(NO_BLOCKING_TICKS);
+            if (noBlockingTicks > 0) {
+                entityData.set(NO_BLOCKING_TICKS, noBlockingTicks - 1);
+            }
+        }
+        
+        if (barrageClashOpponent.map(stand -> {
+        	return !stand.isAlive() || !this.isTargetInReach(new ActionTarget(stand));
+        }).orElse(false)) {
+    		setBarrageClashOpponent(null);
+        }
+        
+        if (summonLockTicks > 0) {
+            summonLockTicks--;
+        }
+        else {
+            boolean stun = hasEffect(ModEffects.STUN.get());
+            currentTask.ifPresent(task -> {
+                if (!stun || task.getAction().ignoresPerformerStun()) {
+                    task.tick(userPower, this);
+                }
+            });
+            
+            if (!stun && gradualSummonWeaknessTicks > 0) {
+                gradualSummonWeaknessTicks--;
+                
+                if (gradualSummonWeaknessTicks == 0 && !level.isClientSide()) {
+                    removeArmsOnlyModifiers();
+                }
+            }
         }
 
         if (!level.isClientSide()) {
@@ -588,70 +1025,180 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 setHealth(user.isAlive() ? user.getHealth() : 0);
             }
             else if (requiresUser()) {
-                setHealth(0);
+                remove();
             }
-            
-            updatePosition(user);
-            if (currentTask != null) {
-                currentTask.onEntityTick();
-            }
-            swings.broadcastSwings(this);
         }
         else {
-            alphaOld = alpha;
-            alpha = entityData.get(ALPHA);
-            
-            if (user != null && isManuallyControlled() && !noPhysics && isInsideViewBlockingBlock()) {
+            if (user != null && isManuallyControlled() && !noPhysics && isInsideViewBlockingBlock(position())) {
                 Vector3d vecToUser = user.position().subtract(position());
                 if (vecToUser.lengthSqr() > 1) {
                     vecToUser = vecToUser.normalize();
                 }
                 moveWithoutCollision(vecToUser);
             }
+            
+            overlayTickCount++;
         }
     }
 
 
 
+    public void updateStrengthMultipliers() {
+    	LivingEntity user = getUser();
+    			
+        rangeEfficiency = user != null ? StandStatFormulas.rangeStrengthFactor(rangeEffective, getMaxRange(), distanceTo(user)) : 1;
+        
+        if (userPower != null) {
+	        staminaCondition = StandUtil.standIgnoresStaminaDebuff(userPower) ? 1
+	        		: 0.25 + Math.min((double) (userPower.getStamina() / userPower.getMaxStamina()) * 1.5, 0.75);
+        }
+    }
 
-    public void updatePosition(LivingEntity user) {
-        if (user != null) {
+    public void updatePosition() {
+    	LivingEntity user = getUser();
+    	if (user != null) {
             if (isFollowingUser()) {
-                Vector3d offset = relativePos.getAbsoluteVec(yRot);
-                setPos(user.getX() + offset.x, 
-                        user.getY() + (user.isShiftKeyDown() ? 0 : offset.y), 
-                        user.getZ() + offset.z);
+                StandRelativeOffset relativeOffset = getOffsetFromUser();
+                if (relativeOffset != null) {
+                	Vector3d pos = user.position().add(taskOffset(user, relativeOffset, 
+                			getCurrentTask().map(task -> task.getTarget()).orElse(ActionTarget.EMPTY)));
+                	if (!isArmsOnlyMode()) {
+                		pos = collideNextPos(pos);
+                	}
+                    
+                    setPos(pos.x, pos.y, pos.z);
+                }
             }
             else if (isBeingRetracted()) {
-                if (!isCloseToEntity(user)) {
-                    setDeltaMovement(new Vector3d(user.getX() - getX(), user.getY() - getY(), user.getZ() - getZ())
+                if (!isCloseToUser()) {
+                    setDeltaMovement(user.position().add(taskOffset(user, getDefaultOffsetFromUser(), ActionTarget.EMPTY)).subtract(position())
                             .normalize().scale(getAttributeValue(Attributes.MOVEMENT_SPEED)));
                 }
                 else {
+                    setDeltaMovement(Vector3d.ZERO);
                     setStandFlag(StandFlag.BEING_RETRACTED, false);
                 }
             }
-        }
+    	}
     }
     
-    public void setRelativePos(double left, double front) {
-        relativePos.left = left;
-        relativePos.forward = front;
+    public Vector3d collideNextPos(Vector3d pos) {
+    	return noPhysics ? pos : position().add(collide(pos.subtract(position())));
     }
 
-    public void setRelativeY(double y) {
-        relativePos.y = y;
+    // yeah...
+    private Vector3d collide(Vector3d offsetVec) {
+    	AxisAlignedBB axisalignedbb = this.getBoundingBox();
+    	ISelectionContext iselectioncontext = ISelectionContext.of(this);
+    	VoxelShape voxelshape = this.level.getWorldBorder().getCollisionShape();
+    	Stream<VoxelShape> stream = VoxelShapes.joinIsNotEmpty(voxelshape, VoxelShapes.create(axisalignedbb.deflate(1.0E-7D)), IBooleanFunction.AND) ? Stream.empty() : Stream.of(voxelshape);
+    	Stream<VoxelShape> stream1 = this.level.getEntityCollisions(this, axisalignedbb.expandTowards(offsetVec), (p_233561_0_) -> {
+    		return true;
+    	});
+    	ReuseableStream<VoxelShape> reuseablestream = new ReuseableStream<>(Stream.concat(stream1, stream));
+    	Vector3d vector3d = offsetVec.lengthSqr() == 0.0D ? offsetVec : collideBoundingBoxHeuristically(this, offsetVec, axisalignedbb, this.level, iselectioncontext, reuseablestream);
+    	boolean flag = offsetVec.x != vector3d.x;
+    	boolean flag1 = offsetVec.y != vector3d.y;
+    	boolean flag2 = offsetVec.z != vector3d.z;
+    	boolean flag3 = this.onGround || flag1 && offsetVec.y < 0.0D;
+    	if (this.maxUpStep > 0.0F && flag3 && (flag || flag2)) {
+    		Vector3d vector3d1 = collideBoundingBoxHeuristically(this, new Vector3d(offsetVec.x, (double)this.maxUpStep, offsetVec.z), axisalignedbb, this.level, iselectioncontext, reuseablestream);
+    		Vector3d vector3d2 = collideBoundingBoxHeuristically(this, new Vector3d(0.0D, (double)this.maxUpStep, 0.0D), axisalignedbb.expandTowards(offsetVec.x, 0.0D, offsetVec.z), this.level, iselectioncontext, reuseablestream);
+    		if (vector3d2.y < (double)this.maxUpStep) {
+    			Vector3d vector3d3 = collideBoundingBoxHeuristically(this, new Vector3d(offsetVec.x, 0.0D, offsetVec.z), axisalignedbb.move(vector3d2), this.level, iselectioncontext, reuseablestream).add(vector3d2);
+    			if (getHorizontalDistanceSqr(vector3d3) > getHorizontalDistanceSqr(vector3d1)) {
+    				vector3d1 = vector3d3;
+    			}
+    		}
+
+    		if (getHorizontalDistanceSqr(vector3d1) > getHorizontalDistanceSqr(vector3d)) {
+    			return vector3d1.add(collideBoundingBoxHeuristically(this, new Vector3d(0.0D, -vector3d1.y + offsetVec.y, 0.0D), axisalignedbb.move(vector3d1), this.level, iselectioncontext, reuseablestream));
+    		}
+    	}
+
+    	return vector3d;
+    }
+    
+    private Vector3d taskOffset(LivingEntity user, StandRelativeOffset relativeOffset, ActionTarget target) {
+    	float yRot;
+    	float xRot;
+    	Vector3d targetPos = target.getTargetPos(true);
+    	if (targetPos != null) {
+    		Vector3d vecToTarget = targetPos.subtract(user.getEyePosition(1.0F));
+    		yRot = MathUtil.yRotDegFromVec(vecToTarget);
+    		xRot = MathUtil.xRotDegFromVec(vecToTarget);
+    	}
+    	else {
+    		yRot = user.yRot;
+    		xRot = user.xRot;
+    	}
+    		
+    	Vector3d offset = relativeOffset.getAbsoluteVec(getDefaultOffsetFromUser(), yRot, xRot, this, user);
+    	if (user.isShiftKeyDown()) {
+    		offset = new Vector3d(offset.x, 0, offset.z);
+    	}
+    	return offset;
+    }
+    
+    @Nullable
+    protected StandRelativeOffset getOffsetFromUser() {
+        if (Optional.ofNullable(getCurrentTaskAction()).map(action -> action.noAdheringToUserOffset(userPower, this)).orElse(false)) {
+            return null;
+        }
+        return getCurrentTask().map(task -> {
+            StandRelativeOffset taskOffset = task.getOffsetFromUser();
+            if (taskOffset != null) {
+                return taskOffset;
+            }
+            return getDefaultOffsetFromUser();
+        }).orElse(getDefaultOffsetFromUser());
+    }
+    
+    public StandRelativeOffset getDefaultOffsetFromUser() {
+        return isArmsOnlyMode() ? offsetDefaultArmsOnly : offsetDefault;
+    }
+    
+//    public void addBarrageOffset() {
+//        if (!isArmsOnlyMode()) {
+//            StandEntityTask currentTask = getCurrentTask();
+//            if (currentTask != null) {
+//                StandRelativeOffset offset = currentTask.getOffsetFromUser();
+//                double currentOffset = offset.getForward();
+//                double newOffset = Math.min(currentOffset + 0.025, rangeEffective);
+//                if (newOffset != currentOffset) {
+//                    offset = offset.copy(null, null, newOffset);
+//                    setTaskPosOffset(offset, true);
+//                }
+//            }
+//        }
+//    }
+    
+    public void setTaskPosOffset(double left, double forward) {
+        setTaskPosOffset(StandRelativeOffset.noYOffset(left, forward), false);
+    }
+    
+    public void setTaskPosOffset(double left, double y, double forward) {
+        setTaskPosOffset(StandRelativeOffset.withYOffset(left, y, forward), false);
+    }
+    
+    public void setTaskPosOffset(StandRelativeOffset offset, boolean sync) {
+        getCurrentTask().ifPresent(task -> {
+            task.setOffsetFromUser(offset);
+            if (sync && !level.isClientSide()) {
+                PacketManager.sendToClientsTracking(new TrSetStandOffsetPacket(getId(), task.getOffsetFromUser()), this);
+            }
+        });
     }
 
-    private boolean isInsideViewBlockingBlock() {
+    private boolean isInsideViewBlockingBlock(Vector3d pos) {
         BlockPos.Mutable blockPos$mutable = new BlockPos.Mutable();
         for (int i = 0; i < 8; ++i) {
-            double x = getX() + (double)(((float)((i >> 0) % 2) - 0.5F) * getBbWidth() * 0.8F);
-            double y = getEyeY() + (double)(((float)((i >> 1) % 2) - 0.5F) * 0.1F);
-            double z = getZ() + (double)(((float)((i >> 2) % 2) - 0.5F) * getBbWidth() * 0.8F);
+            double x = pos.x + (double)(((float)((i >> 0) % 2) - 0.5F) * getBbWidth() * 0.8F);
+            double y = pos.y + getEyeHeight() + (double)(((float)((i >> 1) % 2) - 0.5F) * 0.1F);
+            double z = pos.z + (double)(((float)((i >> 2) % 2) - 0.5F) * getBbWidth() * 0.8F);
             blockPos$mutable.set(x, y, z);
             BlockState blockState = level.getBlockState(blockPos$mutable);
-            if (blockState.getRenderShape() != BlockRenderType.INVISIBLE && blockState.isViewBlocking(level, blockPos$mutable)) {
+            if (blockState.getRenderShape() != BlockRenderType.INVISIBLE && blockState.isSuffocating(level, blockPos$mutable)) {
                 return true;
             }
         }
@@ -660,134 +1207,304 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
 
 
-    public void setTask(StandEntityTask task) {
-        if (task.getTicks() > 0) {
-            if (getStandPose() == StandPose.SUMMON) {
-                setStandPose(StandPose.NONE);
+    public boolean setTask(StandEntityAction action, int ticks, StandEntityAction.Phase phase, ActionTarget taskTarget) {
+        return setTask(StandEntityTask.makeServerSideTask(this, userPower, action, ticks, phase, isArmsOnlyMode(), taskTarget));
+    }
+
+    protected boolean setTask(StandEntityTask task) {
+        if (!level.isClientSide()) {
+        	Optional<StandEntityTask> previousTask = getCurrentTask();
+            if (stopTask(task, false)) {
+            	previousTask.ifPresent(prevTask -> {
+            		if (prevTask.getTarget().getType() != TargetType.EMPTY
+            				&& task.getTarget().getType() == TargetType.EMPTY) {
+            			task.setTarget(this, prevTask.getTarget(), userPower, true);
+            		}
+                	
+            		if (task.getAction().transfersPreviousOffset(userPower, this, prevTask)) {
+                		StandRelativeOffset offset = prevTask.getOffsetFromUser();
+                		if (offset != null) {
+                			task.setOffsetFromUser(offset);
+                		}
+            		}
+            	});
+            	
+                entityData.set(CURRENT_TASK, Optional.of(task));
+                if (task.getAction().enablePhysics) {
+                    setNoPhysics(false);
+                }
+                return true;
             }
-            if (clearTask(false) && currentTask == null) {
-                this.currentTask = task;
-                task.afterInit();
+            // scheduled stand task
+//            else if (task.getAction().canBeScheduled(userPower, this)) {
+//                this.scheduledTask = task;
+//            }
+        }
+        return false;
+    }
+    
+    public void stopTask() {
+        stopTask(false);
+    }
+    
+    protected void stopTask(boolean stopNonCancelable) {
+        stopTask(null, stopNonCancelable);
+    }
+    
+    private boolean stopTask(@Nullable StandEntityTask newTask, boolean stopNonCancelable) {
+        if (!level.isClientSide()) {
+            return getCurrentTask().map(task -> {
+            	StandEntityAction action = newTask != null ? newTask.getAction() : null;
+                if (task.getTicksLeft() <= 0 || stopNonCancelable
+                        || task.getAction().canBeCanceled(userPower, this, task.getPhase(), action)) {
+                    clearTask(task, action);
+                    return true;
+                }
+                return false;
+            }).orElse(true);
+        }
+        return false;
+    }
+    
+    protected void clearTask(StandEntityTask clearedTask, @Nullable StandEntityAction newAction) {
+    	StandEntityAction oldAction = clearedTask.getAction();
+        oldAction.onClear(userPower, this, newAction);
+        
+        barrageParryCount = 0;
+        if (blockDamage > 0) {
+        	prevBlockDamage += blockDamage;
+        	blockDamage = 0;
+        }
+        else {
+        	prevBlockDamage = 0;
+        }
+        
+        updateNoPhysics();
+        setStandPose(StandPose.IDLE);
+		
+        if (newAction == null && !checkInputBuffer()) {
+            if (isArmsOnlyMode()) {
+                StandEntityAction unsummon = ModActions.STAND_ENTITY_UNSUMMON.get();
+                setTask(StandEntityTask.makeServerSideTask(this, userPower, unsummon, unsummon.getStandActionTicks(userPower, this), 
+                        StandEntityAction.Phase.PERFORM, isArmsOnlyMode(), ActionTarget.EMPTY));
             }
             else {
-                this.scheduledTask = task;
+            	boolean retractStand = oldAction.standRetractsAfterTask(getUserPower(), this) && getUser() != null && !isCloseToUser() && isFollowingUser();
+                entityData.set(CURRENT_TASK, Optional.empty());
+            	if (retractStand) {
+            		retractStand(false);
+            	}
             }
         }
     }
     
-    public void clearTask() {
-        clearTask(true);
+    public void stopTaskWithRecovery() {
+        getCurrentTask().ifPresent(task -> {
+            task.moveToPhase(StandEntityAction.Phase.RECOVERY, userPower, this);
+        });
     }
-
-    protected boolean clearTask(boolean resetPos) {
-        if (currentTask == null) {
-            return true;
-        }
-        if (currentTask.clear()) {
-            parryCount = 0;
-            setTaskTarget(ActionTarget.EMPTY);
-            updateNoPhysics();
-            if (currentTask.resetPoseOnClear()) {
-                setStandPose(StandPose.NONE);
-            }
-            if (resetPos && !isArmsOnlyMode()) {
-                relativePos.reset();
-            }
-            currentTask = null;
-            if (scheduledTask != null) {
-                StandEntityTask nextTask = scheduledTask;
-                scheduledTask = null;
-                setTask(nextTask);
-            }
-            return true;
-        }
-        return false;
+    
+    public Optional<StandEntityTask> getCurrentTask() {
+        return entityData.get(CURRENT_TASK);
     }
-
-
-
-    public void setTaskTarget(ActionTarget target) {
-        if (target.getType() != TargetType.ENTITY || target.getEntity(level) != this) {
-            entityData.set(TASK_TARGET, target);
-        }
+    
+    public Optional<StandEntityAction> getCurrentTaskActionOptional() {
+        return getCurrentTask().map(StandEntityTask::getAction);
     }
-
-    protected ActionTarget getTaskTarget() {
-        return entityData.get(TASK_TARGET);
+    
+    public StandEntityAction getCurrentTaskAction() {
+        return getCurrentTaskActionOptional().orElse(null);
     }
-
-
-
-    public void setUserMovementFactor(float userMovementFactor) {
-        entityData.set(USER_MOVEMENT_FACTOR, MathHelper.clamp(userMovementFactor, 0F, 1F));
+    
+    public Optional<StandEntityAction.Phase> getCurrentTaskPhase() {
+        return getCurrentTask().map(StandEntityTask::getPhase);
+    }
+    
+    public float getCurrentTaskCompletion(float partialTick) {
+        return getCurrentTask().map(task -> task.getTaskCompletion(partialTick)).orElse(0F);
     }
 
     public float getUserMovementFactor() {
-        return entityData.get(USER_MOVEMENT_FACTOR);
+    	return getCurrentTask().map(task -> task.getAction().getUserMovementFactor(getUserPower(), this, task)).orElse(1F);
+    }
+    
+    public void queueNextAction(StandEntityAction action) {
+    	if (!level.isClientSide()) {
+    		this.inputBuffer = action;
+    	}
+    }
+    
+    public boolean checkInputBuffer() {
+    	if (inputBuffer != null) {
+    		LivingEntity user = getUser();
+    		if (userPower.onClickAction(inputBuffer, user != null && user.isShiftKeyDown(), ActionTarget.EMPTY)) {
+    			inputBuffer = null;
+    			return true;
+    		}
+    	}
+    	return false;
     }
 
 
+    
+    public RayTraceResult aimWithStandOrUser(double reachDistance, ActionTarget currentTarget) {
+        RayTraceResult aim;
+        if (!isManuallyControlled()) {
+            LivingEntity user = getUser();
+            if (user != null && currentTarget.getType() != TargetType.ENTITY) {
+                aim = precisionRayTrace(user, reachDistance);
+                if (JojoModUtil.isAnotherEntityTargeted(aim, this)
+                        || currentTarget.getType() == TargetType.EMPTY && aim.getType() != RayTraceResult.Type.MISS) {
+                    rotateTowards(ActionTarget.fromRayTraceResult(aim), true);
+                }
+            }
+        }
+        aim = precisionRayTrace(this, reachDistance);
+        return aim;
+    }
+    
+    public RayTraceResult precisionRayTrace(Entity aimingEntity) {
+        return precisionRayTrace(aimingEntity, getAimDistance(aimingEntity));
+    }
+    
+    public double getAimDistance(@Nullable Entity aimingEntity) {
+        double reachDistance = getAttributeValue(ForgeMod.REACH_DISTANCE.get());
+        if (!isManuallyControlled() && aimingEntity instanceof LivingEntity) {
+            LivingEntity livingEntity = (LivingEntity) aimingEntity;
+            if (livingEntity.getAttribute(ForgeMod.REACH_DISTANCE.get()) != null) {
+                reachDistance = livingEntity.getAttributeValue(ForgeMod.REACH_DISTANCE.get());
+            }
+        }
+        return reachDistance;
+    }
 
+    public Predicate<Entity> canTarget() {
+        return entity -> !entity.is(this) && !entity.is(getUser())
+                && !(entity instanceof ProjectileEntity && this.is(((ProjectileEntity) entity).getOwner()));
+    }
+    
+    public RayTraceResult precisionRayTrace(Entity aimingEntity, double reachDistance) {
+        return JojoModUtil.rayTrace(aimingEntity, 
+                reachDistance, canTarget(), 0.25, getPrecision());
+    }
+    
     public boolean canAttackMelee() {
-        return getAttackSpeed() > 0 && getMeleeAttackRange() > 0;
+        return getAttackSpeed() > 0 && getAttributeValue(ForgeMod.REACH_DISTANCE.get()) > 0 ;
     }
 
-    public double getTicksForSinglePunch() {
-        return 20D / getAttackSpeed();
+    public boolean punch(StandEntityAction attack, StandAttackProperties.Factory createPunch, ActionTarget target) {
+    	if (!level.isClientSide()) {
+	        ActionTarget finalTarget = ActionTarget.fromRayTraceResult(aimWithStandOrUser(getAimDistance(getUser()), target));
+	        target = finalTarget.getType() != TargetType.EMPTY && isTargetInReach(finalTarget) ? finalTarget : ActionTarget.EMPTY;
+	        setTaskTarget(target);
+    	}
+        
+        return attackTarget(target, createPunch, attack);
     }
-
-    public void punch(boolean singlePunch) {
-        if (!accumulateTickParry) {
-            accumulateTickParry = true;
-            parryCount = 1;
+    
+    public void addBarrageParryCount(int hits) {
+        if (!accumulateBarrageTickParry) {
+            accumulateBarrageTickParry = true;
+            barrageParryCount = hits + 1;
         }
         else {
-            parryCount++;
+            barrageParryCount += hits;
         }
-        RayTraceResult target = JojoModUtil.rayTrace(this, getMeleeAttackRange(), entity -> !(entity instanceof LivingEntity) || canAttack((LivingEntity) entity), getPrecision() * 0.5);
+    }
+    
+    public SoundEvent nextPunchSound;
+    private Vector3d punchSoundPos;
+    @Nullable
+    public Boolean playPunchSound;
+    public boolean attackTarget(ActionTarget target, StandAttackProperties.Factory createPunch, StandEntityAction action) {
+        boolean punched;
         switch (target.getType()) {
         case BLOCK:
-            breakBlock(((BlockRayTraceResult) target).getBlockPos());
+            punched = breakBlock(target.getBlockPos());
             break;
         case ENTITY:
-            EntityDistanceRayTraceResult result = (EntityDistanceRayTraceResult) target;
-            attackEntity(result.getEntity(), singlePunch, result.getTargetAABBDistance());
+            Entity entity = target.getEntity();
+            
+        	StandAttackProperties punch = createPunch.createPunch(StandAttackProperties::new, this, entity);
+        	
+            nextPunchSound = punch.getPunchSound();
+            playPunchSound = null;
+            punchSoundPos = position();
+            
+            punched = attackEntity(entity, punch, action);
+            if (nextPunchSound != null && punchSoundPos != null && 
+            		(playPunchSound == null && punched || playPunchSound != null && playPunchSound.booleanValue())) {
+        		playSound(nextPunchSound, 1.0F, 1.0F, null, punchSoundPos);
+            }
             break;
         default:
+            punched = false;
             break;
+        }
+        return punched;
+    }
+    
+    protected SoundEvent getAttackBlockSound() {
+    	return ModSounds.STAND_DAMAGE_BLOCK.get();
+    }
+    
+    public void rotateTowards(ActionTarget target, boolean limitBySpeed) {
+    	Vector3d targetPos = target.getTargetPos(true);
+    	if (targetPos != null) {
+    		JojoModUtil.rotateTowards(this, targetPos, limitBySpeed ? (float) getAttackSpeed() / 16F * 18F : 360F);
+    	}
+    }
+    
+    public double getDistanceToTarget(ActionTarget target) {
+    	return target.getBoundingBox(level).map(aabb -> JojoModUtil.getDistance(this, aabb)).orElse(0D);
+    }
+    
+    public boolean isTargetInReach(ActionTarget target) {
+        return getDistanceToTarget(target) <= getAttributeValue(ForgeMod.REACH_DISTANCE.get());
+    }
+    
+    public void setTaskTarget(ActionTarget target) {
+        if (target != null) {
+            getCurrentTask().ifPresent(task -> {
+                boolean sendTarget = task.setTarget(this, target, userPower, !level.isClientSide());
+                if (!level.isClientSide()) {
+                    if (sendTarget) {
+                        PacketManager.sendToClientsTracking(new TrStandEntityTargetPacket(getId(), target), this);
+                    }
+                }
+            });
         }
     }
     
     @Override
     public boolean canAttack(LivingEntity entity) {
+        if (entity.is(this) || !super.canAttack(entity)) return false;
+        
         LivingEntity user = getUser();
-        return super.canAttack(entity) && !entity.is(this) && ((user == null || !entity.is(user) && user.canAttack(entity)));
+        if (user != null) {
+        	return !entity.is(user) && user.canAttack(entity)
+        			&& !(user instanceof PlayerEntity && entity instanceof PlayerEntity
+        					&& !((PlayerEntity) user).canHarmPlayer((PlayerEntity) entity));
+        }
+        
+        return true;
     }
     
     public boolean canHarm(Entity target) {
-        LivingEntity user = getUser();
         if (target instanceof LivingEntity) {
-            if (!user.canAttack((LivingEntity) target)) {
-                return false;
-            }
-            if (user instanceof PlayerEntity && target instanceof PlayerEntity && !((PlayerEntity) user).canHarmPlayer((PlayerEntity) target)) {
-                return false;
-            }
+        	return canAttack((LivingEntity) target);
         }
         return true;
     }
-
-    public double getMeleeAttackRange() {
-        return 3.0D;
-    }
     
-    public void swingAlternateHands() {
+    public Hand alternateHands() {
         Hand hand = Hand.MAIN_HAND;
         if (tickCount - lastSwingTick > 1) {
-            if (alternateSwing) {
+            boolean offHand = entityData.get(SWING_OFF_HAND);
+            if (offHand) {
                 hand = Hand.OFF_HAND;
             }
-            alternateSwing = !alternateSwing;
+            entityData.set(SWING_OFF_HAND, !offHand);
         }
         else {
             if (alternateAdditionalSwing) {
@@ -795,16 +1512,17 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             }
             alternateAdditionalSwing = !alternateAdditionalSwing;
         }
-        swing(hand);
+        return hand;
     }
 
+    // FIXME rewrite the swing animation code
     @Override
     public void swing(Hand hand) {
         if (tickCount - lastSwingTick > 1) {
             lastSwingTick = tickCount;
             super.swing(hand);
         }
-        else if (!level.isClientSide()) {
+        else {
             swings.addSwing(hand == Hand.MAIN_HAND ? getMainArm() : getOppositeToMainArm());
         }
     }
@@ -820,16 +1538,18 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             while (iter.hasNext()) {
                 AdditionalArmSwing swing = iter.next();
                 float anim = swing.addDelta(timeDelta);
-                if (anim > 2F) {
+                if (anim > AdditionalArmSwing.MAX_ANIM_DURATION) {
                     iter.remove();
                 }
             }
         }
         int count = swings.getSwingsCount();
-        int bits = swings.getHandSideBits();
+        long bits = swings.getHandSideBits();
         swings.reset();
         for (int i = 0; i < count; i++) {
-            swingsWithOffsets.add(new AdditionalArmSwing((float) i / (float) count, (bits & 1) == 1 ? HandSide.RIGHT : HandSide.LEFT, this));
+            double maxOffset = 0.9 / (getPrecision() / 16 + 1) - 0.9 / 11;
+            float f = (float) i / (float) count;
+            swingsWithOffsets.add(new AdditionalArmSwing(f, (bits & 1) == 1 ? HandSide.RIGHT : HandSide.LEFT, this, maxOffset));
             bits >>= 1;
         }
     }
@@ -845,6 +1565,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     private HandSide getOppositeToMainArm() {
         return getMainArm() == HandSide.RIGHT ? HandSide.LEFT : HandSide.RIGHT;
+    }
+    
+    public HandSide getSwingingHand() {
+        return swingingArm == Hand.MAIN_HAND ? getMainArm() : getOppositeToMainArm();
     }
 
     @Override
@@ -871,7 +1595,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
     }
 
-    @Override   
+    @Override
     protected void updateSwingTime() {
         int i = getCurrentSwingDuration() + 1;
         if (this.swinging) {
@@ -897,94 +1621,210 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
 
     private int getCurrentSwingDuration() {
-        double attackSpeed = getAttackSpeed();
-        return attackSpeed < 10D ? (int) (20D / attackSpeed) : 2;
+//        double attackSpeed = getAttackSpeed();
+//        return attackSpeed < 10D ? (int) (20D / attackSpeed) : 2;
+    	return 2;
+    }
+    
+    public float getComboMeter() {
+        if (userPower != null && !StandUtil.isComboUnlocked(userPower)) {
+            return 0;
+        }
+        return entityData.get(PUNCHES_COMBO);
+    }
+    
+    public void addComboMeter(float combo, int noDecayTicks) {
+        if (combo > 0 && getUser() != null && getUser().hasEffect(ModEffects.RESOLVE.get())) {
+            combo *= 2F;
+        }
+        setComboMeter(getComboMeter() + combo);
+        this.noComboDecayTicks = Math.max(this.noComboDecayTicks, noDecayTicks);
+    }
+    
+    protected void setComboMeter(float combo) {
+        entityData.set(PUNCHES_COMBO, MathHelper.clamp(combo, 0F, 1F));
+    }
+    
+    public void setHeavyPunchCombo() {
+        entityData.set(LAST_HEAVY_PUNCH_COMBO, getComboMeter());
+    }
+    
+    public float getLastHeavyPunchCombo() {
+        return entityData.get(LAST_HEAVY_PUNCH_COMBO);
     }
 
-    public boolean attackEntity(Entity target, boolean strongAttack, double attackDistance) {
-        if (!canHarm(target)) {
+    public boolean willHeavyPunchCombo() {
+        return getComboMeter() >= 0.5F;
+    }
+
+    public boolean isHeavyComboPunching() {
+        return getLastHeavyPunchCombo() >= 0.5F;
+    }
+    
+    public int getNoComboDecayTicks() {
+        return noComboDecayTicks;
+    }
+    
+    public boolean attackEntity(Entity target, StandAttackProperties punch, StandEntityAction action) {
+        if (level.isClientSide() || !canHarm(target)) {
             return false;
         }
-        float rangeFactor = rangeEfficiencyFactor();
-        double precision = getPrecision();
-        double damage = getAttackDamage(target, strongAttack, rangeFactor, attackDistance, precision);
-        double additionalKnockback = getAttributeValue(Attributes.ATTACK_KNOCKBACK) * rangeFactor;
         StandEntityDamageSource dmgSource = new StandEntityDamageSource("stand", this, getUserPower());
-        if (strongAttack) {
-            additionalKnockback *= 1 + damage / 5;
+        
+        if (punch.isBarrage()) {
+            dmgSource.setBarrageHitsCount(punch.getBarrageHits());
         }
-        else {
-            additionalKnockback = 0;
-            dmgSource.setKnockbackReduction(0.1F);
-        }
-        boolean attacked = hurtTarget(target, dmgSource, (float) damage);
+        
+        action.beforeAttack(target, punch, this, getUserPower(), getUser());
+        boolean attacked = doAttack(target, punch, dmgSource, StandAttackProperties::getDamage);
+        action.afterAttack(target, punch, this, getUserPower(), getUser(), attacked, !target.isAlive());
+        
         if (attacked) {
-            if (target instanceof LivingEntity) {
-                LivingEntity livingTarget = (LivingEntity) target;
-                if (additionalKnockback > 0.0F) {
-                    livingTarget.knockback((float) additionalKnockback * 0.5F, (double) MathHelper.sin(yRot * ((float)Math.PI / 180F)), (double) (-MathHelper.cos(yRot * ((float)Math.PI / 180F))));
-                }
-                if (strongAttack && livingTarget.getUseItem().isShield(livingTarget) && target instanceof PlayerEntity) {
-                    ((PlayerEntity) livingTarget).disableShield(precision > 0.5 && attackDistance < getMeleeAttackRange() * 0.4);
-                }
-                LivingEntity user = getUser();
-                if (user != null) {
-                    if (user.getType() == EntityType.PLAYER) {
-                        livingTarget.setLastHurtByPlayer((PlayerEntity) user);
-                        livingTarget.lastHurtByPlayerTime = 100;
-                    }
-                    else {
-                        livingTarget.setLastHurtByMob(user);
-                    }
+            if (punch.isSweepingAttack()) {
+                for (LivingEntity sweepingTarget : level.getEntitiesOfClass(LivingEntity.class, punch.sweepingAttackAabb(target.getBoundingBox()), 
+                        e -> !e.isSpectator() && e.isPickable()
+                        && JojoModUtil.getDistance(this, e.getBoundingBox()) < getAttributeValue(ForgeMod.REACH_DISTANCE.get()) && this.canHarm(e))) {
+                    doAttack(sweepingTarget, punch, dmgSource, StandAttackProperties::getSweepingDamage);
                 }
             }
-            doEnchantDamageEffects(this, target);
-            setLastHurtMob(target);
+            
+            float addCombo = punch.getAddCombo();
+            if (punch.isBarrage()) {
+            	addCombo *= dmgSource.getBarrageHitsCount();
+            }
+            addComboMeter(addCombo, COMBO_TICKS);
+            if (!isManuallyControlled()) {
+                setLastHurtMob(target);
+            }
+            
+            punchSoundPos = target.position();
         }
         return attacked;
     }
     
-    protected double getAttackDamage(Entity target, boolean strongAttack, double rangeFactor, double attackDistance, double precision) {
-        double damage = getAttributeValue(Attributes.ATTACK_DAMAGE);
-        if (strongAttack) {
-            double targetProximityRatio = Math.max(attackDistance / getMeleeAttackRange(), 0.2);
-            if (targetProximityRatio < 0.4) {
-                if (!isArmsOnlyMode()) {
-                    damage *= 0.4 / targetProximityRatio;
+    protected final boolean doAttack(Entity target, StandAttackProperties attack, StandEntityDamageSource dmgSource, Function<StandAttackProperties, Float> damageMethod) {
+        if (attack.reducesKnockback()) {
+            dmgSource.setKnockbackReduction(attack.getKnockbackReduction());
+        }
+
+        float damage = damageMethod.apply(attack);
+        LivingEntity targetLiving = null;
+        if (target instanceof LivingEntity) {
+            targetLiving = (LivingEntity) target;
+            
+            dmgSource.setStandInvulTicks(attack.getStandInvulTime());
+            
+            if (target instanceof StandEntity) {
+                StandEntity targetStand = (StandEntity) target;
+                
+                if ((attack.canParryHeavyAttack() || attack.disablesBlocking())) {
+                    if (attack.canParryHeavyAttack()) {
+                        if (targetStand.getCurrentTaskAction() instanceof StandEntityHeavyAttack
+                                && targetStand.getCurrentTaskPhase().get() == StandEntityAction.Phase.WINDUP
+                                && targetStand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())
+                                && 1F - targetStand.getCurrentTaskCompletion(0) < attack.getHeavyAttackParryTiming()) {
+                            targetStand.parryHeavyAttack();
+                            return false;
+                        }
+                    }
+                    
+                    if (attack.disablesBlocking() && random.nextFloat() < attack.getDisableBlockingChance()) {
+                        targetStand.breakStandBlocking(StandStatFormulas.getBlockingBreakTicks(targetStand.getDurability()));
+                    }
                 }
             }
-            else if (targetProximityRatio > 0.6) {
-                damage *= 0.6 / targetProximityRatio;
+            
+            damage = DamageUtil.addArmorPiercing(damage, attack.getArmorPiercing(), targetLiving);
+            
+            final float dmg = damage;
+            damage = targetLiving.getCapability(LivingUtilCapProvider.CAPABILITY).map(cap -> {
+                return cap.onStandAttack(dmg);
+            }).orElse(damage);
+        }
+        
+        if (damage <= 0) {
+            return false;
+        }
+        
+        boolean hurt = hurtTarget(target, dmgSource, damage);
+        
+        if (hurt) {
+            if (targetLiving != null) {
+                if (attack.getAdditionalKnockback() > 0) {
+                    Vector3d vecToTarget = target.position().subtract(this.position());
+                    float knockbackYRot = (float) -MathHelper.atan2(vecToTarget.x, vecToTarget.z) * MathUtil.RAD_TO_DEG + attack.getKnockbackYRotDeg();
+                    float knockbackXRot = attack.getKnockbackXRot();
+                    float knockbackStrength = attack.getAdditionalKnockback() * 0.5F;
+                    if (Math.abs(knockbackXRot) < 90) {
+                    	DamageUtil.knockback(targetLiving, knockbackStrength * MathHelper.cos(knockbackXRot * MathUtil.DEG_TO_RAD), knockbackYRot);
+                    }
+                    if (knockbackXRot != 0) {
+                        DamageUtil.upwardsKnockback(targetLiving, -knockbackStrength * MathHelper.sin(knockbackXRot * MathUtil.DEG_TO_RAD));
+                    }
+                }
+                
+                LivingEntity user = getUser();
+                if (user != null) {
+                    if (user.getType() == EntityType.PLAYER) {
+                        targetLiving.setLastHurtByPlayer((PlayerEntity) user);
+                        targetLiving.lastHurtByPlayerTime = 100;
+                    }
+                    LivingEntity aggroTo = isFollowingUser() || targetLiving.canSee(user) ? user : 
+                                StandUtil.isEntityStandUser(targetLiving) ? this : null;
+                    if (aggroTo != null) {
+                        targetLiving.setLastHurtByMob(aggroTo);
+                    }
+                }
+
+                if (attack.disablesBlocking() && 
+                        targetLiving.getUseItem().isShield(targetLiving) && targetLiving instanceof PlayerEntity) {
+                    DamageUtil.disableShield((PlayerEntity) targetLiving, attack.getDisableBlockingChance());
+                }
             }
+            doEnchantDamageEffects(this, target);
         }
-        else {
-            damage *= 0.04;
-            if (random.nextDouble() > precision) {
-                damage *= 1 - (random.nextDouble() * (1 - precision));
-            }
-        }
-        return damage * rangeFactor;
+        
+        return hurt;
     }
-    
-    public double getPrecision() {
-        if (isArmsOnlyMode()) {
-            return 0;
-        }
-        return basePrecision * rangeEfficiencyFactor();
-    }
-    
+
     protected boolean hurtTarget(Entity target, DamageSource dmgSource, float damage) {
-        return ModDamageSources.hurtThroughInvulTicks(target, dmgSource, (float) damage);
+        return DamageUtil.hurtThroughInvulTicks(target, DamageUtil.enderDragonDamageHack(dmgSource, target), damage
+                * JojoModConfig.getCommonConfigInstance(false).standDamageMultiplier.get().floatValue());
+    }
+    
+    protected void parryHeavyAttack() {
+        if (!level.isClientSide()) {
+            stopTask(true);
+            addEffect(new EffectInstance(ModEffects.STUN.get(), 20));
+            playSound(ModSounds.STAND_PARRY.get(), 1.0F, 1.0F);
+        }
+    }
+    
+    protected void breakStandBlocking(int lockTicks) {
+        if (!level.isClientSide() && isStandBlocking()) {
+            entityData.set(NO_BLOCKING_TICKS, lockTicks);
+            stopTask(true);
+            playSound(ModSounds.STAND_PARRY.get(), 1.0F, 1.0F);
+        }
+    }
+    
+    protected void standCrash() {
+        if (!level.isClientSide()) {
+            stopTask(true);
+            addEffect(new EffectInstance(ModEffects.STUN.get(), 40));
+        }
     }
 
     protected boolean breakBlock(BlockPos blockPos) {
-        if (!JojoModUtil.canEntityDestroy(level, blockPos, this)) {
+        if (level.isClientSide() || !JojoModUtil.canEntityDestroy((ServerWorld) level, blockPos, this)) {
             return false;
         }
+        
         BlockState blockState = level.getBlockState(blockPos);
         if (canBreakBlock(blockPos, blockState)) {
             LivingEntity user = getUser();
-            level.destroyBlock(blockPos, !(user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild));
+            level.destroyBlock(blockPos, !(user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild), this);
+            punchSoundPos = Vector3d.atCenterOf(blockPos);
             return true;
         }
         else {
@@ -998,65 +1838,45 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         float blockHardness = blockState.getDestroySpeed(level, blockPos);
         return blockHardness >= 0 && canBreakBlock(blockHardness, blockState.getHarvestLevel());
     }
-    
+
     protected boolean canBreakBlock(float blockHardness, int blockHarvestLevel) {
-        double blockBreakTier = getAttributeValue(Attributes.ATTACK_DAMAGE) / 2; // Star Platinum has 10 Attack Damage
-        /* damage:
-         * 2                                4                                   6                                   8                       10
-         * 
-         * hardness:
-         * e^0 = 1                          e^1 ~ 2.718                         e^2 ~ 7.389                         e^3 ~ 20.086            e^4 ~ 54.598
-         * 
-         * 0.3:  glass, glowstone           1.25: terracota, basalt             2.8:  blue ice                      10:   hardened glass    22.5: ender chest
-         * 0.4:  netherrack                 1.5:  stone                         3.5:  furnace                                               30:   ancient debris
-         * 0.5:  dirt, ice, sand, hay       1.8:  concrete                      3:    ores, gold/lapis block                                50:   obsidian, netherite
-         * 0.6:  clay, gravel               2:    bricks, cobblestone, wood     4.5:  deepslate ores
-         * 0.8:  quartz, sandstone, wool    2.5:  chest                         5:    diamond/iron/redstone block
-         * 1:    melon, mob head
-         * 
-         * harvest level:
-         * -1: leaves/grass                 0: dirt/wood/stone                  1: iron                             2: diamond/gold         3: obsidian/netherite
-         */
-        return blockHardness <= Math.exp(blockBreakTier * rangeEfficiencyFactor() - 1) && blockHarvestLevel + 2 <= blockBreakTier;
+        return StandStatFormulas.isBlockBreakable(getAttackDamage(), blockHardness, blockHarvestLevel);
+    }
+
+    public double getMaxRange() {
+        return rangeMax;
+    }
+
+    public double getMaxEffectiveRange() {
+        return rangeEffective;
     }
     
-    public double getAttackSpeed() {
-        double speed = getAttributeValue(Attributes.ATTACK_SPEED);
-        if (isArmsOnlyMode()) {
-            return speed * 0.5F;
-        }
-        return speed * rangeEfficiencyFactor();
+    public double getRangeEfficiency() {
+        return rangeEfficiency;
     }
 
-    public float rangeEfficiencyFactor() {
-        LivingEntity user = getUser();
-        if (user != null) {
-            double distanceSq = distanceToSqr(user);
-            double rangeSq = getMaxRange();
-            rangeSq *= rangeSq;
-            if (distanceSq > rangeSq / 4) {
-                return (float) (rangeSq / distanceSq / 4);
-            }
+    
+
+    public void addProjectile(DamagingEntity projectile) {
+        if (!level.isClientSide() && !projectile.isAddedToWorld()) {
+            projectile.setDamageFactor(projectile.getDamageFactor() * (float) getAttackDamage() / 8);
+            projectile.setSpeedFactor(projectile.getSpeedFactor() * (float) getAttackSpeed() / 8);
+            level.addFreshEntity(projectile);
         }
-        return 1.0F;
     }
     
-    protected double getMaxRange() {
-        return maxRange;
+    public void shootProjectile(ModdedProjectileEntity projectile, float velocity, float inaccuracy) {
+        if (!level.isClientSide() && !projectile.isAddedToWorld()) {
+            projectile.shootFromRotation(this, velocity, getProjectileInaccuracy(inaccuracy));
+            addProjectile(projectile);
+        }
     }
 
-
-
-    public boolean canAttackRanged() {
-        return true;
+    public float getProjectileInaccuracy(float inaccuracyBase) {
+        return Math.max((inaccuracyBase + 1) * 8 / Math.max((float) getPrecision(), 4) - 1, 0);
     }
 
-    public void rangedAttackTick(int ticks, boolean shift) {}
-
-    public int rangedAttackDuration(boolean shift) {
-        return 1;
-    }
-
+    
 
 
     protected void setStandFlag(StandFlag flag, boolean value) {
@@ -1084,23 +1904,50 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             bit = (byte) (1 << ordinal());
         }
     }
-
+    
     public void retractStand(boolean toUnsummon) {
         LivingEntity user = getUser();
         if (user != null) {
             setStandFlag(StandFlag.BEING_RETRACTED, true);
             if (toUnsummon && userPower.getHeldAction() == null) {
-                setTask(new UnsummonTask(this, user));
+                startStandUnsummon();
             }
         }
+    }
+    
+    public void stopRetraction() {
+        setStandFlag(StandFlag.BEING_RETRACTED, false);
+        getCurrentTask().ifPresent(task -> {
+            if (task.getAction() == ModActions.STAND_ENTITY_UNSUMMON.get()) {
+                this.stopTask();
+            }
+        });
+    }
+    
+    private void startStandUnsummon() {
+        StandEntityAction unsummon = ModActions.STAND_ENTITY_UNSUMMON.get();
+        setTask(unsummon, unsummon.getStandActionTicks(userPower, this), StandEntityAction.Phase.PERFORM, ActionTarget.EMPTY);
+    }
+    
+    public void tickUnsummonOffset() {
+        if (this.unsummonTicks == 0) {
+            unsummonOffset = getOffsetFromUser();
+        }
+        else {
+            Vector3d offsetVec = unsummonOffset.toRelativeVec();
+            offsetVec = offsetVec.normalize().scale(Math.max(offsetVec.length() - 0.075, 0));
+            unsummonOffset = unsummonOffset.withRelativeVec(offsetVec);
+        }
+        this.setTaskPosOffset(unsummonOffset, false);
     }
 
     public boolean isBeingRetracted() {
         return getStandFlag(StandFlag.BEING_RETRACTED);
     }
 
-    public boolean isCloseToEntity(Entity entity) {
-        return distanceToSqr(entity) < 3D;
+    public boolean isCloseToUser() {
+    	LivingEntity user = getUser();
+        return user != null ? distanceToSqr(user) < 2.25 : false;
     }
 
     public boolean isFollowingUser() {
@@ -1116,7 +1963,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         fixRemotePosition = !manualControl && fixRemotePosition;
         setStandFlag(StandFlag.FIXED_REMOTE_POSITION, fixRemotePosition);
         if (!manualControl && !fixRemotePosition) {
-            retractStand(false);
+        	if (!isCloseToUser()) {
+        		retractStand(false);
+        	}
         }
         else {
             setStandFlag(StandFlag.BEING_RETRACTED, false);
@@ -1137,7 +1986,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
 
     public void setNoPhysics(boolean noPhysics) {
-        setStandFlag(StandFlag.NO_PHYSICS, noPhysics);
+        if (noPhysics == true || standCanHaveNoPhysics()) {
+            setStandFlag(StandFlag.NO_PHYSICS, noPhysics);
+        }
     }
 
 
@@ -1153,19 +2004,39 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return isManuallyControlled();
     }
 
+    private boolean prevTickInput = false;
     public void moveStandManually(float strafe, float forward, boolean jumping, boolean sneaking) {
-        if (isManuallyControlled()) {
-            double speed = getAttributeValue(Attributes.MOVEMENT_SPEED);
-            double y = jumping ? speed : 0;
-            if (sneaking) {
-                y -= speed;
-                strafe *= 0.5;
-                forward *= 0.5;
+        if (isManuallyControlled() && canMoveManually()) {
+        	strafe = manualMovementLocks.strafe(strafe);
+        	forward = manualMovementLocks.forward(forward);
+        	jumping = manualMovementLocks.up(jumping);
+        	sneaking = manualMovementLocks.down(sneaking);
+            boolean input = jumping || sneaking || forward != 0 || strafe != 0;
+            if (input) {
+                double speed = getAttributeValue(Attributes.MOVEMENT_SPEED);
+                double y = jumping ? speed : 0;
+                if (sneaking) {
+                    y -= speed;
+                    strafe *= 0.5;
+                    forward *= 0.5;
+                }
+                setDeltaMovement(getAbsoluteMotion(new Vector3d((double)strafe, y, (double)forward), speed, this.yRot).scale(getUserMovementFactor()));
+                
+                if (!prevTickInput) {
+                    setDeltaMovement(Vector3d.ZERO);
+                }
             }
-            setDeltaMovement(getAbsoluteMotion(new Vector3d((double)strafe, y, (double)forward), speed, this.yRot).scale(getUserMovementFactor()));
+            else if (prevTickInput) {
+                setDeltaMovement(Vector3d.ZERO);
+            }
+            prevTickInput = input;
         }
     }
-
+    
+    public boolean hadInput() {
+    	return prevTickInput;
+    }
+    
     private static Vector3d getAbsoluteMotion(Vector3d relative, double speed, float facingYRot) {
         double d0 = relative.lengthSqr();
         if (d0 < 1.0E-7D) {
@@ -1176,6 +2047,14 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             float yRotCos = MathHelper.cos(facingYRot * ((float)Math.PI / 180F));
             return new Vector3d(vec3d.x * (double)yRotCos - vec3d.z * (double)yRotSin, vec3d.y, vec3d.z * (double)yRotCos + vec3d.x * (double)yRotSin);
         }
+    }
+    
+    protected boolean canMoveManually() {
+        return getCurrentTaskActionOptional().map(action -> !action.lockStandManualMovement(getUserPower(), this)).orElse(true);
+    }
+    
+    public ManualStandMovementLock getManualMovementLocks() {
+    	return manualMovementLocks;
     }
 
     @Override
@@ -1211,14 +2090,20 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public boolean canChangeDimensions() {
         return false;
     }
-
-
+    
+    
 
     @Override
     protected void doPush(Entity entity) {
         if (!entity.is(getUser())) {
             super.doPush(entity);
         }
+    }
+    
+    @Override
+    public boolean isPickable() {
+        return super.isPickable() && 
+                !(level.isClientSide() && (ClientUtil.getClientPlayer().is(getUser()) || !StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())));
     }
 
     @Override
@@ -1228,16 +2113,22 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
 
 
-    public void setAlpha(float alpha) {
-        entityData.set(ALPHA, MathHelper.clamp(alpha, 0, 1));
-    }
-
     public float getAlpha(float partialTick) {
-        float alphaLerp = MathHelper.lerp(partialTick, alphaOld, alpha);
-        if (!isFollowingUser()) {
-            alphaLerp *= rangeEfficiencyFactor(); 
+        float alpha = 1F;
+        int ticks = summonLockTicks > 0 ? summonLockTicks : gradualSummonWeaknessTicks;
+        if (ticks > 0 && alphaTicks > 0) {
+            alpha = (float) (alphaTicks - ticks) / (float) alphaTicks;
         }
-        return alphaLerp;
+        alpha *= getCurrentTask().map(
+                task -> task.getAction().getStandAlpha(this, task.getTicksLeft(), partialTick)).orElse(1F);
+        alpha *= rangeEfficiency;
+        
+        LivingEntity user = getUser();
+        if (user != null && !user.hasEffect(ModEffects.RESOLVE.get())) {
+        	alpha *= Math.min(user.getHealth() / 5F, 1F);
+        }
+        	
+        return MathHelper.clamp(alpha, 0F, 1F);
     }
 
 
@@ -1260,6 +2151,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             }
             if (effectInstance.getEffect() == ModEffects.STUN.get()) {
                 user.addEffect(new EffectInstance(effectInstance));
+                stopTask();
             }
         }
     }
@@ -1294,7 +2186,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     @Override
     public void startSeenByPlayer(ServerPlayerEntity player) {
         super.startSeenByPlayer(player);
-        if (player.is(getUser())) {
+        if (player.is(getUser()) && player.isAlive()) {
             StandUtil.setManualControl(player, false, false);
         }
     }
@@ -1306,35 +2198,20 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     @Override
     public void writeSpawnData(PacketBuffer buffer) {
-        byte flags = 0;
-        if (armsOnlyMode) {
-            flags |= 1;
-            if (showMainArm) {
-                flags |= 2;
-            }
-            if (showOffArm) {
-                flags |= 4;
-            }
-        }
-        buffer.writeByte(flags);
-        if (!armsOnlyMode) {
-            buffer.writeVarInt(summonPoseRandomByte);
-        }
+        buffer.writeInt(entityData.get(USER_ID));
+        buffer.writeVarInt(summonPoseRandomByte);
+        buffer.writeInt(tickCount);
     }
-
+    
+    protected void beforeClientSpawn(FMLPlayMessages.SpawnEntity packet, World world) {
+        int userId = packet.getAdditionalData().readInt();
+        entityData.set(USER_ID, userId);
+    }
+    
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
-        byte flags = additionalData.readByte();
-        if ((flags & 1) > 0) {
-            setArmsOnlyMode();
-            showMainArm = (flags & 2) > 0;
-            showOffArm = (flags & 4) > 0;
-        }
-        if (!armsOnlyMode) {
-            summonPoseRandomByte = additionalData.readVarInt();
-        }
-        
-        playStandSound(StandSoundType.SUMMON);
+        summonPoseRandomByte = additionalData.readVarInt();
+        tickCount = additionalData.readInt();
     }
 
     // TODO nbt write/read for stands which will have save enabled
@@ -1372,4 +2249,5 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     @Override
     public boolean startRiding(Entity entity, boolean force) { return false; }
+    
 }

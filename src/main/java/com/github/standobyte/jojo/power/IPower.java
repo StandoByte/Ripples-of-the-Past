@@ -2,70 +2,82 @@ package com.github.standobyte.jojo.power;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.ActionTargetContainer;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.power.stand.type.StandType;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.common.util.LazyOptional;
 
-public interface IPower<T extends IPowerType<T>> {
+public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     PowerClassification getPowerClassification();
     boolean hasPower();
     boolean givePower(T type);
     boolean clear();
     T getType();
     LivingEntity getUser();
+    boolean isUserCreative();
     void tick();
     boolean isActive();
 
-    List<Action> getAttacks();
-    List<Action> getAbilities();
+    List<Action<P>> getAttacks();
+    List<Action<P>> getAbilities();
     
-    default List<Action> getActions(ActionType type) {
+    default List<Action<P>> getActions(ActionType type) {
         return type == ActionType.ATTACK ? getAttacks() : getAbilities();
     }
 
-    float getMana();
-    float getMaxMana();
-    boolean hasMana(float mana);
-    void addMana(float amount);
-    boolean consumeMana(float amount);
-    boolean infiniteMana();
-    void setMana(float amount);
-    float getManaRegenPoints();
-    void setManaRegenPoints(float points);
-    float getManaLimitFactor();
-    void setManaLimitFactor(float factor);
+    boolean isActionOnCooldown(Action<?> action);
+    float getCooldownRatio(Action<?> action, float partialTick);
+    void setCooldownTimer(Action<?> action, int value);
+    void updateCooldownTimer(Action<?> action, int value, int totalCooldown);
+    ActionCooldownTracker getCooldowns();
 
-    boolean isActionOnCooldown(Action action);
-    float getCooldownRatio(Action action, float partialTick);
-    void setCooldownTimer(Action action, int value, int totalCooldown);
-
-    boolean isActionUnlocked(Action action);
-    boolean onClickAction(ActionType type, int index, boolean shift, ActionTarget target);
-    ActionConditionResult checkRequirements(Action action, LivingEntity performer, ActionTarget target, boolean checkTargetType);
-    ActionConditionResult checkTargetType(Action action, LivingEntity performer, ActionTarget target);
+    @Nullable Action<P> getAction(ActionType type, int index, boolean shift);
+    boolean onClickAction(Action<P> action, boolean shift, ActionTarget target);
+    default boolean onClickAction(ActionType type, int index, boolean shift, ActionTarget target) {
+        Action<P> action = this.getAction(type, index, shift);
+        if (action != null) {
+            return onClickAction(action, shift, target);
+        }
+        return false;
+    }
+    ActionConditionResult checkRequirements(Action<P> action, ActionTargetContainer targetContainer, boolean checkTargetType);
+    ActionConditionResult checkTargetType(Action<P> action, ActionTargetContainer targetContainer);
     boolean canUsePower();
+    
+    default RayTraceResult clientHitResult(Entity cameraEntity, RayTraceResult mcHitResult) {
+        return getType() != null ? getType().clientHitResult((P) this, cameraEntity, mcHitResult) : mcHitResult;
+    }
+    
+    float getLearningProgressPoints(Action<P> action);
+    float getLearningProgressRatio(Action<P> action);
 
-    void setHeldAction(Action action);
-    default Action getHeldAction() {
+    void setHeldAction(Action<P> action);
+    default Action<P> getHeldAction() {
         return getHeldAction(false);
     }
-    Action getHeldAction(boolean checkRequirements);
+    Action<P> getHeldAction(boolean checkRequirements);
     void refreshHeldActionTickState(boolean requirementsFulfilled);
     int getHeldActionTicks();
     void setHeldActionTarget(ActionTarget target);
     void stopHeldAction(boolean shouldFire);
 
+    void onUserGettingAttacked(DamageSource dmgSource, float dmgAmount);
+    float getTargetResolveMultiplier(IStandPower attackingStand);
+    
     boolean canLeap();
     boolean isLeapUnlocked();
     float leapStrength();
@@ -76,37 +88,32 @@ public interface IPower<T extends IPowerType<T>> {
 
     INBT writeNBT();
     void readNBT(CompoundNBT nbt);
-    void onClone(IPower<T> oldPower, boolean wasDeath, boolean keep);
+    void onClone(P oldPower, boolean wasDeath);
     void syncWithUserOnly();
     void syncWithTrackingOrUser(ServerPlayerEntity player);
 
 
-    public static LazyOptional<? extends IPower<?>> getPowerOptional(LivingEntity entity, PowerClassification classification) {
+    public static LazyOptional<? extends IPower<?, ?>> getPowerOptional(LivingEntity entity, PowerClassification classification) {
         return classification == PowerClassification.STAND ? IStandPower.getStandPowerOptional(entity) : INonStandPower.getNonStandPowerOptional(entity);
     }
 
-    public static IPower<?> getPlayerPower(PlayerEntity player, PowerClassification classification) {
+    public static IPower<?, ?> getPlayerPower(PlayerEntity player, PowerClassification classification) {
         return classification == PowerClassification.STAND ? IStandPower.getPlayerStandPower(player) : INonStandPower.getPlayerNonStandPower(player);
     }
     
-    public static void castAndGivePower(IPower<?> power, IPowerType<?> powerType, PowerClassification classification) { // TODO get rid of this shit
-        switch (classification) {
-        case STAND:
-            if (power instanceof IStandPower && powerType instanceof StandType) {
-                ((IStandPower) power).givePower((StandType) powerType);
-            }
-            break;
-        case NON_STAND:
-            if (power instanceof INonStandPower && powerType instanceof NonStandPowerType<?>) {
-                ((INonStandPower) power).givePower((NonStandPowerType<?>) powerType);
-            }
-            break;
-        }
-    }
-    
     public static enum PowerClassification {
-        STAND,
-        NON_STAND
+        STAND(IStandPower.class),
+        NON_STAND(INonStandPower.class);
+        
+        private final Class<? extends IPower<?, ?>> powerClass;
+        
+        private PowerClassification(Class<? extends IPower<?, ?>> powerClass) {
+            this.powerClass = powerClass;
+        }
+        
+        public Class<? extends IPower<?, ?>> getPowerClass() {
+            return powerClass;
+        }
     }
     
     public static enum ActionType {

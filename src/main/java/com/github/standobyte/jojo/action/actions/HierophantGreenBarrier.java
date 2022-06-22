@@ -2,51 +2,56 @@ package com.github.standobyte.jojo.action.actions;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
 public class HierophantGreenBarrier extends StandEntityAction {
 
-    public HierophantGreenBarrier(Builder builder) {
+    public HierophantGreenBarrier(StandEntityAction.Builder builder) {
         super(builder);
     }
     
     @Override
-    public ActionConditionResult checkConditions(LivingEntity user, LivingEntity performer, IPower<?> power, ActionTarget target) {
-        if (performer instanceof HierophantGreenEntity) {
-            HierophantGreenEntity stand = (HierophantGreenEntity) performer;
-            if (stand.getPlacedBarriersCount() >= getMaxBarriersPlaceable((IStandPower) power)) {
+    protected ActionConditionResult checkStandConditions(StandEntity stand, IStandPower power, ActionTarget target) {
+        if (stand instanceof HierophantGreenEntity) {
+            HierophantGreenEntity hierophant = (HierophantGreenEntity) stand;
+            if (!hierophant.canPlaceBarrier()) {
                 return conditionMessage("barrier");
             }
+            return ActionConditionResult.POSITIVE;
         }
-        return ActionConditionResult.POSITIVE;
+        return ActionConditionResult.NEGATIVE;
     }
     
     @Override
-    public void perform(World world, LivingEntity user, IPower<?> power, ActionTarget target) {
+    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
-            HierophantGreenEntity stand = (HierophantGreenEntity) getPerformer(user, power);
-            stand.attachBarrier(target.getBlockPos());
+            HierophantGreenEntity hierophant = (HierophantGreenEntity) standEntity;
+            hierophant.attachBarrier(task.getTarget().getBlockPos());
         }
     }
     
-    private int getMaxBarriersPlaceable(IStandPower power) {
-        return 10 + MathHelper.floor((float) (power.getExp() - getExpRequirement()) / (float) (IStandPower.MAX_EXP - getExpRequirement()) * 90F);
+    public static int getMaxBarriersPlaceable(IStandPower power) {
+        int level = power.getResolveLevel();
+        return level >= 4 ? 100 : 15;
     }
     
     @Override
-    public TranslationTextComponent getTranslatedName(IPower<?> power, String key) {
-        IStandPower standPower = (IStandPower) power;
-        IStandManifestation stand = standPower.getStandManifestation();
+    public TranslationTextComponent getTranslatedName(IStandPower power, String key) {
+        IStandManifestation stand = power.getStandManifestation();
         int barriers = stand instanceof HierophantGreenEntity ? ((HierophantGreenEntity) stand).getPlacedBarriersCount() : 0;
-        return new TranslationTextComponent(key, barriers, getMaxBarriersPlaceable(standPower));
+        return new TranslationTextComponent(key, barriers, getMaxBarriersPlaceable(power));
+    }
+    
+    @Override
+    public TargetRequirement getTargetRequirement() {
+        return TargetRequirement.BLOCK;
     }
 
 }

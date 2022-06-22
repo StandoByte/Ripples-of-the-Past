@@ -25,12 +25,12 @@ import net.minecraft.util.ResourceLocation;
 
 public class HamonScreen extends Screen {
     static final int WINDOW_WIDTH = 230;
-    static final int WINDOW_HEIGHT = 230;
+    static final int WINDOW_HEIGHT = 228;
     
     static final int WINDOW_THIN_BORDER = 9;
     static final int WINDOW_UPPER_BORDER = 18;
     
-    static final ResourceLocation WINDOW = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/hamon_window.png");
+    public static final ResourceLocation WINDOW = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/hamon_window.png");
     static final ResourceLocation TABS = new ResourceLocation("textures/gui/advancements/tabs.png");
     
     private HamonTabGui[] tabs;
@@ -86,7 +86,7 @@ public class HamonScreen extends Screen {
             }
         }
         if (selectedTab != null && mouseX > x + WINDOW_THIN_BORDER && mouseX < x + WINDOW_WIDTH - WINDOW_THIN_BORDER 
-                && mouseY > y + WINDOW_UPPER_BORDER && mouseY < y + WINDOW_WIDTH - WINDOW_THIN_BORDER) {
+                && mouseY > y + WINDOW_UPPER_BORDER && mouseY < y + WINDOW_HEIGHT - WINDOW_THIN_BORDER) {
             if (selectedTab.mouseClicked(mouseX - x - WINDOW_THIN_BORDER, mouseY - y - WINDOW_UPPER_BORDER, mouseButton)) {
                 return true;
             }
@@ -104,7 +104,7 @@ public class HamonScreen extends Screen {
         int x = windowPosX();
         int y = windowPosY();
         if (selectedTab != null && mouseX > x + WINDOW_THIN_BORDER && mouseX < x + WINDOW_WIDTH - WINDOW_THIN_BORDER 
-                && mouseY > y + WINDOW_UPPER_BORDER && mouseY < y + WINDOW_WIDTH - WINDOW_THIN_BORDER) {
+                && mouseY > y + WINDOW_UPPER_BORDER && mouseY < y + WINDOW_HEIGHT - WINDOW_THIN_BORDER) {
             if (selectedTab.mouseReleased(mouseX - x - WINDOW_THIN_BORDER, mouseY - y - WINDOW_UPPER_BORDER, mouseButton)) {
                 return true;
             }

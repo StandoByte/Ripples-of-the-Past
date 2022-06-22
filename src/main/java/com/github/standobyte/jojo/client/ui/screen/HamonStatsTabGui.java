@@ -45,7 +45,7 @@ public class HamonStatsTabGui extends HamonTabGui {
         int textWidth = HamonScreen.WINDOW_WIDTH - 30;
         strengthDescLines = minecraft.font.split(new TranslationTextComponent("hamon.strength_stat.desc"), textWidth);
         controlDescLines = minecraft.font.split(new TranslationTextComponent("hamon.control_stat.desc"), textWidth);
-        ITextComponent desc = JojoModConfig.COMMON.breathingTechniqueDeterioration.get() ? 
+        ITextComponent desc = JojoModConfig.getCommonConfigInstance(true).breathingTechniqueDeterioration.get() ? 
                 new TranslationTextComponent("hamon.breathing_stat.desc", new TranslationTextComponent("hamon.breathing_stat.notice"))
                 : new TranslationTextComponent("hamon.breathing_stat.desc");
         breathingDescLines = minecraft.font.split(desc, textWidth);
@@ -57,7 +57,7 @@ public class HamonStatsTabGui extends HamonTabGui {
 
     @Override
     void addButtons() {
-        meditationButton = new Button(screen.windowPosX() + 213, screen.windowPosY(), 7, 7, new StringTextComponent(""), button -> {
+        meditationButton = new Button(screen.windowPosX() + 213, screen.windowPosY() - 1, 7, 7, new StringTextComponent(""), button -> {
             PacketManager.sendToServer(new ClHamonStartMeditationPacket());
             screen.onClose();
         });
@@ -88,8 +88,8 @@ public class HamonStatsTabGui extends HamonTabGui {
             int ptsAtLvl = HamonData.pointsAtLevel(level);
             pts = ((float) (screen.hamon.getHamonStrengthPoints() - ptsAtLvl)) / (HamonData.pointsAtLevel(level + 1) - ptsAtLvl);
         }
-        blit(matrixStack, intScrollX + 154, strengthStatY + 1, 200, 230, (int) (50 * pts), 5);
-        blit(matrixStack, intScrollX + 153, strengthStatY, 0, 242, 52, 7);
+        blit(matrixStack, intScrollX + 154, strengthStatY + 1, 200, 235, (int) (50 * pts), 5);
+        blit(matrixStack, intScrollX + 153, strengthStatY, 199, 228 , 52, 7);
         if (hamonStrengthLimited = level >= (int) breathingTechnique + HamonData.MIN_BREATHING_EXCEED) {
             blit(matrixStack, intScrollX + 142, strengthStatY, 230, 156, 8, 8);
         }
@@ -103,39 +103,59 @@ public class HamonStatsTabGui extends HamonTabGui {
             int ptsAtLevel = HamonData.pointsAtLevel(level);
             pts = ((float) (screen.hamon.getHamonControlPoints() - ptsAtLevel)) / (HamonData.pointsAtLevel(level + 1) - ptsAtLevel);
         }
-        blit(matrixStack, intScrollX + 154, controlStatY + 1, 200, 235, (int) (50 * pts), 5);
-        blit(matrixStack, intScrollX + 153, controlStatY, 0, 242, 52, 7);
+        blit(matrixStack, intScrollX + 154, controlStatY + 1, 200, 240, (int) (50 * pts), 5);
+        blit(matrixStack, intScrollX + 153, controlStatY, 199, 228, 52, 7);
         if (hamonControlLimited = level >= (int) breathingTechnique + HamonData.MIN_BREATHING_EXCEED) {
             blit(matrixStack, intScrollX + 142, controlStatY, 230, 156, 8, 8);
         }
 
         // breathing technique bar
         pts = breathingTechnique == HamonData.MAX_BREATHING_LEVEL ? 1.0F : breathingTechnique - (int)breathingTechnique;
-        blit(matrixStack, intScrollX + 154, breathingStatY + 1, 200, 240, (int) (50 * pts), 5);
-        blit(matrixStack, intScrollX + 153, breathingStatY, 0, 242, 52, 7);
+        blit(matrixStack, intScrollX + 154, breathingStatY + 1, 200, 245, (int) (50 * pts), 5);
+        blit(matrixStack, intScrollX + 153, breathingStatY, 199, 228, 52, 7);
         // bonus icon
         if (screen.hamon.getTrainingBonus() > 0) {
             blit(matrixStack, intScrollX + 200, breathingStatY - 9, 230, 216, 8, 8);
         }
 
         // exercise bars
-        Exercise exercise = Exercise.MINING;
-        blit(matrixStack, intScrollX + 16, exercises1Y + 1, 54, 249, 90 * screen.hamon.getExerciseTicks(exercise) / exercise.maxTicks, 5);
-        blit(matrixStack, intScrollX + 15, exercises1Y, 53, 242, 92, 7);
-        exercise = Exercise.RUNNING;
-        blit(matrixStack, intScrollX + 112, exercises1Y + 1, 54, 249, 90 * screen.hamon.getExerciseTicks(exercise) / exercise.maxTicks, 5);
-        blit(matrixStack, intScrollX + 111, exercises1Y, 53, 242, 92, 7);
-        exercise = Exercise.SWIMMING;
-        blit(matrixStack, intScrollX + 16, exercises2Y + 1, 54, 249, 90 * screen.hamon.getExerciseTicks(exercise) / exercise.maxTicks, 5);
-        blit(matrixStack, intScrollX + 15, exercises2Y, 53, 242, 92, 7);
-        exercise = Exercise.MEDITATION;
-        blit(matrixStack, intScrollX + 112, exercises2Y + 1, 54, 249, 90 * screen.hamon.getExerciseTicks(exercise) / exercise.maxTicks, 5);
-        blit(matrixStack, intScrollX + 111, exercises2Y, 53, 242, 92, 7);
+        drawExerciseBar(this, matrixStack, intScrollX + 15, exercises1Y, screen.hamon, Exercise.MINING, 1.0F);
+        drawExerciseBar(this, matrixStack, intScrollX + 111, exercises1Y, screen.hamon, Exercise.RUNNING, 1.0F);
+        drawExerciseBar(this, matrixStack, intScrollX + 15, exercises2Y, screen.hamon, Exercise.SWIMMING, 1.0F);
+        drawExerciseBar(this, matrixStack, intScrollX + 111, exercises2Y, screen.hamon, Exercise.MEDITATION, 1.0F);
 
-        blit(matrixStack, intScrollX + 6, exercisesAvgY + 1, 1, 237, (int) (198 * screen.hamon.getAverageExercisePoints()), 5);
-        blit(matrixStack, intScrollX + 5, exercisesAvgY, 0, 230, 199, 7);
+        // total exercises bar
+        blit(matrixStack, intScrollX + 6, exercisesAvgY + 1, 1, 235, (int) (198 * screen.hamon.getAverageExercisePoints()), 5);
+        blit(matrixStack, intScrollX + 5, exercisesAvgY, 0, 228, 199, 7);
+        
+        if (screen.hamon.getAverageExercisePoints() >= 1.0F) {
+            matrixStack.pushPose();
+            matrixStack.scale(0.5F, 0.5F, 0.5F);
+            blit(matrixStack, (intScrollX + 197) * 2, (exercisesAvgY - 1) * 2, 160, 240, 16, 16);
+            matrixStack.popPose();
+        }
 
         RenderSystem.disableBlend();
+    }
+    
+    public static void drawExerciseBar(AbstractGui gui, MatrixStack matrixStack, int x, int y, HamonData hamon, Exercise exercise, float alpha) {
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
+        int ticks = hamon.getExerciseTicks(exercise);
+        int ticksMax = exercise.getMaxTicks(hamon);
+        gui.blit(matrixStack, x + 1, y + 1, 1, 247, 90 * ticks / ticksMax, 5);
+        gui.blit(matrixStack, x, y, 0, 240, 92, 7);
+        
+        matrixStack.pushPose();
+        matrixStack.scale(0.5F, 0.5F, 0.5F);
+
+        gui.blit(matrixStack, (x - 3) * 2, (y - 1) * 2, 96 + exercise.ordinal() * 16, 240, 16, 16);
+        
+        if (ticks >= ticksMax) {
+            gui.blit(matrixStack, (x + 85) * 2, (y - 1) * 2, 160, 240, 16, 16);
+        }
+        
+        matrixStack.popPose();
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     @Override
@@ -252,11 +272,12 @@ public class HamonStatsTabGui extends HamonTabGui {
                 }
             }
         }
-        if (screen.hamon.getTrainingBonus() > 0 && 
+        float bonus = screen.hamon.multiplyPositiveBreathingTraining(screen.hamon.getTrainingBonus());
+        if (bonus > 0 && 
                 mouseX >= 200 && mouseX <= 207 && 
                 mouseY >= breathingStatY - 9 && mouseY <= breathingStatY - 2) {
             screen.renderTooltip(matrixStack, minecraft.font.split(new TranslationTextComponent(
-                    "hamon.training_bonus", screen.hamon.getTrainingBonus()), 100), mouseX, mouseY);
+                    "hamon.training_bonus", bonus), 100), mouseX, mouseY);
         }
         if (meditationButton.isMouseOver(mouseX + screen.windowPosX() + HamonScreen.WINDOW_THIN_BORDER, mouseY + screen.windowPosY() + HamonScreen.WINDOW_UPPER_BORDER)) {
             screen.renderTooltip(matrixStack, meditationButtonTooltip, mouseX, mouseY);

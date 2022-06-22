@@ -4,7 +4,8 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.util.damage.ModDamageSources;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -14,6 +15,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.DoubleNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
@@ -26,15 +28,15 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class KnifeEntity extends ItemProjectileEntity {
-    private boolean timeStop;
+    private boolean timeStop = false;
     private Vector3d timeStopHitMotion;
 
     public KnifeEntity(World world, LivingEntity shooter) {
        super(ModEntityTypes.KNIFE.get(), shooter, world);
     }
 
-    public KnifeEntity(World worldIn, double x, double y, double z) {
-       super(ModEntityTypes.KNIFE.get(), x, y, z, worldIn);
+    public KnifeEntity(World world, double x, double y, double z) {
+       super(ModEntityTypes.KNIFE.get(), x, y, z, world);
     }
 
     public KnifeEntity(EntityType<? extends KnifeEntity> type, World world) {
@@ -96,7 +98,7 @@ public class KnifeEntity extends ItemProjectileEntity {
     protected boolean hurtTarget(Entity target, Entity thrower) {
         float dmgAmount = getActualDamage();
         DamageSource damagesource = DamageSource.arrow(this, thrower == null ? this : thrower);
-        return ModDamageSources.hurtThroughInvulTicks(target, damagesource, dmgAmount);
+        return DamageUtil.hurtThroughInvulTicks(target, damagesource, dmgAmount);
     }
     
     @Override
@@ -121,7 +123,7 @@ public class KnifeEntity extends ItemProjectileEntity {
                 setDeltaMovement(timeStopHitMotion);
             }
         }
-        else if (tickCount == 0) {
+        else if (tickCount == 0 && !timeStop) {
             timeStop = true;
         }
         else {
@@ -132,9 +134,11 @@ public class KnifeEntity extends ItemProjectileEntity {
     @Override
     public void readAdditionalSaveData(CompoundNBT nbt) {
         super.readAdditionalSaveData(nbt);
-        if (nbt.contains("TSHitMotion", 9)) {
-            ListNBT listNBT = nbt.getList("TSHitMotion", 6);
-            timeStopHitMotion = new Vector3d(listNBT.getDouble(0), listNBT.getDouble(1), listNBT.getDouble(2));
+        if (nbt.contains("TSHitMotion", JojoModUtil.getNbtId(ListNBT.class))) {
+            ListNBT listNBT = nbt.getList("TSHitMotion", JojoModUtil.getNbtId(DoubleNBT.class));
+            if (listNBT.size() >= 3) {
+                timeStopHitMotion = new Vector3d(listNBT.getDouble(0), listNBT.getDouble(1), listNBT.getDouble(2));
+            }
         }
     }
 

@@ -4,10 +4,11 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.util.MathUtil;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.Entity;
@@ -19,6 +20,10 @@ public abstract class RepeatingModel<T extends Entity> extends EntityModel<T> {
     private float length;
     private float yRotation;
     private float xRotation;
+
+    protected RepeatingModel() {
+    	super(RenderType::entityTranslucent);
+    }
 
     @Nullable
     protected abstract ModelRenderer getMainPart();
@@ -62,11 +67,11 @@ public abstract class RepeatingModel<T extends Entity> extends EntityModel<T> {
             if (squareModelRandomRotation()) {
                 repeatingPart.zRot = RANDOM.nextInt(4) * 90F * MathUtil.DEG_TO_RAD;
             }
-            repeatingPart.render(matrixStack, buffer, packedLight, packedOverlay);
+            repeatingPart.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
             modelLength -= repeatingLength;
             matrixStack.translate(0, 0, repeatingLength);
         }
-        repeatingPart.render(matrixStack, buffer, packedLight, packedOverlay);
+        repeatingPart.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
         
         matrixStack.mulPose(Vector3f.XP.rotationDegrees(-xRotation));
         matrixStack.mulPose(Vector3f.YP.rotationDegrees(-yRotation));
