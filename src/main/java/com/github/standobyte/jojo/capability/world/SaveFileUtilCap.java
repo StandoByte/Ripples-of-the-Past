@@ -26,9 +26,23 @@ public class SaveFileUtilCap {
     private boolean gameruleDayLightCycle;
     private boolean gameruleWeatherCycle;
     private boolean usedTimeStop = false;
+    private boolean refreshNextTick = false;
     
     public SaveFileUtilCap(ServerWorld overworld) {
     	this.overworld = overworld;
+    }
+    
+    public void tick() {
+    	if (refreshNextTick) {
+    		if (usedTimeStop) {
+        		GameRules gameRules = overworld.getGameRules();
+        		MinecraftServer server = overworld.getServer();
+        		gameRules.getRule(GameRules.RULE_DAYLIGHT).set(gameruleDayLightCycle, server);
+        		gameRules.getRule(GameRules.RULE_WEATHER_CYCLE).set(gameruleWeatherCycle, server);
+    			usedTimeStop = false;
+    		}
+    		refreshNextTick = false;
+    	}
     }
     
     public void addPlayerStand(StandType<?> type) {
@@ -119,11 +133,9 @@ public class SaveFileUtilCap {
     }
     
     void loadGamerules(CompoundNBT nbt) {
-    	if (nbt.getBoolean("UsedTimeStop")) {
-	    	GameRules gameRules = overworld.getGameRules();
-	    	MinecraftServer server = overworld.getServer();
-	    	gameRules.getRule(GameRules.RULE_DAYLIGHT).set(nbt.getBoolean("GameruleDayLightCycle"), server);
-	    	gameRules.getRule(GameRules.RULE_WEATHER_CYCLE).set(nbt.getBoolean("GameruleWeatherCycle"), server);
-    	}
+    	usedTimeStop = nbt.getBoolean("UsedTimeStop");
+    	refreshNextTick = usedTimeStop;
+    	gameruleDayLightCycle = nbt.getBoolean("GameruleDayLightCycle");
+    	gameruleWeatherCycle = nbt.getBoolean("GameruleWeatherCycle");
     }
 }
