@@ -154,6 +154,11 @@ public class HungryZombieEntity extends ZombieEntity {
             distanceFromOwner = owner != null ? distanceToSqr(owner) : -1;
         }
     }
+
+    @Override
+    protected boolean convertsInWater() {
+        return false;
+    }
     
     public boolean farFromOwner(double distance) {
         return distanceFromOwner > Math.pow(distance, 2);
