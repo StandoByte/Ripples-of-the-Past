@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.util.utils;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.TimeStopHandler;
 import com.github.standobyte.jojo.capability.world.TimeStopInstance;
 import com.github.standobyte.jojo.capability.world.WorldUtilCap;
@@ -178,6 +179,11 @@ public class TimeUtil {
         event.world.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> {
             cap.getTimeStopHandler().tick();
         });
+        if (event.world.dimension() == World.OVERWORLD) {
+	        event.world.getCapability(SaveFileUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+	        	cap.tick();
+	        });
+        }
     }
 
 
