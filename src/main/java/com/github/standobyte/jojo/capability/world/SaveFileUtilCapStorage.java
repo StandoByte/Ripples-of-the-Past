@@ -23,7 +23,7 @@ public class SaveFileUtilCapStorage implements IStorage<SaveFileUtilCap> {
         }
         cnbt.put("StandsTaken", timesStandsTakenMap);
         
-        cnbt.put("TimeStopGameRules", instance.saveGamerules());
+        cnbt.put("TimeStopGameRules", instance.save());
         
         return cnbt;
     }
@@ -43,6 +43,6 @@ public class SaveFileUtilCapStorage implements IStorage<SaveFileUtilCap> {
             instance.timesStandsTaken = stands;
         }
         
-        instance.loadGamerules(cnbt.getCompound("TimeStopGameRules"));
+        instance.load(cnbt.getCompound("TimeStopGameRules"));
     }
 }

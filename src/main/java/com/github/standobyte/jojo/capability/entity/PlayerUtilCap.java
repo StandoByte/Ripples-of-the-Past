@@ -3,10 +3,12 @@ package com.github.standobyte.jojo.capability.entity;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.entity.mob.RockPaperScissorsGame;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket;
 
@@ -28,6 +30,8 @@ public class PlayerUtilCap {
     
     private boolean hasClientInput;
     private int noClientInputTimer;
+    
+    private Optional<RockPaperScissorsGame> currentGame = Optional.empty();
     
     public PlayerUtilCap(PlayerEntity player) {
         this.player = player;
@@ -128,6 +132,16 @@ public class PlayerUtilCap {
     
     public int getNoClientInputTimer() {
         return noClientInputTimer;
+    }
+    
+    
+    
+    public Optional<RockPaperScissorsGame> getCurrentRockPaperScissorsGame() {
+        return currentGame;
+    }
+    
+    public void setCurrentRockPaperScissorsGame(RockPaperScissorsGame game) {
+        this.currentGame = game != null ? Optional.of(game) : Optional.empty();
     }
     
     

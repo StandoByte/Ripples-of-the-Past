@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClHasInputPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHeldActionTargetPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnLeapPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnStandDashPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClRPSGamePickPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRemovePlayerSoulEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRunAwayPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClSoulRotationPacket;
@@ -32,6 +33,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.LeapCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.MaxAchievedResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.RPSGameStatePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.RefreshMovementInTimeStopPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResetResolveValuePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResetSyncedCommonConfigPacket;
@@ -172,6 +174,11 @@ public class PacketManager {
                 ClRemovePlayerSoulEntityPacket::encode,
                 ClRemovePlayerSoulEntityPacket::decode,
                 ClRemovePlayerSoulEntityPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        
+        channel.registerMessage(index++, ClRPSGamePickPacket.class,
+                ClRPSGamePickPacket::encode,
+                ClRPSGamePickPacket::decode,
+                ClRPSGamePickPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
         
         
 
@@ -384,8 +391,13 @@ public class PacketManager {
                 ResetSyncedCommonConfigPacket::encode,
                 ResetSyncedCommonConfigPacket::decode,
                 ResetSyncedCommonConfigPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, RPSGameStatePacket.class,
+                RPSGameStatePacket::encode,
+                RPSGameStatePacket::decode,
+                RPSGameStatePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
     }
-
+    
     public static void sendToServer(Object msg) {
         channel.sendToServer(msg);
     }

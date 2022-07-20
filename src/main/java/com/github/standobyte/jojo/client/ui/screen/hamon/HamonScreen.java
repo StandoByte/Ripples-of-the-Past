@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.ui.screen;
+package com.github.standobyte.jojo.client.ui.screen.hamon;
 
 import java.util.ArrayList;
 import java.util.EnumSet;

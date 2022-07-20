@@ -124,7 +124,9 @@ public class SaveFileUtilCap {
     	return true;
     }
     
-    CompoundNBT saveGamerules() {
+    
+    
+    CompoundNBT save() {
     	CompoundNBT nbt = new CompoundNBT();
     	nbt.putBoolean("GameruleDayLightCycle", gameruleDayLightCycle);
     	nbt.putBoolean("GameruleWeatherCycle", gameruleWeatherCycle);
@@ -132,7 +134,7 @@ public class SaveFileUtilCap {
     	return nbt;
     }
     
-    void loadGamerules(CompoundNBT nbt) {
+    void load(CompoundNBT nbt) {
     	usedTimeStop = nbt.getBoolean("UsedTimeStop");
     	refreshNextTick = usedTimeStop;
     	gameruleDayLightCycle = nbt.getBoolean("GameruleDayLightCycle");
