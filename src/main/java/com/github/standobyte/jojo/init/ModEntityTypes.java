@@ -38,6 +38,7 @@ import com.github.standobyte.jojo.entity.itemprojectile.KnifeEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.StandArrowEntity;
 import com.github.standobyte.jojo.entity.mob.HamonMasterEntity;
 import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
+import com.github.standobyte.jojo.entity.mob.RockPaperScissorsKidEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
@@ -48,6 +49,7 @@ import com.github.standobyte.jojo.entity.stand.stands.TheWorldEntity;
 
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -71,6 +73,10 @@ public class ModEntityTypes {
     public static final RegistryObject<EntityType<HamonMasterEntity>> HAMON_MASTER = ENTITIES.register("hamon_master", 
             () -> EntityType.Builder.<HamonMasterEntity>of(HamonMasterEntity::new, EntityClassification.MISC).sized(0.6F, /*1.35F*/1.95F)
             .build(new ResourceLocation(JojoMod.MOD_ID, "hamon_teacher").toString()));
+    
+    public static final RegistryObject<EntityType<RockPaperScissorsKidEntity>> ROCK_PAPER_SCISSORS_KID = ENTITIES.register("rps_kid", 
+            () -> EntityType.Builder.<RockPaperScissorsKidEntity>of(RockPaperScissorsKidEntity::new, EntityClassification.MISC).sized(0.6F, 1.95F)
+            .build(new ResourceLocation(JojoMod.MOD_ID, "rps_kid").toString()));
 
     public static final RegistryObject<EntityType<BladeHatEntity>> BLADE_HAT = ENTITIES.register("blade_hat", 
             () -> EntityType.Builder.<BladeHatEntity>of(BladeHatEntity::new, EntityClassification.MISC).sized(0.6F, 0.375F).setUpdateInterval(20)
@@ -248,6 +254,7 @@ public class ModEntityTypes {
     public static void onEntityAttributeCreation(EntityAttributeCreationEvent event) {
         event.put(ModEntityTypes.HAMON_MASTER.get(), HamonMasterEntity.createAttributes().build());
         event.put(ModEntityTypes.HUNGRY_ZOMBIE.get(), HungryZombieEntity.createAttributes().build());
+        event.put(ModEntityTypes.ROCK_PAPER_SCISSORS_KID.get(), VillagerEntity.createAttributes().build());
         
         event.put(ModEntityTypes.STAR_PLATINUM.get(), StandEntity.createAttributes().build());
         event.put(ModEntityTypes.THE_WORLD.get(), StandEntity.createAttributes().build());

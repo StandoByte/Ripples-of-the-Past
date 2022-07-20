@@ -2,7 +2,9 @@ package com.github.standobyte.jojo.client;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.client.ui.screen.HamonScreen;
+import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
+import com.github.standobyte.jojo.client.ui.screen.mob.RockPaperScissorsScreen;
+import com.github.standobyte.jojo.entity.mob.RockPaperScissorsGame;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -57,6 +59,14 @@ public class ClientUtil {
     
     public static Entity getCrosshairPickEntity() {
         return Minecraft.getInstance().crosshairPickEntity;
+    }
+    
+    public static void openScreen(Screen screen) {
+        Minecraft.getInstance().setScreen(screen);
+    }
+    
+    public static void openRockPaperScissorsScreen(RockPaperScissorsGame game, Entity player1, Entity player2) {
+        Minecraft.getInstance().setScreen(new RockPaperScissorsScreen(game, player1, player2));
     }
 
     public static void openHamonTeacherUi() {

@@ -17,8 +17,6 @@ import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.ActionResultType;
@@ -59,10 +57,6 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser 
 
     @Override
     public ActionResultType mobInteract(PlayerEntity player, Hand hand) {
-        ItemStack itemStack = player.getItemInHand(hand);
-        if (itemStack.getItem() == Items.NAME_TAG) {
-            itemStack.interactLivingEntity(player, this, hand);
-        }
         if (hand == Hand.MAIN_HAND) {
             HamonPowerType.interactWithHamonTeacher(level, player, this, 
                     getPower().getTypeSpecificData(ModNonStandPowers.HAMON.get()).get());
