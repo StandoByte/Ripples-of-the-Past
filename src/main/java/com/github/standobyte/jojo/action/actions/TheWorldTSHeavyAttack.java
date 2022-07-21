@@ -76,12 +76,14 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
 	    	LivingEntity aimingEntity = standEntity.isManuallyControlled() ? standEntity : standPower.getUser();
 	    	if (aimingEntity != null) {
     			TimeStopInstant blink = theWorldTimeStopBlink.get();
+                float staminaCostTS = blink.getStaminaCost(standPower) * 0.5F;
+    			float staminaCostTicking = blink.getStaminaCostTicking(standPower);
     			TimeStop timeStop = blink.getBaseTimeStop();
 
 	            int timeStopTicks = TimeStop.getTimeStopTicks(standPower, timeStop);
-	            if (!StandUtil.standIgnoresStaminaDebuff(standPower) && blink != null) {
+	            if (!StandUtil.standIgnoresStaminaDebuff(standPower) && blink != null && staminaCostTicking > 0) {
 	                timeStopTicks = MathHelper.clamp(MathHelper.floor(
-	                		(standPower.getStamina() - blink.getStaminaCost(standPower)) / blink.getStaminaCostTicking(standPower)
+	                		(standPower.getStamina() - staminaCostTS) / staminaCostTicking
 	                		), 0, timeStopTicks);
 	            }
 
@@ -127,7 +129,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
 	    		TimeStopInstant.skipTicksForStandAndUser(standPower, timeStopTicks);
 	    		if (!world.isClientSide()) {
     				blink.playSound(world, standEntity);
-	    			standPower.consumeStamina(blink.getStaminaCost(standPower) * 0.5F + timeStopTicks * blink.getStaminaCostTicking(standPower) * 2F);
+	    			standPower.consumeStamina(staminaCostTS + timeStopTicks * staminaCostTicking);
 	    			if (standPower.hasPower()) {
 		    			StandStats stats = standPower.getType().getStats();
 		    			if (stats instanceof TimeStopperStandStats) {

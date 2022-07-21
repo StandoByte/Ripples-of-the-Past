@@ -312,8 +312,8 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
                 .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<T>(new RotationAngle[] {
                         new RotationAngle(body, 0, 0, 0),
                         new RotationAngle(upperPart, 0.0F, 0.0F, 0.0F),
-                        new RotationAngle(rightForeArm, 0.0F, 0.0F, -1.0472F),
-                        new RotationAngle(leftForeArm, 0.0F, 0.0F, 1.0472F)
+                        RotationAngle.fromDegrees(rightForeArm, 0.0F, 0.0F, -60F),
+                        RotationAngle.fromDegrees(leftForeArm, 0.0F, 0.0F, 60F)
                 }).setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
                     float blockXRot = MathHelper.clamp(xRotation, -60, 60) * MathUtil.DEG_TO_RAD / 2;
                     rightArm.xRot = -1.5708F + blockXRot;

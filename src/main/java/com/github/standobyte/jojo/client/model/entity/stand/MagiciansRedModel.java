@@ -140,7 +140,7 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
     @Override
     protected ModelPose<MagiciansRedEntity> initPoseReset() {
         return super.initPoseReset()
-                .putRotation(new RotationAngle(beakUpper, 0.1745F, 0.0F, 0.0F))
+                .putRotation(RotationAngle.fromDegrees(beakUpper, 10F, 0.0F, 0.0F))
                 .putRotation(new RotationAngle(beakLower, 0.0F, 0.0F, 0.0F));
     }
 
@@ -183,9 +183,9 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
     protected void initActionPoses() {
         actionAnim.put(StandPose.RANGED_ATTACK, new StandActionAnimation.Builder<MagiciansRedEntity>()
                 .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<MagiciansRedEntity>(new RotationAngle[] {
-                        new RotationAngle(beakUpper, -0.3491F, 0.0F, 0.0F),
-                        new RotationAngle(beakLower, 0.5236F, 0.0F, 0.0F),
-                        new RotationAngle(leftArm, -1.5708F, 1.0472F, 0.2182F),
+                        RotationAngle.fromDegrees(beakUpper, -20F, 0.0F, 0.0F),
+                        RotationAngle.fromDegrees(beakLower, 30F, 0.0F, 0.0F),
+                        RotationAngle.fromDegrees(leftArm, -90F, 60F, 12.5F),
                         new RotationAngle(leftForeArm, -0.2618F, 0.0F, 0.5236F),
                         new RotationAngle(rightArm, -1.3963F, -0.9163F, -0.1745F),
                         new RotationAngle(rightForeArm, -0.5236F, 0.0F, -0.6981F),
@@ -195,7 +195,7 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
                 }).setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
                     leftArm.setPos(4.0F, -10.0F, 0.0F);
                     rightArm.setPos(-4.0F, -10.0F, 0.0F);
-                    setRotationAngle(head, -0.3927F + xRotation * MathUtil.DEG_TO_RAD, 0.0F, 0.0F);
+                    setRotationAngle(head, (xRotation - 22.5F) * MathUtil.DEG_TO_RAD, 0.0F, 0.0F);
                 }).createRigid())
                 .build(idlePose));
 

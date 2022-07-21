@@ -114,9 +114,9 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
                 RotationAngle.fromDegrees(leftForeArm, -39.38F, 0, 10.62F),
                 RotationAngle.fromDegrees(rightArm, -63.75F, 0, -11.25F),
                 RotationAngle.fromDegrees(rightForeArm, 0, 67.5F, -44.37F),
-                new RotationAngle(leftLeg, 0.0F, 0.0F, -0.7418F),
-                new RotationAngle(leftLowerLeg, 0.0F, 0.0F, 2.0944F),
-                new RotationAngle(rightLeg, 0.0F, 0.0F, 0.2618F),
+                RotationAngle.fromDegrees(leftLeg, 0.0F, 0.0F, -42.5F),
+                RotationAngle.fromDegrees(leftLowerLeg, 0.0F, 0.0F, 120F),
+                RotationAngle.fromDegrees(rightLeg, 0.0F, 0.0F, 15F),
                 new RotationAngle(rightLowerLeg, 0.0F, 0.0F, 0.0F)
     	});
     	ModelPose<HierophantGreenEntity> esPose4 = new ModelPose<>(new RotationAngle[] {

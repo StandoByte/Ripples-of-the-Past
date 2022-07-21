@@ -34,7 +34,7 @@ public class ModPotions {
     
     private static void registerRecipes(Potion initialPotion, Item initialIngredient, 
             Potion basePotion, @Nullable Potion longPotion, @Nullable Potion strongPotion) {
-        BrewingRecipeRegistry.addRecipe(new PotionBrewingRecipe(Potions.AWKWARD, Items.BLUE_ICE, FREEZE_POTION.get())
-                .withLongPotion(FREEZE_LONG_POTION.get()).withStrongPotion(FREEZE_STRONG_POTION.get()));
+        BrewingRecipeRegistry.addRecipe(new PotionBrewingRecipe(initialPotion, initialIngredient, basePotion)
+                .withLongPotion(longPotion).withStrongPotion(strongPotion));
     }
 }

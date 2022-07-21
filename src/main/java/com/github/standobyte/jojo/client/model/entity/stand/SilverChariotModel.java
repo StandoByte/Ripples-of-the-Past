@@ -145,7 +145,7 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
     @Override
     protected ModelPose<SilverChariotEntity> initPoseReset() {
         return super.initPoseReset()
-                .putRotation(new RotationAngle(rapier, 0.7854F, 0.0F, 0.0F));
+                .putRotation(RotationAngle.fromDegrees(rapier, 45F, 0.0F, 0.0F));
     }
 
     @Override
