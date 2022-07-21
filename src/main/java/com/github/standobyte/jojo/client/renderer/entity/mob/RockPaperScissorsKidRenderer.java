@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.client.renderer.entity.mob;
 
-import com.github.standobyte.jojo.entity.mob.RockPaperScissorsKidEntity;
+import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsKidEntity;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;

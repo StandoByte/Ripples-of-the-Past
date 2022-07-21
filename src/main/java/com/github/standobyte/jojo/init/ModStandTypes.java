@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.action.actions.StandAction;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
+import com.github.standobyte.jojo.power.stand.type.BoyIIManStandType;
 import com.github.standobyte.jojo.power.stand.type.EntityStandType;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 
@@ -24,7 +25,7 @@ import net.minecraftforge.registries.RegistryBuilder;
 
 public class ModStandTypes {
     private static final ITextComponent PART_3_NAME = new TranslationTextComponent("jojo.story_part.3").withStyle(TextFormatting.DARK_PURPLE);
-//    private static final ITextComponent PART_4_NAME = new TranslationTextComponent("jojo.story_part.4").withStyle(TextFormatting.RED);
+    private static final ITextComponent PART_4_NAME = new TranslationTextComponent("jojo.story_part.4").withStyle(TextFormatting.RED);
 //    private static final ITextComponent PART_5_NAME = new TranslationTextComponent("jojo.story_part.5").withStyle(TextFormatting.GOLD);
 //    private static final ITextComponent PART_6_NAME = new TranslationTextComponent("jojo.story_part.6").withStyle(TextFormatting.AQUA);
 //    
@@ -122,6 +123,20 @@ public class ModStandTypes {
                     ModEntityTypes.MAGICIANS_RED)
             .addSummonShout(ModSounds.AVDOL_MAGICIANS_RED)
             .addOst(ModSounds.MAGICIANS_RED_OST));
+    
+    
+    public static final RegistryObject<StandType<StandStats>> BOY_II_MAN = STANDS.register("boy_ii_man", 
+            () -> new BoyIIManStandType<>(0x749FA5, PART_4_NAME,
+                    new StandAction[] {},
+                    new StandAction[] {},
+                    StandStats.class, new StandStats.Builder()
+                    .tier(0)
+                    .power(0)
+                    .speed(0)
+                    .range(0)
+                    .durability(0)
+                    .precision(0)
+                    .build("Boy II Man")));
     
     public static final Supplier<EntityStandType<StandStats>> KILLER_QUEEN = () -> null;
     

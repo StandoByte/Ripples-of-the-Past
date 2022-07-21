@@ -4,8 +4,8 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.entity.mob.RockPaperScissorsGame;
-import com.github.standobyte.jojo.entity.mob.RockPaperScissorsGame.Pick;
+import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
+import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame.Pick;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRPSGamePickPacket;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -39,7 +39,6 @@ public class RockPaperScissorsScreen extends Screen {
             this.onClose();
             return false;
         }
-        JojoMod.LOGGER.debug("click");
         if (pickMouseOver != null) {
             pickClicked = pickMouseOver;
             return true;
@@ -54,7 +53,6 @@ public class RockPaperScissorsScreen extends Screen {
             this.onClose();
             return false;
         }
-        JojoMod.LOGGER.debug("release");
         if (pickClicked != null && pickMouseOver == pickClicked) {
             game.makeAPick(ClientUtil.getClientPlayer(), pickMouseOver);
             PacketManager.sendToServer(new ClRPSGamePickPacket(pickMouseOver));

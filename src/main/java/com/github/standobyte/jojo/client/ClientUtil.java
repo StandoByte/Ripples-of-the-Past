@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
 import com.github.standobyte.jojo.client.ui.screen.mob.RockPaperScissorsScreen;
-import com.github.standobyte.jojo.entity.mob.RockPaperScissorsGame;
+import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
