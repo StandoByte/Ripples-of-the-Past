@@ -38,7 +38,7 @@ import com.github.standobyte.jojo.entity.itemprojectile.KnifeEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.StandArrowEntity;
 import com.github.standobyte.jojo.entity.mob.HamonMasterEntity;
 import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
-import com.github.standobyte.jojo.entity.mob.RockPaperScissorsKidEntity;
+import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsKidEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;

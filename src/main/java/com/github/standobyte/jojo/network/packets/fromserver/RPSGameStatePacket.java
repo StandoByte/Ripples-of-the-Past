@@ -6,8 +6,8 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.entity.mob.RockPaperScissorsGame;
-import com.github.standobyte.jojo.entity.mob.RockPaperScissorsGame.Pick;
+import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
+import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame.Pick;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -21,6 +21,10 @@ public class RPSGameStatePacket {
     private List<Pick> opponentPicks;
     
     private int opponentId;
+    
+    private boolean playerWon;
+    
+    private Pick opponentPick;
     
     public static RPSGameStatePacket stateUpdated(List<Pick> playerPicks, List<Pick> opponentPicks) {
         RPSGameStatePacket packet = new RPSGameStatePacket(Type.UPDATE);
@@ -38,6 +42,19 @@ public class RPSGameStatePacket {
     
     public static RPSGameStatePacket leftGame() {
         RPSGameStatePacket packet = new RPSGameStatePacket(Type.LEAVE);
+        return packet;
+    }
+    
+    public static RPSGameStatePacket gameOver(boolean playerWon) {
+        RPSGameStatePacket packet = new RPSGameStatePacket(Type.GAME_OVER);
+        packet.playerWon = playerWon;
+        return packet;
+    }
+    
+    public static RPSGameStatePacket cheat(int opponentId, Pick opponentPick) {
+        RPSGameStatePacket packet = new RPSGameStatePacket(Type.CHEAT);
+        packet.opponentId = opponentId;
+        packet.opponentPick = opponentPick;
         return packet;
     }
     
@@ -61,7 +78,14 @@ public class RPSGameStatePacket {
         case ENTER:
             buf.writeInt(msg.opponentId);
             break;
-        default:
+        case LEAVE:
+            break;
+        case GAME_OVER:
+            buf.writeBoolean(msg.playerWon);
+            break;
+        case CHEAT:
+            buf.writeInt(msg.opponentId);
+            buf.writeEnum(msg.opponentPick);
             break;
         }
     }
@@ -84,6 +108,10 @@ public class RPSGameStatePacket {
             return RPSGameStatePacket.enteredGame(buf.readInt());
         case LEAVE:
             return RPSGameStatePacket.leftGame();
+        case GAME_OVER:
+            return RPSGameStatePacket.gameOver(buf.readBoolean());
+        case CHEAT:
+            return RPSGameStatePacket.cheat(buf.readInt(), buf.readEnum(Pick.class));
         }
         return null;
     }
@@ -102,12 +130,22 @@ public class RPSGameStatePacket {
                 break;
             case ENTER:
                 Entity opponent = ClientUtil.getEntityById(msg.opponentId);
-                RockPaperScissorsGame game = new RockPaperScissorsGame(player, opponent);
-                player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.setCurrentRockPaperScissorsGame(game));
-                ClientUtil.openRockPaperScissorsScreen(game, player, opponent);
+                RockPaperScissorsGame newGame = new RockPaperScissorsGame(player, opponent);
+                player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.setCurrentRockPaperScissorsGame(newGame));
+                ClientUtil.openRockPaperScissorsScreen(newGame, player, opponent);
                 break;
             case LEAVE:
                 
+                break;
+            case GAME_OVER:
+                
+                break;
+            case CHEAT:
+                player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                    cap.getCurrentRockPaperScissorsGame().ifPresent(game -> {
+                        game.makeAPick(ClientUtil.getEntityById(msg.opponentId), msg.opponentPick);
+                    });
+                });
                 break;
             }
         });
@@ -117,6 +155,8 @@ public class RPSGameStatePacket {
     private enum Type {
         UPDATE,
         ENTER,
-        LEAVE
+        LEAVE,
+        GAME_OVER,
+        CHEAT
     }
 }
