@@ -13,7 +13,7 @@ import net.minecraft.util.SoundEvents;
 
 public enum ModArmorMaterials implements IArmorMaterial {
     STONE_MASK("stone_mask", 3, new int[]{0, 0, 0, 1}, 0, SoundEvents.ARMOR_EQUIP_GENERIC, 0.0F, 0.0F, () -> Ingredient.EMPTY),
-    BREATH_CONTROL_MASK("breath_control_mask", 15, new int[]{0, 0, 0, 1}, 9, SoundEvents.ARMOR_EQUIP_GENERIC, 0.0F, 0.0F, () -> Ingredient.of(Items.IRON_INGOT)),
+    BREATH_CONTROL_MASK("breath_control_mask", 10, new int[]{0, 0, 0, 1}, 9, SoundEvents.ARMOR_EQUIP_GENERIC, 0.0F, 0.0F, () -> Ingredient.of(Items.IRON_INGOT)),
     SATIPOROJA_SCARF("satiporoja_scarf", 0, new int[]{0, 0, 0, 1}, 25, SoundEvents.ARMOR_EQUIP_GENERIC, 0.0F, 0.0F, () -> Ingredient.EMPTY),
     WHITE_CLOTH(Items.WHITE_WOOL),
     ORANGE_CLOTH(Items.ORANGE_WOOL),

@@ -83,7 +83,7 @@ public class ModStandTypes {
                     .tier(5)
                     .power(8.0)
                     .speed(12.0)
-                    .range(50.0)
+                    .range(50.0, 100.0)
                     .durability(10.0)
                     .precision(8.0)
                     .build("Hierophant Green"), 
@@ -99,7 +99,7 @@ public class ModStandTypes {
                     .tier(5)
                     .power(9.0)
                     .speed(14.0)
-                    .range(10.0, 10.0)
+                    .range(10.0)
                     .durability(12.0)
                     .precision(16.0)
                     .build("Silver Chariot"), 
@@ -115,7 +115,7 @@ public class ModStandTypes {
                     .tier(5)
                     .power(12.0)
                     .speed(12.0)
-                    .range(5.0)
+                    .range(5.0, 10.0)
                     .durability(12.0)
                     .precision(8.0)
                     .build("Magician's Red"), 

@@ -2081,6 +2081,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
     }
     
+    public void makeStuckInBlock(BlockState blockState, Vector3d stuckSpeedMultiplier) {}
+    
     private void moveWithoutCollision(Vector3d vec) {
         setBoundingBox(getBoundingBox().move(vec));
         setLocationFromBoundingbox();
