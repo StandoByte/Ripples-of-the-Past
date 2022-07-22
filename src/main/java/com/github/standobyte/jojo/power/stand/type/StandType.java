@@ -42,6 +42,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     private final StandAction[] abilities;
     private final T defaultStats;
     private final Class<T> statsClass;
+    private boolean canPlayerGet = true;
     private String translationKey;
     private Supplier<SoundEvent> summonShoutSupplier = () -> null;
     private OstSoundList ostSupplier = null;
@@ -77,6 +78,11 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         if (item != null && !item.isEmpty()) {
             resolveLevelItems.computeIfAbsent(resolveLevel, lvl -> new ArrayList<>()).add(item);
         }
+        return this;
+    }
+    
+    public StandType<T> setPlayerAccess(boolean canPlayerGet) {
+        this.canPlayerGet = canPlayerGet;
         return this;
     }
     
@@ -277,7 +283,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
             });
         }
     }
-
+    
 //    public static void giveStandExp(LivingDeathEvent event) {
 //        LivingEntity dead = event.getEntityLiving();
 //        dead.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {

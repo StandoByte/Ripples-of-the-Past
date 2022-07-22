@@ -472,7 +472,7 @@ public class ModActions {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void beforeActionsInit(RegistryEvent.Register<Action<?>> event) {
-        Action.initShiftVariationsMap();
+        Action.prepareShiftVariationsMap();
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
