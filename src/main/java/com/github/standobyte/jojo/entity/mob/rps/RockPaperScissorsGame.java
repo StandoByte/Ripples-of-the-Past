@@ -104,7 +104,7 @@ public class RockPaperScissorsGame {
             // FIXME !!!!
             if (round == 3 && loserStand.hasPower()) {
                 // FIXME !!!!
-                loserStand.clear();
+                loserStand.putOutStand();
             }
         }
 	}

@@ -20,18 +20,23 @@ import com.github.standobyte.jojo.power.stand.StandPower;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.entity.AgeableEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ILivingEntityData;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.entity.villager.VillagerType;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.event.ForgeEventFactory;
 
 public class RockPaperScissorsKidEntity extends VillagerEntity implements IMobStandUser {
     private final IStandPower standPower = new StandPower(this);
@@ -123,6 +128,34 @@ public class RockPaperScissorsKidEntity extends VillagerEntity implements IMobSt
         super.readAdditionalSaveData(nbt);
         if (nbt.contains("StandPower", JojoModUtil.getNbtId(CompoundNBT.class))) {
             standPower.readNBT(nbt.getCompound("StandPower"));
+        }
+    }
+    
+    
+    
+    public static boolean canTurnFromArrow(Entity entity) {
+        if (entity.getType() == EntityType.VILLAGER) {
+            MobEntity villager = (MobEntity) entity;
+            return villager.isBaby() && villager.getRandom().nextDouble() < 0.5;
+        }
+        return false;
+    }
+    
+    public static void turnFromArrow(Entity entity) {
+        World world = entity.level;
+        if (!world.isClientSide()) {
+            MobEntity villagerKid = (MobEntity) entity;
+            if (ForgeEventFactory.canLivingConvert(villagerKid, ModEntityTypes.ROCK_PAPER_SCISSORS_KID.get(), (timer) -> {})) {
+                RockPaperScissorsKidEntity RPSkid = villagerKid.convertTo(ModEntityTypes.ROCK_PAPER_SCISSORS_KID.get(), true);
+                RPSkid.finalizeSpawn(
+                        (ServerWorld) world, 
+                        world.getCurrentDifficultyAt(RPSkid.blockPosition()), 
+                        SpawnReason.CONVERSION, 
+                        null, 
+                        null);
+                RPSkid.setVillagerData(RPSkid.getVillagerData().setType(VillagerType.byBiome(world.getBiomeName(RPSkid.blockPosition()))));
+                ForgeEventFactory.onLivingConvert(villagerKid, RPSkid);
+            }
         }
     }
 }

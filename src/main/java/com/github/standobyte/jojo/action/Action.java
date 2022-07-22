@@ -334,7 +334,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     
     
-    public static void initShiftVariationsMap() {
+    public static void prepareShiftVariationsMap() {
         SHIFT_VARIATIONS = new HashMap<>();
     }
     

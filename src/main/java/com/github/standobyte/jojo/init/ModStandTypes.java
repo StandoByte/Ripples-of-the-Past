@@ -6,6 +6,8 @@ import javax.annotation.Nonnull;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.actions.StandAction;
+import com.github.standobyte.jojo.entity.itemprojectile.StandArrowEntity;
+import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsKidEntity;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
@@ -18,11 +20,13 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 
+@EventBusSubscriber(modid = JojoMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public class ModStandTypes {
     private static final ITextComponent PART_3_NAME = new TranslationTextComponent("jojo.story_part.3").withStyle(TextFormatting.DARK_PURPLE);
     private static final ITextComponent PART_4_NAME = new TranslationTextComponent("jojo.story_part.4").withStyle(TextFormatting.RED);
@@ -126,17 +130,23 @@ public class ModStandTypes {
     
     
     public static final RegistryObject<StandType<StandStats>> BOY_II_MAN = STANDS.register("boy_ii_man", 
-            () -> new BoyIIManStandType<>(0x749FA5, PART_4_NAME,
-                    new StandAction[] {},
-                    new StandAction[] {},
-                    StandStats.class, new StandStats.Builder()
-                    .tier(0)
-                    .power(0)
-                    .speed(0)
-                    .range(0)
-                    .durability(0)
-                    .precision(0)
-                    .build("Boy II Man")));
+            () -> {
+                StandArrowEntity.EntityPierce.addBehavior(
+                        () -> RockPaperScissorsKidEntity::canTurnFromArrow, 
+                        () -> RockPaperScissorsKidEntity::turnFromArrow);
+                return new BoyIIManStandType<>(0x749FA5, PART_4_NAME,
+                        new StandAction[] {},
+                        new StandAction[] {},
+                        StandStats.class, new StandStats.Builder()
+                        .tier(0)
+                        .power(0)
+                        .speed(0)
+                        .range(0)
+                        .durability(0)
+                        .precision(0)
+                        .build("Boy II Man"))
+                        .setPlayerAccess(false);
+            });
     
     public static final Supplier<EntityStandType<StandStats>> KILLER_QUEEN = () -> null;
     

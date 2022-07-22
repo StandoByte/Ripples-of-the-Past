@@ -65,16 +65,19 @@ public class StandArrowItem extends ArrowItem {
     }
     
     public static boolean onPiercedByArrow(Entity entity, ItemStack stack, World world) {
-        if (entity instanceof LivingEntity) {
+        if (!world.isClientSide() && entity instanceof LivingEntity) {
             LivingEntity livingEntity = (LivingEntity) entity;
             livingEntity.hurt(DamageUtil.STAND_VIRUS, Math.min(livingEntity.getHealth(), 11F) - 1F);
             stack.hurtAndBreak(1, livingEntity, pl -> {});
             boolean gaveStand = false;
             if (livingEntity instanceof PlayerEntity) {
                 gaveStand = playerPiercedByArrow((PlayerEntity) livingEntity, stack, world, false);
-                if (!gaveStand) {
-                    livingEntity.hurt(DamageUtil.STAND_VIRUS, 10F);
-                }
+            }
+            else {
+                gaveStand = StandArrowEntity.EntityPierce.onArrowPierce(livingEntity);
+            }
+            if (!gaveStand) {
+                livingEntity.hurt(DamageUtil.STAND_VIRUS, 10F);
             }
             return gaveStand;
         }
@@ -109,7 +112,6 @@ public class StandArrowItem extends ArrowItem {
                         if (JojoModConfig.getCommonConfigInstance(world.isClientSide()).standTiers.get()) {
                             player.giveExperienceLevels(-StandUtil.tierLowerBorder(stand.getTier(), false));
                         }
-                        stack.hurtAndBreak(1, player, pl -> {});
                     }
                     return true;
                 }
@@ -117,9 +119,6 @@ public class StandArrowItem extends ArrowItem {
             else {
                 player.displayClientMessage(new TranslationTextComponent("jojo.chat.message.already_have_stand"), true);
             }
-        }
-        else if (!power.hasPower()) {
-            return true;
         }
         return false;
     }
