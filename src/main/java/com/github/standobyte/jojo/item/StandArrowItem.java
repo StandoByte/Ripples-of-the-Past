@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.itemprojectile.StandArrowEntity;
+import com.github.standobyte.jojo.init.ModEnchantments;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.type.StandType;
@@ -18,6 +19,7 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.dispenser.IPosition;
 import net.minecraft.dispenser.ProjectileDispenseBehavior;
 import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -34,6 +36,7 @@ import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.LazyOptional;
 
 public class StandArrowItem extends ArrowItem {
 
@@ -53,7 +56,7 @@ public class StandArrowItem extends ArrowItem {
     @Override
     public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (playerPiercedByArrow(player, stack, world, true)) {
+        if (onPiercedByArrow(player, stack, world)) {
             return ActionResult.success(stack);
         }
         return ActionResult.fail(stack);
@@ -67,30 +70,36 @@ public class StandArrowItem extends ArrowItem {
     public static boolean onPiercedByArrow(Entity entity, ItemStack stack, World world) {
         if (!world.isClientSide() && entity instanceof LivingEntity) {
             LivingEntity livingEntity = (LivingEntity) entity;
-            livingEntity.hurt(DamageUtil.STAND_VIRUS, Math.min(livingEntity.getHealth(), 11F) - 1F);
+            LazyOptional<IStandPower> standPower = IStandPower.getStandPowerOptional(livingEntity);
+            if (standPower.map(stand -> stand.hasPower() && !canPierceWithStand(stand)).orElse(false)) {
+                return false;
+            }
+            boolean wasStandUser = standPower.map(stand -> stand.hasPower() || stand.getUserTier() > 0).orElse(false);
+            DamageUtil.hurtThroughInvulTicks(livingEntity, DamageUtil.STAND_VIRUS, getVirusDamage(stack, livingEntity, !wasStandUser));
             stack.hurtAndBreak(1, livingEntity, pl -> {});
+            if (!livingEntity.isAlive()) {
+                return false;
+            }
             boolean gaveStand = false;
             if (livingEntity instanceof PlayerEntity) {
-                gaveStand = playerPiercedByArrow((PlayerEntity) livingEntity, stack, world, false);
+                gaveStand = playerPiercedByArrow((PlayerEntity) livingEntity, stack, world);
             }
             else {
                 gaveStand = StandArrowEntity.EntityPierce.onArrowPierce(livingEntity);
-            }
-            if (!gaveStand) {
-                livingEntity.hurt(DamageUtil.STAND_VIRUS, 10F);
             }
             return gaveStand;
         }
         return false;
     }
     
-    private static boolean playerPiercedByArrow(PlayerEntity player, ItemStack stack, World world, boolean dealVirusDamage) {
+    private static boolean canPierceWithStand(IStandPower stand) {
+        return false;
+    }
+    
+    private static boolean playerPiercedByArrow(PlayerEntity player, ItemStack stack, World world) {
         IStandPower power = IStandPower.getPlayerStandPower(player);
         if (!world.isClientSide()) {
             if (!power.hasPower()) {
-                if (dealVirusDamage) {
-                    player.hurt(DamageUtil.STAND_VIRUS, Math.min(player.getMaxHealth(), 6F) - 1F);
-                }
                 StandType<?> stand = null;
                 boolean checkTier = JojoModConfig.getCommonConfigInstance(false).standTiers.get();
                 if (checkTier) {
@@ -121,6 +130,16 @@ public class StandArrowItem extends ArrowItem {
             }
         }
         return false;
+    }
+    
+    private static float getVirusDamage(ItemStack arrow, LivingEntity entity, boolean canKill) {
+        float damage = entity.getRandom().nextFloat() * 8F + 8;
+        damage = Math.max(damage * (1 - 0.25F * EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.VIRUS_INHIBITION.get(), arrow)), 0);
+        damage *= entity.getMaxHealth() / 20F;
+        if (!canKill) {
+            damage = Math.min(damage, entity.getHealth() - 1);
+        }
+        return damage;
     }
     
     @Override
@@ -202,6 +221,11 @@ public class StandArrowItem extends ArrowItem {
     @Override
     public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
         return super.canApplyAtEnchantingTable(stack, enchantment) || enchantment.equals(Enchantments.LOYALTY);
+    }
+
+    @Override
+    public int getEnchantmentValue() {
+        return 1;
     }
     
     public enum StandGivingMode {
