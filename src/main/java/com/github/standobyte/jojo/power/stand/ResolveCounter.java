@@ -72,9 +72,10 @@ public class ResolveCounter {
     private float hpOnGettingAttacked = -1;
     
     
-    protected ResolveCounter(IStandPower stand, Optional<ServerPlayerEntity> serverPlayerUser) {
+    protected ResolveCounter(IStandPower stand) {
         this.stand = stand;
-        this.serverPlayerUser = serverPlayerUser;
+        LivingEntity standUser = stand.getUser();
+        this.serverPlayerUser = standUser instanceof ServerPlayerEntity ? Optional.of((ServerPlayerEntity) standUser) : Optional.empty();
     }
 
 

@@ -52,7 +52,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     public StandPower(LivingEntity user) {
         super(user);
-        resolveCounter = new ResolveCounter(this, serverPlayerUser);
+        resolveCounter = new ResolveCounter(this);
     }
 
     @Override
