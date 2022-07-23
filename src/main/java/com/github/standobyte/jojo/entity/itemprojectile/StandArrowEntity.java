@@ -184,6 +184,14 @@ public class StandArrowEntity extends AbstractArrowEntity {
     }
 
     @Override
+    public void playerTouch(PlayerEntity player) {
+        Entity owner = this.getOwner();
+        if (entityData.get(LOYALTY) == 0 || owner == null || owner.getUUID() == player.getUUID()) {
+            super.playerTouch(player);
+        }
+    }
+
+    @Override
     public void tickDespawn() {
         if (pickup != AbstractArrowEntity.PickupStatus.ALLOWED || entityData.get(LOYALTY) <= 0) {
             super.tickDespawn();

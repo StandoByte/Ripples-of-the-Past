@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModDataSerializers;
 import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModEnchantments;
 import com.github.standobyte.jojo.init.ModEntityAttributes;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
@@ -21,6 +22,7 @@ import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.init.ModStructures;
 import com.github.standobyte.jojo.init.ModTileEntities;
 
+import net.minecraft.enchantment.EnchantmentType;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
@@ -35,12 +37,12 @@ public class JojoMod {
 	public static final String MOD_ID = "jojo";
 	public static final Logger LOGGER = LogManager.getLogger();
     
-	public static final ItemGroup MAIN_TAB = new ItemGroup("jojo_tab") {
+	public static final ItemGroup MAIN_TAB = (new ItemGroup("jojo_tab") {
 	    @Override
         public ItemStack makeIcon() {
             return new ItemStack(ModItems.STONE_MASK.get());
         }
-	};
+	}).setEnchantmentCategories(new EnchantmentType[]{ModEnchantments.STAND_ARROW});
 	
 	public static Logger getLogger() {
 	    return LOGGER;
@@ -64,6 +66,7 @@ public class JojoMod {
         ModEntityAttributes.ATTRIBUTES.register(modEventBus);
         ModDataSerializers.DATA_SERIALIZERS.register(modEventBus);
         ModEffects.EFFECTS.register(modEventBus);
+        ModEnchantments.ENCHANTMENTS.register(modEventBus);
         ModEntityTypes.ENTITIES.register(modEventBus);
         ModLootModifierSerializers.LOOT_MODIFIER_SERIALIZERS.register(modEventBus);
         ModPaintings.PAINTINGS.register(modEventBus);
