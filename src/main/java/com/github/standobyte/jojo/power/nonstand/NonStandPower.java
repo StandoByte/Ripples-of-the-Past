@@ -1,7 +1,5 @@
 package com.github.standobyte.jojo.power.nonstand;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -12,6 +10,7 @@ import com.github.standobyte.jojo.action.ActionTargetContainer;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrEnergyPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrTypeNonStandPowerPacket;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.PowerBaseImpl;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
@@ -28,6 +27,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     public static final float BASE_MAX_ENERGY = 1000;
     
     private float energy = 0;
+    protected NonStandPowerType<?> type;
     private TypeSpecificData typeSpecificData;
     
     public NonStandPower(LivingEntity user) {
@@ -40,39 +40,61 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     }
 
     @Override
-    public boolean givePower(NonStandPowerType<?> type) {
-        NonStandPowerType<?> oldType = this.getType();
-        if (super.givePower(type)) {
-            typeSpecificData.onPowerGiven(oldType);
-            return true;
-        }
-        return false;
+    public boolean hasPower() {
+        return getType() != null;
     }
 
     @Override
-    protected void afterTypeInit(NonStandPowerType<?> powerType) {
-        attacks = new ArrayList<>(Arrays.asList(powerType.getAttacks()));
-        abilities = new ArrayList<>(Arrays.asList(powerType.getAbilities()));
+    public boolean givePower(NonStandPowerType<?> type) {
+        if (!canGetPower(type)) {
+            return false;
+        }
+        NonStandPowerType<?> oldType = this.getType();
+        setType(type);
+        onNewPowerGiven(type);
+        typeSpecificData.onPowerGiven(oldType);
+        return true;
+    }
+    
+    private void setType(NonStandPowerType<?> powerType) {
+        this.type = powerType;
+        onPowerSet(powerType);
+    }
+
+    @Override
+    protected void onNewPowerGiven(NonStandPowerType<?> powerType) {
+        super.onNewPowerGiven(powerType);
         TypeSpecificData data = powerType.newSpecificDataInstance();
         energy = 0;
         setTypeSpecificData(data);
         if (isUserCreative()) {
             energy = getMaxEnergy();
         }
+        serverPlayerUser.ifPresent(player -> {
+            PacketManager.sendToClientsTrackingAndSelf(new TrTypeNonStandPowerPacket(player.getId(), getType()), player);
+        });
     }
     
     @Override
     public boolean clear() {
         if (super.clear()) {
+            serverPlayerUser.ifPresent(player -> {
+                PacketManager.sendToClientsTrackingAndSelf(TrTypeNonStandPowerPacket.noPowerType(player.getId()), player);
+            });
             type.onClear(this);
             NonStandPowerType<?> clearedType = this.type;
-            this.type = null;
+            setType(null);
             clearedType.afterClear(this);
             typeSpecificData = null;
             energy = 0;
             return true;
         }
         return false;
+    }
+
+    @Override
+    public NonStandPowerType<?> getType() {
+        return type;
     }
     
     @Override
@@ -240,6 +262,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     @Override
     protected void keepPower(INonStandPower oldPower, boolean wasDeath) {
         super.keepPower(oldPower, wasDeath);
+        setType(oldPower.getType());
         this.energy = oldPower.getEnergy();
         oldPower.getTypeSpecificData(null).ifPresent(data -> {
             this.setTypeSpecificData(data);
@@ -262,14 +285,13 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     @Override
     public void syncWithTrackingOrUser(ServerPlayerEntity player) {
         super.syncWithTrackingOrUser(player);
-        if (hasPower()) {
-            LivingEntity user = getUser();
-            if (user != null) {
-                PacketManager.sendToClient(new TrEnergyPacket(user.getId(), energy), player);
-                getTypeSpecificData(null).ifPresent(data -> {
-                    data.syncWithTrackingOrUser(user, player);
-                });
-            }
+        if (hasPower() && user != null) {
+            PacketManager.sendToClient(new TrTypeNonStandPowerPacket(user.getId(), getType()), player);
+            PacketManager.sendToClient(new TrEnergyPacket(user.getId(), energy), player);
+            getTypeSpecificData(null).ifPresent(data -> {
+                data.syncWithTrackingOrUser(user, player);
+            });
         }
     }
+    
 }

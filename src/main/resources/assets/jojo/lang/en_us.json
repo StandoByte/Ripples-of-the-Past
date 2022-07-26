@@ -318,6 +318,9 @@
   "jojo.message.action_condition.not_unlocked": "You haven't unlocked this",
   "jojo.message.action_condition.target_too_far": "The target is too far",
   "jojo.message.action_condition.stun": "You are stunned",
+  "jojo.message.action_condition.no_stand_part.main_body": "You do not control the Stand's main body",
+  "jojo.message.action_condition.no_stand_part.arms": "Your Stand is missing its arms",
+  "jojo.message.action_condition.no_stand_part.legs": "Your Stand is missing its legs",
   
   "jojo.message.action_condition.peaceful": "Monsters can't hurt anyone on Peaceful difficulty",
   "jojo.message.action_condition.player_target": "You have to target a player with this ability",
@@ -379,7 +382,7 @@
   "jojo.config.standStamina": "Stand Stamina",
   "jojo.config.standStamina.tooltip": "Whether or not Stand stamina mechanic is enabled.",
   "jojo.config.dropStandDisc": "Drop Stand Disc",
-  "jojo.config.dropStandDisc.tooltip": "If enabled, Stand users who got their Stand from a Disc drop their Stand Disc upon death.",
+  "jojo.config.dropStandDisc.tooltip": "If enabled, Stand users drop their Stand's Disc upon death.",
   "jojo.config.standDamageMultiplier": "Stand damage multiplier",
   "jojo.config.standDamageMultiplier.tooltip": "Damage multiplier applied to all Stands.",
   "jojo.config.soulAscension": "Soul Ascension",
@@ -804,6 +807,9 @@
   "entity.jojo.rps_kid": "Rock-Paper-Scissors Kid",
   "item.jojo.rps_kid_spawn_egg": "Rock-Paper-Scissors Kid Spawn Egg",
   "jojo.screen.versus": "%s VS %s",
+  "jojo.disc.missing_part.arms": "Has no arms",
+  "jojo.disc.missing_part.legs": "Has no arms",
+  "jojo.disc.missing_part.main_body": "Has no main body",
   
   "jojo.to_be_continued": "To Be Continued"
 }

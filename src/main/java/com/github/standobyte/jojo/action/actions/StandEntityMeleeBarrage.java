@@ -13,6 +13,7 @@ import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
@@ -174,7 +175,8 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
             			.addCombo(0.005F)
             			.reduceKnockback(0.1F)
             			.setPunchSound(ModSounds.STAND_BARRAGE_ATTACK.get());
-            });
+            })
+            .partsRequired(StandPart.ARMS);
     	}
         
 		@Override

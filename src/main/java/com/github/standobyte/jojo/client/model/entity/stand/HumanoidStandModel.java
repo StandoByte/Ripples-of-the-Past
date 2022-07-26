@@ -19,6 +19,7 @@ import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
 import com.github.standobyte.jojo.client.model.pose.XRotationModelRenderer;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
+import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.util.utils.MathUtil;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -193,6 +194,24 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
             default:
                 break;
             }
+        }
+    }
+
+    @Override
+    protected void partMissing(StandPart standPart) {
+        switch (standPart) {
+        case MAIN_BODY:
+            head.visible = false;
+            torso.visible = false;
+            break;
+        case ARMS:
+            leftArm.visible = false;
+            rightArm.visible = false;
+            break;
+        case LEGS:
+            leftLeg.visible = false;
+            rightLeg.visible = false;
+            break;
         }
     }
 

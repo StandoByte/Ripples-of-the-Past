@@ -1,6 +1,8 @@
 package com.github.standobyte.jojo.power;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,7 +23,6 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.LeapCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHeldActionPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrPowerTypePacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.block.Blocks;
@@ -45,7 +46,6 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     @Nonnull
     protected final LivingEntity user;
     protected final Optional<ServerPlayerEntity> serverPlayerUser;
-    protected T type;
     protected List<Action<P>> attacks = new ArrayList<>();
     protected List<Action<P>> abilities = new ArrayList<>();
     private ActionCooldownTracker cooldowns = new ActionCooldownTracker();
@@ -57,22 +57,14 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         this.user = user;
         this.serverPlayerUser = user instanceof ServerPlayerEntity ? Optional.of((ServerPlayerEntity) user) : Optional.empty();
     }
-
-    @Override
-    public boolean hasPower() {
-        return getType() != null;
+    
+    protected boolean canGetPower(T type) {
+        return type != null && (!hasPower() || getType().isReplaceableWith(type));
     }
 
-    @Override
-    public boolean givePower(T type) {
-        if (type == null || hasPower() && !getType().isReplaceableWith(type)) {
-            return false;
-        }
-        setType(type);
+    protected void onNewPowerGiven(T type) {
         leapCooldown = getLeapCooldownPeriod();
-
         serverPlayerUser.ifPresent(player -> {
-            PacketManager.sendToClientsTrackingAndSelf(new TrPowerTypePacket<P, T>(player.getId(), getPowerClassification(), getType()), player);
             player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                 cap.sendNotification(OneTimeNotification.POWER_CONTROLS, 
                         new TranslationTextComponent("jojo.chat.controls.message", 
@@ -84,14 +76,17 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             });
             ModCriteriaTriggers.GET_POWER.get().trigger(player, getPowerClassification(), this);
         });
-        return true;
     }
-
-    protected abstract void afterTypeInit(T type);
     
-    protected void setType(T type) {
-        this.type = type;
-        afterTypeInit(type);
+    protected void onPowerSet(T type) {
+        if (type != null) {
+            attacks = new ArrayList<>(Arrays.asList(type.getAttacks()));
+            abilities = new ArrayList<>(Arrays.asList(type.getAbilities()));
+        }
+        else {
+            attacks = Collections.emptyList();
+            abilities = Collections.emptyList();
+        }
     }
 
     @Override
@@ -99,19 +94,9 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         if (!hasPower()) {
             return false;
         }
-        attacks = new ArrayList<>();
-        abilities = new ArrayList<>();
-        serverPlayerUser.ifPresent(player -> {
-            PacketManager.sendToClientsTrackingAndSelf(TrPowerTypePacket.noPowerType(player.getId(), getPowerClassification()), player);
-        });
         return true;
     }
-
-    @Override
-    public T getType() {
-        return type;
-    }
-
+    
     @Override
     public final LivingEntity getUser() {
         return user;
@@ -582,13 +567,12 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             keepPower(oldPower, wasDeath);
         }
     }
-    
+
     protected void keepPower(P oldPower, boolean wasDeath) {
-        setType(oldPower.getType());
         this.leapCooldown = oldPower.getLeapCooldown();
         this.cooldowns = oldPower.getCooldowns();
     }
-
+    
     @Override
     public void syncWithUserOnly() {
         serverPlayerUser.ifPresent(player -> {
@@ -602,12 +586,8 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
 
     @Override
     public void syncWithTrackingOrUser(ServerPlayerEntity player) {
-        if (hasPower()) {
-            LivingEntity user = getUser();
-            if (user != null) {
-                PacketManager.sendToClient(new TrPowerTypePacket<P, T>(user.getId(), getPowerClassification(), getType()), player);
-                cooldowns.syncWithTrackingOrUser(user.getId(), getPowerClassification(), player);
-            }
+        if (hasPower() && user != null) {
+            cooldowns.syncWithTrackingOrUser(user.getId(), getPowerClassification(), player);
         }
     }
     

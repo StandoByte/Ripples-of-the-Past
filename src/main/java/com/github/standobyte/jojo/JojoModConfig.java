@@ -95,7 +95,7 @@ public class JojoModConfig {
                         .define("keepStandOnDeath", false);
             
                 dropStandDisc = builder
-                        .comment("    If enabled, Stand users who got their Stand from a Disc drop their Stand Disc upon death.", 
+                        .comment("    If enabled, Stand users drop their Stand's Disc upon death.", 
                         		 "    Works only when keepStandOnDeath is set to false.")
                         .translation("jojo.config.dropStandDisc")
                         .define("dropStandDisc", false);

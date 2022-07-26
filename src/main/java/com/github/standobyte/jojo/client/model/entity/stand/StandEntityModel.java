@@ -19,6 +19,8 @@ import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
 import com.github.standobyte.jojo.client.renderer.entity.stand.AdditionalArmSwing;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
+import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.util.utils.MathUtil;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -73,12 +75,24 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         modelRenderer.zRot = z;
     }
 
-    public void setVisibilityMode(VisibilityMode mode) {
+    public void setVisibility(T entity, VisibilityMode mode) {
         this.visibilityMode = mode;
         updatePartsVisibility(mode);
+        
+        IStandPower standPower = entity.getUserPower();
+        if (standPower != null) {
+            standPower.getStandInstance().ifPresent(standInstance -> {
+                for (StandPart part : StandPart.values()) {
+                    if (!standInstance.hasPart(part)) {
+                        partMissing(part);
+                    }
+                }
+            });
+        }
     }
 
     protected abstract void updatePartsVisibility(VisibilityMode mode);
+    protected abstract void partMissing(StandPart standPart);
 
     @Override
     public void setupAnim(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
@@ -231,7 +245,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
             resetPose(entity);
             for (AdditionalArmSwing swing : swings) {
                 matrixStack.pushPose();
-                setVisibilityMode(swing.getSide() == HandSide.LEFT ? VisibilityMode.LEFT_ARM_ONLY : VisibilityMode.RIGHT_ARM_ONLY);
+                setVisibility(entity, swing.getSide() == HandSide.LEFT ? VisibilityMode.LEFT_ARM_ONLY : VisibilityMode.RIGHT_ARM_ONLY);
                 Vector3d offset = new Vector3d(swing.offset.x, -swing.offset.y, swing.offset.z).xRot(xRotation * MathUtil.DEG_TO_RAD);
                 matrixStack.translate(offset.x, offset.y, -offset.z);
                 attackTime = swing.getAnim() / AdditionalArmSwing.MAX_ANIM_DURATION;

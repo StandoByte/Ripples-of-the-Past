@@ -13,26 +13,35 @@ import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.StringNBT;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 
 public class StandInstance {
     private final StandType<?> standType;
-    private final Set<StandParts> limbs = EnumSet.allOf(StandParts.class);
+    private final EnumSet<StandPart> parts = EnumSet.allOf(StandPart.class);
     private Optional<ITextComponent> customName = Optional.empty();
-    private final ResolveCounter resolveCounter;
     
-    public StandInstance(@Nonnull StandType<?> standType, IStandPower standPower) {
+    public StandInstance(@Nonnull StandType<?> standType) {
         this.standType = standType;
-        this.resolveCounter = new ResolveCounter(standPower);
+//        /* FIXME !!!!!!!!!!!!!!!!!! for testing purposes */ parts.remove(StandPart.MAIN_BODY); parts.remove(StandPart.LEGS);
     }
     
-    public boolean removeLimbs(StandParts limbs) {
-        return this.limbs.remove(limbs);
+    public StandType<?> getType() {
+        return standType;
     }
     
-    public boolean returnLimbs(StandParts limbs) {
-        return this.limbs.add(limbs);
+    public boolean hasPart(StandPart part) {
+        return parts.contains(part);
+    }
+    
+    public boolean removePart(StandPart part) {
+        return this.parts.remove(part);
+    }
+    
+    public boolean addPart(StandPart part) {
+        return this.parts.add(part);
     }
     
     public void setCustomName(ITextComponent customName) {
@@ -41,10 +50,6 @@ public class StandInstance {
     
     public Optional<ITextComponent> getCustomName() {
         return customName;
-    }
-    
-    public ResolveCounter getResolveCounter() {
-        return resolveCounter;
     }
     
     
@@ -56,8 +61,8 @@ public class StandInstance {
         
         CompoundNBT missingLimbsNbt = new CompoundNBT();
         boolean limbsMissing = false;
-        for (StandParts limbs : StandParts.values()) {
-            if (!this.limbs.contains(limbs)) {
+        for (StandPart limbs : StandPart.values()) {
+            if (!this.parts.contains(limbs)) {
                 missingLimbsNbt.putBoolean(limbs.name(), true);
                 limbsMissing = true;
             }
@@ -68,25 +73,23 @@ public class StandInstance {
         
         customName.ifPresent(name -> nbt.putString("CustomName", ITextComponent.Serializer.toJson(name)));
         
-        nbt.put("Resolve", resolveCounter.writeNBT());
-        
         return nbt;
     }
 
-    public static StandInstance fromNBT(CompoundNBT nbt, IStandPower standPower) {
+    public static StandInstance fromNBT(CompoundNBT nbt) {
         String standName = nbt.getString("StandType");
         StandType<?> standType = ModStandTypes.Registry.getRegistry().getValue(new ResourceLocation(standName));
         if (standType == null) {
-            throw new IllegalStateException("Invalid Stand type name read from NBT!");
+            return null;
         }
         
-        StandInstance instance = new StandInstance(standType, standPower);
+        StandInstance instance = new StandInstance(standType);
         
         if (nbt.contains("MissingLimbs", JojoModUtil.getNbtId(CompoundNBT.class))) {
             CompoundNBT missingLimbsNbt = nbt.getCompound("MissingLimbs");
-            for (StandParts limbs : StandParts.values()) {
+            for (StandPart limbs : StandPart.values()) {
                 if (missingLimbsNbt.getBoolean(limbs.name())) {
-                    instance.limbs.remove(limbs);
+                    instance.parts.remove(limbs);
                 }
             }
         }
@@ -100,17 +103,38 @@ public class StandInstance {
             }
         }
         
-        if (nbt.contains("Resolve", JojoModUtil.getNbtId(CompoundNBT.class))) {
-            instance.resolveCounter.readNbt(nbt.getCompound("Resolve"));
+        return instance;
+    }
+    
+    public void toBuf(PacketBuffer buf) {
+        buf.writeRegistryId(standType);
+        
+        Set<StandPart> missingParts = EnumSet.complementOf(parts);
+        buf.writeVarInt(missingParts.size());
+        missingParts.forEach(part -> buf.writeEnum(part));
+        
+        DataSerializers.OPTIONAL_COMPONENT.write(buf, customName);
+    }
+    
+    public static StandInstance fromBuf(PacketBuffer buf) {
+        StandType<?> standType = buf.readRegistryIdSafe(StandType.class);
+        StandInstance standInstance = new StandInstance(standType);
+        
+        int missingPartsCount = buf.readVarInt();
+        for (int i = 0; i < missingPartsCount; i++) {
+            standInstance.parts.remove(buf.readEnum(StandPart.class));
         }
         
-        return instance;
+        standInstance.customName = DataSerializers.OPTIONAL_COMPONENT.read(buf);
+        
+        return standInstance;
     }
     
     
     
     
-    public enum StandParts {
+    public enum StandPart {
+        MAIN_BODY,
         ARMS,
         LEGS
     }
