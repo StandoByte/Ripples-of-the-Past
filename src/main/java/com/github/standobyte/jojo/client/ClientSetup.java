@@ -194,7 +194,7 @@ public class ClientSetup {
                         CrossbowItem.containsChargedProjectile(itemStack, ModItems.STAND_ARROW_BEETLE.get())) ? 1 : 0;
             });
             ItemModelsProperties.register(ModItems.STAND_DISC.get(), new ResourceLocation(JojoMod.MOD_ID, "stand_id"), (itemStack, clientWorld, livingEntity) -> {
-                return StandDiscItem.validStandDisc(itemStack) ? ModStandTypes.Registry.getNumericId(StandDiscItem.getStandResLocFromStack(itemStack)) : -1;
+                return StandDiscItem.validStandDisc(itemStack, true) ? ModStandTypes.Registry.getNumericId(StandDiscItem.getStandFromStack(itemStack, true).getType().getRegistryName()) : -1;
             });
 //            ItemModelsProperties.register(ModItems.EMPEROR.get(), new ResourceLocation(JojoMod.MOD_ID, "stand_invisible"), STAND_ITEM_INVISIBLE);
 

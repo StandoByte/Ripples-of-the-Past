@@ -6,11 +6,12 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 
 public class StandEntityBlock extends StandEntityAction {
     
     public StandEntityBlock() {
-        this(new StandEntityAction.Builder());
+        this(new StandEntityAction.Builder().partsRequired(StandPart.ARMS));
     }
 
     protected StandEntityBlock(StandEntityAction.Builder builder) {

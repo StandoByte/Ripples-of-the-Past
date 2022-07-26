@@ -115,7 +115,7 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
         boolean shouldSit = entity.isPassenger() && (entity.getVehicle() != null && entity.getVehicle().shouldRiderSit());
         model.riding = shouldSit;
         model.young = entity.isBaby();
-        model.setVisibilityMode(visibilityMode(entity));
+        model.setVisibility(entity, visibilityMode(entity));
         float yBodyRotation = MathHelper.rotLerp(partialTick, entity.yBodyRotO, entity.yBodyRot);
         float yHeadRotation = MathHelper.rotLerp(partialTick, entity.yHeadRotO, entity.yHeadRot);
         float f2 = yHeadRotation - yBodyRotation;
@@ -196,7 +196,7 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
             float ticks, float yRotationOffset, float xRotation, 
             ResourceLocation layerModelTexture, M model) {
         getModel().copyPropertiesTo(model);
-        model.setVisibilityMode(visibilityMode(entity));
+        model.setVisibility(entity, visibilityMode(entity));
         model.prepareMobModel(entity, walkAnimSpeed, walkAnimPos, partialTick);
         model.setupAnim(entity, walkAnimSpeed, walkAnimPos, ticks, yRotationOffset, xRotation);
         int packedOverlay = getOverlayCoords(entity, getWhiteOverlayProgress(entity, partialTick));

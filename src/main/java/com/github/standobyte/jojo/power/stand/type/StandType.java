@@ -258,6 +258,10 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         return true;
     }
     
+    public boolean canBeManuallyControlled() {
+        return false;
+    }
+    
     @Nullable
     public SoundEvent getOst(int level) {
         if (ostSupplier == null) {

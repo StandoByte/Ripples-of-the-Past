@@ -1,12 +1,20 @@
 package com.github.standobyte.jojo.action.actions;
 
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Set;
+
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
 public abstract class StandAction extends Action<IStandPower> {
@@ -18,6 +26,7 @@ public abstract class StandAction extends Action<IStandPower> {
     private final boolean autoSummonStand;
     private final float staminaCost;
     private final float staminaCostTick;
+    private final Set<StandPart> partsRequired;
     
     public StandAction(StandAction.AbstractBuilder<?> builder) {
         super(builder);
@@ -28,6 +37,7 @@ public abstract class StandAction extends Action<IStandPower> {
         this.autoSummonStand = builder.autoSummonStand;
         this.staminaCost = builder.staminaCost;
         this.staminaCostTick = builder.staminaCostTick;
+        this.partsRequired = builder.partsRequired;
     }
 
     @Deprecated
@@ -47,6 +57,17 @@ public abstract class StandAction extends Action<IStandPower> {
             cooldown = (int) ((float) cooldown * this.resolveCooldownMultiplier);
         }
         return cooldown;
+    }
+    
+    @Override
+    public ActionConditionResult checkConditions(LivingEntity user, IStandPower power, ActionTarget target) {
+        for (StandPart part : partsRequired) {
+            if (power.hasPower() && !power.getStandInstance().get().hasPart(part)) {
+                ITextComponent message = new TranslationTextComponent("jojo.message.action_condition.no_stand_part." + part.name().toLowerCase());
+                return ActionConditionResult.createNegative(message);
+            }
+        }
+        return super.checkConditions(user, power, target);
     }
     
     public boolean canBeUnlocked(IStandPower power) {
@@ -112,6 +133,7 @@ public abstract class StandAction extends Action<IStandPower> {
         private boolean autoSummonStand = false;
         private float staminaCost = 0;
         private float staminaCostTick = 0;
+        private final Set<StandPart> partsRequired = EnumSet.noneOf(StandPart.class);
 
         @Deprecated
         public T xpRequirement(int xpRequirement) {
@@ -147,6 +169,11 @@ public abstract class StandAction extends Action<IStandPower> {
         public T cooldown(int technical, int additional, float resolveCooldownMultiplier) {
             this.resolveCooldownMultiplier = MathHelper.clamp(resolveCooldownMultiplier, 0, 1);
             return super.cooldown(technical, additional);
+        }
+        
+        public T partsRequired(StandPart... parts) {
+            Collections.addAll(partsRequired, parts);
+            return getThis();
         }
     }
 }

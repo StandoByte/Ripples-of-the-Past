@@ -183,6 +183,11 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
             }
         }
     }
+    
+    @Override
+    public boolean canBeManuallyControlled() {
+        return true;
+    }
 
     @Override
     public void tickUser(LivingEntity user, IStandPower power) {

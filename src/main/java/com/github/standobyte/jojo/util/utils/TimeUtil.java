@@ -211,7 +211,7 @@ public class TimeUtil {
             if (!entity.level.isClientSide()) {
                 PacketManager.sendToClientsTrackingAndSelf(new RefreshMovementInTimeStopPacket(entity.getId(), chunkPos, false), entity);
                 if (worldCap.getTimeStopHandler().getTimeStopTicks(new ChunkPos(entity.blockPosition())) >= 40 && 
-                        IStandPower.getStandPowerOptional(entity).map(stand -> stand.getType() == ModStandTypes.THE_WORLD.get()).orElse(false)) {
+                        IStandPower.getStandPowerOptional(entity).map(stand -> stand.hasPower() && stand.getType() == ModStandTypes.THE_WORLD.get()).orElse(false)) {
                     JojoModUtil.sayVoiceLine(entity, ModSounds.DIO_CANT_MOVE.get());
                 };
             }

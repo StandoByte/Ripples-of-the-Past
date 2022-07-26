@@ -60,11 +60,12 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrHeldActionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrNoMotionLerpPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrNonStandFlagPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrPowerTypePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandOffsetPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntitySwingsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntityTargetPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrTypeNonStandPowerPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrTypeStandInstancePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCachePacket;
 
 import net.minecraft.entity.Entity;
@@ -182,10 +183,15 @@ public class PacketManager {
         
         
 
-        channel.registerMessage(index++, TrPowerTypePacket.class, 
-                TrPowerTypePacket::encode, 
-                TrPowerTypePacket::decode, 
-                TrPowerTypePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        channel.registerMessage(index++, TrTypeNonStandPowerPacket.class, 
+                TrTypeNonStandPowerPacket::encode, 
+                TrTypeNonStandPowerPacket::decode, 
+                TrTypeNonStandPowerPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, TrTypeStandInstancePacket.class, 
+                TrTypeStandInstancePacket::encode, 
+                TrTypeStandInstancePacket::decode, 
+                TrTypeStandInstancePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
         channel.registerMessage(index++, TrHeldActionPacket.class,
                 TrHeldActionPacket::encode,

@@ -72,12 +72,13 @@ public class KnifeItem extends Item {
             }
 
             IStandPower standPower = IStandPower.getPlayerStandPower(player);
-            Optional<StandEntity> theWorld = standPower.getType() == ModStandTypes.THE_WORLD.get() && standPower.isActive()
+            boolean hasTheWorld = standPower.getType() == ModStandTypes.THE_WORLD.get();
+            Optional<StandEntity> theWorld = hasTheWorld && standPower.isActive()
             		? Optional.of((StandEntity) standPower.getStandManifestation()) : Optional.empty();
             
             for (int i = 0; i < knivesToThrow; i++) {
                 KnifeEntity knifeEntity = new KnifeEntity(world, player);
-                if (knivesToThrow == 1 && standPower.getType() == ModStandTypes.THE_WORLD.get()) {
+                if (knivesToThrow == 1 && hasTheWorld) {
                 	player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                 		if (cap.knivesThrewTicks > 0) {
                 			JojoModUtil.sayVoiceLine(player, ModSounds.DIO_ONE_MORE.get());
@@ -90,8 +91,7 @@ public class KnifeItem extends Item {
             }
             
             int cooldown = knivesToThrow * 3;
-            if (standPower.getType() == ModStandTypes.THE_WORLD.get() && knivesToThrow > 1
-            		&& TimeUtil.isTimeStopped(player.level, player.blockPosition())) {
+            if (hasTheWorld && knivesToThrow > 1 && TimeUtil.isTimeStopped(player.level, player.blockPosition())) {
             	player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
             		cap.knivesThrewTicks = 80;
             	});

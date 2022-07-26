@@ -293,8 +293,8 @@ public class GameplayEventHandler {
     	if (config.dropStandDisc.get() && !config.keepStandOnDeath.get()) {
         	LivingEntity entity = event.getEntityLiving();
     		IStandPower.getStandPowerOptional(entity).ifPresent(power -> {
-    			if (power.hasPower() && power.wasGivenByDisc()) {
-    				ItemStack disc = StandDiscItem.withStandType(new ItemStack(ModItems.STAND_DISC.get()), power.getType());
+    			if (power.hasPower()) {
+    				ItemStack disc = StandDiscItem.withStand(new ItemStack(ModItems.STAND_DISC.get()), power.getStandInstance().get());
     				event.getDrops().add(new ItemEntity(entity.level, entity.getX(), entity.getY(), entity.getZ(), disc));
     			}
     		});

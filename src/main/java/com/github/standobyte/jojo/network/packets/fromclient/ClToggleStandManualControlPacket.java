@@ -5,7 +5,6 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
-import com.github.standobyte.jojo.power.stand.type.EntityStandType;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
@@ -26,7 +25,7 @@ public class ClToggleStandManualControlPacket {
             if (player.isAlive()) {
                 IStandPower.getStandPowerOptional(player).ifPresent(power -> {
                     if (power.hasPower()) {
-                        if (power.getType() instanceof EntityStandType) {
+                        if (power.getType().canBeManuallyControlled()) {
                             if (power.isActive()) {
                                 StandUtil.setManualControl(player, !((StandEntity) power.getStandManifestation()).isManuallyControlled(), player.isShiftKeyDown());
                             }

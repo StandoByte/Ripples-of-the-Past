@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
@@ -100,7 +101,8 @@ public class StandEntityLightAttack extends StandEntityAction {
                         .addCombo(0.15F)
                         .parryTiming(stand.getComboMeter() == 0 ? StandStatFormulas.getParryTiming(stand.getPrecision()) : 0)
                         .setPunchSound(ModSounds.STAND_LIGHT_ATTACK.get());
-            });
+            })
+            .partsRequired(StandPart.ARMS);
     	}
 
 		@Override
