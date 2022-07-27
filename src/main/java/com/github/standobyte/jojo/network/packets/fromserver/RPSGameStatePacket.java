@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame.Pick;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -34,9 +35,12 @@ public class RPSGameStatePacket {
         return packet;
     }
     
-    public static RPSGameStatePacket enteredGame(int opponentId) {
+    public static RPSGameStatePacket enteredGame(int opponentId, List<Pick> playerPicks, List<Pick> opponentPicks) {
         RPSGameStatePacket packet = new RPSGameStatePacket(Type.ENTER);
         packet.opponentId = opponentId;
+        int size = Math.min(playerPicks.size(), opponentPicks.size());
+        packet.playerPicks = playerPicks.subList(0, size);
+        packet.opponentPicks = opponentPicks.subList(0, size);
         return packet;
     }
     
@@ -66,16 +70,10 @@ public class RPSGameStatePacket {
         buf.writeEnum(msg.packetType);
         switch (msg.packetType) {
         case UPDATE:
-            int size = msg.playerPicks.size();
-            buf.writeVarInt(size);
-            for (int i = 0; i < size; i++) {
-                buf.writeEnum(msg.playerPicks.get(i));
-            }
-            for (int i = 0; i < size; i++) {
-                buf.writeEnum(msg.opponentPicks.get(i));
-            }
+            writePickLists(msg, buf);
             break;
         case ENTER:
+            writePickLists(msg, buf);
             buf.writeInt(msg.opponentId);
             break;
         case LEAVE:
@@ -90,22 +88,28 @@ public class RPSGameStatePacket {
         }
     }
     
+    private static void writePickLists(RPSGameStatePacket msg, PacketBuffer buf) {
+        int size = msg.playerPicks.size();
+        buf.writeVarInt(size);
+        for (int i = 0; i < size; i++) {
+            buf.writeEnum(msg.playerPicks.get(i));
+        }
+        for (int i = 0; i < size; i++) {
+            buf.writeEnum(msg.opponentPicks.get(i));
+        }
+    }
+    
     public static RPSGameStatePacket decode(PacketBuffer buf) {
         Type type = buf.readEnum(Type.class);
+        List<Pick> playerPicks = new ArrayList<>();
+        List<Pick> opponentPicks = new ArrayList<>();
         switch (type) {
         case UPDATE:
-            int size = buf.readVarInt();
-            List<Pick> playerPicks = new ArrayList<>();
-            for (int i = 0; i < size; i++) {
-                playerPicks.add(buf.readEnum(Pick.class));
-            }
-            List<Pick> opponentPicks = new ArrayList<>();
-            for (int i = 0; i < size; i++) {
-                opponentPicks.add(buf.readEnum(Pick.class));
-            }
+            readPickLists(playerPicks, opponentPicks, buf);
             return RPSGameStatePacket.stateUpdated(playerPicks, opponentPicks);
         case ENTER:
-            return RPSGameStatePacket.enteredGame(buf.readInt());
+            readPickLists(playerPicks, opponentPicks, buf);
+            return RPSGameStatePacket.enteredGame(buf.readInt(), playerPicks, opponentPicks);
         case LEAVE:
             return RPSGameStatePacket.leftGame();
         case GAME_OVER:
@@ -113,7 +117,17 @@ public class RPSGameStatePacket {
         case CHEAT:
             return RPSGameStatePacket.cheat(buf.readInt(), buf.readEnum(Pick.class));
         }
-        return null;
+        throw new IllegalStateException();
+    }
+    
+    private static void readPickLists(List<Pick> playerPicks, List<Pick> opponentPicks, PacketBuffer buf) {
+        int size = buf.readVarInt();
+        for (int i = 0; i < size; i++) {
+            playerPicks.add(buf.readEnum(Pick.class));
+        }
+        for (int i = 0; i < size; i++) {
+            opponentPicks.add(buf.readEnum(Pick.class));
+        }
     }
 
     public static void handle(RPSGameStatePacket msg, Supplier<NetworkEvent.Context> ctx) {
@@ -123,27 +137,33 @@ public class RPSGameStatePacket {
             case UPDATE:
                 player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                     cap.getCurrentRockPaperScissorsGame().ifPresent(game -> {
-                        game.makeAPick(player, null);
+                        game.makeAPick(player, null, true);
                         game.updateState(msg.playerPicks, msg.opponentPicks);
                     });
                 });
                 break;
             case ENTER:
                 Entity opponent = ClientUtil.getEntityById(msg.opponentId);
-                RockPaperScissorsGame newGame = new RockPaperScissorsGame(player, opponent);
-                player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.setCurrentRockPaperScissorsGame(newGame));
-                ClientUtil.openRockPaperScissorsScreen(newGame, player, opponent);
-                break;
-            case LEAVE:
-                
+                if (opponent instanceof LivingEntity) {
+                    RockPaperScissorsGame newGame = new RockPaperScissorsGame(player, (LivingEntity) opponent);
+                    newGame.updateState(msg.playerPicks, msg.opponentPicks);
+                    player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.setCurrentRockPaperScissorsGame(newGame));
+                    ClientUtil.openRockPaperScissorsScreen(newGame);
+                }
                 break;
             case GAME_OVER:
-                
+            case LEAVE:
+                player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                    cap.getCurrentRockPaperScissorsGame().ifPresent(game -> {
+                       game.leaveGame(player); 
+                       ClientUtil.closeRockPaperScissorsScreen(game);
+                    });
+                });
                 break;
             case CHEAT:
                 player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                     cap.getCurrentRockPaperScissorsGame().ifPresent(game -> {
-                        game.makeAPick(ClientUtil.getEntityById(msg.opponentId), msg.opponentPick);
+                        game.makeAPick(ClientUtil.getEntityById(msg.opponentId), msg.opponentPick, true);
                     });
                 });
                 break;

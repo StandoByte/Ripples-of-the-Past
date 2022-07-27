@@ -1,75 +1,105 @@
 package com.github.standobyte.jojo.entity.mob.rps;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.BiFunction;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.RPSGameStatePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.RPSOpponentPickThoughtsPacket;
+import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.power.IPower.PowerClassification;
+import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.google.common.collect.Maps;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.Util;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
 public class RockPaperScissorsGame {
-	public final RockPaperScissorsPlayerData player1;
-	public final RockPaperScissorsPlayerData player2;
-	private int round = 1;
+    private static boolean cheatInitialized = false;
+    private static Map<PowerClassification, Map<IPowerType<?, ?>, RPSCheat>> CHEATS;
+
+    public final RockPaperScissorsPlayerData player1;
+    public final RockPaperScissorsPlayerData player2;
+    private int round = 1;
     private RockPaperScissorsPlayerData lastRoundWinner = null;
-	private RockPaperScissorsPlayerData gameWinner = null;
-	
-	public RockPaperScissorsGame(Entity player1, Entity player2) {
-		this(new RockPaperScissorsPlayerData(player1.getUUID()), new RockPaperScissorsPlayerData(player2.getUUID()));
-	}
-	
-	private RockPaperScissorsGame(RockPaperScissorsPlayerData player1, RockPaperScissorsPlayerData player2) {
-		this.player1 = player1;
-		this.player2 = player2;
-	}
-	
-	public void setIsPlaying(Entity player, boolean isPlaying) {
-		Pair<RockPaperScissorsPlayerData, RockPaperScissorsPlayerData> players = playersPair(player);
-		if (players == null) return;
-		players.getLeft().isPlaying = isPlaying;
-	}
-	
-	public void makeAPick(Entity entity, @Nullable Pick pick) {
-		Pair<RockPaperScissorsPlayerData, RockPaperScissorsPlayerData> players = playersPair(entity);
-		if (players == null) return;
-		RockPaperScissorsPlayerData player = players.getLeft();
-		RockPaperScissorsPlayerData opponent = players.getRight();
-		player.pick = pick;
-		if (player.pick != null && opponent.pick != null) {
-			if (player.pick != opponent.pick) {
-				comparePicks(player, opponent);
-				comparePicks(opponent, player);
-			}
-			player.pick = null;
-            opponent.pick = null;
+    private RockPaperScissorsPlayerData gameWinner = null;
+    private boolean playerLeft = false;
+
+    public RockPaperScissorsGame(LivingEntity player1, LivingEntity player2) {
+        this(new RockPaperScissorsPlayerData(player1.getUUID()), new RockPaperScissorsPlayerData(player2.getUUID()));
+        this.player1.entity = player1;
+        this.player2.entity = player2;
+        initCheat();
+    }
+
+    private RockPaperScissorsGame(RockPaperScissorsPlayerData player1, RockPaperScissorsPlayerData player2) {
+        this.player1 = player1;
+        this.player2 = player2;
+    }
+
+    public void gameStarted(ServerWorld serverWorld) {
+        sendToBothPlayers(serverWorld, (player, opponent) -> {
+            Entity opponentEntity = opponent.getGamePlayerEntity(serverWorld);
+            return opponentEntity != null ? RPSGameStatePacket.enteredGame(opponentEntity.getId(), player1.previousPicks, player2.previousPicks) : null;
+        });
+    }
+
+    public void setIsPlaying(Entity player, boolean isPlaying) {
+        Pair<RockPaperScissorsPlayerData, RockPaperScissorsPlayerData> players = playersPair(player);
+        if (players == null) return;
+        players.getLeft().isReady = isPlaying;
+    }
+
+    @Nullable
+    public RockPaperScissorsPlayerData getPlayer(Entity playerEntity) {
+        Pair<RockPaperScissorsPlayerData, RockPaperScissorsPlayerData> players = playersPair(playerEntity);
+        return players != null ? players.getLeft() : null;
+    }
+
+    public void makeAPick(Entity entity, @Nullable Pick pick, boolean canChange) {
+        Pair<RockPaperScissorsPlayerData, RockPaperScissorsPlayerData> players = playersPair(entity);
+        if (players == null) return;
+        RockPaperScissorsPlayerData player = players.getLeft();
+        RockPaperScissorsPlayerData opponent = players.getRight();
+        if (!canChange && player.pick != null) return;
+        player.pick = pick;
+        if (player.pick != null && opponent.pick != null) {
+            comparePicks(player, opponent);
+            comparePicks(opponent, player);
+            player1.pick = null;
+            player2.pick = null;
             onRoundEnd(entity.level);
             if (gameWinner != null) {
-                onGameOver(entity.level, gameWinner, getOpponent(gameWinner));
+                onGameOver(entity.level, gameWinner);
             }
             round++;
             lastRoundWinner = null;
-		}
-	}
-    
-	private void onRoundEnd(World world) {
+        }
+    }
+
+    private void onRoundEnd(World world) {
         if (!world.isClientSide()) {
             ServerWorld serverWorld = (ServerWorld) world;
             // FIXME (!!) show ties in the ui
-            syncGameState(serverWorld);
+            this.sendToBothPlayers(serverWorld, (player, opponent) -> RPSGameStatePacket.stateUpdated(player.previousPicks, opponent.previousPicks));
             if (lastRoundWinner != null) {
                 roundWon(serverWorld, lastRoundWinner, getOpponent(lastRoundWinner));
             }
@@ -77,38 +107,54 @@ public class RockPaperScissorsGame {
                 roundTie();
             }
         }
-	}
-	
-	private void roundTie() {}
-	
-	private void roundWon(ServerWorld serverWorld, RockPaperScissorsPlayerData roundWinner, RockPaperScissorsPlayerData roundLoser) {
+    }
+
+    private void roundTie() {}
+
+    private void roundWon(ServerWorld serverWorld, RockPaperScissorsPlayerData roundWinner, RockPaperScissorsPlayerData roundLoser) {
         LivingEntity winnerEntity = roundWinner.getGamePlayerEntity(serverWorld);
         LivingEntity loserEntity = roundLoser.getGamePlayerEntity(serverWorld);
         boy2Man(winnerEntity, loserEntity, roundWinner.getScore());
-	}
-	
-	private void onGameOver(World world, RockPaperScissorsPlayerData winner, RockPaperScissorsPlayerData loser) {
+    }
+
+    public void sendThoughtsToOpponent(Entity entity, Pick pick) {
+        if (!entity.level.isClientSide()) {
+            Pair<RockPaperScissorsPlayerData, RockPaperScissorsPlayerData> players = playersPair(entity);
+            if (players == null || !players.getLeft().canOpponentReadThoughts) return;
+            players.getLeft().pickThoughts = pick;
+            Entity opponent = players.getRight().getGamePlayerEntity(entity.level);
+            if (opponent instanceof ServerPlayerEntity) {
+                PacketManager.sendToClient(new RPSOpponentPickThoughtsPacket(pick), (ServerPlayerEntity) opponent);
+            }
+        }
+    }
+
+    public void setOpponentThoughts(Entity entity, Pick pick) {
+        if (entity.level.isClientSide()) {
+            Pair<RockPaperScissorsPlayerData, RockPaperScissorsPlayerData> players = playersPair(entity);
+            players.getRight().pickThoughts = pick;
+        }
+    }
+
+    private void onGameOver(World world, RockPaperScissorsPlayerData winner) {
         if (!world.isClientSide()) {
             ServerWorld serverWorld = (ServerWorld) world;
-            LivingEntity winnerEntity = winner.getGamePlayerEntity(serverWorld);
-            LivingEntity loserEntity = loser.getGamePlayerEntity(serverWorld);
-            sendGameOverTo(winnerEntity, winnerEntity);
-            sendGameOverTo(loserEntity, winnerEntity);
+            sendToBothPlayers(serverWorld, (player, opponent) -> RPSGameStatePacket.gameOver(player == winner));
         }
-	}
-	
-	private void boy2Man(LivingEntity roundWinner, LivingEntity roundLoser, int round) {
-	    IStandPower winnerStand = IStandPower.getStandPowerOptional(roundWinner).orElse(null);
+    }
+
+    private void boy2Man(LivingEntity roundWinner, LivingEntity roundLoser, int round) {
+        IStandPower winnerStand = IStandPower.getStandPowerOptional(roundWinner).orElse(null);
         IStandPower loserStand = IStandPower.getStandPowerOptional(roundLoser).orElse(null);
         if (winnerStand != null && loserStand != null && winnerStand.getType() == ModStandTypes.BOY_II_MAN.get()) {
-            // FIXME !!!!
+            // FIXME (!!) BIIM
             if (round == 3 && loserStand.hasPower()) {
-                // FIXME !!!!
+                // FIXME (!!) BIIM
                 loserStand.putOutStand();
             }
         }
-	}
-    
+    }
+
     private void comparePicks(RockPaperScissorsPlayerData player1, RockPaperScissorsPlayerData player2) {
         if (player1.pick.beats(player2.pick)) {
             lastRoundWinner = player1;
@@ -119,9 +165,8 @@ public class RockPaperScissorsGame {
         if (!player1.pick.ties(player2.pick)) {
             player1.previousPicks.add(player1.pick);
         }
-        player1.pick = null;
     }
-    
+
     public void updateState(List<Pick> playerPicks, List<Pick> opponentPicks) {
         player1.previousPicks = playerPicks;
         player2.previousPicks = opponentPicks;
@@ -139,56 +184,100 @@ public class RockPaperScissorsGame {
             }
         }
     }
-	
-	private void syncGameState(ServerWorld world) {
-	    sendStateUpdateTo(player1, player2, world.getEntity(player1.uuid));
-        sendStateUpdateTo(player2, player1, world.getEntity(player2.uuid));
-	}
-	
-	private void sendStateUpdateTo(RockPaperScissorsPlayerData player, RockPaperScissorsPlayerData opponent, Entity entity) {
-	    if (entity instanceof ServerPlayerEntity) {
-	        PacketManager.sendToClient(RPSGameStatePacket.stateUpdated(player.previousPicks, opponent.previousPicks), (ServerPlayerEntity) entity);
-	    }
-	}
-    
-    private void sendGameOverTo(Entity entity, Entity winner) {
-        if (entity instanceof ServerPlayerEntity) {
-            PacketManager.sendToClient(RPSGameStatePacket.gameOver(entity.is(winner)), (ServerPlayerEntity) entity);
+
+    private void sendToBothPlayers(ServerWorld world, BiFunction<RockPaperScissorsPlayerData, RockPaperScissorsPlayerData, Object> packet) {
+        Entity player1Entity = player1.getGamePlayerEntity(world);
+        if (player1Entity instanceof ServerPlayerEntity) {
+            Object msg = packet.apply(player1, player2);
+            if (msg != null) {
+                PacketManager.sendToClient(msg, (ServerPlayerEntity) player1Entity);
+            }
+        }
+
+        Entity player2Entity = player2.getGamePlayerEntity(world);
+        if (player2Entity instanceof ServerPlayerEntity) {
+            Object msg = packet.apply(player2, player1);
+            if (msg != null) {
+                PacketManager.sendToClient(msg, (ServerPlayerEntity) player2Entity);
+            }
         }
     }
-	
-	@Nullable
-	private Pair<RockPaperScissorsPlayerData, RockPaperScissorsPlayerData> playersPair(Entity player1Entity) {
-		if (player1.uuid == player1Entity.getUUID()) {
-			return Pair.of(player1, player2);
-		}
-		else if (player2.uuid == player1Entity.getUUID()) {
-			return Pair.of(player2, player1);
-		}
-		else {
-			return null;
-		}
-	}
-	
-	private RockPaperScissorsPlayerData getOpponent(RockPaperScissorsPlayerData player) {
-	    return player == player1 ? player2 : player == player2 ? player1 : null;
-	}
-	
-	public int getRound() {
-	    return round;
-	}
-	
-	@Nullable
-	public UUID getWinner() {
-		return gameWinner != null ? gameWinner.uuid : null;
-	}
-	
-	public boolean isGameOver() {
-	    return gameWinner != null;
-	}
-    
-    public void entityLeftGame(Entity entity) {
-        
+
+    @Nullable
+    private Pair<RockPaperScissorsPlayerData, RockPaperScissorsPlayerData> playersPair(Entity player1Entity) {
+        return playersPair(player1Entity.getUUID());
+    }
+
+    @Nullable
+    private Pair<RockPaperScissorsPlayerData, RockPaperScissorsPlayerData> playersPair(UUID player1Id) {
+        if (player1.uuid.equals(player1Id)) {
+            return Pair.of(player1, player2);
+        }
+        else if (player2.uuid.equals(player1Id)) {
+            return Pair.of(player2, player1);
+        }
+        else {
+            return null;
+        }
+    }
+
+    private RockPaperScissorsPlayerData getOpponent(RockPaperScissorsPlayerData player) {
+        return player == player1 ? player2 : player == player2 ? player1 : null;
+    }
+
+    public int getRound() {
+        return round;
+    }
+
+    @Nullable
+    public UUID getWinner() {
+        return gameWinner != null ? gameWinner.uuid : null;
+    }
+
+    public boolean isGameOver() {
+        return gameWinner != null;
+    }
+
+    public void leaveGame(Entity entity) {
+        player1.isReady = false;
+        player2.isReady = false;
+        playerLeft = true;
+        if (!entity.level.isClientSide()) {
+            ServerWorld world = (ServerWorld) entity.level;
+            sendToBothPlayers(world, (player, opponent) -> RPSGameStatePacket.leftGame());
+        }
+    }
+
+    public boolean playerLeft() {
+        return playerLeft;
+    }
+
+    private static void initCheat() {
+        if (!cheatInitialized) {
+            CHEATS = new HashMap<>();
+            CHEATS.put(PowerClassification.NON_STAND, Util.make(Maps.newHashMap(), map -> {
+                map.put(ModNonStandPowers.HAMON.get(), (game, player, world) -> {
+                    game.getOpponent(player).canOpponentReadThoughts = true;
+                });
+                map.put(ModNonStandPowers.VAMPIRISM.get(), (game, player, world) -> {
+                    if (!world.isClientSide()) {
+                        game.makeAPick(game.getOpponent(player).getGamePlayerEntity((ServerWorld) world), Pick.ROCK, true);
+                    }
+                    else {
+                        game.getOpponent(player).pick = Pick.ROCK;
+                    }
+                });
+            }));
+            CHEATS.put(PowerClassification.STAND, Util.make(Maps.newHashMap(), map -> {
+            }));
+//            cheatInitialized = true;
+        }
+    }
+
+    @Nullable
+    public RPSCheat getCheat(LivingEntity entity, PowerClassification powerClassification) {
+        IPower<?, ?> power = IPower.getPowerOptional(entity, powerClassification).orElse(null);
+        return power.hasPower() ? CHEATS.get(powerClassification).get(power.getType()) : null;
     }
 
     public CompoundNBT writeNBT() {
@@ -200,114 +289,151 @@ public class RockPaperScissorsGame {
     }
 
     public static RockPaperScissorsGame fromNBT(CompoundNBT nbt) {
-    	// FIXME (!!) what if a player is missing from nbt?
-        RockPaperScissorsGame game = new RockPaperScissorsGame(
-    			RockPaperScissorsPlayerData.fromNBT(nbt.getCompound("Player1")), 
-				RockPaperScissorsPlayerData.fromNBT(nbt.getCompound("Player2")));
+        // FIXME (!!) what if a player is missing from nbt?
+        RockPaperScissorsPlayerData player1 = RockPaperScissorsPlayerData.fromNBT(nbt.getCompound("Player1"));
+        RockPaperScissorsPlayerData player2 = RockPaperScissorsPlayerData.fromNBT(nbt.getCompound("Player2"));
+        RockPaperScissorsGame game = new RockPaperScissorsGame(player1, player2);
         game.round = nbt.getInt("Round");
         return game;
     }
-	
-	public static class RockPaperScissorsPlayerData {
-		private final UUID uuid;
-		private LivingEntity entity = null;
-		private boolean isPlaying = false;
-		private int score = 0;
-		private List<Pick> previousPicks = new ArrayList<>();
-		@Nullable
-		private Pick pick = null;
-		
-		private RockPaperScissorsPlayerData(@Nonnull UUID uuid) {
-			this.uuid = uuid;
-		}
-		
-		private LivingEntity getGamePlayerEntity(ServerWorld serverWorld) {
-		    if (this.entity == null) {
-		        Entity entity = serverWorld.getEntity(uuid);
-		        if (entity instanceof LivingEntity) {
-		            this.entity = (LivingEntity) entity;
-		        }
-		    }
-		    return this.entity;
-		}
-		
-		private void setIsPlaying(boolean isPlaying) {
-			this.isPlaying = isPlaying;
-		}
-		
-		public int getScore() {
-		    return score;
-		}
-		
-		public List<Pick> getPreviousPicks() {
-		    return previousPicks;
-		}
-		
-		@Nullable
-		public Pick getCurrentPick() {
-		    return pick;
-		}
 
-	    private CompoundNBT writeNBT() {
-	        CompoundNBT nbt = new CompoundNBT();
-	        nbt.putUUID("Player", uuid);
-	        nbt.putByte("Score", (byte) score);
-	        if (pick != null) {
-	        	nbt.putString("Pick", pick.name());
-	        }
-	        return nbt;
-	    }
+    public static class RockPaperScissorsPlayerData {
+        private final UUID uuid;
+        private LivingEntity entity = null;
+        private boolean isReady = false;
+        private int score = 0;
+        private List<Pick> previousPicks = new ArrayList<>();
+        @Nullable
+        private Pick pick = null;
 
-	    private static RockPaperScissorsPlayerData fromNBT(CompoundNBT nbt) {
-	    	UUID uuid = nbt.getUUID("Player");
-	    	// FIXME (!!) what if the uuid is null?
-	    	RockPaperScissorsPlayerData player = new RockPaperScissorsPlayerData(uuid);
-	    	player.score = nbt.getByte("Score");
-	    	player.pick = Pick.valueOf(nbt.getString("Pick"));
-	    	return player;
-	    }
-	}
-	
-	public static class PlayersPair {
-		private final UUID player1;
-		private final UUID player2;
-		
-		public PlayersPair(@Nonnull UUID player1, @Nonnull UUID player2) {
-			this.player1 = player1;
-			this.player2 = player2;
-		}
-		
-		@Override
-		public boolean equals(Object object) {
-			if (object instanceof PlayersPair) {
-				PlayersPair pair = (PlayersPair) object;
-				return this.player1.equals(pair.player1) && this.player2.equals(pair.player2)
-						|| this.player1.equals(pair.player2) && this.player2.equals(pair.player1);
-			}
-			return false;
-		}
-	}
-	
-	public enum Pick {
-		ROCK,
-		PAPER,
-		SCISSORS;
-		
-		public boolean beats(Pick opponentPick) {
-			switch (this) {
-			case ROCK:
-				return opponentPick == SCISSORS;
-			case PAPER:
-				return opponentPick == ROCK;
-			case SCISSORS:
-				return opponentPick == PAPER;
-			default:
-				throw new IllegalStateException("Rock-paper-scissors game only supports three shapes");
-			}
-		}
-		
-		public boolean ties(Pick opponentPick) {
-			return this == opponentPick;
-		}
-	}
+        @Nullable
+        private Pick pickThoughts = null;
+        public boolean canOpponentReadThoughts = false;
+
+        private RockPaperScissorsPlayerData(@Nonnull UUID uuid) {
+            this.uuid = uuid;
+        }
+
+        private LivingEntity getGamePlayerEntity(World serverWorld) {
+            if (this.entity == null && !serverWorld.isClientSide()) {
+                Entity entity = ((ServerWorld) serverWorld).getEntity(uuid);
+                if (entity instanceof LivingEntity) {
+                    this.entity = (LivingEntity) entity;
+                }
+            }
+            return this.entity;
+        }
+
+        public void setIsReady(boolean isPlaying) {
+            this.isReady = isPlaying;
+        }
+
+        public int getScore() {
+            return score;
+        }
+
+        public List<Pick> getPreviousPicks() {
+            return previousPicks;
+        }
+
+        @Nullable
+        public Pick getCurrentPick() {
+            return pick;
+        }
+
+        @Nullable
+        public Pick getPickThoughts() {
+            return pickThoughts;
+        }
+
+        private CompoundNBT writeNBT() {
+            CompoundNBT nbt = new CompoundNBT();
+            nbt.putUUID("Player", uuid);
+            nbt.putByte("Score", (byte) score);
+            if (pick != null) {
+                nbt.putString("Pick", pick.name());
+            }
+
+            CompoundNBT previousPicksNBT = new CompoundNBT();
+            int size = previousPicks.size();
+            if (size > 0) {
+                previousPicksNBT.putInt("Size", size);
+                for (int i = 0; i < size; i++) {
+                    previousPicksNBT.putString(String.valueOf(i), previousPicks.get(i).name());
+                }
+                nbt.put("PreviousPicks", previousPicksNBT);
+            }
+
+            return nbt;
+        }
+
+        private static RockPaperScissorsPlayerData fromNBT(CompoundNBT nbt) {
+            UUID uuid = nbt.getUUID("Player");
+            // FIXME (!!) what if the uuid is null?
+            RockPaperScissorsPlayerData player = new RockPaperScissorsPlayerData(uuid);
+            player.score = nbt.getByte("Score");
+            player.pick = JojoModUtil.enumValueOfNullable(Pick.class, nbt.getString("Pick"));
+
+            if (nbt.contains("PreviousPicks", JojoModUtil.getNbtId(CompoundNBT.class))) {
+                CompoundNBT previousPicksNBT = nbt.getCompound("PreviousPicks");
+                int size = previousPicksNBT.getInt("Size");
+                for (int i = 0; i < size; i++) {
+                    Pick pick = Pick.valueOf(previousPicksNBT.getString(String.valueOf(i)));
+                    if (pick != null) {
+                        player.previousPicks.add(pick);
+                    }
+                }
+            }
+
+            return player;
+        }
+    }
+
+    public static class PlayersPair {
+        private final UUID player1;
+        private final UUID player2;
+
+        public PlayersPair(@Nonnull UUID player1, @Nonnull UUID player2) {
+            this.player1 = player1;
+            this.player2 = player2;
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (object instanceof PlayersPair) {
+                PlayersPair pair = (PlayersPair) object;
+                return this.player1.equals(pair.player1) && this.player2.equals(pair.player2)
+                        || this.player1.equals(pair.player2) && this.player2.equals(pair.player1);
+            }
+            return false;
+        }
+    }
+
+    public enum Pick {
+        ROCK,
+        PAPER,
+        SCISSORS;
+
+        public boolean beats(Pick opponentPick) {
+            switch (this) {
+            case ROCK:
+                return opponentPick == SCISSORS;
+            case PAPER:
+                return opponentPick == ROCK;
+            case SCISSORS:
+                return opponentPick == PAPER;
+            default:
+                throw new IllegalStateException("Rock-paper-scissors game only supports three shapes");
+            }
+        }
+
+        public boolean ties(Pick opponentPick) {
+            return this == opponentPick;
+        }
+    }
+
+    @FunctionalInterface
+    public static interface RPSCheat {
+        void cheat(RockPaperScissorsGame game, RockPaperScissorsPlayerData player, World world);
+    }
 }

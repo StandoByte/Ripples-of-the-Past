@@ -15,7 +15,8 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClHasInputPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHeldActionTargetPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnLeapPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnStandDashPacket;
-import com.github.standobyte.jojo.network.packets.fromclient.ClRPSGamePickPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClRPSGameInputPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClRPSPickThoughtsPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRemovePlayerSoulEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRunAwayPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClSoulRotationPacket;
@@ -176,10 +177,15 @@ public class PacketManager {
                 ClRemovePlayerSoulEntityPacket::decode,
                 ClRemovePlayerSoulEntityPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
         
-        channel.registerMessage(index++, ClRPSGamePickPacket.class,
-                ClRPSGamePickPacket::encode,
-                ClRPSGamePickPacket::decode,
-                ClRPSGamePickPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        channel.registerMessage(index++, ClRPSGameInputPacket.class,
+                ClRPSGameInputPacket::encode,
+                ClRPSGameInputPacket::decode,
+                ClRPSGameInputPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        
+        channel.registerMessage(index++, ClRPSPickThoughtsPacket.class,
+                ClRPSPickThoughtsPacket::encode,
+                ClRPSPickThoughtsPacket::decode,
+                ClRPSPickThoughtsPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
         
         
 
