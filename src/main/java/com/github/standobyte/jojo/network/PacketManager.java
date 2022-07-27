@@ -35,6 +35,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.MaxAchievedResolveP
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.RPSGameStatePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.RPSOpponentPickThoughtsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.RefreshMovementInTimeStopPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResetResolveValuePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResetSyncedCommonConfigPacket;
@@ -408,6 +409,11 @@ public class PacketManager {
                 RPSGameStatePacket::encode,
                 RPSGameStatePacket::decode,
                 RPSGameStatePacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, RPSOpponentPickThoughtsPacket.class,
+                RPSOpponentPickThoughtsPacket::encode,
+                RPSOpponentPickThoughtsPacket::decode,
+                RPSOpponentPickThoughtsPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
     }
     
     public static void sendToServer(Object msg) {
