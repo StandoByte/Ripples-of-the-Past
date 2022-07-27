@@ -811,6 +811,10 @@
   "jojo.disc.missing_part.main_body": "Has no main body",
   "jojo.rps.cheat.jojo.hamon": "",
   "jojo.rps.cheat.jojo.vampirism": "",
+  "jojo.rps.self": "You can't play with yourself",
+  "jojo.rps.too_far": "%s is too far from you",
+  "jojo.rps.game_invite.text": "%s wants to play rock-paper-scissors with you! Type %s to accept",
+  "jojo.rps.game_invite.sent": "Sent a game invite to %s",
   
   "jojo.to_be_continued": "To Be Continued"
 }

@@ -25,7 +25,8 @@ public class RPSGameStatePacket {
     
     private boolean playerWon;
     
-    private Pick opponentPick;
+    private Pick pick;
+    private boolean opponentPick;
     
     public static RPSGameStatePacket stateUpdated(List<Pick> playerPicks, List<Pick> opponentPicks) {
         RPSGameStatePacket packet = new RPSGameStatePacket(Type.UPDATE);
@@ -55,10 +56,25 @@ public class RPSGameStatePacket {
         return packet;
     }
     
-    public static RPSGameStatePacket cheat(int opponentId, Pick opponentPick) {
-        RPSGameStatePacket packet = new RPSGameStatePacket(Type.CHEAT);
+    public static RPSGameStatePacket setOpponentPick(Pick pick, int opponentId) {
+        RPSGameStatePacket packet = new RPSGameStatePacket(Type.SET_PICK);
+        packet.opponentPick = true;
+        packet.pick = pick;
         packet.opponentId = opponentId;
-        packet.opponentPick = opponentPick;
+        return packet;
+    }
+    
+    public static RPSGameStatePacket setOwnPick(Pick pick) {
+        RPSGameStatePacket packet = new RPSGameStatePacket(Type.SET_PICK);
+        packet.opponentPick = false;
+        packet.pick = pick;
+        packet.opponentId = -1;
+        return packet;
+    }
+    
+    public static RPSGameStatePacket mindRead(int opponentId) {
+        RPSGameStatePacket packet = new RPSGameStatePacket(Type.MIND_READ);
+        packet.opponentId = opponentId;
         return packet;
     }
     
@@ -81,9 +97,18 @@ public class RPSGameStatePacket {
         case GAME_OVER:
             buf.writeBoolean(msg.playerWon);
             break;
-        case CHEAT:
+        case SET_PICK:
+            buf.writeBoolean(msg.opponentPick);
+            buf.writeBoolean(msg.pick != null);
+            if (msg.pick != null) {
+                buf.writeEnum(msg.pick);
+            }
+            if (msg.opponentPick) {
+                buf.writeInt(msg.opponentId);
+            }
+            break;
+        case MIND_READ:
             buf.writeInt(msg.opponentId);
-            buf.writeEnum(msg.opponentPick);
             break;
         }
     }
@@ -114,8 +139,12 @@ public class RPSGameStatePacket {
             return RPSGameStatePacket.leftGame();
         case GAME_OVER:
             return RPSGameStatePacket.gameOver(buf.readBoolean());
-        case CHEAT:
-            return RPSGameStatePacket.cheat(buf.readInt(), buf.readEnum(Pick.class));
+        case SET_PICK:
+            boolean opponentPick = buf.readBoolean();
+            Pick pick = buf.readBoolean() ? buf.readEnum(Pick.class) : null;
+            return opponentPick ? RPSGameStatePacket.setOpponentPick(pick, buf.readInt()) : RPSGameStatePacket.setOwnPick(pick);
+        case MIND_READ:
+            return RPSGameStatePacket.mindRead(buf.readInt());
         }
         throw new IllegalStateException();
     }
@@ -160,10 +189,17 @@ public class RPSGameStatePacket {
                     });
                 });
                 break;
-            case CHEAT:
+            case SET_PICK:
                 player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                     cap.getCurrentRockPaperScissorsGame().ifPresent(game -> {
-                        game.makeAPick(ClientUtil.getEntityById(msg.opponentId), msg.opponentPick, true);
+                        game.makeAPick(msg.opponentPick ? ClientUtil.getEntityById(msg.opponentId) : player, msg.pick, true);
+                    });
+                });
+                break;
+            case MIND_READ:
+                player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                    cap.getCurrentRockPaperScissorsGame().ifPresent(game -> {
+                        game.getPlayer(player).canOpponentReadThoughts = true;
                     });
                 });
                 break;
@@ -177,6 +213,7 @@ public class RPSGameStatePacket {
         ENTER,
         LEAVE,
         GAME_OVER,
-        CHEAT
+        SET_PICK,
+        MIND_READ
     }
 }
