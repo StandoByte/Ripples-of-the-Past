@@ -56,6 +56,7 @@ public class RockPaperScissorsGame {
     }
 
     public void gameStarted(ServerWorld serverWorld) {
+        playerLeft = false;
         sendToBothPlayers(serverWorld, (player, opponent) -> {
             Entity opponentEntity = opponent.getGamePlayerEntity(serverWorld);
             return opponentEntity != null ? RPSGameStatePacket.enteredGame(opponentEntity.getId(), player1.previousPicks, player2.previousPicks) : null;
@@ -85,13 +86,22 @@ public class RockPaperScissorsGame {
             comparePicks(player, opponent);
             comparePicks(opponent, player);
             player1.pick = null;
+            player1.canOpponentReadThoughts = false;
+            player1.pickThoughts = null;
+            
             player2.pick = null;
+            player2.canOpponentReadThoughts = false;
+            player2.pickThoughts = null;
+            
             onRoundEnd(entity.level);
             if (gameWinner != null) {
                 onGameOver(entity.level, gameWinner);
             }
             round++;
             lastRoundWinner = null;
+        }
+        if (player.canOpponentReadThoughts && !entity.level.isClientSide()) {
+            this.sendPick((ServerWorld) entity.level, player, true);
         }
     }
 
@@ -120,11 +130,16 @@ public class RockPaperScissorsGame {
     public void sendThoughtsToOpponent(Entity entity, Pick pick) {
         if (!entity.level.isClientSide()) {
             Pair<RockPaperScissorsPlayerData, RockPaperScissorsPlayerData> players = playersPair(entity);
-            if (players == null || !players.getLeft().canOpponentReadThoughts) return;
-            players.getLeft().pickThoughts = pick;
-            Entity opponent = players.getRight().getGamePlayerEntity(entity.level);
-            if (opponent instanceof ServerPlayerEntity) {
-                PacketManager.sendToClient(new RPSOpponentPickThoughtsPacket(pick), (ServerPlayerEntity) opponent);
+            if (players == null) return;
+            if (!players.getLeft().canOpponentReadThoughts) {
+                players.getLeft().pickThoughts = null;
+            }
+            else {
+                players.getLeft().pickThoughts = pick;
+                Entity opponent = players.getRight().getGamePlayerEntity(entity.level);
+                if (opponent instanceof ServerPlayerEntity) {
+                    PacketManager.sendToClient(new RPSOpponentPickThoughtsPacket(pick), (ServerPlayerEntity) opponent);
+                }
             }
         }
     }
@@ -181,6 +196,18 @@ public class RockPaperScissorsGame {
             }
             if (opponentPick.beats(playerPick)) {
                 player2.score++;
+            }
+        }
+    }
+    
+    private void sendPick(ServerWorld world, RockPaperScissorsPlayerData player, boolean toOpponent) {
+        if (player.pick != null) {
+            Entity entity = (toOpponent ? getOpponent(player) : player).getGamePlayerEntity(world);
+            if (entity instanceof ServerPlayerEntity) {
+                PacketManager.sendToClient(
+                        toOpponent ? 
+                                RPSGameStatePacket.setOpponentPick(player.pick, player.getGamePlayerEntity(world).getId())
+                                : RPSGameStatePacket.setOwnPick(player.pick), (ServerPlayerEntity) entity);
             }
         }
     }
@@ -241,6 +268,8 @@ public class RockPaperScissorsGame {
     public void leaveGame(Entity entity) {
         player1.isReady = false;
         player2.isReady = false;
+        player1.pick = null;
+        player2.pick = null;
         playerLeft = true;
         if (!entity.level.isClientSide()) {
             ServerWorld world = (ServerWorld) entity.level;
@@ -257,11 +286,24 @@ public class RockPaperScissorsGame {
             CHEATS = new HashMap<>();
             CHEATS.put(PowerClassification.NON_STAND, Util.make(Maps.newHashMap(), map -> {
                 map.put(ModNonStandPowers.HAMON.get(), (game, player, world) -> {
-                    game.getOpponent(player).canOpponentReadThoughts = true;
+                    if (!world.isClientSide()) {
+                        ServerWorld serverWorld = (ServerWorld) world;
+                        RockPaperScissorsPlayerData opponent = game.getOpponent(player);
+                        game.sendPick(serverWorld, opponent, true);
+                        
+                        opponent.canOpponentReadThoughts = true;
+                        Entity opponentEntity = opponent.getGamePlayerEntity(serverWorld);
+                        if (opponentEntity instanceof ServerPlayerEntity) {
+                            PacketManager.sendToClient(RPSGameStatePacket.mindRead(player.getGamePlayerEntity(serverWorld).getId()), (ServerPlayerEntity) opponentEntity);
+                        }
+                    }
                 });
                 map.put(ModNonStandPowers.VAMPIRISM.get(), (game, player, world) -> {
                     if (!world.isClientSide()) {
-                        game.makeAPick(game.getOpponent(player).getGamePlayerEntity((ServerWorld) world), Pick.ROCK, true);
+                        ServerWorld serverWorld = (ServerWorld) world;
+                        RockPaperScissorsPlayerData opponent = game.getOpponent(player);
+                        game.makeAPick(opponent.getGamePlayerEntity(serverWorld), Pick.ROCK, true);
+                        game.sendPick(serverWorld, opponent, false);
                     }
                     else {
                         game.getOpponent(player).pick = Pick.ROCK;
@@ -277,7 +319,11 @@ public class RockPaperScissorsGame {
     @Nullable
     public RPSCheat getCheat(LivingEntity entity, PowerClassification powerClassification) {
         IPower<?, ?> power = IPower.getPowerOptional(entity, powerClassification).orElse(null);
-        return power.hasPower() ? CHEATS.get(powerClassification).get(power.getType()) : null;
+        return power.hasPower() ? getCheat(powerClassification, power.getType()) : null;
+    }
+    
+    public RPSCheat getCheat(PowerClassification powerClassification, IPowerType<?, ?> powerType) {
+        return CHEATS.get(powerClassification).get(powerType);
     }
 
     public CompoundNBT writeNBT() {
@@ -323,9 +369,17 @@ public class RockPaperScissorsGame {
             }
             return this.entity;
         }
+        
+        public UUID getEntityUuid() {
+            return uuid;
+        }
 
         public void setIsReady(boolean isPlaying) {
             this.isReady = isPlaying;
+        }
+        
+        public boolean isReady() {
+            return isReady;
         }
 
         public int getScore() {

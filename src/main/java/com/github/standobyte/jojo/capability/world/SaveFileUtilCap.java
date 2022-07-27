@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.entity.mob.rps.RPSPvpGamesMap;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 
 import net.minecraft.nbt.CompoundNBT;
@@ -22,6 +23,8 @@ public class SaveFileUtilCap {
 	private final ServerWorld overworld;
 	
     Map<StandType<?>, Integer> timesStandsTaken = new HashMap<>();
+    
+    private final RPSPvpGamesMap rpsPvpGames = new RPSPvpGamesMap();
     
     private boolean gameruleDayLightCycle;
     private boolean gameruleWeatherCycle;
@@ -86,6 +89,12 @@ public class SaveFileUtilCap {
                     .filter(stand -> !st.contains(stand))
                     .collect(Collectors.toList());
         }
+    }
+    
+    
+    
+    public RPSPvpGamesMap getPvpRPSGames() {
+        return rpsPvpGames;
     }
     
     
