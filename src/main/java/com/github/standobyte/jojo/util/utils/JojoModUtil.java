@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
@@ -119,8 +120,19 @@ public class JojoModUtil {
     
     
     
+    @Nullable
     public static <E> E getOrLast(List<E> list, int index) {
-        return list.get(Math.min(index, list.size() - 1));
+        return list.isEmpty() ? null : list.get(Math.min(index, list.size() - 1));
+    }
+    
+    @Nullable
+    public static <T extends Enum<T>> T enumValueOfNullable(Class<T> enumType, @Nonnull String name) {
+        try {
+            return Enum.valueOf(enumType, name);
+        }
+        catch (IllegalArgumentException e) {
+            return null;
+        }
     }
     
     

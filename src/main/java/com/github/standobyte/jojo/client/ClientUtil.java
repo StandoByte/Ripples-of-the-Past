@@ -1,11 +1,16 @@
 package com.github.standobyte.jojo.client;
 
+import java.util.Map;
+
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
 import com.github.standobyte.jojo.client.ui.screen.mob.RockPaperScissorsScreen;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
 import com.github.standobyte.jojo.init.ModParticles;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.minecraft.MinecraftProfileTexture;
+import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
@@ -15,11 +20,13 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.play.server.SSpawnParticlePacket;
 import net.minecraft.util.IReorderingProcessor;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -65,8 +72,17 @@ public class ClientUtil {
         Minecraft.getInstance().setScreen(screen);
     }
     
-    public static void openRockPaperScissorsScreen(RockPaperScissorsGame game, Entity player1, Entity player2) {
-        Minecraft.getInstance().setScreen(new RockPaperScissorsScreen(game, player1, player2));
+    public static void openRockPaperScissorsScreen(RockPaperScissorsGame game) {
+        Minecraft.getInstance().setScreen(new RockPaperScissorsScreen(game));
+    }
+    
+    public static void closeRockPaperScissorsScreen(RockPaperScissorsGame game) {
+        if (Minecraft.getInstance().screen instanceof RockPaperScissorsScreen) {
+            RockPaperScissorsScreen screen = (RockPaperScissorsScreen) Minecraft.getInstance().screen;
+            if (screen.game == game) {
+                Minecraft.getInstance().setScreen(null);
+            }
+        }
     }
 
     public static void openHamonTeacherUi() {
@@ -172,5 +188,15 @@ public class ClientUtil {
         float coeff = maxAlpha / maxAlphaTicks;
         float alpha = ticks <= cycleTicks / 2 ? coeff * ticks : coeff * (cycleTicks - ticks);
         return Math.min(alpha, maxAlpha - minAlpha) + minAlpha;
+    }
+    
+    public static ResourceLocation getPlayerSkin(GameProfile gameProfile) {
+        Minecraft minecraft = Minecraft.getInstance();
+        Map<Type, MinecraftProfileTexture> map = minecraft.getSkinManager().getInsecureSkinInformation(gameProfile);
+        if (map.containsKey(Type.SKIN)) {
+            return minecraft.getSkinManager().registerTexture(map.get(Type.SKIN), Type.SKIN);
+        } else {
+            return DefaultPlayerSkin.getDefaultSkin(PlayerEntity.createPlayerUUID(gameProfile));
+        }
     }
 }

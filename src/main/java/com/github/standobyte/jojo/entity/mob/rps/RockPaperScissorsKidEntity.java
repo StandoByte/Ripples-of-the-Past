@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.entity.mob.rps;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -13,8 +14,6 @@ import com.github.standobyte.jojo.entity.mob.IMobStandUser;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame.Pick;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModStandTypes;
-import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.RPSGameStatePacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandPower;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
@@ -27,7 +26,6 @@ import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.villager.VillagerType;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResultType;
@@ -41,11 +39,12 @@ import net.minecraftforge.event.ForgeEventFactory;
 public class RockPaperScissorsKidEntity extends VillagerEntity implements IMobStandUser {
     private final IStandPower standPower = new StandPower(this);
     // FIXME (!!) also keep pvp games (in the save file cap?)
-    // FIXME (!!) nbt
     private Map<UUID, RockPaperScissorsGame> games = new HashMap<>();
     private Set<UUID> lostTo = new HashSet<>();
     @Nullable
     private RockPaperScissorsGame currentGame;
+    @Nullable
+    private UUID currentOpponent;
 
     public RockPaperScissorsKidEntity(World world) {
         this(ModEntityTypes.ROCK_PAPER_SCISSORS_KID.get(), world);
@@ -75,10 +74,9 @@ public class RockPaperScissorsKidEntity extends VillagerEntity implements IMobSt
             RockPaperScissorsGame game = games.computeIfAbsent(player.getUUID(), 
                     opponentId -> new RockPaperScissorsGame(player, this));
             currentGame = game;
+            currentOpponent = player.getUUID();
             player.getCapability(PlayerUtilCapProvider.CAPABILITY).orElseGet(null).setCurrentRockPaperScissorsGame(game);
-            if (player instanceof ServerPlayerEntity) {
-                PacketManager.sendToClient(RPSGameStatePacket.enteredGame(this.getId()), (ServerPlayerEntity) player);
-            }
+            game.gameStarted((ServerWorld) level);
         }
     }
     
@@ -89,15 +87,19 @@ public class RockPaperScissorsKidEntity extends VillagerEntity implements IMobSt
         if (!level.isClientSide() && tickCount % 50 == 0) {
             makeRandomPick();
         }
-        if (currentGame != null && currentGame.isGameOver()) {
+        if (currentGame != null && (/*currentGame.playerLeft() || */currentGame.isGameOver())) {
+            if (currentGame.isGameOver()) {
+                games.remove(currentOpponent);
+            }
             currentGame = null;
+            currentOpponent = null;
         }
     }
     
     public void makeRandomPick() {
         if (currentGame != null) {
             Pick pick = currentGame.getRound() == 1 ? Pick.SCISSORS : Pick.values()[random.nextInt(Pick.values().length)];
-            currentGame.makeAPick(this, pick);
+            currentGame.makeAPick(this, pick, false);
         }
     }
     
@@ -121,6 +123,19 @@ public class RockPaperScissorsKidEntity extends VillagerEntity implements IMobSt
     public void addAdditionalSaveData(CompoundNBT nbt) {
         super.addAdditionalSaveData(nbt);
         nbt.put("StandPower", standPower.writeNBT());
+        
+        CompoundNBT lostToMapNBT = new CompoundNBT();
+        lostToMapNBT.putInt("Size", lostTo.size());
+        int i = 0;
+        Iterator<UUID> it = lostTo.iterator();
+        while (it.hasNext()) {
+            lostToMapNBT.putUUID(String.valueOf(i++), it.next());
+        }
+        nbt.put("LostTo", lostToMapNBT);
+
+        CompoundNBT unfinishedGamesNBT = new CompoundNBT();
+        games.forEach((playerUUID, game) -> unfinishedGamesNBT.put(playerUUID.toString(), game.writeNBT()));
+        nbt.put("UnfinishedGames", unfinishedGamesNBT);
     }
 
     @Override
@@ -128,6 +143,27 @@ public class RockPaperScissorsKidEntity extends VillagerEntity implements IMobSt
         super.readAdditionalSaveData(nbt);
         if (nbt.contains("StandPower", JojoModUtil.getNbtId(CompoundNBT.class))) {
             standPower.readNBT(nbt.getCompound("StandPower"));
+        }
+
+        if (nbt.contains("LostTo", JojoModUtil.getNbtId(CompoundNBT.class))) {
+            CompoundNBT lostToMapNBT = nbt.getCompound("LostTo");
+            int size = lostToMapNBT.getInt("Size");
+            for (int i = 0; i < size; i++) {
+                lostTo.add(lostToMapNBT.getUUID(String.valueOf(i)));
+            }
+        }
+
+        if (nbt.contains("UnfinishedGames", JojoModUtil.getNbtId(CompoundNBT.class))) {
+            CompoundNBT unfinishedGamesNBT = nbt.getCompound("UnfinishedGames");
+            unfinishedGamesNBT.getAllKeys().forEach(key -> {
+                try {
+                    UUID id = UUID.fromString(key);
+                    if (unfinishedGamesNBT.contains(key, JojoModUtil.getNbtId(CompoundNBT.class))) {
+                        games.put(id, RockPaperScissorsGame.fromNBT(unfinishedGamesNBT.getCompound(key)));
+                    }
+                }
+                catch (IllegalArgumentException e) {}
+            });
         }
     }
     

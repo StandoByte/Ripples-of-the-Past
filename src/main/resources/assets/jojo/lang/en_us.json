@@ -806,10 +806,11 @@
   "entity.jojo.rps_kid.weaponsmith": "Weaponsmith",
   "entity.jojo.rps_kid": "Rock-Paper-Scissors Kid",
   "item.jojo.rps_kid_spawn_egg": "Rock-Paper-Scissors Kid Spawn Egg",
-  "jojo.screen.versus": "%s VS %s",
   "jojo.disc.missing_part.arms": "Has no arms",
-  "jojo.disc.missing_part.legs": "Has no arms",
+  "jojo.disc.missing_part.legs": "Has no legs",
   "jojo.disc.missing_part.main_body": "Has no main body",
+  "jojo.rps.cheat.jojo.hamon": "",
+  "jojo.rps.cheat.jojo.vampirism": "",
   
   "jojo.to_be_continued": "To Be Continued"
 }

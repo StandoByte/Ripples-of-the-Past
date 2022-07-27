@@ -25,7 +25,6 @@ public class StandInstance {
     
     public StandInstance(@Nonnull StandType<?> standType) {
         this.standType = standType;
-//        /* FIXME !!!!!!!!!!!!!!!!!! for testing purposes */ parts.remove(StandPart.MAIN_BODY); parts.remove(StandPart.LEGS);
     }
     
     public StandType<?> getType() {
