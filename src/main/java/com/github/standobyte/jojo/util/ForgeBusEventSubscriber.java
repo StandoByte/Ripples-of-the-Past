@@ -21,6 +21,7 @@ import com.github.standobyte.jojo.command.HamonCommand;
 import com.github.standobyte.jojo.command.JojoControlsCommand;
 import com.github.standobyte.jojo.command.JojoEnergyCommand;
 import com.github.standobyte.jojo.command.JojoPowerCommand;
+import com.github.standobyte.jojo.command.RockPaperScissorsCommand;
 import com.github.standobyte.jojo.command.StandCommand;
 import com.github.standobyte.jojo.init.ModStructures;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -84,6 +85,7 @@ public class ForgeBusEventSubscriber {
 //        StandXpCommand.register(dispatcher);
         JojoControlsCommand.register(dispatcher);
         HamonCommand.register(dispatcher);
+        RockPaperScissorsCommand.register(dispatcher);
     }
     
     @SubscribeEvent
