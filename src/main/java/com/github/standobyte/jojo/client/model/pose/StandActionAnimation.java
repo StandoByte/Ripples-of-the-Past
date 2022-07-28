@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.client.model.pose;
 import java.util.EnumMap;
 import java.util.Map;
 
-import com.github.standobyte.jojo.action.actions.StandEntityAction;
+import com.github.standobyte.jojo.action.stand.StandEntityAction;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.util.HandSide;
