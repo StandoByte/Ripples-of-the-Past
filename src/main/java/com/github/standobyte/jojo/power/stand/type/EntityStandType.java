@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
@@ -22,6 +23,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.Effects;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent;
@@ -198,6 +200,17 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
             if (standEntity.level != user.level) {
                 forceUnsummon(user, power);
             }
+        }
+        if (!user.level.isClientSide()) {
+            power.getStandInstance().ifPresent(standInstance -> {
+                if (!standInstance.hasPart(StandPart.ARMS)) {
+                    user.addEffect(new EffectInstance(Effects.WEAKNESS, 300, 1));
+                    user.addEffect(new EffectInstance(Effects.DIG_SLOWDOWN, 300, 1));
+                }
+                if (!standInstance.hasPart(StandPart.LEGS)) {
+                    user.addEffect(new EffectInstance(Effects.MOVEMENT_SLOWDOWN, 300, 1));
+                }
+            });
         }
     }
     

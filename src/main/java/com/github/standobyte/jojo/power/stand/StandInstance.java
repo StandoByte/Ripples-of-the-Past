@@ -8,20 +8,25 @@ import javax.annotation.Nonnull;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.TrTypeStandInstancePacket;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.World;
 
 public class StandInstance {
     private final StandType<?> standType;
     private final EnumSet<StandPart> parts = EnumSet.allOf(StandPart.class);
     private Optional<ITextComponent> customName = Optional.empty();
+    private boolean isDirty;
     
     public StandInstance(@Nonnull StandType<?> standType) {
         this.standType = standType;
@@ -36,19 +41,37 @@ public class StandInstance {
     }
     
     public boolean removePart(StandPart part) {
-        return this.parts.remove(part);
+        boolean removed = parts.remove(part);
+        isDirty |= removed;
+        return removed;
     }
     
     public boolean addPart(StandPart part) {
-        return this.parts.add(part);
+        boolean added = parts.add(part);
+        isDirty |= added;
+        return added;
+    }
+    
+    public Set<StandPart> getAllParts() {
+        return parts;
     }
     
     public void setCustomName(ITextComponent customName) {
+        isDirty |= this.customName.map(name -> !name.equals(customName)).orElse(customName != null);
         this.customName = Optional.ofNullable(customName);
     }
     
     public Optional<ITextComponent> getCustomName() {
         return customName;
+    }
+    
+    public void tick(IStandPower standPower, LivingEntity standUser, World world) {
+        if (isDirty) {
+            if (!world.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(new TrTypeStandInstancePacket(standUser.getId(), this), standUser);
+            }
+            isDirty = false;
+        }
     }
     
     

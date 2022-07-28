@@ -152,6 +152,7 @@ import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerWakeUpEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.Event.Result;
@@ -833,6 +834,14 @@ public class GameplayEventHandler {
             }
         }
     }
+    
+    @SubscribeEvent
+    public static void onPlayerLogout(PlayerLoggedOutEvent event) {
+        PlayerEntity player = event.getPlayer();
+        IStandPower.getStandPowerOptional(player).ifPresent(stand -> {
+            stand.getContinuousEffects().onUserStandRemoved(player);
+        });
+    }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingDeath(LivingDeathEvent event) {
@@ -853,12 +862,15 @@ public class GameplayEventHandler {
             if (dead instanceof ServerPlayerEntity && killer != null) {
                 ModCriteriaTriggers.ENTITY_KILLED_PLAYER.get().trigger((ServerPlayerEntity) dead, killer, dmgSource);
             }
-            summonSoul(dead, dmgSource);
+            LazyOptional<IStandPower> standOptional = IStandPower.getStandPowerOptional(dead);
+            standOptional.ifPresent(stand -> {
+                stand.getContinuousEffects().onUserStandRemoved(dead);
+                summonSoul(standOptional, dead, dmgSource);
+            });
         }
     }
     
-    private static void summonSoul(LivingEntity entity, DamageSource dmgSource) {
-        LazyOptional<IStandPower> standOptional = IStandPower.getStandPowerOptional(entity);
+    private static void summonSoul(LazyOptional<IStandPower> standOptional, LivingEntity entity, DamageSource dmgSource) {
         int ticks = standOptional.map(power -> getSoulAscensionTicks(entity, power)).orElse(0);
         
         if (ticks > 0) {
