@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.entity;
 
+import java.util.UUID;
+
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -33,6 +35,8 @@ public class RoadRollerEntity extends Entity {
     private int ticksInAir = 0;
     @Nullable
     private Entity owner;
+    @Nullable
+    private UUID ownerId;
     private double tickDamageMotion = 0;
     private boolean punchedFromBelow = false;
 
@@ -46,6 +50,7 @@ public class RoadRollerEntity extends Entity {
     
     public void setOwner(Entity entity) {
     	this.owner = entity;
+    	this.ownerId = entity != null ? entity.getUUID() : null;
     }
 
     @Override
@@ -133,11 +138,19 @@ public class RoadRollerEntity extends Entity {
         else if (ticksBeforeExplosion == 0) {
             remove();
         }
+        Entity owner = getOwner();
         if (!level.isClientSide() && (ticksBeforeExplosion == 0 || 
         		(ticksBeforeExplosion > 0 && ticksBeforeExplosion < 40 && owner != null && distanceToSqr(owner) > 100))) {
         	explode();
         	remove();
         }
+    }
+    
+    private Entity getOwner() {
+        if (!level.isClientSide() && owner == null && ownerId != null) {
+            owner = ((ServerWorld) level).getEntity(ownerId);
+        }
+        return owner;
     }
 
     private void explode() {
@@ -223,7 +236,7 @@ public class RoadRollerEntity extends Entity {
         	ticksBeforeExplosion = nbt.getInt("ExplosionTime");
         }
         if (nbt.hasUUID("Owner")) {
-        	owner = ((ServerWorld) level).getEntity(nbt.getUUID("Owner"));
+            ownerId = nbt.getUUID("Owner");
         }
     }
 
@@ -233,7 +246,7 @@ public class RoadRollerEntity extends Entity {
         nbt.putInt("Age", tickCount);
         nbt.putInt("ExplosionTime", ticksBeforeExplosion);
         if (owner != null) {
-        	nbt.putUUID("Owner", owner.getUUID());
+        	nbt.putUUID("Owner", ownerId);
         }
     }
 

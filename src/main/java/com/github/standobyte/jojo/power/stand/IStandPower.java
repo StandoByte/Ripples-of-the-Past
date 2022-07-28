@@ -47,6 +47,8 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     void setResolveLevel(int level);
     int getMaxResolveLevel();
     float getResolveDmgReduction();
+    
+    StandEffectsTracker getContinuousEffects();
 
     void skipProgression(StandType<?> standType);
     void setProgressionSkipped();

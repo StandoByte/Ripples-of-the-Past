@@ -49,6 +49,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     private boolean skippedProgression;
     private boolean givenByDisc;
     
+    private StandEffectsTracker continuousEffects = new StandEffectsTracker(this);
+    
     private ActionLearningProgressMap<IStandPower> actionLearningProgressMap = new ActionLearningProgressMap<>();
     
     public StandPower(LivingEntity user) {
@@ -131,6 +133,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (standType != null) {
             tier = Math.max(tier, standType.getTier());
         }
+        if (user != null && !user.level.isClientSide()) {
+            continuousEffects.onUserStandRemoved(user);
+        }
     }
 
     @Override
@@ -164,6 +169,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                     SaveFileUtilCapProvider.getSaveFileCap(player).removePlayerStand(standType);
                 });
             }
+            if (user != null && !user.level.isClientSide()) {
+                continuousEffects.onUserStandRemoved(user);
+            }
             return true;
         }
         return false;
@@ -185,6 +193,10 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (hasPower()) {
             tickStamina();
             tickResolve();
+            if (user != null) {
+                standInstance.ifPresent(stand -> stand.tick(this, user, user.level));
+            }
+            continuousEffects.tick();
         }
     }
     
@@ -375,6 +387,12 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (usesResolve()) {
             resolveCounter.tick();
         }
+    }
+    
+
+    @Override
+    public StandEffectsTracker getContinuousEffects() {
+        return continuousEffects;
     }
     
 
@@ -584,7 +602,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         cnbt.putInt("Xp", getXp());
         cnbt.putBoolean("Skipped", skippedProgression);
         cnbt.putBoolean("Disc", givenByDisc);
-        actionLearningProgressMap.writeToNbt(cnbt);
+        cnbt.put("ActionLearning", actionLearningProgressMap.toNBT());
+        cnbt.put("Effects", continuousEffects.toNBT());
         return cnbt;
     }
 
@@ -611,7 +630,12 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
         skippedProgression = nbt.getBoolean("Skipped");
         givenByDisc = nbt.getBoolean("Disc");
-        actionLearningProgressMap.readFromNbt(nbt);
+        if (nbt.contains("ActionLearning", JojoModUtil.getNbtId(CompoundNBT.class))) {
+            actionLearningProgressMap.fromNBT(nbt.getCompound("ActionLearning"));
+        }
+        if (nbt.contains("Effects", JojoModUtil.getNbtId(CompoundNBT.class))) {
+            continuousEffects.fromNBT(nbt.getCompound("Effects"));
+        }
         super.readNBT(nbt);
     }
     
@@ -662,5 +686,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 standManifestation.syncWithTrackingOrUser(player);
             }
         }
+        continuousEffects.syncWithTrackingOrUser(player);
     }
 }
