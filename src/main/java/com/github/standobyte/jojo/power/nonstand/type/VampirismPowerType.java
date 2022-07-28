@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.function.IntBinaryOperator;
 
 import com.github.standobyte.jojo.JojoModConfig;
-import com.github.standobyte.jojo.action.actions.VampirismAction;
+import com.github.standobyte.jojo.action.non_stand.VampirismAction;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
