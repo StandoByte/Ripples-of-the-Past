@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.github.standobyte.jojo.action.stand.effect.BoyIIManStandPartTakenEffect;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -21,6 +22,8 @@ import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandInstance;
+import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 import com.google.common.collect.Maps;
 
@@ -161,11 +164,27 @@ public class RockPaperScissorsGame {
     private void boy2Man(LivingEntity roundWinner, LivingEntity roundLoser, int round) {
         IStandPower winnerStand = IStandPower.getStandPowerOptional(roundWinner).orElse(null);
         IStandPower loserStand = IStandPower.getStandPowerOptional(roundLoser).orElse(null);
-        if (winnerStand != null && loserStand != null && winnerStand.getType() == ModStandTypes.BOY_II_MAN.get()) {
+        if (winnerStand != null && loserStand != null && loserStand.hasPower() && winnerStand.getType() == ModStandTypes.BOY_II_MAN.get()) {
             // FIXME (!!) BIIM
-            if (round == 3 && loserStand.hasPower()) {
+            if (round < 3) {
+                StandPart limbs = round == 1 ? StandPart.ARMS : StandPart.LEGS;
+                loserStand.getStandInstance().ifPresent(stand -> {
+                    if (stand.hasPart(limbs)) {
+                        StandInstance takenParts = new StandInstance(stand.getType());
+                        for (StandPart standPart : StandPart.values()) {
+                            if (standPart != limbs) {
+                                takenParts.removePart(standPart);
+                            }
+                        }
+                        stand.removePart(limbs);
+                        winnerStand.getContinuousEffects().addEffect(new BoyIIManStandPartTakenEffect(takenParts).addTarget(roundLoser));
+                    }
+                });
+            }
+            else if (round == 3 && loserStand.hasPower()) {
                 // FIXME (!!) BIIM
-                loserStand.putOutStand();
+                StandInstance mainStandBody = loserStand.putOutStand().get();
+                winnerStand.getContinuousEffects().addEffect(new BoyIIManStandPartTakenEffect(mainStandBody).addTarget(roundLoser));
             }
         }
     }

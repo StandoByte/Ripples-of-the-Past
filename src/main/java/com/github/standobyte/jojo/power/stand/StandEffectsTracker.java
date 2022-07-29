@@ -31,11 +31,13 @@ public class StandEffectsTracker {
     }
     
     public void addEffect(StandEffectInstance instance) {
-        putEffectInstance(instance);
         LivingEntity user = standPower.getUser();
         if (!user.level.isClientSide()) {
-            PacketManager.sendToClientsTrackingAndSelf(TrStandEffectPacket.add(
-                    instance.withId(EFFECTS_COUNTER.incrementAndGet())), user);
+            instance.withId(EFFECTS_COUNTER.incrementAndGet());
+        }
+        putEffectInstance(instance);
+        if (!user.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(TrStandEffectPacket.add(instance), user);
         }
     }
     

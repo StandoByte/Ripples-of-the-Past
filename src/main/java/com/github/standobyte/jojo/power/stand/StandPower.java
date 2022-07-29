@@ -100,7 +100,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         return true;
     }
 
-    private void setStandInstance(StandInstance standInstance) {
+    @Override
+    public void setStandInstance(StandInstance standInstance) {
         this.standInstance = Optional.ofNullable(standInstance);
         onPowerSet(this.standInstance.map(StandInstance::getType).orElse(null));
     }
