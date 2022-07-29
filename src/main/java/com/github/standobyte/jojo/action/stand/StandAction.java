@@ -70,6 +70,10 @@ public abstract class StandAction extends Action<IStandPower> {
         return super.checkConditions(user, power, target);
     }
     
+    protected boolean isPartRequired(StandPart standPart) {
+        return partsRequired.contains(standPart);
+    }
+    
     public boolean canBeUnlocked(IStandPower power) {
         return !isUnlockedByDefault() && (power.isUserCreative() || 
                 resolveLevelToUnlock > -1 && power.getResolveLevel() >= resolveLevelToUnlock);

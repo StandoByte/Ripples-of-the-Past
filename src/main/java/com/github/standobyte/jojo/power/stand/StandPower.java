@@ -85,7 +85,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     @Override
     public boolean giveStand(StandInstance standInstance, boolean newInstance) {
-        if (standInstance == null || !canGetPower(standInstance.getType())) {
+        if (standInstance == null || (user == null || !user.level.isClientSide()) && !canGetPower(standInstance.getType())) {
             return false;
         }
 
@@ -99,9 +99,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
         return true;
     }
-
-    @Override
-    public void setStandInstance(StandInstance standInstance) {
+    
+    private void setStandInstance(StandInstance standInstance) {
         this.standInstance = Optional.ofNullable(standInstance);
         onPowerSet(this.standInstance.map(StandInstance::getType).orElse(null));
     }

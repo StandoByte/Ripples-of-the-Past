@@ -68,7 +68,7 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> VAMPIRE_FREEZE = SOUNDS.register("vampire_freeze",
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "vampire_freeze")));
 
-    public static final RegistryObject<SoundEvent> VAMPIRE_DARK_AURA = SOUNDS.register("vampire_dark_aura",
+    public static final RegistryObject<SoundEvent> VAMPIRE_EVIL_ATMOSPHERE = SOUNDS.register("vampire_dark_aura",
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "vampire_dark_aura")));
 
     

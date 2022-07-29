@@ -16,6 +16,7 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.JojoModConfig.Common;
 import com.github.standobyte.jojo.action.non_stand.VampirismFreeze;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
+import com.github.standobyte.jojo.action.stand.effect.BoyIIManStandPartTakenEffect;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.block.StoneMaskBlock;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
@@ -33,6 +34,7 @@ import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModPaintings;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.ModStandEffects;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
@@ -49,7 +51,10 @@ import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
 import com.github.standobyte.jojo.power.nonstand.type.VampirismPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandEffectsTracker;
+import com.github.standobyte.jojo.power.stand.StandInstance;
 import com.github.standobyte.jojo.power.stand.StandUtil;
+import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.power.stand.type.EntityStandType;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.github.standobyte.jojo.tileentity.StoneMaskTileEntity;
@@ -150,9 +155,9 @@ import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerWakeUpEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.Event.Result;
@@ -391,6 +396,27 @@ public class GameplayEventHandler {
     public static void onLivingHurtStart(LivingAttackEvent event) {
         DamageSource dmgSource = event.getSource();
         LivingEntity target = event.getEntityLiving();
+        Entity attacker = dmgSource.getEntity();
+        
+        if (attacker != null && attacker.is(dmgSource.getDirectEntity()) && attacker instanceof LivingEntity) {
+            IStandPower.getStandPowerOptional((LivingEntity) attacker).ifPresent(attackerStand -> {
+                IStandPower.getStandPowerOptional(target).ifPresent(boyIIManStand -> {
+                    StandEffectsTracker standEffects = boyIIManStand.getContinuousEffects();
+                    if (!standEffects.getEffects(effect -> {
+                        if (effect.effectType == ModStandEffects.BOY_II_MAN_PART_TAKE.get() && effect.getTargets().contains(attacker)) {
+                            StandInstance partsTaken = ((BoyIIManStandPartTakenEffect) effect).getPartsTaken();
+                            return partsTaken.getType() == attackerStand.getType() && partsTaken.hasPart(StandPart.ARMS);
+                        }
+                        return false;
+                    }).isEmpty()) {
+                        attacker.hurt(dmgSource, event.getAmount());
+                        event.setCanceled(true);
+                        return;
+                    }
+                });
+            });
+        }
+        
         if (target.invulnerableTime > 0 && dmgSource instanceof IModdedDamageSource && 
                 ((IModdedDamageSource) dmgSource).bypassInvulTicks()) {
             event.setCanceled(true);

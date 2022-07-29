@@ -52,7 +52,7 @@ public class StandInstance {
         return added;
     }
     
-    public Set<StandPart> getAllParts() {
+    public EnumSet<StandPart> getAllParts() {
         return parts;
     }
     

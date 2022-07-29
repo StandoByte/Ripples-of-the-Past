@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiFunction;
 
@@ -13,7 +14,10 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.github.standobyte.jojo.action.stand.effect.BoyIIManStandPartTakenEffect;
+import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.ModStandEffects;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.RPSGameStatePacket;
@@ -22,6 +26,7 @@ import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.stand.StandInstance;
 import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
@@ -31,11 +36,13 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.potion.Effects;
 import net.minecraft.util.Util;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
 public class RockPaperScissorsGame {
+    private static final int ROUNDS_TO_WIN = 3;
     private static boolean cheatInitialized = false;
     private static Map<PowerClassification, Map<IPowerType<?, ?>, RPSCheat>> CHEATS;
 
@@ -44,6 +51,7 @@ public class RockPaperScissorsGame {
     private int round = 1;
     private RockPaperScissorsPlayerData lastRoundWinner = null;
     private RockPaperScissorsPlayerData gameWinner = null;
+    private boolean newRound = false;
     private boolean playerLeft = false;
 
     public RockPaperScissorsGame(LivingEntity player1, LivingEntity player2) {
@@ -101,11 +109,18 @@ public class RockPaperScissorsGame {
                 onGameOver(entity.level, gameWinner);
             }
             round++;
+            newRound = true;
             lastRoundWinner = null;
         }
         if (player.canOpponentReadThoughts && !entity.level.isClientSide()) {
             this.sendPick((ServerWorld) entity.level, player, true);
         }
+    }
+    
+    public boolean checkNewRound() {
+        boolean isItNewRoundYet = newRound;
+        this.newRound = false;
+        return isItNewRoundYet;
     }
 
     private void onRoundEnd(World world) {
@@ -158,41 +173,83 @@ public class RockPaperScissorsGame {
         if (!world.isClientSide()) {
             ServerWorld serverWorld = (ServerWorld) world;
             sendToBothPlayers(serverWorld, (player, opponent) -> RPSGameStatePacket.gameOver(player == winner));
+            triggerAchievement(player1.getGamePlayerEntity(serverWorld));
+            triggerAchievement(player2.getGamePlayerEntity(serverWorld));
+        }
+    }
+    
+    private void triggerAchievement(Entity entity) {
+        if (entity instanceof ServerPlayerEntity) {
+            ModCriteriaTriggers.ROCK_PAPER_SCISSORS_GAME.get().trigger((ServerPlayerEntity) entity, this, boyIIManTookStand);
         }
     }
 
+    private boolean boyIIManTookStand = false;
     private void boy2Man(LivingEntity roundWinner, LivingEntity roundLoser, int round) {
         IStandPower winnerStand = IStandPower.getStandPowerOptional(roundWinner).orElse(null);
         IStandPower loserStand = IStandPower.getStandPowerOptional(roundLoser).orElse(null);
-        if (winnerStand != null && loserStand != null && loserStand.hasPower() && winnerStand.getType() == ModStandTypes.BOY_II_MAN.get()) {
+        if (winnerStand == null || loserStand == null) return;
+        if (loserStand.hasPower() && winnerStand.getType() == ModStandTypes.BOY_II_MAN.get()) {
             // FIXME (!!) BIIM
-            if (round < 3) {
-                StandPart limbs = round == 1 ? StandPart.ARMS : StandPart.LEGS;
-                loserStand.getStandInstance().ifPresent(stand -> {
-                    if (stand.hasPart(limbs)) {
-                        StandInstance takenParts = new StandInstance(stand.getType());
-                        for (StandPart standPart : StandPart.values()) {
-                            if (standPart != limbs) {
-                                takenParts.removePart(standPart);
+            if (round < ROUNDS_TO_WIN) {
+                StandPart limbs = round == 1 ? StandPart.ARMS : round == 2 ? StandPart.LEGS : null;
+                if (limbs != null) {
+                    loserStand.getStandInstance().ifPresent(stand -> {
+                        if (stand.hasPart(limbs)) {
+                            StandInstance takenParts = new StandInstance(stand.getType());
+                            for (StandPart standPart : StandPart.values()) {
+                                if (standPart != limbs) {
+                                    takenParts.removePart(standPart);
+                                }
                             }
+                            stand.removePart(limbs);
+                            winnerStand.getContinuousEffects().addEffect(new BoyIIManStandPartTakenEffect(takenParts).addTarget(roundLoser));
                         }
-                        stand.removePart(limbs);
-                        winnerStand.getContinuousEffects().addEffect(new BoyIIManStandPartTakenEffect(takenParts).addTarget(roundLoser));
-                    }
-                });
+                    });
+                }
             }
-            else if (round == 3 && loserStand.hasPower()) {
+            else if (round == ROUNDS_TO_WIN) {
                 // FIXME (!!) BIIM
                 StandInstance mainStandBody = loserStand.putOutStand().get();
                 winnerStand.getContinuousEffects().addEffect(new BoyIIManStandPartTakenEffect(mainStandBody).addTarget(roundLoser));
+                boyIIManTookStand = true;
             }
+        }
+        else if (loserStand.getType() == ModStandTypes.BOY_II_MAN.get() && round == ROUNDS_TO_WIN) {
+            StandEffectsTracker boyIIManEffects = loserStand.getContinuousEffects();
+            boyIIManEffects.getEffects(effect -> effect.effectType == ModStandEffects.BOY_II_MAN_PART_TAKE.get()
+                    && effect.getTargets().contains(roundWinner)).forEach(effect -> {
+                        if (winnerStand.hasPower()) {
+                            // FIXME (!!) BIIM
+                            StandInstance winnerStandPartsLeft = winnerStand.getStandInstance().get();
+                            StandInstance partsTaken = ((BoyIIManStandPartTakenEffect) effect).getPartsTaken();
+                            if (partsTaken.getType() == winnerStand.getType()) {
+                                Set<StandPart> partsToReturn = partsTaken.getAllParts();
+                                if (partsToReturn.stream().allMatch(part -> !winnerStandPartsLeft.hasPart(part))) {
+                                    boyIIManEffects.removeEffect(effect);
+                                    // FIXME (!!) remove the effects more precisely
+                                    if (partsToReturn.contains(StandPart.ARMS)) {
+                                        roundWinner.removeEffect(Effects.WEAKNESS);
+                                        roundWinner.removeEffect(Effects.DIG_SLOWDOWN);
+                                    }
+                                    if (partsToReturn.contains(StandPart.LEGS)) {
+                                        roundWinner.removeEffect(Effects.MOVEMENT_SLOWDOWN);
+                                    }
+                                }
+                            }
+                        }
+                        else {
+                            // FIXME (!!) BIIM
+                            boyIIManEffects.removeEffect(effect);
+                        }
+                    });
         }
     }
 
     private void comparePicks(RockPaperScissorsPlayerData player1, RockPaperScissorsPlayerData player2) {
         if (player1.pick.beats(player2.pick)) {
             lastRoundWinner = player1;
-            if (++player1.score == 3) {
+            if (++player1.score == ROUNDS_TO_WIN) {
                 gameWinner = player1;
             }
         }
@@ -311,9 +368,15 @@ public class RockPaperScissorsGame {
                         game.sendPick(serverWorld, opponent, true);
                         
                         opponent.canOpponentReadThoughts = true;
+                        Entity playerEntity = player.getGamePlayerEntity(serverWorld);
                         Entity opponentEntity = opponent.getGamePlayerEntity(serverWorld);
                         if (opponentEntity instanceof ServerPlayerEntity) {
-                            PacketManager.sendToClient(RPSGameStatePacket.mindRead(player.getGamePlayerEntity(serverWorld).getId()), (ServerPlayerEntity) opponentEntity);
+                            PacketManager.sendToClient(RPSGameStatePacket.mindRead(playerEntity.getId()), (ServerPlayerEntity) opponentEntity);
+                        }
+                        
+                        if (!player.hasCheatedBefore) {
+                            world.playSound(null, playerEntity.getX(), playerEntity.getY(), playerEntity.getZ(), 
+                                    ModSounds.HAMON_CONCENTRATION.get(), playerEntity.getSoundSource(), 1.0F, 1.0F);
                         }
                     }
                 });
@@ -323,6 +386,12 @@ public class RockPaperScissorsGame {
                         RockPaperScissorsPlayerData opponent = game.getOpponent(player);
                         game.makeAPick(opponent.getGamePlayerEntity(serverWorld), Pick.ROCK, true);
                         game.sendPick(serverWorld, opponent, false);
+                        
+                        if (!player.hasCheatedBefore) {
+                            Entity playerEntity = player.getGamePlayerEntity(serverWorld);
+                            world.playSound(null, playerEntity.getX(), playerEntity.getY(), playerEntity.getZ(), 
+                                    ModSounds.VAMPIRE_EVIL_ATMOSPHERE.get(), playerEntity.getSoundSource(), 1.0F, 1.0F);
+                        }
                     }
                     else {
                         game.getOpponent(player).pick = Pick.ROCK;
@@ -331,7 +400,7 @@ public class RockPaperScissorsGame {
             }));
             CHEATS.put(PowerClassification.STAND, Util.make(Maps.newHashMap(), map -> {
             }));
-//            cheatInitialized = true;
+            cheatInitialized = true;
         }
     }
 
@@ -376,6 +445,7 @@ public class RockPaperScissorsGame {
         private List<Pick> previousPicks = new ArrayList<>();
         @Nullable
         private Pick pick = null;
+        private boolean hasCheatedBefore = false;
 
         @Nullable
         private Pick pickThoughts = null;
@@ -423,6 +493,10 @@ public class RockPaperScissorsGame {
         @Nullable
         public Pick getPickThoughts() {
             return pickThoughts;
+        }
+        
+        public void setCheated() {
+            hasCheatedBefore = true;
         }
 
         private CompoundNBT writeNBT() {

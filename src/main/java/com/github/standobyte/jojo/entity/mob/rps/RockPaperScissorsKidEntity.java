@@ -59,6 +59,12 @@ public class RockPaperScissorsKidEntity extends VillagerEntity implements IMobSt
         return this.currentGame != null;
     }
 
+    // FIXME (!!!!) make proper ai, remove this hack
+    @Override
+    public boolean isTrading() {
+        return super.isTrading() || isPlaying();
+    }
+
     @Override
     public ActionResultType mobInteract(PlayerEntity player, Hand hand) {
         if (isBaby() || player.isShiftKeyDown()) {

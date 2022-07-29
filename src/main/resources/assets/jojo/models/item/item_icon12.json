@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "jojo:icons/soul_cloud"
+    "layer0": "jojo:icons/rock_paper_scissors"
   }
 }
