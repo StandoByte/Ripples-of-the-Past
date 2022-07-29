@@ -52,6 +52,7 @@ import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.RayTraceResult.Type;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.InputEvent.ClickInputEvent;
@@ -270,7 +271,7 @@ public class InputHandler {
                     }
                 }
                 else {
-                    mc.player.sendMessage(new TranslationTextComponent(
+                    mc.gui.handleChat(ChatType.GAME_INFO, new TranslationTextComponent(
                             nonStandPower.getTypeSpecificData(ModNonStandPowers.VAMPIRISM.get())
                             .map(vampirism -> vampirism.isVampireHamonUser()).orElse(false) ? 
                                     "jojo.chat.message.no_hamon_vampire"

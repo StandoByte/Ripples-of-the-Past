@@ -418,9 +418,9 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
 		rightForeArm.texOffs(16, 119).addBox(-2.5F, 4.4F, -1.5F, 1.0F, 1.0F, 3.0F, -0.2F, false);
 		rightForeArm.texOffs(16, 123).addBox(-2.5F, 5.0F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, false);
 
-		leftLeg.texOffs(12, 109).addBox(-0.4F, 4.5F, -2.5F, 1.0F, 2.0F, 1.0F, 0.0F, true);
+		leftLeg.texOffs(108, 119).addBox(-0.4F, 4.5F, -2.5F, 1.0F, 2.0F, 1.0F, 0.0F, true);
 
-		rightLeg.texOffs(12, 109).addBox(-0.6F, 4.5F, -2.5F, 1.0F, 2.0F, 1.0F, 0.0F, false);
+		rightLeg.texOffs(76, 119).addBox(-0.6F, 4.5F, -2.5F, 1.0F, 2.0F, 1.0F, 0.0F, false);
 
         hairToAnimate = new ArrayList<>();
         Collections.addAll(hairToAnimate, hair2, hair4, hair6, hair8, hair10, 

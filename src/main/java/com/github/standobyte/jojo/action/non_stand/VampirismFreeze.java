@@ -17,7 +17,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.monster.StrayEntity;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.EffectInstance;
@@ -64,22 +63,21 @@ public class VampirismFreeze extends VampirismAction {
                 if (entityTarget instanceof LivingEntity && !entityTarget.isOnFire()) {
                     int difficulty = world.getDifficulty().getId();
                     LivingEntity targetLiving = (LivingEntity) entityTarget;
-                    if (DamageUtil.dealColdDamage(targetLiving, (float) Math.pow(2, difficulty), user, null)) {
-                        if (targetLiving.getType() == EntityType.SKELETON && targetLiving.getHealth() <= 4F) {
-                            turnSkeletonIntoStray(targetLiving);
+                    float damage = (float) Math.pow(2, difficulty);
+                    if (targetLiving.getType() == EntityType.SKELETON && targetLiving.isAlive() && targetLiving.getHealth() <= damage) {
+                        turnSkeletonIntoStray(targetLiving);
+                    }
+                    else if (DamageUtil.dealColdDamage(targetLiving, damage, user, null)) {
+                        EffectInstance freezeInstance = targetLiving.getEffect(ModEffects.FREEZE.get());
+                        if (freezeInstance == null) {
+                            world.playSound(null, targetLiving, ModSounds.VAMPIRE_FREEZE.get(), targetLiving.getSoundSource(), 1.0F, 1.0F);
+                            targetLiving.addEffect(new EffectInstance(ModEffects.FREEZE.get(), (difficulty + 1) * 50, 0));
                         }
                         else {
-                            EffectInstance freezeInstance = targetLiving.getEffect(ModEffects.FREEZE.get());
-                            if (freezeInstance == null) {
-                                world.playSound(null, targetLiving, ModSounds.VAMPIRE_FREEZE.get(), targetLiving.getSoundSource(), 1.0F, 1.0F);
-                                targetLiving.addEffect(new EffectInstance(ModEffects.FREEZE.get(), (difficulty + 1) * 50, 0));
-                            }
-                            else {
-                                int additionalDuration = (difficulty - 1) * 5 + 1;
-                                int duration = freezeInstance.getDuration() + additionalDuration;
-                                int lvl = duration / 100;
-                                targetLiving.addEffect(new EffectInstance(ModEffects.FREEZE.get(), duration, lvl));
-                            }
+                            int additionalDuration = (difficulty - 1) * 5 + 1;
+                            int duration = freezeInstance.getDuration() + additionalDuration;
+                            int lvl = duration / 100;
+                            targetLiving.addEffect(new EffectInstance(ModEffects.FREEZE.get(), duration, lvl));
                         }
                     }
                 }
@@ -92,19 +90,19 @@ public class VampirismFreeze extends VampirismAction {
         if (skeleton.level.isClientSide()) return false;
         ServerWorld world = (ServerWorld) skeleton.level;
         if ((world.getDifficulty() == Difficulty.NORMAL && skeleton.getRandom().nextBoolean() || world.getDifficulty() == Difficulty.HARD)) {
-            StrayEntity stray;
+            StrayEntity stray = null;
             if (ForgeEventFactory.canLivingConvert(skeleton, EntityType.STRAY, (timer) -> {})) {
                 stray = ((MobEntity) skeleton).convertTo(EntityType.STRAY, true);
             }
             else {
                 return false;
             }
-            stray.finalizeSpawn(
-                    world, 
-                    world.getCurrentDifficultyAt(stray.blockPosition()), 
-                    SpawnReason.CONVERSION, 
-                    null, 
-                    null);
+//            stray.finalizeSpawn(
+//                    world, 
+//                    world.getCurrentDifficultyAt(stray.blockPosition()), 
+//                    SpawnReason.CONVERSION, 
+//                    null, 
+//                    null);
             ForgeEventFactory.onLivingConvert(skeleton, stray);
             if (!skeleton.isSilent()) {
                 world.levelEvent(null, 1026, skeleton.blockPosition(), 0);

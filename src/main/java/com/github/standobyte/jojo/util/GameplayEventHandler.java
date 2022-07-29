@@ -320,9 +320,9 @@ public class GameplayEventHandler {
                         target -> target instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) target)));
             }
         }
-        else if (entity.getType() == EntityType.PAINTING) {
-            cutOutHands((PaintingEntity) event.getEntity());
-        }
+//        else if (entity.getType() == EntityType.PAINTING) {
+//            cutOutHands((PaintingEntity) event.getEntity());
+//        }
     }
 
     private static void makeMobNeutralToVampirePlayers(MobEntity mob) {

@@ -204,7 +204,7 @@ public class StandStats {
         }
         
         public B range(double range) {
-            return range(range, range * 2);
+            return range(range, range);
         }
         
         public B range(double rangeEffective, double rangeMax) {
