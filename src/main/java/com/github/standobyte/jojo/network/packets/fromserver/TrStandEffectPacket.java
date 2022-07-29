@@ -57,7 +57,7 @@ public class TrStandEffectPacket {
             buf.writeInt(msg.effectId);
             NetworkUtil.writeIntArray(buf, msg.targetsId);
             buf.writeRegistryId(msg.effectFactory);
-            msg.effect.writeAdditionalData(buf);
+            msg.effect.writeAdditionalPacketData(buf);
             break;
         case REMOVE:
             buf.writeInt(msg.userId);
@@ -94,7 +94,7 @@ public class TrStandEffectPacket {
                     switch (msg.packetType) {
                     case ADD:
                         StandEffectInstance effect = msg.effectFactory.create().withId(msg.effectId).withStand(stand);
-                        effect.readAdditionalData(msg.buf);
+                        effect.readAdditionalPacketData(msg.buf);
                         stand.getContinuousEffects().addEffect(effect);
                         break;
                     case REMOVE:

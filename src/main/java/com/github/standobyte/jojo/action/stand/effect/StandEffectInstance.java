@@ -108,9 +108,9 @@ public abstract class StandEffectInstance {
         return toBeRemoved;
     }
     
-    public void writeAdditionalData(PacketBuffer buf) {}
+    public void writeAdditionalPacketData(PacketBuffer buf) {}
     
-    public void readAdditionalData(PacketBuffer buf) {}
+    public void readAdditionalPacketData(PacketBuffer buf) {}
 
     public CompoundNBT toNBT() {
         CompoundNBT nbt = new CompoundNBT();
@@ -122,6 +122,7 @@ public abstract class StandEffectInstance {
         targets.forEach(target -> targetsNBT.putUUID(String.valueOf(i.incrementAndGet()), target.getUUID()));
         nbt.put("Targets", targetsNBT);
         
+        writeAdditionalSaveData(nbt);
         return nbt;
     }
     
@@ -141,8 +142,13 @@ public abstract class StandEffectInstance {
             });
         }
         
+        effect.readAdditionalSaveData(nbt);
         return effect;
     }
+
+    protected void writeAdditionalSaveData(CompoundNBT nbt) {}
+
+    protected void readAdditionalSaveData(CompoundNBT nbt) {}
     
     public void updateTargets(ServerWorld world) {
         if (targetsLoaded != null) {

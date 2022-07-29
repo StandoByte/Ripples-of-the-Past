@@ -85,7 +85,7 @@ public class RockPaperScissorsKidEntity extends VillagerEntity implements IMobSt
     public void tick() {
         super.tick();
         // FIXME (!!) random pick
-        if (!level.isClientSide() && tickCount % 50 == 0) {
+        if (!level.isClientSide() && tickCount % 10 == 0) {
             makeRandomPick();
         }
         if (currentGame != null && (/*currentGame.playerLeft() || */currentGame.isGameOver())) {

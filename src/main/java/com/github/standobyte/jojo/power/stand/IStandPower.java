@@ -19,6 +19,7 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     
     Optional<StandInstance> getStandInstance();
     boolean giveStand(StandInstance standInstance, boolean newInstance);
+    void setStandInstance(StandInstance standInstance);
     Optional<StandInstance> putOutStand();
     public void setGivenByDisc();
     public boolean wasGivenByDisc();
