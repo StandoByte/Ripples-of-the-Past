@@ -1,7 +1,10 @@
 This is a template for a data pack which configures Stand stats in Ripples of the Past mod.
 To change the stats of a Stand using this data pack, you'll need to:
-1) Move/copy the "standstats" folder (the one where this file is located) to your world's "datapacks" folder.
-2) Inside this datapack, find a .json file for a Stand you want to configure.
+1) IMPORTANT: Move/copy the "standstats" folder (the one where this file is located) to your world's "datapacks" folder.
+----
+It is a data pack. The game WILL NOT see it if you do not do this step. The "standstats" folder will get rewritten with the default values next time you join the world.
+----
+2) Inside this data pack, find a .json file for a Stand you want to configure.
 3) Open it with any text editor and change the values you need.
 ----
 The file has two main blocks of variables:
