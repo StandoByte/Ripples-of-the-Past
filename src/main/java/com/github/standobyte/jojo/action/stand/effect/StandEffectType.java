@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.action.stand.effect;
 
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
-public class StandEffectType<T extends StandEffectInstance> extends ForgeRegistryEntry<StandEffectType<T>> {
+public class StandEffectType<T extends StandEffectInstance> extends ForgeRegistryEntry<StandEffectType<?>> {
     private IFactory<T> factory;
     
     public StandEffectType(IFactory<T> factory) {
