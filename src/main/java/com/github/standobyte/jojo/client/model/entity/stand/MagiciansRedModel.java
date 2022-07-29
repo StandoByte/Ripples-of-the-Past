@@ -2,8 +2,8 @@ package com.github.standobyte.jojo.client.model.entity.stand;
 
 import java.util.function.Function;
 
-import com.github.standobyte.jojo.action.actions.MagiciansRedRedBind;
-import com.github.standobyte.jojo.action.actions.StandEntityAction;
+import com.github.standobyte.jojo.action.stand.MagiciansRedRedBind;
+import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseTransition;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;

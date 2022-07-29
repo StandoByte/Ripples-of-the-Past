@@ -1,11 +1,12 @@
 package com.github.standobyte.jojo.entity.mob.rps;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.mutable.MutableInt;
 
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
@@ -14,7 +15,6 @@ import net.minecraft.nbt.CompoundNBT;
 
 public class RPSPvpGamesMap {
     private final Map<PlayersPair, RockPaperScissorsGame> pvpGames = new HashMap<>();
-    
     
     public RockPaperScissorsGame addGame(RockPaperScissorsGame game) {
         pvpGames.put(new PlayersPair(game.player1.getEntityUuid(), game.player2.getEntityUuid()), game);
@@ -33,25 +33,20 @@ public class RPSPvpGamesMap {
     
     public CompoundNBT save() {
         CompoundNBT nbt = new CompoundNBT();
-        int i = 0;
-        Iterator<Map.Entry<PlayersPair, RockPaperScissorsGame>> it = pvpGames.entrySet().iterator();
-        while (it.hasNext()) {
-            nbt.put(String.valueOf(i++), it.next().getValue().writeNBT());
-        }
-        nbt.putInt("Size", i);
+        MutableInt i = new MutableInt(0);
+        pvpGames.forEach((players, game) -> nbt.put(String.valueOf(i.incrementAndGet()), game.writeNBT()));
         return nbt;
     }
     
     public void load(CompoundNBT nbt) {
-        int size = nbt.getInt("Size");
-        for (int i = 0; i < size; i++) {
-            if (nbt.contains(String.valueOf(i), JojoModUtil.getNbtId(CompoundNBT.class))) {
-                RockPaperScissorsGame game = RockPaperScissorsGame.fromNBT(nbt.getCompound(String.valueOf(i)));
+        nbt.getAllKeys().forEach(key -> {
+            if (nbt.contains(key, JojoModUtil.getNbtId(CompoundNBT.class))) {
+                RockPaperScissorsGame game = RockPaperScissorsGame.fromNBT(nbt.getCompound(key));
                 if (game != null) {
                     addGame(game);
                 }
             }
-        }
+        });
     }
     
     

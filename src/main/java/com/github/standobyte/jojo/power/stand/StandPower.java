@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.action.actions.StandAction;
+import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -48,6 +48,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     private int xp = 0;
     private boolean skippedProgression;
     private boolean givenByDisc;
+    
+    private StandEffectsTracker continuousEffects = new StandEffectsTracker(this);
     
     private ActionLearningProgressMap<IStandPower> actionLearningProgressMap = new ActionLearningProgressMap<>();
     
@@ -98,7 +100,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         return true;
     }
 
-    private void setStandInstance(StandInstance standInstance) {
+    @Override
+    public void setStandInstance(StandInstance standInstance) {
         this.standInstance = Optional.ofNullable(standInstance);
         onPowerSet(this.standInstance.map(StandInstance::getType).orElse(null));
     }
@@ -130,6 +133,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
         if (standType != null) {
             tier = Math.max(tier, standType.getTier());
+        }
+        if (user != null && !user.level.isClientSide()) {
+            continuousEffects.onUserStandRemoved(user);
         }
     }
 
@@ -164,6 +170,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                     SaveFileUtilCapProvider.getSaveFileCap(player).removePlayerStand(standType);
                 });
             }
+            if (user != null && !user.level.isClientSide()) {
+                continuousEffects.onUserStandRemoved(user);
+            }
             return true;
         }
         return false;
@@ -185,6 +194,10 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (hasPower()) {
             tickStamina();
             tickResolve();
+            if (user != null) {
+                standInstance.ifPresent(stand -> stand.tick(this, user, user.level));
+            }
+            continuousEffects.tick();
         }
     }
     
@@ -375,6 +388,12 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (usesResolve()) {
             resolveCounter.tick();
         }
+    }
+    
+
+    @Override
+    public StandEffectsTracker getContinuousEffects() {
+        return continuousEffects;
     }
     
 
@@ -584,7 +603,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         cnbt.putInt("Xp", getXp());
         cnbt.putBoolean("Skipped", skippedProgression);
         cnbt.putBoolean("Disc", givenByDisc);
-        actionLearningProgressMap.writeToNbt(cnbt);
+        cnbt.put("ActionLearning", actionLearningProgressMap.toNBT());
+        cnbt.put("Effects", continuousEffects.toNBT());
         return cnbt;
     }
 
@@ -611,7 +631,12 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
         skippedProgression = nbt.getBoolean("Skipped");
         givenByDisc = nbt.getBoolean("Disc");
-        actionLearningProgressMap.readFromNbt(nbt);
+        if (nbt.contains("ActionLearning", JojoModUtil.getNbtId(CompoundNBT.class))) {
+            actionLearningProgressMap.fromNBT(nbt.getCompound("ActionLearning"));
+        }
+        if (nbt.contains("Effects", JojoModUtil.getNbtId(CompoundNBT.class))) {
+            continuousEffects.fromNBT(nbt.getCompound("Effects"));
+        }
         super.readNBT(nbt);
     }
     
@@ -662,5 +687,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 standManifestation.syncWithTrackingOrUser(player);
             }
         }
+        continuousEffects.syncWithTrackingOrUser(player);
     }
 }

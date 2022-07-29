@@ -2,12 +2,13 @@ package com.github.standobyte.jojo.entity.mob.rps;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.mutable.MutableInt;
 
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.entity.mob.IMobStandUser;
@@ -84,7 +85,7 @@ public class RockPaperScissorsKidEntity extends VillagerEntity implements IMobSt
     public void tick() {
         super.tick();
         // FIXME (!!) random pick
-        if (!level.isClientSide() && tickCount % 50 == 0) {
+        if (!level.isClientSide() && tickCount % 10 == 0) {
             makeRandomPick();
         }
         if (currentGame != null && (/*currentGame.playerLeft() || */currentGame.isGameOver())) {
@@ -125,12 +126,8 @@ public class RockPaperScissorsKidEntity extends VillagerEntity implements IMobSt
         nbt.put("StandPower", standPower.writeNBT());
         
         CompoundNBT lostToMapNBT = new CompoundNBT();
-        lostToMapNBT.putInt("Size", lostTo.size());
-        int i = 0;
-        Iterator<UUID> it = lostTo.iterator();
-        while (it.hasNext()) {
-            lostToMapNBT.putUUID(String.valueOf(i++), it.next());
-        }
+        MutableInt i = new MutableInt(0);
+        lostTo.forEach(winner -> lostToMapNBT.putUUID(String.valueOf(i.incrementAndGet()), winner));
         nbt.put("LostTo", lostToMapNBT);
 
         CompoundNBT unfinishedGamesNBT = new CompoundNBT();
@@ -147,10 +144,11 @@ public class RockPaperScissorsKidEntity extends VillagerEntity implements IMobSt
 
         if (nbt.contains("LostTo", JojoModUtil.getNbtId(CompoundNBT.class))) {
             CompoundNBT lostToMapNBT = nbt.getCompound("LostTo");
-            int size = lostToMapNBT.getInt("Size");
-            for (int i = 0; i < size; i++) {
-                lostTo.add(lostToMapNBT.getUUID(String.valueOf(i)));
-            }
+            lostToMapNBT.getAllKeys().forEach(key -> {
+                if (lostToMapNBT.hasUUID(key)) {
+                    lostTo.add(lostToMapNBT.getUUID(key));
+                }
+            });
         }
 
         if (nbt.contains("UnfinishedGames", JojoModUtil.getNbtId(CompoundNBT.class))) {
@@ -159,7 +157,10 @@ public class RockPaperScissorsKidEntity extends VillagerEntity implements IMobSt
                 try {
                     UUID id = UUID.fromString(key);
                     if (unfinishedGamesNBT.contains(key, JojoModUtil.getNbtId(CompoundNBT.class))) {
-                        games.put(id, RockPaperScissorsGame.fromNBT(unfinishedGamesNBT.getCompound(key)));
+                        RockPaperScissorsGame game = RockPaperScissorsGame.fromNBT(unfinishedGamesNBT.getCompound(key));
+                        if (game != null) {
+                            games.put(id, game);
+                        }
                     }
                 }
                 catch (IllegalArgumentException e) {}

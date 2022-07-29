@@ -116,4 +116,33 @@ public class NetworkUtil {
             return arr;
         }
     }
+
+    public static PacketBuffer writeIntArray(PacketBuffer buf, int[] arr) {
+        buf.writeVarInt(arr.length);
+
+        for (int i : arr) {
+            buf.writeInt(i);
+        }
+
+        return buf;
+    }
+
+    public static int[] readIntArray(PacketBuffer buf) {
+        return readIntArray(buf, buf.readableBytes());
+    }
+
+    public static int[] readIntArray(PacketBuffer buf, int maxAllowed) {
+        int n = buf.readVarInt();
+        if (n > maxAllowed) {
+            throw new DecoderException("IntArray with size " + n + " is bigger than allowed " + maxAllowed);
+        } else {
+            int[] arr = new int[n];
+
+            for(int i = 0; i < arr.length; ++i) {
+                arr[i] = buf.readInt();
+            }
+
+            return arr;
+        }
+    }
 }
