@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.power.stand.type;
 
-import com.github.standobyte.jojo.action.actions.StandAction;
+import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
 

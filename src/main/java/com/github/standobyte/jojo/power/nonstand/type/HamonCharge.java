@@ -41,7 +41,7 @@ public class HamonCharge {
     public HamonCharge(CompoundNBT nbt) {
         this.charge = nbt.getFloat("Charge");
         this.chargeTicks = nbt.getInt("ChargeTicks");
-        if (nbt.contains("HamonUser")) {
+        if (nbt.hasUUID("HamonUser")) {
             this.hamonUserId = nbt.getUUID("HamonUser");
         }
         this.gavePoints = nbt.getBoolean("GavePoints");

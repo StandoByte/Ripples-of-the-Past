@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.power.stand.stats;
 
-import com.github.standobyte.jojo.action.actions.TimeStop;
+import com.github.standobyte.jojo.action.stand.TimeStop;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.power.stand.IStandPower;

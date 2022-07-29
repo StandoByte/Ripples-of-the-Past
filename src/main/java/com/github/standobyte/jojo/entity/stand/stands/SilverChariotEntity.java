@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.action.actions.StandEntityAction;
+import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
 import com.github.standobyte.jojo.entity.stand.StandAttackProperties;

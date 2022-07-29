@@ -58,7 +58,7 @@ public class TrTypeStandInstancePacket {
                         stand.clear();
                     }
                     else {
-                        stand.giveStand(msg.standInstance, true);
+                        stand.setStandInstance(msg.standInstance);
                     }
                 });
             }
