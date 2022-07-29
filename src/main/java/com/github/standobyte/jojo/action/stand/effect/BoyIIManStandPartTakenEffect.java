@@ -21,6 +21,10 @@ public class BoyIIManStandPartTakenEffect extends StandEffectInstance {
         super(effectType);
     }
     
+    public StandInstance getPartsTaken() {
+        return partsTaken;
+    }
+    
     @Override
     protected void start() {}
 

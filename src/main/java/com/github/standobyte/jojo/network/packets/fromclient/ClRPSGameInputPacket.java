@@ -76,6 +76,7 @@ public class ClRPSGameInputPacket {
                         RPSCheat cheat = game.getCheat(player, msg.cheatPower);
                         if (cheat != null) {
                             cheat.cheat(game, game.getPlayer(player), player.level);
+                            game.getPlayer(player).setCheated();
                         }
                     });
                 });

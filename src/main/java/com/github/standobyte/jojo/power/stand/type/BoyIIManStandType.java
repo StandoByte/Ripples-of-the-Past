@@ -7,7 +7,6 @@ import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.text.ITextComponent;
 
-// FIXME !!!!! uncollectible, for villager kid only
 public class BoyIIManStandType<T extends StandStats> extends StandType<T> {
     
     public BoyIIManStandType(int color, ITextComponent partName, 

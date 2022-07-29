@@ -36,6 +36,7 @@ public class RockPaperScissorsScreen extends ChatScreen {
     @Nullable
     private Pick pickClicked;
     private Button cheatButton;
+    private boolean cheatedThisRound = false;
     @Nullable
     private PowerClassification cheatPower;
     private static final int DEFAULT_CHEAT_BUTTON_Y = 10;
@@ -53,6 +54,7 @@ public class RockPaperScissorsScreen extends ChatScreen {
                 PlayerEntity playerEntity = minecraft.player;
                 RPSCheat cheat = game.getCheat(playerEntity, cheatPower);
                 if (cheat != null) {
+                    cheatedThisRound = true;
                     cheat.cheat(game, game.player1, playerEntity.level);
                 }
                 PacketManager.sendToServer(ClRPSGameInputPacket.cheat(cheatPower));
@@ -97,6 +99,9 @@ public class RockPaperScissorsScreen extends ChatScreen {
         if (game == null) {
             this.onClose();
             return;
+        }
+        if (game.checkNewRound()) {
+            cheatedThisRound = false;
         }
         int windowX = (width - WIDTH) / 2;
         int windowY = (height - HEIGHT) / 2;
@@ -171,7 +176,7 @@ public class RockPaperScissorsScreen extends ChatScreen {
             cheatPower = PowerClassification.NON_STAND;
             cheat = game.getCheat(minecraft.player, cheatPower);
         }
-        cheatButton.active = cheat != null;
+        cheatButton.active = !cheatedThisRound && cheat != null;
         cheatButton.visible = cheat != null;
         if (cheat != null) {
             IPowerType<?, ?> cheatType = IPower.getPowerOptional(minecraft.player, cheatPower).resolve().get().getType();
@@ -228,7 +233,7 @@ public class RockPaperScissorsScreen extends ChatScreen {
     public void tick() {
         super.tick();
         if (sendThoughts) {
-            PacketManager.sendToServer(new ClRPSPickThoughtsPacket(pickMouseOver));
+            PacketManager.sendToServer(new ClRPSPickThoughtsPacket(pickClicked != null ? pickClicked : pickMouseOver));
         }
     }
 

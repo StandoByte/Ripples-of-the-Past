@@ -325,10 +325,8 @@ public class ResolveCounter {
 
     public void onResolveEffectStarted(int amplifier) {
     	int newLevel = amplifier + 1;
-    	if (newLevel <= stand.getMaxResolveLevel()) {
-    		stand.setResolveLevel(newLevel);
-    	}
-    	else {
+        stand.setResolveLevel(Math.min(newLevel, stand.getMaxResolveLevel()));
+    	if (newLevel > stand.getMaxResolveLevel()) {
     		extraLevel++;
     	}
         setResolveValue(stand.getMaxResolve(), 0);
