@@ -23,6 +23,8 @@ import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.IPacket;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.ActionResultType;
@@ -31,8 +33,10 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
+import net.minecraftforge.fml.network.NetworkHooks;
 
-public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser {
+public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser, IEntityAdditionalSpawnData {
     private final INonStandPower hamonPower = new NonStandPower(this);
     private HamonData hamon;
     @Deprecated
@@ -81,7 +85,6 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser 
                 }
             }
         }
-        restoreHamon();
     }
 
     // FIXME liquid walking
@@ -140,6 +143,22 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser 
             iAmDumbForNotUsingFinalizeSpawn = true;
         }
     }
+
+    @Deprecated
+    @Override
+    public void writeSpawnData(PacketBuffer buffer) {
+        restoreHamon();
+    }
+
+    @Deprecated
+    @Override
+    public IPacket<?> getAddEntityPacket() {
+        return NetworkHooks.getEntitySpawningPacket(this);
+    }
+
+    @Deprecated
+    @Override
+    public void readSpawnData(PacketBuffer additionalData) {}
 
     @Override
     protected void registerGoals() {} // TODO Hamon Master ai
