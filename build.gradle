@@ -12,7 +12,7 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
 version = "${mc_version}-${mod_version}"
-group = 'com.github.standobyte.jojo'
+group = 'standobyte.jojo'
 archivesBaseName = 'JJBA-RipplesOfThePast'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(8)
