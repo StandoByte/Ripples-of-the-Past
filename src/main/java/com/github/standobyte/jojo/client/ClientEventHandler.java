@@ -8,6 +8,7 @@ import java.util.Random;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
@@ -38,6 +39,7 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.shader.ShaderGroup;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
@@ -48,6 +50,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
@@ -62,6 +65,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.event.TickEvent.RenderTickEvent;
+import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -406,6 +410,17 @@ public class ClientEventHandler {
     			ClientReflection.setSplash((MainMenuScreen) event.getGui(), splash);
     		}
     	}
+    }
+    
+    @SubscribeEvent
+    public void addTooltipLines(ItemTooltipEvent event) {
+        PlayerEntity player = event.getPlayer();
+        if (player != null) {
+            CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(player.level, player, event.getItemStack()).ifPresent(pos -> {
+                event.getToolTip().add(new TranslationTextComponent("jojo.crazy_diamond.block_checkpoint.tooltip", 
+                        pos.getX(), pos.getY(), pos.getZ()).withStyle(TextFormatting.RED));
+            });
+        }
     }
     
 //    @SubscribeEvent(priority = EventPriority.LOWEST)

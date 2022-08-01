@@ -345,6 +345,8 @@
     "sounds": [ "jojo:stand/stand_parry" ]
   },
   
+  
+  
   "jotaro_star_platinum": {
     "subtitle": "jojo.subtitle.star_platinum_name",
     "sounds": [ "jojo:stand_user/jotaro_star_platinum", "jojo:stand_user/jotaro_star_platinum_2", "jojo:stand_user/jotaro_star_platinum_3", "jojo:stand_user/jotaro_star_platinum_4" ]
@@ -416,6 +418,9 @@
   "star_platinum_time_stop_blink": {
     "sounds": [ "jojo:stand/star_platinum_time_stop_blink" ]
   },
+  
+  
+  
   "dio_die": {
     "subtitle": "jojo.subtitle.die",
     "sounds": [ "jojo:stand_user/dio_die", "jojo:stand_user/dio_die_2" ] 
@@ -501,6 +506,9 @@
     "subtitle": "jojo.subtitle.road_roller_hit",
     "sounds": [ "jojo:road_roller_hit", "jojo:road_roller_hit_2", "jojo:road_roller_hit_3" ]
   },
+  
+  
+  
   "kakyoin_hierophant_green": {
     "subtitle": "jojo.subtitle.hierophant_green_name",
     "sounds": [ "jojo:stand_user/kakyoin_hierophant_green" ]
@@ -533,6 +541,9 @@
   "hierophant_green_grapple_catch": {
     "sounds": [ "jojo:water_splash" ]
   },
+  
+  
+  
   "polnareff_silver_chariot": {
     "subtitle": "jojo.subtitle.silver_chariot_name",
     "sounds": [ "jojo:stand_user/polnareff_silver_chariot", "jojo:stand_user/polnareff_silver_chariot_2" ]
@@ -572,6 +583,9 @@
   "silver_chariot_armor_off": {
     "sounds": [ "jojo:stand/silver_chariot_armor_off" ]
   },
+  
+  
+  
   "avdol_magicians_red": {
     "subtitle": "jojo.subtitle.magicians_red_name",
     "sounds": [ "jojo:stand_user/avdol_magicians_red", "jojo:stand_user/avdol_magicians_red_2", "jojo:stand_user/avdol_magicians_red_3", "jojo:stand_user/avdol_magicians_red_4" ]
@@ -599,6 +613,32 @@
   "magicians_red_fire_ability": {
     "subtitle": "jojo.subtitle.fire_ability",
     "sounds": [ "minecraft:mob/ghast/fireball4" ]
-  }
+  },
   
+  
+  
+  "josuke_crazy_diamond": {
+    "subtitle": "jojo.subtitle.crazy_diamond_name",
+    "sounds": [  ]
+  },
+  "josuke_fix": {
+    "subtitle": "jojo.subtitle.fix",
+    "sounds": [  ]
+  },
+  "crazy_diamond_summon": {
+    "subtitle": "jojo.subtitle.stand_summon",
+    "sounds": [  ]
+  },
+  "crazy_diamond_unsummon": {
+    "subtitle": "jojo.subtitle.stand_unsummon",
+    "sounds": [ "jojo:stand_user/avdol_magicians_red", "jojo:stand_user/avdol_magicians_red_2", "jojo:stand_user/avdol_magicians_red_3", "jojo:stand_user/avdol_magicians_red_4" ]
+  },
+  "crazy_diamond_dora": {
+    "subtitle": "jojo.subtitle.dora",
+    "sounds": [  ]
+  },
+  "crazy_diamond_dorarara": {
+    "subtitle": "jojo.subtitle.dorarara",
+    "sounds": [  ]
+  }
 }

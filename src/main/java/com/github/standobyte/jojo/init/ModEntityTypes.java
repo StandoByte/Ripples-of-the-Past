@@ -41,6 +41,7 @@ import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsKidEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
+import com.github.standobyte.jojo.entity.stand.stands.CrazyDiamondEntity;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
@@ -247,6 +248,11 @@ public class ModEntityTypes {
     public static final RegistryObject<StandEntityType<MagiciansRedEntity>> MAGICIANS_RED = ENTITIES.register("magicians_red", 
             () -> new StandEntityType<MagiciansRedEntity>(MagiciansRedEntity::new, ModStandTypes.MAGICIANS_RED, false, 0.65F, 1.95F)
             .summonSound(ModSounds.MAGICIANS_RED_SUMMON));
+    
+    public static final RegistryObject<StandEntityType<CrazyDiamondEntity>> CRAZY_DIAMOND = ENTITIES.register("crazy_diamond", 
+            () -> new StandEntityType<CrazyDiamondEntity>(CrazyDiamondEntity::new, ModStandTypes.CRAZY_DIAMOND, false, 0.65F, 1.95F)
+//            .summonSound(ModSounds.MAGICIANS_RED_SUMMON)
+            );
 
     
     
@@ -261,5 +267,6 @@ public class ModEntityTypes {
         event.put(ModEntityTypes.HIEROPHANT_GREEN.get(), StandEntity.createAttributes().build());
         event.put(ModEntityTypes.SILVER_CHARIOT.get(), StandEntity.createAttributes().build());
         event.put(ModEntityTypes.MAGICIANS_RED.get(), StandEntity.createAttributes().build());
+        event.put(ModEntityTypes.CRAZY_DIAMOND.get(), StandEntity.createAttributes().build());
     }
 }
