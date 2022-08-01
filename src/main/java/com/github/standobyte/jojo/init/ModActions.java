@@ -35,6 +35,9 @@ import com.github.standobyte.jojo.action.non_stand.VampirismFreeze;
 import com.github.standobyte.jojo.action.non_stand.VampirismHamonSuicide;
 import com.github.standobyte.jojo.action.non_stand.VampirismSpaceRipperStingyEyes;
 import com.github.standobyte.jojo.action.non_stand.VampirismZombieSummon;
+import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
+import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMove;
+import com.github.standobyte.jojo.action.stand.CrazyDiamondDecompose;
 import com.github.standobyte.jojo.action.stand.HierophantGreenBarrier;
 import com.github.standobyte.jojo.action.stand.HierophantGreenEmeraldSplash;
 import com.github.standobyte.jojo.action.stand.HierophantGreenGrapple;
@@ -53,6 +56,7 @@ import com.github.standobyte.jojo.action.stand.SilverChariotSweepingAttack;
 import com.github.standobyte.jojo.action.stand.SilverChariotTakeOffArmor;
 import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
+import com.github.standobyte.jojo.action.stand.StandEntityAction.Phase;
 import com.github.standobyte.jojo.action.stand.StandEntityBlock;
 import com.github.standobyte.jojo.action.stand.StandEntityComboHeavyAttack;
 import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack;
@@ -69,7 +73,6 @@ import com.github.standobyte.jojo.action.stand.TheWorldTimeStopInstant;
 import com.github.standobyte.jojo.action.stand.TimeResume;
 import com.github.standobyte.jojo.action.stand.TimeStop;
 import com.github.standobyte.jojo.action.stand.TimeStopInstant;
-import com.github.standobyte.jojo.action.stand.StandEntityAction.Phase;
 import com.github.standobyte.jojo.entity.stand.StandAttackProperties;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
@@ -469,6 +472,40 @@ public class ModActions {
     public static final RegistryObject<StandAction> MAGICIANS_RED_DETECTOR = ACTIONS.register("magicians_red_detector", 
             () -> new MagiciansRedDetector(new StandAction.Builder().resolveLevelToUnlock(3).autoSummonStand().partsRequired(StandPart.MAIN_BODY)
                     .xpRequirement(500)));
+    
+    
+    public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_PUNCH = ACTIONS.register("crazy_diamond_punch", 
+            () -> new StandEntityLightAttack(new StandEntityLightAttack.Builder()));
+    
+    public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_BARRAGE = ACTIONS.register("crazy_diamond_barrage", 
+            () -> new StandEntityMeleeBarrage(new StandEntityMeleeBarrage.Builder().standSound(ModSounds.CRAZY_DIAMOND_DORARARA)));
+    
+    public static final RegistryObject<StandEntityComboHeavyAttack> CRAZY_DIAMOND_UPPERCUT = ACTIONS.register("crazy_diamond_uppercut", 
+            () -> new StandEntityComboHeavyAttack(new StandEntityComboHeavyAttack.Builder().standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_DORA)
+                    .targetPunchProperties((punch, stand, punchTarget) -> {
+                        return punch.get()
+                        .addKnockback(0.5F + stand.getLastHeavyPunchCombo())
+                        .knockbackXRot(-60F)
+                        .disableBlocking((float) stand.getProximityRatio(punchTarget) - 0.25F);
+                    })
+                    .partsRequired(StandPart.ARMS)));
+    
+    public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_HEAVY_PUNCH = ACTIONS.register("crazy_diamond_heavy_punch", 
+            () -> new StandEntityHeavyAttack(new StandEntityHeavyAttack.Builder().standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_DORA)
+                    .shiftVariationOf(CRAZY_DIAMOND_PUNCH).shiftVariationOf(CRAZY_DIAMOND_BARRAGE).partsRequired(StandPart.ARMS), CRAZY_DIAMOND_UPPERCUT));
+    
+    public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_BLOCK = ACTIONS.register("crazy_diamond_block", 
+            () -> new StandEntityBlock());
+    
+    public static final RegistryObject<StandAction> CRAZY_DIAMOND_BLOCK_CHECKPOINT_MOVE = ACTIONS.register("crazy_diamond_block_checkpoint_move", 
+            () -> new CrazyDiamondBlockCheckpointMove(new StandEntityAction.Builder().holdType().resolveLevelToUnlock(0).partsRequired(StandPart.ARMS)));
+    
+    public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_BLOCK_CHECKPOINT = ACTIONS.register("crazy_diamond_block_checkpoint", 
+            () -> new CrazyDiamondBlockCheckpointMake(new StandEntityAction.Builder().standWindupDuration(10).standRecoveryTicks(5)
+                    .resolveLevelToUnlock(0).partsRequired(StandPart.ARMS).shiftVariationOf(CRAZY_DIAMOND_BLOCK_CHECKPOINT_MOVE)));
+    
+    public static final RegistryObject<StandAction> CRAZY_DIAMOND_DECOMPOSE = ACTIONS.register("crazy_diamond_decompose", 
+            () -> new CrazyDiamondDecompose(new StandAction.Builder().resolveLevelToUnlock(0).partsRequired(StandPart.ARMS)));
     
 
 
