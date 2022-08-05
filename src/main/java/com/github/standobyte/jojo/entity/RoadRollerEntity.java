@@ -28,7 +28,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.network.NetworkHooks;
 
-public class RoadRollerEntity extends Entity {
+public class RoadRollerEntity extends Entity implements IHasHealth {
     private static final DataParameter<Float> HEALTH = EntityDataManager.defineId(RoadRollerEntity.class, DataSerializers.FLOAT);
     private static final float MAX_HEALTH = 50;
     private int ticksBeforeExplosion = -1;
@@ -192,7 +192,9 @@ public class RoadRollerEntity extends Entity {
                     setDeltaMovement(getDeltaMovement().add(0, damageMotion, 0));
                     this.tickDamageMotion += damageMotion;
                 }
-                setHealth(cos < 0 ? getHealth() - amount : getHealth() + amount);
+                if (getHealth() > 0) {
+                    setHealth(cos < 0 ? getHealth() - amount : getHealth() + amount);
+                }
                 markHurt();
                 level.playSound(null, getX(), getY(), getZ(), ModSounds.ROAD_ROLLER_HIT.get(), 
                         getSoundSource(), amount * 0.25F, 1.0F + (random.nextFloat() - 0.5F) * 0.3F);
@@ -201,19 +203,31 @@ public class RoadRollerEntity extends Entity {
         }
     }
 
+    @Override
     public float getHealth() {
         return entityData.get(HEALTH);
     }
 
+    @Override
     public void setHealth(float health) {
-        entityData.set(HEALTH, MathHelper.clamp(health, 0.0F, MAX_HEALTH));
+        entityData.set(HEALTH, MathHelper.clamp(health, 0.0F, getMaxHealth()));
+    }
+
+    @Override
+    public float getMaxHealth() {
+        return MAX_HEALTH;
     }
 
     @Override
     public void onSyncedDataUpdated(DataParameter<?> dataParameter) {
         super.onSyncedDataUpdated(dataParameter);
-        if (HEALTH.equals(dataParameter) && getHealth() == 0.0F) {
-        	ticksBeforeExplosion = 60;
+        if (HEALTH.equals(dataParameter)) {
+            if (getHealth() <= 0.0F) {
+                ticksBeforeExplosion = 60;
+            }
+            else {
+                ticksBeforeExplosion = -1;
+            }
         }
     }
     

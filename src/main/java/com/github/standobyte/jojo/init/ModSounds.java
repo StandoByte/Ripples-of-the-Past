@@ -447,5 +447,14 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_DORARARA = SOUNDS.register("crazy_diamond_dorarara", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_dorarara")));
     
+    public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_FIX = SOUNDS.register("crazy_diamond_fix", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_fix")));
+    
+    public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_FIX_ENDED = SOUNDS.register("crazy_diamond_fix_ended", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_fix_ended")));
+    
+    public static final RegistryObject<SoundEvent> BLOOD_CUTTER_SPLASH = SOUNDS.register("blood_cutter_splash", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "blood_cutter_splash")));
+    
     public static final OstSoundList CRAZY_DIAMOND_OST = new OstSoundList(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_ost"), SOUNDS);
 }

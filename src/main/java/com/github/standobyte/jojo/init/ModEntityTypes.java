@@ -11,6 +11,8 @@ import com.github.standobyte.jojo.entity.PillarmanTempleEngravingEntity;
 import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.damaging.LightBeamEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.CDBloodCutterEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.CDItemProjectileEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.HGEmeraldEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.HamonBubbleBarrierEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.HamonBubbleCutterEntity;
@@ -224,6 +226,14 @@ public class ModEntityTypes {
     public static final RegistryObject<EntityType<MRDetectorEntity>> MR_DETECTOR = ENTITIES.register("mr_detector", 
             () -> EntityType.Builder.<MRDetectorEntity>of(MRDetectorEntity::new, EntityClassification.MISC).sized(0.5F, 0.5F).noSummon().noSave().setUpdateInterval(Integer.MAX_VALUE).setShouldReceiveVelocityUpdates(false)
             .build(new ResourceLocation(JojoMod.MOD_ID, "mr_detector").toString()));
+    
+    public static final RegistryObject<EntityType<CDItemProjectileEntity>> CD_ITEM_PROJECTILE = ENTITIES.register("cd_item_projectile", 
+            () -> EntityType.Builder.<CDItemProjectileEntity>of(CDItemProjectileEntity::new, EntityClassification.MISC).sized(0.5F, 0.5F).noSummon().noSave().setUpdateInterval(10)
+            .build(new ResourceLocation(JojoMod.MOD_ID, "cd_item_projectile").toString()));
+    
+    public static final RegistryObject<EntityType<CDBloodCutterEntity>> CD_BLOOD_CUTTER = ENTITIES.register("cd_blood_cutter", 
+            () -> EntityType.Builder.<CDBloodCutterEntity>of(CDBloodCutterEntity::new, EntityClassification.MISC).sized(0.5F, 0.5F).noSummon().noSave().setUpdateInterval(10)
+            .build(new ResourceLocation(JojoMod.MOD_ID, "cd_blood_cutter").toString()));
     
     
     
