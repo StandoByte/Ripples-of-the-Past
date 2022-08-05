@@ -270,7 +270,7 @@ public class StandEntityTask {
         public Optional<StandEntityTask> copy(Optional<StandEntityTask> value) {
             if (value.isPresent()) {
                 StandEntityTask task = value.get();
-                StandEntityTask taskNew = new StandEntityTask(task.action, task.startingTicks, task.phase, false, task.target, task.offsetFromUser);
+                StandEntityTask taskNew = new StandEntityTask(task.action, task.startingTicks, task.phase, false, task.target.copy(), task.offsetFromUser);
                 taskNew.ticksLeft = task.ticksLeft;
                 taskNew.offsetFromUser = task.offsetFromUser;
                 return Optional.of(taskNew);
