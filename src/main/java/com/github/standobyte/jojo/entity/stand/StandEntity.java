@@ -1219,7 +1219,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             	previousTask.ifPresent(prevTask -> {
             		if (prevTask.getTarget().getType() != TargetType.EMPTY
             				&& task.getTarget().getType() == TargetType.EMPTY) {
-            			task.setTarget(this, prevTask.getTarget(), userPower, true);
+            			task.setTarget(this, prevTask.getTarget(), userPower);
             		}
                 	
             		if (task.getAction().transfersPreviousOffset(userPower, this, prevTask)) {
@@ -1467,7 +1467,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public void setTaskTarget(ActionTarget target) {
         if (target != null) {
             getCurrentTask().ifPresent(task -> {
-                boolean sendTarget = task.setTarget(this, target, userPower, !level.isClientSide());
+                boolean sendTarget = task.setTarget(this, target, userPower);
                 if (!level.isClientSide()) {
                     if (sendTarget) {
                         PacketManager.sendToClientsTracking(new TrStandEntityTargetPacket(getId(), target), this);

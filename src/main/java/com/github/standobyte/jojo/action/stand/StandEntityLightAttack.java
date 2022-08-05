@@ -86,6 +86,11 @@ public class StandEntityLightAttack extends StandEntityAction {
         return true;
     }
     
+    @Override
+    public boolean keepStandTarget(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
+        return true;
+    }
+    
     
     
     public static class Builder extends StandEntityAction.AbstractBuilder<StandEntityLightAttack.Builder>  {
@@ -93,7 +98,6 @@ public class StandEntityLightAttack extends StandEntityAction {
     	public Builder() {
     		standAutoSummonMode(AutoSummonMode.ONE_ARM).staminaCost(10F).standUserSlowDownFactor(1.0F)
             .standOffsetFront().standOffsetFromUser(-0.75, 0.75)
-            .standKeepsTarget().standPose(StandPose.LIGHT_ATTACK)
             .targetPunchProperties((punch, stand, target) -> {
             	return punch.get()
             			.damage(StandStatFormulas.getLightAttackDamage(stand.getAttackDamage()))
@@ -102,6 +106,7 @@ public class StandEntityLightAttack extends StandEntityAction {
                         .parryTiming(stand.getComboMeter() == 0 ? StandStatFormulas.getParryTiming(stand.getPrecision()) : 0)
                         .setPunchSound(ModSounds.STAND_LIGHT_ATTACK.get());
             })
+            .standPose(StandPose.LIGHT_ATTACK)
             .partsRequired(StandPart.ARMS);
     	}
 

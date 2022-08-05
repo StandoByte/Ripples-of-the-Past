@@ -12,7 +12,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.action.ActionTargetContainer;
+import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
@@ -24,16 +24,13 @@ import com.github.standobyte.jojo.network.packets.fromserver.LeapCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHeldActionPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.util.Container;
 
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -211,14 +208,17 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         if (action == null || getHeldAction() == action) return false;
         boolean wasActive = isActive();
         action.onClick(user.level, user, getThis());
-        ActionTargetContainer targetContainer = new ActionTargetContainer(target);
+        Container<ActionTarget> targetContainer = new Container<>(target);
         ActionConditionResult result = checkRequirements(action, targetContainer, true);
-        target = targetContainer.getTarget();
+        target = targetContainer.get();
         serverPlayerUser.ifPresent(player -> {
             player.resetLastActionTime();
         });
         if (action.getHoldDurationMax(getThis()) > 0) {
             action.startedHolding(user.level, user, getThis(), target, result.isPositive());
+            if (!result.isPositive()) {
+                sendMessage(action, result);
+            }
             if (result.isPositive() || !result.shouldStopHeldAction()) {
                 if (!user.level.isClientSide()) {
                     action.playVoiceLine(user, getThis(), target, wasActive, shift);
@@ -228,7 +228,6 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                 return true;
             }
             else {
-                sendMessage(action, result);
                 return false;
             }
         }
@@ -261,7 +260,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
 
     @Override
-    public ActionConditionResult checkRequirements(Action<P> action, ActionTargetContainer targetContainer, boolean checkTargetType) {
+    public ActionConditionResult checkRequirements(Action<P> action, Container<ActionTarget> targetContainer, boolean checkTarget) {
         if (!canUsePower()) {
             return ActionConditionResult.NEGATIVE;
         }
@@ -279,14 +278,14 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition.stun"));
         }
 
-        if (checkTargetType) {
-            ActionConditionResult targetCheckResult = checkTargetType(action, targetContainer);
+        if (checkTarget) {
+            ActionConditionResult targetCheckResult = checkTarget(action, targetContainer);
             if (!targetCheckResult.isPositive()) {
                 return targetCheckResult;
             }
         }
 
-        ActionConditionResult condition = action.checkConditions(user, getThis(), targetContainer.getTarget());
+        ActionConditionResult condition = action.checkConditions(user, getThis(), targetContainer.get());
         if (!condition.isPositive()) {
             return condition;
         }
@@ -298,55 +297,27 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
 
     @Override
-    public ActionConditionResult checkTargetType(Action<P> action, ActionTargetContainer targetContainer) {
-        ActionTarget target = targetContainer.getTarget();
-        LivingEntity performer = action.getPerformer(user, getThis());
-        boolean targetTooFar = false;
-        switch (target.getType()) {
-        case ENTITY:
-            Entity targetEntity = target.getEntity();
-            if (targetEntity == null) {
-                target = ActionTarget.EMPTY;
+    public ActionConditionResult checkTarget(Action<P> action, Container<ActionTarget> targetContainer) {
+        ActionTarget targetInitial = targetContainer.get();
+        if (targetInitial.getType() == TargetType.ENTITY && targetInitial.getEntity() == null 
+                || targetInitial.getType() == TargetType.BLOCK && targetInitial.getBlockPos() == null
+                || !action.getTargetRequirement().checkTargetType(targetContainer.get().getType())) {
+            targetContainer.set(ActionTarget.EMPTY);
+            if (!action.getTargetRequirement().checkTargetType(TargetType.EMPTY)) {
+                return ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
             }
-            else {
-                double rangeSq = action.getMaxRangeSqEntityTarget();
-                if (!performer.canSee(targetEntity)) {
-                    rangeSq /= 4.0D;
-                }
-                if (performer.distanceToSqr(targetEntity) > rangeSq) {
-                    target = ActionTarget.EMPTY;
-                    targetTooFar = true;
-                }
-            }
-            break;
-        case BLOCK:
-            BlockPos targetPos = target.getBlockPos();
-            int buildLimit = 256;
-            boolean validPos = false;
-            if (targetPos.getY() < buildLimit - 1 || target.getFace() != Direction.UP && targetPos.getY() < buildLimit) {
-                double distSq = action.getMaxRangeSqBlockTarget();
-                if (user.level.getBlockState(targetPos).getBlock() != Blocks.AIR && 
-                        performer.distanceToSqr((double)targetPos.getX() + 0.5D, (double)targetPos.getY() + 0.5D, (double)targetPos.getZ() + 0.5D) < distSq) {
-                    validPos = true;
-                }
-            }
-            if (!validPos) {
-                target = ActionTarget.EMPTY;
-                targetTooFar = true;
-            }
-            break;
-        default:
-            break;
         }
+        
+        P power = getThis();
+        ActionConditionResult preResult = action.checkRangeAndTarget(user, power, targetContainer.get());
 
-        targetContainer.setNewTarget(target);
-        if (!action.appropriateTarget(target.getType())) {
-            if (targetTooFar) {
-                return ActionConditionResult.createNegativeContinueHold(new TranslationTextComponent("jojo.message.action_condition.target_too_far"));
-            }
-            return ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
+        if (!preResult.isPositive()) {
+            targetContainer.set(ActionTarget.EMPTY);
+            return action.getTargetRequirement().checkTargetType(TargetType.EMPTY) ? ActionConditionResult.POSITIVE : preResult;
         }
-        return ActionConditionResult.POSITIVE;
+        else {
+            return preResult;
+        }
     }
     
     @Override
@@ -420,9 +391,9 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                     return;
                 }
                 ActionTarget target = heldActionData.getActionTarget();
-                ActionTargetContainer targetContainer = new ActionTargetContainer(target);
+                Container<ActionTarget> targetContainer = new Container<>(target);
                 ActionConditionResult result = checkRequirements(heldActionData.action, targetContainer, true);
-                target = targetContainer.getTarget();
+                target = targetContainer.get();
                 if (!result.isPositive() && result.shouldStopHeldAction()) {
                     stopHeldAction(false);
                     sendMessage(heldAction, result);
@@ -478,14 +449,14 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                 }
             }
             else {
-                ActionTargetContainer targetContainer = new ActionTargetContainer(target);
+                Container<ActionTarget> targetContainer = new Container<>(target);
                 boolean fire = shouldFire && heldActionData.getTicks() >= heldAction.getHoldDurationToFire(getThis()) && 
                         checkRequirements(heldAction, targetContainer, true).isPositive();
 
                 heldAction.stoppedHolding(user.level, user, getThis(), ticksHeld, fire);
                 
                 if (fire) {
-                    target = targetContainer.getTarget();
+                    target = targetContainer.get();
                     performAction(heldAction, target);
                 }
             }
