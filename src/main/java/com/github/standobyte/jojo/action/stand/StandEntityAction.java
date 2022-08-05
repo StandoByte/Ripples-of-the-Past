@@ -58,6 +58,28 @@ public abstract class StandEntityAction extends StandAction {
         this.standSounds = builder.standSounds;
     }
     
+    public void standTickButtonHold(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
+    
+    public void standTickWindup(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
+    
+    public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
+    
+    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
+    
+    public void standTickRecovery(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
+    
+    public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
+        return standWindupDuration;
+    }
+
+    public int getStandActionTicks(IStandPower standPower, StandEntity standEntity) {
+        return standPerformDuration;
+    }
+    
+    public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
+        return standRecoveryDuration;
+    }
+    
     @Override
     public LivingEntity getPerformer(LivingEntity user, IStandPower power) {
         return power.isActive() ? (StandEntity) power.getStandManifestation() : user;
@@ -133,28 +155,6 @@ public abstract class StandEntityAction extends StandAction {
     
     protected boolean lastTargetCheck(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
 		return keepStandTarget != null ? keepStandTarget.checkTargetType(target.getType()) : false;
-    }
-    
-    public void standTickButtonHold(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
-    
-    public void standTickWindup(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
-    
-    public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
-    
-    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
-    
-    public void standTickRecovery(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
-    
-    public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
-        return standWindupDuration;
-    }
-
-    public int getStandActionTicks(IStandPower standPower, StandEntity standEntity) {
-        return standPerformDuration;
-    }
-    
-    public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
-        return standRecoveryDuration;
     }
     
     @Override

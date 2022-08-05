@@ -631,7 +631,7 @@
   },
   "crazy_diamond_unsummon": {
     "subtitle": "jojo.subtitle.stand_unsummon",
-    "sounds": [ "jojo:stand_user/avdol_magicians_red", "jojo:stand_user/avdol_magicians_red_2", "jojo:stand_user/avdol_magicians_red_3", "jojo:stand_user/avdol_magicians_red_4" ]
+    "sounds": [  ]
   },
   "crazy_diamond_dora": {
     "subtitle": "jojo.subtitle.dora",
@@ -639,6 +639,18 @@
   },
   "crazy_diamond_dorarara": {
     "subtitle": "jojo.subtitle.dorarara",
+    "sounds": [  ]
+  },
+  "crazy_diamond_fix": {
+    "subtitle": "jojo.subtitle.fixed",
+    "sounds": [  ]
+  },
+  "crazy_diamond_fix_ended": {
+    "subtitle": "jojo.subtitle.fixed",
+    "sounds": [  ]
+  },
+  "blood_cutter_splash": {
+    "subtitle": "jojo.subtitle.blood_splash",
     "sounds": [  ]
   }
 }

@@ -55,7 +55,7 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
         return false;
     }
     ActionConditionResult checkRequirements(Action<P> action, ActionTargetContainer targetContainer, boolean checkTargetType);
-    ActionConditionResult checkTargetType(Action<P> action, ActionTargetContainer targetContainer);
+    ActionConditionResult checkTarget(Action<P> action, ActionTargetContainer targetContainer);
     boolean canUsePower();
     
     default RayTraceResult clientHitResult(Entity cameraEntity, RayTraceResult mcHitResult) {

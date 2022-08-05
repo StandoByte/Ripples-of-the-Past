@@ -82,7 +82,7 @@ public class SCRapierEntity extends ModdedProjectileEntity {
     }
 
     @Override
-    protected void breakProjectile(TargetType targetType) {
+    protected void breakProjectile(TargetType targetType, RayTraceResult hitTarget) {
     }
     
     @Override

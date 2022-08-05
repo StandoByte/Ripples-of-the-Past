@@ -8,7 +8,7 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 // Made with Blockbench 4.1.3
 
 
-// FIXME !!!!!!!!!! poses
+// FIXME !!!!!!!!!!!!!!!!!! poses
 public class CrazyDiamondModel extends HumanoidStandModel<CrazyDiamondEntity> {
     private final ModelRenderer helmet;
     private final ModelRenderer bone2;
@@ -198,46 +198,48 @@ public class CrazyDiamondModel extends HumanoidStandModel<CrazyDiamondEntity> {
         torso.texOffs(24, 80).addBox(-1.0F, 10.75F, -2.5F, 2.0F, 4.0F, 1.0F, 0.0F, false);
 
         tube = new ModelRenderer(this);
-        tube.setPos(0.5F, 1.75F, 4.5F);
+        tube.setPos(1.0F, 1.25F, 2.0F);
         torso.addChild(tube);
-        setRotationAngle(tube, 0.0F, 0.0F, 0.157F);
-        tube.texOffs(27, 16).addBox(0.0F, -4.0F, -3.0F, 1.0F, 4.0F, 3.0F, 0.0F, false);
-        tube.texOffs(27, 23).addBox(0.0F, -3.0F, -3.0F, 1.0F, 2.0F, 2.0F, 0.0F, false);
+        setRotationAngle(tube, -0.288F, 0.0F, 0.1571F);
+        tube.texOffs(27, 16).addBox(-0.5F, -3.5F, -0.5F, 1.0F, 4.0F, 3.0F, 0.0F, false);
+        tube.texOffs(27, 23).addBox(-0.5F, -2.5F, -0.5F, 1.0F, 2.0F, 2.0F, 0.0F, false);
 
         tube2 = new ModelRenderer(this);
-        tube2.setPos(1.0F, 2.75F, 4.75F);
+        tube2.setPos(1.5F, 2.25F, 2.25F);
         torso.addChild(tube2);
-        setRotationAngle(tube2, 0.0F, 0.2618F, 0.6458F);
-        tube2.texOffs(35, 16).addBox(0.0F, -6.0F, -3.0F, 1.0F, 6.0F, 3.0F, 0.0F, false);
-        tube2.texOffs(36, 25).addBox(0.0F, -5.0F, -3.0F, 1.0F, 4.0F, 2.0F, 0.0F, false);
+        setRotationAngle(tube2, -0.0785F, 0.2618F, 0.6458F);
+        tube2.texOffs(35, 16).addBox(-0.5F, -5.5F, -0.5F, 1.0F, 6.0F, 3.0F, 0.0F, false);
+        tube2.texOffs(36, 25).addBox(-0.5F, -4.5F, -0.5F, 1.0F, 4.0F, 2.0F, 0.0F, false);
+        tube2.texOffs(36, 31).addBox(-0.5F, -4.5F, 0.5F, 1.0F, 3.0F, 0.0F, 0.0F, false);
 
         tube3 = new ModelRenderer(this);
-        tube3.setPos(1.5F, 4.0F, 4.5F);
+        tube3.setPos(2.0F, 3.5F, 2.0F);
         torso.addChild(tube3);
-        setRotationAngle(tube3, 0.0F, 0.3578F, 0.733F);
-        tube3.texOffs(43, 16).addBox(0.0F, -7.0F, -4.0F, 1.0F, 7.0F, 4.0F, 0.0F, false);
-        tube3.texOffs(43, 27).addBox(0.0F, -6.0F, -3.0F, 1.0F, 5.0F, 2.0F, 0.0F, false);
+        setRotationAngle(tube3, -0.0262F, 0.3578F, 0.733F);
+        tube3.texOffs(43, 16).addBox(-0.5F, -6.5F, -1.5F, 1.0F, 7.0F, 4.0F, 0.0F, false);
+        tube3.texOffs(43, 27).addBox(-0.5F, -5.5F, -0.5F, 1.0F, 5.0F, 2.0F, 0.0F, false);
 
         tube4 = new ModelRenderer(this);
-        tube4.setPos(-0.5F, 1.75F, 4.5F);
+        tube4.setPos(-1.0F, 1.25F, 2.0F);
         torso.addChild(tube4);
-        setRotationAngle(tube4, 0.0F, 0.0F, -0.192F);
-        tube4.texOffs(18, 23).addBox(-1.0F, -3.0F, -3.0F, 1.0F, 2.0F, 2.0F, 0.0F, false);
-        tube4.texOffs(18, 16).addBox(-1.0F, -4.0F, -3.0F, 1.0F, 4.0F, 3.0F, 0.0F, false);
+        setRotationAngle(tube4, -0.3229F, 0.0F, -0.192F);
+        tube4.texOffs(18, 23).addBox(-0.5F, -2.5F, -0.5F, 1.0F, 2.0F, 2.0F, 0.0F, false);
+        tube4.texOffs(18, 16).addBox(-0.5F, -3.5F, -0.5F, 1.0F, 4.0F, 3.0F, 0.0F, false);
 
         tube5 = new ModelRenderer(this);
-        tube5.setPos(-0.75F, 2.75F, 4.75F);
+        tube5.setPos(-1.25F, 2.25F, 2.25F);
         torso.addChild(tube5);
-        setRotationAngle(tube5, 0.0F, -0.2356F, -0.6196F);
-        tube5.texOffs(10, 16).addBox(-1.0F, -6.0F, -3.0F, 1.0F, 6.0F, 3.0F, 0.0F, false);
-        tube5.texOffs(10, 25).addBox(-1.0F, -5.0F, -3.0F, 1.0F, 4.0F, 2.0F, 0.0F, false);
+        setRotationAngle(tube5, -0.1484F, -0.2356F, -0.6196F);
+        tube5.texOffs(10, 16).addBox(-0.5F, -5.5F, -0.5F, 1.0F, 6.0F, 3.0F, 0.0F, false);
+        tube5.texOffs(10, 25).addBox(-0.5F, -4.5F, -0.5F, 1.0F, 4.0F, 2.0F, 0.0F, false);
+        tube5.texOffs(10, 31).addBox(-0.5F, -4.5F, 0.5F, 1.0F, 3.0F, 0.0F, 0.0F, false);
 
         tube6 = new ModelRenderer(this);
-        tube6.setPos(-1.5F, 4.25F, 4.5F);
+        tube6.setPos(-1.9F, 3.6F, 2.0F);
         torso.addChild(tube6);
-        setRotationAngle(tube6, 0.0F, -0.3665F, -0.6632F);
-        tube6.texOffs(0, 16).addBox(-1.0F, -7.0F, -4.0F, 1.0F, 7.0F, 4.0F, 0.0F, false);
-        tube6.texOffs(0, 27).addBox(-1.0F, -6.0F, -3.0F, 1.0F, 5.0F, 2.0F, 0.0F, false);
+        setRotationAngle(tube6, -0.0436F, -0.3665F, -0.6632F);
+        tube6.texOffs(0, 16).addBox(-0.5F, -6.5F, -1.5F, 1.0F, 7.0F, 4.0F, 0.0F, false);
+        tube6.texOffs(0, 27).addBox(-0.5F, -5.5F, -0.5F, 1.0F, 5.0F, 2.0F, 0.0F, false);
 
         heartLarge = new ModelRenderer(this);
         heartLarge.setPos(0.0F, 7.5F, -2.0F);

@@ -280,7 +280,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         }
 
         if (checkTargetType) {
-            ActionConditionResult targetCheckResult = checkTargetType(action, targetContainer);
+            ActionConditionResult targetCheckResult = checkTarget(action, targetContainer);
             if (!targetCheckResult.isPositive()) {
                 return targetCheckResult;
             }
@@ -298,7 +298,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
 
     @Override
-    public ActionConditionResult checkTargetType(Action<P> action, ActionTargetContainer targetContainer) {
+    public ActionConditionResult checkTarget(Action<P> action, ActionTargetContainer targetContainer) {
         ActionTarget target = targetContainer.getTarget();
         LivingEntity performer = action.getPerformer(user, getThis());
         boolean targetTooFar = false;

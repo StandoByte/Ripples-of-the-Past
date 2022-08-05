@@ -12,6 +12,7 @@ import com.github.standobyte.jojo.client.model.armor.StoneMaskModel;
 import com.github.standobyte.jojo.client.model.item.RoadRollerBakedModel;
 import com.github.standobyte.jojo.client.particle.AirStreamParticle;
 import com.github.standobyte.jojo.client.particle.BloodParticle;
+import com.github.standobyte.jojo.client.particle.CDRestorationParticle;
 import com.github.standobyte.jojo.client.particle.MeteoriteVirusParticle;
 import com.github.standobyte.jojo.client.particle.OneTickFlameParticle;
 import com.github.standobyte.jojo.client.particle.OnomatopoeiaParticle;
@@ -36,6 +37,8 @@ import com.github.standobyte.jojo.client.renderer.entity.damaging.extending.SPSt
 import com.github.standobyte.jojo.client.renderer.entity.damaging.extending.SatiporojaScarfBindingRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.extending.SatiporojaScarfRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.extending.SnakeMufflerRenderer;
+import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.CDBloodCutterRenderer;
+import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.CDItemProjectileRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.HGEmeraldRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.HamonBubbleBarrierRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.HamonBubbleCutterRenderer;
@@ -148,6 +151,8 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.MR_CROSSFIRE_HURRICANE_SPECIAL.get(), MRCrossfireHurricaneSpecialRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.MR_RED_BIND.get(), MRRedBindRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.MR_DETECTOR.get(), MRDetectorRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.CD_BLOOD_CUTTER.get(), CDBloodCutterRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.CD_ITEM_PROJECTILE.get(), CDItemProjectileRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HUNGRY_ZOMBIE.get(), HungryZombieRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HAMON_MASTER.get(), HamonMasterRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.ROCK_PAPER_SCISSORS_KID.get(), RockPaperScissorsKidRenderer::new);
@@ -209,7 +214,7 @@ public class ClientSetup {
             SoulController.init(mc);
             InputHandler.init(mc);
             InputHandler.getInstance().setActionsOverlay(ActionsOverlayGui.getInstance());
-
+            
             Map<String, PlayerRenderer> skinMap = mc.getEntityRenderDispatcher().getSkinMap();
             addLayers(skinMap.get("default"));
             addLayers(skinMap.get("slim"));
@@ -267,6 +272,7 @@ public class ClientSetup {
         mc.particleEngine.register(ModParticles.SOUL_CLOUD.get(), SoulCloudParticleFactory::new);
         mc.particleEngine.register(ModParticles.AIR_STREAM.get(), AirStreamParticle.Factory::new);
         mc.particleEngine.register(ModParticles.FLAME_ONE_TICK.get(), OneTickFlameParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.CD_RESTORATION.get(), CDRestorationParticle.Factory::new);
         // yep...
         CustomResources.initCustomResourceManagers(mc);
     }

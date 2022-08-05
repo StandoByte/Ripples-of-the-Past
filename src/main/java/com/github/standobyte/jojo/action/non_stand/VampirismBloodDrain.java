@@ -33,7 +33,7 @@ import net.minecraft.world.server.ServerWorld;
 public class VampirismBloodDrain extends VampirismAction {
 
     public VampirismBloodDrain(NonStandAction.Builder builder) {
-        super(builder);
+        super(builder.holdType());
     }
     
     @Override

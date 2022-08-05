@@ -19,6 +19,7 @@ import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
@@ -280,6 +281,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     public boolean heldAllowsOtherActions(P power) {
         return false;
     }
+    
+    public void appendWarnings(List<ITextComponent> warnings, P power, PlayerEntity clientPlayerUser) {}
     
     public String getTranslationKey(P power, ActionTarget target) {
         if (translationKey == null) {
