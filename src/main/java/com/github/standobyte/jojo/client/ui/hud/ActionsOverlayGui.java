@@ -18,7 +18,6 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.action.ActionTargetContainer;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.resources.CustomResources;
@@ -38,6 +37,7 @@ import com.github.standobyte.jojo.power.nonstand.type.HamonData.Exercise;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
+import com.github.standobyte.jojo.util.Container;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -389,6 +389,25 @@ public class ActionsOverlayGui extends AbstractGui {
                     Action<P> action = power.getAction(actionType, i, shift);
                     renderActionIcon(matrixStack, actionType, mode, action, target, x + 20 * i, y, partialTick, i == selected, alpha);
                 }
+                // target type icon
+                if (selected >= 0 && selected < actions.size()) {
+                    SelectedTargetIcon icon = mode.getTargetIcon(actionType);
+                    if (icon != null) {
+                        int[] tex = icon.getIconTex();
+                        if (tex != null) {
+                            mc.getTextureManager().bind(OVERLAY_LOCATION);
+                            int texX = tex[0];
+                            int texY = tex[1];
+                            int iconX = x + 20 * selected + 10;
+                            int iconY = y - 4;
+                            matrixStack.pushPose();
+                            matrixStack.scale(0.5F, 0.5F, 1F);
+                            matrixStack.translate(iconX, iconY, 0);
+                            blit(matrixStack, iconX, iconY, texX, texY, 32, 32);
+                            matrixStack.popPose();
+                        }
+                    }
+                }
                 // highlight when hotbar key is pressed
                 boolean highlightSelection = actionType == ActionType.ATTACK ? attackSelection : abilitySelection;
                 if (highlightSelection) {
@@ -453,25 +472,6 @@ public class ActionsOverlayGui extends AbstractGui {
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, hotbarAlpha);
                 blit(matrixStack, x, y, 0, 16, 16, textureAtlasSprite);
             }
-            // target type icon
-            if (isSelected) {
-                SelectedTargetIcon icon = mode.getTargetIcon(actionType);
-                if (icon != null) {
-                    int[] tex = icon.getIconTex();
-                    if (tex != null) {
-                        mc.getTextureManager().bind(OVERLAY_LOCATION);
-                        int texX = tex[0];
-                        int texY = tex[1];
-                        x += 10;
-                        y -= 4;
-                        matrixStack.pushPose();
-                        matrixStack.scale(0.5F, 0.5F, 1F);
-                        matrixStack.translate(x, y, 0);
-                        blit(matrixStack, x, y, texX, texY, 32, 32);
-                        matrixStack.popPose();
-                    }
-                }
-            }
             // learning bar
             float learningProgress = power.getLearningProgressRatio(action);
             if (learningProgress >= 0 && learningProgress < 1) {
@@ -494,9 +494,9 @@ public class ActionsOverlayGui extends AbstractGui {
     private <P extends IPower<P, ?>> ActionConditionResult actionAvailability(Action<P> action, ActionsModeConfig<P> mode, 
             ActionType hotbar, ActionTarget mouseTarget, boolean isSelected) {
         P power = mode.getPower();
-        ActionTargetContainer targetContainer = new ActionTargetContainer(mouseTarget);
+        Container<ActionTarget> targetContainer = new Container<>(mouseTarget);
         if (isSelected) {
-        	ActionConditionResult targetCheck = power.checkTargetType(action, targetContainer);
+        	ActionConditionResult targetCheck = power.checkTarget(action, targetContainer);
             mode.getTargetIcon(hotbar).update(action.getTargetRequirement(), targetCheck.isPositive());
             if (!targetCheck.isPositive()) {
                 return targetCheck;

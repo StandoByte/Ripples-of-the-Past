@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
-import com.github.standobyte.jojo.action.ActionTargetContainer;
+import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrEnergyPacket;
@@ -14,6 +14,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrTypeNonStandPower
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.PowerBaseImpl;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
+import com.github.standobyte.jojo.util.Container;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
@@ -111,7 +112,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     }
     
     @Override
-    public ActionConditionResult checkRequirements(Action<INonStandPower> action, ActionTargetContainer targetContainer, boolean checkTargetType) {
+    public ActionConditionResult checkRequirements(Action<INonStandPower> action, Container<ActionTarget> targetContainer, boolean checkTargetType) {
         ActionConditionResult result = super.checkRequirements(action, targetContainer, checkTargetType);
         if (!result.isPositive()) {
             serverPlayerUser.ifPresent(player -> {

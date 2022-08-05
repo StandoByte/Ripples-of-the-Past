@@ -376,6 +376,7 @@ public class InputHandler {
         ActionType actionType = key == ActionKey.ATTACK ? ActionType.ATTACK : ActionType.ABILITY;
         
         if (key == ActionKey.ATTACK && leftClickBlockDelay > 0) {
+            event.setSwingHand(false);
         	event.setCanceled(true);
         	return;
         }

@@ -37,22 +37,26 @@ public class VampirismBloodDrain extends VampirismAction {
     }
     
     @Override
+    public ActionConditionResult checkTarget(LivingEntity user, INonStandPower power, ActionTarget target) {
+        Entity entityTarget = target.getEntity();
+        if (entityTarget instanceof LivingEntity) {
+            LivingEntity livingTarget = (LivingEntity) entityTarget;
+            if (!JojoModUtil.canBleed(livingTarget) || JojoModUtil.isUndead(livingTarget)) {
+                return conditionMessageContinueHold("blood");
+//                return livingTarget.tickCount > 20 ? conditionMessageContinueHold("blood") : ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
+            }
+            return ActionConditionResult.POSITIVE;
+        }
+        return ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
+    }
+    
+    @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
         if (user.level.getDifficulty() == Difficulty.PEACEFUL) {
             return conditionMessage("peaceful");
         }
         if (!user.getMainHandItem().isEmpty()) {
             return conditionMessage("hand");
-        }
-        Entity entityTarget = target.getEntity();
-        if (entityTarget instanceof LivingEntity) {
-            LivingEntity livingTarget = (LivingEntity) entityTarget;
-            if (!JojoModUtil.canBleed(livingTarget) || JojoModUtil.isUndead(livingTarget)) {
-                return livingTarget.tickCount > 20 ? conditionMessage("blood") : ActionConditionResult.NEGATIVE;
-            }
-        }
-        else {
-            return ActionConditionResult.NEGATIVE;
         }
         return ActionConditionResult.POSITIVE;
     }
