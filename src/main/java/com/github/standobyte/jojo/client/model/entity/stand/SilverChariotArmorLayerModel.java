@@ -35,12 +35,14 @@ public class SilverChariotArmorLayerModel extends SilverChariotModel {
 		torso.addChild(rightTorsoTube);
 		setRotationAngle(rightTorsoTube, 0.0F, 0.0F, -0.3491F);
 		rightTorsoTube.texOffs(0, 74).addBox(-1.5F, -3.0F, -0.5F, 3.0F, 6.0F, 1.0F, 0.0F, false);
+        rightTorsoTube.texOffs(18, 75).addBox(-0.5F, -2.0F, -0.5F, 2.0F, 5.0F, 1.0F, 0.0F, false);
 
 		leftTorsoTube = new ModelRenderer(this);
 		leftTorsoTube.setPos(0.75F, 9.0F, 0.0F);
 		torso.addChild(leftTorsoTube);
 		setRotationAngle(leftTorsoTube, 0.0F, 0.0F, 0.3491F);
 		leftTorsoTube.texOffs(9, 74).addBox(-1.5F, -3.0F, -0.5F, 3.0F, 6.0F, 1.0F, 0.0F, true);
+        leftTorsoTube.texOffs(25, 75).addBox(-1.5F, -2.0F, -0.5F, 2.0F, 5.0F, 1.0F, 0.0F, true);
 
 		leftArm.texOffs(32, 108).addBox(-2.0F, -2.1F, -2.0F, 4.0F, 6.0F, 4.0F, 0.1F, false);
 		leftArm.texOffs(44, 120).addBox(2.0F, 2.9F, -0.5F, 1.0F, 1.0F, 1.0F, 0.1F, true);

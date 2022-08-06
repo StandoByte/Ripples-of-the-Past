@@ -22,7 +22,7 @@ import net.minecraft.world.World;
 public class CrazyDiamondRepairItem extends StandEntityAction {
 
     public CrazyDiamondRepairItem(StandEntityAction.Builder builder) {
-        super(builder.standKeepsTarget());
+        super(builder);
     }
     
     @Override

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
@@ -14,6 +15,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.item.TNTEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -123,15 +125,24 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
     }
     
     @Override
-    protected boolean canTargetEntity(Entity target, StandEntity standEntity, IStandPower standPower) {
-        return standPower.getResolveLevel() >= 3 && (target instanceof TNTEntity || target.getType() == EntityType.SNOW_GOLEM ||
-                standPower.getResolveLevel() >= 4 && (target.getType() == EntityType.IRON_GOLEM || target.getType() == EntityType.WITHER && ((WitherEntity) target).getInvulnerableTicks() > 0));
+    protected ActionConditionResult checkTarget(LivingEntity user, IStandPower standPower, ActionTarget target) {
+        switch (target.getType()) {
+        case BLOCK:
+            return ActionConditionResult.POSITIVE;
+        case ENTITY:
+            Entity targetEntity = target.getEntity();
+            return standPower.getResolveLevel() >= 3 && (
+                            targetEntity instanceof TNTEntity
+                            || targetEntity.getType() == EntityType.SNOW_GOLEM ||
+                    standPower.getResolveLevel() >= 4 && (
+                            targetEntity.getType() == EntityType.IRON_GOLEM
+                            || targetEntity.getType() == EntityType.WITHER && ((WitherEntity) targetEntity).getInvulnerableTicks() > 0))
+                    ? ActionConditionResult.POSITIVE : conditionMessage("entity_restore");
+        default:
+            return ActionConditionResult.POSITIVE;
+        }
     }
 
-    public boolean appropriateTarget(ActionTarget.TargetType targetType) {
-        return true;
-    }
-    
     private static boolean matches(ItemStack input, ItemStack output) {
         return input.getItem() == output.getItem() && input.getCount() >= output.getCount();
     }

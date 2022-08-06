@@ -99,13 +99,18 @@ public class StandEntityHeavyAttack extends StandEntityAction {
         return true;
     }
     
+    @Override
+    public boolean keepStandTarget(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
+        return target.getType() == TargetType.ENTITY;
+    }
+    
     
     
     public static class Builder extends StandEntityAction.AbstractBuilder<StandEntityHeavyAttack.Builder> {
     	
     	public Builder() {
     		standPose(StandPose.HEAVY_ATTACK).staminaCost(50F)
-            .standOffsetFromUser(-0.75, 0.75).standKeepsTarget(TargetType.ENTITY)
+            .standOffsetFromUser(-0.75, 0.75)
             .targetPunchProperties((punch, stand, target) -> {
             	double strength = stand.getAttackDamage();
             	return punch.get()
