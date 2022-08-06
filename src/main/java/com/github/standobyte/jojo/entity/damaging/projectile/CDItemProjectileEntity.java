@@ -19,6 +19,8 @@ import net.minecraft.world.server.ServerWorld;
 public class CDItemProjectileEntity extends ModdedProjectileEntity {
     private Block block;
     private ResourceLocation blockTex = new ResourceLocation("textures/block/glass.png");
+    // FIXME !! (item projectile) target
+    // FIXME ! (item projectile) CD restore sound
     private Optional<Entity> homingTarget;
     
     public CDItemProjectileEntity(LivingEntity shooter, World world) {
@@ -56,7 +58,7 @@ public class CDItemProjectileEntity extends ModdedProjectileEntity {
 
     @Override
     protected float getBaseDamage() {
-     // FIXME !!!!!!!!!!!! projectile damage
+     // FIXME !! (item projectile) projectile damage
         return 8;
     }
 

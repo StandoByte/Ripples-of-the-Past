@@ -490,8 +490,8 @@ public class ModActions {
 
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_HEAVY_PUNCH = ACTIONS.register("magicians_red_heavy_punch", 
             () -> new StandEntityHeavyAttack(new StandEntityHeavyAttack.Builder()
-                    .shiftVariationOf(MAGICIANS_RED_PUNCH)
-                    .partsRequired(StandPart.ARMS), MAGICIANS_RED_KICK));
+                    .partsRequired(StandPart.ARMS)
+                    .shiftVariationOf(MAGICIANS_RED_PUNCH), MAGICIANS_RED_KICK));
     
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_FLAME_BURST = ACTIONS.register("magicians_red_flame_burst", 
             () -> new MagiciansRedFlameBurst(new StandEntityAction.Builder().holdType()
@@ -565,13 +565,13 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_ITEM_PROJECTILE = ACTIONS.register("crazy_diamond_item_projectile", 
             () -> new CrazyDiamondItemProjectile(new StandEntityAction.Builder().standWindupDuration(5)
-                    .resolveLevelToUnlock(0)
+                    .resolveLevelToUnlock(4)
                     .standOffsetFromUser(0, -0.5)
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_BLOOD_CUTTER = ACTIONS.register("crazy_diamond_blood_cutter", 
             () -> new CrazyDiamondBloodCutter(new StandEntityAction.Builder().standWindupDuration(5)
-                    .resolveLevelToUnlock(0)
+                    .resolveLevelToUnlock(4)
                     .standOffsetFromUser(-0.1, -0.5)
                     .partsRequired(StandPart.ARMS)));
     
@@ -580,32 +580,33 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_REPAIR_ITEM = ACTIONS.register("crazy_diamond_repair_item", 
             () -> new CrazyDiamondRepairItem(new StandEntityAction.Builder().holdType()
-                    .resolveLevelToUnlock(0)
+                    .resolveLevelToUnlock(0).isTrained()
                     .partsRequired(StandPart.ARMS)));
     
-    public static final RegistryObject<StandAction> CRAZY_DIAMOND_DECOMPOSE = ACTIONS.register("crazy_diamond_decompose", 
+    public static final RegistryObject<StandAction> CRAZY_DIAMOND_PREVIOUS_STATE = ACTIONS.register("crazy_diamond_previous_state", 
             () -> new CrazyDiamondPreviousState(new StandEntityAction.Builder().holdType()
-                    .resolveLevelToUnlock(0)
-                    .partsRequired(StandPart.ARMS)));
+                    .resolveLevelToUnlock(-1)
+                    .partsRequired(StandPart.ARMS)
+                    .shiftVariationOf(CRAZY_DIAMOND_REPAIR_ITEM)));
     
-    public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_HEAL = ACTIONS.register("crazy_diamond_heal", 
+    public static final RegistryObject<CrazyDiamondHeal> CRAZY_DIAMOND_HEAL = ACTIONS.register("crazy_diamond_heal", 
             () -> new CrazyDiamondHeal(new StandEntityAction.Builder().holdType()
-                    .resolveLevelToUnlock(0)
+                    .resolveLevelToUnlock(1)
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_RESTORE_TERRAIN = ACTIONS.register("crazy_diamond_restore_terrain", 
             () -> new CrazyDiamondRestoreTerrain(new StandEntityAction.Builder().holdType()
-                    .resolveLevelToUnlock(0)
+                    .resolveLevelToUnlock(2)
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<StandAction> CRAZY_DIAMOND_BLOCK_CHECKPOINT_MOVE = ACTIONS.register("crazy_diamond_block_checkpoint_move", 
             () -> new CrazyDiamondBlockCheckpointMove(new StandEntityAction.Builder().holdType()
-                    .resolveLevelToUnlock(0)
+                    .resolveLevelToUnlock(3)
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_BLOCK_CHECKPOINT = ACTIONS.register("crazy_diamond_block_checkpoint", 
             () -> new CrazyDiamondBlockCheckpointMake(new StandEntityAction.Builder().standWindupDuration(10).standRecoveryTicks(5)
-                    .resolveLevelToUnlock(0)
+                    .resolveLevelToUnlock(3)
                     .partsRequired(StandPart.ARMS)
                     .shiftVariationOf(CRAZY_DIAMOND_BLOCK_CHECKPOINT_MOVE)));
     

@@ -34,66 +34,131 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
     }
 
     @Override
+    public ActionConditionResult checkStandTarget(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
+        switch (target.getType()) {
+        case BLOCK:
+            if (standPower.getResolveLevel() >= 2) {
+                // FIXME !! (prev state) block check
+                return ActionConditionResult.POSITIVE;
+            }
+            return ActionConditionResult.NEGATIVE;
+        case ENTITY:
+            Entity targetEntity = target.getEntity();
+            return standPower.getResolveLevel() >= 3 && (
+                    targetEntity instanceof TNTEntity
+                    || targetEntity.getType() == EntityType.SNOW_GOLEM ||
+                    standPower.getResolveLevel() >= 4 && (
+                            targetEntity.getType() == EntityType.IRON_GOLEM
+                            || targetEntity.getType() == EntityType.WITHER && ((WitherEntity) targetEntity).getInvulnerableTicks() > 0))
+                    ? ActionConditionResult.POSITIVE : conditionMessage("entity_revert");
+        default:
+            // FIXME !! (prev state) offhand item check
+            return ActionConditionResult.POSITIVE;
+        }
+    }
+
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
+        return ActionConditionResult.POSITIVE;
+    }
+
+    // FIXME ! (prev state) CD restore sound
+    @Override
     public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-        if (!world.isClientSide()) {
-            ActionTarget target = task.getTarget();
-            switch (target.getType()) {
-            case ENTITY:
-                if (userPower.getResolveLevel() >= 3) {
-                    Entity targetEntity = target.getEntity();
-                    if (targetEntity instanceof TNTEntity) {
-                        Block tntBlock = ForgeRegistries.BLOCKS.getValue(targetEntity.getType().getRegistryName());
-                        if (tntBlock == null || tntBlock.getRegistryName().equals(ForgeRegistries.BLOCKS.getDefaultKey())) {
-                            tntBlock = Blocks.TNT;
+        ActionTarget target = task.getTarget();
+        switch (target.getType()) {
+        case ENTITY:
+            if (userPower.getResolveLevel() >= 3) {
+                Entity targetEntity = target.getEntity();
+
+                if (targetEntity instanceof TNTEntity) {
+                    TNTEntity tnt = (TNTEntity) targetEntity;
+                    if (CrazyDiamondHeal.handle(world, tnt, tnt, e -> {
+                        e.setFuse(task.getTick() == 0 ? e.getFuse() - e.tickCount + 2 : e.getFuse() + 2);
+                    }, e -> e.getFuse() < 80)) {
+                        CrazyDiamondHeal.handle(world, tnt, tnt, 
+                                e -> {
+                                    Block tntBlock = ForgeRegistries.BLOCKS.getValue(e.getType().getRegistryName());
+                                    if (tntBlock == null || tntBlock.getRegistryName().equals(ForgeRegistries.BLOCKS.getDefaultKey())) {
+                                        tntBlock = Blocks.TNT;
+                                    }
+                                    BlockPos blockPos = e.blockPosition();
+                                    e.remove();
+                                    world.setBlockAndUpdate(blockPos, tntBlock.defaultBlockState());
+                                }, e -> true);
+                    }
+                    return;
+                }
+
+                else if (targetEntity.getType() == EntityType.SNOW_GOLEM) {
+                    if (CrazyDiamondHeal.handleLivingEntity(world, (LivingEntity) targetEntity)) {
+                        CrazyDiamondHeal.handle(world, targetEntity, targetEntity, 
+                                e -> {
+                                    BlockPos blockPos = e.blockPosition();
+                                    world.setBlockAndUpdate(blockPos.offset(0, 2, 0), Blocks.CARVED_PUMPKIN.defaultBlockState());
+                                    world.setBlockAndUpdate(blockPos, Blocks.SNOW_BLOCK.defaultBlockState());
+                                    world.setBlockAndUpdate(blockPos.offset(0, 1, 0), Blocks.SNOW_BLOCK.defaultBlockState());
+                                    e.remove();
+                                }, e -> true);
+                    }
+                    return;
+                }
+
+                else if (userPower.getResolveLevel() >= 4) {
+                    if (targetEntity.getType() == EntityType.IRON_GOLEM) {
+                        if (CrazyDiamondHeal.handleLivingEntity(world, (LivingEntity) targetEntity)) {
+                            CrazyDiamondHeal.handle(world, targetEntity, targetEntity, 
+                                    e -> {
+                                        BlockPos blockPos = e.blockPosition();
+                                        world.setBlockAndUpdate(blockPos, Blocks.IRON_BLOCK.defaultBlockState());
+                                        world.setBlockAndUpdate(blockPos.offset(0, 2, 0), Blocks.CARVED_PUMPKIN.defaultBlockState());
+                                        world.setBlockAndUpdate(blockPos.offset(0, 1, 0), Blocks.IRON_BLOCK.defaultBlockState());
+                                        world.setBlockAndUpdate(blockPos.offset(1, 1, 0), Blocks.IRON_BLOCK.defaultBlockState());
+                                        world.setBlockAndUpdate(blockPos.offset(-1, 1, 0), Blocks.IRON_BLOCK.defaultBlockState());
+                                        e.remove();
+                                    }, e -> true);
                         }
-                        BlockPos blockPos = targetEntity.blockPosition();
-                        targetEntity.remove();
-                        world.setBlockAndUpdate(blockPos, tntBlock.defaultBlockState());
                         return;
                     }
-                    else if (targetEntity.getType() == EntityType.SNOW_GOLEM) {
-                        
-                        return;
-                    }
-                    else if (userPower.getResolveLevel() >= 4) {
-                        if (targetEntity.getType() == EntityType.IRON_GOLEM) {
-    
-                            return;
-                        }
-                        else if (targetEntity.getType() == EntityType.WITHER) {
-                            WitherEntity wither = (WitherEntity) targetEntity;
-                            int spawnTicks = wither.getInvulnerableTicks();
-                            if (spawnTicks > 0) {
-                                if (spawnTicks >= 215 || wither.getHealth() <= 5) {
-                                    BlockPos blockPos = wither.blockPosition();
-                                    world.setBlockAndUpdate(blockPos, Blocks.SOUL_SAND.defaultBlockState());
-                                    world.setBlockAndUpdate(blockPos.offset(0, 1, 0), Blocks.SOUL_SAND.defaultBlockState());
-                                    world.setBlockAndUpdate(blockPos.offset(1, 1, 0), Blocks.SOUL_SAND.defaultBlockState());
-                                    world.setBlockAndUpdate(blockPos.offset(-1, 1, 0), Blocks.SOUL_SAND.defaultBlockState());
-                                    world.setBlockAndUpdate(blockPos.offset(0, 2, 0), Blocks.WITHER_SKELETON_SKULL.defaultBlockState());
-                                    world.setBlockAndUpdate(blockPos.offset(1, 2, 0), Blocks.WITHER_SKELETON_SKULL.defaultBlockState());
-                                    world.setBlockAndUpdate(blockPos.offset(-1, 2, 0), Blocks.WITHER_SKELETON_SKULL.defaultBlockState());
-                                    wither.remove();
-                                }
-                                else {
-                                    wither.setHealth(wither.getHealth() - 5);
-                                    wither.setInvulnerableTicks(spawnTicks + 5);
-                                }
-                                return;
+
+                    else if (targetEntity.getType() == EntityType.WITHER) {
+                        WitherEntity wither = (WitherEntity) targetEntity;
+                        int spawnTicks = wither.getInvulnerableTicks();
+                        if (spawnTicks > 0) {
+                            if (CrazyDiamondHeal.handle(world, wither, wither, 
+                                    e -> {
+                                        e.setHealth(e.getHealth() - 5);
+                                        e.setInvulnerableTicks(spawnTicks + 5);
+                                    }, 
+                                    e -> spawnTicks >= 215 || e.getHealth() <= 5)) {
+                                CrazyDiamondHeal.handle(world, targetEntity, targetEntity, 
+                                        w -> {
+                                            BlockPos blockPos = w.blockPosition();
+                                            world.setBlockAndUpdate(blockPos.offset(0, 2, 0), Blocks.WITHER_SKELETON_SKULL.defaultBlockState());
+                                            world.setBlockAndUpdate(blockPos.offset(1, 2, 0), Blocks.WITHER_SKELETON_SKULL.defaultBlockState());
+                                            world.setBlockAndUpdate(blockPos.offset(-1, 2, 0), Blocks.WITHER_SKELETON_SKULL.defaultBlockState());
+                                            world.setBlockAndUpdate(blockPos, Blocks.SOUL_SAND.defaultBlockState());
+                                            world.setBlockAndUpdate(blockPos.offset(0, 1, 0), Blocks.SOUL_SAND.defaultBlockState());
+                                            world.setBlockAndUpdate(blockPos.offset(1, 1, 0), Blocks.SOUL_SAND.defaultBlockState());
+                                            world.setBlockAndUpdate(blockPos.offset(-1, 1, 0), Blocks.SOUL_SAND.defaultBlockState());
+                                            w.remove();
+                                        }, e -> true);
                             }
                         }
                     }
                 }
-                break;
-            case BLOCK:
-                if (userPower.getResolveLevel() >= 2) {
-                    
-                }
-                break;
-            default:
-                break;
             }
-            if (userPower.getUser() instanceof PlayerEntity) {
+            break;
+        case BLOCK:
+            if (userPower.getResolveLevel() >= 2) {
+                // FIXME !! (prev state) revert blocks (1 block to 1 block uncrafting)
+                // FIXME !! (prev state) particles
+
+            }
+            break;
+        default:
+            // FIXME !! (prev state) revert items (uncrafting)
+            // FIXME !! (prev state) particles
+            if (!world.isClientSide() && userPower.getUser() instanceof PlayerEntity) {
                 PlayerEntity player = (PlayerEntity) userPower.getUser();
                 ItemStack heldItem = player.getOffhandItem();
                 if (!heldItem.isEmpty()) {
@@ -104,7 +169,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                             recipes.add((ICraftingRecipe) recipe);
                         }
                     }
-                    
+
                     if (!recipes.isEmpty()) {
                         ICraftingRecipe randomRecipe = recipes.get(player.getRandom().nextInt(recipes.size()));
                         ItemStack[] ingredients = getIngredients(randomRecipe);
@@ -121,25 +186,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                     }
                 }
             }
-        }
-    }
-    
-    @Override
-    protected ActionConditionResult checkTarget(LivingEntity user, IStandPower standPower, ActionTarget target) {
-        switch (target.getType()) {
-        case BLOCK:
-            return ActionConditionResult.POSITIVE;
-        case ENTITY:
-            Entity targetEntity = target.getEntity();
-            return standPower.getResolveLevel() >= 3 && (
-                            targetEntity instanceof TNTEntity
-                            || targetEntity.getType() == EntityType.SNOW_GOLEM ||
-                    standPower.getResolveLevel() >= 4 && (
-                            targetEntity.getType() == EntityType.IRON_GOLEM
-                            || targetEntity.getType() == EntityType.WITHER && ((WitherEntity) targetEntity).getInvulnerableTicks() > 0))
-                    ? ActionConditionResult.POSITIVE : conditionMessage("entity_restore");
-        default:
-            return ActionConditionResult.POSITIVE;
+            break;
         }
     }
 

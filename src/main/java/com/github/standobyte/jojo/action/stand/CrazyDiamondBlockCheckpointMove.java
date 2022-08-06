@@ -40,10 +40,10 @@ public class CrazyDiamondBlockCheckpointMove extends StandEntityAction {
                     user.fallDistance = 0;
                 }
                 else {
-                    // FIXME !!!!!!!!!! place the block
+                    // FIXME !! (fast travel) place the block
                 }
                 if (world.isClientSide()) {
-                    // FIXME !!!!!!!!!! CD restore sound
+                    // FIXME ! (fast travel) CD restore sound
                     CustomParticlesHelper.createCDRestorationParticle(user, Hand.OFF_HAND);
                 }
             });

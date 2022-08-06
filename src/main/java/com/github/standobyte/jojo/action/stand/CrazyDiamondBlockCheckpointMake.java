@@ -3,7 +3,6 @@ package com.github.standobyte.jojo.action.stand;
 import java.util.List;
 import java.util.Optional;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -32,7 +31,7 @@ public class CrazyDiamondBlockCheckpointMake extends StandEntityAction {
         super(builder);
     }
 
-    // FIXME !!!!!!!!!! restrict to the blocks CD can break
+    // FIXME !! (fast travel) restrict to the blocks CD can break
     @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
         return super.checkSpecificConditions(user, power, target);
@@ -42,7 +41,7 @@ public class CrazyDiamondBlockCheckpointMake extends StandEntityAction {
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
             BlockPos pos = task.getTarget().getBlockPos();
-            // FIXME !!!!!!!!!! what about the "no block breaking" config check?
+            // FIXME !! (fast travel) what about the "no block breaking" config check?
             if (pos != null) {
                 BlockState blockState = world.getBlockState(pos);
                 List<ItemStack> drops = Block.getDrops(blockState, (ServerWorld) world, pos, 
@@ -50,7 +49,6 @@ public class CrazyDiamondBlockCheckpointMake extends StandEntityAction {
                 if (standEntity.breakBlock(pos, false)) {
                     drops.forEach(stack -> {
                         boolean dropItem = true;
-                        JojoMod.LOGGER.debug(stack.getItem());
                         if (stack.getItem() instanceof BlockItem) {
                             CompoundNBT posNBT = new CompoundNBT();
                             posNBT.putInt("x", pos.getX());
@@ -83,8 +81,8 @@ public class CrazyDiamondBlockCheckpointMake extends StandEntityAction {
         return TargetRequirement.BLOCK;
     }
 
-    // FIXME !!!!!!!!!! marker
-    // FIXME !!!!!!!!!!!!!!!!!!!!!! dimension key
+    // FIXME ! (fast travel) marker
+    // FIXME ! (fast travel) dimension key
     public static Optional<BlockPos> getBlockPosMoveTo(World world, ItemStack stack) {
         CompoundNBT nbt = stack.getOrCreateTag();
         if (nbt.contains("CDCheckpoint", JojoModUtil.getNbtId(CompoundNBT.class))) {

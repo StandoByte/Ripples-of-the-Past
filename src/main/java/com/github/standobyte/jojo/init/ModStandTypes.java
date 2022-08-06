@@ -178,7 +178,6 @@ public class ModStandTypes {
                     new StandAction[] {
                             ModActions.CRAZY_DIAMOND_BLOCK.get(), 
                             ModActions.CRAZY_DIAMOND_REPAIR_ITEM.get(), 
-                            ModActions.CRAZY_DIAMOND_DECOMPOSE.get(), 
                             ModActions.CRAZY_DIAMOND_HEAL.get(), 
                             ModActions.CRAZY_DIAMOND_RESTORE_TERRAIN.get(), 
                             ModActions.CRAZY_DIAMOND_BLOCK_CHECKPOINT_MOVE.get()

@@ -64,6 +64,10 @@
     "subtitle": "jojo.subtitle.knife_hit",
     "sounds": [ "jojo:knife_hit" ]
   },
+  "water_splash": {
+    "subtitle": "jojo.subtitle.liquid_splash",
+    "sounds": [ "jojo:water_splash" ]
+  },
   "vampire_blood_drain": {
     "subtitle": "jojo.subtitle.blood_drain",
     "sounds": [ "jojo:vampire_blood_drain" ]
@@ -647,10 +651,6 @@
   },
   "crazy_diamond_fix_ended": {
     "subtitle": "jojo.subtitle.fixed",
-    "sounds": [  ]
-  },
-  "blood_cutter_splash": {
-    "subtitle": "jojo.subtitle.blood_splash",
     "sounds": [  ]
   }
 }

@@ -27,7 +27,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 
 public class CrazyDiamondRestorableBlocks extends StandEffectInstance {
-    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!! save & sync
+    // FIXME ! (restore terrain) save & sync
     private RegistryKey<World> dimension;
     private final Map<ChunkPos, Map<BlockPos, PrevBlockInfo>> blocks = new HashMap<>();
     private final List<CDBlocksBrokenPacket.BlockInfo> blocksToSend = new ArrayList<>();

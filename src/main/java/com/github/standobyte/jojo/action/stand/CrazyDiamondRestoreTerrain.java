@@ -14,6 +14,8 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+// FIXME ! (restore terrain) remember more block breaking instances
+// FIXME !! (restore terrain) blocks overlay
 public class CrazyDiamondRestoreTerrain extends StandEntityAction {
     public static final int MANHATTAN_DIST = 8;
 
@@ -21,7 +23,10 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         super(builder);
     }
 
-
+    // FIXME !! (restore terrain) consume items
+    // FIXME !! (restore terrain) limit the blocks count
+    // FIXME !! (restore terrain) particles
+    // FIXME ! (restore terrain) CD restoration sound
     @Override
     public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {

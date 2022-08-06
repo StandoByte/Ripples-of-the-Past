@@ -432,6 +432,7 @@ public class ActionsOverlayGui extends AbstractGui {
                         int[] tex = icon.getIconTex();
                         if (tex != null) {
                             mc.getTextureManager().bind(OVERLAY_LOCATION);
+                            RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
                             int texX = tex[0];
                             int texY = tex[1];
                             int iconX = x + 20 * selected + 10;

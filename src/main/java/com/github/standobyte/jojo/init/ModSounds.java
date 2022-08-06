@@ -60,6 +60,9 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> KNIFE_HIT = SOUNDS.register("knife_hit",
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "knife_hit")));
+    
+    public static final RegistryObject<SoundEvent> WATER_SPLASH = SOUNDS.register("water_splash",
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "water_splash")));
 
 
     public static final RegistryObject<SoundEvent> VAMPIRE_BLOOD_DRAIN = SOUNDS.register("vampire_blood_drain",
@@ -428,7 +431,7 @@ public class ModSounds {
     
     public static final OstSoundList MAGICIANS_RED_OST = new OstSoundList(new ResourceLocation(JojoMod.MOD_ID, "magicians_red_ost"), SOUNDS);
 
-    // FIXME !!!!!!!!!! sound files
+    // FIXME ! sound files
     public static final RegistryObject<SoundEvent> JOSUKE_CRAZY_DIAMOND = SOUNDS.register("josuke_crazy_diamond", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "josuke_crazy_diamond")));
 
