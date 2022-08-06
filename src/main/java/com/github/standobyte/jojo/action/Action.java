@@ -116,7 +116,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return TargetRequirement.NONE;
     }
     
-    public ActionConditionResult checkRangeAndTarget(LivingEntity user, P power, ActionTarget target) {
+    public ActionConditionResult checkRangeAndTarget(ActionTarget target, LivingEntity user, P power) {
         LivingEntity performer = getPerformer(power.getUser(), power);
         boolean targetTooFar = false;
         switch (target.getType()) {
@@ -150,10 +150,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         if (targetTooFar) {
             return conditionMessageContinueHold("target_too_far");
         }
-        return checkTarget(user, power, target);
+        return checkTarget(target, user, power);
     }
     
-    protected ActionConditionResult checkTarget(LivingEntity user, P power, ActionTarget target) {
+    protected ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, P power) {
         return ActionConditionResult.POSITIVE;
     }
     

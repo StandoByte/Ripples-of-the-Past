@@ -134,15 +134,24 @@ public abstract class StandEntityAction extends StandAction {
     	return ActionConditionResult.POSITIVE;
     }
     
-    public boolean keepStandTarget(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
+    @Override
+    protected final ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, IStandPower power) {
+        if (power.isActive()) {
+            StandEntity stand = (StandEntity) power.getStandManifestation();
+            return checkStandTarget(target, stand, power);
+        }
+        return ActionConditionResult.POSITIVE;
+    }
+    
+    public ActionConditionResult checkStandTarget(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
         switch (target.getType()) {
         case ENTITY:
             Entity targetEntity = target.getEntity();
-            return targetEntity instanceof LivingEntity && standEntity.canAttack(standEntity);
+            return ActionConditionResult.noMessage(targetEntity instanceof LivingEntity && standEntity.canAttack((LivingEntity) targetEntity));
         case BLOCK:
-            return false;
+            return ActionConditionResult.NEGATIVE;
         default:
-            return true;
+            return ActionConditionResult.POSITIVE;
         }
     }
     

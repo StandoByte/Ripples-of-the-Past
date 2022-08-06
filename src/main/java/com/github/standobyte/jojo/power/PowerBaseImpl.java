@@ -305,12 +305,12 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                 || !action.getTargetRequirement().checkTargetType(targetContainer.get().getType())) {
             targetContainer.set(ActionTarget.EMPTY);
             if (!action.getTargetRequirement().checkTargetType(TargetType.EMPTY)) {
-                return ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
+                return ActionConditionResult.NEGATIVE;
             }
         }
         
         P power = getThis();
-        ActionConditionResult preResult = action.checkRangeAndTarget(user, power, targetContainer.get());
+        ActionConditionResult preResult = action.checkRangeAndTarget(targetContainer.get(), user, power);
 
         if (!preResult.isPositive()) {
             targetContainer.set(ActionTarget.EMPTY);

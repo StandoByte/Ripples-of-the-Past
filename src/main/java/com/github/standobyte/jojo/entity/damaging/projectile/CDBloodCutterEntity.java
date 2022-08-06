@@ -39,11 +39,11 @@ public class CDBloodCutterEntity extends ModdedProjectileEntity {
     
     private void splashBlood() {
         if (!level.isClientSide()) {
-            // FIXME !!!!!!!!!!!!!!!!!!! blood tag
+            // FIXME !! (blood cutter) blood tag
         }
         else {
-            level.playLocalSound(getX(), getY(), getZ(), ModSounds.BLOOD_CUTTER_SPLASH.get(), getSoundSource(), 1.0F, 1.0F, false);
-            // FIXME !!!!!!!!!!!!!!!!!!! blood particles
+            level.playLocalSound(getX(), getY(), getZ(), ModSounds.WATER_SPLASH.get(), getSoundSource(), 1.0F, 1.0F, false);
+            // FIXME !! (blood cutter) blood particles
         }
     }
 

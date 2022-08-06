@@ -37,7 +37,7 @@ public class VampirismBloodDrain extends VampirismAction {
     }
     
     @Override
-    public ActionConditionResult checkTarget(LivingEntity user, INonStandPower power, ActionTarget target) {
+    public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, INonStandPower power) {
         Entity entityTarget = target.getEntity();
         if (entityTarget instanceof LivingEntity) {
             LivingEntity livingTarget = (LivingEntity) entityTarget;

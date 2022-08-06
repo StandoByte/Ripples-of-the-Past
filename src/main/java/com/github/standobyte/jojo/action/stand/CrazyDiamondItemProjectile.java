@@ -22,7 +22,7 @@ public class CrazyDiamondItemProjectile extends StandEntityAction {
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
         ItemStack itemToShoot = user.getOffhandItem();
         if (itemToShoot == null || itemToShoot.isEmpty() || !(itemToShoot.getItem() instanceof BlockItem)) {
-            return conditionMessage("offhand_block");
+            return conditionMessage("block_offhand");
         }
         return super.checkSpecificConditions(user, power, target);
     }
@@ -32,6 +32,7 @@ public class CrazyDiamondItemProjectile extends StandEntityAction {
         if (!world.isClientSide()) {
             LivingEntity user = userPower.getUser();
             if (user != null) {
+                // FIXME !! (item projectile) consume block
                 CDItemProjectileEntity bullet = new CDItemProjectileEntity(standEntity, world);
                 standEntity.shootProjectile(bullet, 3.0F, 0.25F);
             }

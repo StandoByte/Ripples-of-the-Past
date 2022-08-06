@@ -87,8 +87,11 @@ public class StandEntityLightAttack extends StandEntityAction {
     }
     
     @Override
-    public boolean keepStandTarget(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
-        return true;
+    public ActionConditionResult checkStandTarget(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
+        if (target.getType() == TargetType.BLOCK) {
+            return ActionConditionResult.POSITIVE;
+        }
+        return super.checkStandTarget(target, standEntity, standPower);
     }
     
     

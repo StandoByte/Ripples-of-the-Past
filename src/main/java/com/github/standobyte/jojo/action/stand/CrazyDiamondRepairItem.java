@@ -44,7 +44,10 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
             if (!world.isClientSide()) {
                 ItemStack itemToRepair = itemToRepair(user);
                 if (!itemToRepair.isEmpty()) {
-                    repair(user, itemToRepair, task.getTick());
+                    float points = repair(user, itemToRepair, task.getTick());
+                    if (points > 0) {
+                        userPower.addLearningProgressPoints(this, points);
+                    }
                 }
             }
             else {
@@ -65,17 +68,13 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
         return entity.getOffhandItem();
     }
     
-    private boolean canBeRepaired(ItemStack itemStack) {
-        return itemStack != null && !itemStack.isEmpty() && (itemStack.isDamaged() || itemStack.isEnchanted()
-                || itemStack.getItem() == Items.CHIPPED_ANVIL || itemStack.getItem() == Items.DAMAGED_ANVIL);
-    }
-    
-    public int repair(LivingEntity user, ItemStack itemStack, int ticks) {
+    public float repair(LivingEntity user, ItemStack itemStack, int ticks) {
         itemStack.removeTagKey("Enchantments");
         itemStack.removeTagKey("StoredEnchantments");
         int damage = Math.min(itemStack.getDamageValue(), 50);
         itemStack.setDamageValue(itemStack.getDamageValue() - 50);
         itemStack.setRepairCost(0);
+        
         if (ticks % 40 == 39) {
             ItemStack newStack = null;
             if (itemStack.getItem() == Items.CHIPPED_ANVIL) {
@@ -89,6 +88,18 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
                 damage += 2000;
             }
         }
-        return damage;
+        
+        // FIXME ! (repair) revert some items
+        return (float) damage * 0.0001F;
+    }
+    
+    private boolean canBeRepaired(ItemStack itemStack) {
+        return itemStack != null && !itemStack.isEmpty() && (itemStack.isDamaged() || itemStack.isEnchanted()
+                || itemStack.getItem() == Items.CHIPPED_ANVIL || itemStack.getItem() == Items.DAMAGED_ANVIL);
+    }
+    
+    @Override
+    public void onMaxTraining(IStandPower power) {
+        power.unlockAction(getShiftVariationIfPresent());
     }
 }

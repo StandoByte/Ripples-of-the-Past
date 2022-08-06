@@ -19,7 +19,7 @@ public class VampirismBloodGift extends VampirismAction {
     }
     
     @Override
-    public ActionConditionResult checkTarget(LivingEntity user, INonStandPower power, ActionTarget target) {
+    public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, INonStandPower power) {
         Entity targetEntity = target.getEntity();
         if (!(targetEntity instanceof PlayerEntity)) {
             return conditionMessageContinueHold("player_target");
