@@ -130,12 +130,14 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
 		head.addChild(leftCable);
 		setRotationAngle(leftCable, 0.0873F, 0.1309F, -1.1345F);
 		leftCable.texOffs(13, 16).addBox(-0.5F, 0.0F, 0.0F, 1.0F, 4.0F, 5.0F, 0.0F, true);
+        leftCable.texOffs(13, 25).addBox(-0.5F, 1.0F, 1.0F, 1.0F, 2.0F, 3.0F, 0.0F, true);
 
 		rightCable = new ModelRenderer(this);
 		rightCable.setPos(-1.25F, -3.3F, 0.25F);
 		head.addChild(rightCable);
 		setRotationAngle(rightCable, 0.0873F, -0.1309F, 1.2217F);
 		rightCable.texOffs(0, 16).addBox(-0.5F, 0.0F, 0.0F, 1.0F, 4.0F, 5.0F, 0.0F, false);
+        rightCable.texOffs(0, 25).addBox(-0.5F, 1.0F, 1.0F, 1.0F, 2.0F, 3.0F, 0.0F, false);
 
 		torso.texOffs(20, 64).addBox(-3.5F, 1.1F, -2.0F, 7.0F, 3.0F, 1.0F, 0.4F, false);
 		torso.texOffs(24, 73).addBox(-2.5F, 4.0F, -2.3F, 5.0F, 6.0F, 1.0F, 0.0F, false);

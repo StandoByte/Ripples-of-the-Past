@@ -23,6 +23,10 @@ public class ActionConditionResult {
         return new ActionConditionResult(false, false, false, warning);
     }
     
+    public static ActionConditionResult noMessage(boolean isPositive) {
+        return isPositive ? POSITIVE : NEGATIVE;
+    }
+    
     private ActionConditionResult(boolean positive, boolean stopHeldAction, boolean highlight, ITextComponent warning) {
         this.positive = positive;
         this.stopHeldAction = stopHeldAction;
