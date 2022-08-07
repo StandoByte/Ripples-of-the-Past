@@ -3,8 +3,6 @@ package com.github.standobyte.jojo.action.stand;
 import java.util.List;
 import java.util.Optional;
 
-import com.github.standobyte.jojo.action.ActionConditionResult;
-import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -31,17 +29,20 @@ public class CrazyDiamondBlockCheckpointMake extends StandEntityAction {
         super(builder);
     }
 
-    // FIXME !! (fast travel) restrict to the blocks CD can break
     @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
-        return super.checkSpecificConditions(user, power, target);
+    public boolean standCanPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
+        BlockPos pos = task.getTarget().getBlockPos();
+        if (pos != null) {
+            return standEntity.canBreakBlock(pos, world.getBlockState(pos));
+        }
+        return false;
     }
 
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
             BlockPos pos = task.getTarget().getBlockPos();
-            // FIXME !! (fast travel) what about the "no block breaking" config check?
+            // FIXME !! (fast travel) handle the "no block breaking" config
             if (pos != null) {
                 BlockState blockState = world.getBlockState(pos);
                 List<ItemStack> drops = Block.getDrops(blockState, (ServerWorld) world, pos, 

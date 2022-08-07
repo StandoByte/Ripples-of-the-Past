@@ -34,7 +34,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
     }
 
     @Override
-    public ActionConditionResult checkStandTarget(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
+    public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, IStandPower standPower) {
         switch (target.getType()) {
         case BLOCK:
             if (standPower.getResolveLevel() >= 2) {
