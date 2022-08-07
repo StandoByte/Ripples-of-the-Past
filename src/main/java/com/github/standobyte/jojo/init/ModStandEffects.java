@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.effect.BoyIIManStandPartTakenEffect;
 import com.github.standobyte.jojo.action.stand.effect.CrazyDiamondRestorableBlocks;
+import com.github.standobyte.jojo.action.stand.effect.DriedBloodDrops;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectType;
 import com.github.standobyte.jojo.power.IPowerType;
 
@@ -28,6 +29,9 @@ public class ModStandEffects {
     
     public static final RegistryObject<StandEffectType<CrazyDiamondRestorableBlocks>> CRAZY_DIAMOND_RESTORABLE_BLOCKS = STAND_EFFECTS.register("crazy_diamond_restorable_blocks", 
             () -> new StandEffectType<>(CrazyDiamondRestorableBlocks::new));
+    
+    public static final RegistryObject<StandEffectType<DriedBloodDrops>> DRIED_BLOOD_DROPS = STAND_EFFECTS.register("dried_blood_drops", 
+            () -> new StandEffectType<>(DriedBloodDrops::new));
     
     
     

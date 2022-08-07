@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
+import com.github.standobyte.jojo.action.stand.effect.StandEffectType;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandEffectPacket;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
@@ -123,6 +124,22 @@ public class StandEffectsTracker {
     
     public StandEffectInstance getById(int id) {
         return effects.get(id);
+    }
+    
+    // FIXME (!!)
+    @SuppressWarnings("unchecked")
+    public <T extends StandEffectInstance> T getOrCreateEffectSingle(StandEffectType<T> effectType, 
+            @Nullable Predicate<StandEffectInstance> additionalFilter) {
+        List<StandEffectInstance> effectList = getEffects(effect -> 
+        effect.effectType == effectType && (additionalFilter == null || additionalFilter.test(effect)));
+        if (effectList.isEmpty()) {
+            T effect = effectType.create();
+            addEffect(effect);
+            return effect;
+        }
+        else {
+            return (T) effectList.get(0);
+        }
     }
     
     public List<StandEffectInstance> getEffects(@Nullable Predicate<StandEffectInstance> filter) {
