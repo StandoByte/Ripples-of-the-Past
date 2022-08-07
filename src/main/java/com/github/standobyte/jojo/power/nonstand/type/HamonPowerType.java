@@ -519,7 +519,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
             }
             else {
                 for (int i = (int) (intensity * 9.5F); i >= 0; i--) {
-                    ClientUtil.createHamonSparksEmitter(entity, Math.max(1, (int) (intensity * 9.5) - i));
+                    ClientUtil.createParticlesEmitter(entity, ModParticles.HAMON_SPARK.get(), Math.max(1, (int) (intensity * 9.5) - i));
                     if (i % 2 == 0) {
                         ClientTickingSoundsHelper.playHamonSparksSound(entity, intensity * 2, 1.0F + (world.random.nextFloat() - 0.5F) * 0.15F);
                     }

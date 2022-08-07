@@ -35,7 +35,7 @@ public class HamonOrganismInfusion extends HamonAction {
     }
 
     @Override
-    public ActionConditionResult checkTarget(LivingEntity user, INonStandPower power, ActionTarget target) {
+    public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, INonStandPower power) {
         switch (target.getType()) {
         case ENTITY:
             Entity entity = target.getEntity();

@@ -134,7 +134,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             tier = Math.max(tier, standType.getTier());
         }
         if (user != null && !user.level.isClientSide()) {
-            continuousEffects.onUserStandRemoved(user);
+            continuousEffects.onStandChanged(user);
         }
     }
 
@@ -169,8 +169,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                     SaveFileUtilCapProvider.getSaveFileCap(player).removePlayerStand(standType);
                 });
             }
-            if (user != null && !user.level.isClientSide()) {
-                continuousEffects.onUserStandRemoved(user);
+            if (user != null) {
+                continuousEffects.onStandChanged(user);
             }
             return true;
         }
@@ -651,6 +651,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         this.skippedProgression = oldPower.wasProgressionSkipped();
         this.givenByDisc = oldPower.wasGivenByDisc();
         this.actionLearningProgressMap = ((StandPower) oldPower).actionLearningProgressMap; // FIXME can i remove this cast?
+        this.continuousEffects = oldPower.getContinuousEffects();
         this.stamina = getMaxStamina();
     }
     
@@ -672,6 +673,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             if (skippedProgression) {
                 PacketManager.sendToClient(new SkippedStandProgressionPacket(), player);
             }
+            continuousEffects.syncWithUserOnly(player);
         });
     }
     

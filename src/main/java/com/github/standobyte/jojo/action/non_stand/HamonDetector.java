@@ -19,7 +19,7 @@ import net.minecraft.world.World;
 public class HamonDetector extends HamonAction {
 
     public HamonDetector(HamonAction.Builder builder) {
-        super(builder);
+        super(builder.holdType());
     }
 
     @Override

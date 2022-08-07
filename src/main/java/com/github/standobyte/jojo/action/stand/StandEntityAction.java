@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.stand.StandAttackProperties;
@@ -53,6 +54,32 @@ public abstract class StandEntityAction extends StandAction {
         this.enablePhysics = builder.enablePhysics;
         this.targetPunch = builder.targetPunch;
         this.standSounds = builder.standSounds;
+    }
+    
+    public void standTickButtonHold(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
+    
+    public void standTickWindup(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
+    
+    public boolean standCanTick(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) { return true; }
+    
+    public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
+    
+    public boolean standCanPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) { return true; }
+    
+    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
+    
+    public void standTickRecovery(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
+    
+    public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
+        return standWindupDuration;
+    }
+
+    public int getStandActionTicks(IStandPower standPower, StandEntity standEntity) {
+        return standPerformDuration;
+    }
+    
+    public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
+        return standRecoveryDuration;
     }
     
     @Override
@@ -108,42 +135,32 @@ public abstract class StandEntityAction extends StandAction {
     	return ActionConditionResult.POSITIVE;
     }
     
-    public boolean keepStandTarget(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
+    @Override
+    public ActionConditionResult checkRangeAndTarget(ActionTarget target, LivingEntity user, IStandPower power) {
+        ActionConditionResult result = super.checkRangeAndTarget(target, user, power);
+        if (result.isPositive() && power.isActive()) {
+            StandEntity stand = (StandEntity) power.getStandManifestation();
+            return checkStandTarget(target, stand, power);
+        }
+        return result;
+    }
+    
+    @Override
+    protected ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, IStandPower power) {
+        if (target.getType() == TargetType.BLOCK) {
+            return ActionConditionResult.noMessage(getTargetRequirement() != TargetRequirement.NONE && getTargetRequirement().checkTargetType(TargetType.BLOCK));
+        }
+        return super.checkTarget(target, user, power);
+    }
+    
+    public ActionConditionResult checkStandTarget(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
         switch (target.getType()) {
         case ENTITY:
             Entity targetEntity = target.getEntity();
-            return targetEntity instanceof LivingEntity && standEntity.canAttack(standEntity);
-        case BLOCK:
-            return false;
+            return ActionConditionResult.noMessage(targetEntity instanceof LivingEntity && standEntity.canAttack((LivingEntity) targetEntity));
         default:
-            return true;
+            return ActionConditionResult.POSITIVE;
         }
-    }
-    
-    public void standTickButtonHold(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
-    
-    public void standTickWindup(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
-    
-    public boolean standCanTick(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) { return true; }
-    
-    public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
-    
-    public boolean standCanPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) { return true; }
-    
-    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
-    
-    public void standTickRecovery(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
-    
-    public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
-        return standWindupDuration;
-    }
-
-    public int getStandActionTicks(IStandPower standPower, StandEntity standEntity) {
-        return standPerformDuration;
-    }
-    
-    public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
-        return standRecoveryDuration;
     }
     
     @Override

@@ -10,7 +10,7 @@ import net.minecraft.world.World;
 public class HamonBubbleLauncher extends HamonAction {
 
     public HamonBubbleLauncher(HamonAction.Builder builder) {
-        super(builder);
+        super(builder.holdType());
     }
     
     @Override

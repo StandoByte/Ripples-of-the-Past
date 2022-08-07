@@ -60,6 +60,9 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> KNIFE_HIT = SOUNDS.register("knife_hit",
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "knife_hit")));
+    
+    public static final RegistryObject<SoundEvent> WATER_SPLASH = SOUNDS.register("water_splash",
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "water_splash")));
 
 
     public static final RegistryObject<SoundEvent> VAMPIRE_BLOOD_DRAIN = SOUNDS.register("vampire_blood_drain",
@@ -427,4 +430,34 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> MAGICIANS_RED_RED_BIND = MAGICIANS_RED_FIRE_BLAST;
     
     public static final OstSoundList MAGICIANS_RED_OST = new OstSoundList(new ResourceLocation(JojoMod.MOD_ID, "magicians_red_ost"), SOUNDS);
+
+    // FIXME ! sound files
+    public static final RegistryObject<SoundEvent> JOSUKE_CRAZY_DIAMOND = SOUNDS.register("josuke_crazy_diamond", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "josuke_crazy_diamond")));
+
+    public static final RegistryObject<SoundEvent> JOSUKE_FIX = SOUNDS.register("josuke_fix", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "josuke_fix")));
+
+    public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_SUMMON = SOUNDS.register("crazy_diamond_summon", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_summon")));
+    
+    public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_UNSUMMON = SOUNDS.register("crazy_diamond_unsummon", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_unsummon")));
+    
+    public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_DORA = SOUNDS.register("crazy_diamond_dora", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_dora")));
+    
+    public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_DORARARA = SOUNDS.register("crazy_diamond_dorarara", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_dorarara")));
+    
+    public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_FIX = SOUNDS.register("crazy_diamond_fix", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_fix")));
+    
+    public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_FIX_ENDED = SOUNDS.register("crazy_diamond_fix_ended", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_fix_ended")));
+    
+    public static final RegistryObject<SoundEvent> BLOOD_CUTTER_SPLASH = SOUNDS.register("blood_cutter_splash", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "blood_cutter_splash")));
+    
+    public static final OstSoundList CRAZY_DIAMOND_OST = new OstSoundList(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_ost"), SOUNDS);
 }

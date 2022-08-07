@@ -39,7 +39,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 
-public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawnData {
+public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawnData, IHasHealth {
     private static final double GRAVITY = -0.05D;
     private static final float MAX_ENERGY = ModActions.HAMON_LIFE_MAGNETISM.get().getEnergyNeeded(0, null);
     private static final float MAX_HEALTH = 4F;
@@ -377,15 +377,21 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
     public float getEnergy() {
         return entityData.get(ENERGY);
     }
-
-    public void setHealth(float health) {
-        entityData.set(HEALTH, health);
-    }
     
+    @Override
     public float getHealth() {
         return entityData.get(HEALTH);
     }
-//    
+
+    public void setHealth(float health) {
+        entityData.set(HEALTH, MathHelper.clamp(health, 0, getMaxHealth()));
+    }
+
+    @Override
+    public float getMaxHealth() {
+        return MAX_HEALTH;
+    }
+    
 //    public void setLeavesBlock(LeavesBlock block) {
 //        if (block != null) {
 //            this.leavesBlock = block;

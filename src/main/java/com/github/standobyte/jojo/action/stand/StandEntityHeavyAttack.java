@@ -8,7 +8,6 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
@@ -97,11 +96,6 @@ public class StandEntityHeavyAttack extends StandEntityAction {
     @Override
     public boolean canFollowUpBarrage() {
         return true;
-    }
-    
-    @Override
-    public boolean keepStandTarget(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
-        return target.getType() == TargetType.ENTITY;
     }
     
     
