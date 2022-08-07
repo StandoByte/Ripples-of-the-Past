@@ -8,9 +8,11 @@ import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
 public class CrazyDiamondBlockCheckpointMove extends StandEntityAction {
@@ -22,7 +24,7 @@ public class CrazyDiamondBlockCheckpointMove extends StandEntityAction {
     @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
         ItemStack blockItem = user.getOffhandItem();
-        if (blockItem == null || blockItem.isEmpty() || blockItem.getTag() == null || !blockItem.getTag().contains("CDCheckpoint")) {
+        if (blockItem == null || !CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(user.level, blockItem).isPresent()) {
             return conditionMessage("item_block_origin");
         }
         return super.checkSpecificConditions(user, power, target);
@@ -40,7 +42,12 @@ public class CrazyDiamondBlockCheckpointMove extends StandEntityAction {
                     user.fallDistance = 0;
                 }
                 else {
-                    // FIXME !! (fast travel) place the block
+                    if (heldItem.getItem() instanceof BlockItem && !world.isClientSide()) {
+                        world.setBlockAndUpdate(pos, CrazyDiamondBlockCheckpointMake.getBlockState(heldItem, 
+                                (BlockItem) heldItem.getItem()));
+                    }
+                    CrazyDiamondRestoreTerrain.addParticlesAroundBlock(world, pos, standEntity.getRandom());
+                    heldItem.shrink(1);
                 }
                 if (world.isClientSide()) {
                     // FIXME ! (fast travel) CD restore sound
@@ -50,4 +57,20 @@ public class CrazyDiamondBlockCheckpointMove extends StandEntityAction {
         }
     }
     
+    @Override
+    public String getTranslationKey(IStandPower power, ActionTarget target) {
+        String key = super.getTranslationKey(power, target);
+        LivingEntity user = power.getUser();
+        ItemStack blockItem = user.getOffhandItem();
+        if (blockItem == null || !CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(user.level, blockItem).isPresent()) {
+            return key + ".empty";
+        }
+        return key + ".pos";
+    }
+
+    
+    public TranslationTextComponent getTranslatedName(IStandPower power, String key) {
+        return CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(power.getUser().level, power.getUser().getOffhandItem()).map(pos -> 
+        new TranslationTextComponent(key, pos.getX(), pos.getY(), pos.getZ())).orElse(super.getTranslatedName(power, key));
+    }
 }

@@ -60,8 +60,8 @@ public class CrazyDiamondRestorableBlocks extends StandEffectInstance {
     }
     
     public void addBlock(World world, BlockPos blockPos, BlockState blockState, List<ItemStack> restoreCost, boolean keep) {
-        if (world.dimension() == dimension) {
-            PrevBlockInfo prevBlock = new PrevBlockInfo(blockState, restoreCost, keep);
+        if (world.dimension() == dimension && restoreCost != null && restoreCost.size() == 1) {
+            PrevBlockInfo prevBlock = new PrevBlockInfo(blockState, restoreCost.get(0), keep);
             getChunkBlocks(blockPos).put(blockPos, prevBlock);
             if (serverPlayerUser.isPresent()) {
                 blocksToSend.add(new CDBlocksBrokenPacket.BlockInfo(blockPos, prevBlock.state, keep));
@@ -169,15 +169,23 @@ public class CrazyDiamondRestorableBlocks extends StandEffectInstance {
     
     public static class PrevBlockInfo {
         public final BlockState state;
-        public final List<ItemStack> stacks;
+//        public final List<ItemStack> stacks;
+        // FIXME (!) (restore terrain) turn it into stacks list
+        public final ItemStack stack;
         public final boolean keep;
         private int tickCount = 0;
         
-        private PrevBlockInfo(BlockState state, List<ItemStack> stacks, boolean keep) {
+        private PrevBlockInfo(BlockState state, ItemStack stack, boolean keep) {
             this.state = state;
-            this.stacks = stacks;
+            this.stack = stack;
             this.keep = keep;
         }
+        
+//        private PrevBlockInfo(BlockState state, List<ItemStack> stacks, boolean keep) {
+//            this.state = state;
+//            this.stacks = stacks;
+//            this.keep = keep;
+//        }
         
         private boolean forget() {
             return !keep && tickCount++ == 1200;

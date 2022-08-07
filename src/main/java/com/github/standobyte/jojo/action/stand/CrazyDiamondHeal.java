@@ -66,10 +66,14 @@ public class CrazyDiamondHeal extends StandEntityAction {
         }
     }
 
-    // FIXME !! (heal) interaction with dying entities
+    // FIXME ! (heal) interaction with dying entities
     public static boolean handleLivingEntity(World world, LivingEntity entity) {
         return handle(world, entity, 
-                entity, e -> e.setHealth(e.getHealth() + 0.4F), 
+                entity, e -> {
+                    if (!e.isDeadOrDying()) {
+                        e.setHealth(e.getHealth() + 0.4F);
+                    }
+                }, 
                 e -> e.getHealth() < e.getMaxHealth());
     }
 
