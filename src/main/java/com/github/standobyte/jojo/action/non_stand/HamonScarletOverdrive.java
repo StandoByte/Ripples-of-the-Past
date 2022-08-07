@@ -16,7 +16,7 @@ import net.minecraft.world.World;
 public class HamonScarletOverdrive extends HamonAction {
 
     public HamonScarletOverdrive(HamonAction.Builder builder) {
-        super(builder);
+        super(builder.doNotCancelClick());
     }
     
     @Override

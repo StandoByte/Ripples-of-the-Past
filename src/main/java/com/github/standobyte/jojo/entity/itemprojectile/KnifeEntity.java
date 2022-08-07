@@ -85,7 +85,7 @@ public class KnifeEntity extends ItemProjectileEntity {
         if (!(timeStop && rayTraceResult.getType() == RayTraceResult.Type.ENTITY)) {
             super.onHit(rayTraceResult);
         }
-        else {
+        else if (timeStopHitMotion == null) {
             timeStopHitMotion = getDeltaMovement();
             setDeltaMovement(Vector3d.ZERO);
         }
@@ -118,9 +118,14 @@ public class KnifeEntity extends ItemProjectileEntity {
     @Override
     public void canUpdate(boolean canUpdate) {
         if (canUpdate) {
-            timeStop = false;
-            if (timeStopHitMotion != null) {
-                setDeltaMovement(timeStopHitMotion);
+            if (timeStop) {
+                timeStop = false;
+                if (timeStopHitMotion != null) {
+                    setDeltaMovement(timeStopHitMotion);
+                }
+            }
+            else {
+                super.canUpdate(canUpdate);
             }
         }
         else if (tickCount == 0 && !timeStop) {

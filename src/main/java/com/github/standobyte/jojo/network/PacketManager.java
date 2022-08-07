@@ -25,6 +25,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClStopHeldActionPac
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandManualControlPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandSummonPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.CDBlocksBrokenPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.CommonConfigPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillLearnPacket;
@@ -410,6 +411,11 @@ public class PacketManager {
                 ResetSyncedCommonConfigPacket::encode,
                 ResetSyncedCommonConfigPacket::decode,
                 ResetSyncedCommonConfigPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, CDBlocksBrokenPacket.class,
+                CDBlocksBrokenPacket::encode,
+                CDBlocksBrokenPacket::decode,
+                CDBlocksBrokenPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
         channel.registerMessage(index++, RPSGameStatePacket.class,
                 RPSGameStatePacket::encode,

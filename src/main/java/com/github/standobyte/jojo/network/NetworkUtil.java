@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -144,5 +145,16 @@ public class NetworkUtil {
 
             return arr;
         }
+    }
+    
+    public static <T> void writeOptional(PacketBuffer buf, T obj, Runnable write) {
+        buf.writeBoolean(obj != null);
+        if (obj != null) {
+            write.run();
+        }
+    }
+    
+    public static <T> T readOptional(PacketBuffer buf, Supplier<T> read) {
+        return buf.readBoolean() ? read.get() : null;
     }
 }

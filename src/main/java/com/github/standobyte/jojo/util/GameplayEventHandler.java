@@ -17,6 +17,7 @@ import com.github.standobyte.jojo.JojoModConfig.Common;
 import com.github.standobyte.jojo.action.non_stand.VampirismFreeze;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.action.stand.effect.BoyIIManStandPartTakenEffect;
+import com.github.standobyte.jojo.action.stand.effect.CrazyDiamondRestorableBlocks;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.block.StoneMaskBlock;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
@@ -53,8 +54,8 @@ import com.github.standobyte.jojo.power.nonstand.type.VampirismPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.stand.StandInstance;
-import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
+import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.type.EntityStandType;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.github.standobyte.jojo.tileentity.StoneMaskTileEntity;
@@ -320,9 +321,9 @@ public class GameplayEventHandler {
                         target -> target instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) target)));
             }
         }
-        else if (entity.getType() == EntityType.PAINTING) {
-            cutOutHands((PaintingEntity) event.getEntity());
-        }
+//        else if (entity.getType() == EntityType.PAINTING) {
+//            cutOutHands((PaintingEntity) event.getEntity());
+//        }
     }
 
     private static void makeMobNeutralToVampirePlayers(MobEntity mob) {
@@ -865,7 +866,7 @@ public class GameplayEventHandler {
     public static void onPlayerLogout(PlayerLoggedOutEvent event) {
         PlayerEntity player = event.getPlayer();
         IStandPower.getStandPowerOptional(player).ifPresent(stand -> {
-            stand.getContinuousEffects().onUserStandRemoved(player);
+            stand.getContinuousEffects().onStandUserLogout((ServerPlayerEntity) player);
         });
     }
 
@@ -890,7 +891,7 @@ public class GameplayEventHandler {
             }
             LazyOptional<IStandPower> standOptional = IStandPower.getStandPowerOptional(dead);
             standOptional.ifPresent(stand -> {
-                stand.getContinuousEffects().onUserStandRemoved(dead);
+                stand.getContinuousEffects().onStandUserDeath(dead);
                 summonSoul(standOptional, dead, dmgSource);
             });
         }
@@ -1169,6 +1170,19 @@ public class GameplayEventHandler {
         if (explosion.getExploder() instanceof MRCrossfireHurricaneEntity) {
             ((MRCrossfireHurricaneEntity) explosion.getExploder())
             .onExplode(event.getAffectedEntities(), event.getAffectedBlocks());
+        }
+    }
+    
+    public static void rememberBrokenBlock(World world, BlockPos blockPos, BlockState blockState, 
+            LivingEntity cdUser, boolean brokenByUser) {
+        if (!world.isClientSide()) {
+            IStandPower.getStandPowerOptional(cdUser).ifPresent(power -> {
+                if (power.getType() == ModStandTypes.CRAZY_DIAMOND.get()) {
+                    CrazyDiamondRestorableBlocks effect = CrazyDiamondRestorableBlocks.getRestorableBlocksEffect(power, world);
+                    effect.addBlock(world, blockPos, blockState, Block.getDrops(blockState, (ServerWorld) world, blockPos, 
+                            blockState.hasTileEntity() ? world.getBlockEntity(blockPos) : null), brokenByUser);
+                }
+            });
         }
     }
     

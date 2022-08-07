@@ -21,7 +21,7 @@ import net.minecraftforge.common.ForgeMod;
 public class HamonTornadoOverdrive extends HamonAction {
 
     public HamonTornadoOverdrive(HamonAction.Builder builder) {
-        super(builder);
+        super(builder.holdType());
     }
      
     @Override

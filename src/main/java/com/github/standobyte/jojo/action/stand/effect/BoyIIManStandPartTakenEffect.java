@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.action.stand.effect;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.init.ModStandEffects;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandInstance;
@@ -56,6 +57,11 @@ public class BoyIIManStandPartTakenEffect extends StandEffectInstance {
                 });
             });
         }
+    }
+    
+    @Override
+    protected boolean removeDeadTarget(LivingEntity target) {
+        return !JojoModConfig.getCommonConfigInstance(target.level.isClientSide()).keepStandOnDeath.get();
     }
 
     

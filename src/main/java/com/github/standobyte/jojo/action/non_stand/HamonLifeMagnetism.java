@@ -15,15 +15,15 @@ import net.minecraft.world.World;
 public class HamonLifeMagnetism extends HamonAction {
 
     public HamonLifeMagnetism(HamonAction.Builder builder) {
-        super(builder);
+        super(builder.emptyMainHand());
     }
     
     @Override
-    public ActionConditionResult checkTarget(LivingEntity user, INonStandPower power, ActionTarget target) {
+    public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, INonStandPower power) {
         if (!(user.level.getBlockState(target.getBlockPos()).getBlock() instanceof LeavesBlock)) {
             return conditionMessage("leaves");
         }
-        return super.checkTarget(user, power, target);
+        return super.checkTarget(target, user, power);
     }
     
     @Override

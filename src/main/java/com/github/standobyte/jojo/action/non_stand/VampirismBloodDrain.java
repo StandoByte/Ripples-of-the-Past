@@ -33,11 +33,11 @@ import net.minecraft.world.server.ServerWorld;
 public class VampirismBloodDrain extends VampirismAction {
 
     public VampirismBloodDrain(NonStandAction.Builder builder) {
-        super(builder);
+        super(builder.holdType());
     }
     
     @Override
-    public ActionConditionResult checkTarget(LivingEntity user, INonStandPower power, ActionTarget target) {
+    public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, INonStandPower power) {
         Entity entityTarget = target.getEntity();
         if (entityTarget instanceof LivingEntity) {
             LivingEntity livingTarget = (LivingEntity) entityTarget;

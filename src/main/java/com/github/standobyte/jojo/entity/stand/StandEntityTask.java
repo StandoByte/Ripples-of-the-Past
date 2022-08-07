@@ -77,7 +77,7 @@ public class StandEntityTask {
                 return false;
             }
         }
-        return action.keepStandTarget(target, standEntity, standPower);
+        return action.checkRangeAndTarget(target, standPower.getUser(), standPower).isPositive();
     }
     
     void tick(IStandPower standPower, StandEntity standEntity) {
