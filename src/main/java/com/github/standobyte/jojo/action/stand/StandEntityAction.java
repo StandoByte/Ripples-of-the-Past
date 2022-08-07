@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.stand.StandAttackProperties;
@@ -135,12 +136,21 @@ public abstract class StandEntityAction extends StandAction {
     }
     
     @Override
-    protected final ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, IStandPower power) {
-        if (power.isActive()) {
+    public ActionConditionResult checkRangeAndTarget(ActionTarget target, LivingEntity user, IStandPower power) {
+        ActionConditionResult result = super.checkRangeAndTarget(target, user, power);
+        if (result.isPositive() && power.isActive()) {
             StandEntity stand = (StandEntity) power.getStandManifestation();
             return checkStandTarget(target, stand, power);
         }
-        return ActionConditionResult.POSITIVE;
+        return result;
+    }
+    
+    @Override
+    protected ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, IStandPower power) {
+        if (target.getType() == TargetType.BLOCK) {
+            return ActionConditionResult.noMessage(getTargetRequirement() != TargetRequirement.NONE && getTargetRequirement().checkTargetType(TargetType.BLOCK));
+        }
+        return super.checkTarget(target, user, power);
     }
     
     public ActionConditionResult checkStandTarget(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
@@ -148,8 +158,6 @@ public abstract class StandEntityAction extends StandAction {
         case ENTITY:
             Entity targetEntity = target.getEntity();
             return ActionConditionResult.noMessage(targetEntity instanceof LivingEntity && standEntity.canAttack((LivingEntity) targetEntity));
-        case BLOCK:
-            return ActionConditionResult.NEGATIVE;
         default:
             return ActionConditionResult.POSITIVE;
         }

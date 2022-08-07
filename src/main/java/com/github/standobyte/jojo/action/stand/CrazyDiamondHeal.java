@@ -25,7 +25,7 @@ public class CrazyDiamondHeal extends StandEntityAction {
     }
     
     @Override
-    public ActionConditionResult checkStandTarget(ActionTarget target, StandEntity standEntity, IStandPower power) {
+    public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, IStandPower power) {
         Entity targetEntity = target.getEntity();
         if (targetEntity.is(power.getUser())) {
             return conditionMessage("cd_heal_self");

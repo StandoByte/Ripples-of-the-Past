@@ -1836,7 +1836,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return false;
     }
     
-    protected boolean canBreakBlock(BlockPos blockPos, BlockState blockState) {
+    public boolean canBreakBlock(BlockPos blockPos, BlockState blockState) {
         float blockHardness = blockState.getDestroySpeed(level, blockPos);
         return blockHardness >= 0 && canBreakBlock(blockHardness, blockState.getHarvestLevel());
     }

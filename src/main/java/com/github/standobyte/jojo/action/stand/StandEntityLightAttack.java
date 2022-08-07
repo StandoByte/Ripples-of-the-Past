@@ -13,6 +13,7 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
@@ -87,11 +88,11 @@ public class StandEntityLightAttack extends StandEntityAction {
     }
     
     @Override
-    public ActionConditionResult checkStandTarget(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
+    public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, IStandPower standPower) {
         if (target.getType() == TargetType.BLOCK) {
             return ActionConditionResult.POSITIVE;
         }
-        return super.checkStandTarget(target, standEntity, standPower);
+        return super.checkTarget(target, user, standPower);
     }
     
     
