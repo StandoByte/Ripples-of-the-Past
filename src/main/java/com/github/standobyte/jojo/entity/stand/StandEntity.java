@@ -218,6 +218,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             Optional<StandEntityTask> taskOptional = getCurrentTask();
             
             taskOptional.ifPresent(task -> {
+                if (task.getTarget().getType() == TargetType.ENTITY) task.getTarget().resolveEntityId(level);
                 StandEntityAction action = task.getAction();
                 StandEntityAction.Phase phase = task.getPhase();
                 action.playSound(this, userPower, phase, task);
@@ -1218,7 +1219,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             	previousTask.ifPresent(prevTask -> {
             		if (prevTask.getTarget().getType() != TargetType.EMPTY
             				&& task.getTarget().getType() == TargetType.EMPTY) {
-            			task.setTarget(this, prevTask.getTarget(), userPower, true);
+            			task.setTarget(this, prevTask.getTarget(), userPower);
             		}
                 	
             		if (task.getAction().transfersPreviousOffset(userPower, this, prevTask)) {
@@ -1420,7 +1421,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         boolean punched;
         switch (target.getType()) {
         case BLOCK:
-            punched = breakBlock(target.getBlockPos());
+            punched = breakBlock(target.getBlockPos(), true);
             break;
         case ENTITY:
             Entity entity = target.getEntity();
@@ -1466,7 +1467,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public void setTaskTarget(ActionTarget target) {
         if (target != null) {
             getCurrentTask().ifPresent(task -> {
-                boolean sendTarget = task.setTarget(this, target, userPower, !level.isClientSide());
+                boolean sendTarget = task.setTarget(this, target, userPower);
                 if (!level.isClientSide()) {
                     if (sendTarget) {
                         PacketManager.sendToClientsTracking(new TrStandEntityTargetPacket(getId(), target), this);
@@ -1815,7 +1816,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
     }
 
-    protected boolean breakBlock(BlockPos blockPos) {
+    public boolean breakBlock(BlockPos blockPos, boolean canDropItems) {
         if (level.isClientSide() || !JojoModUtil.canEntityDestroy((ServerWorld) level, blockPos, this)) {
             return false;
         }
@@ -1823,18 +1824,19 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         BlockState blockState = level.getBlockState(blockPos);
         if (canBreakBlock(blockPos, blockState)) {
             LivingEntity user = getUser();
-            level.destroyBlock(blockPos, !(user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild), this);
-            punchSoundPos = Vector3d.atCenterOf(blockPos);
-            return true;
+            if (level.destroyBlock(blockPos, canDropItems && !(user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild), this)) {
+                punchSoundPos = Vector3d.atCenterOf(blockPos);
+                return true;
+            }
         }
         else {
             SoundType soundType = blockState.getSoundType(level, blockPos, this);
             level.playSound(null, blockPos, soundType.getHitSound(), SoundCategory.BLOCKS, (soundType.getVolume() + 1.0F) / 8.0F, soundType.getPitch() * 0.5F);
-            return false;
         }
+        return false;
     }
     
-    protected boolean canBreakBlock(BlockPos blockPos, BlockState blockState) {
+    public boolean canBreakBlock(BlockPos blockPos, BlockState blockState) {
         float blockHardness = blockState.getDestroySpeed(level, blockPos);
         return blockHardness >= 0 && canBreakBlock(blockHardness, blockState.getHarvestLevel());
     }

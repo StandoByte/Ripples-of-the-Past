@@ -25,7 +25,7 @@ public class HamonPlantInfusion extends HamonOrganismInfusion {
     }
 
     @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
+    public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, INonStandPower power) {
     	BlockPos blockPos = target.getBlockPos();
     	BlockState blockState = user.level.getBlockState(blockPos);
     	if (blockState.getMaterial() == Material.EGG) {

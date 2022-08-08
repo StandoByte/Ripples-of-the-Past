@@ -252,7 +252,7 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     }
     
     @Override
-    protected void breakProjectile(TargetType targetType) {}
+    protected void breakProjectile(TargetType targetType, RayTraceResult hitTarget) {}
 
     @Override
     protected void afterBlockHit(BlockRayTraceResult blockRayTraceResult, boolean blockDestroyed) {

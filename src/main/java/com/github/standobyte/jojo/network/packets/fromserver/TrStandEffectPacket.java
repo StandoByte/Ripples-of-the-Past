@@ -33,11 +33,6 @@ public class TrStandEffectPacket {
                 null, null, null, null);
     }
     
-    public static TrStandEffectPacket removeAll(LivingEntity standUser) {
-        return new TrStandEffectPacket(PacketType.REMOVE_ALL, standUser.getId(), 
-                -1, null, null, null, null);
-    }
-    
     private TrStandEffectPacket(PacketType packetType, int userId, int effectId, int[] targetsId, 
             StandEffectType<?> effectFactory, StandEffectInstance effect, PacketBuffer buf) {
         this.packetType = packetType;
@@ -63,9 +58,6 @@ public class TrStandEffectPacket {
             buf.writeInt(msg.userId);
             buf.writeInt(msg.effectId);
             break;
-        case REMOVE_ALL:
-            buf.writeInt(msg.userId);
-            break;
         }
     }
 
@@ -77,9 +69,6 @@ public class TrStandEffectPacket {
                     buf.readRegistryIdSafe(StandEffectType.class), null, buf);
         case REMOVE:
             return new TrStandEffectPacket(type, buf.readInt(), buf.readInt(), null, 
-                    null, null, null);
-        case REMOVE_ALL:
-            return new TrStandEffectPacket(type, buf.readInt(), -1, null, 
                     null, null, null);
         }
         return null;
@@ -100,8 +89,6 @@ public class TrStandEffectPacket {
                     case REMOVE:
                         StandEffectsTracker effects = stand.getContinuousEffects();
                         effects.removeEffect(effects.getById(msg.effectId));
-                    case REMOVE_ALL:
-                        stand.getContinuousEffects().onUserStandRemoved(livingEntity);
                     }
                 });
             }
@@ -111,7 +98,6 @@ public class TrStandEffectPacket {
     
     private enum PacketType {
         ADD,
-        REMOVE,
-        REMOVE_ALL
+        REMOVE
     }
 }

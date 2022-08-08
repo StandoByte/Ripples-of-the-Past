@@ -33,7 +33,21 @@ import net.minecraft.world.server.ServerWorld;
 public class VampirismBloodDrain extends VampirismAction {
 
     public VampirismBloodDrain(NonStandAction.Builder builder) {
-        super(builder);
+        super(builder.holdType());
+    }
+    
+    @Override
+    public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, INonStandPower power) {
+        Entity entityTarget = target.getEntity();
+        if (entityTarget instanceof LivingEntity) {
+            LivingEntity livingTarget = (LivingEntity) entityTarget;
+            if (!JojoModUtil.canBleed(livingTarget) || JojoModUtil.isUndead(livingTarget)) {
+                return conditionMessageContinueHold("blood");
+//                return livingTarget.tickCount > 20 ? conditionMessageContinueHold("blood") : ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
+            }
+            return ActionConditionResult.POSITIVE;
+        }
+        return ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
     }
     
     @Override
@@ -43,16 +57,6 @@ public class VampirismBloodDrain extends VampirismAction {
         }
         if (!user.getMainHandItem().isEmpty()) {
             return conditionMessage("hand");
-        }
-        Entity entityTarget = target.getEntity();
-        if (entityTarget instanceof LivingEntity) {
-            LivingEntity livingTarget = (LivingEntity) entityTarget;
-            if (!JojoModUtil.canBleed(livingTarget) || JojoModUtil.isUndead(livingTarget)) {
-                return livingTarget.tickCount > 20 ? conditionMessage("blood") : ActionConditionResult.NEGATIVE;
-            }
-        }
-        else {
-            return ActionConditionResult.NEGATIVE;
         }
         return ActionConditionResult.POSITIVE;
     }

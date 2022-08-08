@@ -14,6 +14,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
@@ -24,7 +25,7 @@ import net.minecraftforge.common.ForgeHooks;
 public class HamonOverdriveBarrage extends HamonAction {
 
     public HamonOverdriveBarrage(HamonAction.Builder builder) {
-        super(builder);
+        super(builder.holdType().itemCheck(Hand.MAIN_HAND, ItemStack::isEmpty, "hands").itemCheck(Hand.OFF_HAND, ItemStack::isEmpty, "hands"));
     }
     
     @Override

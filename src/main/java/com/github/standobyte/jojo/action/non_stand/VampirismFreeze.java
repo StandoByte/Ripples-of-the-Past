@@ -35,7 +35,7 @@ import net.minecraftforge.event.entity.living.LivingAttackEvent;
 public class VampirismFreeze extends VampirismAction {
 
     public VampirismFreeze(NonStandAction.Builder builder) {
-        super(builder);
+        super(builder.holdType());
     }
     
     @Override

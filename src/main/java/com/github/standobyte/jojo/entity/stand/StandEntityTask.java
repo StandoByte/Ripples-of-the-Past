@@ -16,6 +16,7 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.StacksTHC;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.IDataSerializer;
 import net.minecraftforge.registries.DataSerializerEntry;
@@ -49,7 +50,7 @@ public class StandEntityTask {
         StandRelativeOffset offset = standEntity.hasEffect(ModEffects.STUN.get()) || !standEntity.hasUser() ? 
                 null
                 : action.getOffsetFromUser(standPower, standEntity, target);
-        if (!canTarget(standEntity, target, standPower, action)) {
+        if (!keepTarget(standEntity, target, standPower, action)) {
             target = ActionTarget.EMPTY;
         }
         
@@ -58,8 +59,8 @@ public class StandEntityTask {
         return task;
     }
     
-    boolean setTarget(StandEntity standEntity, ActionTarget target, IStandPower standPower, boolean targetCheck) {
-        if (!targetCheck || canTarget(standEntity, target, standPower, action)) {
+    boolean setTarget(StandEntity standEntity, ActionTarget target, IStandPower standPower) {
+        if (keepTarget(standEntity, target, standPower, action)) {
             boolean targetChanged = !target.sameTarget(this.target);
             this.target = target;
             return targetChanged;
@@ -67,8 +68,16 @@ public class StandEntityTask {
         return false;
     }
 
-    private static boolean canTarget(StandEntity standEntity, ActionTarget target, IStandPower standPower, StandEntityAction action) {
-        return action.canStandKeepTarget(target, standEntity, standPower);
+    private static boolean keepTarget(StandEntity standEntity, ActionTarget target, IStandPower standPower, StandEntityAction action) {
+        if (target.getType() == TargetType.EMPTY || standEntity.level.isClientSide()) return true;
+        if (target.getType() == TargetType.ENTITY) {
+            Entity targetEntity = target.getEntity();
+            if (targetEntity == null || targetEntity.is(standEntity)
+                    || !targetEntity.isAlive() && !(targetEntity instanceof LivingEntity && ((LivingEntity) targetEntity).deathTime < 20)) {
+                return false;
+            }
+        }
+        return action.checkRangeAndTarget(target, standPower.getUser(), standPower).isPositive();
     }
     
     void tick(IStandPower standPower, StandEntity standEntity) {
@@ -80,9 +89,8 @@ public class StandEntityTask {
 //                setTarget(ActionTarget.EMPTY);
 //            }
 //        }
-        if (!standEntity.level.isClientSide() && target.getType() == TargetType.ENTITY) {
-            Entity targetEntity = target.getEntity();
-            if (targetEntity == null || !targetEntity.isAlive() || targetEntity.is(standEntity)) {
+        if (!standEntity.level.isClientSide()) {
+            if (!keepTarget(standEntity, target, standPower, action)) {
                 standEntity.setTaskTarget(ActionTarget.EMPTY);
             }
         }
@@ -96,16 +104,18 @@ public class StandEntityTask {
             action.standTickWindup(standEntity.level, standEntity, standPower, this);
             break;
         case PERFORM:
-            if (phaseTicks == 0) {
-            	action.standPerform(standEntity.level, standEntity, standPower, this);
+            if (phaseTicks == 0 && action.standCanPerform(standEntity.level, standEntity, standPower, this)) {
+                action.standPerform(standEntity.level, standEntity, standPower, this);
                 if (!standEntity.level.isClientSide()) {
-                	standPower.consumeStamina(action.getStaminaCost(standPower));
+                    standPower.consumeStamina(action.getStaminaCost(standPower));
                 }
             }
-            
-            action.standTickPerform(standEntity.level, standEntity, standPower, this);
-            if (!standEntity.level.isClientSide()) {
-            	standPower.consumeStamina(action.getStaminaCostTicking(standPower));
+
+            if (action.standCanTick(standEntity.level, standEntity, standPower, this)) {
+                action.standTickPerform(standEntity.level, standEntity, standPower, this);
+                if (!standEntity.level.isClientSide()) {
+                    standPower.consumeStamina(action.getStaminaCostTicking(standPower));
+                }
             }
             break;
         case RECOVERY:
@@ -270,7 +280,7 @@ public class StandEntityTask {
         public Optional<StandEntityTask> copy(Optional<StandEntityTask> value) {
             if (value.isPresent()) {
                 StandEntityTask task = value.get();
-                StandEntityTask taskNew = new StandEntityTask(task.action, task.startingTicks, task.phase, false, task.target, task.offsetFromUser);
+                StandEntityTask taskNew = new StandEntityTask(task.action, task.startingTicks, task.phase, false, task.target.copy(), task.offsetFromUser);
                 taskNew.ticksLeft = task.ticksLeft;
                 taskNew.offsetFromUser = task.offsetFromUser;
                 return Optional.of(taskNew);

@@ -25,6 +25,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.play.server.SSpawnParticlePacket;
+import net.minecraft.particles.IParticleData;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
@@ -136,8 +137,8 @@ public class ClientUtil {
                 ModParticles.HAMON_SPARK.get(), false, x, y, z, 0.05F, 0.05F, 0.05F, 0.25F, particlesCount));
     }
     
-    public static void createHamonSparksEmitter(Entity entity, int ticks) {
-        Minecraft.getInstance().particleEngine.createTrackingEmitter(entity, ModParticles.HAMON_SPARK.get(), ticks);
+    public static void createParticlesEmitter(Entity entity, IParticleData type, int ticks) {
+        Minecraft.getInstance().particleEngine.createTrackingEmitter(entity, type, ticks);
     }
     
     public static float[] rgb(int color) {
