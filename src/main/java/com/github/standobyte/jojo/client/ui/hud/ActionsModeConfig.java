@@ -28,7 +28,7 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
         this.power = power;
     }
     
-    P getPower() {
+    public P getPower() {
         return power;
     }
     

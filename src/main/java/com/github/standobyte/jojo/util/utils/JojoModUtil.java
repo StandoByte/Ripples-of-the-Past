@@ -36,6 +36,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.INPC;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MoverType;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.monster.AbstractIllagerEntity;
 import net.minecraft.entity.passive.WaterMobEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -139,6 +140,21 @@ public class JojoModUtil {
     
     public static Vector3d getEntityPosition(Entity entity, float partialTick) {
     	return partialTick == 1.0F ? entity.position() : entity.getPosition(partialTick);
+    }
+    
+    public static void giveItem(PlayerEntity player, ItemStack item) {
+        if (!player.level.isClientSide()) {
+            if (player.inventory.add(item) && item.isEmpty()) {
+                player.inventoryMenu.broadcastChanges();
+            }
+            else {
+                ItemEntity itementity = player.drop(item, false);
+                if (itementity != null) {
+                    itementity.setNoPickUpDelay();
+                    itementity.setOwner(player.getUUID());
+                }
+            }
+        }
     }
     
     

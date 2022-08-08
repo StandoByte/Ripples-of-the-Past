@@ -179,4 +179,12 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
 	protected boolean cancels(StandEntityAction currentAction, IStandPower standPower, StandEntity standEntity, Phase currentPhase) {
         return currentAction != this && currentPhase == Phase.RECOVERY;
     }
+    
+    @Override
+    public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, IStandPower standPower) {
+        if (target.getType() == TargetType.BLOCK) {
+            return ActionConditionResult.POSITIVE;
+        }
+        return super.checkTarget(target, user, standPower);
+    }
 }

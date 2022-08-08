@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.action.non_stand;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
@@ -16,16 +15,20 @@ import net.minecraft.world.World;
 public class HamonLifeMagnetism extends HamonAction {
 
     public HamonLifeMagnetism(HamonAction.Builder builder) {
-        super(builder);
+        super(builder.emptyMainHand());
     }
     
     @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
-        if (target.getType() != TargetType.BLOCK
-                || !(user.level.getBlockState(target.getBlockPos()).getBlock() instanceof LeavesBlock)) {
+    public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, INonStandPower power) {
+        if (!(user.level.getBlockState(target.getBlockPos()).getBlock() instanceof LeavesBlock)) {
             return conditionMessage("leaves");
         }
-        return ActionConditionResult.POSITIVE;
+        return super.checkTarget(target, user, power);
+    }
+    
+    @Override
+    public TargetRequirement getTargetRequirement() {
+        return TargetRequirement.BLOCK;
     }
     
     @Override

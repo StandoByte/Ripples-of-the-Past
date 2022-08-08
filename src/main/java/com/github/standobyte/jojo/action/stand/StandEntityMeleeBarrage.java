@@ -127,11 +127,13 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
     }
     
     @Override
-    protected boolean lastTargetCheck(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
-		return target.getType() == TargetType.ENTITY && standEntity.barrageClashOpponent().map(otherStand -> {
-			return otherStand == target.getEntity();
-		}).orElse(false)
-				|| super.lastTargetCheck(target, standEntity, standPower);
+    public ActionConditionResult checkStandTarget(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
+        if (target.getType() == TargetType.ENTITY) {
+            return ActionConditionResult.noMessage(standEntity.barrageClashOpponent().map(otherStand -> {
+                return otherStand == target.getEntity();
+            }).orElse(false));
+        }
+        return ActionConditionResult.NEGATIVE;
     }
     
     @Override

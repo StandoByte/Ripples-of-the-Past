@@ -145,6 +145,10 @@ public abstract class StandAction extends Action<IStandPower> {
             return getThis();
         }
         
+        public T noResolveUnlock() {
+            return resolveLevelToUnlock(-1);
+        }
+        
         public T resolveLevelToUnlock(int level) {
             this.resolveLevelToUnlock = level;
             return getThis();

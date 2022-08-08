@@ -156,9 +156,11 @@ public class TimeStopInstance {
                 }
             }
             else {
-                SoundEvent voiceLine = ticksManuallySet ? timeManualResumeVoiceLine : timeResumeVoiceLine;
-                if (voiceLine != null) {
-                    JojoModUtil.sayVoiceLine(user, voiceLine);
+                if (startingTicks >= 100) {
+                    SoundEvent voiceLine = ticksManuallySet ? timeManualResumeVoiceLine : timeResumeVoiceLine;
+                    if (voiceLine != null) {
+                        JojoModUtil.sayVoiceLine(user, voiceLine);
+                    }
                 }
                 alwaysSayVoiceLine = false;
             }

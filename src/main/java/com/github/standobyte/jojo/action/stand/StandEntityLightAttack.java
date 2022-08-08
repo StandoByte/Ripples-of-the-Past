@@ -13,6 +13,7 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
@@ -86,6 +87,14 @@ public class StandEntityLightAttack extends StandEntityAction {
         return true;
     }
     
+    @Override
+    public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, IStandPower standPower) {
+        if (target.getType() == TargetType.BLOCK) {
+            return ActionConditionResult.POSITIVE;
+        }
+        return super.checkTarget(target, user, standPower);
+    }
+    
     
     
     public static class Builder extends StandEntityAction.AbstractBuilder<StandEntityLightAttack.Builder>  {
@@ -93,7 +102,6 @@ public class StandEntityLightAttack extends StandEntityAction {
     	public Builder() {
     		standAutoSummonMode(AutoSummonMode.ONE_ARM).staminaCost(10F).standUserSlowDownFactor(1.0F)
             .standOffsetFront().standOffsetFromUser(-0.75, 0.75)
-            .standKeepsTarget().standPose(StandPose.LIGHT_ATTACK)
             .targetPunchProperties((punch, stand, target) -> {
             	return punch.get()
             			.damage(StandStatFormulas.getLightAttackDamage(stand.getAttackDamage()))
@@ -102,6 +110,7 @@ public class StandEntityLightAttack extends StandEntityAction {
                         .parryTiming(stand.getComboMeter() == 0 ? StandStatFormulas.getParryTiming(stand.getPrecision()) : 0)
                         .setPunchSound(ModSounds.STAND_LIGHT_ATTACK.get());
             })
+            .standPose(StandPose.LIGHT_ATTACK)
             .partsRequired(StandPart.ARMS);
     	}
 

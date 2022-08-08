@@ -31,7 +31,6 @@ public abstract class StandEntityAction extends StandAction {
     protected final int standPerformDuration;
     protected final int standRecoveryDuration;
     private final AutoSummonMode autoSummonMode;
-    private final TargetRequirement keepStandTarget;
     private final float userMovementFactor;
     private final StandPose standPose;
     @Nullable
@@ -48,7 +47,6 @@ public abstract class StandEntityAction extends StandAction {
         this.standPerformDuration = builder.standPerformDuration;
         this.standRecoveryDuration = builder.standRecoveryDuration;
         this.autoSummonMode = builder.autoSummonMode;
-        this.keepStandTarget = builder.keepStandTarget;
         this.userMovementFactor = builder.userMovementFactor;
         this.standPose = builder.standPose;
         this.userOffset = builder.userOffset;
@@ -56,6 +54,32 @@ public abstract class StandEntityAction extends StandAction {
         this.enablePhysics = builder.enablePhysics;
         this.targetPunch = builder.targetPunch;
         this.standSounds = builder.standSounds;
+    }
+    
+    public void standTickButtonHold(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
+    
+    public void standTickWindup(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
+    
+    public boolean standCanTick(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) { return true; }
+    
+    public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
+    
+    public boolean standCanPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) { return true; }
+    
+    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
+    
+    public void standTickRecovery(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
+    
+    public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
+        return standWindupDuration;
+    }
+
+    public int getStandActionTicks(IStandPower standPower, StandEntity standEntity) {
+        return standPerformDuration;
+    }
+    
+    public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
+        return standRecoveryDuration;
     }
     
     @Override
@@ -110,51 +134,33 @@ public abstract class StandEntityAction extends StandAction {
     	}
     	return ActionConditionResult.POSITIVE;
     }
-
-    public final boolean canStandKeepTarget(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
-    	if (target.getType() == TargetType.EMPTY) {
-    		return true;
-		}
-    	
-    	if (target.getType() == TargetType.ENTITY && !canTargetEntity(target.getEntity(), standEntity, standPower)) {
-    		return false;
-    	}
-
-    	if (getTargetRequirement() != null && !appropriateTarget(TargetType.EMPTY)) {
-    		return appropriateTarget(target.getType());
-    	}
-    	
-    	return lastTargetCheck(target, standEntity, standPower);
+    
+    @Override
+    public ActionConditionResult checkRangeAndTarget(ActionTarget target, LivingEntity user, IStandPower power) {
+        ActionConditionResult result = super.checkRangeAndTarget(target, user, power);
+        if (result.isPositive() && power.isActive()) {
+            StandEntity stand = (StandEntity) power.getStandManifestation();
+            return checkStandTarget(target, stand, power);
+        }
+        return result;
     }
     
-    protected boolean canTargetEntity(Entity target, StandEntity standEntity, IStandPower standPower) {
-    	return !(target instanceof LivingEntity && standEntity.canAttack(standEntity));
+    @Override
+    protected ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, IStandPower power) {
+        if (target.getType() == TargetType.BLOCK) {
+            return ActionConditionResult.noMessage(getTargetRequirement() != TargetRequirement.NONE && getTargetRequirement().checkTargetType(TargetType.BLOCK));
+        }
+        return super.checkTarget(target, user, power);
     }
     
-    protected boolean lastTargetCheck(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
-		return keepStandTarget != null ? keepStandTarget.checkTargetType(target.getType()) : false;
-    }
-    
-    public void standTickButtonHold(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
-    
-    public void standTickWindup(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
-    
-    public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
-    
-    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
-    
-    public void standTickRecovery(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
-    
-    public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
-        return standWindupDuration;
-    }
-
-    public int getStandActionTicks(IStandPower standPower, StandEntity standEntity) {
-        return standPerformDuration;
-    }
-    
-    public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
-        return standRecoveryDuration;
+    public ActionConditionResult checkStandTarget(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
+        switch (target.getType()) {
+        case ENTITY:
+            Entity targetEntity = target.getEntity();
+            return ActionConditionResult.noMessage(targetEntity instanceof LivingEntity && standEntity.canAttack((LivingEntity) targetEntity));
+        default:
+            return ActionConditionResult.POSITIVE;
+        }
     }
     
     @Override
@@ -428,7 +434,6 @@ public abstract class StandEntityAction extends StandAction {
         private int standPerformDuration = 1;
         private int standRecoveryDuration = 0;
         private AutoSummonMode autoSummonMode = AutoSummonMode.FULL;
-        private TargetRequirement keepStandTarget = null;
         private float userMovementFactor = 0.5F;
         private StandPose standPose = StandPose.IDLE;
         @Nullable
@@ -464,26 +469,6 @@ public abstract class StandEntityAction extends StandAction {
         
         public T standRecoveryTicks(int ticks) {
             this.standRecoveryDuration = Math.max(ticks, 0);
-            return getThis();
-        }
-
-        public T standKeepsTarget() {
-            this.keepStandTarget = TargetRequirement.ANY;
-            return getThis();
-        }
-
-        public T standKeepsTarget(TargetType targetType) {
-            switch (targetType) {
-            case BLOCK:
-                this.keepStandTarget = TargetRequirement.BLOCK;
-                break;
-            case ENTITY:
-                this.keepStandTarget = TargetRequirement.ENTITY;
-                break;
-            default:
-                this.keepStandTarget = null;
-                break;
-            }
             return getThis();
         }
         

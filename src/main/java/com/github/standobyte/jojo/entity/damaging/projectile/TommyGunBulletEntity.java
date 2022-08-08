@@ -10,6 +10,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
 
 public class TommyGunBulletEntity extends ModdedProjectileEntity {
@@ -76,9 +77,9 @@ public class TommyGunBulletEntity extends ModdedProjectileEntity {
     }
     
     @Override
-    protected void breakProjectile(TargetType targetType) {
+    protected void breakProjectile(TargetType targetType, RayTraceResult hitTarget) {
         if (targetType != TargetType.BLOCK) {
-            super.breakProjectile(targetType);
+            super.breakProjectile(targetType, hitTarget);
         }
     }
 

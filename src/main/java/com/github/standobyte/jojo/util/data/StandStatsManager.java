@@ -61,7 +61,6 @@ public class StandStatsManager extends JsonReloadListener {
     }
     
     public static void init() {
-        StandStatsManager i = instance;
         if (instance == null) {
             instance = new StandStatsManager();
         }

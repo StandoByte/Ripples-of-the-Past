@@ -16,7 +16,7 @@ import net.minecraft.world.World;
 public class StarPlatinumZoom extends StandEntityAction {
 
     public StarPlatinumZoom(StandEntityAction.Builder builder) {
-        super(builder);
+        super(builder.holdType());
     }
     
     @Override

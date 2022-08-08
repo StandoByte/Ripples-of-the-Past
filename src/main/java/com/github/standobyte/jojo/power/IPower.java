@@ -7,9 +7,9 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.action.ActionTargetContainer;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.util.Container;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -54,8 +54,8 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
         }
         return false;
     }
-    ActionConditionResult checkRequirements(Action<P> action, ActionTargetContainer targetContainer, boolean checkTargetType);
-    ActionConditionResult checkTargetType(Action<P> action, ActionTargetContainer targetContainer);
+    ActionConditionResult checkRequirements(Action<P> action, Container<ActionTarget> targetContainer, boolean checkTargetType);
+    ActionConditionResult checkTarget(Action<P> action, Container<ActionTarget> targetContainer);
     boolean canUsePower();
     
     default RayTraceResult clientHitResult(Entity cameraEntity, RayTraceResult mcHitResult) {

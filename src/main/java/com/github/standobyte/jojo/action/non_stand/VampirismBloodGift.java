@@ -19,6 +19,22 @@ public class VampirismBloodGift extends VampirismAction {
     }
     
     @Override
+    public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, INonStandPower power) {
+        Entity targetEntity = target.getEntity();
+        if (!(targetEntity instanceof PlayerEntity)) {
+            return conditionMessageContinueHold("player_target");
+        }
+        LivingEntity targetLiving = (LivingEntity) targetEntity;
+        if (INonStandPower.getNonStandPowerOptional(targetLiving).map(targetPower -> targetPower.hasPower()).orElse(true)) {
+            return conditionMessageContinueHold("cant_become_vampire");
+        }
+        if (targetLiving.getHealth() > 6.0F) {
+            return conditionMessageContinueHold("target_too_many_health");
+        }
+        return ActionConditionResult.POSITIVE;
+    }
+    
+    @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
         if (user.level.getDifficulty() == Difficulty.PEACEFUL) {
             return conditionMessage("peaceful");
@@ -26,19 +42,8 @@ public class VampirismBloodGift extends VampirismAction {
         if (!user.getMainHandItem().isEmpty()) {
             return conditionMessage("hand");
         }
-        Entity targetEntity = target.getEntity();
-        if (!(targetEntity instanceof PlayerEntity)) {
-            return conditionMessage("player_target");
-        }
-        LivingEntity targetLiving = (LivingEntity) targetEntity;
-        if (INonStandPower.getNonStandPowerOptional(targetLiving).map(targetPower -> targetPower.hasPower()).orElse(true)) {
-            return conditionMessage("cant_become_vampire");
-        }
         if (user.getHealth() <= 10.0F) {
             return conditionMessage("user_too_low_health");
-        }
-        if (targetLiving.getHealth() > 6.0F) {
-            return conditionMessage("target_too_many_health");
         }
         return ActionConditionResult.POSITIVE;
     }

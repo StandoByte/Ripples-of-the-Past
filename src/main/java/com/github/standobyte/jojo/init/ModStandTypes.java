@@ -41,8 +41,17 @@ public class ModStandTypes {
     
     public static final RegistryObject<StandType<TimeStopperStandStats>> STAR_PLATINUM = STANDS.register("star_platinum", 
             () -> new EntityStandType<>(0x8E45FF, PART_3_NAME,
-                    new StandAction[] {ModActions.STAR_PLATINUM_PUNCH.get(), ModActions.STAR_PLATINUM_BARRAGE.get(), ModActions.STAR_PLATINUM_STAR_FINGER.get()},
-                    new StandAction[] {ModActions.STAR_PLATINUM_BLOCK.get(), ModActions.STAR_PLATINUM_ZOOM.get(), ModActions.STAR_PLATINUM_INHALE.get(), ModActions.STAR_PLATINUM_TIME_STOP.get()},
+                    new StandAction[] {
+                            ModActions.STAR_PLATINUM_PUNCH.get(), 
+                            ModActions.STAR_PLATINUM_BARRAGE.get(), 
+                            ModActions.STAR_PLATINUM_STAR_FINGER.get()
+                            },
+                    new StandAction[] {
+                            ModActions.STAR_PLATINUM_BLOCK.get(), 
+                            ModActions.STAR_PLATINUM_ZOOM.get(), 
+                            ModActions.STAR_PLATINUM_INHALE.get(), 
+                            ModActions.STAR_PLATINUM_TIME_STOP.get()
+                            },
                     TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
                     .tier(6)
                     .power(16.0)
@@ -61,8 +70,15 @@ public class ModStandTypes {
     
     public static final RegistryObject<StandType<TimeStopperStandStats>> THE_WORLD = STANDS.register("the_world", 
             () -> new EntityStandType<>(0xFFD800, PART_3_NAME,
-                    new StandAction[] {ModActions.THE_WORLD_PUNCH.get(), ModActions.THE_WORLD_BARRAGE.get(), ModActions.THE_WORLD_TS_PUNCH.get()},
-                    new StandAction[] {ModActions.THE_WORLD_BLOCK.get(), ModActions.THE_WORLD_TIME_STOP.get()},
+                    new StandAction[] {
+                            ModActions.THE_WORLD_PUNCH.get(), 
+                            ModActions.THE_WORLD_BARRAGE.get(), 
+                            ModActions.THE_WORLD_TS_PUNCH.get()
+                            },
+                    new StandAction[] {
+                            ModActions.THE_WORLD_BLOCK.get(), 
+                            ModActions.THE_WORLD_TIME_STOP.get()
+                            },
                     TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
                     .tier(6)
                     .power(16.0)
@@ -82,8 +98,15 @@ public class ModStandTypes {
     
     public static final RegistryObject<StandType<StandStats>> HIEROPHANT_GREEN = STANDS.register("hierophant_green", 
             () -> new EntityStandType<>(0x00B319, PART_3_NAME,
-                    new StandAction[] {ModActions.HIEROPHANT_GREEN_STRING_ATTACK.get(), ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get()},
-                    new StandAction[] {ModActions.HIEROPHANT_GREEN_BLOCK.get(), ModActions.HIEROPHANT_GREEN_GRAPPLE.get(), ModActions.HIEROPHANT_GREEN_BARRIER.get()},
+                    new StandAction[] {
+                            ModActions.HIEROPHANT_GREEN_STRING_ATTACK.get(), 
+                            ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get()
+                            },
+                    new StandAction[] {
+                            ModActions.HIEROPHANT_GREEN_BLOCK.get(), 
+                            ModActions.HIEROPHANT_GREEN_GRAPPLE.get(), 
+                            ModActions.HIEROPHANT_GREEN_BARRIER.get()
+                            },
                     StandStats.class, new StandStats.Builder()
                     .tier(5)
                     .power(8.0)
@@ -98,8 +121,15 @@ public class ModStandTypes {
     
     public static final RegistryObject<StandType<StandStats>> SILVER_CHARIOT = STANDS.register("silver_chariot", 
             () -> new EntityStandType<>(0xBEC8D6, PART_3_NAME,
-                    new StandAction[] {ModActions.SILVER_CHARIOT_ATTACK.get(), ModActions.SILVER_CHARIOT_BARRAGE.get(), ModActions.SILVER_CHARIOT_RAPIER_LAUNCH.get()},
-                    new StandAction[] {ModActions.SILVER_CHARIOT_BLOCK.get(), ModActions.SILVER_CHARIOT_TAKE_OFF_ARMOR.get()},
+                    new StandAction[] {
+                            ModActions.SILVER_CHARIOT_ATTACK.get(), 
+                            ModActions.SILVER_CHARIOT_BARRAGE.get(), 
+                            ModActions.SILVER_CHARIOT_RAPIER_LAUNCH.get()
+                            },
+                    new StandAction[] {
+                            ModActions.SILVER_CHARIOT_BLOCK.get(), 
+                            ModActions.SILVER_CHARIOT_TAKE_OFF_ARMOR.get()
+                            },
                     StandStats.class, new StandStats.Builder()
                     .tier(5)
                     .power(9.0)
@@ -114,8 +144,17 @@ public class ModStandTypes {
     
     public static final RegistryObject<StandType<StandStats>> MAGICIANS_RED = STANDS.register("magicians_red", 
             () -> new EntityStandType<>(0xDE203A, PART_3_NAME,
-                    new StandAction[] {ModActions.MAGICIANS_RED_PUNCH.get(), ModActions.MAGICIANS_RED_FLAME_BURST.get(), ModActions.MAGICIANS_RED_FIREBALL.get(), ModActions.MAGICIANS_RED_CROSSFIRE_HURRICANE.get()},
-                    new StandAction[] {ModActions.MAGICIANS_RED_BLOCK.get(), ModActions.MAGICIANS_RED_RED_BIND.get(), ModActions.MAGICIANS_RED_DETECTOR.get()},
+                    new StandAction[] {
+                            ModActions.MAGICIANS_RED_PUNCH.get(), 
+                            ModActions.MAGICIANS_RED_FLAME_BURST.get(), 
+                            ModActions.MAGICIANS_RED_FIREBALL.get(), 
+                            ModActions.MAGICIANS_RED_CROSSFIRE_HURRICANE.get()
+                            },
+                    new StandAction[] {
+                            ModActions.MAGICIANS_RED_BLOCK.get(), 
+                            ModActions.MAGICIANS_RED_RED_BIND.get(), 
+                            ModActions.MAGICIANS_RED_DETECTOR.get()
+                            },
                     StandStats.class, new StandStats.Builder()
                     .tier(5)
                     .power(12.0)
@@ -128,6 +167,32 @@ public class ModStandTypes {
             .addSummonShout(ModSounds.AVDOL_MAGICIANS_RED)
             .addOst(ModSounds.MAGICIANS_RED_OST));
     
+    public static final RegistryObject<StandType<TimeStopperStandStats>> CRAZY_DIAMOND = STANDS.register("crazy_diamond", 
+            () -> new EntityStandType<>(0xEA6E7C, PART_4_NAME,
+                    new StandAction[] {
+                            ModActions.CRAZY_DIAMOND_PUNCH.get(), 
+                            ModActions.CRAZY_DIAMOND_BARRAGE.get(), 
+//                            ModActions.CRAZY_DIAMOND_ITEM_PROJECTILE.get(), 
+//                            ModActions.CRAZY_DIAMOND_BLOOD_CUTTER.get()
+                            },
+                    new StandAction[] {
+                            ModActions.CRAZY_DIAMOND_BLOCK.get(), 
+                            ModActions.CRAZY_DIAMOND_REPAIR_ITEM.get(), 
+                            ModActions.CRAZY_DIAMOND_HEAL.get(), 
+                            ModActions.CRAZY_DIAMOND_RESTORE_TERRAIN.get(), 
+                            ModActions.CRAZY_DIAMOND_BLOCK_CHECKPOINT_MOVE.get()
+                            },
+                    TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
+                    .tier(5)
+                    .power(12.0)
+                    .speed(12.0)
+                    .range(2.0, 4.0)
+                    .durability(10.0)
+                    .precision(10.0)
+                    .build("Crazy Diamond"), 
+                    ModEntityTypes.CRAZY_DIAMOND)
+            .addSummonShout(ModSounds.JOSUKE_CRAZY_DIAMOND)
+            .addOst(ModSounds.CRAZY_DIAMOND_OST));
     
     public static final RegistryObject<StandType<StandStats>> BOY_II_MAN = STANDS.register("boy_ii_man", 
             () -> {

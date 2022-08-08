@@ -34,7 +34,7 @@ public class RockPaperScissorsCommand {
     	}
     	if (entity instanceof ServerPlayerEntity) {
     	    if (entity.distanceToSqr(opponent) >= 16) {
-    	        ctx.getSource().sendFailure(new TranslationTextComponent("jojo.rps.too_far", entity.getDisplayName()));
+    	        ctx.getSource().sendFailure(new TranslationTextComponent("jojo.rps.too_far", opponent.getDisplayName()));
     	        return 0;
     	    }
     	    ServerPlayerEntity player = (ServerPlayerEntity) entity;
