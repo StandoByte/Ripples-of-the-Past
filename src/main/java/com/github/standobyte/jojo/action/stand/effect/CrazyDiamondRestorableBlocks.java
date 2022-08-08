@@ -60,8 +60,8 @@ public class CrazyDiamondRestorableBlocks extends StandEffectInstance {
     }
     
     public void addBlock(World world, BlockPos blockPos, BlockState blockState, List<ItemStack> restoreCost, boolean keep) {
-        if (world.dimension() == dimension && restoreCost != null && restoreCost.size() == 1) {
-            PrevBlockInfo prevBlock = new PrevBlockInfo(blockState, restoreCost.get(0), keep);
+        if (world.dimension() == dimension && (world.isClientSide || restoreCost != null && restoreCost.size() == 1)) {
+            PrevBlockInfo prevBlock = new PrevBlockInfo(blockState, restoreCost == null ? null : restoreCost.get(0), keep);
             getChunkBlocks(blockPos).put(blockPos, prevBlock);
             if (serverPlayerUser.isPresent()) {
                 blocksToSend.add(new CDBlocksBrokenPacket.BlockInfo(blockPos, prevBlock.state, keep));
