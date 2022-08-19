@@ -203,7 +203,7 @@ public class RockPaperScissorsGame {
                                 }
                             }
                             stand.removePart(limbs);
-                            winnerStand.getContinuousEffects().addEffect(new BoyIIManStandPartTakenEffect(takenParts).addTarget(roundLoser));
+                            winnerStand.getContinuousEffects().addEffect(new BoyIIManStandPartTakenEffect(takenParts).withTarget(roundLoser));
                         }
                     });
                 }
@@ -211,14 +211,14 @@ public class RockPaperScissorsGame {
             else if (round == ROUNDS_TO_WIN) {
                 // FIXME (!!) BIIM
                 StandInstance mainStandBody = loserStand.putOutStand().get();
-                winnerStand.getContinuousEffects().addEffect(new BoyIIManStandPartTakenEffect(mainStandBody).addTarget(roundLoser));
+                winnerStand.getContinuousEffects().addEffect(new BoyIIManStandPartTakenEffect(mainStandBody).withTarget(roundLoser));
                 boyIIManTookStand = true;
             }
         }
         else if (loserStand.getType() == ModStandTypes.BOY_II_MAN.get() && round == ROUNDS_TO_WIN) {
             StandEffectsTracker boyIIManEffects = loserStand.getContinuousEffects();
             boyIIManEffects.getEffects(effect -> effect.effectType == ModStandEffects.BOY_II_MAN_PART_TAKE.get()
-                    && effect.getTargets().contains(roundWinner)).forEach(effect -> {
+                    && roundWinner.is(effect.getTarget())).forEach(effect -> {
                         if (winnerStand.hasPower()) {
                             // FIXME (!!) BIIM
                             StandInstance winnerStandPartsLeft = winnerStand.getStandInstance().get();

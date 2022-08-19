@@ -71,7 +71,7 @@ public class CrazyDiamondHeal extends StandEntityAction {
         return handle(world, entity, 
                 entity, e -> {
                     if (!e.isDeadOrDying()) {
-                        e.setHealth(e.getHealth() + 0.4F);
+                        e.setHealth(e.getHealth() + 0.5F);
                     }
                 }, 
                 e -> e.getHealth() < e.getMaxHealth());

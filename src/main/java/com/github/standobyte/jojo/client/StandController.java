@@ -149,8 +149,7 @@ public class StandController {
         float partialTick = event.getPartialTicks();
         int light = mc.getEntityRenderDispatcher().getPackedLightCoords(stand, partialTick);
         AbstractStandRenderer renderer = (AbstractStandRenderer<?, ?>)mc.getEntityRenderDispatcher().<StandEntity>getRenderer(stand);
-        renderer.renderFirstPersonArm(HandSide.RIGHT, matrixStack, buffer, light, stand, partialTick);
-        renderer.renderFirstPersonArm(HandSide.LEFT, matrixStack, buffer, light, stand, partialTick);
+        renderer.renderFirstPersonArms(matrixStack, buffer, light, stand, partialTick);
         event.setCanceled(true);
     }
     

@@ -67,6 +67,9 @@ import com.github.standobyte.jojo.client.renderer.player.layer.KnifeLayer;
 import com.github.standobyte.jojo.client.renderer.player.layer.TornadoOverdriveEffectLayer;
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
+import com.github.standobyte.jojo.client.ui.hud.marker.CrazyDiamondAnchorMarker;
+import com.github.standobyte.jojo.client.ui.hud.marker.CrazyDiamondBloodHomingMarker;
+import com.github.standobyte.jojo.client.ui.hud.marker.MarkerRenderer;
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
@@ -218,6 +221,9 @@ public class ClientSetup {
             Map<String, PlayerRenderer> skinMap = mc.getEntityRenderDispatcher().getSkinMap();
             addLayers(skinMap.get("default"));
             addLayers(skinMap.get("slim"));
+            
+            MarkerRenderer.Handler.addRenderer(new CrazyDiamondAnchorMarker(mc));
+            MarkerRenderer.Handler.addRenderer(new CrazyDiamondBloodHomingMarker(mc));
         });
     }
     

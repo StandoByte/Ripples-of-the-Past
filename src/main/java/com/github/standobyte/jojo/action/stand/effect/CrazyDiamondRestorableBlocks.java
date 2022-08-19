@@ -125,6 +125,11 @@ public class CrazyDiamondRestorableBlocks extends StandEffectInstance {
         return false;
     }
     
+    @Override
+    protected boolean needsTarget() {
+        return false;
+    }
+    
     public void syncWithTrackingAndUser() {
         serverPlayerUser.ifPresent(player -> syncWithUserOnly(player));
     }
@@ -170,7 +175,7 @@ public class CrazyDiamondRestorableBlocks extends StandEffectInstance {
     public static class PrevBlockInfo {
         public final BlockState state;
 //        public final List<ItemStack> stacks;
-        // FIXME (!) (restore terrain) turn it into stacks list
+        // FIXME ! (restore terrain) turn it into stacks list
         public final ItemStack stack;
         public final boolean keep;
         private int tickCount = 0;

@@ -45,6 +45,7 @@ public class CrazyDiamondBlockCheckpointMake extends StandEntityAction {
                 BlockState blockState = world.getBlockState(pos);
                 List<ItemStack> drops = Block.getDrops(blockState, (ServerWorld) world, pos, 
                         blockState.hasTileEntity() ? world.getBlockEntity(pos) : null);
+                
                 if (standEntity.breakBlock(pos, false)) {
                     drops.forEach(stack -> {
                         boolean dropItem = true;
@@ -77,7 +78,6 @@ public class CrazyDiamondBlockCheckpointMake extends StandEntityAction {
         return TargetRequirement.BLOCK;
     }
 
-    // FIXME ! (fast travel) marker
     // FIXME ! (fast travel) dimension key
     public static Optional<BlockPos> getBlockPosMoveTo(World world, ItemStack stack) {
         if (stack.hasTag()) {

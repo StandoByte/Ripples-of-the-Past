@@ -223,11 +223,17 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
         }
     }
     
+    
+    public void renderFirstPersonArms(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, T entity, float partialTick) {
+        model.setVisibility(entity, VisibilityMode.ARMS_ONLY);
+        renderFirstPersonArm(HandSide.LEFT, matrixStack, buffer, packedLight, entity, partialTick);
+        renderFirstPersonArm(HandSide.RIGHT, matrixStack, buffer, packedLight, entity, partialTick);
+    }
 
-    public void renderFirstPersonArm(HandSide handSide, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, T entity, float partialTick) {
+    protected void renderFirstPersonArm(HandSide handSide, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, T entity, float partialTick) {
         RenderType renderType = getRenderType(entity, getTextureLocation(entity));
         if (renderType != null) {
-            renderSeparateLayerArm(getModel(), handSide, matrixStack, buffer.getBuffer(renderType), packedLight, entity, partialTick);
+            renderSeparateLayerArm(model, handSide, matrixStack, buffer.getBuffer(renderType), packedLight, entity, partialTick);
             for (LayerRenderer<T, M> layer : layers) {
                 if (layer instanceof StandModelLayerRenderer) {
                     StandModelLayerRenderer<T, M> standLayer = (StandModelLayerRenderer<T, M>) layer;
@@ -265,6 +271,8 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
             matrixStack.scale(-1.0F, -1.0F, 1.0F);
             scale(entity, matrixStack, partialTick);
             doRenderFirstPersonArm(model, handSide, matrixStack, vertexBuilder, packedLight, entity, partialTick);
+//            matrixStack.translate(0, -entity.getEyeHeight() / 2, 0);
+//            model.renderArmSwings(entity, matrixStack, vertexBuilder, packedLight, LivingRenderer.getOverlayCoords(entity, 0), 1, 1, 1, 1);
         }
         else {
             float f = handSide == HandSide.RIGHT ? 1.0F : -1.0F;

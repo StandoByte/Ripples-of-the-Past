@@ -578,7 +578,7 @@ public class ModActions {
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_BLOCK = ACTIONS.register("crazy_diamond_block", 
             () -> new StandEntityBlock());
     
-    public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_REPAIR_ITEM = ACTIONS.register("crazy_diamond_repair_item", 
+    public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_REPAIR = ACTIONS.register("crazy_diamond_repair", 
             () -> new CrazyDiamondRepairItem(new StandEntityAction.Builder().holdType()
                     .resolveLevelToUnlock(0).isTrained()
                     .partsRequired(StandPart.ARMS)));
@@ -587,7 +587,7 @@ public class ModActions {
             () -> new CrazyDiamondPreviousState(new StandEntityAction.Builder().holdType()
                     .resolveLevelToUnlock(-1)
                     .partsRequired(StandPart.ARMS)
-                    .shiftVariationOf(CRAZY_DIAMOND_REPAIR_ITEM)));
+                    .shiftVariationOf(CRAZY_DIAMOND_REPAIR)));
     
     public static final RegistryObject<CrazyDiamondHeal> CRAZY_DIAMOND_HEAL = ACTIONS.register("crazy_diamond_heal", 
             () -> new CrazyDiamondHeal(new StandEntityAction.Builder().holdType()
@@ -599,16 +599,16 @@ public class ModActions {
                     .resolveLevelToUnlock(2)
                     .partsRequired(StandPart.ARMS)));
     
-    public static final RegistryObject<StandAction> CRAZY_DIAMOND_BLOCK_CHECKPOINT_MOVE = ACTIONS.register("crazy_diamond_block_checkpoint_move", 
+    public static final RegistryObject<StandAction> CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE = ACTIONS.register("crazy_diamond_anchor_move", 
             () -> new CrazyDiamondBlockCheckpointMove(new StandEntityAction.Builder().holdType()
                     .resolveLevelToUnlock(3)
                     .partsRequired(StandPart.ARMS)));
     
-    public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_BLOCK_CHECKPOINT = ACTIONS.register("crazy_diamond_block_checkpoint", 
+    public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_BLOCK_ANCHOR_MAKE = ACTIONS.register("crazy_diamond_anchor_make", 
             () -> new CrazyDiamondBlockCheckpointMake(new StandEntityAction.Builder().standWindupDuration(10).standRecoveryTicks(5)
                     .resolveLevelToUnlock(3)
                     .partsRequired(StandPart.ARMS)
-                    .shiftVariationOf(CRAZY_DIAMOND_BLOCK_CHECKPOINT_MOVE)));
+                    .shiftVariationOf(CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE)));
     
 
 

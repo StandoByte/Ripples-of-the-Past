@@ -3,9 +3,12 @@ package com.github.standobyte.jojo.entity.damaging.projectile;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.ModStandEffects;
+import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
@@ -39,14 +42,23 @@ public class CDBloodCutterEntity extends ModdedProjectileEntity {
     
     private void splashBlood() {
         if (!level.isClientSide()) {
-            // FIXME !! (blood cutter) blood tag
+            IStandPower.getStandPowerOptional(getOwner()).ifPresent(stand -> {
+                level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(8), 
+                        EntityPredicates.ENTITY_STILL_ALIVE.and(EntityPredicates.NO_SPECTATORS).and(
+                                entity -> !entity.is(stand.getUser()) && entity != stand.getStandManifestation()
+                                        // FIXME !! (blood cutter) && isn't behind blocks
+                                && entity.getBoundingBox().clip(this.getBoundingBox().getCenter(), entity.getBoundingBox().getCenter()).isPresent()))
+                .forEach(entity -> {
+                    stand.getContinuousEffects().getOrCreateEffect(ModStandEffects.DRIED_BLOOD_DROPS.get(), entity);
+                });
+            });
         }
         else {
             level.playLocalSound(getX(), getY(), getZ(), ModSounds.WATER_SPLASH.get(), getSoundSource(), 1.0F, 1.0F, false);
             // FIXME !! (blood cutter) blood particles
         }
     }
-
+    
     @Override
     protected float getMaxHardnessBreakable() {
         return 0;
