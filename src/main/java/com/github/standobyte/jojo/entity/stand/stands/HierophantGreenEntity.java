@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.entity.stand.stands;
 
 import java.util.UUID;
 
-import com.github.standobyte.jojo.action.actions.HierophantGreenBarrier;
+import com.github.standobyte.jojo.action.stand.HierophantGreenBarrier;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGBarrierEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;

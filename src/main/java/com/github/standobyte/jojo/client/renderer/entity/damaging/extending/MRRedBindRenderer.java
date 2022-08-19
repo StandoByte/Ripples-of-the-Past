@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.client.renderer.entity.damaging.extending;
 
 import java.util.Map;
 
-import com.github.standobyte.jojo.action.actions.StandEntityAction;
+import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.client.model.entity.ownerbound.repeating.MRRedBindModel;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.MRRedBindEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;

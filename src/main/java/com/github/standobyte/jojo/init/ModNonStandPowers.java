@@ -5,8 +5,8 @@ import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.action.actions.HamonAction;
-import com.github.standobyte.jojo.action.actions.VampirismAction;
+import com.github.standobyte.jojo.action.non_stand.HamonAction;
+import com.github.standobyte.jojo.action.non_stand.VampirismAction;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;

@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.util.utils;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import com.github.standobyte.jojo.action.actions.StandAction;
+import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.power.stand.ActionLearningProgressMap;
 import com.github.standobyte.jojo.power.stand.IStandPower;
