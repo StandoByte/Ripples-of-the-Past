@@ -78,6 +78,7 @@ public class RoadRollerEntity extends Entity {
 
     @Override
     public void tick() {
+        boolean wasOnGround = onGround;
         super.tick();
         if (!super.canUpdate()) {
             tickCount--;
@@ -89,17 +90,6 @@ public class RoadRollerEntity extends Entity {
         
         tickDamageMotion = 0;
         punchedFromBelow = false;
-        boolean wasOnGround = onGround;
-        if (level.isClientSide()) {
-            if (!wasOnGround) {
-                ticksInAir++;
-                if (onGround) {
-                    level.playSound(ClientUtil.getClientPlayer(), getX(), getY(), getZ(), ModSounds.ROAD_ROLLER_LAND.get(), 
-                            getSoundSource(), (float) ticksInAir * 0.025F, 1.0F);
-                    ticksInAir = 0;
-                }
-            }
-        }
         
         DamageSource dmgSource = DamageUtil.roadRollerDamage(this);
         float damage = (float) -getDeltaMovement().y * 10F;
@@ -124,6 +114,14 @@ public class RoadRollerEntity extends Entity {
             }
             else {
                 xRot = Math.min(xRot + 6, 0);
+            }
+        }
+        if (level.isClientSide() && !wasOnGround) {
+            ticksInAir++;
+            if (onGround) {
+                level.playSound(ClientUtil.getClientPlayer(), getX(), getY(), getZ(), ModSounds.ROAD_ROLLER_LAND.get(), 
+                        getSoundSource(), (float) ticksInAir * 0.05F, 1.0F);
+                ticksInAir = 0;
             }
         }
         

@@ -4,11 +4,12 @@ import java.util.List;
 import java.util.UUID;
 
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.action.actions.StandEntityAction;
+import com.github.standobyte.jojo.action.stand.punch.PunchHandler;
+import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
-import com.github.standobyte.jojo.entity.stand.StandAttackProperties;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModEntityAttributes;
@@ -155,7 +156,7 @@ public class SilverChariotEntity extends StandEntity {
     }
     
     @Override
-    protected boolean canBreakBlock(float blockHardness, int blockHarvestLevel) {
+    public boolean canBreakBlock(float blockHardness, int blockHarvestLevel) {
         if (hasRapier()) {
             return blockHardness <= 1 && blockHarvestLevel <= 0;
         }
@@ -167,27 +168,27 @@ public class SilverChariotEntity extends StandEntity {
     }
     
     @Override
-    public boolean attackEntity(Entity target, StandAttackProperties punch, StandEntityAction action) {
+    public boolean attackEntity(Entity target, StandEntityPunch punch, StandEntityTask task) {
     	if (hasRapier() && isRapierOnFire()) {
             return DamageUtil.dealDamageAndSetOnFire(target, 
-                    entity -> attackOrDeflect(target, punch, action), 4, true);
+                    entity -> attackOrDeflect(target, punch, task), 4, true);
     	}
     	else {
-    		return attackOrDeflect(target, punch, action);
+    		return attackOrDeflect(target, punch, task);
     	}
     }
 
-    private boolean attackOrDeflect(Entity target, StandAttackProperties punch, StandEntityAction action) {
+    private boolean attackOrDeflect(Entity target, StandEntityPunch punch, StandEntityTask task) {
         if (canDeflectProjectiles() && hasRapier() && target instanceof ProjectileEntity) {
         	return deflectProjectile(target);
         }
         else {
-            return super.attackEntity(target, punch, action);
+            return super.attackEntity(target, punch, task);
         }
     }
     
     @Override
-    public boolean attackTarget(ActionTarget target, StandAttackProperties.Factory createPunch, StandEntityAction action) {
+    public boolean attackTarget(ActionTarget target, PunchHandler punch, StandEntityTask task) {
     	if (canDeflectProjectiles()) {
     		level.getEntitiesOfClass(ProjectileEntity.class, getBoundingBox().inflate(getAttributeValue(ForgeMod.REACH_DISTANCE.get())), 
     				entity -> entity.isAlive() && !entity.isPickable()).forEach(projectile -> {
@@ -198,7 +199,7 @@ public class SilverChariotEntity extends StandEntity {
     				});
     	}
     	
-    	return super.attackTarget(target, createPunch, action);
+    	return super.attackTarget(target, punch, task);
     }
     
     private boolean canDeflectProjectiles() {

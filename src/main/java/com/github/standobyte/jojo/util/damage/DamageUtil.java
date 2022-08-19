@@ -4,6 +4,7 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
@@ -217,6 +218,7 @@ public class DamageUtil {
     }
     
     public static boolean hurtThroughInvulTicks(Entity target, DamageSource dmgSource, float amount) {
+        JojoMod.LOGGER.debug(amount);
         int invulTime = target.invulnerableTime;
         LivingEntity targetLiving = target instanceof LivingEntity ? (LivingEntity) target : null;
         float lastHurt = targetLiving != null ? targetLiving.lastHurt : 0;

@@ -12,7 +12,6 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
-import com.github.standobyte.jojo.entity.stand.StandAttackProperties;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
@@ -39,7 +38,6 @@ public abstract class StandEntityAction extends StandAction {
     @Nullable
     protected final StandRelativeOffset userOffsetArmsOnly;
     public final boolean enablePhysics;
-    private final StandAttackProperties.Factory targetPunch;
     private final Map<Phase, Supplier<SoundEvent>> standSounds;
     
     public StandEntityAction(StandEntityAction.AbstractBuilder<?> builder) {
@@ -54,7 +52,6 @@ public abstract class StandEntityAction extends StandAction {
         this.userOffset = builder.userOffset;
         this.userOffsetArmsOnly = builder.userOffsetArmsOnly;
         this.enablePhysics = builder.enablePhysics;
-        this.targetPunch = builder.targetPunch;
         this.standSounds = builder.standSounds;
     }
     
@@ -389,14 +386,6 @@ public abstract class StandEntityAction extends StandAction {
         return standPose;
     }
     
-    public StandAttackProperties.Factory getPunch() {
-    	return targetPunch;
-    }
-    
-    public void beforeAttack(Entity target, StandAttackProperties punch, StandEntity stand, IStandPower power, LivingEntity user) {}
-    
-    public void afterAttack(Entity target, StandAttackProperties punch, StandEntity stand, IStandPower power, LivingEntity user, boolean hurt, boolean killed) {}
-    
     public enum Phase {
         BUTTON_HOLD,
         WINDUP,
@@ -436,8 +425,6 @@ public abstract class StandEntityAction extends StandAction {
         @Nullable
         private StandRelativeOffset userOffsetArmsOnly = null;
         private boolean enablePhysics = true;
-        @Nullable
-        protected StandAttackProperties.Factory targetPunch = null;
         private final Map<Phase, Supplier<SoundEvent>> standSounds = new HashMap<>();
 
         @Override
@@ -534,11 +521,6 @@ public abstract class StandEntityAction extends StandAction {
 
         public T stayInNoPhysics() {
             this.enablePhysics = false;
-            return getThis();
-        }
-
-        public T targetPunchProperties(StandAttackProperties.Factory properties) {
-            this.targetPunch = targetPunch == null ? properties : targetPunch.applyAfter(properties);
             return getThis();
         }
         

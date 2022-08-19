@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.action.actions;
 
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import javax.annotation.Nullable;
 
@@ -8,21 +9,24 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.action.stand.punch.HeavyEntityPunch;
+import com.github.standobyte.jojo.action.stand.punch.PunchHandler;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
-import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.World;
 
 public class StandEntityHeavyAttack extends StandEntityAction {
+    protected final PunchHandler punch;
 	private final Supplier<StandEntityComboHeavyAttack> comboAttack;
 
     public StandEntityHeavyAttack(StandEntityHeavyAttack.Builder builder, @Nullable Supplier<StandEntityComboHeavyAttack> comboAttack) {
         super(builder);
+        this.punch = builder.punch.build();
         this.comboAttack = comboAttack;
     }
 
@@ -55,7 +59,7 @@ public class StandEntityHeavyAttack extends StandEntityAction {
     
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-        standEntity.punch(this, getPunch(), task.getTarget());
+        standEntity.punch(task, punch, task.getTarget());
     }
 
     @Override
@@ -81,19 +85,21 @@ public class StandEntityHeavyAttack extends StandEntityAction {
     
     
     public static class Builder extends StandEntityAction.AbstractBuilder<StandEntityHeavyAttack.Builder> {
+        private PunchHandler.Builder punch = new PunchHandler.Builder().setEntityPunch(HeavyEntityPunch::new);
     	
     	public Builder() {
     		standPose(StandPose.HEAVY_ATTACK).staminaCost(50F)
-            .standOffsetFromUser(-0.75, 0.75).standKeepsTarget(TargetType.ENTITY)
-            .targetPunchProperties((punch, stand, target) -> {
-            	double strength = stand.getAttackDamage();
-            	return punch.get()
-            			.damage(StandStatFormulas.getHeavyAttackDamage(strength))
-                        .addKnockback(1 + (float) strength / 4 * stand.getLastHeavyPunchCombo())
-                        .setStandInvulTime(10)
-                        .setPunchSound(ModSounds.STAND_STRONG_ATTACK.get());
-            });
+            .standOffsetFromUser(-0.75, 0.75).standKeepsTarget(TargetType.ENTITY);
     	}
+        
+        public Builder modifyPunch(UnaryOperator<PunchHandler.Builder> modifier) {
+            return setPunch(modifier.apply(punch));
+        }
+        
+        public Builder setPunch(PunchHandler.Builder punch) {
+            this.punch = punch;
+            return getThis();
+        }
 
 		@Override
 		protected Builder getThis() {

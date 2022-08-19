@@ -68,11 +68,11 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
         	for (RayTraceResult rayTraceResult : JojoModUtil.rayTraceMultipleEntities(standEntity, 
         			standEntity.getAttributeValue(ForgeMod.REACH_DISTANCE.get()), 
         			standEntity.canTarget(), 0.25, standEntity.getPrecision())) {
-            	standEntity.punch(this, getPunch(), ActionTarget.fromRayTraceResult(rayTraceResult));
+            	standEntity.punch(task, punch, ActionTarget.fromRayTraceResult(rayTraceResult));
         	}
         }
         else if (!Vector3d.ZERO.equals(standEntity.getDeltaMovement())) {
-        	standEntity.punch(this, getPunch(), task.getTarget());
+        	standEntity.punch(task, punch, task.getTarget());
         }
         if (!world.isClientSide() && lastTick && standEntity.isFollowingUser()) {
         	standEntity.retractStand(false);
