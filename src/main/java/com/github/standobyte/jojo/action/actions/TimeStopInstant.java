@@ -136,7 +136,7 @@ public class TimeStopInstant extends StandAction {
         SoundEvent sound = blinkSound.get();
         if (sound != null) {
             JojoModUtil.playSound(world, entity instanceof PlayerEntity ? (PlayerEntity) entity : null, entity.getX(), entity.getY(), entity.getZ(), 
-                    sound, SoundCategory.AMBIENT, 5.0F, 1.0F, TimeUtil::canPlayerSeeInStoppedTime);
+                    sound, SoundCategory.AMBIENT, 1.0F, 1.0F, TimeUtil::canPlayerSeeInStoppedTime);
         }
     }
     

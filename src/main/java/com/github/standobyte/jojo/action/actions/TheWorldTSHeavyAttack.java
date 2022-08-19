@@ -5,8 +5,9 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.action.stand.punch.PunchHandler;
+import com.github.standobyte.jojo.action.stand.punch.TheWorldTSHeavyPunch;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
-import com.github.standobyte.jojo.entity.stand.StandAttackProperties;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
@@ -21,9 +22,9 @@ import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 import com.github.standobyte.jojo.util.utils.TimeUtil;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -32,6 +33,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
     public static final StandPose TS_PUNCH_POSE = new StandPose("TS_PUNCH");
     private final Supplier<StandEntityHeavyAttack> theWorldHeavyAttack;
     private final Supplier<TimeStopInstant> theWorldTimeStopBlink;
+    private final PunchHandler punch = new PunchHandler.Builder().setEntityPunch(TheWorldTSHeavyPunch::new).build();
 
     public TheWorldTSHeavyAttack(StandEntityAction.Builder builder, 
             Supplier<StandEntityHeavyAttack> theWorldHeavyAttack, Supplier<TimeStopInstant> theWorldTimeStopBlink) {
@@ -128,7 +130,8 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
 
 	    		TimeStopInstant.skipTicksForStandAndUser(standPower, timeStopTicks);
 	    		if (!world.isClientSide()) {
-    				blink.playSound(world, standEntity);
+	                JojoModUtil.playSound(world, null, standEntity.getX(), standEntity.getY(), standEntity.getZ(), 
+	                        ModSounds.THE_WORLD_TIME_STOP_UNREVEALED.get(), SoundCategory.AMBIENT, 1.0F, 1.0F, TimeUtil::canPlayerSeeInStoppedTime);
 	    			standPower.consumeStamina(staminaCostTS + timeStopTicks * staminaCostTicking);
 	    			if (standPower.hasPower()) {
 		    			StandStats stats = standPower.getType().getStats();
@@ -143,13 +146,6 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
     }
     
     @Override
-    public void afterAttack(Entity target, StandAttackProperties punch, StandEntity stand, IStandPower power, LivingEntity user, boolean hurt, boolean killed) {
-		if (killed && user != null && stand.distanceToSqr(user) > 16) {
-			JojoModUtil.sayVoiceLine(user, ModSounds.DIO_THIS_IS_THE_WORLD.get());
-		}
-    }
-    
-    @Override
     public float getStaminaCost(IStandPower stand) {
         return theWorldHeavyAttack.get().getStaminaCost(stand);
     }
@@ -161,7 +157,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
     
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-    	standEntity.punch(this, getPunch(), task.getTarget());
+    	standEntity.punch(task, punch, task.getTarget());
     	userPower.getUser().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.hasUsedTimeStopToday = true);
     }
     

@@ -497,9 +497,16 @@
   "the_world_time_stop_blink": {
     "sounds": [ "jojo:stand/the_world_time_stop_blink" ]
   },
+  "the_world_time_stop_unrevealed": {
+    "sounds": [ "jojo:stand/the_world_time_stop_unrevealed" ]
+  },
   "road_roller_hit": {
     "subtitle": "jojo.subtitle.road_roller_hit",
     "sounds": [ "jojo:road_roller_hit", "jojo:road_roller_hit_2", "jojo:road_roller_hit_3" ]
+  },
+  "road_roller_land": {
+    "subtitle": "jojo.subtitle.road_roller_land",
+    "sounds": [ "jojo:road_roller_land" ]
   },
   "kakyoin_hierophant_green": {
     "subtitle": "jojo.subtitle.hierophant_green_name",
@@ -599,6 +606,18 @@
   "magicians_red_fire_ability": {
     "subtitle": "jojo.subtitle.fire_ability",
     "sounds": [ "minecraft:mob/ghast/fireball4" ]
+  },
+  "crazy_diamond_punch_light": {
+    "subtitle": "jojo.subtitle.stand_attack_light",
+    "sounds": [ "jojo:stand/crazy_diamond_punch_light" ]
+  },
+  "crazy_diamond_punch_heavy": {
+    "subtitle": "jojo.subtitle.stand_attack_strong",
+    "sounds": [ "jojo:stand/crazy_diamond_punch_heavy" ]
+  },
+  "crazy_diamond_punch_barrage": {
+    "subtitle": "jojo.subtitle.stand_attack_barrage",
+    "sounds": [ "jojo:stand/crazy_diamond_punch_barrage" ]
   }
   
 }

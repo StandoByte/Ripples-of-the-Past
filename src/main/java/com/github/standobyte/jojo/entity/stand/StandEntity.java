@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -18,8 +17,11 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.actions.StandEntityAction;
-import com.github.standobyte.jojo.action.actions.StandEntityHeavyAttack;
-import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.action.stand.punch.IPunch;
+import com.github.standobyte.jojo.action.stand.punch.PunchHandler;
+import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
+import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
+import com.github.standobyte.jojo.action.stand.punch.StandMissedPunch;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -149,7 +151,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     private static final DataParameter<Float> PUNCHES_COMBO = EntityDataManager.defineId(StandEntity.class, DataSerializers.FLOAT);
     private static final DataParameter<Float> LAST_HEAVY_PUNCH_COMBO = EntityDataManager.defineId(StandEntity.class, DataSerializers.FLOAT);
     private int noComboDecayTicks;
-    private static final int COMBO_TICKS = 40;
+    public static final int COMBO_TICKS = 40;
     private static final float COMBO_DECAY = 0.025F;
     
     private static final DataParameter<Optional<StandEntityTask>> CURRENT_TASK = EntityDataManager.defineId(StandEntity.class, 
@@ -1392,17 +1394,23 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return getAttackSpeed() > 0 && getAttributeValue(ForgeMod.REACH_DISTANCE.get()) > 0 ;
     }
 
-    public boolean punch(StandEntityAction attack, StandAttackProperties.Factory createPunch, ActionTarget target) {
+    public boolean punch(StandEntityTask task, PunchHandler punch, ActionTarget target) {
     	if (!level.isClientSide()) {
 	        ActionTarget finalTarget = ActionTarget.fromRayTraceResult(aimWithStandOrUser(getAimDistance(getUser()), target));
 	        target = finalTarget.getType() != TargetType.EMPTY && isTargetInReach(finalTarget) ? finalTarget : ActionTarget.EMPTY;
 	        setTaskTarget(target);
     	}
         
-        return attackTarget(target, createPunch, attack);
+        return attackTarget(target, punch, task);
     }
     
-    public void addBarrageParryCount(int hits) {
+    public int barrageHits;
+    public void setBarrageHitsThisTick(int hits) {
+        this.barrageHits = hits;
+        addBarrageParryCount(hits);
+    }
+    
+    protected void addBarrageParryCount(int hits) {
         if (!accumulateBarrageTickParry) {
             accumulateBarrageTickParry = true;
             barrageParryCount = hits + 1;
@@ -1412,36 +1420,41 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
     }
     
-    public SoundEvent nextPunchSound;
-    private Vector3d punchSoundPos;
-    @Nullable
-    public Boolean playPunchSound;
-    public boolean attackTarget(ActionTarget target, StandAttackProperties.Factory createPunch, StandEntityAction action) {
-        boolean punched;
+    public Boolean playPunchSound = null;
+    public boolean attackTarget(ActionTarget target, PunchHandler punch, StandEntityTask task) {
+        IPunch punchInstance;
         switch (target.getType()) {
         case BLOCK:
-            punched = breakBlock(target.getBlockPos());
+            BlockPos blockPos = target.getBlockPos();
+            StandBlockPunch blockPunchInstance = punch.punchBlock(this, blockPos, level.getBlockState(blockPos));
+            punchInstance = blockPunchInstance;
             break;
         case ENTITY:
             Entity entity = target.getEntity();
-            
-        	StandAttackProperties punch = createPunch.createPunch(StandAttackProperties::new, this, entity);
-        	
-            nextPunchSound = punch.getPunchSound();
-            playPunchSound = null;
-            punchSoundPos = position();
-            
-            punched = attackEntity(entity, punch, action);
-            if (nextPunchSound != null && punchSoundPos != null && 
-            		(playPunchSound == null && punched || playPunchSound != null && playPunchSound.booleanValue())) {
-        		playSound(nextPunchSound, 1.0F, 1.0F, null, punchSoundPos);
+            // FIXME !!!!!!!!!!!!!!!!!!
+            if (entity == null) {
+                throw new IllegalStateException("Punch entity target is null!");
             }
+            StandEntityPunch entityPunchInstance = punch.punchEntity(this, entity, getDamageSource());
+            punchInstance = entityPunchInstance;
             break;
         default:
-            punched = false;
+            StandMissedPunch emptyPunchInstance = punch.punchMissed(this);
+            punchInstance = emptyPunchInstance;
             break;
         }
-        return punched;
+        
+        punchInstance.hit(this, task);
+        if (playPunchSound == null && punchInstance.targetWasHit() || playPunchSound != null && playPunchSound) {
+            SoundEvent punchSound = punchInstance.getSound();
+            if (punchSound != null) {
+                Vector3d soundPos = punchInstance.getSoundPos();
+                if (soundPos != null) {
+                    playSound(punchSound, 1.0F, 1.0F, null, soundPos);
+                }
+            }
+        }
+        return punchInstance.targetWasHit();
     }
     
     protected SoundEvent getAttackBlockSound() {
@@ -1665,104 +1678,31 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return noComboDecayTicks;
     }
     
-    public boolean attackEntity(Entity target, StandAttackProperties punch, StandEntityAction action) {
+    public boolean hitBlock(BlockPos blockPos, BlockState blockState, StandBlockPunch punch, StandEntityTask task) {
+        return !level.isClientSide() ? punch.hit(this, task) : false;
+    }
+    
+    public StandEntityDamageSource getDamageSource() {
+        return new StandEntityDamageSource("stand", this, getUserPower());
+    }
+    
+    public boolean attackEntity(Entity target, StandEntityPunch punch, StandEntityTask task) {
         if (level.isClientSide() || !canHarm(target)) {
             return false;
         }
-        StandEntityDamageSource dmgSource = new StandEntityDamageSource("stand", this, getUserPower());
-        
-        if (punch.isBarrage()) {
-            dmgSource.setBarrageHitsCount(punch.getBarrageHits());
-        }
-        
-        action.beforeAttack(target, punch, this, getUserPower(), getUser());
-        boolean attacked = doAttack(target, punch, dmgSource, StandAttackProperties::getDamage);
-        action.afterAttack(target, punch, this, getUserPower(), getUser(), attacked, !target.isAlive());
-        
-        if (attacked) {
-            if (punch.isSweepingAttack()) {
-                for (LivingEntity sweepingTarget : level.getEntitiesOfClass(LivingEntity.class, punch.sweepingAttackAabb(target.getBoundingBox()), 
-                        e -> !e.isSpectator() && e.isPickable()
-                        && JojoModUtil.getDistance(this, e.getBoundingBox()) < getAttributeValue(ForgeMod.REACH_DISTANCE.get()) && this.canHarm(e))) {
-                    doAttack(sweepingTarget, punch, dmgSource, StandAttackProperties::getSweepingDamage);
-                }
-            }
-            
-            float addCombo = punch.getAddCombo();
-            if (punch.isBarrage()) {
-            	addCombo *= dmgSource.getBarrageHitsCount();
-            }
-            addComboMeter(addCombo, COMBO_TICKS);
-            if (!isManuallyControlled()) {
-                setLastHurtMob(target);
-            }
-            
-            punchSoundPos = target.position();
+        boolean attacked = punch.hit(this, task);
+        if (attacked && !isManuallyControlled()) {
+            setLastHurtMob(target);
         }
         return attacked;
     }
-    
-    protected final boolean doAttack(Entity target, StandAttackProperties attack, StandEntityDamageSource dmgSource, Function<StandAttackProperties, Float> damageMethod) {
-        if (attack.reducesKnockback()) {
-            dmgSource.setKnockbackReduction(attack.getKnockbackReduction());
-        }
 
-        float damage = damageMethod.apply(attack);
-        LivingEntity targetLiving = null;
-        if (target instanceof LivingEntity) {
-            targetLiving = (LivingEntity) target;
-            
-            dmgSource.setStandInvulTicks(attack.getStandInvulTime());
-            
-            if (target instanceof StandEntity) {
-                StandEntity targetStand = (StandEntity) target;
-                
-                if ((attack.canParryHeavyAttack() || attack.disablesBlocking())) {
-                    if (attack.canParryHeavyAttack()) {
-                        if (targetStand.getCurrentTaskAction() instanceof StandEntityHeavyAttack
-                                && targetStand.getCurrentTaskPhase().get() == StandEntityAction.Phase.WINDUP
-                                && targetStand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())
-                                && 1F - targetStand.getCurrentTaskCompletion(0) < attack.getHeavyAttackParryTiming()) {
-                            targetStand.parryHeavyAttack();
-                            return false;
-                        }
-                    }
-                    
-                    if (attack.disablesBlocking() && random.nextFloat() < attack.getDisableBlockingChance()) {
-                        targetStand.breakStandBlocking(StandStatFormulas.getBlockingBreakTicks(targetStand.getDurability()));
-                    }
-                }
-            }
-            
-            damage = DamageUtil.addArmorPiercing(damage, attack.getArmorPiercing(), targetLiving);
-            
-            final float dmg = damage;
-            damage = targetLiving.getCapability(LivingUtilCapProvider.CAPABILITY).map(cap -> {
-                return cap.onStandAttack(dmg);
-            }).orElse(damage);
-        }
-        
-        if (damage <= 0) {
-            return false;
-        }
-        
-        boolean hurt = hurtTarget(target, dmgSource, damage);
-        
+    public boolean hurtTarget(Entity target, DamageSource dmgSource, float damage) {
+        boolean hurt = DamageUtil.hurtThroughInvulTicks(target, DamageUtil.enderDragonDamageHack(dmgSource, target), damage
+                * JojoModConfig.getCommonConfigInstance(false).standDamageMultiplier.get().floatValue());
         if (hurt) {
-            if (targetLiving != null) {
-                if (attack.getAdditionalKnockback() > 0) {
-                    Vector3d vecToTarget = target.position().subtract(this.position());
-                    float knockbackYRot = (float) -MathHelper.atan2(vecToTarget.x, vecToTarget.z) * MathUtil.RAD_TO_DEG + attack.getKnockbackYRotDeg();
-                    float knockbackXRot = attack.getKnockbackXRot();
-                    float knockbackStrength = attack.getAdditionalKnockback() * 0.5F;
-                    if (Math.abs(knockbackXRot) < 90) {
-                    	DamageUtil.knockback(targetLiving, knockbackStrength * MathHelper.cos(knockbackXRot * MathUtil.DEG_TO_RAD), knockbackYRot);
-                    }
-                    if (knockbackXRot != 0) {
-                        DamageUtil.upwardsKnockback(targetLiving, -knockbackStrength * MathHelper.sin(knockbackXRot * MathUtil.DEG_TO_RAD));
-                    }
-                }
-                
+            if (target instanceof LivingEntity) {
+                LivingEntity targetLiving = (LivingEntity) target;
                 LivingEntity user = getUser();
                 if (user != null) {
                     if (user.getType() == EntityType.PLAYER) {
@@ -1770,29 +1710,18 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                         targetLiving.lastHurtByPlayerTime = 100;
                     }
                     LivingEntity aggroTo = isFollowingUser() || targetLiving.canSee(user) ? user : 
-                                StandUtil.isEntityStandUser(targetLiving) ? this : null;
+                        StandUtil.isEntityStandUser(targetLiving) ? this : null;
                     if (aggroTo != null) {
                         targetLiving.setLastHurtByMob(aggroTo);
                     }
                 }
-
-                if (attack.disablesBlocking() && 
-                        targetLiving.getUseItem().isShield(targetLiving) && targetLiving instanceof PlayerEntity) {
-                    DamageUtil.disableShield((PlayerEntity) targetLiving, attack.getDisableBlockingChance());
-                }
             }
             doEnchantDamageEffects(this, target);
         }
-        
         return hurt;
     }
-
-    protected boolean hurtTarget(Entity target, DamageSource dmgSource, float damage) {
-        return DamageUtil.hurtThroughInvulTicks(target, DamageUtil.enderDragonDamageHack(dmgSource, target), damage
-                * JojoModConfig.getCommonConfigInstance(false).standDamageMultiplier.get().floatValue());
-    }
     
-    protected void parryHeavyAttack() {
+    public void parryHeavyAttack() {
         if (!level.isClientSide()) {
             stopTask(true);
             addEffect(new EffectInstance(ModEffects.STUN.get(), 20));
@@ -1800,7 +1729,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
     }
     
-    protected void breakStandBlocking(int lockTicks) {
+    public void breakStandBlocking(int lockTicks) {
         if (!level.isClientSide() && isStandBlocking()) {
             entityData.set(NO_BLOCKING_TICKS, lockTicks);
             stopTask(true);
@@ -1808,23 +1737,21 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
     }
     
-    protected void standCrash() {
+    public void standCrash() {
         if (!level.isClientSide()) {
             stopTask(true);
             addEffect(new EffectInstance(ModEffects.STUN.get(), 40));
         }
     }
 
-    protected boolean breakBlock(BlockPos blockPos) {
-        if (level.isClientSide() || !JojoModUtil.canEntityDestroy((ServerWorld) level, blockPos, this)) {
+    public boolean breakBlock(BlockPos blockPos, BlockState blockState) {
+        if (level.isClientSide() || !JojoModUtil.canEntityDestroy((ServerWorld) level, blockPos, blockState, this)) {
             return false;
         }
         
-        BlockState blockState = level.getBlockState(blockPos);
         if (canBreakBlock(blockPos, blockState)) {
             LivingEntity user = getUser();
             level.destroyBlock(blockPos, !(user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild), this);
-            punchSoundPos = Vector3d.atCenterOf(blockPos);
             return true;
         }
         else {
@@ -1834,12 +1761,12 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
     }
     
-    protected boolean canBreakBlock(BlockPos blockPos, BlockState blockState) {
+    public boolean canBreakBlock(BlockPos blockPos, BlockState blockState) {
         float blockHardness = blockState.getDestroySpeed(level, blockPos);
         return blockHardness >= 0 && canBreakBlock(blockHardness, blockState.getHarvestLevel());
     }
 
-    protected boolean canBreakBlock(float blockHardness, int blockHarvestLevel) {
+    public boolean canBreakBlock(float blockHardness, int blockHarvestLevel) {
         return StandStatFormulas.isBlockBreakable(getAttackDamage(), blockHardness, blockHarvestLevel);
     }
 
