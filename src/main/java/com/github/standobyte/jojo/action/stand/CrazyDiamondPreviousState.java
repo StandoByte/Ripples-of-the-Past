@@ -37,10 +37,10 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
     public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, IStandPower standPower) {
         switch (target.getType()) {
         case BLOCK:
-            if (standPower.getResolveLevel() >= 2) {
-                // FIXME !! (prev state) block check
-                return ActionConditionResult.POSITIVE;
-            }
+//            if (standPower.getResolveLevel() >= 2) {
+//                // FIXME !! (prev state) block check
+//                return ActionConditionResult.POSITIVE;
+//            }
             return ActionConditionResult.NEGATIVE;
         case ENTITY:
             Entity targetEntity = target.getEntity();

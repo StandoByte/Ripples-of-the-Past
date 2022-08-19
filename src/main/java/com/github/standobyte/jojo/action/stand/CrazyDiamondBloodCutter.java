@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
 
 public class CrazyDiamondBloodCutter extends StandEntityAction {
@@ -18,7 +19,8 @@ public class CrazyDiamondBloodCutter extends StandEntityAction {
     
     @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
-        if (user.getHealth() >= user.getMaxHealth()) {
+        if (user.getHealth() >= user.getMaxHealth()
+                && !(user instanceof PlayerEntity && ((PlayerEntity) user).abilities.invulnerable)) {
             return conditionMessage("full_health");
         }
         return super.checkSpecificConditions(user, power, target);
@@ -27,7 +29,10 @@ public class CrazyDiamondBloodCutter extends StandEntityAction {
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
-            standEntity.shootProjectile(new CDBloodCutterEntity(standEntity, world), 2.0F, 1.0F);
+            LivingEntity user = userPower.getUser();
+            CDBloodCutterEntity cutter = new CDBloodCutterEntity(user, world);
+            cutter.shootFromRotation(user, 2.0F, standEntity.getProjectileInaccuracy(1.0F));
+            standEntity.addProjectile(cutter);
         }
     }
 

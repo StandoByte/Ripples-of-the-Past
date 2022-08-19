@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.power.stand;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
@@ -52,11 +52,6 @@ public class StandEffectsTracker {
         if (instance != null) {
             onEffectRemoved(instance);
             effects.remove(instance.getId());
-            LivingEntity user = standPower.getUser();
-            if (!user.level.isClientSide()) {
-                PacketManager.sendToClientsTrackingAndSelf(TrStandEffectPacket.remove(
-                        instance.withId(EFFECTS_COUNTER.incrementAndGet())), user);
-            }
         }
     }
 
@@ -68,8 +63,10 @@ public class StandEffectsTracker {
         ObjectIterator<Entry<StandEffectInstance>> it = effects.int2ObjectEntrySet().iterator();
         while (it.hasNext()) {
             StandEffectInstance effect = it.next().getValue();
-            effect.tickCount++;
-            effect.onTick();
+            if (!effect.toBeRemoved()) {
+                effect.tickCount++;
+                effect.onTick();
+            }
             if (effect.toBeRemoved()) {
                 onEffectRemoved(effect);
                 it.remove();
@@ -112,6 +109,11 @@ public class StandEffectsTracker {
     
     private void onEffectRemoved(StandEffectInstance instance) {
         instance.onStop();
+        LivingEntity user = standPower.getUser();
+        if (!user.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(TrStandEffectPacket.remove(
+                    instance.withId(EFFECTS_COUNTER.incrementAndGet())), user);
+        }
     }
 
 //    public void onUserStandRemoved(LivingEntity user) {
@@ -126,15 +128,14 @@ public class StandEffectsTracker {
         return effects.get(id);
     }
     
-    // FIXME (!!)
     @SuppressWarnings("unchecked")
-    public <T extends StandEffectInstance> T getOrCreateEffectSingle(StandEffectType<T> effectType, 
-            @Nullable Predicate<StandEffectInstance> additionalFilter) {
+    public <T extends StandEffectInstance> T getOrCreateEffect(StandEffectType<T> effectType, LivingEntity target) {
         List<StandEffectInstance> effectList = getEffects(effect -> 
-        effect.effectType == effectType && (additionalFilter == null || additionalFilter.test(effect)));
+                effect.effectType == effectType && 
+                (target == null ? effect.getTargetUUID() == null : target.getUUID().equals(effect.getTargetUUID())));
         if (effectList.isEmpty()) {
             T effect = effectType.create();
-            addEffect(effect);
+            addEffect(effect.withTarget(target));
             return effect;
         }
         else {
@@ -144,7 +145,7 @@ public class StandEffectsTracker {
     
     public List<StandEffectInstance> getEffects(@Nullable Predicate<StandEffectInstance> filter) {
         if (filter == null) {
-            return Collections.emptyList();
+            return new ArrayList<>(effects.values());
         }
         return effects.values().stream().filter(filter).collect(Collectors.toList());
     }
@@ -157,7 +158,7 @@ public class StandEffectsTracker {
     
     public void syncWithTrackingOrUser(ServerPlayerEntity player) {
         effects.values().forEach(effect -> {
-            effect.updateTargets(player.getLevel());
+            effect.updateTarget(player.getLevel());
             effect.syncWithTrackingOrUser(player);
         });
     }

@@ -1,22 +1,13 @@
 package com.github.standobyte.jojo.action.stand.effect;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.mutable.MutableInt;
 
 import com.github.standobyte.jojo.init.ModStandEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandEffectPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -24,18 +15,21 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
 public abstract class StandEffectInstance {
     @Nonnull public final StandEffectType<?> effectType;
-    protected LivingEntity user;
-    protected IStandPower userPower;
-    // FIXME !!!!!!!!!!!!!!!!!!!!!!!! map<UUID, LivingEntity>
-    protected final Set<LivingEntity> targets = new HashSet<LivingEntity>();
-    @Nullable private Set<UUID> targetsLoaded;
+    
     private int id;
     public int tickCount = 0;
     private boolean toBeRemoved = false;
+    
+    protected LivingEntity user;
+    protected IStandPower userPower;
+    private UUID targetUUID;
+    private LivingEntity target;
+    
     
     public StandEffectInstance(@Nonnull StandEffectType<?> effectType) {
         this.effectType = effectType;
@@ -58,8 +52,9 @@ public abstract class StandEffectInstance {
         return this;
     }
     
-    public StandEffectInstance addTarget(LivingEntity target) {
-        this.targets.add(target);
+    public StandEffectInstance withTarget(LivingEntity target) {
+        this.target = target;
+        this.targetUUID = target != null ? target.getUUID() : null;
         return this;
     }
     
@@ -67,8 +62,12 @@ public abstract class StandEffectInstance {
         return user;
     }
     
-    public Collection<LivingEntity> getTargets() {
-        return Collections.unmodifiableCollection(targets);
+    public LivingEntity getTarget() {
+        return target;
+    }
+    
+    public UUID getTargetUUID() {
+        return targetUUID;
     }
     
     public void onStart() {
@@ -77,20 +76,38 @@ public abstract class StandEffectInstance {
     
     public void onTick() {
         tickCount++;
-        
-        Iterator<LivingEntity> it = targets.iterator();
-        while (it.hasNext()) {
-            LivingEntity target = it.next();
-            if (target.isDeadOrDying()) {
-                if (removeDeadTarget(target)) {
-                    it.remove();
-                }
+
+        World world = user.level;
+        updateTarget(world);
+        if (targetUUID != null && target != null) {
+            if (!keepTarget(target)) {
+                targetUUID = null;
+                target = null;
             }
-            else {
+            if (target != null) {
                 tickTarget(target);
             }
         }
+        if (targetUUID == null && needsTarget()) {
+            remove();
+            return;
+        }
+        
         tick();
+    }
+
+    public void updateTarget(World world) {
+        if (target == null) {
+            if (targetUUID != null && !world.isClientSide()) {
+                Entity entity = ((ServerWorld) world).getEntity(targetUUID);
+                if (entity instanceof LivingEntity) {
+                    target = (LivingEntity) entity;
+                }
+            }
+        }
+        else if (!target.isAlive()) {
+            target = null;
+        }
     }
     
     public void onStop() {
@@ -114,9 +131,11 @@ public abstract class StandEffectInstance {
         return true;
     }
     
-    protected boolean removeDeadTarget(LivingEntity target) {
-        return true;
+    protected boolean keepTarget(LivingEntity target) {
+        return !target.isDeadOrDying();
     }
+    
+    protected abstract boolean needsTarget();
     
     public int getId() {
         return id;
@@ -144,11 +163,9 @@ public abstract class StandEffectInstance {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putString("Type", effectType.getRegistryName().toString());
         nbt.putInt("TickCount", tickCount);
-        
-        CompoundNBT targetsNBT = new CompoundNBT();
-        MutableInt i = new MutableInt(0);
-        targets.forEach(target -> targetsNBT.putUUID(String.valueOf(i.incrementAndGet()), target.getUUID()));
-        nbt.put("Targets", targetsNBT);
+        if (targetUUID != null) {
+            nbt.putUUID("Target", targetUUID);
+        }
         
         writeAdditionalSaveData(nbt);
         return nbt;
@@ -159,31 +176,12 @@ public abstract class StandEffectInstance {
         if (effectType == null) return null;
         StandEffectInstance effect = effectType.create();
         effect.tickCount = nbt.getInt("TickCount");
-        
-        if (nbt.contains("Targets", JojoModUtil.getNbtId(CompoundNBT.class))) {
-            CompoundNBT targetsNBT = nbt.getCompound("Targets");
-            effect.targetsLoaded = new HashSet<>();
-            targetsNBT.getAllKeys().forEach(key -> {
-                if (targetsNBT.hasUUID(key)) {
-                    effect.targetsLoaded.add(targetsNBT.getUUID(key));
-                }
-            });
+        if (nbt.hasUUID("Target")) {
+            effect.targetUUID = nbt.getUUID("Target");
         }
         
         effect.readAdditionalSaveData(nbt);
         return effect;
-    }
-    
-    public void updateTargets(ServerWorld world) {
-        if (targetsLoaded != null) {
-            targetsLoaded.forEach(uuid -> {
-                Entity entity = world.getEntity(uuid);
-                if (entity instanceof LivingEntity) {
-                    addTarget((LivingEntity) entity);
-                }
-            });
-            targetsLoaded = null;
-        }
     }
     
     public void writeAdditionalPacketData(PacketBuffer buf) {}

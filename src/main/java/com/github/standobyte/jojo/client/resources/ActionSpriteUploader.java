@@ -21,6 +21,11 @@ public class ActionSpriteUploader extends SpriteUploader {
     }
 
     public TextureAtlasSprite getSprite(Action<?> action) {
-        return getSprite(ModActions.Registry.getRegistry().getKey(action));
+        return getSprite(action.getRegistryName());
+    }
+    
+    public static ResourceLocation getIcon(Action<?> action) {
+        ResourceLocation key = action.getRegistryName();
+        return new ResourceLocation(key.getNamespace(), "textures/action/" + key.getPath() + ".png");
     }
 }

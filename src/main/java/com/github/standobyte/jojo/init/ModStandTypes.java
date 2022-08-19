@@ -172,15 +172,15 @@ public class ModStandTypes {
                     new StandAction[] {
                             ModActions.CRAZY_DIAMOND_PUNCH.get(), 
                             ModActions.CRAZY_DIAMOND_BARRAGE.get(), 
-//                            ModActions.CRAZY_DIAMOND_ITEM_PROJECTILE.get(), 
-//                            ModActions.CRAZY_DIAMOND_BLOOD_CUTTER.get()
+                            ModActions.CRAZY_DIAMOND_ITEM_PROJECTILE.get(), 
+                            ModActions.CRAZY_DIAMOND_BLOOD_CUTTER.get()
                             },
                     new StandAction[] {
                             ModActions.CRAZY_DIAMOND_BLOCK.get(), 
-                            ModActions.CRAZY_DIAMOND_REPAIR_ITEM.get(), 
+                            ModActions.CRAZY_DIAMOND_REPAIR.get(), 
                             ModActions.CRAZY_DIAMOND_HEAL.get(), 
                             ModActions.CRAZY_DIAMOND_RESTORE_TERRAIN.get(), 
-                            ModActions.CRAZY_DIAMOND_BLOCK_CHECKPOINT_MOVE.get()
+                            ModActions.CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE.get()
                             },
                     TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
                     .tier(5)

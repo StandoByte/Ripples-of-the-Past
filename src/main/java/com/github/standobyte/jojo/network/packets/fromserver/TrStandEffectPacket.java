@@ -1,11 +1,11 @@
 package com.github.standobyte.jojo.network.packets.fromserver;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectType;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandEffectsTracker;
 
@@ -18,27 +18,27 @@ public class TrStandEffectPacket {
     private final PacketType packetType;
     private final int userId;
     private final int effectId;
-    private final int[] targetsId;
+    private final int targetId;
     private final StandEffectType<?> effectFactory;
     private final StandEffectInstance effect;
     private final PacketBuffer buf;
     
     public static TrStandEffectPacket add(StandEffectInstance effect) {
         return new TrStandEffectPacket(PacketType.ADD, effect.getStandUser().getId(), 
-                effect.getId(), effect.getTargets().stream().mapToInt(Entity::getId).toArray(), effect.effectType, effect, null);
+                effect.getId(), Optional.ofNullable(effect.getTarget()).map(Entity::getId).orElse(-1), effect.effectType, effect, null);
     }
     
     public static TrStandEffectPacket remove(StandEffectInstance effect) {
         return new TrStandEffectPacket(PacketType.REMOVE, effect.getStandUser().getId(), effect.getId(), 
-                null, null, null, null);
+                -1, null, null, null);
     }
     
-    private TrStandEffectPacket(PacketType packetType, int userId, int effectId, int[] targetsId, 
+    private TrStandEffectPacket(PacketType packetType, int userId, int effectId, int targetId, 
             StandEffectType<?> effectFactory, StandEffectInstance effect, PacketBuffer buf) {
         this.packetType = packetType;
         this.userId = userId;
         this.effectId = effectId;
-        this.targetsId = targetsId;
+        this.targetId = targetId;
         this.effectFactory = effectFactory;
         this.effect = effect;
         this.buf = buf;
@@ -50,7 +50,7 @@ public class TrStandEffectPacket {
         case ADD:
             buf.writeInt(msg.userId);
             buf.writeInt(msg.effectId);
-            NetworkUtil.writeIntArray(buf, msg.targetsId);
+            buf.writeInt(msg.targetId);
             buf.writeRegistryId(msg.effectFactory);
             msg.effect.writeAdditionalPacketData(buf);
             break;
@@ -65,11 +65,11 @@ public class TrStandEffectPacket {
         PacketType type = buf.readEnum(PacketType.class);
         switch (type) {
         case ADD:
-            return new TrStandEffectPacket(type, buf.readInt(), buf.readInt(), NetworkUtil.readIntArray(buf), 
-                    buf.readRegistryIdSafe(StandEffectType.class), null, buf);
+            return new TrStandEffectPacket(type, buf.readInt(), buf.readInt(), 
+                    buf.readInt(), buf.readRegistryIdSafe(StandEffectType.class), null, buf);
         case REMOVE:
-            return new TrStandEffectPacket(type, buf.readInt(), buf.readInt(), null, 
-                    null, null, null);
+            return new TrStandEffectPacket(type, buf.readInt(), buf.readInt(), 
+                    -1, null, null, null);
         }
         return null;
     }
@@ -83,6 +83,12 @@ public class TrStandEffectPacket {
                     switch (msg.packetType) {
                     case ADD:
                         StandEffectInstance effect = msg.effectFactory.create().withId(msg.effectId).withStand(stand);
+                        if (msg.targetId != -1) {
+                            Entity target = ClientUtil.getEntityById(msg.targetId);
+                            if (target instanceof LivingEntity) {
+                                effect.withTarget((LivingEntity) target);
+                            }
+                        }
                         effect.readAdditionalPacketData(msg.buf);
                         stand.getContinuousEffects().addEffect(effect);
                         break;
