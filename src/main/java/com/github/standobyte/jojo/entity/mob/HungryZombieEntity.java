@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.action.actions.VampirismBloodDrain;
+import com.github.standobyte.jojo.action.non_stand.VampirismBloodDrain;
 import com.github.standobyte.jojo.entity.ai.ZombieFollowOwnerGoal;
 import com.github.standobyte.jojo.entity.ai.ZombieNearestAttackableTargetGoal;
 import com.github.standobyte.jojo.entity.ai.ZombieOwnerHurtByTargetGoal;

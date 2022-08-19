@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import com.github.standobyte.jojo.action.actions.StandAction;
-import com.github.standobyte.jojo.action.actions.StandEntityHeavyAttack;
-import com.github.standobyte.jojo.action.actions.StandEntityLightAttack;
-import com.github.standobyte.jojo.action.actions.StandEntityMeleeBarrage;
+import com.github.standobyte.jojo.action.stand.StandAction;
+import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack;
+import com.github.standobyte.jojo.action.stand.StandEntityLightAttack;
+import com.github.standobyte.jojo.action.stand.StandEntityMeleeBarrage;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.network.PacketManager;

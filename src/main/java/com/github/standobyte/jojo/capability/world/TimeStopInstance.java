@@ -4,8 +4,8 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.action.actions.TimeStop;
-import com.github.standobyte.jojo.action.actions.TimeStopInstant;
+import com.github.standobyte.jojo.action.stand.TimeStop;
+import com.github.standobyte.jojo.action.stand.TimeStopInstant;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
