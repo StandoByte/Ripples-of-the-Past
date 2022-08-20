@@ -950,6 +950,12 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
 
 
+    // FIXME fix too far clockwise body rotation
+    @Override
+    protected float tickHeadTurn(float p_110146_1_, float p_110146_2_) {
+        return super.tickHeadTurn(p_110146_1_, p_110146_2_);
+    }
+    
     @Override
     public void tick() {
         super.tick();

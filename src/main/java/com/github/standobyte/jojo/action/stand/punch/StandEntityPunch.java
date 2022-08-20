@@ -117,6 +117,8 @@ public class StandEntityPunch implements IPunch {
     public float getDamage() {
         return damage;
     }
+    
+    
 
     private boolean reducesKnockback() {
         return knockback < 1;

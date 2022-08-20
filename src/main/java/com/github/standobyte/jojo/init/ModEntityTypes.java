@@ -261,7 +261,8 @@ public class ModEntityTypes {
     
     public static final RegistryObject<StandEntityType<CrazyDiamondEntity>> CRAZY_DIAMOND = ENTITIES.register("crazy_diamond", 
             () -> new StandEntityType<CrazyDiamondEntity>(CrazyDiamondEntity::new, ModStandTypes.CRAZY_DIAMOND, false, 0.65F, 1.95F)
-//            .summonSound(ModSounds.MAGICIANS_RED_SUMMON)
+            .summonSound(ModSounds.CRAZY_DIAMOND_SUMMON)
+            .unsummonSound(ModSounds.CRAZY_DIAMOND_UNSUMMON)
             );
 
     
