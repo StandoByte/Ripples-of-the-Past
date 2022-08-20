@@ -35,7 +35,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class TimeStopInstant extends StandAction {
-    private final Supplier<SoundEvent> blinkSound;
+    final Supplier<SoundEvent> blinkSound;
     private final Supplier<TimeStop> baseTimeStop;
 
     public TimeStopInstant(StandAction.Builder builder, @Nonnull Supplier<TimeStop> baseTimeStop, @Nonnull Supplier<SoundEvent> blinkSound) {

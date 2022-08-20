@@ -346,10 +346,12 @@ public class ModActions {
 
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_STRING_ATTACK = ACTIONS.register("hierophant_green_attack", 
             () -> new HierophantGreenStringAttack(new StandEntityAction.Builder().staminaCost(75).standPerformDuration(10)
+                    .standSound(ModSounds.HIEROPHANT_GREEN_TENTACLES)
                     .partsRequired(StandPart.MAIN_BODY)));
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_STRING_BIND = ACTIONS.register("hierophant_green_attack_binding", 
             () -> new HierophantGreenStringAttack(new StandEntityAction.Builder().staminaCost(75).standPerformDuration(25).cooldown(25, 100, 0.5F)
+                    .standSound(ModSounds.HIEROPHANT_GREEN_TENTACLES)
                     .partsRequired(StandPart.MAIN_BODY)
                     .shiftVariationOf(HIEROPHANT_GREEN_STRING_ATTACK)
                     .xpRequirement(200)));

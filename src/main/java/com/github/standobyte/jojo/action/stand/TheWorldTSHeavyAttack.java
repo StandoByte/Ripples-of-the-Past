@@ -132,8 +132,9 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
 
 	    		TimeStopInstant.skipTicksForStandAndUser(standPower, timeStopTicks);
 	    		if (!world.isClientSide()) {
-                    JojoModUtil.playSound(world, null, standEntity.getX(), standEntity.getY(), standEntity.getZ(), 
-                            ModSounds.THE_WORLD_TIME_STOP_UNREVEALED.get(), SoundCategory.AMBIENT, 1.0F, 1.0F, TimeUtil::canPlayerSeeInStoppedTime);
+                    JojoModUtil.playEitherSound(world, null, standEntity.getX(), standEntity.getY(), standEntity.getZ(), 
+                            TimeUtil::canPlayerSeeInStoppedTime, blink.blinkSound.get(), ModSounds.THE_WORLD_TIME_STOP_UNREVEALED.get(), 
+                            SoundCategory.AMBIENT, 1.0F, 1.0F);
 	    			standPower.consumeStamina(staminaCostTS + timeStopTicks * staminaCostTicking);
 	    			if (standPower.hasPower()) {
 		    			StandStats stats = standPower.getType().getStats();

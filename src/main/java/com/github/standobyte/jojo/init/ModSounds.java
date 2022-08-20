@@ -298,6 +298,9 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> HIEROPHANT_GREEN_SUMMON = SOUNDS.register("hierophant_green_summon", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "hierophant_green_summon")));
     
+    public static final RegistryObject<SoundEvent> HIEROPHANT_GREEN_TENTACLES = SOUNDS.register("hierophant_green_tentacles", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "hierophant_green_tentacles")));
+    
     public static final RegistryObject<SoundEvent> HIEROPHANT_GREEN_EMERALD_SPLASH = SOUNDS.register("hierophant_green_emerald_splash", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "hierophant_green_emerald_splash")));
     

@@ -466,6 +466,12 @@ public class JojoModUtil {
         }
     }
 
+    public static void playEitherSound(World world, @Nullable PlayerEntity clientHandled, double x, double y, double z, 
+            Predicate<PlayerEntity> predicate, SoundEvent soundTrue, SoundEvent soundFalse, SoundCategory category, float volume, float pitch) {
+        if (soundTrue != null) playSound(world, clientHandled, x, y, z, soundTrue, category, volume, pitch, predicate);
+        if (soundFalse != null) playSound(world, clientHandled, x, y, z, soundFalse, category, volume, pitch, predicate.negate());
+    }
+
     public static void playSound(World world, @Nullable PlayerEntity clientHandled, Entity entity, 
             SoundEvent sound, SoundCategory category, float volume, float pitch, Predicate<PlayerEntity> condition) {
         if (!world.isClientSide()) {
