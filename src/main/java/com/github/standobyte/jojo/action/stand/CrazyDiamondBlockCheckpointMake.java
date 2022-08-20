@@ -46,7 +46,7 @@ public class CrazyDiamondBlockCheckpointMake extends StandEntityAction {
                 List<ItemStack> drops = Block.getDrops(blockState, (ServerWorld) world, pos, 
                         blockState.hasTileEntity() ? world.getBlockEntity(pos) : null);
                 
-                if (standEntity.breakBlock(pos, false)) {
+                if (standEntity.breakBlock(pos, blockState, false)) {
                     drops.forEach(stack -> {
                         boolean dropItem = true;
                         if (stack.getItem() instanceof BlockItem) {

@@ -1,8 +1,8 @@
 package com.github.standobyte.jojo.entity.stand.stands;
 
-import com.github.standobyte.jojo.action.stand.StandEntityAction;
-import com.github.standobyte.jojo.entity.stand.StandAttackProperties;
+import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.util.damage.DamageUtil;
 
@@ -16,9 +16,9 @@ public class MagiciansRedEntity extends StandEntity {
     }
     
     @Override
-    public boolean attackEntity(Entity target, StandAttackProperties punch, StandEntityAction action) {
+    public boolean attackEntity(Entity target, StandEntityPunch punch, StandEntityTask task) {
         return DamageUtil.dealDamageAndSetOnFire(target, 
-                entity -> super.attackEntity(target, punch, action), 10, true);
+                entity -> super.attackEntity(target, punch, task), 10, true);
     }
     
     @Override

@@ -75,7 +75,7 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
     @Override
     public void remove() {
         super.remove();
-        if (level.isClientSide()) {
+        if (!level.isClientSide()) {
 	        getPassengers().forEach(entity -> {
 	            if (entity instanceof LivingEntity) {
 	                ((LivingEntity) entity).removeEffect(ModEffects.STUN.get());

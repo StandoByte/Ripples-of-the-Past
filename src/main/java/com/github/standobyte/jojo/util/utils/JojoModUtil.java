@@ -316,11 +316,10 @@ public class JojoModUtil {
 
 
 
-    public static boolean canEntityDestroy(ServerWorld world, BlockPos pos, LivingEntity entity) {
-        BlockState state = world.getBlockState(pos);
+    public static boolean canEntityDestroy(ServerWorld world, BlockPos blockPos, BlockState blockState, LivingEntity entity) {
         if (JojoModConfig.getCommonConfigInstance(world.isClientSide()).abilitiesBreakBlocks.get()
-                && state.canEntityDestroy(world, pos, entity)
-                && ForgeEventFactory.onEntityDestroyBlock(entity, pos, state)) {
+                && blockState.canEntityDestroy(world, blockPos, entity)
+                && ForgeEventFactory.onEntityDestroyBlock(entity, blockPos, blockState)) {
         	PlayerEntity player = null;
         	if (entity instanceof PlayerEntity) {
         		player = (PlayerEntity) entity;
@@ -331,7 +330,7 @@ public class JojoModUtil {
             		player = (PlayerEntity) standUser;
             	}
         	}
-        	return player == null || world.mayInteract(player, pos);
+        	return player == null || world.mayInteract(player, blockPos);
         }
         return false;
     }
