@@ -26,6 +26,7 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotific
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.renderer.entity.stand.AdditionalArmSwing;
+import com.github.standobyte.jojo.client.sound.BarrageSoundsHandler;
 import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
 import com.github.standobyte.jojo.entity.mob.IMobStandUser;
@@ -138,12 +139,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     private boolean alternateAdditionalSwing;
     private int lastSwingTick = -2;
     private final ArmSwings swings = new ArmSwings();
-    public boolean barragePunchDelayed = false;
-    public int barrageDelayedPunches = 0;
-    private boolean accumulateBarrageTickParry;
-    private int barrageParryCount;
     private static final DataParameter<Integer> BARRAGE_CLASH_OPPONENT_ID = EntityDataManager.defineId(StandEntity.class, DataSerializers.INT);
-    private Optional<Entity> barrageClashOpponent = Optional.empty();
+    public final BarrageHandler barrageHandler = new BarrageHandler(this);
+    private final BarrageSoundsHandler barrageSoundsHandler;
     
     private float blockDamage = 0;
     private float prevBlockDamage = 0;
@@ -186,9 +184,11 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         this.summonLockTicks = StandStatFormulas.getSummonLockTicks(stats.getBaseAttackSpeed());
         if (level.isClientSide()) {
             this.alphaTicks = this.summonLockTicks;
+            this.barrageSoundsHandler = new BarrageSoundsHandler(this);
         }
         else {
             this.summonPoseRandomByte = random.nextInt(128);
+            this.barrageSoundsHandler = null;
         }
     }
     
@@ -241,7 +241,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             onArmsOnlyModeUpdated();
         }
         else if (BARRAGE_CLASH_OPPONENT_ID.equals(dataParameter)) {
-        	barrageClashOpponent = Optional.ofNullable(level.getEntity(entityData.get(BARRAGE_CLASH_OPPONENT_ID)));
+        	barrageHandler.clashOpponent = Optional.ofNullable(level.getEntity(entityData.get(BARRAGE_CLASH_OPPONENT_ID)));
         }
         else if (MANUAL_MOVEMENT_LOCK.equals(dataParameter)) {
         	this.manualMovementLocks.onEntityDataUpdated(this);
@@ -700,7 +700,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     @Override
     public boolean hurt(DamageSource dmgSource, float dmgAmount) {
         wasDamageBlocked = false;
-        if (!level.isClientSide() && barrageParryCount > 0
+        if (!level.isClientSide() && barrageHandler.parryCount > 0
                 && !isInvulnerableTo(dmgSource) && !isDeadOrDying() 
                 && !(dmgSource.isFire() && hasEffect(Effects.FIRE_RESISTANCE))
                 && canBlockDamage(dmgSource) && canBlockOrParryFromAngle(dmgSource.getSourcePosition())
@@ -709,7 +709,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             int punchesIncoming = standDmgSource.getBarrageHitsCount();
             if (punchesIncoming > 0) {
                 float parriableProportion = Math.min(StandStatFormulas.getMaxBarrageParryTickDamage(getDurability()) / dmgAmount, 1);
-                int punchesCanParry = MathHelper.floor(parriableProportion * barrageParryCount);
+                int punchesCanParry = MathHelper.floor(parriableProportion * barrageHandler.parryCount);
                 
                 if (punchesCanParry > 0) {
                     Vector3d attackPos = this.getEyePosition(1.0F);
@@ -728,7 +728,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                     
                     punchesCanParry = Math.min(punchesCanParry, punchesIncoming);
                     standDmgSource.setBarrageHitsCount(punchesIncoming - punchesCanParry);
-                    barrageParryCount -= punchesCanParry;
+                    barrageHandler.parryCount -= punchesCanParry;
                     addComboMeter(0.0125F, COMBO_TICKS);
                     setBarrageClashOpponent(attacker);
                     
@@ -748,7 +748,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     public Optional<Entity> barrageClashOpponent() {
-    	return barrageClashOpponent;
+    	return barrageHandler.clashOpponent;
     }
     
     public void barrageClashStopped() {
@@ -953,7 +953,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     @Override
     public void tick() {
         super.tick();
-        accumulateBarrageTickParry = false;
+        barrageHandler.tick();
         LivingEntity user = getUser();
         
         checkInputBuffer();
@@ -997,7 +997,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             }
         }
         
-        if (barrageClashOpponent.map(stand -> {
+        if (barrageHandler.clashOpponent.map(stand -> {
         	return !stand.isAlive() || !this.isTargetInReach(new ActionTarget(stand));
         }).orElse(false)) {
     		setBarrageClashOpponent(null);
@@ -1273,7 +1273,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     	StandEntityAction oldAction = clearedTask.getAction();
         oldAction.onClear(userPower, this, newAction);
         
-        barrageParryCount = 0;
+        barrageHandler.reset();
         if (blockDamage > 0) {
         	prevBlockDamage += blockDamage;
         	blockDamage = 0;
@@ -1408,17 +1408,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public int barrageHits;
     public void setBarrageHitsThisTick(int hits) {
         this.barrageHits = hits;
-        addBarrageParryCount(hits);
-    }
-    
-    protected void addBarrageParryCount(int hits) {
-        if (!accumulateBarrageTickParry) {
-            accumulateBarrageTickParry = true;
-            barrageParryCount = hits + 1;
-        }
-        else {
-            barrageParryCount += hits;
-        }
+        barrageHandler.addParryCount(hits);
     }
     
     public Boolean playPunchSound = null;
@@ -1432,10 +1422,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             break;
         case ENTITY:
             Entity entity = target.getEntity();
-            // FIXME !!!!!!!!!!!!!!!!!!
-            if (entity == null) {
-                throw new IllegalStateException("Punch entity target is null!");
-            }
             StandEntityPunch entityPunchInstance = punch.punchEntity(this, entity, getDamageSource());
             punchInstance = entityPunchInstance;
             break;
@@ -1509,6 +1495,13 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         	return canAttack((LivingEntity) target);
         }
         return true;
+    }
+    
+    public BarrageSoundsHandler getBarrageSoundsHandler() {
+        if (!level.isClientSide()) {
+            throw new IllegalStateException("Barrage sound handling class is only available on the cilent!");
+        }
+        return barrageSoundsHandler;
     }
     
     public Hand alternateHands() {

@@ -5,8 +5,8 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack.HeavyEntityPunch;
 import com.github.standobyte.jojo.action.stand.punch.PunchHandler;
-import com.github.standobyte.jojo.action.stand.punch.TheWorldTSHeavyPunch;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
@@ -19,9 +19,11 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
+import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 import com.github.standobyte.jojo.util.utils.TimeUtil;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.util.SoundCategory;
@@ -182,5 +184,30 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
             return ActionConditionResult.POSITIVE;
         }
         return super.checkTarget(target, user, standPower);
+    }
+    
+    
+    
+    public static class TheWorldTSHeavyPunch extends HeavyEntityPunch {
+
+        public TheWorldTSHeavyPunch(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
+            super(stand, target, dmgSource);
+            this
+            .damage(StandStatFormulas.getHeavyAttackDamage(stand.getAttackDamage()))
+            .addKnockback(4)
+            .disableBlocking(1.0F)
+            .setStandInvulTime(10)
+            .setPunchSound(ModSounds.STAND_STRONG_ATTACK);
+        }
+
+        @Override
+        protected void afterAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, StandEntityTask task, boolean hurt, boolean killed) {
+            if (killed) {
+                LivingEntity user = stand.getUser();
+                if (user != null && stand.distanceToSqr(user) > 16) {
+                    JojoModUtil.sayVoiceLine(user, ModSounds.DIO_THIS_IS_THE_WORLD.get());
+                }
+            }
+        }
     }
 }

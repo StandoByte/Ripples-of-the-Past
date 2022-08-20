@@ -527,16 +527,17 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_PUNCH = ACTIONS.register("crazy_diamond_punch", 
             () -> new StandEntityLightAttack(new StandEntityLightAttack.Builder()
-                    .modifyPunch(punch -> punch.setPunchSound(ModSounds.CRAZY_DIAMOND_PUNCH_LIGHT))));
+//                    .modifyPunch(punch -> punch.setPunchSound(ModSounds.CRAZY_DIAMOND_PUNCH_LIGHT))
+                    ));
     
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_BARRAGE = ACTIONS.register("crazy_diamond_barrage", 
             () -> new StandEntityMeleeBarrage(new StandEntityMeleeBarrage.Builder()
-                    .modifyPunch(punch -> punch.setPunchSound(ModSounds.CRAZY_DIAMOND_PUNCH_BARRAGE))
+//                    .modifyPunch(punch -> punch.setPunchSound(ModSounds.CRAZY_DIAMOND_PUNCH_BARRAGE))
                     .standSound(ModSounds.CRAZY_DIAMOND_DORARARA)));
     
     public static final RegistryObject<StandEntityComboHeavyAttack> CRAZY_DIAMOND_UPPERCUT = ACTIONS.register("crazy_diamond_uppercut", 
             () -> new StandEntityComboHeavyAttack(new StandEntityComboHeavyAttack.Builder()
-                    .modifyPunch(punch -> punch.setPunchSound(ModSounds.CRAZY_DIAMOND_PUNCH_HEAVY))
+//                    .modifyPunch(punch -> punch.setPunchSound(ModSounds.CRAZY_DIAMOND_PUNCH_HEAVY))
                     .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_DORA)
                     .partsRequired(StandPart.ARMS)));
     
