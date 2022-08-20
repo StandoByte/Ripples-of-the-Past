@@ -1,15 +1,18 @@
 package com.github.standobyte.jojo.action.stand;
 
+import java.util.function.UnaryOperator;
+
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.action.stand.punch.LightEntityPunch;
+import com.github.standobyte.jojo.action.stand.punch.PunchHandler;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
-import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 
@@ -19,9 +22,11 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
 
 public class StandEntityLightAttack extends StandEntityAction {
+    private final PunchHandler punch;
 
     public StandEntityLightAttack(StandEntityLightAttack.Builder builder) {
         super(builder);
+        this.punch = builder.punch.build();
     }
 
     @Override
@@ -39,7 +44,7 @@ public class StandEntityLightAttack extends StandEntityAction {
     
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-        standEntity.punch(this, getPunch(), task.getTarget());
+        standEntity.punch(task, punch, task.getTarget());
     }
     
     @Override
@@ -98,21 +103,23 @@ public class StandEntityLightAttack extends StandEntityAction {
     
     
     public static class Builder extends StandEntityAction.AbstractBuilder<StandEntityLightAttack.Builder>  {
+        private PunchHandler.Builder punch = new PunchHandler.Builder().setEntityPunch(LightEntityPunch::new);
     	
     	public Builder() {
-    		standAutoSummonMode(AutoSummonMode.ONE_ARM).staminaCost(10F).standUserSlowDownFactor(1.0F)
+            standAutoSummonMode(AutoSummonMode.ONE_ARM).staminaCost(10F).standUserSlowDownFactor(1.0F)
             .standOffsetFront().standOffsetFromUser(-0.75, 0.75)
-            .targetPunchProperties((punch, stand, target) -> {
-            	return punch.get()
-            			.damage(StandStatFormulas.getLightAttackDamage(stand.getAttackDamage()))
-                        .addKnockback(stand.guardCounter())
-                        .addCombo(0.15F)
-                        .parryTiming(stand.getComboMeter() == 0 ? StandStatFormulas.getParryTiming(stand.getPrecision()) : 0)
-                        .setPunchSound(ModSounds.STAND_LIGHT_ATTACK.get());
-            })
             .standPose(StandPose.LIGHT_ATTACK)
             .partsRequired(StandPart.ARMS);
     	}
+    	
+    	public Builder modifyPunch(UnaryOperator<PunchHandler.Builder> modifier) {
+    	    return setPunch(modifier.apply(punch));
+    	}
+        
+        public Builder setPunch(PunchHandler.Builder punch) {
+            this.punch = punch;
+            return getThis();
+        }
 
 		@Override
 		protected Builder getThis() {

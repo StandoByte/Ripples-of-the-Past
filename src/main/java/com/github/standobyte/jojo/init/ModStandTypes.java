@@ -121,15 +121,8 @@ public class ModStandTypes {
     
     public static final RegistryObject<StandType<StandStats>> SILVER_CHARIOT = STANDS.register("silver_chariot", 
             () -> new EntityStandType<>(0xBEC8D6, PART_3_NAME,
-                    new StandAction[] {
-                            ModActions.SILVER_CHARIOT_ATTACK.get(), 
-                            ModActions.SILVER_CHARIOT_BARRAGE.get(), 
-                            ModActions.SILVER_CHARIOT_RAPIER_LAUNCH.get()
-                            },
-                    new StandAction[] {
-                            ModActions.SILVER_CHARIOT_BLOCK.get(), 
-                            ModActions.SILVER_CHARIOT_TAKE_OFF_ARMOR.get()
-                            },
+                    new StandAction[] {ModActions.SILVER_CHARIOT_ATTACK.get(), ModActions.SILVER_CHARIOT_RAPIER_BARRAGE.get(), ModActions.SILVER_CHARIOT_RAPIER_LAUNCH.get()},
+                    new StandAction[] {ModActions.SILVER_CHARIOT_BLOCK.get(), ModActions.SILVER_CHARIOT_TAKE_OFF_ARMOR.get()},
                     StandStats.class, new StandStats.Builder()
                     .tier(5)
                     .power(9.0)

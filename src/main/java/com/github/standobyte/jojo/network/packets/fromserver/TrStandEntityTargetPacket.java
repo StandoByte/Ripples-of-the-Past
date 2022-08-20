@@ -33,6 +33,9 @@ public class TrStandEntityTargetPacket {
             Entity entity = ClientUtil.getEntityById(msg.standEntityId);
             if (entity instanceof StandEntity) {
                 StandEntity standEntity = (StandEntity) entity;
+                if (msg.target.getType() == ActionTarget.TargetType.ENTITY) {
+                    msg.target.resolveEntityId(ClientUtil.getClientWorld());
+                }
                 standEntity.setTaskTarget(msg.target);
             }
         });

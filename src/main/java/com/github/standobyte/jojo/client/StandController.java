@@ -33,7 +33,6 @@ import net.minecraft.network.play.client.CPlayerPacket;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
-import net.minecraft.util.HandSide;
 import net.minecraft.util.MovementInput;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;

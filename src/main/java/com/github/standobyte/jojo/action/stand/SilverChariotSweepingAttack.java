@@ -2,9 +2,9 @@ package com.github.standobyte.jojo.action.stand;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCFlameSwingEntity;
-import com.github.standobyte.jojo.entity.stand.StandAttackProperties;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
@@ -61,13 +61,11 @@ public class SilverChariotSweepingAttack extends StandEntityComboHeavyAttack {
     					Vector3d targetVec = targetEntity.position().subtract(standEntity.position()).normalize();
     					double cos = standLookVec.dot(targetVec);
     					if (cos > -0.5) {
-    						standEntity.attackEntity(targetEntity, getPunch().applyAfter((punch, stand, punchTarget) -> {
-    							StandAttackProperties slash = punch.get();
-    							if (cos < 0.5) {
-    								slash.damage(slash.getDamage() * 0.5F);
-    							}
-    							return slash;
-    						}).createPunch(StandAttackProperties::new, standEntity, targetEntity), this);
+    					    StandEntityPunch slash = punch.punchEntity(standEntity, targetEntity, standEntity.getDamageSource());
+                            if (cos < 0.5) {
+                                slash.damage(slash.getDamage() * 0.5F);
+                            }
+    					    standEntity.attackEntity(targetEntity, slash, task);
     					}
     				});
     	}

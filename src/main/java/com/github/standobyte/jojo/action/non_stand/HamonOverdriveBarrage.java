@@ -42,7 +42,7 @@ public class HamonOverdriveBarrage extends HamonAction {
             switch (target.getType()) {
             case BLOCK:
                 BlockPos pos = target.getBlockPos();
-                if (!world.isClientSide() && JojoModUtil.canEntityDestroy((ServerWorld) world, pos, user)) {
+                if (!world.isClientSide() && JojoModUtil.canEntityDestroy((ServerWorld) world, pos, world.getBlockState(pos), user)) {
                     if (!world.isEmptyBlock(pos)) {
                         BlockState blockState = world.getBlockState(pos);
                         float digDuration = blockState.getDestroySpeed(world, pos);

@@ -20,16 +20,15 @@ public class CrazyDiamondEntity extends StandEntity {
     }
 
     @Override
-    public boolean breakBlock(BlockPos blockPos, boolean canDropItems) {
+    public boolean breakBlock(BlockPos blockPos, BlockState blockState, boolean canDropItems) {
         if (!level.isClientSide()) {
-            BlockState blockState = level.getBlockState(blockPos);
             List<ItemStack> drops = Block.getDrops(blockState, (ServerWorld) level, blockPos, blockState.hasTileEntity() ? level.getBlockEntity(blockPos) : null);
-            if (super.breakBlock(blockPos, canDropItems)) {
+            if (super.breakBlock(blockPos, blockState, canDropItems)) {
                 CrazyDiamondRestorableBlocks.getRestorableBlocksEffect(getUserPower(), level).addBlock(level, blockPos, blockState, drops, true);
                 return true;
             }
             return false;
         }
-        return super.breakBlock(blockPos, canDropItems);
+        return super.breakBlock(blockPos, blockState, canDropItems);
     }
 }
