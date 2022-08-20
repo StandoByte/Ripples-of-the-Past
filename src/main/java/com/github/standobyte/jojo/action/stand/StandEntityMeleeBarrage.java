@@ -7,13 +7,14 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
-import com.github.standobyte.jojo.action.stand.punch.BarrageEntityPunch;
 import com.github.standobyte.jojo.action.stand.punch.PunchHandler;
+import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
@@ -50,19 +51,17 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
         }
         hitsPerSecond -= extraTickSwings * 20;
         
-        if (standEntity.barragePunchDelayed) {
-            standEntity.barragePunchDelayed = false;
+        if (standEntity.barrageHandler.popDelayedHit()) {
             hitsThisTick++;
         }
         else if (hitsPerSecond > 0) {
             double ticksInterval = 20D / hitsPerSecond;
             int intTicksInterval = (int) ticksInterval;
-            if ((getStandActionTicks(userPower, standEntity) - task.getTick() + standEntity.barrageDelayedPunches) % intTicksInterval == 0) {
+            if ((getStandActionTicks(userPower, standEntity) - task.getTick() + standEntity.barrageHandler.getHitsDelayed()) % intTicksInterval == 0) {
                 if (!world.isClientSide()) {
                     double delayProb = ticksInterval - intTicksInterval;
                     if (standEntity.getRandom().nextDouble() < delayProb) {
-                        standEntity.barragePunchDelayed = true;
-                        standEntity.barrageDelayedPunches++;
+                        standEntity.barrageHandler.delayHit();
                     }
                     else {
                         hitsThisTick++;
@@ -190,6 +189,44 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
         @Override
         protected Builder getThis() {
             return this;
+        }
+    }
+    
+    
+    
+    public static class BarrageEntityPunch extends StandEntityPunch {
+        private int barrageHits = 0;
+
+        public BarrageEntityPunch(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
+            super(stand, target, dmgSource);
+            this
+            .damage(StandStatFormulas.getBarrageHitDamage(stand.getAttackDamage(), stand.getPrecision()))
+            .addCombo(0.005F)
+            .reduceKnockback(0.1F)
+            .setPunchSound(ModSounds.STAND_BARRAGE_ATTACK);
+        }
+        
+        public BarrageEntityPunch barrageHits(StandEntity stand, int hits) {
+            this.barrageHits = hits;
+            damage(StandStatFormulas.getBarrageHitDamage(stand.getAttackDamage(), stand.getPrecision()) * hits);
+            return this;
+        }
+        
+        @Override
+        public boolean hit(StandEntity stand, StandEntityTask task) {
+            if (stand.level.isClientSide()) return false;
+            if (barrageHits > 0) {
+                dmgSource.setBarrageHitsCount(barrageHits);
+            }
+            return super.hit(stand, task);
+        }
+
+        @Override
+        protected void afterAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, StandEntityTask task, boolean hurt, boolean killed) {
+            if (hurt && dmgSource.getBarrageHitsCount() > 0) {
+                addCombo *= dmgSource.getBarrageHitsCount();
+            }
+            super.afterAttack(stand, target, dmgSource, task, hurt, killed);
         }
     }
 }

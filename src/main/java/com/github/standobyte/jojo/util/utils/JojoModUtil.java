@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -508,5 +509,13 @@ public class JojoModUtil {
     		return timesInt + 1;
     	}
     	return timesInt;
+    }
+
+    public static <T> void ifPresentOrElse(Optional<T> optional, Consumer<? super T> action, Runnable emptyAction) {
+        if (optional.isPresent()) {
+            action.accept(optional.get());
+        } else {
+            emptyAction.run();
+        }
     }
 }

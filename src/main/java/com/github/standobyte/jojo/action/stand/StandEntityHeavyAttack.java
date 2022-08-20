@@ -9,15 +9,18 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.action.stand.punch.HeavyEntityPunch;
 import com.github.standobyte.jojo.action.stand.punch.PunchHandler;
+import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
+import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.World;
 
@@ -125,5 +128,20 @@ public class StandEntityHeavyAttack extends StandEntityAction {
 		protected Builder getThis() {
 			return this;
 		}
+    }
+    
+    
+    
+    public static class HeavyEntityPunch extends StandEntityPunch {
+        
+        public HeavyEntityPunch(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
+            super(stand, target, dmgSource);
+            double strength = stand.getAttackDamage();
+            this
+            .damage(StandStatFormulas.getHeavyAttackDamage(strength))
+            .addKnockback(1 + (float) strength / 8)
+            .setStandInvulTime(10)
+            .setPunchSound(ModSounds.STAND_STRONG_ATTACK);
+        }
     }
 }
