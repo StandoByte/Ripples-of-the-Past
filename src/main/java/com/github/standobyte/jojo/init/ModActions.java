@@ -537,21 +537,22 @@ public class ModActions {
 //                    .modifyPunch(punch -> punch.setPunchSound(ModSounds.CRAZY_DIAMOND_PUNCH_BARRAGE))
                     .standSound(ModSounds.CRAZY_DIAMOND_DORARARA)));
     
-    public static final RegistryObject<StandEntityComboHeavyAttack> CRAZY_DIAMOND_UPPERCUT = ACTIONS.register("crazy_diamond_uppercut", 
-            () -> new StandEntityComboHeavyAttack(new StandEntityComboHeavyAttack.Builder()
-//                    .modifyPunch(punch -> punch.setPunchSound(ModSounds.CRAZY_DIAMOND_PUNCH_HEAVY))
-                    .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_DORA)
-                    .partsRequired(StandPart.ARMS)));
+    // FIXME !! (CD combo attack)
+//    public static final RegistryObject<StandEntityComboHeavyAttack> CRAZY_DIAMOND_UPPERCUT = ACTIONS.register("crazy_diamond_uppercut", 
+//            () -> new StandEntityComboHeavyAttack(new StandEntityComboHeavyAttack.Builder()
+////                    .modifyPunch(punch -> punch.setPunchSound(ModSounds.CRAZY_DIAMOND_PUNCH_HEAVY))
+//                    .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_DORA)
+//                    .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_HEAVY_PUNCH = ACTIONS.register("crazy_diamond_heavy_punch", 
             () -> new StandEntityHeavyAttack(new StandEntityHeavyAttack.Builder()
                     .modifyPunch(punch -> punch.setPunchSound(ModSounds.CRAZY_DIAMOND_PUNCH_HEAVY))
                     .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_DORA)
                     .partsRequired(StandPart.ARMS)
-                    .shiftVariationOf(CRAZY_DIAMOND_PUNCH).shiftVariationOf(CRAZY_DIAMOND_BARRAGE), CRAZY_DIAMOND_UPPERCUT));
+                    .shiftVariationOf(CRAZY_DIAMOND_PUNCH).shiftVariationOf(CRAZY_DIAMOND_BARRAGE), () -> null));
     
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_ITEM_PROJECTILE = ACTIONS.register("crazy_diamond_item_projectile", 
-            () -> new CrazyDiamondItemProjectile(new StandEntityAction.Builder().standWindupDuration(5)
+            () -> new CrazyDiamondItemProjectile(new StandEntityAction.Builder().standWindupDuration(15)
                     .resolveLevelToUnlock(4)
                     .standOffsetFromUser(0, -0.5)
                     .partsRequired(StandPart.ARMS)));
@@ -565,7 +566,7 @@ public class ModActions {
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_BLOCK = ACTIONS.register("crazy_diamond_block", 
             () -> new StandEntityBlock());
     
-    public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_REPAIR = ACTIONS.register("crazy_diamond_repair", 
+    public static final RegistryObject<CrazyDiamondRepairItem> CRAZY_DIAMOND_REPAIR = ACTIONS.register("crazy_diamond_repair", 
             () -> new CrazyDiamondRepairItem(new StandEntityAction.Builder().holdType()
                     .resolveLevelToUnlock(0).isTrained()
                     .partsRequired(StandPart.ARMS)));

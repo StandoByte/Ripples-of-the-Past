@@ -2,16 +2,26 @@ package com.github.standobyte.jojo.action.stand;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
+import java.util.function.Predicate;
+
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -19,10 +29,17 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.item.TNTEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.AbstractCookingRecipe;
+import net.minecraft.item.crafting.BlastingRecipe;
 import net.minecraft.item.crafting.ICraftingRecipe;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.item.crafting.SmithingRecipe;
+import net.minecraft.item.crafting.StonecuttingRecipe;
+import net.minecraft.util.Hand;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -37,10 +54,15 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
     public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, IStandPower standPower) {
         switch (target.getType()) {
         case BLOCK:
-//            if (standPower.getResolveLevel() >= 2) {
-//                // FIXME !! (prev state) block check
-//                return ActionConditionResult.POSITIVE;
-//            }
+            if (standPower.getResolveLevel() >= 2) {
+                BlockPos blockPos = target.getBlockPos();
+                BlockState blockState = user.level.getBlockState(blockPos);
+                ItemStack blockItem = new ItemStack(blockState.getBlock().asItem());
+                return ActionConditionResult.noMessage(convertTo(blockItem, user.level, recipe -> {
+                    ItemStack[] ingredients = getIngredients(recipe);
+                    return ingredients.length == 1 && !ingredients[0].isEmpty() && ingredients[0].getItem() instanceof BlockItem;
+                }, user.getRandom()).isPresent());
+            }
             return ActionConditionResult.NEGATIVE;
         case ENTITY:
             Entity targetEntity = target.getEntity();
@@ -52,13 +74,18 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                             || targetEntity.getType() == EntityType.WITHER && ((WitherEntity) targetEntity).getInvulnerableTicks() > 0))
                     ? ActionConditionResult.POSITIVE : conditionMessage("entity_revert");
         default:
-            // FIXME !! (prev state) offhand item check
             return ActionConditionResult.POSITIVE;
         }
     }
 
+    @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
-        return ActionConditionResult.POSITIVE;
+        if (target.getType() == TargetType.EMPTY) {
+            ItemStack heldItem = user.getOffhandItem();
+            if (heldItem.isEmpty()) return conditionMessage("item_offhand");
+            return convertTo(heldItem, user.level, null, user.getRandom()).isPresent() ? ActionConditionResult.POSITIVE : conditionMessage("item_revert");
+        }
+        return super.checkSpecificConditions(user, power, target);
     }
 
     // FIXME ! (prev state) CD restore sound
@@ -93,11 +120,13 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                     if (CrazyDiamondHeal.handleLivingEntity(world, (LivingEntity) targetEntity)) {
                         CrazyDiamondHeal.handle(world, targetEntity, targetEntity, 
                                 e -> {
-                                    BlockPos blockPos = e.blockPosition();
-                                    world.setBlockAndUpdate(blockPos.offset(0, 2, 0), Blocks.CARVED_PUMPKIN.defaultBlockState());
-                                    world.setBlockAndUpdate(blockPos, Blocks.SNOW_BLOCK.defaultBlockState());
-                                    world.setBlockAndUpdate(blockPos.offset(0, 1, 0), Blocks.SNOW_BLOCK.defaultBlockState());
-                                    e.remove();
+                                    if (standEntity.getRandom().nextFloat() < 0.1F) {
+                                        BlockPos blockPos = e.blockPosition();
+                                        world.setBlockAndUpdate(blockPos.offset(0, 2, 0), Blocks.CARVED_PUMPKIN.defaultBlockState());
+                                        world.setBlockAndUpdate(blockPos, Blocks.SNOW_BLOCK.defaultBlockState());
+                                        world.setBlockAndUpdate(blockPos.offset(0, 1, 0), Blocks.SNOW_BLOCK.defaultBlockState());
+                                        e.remove();
+                                    }
                                 }, e -> true);
                     }
                     return;
@@ -108,13 +137,15 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                         if (CrazyDiamondHeal.handleLivingEntity(world, (LivingEntity) targetEntity)) {
                             CrazyDiamondHeal.handle(world, targetEntity, targetEntity, 
                                     e -> {
-                                        BlockPos blockPos = e.blockPosition();
-                                        world.setBlockAndUpdate(blockPos, Blocks.IRON_BLOCK.defaultBlockState());
-                                        world.setBlockAndUpdate(blockPos.offset(0, 2, 0), Blocks.CARVED_PUMPKIN.defaultBlockState());
-                                        world.setBlockAndUpdate(blockPos.offset(0, 1, 0), Blocks.IRON_BLOCK.defaultBlockState());
-                                        world.setBlockAndUpdate(blockPos.offset(1, 1, 0), Blocks.IRON_BLOCK.defaultBlockState());
-                                        world.setBlockAndUpdate(blockPos.offset(-1, 1, 0), Blocks.IRON_BLOCK.defaultBlockState());
-                                        e.remove();
+                                        if (standEntity.getRandom().nextFloat() < 0.05F) {
+                                            BlockPos blockPos = e.blockPosition();
+                                            world.setBlockAndUpdate(blockPos, Blocks.IRON_BLOCK.defaultBlockState());
+                                            world.setBlockAndUpdate(blockPos.offset(0, 2, 0), Blocks.CARVED_PUMPKIN.defaultBlockState());
+                                            world.setBlockAndUpdate(blockPos.offset(0, 1, 0), Blocks.IRON_BLOCK.defaultBlockState());
+                                            world.setBlockAndUpdate(blockPos.offset(1, 1, 0), Blocks.IRON_BLOCK.defaultBlockState());
+                                            world.setBlockAndUpdate(blockPos.offset(-1, 1, 0), Blocks.IRON_BLOCK.defaultBlockState());
+                                            e.remove();
+                                        }
                                     }, e -> true);
                         }
                         return;
@@ -149,52 +180,82 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
             }
             break;
         case BLOCK:
-            if (userPower.getResolveLevel() >= 2) {
-                // FIXME !! (prev state) revert blocks (1 block to 1 block uncrafting)
-                // FIXME !! (prev state) particles
-
+            BlockPos blockPos = target.getBlockPos();
+            if (!world.isClientSide()) {
+                BlockState blockState = world.getBlockState(blockPos);
+                ItemStack blockItem = new ItemStack(blockState.getBlock().asItem());
+                convertTo(blockItem, world, recipe -> {
+                    ItemStack[] ingredients = getIngredients(recipe);
+                    return ingredients.length == 1 && !ingredients[0].isEmpty() && ingredients[0].getItem() instanceof BlockItem
+                            && ingredients[0].getCount() == recipe.getResultItem().getCount();
+                }, standEntity.getRandom()).ifPresent(oneItemArray -> {
+                    BlockItem item = (BlockItem) oneItemArray.getLeft()[0].getItem();
+                    world.setBlockAndUpdate(blockPos, item.getBlock().defaultBlockState());
+                });
+            }
+            else {
+                CrazyDiamondRestoreTerrain.addParticlesAroundBlock(world, blockPos, standEntity.getRandom());
             }
             break;
         default:
-            // FIXME !! (prev state) revert items (uncrafting)
-            // FIXME !! (prev state) particles
-            if (!world.isClientSide() && userPower.getUser() instanceof PlayerEntity) {
-                PlayerEntity player = (PlayerEntity) userPower.getUser();
-                ItemStack heldItem = player.getOffhandItem();
-                if (!heldItem.isEmpty()) {
-                    List<ICraftingRecipe> recipes = new ArrayList<>();
-                    for (IRecipe<?> recipe : world.getRecipeManager().getRecipes()) {
-                        if (recipe instanceof ICraftingRecipe && recipe.canCraftInDimensions(3, 3)
-                                && !recipe.getIngredients().isEmpty() && matches(heldItem, recipe.getResultItem())) {
-                            recipes.add((ICraftingRecipe) recipe);
-                        }
-                    }
-
-                    if (!recipes.isEmpty()) {
-                        ICraftingRecipe randomRecipe = recipes.get(player.getRandom().nextInt(recipes.size()));
-                        ItemStack[] ingredients = getIngredients(randomRecipe);
+            if (!world.isClientSide()) {
+                ItemStack heldItem = userPower.getUser().getOffhandItem();
+                if (ModActions.CRAZY_DIAMOND_REPAIR.get().repairTick(userPower.getUser(), heldItem, task.getTick()) == 0
+                        && userPower.getUser() instanceof PlayerEntity && task.getTick() % 10 == 9) {
+                    PlayerEntity player = (PlayerEntity) userPower.getUser();
+                    convertTo(heldItem, world, null, standEntity.getRandom()).ifPresent(itemsAndCount -> {
                         boolean gaveIngredients = false;
-                        for (ItemStack ingredient : ingredients) {
+                        for (ItemStack ingredient : itemsAndCount.getLeft()) {
                             if (!ingredient.isEmpty()) {
                                 JojoModUtil.giveItem(player, ingredient);
                                 gaveIngredients = true;
                             }
                         }
                         if (gaveIngredients) {
-                            heldItem.shrink(randomRecipe.getResultItem().getCount());
+                            heldItem.shrink(itemsAndCount.getRight());
                         }
-                    }
+                    });
                 }
+            }
+            else {
+                CustomParticlesHelper.createCDRestorationParticle(userPower.getUser(), Hand.OFF_HAND);
             }
             break;
         }
     }
+    
+    private Optional<Pair<ItemStack[], Integer>> convertTo(ItemStack item, World world, 
+            @Nullable Predicate<IRecipe<?>> additionalCondition, Random random) {
+        if (item.isEmpty()) return Optional.empty();
 
-    private static boolean matches(ItemStack input, ItemStack output) {
-        return input.getItem() == output.getItem() && input.getCount() >= output.getCount();
+        // FIXME !! (prev state) brewing recipes
+        return JojoModUtil.groupByPredicatesOrdered(
+                world.getRecipeManager().getRecipes().stream(), Util.make(new ArrayList<>(), list -> {
+                    // FIXME !! (prev state) netherite gear doesn't transform back
+                    list.add(recipe -> recipe instanceof SmithingRecipe);
+                    list.add(recipe -> recipe instanceof AbstractCookingRecipe);
+                    list.add(recipe -> recipe instanceof StonecuttingRecipe);
+                    list.add(recipe -> recipe instanceof ICraftingRecipe);
+                    list.add(recipe -> true);
+                }), recipe -> outputMatches(recipe, item) && !bannedItem(item, world) && (additionalCondition == null || additionalCondition.test(recipe)), false)
+        .values().stream().filter(list -> !list.isEmpty()).findFirst()
+        .flatMap(recipesOfPreferredType -> {
+            IRecipe<?> randomRecipe = recipesOfPreferredType.get(random.nextInt(recipesOfPreferredType.size()));
+            ItemStack[] ingredients = getIngredients(randomRecipe);
+            return Optional.of(Pair.of(ingredients, randomRecipe.getResultItem().getCount()));
+        });
+    }
+    
+    private boolean outputMatches(IRecipe<?> recipe, ItemStack stack) {
+        return recipe.getResultItem().getItem() == stack.getItem() && recipe.getResultItem().getCount() <= stack.getCount();
+    }
+    
+    private boolean bannedItem(ItemStack stack, World world) {
+        return world.getRecipeManager().getRecipes().stream().anyMatch(recipe -> 
+        recipe.getResultItem().getItem() == stack.getItem() && recipe instanceof BlastingRecipe);
     }
 
-    private ItemStack[] getIngredients(ICraftingRecipe recipe) {
+    private ItemStack[] getIngredients(IRecipe<?> recipe) {
         List<Ingredient> ingredients = recipe.getIngredients();
         ItemStack[] stacks = new ItemStack[ingredients.size()];
 

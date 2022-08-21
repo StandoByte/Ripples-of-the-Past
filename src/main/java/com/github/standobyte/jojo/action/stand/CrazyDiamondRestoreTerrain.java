@@ -24,7 +24,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 // FIXME ! (restore terrain) remember more block breaking instances
-// FIXME !! (restore terrain) blocks overlay
+// FIXME !!! (restore terrain) blocks overlay
 public class CrazyDiamondRestoreTerrain extends StandEntityAction {
     public static final int MANHATTAN_DIST = 8;
 
@@ -32,7 +32,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         super(builder);
     }
 
-    // FIXME ! (restore terrain) particles
+    // FIXME !!! (restore terrain) particles
     // FIXME ! (restore terrain) CD restoration sound
     @Override
     public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
@@ -50,7 +50,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
                 BlockPos blockPos = blockEntry.getKey();
                 boolean placedBlock = false;
 
-                // FIXME !!!! that thing
+                // FIXME ! that thing
                 if (player.abilities.instabuild) {
                     if (!world.isEmptyBlock(blockPos)) {
                         world.destroyBlock(blockPos, true);

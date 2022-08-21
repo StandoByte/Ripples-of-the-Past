@@ -1,13 +1,16 @@
 package com.github.standobyte.jojo.util.utils;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -67,6 +70,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.EntityRayTraceResult;
@@ -523,5 +527,25 @@ public class JojoModUtil {
         } else {
             emptyAction.run();
         }
+    }
+    
+    public static <T> LinkedHashMap<Predicate<T>, List<T>> groupByPredicatesOrdered(Stream<T> elements, List<Predicate<T>> predicates, 
+            @Nullable Predicate<T> commonCondition, boolean elementRepeats) {
+        LinkedHashMap<Predicate<T>, List<T>> map = Util.make(new LinkedHashMap<>(), m -> {
+            predicates.forEach(key -> m.put(key, new ArrayList<>()));
+        });
+        elements.forEach(element -> {
+            if (commonCondition == null || commonCondition.test(element)) {
+                for (Predicate<T> predicate : predicates) {
+                    if (predicate.test(element)) {
+                        map.get(predicate).add(element);
+                        if (!elementRepeats) {
+                            break;
+                        }
+                    }
+                }
+            }
+        });
+        return map;
     }
 }

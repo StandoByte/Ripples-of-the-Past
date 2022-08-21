@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.entity.damaging.projectile;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.github.standobyte.jojo.action.stand.CrazyDiamondHeal;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.network.NetworkUtil;
 
@@ -19,9 +20,8 @@ import net.minecraft.world.server.ServerWorld;
 public class CDItemProjectileEntity extends ModdedProjectileEntity {
     private Block block;
     private ResourceLocation blockTex = new ResourceLocation("textures/block/glass.png");
-    // FIXME !! (item projectile) target
     // FIXME ! (item projectile) CD restore sound
-    private Optional<Entity> homingTarget;
+    private Optional<Entity> homingTarget = Optional.empty();
     
     public CDItemProjectileEntity(LivingEntity shooter, World world) {
         super(ModEntityTypes.CD_ITEM_PROJECTILE.get(), shooter, world);
@@ -57,8 +57,25 @@ public class CDItemProjectileEntity extends ModdedProjectileEntity {
     }
 
     @Override
+    protected void moveProjectile() {
+        super.moveProjectile();
+        homingTarget.ifPresent(target -> {
+            if (!target.isAlive()) {
+                homingTarget = Optional.empty();
+            }
+            else if ((tickCount >= 8 || target.distanceToSqr(this) < 36)) {
+                // FIXME !!! (item projectile) use energy
+                setDeltaMovement(target.getBoundingBox().getCenter().subtract(this.position())
+                        .normalize().scale(this.getDeltaMovement().length()));
+                if (level.isClientSide()) {
+                    CrazyDiamondHeal.addParticlesAround(this);
+                }
+            }
+        });
+    }
+
+    @Override
     protected float getBaseDamage() {
-     // FIXME !! (item projectile) projectile damage
         return 8;
     }
 
@@ -95,12 +112,14 @@ public class CDItemProjectileEntity extends ModdedProjectileEntity {
             setTarget(((ServerWorld) level).getEntity(targetUUID));
         }
         super.writeSpawnData(buffer);
-        NetworkUtil.writeOptional(buffer, block, () -> buffer.writeRegistryId(block));
+        NetworkUtil.writeOptional(buffer, block, bl -> buffer.writeRegistryId(bl));
+        NetworkUtil.writeOptional(buffer, homingTarget.map(target -> target.getId()).orElse(null), id -> buffer.writeInt(id));
     }
 
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
         super.readSpawnData(additionalData);
-        setBlock(NetworkUtil.readOptional(additionalData, () -> additionalData.readRegistryIdSafe(Block.class)));
+        NetworkUtil.readOptional(additionalData, () -> additionalData.readRegistryIdSafe(Block.class)).ifPresent(block -> setBlock(block));
+        NetworkUtil.readOptional(additionalData, () -> additionalData.readInt()).ifPresent(id -> setTarget(level.getEntity(id)));
     }
 }

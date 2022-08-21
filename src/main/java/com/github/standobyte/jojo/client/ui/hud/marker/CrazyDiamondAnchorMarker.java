@@ -27,7 +27,7 @@ public class CrazyDiamondAnchorMarker extends MarkerRenderer {
     }
 
     @Override
-    protected void updatePositions(List<Vector3d> list, float partialTick) {
-        CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(mc.level, mc.player.getOffhandItem()).ifPresent(pos -> list.add(Vector3d.atCenterOf(pos)));
+    protected void updatePositions(List<MarkerInstance> list, float partialTick) {
+        CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(mc.level, mc.player.getOffhandItem()).ifPresent(pos -> list.add(new MarkerInstance(Vector3d.atCenterOf(pos), false)));
     }
 }

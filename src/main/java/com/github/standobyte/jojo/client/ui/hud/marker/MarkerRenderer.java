@@ -22,10 +22,11 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 public abstract class MarkerRenderer {
     private static final ResourceLocation MARKER_OUTLINE = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/marker.png");
+    private static final ResourceLocation MARKER_OUTLINE_OUTLINE = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/marker_outline.png");
     
     private final int color;
     private final ResourceLocation iconTexture;
-    private final List<Vector3d> positions = new ArrayList<>();
+    private final List<MarkerInstance> positions = new ArrayList<>();
     protected final Minecraft mc;
     
     public MarkerRenderer(int color, ResourceLocation iconTexture, Minecraft mc) {
@@ -42,15 +43,15 @@ public abstract class MarkerRenderer {
             float[] rgb = ClientUtil.rgb(getColor());
             positions.clear();
             updatePositions(positions, partialTick);
-            positions.forEach(pos -> {
-                renderAt(pos, matrixStack, camera, partialTick, rgb);
+            positions.forEach(marker -> {
+                renderAt(marker.getPos(), matrixStack, camera, partialTick, rgb, marker.isOutlined());
             });
             
             matrixStack.popPose();
         }
     }
     
-    protected void renderAt(Vector3d worldPos, MatrixStack matrixStack, ActiveRenderInfo camera, float partialTick, float[] rgb) {
+    protected void renderAt(Vector3d worldPos, MatrixStack matrixStack, ActiveRenderInfo camera, float partialTick, float[] rgb, boolean outline) {
         matrixStack.pushPose();
         Vector3d diff = worldPos.subtract(camera.getPosition())
                 .yRot(camera.getYRot() * MathUtil.DEG_TO_RAD)
@@ -71,12 +72,16 @@ public abstract class MarkerRenderer {
         mc.getTextureManager().bind(MARKER_OUTLINE);
         AbstractGui.blit(matrixStack, -16, -32, 0, 0, 32, 32, 32, 32);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        if (outline) {
+            mc.getTextureManager().bind(MARKER_OUTLINE_OUTLINE);
+            AbstractGui.blit(matrixStack, -16, -32, 0, 0, 32, 32, 32, 32);
+        }
 
         matrixStack.popPose();
     }
     
     protected abstract boolean shouldRender();
-    protected abstract void updatePositions(List<Vector3d> list, float partialTick);
+    protected abstract void updatePositions(List<MarkerInstance> list, float partialTick);
     
     protected int getColor() {
         return color;
@@ -105,6 +110,26 @@ public abstract class MarkerRenderer {
                 
                 RenderSystem.enableDepthTest();
             }
+        }
+    }
+    
+    
+    
+    protected static class MarkerInstance {
+        private final Vector3d pos;
+        private final boolean outlined;
+        
+        protected MarkerInstance(Vector3d pos, boolean outlined) {
+            this.pos = pos;
+            this.outlined = outlined;
+        }
+        
+        protected Vector3d getPos() {
+            return pos;
+        }
+        
+        protected boolean isOutlined() {
+            return outlined;
         }
     }
 }

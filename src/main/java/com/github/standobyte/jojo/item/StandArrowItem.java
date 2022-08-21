@@ -57,6 +57,7 @@ public class StandArrowItem extends ArrowItem {
     public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         ItemStack stack = player.getItemInHand(hand);
         if (onPiercedByArrow(player, stack, world)) {
+            stack.hurtAndBreak(1, player, pl -> {});
             return ActionResult.success(stack);
         }
         return ActionResult.fail(stack);
@@ -76,7 +77,6 @@ public class StandArrowItem extends ArrowItem {
             }
             boolean wasStandUser = standPower.map(stand -> stand.hasPower() || stand.getUserTier() > 0).orElse(false);
             DamageUtil.hurtThroughInvulTicks(livingEntity, DamageUtil.STAND_VIRUS, getVirusDamage(stack, livingEntity, !wasStandUser));
-            stack.hurtAndBreak(1, livingEntity, pl -> {});
             if (!livingEntity.isAlive()) {
                 return false;
             }
