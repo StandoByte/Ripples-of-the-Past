@@ -26,6 +26,7 @@ public abstract class StandEffectInstance {
     private boolean toBeRemoved = false;
     
     protected LivingEntity user;
+    protected World world;
     protected IStandPower userPower;
     private UUID targetUUID;
     private LivingEntity target;
@@ -37,12 +38,14 @@ public abstract class StandEffectInstance {
     
     public StandEffectInstance withUser(LivingEntity user) {
         this.user = user;
+        this.world = user.level;
         this.userPower = IStandPower.getStandPowerOptional(user).orElse(null);
         return this;
     }
     
     public StandEffectInstance withStand(IStandPower stand) {
         this.user = stand.getUser();
+        this.world = user.level;
         this.userPower = stand;
         return this;
     }
@@ -77,7 +80,6 @@ public abstract class StandEffectInstance {
     public void onTick() {
         tickCount++;
 
-        World world = user.level;
         updateTarget(world);
         if (targetUUID != null && target != null) {
             if (!keepTarget(target)) {

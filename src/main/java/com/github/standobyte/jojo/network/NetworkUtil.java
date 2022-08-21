@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -147,14 +149,14 @@ public class NetworkUtil {
         }
     }
     
-    public static <T> void writeOptional(PacketBuffer buf, T obj, Runnable write) {
+    public static <T> void writeOptional(PacketBuffer buf, T obj, Consumer<T> write) {
         buf.writeBoolean(obj != null);
         if (obj != null) {
-            write.run();
+            write.accept(obj);
         }
     }
     
-    public static <T> T readOptional(PacketBuffer buf, Supplier<T> read) {
-        return buf.readBoolean() ? read.get() : null;
+    public static <T> Optional<T> readOptional(PacketBuffer buf, Supplier<T> read) {
+        return buf.readBoolean() ? Optional.of(read.get()) : Optional.empty();
     }
 }

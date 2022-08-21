@@ -163,7 +163,7 @@ public class ClientEventHandler {
             }
         }
 
-        // FIXME !!!!!!!!!! reset the glowing flag after outline is no longer needed
+        // FIXME (!) reset the glowing flag after outline is no longer needed
         int outlineColor = outlineColor(entity);
         if (outlineColor > 0) {
             entity.setGlowing(true);

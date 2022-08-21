@@ -286,7 +286,7 @@ public class JojoModConfig {
         }
         
         public boolean isStandBanned(StandType<?> stand) {
-            // FIXME (!!!!) temporary
+            // FIXME (!!!) temporary
             if (stand == ModStandTypes.BOY_II_MAN.get()) return true;
             return bannedStandsResLocs.contains(stand.getRegistryName());
         }

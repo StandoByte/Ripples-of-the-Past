@@ -149,6 +149,19 @@ public class ActionTarget {
         }
     }
     
+    public static ActionTarget readFromBuf(PacketBuffer buf, World clientWorld) {
+        ActionTarget target = readFromBuf(buf);
+        return target.resolveEntityId(clientWorld);
+    }
+    
+    public ActionTarget resolveEntityId(World world) {
+        if (getType() == TargetType.ENTITY) {
+            this.entity = world.getEntity(entityId);
+            return this.entity != null ? this : ActionTarget.EMPTY;
+        }
+        return this;
+    }
+    
     public ActionTarget copy() {
         switch (type) {
         case EMPTY:
@@ -169,10 +182,6 @@ public class ActionTarget {
         this.entity = null;
         this.entityId = entityIdOnly;
         this.targetPos = null;
-    }
-    
-    public void resolveEntityId(World world) {
-        this.entity = world.getEntity(entityId);
     }
     
     @Override

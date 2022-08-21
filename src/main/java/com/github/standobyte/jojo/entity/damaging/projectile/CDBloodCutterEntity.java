@@ -41,12 +41,13 @@ public class CDBloodCutterEntity extends ModdedProjectileEntity {
     }
     
     private void splashBlood() {
+        if (isInWaterOrBubble()) return;
         if (!level.isClientSide()) {
             IStandPower.getStandPowerOptional(getOwner()).ifPresent(stand -> {
-                level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(8), 
+                level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(4), 
                         EntityPredicates.ENTITY_STILL_ALIVE.and(EntityPredicates.NO_SPECTATORS).and(
                                 entity -> !entity.is(stand.getUser()) && entity != stand.getStandManifestation()
-                                        // FIXME !! (blood cutter) && isn't behind blocks
+                                        // FIXME !!! (blood cutter) && isn't behind blocks
                                 && entity.getBoundingBox().clip(this.getBoundingBox().getCenter(), entity.getBoundingBox().getCenter()).isPresent()))
                 .forEach(entity -> {
                     stand.getContinuousEffects().getOrCreateEffect(ModStandEffects.DRIED_BLOOD_DROPS.get(), entity);
@@ -55,7 +56,7 @@ public class CDBloodCutterEntity extends ModdedProjectileEntity {
         }
         else {
             level.playLocalSound(getX(), getY(), getZ(), ModSounds.WATER_SPLASH.get(), getSoundSource(), 1.0F, 1.0F, false);
-            // FIXME !! (blood cutter) blood particles
+            // FIXME !!! (blood cutter) blood particles
         }
     }
     

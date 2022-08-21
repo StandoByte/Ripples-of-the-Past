@@ -1,11 +1,13 @@
 package com.github.standobyte.jojo.client.ui.hud.marker;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.action.stand.CrazyDiamondItemProjectile;
+import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.ModActions;
-import com.github.standobyte.jojo.init.ModStandEffects;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -13,7 +15,6 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3d;
 
 public class CrazyDiamondBloodHomingMarker extends MarkerRenderer {
     
@@ -23,18 +24,18 @@ public class CrazyDiamondBloodHomingMarker extends MarkerRenderer {
     
     @Override
     protected boolean shouldRender() {
-        return ActionsOverlayGui.getInstance().getSelectedAction(ActionType.ATTACK) == ModActions.CRAZY_DIAMOND_ITEM_PROJECTILE.get();
+        return ActionsOverlayGui.getInstance().getSelectedAction(ActionType.ATTACK) == ModActions.CRAZY_DIAMOND_ITEM_PROJECTILE.get()
+                && !mc.player.isShiftKeyDown();
     }
 
     @Override
-    protected void updatePositions(List<Vector3d> list, float partialTick) {
+    protected void updatePositions(List<MarkerInstance> list, float partialTick) {
         IStandPower.getStandPowerOptional(mc.player).ifPresent(stand -> {
-            stand.getContinuousEffects().getEffects(effect -> effect.effectType == ModStandEffects.DRIED_BLOOD_DROPS.get())
-            .forEach(effect -> {
+            Optional<StandEffectInstance> outlined = CrazyDiamondItemProjectile.getTarget(CrazyDiamondItemProjectile.targets(stand), mc.player);
+            CrazyDiamondItemProjectile.targets(stand).forEach(effect -> {
                 LivingEntity target = effect.getTarget();
-                if (target != null) {
-                    list.add(target.getPosition(partialTick).add(0, target.getBbHeight() * 1.1, 0));
-                }
+                list.add(new MarkerInstance(target.getPosition(partialTick).add(0, target.getBbHeight() * 1.1, 0), 
+                        outlined.map(outlinedEffect -> effect == outlinedEffect).orElse(false)));
             });
         });
     }

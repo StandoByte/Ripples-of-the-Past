@@ -64,7 +64,6 @@ public class StandEffectsTracker {
         while (it.hasNext()) {
             StandEffectInstance effect = it.next().getValue();
             if (!effect.toBeRemoved()) {
-                effect.tickCount++;
                 effect.onTick();
             }
             if (effect.toBeRemoved()) {
@@ -111,8 +110,7 @@ public class StandEffectsTracker {
         instance.onStop();
         LivingEntity user = standPower.getUser();
         if (!user.level.isClientSide()) {
-            PacketManager.sendToClientsTrackingAndSelf(TrStandEffectPacket.remove(
-                    instance.withId(EFFECTS_COUNTER.incrementAndGet())), user);
+            PacketManager.sendToClientsTrackingAndSelf(TrStandEffectPacket.remove(instance), user);
         }
     }
 
