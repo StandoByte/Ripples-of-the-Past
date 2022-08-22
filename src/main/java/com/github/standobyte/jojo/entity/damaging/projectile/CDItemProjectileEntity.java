@@ -76,7 +76,7 @@ public class CDItemProjectileEntity extends ModdedProjectileEntity {
 
     @Override
     protected float getBaseDamage() {
-        return 8;
+        return 6;
     }
 
     @Override

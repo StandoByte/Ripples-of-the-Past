@@ -145,7 +145,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     public float getStaminaRegen(IStandPower power) {
-        return 2.5F;
+        return 3F;
     }
     
     public boolean usesResolve() {

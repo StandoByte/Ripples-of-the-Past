@@ -99,7 +99,7 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
         itemStack.removeTagKey("Enchantments");
         itemStack.removeTagKey("StoredEnchantments");
         damage = Math.min(itemStack.getDamageValue(), 50);
-        itemStack.setDamageValue(itemStack.getDamageValue() - 50);
+        itemStack.setDamageValue(itemStack.getDamageValue() - damage);
         itemStack.setRepairCost(0);
         
         return (float) damage * 0.0001F;

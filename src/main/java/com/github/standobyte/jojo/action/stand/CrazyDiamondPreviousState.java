@@ -110,7 +110,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                                     }
                                     BlockPos blockPos = e.blockPosition();
                                     e.remove();
-                                    world.setBlockAndUpdate(blockPos, tntBlock.defaultBlockState());
+                                    CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos, tntBlock.defaultBlockState());
                                 }, e -> true);
                     }
                     return;
@@ -122,9 +122,9 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                                 e -> {
                                     if (standEntity.getRandom().nextFloat() < 0.1F) {
                                         BlockPos blockPos = e.blockPosition();
-                                        world.setBlockAndUpdate(blockPos.offset(0, 2, 0), Blocks.CARVED_PUMPKIN.defaultBlockState());
-                                        world.setBlockAndUpdate(blockPos, Blocks.SNOW_BLOCK.defaultBlockState());
-                                        world.setBlockAndUpdate(blockPos.offset(0, 1, 0), Blocks.SNOW_BLOCK.defaultBlockState());
+                                        CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(0, 2, 0), Blocks.CARVED_PUMPKIN.defaultBlockState());
+                                        CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos, Blocks.SNOW_BLOCK.defaultBlockState());
+                                        CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(0, 1, 0), Blocks.SNOW_BLOCK.defaultBlockState());
                                         e.remove();
                                     }
                                 }, e -> true);
@@ -139,11 +139,11 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                                     e -> {
                                         if (standEntity.getRandom().nextFloat() < 0.05F) {
                                             BlockPos blockPos = e.blockPosition();
-                                            world.setBlockAndUpdate(blockPos, Blocks.IRON_BLOCK.defaultBlockState());
-                                            world.setBlockAndUpdate(blockPos.offset(0, 2, 0), Blocks.CARVED_PUMPKIN.defaultBlockState());
-                                            world.setBlockAndUpdate(blockPos.offset(0, 1, 0), Blocks.IRON_BLOCK.defaultBlockState());
-                                            world.setBlockAndUpdate(blockPos.offset(1, 1, 0), Blocks.IRON_BLOCK.defaultBlockState());
-                                            world.setBlockAndUpdate(blockPos.offset(-1, 1, 0), Blocks.IRON_BLOCK.defaultBlockState());
+                                            CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos, Blocks.IRON_BLOCK.defaultBlockState());
+                                            CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(0, 2, 0), Blocks.CARVED_PUMPKIN.defaultBlockState());
+                                            CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(0, 1, 0), Blocks.IRON_BLOCK.defaultBlockState());
+                                            CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(1, 1, 0), Blocks.IRON_BLOCK.defaultBlockState());
+                                            CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(-1, 1, 0), Blocks.IRON_BLOCK.defaultBlockState());
                                             e.remove();
                                         }
                                     }, e -> true);
@@ -164,13 +164,13 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                                 CrazyDiamondHeal.handle(world, targetEntity, targetEntity, 
                                         w -> {
                                             BlockPos blockPos = w.blockPosition();
-                                            world.setBlockAndUpdate(blockPos.offset(0, 2, 0), Blocks.WITHER_SKELETON_SKULL.defaultBlockState());
-                                            world.setBlockAndUpdate(blockPos.offset(1, 2, 0), Blocks.WITHER_SKELETON_SKULL.defaultBlockState());
-                                            world.setBlockAndUpdate(blockPos.offset(-1, 2, 0), Blocks.WITHER_SKELETON_SKULL.defaultBlockState());
-                                            world.setBlockAndUpdate(blockPos, Blocks.SOUL_SAND.defaultBlockState());
-                                            world.setBlockAndUpdate(blockPos.offset(0, 1, 0), Blocks.SOUL_SAND.defaultBlockState());
-                                            world.setBlockAndUpdate(blockPos.offset(1, 1, 0), Blocks.SOUL_SAND.defaultBlockState());
-                                            world.setBlockAndUpdate(blockPos.offset(-1, 1, 0), Blocks.SOUL_SAND.defaultBlockState());
+                                            CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(0, 2, 0), Blocks.WITHER_SKELETON_SKULL.defaultBlockState());
+                                            CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(1, 2, 0), Blocks.WITHER_SKELETON_SKULL.defaultBlockState());
+                                            CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(-1, 2, 0), Blocks.WITHER_SKELETON_SKULL.defaultBlockState());
+                                            CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos, Blocks.SOUL_SAND.defaultBlockState());
+                                            CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(0, 1, 0), Blocks.SOUL_SAND.defaultBlockState());
+                                            CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(1, 1, 0), Blocks.SOUL_SAND.defaultBlockState());
+                                            CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(-1, 1, 0), Blocks.SOUL_SAND.defaultBlockState());
                                             w.remove();
                                         }, e -> true);
                             }

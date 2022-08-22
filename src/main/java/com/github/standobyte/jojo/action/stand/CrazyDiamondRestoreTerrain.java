@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -39,7 +40,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         if (!world.isClientSide()) {
             CrazyDiamondRestorableBlocks blocks = CrazyDiamondRestorableBlocks.getRestorableBlocksEffect(userPower, world);
             PlayerEntity player = (PlayerEntity) userPower.getUser();
-            Map<BlockPos, PrevBlockInfo> map = blocks.getBlocksAround(player.blockPosition(), MANHATTAN_DIST)
+            Map<BlockPos, PrevBlockInfo> map = blocks.getBlocksAround(standEntity.isFollowingUser() ? player.blockPosition() : standEntity.blockPosition(), MANHATTAN_DIST)
                     .filter(entry -> !player.getBoundingBox().intersects(new AxisAlignedBB(entry.getKey())))
                     .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
             List<ItemEntity> itemsAround = world.getEntitiesOfClass(ItemEntity.class, player.getBoundingBox().inflate(MANHATTAN_DIST));
@@ -50,12 +51,9 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
                 BlockPos blockPos = blockEntry.getKey();
                 boolean placedBlock = false;
 
-                // FIXME ! that thing
+                // FIXME !!!! that thing
                 if (player.abilities.instabuild) {
-                    if (!world.isEmptyBlock(blockPos)) {
-                        world.destroyBlock(blockPos, true);
-                    }
-                    world.setBlockAndUpdate(blockPos, blockEntry.getValue().state);
+                    replaceBlock(world, blockPos, blockEntry.getValue().state);
                     placed.add(blockPos);
                     ++blocksPlaced;
                     placedBlock = true;
@@ -73,10 +71,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
                                 lyingItem.remove();
                                 it.remove();
                             }
-                            if (!world.isEmptyBlock(blockPos)) {
-                                world.destroyBlock(blockPos, true);
-                            }
-                            world.setBlockAndUpdate(blockPos, blockEntry.getValue().state);
+                            replaceBlock(world, blockPos, blockEntry.getValue().state);
                             placed.add(blockPos);
                             ++blocksPlaced;
                             placedBlock = true;
@@ -89,10 +84,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
                     for (int slot = 0; slot < player.inventory.getContainerSize(); ++slot) {
                         ItemStack inventoryItem = player.inventory.getItem(slot);
                         if (consumeFromItemStack(inventoryItem, itemNeeded)) {
-                            if (!world.isEmptyBlock(blockPos)) {
-                                world.destroyBlock(blockPos, true);
-                            }
-                            world.setBlockAndUpdate(blockPos, blockEntry.getValue().state);
+                            replaceBlock(world, blockPos, blockEntry.getValue().state);
                             placed.add(blockPos);
                             ++blocksPlaced;
                             placedBlock = true;
@@ -111,9 +103,18 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         }
     }
     
+    public static void replaceBlock(World world, BlockPos pos, BlockState state) {
+        if (!world.isClientSide() && world.getBlockState(pos).getDestroySpeed(world, pos) >= 0) {
+            if (!world.isEmptyBlock(pos)) {
+                world.destroyBlock(pos, true);
+            }
+            world.setBlockAndUpdate(pos, state);
+        }
+    }
+    
     private boolean consumeFromItemStack(ItemStack itemStack, ItemStack itemNeeded) {
-        if (ItemStack.isSame(itemStack, itemNeeded)) {
-            itemStack.shrink(1);
+        if (ItemStack.isSame(itemStack, itemNeeded) && itemStack.getCount() <= itemNeeded.getCount()) {
+            itemStack.shrink(itemNeeded.getCount());
             return true;
         }
         return false;
