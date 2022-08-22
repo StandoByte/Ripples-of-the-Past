@@ -662,15 +662,17 @@ public class GameplayEventHandler {
         }
         if (entity instanceof PlayerEntity) {
             PlayerEntity player = (PlayerEntity) entity;
-            INonStandPower power = INonStandPower.getPlayerNonStandPower(player);
             VampirismPowerType vampirism = ModNonStandPowers.VAMPIRISM.get();
-            if (power.getTypeSpecificData(vampirism).map(vamp -> !vamp.isVampireAtFullPower()).orElse(false) || power.givePower(vampirism)) {
-                entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.STONE_MASK_ACTIVATION_ENTITY.get(), entity.getSoundSource(), 1.0F, 1.0F);
-                power.getTypeSpecificData(vampirism).get().setVampireFullPower(true);
-                StoneMaskItem.setActivatedArmorTexture(headStack); // TODO light beams on stone mask activation
-                headStack.hurtAndBreak(1, entity, stack -> {});
-                return true;
-            }
+            return INonStandPower.getNonStandPowerOptional(player).map(power -> {
+                if (power.getTypeSpecificData(vampirism).map(vamp -> !vamp.isVampireAtFullPower()).orElse(false) || power.givePower(vampirism)) {
+                    entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.STONE_MASK_ACTIVATION_ENTITY.get(), entity.getSoundSource(), 1.0F, 1.0F);
+                    power.getTypeSpecificData(vampirism).get().setVampireFullPower(true);
+                    StoneMaskItem.setActivatedArmorTexture(headStack); // TODO light beams on stone mask activation
+                    headStack.hurtAndBreak(1, entity, stack -> {});
+                    return true;
+                }
+                return false;
+            }).orElse(false);
         }
         return false;
     }
@@ -760,9 +762,10 @@ public class GameplayEventHandler {
             Entity target = event.getTarget();
             if (target instanceof PlayerEntity) {
                 PlayerEntity targetPlayer = (PlayerEntity) target;
-                INonStandPower targetPower = INonStandPower.getPlayerNonStandPower(targetPlayer);
-                INonStandPower playerPower = INonStandPower.getPlayerNonStandPower(event.getPlayer());
-                if (targetPower.getType() == ModNonStandPowers.HAMON.get()
+                INonStandPower targetPower = INonStandPower.getNonStandPowerOptional(targetPlayer).orElse(null);
+                INonStandPower playerPower = INonStandPower.getNonStandPowerOptional(event.getPlayer()).orElse(null);
+                if (targetPower != null && playerPower != null && 
+                        targetPower.getType() == ModNonStandPowers.HAMON.get()
                         && (!playerPower.hasPower() || playerPower.getType().isReplaceableWith(ModNonStandPowers.HAMON.get()))) {
                     HamonPowerType.interactWithHamonTeacher(target.level, event.getPlayer(), targetPlayer, 
                             targetPower.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get());
@@ -789,15 +792,16 @@ public class GameplayEventHandler {
                 BlockPos pos = event.getHitVec().getBlockPos();
                 BlockState blockState = world.getBlockState(pos);
                 if (blockState.getBlock() == Blocks.TRIPWIRE) {
-                    INonStandPower power = INonStandPower.getPlayerNonStandPower(event.getPlayer());
-                    power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
-                        if (hamon.isSkillLearned(HamonSkill.ROPE_TRAP)) {
-                            event.setCanceled(true);
-                            event.setCancellationResult(ActionResultType.SUCCESS);
-                            if (!world.isClientSide()) {
-                                HamonPowerType.ropeTrap(player, pos, blockState, world, power, hamon);
+                    INonStandPower.getNonStandPowerOptional(event.getPlayer()).ifPresent(power -> {
+                        power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
+                            if (hamon.isSkillLearned(HamonSkill.ROPE_TRAP)) {
+                                event.setCanceled(true);
+                                event.setCancellationResult(ActionResultType.SUCCESS);
+                                if (!world.isClientSide()) {
+                                    HamonPowerType.ropeTrap(player, pos, blockState, world, power, hamon);
+                                }
                             }
-                        }
+                        });
                     });
                 }
             }
@@ -814,21 +818,22 @@ public class GameplayEventHandler {
                 BlockPos pos = event.getHitVec().getBlockPos();
                 BlockState blockState = world.getBlockState(pos);
                 if (blockState.getBlock() instanceof AbstractFurnaceBlock) {
-                    IStandPower power = IStandPower.getPlayerStandPower(event.getPlayer());
-                    if (power.isActive() && power.getType() == ModStandTypes.MAGICIANS_RED.get()) {
-                        TileEntity tileEntity = world.getBlockEntity(pos);
-                        if (tileEntity instanceof AbstractFurnaceTileEntity) {
-                            AbstractFurnaceTileEntity furnace = (AbstractFurnaceTileEntity) tileEntity;
-                            int timeLeft = CommonReflection.getFurnaceLitTime(furnace);
-                            if (timeLeft < LIT_TICKS) {
-                                CommonReflection.setFurnaceLitTime(furnace, LIT_TICKS);
-                                CommonReflection.setFurnaceLitDuration(furnace, LIT_TICKS);
-                                StandEntity magiciansRed = (StandEntity) power.getStandManifestation();
-                                magiciansRed.playSound(ModSounds.MAGICIANS_RED_FIRE_BLAST.get(), 1.0F, 1.0F, player);
-                                world.setBlock(pos, blockState.setValue(AbstractFurnaceBlock.LIT, true), 3);
+                    IStandPower.getStandPowerOptional(event.getPlayer()).ifPresent(power -> {
+                        if (power.isActive() && power.getType() == ModStandTypes.MAGICIANS_RED.get()) {
+                            TileEntity tileEntity = world.getBlockEntity(pos);
+                            if (tileEntity instanceof AbstractFurnaceTileEntity) {
+                                AbstractFurnaceTileEntity furnace = (AbstractFurnaceTileEntity) tileEntity;
+                                int timeLeft = CommonReflection.getFurnaceLitTime(furnace);
+                                if (timeLeft < LIT_TICKS) {
+                                    CommonReflection.setFurnaceLitTime(furnace, LIT_TICKS);
+                                    CommonReflection.setFurnaceLitDuration(furnace, LIT_TICKS);
+                                    StandEntity magiciansRed = (StandEntity) power.getStandManifestation();
+                                    magiciansRed.playSound(ModSounds.MAGICIANS_RED_FIRE_BLAST.get(), 1.0F, 1.0F, player);
+                                    world.setBlock(pos, blockState.setValue(AbstractFurnaceBlock.LIT, true), 3);
+                                }
                             }
                         }
-                    }
+                    });
                 }
             }
         }
@@ -1137,10 +1142,11 @@ public class GameplayEventHandler {
     @SubscribeEvent
     public static void onWakeUp(PlayerWakeUpEvent event) {
         if (!event.wakeImmediately() && !event.updateWorld()) {
-            IStandPower stand = IStandPower.getPlayerStandPower(event.getPlayer());
-            if (stand.hasPower()) {
-                stand.setStamina(stand.getMaxStamina());
-            }
+            IStandPower.getStandPowerOptional(event.getPlayer()).ifPresent(stand -> {
+                if (stand.hasPower()) {
+                    stand.setStamina(stand.getMaxStamina());
+                }
+            });
         }
     }
 }
