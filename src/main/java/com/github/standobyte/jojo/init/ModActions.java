@@ -298,7 +298,7 @@ public class ModActions {
             () -> new StandEntityComboHeavyAttack(new StandEntityComboHeavyAttack.Builder()
                     .modifyPunch(punch -> punch
                             .modifyEntityPunch(kick -> kick
-                                    .addKnockback(4)
+                                    .addKnockback(3)
                                     .knockbackYRotDeg(60)
                                     .disableBlocking((float) kick.stand.getProximityRatio(kick.target) - 0.25F)
                                     .sweepingAttack(0.5, 0, 0.5, kick.getDamage() * 0.5F)))
@@ -473,7 +473,7 @@ public class ModActions {
             () -> new MagiciansRedKick(new StandEntityComboHeavyAttack.Builder()
                     .modifyPunch(kick -> kick
                             .modifyEntityPunch(entityKick -> entityKick
-                                    .addKnockback(4)))
+                                    .addKnockback(3)))
                     .partsRequired(StandPart.LEGS)));
 
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_HEAVY_PUNCH = ACTIONS.register("magicians_red_heavy_punch", 
@@ -549,7 +549,7 @@ public class ModActions {
                     .modifyPunch(punch -> punch.setPunchSound(ModSounds.CRAZY_DIAMOND_PUNCH_HEAVY))
                     .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_DORA)
                     .partsRequired(StandPart.ARMS)
-                    .shiftVariationOf(CRAZY_DIAMOND_PUNCH).shiftVariationOf(CRAZY_DIAMOND_BARRAGE), () -> null));
+                    .shiftVariationOf(CRAZY_DIAMOND_PUNCH).shiftVariationOf(CRAZY_DIAMOND_BARRAGE), null));
     
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_ITEM_PROJECTILE = ACTIONS.register("crazy_diamond_item_projectile", 
             () -> new CrazyDiamondItemProjectile(new StandEntityAction.Builder().standWindupDuration(15)

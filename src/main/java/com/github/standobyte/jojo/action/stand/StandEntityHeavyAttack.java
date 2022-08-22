@@ -139,7 +139,7 @@ public class StandEntityHeavyAttack extends StandEntityAction {
             double strength = stand.getAttackDamage();
             this
             .damage(StandStatFormulas.getHeavyAttackDamage(strength))
-            .addKnockback(1 + (float) strength / 8)
+            .addKnockback(0.5F + (float) strength / 8)
             .setStandInvulTime(10)
             .setPunchSound(ModSounds.STAND_STRONG_ATTACK);
         }

@@ -4,6 +4,8 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStandEffects;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.EntityType;
@@ -50,7 +52,11 @@ public class CDBloodCutterEntity extends ModdedProjectileEntity {
                                         // FIXME !!! (blood cutter) && isn't behind blocks
                                 && entity.getBoundingBox().clip(this.getBoundingBox().getCenter(), entity.getBoundingBox().getCenter()).isPresent()))
                 .forEach(entity -> {
+                    // FIXME !! (blood cutter) refresh the timer
                     stand.getContinuousEffects().getOrCreateEffect(ModStandEffects.DRIED_BLOOD_DROPS.get(), entity);
+
+                    PacketManager.sendToClientsTracking(new BloodParticlesPacket(
+                            this.getBoundingBox().getCenter(), entity.getBoundingBox().getCenter(), 32), this);
                 });
             });
         }

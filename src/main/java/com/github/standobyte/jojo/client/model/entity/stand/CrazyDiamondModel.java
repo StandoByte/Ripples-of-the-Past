@@ -1,7 +1,11 @@
 package com.github.standobyte.jojo.client.model.entity.stand;
 
+import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
+import com.github.standobyte.jojo.client.model.pose.ModelPoseTransitionMultiple;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
+import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
+import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.stands.CrazyDiamondEntity;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -194,6 +198,8 @@ public class CrazyDiamondModel extends HumanoidStandModel<CrazyDiamondEntity> {
         torso.texOffs(20, 64).addBox(-3.5F, 1.25F, -2.75F, 3.0F, 3.0F, 1.0F, 0.1F, false);
         torso.texOffs(24, 73).addBox(-2.5F, 4.0F, -2.3F, 5.0F, 6.0F, 1.0F, 0.0F, false);
         torso.texOffs(24, 80).addBox(-1.0F, 10.75F, -2.5F, 2.0F, 4.0F, 1.0F, 0.0F, false);
+        torso.texOffs(108, 106).addBox(3.65F, 10.5F, -1.5F, 1.0F, 3.0F, 3.0F, -0.25F, true);
+        torso.texOffs(76, 106).addBox(-4.65F, 10.5F, -1.5F, 1.0F, 3.0F, 3.0F, -0.25F, false);
 
         tube = new ModelRenderer(this);
         tube.setPos(1.0F, 1.25F, 2.0F);
@@ -335,7 +341,6 @@ public class CrazyDiamondModel extends HumanoidStandModel<CrazyDiamondEntity> {
         largeHeartCube4.texOffs(16, 103).addBox(0.0F, -4.0F, 0.0F, 3.0F, 4.0F, 1.0F, 0.0F, false);
         largeHeartCube4.texOffs(18, 108).addBox(1.0F, -3.5F, -1.0F, 1.0F, 1.0F, 2.0F, -0.2F, false);
 
-        leftLeg.texOffs(108, 106).addBox(1.75F, -1.5F, -1.5F, 1.0F, 3.0F, 3.0F, -0.25F, true);
         leftLeg.texOffs(118, 112).addBox(1.3F, 1.25F, -1.0F, 1.0F, 3.0F, 2.0F, 0.0F, false);
         leftLeg.texOffs(112, 112).addBox(-2.3F, 0.75F, -1.0F, 1.0F, 4.0F, 2.0F, 0.0F, false);
 
@@ -362,13 +367,12 @@ public class CrazyDiamondModel extends HumanoidStandModel<CrazyDiamondEntity> {
         setRotationAngle(heartCube10, 0.0F, 0.0F, -0.7854F);
         heartCube10.texOffs(124, 114).addBox(2.8284F, 1.8784F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
 
-        leftLowerLeg.texOffs(118, 117).addBox(1.3F, -0.05F, -1.0F, 1.0F, 3.0F, 2.0F, 0.0F, false);
-        leftLowerLeg.texOffs(112, 118).addBox(-2.3F, -0.05F, -1.0F, 1.0F, 3.0F, 2.0F, 0.0F, false);
+        leftLowerLeg.texOffs(118, 117).addBox(1.3F, 0.05F, -1.0F, 1.0F, 3.0F, 2.0F, 0.0F, false);
+        leftLowerLeg.texOffs(112, 118).addBox(-2.3F, 0.05F, -1.0F, 1.0F, 3.0F, 2.0F, 0.0F, false);
         leftLowerLeg.texOffs(112, 123).addBox(-2.0F, 3.0F, -2.0F, 4.0F, 1.0F, 4.0F, 0.249F, false);
         leftLowerLeg.texOffs(92, 125).addBox(-2.8F, 3.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
         leftLowerLeg.texOffs(124, 125).addBox(2.2F, 3.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
 
-        rightLeg.texOffs(76, 106).addBox(-2.75F, -1.5F, -1.5F, 1.0F, 3.0F, 3.0F, -0.25F, false);
         rightLeg.texOffs(80, 112).addBox(-2.3F, 0.95F, -1.0F, 1.0F, 3.0F, 2.0F, 0.0F, false);
         rightLeg.texOffs(86, 112).addBox(1.3F, 0.75F, -1.0F, 1.0F, 4.0F, 2.0F, 0.0F, false);
 
@@ -398,8 +402,8 @@ public class CrazyDiamondModel extends HumanoidStandModel<CrazyDiamondEntity> {
         rightLowerLeg.texOffs(80, 123).addBox(-2.0F, 3.0F, -2.0F, 4.0F, 1.0F, 4.0F, 0.249F, false);
         rightLowerLeg.texOffs(80, 125).addBox(-3.0F, 3.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
         rightLowerLeg.texOffs(112, 125).addBox(2.0F, 3.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
-        rightLowerLeg.texOffs(80, 117).addBox(-2.3F, -0.05F, -1.0F, 1.0F, 3.0F, 2.0F, 0.0F, false);
-        rightLowerLeg.texOffs(86, 118).addBox(1.3F, -0.05F, -1.0F, 1.0F, 3.0F, 2.0F, 0.0F, false);
+        rightLowerLeg.texOffs(80, 117).addBox(-2.3F, 0.05F, -1.0F, 1.0F, 3.0F, 2.0F, 0.0F, false);
+        rightLowerLeg.texOffs(86, 118).addBox(1.3F, 0.05F, -1.0F, 1.0F, 3.0F, 2.0F, 0.0F, false);
     }
 
     @Override
@@ -409,6 +413,124 @@ public class CrazyDiamondModel extends HumanoidStandModel<CrazyDiamondEntity> {
     
     @Override
     protected void initActionPoses() {
+        ModelPose<CrazyDiamondEntity> heavyPunchPose1 = new ModelPose<>(new RotationAngle[] {
+                RotationAngle.fromDegrees(head, 0, 385, 0).noDegreesWrapping(), 
+                RotationAngle.fromDegrees(body, 7.5F, 382.5F, 0),
+                RotationAngle.fromDegrees(upperPart, 0, 0, 0),
+                RotationAngle.fromDegrees(leftArm, 0, 0, -22.5F),
+                RotationAngle.fromDegrees(leftForeArm, 0, 0, 10),
+                RotationAngle.fromDegrees(rightArm, 0, 0, 80),
+                RotationAngle.fromDegrees(rightForeArm, -70, -22.5F, -30),
+                RotationAngle.fromDegrees(leftLeg, 7.5F, 0, -7.5F),
+                RotationAngle.fromDegrees(leftLowerLeg, 0, 0, 0),
+                RotationAngle.fromDegrees(rightLeg, -7.5F, 0, 5),
+                RotationAngle.fromDegrees(rightLowerLeg, 17.5F, 0, 0)
+        });
+        ModelPose<CrazyDiamondEntity> heavyPunchPose2 = new ModelPose<>(new RotationAngle[] {
+                RotationAngle.fromDegrees(head, 10, 400.5F, 0).noDegreesWrapping(), 
+                RotationAngle.fromDegrees(body, 30, 390, 0),
+                RotationAngle.fromDegrees(upperPart, 0, 7.5F, 0),
+                RotationAngle.fromDegrees(leftArm, 7.5F, 0, -45),
+                RotationAngle.fromDegrees(leftForeArm, 0, 0, 17.5F),
+                RotationAngle.fromDegrees(rightArm, 15, -5, 100),
+                RotationAngle.fromDegrees(rightForeArm, -90, -10, -70),
+                RotationAngle.fromDegrees(leftLeg, 15, 0, -7.5F),
+                RotationAngle.fromDegrees(leftLowerLeg, 0, 0, 0),
+                RotationAngle.fromDegrees(rightLeg, -12.5F, 0, 10),
+                RotationAngle.fromDegrees(rightLowerLeg, 25, 0, 0)
+        });
+        ModelPose<CrazyDiamondEntity> heavyPunchPose3 = new ModelPose<>(new RotationAngle[] {
+                RotationAngle.fromDegrees(head, 0, 345, 0).noDegreesWrapping(), 
+                RotationAngle.fromDegrees(body, -7.5F, 337.5F, -7.5F),
+                RotationAngle.fromDegrees(upperPart, 0, 7.5F, 0),
+                RotationAngle.fromDegrees(leftArm, -22.5F, -15, -90),
+                RotationAngle.fromDegrees(leftForeArm, -45, -15, 75),
+                RotationAngle.fromDegrees(rightArm, 0, 0, 75),
+                RotationAngle.fromDegrees(rightForeArm, 0, 90, 0),
+                RotationAngle.fromDegrees(leftLeg, 20, 0, -5),
+                RotationAngle.fromDegrees(leftLowerLeg, 0, 0, 0),
+                RotationAngle.fromDegrees(rightLeg, 1.6667F, -1.6667F, 34.1667F),
+                RotationAngle.fromDegrees(rightLowerLeg, 26.67F, 0, 0)
+        });
+        ModelPose<CrazyDiamondEntity> heavyPunchPose4 = new ModelPose<>(new RotationAngle[] {
+                RotationAngle.fromDegrees(head, -5, 322.5F, 0).noDegreesWrapping(), 
+                RotationAngle.fromDegrees(body, -21.25F, 282.5F, -13.75F),
+                RotationAngle.fromDegrees(upperPart, 0, 7.5F, 0),
+                RotationAngle.fromDegrees(leftArm, -5.62F, -15, -90),
+                RotationAngle.fromDegrees(leftForeArm, -45, -15, 75),
+                RotationAngle.fromDegrees(rightArm, 30, 0, 75),
+                RotationAngle.fromDegrees(rightForeArm, 0, 90, 0),
+                RotationAngle.fromDegrees(leftLeg, 25, 0, -2.5F),
+                RotationAngle.fromDegrees(leftLowerLeg, 0, 0, 0),
+                RotationAngle.fromDegrees(rightLeg, 15.8334F, -3.3334F, 58.3334F),
+                RotationAngle.fromDegrees(rightLowerLeg, 28.34F, 0, 0)
+        });
+        ModelPose<CrazyDiamondEntity> heavyPunchPose5 = new ModelPose<>(new RotationAngle[] {
+                RotationAngle.fromDegrees(head, -17.5F, 300, -22.5F).noDegreesWrapping(), 
+                RotationAngle.fromDegrees(body, -30, 225, -15),
+                RotationAngle.fromDegrees(upperPart, 0, 7.5F, 0),
+                RotationAngle.fromDegrees(leftArm, 11.25F, -15, -90),
+                RotationAngle.fromDegrees(leftForeArm, -45, -15, 75),
+                RotationAngle.fromDegrees(rightArm, 60, 0, 75),
+                RotationAngle.fromDegrees(rightForeArm, -20, 60, -20),
+                RotationAngle.fromDegrees(leftLeg, 30, 0, 0),
+                RotationAngle.fromDegrees(leftLowerLeg, 0, 0, 0),
+                RotationAngle.fromDegrees(rightLeg, 30, -5, 82.5F),
+                RotationAngle.fromDegrees(rightLowerLeg, 30, 0, 0)
+        });
+        ModelPose<CrazyDiamondEntity> heavyPunchPose6 = new ModelPose<>(new RotationAngle[] {
+                RotationAngle.fromDegrees(head, 15, 60, 0).noDegreesWrapping(), 
+                RotationAngle.fromDegrees(body, 15, 102.5F, 0),
+                RotationAngle.fromDegrees(upperPart, 0, 7.5F, 0),
+                RotationAngle.fromDegrees(leftArm, 45, -15, -90),
+                RotationAngle.fromDegrees(leftForeArm, -45, -15, 75),
+                RotationAngle.fromDegrees(rightArm, 60, 0, 75),
+                RotationAngle.fromDegrees(rightForeArm, -60, 0, -60),
+                RotationAngle.fromDegrees(leftLeg, -3.3333F, 6.6667F, -6.6667F),
+                RotationAngle.fromDegrees(leftLowerLeg, 45, 0, 0),
+                RotationAngle.fromDegrees(rightLeg, -49.1667F, 10.8333F, 36.6667F),
+                RotationAngle.fromDegrees(rightLowerLeg, 80, 0, 0)
+        });
+        ModelPose<CrazyDiamondEntity> heavyPunchPose7 = new ModelPose<>(new RotationAngle[] {
+                RotationAngle.fromDegrees(head, 0, 15, -7.5F), 
+                RotationAngle.fromDegrees(body, 22.5F, 36.25F, -7.5F),
+                RotationAngle.fromDegrees(upperPart, 0, 7.5F, 0),
+                RotationAngle.fromDegrees(leftArm, 22.5F, -15, -90),
+                RotationAngle.fromDegrees(leftForeArm, -67.5F, 0, 86.25F),
+                RotationAngle.fromDegrees(rightArm, 45, 0, 75),
+                RotationAngle.fromDegrees(rightForeArm, -45, -5, -120),
+                RotationAngle.fromDegrees(leftLeg, -20, 10, -10),
+                RotationAngle.fromDegrees(leftLowerLeg, 67.5F, 0, 0),
+                RotationAngle.fromDegrees(rightLeg, -88.75F, 18.75F, 13.75F),
+                RotationAngle.fromDegrees(rightLowerLeg, 105, 0, 0)
+        });
+        ModelPose<CrazyDiamondEntity> heavyPunchPose8 = new ModelPose<>(new RotationAngle[] {
+                RotationAngle.fromDegrees(head, 0, 0, 0), 
+                RotationAngle.fromDegrees(body, 30, -30, -15),
+                RotationAngle.fromDegrees(upperPart, 0, 7.5F, 0),
+                RotationAngle.fromDegrees(leftArm, 22.5F, 15, -60),
+                RotationAngle.fromDegrees(leftForeArm, -90, 15, 97.5F),
+                RotationAngle.fromDegrees(rightArm, -45, -10, 75),
+                RotationAngle.fromDegrees(rightForeArm, -165.665F, -4.4638F, -133.0616F),
+                RotationAngle.fromDegrees(leftLeg, -76.5527F, 15.4535F, -3.9853F),
+                RotationAngle.fromDegrees(leftLowerLeg, 90, 0, 0),
+                RotationAngle.fromDegrees(rightLeg, 15, 30, 0),
+                RotationAngle.fromDegrees(rightLowerLeg, 30, 0, 0)
+        });
+        actionAnim.put(StandPose.HEAVY_ATTACK, new StandActionAnimation.Builder<CrazyDiamondEntity>()
+                .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransitionMultiple.Builder<>(heavyPunchPose1)
+                        .addPose(0.2222F, heavyPunchPose2)
+                        .addPose(0.3333F, heavyPunchPose3)
+                        .addPose(0.4444F, heavyPunchPose4)
+                        .addPose(0.5555F, heavyPunchPose5)
+                        .addPose(0.7777F, heavyPunchPose6)
+                        .addPose(0.8888F, heavyPunchPose7)
+                        .build(heavyPunchPose8))
+                .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransitionMultiple.Builder<>(heavyPunchPose8)
+                        .addPose(0.5F, heavyPunchPose8)
+                        .build(idlePose))
+                .build(idlePose));
+            
         super.initActionPoses();
     }
     
