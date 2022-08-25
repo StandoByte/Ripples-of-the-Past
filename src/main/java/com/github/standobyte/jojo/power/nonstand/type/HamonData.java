@@ -53,7 +53,7 @@ import net.minecraftforge.common.ForgeMod;
 public class HamonData extends TypeSpecificData {
     public static final int MAX_STAT_LEVEL = 60;
     public static final float MAX_BREATHING_LEVEL = 100;
-    public static final int MIN_BREATHING_EXCEED = 5;
+    public static final int MIN_BREATHING_EXCEED = 10;
     
     private static final int LVL_1_POINTS = 2;
     private static final int NEXT_LVL_DIFF = 3;

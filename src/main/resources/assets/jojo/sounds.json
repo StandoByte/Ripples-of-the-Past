@@ -635,7 +635,7 @@
   },
   "crazy_diamond_summon": {
     "subtitle": "jojo.subtitle.stand_summon",
-    "sounds": [ "jojo:stand/crazy_diamond_summon", "jojo:stand/crazy_diamond_summon_2", "jojo:stand/crazy_diamond_summon_3" ]
+    "sounds": [ "jojo:stand/crazy_diamond_summon", "jojo:stand/crazy_diamond_summon_2" ]
   },
   "crazy_diamond_unsummon": {
     "subtitle": "jojo.subtitle.stand_unsummon",

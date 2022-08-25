@@ -3,7 +3,7 @@
   "display": {
     "icon": {
       "item": "jojo:meteoric_scrap",
-      "nbt": "{Icon:12}"
+      "nbt": "{Icon:11}"
     },
     "title": {
       "translate": "advancements.jojo.stand_lost_rps.title"

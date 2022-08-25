@@ -18,7 +18,7 @@ public class StarPlatinumInhale extends StandEntityAction {
 		super(builder);
 	}
 
-	private static final double RANGE = 10;
+	private static final double RANGE = 12;
     @Override
     public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
     	Vector3d mouthPos = standEntity.position()

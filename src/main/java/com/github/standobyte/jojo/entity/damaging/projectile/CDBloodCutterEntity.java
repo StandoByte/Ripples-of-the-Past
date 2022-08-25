@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStandEffects;
@@ -49,6 +50,7 @@ public class CDBloodCutterEntity extends ModdedProjectileEntity {
                 level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(4), 
                         EntityPredicates.ENTITY_STILL_ALIVE.and(EntityPredicates.NO_SPECTATORS).and(
                                 entity -> !entity.is(stand.getUser()) && entity != stand.getStandManifestation()
+                                && !(entity instanceof StandEntity && !((StandEntity) entity).isVisibleForAll())
                                         // FIXME !!! (blood cutter) && isn't behind blocks
                                 && entity.getBoundingBox().clip(this.getBoundingBox().getCenter(), entity.getBoundingBox().getCenter()).isPresent()))
                 .forEach(entity -> {

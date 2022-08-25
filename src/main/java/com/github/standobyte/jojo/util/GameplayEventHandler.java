@@ -221,7 +221,7 @@ public class GameplayEventHandler {
     private static final float MAX_SUN_DAMAGE = 10;
     private static final float MIN_SUN_DAMAGE = 2;
     private static float getSunDamage(LivingEntity entity) {
-        if (entity.hasEffect(ModEffects.SUN_RESISTANCE.get())) {
+        if (entity.hasEffect(ModEffects.SUN_RESISTANCE.get()) || !(entity instanceof PlayerEntity || JojoModConfig.getCommonConfigInstance(false).undeadMobsSunDamage.get())) {
             return 0;
         }
         World world = entity.level;
@@ -888,50 +888,52 @@ public class GameplayEventHandler {
                     killer = killerStand.getUser();
                 }
             }
-            if (killer instanceof ServerPlayerEntity) {
-                ModCriteriaTriggers.PLAYER_KILLED_ENTITY.get().trigger((ServerPlayerEntity) killer, dead, dmgSource);
-            }
-            if (dead instanceof ServerPlayerEntity && killer != null) {
-                ModCriteriaTriggers.ENTITY_KILLED_PLAYER.get().trigger((ServerPlayerEntity) dead, killer, dmgSource);
+            if (!dead.is(killer)) {
+                if (killer instanceof ServerPlayerEntity) {
+                    ModCriteriaTriggers.PLAYER_KILLED_ENTITY.get().trigger((ServerPlayerEntity) killer, dead, dmgSource);
+                }
+                if (dead instanceof ServerPlayerEntity && killer != null) {
+                    ModCriteriaTriggers.ENTITY_KILLED_PLAYER.get().trigger((ServerPlayerEntity) dead, killer, dmgSource);
+                }
             }
             LazyOptional<IStandPower> standOptional = IStandPower.getStandPowerOptional(dead);
             standOptional.ifPresent(stand -> {
                 stand.getContinuousEffects().onStandUserDeath(dead);
-                summonSoul(standOptional, dead, dmgSource);
+                summonSoul(stand, dead, dmgSource);
             });
         }
     }
     
-    private static void summonSoul(LazyOptional<IStandPower> standOptional, LivingEntity entity, DamageSource dmgSource) {
-        int ticks = standOptional.map(power -> getSoulAscensionTicks(entity, power)).orElse(0);
-        
+    private static void summonSoul(IStandPower stand, LivingEntity user, DamageSource dmgSource) {
+        int ticks = getSoulAscensionTicks(user, stand);
+
         if (ticks > 0) {
-            if (entity instanceof ServerPlayerEntity) {
-                ModCriteriaTriggers.SOUL_ASCENSION.get().trigger((ServerPlayerEntity) entity, standOptional.orElse(null), ticks);
+            boolean givesResolve = user.level.getLevelData().isHardcore()
+                    || !JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).keepStandOnDeath.get();
+            
+            if (user instanceof ServerPlayerEntity) {
+                ModCriteriaTriggers.SOUL_ASCENSION.get().trigger((ServerPlayerEntity) user, stand, ticks);
             }
-            SoulEntity soulEntity = new SoulEntity(entity.level, entity, ticks);
-            entity.level.addFreshEntity(soulEntity);
+            SoulEntity soulEntity = new SoulEntity(user.level, user, ticks, givesResolve);
+            user.level.addFreshEntity(soulEntity);
         }
     }
     
     public static int getSoulAscensionTicks(LivingEntity user, IStandPower stand) {
         if (!stand.usesResolve() || stand.getResolveLevel() == 0 ||
                 !JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).soulAscension.get() || JojoModUtil.isUndead(user) || 
-                user instanceof PlayerEntity && user.level.getGameRules().getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN)) {
+                user instanceof PlayerEntity && (
+                        user.level.getGameRules().getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN) || 
+                        stand.wasProgressionSkipped())) {
             return 0;
         }
-        boolean hardcore = user.level.getLevelData().isHardcore();
-        if (user instanceof PlayerEntity && (
-                stand.wasProgressionSkipped() || 
-                JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).keepStandOnDeath.get() && !hardcore)) {
-            return 0;
-        }
-        
+
         float resolveRatio = user.hasEffect(ModEffects.RESOLVE.get()) ? 1 : stand.getResolveRatio();
         int ticks = (int) (60 * (stand.getResolveLevel() + resolveRatio));
-        if (hardcore) {
+        if (user.level.getLevelData().isHardcore()) {
             ticks += ticks / 2;
         }
+        
         return ticks;
     }
 

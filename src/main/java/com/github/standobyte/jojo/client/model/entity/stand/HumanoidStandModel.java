@@ -331,17 +331,17 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
                 .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<T>(new RotationAngle[] {
                         new RotationAngle(body, 0, 0, 0),
                         new RotationAngle(upperPart, 0.0F, 0.0F, 0.0F),
-                        RotationAngle.fromDegrees(rightForeArm, 0.0F, 0.0F, -60F),
-                        RotationAngle.fromDegrees(leftForeArm, 0.0F, 0.0F, 60F)
+                        RotationAngle.fromDegrees(rightForeArm, -90, 30, -90),
+                        RotationAngle.fromDegrees(leftForeArm, -90, -30, 90)
                 }).setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
                     float blockXRot = MathHelper.clamp(xRotation, -60, 60) * MathUtil.DEG_TO_RAD / 2;
                     rightArm.xRot = -1.5708F + blockXRot;
                     leftArm.xRot = rightArm.xRot;
 
-                    rightArm.yRot = blockXRot / 2;
+                    rightArm.yRot = -blockXRot / 2;
                     leftArm.yRot = -rightArm.yRot;
 
-                    rightArm.zRot = Math.abs(blockXRot) / 2 - 0.7854F;
+                    rightArm.zRot = -Math.abs(blockXRot) / 2 + 0.7854F;
                     leftArm.zRot = -rightArm.zRot;
                 }))
                 .build(idlePose));

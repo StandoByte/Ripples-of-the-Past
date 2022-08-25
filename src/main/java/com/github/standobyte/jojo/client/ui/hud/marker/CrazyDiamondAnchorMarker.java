@@ -21,13 +21,18 @@ public class CrazyDiamondAnchorMarker extends MarkerRenderer {
     
     @Override
     protected boolean shouldRender() {
-        Action<?> selectedAbility = ActionsOverlayGui.getInstance().getSelectedAction(ActionType.ABILITY);
-        return selectedAbility != null && selectedAbility.getShiftVariationIfPresent()
-                == ModActions.CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE.get().getShiftVariationIfPresent();
+        return true;
     }
 
     @Override
     protected void updatePositions(List<MarkerInstance> list, float partialTick) {
-        CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(mc.level, mc.player.getOffhandItem()).ifPresent(pos -> list.add(new MarkerInstance(Vector3d.atCenterOf(pos), false)));
+        CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(mc.level, mc.player.getMainHandItem()).ifPresent(pos -> 
+            list.add(new MarkerInstance(Vector3d.atCenterOf(pos), false)));
+        CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(mc.level, mc.player.getOffhandItem()).ifPresent(pos -> {
+            Action<?> selectedAbility = ActionsOverlayGui.getInstance().getSelectedAction(ActionType.ABILITY);
+            boolean abilitySelected = selectedAbility != null && selectedAbility.getShiftVariationIfPresent()
+                    == ModActions.CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE.get().getShiftVariationIfPresent();
+            list.add(new MarkerInstance(Vector3d.atCenterOf(pos), abilitySelected));
+        });
     }
 }
