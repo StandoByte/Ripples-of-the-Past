@@ -4,6 +4,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
 import com.github.standobyte.jojo.client.ui.screen.mob.RockPaperScissorsScreen;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
@@ -39,6 +40,7 @@ import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.World;
 
 public class ClientUtil {
+    public static final ResourceLocation ADDITIONAL_UI = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/additional.png");
     public static final int MAX_MODEL_LIGHT = LightTexture.pack(15, 15);
 
     public static PlayerEntity getClientPlayer() {

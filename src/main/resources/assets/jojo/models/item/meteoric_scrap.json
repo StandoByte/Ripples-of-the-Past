@@ -69,12 +69,6 @@
         "jojo:icon": 11
       },
       "model": "jojo:item/item_icon11"
-    },
-    {
-      "predicate": {
-        "jojo:icon": 12
-      },
-      "model": "jojo:item/item_icon12"
     }
   ]
 }

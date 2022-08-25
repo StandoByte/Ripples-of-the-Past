@@ -419,6 +419,21 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public void setArmsOnlyMode() {
         setArmsOnlyMode(true, true);
     }
+    
+    public void addToArmsOnly(Hand arm) {
+        if (arm != null && !level.isClientSide() && isArmsOnlyMode()) {
+            byte b = entityData.get(ARMS_ONLY_MODE);
+            switch (arm) {
+            case MAIN_HAND:
+                b |= 4;
+                break;
+            case OFF_HAND:
+                b |= 8;
+                break;
+            }
+            entityData.set(ARMS_ONLY_MODE, b);
+        }
+    }
 
     public void setArmsOnlyMode(boolean showMainArm, boolean showOffArm) {
         if (!level.isClientSide()) {

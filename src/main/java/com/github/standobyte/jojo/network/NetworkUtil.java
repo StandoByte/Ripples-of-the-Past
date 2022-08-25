@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -149,14 +149,14 @@ public class NetworkUtil {
         }
     }
     
-    public static <T> void writeOptional(PacketBuffer buf, T obj, Consumer<T> write) {
+    public static <T> void writeOptional(PacketBuffer buf, T obj, BiConsumer<PacketBuffer, T> write) {
         buf.writeBoolean(obj != null);
         if (obj != null) {
-            write.accept(obj);
+            write.accept(buf, obj);
         }
     }
     
-    public static <T> Optional<T> readOptional(PacketBuffer buf, Supplier<T> read) {
-        return buf.readBoolean() ? Optional.of(read.get()) : Optional.empty();
+    public static <T> Optional<T> readOptional(PacketBuffer buf, Function<PacketBuffer, T> read) {
+        return buf.readBoolean() ? Optional.of(read.apply(buf)) : Optional.empty();
     }
 }

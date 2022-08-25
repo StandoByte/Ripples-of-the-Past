@@ -82,7 +82,6 @@ public class ForgeBusEventSubscriber {
         StandCommand.register(dispatcher);
         JojoPowerCommand.register(dispatcher);
         JojoEnergyCommand.register(dispatcher);
-//        StandXpCommand.register(dispatcher);
         JojoControlsCommand.register(dispatcher);
         HamonCommand.register(dispatcher);
         RockPaperScissorsCommand.register(dispatcher);

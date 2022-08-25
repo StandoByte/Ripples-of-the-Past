@@ -109,9 +109,10 @@ public class StandEntityLightAttack extends StandEntityAction {
         private PunchHandler.Builder punch = new PunchHandler.Builder().setEntityPunch(LightEntityPunch::new);
     	
     	public Builder() {
-            standAutoSummonMode(AutoSummonMode.ONE_ARM).staminaCost(10F).standUserSlowDownFactor(1.0F)
+            staminaCost(10F).standUserSlowDownFactor(1.0F)
             .standOffsetFront().standOffsetFromUser(-0.75, 0.75)
             .standPose(StandPose.LIGHT_ATTACK)
+            .standAutoSummonMode(AutoSummonMode.MAIN_ARM)
             .partsRequired(StandPart.ARMS);
     	}
     	

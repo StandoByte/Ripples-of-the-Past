@@ -214,6 +214,16 @@ public class ActionsOverlayGui extends AbstractGui {
                 });
             }
             
+            ActionsModeConfig<?> modeIcon = currentMode != null ? currentMode : standUiMode;
+            float standAlpha = 1.0F;
+            if (modeIcon == standUiMode && modeIcon != null) {
+                IStandPower stand = standUiMode.getPower();
+                if (stand != null && stand.isActive() && stand.getStandManifestation() instanceof StandEntity) {
+                    standAlpha = ((StandEntity) stand.getStandManifestation()).getAlpha(partialTick);
+                }
+            }
+            renderPowerIcon(matrixStack, hotbarsPosition, modeIcon, standAlpha);
+            
             RenderSystem.disableRescaleNormal();
             RenderSystem.disableBlend();
         }
@@ -246,8 +256,6 @@ public class ActionsOverlayGui extends AbstractGui {
                 RenderSystem.enableRescaleNormal();
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
-
-                renderPowerIcon(matrixStack, hotbarsPosition, currentMode);
                 
                 renderActionsHotbar(matrixStack, hotbarsPosition, ActionType.ATTACK, currentMode, target, partialTick);
                 renderActionsHotbar(matrixStack, hotbarsPosition, ActionType.ABILITY, currentMode, target, partialTick);
@@ -646,16 +654,23 @@ public class ActionsOverlayGui extends AbstractGui {
     
     
     
-    private void renderPowerIcon(MatrixStack matrixStack, ElementPosition position, @Nonnull ActionsModeConfig<?> mode) {
+    private void renderPowerIcon(MatrixStack matrixStack, ElementPosition position, @Nullable ActionsModeConfig<?> mode, float alpha) {
         int x = position.x;
         if (position.alignment == Alignment.RIGHT) {
             x -= 16;
         }
         int y = position.y;
-        IPower<?, ?> power = currentMode.getPower();
-        if (power.isActive()) {
-            mc.getTextureManager().bind(power.getType().getIconTexture());
+        if (mode != null && mode.getPower() != null && mode.getPower().isActive()) {
+            if (alpha < 1.0F) {
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
+            }
+            
+            mc.getTextureManager().bind(mode.getPower().getType().getIconTexture());
             blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
+            
+            if (alpha < 1.0F) {
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            }
         }
     }
     

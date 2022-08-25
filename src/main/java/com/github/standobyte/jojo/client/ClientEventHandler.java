@@ -405,7 +405,6 @@ public class ClientEventHandler {
 
 
 
-    private static final ResourceLocation ADDITIONAL_UI = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/additional.png");
     @SubscribeEvent
     public void afterScreenRender(DrawScreenEvent.Post event) {
         if (event.getGui() instanceof DeathScreen) {
@@ -416,8 +415,8 @@ public class ClientEventHandler {
             int x = event.getGui().width - 5 - 
                     (int) ((event.getGui().width - 10) * Math.min(deathScreenTick + event.getRenderPartialTicks(), 20F) / 20F);
             int y = event.getGui().height - 29;
-            mc.textureManager.bind(ADDITIONAL_UI);
-            event.getGui().blit(event.getMatrixStack(), x, y, 0, 0, 130, 25);
+            mc.textureManager.bind(ClientUtil.ADDITIONAL_UI);
+            event.getGui().blit(event.getMatrixStack(), x, y, 0, 231, 130, 25);
             AbstractGui.drawCenteredString(event.getMatrixStack(), mc.font, new TranslationTextComponent("jojo.to_be_continued"), x + 61, y + 8, 0x525544);
         }
     }

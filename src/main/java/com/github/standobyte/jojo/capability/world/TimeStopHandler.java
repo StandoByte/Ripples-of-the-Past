@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -139,7 +140,7 @@ public class TimeStopHandler {
         
         canMove = canMove || checkEffect && entityToCheck instanceof LivingEntity && ((LivingEntity) entityToCheck).hasEffect(ModEffects.TIME_STOP.get()) || 
                 entityToCheck instanceof PlayerEntity && TimeUtil.canPlayerMoveInStoppedTime((PlayerEntity) entityToCheck, false)
-                || ModInteractionUtil.isEntityEnderman(entityToCheck); // for even more lulz
+                || JojoModConfig.getCommonConfigInstance(entity.level.isClientSide()).endermenBeyondTimeSpace.get() && ModInteractionUtil.isEntityEnderman(entityToCheck); // for even more lulz
         
         boolean stopInTime = !canMove;
         entity.getCapability(EntityUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.updateEntityTimeStop(stopInTime));
