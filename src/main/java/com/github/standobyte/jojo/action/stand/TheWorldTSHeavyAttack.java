@@ -5,8 +5,7 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
-import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack.HeavyEntityPunch;
-import com.github.standobyte.jojo.action.stand.punch.PunchHandler;
+import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
@@ -31,11 +30,10 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
-public class TheWorldTSHeavyAttack extends StandEntityAction {
+public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStandPunch {
     public static final StandPose TS_PUNCH_POSE = new StandPose("TS_PUNCH");
     private final Supplier<StandEntityHeavyAttack> theWorldHeavyAttack;
     private final Supplier<TimeStopInstant> theWorldTimeStopBlink;
-    private final PunchHandler punch = new PunchHandler.Builder().setEntityPunch(TheWorldTSHeavyPunch::new).build();
 
     public TheWorldTSHeavyAttack(StandEntityAction.Builder builder, 
             Supplier<StandEntityHeavyAttack> theWorldHeavyAttack, Supplier<TimeStopInstant> theWorldTimeStopBlink) {
@@ -160,8 +158,19 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
     
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-    	standEntity.punch(task, punch, task.getTarget());
+    	standEntity.punch(task, this, task.getTarget());
     	userPower.getUser().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.hasUsedTimeStopToday = true);
+    }
+
+    @Override
+    public StandEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
+        double strength = stand.getAttackDamage();
+        return new TheWorldTSHeavyPunch(stand, target, dmgSource)
+                .damage(StandStatFormulas.getHeavyAttackDamage(strength))
+                .addKnockback(4)
+                .disableBlocking(1.0F)
+                .setStandInvulTime(10)
+                .setPunchSound(ModSounds.STAND_STRONG_ATTACK);
     }
     
     @Override
@@ -189,16 +198,10 @@ public class TheWorldTSHeavyAttack extends StandEntityAction {
     
     
     
-    public static class TheWorldTSHeavyPunch extends HeavyEntityPunch {
+    public static class TheWorldTSHeavyPunch extends StandEntityPunch {
 
         public TheWorldTSHeavyPunch(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
             super(stand, target, dmgSource);
-            this
-            .damage(StandStatFormulas.getHeavyAttackDamage(stand.getAttackDamage()))
-            .addKnockback(4)
-            .disableBlocking(1.0F)
-            .setStandInvulTime(10)
-            .setPunchSound(ModSounds.STAND_STRONG_ATTACK);
         }
 
         @Override

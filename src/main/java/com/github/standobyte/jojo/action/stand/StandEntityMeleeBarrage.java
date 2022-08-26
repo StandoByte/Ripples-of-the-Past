@@ -1,13 +1,10 @@
 package com.github.standobyte.jojo.action.stand;
 
-import java.util.function.UnaryOperator;
-
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
-import com.github.standobyte.jojo.action.stand.punch.PunchHandler;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
@@ -27,12 +24,10 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
-public class StandEntityMeleeBarrage extends StandEntityAction {
-    protected final PunchHandler punch;
+public class StandEntityMeleeBarrage extends StandEntityAction implements IHasStandPunch {
 
     public StandEntityMeleeBarrage(StandEntityMeleeBarrage.Builder builder) {
         super(builder);
-        this.punch = builder.punch.build();
     }
 
     @Override
@@ -72,7 +67,12 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
         }
         int barrageHits = hitsThisTick;
         standEntity.setBarrageHitsThisTick(barrageHits);
-        standEntity.punch(task, punch, task.getTarget());
+        standEntity.punch(task, this, task.getTarget());
+    }
+    
+    @Override
+    public BarrageEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
+        return new BarrageEntityPunch(stand, target, dmgSource).barrageHits(stand, stand.barrageHits);
     }
     
     @Override
@@ -167,8 +167,6 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
     
     
     public static class Builder extends StandEntityAction.AbstractBuilder<StandEntityMeleeBarrage.Builder> {
-        private PunchHandler.Builder punch = new PunchHandler.Builder().setEntityPunch(
-                (StandEntity stand, Entity target, StandEntityDamageSource dmgSource) -> new BarrageEntityPunch(stand, target, dmgSource).barrageHits(stand, stand.barrageHits));
         
         public Builder() {
             super();
@@ -177,15 +175,6 @@ public class StandEntityMeleeBarrage extends StandEntityAction {
             .partsRequired(StandPart.ARMS);
         }
         
-        public Builder modifyPunch(UnaryOperator<PunchHandler.Builder> modifier) {
-            return setPunch(modifier.apply(punch));
-        }
-        
-        public Builder setPunch(PunchHandler.Builder punch) {
-            this.punch = punch;
-            return getThis();
-        }
-
         @Override
         protected Builder getThis() {
             return this;

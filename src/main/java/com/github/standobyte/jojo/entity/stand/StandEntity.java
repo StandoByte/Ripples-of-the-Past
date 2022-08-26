@@ -17,9 +17,9 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.action.stand.IHasStandPunch;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.action.stand.punch.IPunch;
-import com.github.standobyte.jojo.action.stand.punch.PunchHandler;
 import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandMissedPunch;
@@ -1418,7 +1418,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return getAttackSpeed() > 0 && getAttributeValue(ForgeMod.REACH_DISTANCE.get()) > 0 ;
     }
 
-    public boolean punch(StandEntityTask task, PunchHandler punch, ActionTarget target) {
+    public boolean punch(StandEntityTask task, IHasStandPunch punch, ActionTarget target) {
     	if (!level.isClientSide()) {
 	        ActionTarget finalTarget = ActionTarget.fromRayTraceResult(aimWithStandOrUser(getAimDistance(getUser()), target));
 	        target = finalTarget.getType() != TargetType.EMPTY && isTargetInReach(finalTarget) ? finalTarget : ActionTarget.EMPTY;
@@ -1435,7 +1435,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     public Boolean playPunchSound = null;
-    public boolean attackTarget(ActionTarget target, PunchHandler punch, StandEntityTask task) {
+    public boolean attackTarget(ActionTarget target, IHasStandPunch punch, StandEntityTask task) {
         IPunch punchInstance;
         switch (target.getType()) {
         case BLOCK:

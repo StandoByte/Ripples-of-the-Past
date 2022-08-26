@@ -3,12 +3,15 @@ package com.github.standobyte.jojo.action.stand;
 import java.util.Optional;
 
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.MRRedBindEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
@@ -68,6 +71,12 @@ public class MagiciansRedKick extends StandEntityComboHeavyAttack {
                 });
             }
     	}
+    }
+
+    @Override
+    public StandEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
+        return super.punchEntity(stand, target, dmgSource)
+                .addKnockback(3);
     }
     
     @Override

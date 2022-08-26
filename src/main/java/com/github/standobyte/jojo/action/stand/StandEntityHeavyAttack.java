@@ -2,14 +2,12 @@ package com.github.standobyte.jojo.action.stand;
 
 import java.util.EnumSet;
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.action.stand.punch.PunchHandler;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
@@ -24,14 +22,12 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.World;
 
-public class StandEntityHeavyAttack extends StandEntityAction {
+public class StandEntityHeavyAttack extends StandEntityAction implements IHasStandPunch {
 	private final Supplier<StandEntityComboHeavyAttack> comboAttack;
     private final Supplier<StandEntityAction> recoveryAction;
-	protected final PunchHandler punch;
 
     public StandEntityHeavyAttack(StandEntityHeavyAttack.Builder builder) {
         super(builder);
-        this.punch = builder.punch.build();
         this.comboAttack = builder.comboAttack;
         this.recoveryAction = builder.recoveryAction;
     }
@@ -116,7 +112,17 @@ public class StandEntityHeavyAttack extends StandEntityAction {
     
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-        standEntity.punch(task, punch, task.getTarget());
+        standEntity.punch(task, this, task.getTarget());
+    }
+    
+    @Override
+    public StandEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
+        double strength = stand.getAttackDamage();
+        return IHasStandPunch.super.punchEntity(stand, target, dmgSource)
+                .damage(StandStatFormulas.getHeavyAttackDamage(strength))
+                .addKnockback(0.5F + (float) strength / 8)
+                .setStandInvulTime(10)
+                .setPunchSound(ModSounds.STAND_STRONG_ATTACK);
     }
 
     @Override
@@ -142,7 +148,6 @@ public class StandEntityHeavyAttack extends StandEntityAction {
     
     
     public static class Builder extends StandEntityAction.AbstractBuilder<StandEntityHeavyAttack.Builder> {
-        private PunchHandler.Builder punch = new PunchHandler.Builder().setEntityPunch(HeavyEntityPunch::new);
         private Supplier<StandEntityComboHeavyAttack> comboAttack = () -> null;
         private Supplier<StandEntityAction> recoveryAction = () -> null;
     	
@@ -150,15 +155,6 @@ public class StandEntityHeavyAttack extends StandEntityAction {
             standPose(StandPose.HEAVY_ATTACK).staminaCost(50F)
             .standOffsetFromUser(-0.75, 0.75);
     	}
-        
-        public Builder modifyPunch(UnaryOperator<PunchHandler.Builder> modifier) {
-            return setPunch(modifier.apply(punch));
-        }
-        
-        public Builder setPunch(PunchHandler.Builder punch) {
-            this.punch = punch;
-            return getThis();
-        }
         
         public Builder setComboAttack(Supplier<StandEntityComboHeavyAttack> comboAttack) {
             this.comboAttack = comboAttack != null ? comboAttack : () -> null;
@@ -174,20 +170,5 @@ public class StandEntityHeavyAttack extends StandEntityAction {
 		protected Builder getThis() {
 			return this;
 		}
-    }
-    
-    
-    
-    public static class HeavyEntityPunch extends StandEntityPunch {
-        
-        public HeavyEntityPunch(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
-            super(stand, target, dmgSource);
-            double strength = stand.getAttackDamage();
-            this
-            .damage(StandStatFormulas.getHeavyAttackDamage(strength))
-            .addKnockback(0.5F + (float) strength / 8)
-            .setStandInvulTime(10)
-            .setPunchSound(ModSounds.STAND_STRONG_ATTACK);
-        }
     }
 }

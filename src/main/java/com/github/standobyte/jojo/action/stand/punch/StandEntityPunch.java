@@ -27,6 +27,7 @@ public class StandEntityPunch implements IPunch {
     public final Entity target;
     public final StandEntityDamageSource dmgSource;
     private boolean targetHit;
+    
     protected float damage;
     protected float addCombo;
     protected float knockback = 1.0F;

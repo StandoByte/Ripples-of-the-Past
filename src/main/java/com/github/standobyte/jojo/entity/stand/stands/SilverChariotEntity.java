@@ -5,7 +5,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.action.stand.punch.PunchHandler;
+import com.github.standobyte.jojo.action.stand.IHasStandPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
@@ -189,7 +189,7 @@ public class SilverChariotEntity extends StandEntity {
     }
     
     @Override
-    public boolean attackTarget(ActionTarget target, PunchHandler punch, StandEntityTask task) {
+    public boolean attackTarget(ActionTarget target, IHasStandPunch punch, StandEntityTask task) {
     	if (canDeflectProjectiles()) {
     		level.getEntitiesOfClass(ProjectileEntity.class, getBoundingBox().inflate(getAttributeValue(ForgeMod.REACH_DISTANCE.get())), 
     				entity -> entity.isAlive() && !entity.isPickable()).forEach(projectile -> {
