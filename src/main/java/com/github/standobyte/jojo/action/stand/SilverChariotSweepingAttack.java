@@ -65,7 +65,7 @@ public class SilverChariotSweepingAttack extends StandEntityComboHeavyAttack {
                             if (cos < 0.5) {
                                 slash.damage(slash.getDamage() * 0.5F);
                             }
-    					    standEntity.attackEntity(targetEntity, slash, task);
+                            slash.hit(standEntity, task);
     					}
     				});
     	}

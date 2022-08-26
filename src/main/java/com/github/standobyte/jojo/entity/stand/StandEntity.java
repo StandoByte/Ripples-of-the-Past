@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
@@ -1466,6 +1467,49 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return punchInstance.targetWasHit();
     }
     
+    public boolean hitBlock(BlockPos blockPos, BlockState blockState, StandBlockPunch punch, StandEntityTask task) {
+        return !level.isClientSide() ? punch.hit(this, task) : false;
+    }
+    
+    public StandEntityDamageSource getDamageSource() {
+        return new StandEntityDamageSource("stand", this, getUserPower());
+    }
+    
+    public boolean attackEntity(Supplier<Boolean> doAttack, StandEntityPunch punch, StandEntityTask task) {
+        if (level.isClientSide() || !canHarm(punch.target)) {
+            return false;
+        }
+        boolean attacked = doAttack.get();
+        if (attacked && !isManuallyControlled()) {
+            setLastHurtMob(punch.target);
+        }
+        return attacked;
+    }
+
+    public boolean hurtTarget(Entity target, DamageSource dmgSource, float damage) {
+        boolean hurt = DamageUtil.hurtThroughInvulTicks(target, DamageUtil.enderDragonDamageHack(dmgSource, target), damage
+                * JojoModConfig.getCommonConfigInstance(false).standDamageMultiplier.get().floatValue());
+        if (hurt) {
+            if (target instanceof LivingEntity) {
+                LivingEntity targetLiving = (LivingEntity) target;
+                LivingEntity user = getUser();
+                if (user != null) {
+                    if (user.getType() == EntityType.PLAYER) {
+                        targetLiving.setLastHurtByPlayer((PlayerEntity) user);
+                        targetLiving.lastHurtByPlayerTime = 100;
+                    }
+                    LivingEntity aggroTo = isFollowingUser() || targetLiving.canSee(user) ? user : 
+                        StandUtil.isEntityStandUser(targetLiving) ? this : null;
+                    if (aggroTo != null) {
+                        targetLiving.setLastHurtByMob(aggroTo);
+                    }
+                }
+            }
+            doEnchantDamageEffects(this, target);
+        }
+        return hurt;
+    }
+    
     protected SoundEvent getAttackBlockSound() {
     	return ModSounds.STAND_DAMAGE_BLOCK.get();
     }
@@ -1692,49 +1736,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
     public int getNoComboDecayTicks() {
         return noComboDecayTicks;
-    }
-    
-    public boolean hitBlock(BlockPos blockPos, BlockState blockState, StandBlockPunch punch, StandEntityTask task) {
-        return !level.isClientSide() ? punch.hit(this, task) : false;
-    }
-    
-    public StandEntityDamageSource getDamageSource() {
-        return new StandEntityDamageSource("stand", this, getUserPower());
-    }
-    
-    public boolean attackEntity(Entity target, StandEntityPunch punch, StandEntityTask task) {
-        if (level.isClientSide() || !canHarm(target)) {
-            return false;
-        }
-        boolean attacked = punch.hit(this, task);
-        if (attacked && !isManuallyControlled()) {
-            setLastHurtMob(target);
-        }
-        return attacked;
-    }
-
-    public boolean hurtTarget(Entity target, DamageSource dmgSource, float damage) {
-        boolean hurt = DamageUtil.hurtThroughInvulTicks(target, DamageUtil.enderDragonDamageHack(dmgSource, target), damage
-                * JojoModConfig.getCommonConfigInstance(false).standDamageMultiplier.get().floatValue());
-        if (hurt) {
-            if (target instanceof LivingEntity) {
-                LivingEntity targetLiving = (LivingEntity) target;
-                LivingEntity user = getUser();
-                if (user != null) {
-                    if (user.getType() == EntityType.PLAYER) {
-                        targetLiving.setLastHurtByPlayer((PlayerEntity) user);
-                        targetLiving.lastHurtByPlayerTime = 100;
-                    }
-                    LivingEntity aggroTo = isFollowingUser() || targetLiving.canSee(user) ? user : 
-                        StandUtil.isEntityStandUser(targetLiving) ? this : null;
-                    if (aggroTo != null) {
-                        targetLiving.setLastHurtByMob(aggroTo);
-                    }
-                }
-            }
-            doEnchantDamageEffects(this, target);
-        }
-        return hurt;
     }
     
     public void parryHeavyAttack() {
@@ -2159,18 +2160,28 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
     @Override
     public void remove() {
-        dropItemOnRemove(getMainArm(), mainHandItem);
-        dropItemOnRemove(getOppositeToMainArm(), offHandItem);
+        if (!level.isClientSide()) {
+            collectHeldItems().forEach(item -> level.addFreshEntity(item));
+        }
         super.remove();
     }
     
-    protected void dropItemOnRemove(HandSide side, ItemStack itemStack) {
-        if (!level.isClientSide() && !itemStack.isEmpty()) {
+    protected List<ItemEntity> collectHeldItems() {
+        List<ItemEntity> items = new ArrayList<>();
+        makeHeldItemEntity(getMainArm(), mainHandItem).ifPresent(item -> items.add(item));
+        makeHeldItemEntity(getOppositeToMainArm(), offHandItem).ifPresent(item -> items.add(item));
+        return items;
+    }
+    
+    protected Optional<ItemEntity> makeHeldItemEntity(HandSide side, ItemStack itemStack) {
+        if (!itemStack.isEmpty()) {
             Vector3d pos = position()
                     .add(new Vector3d(getBbWidth() * 0.5 * (side == HandSide.LEFT ? -1 : 1), getBbHeight() * 0.4, 0).yRot((180 - yRot) * MathUtil.DEG_TO_RAD));
-            level.addFreshEntity(new ItemEntity(level, pos.x, pos.y, pos.z, itemStack.copy()));
+            return Optional.of(new ItemEntity(level, pos.x, pos.y, pos.z, itemStack.copy()));
         }
+        return Optional.empty();
     }
+    // FIXME !!!! save the items in nbt
 
 
 
