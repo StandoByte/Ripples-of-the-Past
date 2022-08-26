@@ -6,7 +6,7 @@ import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
 
 import net.minecraft.entity.Entity;
 
-public class StarPlatinumUppercut extends StandEntityComboHeavyAttack {
+public class StarPlatinumUppercut extends StandEntityHeavyAttack {
 
     public StarPlatinumUppercut(StandEntityHeavyAttack.Builder builder) {
         super(builder);

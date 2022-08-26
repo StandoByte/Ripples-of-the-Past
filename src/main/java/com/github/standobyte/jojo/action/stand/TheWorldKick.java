@@ -6,7 +6,7 @@ import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
 
 import net.minecraft.entity.Entity;
 
-public class TheWorldKick extends StandEntityComboHeavyAttack {
+public class TheWorldKick extends StandEntityHeavyAttack {
 
     public TheWorldKick(StandEntityHeavyAttack.Builder builder) {
         super(builder);

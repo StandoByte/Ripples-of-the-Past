@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.action.stand;
 
+import java.util.function.Supplier;
+
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
@@ -22,9 +24,11 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
 
 public class StandEntityLightAttack extends StandEntityAction implements IHasStandPunch {
+    private final Supplier<SoundEvent> punchSound;
 
     public StandEntityLightAttack(StandEntityLightAttack.Builder builder) {
         super(builder);
+        this.punchSound = builder.punchSound;
     }
 
     @Override
@@ -111,6 +115,7 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
     
     
     public static class Builder extends StandEntityAction.AbstractBuilder<StandEntityLightAttack.Builder>  {
+        private Supplier<SoundEvent> punchSound = () -> null;
     	
     	public Builder() {
             staminaCost(10F).standUserSlowDownFactor(1.0F)
@@ -118,6 +123,11 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
             .standPose(StandPose.LIGHT_ATTACK)
             .standAutoSummonMode(AutoSummonMode.MAIN_ARM)
             .partsRequired(StandPart.ARMS);
+    	}
+    	
+    	public Builder punchSound(Supplier<SoundEvent> punchSound) {
+    	    this.punchSound = punchSound != null ? punchSound : () -> null;
+    	    return getThis();
     	}
     	
 		@Override

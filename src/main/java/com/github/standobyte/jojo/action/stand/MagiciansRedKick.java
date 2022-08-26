@@ -18,7 +18,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
-public class MagiciansRedKick extends StandEntityComboHeavyAttack {
+public class MagiciansRedKick extends StandEntityHeavyAttack {
 
     public MagiciansRedKick(StandEntityHeavyAttack.Builder builder) {
         super(builder);

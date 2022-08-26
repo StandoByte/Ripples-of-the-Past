@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.action.stand;
 
+import java.util.function.Supplier;
+
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
@@ -20,14 +22,17 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class StandEntityMeleeBarrage extends StandEntityAction implements IHasStandPunch {
+    private final Supplier<SoundEvent> barrageSound;
 
     public StandEntityMeleeBarrage(StandEntityMeleeBarrage.Builder builder) {
         super(builder);
+        this.barrageSound = builder.barrageSound;
     }
 
     @Override
@@ -167,12 +172,18 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     
     
     public static class Builder extends StandEntityAction.AbstractBuilder<StandEntityMeleeBarrage.Builder> {
+        private Supplier<SoundEvent> barrageSound = () -> null;
         
         public Builder() {
             super();
             standAutoSummonMode(AutoSummonMode.ARMS).holdType().staminaCostTick(3F)
             .standUserSlowDownFactor(0.3F).standOffsetFront()
             .partsRequired(StandPart.ARMS);
+        }
+        
+        public Builder barrageSound(Supplier<SoundEvent> barrageSound) {
+            this.barrageSound = barrageSound != null ? barrageSound : () -> null;
+            return getThis();
         }
         
         @Override
@@ -182,7 +193,8 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     }
     
     
-    
+
+    // FIXME !!!!!! barrage sound
     public static class BarrageEntityPunch extends StandEntityPunch {
         private int barrageHits = 0;
 
