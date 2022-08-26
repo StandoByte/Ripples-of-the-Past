@@ -20,7 +20,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeMod;
 
-public class SilverChariotSweepingAttack extends StandEntityComboHeavyAttack {
+public class SilverChariotSweepingAttack extends StandEntityHeavyAttack {
 
     public SilverChariotSweepingAttack(StandEntityHeavyAttack.Builder builder) {
         super(builder);
