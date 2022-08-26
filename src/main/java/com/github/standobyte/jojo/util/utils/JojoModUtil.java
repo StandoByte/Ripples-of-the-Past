@@ -147,7 +147,21 @@ public class JojoModUtil {
     	return partialTick == 1.0F ? entity.position() : entity.getPosition(partialTick);
     }
     
-    public static void giveItem(PlayerEntity player, ItemStack item) {
+    public static void giveItemTo(LivingEntity entity, ItemStack item) {
+        if (!entity.level.isClientSide()) {
+            if (entity instanceof PlayerEntity) {
+                giveItemToPlayer((PlayerEntity) entity, item);
+            }
+            else {
+                ItemEntity itemEntity = drop(entity, item);
+                if (itemEntity != null) {
+                    entity.level.addFreshEntity(itemEntity);
+                }
+            }
+        }
+    }
+    
+    public static void giveItemToPlayer(PlayerEntity player, ItemStack item) {
         if (!player.level.isClientSide()) {
             if (player.inventory.add(item) && item.isEmpty()) {
                 player.inventoryMenu.broadcastChanges();
@@ -159,6 +173,18 @@ public class JojoModUtil {
                     itementity.setOwner(player.getUUID());
                 }
             }
+        }
+    }
+    
+    private static ItemEntity drop(LivingEntity entity, ItemStack item) {
+        if (item.isEmpty()) {
+            return null;
+        }
+        else {
+            ItemEntity itemEntity = new ItemEntity(entity.level, entity.getX(), entity.getEyeY() - 0.3, entity.getZ(), item);
+            itemEntity.setNoPickUpDelay();
+            itemEntity.setOwner(entity.getUUID());
+            return itemEntity;
         }
     }
     

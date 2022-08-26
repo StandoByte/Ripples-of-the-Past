@@ -66,6 +66,7 @@ import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.effect.LightningBoltEntity;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
@@ -2126,6 +2127,51 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
     }
 
+    
+
+    private ItemStack mainHandItem = ItemStack.EMPTY;
+    private ItemStack offHandItem = ItemStack.EMPTY;
+    @Override
+    public ItemStack getItemBySlot(EquipmentSlotType slot) {
+        switch (slot) {
+        case MAINHAND:
+            return mainHandItem;
+        case OFFHAND:
+            return offHandItem;
+        default:
+            return ItemStack.EMPTY;
+        }
+    }
+
+    @Override
+    public void setItemSlot(EquipmentSlotType slot, ItemStack stack) {
+        switch (slot) {
+        case MAINHAND:
+            this.mainHandItem = stack;
+            break;
+        case OFFHAND:
+            this.offHandItem = stack;
+            break;
+        default:
+            break;
+        }
+    }
+    
+    @Override
+    public void remove() {
+        dropItemOnRemove(getMainArm(), mainHandItem);
+        dropItemOnRemove(getOppositeToMainArm(), offHandItem);
+        super.remove();
+    }
+    
+    protected void dropItemOnRemove(HandSide side, ItemStack itemStack) {
+        if (!level.isClientSide() && !itemStack.isEmpty()) {
+            Vector3d pos = position()
+                    .add(new Vector3d(getBbWidth() * 0.5 * (side == HandSide.LEFT ? -1 : 1), getBbHeight() * 0.4, 0).yRot((180 - yRot) * MathUtil.DEG_TO_RAD));
+            level.addFreshEntity(new ItemEntity(level, pos.x, pos.y, pos.z, itemStack.copy()));
+        }
+    }
+
 
 
     @Override
@@ -2176,12 +2222,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     @Override
     public boolean isAffectedByPotions() { return false; }
-
-    @Override
-    public ItemStack getItemBySlot(EquipmentSlotType slot) { return ItemStack.EMPTY; }
-
-    @Override
-    public void setItemSlot(EquipmentSlotType slot, ItemStack stack) {}
 
     @Override
     public boolean causeFallDamage(float distance, float damageMultiplier) { return false; }

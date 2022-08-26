@@ -26,39 +26,73 @@ import net.minecraft.world.World;
 
 public class StandEntityHeavyAttack extends StandEntityAction {
 	private final Supplier<StandEntityComboHeavyAttack> comboAttack;
+    private final Supplier<StandEntityAction> recoveryAction;
 	protected final PunchHandler punch;
 
-    public StandEntityHeavyAttack(StandEntityHeavyAttack.Builder builder, @Nullable Supplier<StandEntityComboHeavyAttack> comboAttack) {
+    public StandEntityHeavyAttack(StandEntityHeavyAttack.Builder builder) {
         super(builder);
-        this.comboAttack = comboAttack;
         this.punch = builder.punch.build();
+        this.comboAttack = builder.comboAttack;
+        this.recoveryAction = builder.recoveryAction;
     }
 
 	@Override
     protected Action<IStandPower> replaceAction(IStandPower power) {
-	    if (comboAttack != null && comboAttack.get() != null) {
-	        StandEntityComboHeavyAttack comboAttack = this.comboAttack.get();
-	        EnumSet<StandPart> missingParts = EnumSet.complementOf(power.getStandInstance().get().getAllParts());
-	        if (!missingParts.isEmpty()) {
-	            boolean canUseThis = true;
-	            for (StandPart missingPart : missingParts) {
-	                if (comboAttack.isPartRequired(missingPart)) {
-	                    return this;
+	    StandEntityHeavyAttack attackWithCombo = getComboAttack(power);
+	    if (attackWithCombo != this) {
+	        return attackWithCombo.replaceAction(power);
+	    }
+	    
+	    if (power.isActive()) {
+	        StandEntity standEntity = (StandEntity) power.getStandManifestation();
+	        return standEntity.getCurrentTask().map(task -> {
+	            if (task.getPhase() == Phase.RECOVERY) {
+	                StandEntityAction action = getRecoveryAction(power, standEntity, task);
+	                if (action != null) {
+	                    return action;
 	                }
+	            }
+	            return this;
+	        }).orElse(this);
+	    }
+	    
+	    return this;
+    }
+	
+	private StandEntityHeavyAttack getComboAttack(IStandPower power) {
+        StandEntityComboHeavyAttack comboAttack = this.comboAttack.get();
+        if (comboAttack != null) {
+            EnumSet<StandPart> missingParts = EnumSet.complementOf(power.getStandInstance().get().getAllParts());
+            if (!missingParts.isEmpty()) {
+                boolean canUseThis = true;
+                for (StandPart missingPart : missingParts) {
+                    if (comboAttack.isPartRequired(missingPart)) {
+                        return this;
+                    }
                     if (this.isPartRequired(missingPart)) {
                         canUseThis = false;
                     }
-	            }
-	            if (!canUseThis) {
-	                return comboAttack;
-	            }
-	        }
-	        
-	        return power.isActive() && ((StandEntity) power.getStandManifestation()).willHeavyPunchCombo()
-	                ? comboAttack : this;
-	    }
-	    return this;
-    }
+                }
+                if (!canUseThis) {
+                    return comboAttack;
+                }
+            }
+            
+            return power.isActive() && ((StandEntity) power.getStandManifestation()).willHeavyPunchCombo()
+                    ? comboAttack : this;
+        }
+        return this;
+	}
+	
+	protected StandEntityAction getRecoveryAction(IStandPower power, StandEntity standEntity, StandEntityTask task) {
+	    return recoveryAction.get();
+	}
+	
+	@Override
+	protected boolean isCancelable(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction, Phase phase) {
+	    return phase == Phase.RECOVERY && recoveryAction.get() != null && recoveryAction.get() == newAction
+	            || super.isCancelable(standPower, standEntity, newAction, phase);
+	}
 	
     @Override
     protected ActionConditionResult checkStandConditions(StandEntity stand, IStandPower power, ActionTarget target) {
@@ -109,6 +143,8 @@ public class StandEntityHeavyAttack extends StandEntityAction {
     
     public static class Builder extends StandEntityAction.AbstractBuilder<StandEntityHeavyAttack.Builder> {
         private PunchHandler.Builder punch = new PunchHandler.Builder().setEntityPunch(HeavyEntityPunch::new);
+        private Supplier<StandEntityComboHeavyAttack> comboAttack = () -> null;
+        private Supplier<StandEntityAction> recoveryAction = () -> null;
     	
     	public Builder() {
             standPose(StandPose.HEAVY_ATTACK).staminaCost(50F)
@@ -121,6 +157,16 @@ public class StandEntityHeavyAttack extends StandEntityAction {
         
         public Builder setPunch(PunchHandler.Builder punch) {
             this.punch = punch;
+            return getThis();
+        }
+        
+        public Builder setComboAttack(Supplier<StandEntityComboHeavyAttack> comboAttack) {
+            this.comboAttack = comboAttack != null ? comboAttack : () -> null;
+            return getThis();
+        }
+        
+        public Builder setRecoveryAction(Supplier<StandEntityAction> recoveryAction) {
+            this.recoveryAction = recoveryAction != null ? recoveryAction : () -> null;
             return getThis();
         }
 

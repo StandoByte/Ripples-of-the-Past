@@ -1,7 +1,5 @@
 package com.github.standobyte.jojo.action.stand;
 
-import java.util.function.Supplier;
-
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -20,8 +18,8 @@ import net.minecraftforge.common.ForgeMod;
 
 public class SilverChariotDashAttack extends StandEntityHeavyAttack {
 
-    public SilverChariotDashAttack(StandEntityHeavyAttack.Builder builder, Supplier<StandEntityComboHeavyAttack> comboAttack) {
-        super(builder, comboAttack);
+    public SilverChariotDashAttack(StandEntityHeavyAttack.Builder builder) {
+        super(builder);
     }
 
     @Override

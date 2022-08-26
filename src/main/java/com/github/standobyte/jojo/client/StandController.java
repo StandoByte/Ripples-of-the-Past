@@ -132,6 +132,7 @@ public class StandController {
     
     
 
+    // FIXME render items in hands
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void renderStandHands(RenderHandEvent event) {
         if (!isControllingStand()) {

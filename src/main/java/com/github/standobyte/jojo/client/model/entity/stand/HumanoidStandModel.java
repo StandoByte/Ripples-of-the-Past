@@ -23,6 +23,7 @@ import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.util.utils.MathUtil;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -437,7 +438,8 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         return barrageSwing;
     }
 
-    protected XRotationModelRenderer getArm(HandSide side) {
+    @Override
+    public XRotationModelRenderer getArm(HandSide side) {
         switch (side) {
         case LEFT:
             return leftArm;
@@ -504,11 +506,6 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
     protected Iterable<ModelRenderer> bodyParts() {
         return ImmutableList.of(body);
     }
-
-    @Override
-    public ModelRenderer armModel(HandSide side) {
-        return getArm(side);
-    }
     
     @Override
     protected void initOpposites() {
@@ -517,5 +514,22 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         oppositeHandside.put(leftForeArm, rightForeArm);
         oppositeHandside.put(leftLeg, rightLeg);
         oppositeHandside.put(leftLowerLeg, rightLowerLeg);
+    }
+    
+    @Override
+    public void translateToHand(HandSide handSide, MatrixStack matrixStack) {
+        matrixStack.translate(handSide == HandSide.LEFT ? -0.0625 : 0.0625, 0, 0);
+        body.translateAndRotate(matrixStack);
+        upperPart.translateAndRotate(matrixStack);
+        
+        ModelRenderer arm = getArm(handSide);
+        arm.translateAndRotate(matrixStack);
+
+        ModelRenderer foreArm = getForeArm(handSide);
+        foreArm.translateAndRotate(matrixStack);
+        matrixStack.translate(
+                (double)(-foreArm.x / 16.0F), 
+                (double)(-foreArm.y / 16.0F), 
+                (double)(-foreArm.z / 16.0F));
     }
 }
