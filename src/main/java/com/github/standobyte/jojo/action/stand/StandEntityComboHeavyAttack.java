@@ -29,7 +29,7 @@ public class StandEntityComboHeavyAttack extends StandEntityHeavyAttack {
     	public Builder() {
     		standPose(StandPose.HEAVY_ATTACK_COMBO);
     	}
-        
+    	
     	@Override
         public StandEntityHeavyAttack.Builder setComboAttack(Supplier<StandEntityComboHeavyAttack> comboAttack) {
             return getThis();
