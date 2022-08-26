@@ -21,9 +21,12 @@ import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent;
@@ -132,6 +135,9 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
             StandEntity standEntity = getEntityType().create(user.level);
             standEntity.copyPosition(user);
             standPower.setStandManifestation(standEntity);
+            // FIXME !!!!!!!!!!!!!
+            standEntity.setItemInHand(Hand.MAIN_HAND, new ItemStack(Items.DIAMOND_SWORD));
+            standEntity.setItemInHand(Hand.OFF_HAND, new ItemStack(Items.SHIELD));
             beforeTheSummon.accept(standEntity);
             user.level.addFreshEntity(standEntity);
             

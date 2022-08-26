@@ -207,7 +207,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                         boolean gaveIngredients = false;
                         for (ItemStack ingredient : itemsAndCount.getLeft()) {
                             if (!ingredient.isEmpty()) {
-                                JojoModUtil.giveItem(player, ingredient);
+                                JojoModUtil.giveItemToPlayer(player, ingredient);
                                 gaveIngredients = true;
                             }
                         }

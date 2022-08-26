@@ -39,12 +39,17 @@ public class BloodParticle extends SpriteTexturedParticle {
             double smallVal = 1.0E-5;
             if (Math.abs(xdPrev) >= smallVal && Math.abs(xd) < smallVal || 
                 Math.abs(ydPrev) >= smallVal && Math.abs(yd) < smallVal || 
-                Math.abs(zdPrev) >= smallVal && Math.abs(zd) < smallVal) {
-                xd = 0;
-                yd = 0;
-                zd = 0;
+                Math.abs(zdPrev) >= smallVal && Math.abs(zd) < smallVal
+                || !level.getEntities(null, this.getBoundingBox()).isEmpty()) {
+                stopParticle();
             }
         }
+    }
+    
+    private void stopParticle() {
+        xd = 0;
+        yd = 0;
+        zd = 0;
     }
 
     public static class Factory implements IParticleFactory<BasicParticleType> {
