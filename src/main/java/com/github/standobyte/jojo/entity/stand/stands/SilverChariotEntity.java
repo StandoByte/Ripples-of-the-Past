@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.entity.stand.stands;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.stand.punch.PunchHandler;
@@ -168,22 +169,22 @@ public class SilverChariotEntity extends StandEntity {
     }
     
     @Override
-    public boolean attackEntity(Entity target, StandEntityPunch punch, StandEntityTask task) {
+    public boolean attackEntity(Supplier<Boolean> doAttack, StandEntityPunch punch, StandEntityTask task) {
     	if (hasRapier() && isRapierOnFire()) {
-            return DamageUtil.dealDamageAndSetOnFire(target, 
-                    entity -> attackOrDeflect(target, punch, task), 4, true);
+            return DamageUtil.dealDamageAndSetOnFire(punch.target, 
+                    entity -> attackOrDeflect(doAttack, punch, task), 4, true);
     	}
     	else {
-    		return attackOrDeflect(target, punch, task);
+    		return attackOrDeflect(doAttack, punch, task);
     	}
     }
 
-    private boolean attackOrDeflect(Entity target, StandEntityPunch punch, StandEntityTask task) {
-        if (canDeflectProjectiles() && hasRapier() && target instanceof ProjectileEntity) {
-        	return deflectProjectile(target);
+    private boolean attackOrDeflect(Supplier<Boolean> doAttack, StandEntityPunch punch, StandEntityTask task) {
+        if (canDeflectProjectiles() && hasRapier() && punch.target instanceof ProjectileEntity) {
+        	return deflectProjectile(punch.target);
         }
         else {
-            return super.attackEntity(target, punch, task);
+            return super.attackEntity(doAttack, punch, task);
         }
     }
     
