@@ -28,8 +28,10 @@ public abstract class StandEffectInstance {
     protected LivingEntity user;
     protected World world;
     protected IStandPower userPower;
-    private UUID targetUUID;
+    
     private LivingEntity target;
+    private UUID targetUUID;
+    private int targetNetworkId = -1;
     
     
     public StandEffectInstance(@Nonnull StandEffectType<?> effectType) {
@@ -58,6 +60,15 @@ public abstract class StandEffectInstance {
     public StandEffectInstance withTarget(LivingEntity target) {
         this.target = target;
         this.targetUUID = target != null ? target.getUUID() : null;
+        this.targetNetworkId = target.getId();
+        return this;
+    }
+    
+    public StandEffectInstance withTargetEntityId(int entityId) {
+        this.targetNetworkId = entityId;
+        if (target != null && target.getId() != entityId) {
+            target = null;
+        }
         return this;
     }
     
@@ -81,16 +92,8 @@ public abstract class StandEffectInstance {
         tickCount++;
 
         updateTarget(world);
-        if (targetUUID != null && target != null) {
-            if (!keepTarget(target)) {
-                targetUUID = null;
-                target = null;
-            }
-            if (target != null) {
-                tickTarget(target);
-            }
-        }
-        if (targetUUID == null && needsTarget()) {
+        
+        if (!world.isClientSide() && targetUUID == null && needsTarget()) {
             remove();
             return;
         }
@@ -100,15 +103,38 @@ public abstract class StandEffectInstance {
 
     public void updateTarget(World world) {
         if (target == null) {
-            if (targetUUID != null && !world.isClientSide()) {
-                Entity entity = ((ServerWorld) world).getEntity(targetUUID);
+            if (!world.isClientSide()) {
+                if (targetUUID != null) {
+                    Entity entity = ((ServerWorld) world).getEntity(targetUUID);
+                    if (entity instanceof LivingEntity) {
+                        target = (LivingEntity) entity;
+                        PacketManager.sendToClientsTrackingAndSelf(TrStandEffectPacket.updateTarget(this), user);
+                    }
+                }
+            }
+            else if (targetNetworkId > -1) {
+                Entity entity = world.getEntity(targetNetworkId);
                 if (entity instanceof LivingEntity) {
                     target = (LivingEntity) entity;
                 }
             }
         }
-        else if (!target.isAlive()) {
-            target = null;
+        
+        if (!world.isClientSide() && targetUUID != null && target != null) {
+            if (!keepTarget(target)) {
+                targetUUID = null;
+                target = null;
+                PacketManager.sendToClientsTrackingAndSelf(TrStandEffectPacket.updateTarget(this), user);
+            }
+        }
+        
+        if (target != null) {
+            if (!target.isAlive()) {
+                target = null;
+            }
+            else {
+                tickTarget(target);
+            }
         }
     }
     
@@ -151,7 +177,9 @@ public abstract class StandEffectInstance {
         return toBeRemoved;
     }
     
-    public void syncWithUserOnly(ServerPlayerEntity user) {}
+    public void syncWithUserOnly(ServerPlayerEntity user) {
+        updateTarget(user.level);
+    }
     
     public void syncWithTrackingAndUser() {
         PacketManager.sendToClientsTrackingAndSelf(TrStandEffectPacket.add(this), user);

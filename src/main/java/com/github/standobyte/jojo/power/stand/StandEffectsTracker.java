@@ -176,7 +176,7 @@ public class StandEffectsTracker {
             if (nbt.contains(key, JojoModUtil.getNbtId(CompoundNBT.class))) {
                 StandEffectInstance effect = StandEffectInstance.fromNBT(nbt.getCompound(key));
                 if (effect != null) {
-                    putEffectInstance(effect);
+                    putEffectInstance(effect.withId(EFFECTS_COUNTER.incrementAndGet()));
                 }
             }
         });
