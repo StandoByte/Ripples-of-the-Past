@@ -1,13 +1,12 @@
 package com.github.standobyte.jojo.capability.world;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
@@ -204,8 +203,8 @@ public class TimeStopHandler {
         PacketManager.sendToClient(new TimeStopPlayerStatePacket(canSee, canMove), player);
     }
     
-    public Collection<TimeStopInstance> getAllTimeStopInstances() {
-    	return Collections.unmodifiableCollection(timeStopInstances.values());
+    public Stream<TimeStopInstance> getAllTimeStopInstances() {
+        return timeStopInstances.values().stream();
     }
     
 

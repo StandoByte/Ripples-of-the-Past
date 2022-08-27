@@ -24,13 +24,18 @@ public class TrStandEffectPacket {
     private final PacketBuffer buf;
     
     public static TrStandEffectPacket add(StandEffectInstance effect) {
-        return new TrStandEffectPacket(PacketType.ADD, effect.getStandUser().getId(), 
-                effect.getId(), Optional.ofNullable(effect.getTarget()).map(Entity::getId).orElse(-1), effect.effectType, effect, null);
+        return new TrStandEffectPacket(PacketType.ADD, effect.getStandUser().getId(), effect.getId(), 
+                Optional.ofNullable(effect.getTarget()).map(Entity::getId).orElse(-1), effect.effectType, effect, null);
     }
     
     public static TrStandEffectPacket remove(StandEffectInstance effect) {
         return new TrStandEffectPacket(PacketType.REMOVE, effect.getStandUser().getId(), effect.getId(), 
                 -1, null, null, null);
+    }
+    
+    public static TrStandEffectPacket updateTarget(StandEffectInstance effect) {
+        return new TrStandEffectPacket(PacketType.UPDATE_TARGET, effect.getStandUser().getId(), effect.getId(), 
+                Optional.ofNullable(effect.getTarget()).map(Entity::getId).orElse(-1), null, null, null);
     }
     
     private TrStandEffectPacket(PacketType packetType, int userId, int effectId, int targetId, 
@@ -58,6 +63,11 @@ public class TrStandEffectPacket {
             buf.writeInt(msg.userId);
             buf.writeInt(msg.effectId);
             break;
+        case UPDATE_TARGET:
+            buf.writeInt(msg.userId);
+            buf.writeInt(msg.effectId);
+            buf.writeInt(msg.targetId);
+            break;
         }
     }
 
@@ -70,6 +80,9 @@ public class TrStandEffectPacket {
         case REMOVE:
             return new TrStandEffectPacket(type, buf.readInt(), buf.readInt(), 
                     -1, null, null, null);
+        case UPDATE_TARGET:
+            return new TrStandEffectPacket(type, buf.readInt(), buf.readInt(), 
+                    buf.readInt(), null, null, null);
         }
         return null;
     }
@@ -82,19 +95,21 @@ public class TrStandEffectPacket {
                 IStandPower.getStandPowerOptional(livingEntity).ifPresent(stand -> {
                     switch (msg.packetType) {
                     case ADD:
-                        StandEffectInstance effect = msg.effectFactory.create().withId(msg.effectId).withStand(stand);
+                        StandEffectInstance newEffect = msg.effectFactory.create().withId(msg.effectId).withStand(stand);
                         if (msg.targetId != -1) {
-                            Entity target = ClientUtil.getEntityById(msg.targetId);
-                            if (target instanceof LivingEntity) {
-                                effect.withTarget((LivingEntity) target);
-                            }
+                            newEffect.withTargetEntityId(msg.targetId);
                         }
-                        effect.readAdditionalPacketData(msg.buf);
-                        stand.getContinuousEffects().addEffect(effect);
+                        newEffect.readAdditionalPacketData(msg.buf);
+                        stand.getContinuousEffects().addEffect(newEffect);
                         break;
                     case REMOVE:
                         StandEffectsTracker effects = stand.getContinuousEffects();
                         effects.removeEffect(effects.getById(msg.effectId));
+                    case UPDATE_TARGET:
+                        StandEffectInstance effect = stand.getContinuousEffects().getById(msg.effectId);
+                        if (effect != null) {
+                            effect.withTargetEntityId(msg.targetId);
+                        }
                     }
                 });
             }
@@ -104,6 +119,7 @@ public class TrStandEffectPacket {
     
     private enum PacketType {
         ADD,
-        REMOVE
+        REMOVE,
+        UPDATE_TARGET
     }
 }
