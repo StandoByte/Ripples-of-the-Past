@@ -145,7 +145,7 @@ public class StandStatFormulas {
          * harvest level:
          * -1: leaves/grass                 0: dirt/wood/stone                  1: iron                             2: diamond/gold                         3: obsidian/netherite
          */
-        return blockHardness < Math.exp(strength / 4) && blockHarvestLevel < (int) strength / 4;
+        return blockHardness >= 0 && blockHardness < Math.exp(strength / 4) && blockHarvestLevel < (int) strength / 4;
     }
     
     // dash

@@ -51,6 +51,7 @@ public class CDBloodCutterEntity extends ModdedProjectileEntity {
                         EntityPredicates.ENTITY_STILL_ALIVE.and(EntityPredicates.NO_SPECTATORS).and(
                                 entity -> !entity.is(stand.getUser()) && entity != stand.getStandManifestation()
                                 && !(entity instanceof StandEntity && !((StandEntity) entity).isVisibleForAll())
+                                && !entity.isInWaterOrBubble()
                                         // FIXME !!! (blood cutter) && isn't behind blocks
                                 && entity.getBoundingBox().clip(this.getBoundingBox().getCenter(), entity.getBoundingBox().getCenter()).isPresent()))
                 .forEach(entity -> {
@@ -64,7 +65,6 @@ public class CDBloodCutterEntity extends ModdedProjectileEntity {
         }
         else {
             level.playLocalSound(getX(), getY(), getZ(), ModSounds.WATER_SPLASH.get(), getSoundSource(), 1.0F, 1.0F, false);
-            // FIXME !!! (blood cutter) blood particles
         }
     }
     

@@ -39,6 +39,7 @@ import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMove;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBloodCutter;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondDisfigure;
+import com.github.standobyte.jojo.action.stand.CrazyDiamondDisfiguringPunch;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondHeal;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondItemProjectile;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondLeaveObject;
@@ -65,6 +66,7 @@ import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.action.stand.StandEntityAction.AutoSummonMode;
 import com.github.standobyte.jojo.action.stand.StandEntityAction.Phase;
+import com.github.standobyte.jojo.action.stand.StandEntityActionModifier;
 import com.github.standobyte.jojo.action.stand.StandEntityBlock;
 import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack;
 import com.github.standobyte.jojo.action.stand.StandEntityLightAttack;
@@ -475,18 +477,14 @@ public class ModActions {
                     .barrageSound(ModSounds.CRAZY_DIAMOND_PUNCH_BARRAGE)
                     .standSound(ModSounds.CRAZY_DIAMOND_DORARARA)));
     
-    public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_LEAVE_OBJECT = ACTIONS.register("crazy_diamond_leave_object", 
-            () -> new CrazyDiamondLeaveObject(new StandEntityAction.Builder()));
-    
-    public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_DISFIGURE = ACTIONS.register("crazy_diamond_disfigure", 
-            () -> new CrazyDiamondDisfigure(new StandEntityAction.Builder()));
-    
-    public static final RegistryObject<StandEntityHeavyAttack> CRAZY_DIAMOND_COMBO_PUNCH = ACTIONS.register("crazy_diamond_combo_punch", 
-            () -> new StandEntityHeavyAttack(new StandEntityHeavyAttack.Builder()
+    public static final RegistryObject<StandEntityHeavyAttack> CRAZY_DIAMOND_COMBO_PUNCH = ACTIONS.register("crazy_diamond_disfiguring_punch", 
+            () -> new CrazyDiamondDisfiguringPunch(new StandEntityHeavyAttack.Builder()
                     .punchSound(ModSounds.CRAZY_DIAMOND_PUNCH_HEAVY)
                     .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_DORA)
-                    .partsRequired(StandPart.ARMS)
-                    .setRecoveryFollowUpAction(CRAZY_DIAMOND_DISFIGURE)));
+                    .partsRequired(StandPart.ARMS)));
+    
+    public static final RegistryObject<StandEntityActionModifier> CRAZY_DIAMOND_DISFIGURE = ACTIONS.register("crazy_diamond_disfigure", 
+            () -> new CrazyDiamondDisfigure(new StandAction.Builder()));
     
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_HEAVY_PUNCH = ACTIONS.register("crazy_diamond_heavy_punch", 
             () -> new StandEntityHeavyAttack(new StandEntityHeavyAttack.Builder()
@@ -494,8 +492,10 @@ public class ModActions {
                     .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_DORA)
                     .partsRequired(StandPart.ARMS)
                     .setComboAttack(CRAZY_DIAMOND_COMBO_PUNCH)
-                    .setRecoveryFollowUpAction(CRAZY_DIAMOND_LEAVE_OBJECT)
                     .shiftVariationOf(CRAZY_DIAMOND_PUNCH).shiftVariationOf(CRAZY_DIAMOND_BARRAGE)));
+    
+    public static final RegistryObject<StandEntityActionModifier> CRAZY_DIAMOND_LEAVE_OBJECT = ACTIONS.register("crazy_diamond_leave_object", 
+            () -> new CrazyDiamondLeaveObject(new StandAction.Builder()));
     
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_ITEM_PROJECTILE = ACTIONS.register("crazy_diamond_item_projectile", 
             () -> new CrazyDiamondItemProjectile(new StandEntityAction.Builder().standWindupDuration(15)

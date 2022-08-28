@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.action.stand;
 
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
@@ -52,25 +52,48 @@ public class CrazyDiamondHeal extends StandEntityAction {
     public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         Entity targetEntity = task.getTarget().getEntity();
         if (targetEntity instanceof LivingEntity) {
-            handleLivingEntity(world, (LivingEntity) targetEntity);
+            LivingEntity targetLiving = (LivingEntity) targetEntity;
+            // FIXME disable it if the target is a dead body already
+            if (targetLiving.deathTime > 0) {
+                handle(world, targetEntity, targetLiving, 
+                        (e, clientSide) -> {
+                            if (targetLiving.deathTime == 1) {
+                                if (!clientSide) {
+                                    targetLiving.setHealth(0.001F);
+                                }
+                                targetLiving.deathTime--;
+                            }
+                        },
+                        e -> e.getHealth() < e.getMaxHealth());
+            }
+            else {
+                handleLivingEntity(world, targetLiving);
+            }
         }
         else if (targetEntity instanceof IHasHealth) {
             handle(world, targetEntity, (IHasHealth) targetEntity, 
-                    e -> e.setHealth(e.getHealth() + e.getMaxHealth() / 40), 
+                    (e, clientSide) -> {
+                        if (!clientSide) {
+                            e.setHealth(e.getHealth() + e.getMaxHealth() / 40);
+                        }
+                    },
                     e -> e.getHealth() < e.getMaxHealth());
         }
         else if (targetEntity instanceof BoatEntity) {
             handle(world, targetEntity, (BoatEntity) targetEntity, 
-                    e -> e.setDamage(Math.max(e.getDamage() - 1, 0)), 
+                    (e, clientSide) -> {
+                        if (clientSide) {
+                            e.setDamage(Math.max(e.getDamage() - 1, 0));
+                        }
+                    },
                     e -> e.getDamage() > 0);
         }
     }
 
-    // FIXME ! (heal) interaction with dying entities
     public static boolean handleLivingEntity(World world, LivingEntity entity) {
         return handle(world, entity, 
-                entity, e -> {
-                    if (!e.isDeadOrDying()) {
+                entity, (e, clientSide) -> {
+                    if (!clientSide) {
                         e.setHealth(e.getHealth() + 0.5F);
                     }
                 }, 
@@ -78,14 +101,12 @@ public class CrazyDiamondHeal extends StandEntityAction {
     }
 
     // FIXME ! (heal) CD restore sound
-    public static <T> boolean handle(World world, Entity entity, T entityCasted, Consumer<T> heal, Predicate<T> healthMissing) {
-        if (!world.isClientSide()) {
-            heal.accept(entityCasted);
-        }
-        else if (healthMissing.test(entityCasted)) {
+    public static <T> boolean handle(World world, Entity entity, T entityCasted, BiConsumer<T, Boolean> heal, Predicate<T> isHealthMissing) {
+        heal.accept(entityCasted, world.isClientSide());
+        if (world.isClientSide() && isHealthMissing.test(entityCasted)) {
             addParticlesAround(entity);
         }
-        return !healthMissing.test(entityCasted);
+        return !isHealthMissing.test(entityCasted);
     }
     
     public static void addParticlesAround(Entity entity) {

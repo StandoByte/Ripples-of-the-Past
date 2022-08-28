@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.network;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -149,14 +150,36 @@ public class NetworkUtil {
         }
     }
     
-    public static <T> void writeOptional(PacketBuffer buf, T obj, BiConsumer<PacketBuffer, T> write) {
+    public static <T> void writeOptionally(PacketBuffer buf, T obj, BiConsumer<PacketBuffer, T> write) {
         buf.writeBoolean(obj != null);
         if (obj != null) {
             write.accept(buf, obj);
         }
     }
     
+    public static <T> void writeOptional(PacketBuffer buf, @Nonnull Optional<T> objOptional, BiConsumer<PacketBuffer, T> write) {
+        buf.writeBoolean(objOptional.isPresent());
+        objOptional.ifPresent(obj -> write.accept(buf, obj));
+    }
+    
     public static <T> Optional<T> readOptional(PacketBuffer buf, Function<PacketBuffer, T> read) {
         return buf.readBoolean() ? Optional.of(read.apply(buf)) : Optional.empty();
+    }
+    
+    public static <T> void writeCollection(PacketBuffer buf, Collection<T> collection, BiConsumer<PacketBuffer, T> writeElement) {
+        buf.writeVarInt(collection.size());
+        collection.forEach(element -> writeElement.accept(buf, element));
+    }
+    
+    public static <T> List<T> readCollection(PacketBuffer buf, Function<PacketBuffer, T> readElement) {
+        int size = buf.readVarInt();
+        if (size > 0) {
+            List<T> list = new ArrayList<T>(size);
+            for (int i = 0; i < size; i++) {
+                list.add(readElement.apply(buf));
+            }
+            return list;
+        }
+        return Collections.emptyList();
     }
 }

@@ -24,7 +24,7 @@ public class ModDataSerializers {
 
         @Override
         public void write(PacketBuffer buf, Optional<Vector3d> value) {
-            NetworkUtil.writeOptional(buf, value.orElseGet(null), (buffer, vector) -> {
+            NetworkUtil.writeOptionally(buf, value.orElseGet(null), (buffer, vector) -> {
                 buffer.writeDouble(vector.x);
                 buffer.writeDouble(vector.y);
                 buffer.writeDouble(vector.z);

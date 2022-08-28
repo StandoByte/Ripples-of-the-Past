@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.power;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -47,13 +48,6 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
 
     @Nullable Action<P> getAction(ActionType type, int index, boolean shift);
     boolean onClickAction(Action<P> action, boolean shift, ActionTarget target);
-    default boolean onClickAction(ActionType type, int index, boolean shift, ActionTarget target) {
-        Action<P> action = this.getAction(type, index, shift);
-        if (action != null) {
-            return onClickAction(action, shift, target);
-        }
-        return false;
-    }
     ActionConditionResult checkRequirements(Action<P> action, Container<ActionTarget> targetContainer, boolean checkTargetType);
     ActionConditionResult checkTarget(Action<P> action, Container<ActionTarget> targetContainer);
     boolean canUsePower();
@@ -92,6 +86,13 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     void syncWithUserOnly();
     void syncWithTrackingOrUser(ServerPlayerEntity player);
 
+    default boolean onClickAction(ActionType type, int index, boolean shift, ActionTarget target, Optional<Action<?>> inputValidation) {
+        Action<P> action = this.getAction(type, index, shift);
+        if (action != null && inputValidation.map(clientAction -> clientAction == action).orElse(true)) {
+            return onClickAction(action, shift, target);
+        }
+        return false;
+    }
 
     public static LazyOptional<? extends IPower<?, ?>> getPowerOptional(LivingEntity entity, PowerClassification classification) {
         return classification == PowerClassification.STAND ? IStandPower.getStandPowerOptional(entity) : INonStandPower.getNonStandPowerOptional(entity);
