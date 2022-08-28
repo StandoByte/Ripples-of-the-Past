@@ -40,11 +40,10 @@ public class CrazyDiamondItemProjectile extends StandEntityAction {
         }
         Block block = ((BlockItem) itemToShoot.getItem()).getBlock();
         BlockState blockState = block.defaultBlockState();
-        float blockHardness = blockState.getDestroySpeed(user.level, user.blockPosition());
-        if (blockHardness < 0 || !StandStatFormulas.isBlockBreakable(
+        if (!StandStatFormulas.isBlockBreakable(
                 power.isActive() ? ((StandEntity) power.getStandManifestation()).getAttackDamage()
-                        : power.getType().getStats().getDevPower(power.getStatsDevelopment()), 
-                        blockHardness, blockState.getHarvestLevel())) {
+                        : power.getType().getStats().getBasePower() + power.getType().getStats().getDevPower(power.getStatsDevelopment()), 
+                        blockState.getDestroySpeed(user.level, user.blockPosition()), blockState.getHarvestLevel())) {
             return conditionMessage("stand_cant_break_block");
         }
         if (!hardMaterial(blockState.getMaterial())) {

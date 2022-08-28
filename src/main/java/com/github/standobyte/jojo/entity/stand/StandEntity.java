@@ -983,7 +983,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         
         Optional<StandEntityTask> currentTask = getCurrentTask();
         
-        if (!currentTask.map(task -> task.rotateStand(this, false)).orElse(false)
+        if (!currentTask.map(task -> task.rotateStand(this)).orElse(false)
         		&& user != null && !isRemotePositionFixed()) {
             float yRotSet = user.yRot;
             setRot(yRotSet, user.xRot);
@@ -1381,7 +1381,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 aim = precisionRayTrace(user, reachDistance);
                 if (JojoModUtil.isAnotherEntityTargeted(aim, this)
                         || currentTarget.getType() == TargetType.EMPTY && aim.getType() != RayTraceResult.Type.MISS) {
-                    rotateTowards(ActionTarget.fromRayTraceResult(aim), true);
+                    Vector3d targetPos = ActionTarget.fromRayTraceResult(aim).getTargetPos(true);
+                    if (targetPos != null) {
+                        JojoModUtil.rotateTowards(this, targetPos, (float) getAttackSpeed() / 16F * 18F);
+                    }
                 }
             }
         }
@@ -1512,13 +1515,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
     protected SoundEvent getAttackBlockSound() {
     	return ModSounds.STAND_DAMAGE_BLOCK.get();
-    }
-    
-    public void rotateTowards(ActionTarget target, boolean limitBySpeed) {
-    	Vector3d targetPos = target.getTargetPos(true);
-    	if (targetPos != null) {
-    		JojoModUtil.rotateTowards(this, targetPos, limitBySpeed ? (float) getAttackSpeed() / 16F * 18F : 360F);
-    	}
     }
     
     public double getDistanceToTarget(ActionTarget target) {
@@ -2181,7 +2177,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
         return Optional.empty();
     }
-    // FIXME !!!! save the items in nbt
+    // FIXME save the items in nbt
 
 
 

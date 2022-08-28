@@ -3,6 +3,8 @@ package com.github.standobyte.jojo.action.stand;
 import java.util.EnumSet;
 import java.util.function.Supplier;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
@@ -15,6 +17,7 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.power.stand.StandUtil;
+import com.github.standobyte.jojo.util.Container;
 import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
 
 import net.minecraft.entity.Entity;
@@ -24,7 +27,7 @@ import net.minecraft.world.World;
 
 public class StandEntityHeavyAttack extends StandEntityAction implements IHasStandPunch {
 	private final Supplier<StandEntityHeavyAttack> comboAttack;
-    private final Supplier<? extends Action<IStandPower>> recoveryAction;
+    private final Supplier<StandEntityActionModifier> recoveryAction;
     boolean isCombo = false;
     private final Supplier<SoundEvent> punchSound;
 
@@ -37,28 +40,26 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
 
 	@Override
     protected Action<IStandPower> replaceAction(IStandPower power) {
-	    StandEntityHeavyAttack attackWithCombo = getComboAttack(power);
+	    StandEntity standEntity = power.isActive() ? (StandEntity) power.getStandManifestation() : null;
+	    
+	    StandEntityHeavyAttack attackWithCombo = getComboAttack(power, standEntity);
 	    if (attackWithCombo != this) {
 	        return attackWithCombo.replaceAction(power);
 	    }
 	    
-//	    if (power.isActive()) {
-//	        StandEntity standEntity = (StandEntity) power.getStandManifestation();
-//	        return standEntity.getCurrentTask().map(task -> {
-//	            if (task.getPhase() == Phase.RECOVERY) {
-//	                StandEntityAction action = getRecoveryAction(power, standEntity, task);
-//	                if (action != null) {
-//	                    return action;
-//	                }
-//	            }
-//	            return this;
-//	        }).orElse(this);
-//	    }
+	    StandEntityActionModifier followUp = getRecoveryFollowup(power, standEntity);
+	    if (followUp != null && standEntity != null && standEntity.getCurrentTask().map(task -> {
+	        return task.getAction() == this && 
+	                !task.getModifierActions().filter(action -> action == followUp).findAny().isPresent() &&
+	                power.checkRequirements(followUp, new Container<>(task.getTarget()), true).isPositive();
+	    }).orElse(false)) {
+	        return recoveryAction.get();
+	    };
 	    
 	    return this;
     }
 	
-	private StandEntityHeavyAttack getComboAttack(IStandPower power) {
+	private StandEntityHeavyAttack getComboAttack(IStandPower power, @Nullable StandEntity standEntity) {
         StandEntityHeavyAttack comboAttack = this.comboAttack.get();
         if (comboAttack != null) {
             EnumSet<StandPart> missingParts = EnumSet.complementOf(power.getStandInstance().get().getAllParts());
@@ -77,10 +78,16 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
                 }
             }
             
-            return power.isActive() && ((StandEntity) power.getStandManifestation()).willHeavyPunchCombo()
-                    ? comboAttack : this;
+            if (standEntity != null && (standEntity.getCurrentTaskAction() == comboAttack || standEntity.willHeavyPunchCombo())) {
+                return comboAttack;
+            }
         }
         return this;
+	}
+	
+	@Nullable
+	protected StandEntityActionModifier getRecoveryFollowup(IStandPower standPower, StandEntity standEntity) {
+	    return recoveryAction.get();
 	}
 	
     @Override
@@ -157,7 +164,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     
     public static class Builder extends StandEntityAction.AbstractBuilder<StandEntityHeavyAttack.Builder> {
         private Supplier<StandEntityHeavyAttack> comboAttack = () -> null;
-        private Supplier<? extends Action<IStandPower>> recoveryAction = () -> null;
+        private Supplier<StandEntityActionModifier> recoveryAction = () -> null;
         private Supplier<SoundEvent> punchSound = () -> null;
     	
     	public Builder() {
@@ -173,7 +180,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
             return getThis();
         }
         
-        public Builder setRecoveryFollowUpAction(Supplier<? extends Action<IStandPower>> recoveryAction) {
+        public Builder setRecoveryFollowUpAction(Supplier<StandEntityActionModifier> recoveryAction) {
             this.recoveryAction = recoveryAction != null ? recoveryAction : () -> null;
             return getThis();
         }

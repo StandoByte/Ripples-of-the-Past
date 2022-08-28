@@ -112,8 +112,8 @@ public class CDItemProjectileEntity extends ModdedProjectileEntity {
             setTarget(((ServerWorld) level).getEntity(targetUUID));
         }
         super.writeSpawnData(buffer);
-        NetworkUtil.writeOptional(buffer, block, (buf, bl) -> buf.writeRegistryId(bl));
-        NetworkUtil.writeOptional(buffer, homingTarget.map(target -> target.getId()).orElse(null), (buf, id) -> buf.writeInt(id));
+        NetworkUtil.writeOptionally(buffer, block, (buf, bl) -> buf.writeRegistryId(bl));
+        NetworkUtil.writeOptionally(buffer, homingTarget.map(target -> target.getId()).orElse(null), (buf, id) -> buf.writeInt(id));
     }
 
     @Override

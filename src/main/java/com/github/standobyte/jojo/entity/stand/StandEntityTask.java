@@ -1,7 +1,10 @@
 package com.github.standobyte.jojo.entity.stand;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -9,9 +12,14 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.action.stand.IStandPhasedAction;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
+import com.github.standobyte.jojo.action.stand.StandEntityActionModifier;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.network.NetworkUtil;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntityTaskModifierPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.StacksTHC;
 
@@ -30,6 +38,7 @@ public class StandEntityTask {
     private int ticksLeft;
     @Nonnull
     private StandEntityAction.Phase phase;
+    private Set<StandEntityActionModifier> taskModifiers = new HashSet<>();
     @Nullable
     private StandRelativeOffset offsetFromUser;
     private StacksTHC additionalData = new StacksTHC();
@@ -80,6 +89,17 @@ public class StandEntityTask {
         return action.checkRangeAndTarget(target, standPower.getUser(), standPower).isPositive();
     }
     
+    public void addModifierAction(StandEntityActionModifier action, StandEntity standEntity) {
+        taskModifiers.add(action);
+        if (!standEntity.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(new TrStandEntityTaskModifierPacket(standEntity.getId(), action), standEntity);
+        }
+    }
+    
+    public Stream<StandEntityActionModifier> getModifierActions() {
+        return taskModifiers.stream();
+    }
+    
     void tick(IStandPower standPower, StandEntity standEntity) {
 //        if (target.getType() != TargetType.EMPTY) {
 //            if (!standEntity.level.isClientSide() && ticksLeft < startingTicks) {
@@ -95,6 +115,16 @@ public class StandEntityTask {
             }
         }
         
+        tickAction(standPower, standEntity, action);
+        taskModifiers.forEach(modifier -> tickAction(standPower, standEntity, modifier));
+        
+        ticksLeft--;
+        if (ticksLeft <= 0 && phase != StandEntityAction.Phase.BUTTON_HOLD) {
+            moveToPhase(phase.getNextPhase(), standPower, standEntity);
+        }
+    }
+    
+    private void tickAction(IStandPower standPower, StandEntity standEntity, IStandPhasedAction action) {
         int phaseTicks = startingTicks - ticksLeft;
         switch (phase) {
         case BUTTON_HOLD:
@@ -121,11 +151,6 @@ public class StandEntityTask {
         case RECOVERY:
             action.standTickRecovery(standEntity.level, standEntity, standPower, this);
             break;
-        }
-        
-        ticksLeft--;
-        if (ticksLeft <= 0 && phase != StandEntityAction.Phase.BUTTON_HOLD) {
-            moveToPhase(phase.getNextPhase(), standPower, standEntity);
         }
     }
 
@@ -174,9 +199,9 @@ public class StandEntityTask {
         this.startingTicks += ticks;
     }
     
-    boolean rotateStand(StandEntity standEntity, boolean limitBySpeed) {
+    boolean rotateStand(StandEntity standEntity) {
         if (target.getType() != TargetType.EMPTY && !standEntity.isManuallyControlled()) {
-    		standEntity.rotateTowards(target, limitBySpeed);
+            action.rotateStandTowardsTarget(standEntity, target, this);
     		return true;
         }
         return false;
@@ -248,6 +273,8 @@ public class StandEntityTask {
                 if (task.offsetFromUser != null) {
                     task.offsetFromUser.writeToBuf(buf);
                 }
+                
+                NetworkUtil.writeCollection(buf, task.taskModifiers, (buffer, action) -> buffer.writeRegistryId(action));
             }
         }
 
@@ -273,6 +300,12 @@ public class StandEntityTask {
             }
             
             StandEntityTask task = new StandEntityTask((StandEntityAction) action, ticks, phase, false, target, offset);
+            
+            NetworkUtil.readCollection(buf, buffer -> buffer.readRegistryIdSafe(Action.class)).forEach(modifier -> {
+                if (modifier instanceof StandEntityActionModifier) {
+                    task.taskModifiers.add((StandEntityActionModifier) modifier);
+                }
+            });
             return Optional.of(task);
         }
 
@@ -283,6 +316,7 @@ public class StandEntityTask {
                 StandEntityTask taskNew = new StandEntityTask(task.action, task.startingTicks, task.phase, false, task.target.copy(), task.offsetFromUser);
                 taskNew.ticksLeft = task.ticksLeft;
                 taskNew.offsetFromUser = task.offsetFromUser;
+                taskNew.taskModifiers = task.taskModifiers;
                 return Optional.of(taskNew);
             }
             return Optional.empty();

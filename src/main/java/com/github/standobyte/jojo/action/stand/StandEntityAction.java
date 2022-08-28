@@ -18,15 +18,17 @@ import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.type.EntityStandType;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
-public abstract class StandEntityAction extends StandAction {
+public abstract class StandEntityAction extends StandAction implements IStandPhasedAction {
     protected final int standWindupDuration;
     protected final int standPerformDuration;
     protected final int standRecoveryDuration;
@@ -53,29 +55,18 @@ public abstract class StandEntityAction extends StandAction {
         this.enablePhysics = builder.enablePhysics;
         this.standSounds = builder.standSounds;
     }
-    
-    public void standTickButtonHold(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
-    
-    public void standTickWindup(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
-    
-    public boolean standCanTick(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) { return true; }
-    
-    public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
-    
-    public boolean standCanPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) { return true; }
-    
-    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
-    
-    public void standTickRecovery(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
-    
+
+    @Override
     public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
         return standWindupDuration;
     }
 
+    @Override
     public int getStandActionTicks(IStandPower standPower, StandEntity standEntity) {
         return standPerformDuration;
     }
-    
+
+    @Override
     public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
         return standRecoveryDuration;
     }
@@ -401,6 +392,13 @@ public abstract class StandEntityAction extends StandAction {
     
     public StandPose getStandPose(IStandPower standPower, StandEntity standEntity) {
         return standPose;
+    }
+    
+    public void rotateStandTowardsTarget(StandEntity standEntity, ActionTarget target, StandEntityTask task) {
+        Vector3d targetPos = target.getTargetPos(true);
+        if (targetPos != null) {
+            JojoModUtil.rotateTowards(standEntity, targetPos, 360F);
+        }
     }
     
     public enum Phase {

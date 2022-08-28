@@ -229,28 +229,32 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         
         
         RotationAngle[] jabRightAngles1 = new RotationAngle[] {
-                RotationAngle.fromDegrees(body, 0, -15, 0),
+                RotationAngle.fromDegrees(body, 0, 0, 0),
+                RotationAngle.fromDegrees(upperPart, 0, -15, 0),
                 RotationAngle.fromDegrees(leftArm, -7.5F, 0, -15),
                 RotationAngle.fromDegrees(leftForeArm, -100, 15, 7.5F),
                 RotationAngle.fromDegrees(rightArm, 22.5F, 0, 22.5F),
                 RotationAngle.fromDegrees(rightForeArm, -105, 0, -15)
         };
         RotationAngle[] jabRightAngles2 = new RotationAngle[] {
-                RotationAngle.fromDegrees(body, 0, -22.5F, 0),
+                RotationAngle.fromDegrees(body, 0, -3.75F, 0),
+                RotationAngle.fromDegrees(upperPart, 0, -18.75F, 0),
                 RotationAngle.fromDegrees(leftArm, 30F, 0, -15F),
                 RotationAngle.fromDegrees(leftForeArm, -107.5F, 15, 7.5F),
                 RotationAngle.fromDegrees(rightArm, 5.941F, 8.4211F, 69.059F),
                 RotationAngle.fromDegrees(rightForeArm, -75, 0, 0)
         };
         RotationAngle[] jabRightAngles3 = new RotationAngle[] {
-                RotationAngle.fromDegrees(body, 0, -30, 0),
+                RotationAngle.fromDegrees(body, 0, -7.5F, 0),
+                RotationAngle.fromDegrees(upperPart, 0, -22.5F, 0),
                 RotationAngle.fromDegrees(leftArm, 37.5F, 0, -15F),
                 RotationAngle.fromDegrees(leftForeArm, -115, 15, 7.5F),
                 RotationAngle.fromDegrees(rightArm, -81.9244F, 11.0311F, 70.2661F),
                 RotationAngle.fromDegrees(rightForeArm, 0, 0, 0)
         };
         RotationAngle[] jabRightAngles4 = new RotationAngle[] {
-                RotationAngle.fromDegrees(body, 0, -7.5F, 0),
+                RotationAngle.fromDegrees(body, 0, -3.75F, 0),
+                RotationAngle.fromDegrees(upperPart, 0, -3.75F, 0),
                 RotationAngle.fromDegrees(leftArm, 5.63F, 0, -20.62F),
                 RotationAngle.fromDegrees(leftForeArm, -103.75F, 3.75F, 13.13F),
                 RotationAngle.fromDegrees(rightArm, 5.941F, 8.4211F, 69.059F),

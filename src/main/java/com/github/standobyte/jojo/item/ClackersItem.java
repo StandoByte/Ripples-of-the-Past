@@ -1,10 +1,11 @@
 package com.github.standobyte.jojo.item;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.itemprojectile.ClackersEntity;
+import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.damage.DamageUtil;
@@ -13,6 +14,8 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableMultimap.Builder;
 import com.google.common.collect.Multimap;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -25,8 +28,8 @@ import net.minecraft.item.UseAction;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class ClackersItem extends Item {
     public static final int TICKS_MAX_POWER = 80;
@@ -61,33 +64,23 @@ public class ClackersItem extends Item {
     }
     
     private void ding(World world, PlayerEntity player) {
+        if (world.isClientSide()) return;
+        ForgeRegistries.BLOCKS.forEach(block -> {
+            BlockState blockState = block.defaultBlockState();
+            Material material = blockState.getMaterial();
+            if (    (
+                    material == Material.WOOD
+                    )
+                    && StandStatFormulas.isBlockBreakable(14, blockState.getDestroySpeed(world, null), blockState.getHarvestLevel())) {
+                JojoMod.LOGGER.debug(block.getRegistryName() + ", " + blockState.getDestroySpeed(world, null));
+            }
+        });
     }
 
     private static final float CHARGE_TICK_COST = 5;
     private static final float UPKEEP_TICK_COST = CHARGE_TICK_COST / 5;
     @Override
     public void onUseTick(World world, LivingEntity entity, ItemStack stack, int remainingTicks) {
-        int ticksUsed = getUseDuration(stack) - remainingTicks;
-        int ticksMaxPower = TICKS_MAX_POWER;
-        if (clackersTexVariant(ticksUsed, ticksMaxPower) > 0) {
-            playClackSound(world, entity);
-            if (ticksUsed >= ticksMaxPower / 2 && !world.isClientSide()) {
-                Vector3d sparkVec = entity.getLookAngle().scale(0.75)
-                        .add(entity.getX(), entity.getY(0.6), entity.getZ());
-                HamonPowerType.createHamonSparkParticles(world, entity instanceof PlayerEntity ? (PlayerEntity) entity : null, 
-                        sparkVec, ticksUsed >= ticksMaxPower ? 0.25F : 0.1F);
-            }
-        }
-        if (!world.isClientSide()) {
-            if (!INonStandPower.getNonStandPowerOptional(entity).map(power -> 
-            power.consumeEnergy(ticksUsed <= ticksMaxPower ? CHARGE_TICK_COST : UPKEEP_TICK_COST)).orElse(false)) {
-                entity.releaseUsingItem();
-                return;
-            }
-            if (ticksUsed == ticksMaxPower) {
-                JojoModUtil.sayVoiceLine(entity, ModSounds.JOSEPH_CLACKER_VOLLEY.get());
-            }
-        }
     }
     
     public static int clackersTexVariant(int ticksUsed, int ticksMax) {

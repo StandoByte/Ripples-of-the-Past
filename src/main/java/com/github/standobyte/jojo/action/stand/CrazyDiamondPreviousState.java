@@ -99,18 +99,22 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
 
                 if (targetEntity instanceof TNTEntity) {
                     TNTEntity tnt = (TNTEntity) targetEntity;
-                    if (CrazyDiamondHeal.handle(world, tnt, tnt, e -> {
-                        e.setFuse(task.getTick() == 0 ? e.getFuse() - e.tickCount + 2 : e.getFuse() + 2);
+                    if (CrazyDiamondHeal.handle(world, tnt, tnt, (e, clientSide) -> {
+                        if (!clientSide) {
+                            e.setFuse(task.getTick() == 0 ? e.getFuse() - e.tickCount + 2 : e.getFuse() + 2);
+                        }
                     }, e -> e.getFuse() < 80)) {
                         CrazyDiamondHeal.handle(world, tnt, tnt, 
-                                e -> {
-                                    Block tntBlock = ForgeRegistries.BLOCKS.getValue(e.getType().getRegistryName());
-                                    if (tntBlock == null || tntBlock.getRegistryName().equals(ForgeRegistries.BLOCKS.getDefaultKey())) {
-                                        tntBlock = Blocks.TNT;
+                                (e, clientSide) -> {
+                                    if (!clientSide) {
+                                        Block tntBlock = ForgeRegistries.BLOCKS.getValue(e.getType().getRegistryName());
+                                        if (tntBlock == null || tntBlock.getRegistryName().equals(ForgeRegistries.BLOCKS.getDefaultKey())) {
+                                            tntBlock = Blocks.TNT;
+                                        }
+                                        BlockPos blockPos = e.blockPosition();
+                                        e.remove();
+                                        CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos, tntBlock.defaultBlockState());
                                     }
-                                    BlockPos blockPos = e.blockPosition();
-                                    e.remove();
-                                    CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos, tntBlock.defaultBlockState());
                                 }, e -> true);
                     }
                     return;
@@ -119,8 +123,8 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                 else if (targetEntity.getType() == EntityType.SNOW_GOLEM) {
                     if (CrazyDiamondHeal.handleLivingEntity(world, (LivingEntity) targetEntity)) {
                         CrazyDiamondHeal.handle(world, targetEntity, targetEntity, 
-                                e -> {
-                                    if (standEntity.getRandom().nextFloat() < 0.1F) {
+                                (e, clientSide) -> {
+                                    if (!clientSide && standEntity.getRandom().nextFloat() < 0.1F) {
                                         BlockPos blockPos = e.blockPosition();
                                         CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(0, 2, 0), Blocks.CARVED_PUMPKIN.defaultBlockState());
                                         CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos, Blocks.SNOW_BLOCK.defaultBlockState());
@@ -136,8 +140,8 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                     if (targetEntity.getType() == EntityType.IRON_GOLEM) {
                         if (CrazyDiamondHeal.handleLivingEntity(world, (LivingEntity) targetEntity)) {
                             CrazyDiamondHeal.handle(world, targetEntity, targetEntity, 
-                                    e -> {
-                                        if (standEntity.getRandom().nextFloat() < 0.05F) {
+                                    (e, clientSide) -> {
+                                        if (!clientSide && standEntity.getRandom().nextFloat() < 0.05F) {
                                             BlockPos blockPos = e.blockPosition();
                                             CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos, Blocks.IRON_BLOCK.defaultBlockState());
                                             CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(0, 2, 0), Blocks.CARVED_PUMPKIN.defaultBlockState());
@@ -156,22 +160,26 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                         int spawnTicks = wither.getInvulnerableTicks();
                         if (spawnTicks > 0) {
                             if (CrazyDiamondHeal.handle(world, wither, wither, 
-                                    e -> {
-                                        e.setHealth(e.getHealth() - 5);
-                                        e.setInvulnerableTicks(spawnTicks + 5);
+                                    (e, clientSide) -> {
+                                        if (!clientSide) {
+                                            e.setHealth(e.getHealth() - 5);
+                                            e.setInvulnerableTicks(spawnTicks + 5);
+                                        }
                                     }, 
                                     e -> spawnTicks >= 215 || e.getHealth() <= 5)) {
                                 CrazyDiamondHeal.handle(world, targetEntity, targetEntity, 
-                                        w -> {
-                                            BlockPos blockPos = w.blockPosition();
-                                            CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(0, 2, 0), Blocks.WITHER_SKELETON_SKULL.defaultBlockState());
-                                            CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(1, 2, 0), Blocks.WITHER_SKELETON_SKULL.defaultBlockState());
-                                            CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(-1, 2, 0), Blocks.WITHER_SKELETON_SKULL.defaultBlockState());
-                                            CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos, Blocks.SOUL_SAND.defaultBlockState());
-                                            CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(0, 1, 0), Blocks.SOUL_SAND.defaultBlockState());
-                                            CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(1, 1, 0), Blocks.SOUL_SAND.defaultBlockState());
-                                            CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(-1, 1, 0), Blocks.SOUL_SAND.defaultBlockState());
-                                            w.remove();
+                                        (w, clientSide) -> {
+                                            if (!clientSide) {
+                                                BlockPos blockPos = w.blockPosition();
+                                                CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(0, 2, 0), Blocks.WITHER_SKELETON_SKULL.defaultBlockState());
+                                                CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(1, 2, 0), Blocks.WITHER_SKELETON_SKULL.defaultBlockState());
+                                                CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(-1, 2, 0), Blocks.WITHER_SKELETON_SKULL.defaultBlockState());
+                                                CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos, Blocks.SOUL_SAND.defaultBlockState());
+                                                CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(0, 1, 0), Blocks.SOUL_SAND.defaultBlockState());
+                                                CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(1, 1, 0), Blocks.SOUL_SAND.defaultBlockState());
+                                                CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(-1, 1, 0), Blocks.SOUL_SAND.defaultBlockState());
+                                                w.remove();
+                                            }
                                         }, e -> true);
                             }
                         }
@@ -228,10 +236,10 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
             @Nullable Predicate<IRecipe<?>> additionalCondition, Random random) {
         if (item.isEmpty()) return Optional.empty();
 
-        // FIXME !! (prev state) brewing recipes
+        // FIXME revert brewing recipes
         return JojoModUtil.groupByPredicatesOrdered(
                 world.getRecipeManager().getRecipes().stream(), Util.make(new ArrayList<>(), list -> {
-                    // FIXME !! (prev state) netherite gear doesn't transform back
+                    // FIXME revert nbt recipes (including netherite armor)
                     list.add(recipe -> recipe instanceof SmithingRecipe);
                     list.add(recipe -> recipe instanceof AbstractCookingRecipe);
                     list.add(recipe -> recipe instanceof StonecuttingRecipe);

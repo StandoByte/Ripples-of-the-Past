@@ -1119,9 +1119,11 @@ public class ActionsOverlayGui extends AbstractGui {
                     return true;
                 }
                 RayTraceResult target = InputHandler.getInstance().mouseTarget;
-                PacketManager.sendToServer(ClClickActionPacket.withRayTraceResult(power.getPowerClassification(), actionType, shift, index, target));
+                ClClickActionPacket packet = ClClickActionPacket.withRayTraceResult(power.getPowerClassification(), actionType, shift, index, target);
+                if (action.validateInput()) packet.validateInput(action);
+                PacketManager.sendToServer(packet);
                 ActionTarget actionTarget = ActionTarget.fromRayTraceResult(target);
-                boolean actionWentOff = power.onClickAction(actionType, index, shift, actionTarget);
+                boolean actionWentOff = power.onClickAction(power.getAction(actionType, index, shift), shift, actionTarget);
                 return actionWentOff;
             }
         }
