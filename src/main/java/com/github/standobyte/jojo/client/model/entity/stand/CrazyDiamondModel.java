@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 // Made with Blockbench 4.1.3
 
 
-// FIXME !! (CD model) poses
+// FIXME ! (CD model) poses
 public class CrazyDiamondModel extends HumanoidStandModel<CrazyDiamondEntity> {
     private final ModelRenderer helmet;
     private final ModelRenderer bone2;

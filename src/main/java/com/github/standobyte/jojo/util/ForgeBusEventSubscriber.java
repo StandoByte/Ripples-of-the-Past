@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
@@ -41,6 +42,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.FlatChunkGenerator;
 import net.minecraft.world.gen.feature.StructureFeature;
 import net.minecraft.world.gen.feature.structure.Structure;
@@ -75,6 +77,7 @@ public class ForgeBusEventSubscriber {
     private static final ResourceLocation PROJECTILE_HAMON_CAP = new ResourceLocation(JojoMod.MOD_ID, "projectile_hamon");
     private static final ResourceLocation WORLD_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "world_util");
     private static final ResourceLocation SAVE_FILE_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "save_file_util");
+    private static final ResourceLocation CHUNK_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "chunk_util");
     
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
@@ -94,6 +97,12 @@ public class ForgeBusEventSubscriber {
         if (!world.isClientSide() && world.dimension() == World.OVERWORLD) {
             event.addCapability(SAVE_FILE_UTIL_CAP, new SaveFileUtilCapProvider((ServerWorld) world));
         }
+    }
+    
+    @SubscribeEvent
+    public static void onAttachCapabilitiesChunk(AttachCapabilitiesEvent<Chunk> event) {
+        Chunk chunk = event.getObject();
+        event.addCapability(CHUNK_UTIL_CAP, new ChunkCapProvider(chunk));
     }
     
     @SubscribeEvent

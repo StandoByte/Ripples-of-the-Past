@@ -1,8 +1,6 @@
 package com.github.standobyte.jojo.item;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.itemprojectile.ClackersEntity;
-import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
@@ -14,8 +12,6 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableMultimap.Builder;
 import com.google.common.collect.Multimap;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.material.Material;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -29,7 +25,6 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
-import net.minecraftforge.registries.ForgeRegistries;
 
 public class ClackersItem extends Item {
     public static final int TICKS_MAX_POWER = 80;
@@ -64,17 +59,6 @@ public class ClackersItem extends Item {
     }
     
     private void ding(World world, PlayerEntity player) {
-        if (world.isClientSide()) return;
-        ForgeRegistries.BLOCKS.forEach(block -> {
-            BlockState blockState = block.defaultBlockState();
-            Material material = blockState.getMaterial();
-            if (    (
-                    material == Material.WOOD
-                    )
-                    && StandStatFormulas.isBlockBreakable(14, blockState.getDestroySpeed(world, null), blockState.getHarvestLevel())) {
-                JojoMod.LOGGER.debug(block.getRegistryName() + ", " + blockState.getDestroySpeed(world, null));
-            }
-        });
     }
 
     private static final float CHARGE_TICK_COST = 5;

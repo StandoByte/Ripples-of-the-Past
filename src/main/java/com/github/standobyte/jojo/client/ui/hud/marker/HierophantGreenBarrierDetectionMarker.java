@@ -25,7 +25,7 @@ public class HierophantGreenBarrierDetectionMarker extends MarkerRenderer {
     protected void updatePositions(List<MarkerInstance> list, float partialTick) {
         IStandPower.getStandPowerOptional(mc.player).ifPresent(stand -> {
             if (stand.getStandManifestation() instanceof HierophantGreenEntity) {
-                // FIXME !! the net isn't synced to client
+                // FIXME the net isn't synced to client
                 ((HierophantGreenEntity) stand.getStandManifestation()).getBarriersNet()
                 .wasRippedAt().forEach(point -> {
                     list.add(new MarkerInstance(point, false));

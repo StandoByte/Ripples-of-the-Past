@@ -156,7 +156,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     public void onClick(World world, LivingEntity user, IStandPower power) {
         if (!world.isClientSide()) {
             if (!power.isActive()) {
-                // FIXME !!!!!!!! only summon in arms-only mode if the task can actually be set
+                // FIXME !!!! only summon in arms-only mode if the task can actually be set
                 switch (autoSummonMode) {
                 case FULL:
                     power.getType().summon(user, power, true);

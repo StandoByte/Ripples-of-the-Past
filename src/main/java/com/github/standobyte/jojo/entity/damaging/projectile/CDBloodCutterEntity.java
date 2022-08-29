@@ -52,10 +52,10 @@ public class CDBloodCutterEntity extends ModdedProjectileEntity {
                                 entity -> !entity.is(stand.getUser()) && entity != stand.getStandManifestation()
                                 && !(entity instanceof StandEntity && !((StandEntity) entity).isVisibleForAll())
                                 && !entity.isInWaterOrBubble()
-                                        // FIXME !!! (blood cutter) && isn't behind blocks
+                                        // FIXME !! (blood cutter) && isn't behind blocks
                                 && entity.getBoundingBox().clip(this.getBoundingBox().getCenter(), entity.getBoundingBox().getCenter()).isPresent()))
                 .forEach(entity -> {
-                    // FIXME !! (blood cutter) refresh the timer
+                    // FIXME !!! (blood cutter) refresh the timer
                     stand.getContinuousEffects().getOrCreateEffect(ModStandEffects.DRIED_BLOOD_DROPS.get(), entity);
 
                     PacketManager.sendToClientsTracking(new BloodParticlesPacket(
