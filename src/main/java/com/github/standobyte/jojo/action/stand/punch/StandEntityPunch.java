@@ -39,7 +39,7 @@ public class StandEntityPunch implements IPunch {
     protected Vector3d sweepingAabb;
     protected float sweepingDamage;
     protected int standInvulTime = 0;
-    // FIXME !!!!!! punch sound
+    // FIXME !! punch sound
     protected Supplier<SoundEvent> punchSound = () -> null;
     
     public StandEntityPunch(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {

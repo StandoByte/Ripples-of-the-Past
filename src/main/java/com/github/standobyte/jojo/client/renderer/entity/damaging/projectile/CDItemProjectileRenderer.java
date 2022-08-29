@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.entity.damaging.projectile.CDItemProjectileEnt
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.util.ResourceLocation;
 
+// FIXME ! (item projectile) render a blood drop if it's homing
 public class CDItemProjectileRenderer extends SimpleEntityRenderer<CDItemProjectileEntity, CDItemProjectileModel> {
 
     public CDItemProjectileRenderer(EntityRendererManager renderManager) {

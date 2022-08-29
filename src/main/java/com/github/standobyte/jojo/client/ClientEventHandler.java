@@ -10,14 +10,12 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
-import com.github.standobyte.jojo.action.stand.effect.CrazyDiamondRestorableBlocks;
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
-import com.github.standobyte.jojo.init.ModStandEffects;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
@@ -53,7 +51,9 @@ import net.minecraft.util.Timer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -436,13 +436,14 @@ public class ClientEventHandler {
         if (ActionsOverlayGui.getInstance().getSelectedAction(ActionType.ABILITY) == ModActions.CRAZY_DIAMOND_RESTORE_TERRAIN.get()) {
             MatrixStack matrixStack = event.getMatrixStack();
             IStandPower stand = ActionsOverlayGui.getInstance().standUiMode.getPower();
+            Entity entity = CrazyDiamondRestoreTerrain.restorationCenterEntity(mc.player, stand);
+            Vector3i pos = CrazyDiamondRestoreTerrain.eyePos(entity);
+            Vector3d lookVec = entity.getLookAngle();
+            Vector3d eyePosD = entity.getEyePosition(1.0F);
             TranslucentBlockRenderHelper.renderTranslucentBlocks(matrixStack, mc, 
-                    stand.getContinuousEffects().getEffects(effect -> 
-                    effect.effectType == ModStandEffects.CRAZY_DIAMOND_RESTORABLE_BLOCKS.get()).stream()
-                    .map(effect -> (CrazyDiamondRestorableBlocks) effect)
-                    .filter(effect -> mc.level.dimension().equals(effect.getDimension()))
-                    .flatMap(effect -> effect.getBlocksAround(mc.player.blockPosition(), 32)), 
-                    pos -> mc.player.blockPosition().distManhattan(pos) <= CrazyDiamondRestoreTerrain.MANHATTAN_DIST);
+                    CrazyDiamondRestoreTerrain.getBlocksInRange(mc.level, mc.player, pos, 32, 
+                            block -> mc.level.getBlockState(block.pos).isAir(mc.level, block.pos)),
+                    block -> CrazyDiamondRestoreTerrain.blockPosSelectedForRestoration(block, entity, lookVec, eyePosD, pos));
         }
     }
 

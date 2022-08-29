@@ -15,7 +15,7 @@ public class StandBlockPunch implements IPunch {
     public final BlockPos blockPos;
     public final BlockState blockState;
     private boolean targetHit;
-    // FIXME !!!!!! punch sound
+    // FIXME !! punch sound
     protected Supplier<SoundEvent> punchSound = () -> null;
     
     public StandBlockPunch(StandEntity stand, BlockPos targetPos, BlockState blockState) {

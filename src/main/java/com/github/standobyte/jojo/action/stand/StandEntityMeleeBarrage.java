@@ -194,7 +194,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     
     
 
-    // FIXME !!!!!! barrage sound
+    // FIXME !! barrage sound
     public static class BarrageEntityPunch extends StandEntityPunch {
         private int barrageHits = 0;
 

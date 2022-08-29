@@ -17,9 +17,9 @@ import com.github.standobyte.jojo.JojoModConfig.Common;
 import com.github.standobyte.jojo.action.non_stand.VampirismFreeze;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.action.stand.effect.BoyIIManStandPartTakenEffect;
-import com.github.standobyte.jojo.action.stand.effect.CrazyDiamondRestorableBlocks;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.block.StoneMaskBlock;
+import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
@@ -127,6 +127,7 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.ForgeHooks;
@@ -275,6 +276,14 @@ public class GameplayEventHandler {
                                 entity.getX(), entity.getY(0.5), entity.getZ(), cap.getHamonDamage());
                     }
                 });
+            });
+            
+            ((ServerWorld) event.world).getChunkSource().chunkMap.getChunks().forEach(chunkHolder -> {
+                Chunk chunk = chunkHolder.getTickingChunk();
+                if (chunk != null) { // FIXME !!! (restore terrain) and if it's loaded
+//                    JojoMod.LOGGER.debug(chunk.getPos());
+                    chunk.getCapability(ChunkCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
+                }
             });
         }
     }
@@ -1177,19 +1186,6 @@ public class GameplayEventHandler {
         if (explosion.getExploder() instanceof MRCrossfireHurricaneEntity) {
             ((MRCrossfireHurricaneEntity) explosion.getExploder())
             .onExplode(event.getAffectedEntities(), event.getAffectedBlocks());
-        }
-    }
-    
-    public static void rememberBrokenBlock(World world, BlockPos blockPos, BlockState blockState, 
-            LivingEntity cdUser, boolean brokenByUser) {
-        if (!world.isClientSide()) {
-            IStandPower.getStandPowerOptional(cdUser).ifPresent(power -> {
-                if (power.getType() == ModStandTypes.CRAZY_DIAMOND.get()) {
-                    CrazyDiamondRestorableBlocks effect = CrazyDiamondRestorableBlocks.getRestorableBlocksEffect(power, world);
-                    effect.addBlock(world, blockPos, blockState, Block.getDrops(blockState, (ServerWorld) world, blockPos, 
-                            blockState.hasTileEntity() ? world.getBlockEntity(blockPos) : null), brokenByUser);
-                }
-            });
         }
     }
     

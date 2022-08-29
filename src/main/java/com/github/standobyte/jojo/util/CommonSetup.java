@@ -2,6 +2,8 @@ package com.github.standobyte.jojo.util;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
+import com.github.standobyte.jojo.capability.chunk.ChunkCap;
+import com.github.standobyte.jojo.capability.chunk.ChunkCapStorage;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCap;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapStorage;
@@ -56,6 +58,8 @@ public class CommonSetup {
             
             CapabilityManager.INSTANCE.register(WorldUtilCap.class, new WorldUtilCapStorage(), () -> new WorldUtilCap(null));
             CapabilityManager.INSTANCE.register(SaveFileUtilCap.class, new SaveFileUtilCapStorage(), () -> new SaveFileUtilCap(null));
+
+            CapabilityManager.INSTANCE.register(ChunkCap.class, new ChunkCapStorage(), () -> new ChunkCap(null));
             
             ArgumentTypes.register("stand", StandArgument.class, new ArgumentSerializer<>(StandArgument::new));
 

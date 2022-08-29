@@ -64,7 +64,7 @@ public class CDItemProjectileEntity extends ModdedProjectileEntity {
                 homingTarget = Optional.empty();
             }
             else if ((tickCount >= 8 || target.distanceToSqr(this) < 36)) {
-                // FIXME !!! (item projectile) use energy
+                // FIXME !! (item projectile) use energy
                 setDeltaMovement(target.getBoundingBox().getCenter().subtract(this.position())
                         .normalize().scale(this.getDeltaMovement().length()));
                 if (level.isClientSide()) {
