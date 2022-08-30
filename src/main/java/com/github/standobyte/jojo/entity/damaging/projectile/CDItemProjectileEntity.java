@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import com.github.standobyte.jojo.action.stand.CrazyDiamondHeal;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.network.NetworkUtil;
 
 import net.minecraft.block.Block;
@@ -14,6 +15,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
@@ -65,10 +67,18 @@ public class CDItemProjectileEntity extends ModdedProjectileEntity {
             }
             else if ((tickCount >= 8 || target.distanceToSqr(this) < 36)) {
                 // FIXME !! (item projectile) use energy
-                setDeltaMovement(target.getBoundingBox().getCenter().subtract(this.position())
-                        .normalize().scale(this.getDeltaMovement().length()));
+                Vector3d targetPos = target.getBoundingBox().getCenter();
+                Vector3d vecToTarget = targetPos.subtract(this.position());
+                setDeltaMovement(vecToTarget.normalize().scale(this.getDeltaMovement().length()));
                 if (level.isClientSide()) {
                     CrazyDiamondHeal.addParticlesAround(this);
+                    target.getBoundingBox().clip(position(), targetPos).ifPresent(pos -> {
+                        level.addParticle(ModParticles.CD_RESTORATION.get(), 
+                                pos.x + (random.nextDouble() - 0.5) * 0.25, 
+                                pos.y + (random.nextDouble() - 0.5) * 0.25, 
+                                pos.z + (random.nextDouble() - 0.5) * 0.25, 
+                                0, 0, 0);
+                    });
                 }
             }
         });

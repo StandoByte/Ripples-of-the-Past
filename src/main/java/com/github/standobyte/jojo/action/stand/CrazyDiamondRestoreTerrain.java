@@ -18,6 +18,8 @@ import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModParticles;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.stand_specific.CDBlocksRestoredPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.block.BlockState;
@@ -44,7 +46,6 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         super(builder);
     }
     
-    // FIXME !!! (restore terrain) particles
     // FIXME ! (restore terrain) CD restoration sound
     @Override
     public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
@@ -78,6 +79,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
                 return blocksPlaced.size() >= BLOCKS_PER_TICK;
             });
             
+            PacketManager.sendToClientsTracking(new CDBlocksRestoredPacket(blocksPlaced), standEntity);
             forgetBrokenBlocks(world, blocksToForget);
         }
     }

@@ -89,7 +89,7 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
             Vector3d vecFromOwner = position().subtract(owner.position());
             if (vecFromOwner.lengthSqr() > 4) {
                 Vector3d grappleVec = vecFromOwner.normalize().scale(2);
-                LivingEntity entity = owner;
+                Entity entity = owner;
                 if (stand == null && owner instanceof StandEntity) {
                 	stand = (StandEntity) owner;
                 }
@@ -99,6 +99,7 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
                     	entity = user;
                     }
                 }
+                entity = entity.getRootVehicle();
                 entity.setDeltaMovement(grappleVec);
                 entity.fallDistance = 0;
             }
