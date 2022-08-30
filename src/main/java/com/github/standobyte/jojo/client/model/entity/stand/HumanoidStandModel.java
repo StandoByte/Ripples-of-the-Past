@@ -23,6 +23,7 @@ import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.util.utils.MathUtil;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -228,28 +229,32 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         
         
         RotationAngle[] jabRightAngles1 = new RotationAngle[] {
-                RotationAngle.fromDegrees(body, 0, -15, 0),
+                RotationAngle.fromDegrees(body, 0, 0, 0),
+                RotationAngle.fromDegrees(upperPart, 0, -15, 0),
                 RotationAngle.fromDegrees(leftArm, -7.5F, 0, -15),
                 RotationAngle.fromDegrees(leftForeArm, -100, 15, 7.5F),
                 RotationAngle.fromDegrees(rightArm, 22.5F, 0, 22.5F),
                 RotationAngle.fromDegrees(rightForeArm, -105, 0, -15)
         };
         RotationAngle[] jabRightAngles2 = new RotationAngle[] {
-                RotationAngle.fromDegrees(body, 0, -22.5F, 0),
+                RotationAngle.fromDegrees(body, 0, -3.75F, 0),
+                RotationAngle.fromDegrees(upperPart, 0, -18.75F, 0),
                 RotationAngle.fromDegrees(leftArm, 30F, 0, -15F),
                 RotationAngle.fromDegrees(leftForeArm, -107.5F, 15, 7.5F),
                 RotationAngle.fromDegrees(rightArm, 5.941F, 8.4211F, 69.059F),
                 RotationAngle.fromDegrees(rightForeArm, -75, 0, 0)
         };
         RotationAngle[] jabRightAngles3 = new RotationAngle[] {
-                RotationAngle.fromDegrees(body, 0, -30, 0),
+                RotationAngle.fromDegrees(body, 0, -7.5F, 0),
+                RotationAngle.fromDegrees(upperPart, 0, -22.5F, 0),
                 RotationAngle.fromDegrees(leftArm, 37.5F, 0, -15F),
                 RotationAngle.fromDegrees(leftForeArm, -115, 15, 7.5F),
                 RotationAngle.fromDegrees(rightArm, -81.9244F, 11.0311F, 70.2661F),
                 RotationAngle.fromDegrees(rightForeArm, 0, 0, 0)
         };
         RotationAngle[] jabRightAngles4 = new RotationAngle[] {
-                RotationAngle.fromDegrees(body, 0, -7.5F, 0),
+                RotationAngle.fromDegrees(body, 0, -3.75F, 0),
+                RotationAngle.fromDegrees(upperPart, 0, -3.75F, 0),
                 RotationAngle.fromDegrees(leftArm, 5.63F, 0, -20.62F),
                 RotationAngle.fromDegrees(leftForeArm, -103.75F, 3.75F, 13.13F),
                 RotationAngle.fromDegrees(rightArm, 5.941F, 8.4211F, 69.059F),
@@ -331,17 +336,17 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
                 .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<T>(new RotationAngle[] {
                         new RotationAngle(body, 0, 0, 0),
                         new RotationAngle(upperPart, 0.0F, 0.0F, 0.0F),
-                        RotationAngle.fromDegrees(rightForeArm, 0.0F, 0.0F, -60F),
-                        RotationAngle.fromDegrees(leftForeArm, 0.0F, 0.0F, 60F)
+                        RotationAngle.fromDegrees(rightForeArm, -90, 30, -90),
+                        RotationAngle.fromDegrees(leftForeArm, -90, -30, 90)
                 }).setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
                     float blockXRot = MathHelper.clamp(xRotation, -60, 60) * MathUtil.DEG_TO_RAD / 2;
                     rightArm.xRot = -1.5708F + blockXRot;
                     leftArm.xRot = rightArm.xRot;
 
-                    rightArm.yRot = blockXRot / 2;
+                    rightArm.yRot = -blockXRot / 2;
                     leftArm.yRot = -rightArm.yRot;
 
-                    rightArm.zRot = Math.abs(blockXRot) / 2 - 0.7854F;
+                    rightArm.zRot = -Math.abs(blockXRot) / 2 + 0.7854F;
                     leftArm.zRot = -rightArm.zRot;
                 }))
                 .build(idlePose));
@@ -437,7 +442,8 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         return barrageSwing;
     }
 
-    protected XRotationModelRenderer getArm(HandSide side) {
+    @Override
+    public XRotationModelRenderer getArm(HandSide side) {
         switch (side) {
         case LEFT:
             return leftArm;
@@ -504,11 +510,6 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
     protected Iterable<ModelRenderer> bodyParts() {
         return ImmutableList.of(body);
     }
-
-    @Override
-    public ModelRenderer armModel(HandSide side) {
-        return getArm(side);
-    }
     
     @Override
     protected void initOpposites() {
@@ -517,5 +518,22 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         oppositeHandside.put(leftForeArm, rightForeArm);
         oppositeHandside.put(leftLeg, rightLeg);
         oppositeHandside.put(leftLowerLeg, rightLowerLeg);
+    }
+    
+    @Override
+    public void translateToHand(HandSide handSide, MatrixStack matrixStack) {
+        matrixStack.translate(handSide == HandSide.LEFT ? -0.0625 : 0.0625, 0, 0);
+        body.translateAndRotate(matrixStack);
+        upperPart.translateAndRotate(matrixStack);
+        
+        ModelRenderer arm = getArm(handSide);
+        arm.translateAndRotate(matrixStack);
+
+        ModelRenderer foreArm = getForeArm(handSide);
+        foreArm.translateAndRotate(matrixStack);
+        matrixStack.translate(
+                (double)(-foreArm.x / 16.0F), 
+                (double)(-foreArm.y / 16.0F), 
+                (double)(-foreArm.z / 16.0F));
     }
 }

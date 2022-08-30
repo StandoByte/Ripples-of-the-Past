@@ -27,7 +27,8 @@ public class HamonStatsTabGui extends HamonTabGui {
     private final List<IReorderingProcessor> breathingDescLines;
     private final List<IReorderingProcessor> exercisesDescLines;
     private final List<IReorderingProcessor> statLimitTooltip;
-    private final List<IReorderingProcessor> meditationButtonTooltip;
+    private final List<IReorderingProcessor> meditationButtonTooltipButton;
+    private final List<IReorderingProcessor> meditationButtonTooltipBar;
 
     private Button meditationButton;
     private boolean buttonYRecalculated = false;
@@ -51,7 +52,11 @@ public class HamonStatsTabGui extends HamonTabGui {
         breathingDescLines = minecraft.font.split(desc, textWidth);
         exercisesDescLines = minecraft.font.split(new TranslationTextComponent("hamon.exercises_average"), textWidth);
         statLimitTooltip = minecraft.font.split(new TranslationTextComponent("hamon.stat_limited"), 150);
-        meditationButtonTooltip = minecraft.font.split(new TranslationTextComponent("hamon.meditation_button", 
+        meditationButtonTooltipButton = minecraft.font.split(new TranslationTextComponent("hamon.meditation_button", 
+                new KeybindTextComponent("hamon.meditation_button.mouse_button"),
+                new KeybindTextComponent("key.sneak"), new KeybindTextComponent("jojo.key.hamon_skills_window")), 100);
+        meditationButtonTooltipBar = minecraft.font.split(new TranslationTextComponent("hamon.meditation_button", 
+                new KeybindTextComponent("hamon.meditation_button.mouse_bar"),
                 new KeybindTextComponent("key.sneak"), new KeybindTextComponent("jojo.key.hamon_skills_window")), 100);
     }
 
@@ -272,6 +277,7 @@ public class HamonStatsTabGui extends HamonTabGui {
                 }
             }
         }
+        
         float bonus = screen.hamon.multiplyPositiveBreathingTraining(screen.hamon.getTrainingBonus());
         if (bonus > 0 && 
                 mouseX >= 200 && mouseX <= 207 && 
@@ -279,8 +285,12 @@ public class HamonStatsTabGui extends HamonTabGui {
             screen.renderTooltip(matrixStack, minecraft.font.split(new TranslationTextComponent(
                     "hamon.training_bonus", bonus), 100), mouseX, mouseY);
         }
+        
         if (meditationButton.isMouseOver(mouseX + screen.windowPosX() + HamonScreen.WINDOW_THIN_BORDER, mouseY + screen.windowPosY() + HamonScreen.WINDOW_UPPER_BORDER)) {
-            screen.renderTooltip(matrixStack, meditationButtonTooltip, mouseX, mouseY);
+            screen.renderTooltip(matrixStack, meditationButtonTooltipButton, mouseX, mouseY);
+        }
+        else if (mouseX >= 108 && mouseX <= 203 && mouseY >= 138 && mouseY <= 144) {
+            screen.renderTooltip(matrixStack, meditationButtonTooltipBar, mouseX, mouseY);
         }
     }
 

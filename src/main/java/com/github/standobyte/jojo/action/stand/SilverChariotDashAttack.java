@@ -1,18 +1,20 @@
 package com.github.standobyte.jojo.action.stand;
 
-import java.util.function.Supplier;
-
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 import com.github.standobyte.jojo.util.utils.MathUtil;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -20,8 +22,8 @@ import net.minecraftforge.common.ForgeMod;
 
 public class SilverChariotDashAttack extends StandEntityHeavyAttack {
 
-    public SilverChariotDashAttack(StandEntityHeavyAttack.Builder builder, Supplier<StandEntityComboHeavyAttack> comboAttack) {
-        super(builder, comboAttack);
+    public SilverChariotDashAttack(StandEntityHeavyAttack.Builder builder) {
+        super(builder);
     }
 
     @Override
@@ -68,16 +70,37 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
         	for (RayTraceResult rayTraceResult : JojoModUtil.rayTraceMultipleEntities(standEntity, 
         			standEntity.getAttributeValue(ForgeMod.REACH_DISTANCE.get()), 
         			standEntity.canTarget(), 0.25, standEntity.getPrecision())) {
-            	standEntity.punch(task, punch, ActionTarget.fromRayTraceResult(rayTraceResult));
+            	standEntity.punch(task, this, ActionTarget.fromRayTraceResult(rayTraceResult));
         	}
         }
         else if (!Vector3d.ZERO.equals(standEntity.getDeltaMovement())) {
-        	standEntity.punch(task, punch, task.getTarget());
+        	standEntity.punch(task, this, task.getTarget());
         }
         if (!world.isClientSide() && lastTick && standEntity.isFollowingUser()) {
         	standEntity.retractStand(false);
         }
         standEntity.setDeltaMovement(moveForward ? task.getAdditionalData().peek(Vector3d.class) : Vector3d.ZERO);
+    }
+    
+    @Override
+    public StandEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
+        StandEntityPunch stab = super.punchEntity(stand, target, dmgSource);
+        stab.setPunchSound(null);
+        if (stand.getAttackSpeed() < 24) {
+            boolean left = MathHelper.wrapDegrees(
+                    MathUtil.yRotDegFromVec(stand.getLookAngle())
+                    - MathUtil.yRotDegFromVec(stab.target.position().subtract(stand.position())))
+                    < 0;
+            return stab
+                    .addKnockback(1.5F)
+                    .knockbackYRotDeg((60F + stand.getRandom().nextFloat() * 30F) * (left ? 1 : -1));
+        }
+        else {
+            return stab
+                    .addKnockback(0.25F)
+                    .knockbackXRot(-90F)
+                    .setPunchSound(null);
+        }
     }
     
     @Override

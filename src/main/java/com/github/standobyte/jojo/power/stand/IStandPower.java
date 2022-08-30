@@ -15,8 +15,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.common.util.LazyOptional;
 
 public interface IStandPower extends IPower<IStandPower, StandType<?>> {
-    public static final int MAX_EXP = 1000;
-    
     Optional<StandInstance> getStandInstance();
     boolean giveStand(StandInstance standInstance, boolean newInstance);
     Optional<StandInstance> putOutStand();
@@ -54,11 +52,6 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     void setProgressionSkipped();
     boolean wasProgressionSkipped();
     float getStatsDevelopment();
-    
-    @Deprecated
-    int getXp();
-    @Deprecated
-    void setXp(int xp);
     
     boolean unlockAction(Action<IStandPower> action);
     void setLearningProgressPoints(Action<IStandPower> action, float progress, boolean clamp, boolean notLess);

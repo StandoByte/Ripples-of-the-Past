@@ -43,9 +43,9 @@ public class MagiciansRedCrossfireHurricane extends StandEntityAction {
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
-        	int chargeTicks = task.getAdditionalData().isEmply(Integer.class) ? 0 : 
+        	int chargeTicks = task.getAdditionalData().isEmpty(Integer.class) ? 0 : 
         		task.getAdditionalData().pop(Integer.class);
-        	int fireBlocksConsumed = task.getAdditionalData().isEmply(Integer.class) ? 0 : 
+        	int fireBlocksConsumed = task.getAdditionalData().isEmpty(Integer.class) ? 0 : 
         		task.getAdditionalData().pop(Integer.class);
         	float fireConsumed = fireBlocksConsumed > 0 && chargeTicks > 0 ? (float) fireBlocksConsumed / (float) chargeTicks : 0;
         	

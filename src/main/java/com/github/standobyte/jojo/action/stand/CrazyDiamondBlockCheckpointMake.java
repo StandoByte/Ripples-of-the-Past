@@ -40,9 +40,10 @@ public class CrazyDiamondBlockCheckpointMake extends StandEntityAction {
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
             BlockPos pos = task.getTarget().getBlockPos();
-            // FIXME ! (fast travel) handle the "no block breaking" config
+            // FIXME !!! (fast travel) handle the "no block breaking" config
             if (pos != null) {
                 BlockState blockState = world.getBlockState(pos);
+                // FIXME !!! (fast travel) block drops gathering
                 List<ItemStack> drops = Block.getDrops(blockState, (ServerWorld) world, pos, 
                         blockState.hasTileEntity() ? world.getBlockEntity(pos) : null);
                 
@@ -78,7 +79,7 @@ public class CrazyDiamondBlockCheckpointMake extends StandEntityAction {
         return TargetRequirement.BLOCK;
     }
 
-    // FIXME ! (fast travel) dimension key
+    // FIXME !!! (fast travel) dimension key
     public static Optional<BlockPos> getBlockPosMoveTo(World world, ItemStack stack) {
         if (stack.hasTag()) {
             CompoundNBT nbt = stack.getTag();

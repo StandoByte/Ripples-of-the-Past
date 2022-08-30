@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.itemprojectile.StandArrowEntity;
 import com.github.standobyte.jojo.init.ModEnchantments;
+import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.type.StandType;
@@ -226,6 +227,11 @@ public class StandArrowItem extends ArrowItem {
     @Override
     public int getEnchantmentValue() {
         return 1;
+    }
+
+    @Override
+    public boolean isValidRepairItem(ItemStack item, ItemStack repairItem) {
+        return repairItem.getItem() == ModItems.METEORIC_INGOT.get();
     }
     
     public enum StandGivingMode {

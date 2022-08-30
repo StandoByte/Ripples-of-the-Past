@@ -287,34 +287,4 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
             });
         }
     }
-    
-//    public static void giveStandExp(LivingDeathEvent event) {
-//        LivingEntity dead = event.getEntityLiving();
-//        dead.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-//            IStandPower stand = cap.getLastHurtByStand();
-//            if (stand != null) {
-//                int expToAdd = 0;
-//                if (dead.getType().getCategory() == EntityClassification.MONSTER) {
-//                    expToAdd = 4;
-//                }
-//                else if (dead instanceof PlayerEntity) {
-//                    expToAdd = 20;
-//                }
-//                else {
-//                    return;
-//                }
-//                
-//                expToAdd *= IStandPower.getStandPowerOptional(dead).map(deadPower -> {
-//                    StandType<?> type = deadPower.getType();
-//                    return type != null ? type.getExpRewardMultiplier() : 1;
-//                }).orElse(1);
-//                expToAdd *= INonStandPower.getNonStandPowerOptional(dead).map(deadPower -> {
-//                    NonStandPowerType<?> type = deadPower.getType();
-//                    return type != null ? type.getExpRewardMultiplier() : 1;
-//                }).orElse(1);
-//                expToAdd = (int) ((float) expToAdd * dead.getMaxHealth() / 20F);
-//                stand.setXp(stand.getXp() + expToAdd);
-//            }
-//        });
-//    }
 }

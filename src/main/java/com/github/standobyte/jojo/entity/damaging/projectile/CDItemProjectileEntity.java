@@ -64,7 +64,7 @@ public class CDItemProjectileEntity extends ModdedProjectileEntity {
                 homingTarget = Optional.empty();
             }
             else if ((tickCount >= 8 || target.distanceToSqr(this) < 36)) {
-                // FIXME !!! (item projectile) use energy
+                // FIXME !! (item projectile) use energy
                 setDeltaMovement(target.getBoundingBox().getCenter().subtract(this.position())
                         .normalize().scale(this.getDeltaMovement().length()));
                 if (level.isClientSide()) {
@@ -112,14 +112,14 @@ public class CDItemProjectileEntity extends ModdedProjectileEntity {
             setTarget(((ServerWorld) level).getEntity(targetUUID));
         }
         super.writeSpawnData(buffer);
-        NetworkUtil.writeOptional(buffer, block, bl -> buffer.writeRegistryId(bl));
-        NetworkUtil.writeOptional(buffer, homingTarget.map(target -> target.getId()).orElse(null), id -> buffer.writeInt(id));
+        NetworkUtil.writeOptionally(buffer, block, (buf, bl) -> buf.writeRegistryId(bl));
+        NetworkUtil.writeOptionally(buffer, homingTarget.map(target -> target.getId()).orElse(null), (buf, id) -> buf.writeInt(id));
     }
 
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
         super.readSpawnData(additionalData);
-        NetworkUtil.readOptional(additionalData, () -> additionalData.readRegistryIdSafe(Block.class)).ifPresent(block -> setBlock(block));
-        NetworkUtil.readOptional(additionalData, () -> additionalData.readInt()).ifPresent(id -> setTarget(level.getEntity(id)));
+        NetworkUtil.readOptional(additionalData, buf -> buf.readRegistryIdSafe(Block.class)).ifPresent(block -> setBlock(block));
+        NetworkUtil.readOptional(additionalData, buf -> buf.readInt()).ifPresent(id -> setTarget(level.getEntity(id)));
     }
 }

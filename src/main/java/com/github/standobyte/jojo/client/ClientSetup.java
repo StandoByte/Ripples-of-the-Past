@@ -69,6 +69,7 @@ import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.hud.marker.CrazyDiamondAnchorMarker;
 import com.github.standobyte.jojo.client.ui.hud.marker.CrazyDiamondBloodHomingMarker;
+import com.github.standobyte.jojo.client.ui.hud.marker.HierophantGreenBarrierDetectionMarker;
 import com.github.standobyte.jojo.client.ui.hud.marker.MarkerRenderer;
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEntityTypes;
@@ -221,7 +222,8 @@ public class ClientSetup {
             Map<String, PlayerRenderer> skinMap = mc.getEntityRenderDispatcher().getSkinMap();
             addLayers(skinMap.get("default"));
             addLayers(skinMap.get("slim"));
-            
+
+            MarkerRenderer.Handler.addRenderer(new HierophantGreenBarrierDetectionMarker(mc));
             MarkerRenderer.Handler.addRenderer(new CrazyDiamondAnchorMarker(mc));
             MarkerRenderer.Handler.addRenderer(new CrazyDiamondBloodHomingMarker(mc));
         });

@@ -44,8 +44,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     private float stamina;
     
     private final ResolveCounter resolveCounter;
-    @Deprecated
-    private int xp = 0;
     private boolean skippedProgression;
     private boolean givenByDisc;
     
@@ -161,7 +159,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             setStandInstance(null);
             stamina = 0;
             resolveCounter.reset();
-            xp = 0;
             skippedProgression = false;
             givenByDisc = false;
             if (countTaken) {
@@ -426,20 +423,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     public float getStatsDevelopment() {
         return usesResolve() ? (float) getResolveLevel() / (float) getMaxResolveLevel() : 0;
     }
-    
-
-    @Deprecated
-    @Override
-    public int getXp() {
-        return xp;
-    }
-
-    @Deprecated
-    @Override
-    public void setXp(int xp) {
-        xp = MathHelper.clamp(xp, 0, MAX_EXP);
-        this.xp = xp;
-    }
 
     @Override
     public boolean unlockAction(Action<IStandPower> action) {
@@ -599,7 +582,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (usesResolve()) {
             cnbt.put("Resolve", resolveCounter.writeNBT());
         }
-        cnbt.putInt("Xp", getXp());
         cnbt.putBoolean("Skipped", skippedProgression);
         cnbt.putBoolean("Disc", givenByDisc);
         cnbt.put("ActionLearning", actionLearningProgressMap.toNBT());
@@ -613,14 +595,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 ? StandInstance.fromNBT(nbt.getCompound("StandInstance"))
                         : LegacyUtil.readOldStandCapType(nbt).orElse(null);
         setStandInstance(standInstance);
-        
-        if (nbt.contains("Exp")) {
-            xp = nbt.getInt("Exp");
-            LegacyUtil.readNbtStandXp(this, xp, actionLearningProgressMap);
-        }
-        else {
-            xp = nbt.getInt("Xp");
-        }
             
         if (usesStamina()) {
             stamina = nbt.getFloat("Stamina");
@@ -643,7 +617,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     protected void keepPower(IStandPower oldPower, boolean wasDeath) {
         super.keepPower(oldPower, wasDeath);
         oldPower.getStandInstance().ifPresent(stand -> this.setStandInstance(stand));
-        this.xp = oldPower.getXp();
         this.setResolveCounter(oldPower.getResolveCounter());
         if (wasDeath) {
             this.resolveCounter.alwaysResetOnDeath();

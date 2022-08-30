@@ -18,8 +18,6 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
 public abstract class StandAction extends Action<IStandPower> {
-    @Deprecated
-    protected final int xpRequirement;
     private final float resolveLevelToUnlock;
     private final float resolveCooldownMultiplier;
     private final boolean isTrained;
@@ -30,7 +28,6 @@ public abstract class StandAction extends Action<IStandPower> {
     
     public StandAction(StandAction.AbstractBuilder<?> builder) {
         super(builder);
-        this.xpRequirement = builder.xpRequirement;
         this.resolveLevelToUnlock = builder.resolveLevelToUnlock;
         this.resolveCooldownMultiplier = builder.resolveCooldownMultiplier;
         this.isTrained = builder.isTrained;
@@ -38,11 +35,6 @@ public abstract class StandAction extends Action<IStandPower> {
         this.staminaCost = builder.staminaCost;
         this.staminaCostTick = builder.staminaCostTick;
         this.partsRequired = builder.partsRequired;
-    }
-
-    @Deprecated
-    public int getXpRequirement() {
-        return xpRequirement;
     }
     
     @Override
@@ -129,8 +121,6 @@ public abstract class StandAction extends Action<IStandPower> {
     }
     
     protected abstract static class AbstractBuilder<T extends StandAction.AbstractBuilder<T>> extends Action.AbstractBuilder<T> {
-        @Deprecated
-        private int xpRequirement;
         private int resolveLevelToUnlock = 0;
         private float resolveCooldownMultiplier = 0;
         private boolean isTrained = false;
@@ -139,12 +129,6 @@ public abstract class StandAction extends Action<IStandPower> {
         private float staminaCostTick = 0;
         private final Set<StandPart> partsRequired = EnumSet.noneOf(StandPart.class);
 
-        @Deprecated
-        public T xpRequirement(int xpRequirement) {
-            this.xpRequirement = xpRequirement;
-            return getThis();
-        }
-        
         public T noResolveUnlock() {
             return resolveLevelToUnlock(-1);
         }

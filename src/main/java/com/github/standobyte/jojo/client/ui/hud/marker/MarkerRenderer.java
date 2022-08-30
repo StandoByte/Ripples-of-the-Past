@@ -21,9 +21,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 public abstract class MarkerRenderer {
-    private static final ResourceLocation MARKER_OUTLINE = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/marker.png");
-    private static final ResourceLocation MARKER_OUTLINE_OUTLINE = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/marker_outline.png");
-    
     private final int color;
     private final ResourceLocation iconTexture;
     private final List<MarkerInstance> positions = new ArrayList<>();
@@ -37,17 +34,19 @@ public abstract class MarkerRenderer {
 
     protected void render(MatrixStack matrixStack, ActiveRenderInfo camera, float partialTick) {
         if (shouldRender()) {
-            matrixStack.pushPose();
-            matrixStack.mulPose(camera.rotation());
-            
-            float[] rgb = ClientUtil.rgb(getColor());
             positions.clear();
             updatePositions(positions, partialTick);
-            positions.forEach(marker -> {
-                renderAt(marker.getPos(), matrixStack, camera, partialTick, rgb, marker.isOutlined());
-            });
-            
-            matrixStack.popPose();
+            if (!positions.isEmpty()) {
+                matrixStack.pushPose();
+                matrixStack.mulPose(camera.rotation());
+                
+                float[] rgb = ClientUtil.rgb(getColor());
+                positions.forEach(marker -> {
+                    renderAt(marker.getPos(), matrixStack, camera, partialTick, rgb, marker.isOutlined());
+                });
+                
+                matrixStack.popPose();
+            }
         }
     }
     
@@ -67,14 +66,13 @@ public abstract class MarkerRenderer {
         
         mc.getTextureManager().bind(getIcon());
         AbstractGui.blit(matrixStack, -8, -28, 0, 0, 16, 16, 16, 16);
-        
+
+        mc.getTextureManager().bind(ClientUtil.ADDITIONAL_UI);
         RenderSystem.color4f(rgb[0], rgb[1], rgb[2], 1.0F);
-        mc.getTextureManager().bind(MARKER_OUTLINE);
-        AbstractGui.blit(matrixStack, -16, -32, 0, 0, 32, 32, 32, 32);
+        AbstractGui.blit(matrixStack, -16, -32, 0, 0, 32, 32, 256, 256);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         if (outline) {
-            mc.getTextureManager().bind(MARKER_OUTLINE_OUTLINE);
-            AbstractGui.blit(matrixStack, -16, -32, 0, 0, 32, 32, 32, 32);
+            AbstractGui.blit(matrixStack, -16, -32, 32, 0, 64, 32, 256, 256);
         }
 
         matrixStack.popPose();
@@ -104,7 +102,7 @@ public abstract class MarkerRenderer {
             Minecraft mc = Minecraft.getInstance();
             if (!mc.options.hideGui) {
                 RenderSystem.disableDepthTest();
-                
+
                 MatrixStack matrixStack = event.getMatrixStack();
                 RENDERERS.forEach(marker -> marker.render(matrixStack, mc.gameRenderer.getMainCamera(), event.getPartialTicks()));
                 
