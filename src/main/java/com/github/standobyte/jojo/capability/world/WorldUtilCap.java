@@ -11,6 +11,10 @@ public class WorldUtilCap {
         this.timeStops = new TimeStopHandler(world);
     }
     
+    public void tick() {
+        timeStops.tick();
+    }
+    
     public TimeStopHandler getTimeStopHandler() {
         return timeStops;
     }

@@ -9,8 +9,10 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
 import com.github.standobyte.jojo.util.utils.MathUtil;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.MathHelper;
@@ -18,7 +20,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeMod;
 
-public class SilverChariotSweepingAttack extends StandEntityComboHeavyAttack {
+public class SilverChariotSweepingAttack extends StandEntityHeavyAttack {
 
     public SilverChariotSweepingAttack(StandEntityHeavyAttack.Builder builder) {
         super(builder);
@@ -61,14 +63,21 @@ public class SilverChariotSweepingAttack extends StandEntityComboHeavyAttack {
     					Vector3d targetVec = targetEntity.position().subtract(standEntity.position()).normalize();
     					double cos = standLookVec.dot(targetVec);
     					if (cos > -0.5) {
-    					    StandEntityPunch slash = punch.punchEntity(standEntity, targetEntity, standEntity.getDamageSource());
+    					    StandEntityPunch slash = punchEntity(standEntity, targetEntity, standEntity.getDamageSource());
                             if (cos < 0.5) {
                                 slash.damage(slash.getDamage() * 0.5F);
                             }
-    					    standEntity.attackEntity(targetEntity, slash, task);
+                            slash.hit(standEntity, task);
     					}
     				});
     	}
+    }
+    
+    @Override
+    public StandEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
+        return super.punchEntity(stand, target, dmgSource)
+                .setPunchSound(null)
+                .addKnockback(1);
     }
     
     @Override

@@ -25,7 +25,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClStopHeldActionPac
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandManualControlPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandSummonPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.CDBlocksBrokenPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.BrokenChunkBlocksPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.CommonConfigPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillLearnPacket;
@@ -68,6 +68,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandOffsetPac
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandEffectPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntitySwingsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntityTargetPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntityTaskModifierPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrTypeNonStandPowerPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrTypeStandInstancePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCachePacket;
@@ -78,6 +79,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.LogicalSidedProvider;
@@ -337,6 +339,11 @@ public class PacketManager {
                 TrStandEntityTargetPacket::decode,
                 TrStandEntityTargetPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
+        channel.registerMessage(index++, TrStandEntityTaskModifierPacket.class,
+                TrStandEntityTaskModifierPacket::encode,
+                TrStandEntityTaskModifierPacket::decode,
+                TrStandEntityTaskModifierPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
         channel.registerMessage(index++, TrSetStandOffsetPacket.class,
                 TrSetStandOffsetPacket::encode,
                 TrSetStandOffsetPacket::decode,
@@ -412,10 +419,10 @@ public class PacketManager {
                 ResetSyncedCommonConfigPacket::decode,
                 ResetSyncedCommonConfigPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.registerMessage(index++, CDBlocksBrokenPacket.class,
-                CDBlocksBrokenPacket::encode,
-                CDBlocksBrokenPacket::decode,
-                CDBlocksBrokenPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        channel.registerMessage(index++, BrokenChunkBlocksPacket.class,
+                BrokenChunkBlocksPacket::encode,
+                BrokenChunkBlocksPacket::decode,
+                BrokenChunkBlocksPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
         channel.registerMessage(index++, RPSGameStatePacket.class,
                 RPSGameStatePacket::encode,
@@ -448,6 +455,10 @@ public class PacketManager {
 
     public static void sendToNearby(Object msg, @Nullable ServerPlayerEntity excluded, double x, double y, double z, double radius, RegistryKey<World> dimension) {
         channel.send(PacketDistributor.NEAR.with(() -> new TargetPoint(excluded, x, y, z, radius, dimension)), msg);
+    }
+
+    public static void sendToTrackingChunk(Object msg, Chunk chunk) {
+        channel.send(PacketDistributor.TRACKING_CHUNK.with(() -> chunk), msg);
     }
     
     public static void sendGlobally(Object msg, @Nullable RegistryKey<World> dimension) {

@@ -30,13 +30,14 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.model.AgeableModel;
+import net.minecraft.client.renderer.entity.model.IHasArm;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 
-public abstract class StandEntityModel<T extends StandEntity> extends AgeableModel<T> {
+public abstract class StandEntityModel<T extends StandEntity> extends AgeableModel<T> implements IHasArm {
     protected VisibilityMode visibilityMode = VisibilityMode.ALL;
     protected float yRotation;
     protected float xRotation;
@@ -237,7 +238,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
             IVertexBuilder buffer, int packedLight, T entity, float partialTick, 
             int packedOverlay, float red, float green, float blue, float alpha) {}
 
-    public abstract ModelRenderer armModel(HandSide side);
+    public abstract ModelRenderer getArm(HandSide side);
 
     public void renderArmSwings(T entity, MatrixStack matrixStack, IVertexBuilder buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
         List<AdditionalArmSwing> swings = entity.getSwingsWithOffsets();

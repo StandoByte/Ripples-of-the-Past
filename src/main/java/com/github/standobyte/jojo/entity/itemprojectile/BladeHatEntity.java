@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.entity.itemprojectile;
 
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModSounds;
 
 import net.minecraft.block.Block;
@@ -117,6 +118,10 @@ public class BladeHatEntity extends ItemNbtProjectileEntity implements IEntityAd
     public void readAdditionalSaveData(CompoundNBT compound) {
         super.readAdditionalSaveData(compound);
         setReturningToOwner(compound.getBoolean("Returning"));
+        // TODO remove the retroactive fix
+        if (thrownStack.isEmpty()) {
+            thrownStack = new ItemStack(ModItems.BLADE_HAT.get());
+        }
     }
 
     @Override

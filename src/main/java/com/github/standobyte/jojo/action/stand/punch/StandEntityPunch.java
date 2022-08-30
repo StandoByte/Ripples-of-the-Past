@@ -27,6 +27,7 @@ public class StandEntityPunch implements IPunch {
     public final Entity target;
     public final StandEntityDamageSource dmgSource;
     private boolean targetHit;
+    
     protected float damage;
     protected float addCombo;
     protected float knockback = 1.0F;
@@ -38,6 +39,7 @@ public class StandEntityPunch implements IPunch {
     protected Vector3d sweepingAabb;
     protected float sweepingDamage;
     protected int standInvulTime = 0;
+    // FIXME !! punch sound
     protected Supplier<SoundEvent> punchSound = () -> null;
     
     public StandEntityPunch(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
@@ -153,7 +155,7 @@ public class StandEntityPunch implements IPunch {
     @Override
     public boolean hit(StandEntity standEntity, StandEntityTask task) {
         if (stand.level.isClientSide()) return false;
-        targetHit = attackEntity(standEntity, target, dmgSource, task);
+        targetHit = attackEntity(standEntity, task);
         return targetHit;
     }
 
@@ -174,8 +176,8 @@ public class StandEntityPunch implements IPunch {
     
     
     
-    private boolean attackEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, StandEntityTask task) {
-        boolean attacked = doAttack(stand, target, dmgSource, damage);
+    private boolean attackEntity(StandEntity stand, StandEntityTask task) {
+        boolean attacked = stand.attackEntity(() -> doAttack(stand, target, dmgSource, damage), this, task);
         afterAttack(stand, target, dmgSource, task, attacked, !target.isAlive());
         
         if (attacked) {
@@ -194,7 +196,7 @@ public class StandEntityPunch implements IPunch {
 
     protected void afterAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, StandEntityTask task, boolean hurt, boolean killed) {}
     
-    public boolean doAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, float damage) {
+    protected boolean doAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, float damage) {
         if (reducesKnockback()) {
             dmgSource.setKnockbackReduction(getKnockbackReduction());
         }

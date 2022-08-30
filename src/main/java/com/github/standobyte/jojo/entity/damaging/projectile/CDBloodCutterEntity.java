@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStandEffects;
@@ -49,10 +50,12 @@ public class CDBloodCutterEntity extends ModdedProjectileEntity {
                 level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(4), 
                         EntityPredicates.ENTITY_STILL_ALIVE.and(EntityPredicates.NO_SPECTATORS).and(
                                 entity -> !entity.is(stand.getUser()) && entity != stand.getStandManifestation()
-                                        // FIXME !!! (blood cutter) && isn't behind blocks
+                                && !(entity instanceof StandEntity && !((StandEntity) entity).isVisibleForAll())
+                                && !entity.isInWaterOrBubble()
+                                        // FIXME !! (blood cutter) && isn't behind blocks
                                 && entity.getBoundingBox().clip(this.getBoundingBox().getCenter(), entity.getBoundingBox().getCenter()).isPresent()))
                 .forEach(entity -> {
-                    // FIXME !! (blood cutter) refresh the timer
+                    // FIXME !!! (blood cutter) refresh the timer
                     stand.getContinuousEffects().getOrCreateEffect(ModStandEffects.DRIED_BLOOD_DROPS.get(), entity);
 
                     PacketManager.sendToClientsTracking(new BloodParticlesPacket(
@@ -62,7 +65,6 @@ public class CDBloodCutterEntity extends ModdedProjectileEntity {
         }
         else {
             level.playLocalSound(getX(), getY(), getZ(), ModSounds.WATER_SPLASH.get(), getSoundSource(), 1.0F, 1.0F, false);
-            // FIXME !!! (blood cutter) blood particles
         }
     }
     

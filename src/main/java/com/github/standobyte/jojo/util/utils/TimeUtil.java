@@ -177,7 +177,7 @@ public class TimeUtil {
             return;
         }
         event.world.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-            cap.getTimeStopHandler().tick();
+            cap.tick();
         });
         if (event.world.dimension() == World.OVERWORLD) {
 	        event.world.getCapability(SaveFileUtilCapProvider.CAPABILITY).ifPresent(cap -> {

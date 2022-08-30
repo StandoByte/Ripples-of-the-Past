@@ -1,13 +1,12 @@
 package com.github.standobyte.jojo.action.stand;
 
-import java.util.function.UnaryOperator;
+import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
-import com.github.standobyte.jojo.action.stand.punch.PunchHandler;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
@@ -24,12 +23,12 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
 
-public class StandEntityLightAttack extends StandEntityAction {
-    private final PunchHandler punch;
+public class StandEntityLightAttack extends StandEntityAction implements IHasStandPunch {
+    private final Supplier<SoundEvent> punchSound;
 
     public StandEntityLightAttack(StandEntityLightAttack.Builder builder) {
         super(builder);
-        this.punch = builder.punch.build();
+        this.punchSound = builder.punchSound;
     }
 
     @Override
@@ -47,7 +46,17 @@ public class StandEntityLightAttack extends StandEntityAction {
     
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-        standEntity.punch(task, punch, task.getTarget());
+        standEntity.punch(task, this, task.getTarget());
+    }
+    
+    @Override
+    public StandEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
+        return IHasStandPunch.super.punchEntity(stand, target, dmgSource)
+                .damage(StandStatFormulas.getLightAttackDamage(stand.getAttackDamage()))
+                .addKnockback(stand.guardCounter())
+                .addCombo(0.15F)
+                .parryTiming(stand.getComboMeter() == 0 ? StandStatFormulas.getParryTiming(stand.getPrecision()) : 0)
+                .setPunchSound(ModSounds.STAND_LIGHT_ATTACK);
     }
     
     @Override
@@ -106,42 +115,24 @@ public class StandEntityLightAttack extends StandEntityAction {
     
     
     public static class Builder extends StandEntityAction.AbstractBuilder<StandEntityLightAttack.Builder>  {
-        private PunchHandler.Builder punch = new PunchHandler.Builder().setEntityPunch(LightEntityPunch::new);
+        private Supplier<SoundEvent> punchSound = () -> null;
     	
     	public Builder() {
-            standAutoSummonMode(AutoSummonMode.ONE_ARM).staminaCost(10F).standUserSlowDownFactor(1.0F)
+            staminaCost(10F).standUserSlowDownFactor(1.0F)
             .standOffsetFront().standOffsetFromUser(-0.75, 0.75)
             .standPose(StandPose.LIGHT_ATTACK)
+            .standAutoSummonMode(AutoSummonMode.MAIN_ARM)
             .partsRequired(StandPart.ARMS);
     	}
     	
-    	public Builder modifyPunch(UnaryOperator<PunchHandler.Builder> modifier) {
-    	    return setPunch(modifier.apply(punch));
+    	public Builder punchSound(Supplier<SoundEvent> punchSound) {
+    	    this.punchSound = punchSound != null ? punchSound : () -> null;
+    	    return getThis();
     	}
-        
-        public Builder setPunch(PunchHandler.Builder punch) {
-            this.punch = punch;
-            return getThis();
-        }
-
+    	
 		@Override
 		protected Builder getThis() {
 			return this;
 		}
-    }
-    
-    
-    
-    public static class LightEntityPunch extends StandEntityPunch {
-        
-        public LightEntityPunch(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
-            super(stand, target, dmgSource);
-            this
-            .damage(StandStatFormulas.getLightAttackDamage(stand.getAttackDamage()))
-            .addKnockback(stand.guardCounter())
-            .addCombo(0.15F)
-            .parryTiming(stand.getComboMeter() == 0 ? StandStatFormulas.getParryTiming(stand.getPrecision()) : 0)
-            .setPunchSound(ModSounds.STAND_LIGHT_ATTACK);
-        }
     }
 }

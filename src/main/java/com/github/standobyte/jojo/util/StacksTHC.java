@@ -21,7 +21,7 @@ public class StacksTHC {
 		return ((Stack<T>) store.get(stackType)).peek();
 	}
 	
-	public <T> boolean isEmply(Class<T> stackType) {
+	public <T> boolean isEmpty(Class<T> stackType) {
 		return store.containsKey(stackType) ? store.get(stackType).isEmpty() : true;
 	}
 }

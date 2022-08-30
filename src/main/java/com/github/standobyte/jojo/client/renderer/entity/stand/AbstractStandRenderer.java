@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.LivingRenderer;
+import net.minecraft.client.renderer.entity.layers.HeldItemLayer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.Entity;
@@ -35,6 +36,7 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
     public AbstractStandRenderer(EntityRendererManager rendererManager, M entityModel, float shadowRadius) {
         super(rendererManager, entityModel, shadowRadius);
         entityModel.afterInit();
+        addLayer(new HeldItemLayer<>(this));
     }
 
     @Override
@@ -173,10 +175,10 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
             float alpha = getAlpha(entity, partialTick);
             model.renderToBuffer(matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
             model.renderArmSwings(entity, matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
-            if (!entity.isSpectator()) {
-                for (LayerRenderer<T, M> layerRenderer : this.layers) {
-                    layerRenderer.render(matrixStack, buffer, packedLight, entity, walkAnimPos, walkAnimSpeed, partialTick, ticks, f2, xRotation);
-                }
+        }
+        if (!entity.isSpectator()) {
+            for (LayerRenderer<T, M> layerRenderer : this.layers) {
+                layerRenderer.render(matrixStack, buffer, packedLight, entity, walkAnimPos, walkAnimSpeed, partialTick, ticks, f2, xRotation);
             }
         }
 
@@ -291,7 +293,7 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
 
     protected void doRenderFirstPersonArm(M model, HandSide handSide, 
             MatrixStack matrixStack, IVertexBuilder vertexBuilder, int packedLight, T entity, float partialTick) {
-        ModelRenderer armModelRenderer = model.armModel(handSide);
+        ModelRenderer armModelRenderer = model.getArm(handSide);
         armModelRenderer.render(matrixStack, vertexBuilder, packedLight, 
                 LivingRenderer.getOverlayCoords(entity, getWhiteOverlayProgress(entity, partialTick)), 1.0F, 1.0F, 1.0F, entity.getAlpha(partialTick));
     }

@@ -160,7 +160,7 @@ public class ModStandTypes {
             .addSummonShout(ModSounds.AVDOL_MAGICIANS_RED)
             .addOst(ModSounds.MAGICIANS_RED_OST));
     
-    public static final RegistryObject<StandType<TimeStopperStandStats>> CRAZY_DIAMOND = STANDS.register("crazy_diamond", 
+    public static final RegistryObject<StandType<StandStats>> CRAZY_DIAMOND = STANDS.register("crazy_diamond", 
             () -> new EntityStandType<>(0xEA6E7C, PART_4_NAME,
                     new StandAction[] {
                             ModActions.CRAZY_DIAMOND_PUNCH.get(), 
@@ -175,13 +175,13 @@ public class ModStandTypes {
                             ModActions.CRAZY_DIAMOND_RESTORE_TERRAIN.get(), 
                             ModActions.CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE.get()
                             },
-                    TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
+                    StandStats.class, new StandStats.Builder()
                     .tier(5)
-                    .power(12.0)
-                    .speed(12.0)
+                    .power(14.0)
+                    .speed(14.0)
                     .range(2.0, 4.0)
-                    .durability(10.0)
-                    .precision(10.0)
+                    .durability(12.0)
+                    .precision(12.0)
                     .build("Crazy Diamond"), 
                     ModEntityTypes.CRAZY_DIAMOND)
             .addSummonShout(ModSounds.JOSUKE_CRAZY_DIAMOND)
