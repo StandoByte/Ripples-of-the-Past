@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
@@ -37,9 +38,10 @@ public class CrazyDiamondBlockCheckpointMove extends StandEntityAction {
             ItemStack heldItem = user.getOffhandItem();
             CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(world, heldItem).ifPresent(pos -> {
                 Vector3d posD = Vector3d.atCenterOf(pos);
-                if (user.distanceToSqr(posD) > 16) {
-                    user.setDeltaMovement(posD.subtract(user.position()).normalize().scale(0.75));
-                    user.fallDistance = 0;
+                Entity entity = user.getRootVehicle();
+                if (entity.distanceToSqr(posD) > 16) {
+                    entity.setDeltaMovement(posD.subtract(entity.position()).normalize().scale(0.75));
+                    entity.fallDistance = 0;
                 }
                 else {
                     if (heldItem.getItem() instanceof BlockItem && !world.isClientSide()) {

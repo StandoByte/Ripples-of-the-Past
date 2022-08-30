@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.network.packets.fromserver;
+package com.github.standobyte.jojo.network.packets.fromserver.stand_specific;
 
 import java.util.ArrayList;
 import java.util.List;

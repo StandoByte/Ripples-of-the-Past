@@ -265,7 +265,7 @@ public class JojoModUtil {
         
 //        return new EntityRayTraceResult(targetEntity, targetEntityPos);
     }
-
+    
     private static AxisAlignedBB standPrecisionTargetHitbox(AxisAlignedBB aabb, double precision) {
         if (precision > 0) {
             double smallAabbAddFraction = Math.min(precision, 16) / 16;

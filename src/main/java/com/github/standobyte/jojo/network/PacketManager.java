@@ -35,8 +35,6 @@ import com.github.standobyte.jojo.network.packets.fromserver.LeapCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.MaxAchievedResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket;
-import com.github.standobyte.jojo.network.packets.fromserver.RPSGameStatePacket;
-import com.github.standobyte.jojo.network.packets.fromserver.RPSOpponentPickThoughtsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.RefreshMovementInTimeStopPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResetResolveValuePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResetSyncedCommonConfigPacket;
@@ -72,6 +70,9 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntityTaskMo
 import com.github.standobyte.jojo.network.packets.fromserver.TrTypeNonStandPowerPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrTypeStandInstancePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCachePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.stand_specific.CDBlocksRestoredPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.stand_specific.RPSGameStatePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.stand_specific.RPSOpponentPickThoughtsPacket;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -423,6 +424,11 @@ public class PacketManager {
                 BrokenChunkBlocksPacket::encode,
                 BrokenChunkBlocksPacket::decode,
                 BrokenChunkBlocksPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, CDBlocksRestoredPacket.class,
+                CDBlocksRestoredPacket::encode,
+                CDBlocksRestoredPacket::decode,
+                CDBlocksRestoredPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
         channel.registerMessage(index++, RPSGameStatePacket.class,
                 RPSGameStatePacket::encode,
