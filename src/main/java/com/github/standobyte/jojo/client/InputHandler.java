@@ -447,6 +447,27 @@ public class InputHandler {
             }
         }
     }
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void invertMovementInput(InputUpdateEvent event) {
+        if (mc.player.hasEffect(ModEffects.DISFIGURED_LEGS.get())) {
+            MovementInput input = event.getMovementInput();
+            input.forwardImpulse *= -1;
+            input.leftImpulse *= -1;
+            
+            boolean tmp = input.down;
+            input.down = input.up;
+            input.up = tmp;
+            
+            tmp = input.left;
+            input.left = input.right;
+            input.right = tmp;
+            
+            tmp = input.jumping;
+            input.jumping = input.shiftKeyDown;
+            input.shiftKeyDown = tmp;
+        }
+    }
     
     @SubscribeEvent(priority = EventPriority.LOW)
     public void onInputUpdate(InputUpdateEvent event) {
