@@ -41,6 +41,7 @@ import com.github.standobyte.jojo.action.stand.CrazyDiamondBloodCutter;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondDisfigure;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondDisfiguringPunch;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondHeal;
+import com.github.standobyte.jojo.action.stand.CrazyDiamondHeavyPunch;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondItemProjectile;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondLeaveObject;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondPreviousState;
@@ -487,7 +488,7 @@ public class ModActions {
             () -> new CrazyDiamondDisfigure(new StandAction.Builder()));
     
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_HEAVY_PUNCH = ACTIONS.register("crazy_diamond_heavy_punch", 
-            () -> new StandEntityHeavyAttack(new StandEntityHeavyAttack.Builder()
+            () -> new CrazyDiamondHeavyPunch(new StandEntityHeavyAttack.Builder()
                     .punchSound(ModSounds.CRAZY_DIAMOND_PUNCH_HEAVY)
                     .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_DORA)
                     .partsRequired(StandPart.ARMS)

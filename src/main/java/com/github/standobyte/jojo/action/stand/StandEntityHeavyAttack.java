@@ -53,7 +53,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
 	                !task.getModifierActions().filter(action -> action == followUp).findAny().isPresent() &&
 	                power.checkRequirements(followUp, new Container<>(task.getTarget()), true).isPositive();
 	    }).orElse(false)) {
-	        return recoveryAction.get();
+	        return followUp;
 	    };
 	    
 	    return this;

@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.World;
 
+// FIXME !!!!! onInput
 public abstract class StandEntityActionModifier extends StandAction implements IStandPhasedAction {
 
     public StandEntityActionModifier(AbstractBuilder<?> builder) {
