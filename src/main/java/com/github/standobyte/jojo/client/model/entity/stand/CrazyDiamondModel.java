@@ -4,7 +4,7 @@ import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseTransitionMultiple;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
-import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
+import com.github.standobyte.jojo.client.model.pose.anim.PosedActionAnimation;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.stands.CrazyDiamondEntity;
 
@@ -570,7 +570,7 @@ public class CrazyDiamondModel extends HumanoidStandModel<CrazyDiamondEntity> {
                 RotationAngle.fromDegrees(rightLeg, 15, 30, 0),
                 RotationAngle.fromDegrees(rightLowerLeg, 30, 0, 0)
         });
-        actionAnim.put(StandPose.HEAVY_ATTACK, new StandActionAnimation.Builder<CrazyDiamondEntity>()
+        actionAnim.put(StandPose.HEAVY_ATTACK, new PosedActionAnimation.Builder<CrazyDiamondEntity>()
                 .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransitionMultiple.Builder<>(heavyPunchPose1)
                         .addPose(0.2222F, heavyPunchPose2)
                         .addPose(0.3333F, heavyPunchPose3)

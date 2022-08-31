@@ -5,7 +5,7 @@ import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseTransitionMultiple;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
-import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
+import com.github.standobyte.jojo.client.model.pose.anim.PosedActionAnimation;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 
@@ -129,7 +129,7 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
                 RotationAngle.fromDegrees(rightForeArm, 0, 90, -45)
     			
     	});
-        actionAnim.put(StandPose.RANGED_ATTACK, new StandActionAnimation.Builder<HierophantGreenEntity>()
+        actionAnim.put(StandPose.RANGED_ATTACK, new PosedActionAnimation.Builder<HierophantGreenEntity>()
         		.addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransitionMultiple.Builder<>(esPose1)
         				.addPose(0.6F, esPose2)
         				.addPose(0.85F, esPose3)
@@ -138,7 +138,7 @@ public class HierophantGreenModel extends HumanoidStandModel<HierophantGreenEnti
         		.addPose(StandEntityAction.Phase.RECOVERY, idlePose)
                 .build(idlePose));
 
-        actionAnim.put(HierophantGreenGrapple.GRAPPLE_POSE, new StandActionAnimation.Builder<HierophantGreenEntity>()
+        actionAnim.put(HierophantGreenGrapple.GRAPPLE_POSE, new PosedActionAnimation.Builder<HierophantGreenEntity>()
                 .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<>(new RotationAngle[] {
                         new RotationAngle(rightArm, -1.5708F, 0.0F, 0.0F), 
                         new RotationAngle(rightForeArm, 0.0F, 0.0F, 0.0F), 

@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.client.renderer.entity.stand;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.model.entity.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.model.entity.stand.StandEntityModel.VisibilityMode;
 import com.github.standobyte.jojo.client.renderer.entity.stand.layer.StandModelLayerRenderer;
@@ -113,6 +114,7 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
     public void render(T entity, float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
         if (MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Pre<T, M>(entity, this, partialTick, matrixStack, buffer, packedLight))) return;
         matrixStack.pushPose();
+        model.layerRenderer = false;
         model.attackTime = this.getAttackAnim(entity, partialTick);
         boolean shouldSit = entity.isPassenger() && (entity.getVehicle() != null && entity.getVehicle().shouldRiderSit());
         model.riding = shouldSit;
@@ -173,9 +175,9 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
             IVertexBuilder vertexBuilder = buffer.getBuffer(renderType);
             int packedOverlay = getOverlayCoords(entity, getWhiteOverlayProgress(entity, partialTick));
             float alpha = getAlpha(entity, partialTick);
-            model.renderToBuffer(matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
-            model.renderArmSwings(entity, matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
+            model.render(entity, matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
         }
+        
         if (!entity.isSpectator()) {
             for (LayerRenderer<T, M> layerRenderer : this.layers) {
                 layerRenderer.render(matrixStack, buffer, packedLight, entity, walkAnimPos, walkAnimSpeed, partialTick, ticks, f2, xRotation);
@@ -200,11 +202,11 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
         getModel().copyPropertiesTo(model);
         model.setVisibility(entity, visibilityMode(entity));
         model.prepareMobModel(entity, walkAnimSpeed, walkAnimPos, partialTick);
+        model.layerRenderer = true;
         model.setupAnim(entity, walkAnimSpeed, walkAnimPos, ticks, yRotationOffset, xRotation);
         int packedOverlay = getOverlayCoords(entity, getWhiteOverlayProgress(entity, partialTick));
         float alpha = getAlpha(entity, partialTick);
-        model.renderToBuffer(matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
-        model.renderArmSwings(entity, matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
+        model.render(entity, matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
     }
 
     private VisibilityMode visibilityMode(T entity) {

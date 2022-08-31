@@ -6,7 +6,7 @@ import com.github.standobyte.jojo.client.model.pose.ModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseTransition;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseTransitionMultiple;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
-import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
+import com.github.standobyte.jojo.client.model.pose.anim.PosedActionAnimation;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.stands.TheWorldEntity;
 
@@ -374,7 +374,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                 new RotationAngle(leftLowerLeg, 1.8326F, 0.0F, 0.0F),
                 new RotationAngle(rightLeg, 0.2618F, 0.2618F, 0.1309F)
         });
-        actionAnim.put(StandPose.HEAVY_ATTACK, new StandActionAnimation.Builder<TheWorldEntity>()
+        actionAnim.put(StandPose.HEAVY_ATTACK, new PosedActionAnimation.Builder<TheWorldEntity>()
                 .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<>(heavyPunchPose1, heavyPunchPose2).setEasing(pr -> Math.max(pr * 3F - 2F, 0F)))
                 .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransition<>(heavyPunchPose2, heavyPunchPose3))
                 .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransitionMultiple.Builder<>(heavyPunchPose3)
@@ -416,7 +416,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                 RotationAngle.fromDegrees(rightLeg, -30F, 0, 105F),
                 RotationAngle.fromDegrees(rightLowerLeg, 0F, 0F, 0F)
         });
-        actionAnim.put(StandPose.HEAVY_ATTACK_COMBO, new StandActionAnimation.Builder<TheWorldEntity>()
+        actionAnim.put(StandPose.HEAVY_ATTACK_COMBO, new PosedActionAnimation.Builder<TheWorldEntity>()
                 .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransitionMultiple.Builder<>(idlePose)
                         .addPose(0.5F, kickPose1)
                         .addPose(0.75F, kickPose2)
@@ -457,7 +457,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                 RotationAngle.fromDegrees(rightLeg, 0F, 0F, 10F),
                 RotationAngle.fromDegrees(rightLowerLeg, 45F, 0F, 0F)
         });
-        actionAnim.put(TheWorldTSHeavyAttack.TS_PUNCH_POSE, new StandActionAnimation.Builder<TheWorldEntity>()
+        actionAnim.put(TheWorldTSHeavyAttack.TS_PUNCH_POSE, new PosedActionAnimation.Builder<TheWorldEntity>()
                 .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<>(punchPose1, punchPose2))
                 .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransition<>(punchPose2, punchPose3))
                 .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransitionMultiple.Builder<>(punchPose3)

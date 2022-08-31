@@ -152,8 +152,8 @@ public class SilverChariotEntity extends StandEntity {
     }
     
     @Override
-    public HandSide getSwingingHand() {
-        return hasRapier() ? HandSide.RIGHT : super.getSwingingHand();
+    public HandSide getPunchingHand() {
+        return hasRapier() ? HandSide.RIGHT : super.getPunchingHand();
     }
     
     @Override
