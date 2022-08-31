@@ -231,7 +231,9 @@ public class HungryZombieEntity extends ZombieEntity {
     }
     
     public static boolean createZombie(ServerWorld world, LivingEntity owner, LivingEntity dead, boolean makePersistent) {
-        if ((world.getDifficulty() == Difficulty.NORMAL && dead.getRandom().nextBoolean() || world.getDifficulty() == Difficulty.HARD)) {
+        if ((world.getDifficulty() == Difficulty.HARD
+                || world.getDifficulty() == Difficulty.NORMAL && dead.getRandom().nextBoolean()
+                || world.getDifficulty() == Difficulty.EASY && dead.getRandom().nextFloat() <= 0.1F)) {
             HungryZombieEntity zombie;
             if ((dead instanceof VillagerEntity || dead instanceof AbstractIllagerEntity) 
                     && ForgeEventFactory.canLivingConvert(dead, ModEntityTypes.HUNGRY_ZOMBIE.get(), (timer) -> {})) {

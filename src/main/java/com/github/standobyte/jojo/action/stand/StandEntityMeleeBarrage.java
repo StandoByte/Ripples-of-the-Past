@@ -12,6 +12,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
+import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -46,7 +47,6 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
         int hitsPerSecond = StandStatFormulas.getBarrageHitsPerSecond(standEntity.getAttackSpeed());
         int extraTickSwings = hitsPerSecond / 20;
         for (int i = 0; i < extraTickSwings; i++) {
-            swing(standEntity);
             hitsThisTick++;
         }
         hitsPerSecond -= extraTickSwings * 20;
@@ -67,7 +67,6 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
                         hitsThisTick++;
                     }
                 }
-                swing(standEntity);
             }
         }
         int barrageHits = hitsThisTick;
@@ -99,12 +98,6 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
             double offsetToTarget = targetPos.subtract(user.position()).multiply(1, 0, 1).length() - backAway;
             offset = MathHelper.clamp(offsetToTarget, offset, offset + maxVariation);
             return StandRelativeOffset.withXRot(0, offset);
-        }
-    }
-    
-    private void swing(StandEntity standEntity) {
-        if (standEntity.level.isClientSide()) {
-            standEntity.swing(standEntity.alternateHands());
         }
     }
     
@@ -176,7 +169,8 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
         
         public Builder() {
             super();
-            standAutoSummonMode(AutoSummonMode.ARMS).holdType().staminaCostTick(3F)
+            standPose(StandPose.BARRAGE)
+            .standAutoSummonMode(AutoSummonMode.ARMS).holdType().staminaCostTick(3F)
             .standUserSlowDownFactor(0.3F).standOffsetFront()
             .partsRequired(StandPart.ARMS);
         }
@@ -203,7 +197,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
             this
             .damage(StandStatFormulas.getBarrageHitDamage(stand.getAttackDamage(), stand.getPrecision()))
             .addCombo(0.005F)
-            .reduceKnockback(0.1F)
+            .reduceKnockback(0)
             .setPunchSound(ModSounds.STAND_BARRAGE_ATTACK);
         }
         

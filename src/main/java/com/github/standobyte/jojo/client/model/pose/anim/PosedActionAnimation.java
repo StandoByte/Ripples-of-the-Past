@@ -1,17 +1,20 @@
-package com.github.standobyte.jojo.client.model.pose;
+package com.github.standobyte.jojo.client.model.pose.anim;
 
 import java.util.EnumMap;
 import java.util.Map;
 
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
+import com.github.standobyte.jojo.client.model.pose.IModelPose;
+import com.github.standobyte.jojo.client.model.pose.ModelPoseTransition;
+import com.github.standobyte.jojo.client.model.pose.RigidModelPose;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.util.HandSide;
 
-public class StandActionAnimation<T extends Entity> {
+public class PosedActionAnimation<T extends Entity> implements IActionAnimation<T> {
     private final Map<StandEntityAction.Phase, IModelPose<T>> phasePoses;
     
-    private StandActionAnimation(StandActionAnimation.Builder<T> builder, IModelPose<T> idlePose) {
+    private PosedActionAnimation(PosedActionAnimation.Builder<T> builder, IModelPose<T> idlePose) {
         this.phasePoses = builder.phasePoses;
         StandEntityAction.Phase[] phases = StandEntityAction.Phase.values();
         int iLastMissing = -1;
@@ -39,7 +42,7 @@ public class StandActionAnimation<T extends Entity> {
     }
     
     public void animate(StandEntityAction.Phase phase, float actionCompletion, 
-            T entity, float ticks, float yRotationOffset, float xRotation, HandSide side) {
+            T entity, float ticks, float yRotationOffset, float xRotation, HandSide side, boolean layer) {
         phasePoses.get(phase).poseModel(actionCompletion, entity, ticks, yRotationOffset, xRotation, side);
     }
 
@@ -53,8 +56,8 @@ public class StandActionAnimation<T extends Entity> {
             return this;
         }
         
-        public StandActionAnimation<T> build(IModelPose<T> idlePose) {
-            return new StandActionAnimation<T>(this, idlePose);
+        public PosedActionAnimation<T> build(IModelPose<T> idlePose) {
+            return new PosedActionAnimation<T>(this, idlePose);
         }
     }
 }

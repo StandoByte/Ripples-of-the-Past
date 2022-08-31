@@ -3,8 +3,6 @@ package com.github.standobyte.jojo.entity.stand;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -26,7 +24,7 @@ import com.github.standobyte.jojo.action.stand.punch.StandMissedPunch;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.renderer.entity.stand.AdditionalArmSwing;
+import com.github.standobyte.jojo.client.model.pose.anim.barrage.BarrageSwingsHolder;
 import com.github.standobyte.jojo.client.sound.BarrageSoundsHandler;
 import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
@@ -140,10 +138,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     private static final DataParameter<Boolean> SWING_OFF_HAND = EntityDataManager.defineId(StandEntity.class, DataSerializers.BOOLEAN);
     private boolean alternateAdditionalSwing;
     private int lastSwingTick = -2;
-    private final ArmSwings swings = new ArmSwings();
     private static final DataParameter<Integer> BARRAGE_CLASH_OPPONENT_ID = EntityDataManager.defineId(StandEntity.class, DataSerializers.INT);
     public final BarrageHandler barrageHandler = new BarrageHandler(this);
-    private final BarrageSoundsHandler barrageSoundsHandler;
     
     private float blockDamage = 0;
     private float prevBlockDamage = 0;
@@ -174,6 +170,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public int overlayTickCount = 0;
     private int alphaTicks;
 
+    private final BarrageSoundsHandler barrageSoundsHandler;
+    private BarrageSwingsHolder<?> barrageSwings;
+
     public StandEntity(StandEntityType<? extends StandEntity> type, World world) {
         super(type, world);
         this.type = type;
@@ -191,6 +190,16 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         else {
             this.summonPoseRandomByte = random.nextInt(128);
             this.barrageSoundsHandler = null;
+        }
+        init(this);
+    }
+    
+    private <T extends StandEntity> void init(T thisEntity) {
+        if (level.isClientSide()) {
+            this.barrageSwings = new BarrageSwingsHolder<T>();
+        }
+        else {
+            this.barrageSwings = null;
         }
     }
     
@@ -637,6 +646,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         public static final StandPose HEAVY_ATTACK = new StandPose("HEAVY_ATTACK");
         public static final StandPose HEAVY_ATTACK_COMBO = new StandPose("HEAVY_ATTACK_COMBO");
         public static final StandPose RANGED_ATTACK = new StandPose("RANGED_ATTACK");
+        public static final StandPose BARRAGE = new StandPose("BARRAGE");
     }
 
 
@@ -994,8 +1004,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         updateStrengthMultipliers();
         
         if (!level.isClientSide()) {
-            swings.broadcastSwings(this);
-            
             if (noComboDecayTicks > 0) {
                 noComboDecayTicks--;
             }
@@ -1566,6 +1574,13 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return barrageSoundsHandler;
     }
     
+    public BarrageSwingsHolder<?> getBarrageSwingsHolder() {
+        if (!level.isClientSide()) {
+            throw new IllegalStateException("Barrage swing animating class is only available on the cilent!");
+        }
+        return this.barrageSwings;
+    }
+    
     public Hand alternateHands() {
         Hand hand = Hand.MAIN_HAND;
         if (tickCount - lastSwingTick > 1) {
@@ -1584,115 +1599,21 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return hand;
     }
 
-    // FIXME rewrite the swing animation code
-    @Override
-    public void swing(Hand hand) {
-        if (tickCount - lastSwingTick > 1) {
-            lastSwingTick = tickCount;
-            super.swing(hand);
-        }
-        else {
-            swings.addSwing(hand == Hand.MAIN_HAND ? getMainArm() : getOppositeToMainArm());
-        }
-    }
-    
-    public ArmSwings getAdditionalSwings() {
-        return swings;
-    }
-    
-    private List<AdditionalArmSwing> swingsWithOffsets = new LinkedList<>();
-    public void clUpdateSwings(float timeDelta) {
-        if (!swingsWithOffsets.isEmpty()) {
-            Iterator<AdditionalArmSwing> iter = swingsWithOffsets.iterator();
-            while (iter.hasNext()) {
-                AdditionalArmSwing swing = iter.next();
-                float anim = swing.addDelta(timeDelta);
-                if (anim > AdditionalArmSwing.MAX_ANIM_DURATION) {
-                    iter.remove();
-                }
-            }
-        }
-        int count = swings.getSwingsCount();
-        long bits = swings.getHandSideBits();
-        swings.reset();
-        for (int i = 0; i < count; i++) {
-            double maxOffset = 0.9 / (getPrecision() / 16 + 1) - 0.9 / 11;
-            float f = (float) i / (float) count;
-            swingsWithOffsets.add(new AdditionalArmSwing(f, (bits & 1) == 1 ? HandSide.RIGHT : HandSide.LEFT, this, maxOffset));
-            bits >>= 1;
-        }
-    }
-    
-    public List<AdditionalArmSwing> getSwingsWithOffsets() {
-        return swingsWithOffsets;
-    }
-
     @Override
     public HandSide getMainArm() {
         return HandSide.RIGHT;
+    }
+    
+    public HandSide getArm(Hand arm) {
+        return arm == Hand.MAIN_HAND ? getMainArm() : getOppositeToMainArm();
     }
 
     private HandSide getOppositeToMainArm() {
         return getMainArm() == HandSide.RIGHT ? HandSide.LEFT : HandSide.RIGHT;
     }
     
-    public HandSide getSwingingHand() {
-        return swingingArm == Hand.MAIN_HAND ? getMainArm() : getOppositeToMainArm();
-    }
-
-    @Override
-    public void aiStep() {
-        updateSwingTime();
-        super.aiStep();
-    }
-
-    @Override
-    public void swing(Hand hand, boolean sendPacketToSelf) { // copypasted because can't override LivingEntity#getCurrentSwingDuration()
-        if (!this.swinging || this.swingTime < 0 || this.swingTime >= getCurrentSwingDuration() / 2) {
-            this.swingTime = -1;
-            this.swinging = true;
-            this.swingingArm = hand;
-            if (this.level instanceof ServerWorld) {
-                SAnimateHandPacket sanimatehandpacket = new SAnimateHandPacket(this, hand == Hand.MAIN_HAND ? 0 : 3);
-                ServerChunkProvider serverchunkprovider = ((ServerWorld)this.level).getChunkSource();
-                if (sendPacketToSelf) {
-                    serverchunkprovider.broadcastAndSend(this, sanimatehandpacket);
-                } else {
-                    serverchunkprovider.broadcast(this, sanimatehandpacket);
-                }
-            }
-        }
-    }
-
-    @Override
-    protected void updateSwingTime() {
-        int i = getCurrentSwingDuration() + 1;
-        if (this.swinging) {
-            ++this.swingTime;
-            if (this.swingTime >= i) {
-                this.swingTime = 0;
-                this.swinging = false;
-            }
-        }
-        else {
-            this.swingTime = 0;
-        }
-        this.attackAnim = (float)this.swingTime / (float)i;
-    }
-    
-    @Override
-    public float getAttackAnim(float partialTick) {
-        float f = this.attackAnim - this.oAttackAnim;
-        if (f < 0.0F) {
-            ++f;
-        }
-        return this.oAttackAnim + f * partialTick;
-    }
-
-    private int getCurrentSwingDuration() {
-//        double attackSpeed = getAttackSpeed();
-//        return attackSpeed < 10D ? (int) (20D / attackSpeed) : 2;
-    	return 2;
+    public HandSide getPunchingHand() {
+        return getArm(swingingArm);
     }
     
     public float getComboMeter() {
@@ -2222,6 +2143,76 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public void addAdditionalSaveData(CompoundNBT nbt) {
         super.addAdditionalSaveData(nbt);
     }
+    
+    
+
+    @Override
+    public void swing(Hand hand) {
+        if (tickCount - lastSwingTick > 1) {
+            lastSwingTick = tickCount;
+            super.swing(hand);
+        }
+        else {
+//            swings.addSwing(hand == Hand.MAIN_HAND ? getMainArm() : getOppositeToMainArm());
+        }
+    }
+
+    @Override
+    public void aiStep() {
+        updateSwingTime();
+        super.aiStep();
+    }
+
+    @Override
+    public void swing(Hand hand, boolean sendPacketToSelf) { // copypasted because can't override LivingEntity#getCurrentSwingDuration()
+        if (!this.swinging || this.swingTime < 0 || this.swingTime >= getCurrentSwingDuration() / 2) {
+            this.swingTime = -1;
+            this.swinging = true;
+            this.swingingArm = hand;
+            if (this.level instanceof ServerWorld) {
+                SAnimateHandPacket sanimatehandpacket = new SAnimateHandPacket(this, hand == Hand.MAIN_HAND ? 0 : 3);
+                ServerChunkProvider serverchunkprovider = ((ServerWorld)this.level).getChunkSource();
+                if (sendPacketToSelf) {
+                    serverchunkprovider.broadcastAndSend(this, sanimatehandpacket);
+                } else {
+                    serverchunkprovider.broadcast(this, sanimatehandpacket);
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void updateSwingTime() {
+        int i = getCurrentSwingDuration() + 1;
+        if (this.swinging) {
+            ++this.swingTime;
+            if (this.swingTime >= i) {
+                this.swingTime = 0;
+                this.swinging = false;
+            }
+        }
+        else {
+            this.swingTime = 0;
+        }
+        this.attackAnim = (float)this.swingTime / (float)i;
+    }
+    
+    @Override
+    public float getAttackAnim(float partialTick) {
+        float f = this.attackAnim - this.oAttackAnim;
+        if (f < 0.0F) {
+            ++f;
+        }
+        return this.oAttackAnim + f * partialTick;
+    }
+
+    private int getCurrentSwingDuration() {
+//        double attackSpeed = getAttackSpeed();
+//        return attackSpeed < 10D ? (int) (20D / attackSpeed) : 2;
+        return 2;
+    }
+    
+    
 
     private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
     @Override
