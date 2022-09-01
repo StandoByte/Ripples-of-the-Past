@@ -25,7 +25,7 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotific
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.model.pose.anim.barrage.BarrageSwingsHolder;
-import com.github.standobyte.jojo.client.sound.BarrageSoundsHandler;
+import com.github.standobyte.jojo.client.sound.BarrageHitSoundHandler;
 import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
 import com.github.standobyte.jojo.entity.mob.IMobStandUser;
@@ -170,8 +170,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public int overlayTickCount = 0;
     private int alphaTicks;
 
-    private final BarrageSoundsHandler barrageSoundsHandler;
     private BarrageSwingsHolder<?> barrageSwings;
+    private final BarrageHitSoundHandler barrageSounds;
 
     public StandEntity(StandEntityType<? extends StandEntity> type, World world) {
         super(type, world);
@@ -185,11 +185,11 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         this.summonLockTicks = StandStatFormulas.getSummonLockTicks(stats.getBaseAttackSpeed());
         if (level.isClientSide()) {
             this.alphaTicks = this.summonLockTicks;
-            this.barrageSoundsHandler = new BarrageSoundsHandler(this);
+            this.barrageSounds = new BarrageHitSoundHandler();
         }
         else {
             this.summonPoseRandomByte = random.nextInt(128);
-            this.barrageSoundsHandler = null;
+            this.barrageSounds = null;
         }
         init(this);
     }
@@ -236,7 +236,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 StandEntityAction.Phase phase = task.getPhase();
                 action.playSound(this, userPower, phase, task);
                 action.onTaskSet(level, this, userPower, phase, task, task.getTicksLeft());
-                action.onPhaseSet(level, this, userPower, phase, task, task.getTicksLeft());
+                action.onPhaseSet(level, this, userPower, null, phase, task, task.getTicksLeft());
                 setStandPose(action.getStandPose(userPower, this));
             });
             if (!taskOptional.isPresent()) {
@@ -255,7 +255,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         	barrageHandler.clashOpponent = Optional.ofNullable(level.getEntity(entityData.get(BARRAGE_CLASH_OPPONENT_ID)));
         }
         else if (MANUAL_MOVEMENT_LOCK.equals(dataParameter)) {
-        	this.manualMovementLocks.onEntityDataUpdated(this);
+        	manualMovementLocks.onEntityDataUpdated(this);
         }
     }
 
@@ -888,9 +888,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             }
             if (blockedRatio == 1) {
                 wasDamageBlocked = true;
-                if (damageSrc.getEntity() instanceof StandEntity) {
-                	((StandEntity) damageSrc.getEntity()).playPunchSound = false;
-                }
+//                if (damageSrc.getEntity() instanceof StandEntity) {
+//                	((StandEntity) damageSrc.getEntity()).playPunchSound = false;
+//                }
             }
             return damageAmount * (1 - getPhysicalResistance(blockedRatio));
         }
@@ -1302,7 +1302,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
     protected void clearTask(StandEntityTask clearedTask, @Nullable StandEntityAction newAction) {
     	StandEntityAction oldAction = clearedTask.getAction();
-        oldAction.onClear(userPower, this, newAction);
+        oldAction.onClearServerSide(userPower, this, newAction);
         
         barrageHandler.reset();
         if (blockDamage > 0) {
@@ -1446,40 +1446,35 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     public Boolean playPunchSound = null;
-    public boolean attackTarget(ActionTarget target, IHasStandPunch punch, StandEntityTask task) {
+    public boolean attackTarget(ActionTarget target, IHasStandPunch punchAction, StandEntityTask task) {
         IPunch punchInstance;
+        playPunchSound = null;
         switch (target.getType()) {
         case BLOCK:
             BlockPos blockPos = target.getBlockPos();
-            StandBlockPunch blockPunchInstance = punch.punchBlock(this, blockPos, level.getBlockState(blockPos));
+            StandBlockPunch blockPunchInstance = punchAction.punchBlock(this, blockPos, level.getBlockState(blockPos));
             punchInstance = blockPunchInstance;
             break;
         case ENTITY:
             Entity entity = target.getEntity();
-            StandEntityPunch entityPunchInstance = punch.punchEntity(this, entity, getDamageSource());
+            StandEntityPunch entityPunchInstance = punchAction.punchEntity(this, entity, getDamageSource());
             punchInstance = entityPunchInstance;
             break;
         default:
-            StandMissedPunch emptyPunchInstance = punch.punchMissed(this);
+            StandMissedPunch emptyPunchInstance = punchAction.punchMissed(this);
             punchInstance = emptyPunchInstance;
             break;
         }
         
-        punchInstance.hit(this, task);
-        if (playPunchSound == null && punchInstance.targetWasHit() || playPunchSound != null && playPunchSound) {
-            SoundEvent punchSound = punchInstance.getSound();
-            if (punchSound != null) {
-                Vector3d soundPos = punchInstance.getSoundPos();
-                if (soundPos != null) {
-                    playSound(punchSound, 1.0F, 1.0F, null, soundPos);
-                }
-            }
+        punchInstance.doHit(task);
+        if (!level.isClientSide()) {
+            punchAction.playPunchSound(punchInstance, target.getType(), playPunchSound == null || playPunchSound, playPunchSound != null && playPunchSound);
         }
         return punchInstance.targetWasHit();
     }
     
     public boolean hitBlock(BlockPos blockPos, BlockState blockState, StandBlockPunch punch, StandEntityTask task) {
-        return !level.isClientSide() ? punch.hit(this, task) : false;
+        return !level.isClientSide() ? punch.doHit(task) : false;
     }
     
     public StandEntityDamageSource getDamageSource() {
@@ -1565,20 +1560,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         	return canAttack((LivingEntity) target);
         }
         return true;
-    }
-    
-    public BarrageSoundsHandler getBarrageSoundsHandler() {
-        if (!level.isClientSide()) {
-            throw new IllegalStateException("Barrage sound handling class is only available on the cilent!");
-        }
-        return barrageSoundsHandler;
-    }
-    
-    public BarrageSwingsHolder<?> getBarrageSwingsHolder() {
-        if (!level.isClientSide()) {
-            throw new IllegalStateException("Barrage swing animating class is only available on the cilent!");
-        }
-        return this.barrageSwings;
     }
     
     public Hand alternateHands() {
@@ -1716,9 +1697,23 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public double getRangeEfficiency() {
         return rangeEfficiency;
     }
-
     
-
+    public BarrageSwingsHolder<?> getBarrageSwingsHolder() {
+        if (!level.isClientSide()) {
+            throw new IllegalStateException("Barrage swing animating class is only available on the client!");
+        }
+        return this.barrageSwings;
+    }
+    
+    public BarrageHitSoundHandler getBarrageHitSoundsHandler() {
+        if (!level.isClientSide()) {
+            throw new IllegalStateException("Barrage sound handling class is only available on the client!");
+        }
+        return this.barrageSounds;
+    }
+    
+    
+    
     public void addProjectile(DamagingEntity projectile) {
         if (!level.isClientSide() && !projectile.isAddedToWorld()) {
             projectile.setDamageFactor(projectile.getDamageFactor() * (float) getAttackDamage() / 8);
@@ -1993,6 +1988,16 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
         	
         return MathHelper.clamp(alpha, 0F, 1F);
+    }
+    
+    @Override
+    public boolean shouldRender(double cameraX, double cameraY, double cameraZ) {
+        onClientRenderTick(ClientUtil.getPartialTick());
+        return super.shouldRender(cameraX, cameraY, cameraZ);
+    }
+    
+    protected void onClientRenderTick(float partialTick) {
+        this.barrageSounds.playSound(this, tickCount + partialTick);
     }
 
 

@@ -39,7 +39,7 @@ public class ArmBarrageSwing<T extends StandEntity> extends AdditionalBarrageSwi
             float yRotationOffset, float xRotation, 
             int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
         model.setVisibility(entity, side == HandSide.LEFT ? VisibilityMode.LEFT_ARM_ONLY : VisibilityMode.RIGHT_ARM_ONLY);
-        double zAdditional = (0.75F - Math.abs(0.5F - ticks / ticksMax)) * 0.5;
+        double zAdditional = (0.75F - Math.abs(0.5F - ticks / ticksMax)) * 0.25;
         Vector3d offsetRot = new Vector3d(offset.x, -offset.y, offset.z + zAdditional).xRot(xRotation * MathUtil.DEG_TO_RAD);
         matrixStack.pushPose();
         matrixStack.translate(offsetRot.x, offsetRot.y, -offsetRot.z - zAdditional);

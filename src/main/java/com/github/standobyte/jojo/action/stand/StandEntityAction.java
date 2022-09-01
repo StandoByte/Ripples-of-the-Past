@@ -290,7 +290,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     
     public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task, int ticks) {}
     
-    public void onPhaseSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task, int ticks) {}
+    public void onPhaseSet(World world, StandEntity standEntity, IStandPower standPower, @Nullable Phase from, @Nullable Phase to, StandEntityTask task, int ticks) {}
     
     public void playSound(StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task) {
         SoundEvent sound = getSound(standEntity, standPower, phase, task);
@@ -379,7 +379,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         return false;
     }
     
-    public void onClear(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction) {
+    public void onClearServerSide(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction) {
     }
     
     public float getStandAlpha(StandEntity standEntity, int ticksLeft, float partialTick) {

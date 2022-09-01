@@ -7,20 +7,22 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
-import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class StandEntityLightAttack extends StandEntityAction implements IHasStandPunch {
@@ -56,7 +58,13 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
                 .addKnockback(stand.guardCounter())
                 .addCombo(0.15F)
                 .parryTiming(stand.getComboMeter() == 0 ? StandStatFormulas.getParryTiming(stand.getPrecision()) : 0)
-                .setPunchSound(ModSounds.STAND_LIGHT_ATTACK);
+                .impactSound(punchSound);
+    }
+    
+    @Override
+    public StandBlockPunch punchBlock(StandEntity stand, BlockPos pos, BlockState state) {
+        return IHasStandPunch.super.punchBlock(stand, pos, state)
+                .impactSound(punchSound);
     }
     
     @Override

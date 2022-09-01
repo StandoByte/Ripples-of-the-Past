@@ -313,33 +313,6 @@
     "subtitle": "jojo.subtitle.stand_damage_block",
     "sounds": [ "jojo:attack_block_1", "jojo:attack_block_2" ]
   },
-  "stand_light_attack": {
-    "subtitle": "jojo.subtitle.stand_attack_light",
-    "sounds": [
-      {
-        "name": "minecraft:entity.player.attack.strong",
-        "type": "event"
-      }
-    ]
-  },
-  "stand_strong_attack": {
-    "subtitle": "jojo.subtitle.stand_attack_strong",
-    "sounds": [
-      {
-        "name": "minecraft:entity.player.attack.knockback",
-        "type": "event"
-      }
-    ]
-  },
-  "stand_barrage_attack": {
-    "subtitle": "jojo.subtitle.stand_attack_barrage",
-    "sounds": [
-      {
-        "name": "minecraft:entity.player.attack.weak",
-        "type": "event"
-      }
-    ]
-  },
   "stand_crash": {
     "subtitle": "jojo.subtitle.stand_crash",
     "sounds": [ "jojo:stand/stand_parry" ]
@@ -382,6 +355,14 @@
   "star_platinum_unsummon": {
     "subtitle": "jojo.subtitle.stand_unsummon",
     "sounds": [ "jojo:stand/star_platinum_unsummon" ]
+  },
+  "star_platinum_punch_light": {
+    "subtitle": "jojo.subtitle.stand_attack_light",
+    "sounds": [ "minecraft:random/anvil_land" ]
+  },
+  "star_platinum_punch_heavy": {
+    "subtitle": "jojo.subtitle.stand_attack_strong",
+    "sounds": [ "minecraft:random/anvil_land" ]
   },
   "star_platinum_ora": {
     "subtitle": "jojo.subtitle.ora",
@@ -496,6 +477,21 @@
   "the_world_muda_muda_muda": {
     "subtitle": "jojo.subtitle.muda_muda_muda",
     "sounds": [ "jojo:stand/the_world_muda_muda_muda", "jojo:stand/the_world_muda_muda_muda_2" ]
+  },
+  "the_world_punch_light": {
+    "subtitle": "jojo.subtitle.stand_attack_light",
+    "sounds": [ "minecraft:random/anvil_land" ]
+  },
+  "the_world_punch_heavy": {
+    "subtitle": "jojo.subtitle.stand_attack_strong",
+    "sounds": [ "minecraft:random/anvil_land" ]
+  },
+  "the_world_punch_heavy_unrevealed": {
+    "sounds": [ "minecraft:mob/wither/spawn" ]
+  },
+  "the_world_kick_heavy": {
+    "subtitle": "jojo.subtitle.stand_attack_strong",
+    "sounds": [ "minecraft:random/anvil_land" ]
   },
   "the_world_time_stop": {
     "sounds": [ "jojo:stand/the_world_time_stop" ]
@@ -621,6 +617,18 @@
     "subtitle": "jojo.subtitle.stand_summon",
     "sounds": [ "jojo:stand/magicians_red_summon", "jojo:stand/magicians_red_summon_2" ]
   },
+  "magicians_red_punch_light": {
+    "subtitle": "jojo.subtitle.stand_attack_light",
+    "sounds": [ "minecraft:random/anvil_land" ]
+  },
+  "magicians_red_punch_heavy": {
+    "subtitle": "jojo.subtitle.stand_attack_strong",
+    "sounds": [ "minecraft:random/anvil_land" ]
+  },
+  "magicians_red_kick_heavy": {
+    "subtitle": "jojo.subtitle.stand_attack_strong",
+    "sounds": [ "minecraft:random/anvil_land" ]
+  },
   "magicians_red_fire_ability": {
     "subtitle": "jojo.subtitle.fire_ability",
     "sounds": [ "minecraft:mob/ghast/fireball4" ]
@@ -647,11 +655,7 @@
   },
   "crazy_diamond_punch_heavy": {
     "subtitle": "jojo.subtitle.stand_attack_strong",
-    "sounds": [ "jojo:stand/crazy_diamond_punch_heavy" ]
-  },
-  "crazy_diamond_punch_barrage": {
-    "subtitle": "jojo.subtitle.stand_attack_barrage",
-    "sounds": [ "jojo:stand/crazy_diamond_punch_barrage" ]
+    "sounds": [ "minecraft:random/anvil_land" ]
   },
   "crazy_diamond_dora": {
     "subtitle": "jojo.subtitle.dora",

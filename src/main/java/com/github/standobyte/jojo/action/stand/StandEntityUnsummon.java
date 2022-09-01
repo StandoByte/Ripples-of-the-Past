@@ -14,7 +14,7 @@ import net.minecraft.world.World;
 public final class StandEntityUnsummon extends StandEntityAction {
 
     public StandEntityUnsummon() {
-        super(new StandEntityAction.Builder().standPerformDuration(Integer.MAX_VALUE).standUserSlowDownFactor(1.0F));
+        super(new StandEntityAction.Builder().standUserSlowDownFactor(1.0F));
     }
 
     @Override
@@ -62,7 +62,7 @@ public final class StandEntityUnsummon extends StandEntityAction {
     }
     
     @Override
-    public void onClear(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction) {
+    public void onClearServerSide(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction) {
         standEntity.unsummonTicks = 0;
         standEntity.unsummonOffset = standEntity.getDefaultOffsetFromUser().copy();
     }
@@ -83,5 +83,10 @@ public final class StandEntityUnsummon extends StandEntityAction {
         if (world.isClientSide()) {
             ClientTickingSoundsHelper.playStandEntityUnsummonSound(standEntity, sound, 1.0F, 1.0F);
         }
+    }
+
+    @Override
+    public int getStandActionTicks(IStandPower standPower, StandEntity standEntity) {
+        return Integer.MAX_VALUE;
     }
 }

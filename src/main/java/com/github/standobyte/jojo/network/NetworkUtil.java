@@ -23,6 +23,7 @@ import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.extensions.IForgePacketBuffer;
 import net.minecraftforge.registries.ForgeRegistry;
@@ -148,6 +149,19 @@ public class NetworkUtil {
 
             return arr;
         }
+    }
+    
+    public static void writeVecApproximate(PacketBuffer buf, Vector3d vec) {
+        buf.writeInt((int) (vec.x * 8.0));
+        buf.writeInt((int) (vec.y * 8.0));
+        buf.writeInt((int) (vec.z * 8.0));
+    }
+    
+    public static Vector3d readVecApproximate(PacketBuffer buf) {
+        return new Vector3d(
+                buf.readInt() / 8.0, 
+                buf.readInt() / 8.0, 
+                buf.readInt() / 8.0);
     }
     
     public static <T> void writeOptionally(PacketBuffer buf, T obj, BiConsumer<PacketBuffer, T> write) {

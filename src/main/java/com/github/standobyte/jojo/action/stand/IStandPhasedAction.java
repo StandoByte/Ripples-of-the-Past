@@ -21,6 +21,8 @@ public interface IStandPhasedAction {
     
     default void standTickRecovery(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
     
+    default void phaseTransition(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
+    
     default int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) { return 0; }
 
     default int getStandActionTicks(IStandPower standPower, StandEntity standEntity) { return 1; }
