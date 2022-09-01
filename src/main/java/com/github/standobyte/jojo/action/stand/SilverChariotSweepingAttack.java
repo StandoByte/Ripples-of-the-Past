@@ -67,7 +67,7 @@ public class SilverChariotSweepingAttack extends StandEntityHeavyAttack {
                             if (cos < 0.5) {
                                 slash.damage(slash.getDamage() * 0.5F);
                             }
-                            slash.hit(standEntity, task);
+                            slash.doHit(task);
     					}
     				});
     	}
@@ -76,7 +76,7 @@ public class SilverChariotSweepingAttack extends StandEntityHeavyAttack {
     @Override
     public StandEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
         return super.punchEntity(stand, target, dmgSource)
-                .setPunchSound(null)
+                .impactSound(null)
                 .addKnockback(1);
     }
     

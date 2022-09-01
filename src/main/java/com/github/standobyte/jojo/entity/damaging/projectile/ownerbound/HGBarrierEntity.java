@@ -12,6 +12,7 @@ import com.github.standobyte.jojo.init.ModDataSerializers;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.StandUtil;
+import com.github.standobyte.jojo.util.damage.DamageUtil;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.entity.Entity;
@@ -36,6 +37,7 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
     protected static final DataParameter<Boolean> WAS_RIPPED = EntityDataManager.defineId(HGBarrierEntity.class, DataSerializers.BOOLEAN);
     protected static final DataParameter<Optional<Vector3d>> RIPPED_POINT = EntityDataManager.defineId(HGBarrierEntity.class, 
             (IDataSerializer<Optional<Vector3d>>) ModDataSerializers.OPTIONAL_VECTOR3D.get().getSerializer());
+    private boolean rippedHurtOwner = false;
     private LivingEntity standUser;
     private BlockPos originBlockPos;
     private int rippedTicks = -1;
@@ -63,8 +65,14 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
         if (!timeStop) {
             if (rippedTicks > 0) {
                 if (--rippedTicks == 0) {
-                    remove();
+                    if (!level.isClientSide()) {
+                        remove();
+                    }
                     return;
+                }
+                if (!level.isClientSide() && !rippedHurtOwner) {
+                    DamageUtil.hurtThroughInvulTicks(standUser, DamageSource.GENERIC, 0.2F);
+                    rippedHurtOwner = true;
                 }
             }
             else {
@@ -78,12 +86,14 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
                 }
             }
         }
-        else if (!level.isClientSide() && !wasRipped()) {
-            RayTraceResult[] rayTrace = rayTrace();
-            for (RayTraceResult result : rayTrace) {
-                if (result.getType() == RayTraceResult.Type.ENTITY && !ForgeEventFactory.onProjectileImpact(this, result)) {
-                    ripAt(result.getLocation());
-                    break;
+        else if (!level.isClientSide()) {
+            if (!wasRipped()) {
+                RayTraceResult[] rayTrace = rayTrace();
+                for (RayTraceResult result : rayTrace) {
+                    if (result.getType() == RayTraceResult.Type.ENTITY && !ForgeEventFactory.onProjectileImpact(this, result)) {
+                        ripAt(result.getLocation());
+                        break;
+                    }
                 }
             }
         }
@@ -172,9 +182,6 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
                     stand.getBarriersNet().shootEmeraldsFromBarriers(stand.getUserPower(), stand, 
                     		target.getBoundingBox().getCenter(), 0, 20 * stand.getStaminaCondition(), 
                     		ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get().getStaminaCostTicking(stand.getUserPower()) * 0.5F, 2, false);
-                    if (stand.getUser() != null) {
-                        stand.getUser().hurt(DamageSource.GENERIC, 0.1F);
-                    }
                 }
                 JojoModUtil.playSound(level, null, target.getX(), target.getY(), target.getZ(), 
                         ModSounds.HIEROPHANT_GREEN_BARRIER_RIPPED.get(), getSoundSource(), 1.0F, 1.0F, StandUtil::shouldHearStands);
@@ -215,6 +222,11 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
     @Override
     public void canUpdate(boolean canUpdate) {
         timeStop = !canUpdate;
+    }
+    
+    @Override
+    public boolean canUpdate() {
+        return true;
     }
 
     @Override

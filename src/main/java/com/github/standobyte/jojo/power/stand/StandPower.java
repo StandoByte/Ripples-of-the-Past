@@ -17,7 +17,7 @@ import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.StaminaPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrStaminaPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandActionLearningPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandActionsClearLearningPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrTypeStandInstancePacket;
@@ -263,7 +263,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         this.stamina = amount;
         if (send) {
             serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new StaminaPacket(getStamina()), player);
+                PacketManager.sendToClientsTrackingAndSelf(new TrStaminaPacket(user.getId(), getStamina()), player);
             });
         }
     }
@@ -633,9 +633,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         super.syncWithUserOnly();
         serverPlayerUser.ifPresent(player -> {
             if (hasPower()) {
-                if (usesStamina()) {
-                    PacketManager.sendToClient(new StaminaPacket(stamina), player);
-                }
                 if (usesResolve()) {
                     resolveCounter.syncWithUser(player);
                 }
@@ -656,6 +653,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (hasPower()) {
             if (user != null) {
                 PacketManager.sendToClient(new TrTypeStandInstancePacket(user.getId(), getStandInstance().get()), player);
+            }
+            if (usesStamina()) {
+                PacketManager.sendToClient(new TrStaminaPacket(user.getId(), stamina), player);
             }
             if (standManifestation != null) {
                 standManifestation.syncWithTrackingOrUser(player);

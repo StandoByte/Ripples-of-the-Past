@@ -14,13 +14,18 @@ public class StandMissedPunch implements IPunch {
     }
 
     @Override
-    public boolean hit(StandEntity standEntity, StandEntityTask task) {
+    public boolean doHit(StandEntityTask standTask) {
         return false;
     }
 
     @Override
     public boolean targetWasHit() {
         return false;
+    }
+    
+    @Override
+    public StandEntity getStand() {
+        return stand;
     }
 
     @Override

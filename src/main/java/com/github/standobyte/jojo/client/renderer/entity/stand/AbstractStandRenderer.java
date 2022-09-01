@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.client.renderer.entity.stand;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.model.entity.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.model.entity.stand.StandEntityModel.VisibilityMode;
 import com.github.standobyte.jojo.client.renderer.entity.stand.layer.StandModelLayerRenderer;

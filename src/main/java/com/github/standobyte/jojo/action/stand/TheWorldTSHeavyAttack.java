@@ -170,7 +170,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
                 .addKnockback(4)
                 .disableBlocking(1.0F)
                 .setStandInvulTime(10)
-                .setPunchSound(ModSounds.STAND_STRONG_ATTACK);
+                .impactSound(ModSounds.THE_WORLD_PUNCH_HEAVY);
     }
     
     @Override

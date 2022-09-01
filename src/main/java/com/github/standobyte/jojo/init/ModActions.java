@@ -223,19 +223,23 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_PUNCH = ACTIONS.register("star_platinum_punch", 
             () -> new StandEntityLightAttack(new StandEntityLightAttack.Builder()
+                    .punchSound(ModSounds.STAR_PLATINUM_PUNCH_LIGHT)
                     .standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_ORA)));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_BARRAGE = ACTIONS.register("star_platinum_barrage", 
             () -> new StandEntityMeleeBarrage(new StandEntityMeleeBarrage.Builder()
+                    .barrageHitSound(ModSounds.STAR_PLATINUM_PUNCH_BARRAGE)
                     .standSound(ModSounds.STAR_PLATINUM_ORA_ORA_ORA)));
     
     public static final RegistryObject<StandEntityHeavyAttack> STAR_PLATINUM_UPPERCUT = ACTIONS.register("star_platinum_uppercut", 
             () -> new StarPlatinumUppercut(new StandEntityHeavyAttack.Builder()
+                    .punchSound(ModSounds.STAR_PLATINUM_PUNCH_HEAVY)
                     .standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_ORA_LONG)
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_HEAVY_PUNCH = ACTIONS.register("star_platinum_heavy_punch", 
             () -> new StandEntityHeavyAttack(new StandEntityHeavyAttack.Builder()
+                    .punchSound(ModSounds.STAR_PLATINUM_PUNCH_HEAVY)
                     .standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_ORA_LONG)
                     .partsRequired(StandPart.ARMS)
                     .setComboAttack(STAR_PLATINUM_UPPERCUT)
@@ -286,19 +290,23 @@ public class ModActions {
 
     public static final RegistryObject<StandEntityAction> THE_WORLD_PUNCH = ACTIONS.register("the_world_punch", 
             () -> new StandEntityLightAttack(new StandEntityLightAttack.Builder()
+                    .punchSound(ModSounds.THE_WORLD_PUNCH_LIGHT)
                     .standSound(Phase.WINDUP, ModSounds.DIO_MUDA)));
     
     public static final RegistryObject<StandEntityAction> THE_WORLD_BARRAGE = ACTIONS.register("the_world_barrage", 
             () -> new TheWorldBarrage(new StandEntityMeleeBarrage.Builder()
+                    .barrageHitSound(ModSounds.THE_WORLD_PUNCH_BARRAGE)
                     .standSound(ModSounds.THE_WORLD_MUDA_MUDA_MUDA).shout(ModSounds.DIO_MUDA_MUDA), ModSounds.DIO_WRY));
 
     public static final RegistryObject<StandEntityHeavyAttack> THE_WORLD_KICK = ACTIONS.register("the_world_kick", 
             () -> new TheWorldKick(new StandEntityHeavyAttack.Builder()
+                    .punchSound(ModSounds.THE_WORLD_KICK_HEAVY)
                     .shout(ModSounds.DIO_DIE)
                     .partsRequired(StandPart.LEGS)));
 
     public static final RegistryObject<StandEntityHeavyAttack> THE_WORLD_HEAVY_PUNCH = ACTIONS.register("the_world_heavy_punch", 
             () -> new TheWorldHeavyPunch(new StandEntityHeavyAttack.Builder()
+                    .punchSound(ModSounds.THE_WORLD_PUNCH_HEAVY)
                     .shout(ModSounds.DIO_DIE)
                     .partsRequired(StandPart.ARMS)
                     .setComboAttack(THE_WORLD_KICK)
@@ -416,14 +424,17 @@ public class ModActions {
     
 
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_PUNCH = ACTIONS.register("magicians_red_punch", 
-            () -> new StandEntityLightAttack(new StandEntityLightAttack.Builder()));
+            () -> new StandEntityLightAttack(new StandEntityLightAttack.Builder()
+                    .punchSound(ModSounds.MAGICIANS_RED_PUNCH_LIGHT)));
 
     public static final RegistryObject<StandEntityHeavyAttack> MAGICIANS_RED_KICK = ACTIONS.register("magicians_red_kick", 
             () -> new MagiciansRedKick(new StandEntityHeavyAttack.Builder()
+                    .punchSound(ModSounds.MAGICIANS_RED_KICK_HEAVY)
                     .partsRequired(StandPart.LEGS)));
 
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_HEAVY_PUNCH = ACTIONS.register("magicians_red_heavy_punch", 
             () -> new StandEntityHeavyAttack(new StandEntityHeavyAttack.Builder()
+                    .punchSound(ModSounds.MAGICIANS_RED_PUNCH_HEAVY)
                     .partsRequired(StandPart.ARMS)
                     .setComboAttack(MAGICIANS_RED_KICK)
                     .shiftVariationOf(MAGICIANS_RED_PUNCH)));
@@ -475,7 +486,7 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_BARRAGE = ACTIONS.register("crazy_diamond_barrage", 
             () -> new StandEntityMeleeBarrage(new StandEntityMeleeBarrage.Builder()
-                    .barrageSound(ModSounds.CRAZY_DIAMOND_PUNCH_BARRAGE)
+                    .barrageHitSound(ModSounds.CRAZY_DIAMOND_PUNCH_BARRAGE)
                     .standSound(ModSounds.CRAZY_DIAMOND_DORARARA)));
     
     public static final RegistryObject<StandEntityHeavyAttack> CRAZY_DIAMOND_COMBO_PUNCH = ACTIONS.register("crazy_diamond_disfiguring_punch", 

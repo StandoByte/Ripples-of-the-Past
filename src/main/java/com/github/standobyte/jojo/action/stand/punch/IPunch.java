@@ -7,8 +7,11 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.vector.Vector3d;
 
 public interface IPunch {
-    boolean hit(StandEntity standEntity, StandEntityTask task);
+    boolean doHit(StandEntityTask task);
     boolean targetWasHit();
+    
+    StandEntity getStand();
+    
     SoundEvent getSound();
     Vector3d getSoundPos();
 }

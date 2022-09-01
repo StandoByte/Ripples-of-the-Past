@@ -43,7 +43,6 @@ import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartP
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveLevelPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.StaminaPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandActionLearningPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandActionsClearLearningPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandCancelManualMovementPacket;
@@ -52,6 +51,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.StandStatsDataPacke
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopInstancePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerJoinPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerStatePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrBarrageHitSoundPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDirectEntityPosPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrEnergyPacket;
@@ -63,6 +63,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrNoMotionLerpPacke
 import com.github.standobyte.jojo.network.packets.fromserver.TrNonStandFlagPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandOffsetPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrStaminaPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandEffectPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntityTargetPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntityTaskModifierPacket;
@@ -259,10 +260,10 @@ public class PacketManager {
                 TrNonStandFlagPacket::decode,
                 TrNonStandFlagPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.registerMessage(index++, StaminaPacket.class,
-                StaminaPacket::encode,
-                StaminaPacket::decode,
-                StaminaPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        channel.registerMessage(index++, TrStaminaPacket.class,
+                TrStaminaPacket::encode,
+                TrStaminaPacket::decode,
+                TrStaminaPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
         channel.registerMessage(index++, ResolvePacket.class,
                 ResolvePacket::encode,
@@ -373,6 +374,11 @@ public class PacketManager {
                 PlaySoundAtClientPacket::encode,
                 PlaySoundAtClientPacket::decode,
                 PlaySoundAtClientPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, TrBarrageHitSoundPacket.class,
+                TrBarrageHitSoundPacket::encode,
+                TrBarrageHitSoundPacket::decode,
+                TrBarrageHitSoundPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
         channel.registerMessage(index++, TimeStopInstancePacket.class,
                 TimeStopInstancePacket::encode,

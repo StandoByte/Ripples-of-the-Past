@@ -71,6 +71,10 @@ public class ClientUtil {
         return Minecraft.getInstance().crosshairPickEntity;
     }
     
+    public static float getPartialTick() {
+        return Minecraft.getInstance().getFrameTime();
+    }
+    
     public static void openScreen(Screen screen) {
         Minecraft.getInstance().setScreen(screen);
     }
