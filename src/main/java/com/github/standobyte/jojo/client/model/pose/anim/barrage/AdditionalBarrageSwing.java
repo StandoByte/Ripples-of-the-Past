@@ -17,7 +17,7 @@ public abstract class AdditionalBarrageSwing<T extends StandEntity> {
     }
     
     public void addDelta(float delta) {
-        ticks += delta;
+        ticks += delta * 0.75F;
     }
     
     public boolean removeSwing() {
