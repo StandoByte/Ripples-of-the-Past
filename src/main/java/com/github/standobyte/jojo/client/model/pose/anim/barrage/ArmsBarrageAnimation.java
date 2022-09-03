@@ -64,6 +64,7 @@ public abstract class ArmsBarrageAnimation<T extends StandEntity> extends Action
         int swingsToAdd = (int) hits;
         if (entity.getRandom().nextFloat() <= (float) (hits - swingsToAdd)) swingsToAdd++;
         double maxOffset = 0.8 / (entity.getPrecision() / 24 + 1);
+        if (switchesArms() && entity.getRandom().nextBoolean()) side = side.getOpposite();
         
         for (int i = 0; i < swingsToAdd; i++) {
             float f = ((float) i / (float) swingsToAdd

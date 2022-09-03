@@ -15,6 +15,7 @@ import net.minecraft.util.math.vector.Vector3d;
 public class ArmBarrageSwing<T extends StandEntity> extends AdditionalBarrageSwing<T> {
     private final HandSide side;
     private final Vector3d offset;
+    private final float zRot;
     
     public ArmBarrageSwing(IBarrageAnimation<T> barrageAnim, float ticks, float ticksMax, HandSide side, StandEntity stand, double maxOffset) {
         super(barrageAnim, ticks, ticksMax);
@@ -27,6 +28,7 @@ public class ArmBarrageSwing<T extends StandEntity> extends AdditionalBarrageSwi
         if (side == HandSide.RIGHT) {
             leftOffset *= -1;
         }
+        zRot = 0;
         offset = new Vector3d(leftOffset, upOffset, frontOffset);
     }
     
@@ -39,9 +41,14 @@ public class ArmBarrageSwing<T extends StandEntity> extends AdditionalBarrageSwi
             float yRotationOffset, float xRotation, 
             int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
         model.setVisibility(entity, side == HandSide.LEFT ? VisibilityMode.LEFT_ARM_ONLY : VisibilityMode.RIGHT_ARM_ONLY);
-        double zAdditional = (0.75F - Math.abs(0.5F - ticks / ticksMax)) * 0.25;
+        double zAdditional = (0.75F - Math.abs(0.5F - ticks / ticksMax)) * 0.3;
         Vector3d offsetRot = new Vector3d(offset.x, -offset.y, offset.z + zAdditional).xRot(xRotation * MathUtil.DEG_TO_RAD);
         matrixStack.pushPose();
+        
+//        matrixStack.translate(side == HandSide.LEFT ? 0.375 : -0.375, 0.125, 0);
+//        matrixStack.mulPose(Vector3f.ZP.rotation(zRot));
+//        matrixStack.translate(side == HandSide.LEFT ? -0.375 : 0.375, -0.125, 0);
+        
         matrixStack.translate(offsetRot.x, offsetRot.y, -offsetRot.z - zAdditional);
         barrageAnim.animateSwing(entity, ticks / ticksMax, side, yRotationOffset, xRotation);
         model.renderToBuffer(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha * 0.5F);
