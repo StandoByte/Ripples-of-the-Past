@@ -499,7 +499,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
             return getThis();
         }
 
-        public T standOffsetFromUser(double left, double y, double forward, boolean armsOnlyMode) {
+        public T standOffsetFromUser(double left, double forward, double y, boolean armsOnlyMode) {
             setStandOffset(StandRelativeOffset.withYOffset(left, y, forward), armsOnlyMode);
             return getThis();
         }

@@ -63,7 +63,7 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
 
     @Override
     public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-        float completion = task.getTaskCompletion(1.0F);
+        float completion = task.getPhaseCompletion(1.0F);
         boolean lastTick = task.getTicksLeft() <= 1;
         boolean moveForward = completion <= 0.5F;
         if (moveForward) {

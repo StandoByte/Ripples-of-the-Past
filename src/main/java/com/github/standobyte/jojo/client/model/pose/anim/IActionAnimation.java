@@ -9,7 +9,7 @@ import net.minecraft.util.HandSide;
 
 public interface IActionAnimation<T extends Entity> {
     
-    void animate(StandEntityAction.Phase phase, float actionCompletion, 
+    void animate(StandEntityAction.Phase phase, float phaseCompletion, 
             T entity, float ticks, float yRotationOffset, float xRotation, HandSide side, boolean layer);
     
     default void renderAdditional(T entity, MatrixStack matrixStack, IVertexBuilder buffer, 

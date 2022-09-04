@@ -117,7 +117,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
 
         poseStand(entity, ticks, yRotationOffset, xRotation, 
                 pose, entity.getCurrentTaskPhase(), 
-                entity.getCurrentTaskCompletion(ticks - entity.tickCount), swingingHand);
+                entity.getCurrentTaskPhaseCompletion(ticks - entity.tickCount), swingingHand);
         this.yRotation = yRotationOffset;
         this.xRotation = xRotation;
         this.ticks = ticks;
@@ -125,14 +125,14 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     }
 
     protected void poseStand(T entity, float ticks, float yRotationOffset, float xRotation, 
-            StandPose standPose, Optional<Phase> actionPhase, float actionCompletion, HandSide swingingHand) {
+            StandPose standPose, Optional<Phase> actionPhase, float phaseCompletion, HandSide swingingHand) {
         if (actionAnim.containsKey(standPose)) {
             idlePose.poseModel(1.0F, entity, ticks, yRotationOffset, xRotation, swingingHand);
             onPose(entity, ticks);
             
             currentActionAnim = getActionAnim(entity, standPose);
             if (currentActionAnim != null) {
-                currentActionAnim.animate(actionPhase.get(), actionCompletion, 
+                currentActionAnim.animate(actionPhase.get(), phaseCompletion, 
                         entity, ticks, yRotationOffset, xRotation, swingingHand, layerRenderer);
             }
         }

@@ -236,7 +236,7 @@ public class StandEntityPunch implements IPunch {
                         if (targetStand.getCurrentTaskAction() instanceof StandEntityHeavyAttack
                                 && targetStand.getCurrentTaskPhase().get() == StandEntityAction.Phase.WINDUP
                                 && targetStand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())
-                                && 1F - targetStand.getCurrentTaskCompletion(0) < parryTiming) {
+                                && 1F - targetStand.getCurrentTaskPhaseCompletion(0) < parryTiming) {
                             targetStand.parryHeavyAttack();
                             return false;
                         }

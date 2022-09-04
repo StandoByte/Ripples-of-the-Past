@@ -470,7 +470,8 @@ public class ModActions {
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_RED_BIND = ACTIONS.register("magicians_red_red_bind", 
             () -> new MagiciansRedRedBind(new StandEntityAction.Builder().staminaCostTick(1).holdType().heldSlowDownFactor(0.3F)
                     .resolveLevelToUnlock(1)
-                    .standOffsetFront().standPose(MagiciansRedRedBind.RED_BIND_POSE)
+//                    .standOffsetFront()
+                    .standPose(MagiciansRedRedBind.RED_BIND_POSE)
                     .shout(ModSounds.AVDOL_RED_BIND).standSound(ModSounds.MAGICIANS_RED_FIRE_BLAST)
                     .partsRequired(StandPart.ARMS)));
     
