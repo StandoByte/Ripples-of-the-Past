@@ -1355,8 +1355,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return getCurrentTask().map(StandEntityTask::getPhase);
     }
     
-    public float getCurrentTaskCompletion(float partialTick) {
-        return getCurrentTask().map(task -> task.getTaskCompletion(partialTick)).orElse(0F);
+    public float getCurrentTaskPhaseCompletion(float partialTick) {
+        return getCurrentTask().map(task -> task.getPhaseCompletion(partialTick)).orElse(0F);
     }
 
     public float getUserMovementFactor() {

@@ -12,8 +12,8 @@ import net.minecraft.util.HandSide;
 public class OneHandedBarrageAnimation<T extends StandEntity> extends ArmsBarrageAnimation<T> {
     private final Hand standArm;
 
-    public OneHandedBarrageAnimation(StandEntityModel<T> model, IModelPose<T> loop, Hand standArm) {
-        super(model, loop, 2);
+    public OneHandedBarrageAnimation(StandEntityModel<T> model, IModelPose<T> loop, IModelPose<T> recovery, Hand standArm) {
+        super(model, loop, recovery, 2);
         this.standArm = standArm;
     }
 

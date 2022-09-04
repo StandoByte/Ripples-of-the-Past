@@ -398,8 +398,27 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
                 new ModelPose<T>(mirrorAngles(barrageRightImpact)).setAdditionalAnim(armsRotationFull),
                 new ModelPose<T>(barrageRightImpact).setAdditionalAnim(armsRotationFull));
         
-        actionAnim.putIfAbsent(StandPose.BARRAGE, new TwoHandedBarrageAnimation<T>(this, 
-                new ModelPoseTransition<T>(barrageHitStart, barrageHitImpact).setEasing(HumanoidStandModel::barrageHitEasing)));
+        IModelPose<T> barrageRecovery = new ModelPose<>(new RotationAngle[] {
+                RotationAngle.fromDegrees(body, 0, 0, 0),
+                RotationAngle.fromDegrees(upperPart, 0, 0, 0),
+                RotationAngle.fromDegrees(leftArm, 22.5F, 0, -22.5F),
+                RotationAngle.fromDegrees(leftForeArm, -75, 7.5F, 22.5F),
+                RotationAngle.fromDegrees(rightArm, 22.5F, 0, 22.5F),
+                RotationAngle.fromDegrees(rightForeArm, -75, -7.5F, -22.5F)
+        });
+        
+        actionAnim.put(StandPose.BARRAGE, new TwoHandedBarrageAnimation<T>(this, 
+                new ModelPoseTransition<T>(barrageHitStart, barrageHitImpact).setEasing(HumanoidStandModel::barrageHitEasing), 
+                new ModelPoseTransitionMultiple.Builder<T>(new ModelPose<T>(
+                        RotationAngle.fromDegrees(body, 0, 0, 0),
+                        RotationAngle.fromDegrees(upperPart, 0, 0, 0),
+                        RotationAngle.fromDegrees(leftArm, -33.75F, 0, -75),
+                        RotationAngle.fromDegrees(leftForeArm, -67.5F, 0, 0),
+                        RotationAngle.fromDegrees(rightArm, -33.75F, 0, 75),
+                        RotationAngle.fromDegrees(rightForeArm, -67.5F, 0, 0)).setAdditionalAnim(armsRotationFull))
+                .addPose(0.25F, barrageRecovery)
+                .addPose(0.5F, barrageRecovery)
+                .build(idlePose)));
     }
     
     public static float barrageHitEasing(float loopProgress) {

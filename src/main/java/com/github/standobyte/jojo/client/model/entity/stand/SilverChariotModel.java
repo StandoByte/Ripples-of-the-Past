@@ -301,7 +301,11 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
             return halfSwing * halfSwing * halfSwing;
         });
         
-        rapierAnim.putIfAbsent(StandPose.BARRAGE, new OneHandedBarrageAnimation<SilverChariotEntity>(this, stabLoop, Hand.MAIN_HAND));
+        rapierAnim.putIfAbsent(StandPose.BARRAGE, new OneHandedBarrageAnimation<SilverChariotEntity>(this, 
+                stabLoop, 
+                // FIXME !!!!!!!! SC barrage recovery anim
+                null, 
+                Hand.MAIN_HAND));
         
         super.initActionPoses();
     }

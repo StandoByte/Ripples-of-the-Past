@@ -11,16 +11,18 @@ import net.minecraft.util.math.MathHelper;
 
 public abstract class ArmsBarrageAnimation<T extends StandEntity> extends ActionModelAnimation<T> implements IBarrageAnimation<T> {
     private final IModelPose<T> loop;
+    private final IModelPose<T> recovery;
     private float loopLen;
 
-    public ArmsBarrageAnimation(StandEntityModel<T> model, IModelPose<T> loop, float loopLen) {
+    public ArmsBarrageAnimation(StandEntityModel<T> model, IModelPose<T> loop, IModelPose<T> recovery, float loopLen) {
         super(model);
         this.loop = loop;
+        this.recovery = recovery;
         this.loopLen = loopLen;
     }
 
     @Override
-    public void animate(Phase phase, float actionCompletion, T entity, float ticks, 
+    public void animate(Phase phase, float phaseCompletion, T entity, float ticks, 
             float yRotationOffset, float xRotation, HandSide side, boolean layer) {
         float loop = ticks / getLoopLen();
         side = getHandSide(phase, entity, ticks);
@@ -37,6 +39,8 @@ public abstract class ArmsBarrageAnimation<T extends StandEntity> extends Action
                 swings.setLoopCount(loop);
             }
             break;
+        case RECOVERY:
+            recovery.poseModel(phaseCompletion, entity, ticks, yRotationOffset, xRotation, side);
         default:
             break;
         }

@@ -225,7 +225,7 @@ public class StandEntityTask {
     	return startingTicks - ticksLeft;
     }
     
-    public float getTaskCompletion(float partialTick) {
+    public float getPhaseCompletion(float partialTick) {
         return Math.min(1F - ((float) ticksLeft - partialTick) / (float) startingTicks, 1F);
     }
     

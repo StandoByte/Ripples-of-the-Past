@@ -78,7 +78,7 @@ public class CrazyDiamondLeaveObject extends StandEntityActionModifier {
     @Override
     public void standTickRecovery(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         // FIXME !!!!! (normal heavy) could be input later
-        if (!world.isClientSide() && task.getTaskCompletion(1.0F) >= 0.45F) {
+        if (!world.isClientSide() && task.getPhaseCompletion(1.0F) >= 0.45F) {
             if (task.getTarget().getType() == TargetType.ENTITY) {
                 Entity entity = task.getTarget().getEntity();
                 if (entity.isAlive() && entity instanceof LivingEntity && !(entity instanceof SkeletonEntity) && !(entity instanceof StandEntity)) {

@@ -452,6 +452,7 @@ public class GameplayEventHandler {
         LivingEntity target = event.getEntityLiving();
         if (!target.level.isClientSide()) {
 	        DamageSource damageSrc = event.getSource();
+	        if (target.is(damageSrc.getEntity())) return;
 	        float points = Math.min(event.getAmount(), target.getHealth());
 	        
 	        if (damageSrc instanceof IStandDamageSource) {

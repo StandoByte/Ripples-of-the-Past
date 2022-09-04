@@ -11,8 +11,8 @@ import net.minecraft.util.HandSide;
 
 public class TwoHandedBarrageAnimation<T extends StandEntity> extends ArmsBarrageAnimation<T> {
 
-    public TwoHandedBarrageAnimation(StandEntityModel<T> model, IModelPose<T> loop) {
-        super(model, loop, 4);
+    public TwoHandedBarrageAnimation(StandEntityModel<T> model, IModelPose<T> loop, IModelPose<T> recovery) {
+        super(model, loop, recovery, 4);
     }
     
     @Override
