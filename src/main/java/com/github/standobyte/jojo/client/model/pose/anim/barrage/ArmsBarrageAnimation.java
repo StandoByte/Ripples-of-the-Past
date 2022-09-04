@@ -27,7 +27,7 @@ public abstract class ArmsBarrageAnimation<T extends StandEntity> extends Action
         
         switch (phase) {
         case PERFORM:
-            animateSwing(entity, MathHelper.frac(loop), side, yRotationOffset, xRotation);
+            animateSwing(entity, MathHelper.frac(loop), side, yRotationOffset, xRotation, 0);
             if (!layer) {
                 BarrageSwingsHolder<T> swings = (BarrageSwingsHolder<T>) entity.getBarrageSwingsHolder();
                 float swingsToAdd = swingsToAdd(entity, loop, swings.getLoopCount());
@@ -46,7 +46,7 @@ public abstract class ArmsBarrageAnimation<T extends StandEntity> extends Action
     
     protected abstract boolean switchesArms();
     
-    public void animateSwing(T entity, float loopCompletion, HandSide side, float yRotationOffset, float xRotation) {
+    public void animateSwing(T entity, float loopCompletion, HandSide side, float yRotationOffset, float xRotation, float zRotationOffset) {
         loop.poseModel(loopCompletion, entity, 0, yRotationOffset, xRotation, side);
     }
     
@@ -56,20 +56,20 @@ public abstract class ArmsBarrageAnimation<T extends StandEntity> extends Action
     
     protected float swingsToAdd(StandEntity entity, float loop, float lastLoop) {
         return (int) (loop * 2) > (int) (lastLoop * 2) ? 
-                StandStatFormulas.getBarrageHitsPerSecond(entity.getAttackSpeed()) * getLoopLen() / 20F - 1
+                StandStatFormulas.getBarrageHitsPerSecond(entity.getAttackSpeed()) * getLoopLen() / 40F - 1
                 : 0;
     }
 
     protected void addSwings(T entity, BarrageSwingsHolder<T> swings, HandSide side, float hits) {
         int swingsToAdd = (int) hits;
         if (entity.getRandom().nextFloat() <= (float) (hits - swingsToAdd)) swingsToAdd++;
-        double maxOffset = 0.8 / (entity.getPrecision() / 24 + 1);
+        double maxOffset = 1 - entity.getPrecision() / 32;
         if (switchesArms() && entity.getRandom().nextBoolean()) side = side.getOpposite();
         
         for (int i = 0; i < swingsToAdd; i++) {
             float f = ((float) i / (float) swingsToAdd
                     + (entity.getRandom().nextFloat() - 0.5F) * 0.4F / hits)
-                    * getLoopLen();
+                    * getLoopLen() * 0.5F;
             if (switchesArms()) side = side.getOpposite();
             swings.addSwing(new ArmBarrageSwing<T>(this, f, getLoopLen(), side, entity, maxOffset));
         }

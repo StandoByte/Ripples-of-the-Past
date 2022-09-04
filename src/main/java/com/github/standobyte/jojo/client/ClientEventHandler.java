@@ -255,6 +255,9 @@ public class ClientEventHandler {
     }
 
     private ResourceLocation getCurrentShader() {
+        if (mc.level == null) {
+            return null;
+        }
         if (isTimeStopped && canSeeInStoppedTime) {
             return SHADER_TIME_STOP;
         }

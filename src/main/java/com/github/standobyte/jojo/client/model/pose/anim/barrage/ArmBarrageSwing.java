@@ -10,6 +10,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import net.minecraft.util.HandSide;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 
 public class ArmBarrageSwing<T extends StandEntity> extends AdditionalBarrageSwing<T> {
@@ -19,16 +20,15 @@ public class ArmBarrageSwing<T extends StandEntity> extends AdditionalBarrageSwi
     
     public ArmBarrageSwing(IBarrageAnimation<T> barrageAnim, float ticks, float ticksMax, HandSide side, StandEntity stand, double maxOffset) {
         super(barrageAnim, ticks, ticksMax);
-//        anim = (anim - 1) * 0.5F + 1;
         this.side = side;
         Random random = stand.getRandom();
         double upOffset = (random.nextDouble() - 0.5) * maxOffset;
         double leftOffset = random.nextDouble() * maxOffset / 2;
-        double frontOffset = random.nextDouble() * 0.25;
+        double frontOffset = random.nextDouble() * 0.5;
         if (side == HandSide.RIGHT) {
             leftOffset *= -1;
         }
-        zRot = 0;
+        zRot = MathUtil.wrapRadians((float) (Math.PI / 2 - MathHelper.atan2(upOffset, leftOffset)));
         offset = new Vector3d(leftOffset, upOffset, frontOffset);
     }
     
@@ -41,17 +41,12 @@ public class ArmBarrageSwing<T extends StandEntity> extends AdditionalBarrageSwi
             float yRotationOffset, float xRotation, 
             int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
         model.setVisibility(entity, side == HandSide.LEFT ? VisibilityMode.LEFT_ARM_ONLY : VisibilityMode.RIGHT_ARM_ONLY);
-        double zAdditional = (0.75F - Math.abs(0.5F - ticks / ticksMax)) * 0.3;
+        double zAdditional = (0.5F - Math.abs(0.5F - ticks / ticksMax));
         Vector3d offsetRot = new Vector3d(offset.x, -offset.y, offset.z + zAdditional).xRot(xRotation * MathUtil.DEG_TO_RAD);
         matrixStack.pushPose();
-        
-//        matrixStack.translate(side == HandSide.LEFT ? 0.375 : -0.375, 0.125, 0);
-//        matrixStack.mulPose(Vector3f.ZP.rotation(zRot));
-//        matrixStack.translate(side == HandSide.LEFT ? -0.375 : 0.375, -0.125, 0);
-        
-        matrixStack.translate(offsetRot.x, offsetRot.y, -offsetRot.z - zAdditional);
-        barrageAnim.animateSwing(entity, ticks / ticksMax, side, yRotationOffset, xRotation);
-        model.renderToBuffer(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha * 0.5F);
+        matrixStack.translate(offsetRot.x, offsetRot.y, -offsetRot.z);
+        barrageAnim.animateSwing(entity, ticks / ticksMax, side, yRotationOffset, xRotation, zRot);
+        model.renderToBuffer(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha * 0.75F);
         matrixStack.popPose();
     }
 }

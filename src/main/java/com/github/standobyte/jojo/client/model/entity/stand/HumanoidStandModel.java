@@ -399,16 +399,18 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
                 new ModelPose<T>(barrageRightImpact).setAdditionalAnim(armsRotationFull));
         
         actionAnim.putIfAbsent(StandPose.BARRAGE, new TwoHandedBarrageAnimation<T>(this, 
-                new ModelPoseTransition<T>(barrageHitStart, barrageHitImpact).setEasing(sw -> {
-                    if (sw < 0.5F) {
-                        return sw * sw * sw * 8;
-                    }
-                    if (sw < 1.0F) {
-                        float halfSw = 2 * sw - 1;
-                        return 1 - halfSw * halfSw * halfSw;
-                    }
-                    return 0F;
-                })));
+                new ModelPoseTransition<T>(barrageHitStart, barrageHitImpact).setEasing(HumanoidStandModel::barrageHitEasing)));
+    }
+    
+    public static float barrageHitEasing(float loopProgress) {
+        if (loopProgress < 0.5F) {
+            return loopProgress * loopProgress * loopProgress * 8;
+        }
+        if (loopProgress < 1.0F) {
+            float halfSw = 2 * loopProgress - 1;
+            return 1 - halfSw * halfSw * halfSw;
+        }
+        return 0F;
     }
     
     protected RotationAngle[] mirrorAngles(RotationAngle[] angles) {
