@@ -78,19 +78,21 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
         if (visibleForSpectator(entity)) {
             return 0.15F;
         }
+        return entity.getAlpha(partialTick);
+    }
+    
+    protected boolean obstructsView(T entity, float partialTick) {
         if (entity.isFollowingUser() && !entity.isArmsOnlyMode()) {
             Minecraft mc = Minecraft.getInstance();
             if (mc.options.getCameraType().isFirstPerson()) {
                 Entity user = entity.getUser();
                 if (mc.player.is(user)) {
                     Vector3d diffVec = entity.getPosition(partialTick).subtract(user.getPosition(partialTick));
-                    if (diffVec.lengthSqr() < 0.09 || diffVec.lengthSqr() < 1 && user.getViewVector(partialTick).dot(diffVec) > diffVec.lengthSqr() / 2) {
-                        return 0.1F;
-                    }
+                    return diffVec.lengthSqr() < 0.09 || diffVec.lengthSqr() < 1 && user.getViewVector(partialTick).dot(diffVec) > diffVec.lengthSqr() / 2;
                 }
             }
         }
-        return entity.getAlpha(partialTick);
+        return false;
     }
 
     private static final float PLAYER_RENDER_SCALE = 0.9375F;
@@ -118,7 +120,7 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
         boolean shouldSit = entity.isPassenger() && (entity.getVehicle() != null && entity.getVehicle().shouldRiderSit());
         model.riding = shouldSit;
         model.young = entity.isBaby();
-        model.setVisibility(entity, visibilityMode(entity));
+        model.setVisibility(entity, visibilityMode(entity, partialTick));
         float yBodyRotation = MathHelper.rotLerp(partialTick, entity.yBodyRotO, entity.yBodyRot);
         float yHeadRotation = MathHelper.rotLerp(partialTick, entity.yHeadRotO, entity.yHeadRot);
         float f2 = yHeadRotation - yBodyRotation;
@@ -199,7 +201,7 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
             float ticks, float yRotationOffset, float xRotation, 
             ResourceLocation layerModelTexture, M model) {
         getModel().copyPropertiesTo(model);
-        model.setVisibility(entity, visibilityMode(entity));
+        model.setVisibility(entity, visibilityMode(entity, partialTick));
         model.prepareMobModel(entity, walkAnimSpeed, walkAnimPos, partialTick);
         model.layerRenderer = true;
         model.setupAnim(entity, walkAnimSpeed, walkAnimPos, ticks, yRotationOffset, xRotation);
@@ -208,9 +210,9 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
         model.render(entity, matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
     }
 
-    private VisibilityMode visibilityMode(T entity) {
+    private VisibilityMode visibilityMode(T entity, float partialTick) {
         if (!entity.isArmsOnlyMode()) {
-            return VisibilityMode.ALL;
+            return obstructsView(entity, partialTick) ? VisibilityMode.ARMS_ONLY : VisibilityMode.ALL;
         }
         boolean mainArm = entity.showArm(Hand.MAIN_HAND);
         boolean offArm = entity.showArm(Hand.OFF_HAND);

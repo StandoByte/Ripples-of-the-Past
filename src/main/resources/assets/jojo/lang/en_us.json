@@ -27,6 +27,7 @@
   "item.jojo.stand_disc": "Stand Disc",
   "item.jojo.stand_remover": "Remove Stand",
   "item.jojo.cocoa_gum": "Cocoa Gum",
+  "item.jojo.dono_tooltip": "Brought by: %s",
   
   "entity.jojo.hungry_zombie": "Hungry Zombie",
   "entity.jojo.hamon_master": "Hamon Master",
@@ -463,6 +464,8 @@
   "commands.hamon.breathing.success.multiple": "Set breathing level of %s on %s players",
   "commands.hamon.failed.single": "%s is not a Hamon user",
   "commands.hamon.failed.multiple": "All %s players are not Hamon users",
+  "commands.genstandstats.success": "Generated default Stand stats data pack as %s folder inside the world folder",
+  "commands.genstandstats.hint": "Move the generated folder into the %s folder and edit the pack (check %s file for detailed instructions)",
   
   "jojo.action.toast.title": "New actions unlocked!",
   "jojo.action.toast.stand.attack.description": "New Stand attacks",

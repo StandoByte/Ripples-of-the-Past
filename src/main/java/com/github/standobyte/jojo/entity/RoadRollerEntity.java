@@ -222,6 +222,9 @@ public class RoadRollerEntity extends Entity implements IHasHealth {
         if (HEALTH.equals(dataParameter)) {
             if (getHealth() <= 0.0F) {
                 ticksBeforeExplosion = 60;
+                if (!level.isClientSide()) {
+                    ejectPassengers();
+                }
             }
             else {
                 ticksBeforeExplosion = -1;

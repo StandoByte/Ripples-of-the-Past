@@ -1,16 +1,25 @@
 package com.github.standobyte.jojo.client.model.pose.anim.barrage;
 
 import com.github.standobyte.jojo.action.stand.StandEntityAction.Phase;
+import com.github.standobyte.jojo.client.model.entity.stand.HumanoidStandModel;
 import com.github.standobyte.jojo.client.model.entity.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.model.pose.IModelPose;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 
+import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.HandSide;
 
 public class TwoHandedBarrageAnimation<T extends StandEntity> extends ArmsBarrageAnimation<T> {
 
     public TwoHandedBarrageAnimation(StandEntityModel<T> model, IModelPose<T> loop) {
         super(model, loop, 4);
+    }
+    
+    @Override
+    public void animateSwing(T entity, float loopCompletion, HandSide side, float yRotationOffset, float xRotation, float zRotationOffset) {
+        super.animateSwing(entity, loopCompletion, side, yRotationOffset, xRotation, zRotationOffset);
+        ModelRenderer arm = model.getArm(side);
+        arm.zRot = arm.zRot + HumanoidStandModel.barrageHitEasing(loopCompletion) * zRotationOffset;
     }
 
     @Override

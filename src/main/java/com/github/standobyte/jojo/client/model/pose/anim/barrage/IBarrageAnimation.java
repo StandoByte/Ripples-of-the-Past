@@ -7,5 +7,5 @@ import net.minecraft.util.HandSide;
 
 public interface IBarrageAnimation<T extends StandEntity> extends IActionAnimation<T> {
 
-    public void animateSwing(T entity, float loopCompletion, HandSide side, float yRotationOffset, float xRotation);
+    public void animateSwing(T entity, float loopCompletion, HandSide side, float yRotationOffset, float xRotation, float zRotationOffset);
 }
