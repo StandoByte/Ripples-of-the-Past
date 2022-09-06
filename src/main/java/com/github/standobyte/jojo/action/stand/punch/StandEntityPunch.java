@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.stand.punch;
 
 import java.util.function.Supplier;
 
+import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
@@ -27,6 +28,7 @@ public class StandEntityPunch implements IPunch {
     public final Entity target;
     public final StandEntityDamageSource dmgSource;
     private boolean targetHit;
+    private float damageDealtToLiving;
     
     protected float damage;
     protected float addCombo;
@@ -45,6 +47,11 @@ public class StandEntityPunch implements IPunch {
         this.stand = stand;
         this.target = target;
         this.dmgSource = dmgSource;
+    }
+    
+    @Override
+    public TargetType getType() {
+        return TargetType.ENTITY;
     }
     
     public StandEntityPunch copyProperties(StandEntityPunch original) {
@@ -192,6 +199,10 @@ public class StandEntityPunch implements IPunch {
         return target.getBoundingBox().getCenter();
     }
     
+    public float getDamageDealtToLiving() {
+        return damageDealtToLiving;
+    }
+    
     
     
     @Override
@@ -223,8 +234,10 @@ public class StandEntityPunch implements IPunch {
         }
 
         LivingEntity targetLiving = null;
+        float hp = 0;
         if (target instanceof LivingEntity) {
             targetLiving = (LivingEntity) target;
+            hp = targetLiving.getHealth();
             
             dmgSource.setStandInvulTicks(standInvulTime);
             
@@ -280,6 +293,8 @@ public class StandEntityPunch implements IPunch {
                         targetLiving.getUseItem().isShield(targetLiving) && targetLiving instanceof PlayerEntity) {
                     DamageUtil.disableShield((PlayerEntity) targetLiving, disableBlockingChance);
                 }
+                
+                damageDealtToLiving = hp - targetLiving.getHealth();
             }
         }
         

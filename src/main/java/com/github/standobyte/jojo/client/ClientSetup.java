@@ -90,7 +90,9 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.color.ItemColors;
+import net.minecraft.client.renderer.entity.FireworkRocketRenderer;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
+import net.minecraft.client.renderer.entity.SpriteRenderer;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.client.world.ClientWorld;
@@ -157,6 +159,8 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.MR_DETECTOR.get(), MRDetectorRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.CD_BLOOD_CUTTER.get(), CDBloodCutterRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.CD_ITEM_PROJECTILE.get(), CDItemProjectileRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.EYE_OF_ENDER_INSIDE.get(), manager -> new SpriteRenderer<>(manager, Minecraft.getInstance().getItemRenderer(), 1.0F, true));
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.FIREWORK_INSIDE.get(), manager -> new FireworkRocketRenderer(manager, Minecraft.getInstance().getItemRenderer()));
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HUNGRY_ZOMBIE.get(), HungryZombieRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HAMON_MASTER.get(), HamonMasterRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.ROCK_PAPER_SCISSORS_KID.get(), RockPaperScissorsKidRenderer::new);

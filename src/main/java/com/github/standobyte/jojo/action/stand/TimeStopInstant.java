@@ -59,8 +59,11 @@ public class TimeStopInstant extends StandAction {
     @Override
     protected Action<IStandPower> replaceAction(IStandPower power) {
         LivingEntity user = power.getUser();
-        return user != null && TimeResume.userTimeStopInstance(user.level, user, null)
-                ? ModActions.TIME_RESUME.get() : this;
+        if (TimeUtil.isTimeStopped(user.level, user.blockPosition())) {
+            return user != null && TimeResume.userTimeStopInstance(user.level, user, null)
+                    ? ModActions.TIME_RESUME.get() : null;
+        }
+        return this;
     }
     
     

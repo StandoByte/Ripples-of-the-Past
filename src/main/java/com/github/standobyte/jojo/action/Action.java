@@ -189,11 +189,12 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     public final Action<P> getVisibleAction(P power) {
     	if (isUnlocked(power)) {
     		Action<P> replacingVariation = replaceAction(power);
-    		return replacingVariation.isUnlocked(power) ? replacingVariation : this;
+    		return replacingVariation == null || replacingVariation.isUnlocked(power) ? replacingVariation : this;
     	}
         return null;
     }
     
+    @Nullable
     protected Action<P> replaceAction(P power) {
     	return this;
     }

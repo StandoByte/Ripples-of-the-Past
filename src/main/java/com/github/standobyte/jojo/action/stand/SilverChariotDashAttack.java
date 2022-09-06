@@ -45,8 +45,8 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
     }
     
     @Override
-    public void onPhaseSet(World world, StandEntity standEntity, IStandPower standPower, Phase from, Phase to, StandEntityTask task, int ticks) {
-        super.onPhaseSet(world, standEntity, standPower, from, to, task, ticks);
+    public void onPhaseTransition(World world, StandEntity standEntity, IStandPower standPower, Phase from, Phase to, StandEntityTask task, int ticks) {
+        super.onPhaseTransition(world, standEntity, standPower, from, to, task, ticks);
         if (to == Phase.PERFORM) {
             if (standEntity.isFollowingUser() && standEntity.getAttackSpeed() < 24) {
                 LivingEntity user = standEntity.getUser();

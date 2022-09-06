@@ -80,7 +80,10 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         modelRenderer.zRot = z;
     }
 
-    public void setVisibility(T entity, VisibilityMode mode) {
+    public void setVisibility(T entity, VisibilityMode mode, boolean obstructsView) {
+        if (obstructsView) {
+            mode = entity.getStandPose().armsObstructView ? VisibilityMode.NONE : VisibilityMode.ARMS_ONLY;
+        }
         this.visibilityMode = mode;
         updatePartsVisibility(mode);
         
@@ -107,7 +110,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         });
 
 //        initPoses();
-        initActionPoses();
+//        initActionPoses();
 
         StandPose pose = entity.getStandPose();
         if (pose == StandPose.SUMMON && (ticks > SUMMON_ANIMATION_LENGTH || entity.isArmsOnlyMode())) {
@@ -269,6 +272,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         ALL,
         ARMS_ONLY,
         LEFT_ARM_ONLY,
-        RIGHT_ARM_ONLY
+        RIGHT_ARM_ONLY,
+        NONE
     }
 }

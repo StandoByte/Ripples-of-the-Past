@@ -1,5 +1,8 @@
 package com.github.standobyte.jojo.action.stand;
 
+import javax.annotation.Nullable;
+
+import com.github.standobyte.jojo.action.stand.StandEntityAction.Phase;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -21,7 +24,8 @@ public interface IStandPhasedAction {
     
     default void standTickRecovery(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
     
-    default void phaseTransition(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
+    default void onPhaseTransition(World world, StandEntity standEntity, IStandPower standPower, 
+            @Nullable Phase from, @Nullable Phase to, StandEntityTask task, int nextPhaseTicks) {}
     
     default int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) { return 0; }
 

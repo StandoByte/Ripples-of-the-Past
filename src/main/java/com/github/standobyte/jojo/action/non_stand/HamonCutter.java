@@ -4,6 +4,7 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.damaging.projectile.HamonCutterEntity;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -48,9 +49,7 @@ public class HamonCutter extends HamonAction {
             }
             if (player == null || !player.abilities.instabuild) {
                 potionItem.shrink(1);
-                if (player != null) { 
-                    player.inventory.add(new ItemStack(Items.GLASS_BOTTLE));
-                }
+                JojoModUtil.giveItemTo(user, new ItemStack(Items.GLASS_BOTTLE), true);
             }
 
             for (int i = 0; i < 8; i++) {

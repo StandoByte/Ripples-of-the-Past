@@ -3,6 +3,8 @@ package com.github.standobyte.jojo.init;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.AfterimageEntity;
 import com.github.standobyte.jojo.entity.CrimsonBubbleEntity;
+import com.github.standobyte.jojo.entity.EyeOfEnderInsideEntity;
+import com.github.standobyte.jojo.entity.FireworkInsideEntity;
 import com.github.standobyte.jojo.entity.HamonBlockChargeEntity;
 import com.github.standobyte.jojo.entity.HamonProjectileShieldEntity;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
@@ -234,6 +236,14 @@ public class ModEntityTypes {
     public static final RegistryObject<EntityType<CDBloodCutterEntity>> CD_BLOOD_CUTTER = ENTITIES.register("cd_blood_cutter", 
             () -> EntityType.Builder.<CDBloodCutterEntity>of(CDBloodCutterEntity::new, EntityClassification.MISC).sized(0.5F, 0.5F).noSummon().noSave().setUpdateInterval(10)
             .build(new ResourceLocation(JojoMod.MOD_ID, "cd_blood_cutter").toString()));
+    
+    public static final RegistryObject<EntityType<EyeOfEnderInsideEntity>> EYE_OF_ENDER_INSIDE = ENTITIES.register("eye_of_ender_inside", 
+            () -> EntityType.Builder.<EyeOfEnderInsideEntity>of(EyeOfEnderInsideEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(4)
+            .build(new ResourceLocation(JojoMod.MOD_ID, "eye_of_ender_inside").toString()));
+    
+    public static final RegistryObject<EntityType<FireworkInsideEntity>> FIREWORK_INSIDE = ENTITIES.register("firework_inside", 
+            () -> EntityType.Builder.<FireworkInsideEntity>of(FireworkInsideEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10)
+            .build(new ResourceLocation(JojoMod.MOD_ID, "firework_inside").toString()));
     
     
     

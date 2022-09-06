@@ -193,7 +193,11 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
                 leftArm.visible = false;
                 rightArm.visible = true;
                 break;
-            default:
+            case NONE:
+                leftArm.visible = false;
+                rightArm.visible = false;
+                
+            case ALL:
                 break;
             }
         }
@@ -407,7 +411,7 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
                 RotationAngle.fromDegrees(rightForeArm, -75, -7.5F, -22.5F)
         });
         
-        actionAnim.put(StandPose.BARRAGE, new TwoHandedBarrageAnimation<T>(this, 
+        actionAnim.putIfAbsent(StandPose.BARRAGE, new TwoHandedBarrageAnimation<T>(this, 
                 new ModelPoseTransition<T>(barrageHitStart, barrageHitImpact).setEasing(HumanoidStandModel::barrageHitEasing), 
                 new ModelPoseTransitionMultiple.Builder<T>(new ModelPose<T>(
                         RotationAngle.fromDegrees(body, 0, 0, 0),

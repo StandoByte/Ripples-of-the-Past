@@ -14,10 +14,13 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.capability.chunk.ChunkCap.PrevBlockInfo;
+import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModParticles;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.stand_specific.CDBlocksRestoredPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -81,6 +84,20 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
             
             PacketManager.sendToClientsTracking(new CDBlocksRestoredPacket(blocksPlaced), standEntity);
             forgetBrokenBlocks(world, blocksToForget);
+        }
+    }
+    
+    @Override
+    public void onPhaseTransition(World world, StandEntity standEntity, IStandPower standPower, 
+            @Nullable Phase from, @Nullable Phase to, StandEntityTask task, int nextPhaseTicks) {
+        if (world.isClientSide()) {
+            if (to == Phase.PERFORM) {
+                ClientTickingSoundsHelper.playStandEntityCancelableActionSound(standEntity, 
+                        ModSounds.CRAZY_DIAMOND_FIX_STARTED.get(), this, Phase.PERFORM, 1.0F, 1.0F, false);
+            }
+            else if (from == Phase.PERFORM) {
+                standEntity.playSound(ModSounds.CRAZY_DIAMOND_FIX_ENDED.get(), 1.0F, 1.0F, ClientUtil.getClientPlayer());
+            }
         }
     }
     

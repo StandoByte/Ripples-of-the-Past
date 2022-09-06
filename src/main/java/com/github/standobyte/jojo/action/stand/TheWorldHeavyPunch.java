@@ -29,11 +29,11 @@ public class TheWorldHeavyPunch extends StandEntityHeavyAttack {
             super(stand, target, dmgSource);
         }
 
-        @Override
-        protected void afterAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, StandEntityTask task, boolean hurt, boolean killed) {
-            if (hurt && !target.canUpdate()) {
-                // TODO ModSounds.THE_WORLD_PUNCH_HEAVY_UNREVEALED.get();
-            }
-        }
+//        @Override
+//        protected void afterAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, StandEntityTask task, boolean hurt, boolean killed) {
+//            if (hurt && !target.canUpdate()) {
+//                // TODO ModSounds.THE_WORLD_PUNCH_HEAVY_UNREVEALED.get();
+//            }
+//        }
     }
 }

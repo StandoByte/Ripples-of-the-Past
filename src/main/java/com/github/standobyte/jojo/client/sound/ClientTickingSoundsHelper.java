@@ -71,7 +71,7 @@ public abstract class ClientTickingSoundsHelper {
     }
     
     public static void playStandEntityCancelableActionSound(StandEntity stand, SoundEvent sound, 
-            StandEntityAction action, @Nullable StandEntityAction.Phase phase, float volume, float pitch) {
+            StandEntityAction action, @Nullable StandEntityAction.Phase phase, float volume, float pitch, boolean looping) {
         Minecraft mc = Minecraft.getInstance();
         if (!stand.isVisibleForAll() && !StandUtil.shouldHearStands(mc.player)) {
             return;
@@ -86,7 +86,7 @@ public abstract class ClientTickingSoundsHelper {
         pitch = event.getPitch();
         
         mc.getSoundManager().play(new StoppableEntityTickableSound<StandEntity>(sound, category, 
-                volume, pitch, false, stand, e -> e.getCurrentTaskAction() != action
+                volume, pitch, looping, stand, e -> e.getCurrentTaskAction() != action
                         || phase != null && e.getCurrentTaskPhase().map(stPhase -> stPhase != phase).orElse(true)));
     }
     

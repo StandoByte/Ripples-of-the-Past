@@ -169,6 +169,7 @@
   "jojo.subtitle.knives_throw": "Knives thrown",
   "jojo.subtitle.knife_hit": "Knife hits",
   "jojo.subtitle.liquid_splash": "Liquid splashes",
+  "jojo.subtitle.shot": "Something shot",
   
   "jojo.subtitle.hamon_breath": "Player breathes heavily",
   "jojo.subtitle.turqouise_blue_overdrive": "\"Turqouise Blue Overdrive!\"",
@@ -247,6 +248,7 @@
   "death.attack.explosion.stand.item": "%1$s was blown up by %2$s using %3$s",
   "death.attack.roadRoller": "%s was smashed flat as a pancake",
   "death.attack.roadRoller.player": "%s was smashed flat as a pancake whilst fighting %s",
+  "death.attack.eyeOfEnderShards": "%s was killed by eye of ender shards from the inside",
   
   "stat.jojo.vampire_animals_drained": "Animals Drained",
   "stat.jojo.vampire_people_drained": "People Drained",
@@ -810,6 +812,10 @@
   "jojo.subtitle.red_bind_name": "\"Red Bind!\"",
   
   "entity.jojo.crazy_diamond": "Crazy Diamond",
+  "entity.jojo.cd_item_projectile": "Block Projectile",
+  "entity.jojo.cd_blood_cutter": "Blood Cutter",
+  "entity.jojo.eye_of_ender_inside": "Eye of Ender",
+  "entity.jojo.firework_inside": "Firework Rocket",
   "stand.jojo.crazy_diamond": "Crazy Diamond",
   "action.jojo.crazy_diamond_punch": "Punch",
   "action.jojo.crazy_diamond_heavy_punch": "Heavy Punch",

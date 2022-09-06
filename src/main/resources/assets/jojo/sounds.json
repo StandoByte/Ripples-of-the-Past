@@ -635,11 +635,11 @@
   },
   "josuke_crazy_diamond": {
     "subtitle": "jojo.subtitle.crazy_diamond_name",
-    "sounds": [  ]
+    "sounds": [ "jojo:stand_user/josuke_crazy_diamond", "jojo:stand_user/josuke_crazy_diamond_2" ]
   },
   "josuke_fix": {
     "subtitle": "jojo.subtitle.fix",
-    "sounds": [  ]
+    "sounds": [ "jojo:stand_user/josuke_fix" ]
   },
   "crazy_diamond_summon": {
     "subtitle": "jojo.subtitle.stand_summon",
@@ -651,11 +651,11 @@
   },
   "crazy_diamond_punch_light": {
     "subtitle": "jojo.subtitle.stand_attack_light",
-    "sounds": [ "jojo:stand/crazy_diamond_punch_light" ]
+    "sounds": [ "jojo:stand/crazy_diamond_punch_light", "jojo:stand/crazy_diamond_punch_light_2", "jojo:stand/crazy_diamond_punch_light_3" ]
   },
   "crazy_diamond_punch_heavy": {
     "subtitle": "jojo.subtitle.stand_attack_strong",
-    "sounds": [ "minecraft:random/anvil_land" ]
+    "sounds": [ "jojo:stand/crazy_diamond_punch_heavy", "jojo:stand/crazy_diamond_punch_heavy_2" ]
   },
   "crazy_diamond_dora": {
     "subtitle": "jojo.subtitle.dora",
@@ -663,18 +663,26 @@
   },
   "crazy_diamond_dorarara": {
     "subtitle": "jojo.subtitle.dorarara",
-    "sounds": [  ]
+    "sounds": [ "jojo:stand/crazy_diamond_dorarara_2" ]
   },
   "crazy_diamond_fix_started": {
     "subtitle": "jojo.subtitle.fixed",
     "sounds": [ "jojo:stand/crazy_diamond_restoration_start" ]
   },
-  "crazy_diamond_fix": {
+  "crazy_diamond_fix_loop": {
     "subtitle": "jojo.subtitle.fixed",
-    "sounds": [  ]
+    "sounds": [ "jojo:stand/crazy_diamond_restoration_loop" ]
   },
   "crazy_diamond_fix_ended": {
     "subtitle": "jojo.subtitle.fixed",
     "sounds": [ "jojo:stand/crazy_diamond_restoration_over" ]
+  },
+  "crazy_diamond_bullet_charge": {
+    "subtitle": "jojo.subtitle.fixed",
+    "sounds": [ "jojo:stand/crazy_diamond_bullet_charge" ]
+  },
+  "crazy_diamond_bullet_shot": {
+    "subtitle": "jojo.subtitle.shot",
+    "sounds": [ "jojo:stand/crazy_diamond_bullet_shot" ]
   }
 }

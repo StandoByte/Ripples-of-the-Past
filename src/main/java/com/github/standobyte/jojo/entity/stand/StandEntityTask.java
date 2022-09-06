@@ -156,7 +156,7 @@ public class StandEntityTask {
 
     public void moveToPhase(@Nullable StandEntityAction.Phase phase, IStandPower standPower, StandEntity standEntity) {
         if (phase == null) {
-            action.onPhaseSet(standEntity.level, standEntity, standPower, this.phase, null, this, 0);
+            action.onPhaseTransition(standEntity.level, standEntity, standPower, this.phase, null, this, 0);
             standEntity.stopTask();
             return;
         }
@@ -180,7 +180,7 @@ public class StandEntityTask {
         StandEntityAction.Phase prevPhase = this.phase;
         if (setPhase(phase, ticks)) {
             action.playSound(standEntity, standPower, phase, this);
-            action.onPhaseSet(standEntity.level, standEntity, standPower, prevPhase, phase, this, ticks);
+            action.onPhaseTransition(standEntity.level, standEntity, standPower, prevPhase, phase, this, ticks);
         }
         else {
             moveToPhase(phase.getNextPhase(), standPower, standEntity);
