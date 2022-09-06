@@ -80,7 +80,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     }
     
     @Override
-    public void onPhaseSet(World world, StandEntity standEntity, IStandPower standPower, Phase from, Phase to, StandEntityTask task, int ticks) {
+    public void onPhaseTransition(World world, StandEntity standEntity, IStandPower standPower, Phase from, Phase to, StandEntityTask task, int ticks) {
         if (world.isClientSide()) {
             standEntity.getBarrageHitSoundsHandler().setIsBarraging(to == Phase.PERFORM);
         }

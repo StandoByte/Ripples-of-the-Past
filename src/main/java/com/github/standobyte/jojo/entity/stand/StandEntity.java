@@ -171,6 +171,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public int overlayTickCount = 0;
     private int alphaTicks;
 
+    private IPunch lastPunch;
     private BarrageSwingsHolder<?> barrageSwings;
     private final BarrageHitSoundHandler barrageSounds;
 
@@ -237,7 +238,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 StandEntityAction.Phase phase = task.getPhase();
                 action.playSound(this, userPower, phase, task);
                 action.onTaskSet(level, this, userPower, phase, task, task.getTicksLeft());
-                action.onPhaseSet(level, this, userPower, null, phase, task, task.getTicksLeft());
+                action.onPhaseTransition(level, this, userPower, null, phase, task, task.getTicksLeft());
                 setStandPose(action.getStandPose(userPower, this));
             });
             if (!taskOptional.isPresent()) {
@@ -630,9 +631,15 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     public static class StandPose {
         private final String name;
+        public final boolean armsObstructView;
+        
+        public StandPose(String name, boolean armsObstructView) {
+            this.name = name;
+            this.armsObstructView = armsObstructView;
+        }
         
         public StandPose(String name) {
-            this.name = name;
+            this(name, false);
         }
         
         @Override
@@ -1468,10 +1475,16 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
         
         punchInstance.doHit(task);
+        lastPunch = punchInstance;
         if (!level.isClientSide()) {
             punchAction.playPunchSound(punchInstance, target.getType(), playPunchSound == null || playPunchSound, playPunchSound != null && playPunchSound);
         }
         return punchInstance.targetWasHit();
+    }
+    
+    @Nullable
+    public IPunch getLastPunch() {
+        return lastPunch;
     }
     
     public boolean hitBlock(BlockPos blockPos, BlockState blockState, StandBlockPunch punch, StandEntityTask task) {
@@ -2082,28 +2095,88 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         }
     }
     
+    public void takeItem(EquipmentSlotType slot, ItemStack item, boolean dropPrev, @Nullable LivingEntity dropPrevTo) {
+        if (!level.isClientSide() && !item.isEmpty()) {
+            ItemStack heldItem = getItemBySlot(slot);
+            if (!heldItem.isEmpty()) {
+                if (heldItem.sameItem(item) && ItemStack.tagMatches(heldItem, item)) {
+                    int toMove = Math.min(item.getCount(), heldItem.getMaxStackSize() - heldItem.getCount());
+                    item.shrink(toMove);
+                    heldItem.grow(toMove);
+                }
+                else if (dropPrev) {
+                    if (dropPrevTo != null) {
+                        dropItemTo(slot, dropPrevTo);
+                    }
+                    else {
+                        dropItem(slot);
+                    }
+                    setItemSlot(slot, item);
+                }
+            }
+            else {
+                setItemSlot(slot, item);
+            }
+        }
+    }
+    
+    public void dropItemTo(EquipmentSlotType slot, @Nullable LivingEntity entity) {
+        if (!level.isClientSide()) {
+            if (entity == null) {
+                dropItem(slot);
+            }
+            else {
+                ItemStack heldItem = getItemBySlot(slot);
+                if (!heldItem.isEmpty()) {
+                    setItemSlot(slot, ItemStack.EMPTY);
+                    JojoModUtil.giveItemTo(entity, heldItem, true);
+                }
+            }
+        }
+    }
+    
+    public void dropItem(EquipmentSlotType slot) {
+        if (!level.isClientSide()) {
+            ItemStack item = getItemBySlot(slot);
+            if (!item.isEmpty()) {
+                Vector3d itemPos = position();
+                Hand hand = slot == EquipmentSlotType.MAINHAND ? Hand.MAIN_HAND
+                          : slot == EquipmentSlotType.OFFHAND ? Hand.OFF_HAND
+                          : null;
+                if (hand != null) {
+                    itemPos = itemPos.add(new Vector3d(getBbWidth() * 0.5 * (getArm(hand) == HandSide.LEFT ? -1 : 1), 
+                            getBbHeight() * 0.4, 0).yRot((180 - yRot) * MathUtil.DEG_TO_RAD));
+                }
+                ItemEntity itemEntity = new ItemEntity(level, itemPos.x, itemPos.y, itemPos.z, item.copy());
+                setItemSlot(slot, ItemStack.EMPTY);
+                level.addFreshEntity(itemEntity);
+            }
+        }
+    }
+    
+    private void dropHeldItems() {
+        for (EquipmentSlotType slot : EquipmentSlotType.values()) {
+            dropItem(slot);
+        }
+    }
+    
     @Override
     public void remove() {
         if (!level.isClientSide()) {
-            collectHeldItems().forEach(item -> level.addFreshEntity(item));
+            dropHeldItems();
         }
         super.remove();
     }
     
-    protected List<ItemEntity> collectHeldItems() {
-        List<ItemEntity> items = new ArrayList<>();
-        makeHeldItemEntity(getMainArm(), mainHandItem).ifPresent(item -> items.add(item));
-        makeHeldItemEntity(getOppositeToMainArm(), offHandItem).ifPresent(item -> items.add(item));
-        return items;
-    }
-    
-    protected Optional<ItemEntity> makeHeldItemEntity(HandSide side, ItemStack itemStack) {
-        if (!itemStack.isEmpty()) {
-            Vector3d pos = position()
-                    .add(new Vector3d(getBbWidth() * 0.5 * (side == HandSide.LEFT ? -1 : 1), getBbHeight() * 0.4, 0).yRot((180 - yRot) * MathUtil.DEG_TO_RAD));
-            return Optional.of(new ItemEntity(level, pos.x, pos.y, pos.z, itemStack.copy()));
+    public final EquipmentSlotType handItemSlot(Hand hand) {
+        if (hand == null) return null;
+        switch (hand) {
+        case MAIN_HAND:
+            return EquipmentSlotType.MAINHAND;
+        case OFF_HAND:
+            return EquipmentSlotType.OFFHAND;
         }
-        return Optional.empty();
+        return null;
     }
     // FIXME save the items in nbt
 

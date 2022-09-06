@@ -120,7 +120,7 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
         boolean shouldSit = entity.isPassenger() && (entity.getVehicle() != null && entity.getVehicle().shouldRiderSit());
         model.riding = shouldSit;
         model.young = entity.isBaby();
-        model.setVisibility(entity, visibilityMode(entity, partialTick));
+        model.setVisibility(entity, visibilityMode(entity), obstructsView(entity, partialTick));
         float yBodyRotation = MathHelper.rotLerp(partialTick, entity.yBodyRotO, entity.yBodyRot);
         float yHeadRotation = MathHelper.rotLerp(partialTick, entity.yHeadRotO, entity.yHeadRot);
         float f2 = yHeadRotation - yBodyRotation;
@@ -201,7 +201,7 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
             float ticks, float yRotationOffset, float xRotation, 
             ResourceLocation layerModelTexture, M model) {
         getModel().copyPropertiesTo(model);
-        model.setVisibility(entity, visibilityMode(entity, partialTick));
+        model.setVisibility(entity, visibilityMode(entity), obstructsView(entity, partialTick));
         model.prepareMobModel(entity, walkAnimSpeed, walkAnimPos, partialTick);
         model.layerRenderer = true;
         model.setupAnim(entity, walkAnimSpeed, walkAnimPos, ticks, yRotationOffset, xRotation);
@@ -210,9 +210,9 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
         model.render(entity, matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
     }
 
-    private VisibilityMode visibilityMode(T entity, float partialTick) {
+    private VisibilityMode visibilityMode(T entity) {
         if (!entity.isArmsOnlyMode()) {
-            return obstructsView(entity, partialTick) ? VisibilityMode.ARMS_ONLY : VisibilityMode.ALL;
+            return VisibilityMode.ALL;
         }
         boolean mainArm = entity.showArm(Hand.MAIN_HAND);
         boolean offArm = entity.showArm(Hand.OFF_HAND);
@@ -230,7 +230,7 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
     
     
     public void renderFirstPersonArms(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, T entity, float partialTick) {
-        model.setVisibility(entity, VisibilityMode.ARMS_ONLY);
+        model.setVisibility(entity, VisibilityMode.ARMS_ONLY, false);
         renderFirstPersonArm(HandSide.LEFT, matrixStack, buffer, packedLight, entity, partialTick);
         renderFirstPersonArm(HandSide.RIGHT, matrixStack, buffer, packedLight, entity, partialTick);
     }

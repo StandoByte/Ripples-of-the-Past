@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.action.stand.punch;
 
+import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 
@@ -14,4 +15,6 @@ public interface IPunch {
     
     SoundEvent getSound();
     Vector3d getSoundPos();
+    
+    TargetType getType();
 }

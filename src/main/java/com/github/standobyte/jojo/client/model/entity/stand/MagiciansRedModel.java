@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.client.model.entity.stand;
 
 import java.util.function.Function;
 
+import com.github.standobyte.jojo.action.stand.MagiciansRedFlameBurst;
 import com.github.standobyte.jojo.action.stand.MagiciansRedRedBind;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
@@ -181,7 +182,7 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
     
     @Override
     protected void initActionPoses() {
-        actionAnim.put(StandPose.RANGED_ATTACK, new PosedActionAnimation.Builder<MagiciansRedEntity>()
+        actionAnim.put(MagiciansRedFlameBurst.FLAME_BURST_POSE, new PosedActionAnimation.Builder<MagiciansRedEntity>()
                 .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<MagiciansRedEntity>(new RotationAngle[] {
                         RotationAngle.fromDegrees(beakUpper, -20F, 0.0F, 0.0F),
                         RotationAngle.fromDegrees(beakLower, 30F, 0.0F, 0.0F),

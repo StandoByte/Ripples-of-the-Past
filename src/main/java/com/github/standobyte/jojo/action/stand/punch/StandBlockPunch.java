@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.stand.punch;
 
 import java.util.function.Supplier;
 
+import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 
@@ -53,5 +54,10 @@ public class StandBlockPunch implements IPunch {
     @Override
     public Vector3d getSoundPos() {
         return Vector3d.atCenterOf(blockPos);
+    }
+    
+    @Override
+    public TargetType getType() {
+        return TargetType.BLOCK;
     }
 }

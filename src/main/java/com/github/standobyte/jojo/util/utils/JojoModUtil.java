@@ -147,36 +147,18 @@ public class JojoModUtil {
     	return partialTick == 1.0F ? entity.position() : entity.getPosition(partialTick);
     }
     
-    public static void giveItemTo(LivingEntity entity, ItemStack item) {
-        if (!entity.level.isClientSide()) {
+    public static void giveItemTo(LivingEntity entity, ItemStack item, boolean drop) {
+        if (!entity.level.isClientSide() && !item.isEmpty()) {
             if (entity instanceof PlayerEntity) {
-                giveItemToPlayer((PlayerEntity) entity, item);
+                drop = !(((PlayerEntity) entity).inventory.add(item) && item.isEmpty());
             }
-            else {
-                ItemEntity itemEntity = drop(entity, item);
-                if (itemEntity != null) {
-                    entity.level.addFreshEntity(itemEntity);
-                }
+            if (drop) {
+                entity.level.addFreshEntity(dropAt(entity, item));
             }
         }
     }
     
-    public static void giveItemToPlayer(PlayerEntity player, ItemStack item) {
-        if (!player.level.isClientSide()) {
-            if (player.inventory.add(item) && item.isEmpty()) {
-                player.inventoryMenu.broadcastChanges();
-            }
-            else {
-                ItemEntity itementity = player.drop(item, false);
-                if (itementity != null) {
-                    itementity.setNoPickUpDelay();
-                    itementity.setOwner(player.getUUID());
-                }
-            }
-        }
-    }
-    
-    private static ItemEntity drop(LivingEntity entity, ItemStack item) {
+    public static ItemEntity dropAt(LivingEntity entity, ItemStack item) {
         if (item.isEmpty()) {
             return null;
         }

@@ -20,8 +20,8 @@ public class MagiciansRedCrossfireHurricane extends StandEntityAction {
     }
     
     @Override
-    public void onPhaseSet(World world, StandEntity standEntity, IStandPower standPower, Phase from, Phase to, StandEntityTask task, int ticks) {
-        super.onPhaseSet(world, standEntity, standPower, from, to, task, ticks);
+    public void onPhaseTransition(World world, StandEntity standEntity, IStandPower standPower, Phase from, Phase to, StandEntityTask task, int ticks) {
+        super.onPhaseTransition(world, standEntity, standPower, from, to, task, ticks);
         if (!world.isClientSide() && to == Phase.BUTTON_HOLD) {
         	task.getAdditionalData().push(Integer.class, 0);
         }
