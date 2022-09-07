@@ -14,9 +14,9 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.capability.chunk.ChunkCap.PrevBlockInfo;
+import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
-import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModParticles;
@@ -24,6 +24,7 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.stand_specific.CDBlocksRestoredPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -49,7 +50,6 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         super(builder);
     }
     
-    // FIXME ! (restore terrain) CD restoration sound
     @Override
     public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
@@ -93,7 +93,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         if (world.isClientSide()) {
             if (to == Phase.PERFORM) {
                 ClientTickingSoundsHelper.playStandEntityCancelableActionSound(standEntity, 
-                        ModSounds.CRAZY_DIAMOND_FIX_STARTED.get(), this, Phase.PERFORM, 1.0F, 1.0F, false);
+                        ModSounds.CRAZY_DIAMOND_FIX_LOOP.get(), this, Phase.PERFORM, 1.0F, 1.0F, true);
             }
             else if (from == Phase.PERFORM) {
                 standEntity.playSound(ModSounds.CRAZY_DIAMOND_FIX_ENDED.get(), 1.0F, 1.0F, ClientUtil.getClientPlayer());
@@ -171,15 +171,16 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
     
     
 
-    // FIXME !!! (restore terrain) add particles & sounds (the task is server only)
     public static void addParticlesAroundBlock(World world, BlockPos blockPos, Random random) {
-        Vector3d posLLCorner = Vector3d.atLowerCornerOf(blockPos).subtract(0.25, 0.25, 0.25);
-        for (int i = 0; i < 24; i++) {
-            world.addParticle(ModParticles.CD_RESTORATION.get(), 
-                    posLLCorner.x + random.nextDouble() * 1.5, 
-                    posLLCorner.y + random.nextDouble() * 1.5, 
-                    posLLCorner.z + random.nextDouble() * 1.5, 
-                    0, 0, 0);
+        if (world.isClientSide() && StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) {
+            Vector3d posLLCorner = Vector3d.atLowerCornerOf(blockPos).subtract(0.25, 0.25, 0.25);
+            for (int i = 0; i < 24; i++) {
+                world.addParticle(ModParticles.CD_RESTORATION.get(), 
+                        posLLCorner.x + random.nextDouble() * 1.5, 
+                        posLLCorner.y + random.nextDouble() * 1.5, 
+                        posLLCorner.z + random.nextDouble() * 1.5, 
+                        0, 0, 0);
+            }
         }
     }
     

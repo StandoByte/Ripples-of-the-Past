@@ -182,7 +182,7 @@ public class ModActions {
             () -> new HamonBubbleCutter(new HamonAction.Builder().energyCost(500F).swingHand().shout(ModSounds.CAESAR_BUBBLE_CUTTER)));
     
     public static final RegistryObject<HamonAction> CAESAR_BUBBLE_CUTTER_GLIDING = ACTIONS.register("caesar_bubble_cutter_gliding", 
-            () -> new HamonBubbleCutter(new HamonAction.Builder().energyCost(600F).cooldown(0, 40).swingHand()
+            () -> new HamonBubbleCutter(new HamonAction.Builder().energyCost(600F).cooldown(40).swingHand()
                     .shout(ModSounds.CAESAR_BUBBLE_CUTTER_GLIDING).shiftVariationOf(CAESAR_BUBBLE_CUTTER)));
     
 
@@ -194,17 +194,17 @@ public class ModActions {
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_SPACE_RIPPER_STINGY_EYES = ACTIONS.register("vampirism_space_ripper_stingy_eyes", 
             () -> new VampirismSpaceRipperStingyEyes(new NonStandAction.Builder().holdType(20)
-                    .holdEnergyCost(20F).cooldown(0, 50).heldSlowDownFactor(0.3F).ignoresPerformerStun()));
+                    .holdEnergyCost(20F).cooldown(50).heldSlowDownFactor(0.3F).ignoresPerformerStun()));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_BLOOD_GIFT = ACTIONS.register("vampirism_blood_gift", 
             () -> new VampirismBloodGift(new NonStandAction.Builder().holdToFire(60, false)
                     .holdEnergyCost(5F).heldSlowDownFactor(0.3F).emptyMainHand()));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_ZOMBIE_SUMMON = ACTIONS.register("vampirism_zombie_summon", 
-            () -> new VampirismZombieSummon(new NonStandAction.Builder().energyCost(100F).cooldown(0, 100)));
+            () -> new VampirismZombieSummon(new NonStandAction.Builder().energyCost(100F).cooldown(100)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_DARK_AURA = ACTIONS.register("vampirism_dark_aura", 
-            () -> new VampirismDarkAura(new NonStandAction.Builder().energyCost(25F).cooldown(0, 300).ignoresPerformerStun()));
+            () -> new VampirismDarkAura(new NonStandAction.Builder().energyCost(25F).cooldown(300).ignoresPerformerStun()));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_HAMON_SUICIDE = ACTIONS.register("vampirism_hamon_suicide", 
             () -> new VampirismHamonSuicide(new NonStandAction.Builder().holdToFire(100, false).ignoresPerformerStun()));
@@ -262,7 +262,7 @@ public class ModActions {
                     .partsRequired(StandPart.MAIN_BODY)));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_INHALE = ACTIONS.register("star_platinum_inhale", 
-            () -> new StarPlatinumInhale(new StandEntityAction.Builder().holdType(80).staminaCostTick(2F).cooldown(0, 200)
+            () -> new StarPlatinumInhale(new StandEntityAction.Builder().holdType(80).staminaCostTick(2F).cooldown(200)
                     .ignoresPerformerStun().resolveLevelToUnlock(2)
                     .standOffsetFromUser(0, -0.25).standSound(ModSounds.STAR_PLATINUM_INHALE)
                     .partsRequired(StandPart.MAIN_BODY)));
@@ -335,7 +335,7 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> THE_WORLD_TS_PUNCH = ACTIONS.register("the_world_ts_punch", 
             () -> new TheWorldTSHeavyAttack(new StandEntityAction.Builder().resolveLevelToUnlock(3).standUserSlowDownFactor(1.0F)
-                    .standPose(TheWorldTSHeavyAttack.TS_PUNCH_POSE).standWindupDuration(5).cooldown(0, 50)
+                    .standPose(TheWorldTSHeavyAttack.TS_PUNCH_POSE).standWindupDuration(5).cooldown(50)
                     .partsRequired(StandPart.MAIN_BODY, StandPart.ARMS), THE_WORLD_HEAVY_PUNCH, THE_WORLD_TIME_STOP_BLINK));
     
 
@@ -407,7 +407,7 @@ public class ModActions {
                     .shiftVariationOf(SILVER_CHARIOT_ATTACK).shiftVariationOf(SILVER_CHARIOT_RAPIER_BARRAGE)));
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_RAPIER_LAUNCH = ACTIONS.register("silver_chariot_rapier_launch", 
-            () -> new SilverChariotRapierLaunch(new StandEntityAction.Builder().cooldown(0, 100)
+            () -> new SilverChariotRapierLaunch(new StandEntityAction.Builder().cooldown(100)
                     .ignoresPerformerStun()
                     .resolveLevelToUnlock(2)
                     .standOffsetFromUser(0, 0.25).standPose(StandPose.RANGED_ATTACK).standSound(ModSounds.SILVER_CHARIOT_RAPIER_SHOT)
@@ -513,12 +513,14 @@ public class ModActions {
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_ITEM_PROJECTILE = ACTIONS.register("crazy_diamond_item_projectile", 
             () -> new CrazyDiamondItemProjectile(new StandEntityAction.Builder().standWindupDuration(15)
                     .resolveLevelToUnlock(4)
+                    .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_FIX_STARTED).standSound(Phase.PERFORM, ModSounds.CRAZY_DIAMOND_BULLET_SHOT)
                     .standOffsetFromUser(0, -0.5)
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_BLOOD_CUTTER = ACTIONS.register("crazy_diamond_blood_cutter", 
-            () -> new CrazyDiamondBloodCutter(new StandEntityAction.Builder().standWindupDuration(5)
+            () -> new CrazyDiamondBloodCutter(new StandEntityAction.Builder().standWindupDuration(5).cooldown(200)
                     .resolveLevelToUnlock(4)
+                    .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_FIX_STARTED) /*FIXME ! (blood cutter) shot sound*/
                     .standOffsetFromUser(-0.1, -0.5)
                     .partsRequired(StandPart.ARMS)));
     
@@ -541,18 +543,20 @@ public class ModActions {
     public static final RegistryObject<CrazyDiamondHeal> CRAZY_DIAMOND_HEAL = ACTIONS.register("crazy_diamond_heal", 
             () -> new CrazyDiamondHeal(new StandEntityAction.Builder().holdType()
                     .resolveLevelToUnlock(1)
+                    .standSound(Phase.PERFORM, ModSounds.CRAZY_DIAMOND_FIX_STARTED)
                     .standAutoSummonMode(AutoSummonMode.MAIN_ARM)
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_RESTORE_TERRAIN = ACTIONS.register("crazy_diamond_restore_terrain", 
             () -> new CrazyDiamondRestoreTerrain(new StandEntityAction.Builder().holdType()
                     .resolveLevelToUnlock(2)
-                    .shout(ModSounds.JOSUKE_FIX).standSound(Phase.PERFORM, ModSounds.CRAZY_DIAMOND_FIX_LOOP, true)
+                    .shout(ModSounds.JOSUKE_FIX).standSound(Phase.PERFORM, ModSounds.CRAZY_DIAMOND_FIX_STARTED)
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE = ACTIONS.register("crazy_diamond_anchor_move", 
             () -> new CrazyDiamondBlockCheckpointMove(new StandEntityAction.Builder().holdType()
                     .resolveLevelToUnlock(3)
+                    .standSound(Phase.PERFORM, ModSounds.CRAZY_DIAMOND_FIX_STARTED)
                     .standAutoSummonMode(AutoSummonMode.OFF_ARM)
                     .partsRequired(StandPart.ARMS)));
     

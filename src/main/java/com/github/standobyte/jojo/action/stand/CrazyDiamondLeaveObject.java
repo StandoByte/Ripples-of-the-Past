@@ -103,6 +103,7 @@ public class CrazyDiamondLeaveObject extends StandEntityActionModifier {
         if (task.getAdditionalData().isEmpty(TriggeredFlag.class) && task.getTarget().getType() == TargetType.ENTITY) {
             Entity entity = task.getTarget().getEntity();
             if (entity.isAlive() && entity instanceof LivingEntity && !(entity instanceof SkeletonEntity) && !(entity instanceof StandEntity)) {
+                // FIXME !!!!!!!!!!!!!! doesn't play for other clients
                 if (world.isClientSide()) {
                     if (StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) {
                         CrazyDiamondHeal.addParticlesAround(entity);
@@ -112,7 +113,7 @@ public class CrazyDiamondLeaveObject extends StandEntityActionModifier {
                                 standEntity.getSoundSource(), 1.0F, 1.0F, false);
                     }
                 }
-                if (triggerEffect) {
+                else if (triggerEffect) {
                     LivingEntity targetEntity = (LivingEntity) entity;
                     
                     ItemStack item = standEntity.getMainHandItem();
@@ -127,9 +128,7 @@ public class CrazyDiamondLeaveObject extends StandEntityActionModifier {
     
                     IPunch punch = standEntity.getLastPunch();
                     float damageDealt = punch.getType() == TargetType.ENTITY ? ((StandEntityPunch) punch).getDamageDealtToLiving() : 0;
-                    if (!world.isClientSide()) {
-                        targetEntity.setHealth(targetEntity.getHealth() + damageDealt * 0.5F);
-                    }
+                    targetEntity.setHealth(targetEntity.getHealth() + damageDealt * 0.5F);
                 }
             }
             if (triggerEffect) {
@@ -137,8 +136,6 @@ public class CrazyDiamondLeaveObject extends StandEntityActionModifier {
             }
         }
     }
-    
-    private class TriggeredFlag {}
     
     static boolean canUseItem(ItemStack itemStack) {
         return ITEM_ACTION.keySet().stream().anyMatch(predicate -> predicate.test(itemStack));
@@ -229,7 +226,7 @@ public class CrazyDiamondLeaveObject extends StandEntityActionModifier {
             ServerWorld world = (ServerWorld) entity.level;
             BlockPos strongholdPos = world.getChunkSource().getGenerator().findNearestMapFeature(world, Structure.STRONGHOLD, entity.blockPosition(), 100, false);
             if (strongholdPos != null) {
-                EyeOfEnderEntity eyeOfEnder = new EyeOfEnderInsideEntity(entity.level, entity.getX(), entity.getY(0.5D), entity.getZ());
+                EyeOfEnderEntity eyeOfEnder = new EyeOfEnderInsideEntity(entity.level, entity);
 
                 eyeOfEnder.setItem(item);
                 eyeOfEnder.signalTo(strongholdPos);
@@ -239,7 +236,6 @@ public class CrazyDiamondLeaveObject extends StandEntityActionModifier {
                 world.levelEvent(null, 1003, entity.blockPosition(), 0);
 
                 world.addFreshEntity(eyeOfEnder);
-                entity.startRiding(eyeOfEnder, true);
                 
                 if (entity instanceof ServerPlayerEntity) {
                     CriteriaTriggers.USED_ENDER_EYE.trigger((ServerPlayerEntity) entity, strongholdPos);
@@ -252,9 +248,7 @@ public class CrazyDiamondLeaveObject extends StandEntityActionModifier {
     }
     
     private static void fireworkFlight(LivingEntity entity, ItemStack item, LivingEntity user) {
-        FireworkRocketEntity firework = new FireworkInsideEntity(entity.level, 
-                entity.getX(), entity.getY(0.5), entity.getZ(), item);
+        FireworkRocketEntity firework = new FireworkInsideEntity(entity.level, item, entity);
         entity.level.addFreshEntity(firework);
-        entity.startRiding(firework, true);
     }
 }

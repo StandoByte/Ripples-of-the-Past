@@ -1,11 +1,17 @@
 package com.github.standobyte.jojo.action.stand;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
+import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -44,18 +50,35 @@ public class CrazyDiamondBlockCheckpointMove extends StandEntityAction {
                     entity.fallDistance = 0;
                 }
                 else {
-                    if (heldItem.getItem() instanceof BlockItem && !world.isClientSide()) {
-                        world.setBlockAndUpdate(pos, CrazyDiamondBlockCheckpointMake.getBlockState(heldItem, 
-                                (BlockItem) heldItem.getItem()));
+                    if (!world.isClientSide()) {
+                        if (heldItem.getItem() instanceof BlockItem) {
+                            world.setBlockAndUpdate(pos, CrazyDiamondBlockCheckpointMake.getBlockState(heldItem, 
+                                    (BlockItem) heldItem.getItem()));
+                        }
+                        heldItem.shrink(1);
                     }
-                    CrazyDiamondRestoreTerrain.addParticlesAroundBlock(world, pos, standEntity.getRandom());
-                    heldItem.shrink(1);
+                    else {
+                        CrazyDiamondRestoreTerrain.addParticlesAroundBlock(world, pos, standEntity.getRandom());
+                        if (StandUtil.shouldHearStands(ClientUtil.getClientPlayer())) {
+                            standEntity.playSound(ModSounds.CRAZY_DIAMOND_FIX_ENDED.get(), 1.0F, 1.0F, ClientUtil.getClientPlayer());
+                        }
+                    }
                 }
-                if (world.isClientSide()) {
-                    // FIXME ! (fast travel) CD restore sound
+                if (world.isClientSide() && StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) {
                     CustomParticlesHelper.createCDRestorationParticle(user, Hand.OFF_HAND);
                 }
             });
+        }
+    }
+    
+    @Override
+    public void onPhaseTransition(World world, StandEntity standEntity, IStandPower standPower, 
+            @Nullable Phase from, @Nullable Phase to, StandEntityTask task, int nextPhaseTicks) {
+        if (world.isClientSide()) {
+            if (to == Phase.PERFORM) {
+                ClientTickingSoundsHelper.playStandEntityCancelableActionSound(standEntity, 
+                        ModSounds.CRAZY_DIAMOND_FIX_LOOP.get(), this, Phase.PERFORM, 1.0F, 1.0F, true);
+            }
         }
     }
     

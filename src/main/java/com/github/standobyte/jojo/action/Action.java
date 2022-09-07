@@ -448,6 +448,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         private Supplier<SoundEvent> shoutSupplier = () -> null;
         protected List<Supplier<? extends Action<?>>> shiftVariationOf = new ArrayList<>();
         
+        public T cooldown(int cooldown) {
+            return cooldown(0, cooldown);
+        }
+        
         public T cooldown(int technical, int additional) {
             this.cooldownTechnical = technical;
             this.cooldownAdditional = additional;

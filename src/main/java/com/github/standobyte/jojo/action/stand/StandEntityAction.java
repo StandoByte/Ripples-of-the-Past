@@ -1,9 +1,7 @@
 package com.github.standobyte.jojo.action.stand;
 
 import java.util.EnumMap;
-import java.util.EnumSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -43,7 +41,6 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     protected final StandRelativeOffset userOffsetArmsOnly;
     public final boolean enablePhysics;
     private final Map<Phase, Supplier<SoundEvent>> standSounds;
-    private final Set<Phase> standSoundLooped;
     
     public StandEntityAction(StandEntityAction.AbstractBuilder<?> builder) {
         super(builder);
@@ -57,7 +54,6 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         this.userOffsetArmsOnly = builder.userOffsetArmsOnly;
         this.enablePhysics = builder.enablePhysics;
         this.standSounds = builder.standSounds;
-        this.standSoundLooped = builder.standSoundLooped;
     }
 
     @Override
@@ -313,7 +309,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     protected void playSoundAtStand(World world, StandEntity standEntity, SoundEvent sound, IStandPower standPower, Phase phase) {
         if (world.isClientSide()) {
             if (canBeCanceled(standPower, standEntity, phase, null)) {
-                ClientTickingSoundsHelper.playStandEntityCancelableActionSound(standEntity, sound, this, phase, 1.0F, 1.0F, standSoundLooped.contains(phase));
+                ClientTickingSoundsHelper.playStandEntityCancelableActionSound(standEntity, sound, this, phase, 1.0F, 1.0F, false);
             }
             else {
                 standEntity.playSound(sound, 1.0F, 1.0F, ClientUtil.getClientPlayer());
@@ -442,7 +438,6 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         private StandRelativeOffset userOffsetArmsOnly = null;
         private boolean enablePhysics = true;
         private final Map<Phase, Supplier<SoundEvent>> standSounds = new EnumMap<>(Phase.class);
-        private final Set<Phase> standSoundLooped = EnumSet.noneOf(Phase.class);
 
         @Override
         public T autoSummonStand() {
@@ -522,19 +517,12 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         }
         
         public T standSound(Supplier<SoundEvent> soundSupplier) {
-            return standSound(Phase.PERFORM, soundSupplier, false);
+            return standSound(Phase.PERFORM, soundSupplier);
         }
         
         public T standSound(Phase phase, Supplier<SoundEvent> soundSupplier) {
-            return standSound(phase, soundSupplier, false);
-        }
-        
-        public T standSound(Phase phase, Supplier<SoundEvent> soundSupplier, boolean loopHeldSound) {
             if (phase != null) {
                 this.standSounds.put(phase, soundSupplier);
-            }
-            if (loopHeldSound) {
-                this.standSoundLooped.add(phase);
             }
             return getThis();
         }

@@ -92,7 +92,7 @@ public class StandEntityTask {
     public void addModifierAction(StandEntityActionModifier action, StandEntity standEntity) {
         taskModifiers.add(action);
         if (!standEntity.level.isClientSide()) {
-            PacketManager.sendToClientsTrackingAndSelf(new TrStandEntityTaskModifierPacket(standEntity.getId(), action), standEntity);
+            PacketManager.sendToClientsTracking(new TrStandEntityTaskModifierPacket(standEntity.getId(), action), standEntity);
         }
     }
     

@@ -4,10 +4,12 @@ import java.util.List;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -52,7 +54,7 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
                     }
                 }
             }
-            else {
+            else if (StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) {
                 CustomParticlesHelper.createCDRestorationParticle(user, Hand.OFF_HAND);
             }
         }
@@ -120,4 +122,6 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
     public void onMaxTraining(IStandPower power) {
         power.unlockAction(getShiftVariationIfPresent());
     }
+    
+    // FIXME ! (repair) CD restore sound
 }

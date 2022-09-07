@@ -27,6 +27,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandSummon
 import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.BrokenChunkBlocksPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.CommonConfigPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.EntityTimeResumeSoundPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillLearnPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillsResetPacket;
@@ -399,6 +400,11 @@ public class PacketManager {
                 RefreshMovementInTimeStopPacket::encode,
                 RefreshMovementInTimeStopPacket::decode,
                 RefreshMovementInTimeStopPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, EntityTimeResumeSoundPacket.class,
+                EntityTimeResumeSoundPacket::encode,
+                EntityTimeResumeSoundPacket::decode,
+                EntityTimeResumeSoundPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
         channel.registerMessage(index++, TrNoMotionLerpPacket.class,
                 TrNoMotionLerpPacket::encode,

@@ -33,7 +33,7 @@ public class CDBloodCutterEntity extends ModdedProjectileEntity {
 
     @Override
     protected float getBaseDamage() {
-        return 5.0F;
+        return 4.0F;
     }
     
     protected void breakProjectile(TargetType targetType, RayTraceResult hitTarget) {
@@ -55,16 +55,13 @@ public class CDBloodCutterEntity extends ModdedProjectileEntity {
                                         // FIXME !! (blood cutter) && isn't behind blocks
                                 && entity.getBoundingBox().clip(this.getBoundingBox().getCenter(), entity.getBoundingBox().getCenter()).isPresent()))
                 .forEach(entity -> {
-                    // FIXME !!! (blood cutter) refresh the timer
-                    stand.getContinuousEffects().getOrCreateEffect(ModStandEffects.DRIED_BLOOD_DROPS.get(), entity);
+                    stand.getContinuousEffects().getOrCreateEffect(ModStandEffects.DRIED_BLOOD_DROPS.get(), entity).resetTicks();
 
                     PacketManager.sendToClientsTracking(new BloodParticlesPacket(
                             this.getBoundingBox().getCenter(), entity.getBoundingBox().getCenter(), 32), this);
                 });
             });
-        }
-        else {
-            level.playLocalSound(getX(), getY(), getZ(), ModSounds.WATER_SPLASH.get(), getSoundSource(), 1.0F, 1.0F, false);
+            level.playSound(null, getX(), getY(), getZ(), ModSounds.WATER_SPLASH.get(), getSoundSource(), 1.0F, 1.0F);
         }
     }
     
