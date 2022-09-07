@@ -6,13 +6,16 @@ import java.util.stream.Stream;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
+import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDItemProjectileEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModStandEffects;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandUtil;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -22,6 +25,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -46,13 +50,14 @@ public class CrazyDiamondItemProjectile extends StandEntityAction {
                         blockState.getDestroySpeed(user.level, user.blockPosition()), blockState.getHarvestLevel())) {
             return conditionMessage("stand_cant_break_block");
         }
-        if (!hardMaterial(blockState.getMaterial())) {
+        if (!hardMaterial(blockState)) {
             return conditionMessage("item_hard_material");
         }
         return super.checkSpecificConditions(user, power, target);
     }
     
-    private boolean hardMaterial(Material material) {
+    private boolean hardMaterial(BlockState blockState) {
+        Material material = blockState.getMaterial();
         return 
                 material == Material.BUILDABLE_GLASS || 
                 material == Material.ICE_SOLID || 
@@ -62,12 +67,13 @@ public class CrazyDiamondItemProjectile extends StandEntityAction {
                 material == Material.ICE || 
                 material == Material.STONE || 
                 material == Material.METAL || 
-                material == Material.HEAVY_METAL;
+                material == Material.HEAVY_METAL || 
+                material == Material.CLAY && blockState.getBlock().getRegistryName().getPath().contains("infested");
     }
 
     @Override
     public void standTickWindup(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-        if (world.isClientSide() && userPower.getUser() != null) {
+        if (world.isClientSide() && userPower.getUser() != null && StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) {
             CustomParticlesHelper.createCDRestorationParticle(userPower.getUser(), Hand.OFF_HAND);
         }
     }
@@ -89,6 +95,16 @@ public class CrazyDiamondItemProjectile extends StandEntityAction {
                     });
                 }
             }
+        }
+    }
+    
+    @Override
+    protected void playSoundAtStand(World world, StandEntity standEntity, SoundEvent sound, IStandPower standPower, Phase phase) {
+        if (world.isClientSide() && phase == Phase.WINDUP) {
+            ClientTickingSoundsHelper.playStandEntityCancelableActionSound(standEntity, sound, this, phase, 1.0F, 1.0F, false);
+        }
+        else {
+            super.playSoundAtStand(world, standEntity, sound, standPower, phase);
         }
     }
     

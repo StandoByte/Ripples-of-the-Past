@@ -31,7 +31,7 @@ import net.minecraft.util.math.MathHelper;
 
 public class ResolveCounter {
     public static final float RESOLVE_DMG_REDUCTION = 0.6667F;
-    public static final Double[] DEFAULT_MAX_RESOLVE_VALUES = {2500.0, 5000.0, 10000.0, 20000.0, 15000.0};
+    public static final Double[] DEFAULT_MAX_RESOLVE_VALUES = {2500.0, 10000.0, 25000.0, 50000.0, 32500.0};
     private static final float RESOLVE_DECAY = 2F;
     private static final int RESOLVE_NO_DECAY_TICKS = 400;
     private static final float RESOLVE_FOR_DMG_POINT = 1F;
@@ -62,7 +62,7 @@ public class ResolveCounter {
     private int extraLevel = 0;
     
     private DiscardingSortedMultisetWrapper<Float> resolveRecords = 
-            new DiscardingSortedMultisetWrapper<>(99);
+            new DiscardingSortedMultisetWrapper<>(10);
     private boolean saveNextRecord = true;
     private float maxAchievedValue;
     
@@ -146,7 +146,7 @@ public class ResolveCounter {
 
     float getMaxResolveValue() {
         return JojoModUtil.getOrLast(
-                JojoModConfig.getCommonConfigInstance(stand.getUser().level.isClientSide()).resolvePoints.get(), 
+                JojoModConfig.getCommonConfigInstance(stand.getUser().level.isClientSide()).resolveLvlPoints.get(), 
                 getResolveLevel()).floatValue();
     }
     
@@ -212,17 +212,11 @@ public class ResolveCounter {
     private float multiplyRecords(float addedValue) {
         float totalBoostedValue = 0;
         SortedMultiset<Float> higherRecords = resolveRecords.getWrappedSet().tailMultiset(this.resolve, BoundType.OPEN);
-        float lowerBorder = getResolveValue();
+        float currentResolve = getResolveValue();
         for (Multiset.Entry<Float> entry : higherRecords.entrySet()) {
             float upperBorder = entry.getElement();
             float multiplier = 1 + entry.getCount();
-            float sectionValueBoosted = MathHelper.clamp(addedValue, 0, (upperBorder - lowerBorder) / multiplier);
-            if (sectionValueBoosted == 0) {
-                break;
-            }
-            addedValue -= sectionValueBoosted;
-            totalBoostedValue += sectionValueBoosted * multiplier;
-            lowerBorder = upperBorder;
+            totalBoostedValue += Math.min(addedValue, upperBorder - currentResolve) * multiplier;
         }
         return totalBoostedValue + addedValue;
     }

@@ -13,11 +13,13 @@ import org.apache.commons.lang3.tuple.Pair;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.block.Block;
@@ -99,12 +101,12 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
 
                 if (targetEntity instanceof TNTEntity) {
                     TNTEntity tnt = (TNTEntity) targetEntity;
-                    if (CrazyDiamondHeal.handle(world, tnt, tnt, (e, clientSide) -> {
+                    if (CrazyDiamondHeal.heal(world, tnt, tnt, (e, clientSide) -> {
                         if (!clientSide) {
                             e.setFuse(task.getTick() == 0 ? e.getFuse() - e.tickCount + 2 : e.getFuse() + 2);
                         }
                     }, e -> e.getFuse() < 80)) {
-                        CrazyDiamondHeal.handle(world, tnt, tnt, 
+                        CrazyDiamondHeal.heal(world, tnt, tnt, 
                                 (e, clientSide) -> {
                                     if (!clientSide) {
                                         Block tntBlock = ForgeRegistries.BLOCKS.getValue(e.getType().getRegistryName());
@@ -121,8 +123,8 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                 }
 
                 else if (targetEntity.getType() == EntityType.SNOW_GOLEM) {
-                    if (CrazyDiamondHeal.handleLivingEntity(world, (LivingEntity) targetEntity)) {
-                        CrazyDiamondHeal.handle(world, targetEntity, targetEntity, 
+                    if (CrazyDiamondHeal.healLivingEntity(world, (LivingEntity) targetEntity)) {
+                        CrazyDiamondHeal.heal(world, targetEntity, targetEntity, 
                                 (e, clientSide) -> {
                                     if (!clientSide && standEntity.getRandom().nextFloat() < 0.1F) {
                                         BlockPos blockPos = e.blockPosition();
@@ -138,8 +140,8 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
 
                 else if (userPower.getResolveLevel() >= 4) {
                     if (targetEntity.getType() == EntityType.IRON_GOLEM) {
-                        if (CrazyDiamondHeal.handleLivingEntity(world, (LivingEntity) targetEntity)) {
-                            CrazyDiamondHeal.handle(world, targetEntity, targetEntity, 
+                        if (CrazyDiamondHeal.healLivingEntity(world, (LivingEntity) targetEntity)) {
+                            CrazyDiamondHeal.heal(world, targetEntity, targetEntity, 
                                     (e, clientSide) -> {
                                         if (!clientSide && standEntity.getRandom().nextFloat() < 0.05F) {
                                             BlockPos blockPos = e.blockPosition();
@@ -159,7 +161,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                         WitherEntity wither = (WitherEntity) targetEntity;
                         int spawnTicks = wither.getInvulnerableTicks();
                         if (spawnTicks > 0) {
-                            if (CrazyDiamondHeal.handle(world, wither, wither, 
+                            if (CrazyDiamondHeal.heal(world, wither, wither, 
                                     (e, clientSide) -> {
                                         if (!clientSide) {
                                             e.setHealth(e.getHealth() - 5);
@@ -167,7 +169,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                                         }
                                     }, 
                                     e -> spawnTicks >= 215 || e.getHealth() <= 5)) {
-                                CrazyDiamondHeal.handle(world, targetEntity, targetEntity, 
+                                CrazyDiamondHeal.heal(world, targetEntity, targetEntity, 
                                         (w, clientSide) -> {
                                             if (!clientSide) {
                                                 BlockPos blockPos = w.blockPosition();
@@ -225,7 +227,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                     });
                 }
             }
-            else {
+            else if (StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) {
                 CustomParticlesHelper.createCDRestorationParticle(userPower.getUser(), Hand.OFF_HAND);
             }
             break;

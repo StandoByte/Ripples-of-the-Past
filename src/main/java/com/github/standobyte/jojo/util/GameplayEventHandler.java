@@ -600,7 +600,7 @@ public class GameplayEventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingDamage(LivingDamageEvent event) {
-        dropBlood(event.getSource(), event.getAmount(), event.getEntityLiving());
+        bleed(event.getSource(), event.getAmount(), event.getEntityLiving());
         StandType.onHurtByStand(event.getSource(), event.getAmount(), event.getEntityLiving());
         
         for (PowerClassification powerClassification : PowerClassification.values()) {
@@ -620,7 +620,6 @@ public class GameplayEventHandler {
         }
     }
 
-    // sucks that LivingKnockBackEvent doesn't receive DamageSource
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onEntityKnockback(LivingKnockBackEvent event) {
         event.getEntityLiving().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(util -> {
@@ -631,7 +630,9 @@ public class GameplayEventHandler {
         });
     }
 
-    private static void dropBlood(DamageSource dmgSource, float dmgAmount, LivingEntity target) {
+    // FIXME !!!!!!!!!!!!!!!!!!!!!!! drop blood on entities around (rng)
+    // FIXME !!!!!!!!!!!!!!!!!!!!!!! refresh blood cutter cd
+    private static void bleed(DamageSource dmgSource, float dmgAmount, LivingEntity target) {
         World world = target.level;
         if (world.isClientSide()) return;
         if (dmgAmount >= 0.98F && 

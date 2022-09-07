@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.network.NetworkUtil;
+import com.github.standobyte.jojo.power.stand.StandUtil;
 
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.BlockPos;
@@ -29,8 +30,11 @@ public class CDBlocksRestoredPacket {
 
     public static void handle(CDBlocksRestoredPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
-            World world = ClientUtil.getClientWorld();
-            msg.positions.forEach(pos -> CrazyDiamondRestoreTerrain.addParticlesAroundBlock(world, pos, world.getRandom()));
+            // FIXME do not send these packets to non-stand users at all
+            if (StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) {
+                World world = ClientUtil.getClientWorld();
+                msg.positions.forEach(pos -> CrazyDiamondRestoreTerrain.addParticlesAroundBlock(world, pos, world.getRandom()));
+            }
         });
         ctx.get().setPacketHandled(true);
     }

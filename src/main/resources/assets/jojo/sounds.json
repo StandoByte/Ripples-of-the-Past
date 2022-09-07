@@ -358,11 +358,24 @@
   },
   "star_platinum_punch_light": {
     "subtitle": "jojo.subtitle.stand_attack_light",
-    "sounds": [ "minecraft:random/anvil_land" ]
+    "sounds": [ "jojo:stand/star_platinum_punch_light" ]
+  },
+  "star_platinum_punch_barrage": {
+    "subtitle": "jojo.subtitle.stand_attack_light",
+    "sounds": [ 
+      {
+        "name": "jojo:stand/star_platinum_punch_light",
+        "weight" : 3
+      },
+      {
+        "name": "jojo:stand/star_platinum_punch_barrage",
+        "weight" : 1
+      }
+    ]
   },
   "star_platinum_punch_heavy": {
     "subtitle": "jojo.subtitle.stand_attack_strong",
-    "sounds": [ "minecraft:random/anvil_land" ]
+    "sounds": [ "jojo:stand/star_platinum_punch_heavy", "jojo:stand/star_platinum_punch_heavy_2" ]
   },
   "star_platinum_ora": {
     "subtitle": "jojo.subtitle.ora",
@@ -480,18 +493,26 @@
   },
   "the_world_punch_light": {
     "subtitle": "jojo.subtitle.stand_attack_light",
-    "sounds": [ "minecraft:random/anvil_land" ]
+    "sounds": [  ]
+  },
+  "the_world_punch_barrage": {
+    "subtitle": "jojo.subtitle.stand_attack_light",
+    "sounds": [  ]
   },
   "the_world_punch_heavy": {
     "subtitle": "jojo.subtitle.stand_attack_strong",
-    "sounds": [ "minecraft:random/anvil_land" ]
+    "sounds": [  "jojo:stand/the_world_punch_heavy"]
   },
-  "the_world_punch_heavy_unrevealed": {
-    "sounds": [ "minecraft:mob/wither/spawn" ]
+  "the_world_punch_heavy_entity": {
+    "subtitle": "jojo.subtitle.stand_attack_strong",
+    "sounds": [ "jojo:stand/the_world_punch_heavy_entity" ]
+  },
+  "the_world_punch_heavy_ts_impact": {
+    "sounds": [ "jojo:stand/the_world_punch_heavy_impact" ]
   },
   "the_world_kick_heavy": {
     "subtitle": "jojo.subtitle.stand_attack_strong",
-    "sounds": [ "minecraft:random/anvil_land" ]
+    "sounds": [ "jojo:stand/the_world_kick_heavy" ]
   },
   "the_world_time_stop": {
     "sounds": [ "jojo:stand/the_world_time_stop" ]
@@ -676,10 +697,6 @@
   "crazy_diamond_fix_ended": {
     "subtitle": "jojo.subtitle.fixed",
     "sounds": [ "jojo:stand/crazy_diamond_restoration_over" ]
-  },
-  "crazy_diamond_bullet_charge": {
-    "subtitle": "jojo.subtitle.fixed",
-    "sounds": [ "jojo:stand/crazy_diamond_bullet_charge" ]
   },
   "crazy_diamond_bullet_shot": {
     "subtitle": "jojo.subtitle.shot",

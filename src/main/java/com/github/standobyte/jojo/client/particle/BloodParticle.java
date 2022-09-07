@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.github.standobyte.jojo.init.ModEntityTypes;
+
 import net.minecraft.client.particle.IAnimatedSprite;
 import net.minecraft.client.particle.IParticleFactory;
 import net.minecraft.client.particle.IParticleRenderType;
@@ -65,7 +67,8 @@ public class BloodParticle extends SpriteTexturedParticle {
                 stopParticle();
             }
             else {
-                List<Entity> entities = level.getEntities(null, this.getBoundingBox());
+                List<Entity> entities = level.getEntities((Entity) null, this.getBoundingBox(), 
+                        entity -> entity.getType() != ModEntityTypes.CD_BLOOD_CUTTER.get());
                 if (!entities.isEmpty()) {
                     Entity entity = entities.get(0);
                     entityOffset = Optional.of(Pair.of(entity, entity.position().subtract(x, y, z)));
