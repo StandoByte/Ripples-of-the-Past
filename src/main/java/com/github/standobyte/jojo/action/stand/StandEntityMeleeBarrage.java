@@ -81,13 +81,9 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     }
     
     @Override
-    public void onPhaseTransition(World world, StandEntity standEntity, IStandPower standPower, Phase from, Phase to, StandEntityTask task, int ticks) {
-        boolean started = to == Phase.PERFORM;
+    protected void onPhaseTransition(World world, StandEntity standEntity, IStandPower standPower, Phase from, Phase to, StandEntityTask task, int ticks) {
         if (world.isClientSide()) {
-            standEntity.getBarrageHitSoundsHandler().setIsBarraging(started);
-        }
-        else if (!started) {
-            PacketManager.sendToClientsTracking(TrBarrageHitSoundPacket.barrageStopped(standEntity.getId()), standEntity);
+            standEntity.getBarrageHitSoundsHandler().setIsBarraging(to == Phase.PERFORM);
         }
     }
     
@@ -157,10 +153,13 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     }
     
     @Override
-    public void onClearServerSide(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction) {
-    	if (newAction != this) {
+    protected void onTaskStopped(World world, StandEntity standEntity, IStandPower standPower, StandEntityTask task, @Nullable StandEntityAction newAction) {
+    	if (!world.isClientSide() && newAction != this) {
     		standEntity.barrageClashStopped();
     	}
+        if (world.isClientSide()) {
+            standEntity.getBarrageHitSoundsHandler().setIsBarraging(false);
+        }
     }
 
     @Override

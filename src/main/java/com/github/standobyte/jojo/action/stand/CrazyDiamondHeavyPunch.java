@@ -42,8 +42,10 @@ public class CrazyDiamondHeavyPunch extends StandEntityHeavyAttack {
     }
 
     @Override
-    public void onClearServerSide(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction) {
-        standEntity.dropItemTo(standEntity.handItemSlot(Hand.MAIN_HAND), standPower.getUser());
+    protected void onTaskStopped(World world, StandEntity standEntity, IStandPower standPower, StandEntityTask task, @Nullable StandEntityAction newAction) {
+        if (!world.isClientSide()) {
+            standEntity.dropItemTo(standEntity.handItemSlot(Hand.MAIN_HAND), standPower.getUser());
+        }
     }
 
     @Override

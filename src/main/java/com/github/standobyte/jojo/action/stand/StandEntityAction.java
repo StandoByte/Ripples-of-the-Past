@@ -17,6 +17,8 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.TrBarrageHitSoundPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.type.EntityStandType;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
@@ -42,6 +44,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     protected final StandRelativeOffset userOffsetArmsOnly;
     public final boolean enablePhysics;
     private final Map<Phase, Supplier<SoundEvent>> standSounds;
+    protected final Supplier<StandEntityMeleeBarrage> barrageVisuals;
     
     public StandEntityAction(StandEntityAction.AbstractBuilder<?> builder) {
         super(builder);
@@ -55,6 +58,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         this.userOffsetArmsOnly = builder.userOffsetArmsOnly;
         this.enablePhysics = builder.enablePhysics;
         this.standSounds = builder.standSounds;
+        this.barrageVisuals = builder.barrageVisuals;
     }
 
     @Override
@@ -158,7 +162,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         if (!world.isClientSide()) {
             if (!power.isActive()) {
                 // FIXME !!!! only summon in arms-only mode if the task can actually be set
-                switch (autoSummonMode) {
+                switch (getAutoSummonMode()) {
                 case FULL:
                     power.getType().summon(user, power, true);
                     break;
@@ -178,7 +182,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
             else {
                 StandEntity stand = (StandEntity) power.getStandManifestation();
                 if (stand.isArmsOnlyMode()) {
-                    switch (autoSummonMode) {
+                    switch (getAutoSummonMode()) {
                     case ARMS:
                         stand.setArmsOnlyMode();
                         break;
@@ -261,8 +265,8 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     
     protected void preTaskInit(World world, IStandPower standPower, StandEntity standEntity, ActionTarget target) {}
     
-    protected boolean allowArmsOnly() {
-        return autoSummonMode == AutoSummonMode.ARMS || autoSummonMode == AutoSummonMode.MAIN_ARM || autoSummonMode == AutoSummonMode.OFF_ARM;
+    protected AutoSummonMode getAutoSummonMode() {
+        return autoSummonMode;
     }
     
     protected void setAction(IStandPower standPower, StandEntity standEntity, int ticks, Phase phase, ActionTarget target) {
@@ -300,6 +304,10 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     
     @Nullable
     public SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task) {
+        if (barrageVisuals(standEntity, standPower, task)) {
+            return barrageVisuals.get().getSound(standEntity, standPower, phase, task);
+        }
+        
         Supplier<SoundEvent> standSoundSupplier = standSounds.get(phase);
         if (standSoundSupplier == null) {
             return null;
@@ -317,6 +325,45 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
             }
         }
     }
+    
+
+    protected boolean barrageVisuals(StandEntity standEntity, IStandPower standPower, StandEntityTask task) {
+        return barrageVisuals.get() != null;
+    }
+    
+    @Override
+    public final void phaseTransition(World world, StandEntity standEntity, IStandPower standPower, 
+            @Nullable Phase from, @Nullable Phase to, StandEntityTask task, int nextPhaseTicks) {
+        barrageVisualsPhaseTransition(world, standEntity, standPower, to, task);
+        onPhaseTransition(world, standEntity, standPower, from, to, task, nextPhaseTicks);
+    }
+    
+    private void barrageVisualsPhaseTransition(World world, StandEntity standEntity, IStandPower standPower, @Nullable Phase to, StandEntityTask task) {
+        if (world.isClientSide()) {
+            standEntity.getBarrageHitSoundsHandler().setIsBarraging(to == Phase.PERFORM && barrageVisuals(standEntity, standPower, task));
+        }
+    }
+    
+    protected void onPhaseTransition(World world, StandEntity standEntity, IStandPower standPower, 
+            @Nullable Phase from, @Nullable Phase to, StandEntityTask task, int nextPhaseTicks) {}
+    
+    protected void barrageVisualsTick(StandEntity stand, boolean playSound, Vector3d soundPos) {
+        if (!stand.level.isClientSide()) {
+            SoundEvent hitSound = barrageVisuals.get() != null ? barrageVisuals.get().getHitSound() : null;
+            if (hitSound != null) {
+                PacketManager.sendToClientsTracking(playSound ? 
+                        new TrBarrageHitSoundPacket(stand.getId(), hitSound, soundPos)
+                        : TrBarrageHitSoundPacket.noSound(stand.getId()), stand);
+            }
+        }
+    }
+    
+    public final void taskStopped(World world, StandEntity standEntity, IStandPower standPower, StandEntityTask task, @Nullable StandEntityAction newAction) {
+        barrageVisualsPhaseTransition(world, standEntity, standPower, null, task);
+        onTaskStopped(world, standEntity, standPower, task, newAction);
+    }
+    
+    protected void onTaskStopped(World world, StandEntity standEntity, IStandPower standPower, StandEntityTask task, @Nullable StandEntityAction newAction) {}
     
     @Nullable
     public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, ActionTarget aimTarget) {
@@ -382,9 +429,6 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         return false;
     }
     
-    public void onClearServerSide(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction) {
-    }
-    
     public float getStandAlpha(StandEntity standEntity, int ticksLeft, float partialTick) {
         return 1F;
     }
@@ -394,6 +438,9 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     }
     
     public StandPose getStandPose(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
+        if (barrageVisuals(standEntity, standPower, task)) {
+            return barrageVisuals.get().getStandPose(standPower, standEntity, task);
+        }
         return standPose;
     }
     
@@ -443,6 +490,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         private StandRelativeOffset userOffsetArmsOnly = null;
         private boolean enablePhysics = true;
         private final Map<Phase, Supplier<SoundEvent>> standSounds = new EnumMap<>(Phase.class);
+        private Supplier<StandEntityMeleeBarrage> barrageVisuals = () -> null;
 
         @Override
         public T autoSummonStand() {
@@ -529,6 +577,11 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
             if (phase != null) {
                 this.standSounds.put(phase, soundSupplier);
             }
+            return getThis();
+        }
+        
+        public T barrageVisuals(Supplier<StandEntityMeleeBarrage> barrageAttack) {
+            this.barrageVisuals = barrageAttack != null ? barrageAttack : () -> null;
             return getThis();
         }
     }

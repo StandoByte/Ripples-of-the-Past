@@ -157,6 +157,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 //    @Nullable
 //    private StandEntityTask scheduledTask;
     private StandEntityAction inputBuffer;
+    private Optional<StandEntityTask> lastTask = Optional.empty();
     
     static final DataParameter<Byte> MANUAL_MOVEMENT_LOCK = EntityDataManager.defineId(StandEntity.class, DataSerializers.BYTE);
     private ManualStandMovementLock manualMovementLocks = new ManualStandMovementLock(this);
@@ -238,7 +239,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 StandEntityAction.Phase phase = task.getPhase();
                 action.playSound(this, userPower, phase, task);
                 action.onTaskSet(level, this, userPower, phase, task, task.getTicksLeft());
-                action.onPhaseTransition(level, this, userPower, null, phase, task, task.getTicksLeft());
+                action.phaseTransition(level, this, userPower, null, phase, task, task.getTicksLeft());
                 setStandPose(action.getStandPose(userPower, this, task));
             });
             if (!taskOptional.isPresent()) {
@@ -246,6 +247,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 	setStandPose(StandPose.IDLE);
                 }
             }
+            
+            lastTask.ifPresent(task -> task.getAction().taskStopped(level, this, userPower, task, taskOptional.map(StandEntityTask::getAction).orElse(null)));
+            lastTask = taskOptional;
         }
         else if (SWING_OFF_HAND.equals(dataParameter)) {
             swingingArm = entityData.get(SWING_OFF_HAND) ? Hand.OFF_HAND : Hand.MAIN_HAND;
@@ -1336,7 +1340,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
     protected void clearTask(StandEntityTask clearedTask, @Nullable StandEntityAction newAction) {
     	StandEntityAction oldAction = clearedTask.getAction();
-        oldAction.onClearServerSide(userPower, this, newAction);
         
         barrageHandler.reset();
         if (blockDamage > 0) {

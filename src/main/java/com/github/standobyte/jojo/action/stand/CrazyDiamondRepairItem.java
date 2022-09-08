@@ -128,7 +128,7 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
     }
     
     @Override
-    public void onPhaseTransition(World world, StandEntity standEntity, IStandPower standPower, 
+    protected void onPhaseTransition(World world, StandEntity standEntity, IStandPower standPower, 
             @Nullable Phase from, @Nullable Phase to, StandEntityTask task, int nextPhaseTicks) {
         if (world.isClientSide()) {
             if (to == Phase.PERFORM) {
