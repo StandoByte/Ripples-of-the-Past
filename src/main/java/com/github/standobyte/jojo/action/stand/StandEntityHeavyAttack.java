@@ -120,7 +120,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     @Override
     public StandEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
         double strength = stand.getAttackDamage();
-        return IHasStandPunch.super.punchEntity(stand, target, dmgSource)
+        return new HeavyPunchInstance(stand, target, dmgSource)
                 .damage(StandStatFormulas.getHeavyAttackDamage(strength))
                 .addKnockback(0.5F + (float) strength / 8)
                 .setStandInvulTime(10)
@@ -164,8 +164,8 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     }
     
     @Override
-    public StandPose getStandPose(IStandPower standPower, StandEntity standEntity) {
-        return isCombo ? StandPose.HEAVY_ATTACK_COMBO : super.getStandPose(standPower, standEntity);
+    public StandPose getStandPose(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
+        return isCombo ? StandPose.HEAVY_ATTACK_COMBO : super.getStandPose(standPower, standEntity, task);
     }
     
     
@@ -202,5 +202,25 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
 		protected Builder getThis() {
 			return this;
 		}
+    }
+    
+    
+    
+    public static class HeavyPunchInstance extends StandEntityPunch {
+
+        public HeavyPunchInstance(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
+            super(stand, target, dmgSource);
+        }
+
+        @Override
+        protected void afterAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, StandEntityTask task, boolean hurt, boolean killed) {
+            if (!stand.level.isClientSide() && target instanceof StandEntity && hurt && !killed) {
+                StandEntity standTarget = (StandEntity) target;
+                if (standTarget.getCurrentTask().isPresent() && standTarget.getCurrentTaskAction().stopOnHeavyAttack(this)) {
+                    standTarget.stopTaskWithRecovery();
+                }
+            }
+            super.afterAttack(stand, target, dmgSource, task, hurt, killed);
+        }
     }
 }

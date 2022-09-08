@@ -103,7 +103,6 @@ public class CrazyDiamondLeaveObject extends StandEntityActionModifier {
         if (task.getAdditionalData().isEmpty(TriggeredFlag.class) && task.getTarget().getType() == TargetType.ENTITY) {
             Entity entity = task.getTarget().getEntity();
             if (entity.isAlive() && entity instanceof LivingEntity && !(entity instanceof SkeletonEntity) && !(entity instanceof StandEntity)) {
-                // FIXME !!!!!!!!!!!!!! doesn't play for other clients
                 if (world.isClientSide()) {
                     if (StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) {
                         CrazyDiamondHeal.addParticlesAround(entity);

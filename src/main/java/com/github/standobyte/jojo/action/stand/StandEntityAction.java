@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack.HeavyPunchInstance;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -364,6 +365,10 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         return false;
     }
     
+    public boolean stopOnHeavyAttack(HeavyPunchInstance punch) {
+        return false;
+    }
+    
     @Override
     public boolean heldAllowsOtherActions(IStandPower standPower) {
         return getHoldDurationToFire(standPower) == 0;
@@ -388,7 +393,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         return task.getPhase() == Phase.RECOVERY && isFreeRecovery(standPower, standEntity) ? 1F : userMovementFactor;
     }
     
-    public StandPose getStandPose(IStandPower standPower, StandEntity standEntity) {
+    public StandPose getStandPose(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
         return standPose;
     }
     

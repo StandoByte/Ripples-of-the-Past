@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack.HeavyPunchInstance;
 import com.github.standobyte.jojo.action.stand.punch.IPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
@@ -81,8 +82,12 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     
     @Override
     public void onPhaseTransition(World world, StandEntity standEntity, IStandPower standPower, Phase from, Phase to, StandEntityTask task, int ticks) {
+        boolean started = to == Phase.PERFORM;
         if (world.isClientSide()) {
-            standEntity.getBarrageHitSoundsHandler().setIsBarraging(to == Phase.PERFORM);
+            standEntity.getBarrageHitSoundsHandler().setIsBarraging(started);
+        }
+        else if (!started) {
+            PacketManager.sendToClientsTracking(TrBarrageHitSoundPacket.barrageStopped(standEntity.getId()), standEntity);
         }
     }
     
@@ -96,6 +101,10 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     @Override
     public StandBlockPunch punchBlock(StandEntity stand, BlockPos pos, BlockState state) {
         return IHasStandPunch.super.punchBlock(stand, pos, state).impactSound(hitSound);
+    }
+    
+    public SoundEvent getHitSound() {
+        return hitSound == null ? null : hitSound.get();
     }
     
     @Override
@@ -157,6 +166,11 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     @Override
     public boolean cancelHeldOnGettingAttacked(IStandPower power, DamageSource dmgSource, float dmgAmount) {
         return dmgAmount >= 4F && "healthLink".equals(dmgSource.msgId);
+    }
+    
+    @Override
+    public boolean stopOnHeavyAttack(HeavyPunchInstance punch) {
+        return true;
     }
     
     @Override

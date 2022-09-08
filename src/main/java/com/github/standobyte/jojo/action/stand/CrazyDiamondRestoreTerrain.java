@@ -87,20 +87,6 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         }
     }
     
-    @Override
-    public void onPhaseTransition(World world, StandEntity standEntity, IStandPower standPower, 
-            @Nullable Phase from, @Nullable Phase to, StandEntityTask task, int nextPhaseTicks) {
-        if (world.isClientSide()) {
-            if (to == Phase.PERFORM) {
-                ClientTickingSoundsHelper.playStandEntityCancelableActionSound(standEntity, 
-                        ModSounds.CRAZY_DIAMOND_FIX_LOOP.get(), this, Phase.PERFORM, 1.0F, 1.0F, true);
-            }
-            else if (from == Phase.PERFORM) {
-                standEntity.playSound(ModSounds.CRAZY_DIAMOND_FIX_ENDED.get(), 1.0F, 1.0F, ClientUtil.getClientPlayer());
-            }
-        }
-    }
-    
     
     // FIXME !!! (restore terrain) tile entities (shulker (test for both dupes and item disappearance))
     private static boolean tryReplaceBlock(World world, BlockPos blockPos, BlockState blockState, Set<BlockPos> placedBlocks, 
@@ -263,5 +249,19 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         return block.pos.distManhattan(restorationCenter) <= CrazyDiamondRestoreTerrain.RESTORATION_RANGE
                 && entityLookVec.dot(Vector3d.atCenterOf(block.pos).subtract(entityEyePos).normalize()) >= 0.5
                 ;
+    }
+    
+    @Override
+    public void onPhaseTransition(World world, StandEntity standEntity, IStandPower standPower, 
+            @Nullable Phase from, @Nullable Phase to, StandEntityTask task, int nextPhaseTicks) {
+        if (world.isClientSide()) {
+            if (to == Phase.PERFORM) {
+                ClientTickingSoundsHelper.playStandEntityCancelableActionSound(standEntity, 
+                        ModSounds.CRAZY_DIAMOND_FIX_LOOP.get(), this, Phase.PERFORM, 1.0F, 1.0F, true);
+            }
+            else if (from == Phase.PERFORM) {
+                standEntity.playSound(ModSounds.CRAZY_DIAMOND_FIX_ENDED.get(), 1.0F, 1.0F, ClientUtil.getClientPlayer());
+            }
+        }
     }
 }

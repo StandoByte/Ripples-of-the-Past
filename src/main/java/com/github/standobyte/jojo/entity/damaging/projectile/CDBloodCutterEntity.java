@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.EntityPredicates;
@@ -49,9 +50,7 @@ public class CDBloodCutterEntity extends ModdedProjectileEntity {
             IStandPower.getStandPowerOptional(getOwner()).ifPresent(stand -> {
                 level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(4), 
                         EntityPredicates.ENTITY_STILL_ALIVE.and(EntityPredicates.NO_SPECTATORS).and(
-                                entity -> !entity.is(stand.getUser()) && entity != stand.getStandManifestation()
-                                && !(entity instanceof StandEntity && !((StandEntity) entity).isVisibleForAll())
-                                && !entity.isInWaterOrBubble()
+                                entity -> canHaveBloodDropsOn(entity, stand)
                                         // FIXME !! (blood cutter) && isn't behind blocks
                                 && entity.getBoundingBox().clip(this.getBoundingBox().getCenter(), entity.getBoundingBox().getCenter()).isPresent()))
                 .forEach(entity -> {
@@ -63,6 +62,12 @@ public class CDBloodCutterEntity extends ModdedProjectileEntity {
             });
             level.playSound(null, getX(), getY(), getZ(), ModSounds.WATER_SPLASH.get(), getSoundSource(), 1.0F, 1.0F);
         }
+    }
+    
+    public static boolean canHaveBloodDropsOn(Entity target, IStandPower bleedingEntityStand) {
+        return !target.is(bleedingEntityStand.getUser()) && target != bleedingEntityStand.getStandManifestation()
+                && !(target instanceof StandEntity && !((StandEntity) target).isVisibleForAll())
+                && !target.isInWaterOrBubble();
     }
     
     @Override
