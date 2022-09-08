@@ -43,11 +43,6 @@ public final class StandEntityUnsummon extends StandEntityAction {
     }
     
     @Override
-    protected boolean allowArmsOnly() {
-        return true;
-    }
-    
-    @Override
 	protected boolean isCancelable(IStandPower standPower, StandEntity standEntity, StandEntityAction newAction, Phase phase) {
         return !standEntity.isArmsOnlyMode() && newAction != this;
     }
@@ -62,9 +57,11 @@ public final class StandEntityUnsummon extends StandEntityAction {
     }
     
     @Override
-    public void onClearServerSide(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction) {
-        standEntity.unsummonTicks = 0;
-        standEntity.unsummonOffset = standEntity.getDefaultOffsetFromUser().copy();
+    protected void onTaskStopped(World world, StandEntity standEntity, IStandPower standPower, StandEntityTask task, @Nullable StandEntityAction newAction) {
+        if (!world.isClientSide()) {
+            standEntity.unsummonTicks = 0;
+            standEntity.unsummonOffset = standEntity.getDefaultOffsetFromUser().copy();
+        }
     }
     
     @Override

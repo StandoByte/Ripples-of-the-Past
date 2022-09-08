@@ -106,6 +106,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
         case ENTITY:
             if (userPower.getResolveLevel() >= 3) {
                 Entity targetEntity = target.getEntity();
+                boolean healTick = false;
 
                 if (targetEntity instanceof TNTEntity) {
                     TNTEntity tnt = (TNTEntity) targetEntity;
@@ -127,7 +128,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                                     }
                                 }, e -> true);
                     }
-                    return;
+                    healTick = true;
                 }
 
                 else if (targetEntity.getType() == EntityType.SNOW_GOLEM) {
@@ -143,7 +144,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                                     }
                                 }, e -> true);
                     }
-                    return;
+                    healTick = true;
                 }
 
                 else if (userPower.getResolveLevel() >= 4) {
@@ -162,7 +163,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                                         }
                                     }, e -> true);
                         }
-                        return;
+                        healTick = true;
                     }
 
                     else if (targetEntity.getType() == EntityType.WITHER) {
@@ -193,6 +194,11 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                                         }, e -> true);
                             }
                         }
+                        healTick = true;
+                    }
+                    
+                    if (!world.isClientSide()) {
+                        barrageVisualsTick(standEntity, healTick, targetEntity != null ? targetEntity.getBoundingBox().getCenter() : null);
                     }
                 }
             }
@@ -287,7 +293,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
     }
     
     @Override
-    public void onPhaseTransition(World world, StandEntity standEntity, IStandPower standPower, 
+    protected void onPhaseTransition(World world, StandEntity standEntity, IStandPower standPower, 
             @Nullable Phase from, @Nullable Phase to, StandEntityTask task, int nextPhaseTicks) {
         if (world.isClientSide()) {
             if (to == Phase.PERFORM) {
@@ -298,5 +304,11 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                 standEntity.playSound(ModSounds.CRAZY_DIAMOND_FIX_ENDED.get(), 1.0F, 1.0F, ClientUtil.getClientPlayer());
             }
         }
+    }
+    
+    @Override
+    protected boolean barrageVisuals(StandEntity standEntity, IStandPower standPower, StandEntityTask task) {
+        return super.barrageVisuals(standEntity, standPower, task)
+                && task.getTarget().getType() == TargetType.ENTITY && checkTarget(task.getTarget(), standPower.getUser(), standPower).isPositive();
     }
 }

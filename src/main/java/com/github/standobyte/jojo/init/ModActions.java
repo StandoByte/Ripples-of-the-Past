@@ -537,7 +537,7 @@ public class ModActions {
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_PREVIOUS_STATE = ACTIONS.register("crazy_diamond_previous_state", 
             () -> new CrazyDiamondPreviousState(new StandEntityAction.Builder().holdType()
                     .resolveLevelToUnlock(-1)
-                    .standSound(Phase.PERFORM, ModSounds.CRAZY_DIAMOND_FIX_STARTED)
+                    .standSound(Phase.PERFORM, ModSounds.CRAZY_DIAMOND_FIX_STARTED).barrageVisuals(CRAZY_DIAMOND_BARRAGE)
                     .standAutoSummonMode(AutoSummonMode.OFF_ARM)
                     .partsRequired(StandPart.ARMS)
                     .shiftVariationOf(CRAZY_DIAMOND_REPAIR)));
@@ -545,10 +545,9 @@ public class ModActions {
     public static final RegistryObject<CrazyDiamondHeal> CRAZY_DIAMOND_HEAL = ACTIONS.register("crazy_diamond_heal", 
             () -> new CrazyDiamondHeal(new StandEntityAction.Builder().holdType()
                     .resolveLevelToUnlock(1)
-                    .standSound(Phase.PERFORM, ModSounds.CRAZY_DIAMOND_FIX_STARTED)
+                    .standSound(Phase.PERFORM, ModSounds.CRAZY_DIAMOND_FIX_STARTED).barrageVisuals(CRAZY_DIAMOND_BARRAGE)
                     .standAutoSummonMode(AutoSummonMode.MAIN_ARM)
-                    .partsRequired(StandPart.ARMS),
-                    CRAZY_DIAMOND_BARRAGE));
+                    .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_RESTORE_TERRAIN = ACTIONS.register("crazy_diamond_restore_terrain", 
             () -> new CrazyDiamondRestoreTerrain(new StandEntityAction.Builder().holdType()
