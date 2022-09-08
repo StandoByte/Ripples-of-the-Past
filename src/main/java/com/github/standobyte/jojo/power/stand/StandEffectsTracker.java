@@ -21,6 +21,7 @@ import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 
 public class StandEffectsTracker {
     private static final AtomicInteger EFFECTS_COUNTER = new AtomicInteger();
@@ -163,22 +164,24 @@ public class StandEffectsTracker {
     
     public CompoundNBT toNBT() {
         CompoundNBT nbt = new CompoundNBT();
+        ListNBT effectsList = new ListNBT();
         effects.forEach((id, effect) -> {
             if (!effect.toBeRemoved()) {
-                nbt.put(String.valueOf(id), effect.toNBT());
+                effectsList.add(effect.toNBT());
             }
         });
+        nbt.put("Effects", effectsList);
         return nbt;
     }
     
     public void fromNBT(CompoundNBT nbt) {
-        nbt.getAllKeys().forEach(key -> {
-            if (nbt.contains(key, JojoModUtil.getNbtId(CompoundNBT.class))) {
-                StandEffectInstance effect = StandEffectInstance.fromNBT(nbt.getCompound(key));
+        if (nbt.contains("Effects", JojoModUtil.getNbtId(ListNBT.class))) {
+            nbt.getList("Effects", JojoModUtil.getNbtId(CompoundNBT.class)).forEach(effectNBT -> {
+                StandEffectInstance effect = StandEffectInstance.fromNBT((CompoundNBT) effectNBT);
                 if (effect != null) {
                     putEffectInstance(effect.withId(EFFECTS_COUNTER.incrementAndGet()));
                 }
-            }
-        });
+            });
+        }
     }
 }
