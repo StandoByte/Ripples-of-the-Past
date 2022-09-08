@@ -8,8 +8,6 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.mutable.MutableInt;
-
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.entity.mob.IMobStandUser;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame.Pick;
@@ -29,6 +27,9 @@ import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.villager.VillagerType;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.IntArrayNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.world.DifficultyInstance;
@@ -131,10 +132,9 @@ public class RockPaperScissorsKidEntity extends VillagerEntity implements IMobSt
         super.addAdditionalSaveData(nbt);
         nbt.put("StandPower", standPower.writeNBT());
         
-        CompoundNBT lostToMapNBT = new CompoundNBT();
-        MutableInt i = new MutableInt(0);
-        lostTo.forEach(winner -> lostToMapNBT.putUUID(String.valueOf(i.incrementAndGet()), winner));
-        nbt.put("LostTo", lostToMapNBT);
+        ListNBT lostToNBT = new ListNBT();
+        lostTo.forEach(winner -> lostToNBT.add(NBTUtil.createUUID(winner)));
+        nbt.put("LostTo", lostToNBT);
 
         CompoundNBT unfinishedGamesNBT = new CompoundNBT();
         games.forEach((playerUUID, game) -> unfinishedGamesNBT.put(playerUUID.toString(), game.writeNBT()));
@@ -148,11 +148,10 @@ public class RockPaperScissorsKidEntity extends VillagerEntity implements IMobSt
             standPower.readNBT(nbt.getCompound("StandPower"));
         }
 
-        if (nbt.contains("LostTo", JojoModUtil.getNbtId(CompoundNBT.class))) {
-            CompoundNBT lostToMapNBT = nbt.getCompound("LostTo");
-            lostToMapNBT.getAllKeys().forEach(key -> {
-                if (lostToMapNBT.hasUUID(key)) {
-                    lostTo.add(lostToMapNBT.getUUID(key));
+        if (nbt.contains("LostTo", JojoModUtil.getNbtId(ListNBT.class))) {
+            nbt.getList("LostTo", JojoModUtil.getNbtId(IntArrayNBT.class)).forEach(uuidNBT -> {
+                if (uuidNBT != null && uuidNBT.getType() == IntArrayNBT.TYPE && ((IntArrayNBT) uuidNBT).getAsIntArray().length == 4) {
+                    lostTo.add(NBTUtil.loadUUID(uuidNBT));
                 }
             });
         }

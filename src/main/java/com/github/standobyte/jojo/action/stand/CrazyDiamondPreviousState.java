@@ -25,14 +25,18 @@ import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.boss.WitherEntity;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.TNTEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.item.crafting.AbstractCookingRecipe;
 import net.minecraft.item.crafting.BlastingRecipe;
 import net.minecraft.item.crafting.ICraftingRecipe;
@@ -40,9 +44,14 @@ import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.SmithingRecipe;
 import net.minecraft.item.crafting.StonecuttingRecipe;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -94,7 +103,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
         if (target.getType() == TargetType.EMPTY) {
             ItemStack heldItem = user.getOffhandItem();
             if (heldItem.isEmpty()) return conditionMessage("item_offhand");
-            return convertTo(heldItem, user.level, null, user.getRandom()).isPresent() ? ActionConditionResult.POSITIVE : conditionMessage("item_revert");
+            return convertTo(heldItem, user.level, null, user.getRandom(), false).isPresent() ? ActionConditionResult.POSITIVE : conditionMessage("item_revert");
         }
         return super.checkSpecificConditions(user, power, target);
     }
@@ -107,6 +116,9 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
             if (userPower.getResolveLevel() >= 3) {
                 Entity targetEntity = target.getEntity();
                 boolean healTick = false;
+                if (!targetEntity.isAlive()) {
+                    return;
+                }
 
                 if (targetEntity instanceof TNTEntity) {
                     TNTEntity tnt = (TNTEntity) targetEntity;
@@ -114,7 +126,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                         if (!clientSide) {
                             e.setFuse(task.getTick() == 0 ? e.getFuse() - e.tickCount + 2 : e.getFuse() + 2);
                         }
-                    }, e -> e.getFuse() < 80)) {
+                    }, e -> task.getTick() == 0 || e.getFuse() < 80)) {
                         CrazyDiamondHeal.heal(world, tnt, tnt, 
                                 (e, clientSide) -> {
                                     if (!clientSide) {
@@ -124,7 +136,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                                         }
                                         BlockPos blockPos = e.blockPosition();
                                         e.remove();
-//                                        CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos, tntBlock.defaultBlockState());
+                                        replaceOrDropBlock(world, blockPos, tntBlock.defaultBlockState());
                                     }
                                 }, e -> true);
                     }
@@ -137,10 +149,10 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                                 (e, clientSide) -> {
                                     if (!clientSide && standEntity.getRandom().nextFloat() < 0.1F) {
                                         BlockPos blockPos = e.blockPosition();
-//                                        CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(0, 2, 0), Blocks.CARVED_PUMPKIN.defaultBlockState());
-//                                        CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos, Blocks.SNOW_BLOCK.defaultBlockState());
-//                                        CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(0, 1, 0), Blocks.SNOW_BLOCK.defaultBlockState());
                                         e.remove();
+                                        replaceOrDropBlock(world, blockPos.offset(0, 2, 0), Blocks.CARVED_PUMPKIN.defaultBlockState());
+                                        replaceOrDropBlock(world, blockPos, Blocks.SNOW_BLOCK.defaultBlockState());
+                                        replaceOrDropBlock(world, blockPos.offset(0, 1, 0), Blocks.SNOW_BLOCK.defaultBlockState());
                                     }
                                 }, e -> true);
                     }
@@ -154,12 +166,12 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                                     (e, clientSide) -> {
                                         if (!clientSide && standEntity.getRandom().nextFloat() < 0.05F) {
                                             BlockPos blockPos = e.blockPosition();
-//                                            CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos, Blocks.IRON_BLOCK.defaultBlockState());
-//                                            CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(0, 2, 0), Blocks.CARVED_PUMPKIN.defaultBlockState());
-//                                            CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(0, 1, 0), Blocks.IRON_BLOCK.defaultBlockState());
-//                                            CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(1, 1, 0), Blocks.IRON_BLOCK.defaultBlockState());
-//                                            CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(-1, 1, 0), Blocks.IRON_BLOCK.defaultBlockState());
                                             e.remove();
+                                            replaceOrDropBlock(world, blockPos, Blocks.IRON_BLOCK.defaultBlockState());
+                                            replaceOrDropBlock(world, blockPos.offset(0, 2, 0), Blocks.CARVED_PUMPKIN.defaultBlockState());
+                                            replaceOrDropBlock(world, blockPos.offset(0, 1, 0), Blocks.IRON_BLOCK.defaultBlockState());
+                                            replaceOrDropBlock(world, blockPos.offset(1, 1, 0), Blocks.IRON_BLOCK.defaultBlockState());
+                                            replaceOrDropBlock(world, blockPos.offset(-1, 1, 0), Blocks.IRON_BLOCK.defaultBlockState());
                                         }
                                     }, e -> true);
                         }
@@ -173,33 +185,32 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                             if (!CrazyDiamondHeal.heal(world, wither, wither, 
                                     (e, clientSide) -> {
                                         if (!clientSide) {
-                                            e.setHealth(e.getHealth() - 5);
-                                            e.setInvulnerableTicks(spawnTicks + 5);
+                                            e.setInvulnerableTicks(Math.min(spawnTicks + 5, 220));
                                         }
                                     }, 
-                                    e -> spawnTicks >= 215 || e.getHealth() <= 5)) {
+                                    e -> spawnTicks < 215)) {
                                 CrazyDiamondHeal.heal(world, targetEntity, targetEntity, 
                                         (w, clientSide) -> {
-                                            if (!clientSide) {
+                                            if (!clientSide && standEntity.getRandom().nextFloat() < 0.005F) {
                                                 BlockPos blockPos = w.blockPosition();
-//                                                CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(0, 2, 0), Blocks.WITHER_SKELETON_SKULL.defaultBlockState());
-//                                                CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(1, 2, 0), Blocks.WITHER_SKELETON_SKULL.defaultBlockState());
-//                                                CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(-1, 2, 0), Blocks.WITHER_SKELETON_SKULL.defaultBlockState());
-//                                                CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos, Blocks.SOUL_SAND.defaultBlockState());
-//                                                CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(0, 1, 0), Blocks.SOUL_SAND.defaultBlockState());
-//                                                CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(1, 1, 0), Blocks.SOUL_SAND.defaultBlockState());
-//                                                CrazyDiamondRestoreTerrain.replaceBlock(world, blockPos.offset(-1, 1, 0), Blocks.SOUL_SAND.defaultBlockState());
                                                 w.remove();
+                                                replaceOrDropBlock(world, blockPos.offset(0, 2, 0), Blocks.WITHER_SKELETON_SKULL.defaultBlockState());
+                                                replaceOrDropBlock(world, blockPos.offset(1, 2, 0), Blocks.WITHER_SKELETON_SKULL.defaultBlockState());
+                                                replaceOrDropBlock(world, blockPos.offset(-1, 2, 0), Blocks.WITHER_SKELETON_SKULL.defaultBlockState());
+                                                replaceOrDropBlock(world, blockPos, Blocks.SOUL_SAND.defaultBlockState());
+                                                replaceOrDropBlock(world, blockPos.offset(0, 1, 0), Blocks.SOUL_SAND.defaultBlockState());
+                                                replaceOrDropBlock(world, blockPos.offset(1, 1, 0), Blocks.SOUL_SAND.defaultBlockState());
+                                                replaceOrDropBlock(world, blockPos.offset(-1, 1, 0), Blocks.SOUL_SAND.defaultBlockState());
                                             }
                                         }, e -> true);
                             }
                         }
                         healTick = true;
                     }
-                    
-                    if (!world.isClientSide()) {
-                        barrageVisualsTick(standEntity, healTick, targetEntity != null ? targetEntity.getBoundingBox().getCenter() : null);
-                    }
+                }
+                
+                if (!world.isClientSide()) {
+                    barrageVisualsTick(standEntity, healTick, targetEntity != null ? targetEntity.getBoundingBox().getCenter() : null);
                 }
             }
             break;
@@ -227,7 +238,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                 if (ModActions.CRAZY_DIAMOND_REPAIR.get().repairTick(userPower.getUser(), heldItem, task.getTick()) == 0
                         && userPower.getUser() instanceof PlayerEntity && task.getTick() % 10 == 9) {
                     PlayerEntity player = (PlayerEntity) userPower.getUser();
-                    convertTo(heldItem, world, null, standEntity.getRandom()).ifPresent(itemsAndCount -> {
+                    convertTo(heldItem, world, null, standEntity.getRandom(), true).ifPresent(itemsAndCount -> {
                         boolean gaveIngredients = false;
                         for (ItemStack ingredient : itemsAndCount.getLeft()) {
                             if (!ingredient.isEmpty()) {
@@ -247,10 +258,24 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
             break;
         }
     }
-    
+
+    private static final Optional<Pair<ItemStack[], Integer>> EXISTS = Optional.of(Pair.of(new ItemStack[0], 0));
     private Optional<Pair<ItemStack[], Integer>> convertTo(ItemStack item, World world, 
-            @Nullable Predicate<IRecipe<?>> additionalCondition, Random random) {
+            @Nullable Predicate<IRecipe<?>> additionalCondition, Random random, boolean createItems) {
         if (item.isEmpty()) return Optional.empty();
+        
+        if (item.getItem() == Items.ENCHANTED_BOOK)     return createItems ? Optional.of(Pair.of(new ItemStack[]{new ItemStack(Items.BOOK)}, 1)) : EXISTS;
+        if (item.getItem() == Items.FILLED_MAP)         return createItems ? Optional.of(Pair.of(new ItemStack[]{new ItemStack(Items.MAP)}, 1))  : EXISTS;
+        
+        if (item.getItem() == Items.WRITTEN_BOOK) {
+            if (createItems) {
+                ItemStack writableBook = new ItemStack(Items.WRITABLE_BOOK);
+                writableBook.setTag(revertBookPagesNBT(item.getTag()));
+                return Optional.of(Pair.of(new ItemStack[]{writableBook}, 1));
+            } else {
+                return EXISTS;
+            }
+        }
 
         // FIXME revert brewing recipes
         return JojoModUtil.groupByPredicatesOrdered(
@@ -262,12 +287,13 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                     list.add(recipe -> recipe instanceof ICraftingRecipe);
                     list.add(recipe -> true);
                 }), recipe -> outputMatches(recipe, item) && !bannedItem(item, world) && (additionalCondition == null || additionalCondition.test(recipe)), false)
-        .values().stream().filter(list -> !list.isEmpty()).findFirst()
-        .flatMap(recipesOfPreferredType -> {
-            IRecipe<?> randomRecipe = recipesOfPreferredType.get(random.nextInt(recipesOfPreferredType.size()));
-            ItemStack[] ingredients = getIngredients(randomRecipe);
-            return Optional.of(Pair.of(ingredients, randomRecipe.getResultItem().getCount()));
-        });
+                .values().stream().filter(list -> !list.isEmpty()).findFirst()
+                .flatMap(recipesOfPreferredType -> {
+                    IRecipe<?> randomRecipe = recipesOfPreferredType.get(random.nextInt(recipesOfPreferredType.size()));
+                    ItemStack[] ingredients = getIngredients(randomRecipe);
+                    if (ingredients.length == 0) return Optional.empty();
+                    return Optional.of(Pair.of(ingredients, randomRecipe.getResultItem().getCount()));
+                });
     }
     
     private boolean outputMatches(IRecipe<?> recipe, ItemStack stack) {
@@ -290,6 +316,45 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
         }
 
         return stacks;
+    }
+    
+    private CompoundNBT revertBookPagesNBT(CompoundNBT signedBookNBT) {
+        CompoundNBT nbt = new CompoundNBT();
+        if (signedBookNBT.contains("pages", JojoModUtil.getNbtId(ListNBT.class))) {
+            ListNBT textPagesClean = new ListNBT();
+            
+            signedBookNBT.getList("pages", JojoModUtil.getNbtId(StringNBT.class)).forEach(pageNBT -> {
+                if (pageNBT.getId() == JojoModUtil.getNbtId(StringNBT.class)) {
+                    ITextComponent text = ITextComponent.Serializer.fromJson(((StringNBT) pageNBT).getAsString());
+                    if (text != null) {
+                        textPagesClean.add(StringNBT.valueOf(text.getString()));
+                    }
+                }
+            });
+            
+            nbt.put("pages", textPagesClean);
+        }
+        return nbt;
+    }
+    
+    private void replaceOrDropBlock(World world, BlockPos blockPos, BlockState newBlockState) {
+        if (!world.isClientSide()) {
+            BlockState currentBlockState = world.getBlockState(blockPos);
+            float hardness = currentBlockState.getDestroySpeed(world, blockPos);
+            if (hardness < 0 || hardness > newBlockState.getDestroySpeed(world, blockPos)) {
+                Item blockItem = newBlockState.getBlock().asItem();
+                if (blockItem != null && blockItem != Items.AIR) {
+                    ItemStack dropAsItem = new ItemStack(blockItem);
+                    Vector3d pos = Vector3d.atCenterOf(blockPos);
+                    ItemEntity itemEntity = new ItemEntity(world, pos.x, pos.y, pos.z, dropAsItem);
+                    world.addFreshEntity(itemEntity);
+                }
+            }
+            else {
+                world.destroyBlock(blockPos, true);
+                world.setBlockAndUpdate(blockPos, newBlockState);
+            }
+        }
     }
     
     @Override
