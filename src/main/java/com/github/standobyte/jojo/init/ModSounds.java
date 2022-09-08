@@ -464,7 +464,6 @@ public class ModSounds {
     
     public static final OstSoundList MAGICIANS_RED_OST = new OstSoundList(new ResourceLocation(JojoMod.MOD_ID, "magicians_red_ost"), SOUNDS);
 
-    // FIXME ! sound files
     public static final RegistryObject<SoundEvent> JOSUKE_CRAZY_DIAMOND = SOUNDS.register("josuke_crazy_diamond", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "josuke_crazy_diamond")));
 
@@ -505,6 +504,9 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_BULLET_SHOT = SOUNDS.register("crazy_diamond_bullet_shot", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_bullet_shot")));
+    
+    public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_BLOOD_CUTTER_SHOT = SOUNDS.register("crazy_diamond_blood_cutter_shot", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_blood_cutter_shot")));
     
     public static final OstSoundList CRAZY_DIAMOND_OST = new OstSoundList(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_ost"), SOUNDS);
 }

@@ -59,6 +59,7 @@ public class FireworkInsideEntity extends FireworkRocketEntity {
             if (entityInsideOf == null) {
                 entityInsideOf = ((ServerWorld) level).getEntity(entityInsideOfUUID);
             }
+            // FIXME dismount prevention
             if (entityInsideOf != null && !this.is(entityInsideOf.getVehicle())) {
                 entityInsideOf.startRiding(this, true);
             }

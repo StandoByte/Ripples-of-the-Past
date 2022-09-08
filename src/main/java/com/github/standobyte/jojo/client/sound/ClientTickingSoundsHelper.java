@@ -119,6 +119,16 @@ public abstract class ClientTickingSoundsHelper {
                 e -> power.getHeldAction(true) != action));
     }
     
+    public static void playEntitySound(Entity entity, SoundEvent sound, float volume, float pitch, boolean looping) {
+        Minecraft.getInstance().getSoundManager().play(new LoopingEntityTickableSound(sound, entity.getSoundSource(), volume, pitch, looping, entity));
+    }
+    
+    public static <T extends Entity> void playStoppableEntitySound(T entity, SoundEvent sound, 
+            float volume, float pitch, boolean looping, Predicate<T> stopCondition) {
+        Minecraft.getInstance().getSoundManager().play(new StoppableEntityTickableSound<T>(sound, entity.getSoundSource(), 
+                volume, pitch, looping, entity, stopCondition));
+    }
+    
     public static void playHamonSparksSound(Entity entity, float volume, float pitch) {
         Minecraft.getInstance().getSoundManager().play(new HamonSparksSound(entity, volume, pitch));
     }

@@ -15,15 +15,16 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
+import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModActions;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -31,7 +32,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.item.TNTEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.AbstractCookingRecipe;
 import net.minecraft.item.crafting.BlastingRecipe;
@@ -56,18 +56,19 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
     public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, IStandPower standPower) {
         switch (target.getType()) {
         case BLOCK:
-            if (standPower.getResolveLevel() >= 2) {
-                BlockPos blockPos = target.getBlockPos();
-                BlockState blockState = user.level.getBlockState(blockPos);
-                ItemStack blockItem = new ItemStack(blockState.getBlock().asItem());
-                return ActionConditionResult.noMessage(convertTo(blockItem, user.level, recipe -> {
-                    ItemStack[] ingredients = getIngredients(recipe);
-                    return ingredients.length == 1 && !ingredients[0].isEmpty() && ingredients[0].getItem() instanceof BlockItem;
-                }, user.getRandom()).isPresent());
-            }
+//            if (standPower.getResolveLevel() >= 2) {
+//                BlockPos blockPos = target.getBlockPos();
+//                BlockState blockState = user.level.getBlockState(blockPos);
+//                ItemStack blockItem = new ItemStack(blockState.getBlock().asItem());
+//                return ActionConditionResult.noMessage(convertTo(blockItem, user.level, recipe -> {
+//                    ItemStack[] ingredients = getIngredients(recipe);
+//                    return ingredients.length == 1 && !ingredients[0].isEmpty() && ingredients[0].getItem() instanceof BlockItem;
+//                }, user.getRandom()).isPresent());
+//            }
             return ActionConditionResult.NEGATIVE;
         case ENTITY:
             Entity targetEntity = target.getEntity();
+            
             return standPower.getResolveLevel() >= 3 && (
                     targetEntity instanceof TNTEntity
                     || targetEntity.getType() == EntityType.SNOW_GOLEM ||
@@ -78,6 +79,14 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
         default:
             return ActionConditionResult.POSITIVE;
         }
+    }
+    
+    @Override
+    public ActionConditionResult checkStandTarget(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
+        if (target.getEntity() instanceof TNTEntity) {
+            return ActionConditionResult.POSITIVE;
+        }
+        return super.checkStandTarget(target, standEntity, standPower);
     }
 
     @Override
@@ -90,7 +99,6 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
         return super.checkSpecificConditions(user, power, target);
     }
 
-    // FIXME ! (prev state) CD restore sound
     @Override
     public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         ActionTarget target = task.getTarget();
@@ -101,7 +109,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
 
                 if (targetEntity instanceof TNTEntity) {
                     TNTEntity tnt = (TNTEntity) targetEntity;
-                    if (CrazyDiamondHeal.heal(world, tnt, tnt, (e, clientSide) -> {
+                    if (!CrazyDiamondHeal.heal(world, tnt, tnt, (e, clientSide) -> {
                         if (!clientSide) {
                             e.setFuse(task.getTick() == 0 ? e.getFuse() - e.tickCount + 2 : e.getFuse() + 2);
                         }
@@ -123,7 +131,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                 }
 
                 else if (targetEntity.getType() == EntityType.SNOW_GOLEM) {
-                    if (CrazyDiamondHeal.healLivingEntity(world, (LivingEntity) targetEntity)) {
+                    if (!CrazyDiamondHeal.healLivingEntity(world, (LivingEntity) targetEntity)) {
                         CrazyDiamondHeal.heal(world, targetEntity, targetEntity, 
                                 (e, clientSide) -> {
                                     if (!clientSide && standEntity.getRandom().nextFloat() < 0.1F) {
@@ -140,7 +148,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
 
                 else if (userPower.getResolveLevel() >= 4) {
                     if (targetEntity.getType() == EntityType.IRON_GOLEM) {
-                        if (CrazyDiamondHeal.healLivingEntity(world, (LivingEntity) targetEntity)) {
+                        if (!CrazyDiamondHeal.healLivingEntity(world, (LivingEntity) targetEntity)) {
                             CrazyDiamondHeal.heal(world, targetEntity, targetEntity, 
                                     (e, clientSide) -> {
                                         if (!clientSide && standEntity.getRandom().nextFloat() < 0.05F) {
@@ -161,7 +169,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                         WitherEntity wither = (WitherEntity) targetEntity;
                         int spawnTicks = wither.getInvulnerableTicks();
                         if (spawnTicks > 0) {
-                            if (CrazyDiamondHeal.heal(world, wither, wither, 
+                            if (!CrazyDiamondHeal.heal(world, wither, wither, 
                                     (e, clientSide) -> {
                                         if (!clientSide) {
                                             e.setHealth(e.getHealth() - 5);
@@ -189,24 +197,24 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                 }
             }
             break;
-        case BLOCK:
-            BlockPos blockPos = target.getBlockPos();
-            if (!world.isClientSide()) {
-                BlockState blockState = world.getBlockState(blockPos);
-                ItemStack blockItem = new ItemStack(blockState.getBlock().asItem());
-                convertTo(blockItem, world, recipe -> {
-                    ItemStack[] ingredients = getIngredients(recipe);
-                    return ingredients.length == 1 && !ingredients[0].isEmpty() && ingredients[0].getItem() instanceof BlockItem
-                            && ingredients[0].getCount() == recipe.getResultItem().getCount();
-                }, standEntity.getRandom()).ifPresent(oneItemArray -> {
-                    BlockItem item = (BlockItem) oneItemArray.getLeft()[0].getItem();
-                    world.setBlockAndUpdate(blockPos, item.getBlock().defaultBlockState());
-                });
-            }
-            else {
-                CrazyDiamondRestoreTerrain.addParticlesAroundBlock(world, blockPos, standEntity.getRandom());
-            }
-            break;
+//        case BLOCK:
+//            BlockPos blockPos = target.getBlockPos();
+//            if (!world.isClientSide()) {
+//                BlockState blockState = world.getBlockState(blockPos);
+//                ItemStack blockItem = new ItemStack(blockState.getBlock().asItem());
+//                convertTo(blockItem, world, recipe -> {
+//                    ItemStack[] ingredients = getIngredients(recipe);
+//                    return ingredients.length == 1 && !ingredients[0].isEmpty() && ingredients[0].getItem() instanceof BlockItem
+//                            && ingredients[0].getCount() == recipe.getResultItem().getCount();
+//                }, standEntity.getRandom()).ifPresent(oneItemArray -> {
+//                    BlockItem item = (BlockItem) oneItemArray.getLeft()[0].getItem();
+//                    world.setBlockAndUpdate(blockPos, item.getBlock().defaultBlockState());
+//                });
+//            }
+//            else {
+//                CrazyDiamondRestoreTerrain.addParticlesAroundBlock(world, blockPos, standEntity.getRandom());
+//            }
+//            break;
         default:
             if (!world.isClientSide()) {
                 ItemStack heldItem = userPower.getUser().getOffhandItem();
@@ -276,5 +284,19 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
         }
 
         return stacks;
+    }
+    
+    @Override
+    public void onPhaseTransition(World world, StandEntity standEntity, IStandPower standPower, 
+            @Nullable Phase from, @Nullable Phase to, StandEntityTask task, int nextPhaseTicks) {
+        if (world.isClientSide()) {
+            if (to == Phase.PERFORM) {
+                ClientTickingSoundsHelper.playStandEntityCancelableActionSound(standEntity, 
+                        ModSounds.CRAZY_DIAMOND_FIX_LOOP.get(), this, Phase.PERFORM, 1.0F, 1.0F, true);
+            }
+            else if (from == Phase.PERFORM) {
+                standEntity.playSound(ModSounds.CRAZY_DIAMOND_FIX_ENDED.get(), 1.0F, 1.0F, ClientUtil.getClientPlayer());
+            }
+        }
     }
 }

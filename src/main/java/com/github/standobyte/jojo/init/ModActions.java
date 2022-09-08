@@ -485,7 +485,7 @@ public class ModActions {
                     .punchSound(ModSounds.CRAZY_DIAMOND_PUNCH_LIGHT)
                     ));
     
-    public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_BARRAGE = ACTIONS.register("crazy_diamond_barrage", 
+    public static final RegistryObject<StandEntityMeleeBarrage> CRAZY_DIAMOND_BARRAGE = ACTIONS.register("crazy_diamond_barrage", 
             () -> new StandEntityMeleeBarrage(new StandEntityMeleeBarrage.Builder()
                     .barrageHitSound(ModSounds.CRAZY_DIAMOND_PUNCH_BARRAGE)
                     .standSound(ModSounds.CRAZY_DIAMOND_DORARARA)));
@@ -518,9 +518,9 @@ public class ModActions {
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_BLOOD_CUTTER = ACTIONS.register("crazy_diamond_blood_cutter", 
-            () -> new CrazyDiamondBloodCutter(new StandEntityAction.Builder().standWindupDuration(5).cooldown(200)
+            () -> new CrazyDiamondBloodCutter(new StandEntityAction.Builder().standWindupDuration(5).cooldown(300)
                     .resolveLevelToUnlock(4)
-                    .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_FIX_STARTED) /*FIXME ! (blood cutter) shot sound*/
+                    .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_FIX_STARTED).standSound(Phase.PERFORM, ModSounds.CRAZY_DIAMOND_BLOOD_CUTTER_SHOT)
                     .standOffsetFromUser(-0.1, -0.5)
                     .partsRequired(StandPart.ARMS)));
     
@@ -530,12 +530,14 @@ public class ModActions {
     public static final RegistryObject<CrazyDiamondRepairItem> CRAZY_DIAMOND_REPAIR = ACTIONS.register("crazy_diamond_repair", 
             () -> new CrazyDiamondRepairItem(new StandEntityAction.Builder().holdType()
                     .resolveLevelToUnlock(0).isTrained()
+                    .standSound(Phase.PERFORM, ModSounds.CRAZY_DIAMOND_FIX_STARTED)
                     .standAutoSummonMode(AutoSummonMode.OFF_ARM)
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_PREVIOUS_STATE = ACTIONS.register("crazy_diamond_previous_state", 
             () -> new CrazyDiamondPreviousState(new StandEntityAction.Builder().holdType()
                     .resolveLevelToUnlock(-1)
+                    .standSound(Phase.PERFORM, ModSounds.CRAZY_DIAMOND_FIX_STARTED)
                     .standAutoSummonMode(AutoSummonMode.OFF_ARM)
                     .partsRequired(StandPart.ARMS)
                     .shiftVariationOf(CRAZY_DIAMOND_REPAIR)));
@@ -545,7 +547,8 @@ public class ModActions {
                     .resolveLevelToUnlock(1)
                     .standSound(Phase.PERFORM, ModSounds.CRAZY_DIAMOND_FIX_STARTED)
                     .standAutoSummonMode(AutoSummonMode.MAIN_ARM)
-                    .partsRequired(StandPart.ARMS)));
+                    .partsRequired(StandPart.ARMS),
+                    CRAZY_DIAMOND_BARRAGE));
     
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_RESTORE_TERRAIN = ACTIONS.register("crazy_diamond_restore_terrain", 
             () -> new CrazyDiamondRestoreTerrain(new StandEntityAction.Builder().holdType()
@@ -563,6 +566,7 @@ public class ModActions {
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_BLOCK_ANCHOR_MAKE = ACTIONS.register("crazy_diamond_anchor_make", 
             () -> new CrazyDiamondBlockCheckpointMake(new StandEntityAction.Builder().standWindupDuration(10).standRecoveryTicks(5)
                     .resolveLevelToUnlock(3)
+                    .standPose(StandPose.HEAVY_ATTACK_COMBO)
                     .partsRequired(StandPart.ARMS)
                     .shiftVariationOf(CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE)));
     

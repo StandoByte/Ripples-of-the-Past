@@ -150,7 +150,9 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         if (targetTooFar) {
             return conditionMessageContinueHold("target_too_far");
         }
-        return checkTarget(target, user, power);
+        
+        ActionConditionResult targetCheck = checkTarget(target, user, power);
+        return targetCheck;
     }
     
     protected ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, P power) {

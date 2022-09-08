@@ -182,7 +182,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
 
     
 
-    @Nullable   
+    @Nullable
     @Override
     public final Action<P> getAction(ActionType type, int index, boolean shift) {
         List<Action<P>> actions = getActions(type);

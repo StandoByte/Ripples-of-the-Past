@@ -27,7 +27,7 @@ public class TheWorldHeavyPunch extends StandEntityHeavyAttack {
 
     
     
-    public static class TheWorldHeavyPunchInstance extends StandEntityPunch {
+    public static class TheWorldHeavyPunchInstance extends HeavyPunchInstance {
 
         public TheWorldHeavyPunchInstance(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
             super(stand, target, dmgSource);
@@ -39,6 +39,7 @@ public class TheWorldHeavyPunch extends StandEntityHeavyAttack {
                 PacketManager.sendToClientsTrackingAndSelf(new EntityTimeResumeSoundPacket(
                         target.getBoundingBox().getCenter(), ModSounds.THE_WORLD_PUNCH_HEAVY_TS_IMPACT.get()), target);
             }
+            super.afterAttack(stand, target, dmgSource, task, hurt, killed);
         }
     }
 }

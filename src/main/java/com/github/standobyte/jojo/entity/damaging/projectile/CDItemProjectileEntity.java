@@ -6,9 +6,11 @@ import java.util.UUID;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondHeal;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModParticles;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.util.damage.DamageUtil;
@@ -31,7 +33,7 @@ import net.minecraft.world.server.ServerWorld;
 
 public class CDItemProjectileEntity extends ModdedProjectileEntity {
     private Block block;
-    private ResourceLocation blockTex = new ResourceLocation("textures/block/glass.png");
+    private ResourceLocation blockTex = null;
     private Optional<Entity> homingTarget = Optional.empty();
     private boolean soundStarted = false;
     
@@ -49,10 +51,6 @@ public class CDItemProjectileEntity extends ModdedProjectileEntity {
     
     public void setBlock(Block block) {
         this.block = block;
-        this.blockTex = block != null ? new ResourceLocation(
-                block.getRegistryName().getNamespace(), 
-                "textures/block/" + block.getRegistryName().getPath() + ".png")
-                : new ResourceLocation("textures/block/glass.png");
     }
     
     public Block getBlock() {
@@ -62,6 +60,11 @@ public class CDItemProjectileEntity extends ModdedProjectileEntity {
     public ResourceLocation getBlockTex() {
         return blockTex;
     }
+    
+    public void setBlockTex(ResourceLocation texture) {
+        this.blockTex = texture;
+    }
+    
 
     @Override
     public int ticksLifespan() {
@@ -75,7 +78,7 @@ public class CDItemProjectileEntity extends ModdedProjectileEntity {
             if (!target.isAlive()) {
                 homingTarget = Optional.empty();
             }
-            else if ((tickCount >= 8 || target.distanceToSqr(this) < 36)) {
+            else if (tickCount >= 8 || target.distanceToSqr(this) < 36) {
                 Vector3d targetPos = target.getBoundingBox().getCenter();
                 Vector3d vecToTarget = targetPos.subtract(this.position());
                 setDeltaMovement(vecToTarget.normalize().scale(this.getDeltaMovement().length()));
@@ -86,6 +89,7 @@ public class CDItemProjectileEntity extends ModdedProjectileEntity {
                 else {
                     if (StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) {
                         CrazyDiamondHeal.addParticlesAround(this);
+                        
                         target.getBoundingBox().clip(position(), targetPos).ifPresent(pos -> {
                             level.addParticle(ModParticles.CD_RESTORATION.get(), 
                                     pos.x + (random.nextDouble() - 0.5) * 0.25, 
@@ -95,8 +99,11 @@ public class CDItemProjectileEntity extends ModdedProjectileEntity {
                         });
                     }
                     if (!soundStarted && StandUtil.shouldHearStands(ClientUtil.getClientPlayer())) {
-                        // FIXME ! (item projectile) CD restore sound
+                        ClientTickingSoundsHelper.playEntitySound(this, ModSounds.CRAZY_DIAMOND_FIX_STARTED.get(), 1, 1, false);
+                        ClientTickingSoundsHelper.playEntitySound(this, ModSounds.CRAZY_DIAMOND_FIX_LOOP.get(), 1, 1, true);
                         
+                        ClientTickingSoundsHelper.playStoppableEntitySound(target, ModSounds.CRAZY_DIAMOND_FIX_STARTED.get(), 1, 1, false, e -> !this.isAlive());
+                        ClientTickingSoundsHelper.playStoppableEntitySound(target, ModSounds.CRAZY_DIAMOND_FIX_LOOP.get(), 1, 1, true, e -> !this.isAlive());
                         soundStarted = true;
                     }
                 }

@@ -98,6 +98,10 @@ public class StandLinkDamageSource extends DamageSource {
     public String getMsgId() {
         return actualSource.getMsgId();
     }
+    
+    public DamageSource getOriginalDamageSource() {
+        return actualSource;
+    }
 
     @Override
     @Nullable

@@ -239,7 +239,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 action.playSound(this, userPower, phase, task);
                 action.onTaskSet(level, this, userPower, phase, task, task.getTicksLeft());
                 action.onPhaseTransition(level, this, userPower, null, phase, task, task.getTicksLeft());
-                setStandPose(action.getStandPose(userPower, this));
+                setStandPose(action.getStandPose(userPower, this, task));
             });
             if (!taskOptional.isPresent()) {
                 if (getStandPose() != StandPose.SUMMON) {
@@ -833,7 +833,33 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             super.actuallyHurt(dmgSource, damageAmount);
         }
     }
-    
+
+    @Override
+    protected float getDamageAfterMagicAbsorb(DamageSource dmgSource, float dmgAmount) {
+        dmgAmount = super.getDamageAfterMagicAbsorb(dmgSource, dmgAmount);
+
+        if (dmgSource.isBypassMagic()) return dmgAmount;
+        LivingEntity user = getUser();
+        if (user == null || user.is(this)) return dmgAmount;
+
+        if (user.hasEffect(Effects.DAMAGE_RESISTANCE) && dmgSource != DamageSource.OUT_OF_WORLD) {
+            int j = 25 - (user.getEffect(Effects.DAMAGE_RESISTANCE).getAmplifier() + 1) * 5;
+            float f = dmgAmount * (float)j;
+            float f1 = dmgAmount;
+            dmgAmount = Math.max(f / 25.0F, 0.0F);
+            float f2 = f1 - dmgAmount;
+            if (f2 > 0.0F && f2 < Float.MAX_VALUE) {
+                if (user instanceof ServerPlayerEntity) {
+                    ((ServerPlayerEntity) user).awardStat(Stats.DAMAGE_RESISTED, Math.round(f2 * 10.0F));
+                } else if (dmgSource.getEntity() instanceof ServerPlayerEntity) {
+                    ((ServerPlayerEntity) dmgSource.getEntity()).awardStat(Stats.DAMAGE_DEALT_RESISTED, Math.round(f2 * 10.0F));
+                }
+            }
+        }
+
+        return dmgAmount;
+    }
+
     public float guardCounter() {
     	return Math.min((isStandBlocking() ? blockDamage : prevBlockDamage) / 5F, 1F);
     }
