@@ -13,6 +13,7 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.BlockItem;
@@ -50,14 +51,21 @@ public class CrazyDiamondBlockCheckpointMove extends StandEntityAction {
                     entity.fallDistance = 0;
                 }
                 else {
-                    if (!world.isClientSide()) {
-                        if (heldItem.getItem() instanceof BlockItem) {
-                            world.setBlockAndUpdate(pos, CrazyDiamondBlockCheckpointMake.getBlockState(heldItem, 
-                                    (BlockItem) heldItem.getItem()));
-                        }
-                        heldItem.shrink(1);
+                    BlockState blockState = null;
+                    if (heldItem.getItem() instanceof BlockItem) {
+                        blockState = CrazyDiamondBlockCheckpointMake.getBlockState(heldItem, (BlockItem) heldItem.getItem());
                     }
-                    else {
+                    boolean willRestore = blockState == null || CrazyDiamondPreviousState.canReplaceBlock(world, pos, blockState);
+                    
+                    if (!world.isClientSide()) {
+                        if (willRestore) {
+                            heldItem.shrink(1);
+                            if (blockState != null) {
+                                world.setBlockAndUpdate(pos, blockState);
+                            }
+                        }
+                    }
+                    else if (willRestore) {
                         CrazyDiamondRestoreTerrain.addParticlesAroundBlock(world, pos, standEntity.getRandom());
                         if (StandUtil.shouldHearStands(ClientUtil.getClientPlayer())) {
                             standEntity.playSound(ModSounds.CRAZY_DIAMOND_FIX_ENDED.get(), 1.0F, 1.0F, ClientUtil.getClientPlayer());

@@ -366,7 +366,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     protected void onTaskStopped(World world, StandEntity standEntity, IStandPower standPower, StandEntityTask task, @Nullable StandEntityAction newAction) {}
     
     @Nullable
-    public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, ActionTarget aimTarget) {
+    public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
         return standEntity.isArmsOnlyMode() ? userOffsetArmsOnly : userOffset;
     }
     

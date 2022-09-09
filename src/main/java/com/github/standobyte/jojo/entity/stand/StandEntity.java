@@ -37,7 +37,6 @@ import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandOffsetPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntityTargetPacket;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -516,14 +515,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 }
                 else if (gradualSummonWeaknessTicks == 0) {
                     removeArmsOnlyModifiers();
-                }
-                if (hasUser()) {
-                    getCurrentTask().ifPresent(task -> {
-                        StandEntityAction action = task.getAction();
-                        if (action != ModActions.STAND_ENTITY_UNSUMMON.get() || !hasEffect(ModEffects.STUN.get())) {
-                            task.setOffsetFromUser(action.getOffsetFromUser(getUserPower(), this, task.getTarget()));
-                        }
-                    });
                 }
             }
         }
@@ -1127,30 +1118,31 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
 
     public void updatePosition() {
+        if (hasEffect(ModEffects.STUN.get())) return;
     	LivingEntity user = getUser();
-    	if (user != null) {
-            if (isFollowingUser()) {
-                StandRelativeOffset relativeOffset = getOffsetFromUser();
-                if (relativeOffset != null) {
-                	Vector3d pos = user.position().add(taskOffset(user, relativeOffset, 
-                			getCurrentTask().map(task -> task.getTarget()).orElse(ActionTarget.EMPTY)));
-                	if (!isArmsOnlyMode()) {
-                		pos = collideNextPos(pos);
-                	}
-                    
-                    setPos(pos.x, pos.y, pos.z);
-                }
-            }
-            else if (isBeingRetracted()) {
-                if (!isCloseToUser()) {
-                    setDeltaMovement(user.position().add(taskOffset(user, getDefaultOffsetFromUser(), ActionTarget.EMPTY)).subtract(position())
-                            .normalize().scale(getAttributeValue(Attributes.MOVEMENT_SPEED)));
-                }
-                else {
-                    setDeltaMovement(Vector3d.ZERO);
-                    setStandFlag(StandFlag.BEING_RETRACTED, false);
-                }
-            }
+    	if (user == null) return;
+    	
+    	if (isFollowingUser()) {
+    	    StandRelativeOffset relativeOffset = getOffsetFromUser();
+    	    if (relativeOffset != null) {
+    	        Vector3d pos = user.position().add(taskOffset(user, relativeOffset, 
+    	                getCurrentTask().map(task -> task.getTarget()).orElse(ActionTarget.EMPTY)));
+    	        if (!isArmsOnlyMode()) {
+    	            pos = collideNextPos(pos);
+    	        }
+
+    	        setPos(pos.x, pos.y, pos.z);
+    	    }
+    	}
+    	else if (isBeingRetracted()) {
+    	    if (!isCloseToUser()) {
+    	        setDeltaMovement(user.position().add(taskOffset(user, getDefaultOffsetFromUser(), ActionTarget.EMPTY)).subtract(position())
+    	                .normalize().scale(getAttributeValue(Attributes.MOVEMENT_SPEED)));
+    	    }
+    	    else {
+    	        setDeltaMovement(Vector3d.ZERO);
+    	        setStandFlag(StandFlag.BEING_RETRACTED, false);
+    	    }
     	}
     }
     
@@ -1213,12 +1205,12 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
     
     @Nullable
-    protected StandRelativeOffset getOffsetFromUser() {
+    public StandRelativeOffset getOffsetFromUser() {
         if (Optional.ofNullable(getCurrentTaskAction()).map(action -> action.noAdheringToUserOffset(userPower, this)).orElse(false)) {
             return null;
         }
         return getCurrentTask().map(task -> {
-            StandRelativeOffset taskOffset = task.getOffsetFromUser();
+            StandRelativeOffset taskOffset = task.getOffsetFromUser(userPower, this);
             if (taskOffset != null) {
                 return taskOffset;
             }
@@ -1244,23 +1236,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 //            }
 //        }
 //    }
-    
-    public void setTaskPosOffset(double left, double forward) {
-        setTaskPosOffset(StandRelativeOffset.noYOffset(left, forward), false);
-    }
-    
-    public void setTaskPosOffset(double left, double y, double forward) {
-        setTaskPosOffset(StandRelativeOffset.withYOffset(left, y, forward), false);
-    }
-    
-    public void setTaskPosOffset(StandRelativeOffset offset, boolean sync) {
-        getCurrentTask().ifPresent(task -> {
-            task.setOffsetFromUser(offset);
-            if (sync && !level.isClientSide()) {
-                PacketManager.sendToClientsTracking(new TrSetStandOffsetPacket(getId(), task.getOffsetFromUser()), this);
-            }
-        });
-    }
 
     private boolean isInsideViewBlockingBlock(Vector3d pos) {
         BlockPos.Mutable blockPos$mutable = new BlockPos.Mutable();
@@ -1294,9 +1269,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             		}
                 	
             		if (task.getAction().transfersPreviousOffset(userPower, this, prevTask)) {
-                		StandRelativeOffset offset = prevTask.getOffsetFromUser();
+                		StandRelativeOffset offset = prevTask.getOffsetFromUser(userPower, this);
                 		if (offset != null) {
-                			task.setOffsetFromUser(offset);
+                			task.overrideOffsetFromUser(offset);
                 		}
             		}
             	});
@@ -1830,18 +1805,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         setTask(unsummon, unsummon.getStandActionTicks(userPower, this), StandEntityAction.Phase.PERFORM, ActionTarget.EMPTY);
     }
     
-    public void tickUnsummonOffset() {
-        if (this.unsummonTicks == 0) {
-            unsummonOffset = getOffsetFromUser();
-        }
-        else {
-            Vector3d offsetVec = unsummonOffset.toRelativeVec();
-            offsetVec = offsetVec.normalize().scale(Math.max(offsetVec.length() - 0.075, 0));
-            unsummonOffset = unsummonOffset.withRelativeVec(offsetVec);
-        }
-        this.setTaskPosOffset(unsummonOffset, false);
-    }
-
     public boolean isBeingRetracted() {
         return getStandFlag(StandFlag.BEING_RETRACTED);
     }
