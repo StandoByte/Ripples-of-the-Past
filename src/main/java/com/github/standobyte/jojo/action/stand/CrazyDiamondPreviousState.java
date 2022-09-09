@@ -337,11 +337,19 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
         return nbt;
     }
     
+    public static boolean canReplaceBlock(World world, BlockPos blockPos, BlockState newBlockState) {
+        BlockState currentBlockState = world.getBlockState(blockPos);
+        float hardness = currentBlockState.getDestroySpeed(world, blockPos);
+        return currentBlockState.getMaterial().isReplaceable() || hardness >= 0 && hardness < newBlockState.getDestroySpeed(world, blockPos);
+    }
+    
     private void replaceOrDropBlock(World world, BlockPos blockPos, BlockState newBlockState) {
         if (!world.isClientSide()) {
-            BlockState currentBlockState = world.getBlockState(blockPos);
-            float hardness = currentBlockState.getDestroySpeed(world, blockPos);
-            if (hardness < 0 || hardness > newBlockState.getDestroySpeed(world, blockPos)) {
+            if (canReplaceBlock(world, blockPos, newBlockState)) {
+                world.destroyBlock(blockPos, true);
+                world.setBlockAndUpdate(blockPos, newBlockState);
+            }
+            else {
                 Item blockItem = newBlockState.getBlock().asItem();
                 if (blockItem != null && blockItem != Items.AIR) {
                     ItemStack dropAsItem = new ItemStack(blockItem);
@@ -349,10 +357,6 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                     ItemEntity itemEntity = new ItemEntity(world, pos.x, pos.y, pos.z, dropAsItem);
                     world.addFreshEntity(itemEntity);
                 }
-            }
-            else {
-                world.destroyBlock(blockPos, true);
-                world.setBlockAndUpdate(blockPos, newBlockState);
             }
         }
     }

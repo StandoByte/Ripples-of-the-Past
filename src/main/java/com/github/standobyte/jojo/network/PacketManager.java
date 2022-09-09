@@ -63,7 +63,6 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket
 import com.github.standobyte.jojo.network.packets.fromserver.TrNoMotionLerpPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrNonStandFlagPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandOffsetPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStaminaPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandEffectPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntityTargetPacket;
@@ -345,11 +344,6 @@ public class PacketManager {
                 TrStandEntityTaskModifierPacket::encode,
                 TrStandEntityTaskModifierPacket::decode,
                 TrStandEntityTaskModifierPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        
-        channel.registerMessage(index++, TrSetStandOffsetPacket.class,
-                TrSetStandOffsetPacket::encode,
-                TrSetStandOffsetPacket::decode,
-                TrSetStandOffsetPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
         channel.registerMessage(index++, UpdateClientCapCachePacket.class,
                 UpdateClientCapCachePacket::encode,

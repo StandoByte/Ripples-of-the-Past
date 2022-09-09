@@ -54,11 +54,11 @@ public class StandRelativeOffset {
         return vec;
     }
     
-    Vector3d toRelativeVec() {
+    public Vector3d toRelativeVec() {
         return new Vector3d(left, y, forward);
     }
     
-    StandRelativeOffset withRelativeVec(Vector3d vec) {
+    public StandRelativeOffset withRelativeVec(Vector3d vec) {
     	return new StandRelativeOffset(vec.x, vec.y, vec.z, this.doYOffset, this.useXRot);
     }
     

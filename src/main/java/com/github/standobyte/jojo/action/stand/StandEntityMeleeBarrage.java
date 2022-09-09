@@ -116,13 +116,14 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
             stand);
         }
     }
-    
+
     @Override
-    public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, ActionTarget target) {
+    public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
         if (standEntity.isArmsOnlyMode()) {
-            return super.getOffsetFromUser(standPower, standEntity, target);
+            return super.getOffsetFromUser(standPower, standEntity, task);
         }
         double maxVariation = standEntity.getAttributeValue(Attributes.MOVEMENT_SPEED) * 1.5 * standEntity.getStaminaCondition();
+        ActionTarget target = task.getTarget();
         Vector3d targetPos = target.getTargetPos(true);
         double offset = 0.5;
         if (targetPos == null) {
@@ -130,7 +131,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
         }
         else {
             LivingEntity user = standEntity.getUser();
-            double backAway = 0.5 + (target.getType() == TargetType.ENTITY ? 
+            double backAway = 1.0 + (target.getType() == TargetType.ENTITY ? 
                     target.getEntity().getBoundingBox().getXsize() / 2
                     : 0.5);
             double offsetToTarget = targetPos.subtract(user.position()).multiply(1, 0, 1).length() - backAway;

@@ -5,10 +5,12 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public final class StandEntityUnsummon extends StandEntityAction {
@@ -28,11 +30,8 @@ public final class StandEntityUnsummon extends StandEntityAction {
                 }
             }
             else {
-                if (standEntity.isArmsOnlyMode()) {
-                    standEntity.setTaskPosOffset(0, 0, 0);
-                }
-                else {
-                    standEntity.tickUnsummonOffset();
+                if (!standEntity.isArmsOnlyMode() && standEntity.unsummonTicks == 0) {
+                    standEntity.unsummonOffset = standEntity.getOffsetFromUser();
                 }
                 standEntity.unsummonTicks++;
             }
@@ -40,6 +39,19 @@ public final class StandEntityUnsummon extends StandEntityAction {
         else {
             standEntity.unsummonTicks = 0;
         }
+    }
+    
+    @Override
+    public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
+        if (!standEntity.isArmsOnlyMode()) {
+            int unsummonDuration = getUnsummonDuration(standEntity);
+            if (unsummonDuration == 0) return super.getOffsetFromUser(standPower, standEntity, task);
+            
+            Vector3d offsetVec = standEntity.unsummonOffset.toRelativeVec();
+            offsetVec = offsetVec.scale(1 - ((double) task.getTick() / (double) unsummonDuration));
+            return standEntity.unsummonOffset.withRelativeVec(offsetVec);
+        }
+        return super.getOffsetFromUser(standPower, standEntity, task);
     }
     
     @Override
@@ -58,10 +70,8 @@ public final class StandEntityUnsummon extends StandEntityAction {
     
     @Override
     protected void onTaskStopped(World world, StandEntity standEntity, IStandPower standPower, StandEntityTask task, @Nullable StandEntityAction newAction) {
-        if (!world.isClientSide()) {
-            standEntity.unsummonTicks = 0;
-            standEntity.unsummonOffset = standEntity.getDefaultOffsetFromUser().copy();
-        }
+        standEntity.unsummonTicks = 0;
+        standEntity.unsummonOffset = standEntity.getDefaultOffsetFromUser().copy();
     }
     
     @Override
