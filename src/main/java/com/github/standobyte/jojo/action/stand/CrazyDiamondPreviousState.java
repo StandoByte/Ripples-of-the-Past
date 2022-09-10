@@ -266,7 +266,8 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
         if (item.isEmpty()) return Optional.empty();
         
         if (item.getItem() == Items.ENCHANTED_BOOK)     return createItems ? Optional.of(Pair.of(new ItemStack[]{new ItemStack(Items.BOOK)}, 1)) : EXISTS;
-        if (item.getItem() == Items.FILLED_MAP)         return createItems ? Optional.of(Pair.of(new ItemStack[]{new ItemStack(Items.MAP)}, 1))  : EXISTS;
+        // FIXME free up the map id
+//        if (item.getItem() == Items.FILLED_MAP)         return createItems ? Optional.of(Pair.of(new ItemStack[]{new ItemStack(Items.MAP)}, 1))  : EXISTS;
         
         if (item.getItem() == Items.WRITTEN_BOOK) {
             if (createItems) {
