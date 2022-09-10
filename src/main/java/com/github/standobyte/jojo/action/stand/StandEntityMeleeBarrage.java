@@ -22,6 +22,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrBarrageHitSoundPa
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -30,7 +31,6 @@ import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
@@ -122,22 +122,12 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
         if (standEntity.isArmsOnlyMode()) {
             return super.getOffsetFromUser(standPower, standEntity, task);
         }
-        double maxVariation = standEntity.getAttributeValue(Attributes.MOVEMENT_SPEED) * 1.5 * standEntity.getStaminaCondition();
-        ActionTarget target = task.getTarget();
-        Vector3d targetPos = target.getTargetPos(true);
-        double offset = 0.5;
-        if (targetPos == null) {
-            return StandRelativeOffset.withXRot(0, Math.min(offset + maxVariation, standEntity.getMaxEffectiveRange()));
-        }
-        else {
-            LivingEntity user = standEntity.getUser();
-            double backAway = 1.0 + (target.getType() == TargetType.ENTITY ? 
-                    target.getEntity().getBoundingBox().getXsize() / 2
-                    : 0.5);
-            double offsetToTarget = targetPos.subtract(user.position()).multiply(1, 0, 1).length() - backAway;
-            offset = MathHelper.clamp(offsetToTarget, offset, offset + maxVariation);
-            return StandRelativeOffset.withXRot(0, offset);
-        }
+        double minOffset = 0.5;
+        double maxOffset = minOffset + standEntity.getAttributeValue(Attributes.MOVEMENT_SPEED) * 1.5 * standEntity.getStaminaCondition();
+        return offsetToTarget(standPower, standEntity, task, 
+                minOffset, maxOffset, 
+                () -> ActionTarget.fromRayTraceResult(JojoModUtil.rayTrace(standPower.getUser(), maxOffset, standEntity::canHarm, 0.25, 0)))
+                .orElse(StandRelativeOffset.withXRot(0, Math.min(maxOffset, standEntity.getMaxEffectiveRange())));
     }
     
     @Override

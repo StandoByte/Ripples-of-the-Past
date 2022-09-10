@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.stand;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -378,6 +379,31 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     @Nullable
     public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
         return standEntity.isArmsOnlyMode() ? userOffsetArmsOnly : userOffset;
+    }
+    
+    protected Optional<StandRelativeOffset> offsetToTarget(IStandPower standPower, StandEntity standEntity, StandEntityTask task, 
+            double minOffset, double maxOffset, @Nullable Supplier<ActionTarget> noTaskTarget) {
+        if (standEntity.isArmsOnlyMode()) {
+            return Optional.empty();
+        }
+        LivingEntity user = standEntity.getUser();
+        ActionTarget target = task.getTarget();
+        
+        if (target.getType() == TargetType.EMPTY && noTaskTarget != null) {
+            target = noTaskTarget.get();
+        }
+        
+        Vector3d targetPos = target.getTargetPos(true);
+        if (targetPos == null) {
+            return Optional.empty();
+        }
+        else {
+            double backAway = 1.0 + (target.getType() == TargetType.ENTITY ? 
+                    target.getEntity().getBoundingBox().getXsize() / 2
+                    : 0.5);
+            double offsetToTarget = targetPos.subtract(user.position()).multiply(1, 0, 1).length() - backAway;
+            return Optional.of(StandRelativeOffset.withXRot(0, MathHelper.clamp(offsetToTarget, minOffset, maxOffset)));
+        }
     }
     
     public boolean transfersPreviousOffset(IStandPower standPower, StandEntity standEntity, StandEntityTask previousTask) {
