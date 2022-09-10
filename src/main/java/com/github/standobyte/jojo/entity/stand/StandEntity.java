@@ -624,34 +624,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return summonPoseRandomByte;
     }
 
-    public static class StandPose {
-        private final String name;
-        public final boolean armsObstructView;
-        
-        public StandPose(String name, boolean armsObstructView) {
-            this.name = name;
-            this.armsObstructView = armsObstructView;
-        }
-        
-        public StandPose(String name) {
-            this(name, false);
-        }
-        
-        @Override
-        public String toString() {
-            return name;
-        }
-        
-        public static final StandPose IDLE = new StandPose("IDLE");
-        public static final StandPose SUMMON = new StandPose("SUMMON");
-        public static final StandPose BLOCK = new StandPose("BLOCK");
-        public static final StandPose LIGHT_ATTACK = new StandPose("LIGHT_ATTACK");
-        public static final StandPose HEAVY_ATTACK = new StandPose("HEAVY_ATTACK");
-        public static final StandPose HEAVY_ATTACK_COMBO = new StandPose("HEAVY_ATTACK_COMBO");
-        public static final StandPose RANGED_ATTACK = new StandPose("RANGED_ATTACK");
-        public static final StandPose BARRAGE = new StandPose("BARRAGE");
-    }
-
 
 
     @Override
@@ -1685,7 +1657,12 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         
         if (canBreakBlock(blockPos, blockState)) {
             LivingEntity user = getUser();
-            if (level.destroyBlock(blockPos, canDropItems && !(user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild), this)) {
+            PlayerEntity playerUser = user instanceof PlayerEntity ? (PlayerEntity) user : null;
+            if (playerUser != null) {
+                blockState.getBlock().playerWillDestroy(level, blockPos, blockState, playerUser);
+            }
+            if (level.destroyBlock(blockPos, canDropItems && (playerUser == null || !playerUser.abilities.instabuild), this)) {
+                blockState.getBlock().destroy(level, blockPos, blockState);
                 return true;
             }
         }

@@ -4,7 +4,7 @@ import com.github.standobyte.jojo.client.model.entity.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.model.entity.stand.StandEntityModel.VisibilityMode;
 import com.github.standobyte.jojo.client.renderer.entity.stand.layer.StandModelLayerRenderer;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
+import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
@@ -230,6 +230,8 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
     
     
     public void renderFirstPersonArms(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, T entity, float partialTick) {
+        if (entity.getStandPose().armsObstructView) return;
+        
         model.setVisibility(entity, VisibilityMode.ARMS_ONLY, false);
         renderFirstPersonArm(HandSide.LEFT, matrixStack, buffer, packedLight, entity, partialTick);
         renderFirstPersonArm(HandSide.RIGHT, matrixStack, buffer, packedLight, entity, partialTick);
