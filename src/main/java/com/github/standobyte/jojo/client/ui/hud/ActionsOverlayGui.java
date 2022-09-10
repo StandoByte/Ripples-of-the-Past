@@ -1123,7 +1123,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 if (action.validateInput()) packet.validateInput(action);
                 PacketManager.sendToServer(packet);
                 ActionTarget actionTarget = ActionTarget.fromRayTraceResult(target);
-                boolean actionWentOff = power.onClickAction(power.getAction(actionType, index, shift), shift, actionTarget);
+                boolean actionWentOff = power.clickAction(power.getAction(actionType, index, shift), shift, actionTarget);
                 return actionWentOff;
             }
         }

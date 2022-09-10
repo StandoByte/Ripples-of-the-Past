@@ -121,10 +121,10 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
 
     @Override
     public boolean summon(LivingEntity user, IStandPower standPower, boolean withoutNameVoiceLine) {
-        return summon(user, standPower, entity -> {}, withoutNameVoiceLine);
+        return summon(user, standPower, entity -> {}, withoutNameVoiceLine, true);
     }
 
-    public boolean summon(LivingEntity user, IStandPower standPower, Consumer<StandEntity> beforeTheSummon, boolean withoutNameVoiceLine) {
+    public boolean summon(LivingEntity user, IStandPower standPower, Consumer<StandEntity> beforeTheSummon, boolean withoutNameVoiceLine, boolean addToWorld) {
         if (!super.summon(user, standPower, withoutNameVoiceLine)) {
             return false;
         }
@@ -133,7 +133,10 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
             standEntity.copyPosition(user);
             standPower.setStandManifestation(standEntity);
             beforeTheSummon.accept(standEntity);
-            user.level.addFreshEntity(standEntity);
+            
+            if (addToWorld) {
+                finalizeStandSummonFromAction(user, standPower, standEntity, true);
+            }
             
             List<Effect> effectsToCopy = standEntity.getEffectsSharedToStand();
             for (Effect effect : effectsToCopy) {
@@ -142,14 +145,22 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
                     standEntity.addEffect(new EffectInstance(userEffectInstance));
                 }
             }
-            
-            standEntity.playStandSummonSound();
-            
-            PacketManager.sendToClientsTrackingAndSelf(new TrSetStandEntityPacket(user.getId(), standEntity.getId()), user);
-            
-            triggerAdvancement(standPower, standPower.getStandManifestation());
         }
         return true;
+    }
+    
+    public void finalizeStandSummonFromAction(LivingEntity user, IStandPower standPower, StandEntity standEntity, boolean addToWorld) {
+        if (!user.level.isClientSide() && !standEntity.isAddedToWorld()) {
+            if (addToWorld) {
+                user.level.addFreshEntity(standEntity);
+                standEntity.playStandSummonSound();
+                PacketManager.sendToClientsTrackingAndSelf(new TrSetStandEntityPacket(user.getId(), standEntity.getId()), user);
+                triggerAdvancement(standPower, standPower.getStandManifestation());
+            }
+            else {
+                forceUnsummon(user, standPower);
+            }
+        }
     }
     
     protected void triggerAdvancement(IStandPower standPower, IStandManifestation stand) {

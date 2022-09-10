@@ -90,6 +90,7 @@ import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.fml.network.PacketDistributor.TargetPoint;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 
+// FIXME barrage clashes cause client logs getting spammed with network exceptions (either the payload is an EmptyByteBuf or "Received invalid discriminator byte" error)
 public class PacketManager {
     private static final String PROTOCOL_VERSION = "1";
     private static SimpleChannel channel;
