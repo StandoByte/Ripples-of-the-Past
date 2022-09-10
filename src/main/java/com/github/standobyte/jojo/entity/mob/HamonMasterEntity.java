@@ -38,7 +38,6 @@ import net.minecraftforge.fml.network.NetworkHooks;
 
 public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser, IEntityAdditionalSpawnData {
     private final INonStandPower hamonPower = new NonStandPower(this);
-    private HamonData hamon;
     @Deprecated
     private boolean iAmDumbForNotUsingFinalizeSpawn; // TODO remove in later versions
     
@@ -90,7 +89,9 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser,
     // FIXME liquid walking
     @Override
     public boolean canStandOnFluid(Fluid fluid) {
-        return hamon.isSkillLearned(HamonSkill.LAVA_WALKING) || hamon.isSkillLearned(HamonSkill.WATER_WALKING) && fluid.is(FluidTags.WATER);
+        return hamonPower.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(hamon -> 
+        hamon.isSkillLearned(HamonSkill.LAVA_WALKING) || hamon.isSkillLearned(HamonSkill.WATER_WALKING) && fluid.is(FluidTags.WATER))
+                .orElse(false);
     }
 
     @Override
@@ -115,7 +116,7 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser,
     
     public void addMasterHamon(INonStandPower power) {
         hamonPower.givePower(ModNonStandPowers.HAMON.get());
-        hamon = hamonPower.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
+        HamonData hamon = hamonPower.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
         hamon.setBreathingLevel(HamonData.MAX_BREATHING_LEVEL);
         hamon.setHamonStatPoints(HamonSkill.HamonStat.STRENGTH, HamonData.MAX_HAMON_POINTS, true, true);
         hamon.setHamonStatPoints(HamonSkill.HamonStat.CONTROL, HamonData.MAX_HAMON_POINTS, true, true);

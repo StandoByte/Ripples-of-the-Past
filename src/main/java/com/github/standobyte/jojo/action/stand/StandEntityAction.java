@@ -164,16 +164,16 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
                 // FIXME !!!! only summon in arms-only mode if the task can actually be set
                 switch (getAutoSummonMode()) {
                 case FULL:
-                    power.getType().summon(user, power, true);
+                    ((EntityStandType<?>) power.getType()).summon(user, power, entity -> {}, true, false);
                     break;
                 case ARMS:
-                    ((EntityStandType<?>) power.getType()).summon(user, power, entity -> entity.setArmsOnlyMode(), true);
+                    ((EntityStandType<?>) power.getType()).summon(user, power, entity -> entity.setArmsOnlyMode(), true, false);
                     break;
                 case MAIN_ARM:
-                    ((EntityStandType<?>) power.getType()).summon(user, power, entity -> entity.setArmsOnlyMode(true, false), true);
+                    ((EntityStandType<?>) power.getType()).summon(user, power, entity -> entity.setArmsOnlyMode(true, false), true, false);
                     break;
                 case OFF_ARM:
-                    ((EntityStandType<?>) power.getType()).summon(user, power, entity -> entity.setArmsOnlyMode(false, true), true);
+                    ((EntityStandType<?>) power.getType()).summon(user, power, entity -> entity.setArmsOnlyMode(false, true), true, false);
                     break;
                 default:
                     break;
@@ -199,6 +199,16 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
                         break;
                     }
                 }
+            }
+        }
+    }
+    
+    @Override
+    public void afterClick(World world, LivingEntity user, IStandPower power, boolean passedRequirements) {
+        if (!world.isClientSide() && power.isActive()) {
+            StandEntity standEntity = (StandEntity) power.getStandManifestation();
+            if (!standEntity.isAddedToWorld()) {
+                ((EntityStandType<?>) power.getType()).finalizeStandSummonFromAction(user, power, standEntity, passedRequirements);
             }
         }
     }

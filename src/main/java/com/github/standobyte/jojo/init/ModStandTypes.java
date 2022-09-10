@@ -189,9 +189,9 @@ public class ModStandTypes {
     
     public static final RegistryObject<StandType<StandStats>> BOY_II_MAN = STANDS.register("boy_ii_man", 
             () -> {
-                StandArrowEntity.EntityPierce.addBehavior(
-                        () -> RockPaperScissorsKidEntity::canTurnFromArrow, 
-                        () -> RockPaperScissorsKidEntity::turnFromArrow);
+//                StandArrowEntity.EntityPierce.addBehavior(
+//                        () -> RockPaperScissorsKidEntity::canTurnFromArrow, 
+//                        () -> RockPaperScissorsKidEntity::turnFromArrow);
                 return new BoyIIManStandType<>(0x749FA5, PART_4_NAME,
                         new StandAction[] {},
                         new StandAction[] {},

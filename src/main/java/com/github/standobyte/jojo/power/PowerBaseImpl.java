@@ -204,7 +204,13 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
     
     @Override
-    public final boolean onClickAction(Action<P> action, boolean shift, ActionTarget target) {
+    public final boolean clickAction(Action<P> action, boolean shift, ActionTarget target) {
+        boolean res = onClickAction(action, shift, target);
+        action.afterClick(user.level, user, getThis(), res);
+        return res;
+    }
+    
+    private boolean onClickAction(Action<P> action, boolean shift, ActionTarget target) {
         if (action == null || getHeldAction() == action) return false;
         boolean wasActive = isActive();
         action.onClick(user.level, user, getThis());

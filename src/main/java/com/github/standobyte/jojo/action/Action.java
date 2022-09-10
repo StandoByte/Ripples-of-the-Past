@@ -232,6 +232,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     public void onClick(World world, LivingEntity user, P power) {}
     
+    public void afterClick(World world, LivingEntity user, P power, boolean passedRequirements) {}
+    
     public ActionTarget targetBeforePerform(World world, LivingEntity user, P power, ActionTarget target) {
         return target;
     }
