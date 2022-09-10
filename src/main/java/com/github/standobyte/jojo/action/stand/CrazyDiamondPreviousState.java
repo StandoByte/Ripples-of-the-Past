@@ -18,6 +18,7 @@ import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -379,5 +380,11 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
     protected boolean barrageVisuals(StandEntity standEntity, IStandPower standPower, StandEntityTask task) {
         return super.barrageVisuals(standEntity, standPower, task)
                 && task.getTarget().getType() == TargetType.ENTITY && checkTarget(task.getTarget(), standPower.getUser(), standPower).isPositive();
+    }
+
+    @Override
+    public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
+        return offsetToTarget(standPower, standEntity, task, 0, standEntity.getMaxEffectiveRange(), null)
+                .orElse(super.getOffsetFromUser(standPower, standEntity, task));
     }
 }

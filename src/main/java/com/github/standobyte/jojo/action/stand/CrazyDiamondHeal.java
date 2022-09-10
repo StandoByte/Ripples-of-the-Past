@@ -13,6 +13,8 @@ import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.IHasHealth;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
+import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -152,11 +154,21 @@ public class CrazyDiamondHeal extends StandEntityAction {
     protected boolean barrageVisuals(StandEntity standEntity, IStandPower standPower, StandEntityTask task) {
         if (!super.barrageVisuals(standEntity, standPower, task)) return false;
         
+        if (standPower.getUser() != null && standPower.getUser().hasEffect(ModEffects.RESOLVE.get())) {
+            return true;
+        }
+        
         ActionTarget target = task.getTarget();
         if (target.getType() == TargetType.ENTITY && target.getEntity() instanceof LivingEntity) {
             LivingEntity targetLiving = (LivingEntity) target.getEntity();
             return targetLiving.getHealth() / targetLiving.getMaxHealth() <= 0.5F;
         }
         return false;
+    }
+
+    @Override
+    public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
+        return offsetToTarget(standPower, standEntity, task, 0, standEntity.getMaxEffectiveRange(), null)
+                .orElse(super.getOffsetFromUser(standPower, standEntity, task));
     }
 }
