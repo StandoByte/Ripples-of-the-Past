@@ -10,25 +10,25 @@ import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-public class TrStandEntityTargetPacket {
+public class TrStandTaskTargetPacket {
     private final int standEntityId;
     private final ActionTarget target;
 
-    public TrStandEntityTargetPacket(int standEntityId, ActionTarget target) {
+    public TrStandTaskTargetPacket(int standEntityId, ActionTarget target) {
         this.standEntityId = standEntityId;
         this.target = target;
     }
 
-    public static void encode(TrStandEntityTargetPacket msg, PacketBuffer buf) {
+    public static void encode(TrStandTaskTargetPacket msg, PacketBuffer buf) {
         buf.writeInt(msg.standEntityId);
         msg.target.writeToBuf(buf);
     }
 
-    public static TrStandEntityTargetPacket decode(PacketBuffer buf) {
-        return new TrStandEntityTargetPacket(buf.readInt(), ActionTarget.readFromBuf(buf, ClientUtil.getClientWorld()));
+    public static TrStandTaskTargetPacket decode(PacketBuffer buf) {
+        return new TrStandTaskTargetPacket(buf.readInt(), ActionTarget.readFromBuf(buf, ClientUtil.getClientWorld()));
     }
 
-    public static void handle(TrStandEntityTargetPacket msg, Supplier<NetworkEvent.Context> ctx) {
+    public static void handle(TrStandTaskTargetPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             Entity entity = ClientUtil.getEntityById(msg.standEntityId);
             if (entity instanceof StandEntity) {

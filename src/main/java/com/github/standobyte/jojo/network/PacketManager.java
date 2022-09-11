@@ -65,8 +65,8 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrNonStandFlagPacke
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStaminaPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandEffectPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntityTargetPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntityTaskModifierPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrStandTaskModifierPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrStandTaskTargetPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrTypeNonStandPowerPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrTypeStandInstancePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCachePacket;
@@ -336,15 +336,15 @@ public class PacketManager {
                 StandCancelManualMovementPacket::decode,
                 StandCancelManualMovementPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.registerMessage(index++, TrStandEntityTargetPacket.class,
-                TrStandEntityTargetPacket::encode,
-                TrStandEntityTargetPacket::decode,
-                TrStandEntityTargetPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        channel.registerMessage(index++, TrStandTaskTargetPacket.class,
+                TrStandTaskTargetPacket::encode,
+                TrStandTaskTargetPacket::decode,
+                TrStandTaskTargetPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.registerMessage(index++, TrStandEntityTaskModifierPacket.class,
-                TrStandEntityTaskModifierPacket::encode,
-                TrStandEntityTaskModifierPacket::decode,
-                TrStandEntityTaskModifierPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        channel.registerMessage(index++, TrStandTaskModifierPacket.class,
+                TrStandTaskModifierPacket::encode,
+                TrStandTaskModifierPacket::decode,
+                TrStandTaskModifierPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
         channel.registerMessage(index++, UpdateClientCapCachePacket.class,
                 UpdateClientCapCachePacket::encode,

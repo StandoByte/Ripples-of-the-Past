@@ -26,6 +26,7 @@ import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
@@ -305,6 +306,10 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     }
     
     public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task, int ticks) {}
+    
+    public void taskWriteAdditional(StandEntityTask task, PacketBuffer buffer) {}
+    public void taskReadAdditional(StandEntityTask task, PacketBuffer buffer) {}
+    public void taskCopyAdditional(StandEntityTask task, StandEntityTask sourceTask) {}
     
     public void playSound(StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task) {
         SoundEvent sound = getSound(standEntity, standPower, phase, task);

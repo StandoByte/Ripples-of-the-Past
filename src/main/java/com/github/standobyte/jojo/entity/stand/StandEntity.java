@@ -15,6 +15,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.action.stand.IHasStandPunch;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.action.stand.punch.IPunch;
@@ -37,7 +38,7 @@ import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntityTargetPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrStandTaskTargetPacket;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
@@ -238,7 +239,6 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 StandEntityAction.Phase phase = task.getPhase();
                 action.playSound(this, userPower, phase, task);
                 action.onTaskSet(level, this, userPower, phase, task, task.getTicksLeft());
-                action.phaseTransition(level, this, userPower, null, phase, task, task.getTicksLeft());
                 setStandPose(action.getStandPose(userPower, this, task));
             });
             if (!taskOptional.isPresent()) {
@@ -249,6 +249,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             
             lastTask.ifPresent(task -> task.getAction().taskStopped(level, this, userPower, task, taskOptional.map(StandEntityTask::getAction).orElse(null)));
             lastTask = taskOptional;
+            
+            taskOptional.ifPresent(task -> {
+                task.getAction().phaseTransition(level, this, userPower, null, task.getPhase(), task, task.getTicksLeft());
+            });
         }
         else if (SWING_OFF_HAND.equals(dataParameter)) {
             swingingArm = entityData.get(SWING_OFF_HAND) ? Hand.OFF_HAND : Hand.MAIN_HAND;
@@ -765,6 +769,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     protected void actuallyHurt(DamageSource dmgSource, float damageAmount) {
         boolean blockableAngle = canBlockOrParryFromAngle(dmgSource.getSourcePosition());
         if (!isManuallyControlled() && canBlockDamage(dmgSource) && blockableAngle && !getCurrentTask().isPresent() && canStartBlocking()) {
+            // FIXME extend the task if it's already blocking
             setTask(ModActions.STAND_ENTITY_BLOCK.get(), 5, StandEntityAction.Phase.PERFORM, ActionTarget.EMPTY);
         }
         if (transfersDamage() && hasUser()) {
@@ -1524,7 +1529,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 boolean sendTarget = task.setTarget(this, target, userPower);
                 if (!level.isClientSide()) {
                     if (sendTarget) {
-                        PacketManager.sendToClientsTracking(new TrStandEntityTargetPacket(getId(), target), this);
+                        PacketManager.sendToClientsTracking(new TrStandTaskTargetPacket(getId(), target), this);
                     }
                 }
             });
@@ -1658,10 +1663,16 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         if (canBreakBlock(blockPos, blockState)) {
             LivingEntity user = getUser();
             PlayerEntity playerUser = user instanceof PlayerEntity ? (PlayerEntity) user : null;
+            boolean dropItem = canDropItems;
             if (playerUser != null) {
                 blockState.getBlock().playerWillDestroy(level, blockPos, blockState, playerUser);
+                dropItem &= !playerUser.abilities.instabuild;
             }
-            if (level.destroyBlock(blockPos, canDropItems && (playerUser == null || !playerUser.abilities.instabuild), this)) {
+            if (!dropItem) {
+                CrazyDiamondRestoreTerrain.rememberBrokenBlockCreative(level, blockPos, blockState, 
+                        Optional.ofNullable(level.getBlockEntity(blockPos)));
+            }
+            if (level.destroyBlock(blockPos, dropItem, this)) {
                 blockState.getBlock().destroy(level, blockPos, blockState);
                 return true;
             }

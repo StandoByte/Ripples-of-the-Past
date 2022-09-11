@@ -52,7 +52,7 @@ public class CrazyDiamondHeal extends StandEntityAction {
     }
     
     @Override
-    public boolean standCanTick(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
+    public boolean standCanTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         return task.getTarget().getType() == TargetType.ENTITY;
     }
     

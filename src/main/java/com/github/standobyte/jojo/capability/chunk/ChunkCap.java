@@ -17,6 +17,7 @@ import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -37,6 +38,9 @@ public class ChunkCap {
     }
 
     public void saveBrokenBlock(BlockPos pos, BlockState state, Optional<TileEntity> tileEntity, List<ItemStack> drops) {
+        // FIXME remember blocks with inventory
+        if (tileEntity.map(te -> te instanceof IInventory).orElse(false)) return;
+        
         saveBrokenBlock(new PrevBlockInfo(pos, state, drops, false));
     }
     

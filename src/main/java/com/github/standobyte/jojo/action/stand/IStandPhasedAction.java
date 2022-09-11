@@ -14,7 +14,7 @@ public interface IStandPhasedAction {
     
     default void standTickWindup(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
     
-    default boolean standCanTick(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) { return true; }
+    default boolean standCanTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) { return true; }
     
     default void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {}
     

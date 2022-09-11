@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
@@ -18,7 +19,7 @@ import com.github.standobyte.jojo.action.stand.StandEntityActionModifier;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntityTaskModifierPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrStandTaskModifierPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.StacksTHC;
 
@@ -86,7 +87,7 @@ public class StandEntityTask {
     public void addModifierAction(StandEntityActionModifier action, StandEntity standEntity) {
         taskModifiers.add(action);
         if (!standEntity.level.isClientSide()) {
-            PacketManager.sendToClientsTracking(new TrStandEntityTaskModifierPacket(standEntity.getId(), action), standEntity);
+            PacketManager.sendToClientsTracking(new TrStandTaskModifierPacket(standEntity.getId(), action), standEntity);
         }
     }
     
@@ -135,7 +136,7 @@ public class StandEntityTask {
                 }
             }
 
-            if (action.standCanTick(standEntity.level, standEntity, standPower, this)) {
+            if (action.standCanTickPerform(standEntity.level, standEntity, standPower, this)) {
                 action.standTickPerform(standEntity.level, standEntity, standPower, this);
                 if (!standEntity.level.isClientSide()) {
                     standPower.consumeStamina(action.getStaminaCostTicking(standPower));
@@ -271,6 +272,9 @@ public class StandEntityTask {
                 }
                 
                 NetworkUtil.writeCollection(buf, task.taskModifiers, (buffer, action) -> buffer.writeRegistryId(action));
+                
+                JojoMod.LOGGER.debug("wtf");
+                task.action.taskWriteAdditional(task, buf);
             }
         }
 
@@ -284,13 +288,14 @@ public class StandEntityTask {
             if (!(action instanceof StandEntityAction)) {
                 return Optional.empty();
             }
+            StandEntityAction standAction = (StandEntityAction) action;
             
             int ticks = buf.readVarInt();
             StandEntityAction.Phase phase = buf.readEnum(StandEntityAction.Phase.class);
             
             ActionTarget target = ActionTarget.readFromBuf(buf);
             
-            StandEntityTask task = new StandEntityTask((StandEntityAction) action, ticks, phase, false, target);
+            StandEntityTask task = new StandEntityTask(standAction, ticks, phase, false, target);
             
             if (buf.readBoolean()) {
                 StandRelativeOffset offset = StandRelativeOffset.readFromBuf(buf);
@@ -302,6 +307,9 @@ public class StandEntityTask {
                     task.taskModifiers.add((StandEntityActionModifier) modifier);
                 }
             });
+            
+            standAction.taskReadAdditional(task, buf);
+            
             return Optional.of(task);
         }
 
@@ -314,6 +322,8 @@ public class StandEntityTask {
                 taskNew.ticksLeft = task.ticksLeft;
                 taskNew.offsetFromUserOverride = task.offsetFromUserOverride;
                 taskNew.taskModifiers = task.taskModifiers;
+                task.action.taskCopyAdditional(taskNew, task);
+                
                 return Optional.of(taskNew);
             }
             return Optional.empty();
