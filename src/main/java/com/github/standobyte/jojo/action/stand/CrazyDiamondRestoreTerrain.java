@@ -261,8 +261,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
     
     public static boolean blockPosSelectedForRestoration(PrevBlockInfo block, Entity cameraEntity, Vector3d entityLookVec, Vector3d entityEyePos, Vector3i restorationCenter) {
         return block.pos.distManhattan(restorationCenter) <= CrazyDiamondRestoreTerrain.RESTORATION_RANGE
-                && entityLookVec.dot(Vector3d.atCenterOf(block.pos).subtract(entityEyePos).normalize()) >= 0.5
-                ;
+                && entityLookVec.dot(Vector3d.atCenterOf(block.pos).subtract(entityEyePos).normalize()) >= 0.886;
     }
     
     @Override
