@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.action.stand;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,6 +15,8 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.capability.chunk.ChunkCap.PrevBlockInfo;
+import com.github.standobyte.jojo.action.ActionConditionResult;
+import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
@@ -48,6 +51,17 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
 
     public CrazyDiamondRestoreTerrain(StandEntityAction.Builder builder) {
         super(builder);
+    }
+    
+    @Override
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
+        Entity cameraEntity = restorationCenterEntity(user, power);
+        Vector3i eyePosI = eyePos(cameraEntity);
+        if (getBlocksInRange(user.level, user, eyePosI, RESTORATION_RANGE, 
+                block -> blockPosSelectedForRestoration(block, cameraEntity, cameraEntity.getLookAngle(), cameraEntity.getEyePosition(1.0F), eyePosI)).count() == 0) {
+            return ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
+        }
+        return super.checkSpecificConditions(user, power, target);
     }
     
     @Override
@@ -182,12 +196,12 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         }
     }
     
-    public static void rememberBrokenBlockCreative(World world, BlockPos pos, BlockState state) {
+    public static void rememberBrokenBlockCreative(World world, BlockPos pos, BlockState state, Optional<TileEntity> tileEntity) {
         // FIXME !!! (restore terrain) remember blocks broken in creative
         IChunk chunk = world.getChunk(pos);
         if (chunk instanceof Chunk) {
             ((Chunk) chunk).getCapability(ChunkCapProvider.CAPABILITY).ifPresent(cap -> {
-//                cap.saveBrokenBlock(pos, state, tileEntity, drops);
+                cap.saveBrokenBlock(pos, state, tileEntity, Collections.emptyList());
             });
         }
     }

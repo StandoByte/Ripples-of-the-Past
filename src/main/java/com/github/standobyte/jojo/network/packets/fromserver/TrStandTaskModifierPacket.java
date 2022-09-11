@@ -11,25 +11,25 @@ import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-public class TrStandEntityTaskModifierPacket {
+public class TrStandTaskModifierPacket {
     private final int standEntityId;
     private final Action<?> action;
 
-    public TrStandEntityTaskModifierPacket(int standEntityId, Action<?> action) {
+    public TrStandTaskModifierPacket(int standEntityId, Action<?> action) {
         this.standEntityId = standEntityId;
         this.action = action;
     }
 
-    public static void encode(TrStandEntityTaskModifierPacket msg, PacketBuffer buf) {
+    public static void encode(TrStandTaskModifierPacket msg, PacketBuffer buf) {
         buf.writeInt(msg.standEntityId);
         buf.writeRegistryId(msg.action);
     }
 
-    public static TrStandEntityTaskModifierPacket decode(PacketBuffer buf) {
-        return new TrStandEntityTaskModifierPacket(buf.readInt(), buf.readRegistryIdSafe(Action.class));
+    public static TrStandTaskModifierPacket decode(PacketBuffer buf) {
+        return new TrStandTaskModifierPacket(buf.readInt(), buf.readRegistryIdSafe(Action.class));
     }
 
-    public static void handle(TrStandEntityTaskModifierPacket msg, Supplier<NetworkEvent.Context> ctx) {
+    public static void handle(TrStandTaskModifierPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             if (msg.action instanceof StandEntityActionModifier) {
                 Entity entity = ClientUtil.getEntityById(msg.standEntityId);

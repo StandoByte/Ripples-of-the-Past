@@ -164,7 +164,7 @@ public class NetworkUtil {
                 buf.readInt() / 8.0);
     }
     
-    public static <T> void writeOptionally(PacketBuffer buf, T obj, BiConsumer<PacketBuffer, T> write) {
+    public static <T> void writeOptionally(PacketBuffer buf, @Nullable T obj, BiConsumer<PacketBuffer, T> write) {
         buf.writeBoolean(obj != null);
         if (obj != null) {
             write.accept(buf, obj);

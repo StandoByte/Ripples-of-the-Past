@@ -102,6 +102,12 @@ public class HGStringEntity extends OwnerBoundProjectileEntity {
 	public boolean isBodyPart() {
         return true;
     }
+    
+    private static final Vector3d FRONT_OFFSET = new Vector3d(0.0D, 0.0D, 0.375D);
+    @Override
+    protected Vector3d getXRotOffset() {
+        return FRONT_OFFSET;
+    }
 
     @Override
     protected Vector3d originOffset(float yRot, float xRot, double distance) {

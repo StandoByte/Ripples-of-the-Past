@@ -225,7 +225,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             if (!result.isPositive()) {
                 sendMessage(action, result);
             }
-            if (result.isPositive() || !result.shouldStopHeldAction()) {
+            if (result.isPositive()) {
                 if (!user.level.isClientSide()) {
                     action.playVoiceLine(user, getThis(), target, wasActive, shift);
                 }
@@ -311,7 +311,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                 || !action.getTargetRequirement().checkTargetType(targetContainer.get().getType())) {
             targetContainer.set(ActionTarget.EMPTY);
             if (!action.getTargetRequirement().checkTargetType(TargetType.EMPTY)) {
-                return ActionConditionResult.NEGATIVE;
+                return ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
             }
         }
         

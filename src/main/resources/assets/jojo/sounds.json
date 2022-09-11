@@ -493,11 +493,11 @@
   },
   "the_world_punch_light": {
     "subtitle": "jojo.subtitle.stand_attack_light",
-    "sounds": [ "jojo:stand/star_platinum_punch_light" ]
+    "sounds": [ "jojo:stand/the_world_punch_light" ]
   },
   "the_world_punch_barrage": {
     "subtitle": "jojo.subtitle.stand_attack_light",
-    "sounds": [ "jojo:stand/star_platinum_punch_light" ]
+    "sounds": [ "jojo:stand/the_world_punch_light" ]
   },
   "the_world_punch_heavy": {
     "subtitle": "jojo.subtitle.stand_attack_strong",
@@ -644,11 +644,11 @@
   },
   "magicians_red_punch_heavy": {
     "subtitle": "jojo.subtitle.stand_attack_strong",
-    "sounds": [ "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" ]
+    "sounds": [ "jojo:stand/magicians_red_punch_heavy" ]
   },
   "magicians_red_kick_heavy": {
     "subtitle": "jojo.subtitle.stand_attack_strong",
-    "sounds": [ "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" ]
+    "sounds": [ "jojo:stand/magicians_red_punch_heavy" ]
   },
   "magicians_red_fire_ability": {
     "subtitle": "jojo.subtitle.fire_ability",
