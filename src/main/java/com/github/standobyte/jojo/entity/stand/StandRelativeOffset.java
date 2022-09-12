@@ -31,6 +31,10 @@ public class StandRelativeOffset {
         return new StandRelativeOffset(this.left, this.y, this.forward, this.doYOffset, this.useXRot);
     }
     
+    public StandRelativeOffset copyScale(double leftScale, double yScale, double forwardScale) {
+        return new StandRelativeOffset(this.left * leftScale, this.y * yScale, this.forward * forwardScale, this.doYOffset, this.useXRot);
+    }
+    
     private StandRelativeOffset(double left, double y, double forward, boolean doYOffset, boolean useXRot) {
         this.left = left;
         this.forward = forward;
@@ -39,7 +43,7 @@ public class StandRelativeOffset {
         this.useXRot = useXRot;
     }
     
-    Vector3d getAbsoluteVec(StandRelativeOffset offsetDefault, float yRot, float xRot, StandEntity standEntity, LivingEntity user) {
+    public Vector3d getAbsoluteVec(StandRelativeOffset offsetDefault, float yRot, float xRot, StandEntity standEntity, LivingEntity user) {
     	double yOffset = 0;
     	if (standEntity.isArmsOnlyMode() && user.getPose() != Pose.STANDING) {
     		yOffset = (user.getDimensions(user.getPose()).height - user.getDimensions(Pose.STANDING).height) * 0.85F;

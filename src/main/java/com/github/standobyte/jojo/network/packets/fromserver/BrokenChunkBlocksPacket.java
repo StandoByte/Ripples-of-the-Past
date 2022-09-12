@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.network.packets.fromserver;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -20,10 +20,12 @@ import net.minecraft.world.chunk.IChunk;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 public class BrokenChunkBlocksPacket {
-    private final List<PrevBlockInfo> blocks;
+    private final Collection<PrevBlockInfo> blocks;
+    private final boolean reset;
 
-    public BrokenChunkBlocksPacket(List<PrevBlockInfo> blocks) {
+    public BrokenChunkBlocksPacket(Collection<PrevBlockInfo> blocks, boolean reset) {
         this.blocks = blocks;
+        this.reset = reset;
     }
 
     public static void encode(BrokenChunkBlocksPacket msg, PacketBuffer buf) {
@@ -31,11 +33,13 @@ public class BrokenChunkBlocksPacket {
             buffer.writeBlockPos(block.pos);
             buf.writeVarInt(Block.getId(block.state));
         });
+        buf.writeBoolean(msg.reset);
     }
 
     public static BrokenChunkBlocksPacket decode(PacketBuffer buf) {
         return new BrokenChunkBlocksPacket(NetworkUtil.readCollection(buf, buffer -> 
-        PrevBlockInfo.clientInstance(buffer.readBlockPos(), Block.stateById(buf.readVarInt()))));
+        PrevBlockInfo.clientInstance(buffer.readBlockPos(), Block.stateById(buf.readVarInt()))), 
+                buf.readBoolean());
     }
 
     public static void handle(BrokenChunkBlocksPacket msg, Supplier<NetworkEvent.Context> ctx) {
@@ -46,6 +50,9 @@ public class BrokenChunkBlocksPacket {
                     IChunk chunk = world.getChunk(block.pos);
                     if (chunk instanceof Chunk) {
                         ((Chunk) chunk).getCapability(ChunkCapProvider.CAPABILITY).ifPresent(cap -> {
+                            if (msg.reset) {
+                                cap.reset();
+                            }
                             if (block.state != Blocks.AIR.defaultBlockState()) {
                                 cap.saveBrokenBlock(block.pos, block.state, Optional.empty(), Collections.emptyList());
                             }

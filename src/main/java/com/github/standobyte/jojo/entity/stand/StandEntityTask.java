@@ -9,7 +9,6 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
@@ -196,12 +195,13 @@ public class StandEntityTask {
         this.startingTicks += ticks;
     }
     
-    boolean rotateStand(StandEntity standEntity) {
+    void rotateStand(StandEntity standEntity) {
         if (target.getType() != TargetType.EMPTY && !standEntity.isManuallyControlled()) {
             action.rotateStandTowardsTarget(standEntity, target, this);
-    		return true;
         }
-        return false;
+        else {
+            action.rotateStand(standEntity, this);
+        }
     }
     
     public StandEntityAction getAction() {
@@ -273,7 +273,6 @@ public class StandEntityTask {
                 
                 NetworkUtil.writeCollection(buf, task.taskModifiers, (buffer, action) -> buffer.writeRegistryId(action));
                 
-                JojoMod.LOGGER.debug("wtf");
                 task.action.taskWriteAdditional(task, buf);
             }
         }

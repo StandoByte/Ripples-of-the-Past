@@ -11,6 +11,8 @@ import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.entity.stand.StandPose;
+import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
@@ -21,6 +23,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.DrinkHelper;
 import net.minecraft.util.Hand;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -28,9 +31,12 @@ import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class CrazyDiamondRepairItem extends StandEntityAction {
+    public static final StandPose ITEM_FIX_POS = new StandPose("CD_ITEM_FIX");
+    private final StandRelativeOffset userOffsetLeftArm;
 
     public CrazyDiamondRepairItem(StandEntityAction.Builder builder) {
         super(builder);
+        this.userOffsetLeftArm = builder.userOffset.copyScale(-1, 1, 1);
     }
     
     @Override
@@ -141,4 +147,31 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
         }
     }
     
+    @Override
+    public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
+        if (!standEntity.isArmsOnlyMode()) {
+            LivingEntity user = standEntity.getUser();
+            if (user.getMainArm() == HandSide.LEFT) {
+                return userOffsetLeftArm;
+            }
+        }
+        return super.getOffsetFromUser(standPower, standEntity, task);
+    }
+
+    @Override
+    public float yRotForOffset(LivingEntity user, StandEntityTask task) {
+        return user.yBodyRot;
+    }
+    
+    @Override
+    public void rotateStand(StandEntity standEntity, StandEntityTask task) {
+        if (!standEntity.isRemotePositionFixed()) {
+            LivingEntity user = standEntity.getUser();
+            if (user != null) {
+                float rotationOffset = user.getMainArm() == HandSide.RIGHT ? 15 : -15;
+                standEntity.setRot(user.yBodyRot + rotationOffset, user.xRot);
+                standEntity.setYHeadRot(user.yBodyRot + rotationOffset);
+            }
+        }
+    }
 }
