@@ -19,7 +19,6 @@ import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -113,11 +112,8 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
     }
     
     @Override
-    public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, IStandPower standPower) {
-        if (target.getType() == TargetType.BLOCK) {
-            return ActionConditionResult.POSITIVE;
-        }
-        return super.checkTarget(target, user, standPower);
+    protected boolean standKeepsTarget(ActionTarget target) {
+        return true;
     }
     
     

@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.action.stand;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.punch.IPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
@@ -47,7 +46,7 @@ public class CrazyDiamondMisshapeBodyPart extends StandEntityActionModifier {
                 else if (triggerEffect) {
                     LivingEntity targetEntity = StandUtil.getStandUser((LivingEntity) entity);
                     
-                    hitPart.disfigure(targetEntity);
+                    hitPart.misshape(targetEntity);
     
                     IPunch punch = standEntity.getLastPunch();
                     float damageDealt = punch.getType() == TargetType.ENTITY ? ((StandEntityPunch) punch).getDamageDealtToLiving() : 0;
@@ -84,26 +83,24 @@ public class CrazyDiamondMisshapeBodyPart extends StandEntityActionModifier {
             }
         }
         
-        void disfigure(LivingEntity target) {
-            JojoMod.LOGGER.debug(this);
+        void misshape(LivingEntity target) {
             switch (this) {
-                // FIXME !!!!! (combo heavy) player effect
                 // FIXME !!!!! (combo heavy) mob effect
             case HEAD:
                 target.addEffect(new EffectInstance(Effects.CONFUSION, 60, 0, false, false, true));
-                
+                target.addEffect(new EffectInstance(ModEffects.MISSHAPEN_FACE.get(), 200, 0, false, false, true));
                 break;
                 // FIXME !!!!! (combo heavy) player effect
                 // FIXME !!!!! (combo heavy) mob effect
             case TORSO_ARMS:
                 target.addEffect(new EffectInstance(Effects.WEAKNESS, 60, 0, false, false, true));
                 target.addEffect(new EffectInstance(Effects.DIG_SLOWDOWN, 60, 1, false, false, true));
-                
+                target.addEffect(new EffectInstance(ModEffects.MISSHAPEN_ARMS.get(), 200, 0, false, false, true));
                 break;
                 // FIXME !!!!! (combo heavy) mob effect
             case LEGS:
                 target.addEffect(new EffectInstance(Effects.MOVEMENT_SLOWDOWN, 60, 1, false, false, true));
-                target.addEffect(new EffectInstance(ModEffects.DISFIGURED_LEGS.get(), 200, 0, false, false, true));
+                target.addEffect(new EffectInstance(ModEffects.MISSHAPEN_LEGS.get(), 200, 0, false, false, true));
                 break;
             }
         }

@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.action.stand;
 
+import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGGrapplingStringEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
@@ -29,5 +31,10 @@ public class HierophantGreenGrapple extends StandEntityAction {
     @Override
     public boolean standRetractsAfterTask(IStandPower standPower, StandEntity standEntity) {
     	return isShiftVariation();
+    }
+    
+    @Override
+    protected boolean standKeepsTarget(ActionTarget target) {
+        return this.isShiftVariation() && target.getType() == TargetType.ENTITY;
     }
 }

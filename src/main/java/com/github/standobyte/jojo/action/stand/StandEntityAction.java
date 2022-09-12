@@ -143,10 +143,17 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     
     @Override
     protected ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, IStandPower power) {
-        if (target.getType() == TargetType.BLOCK) {
-            return ActionConditionResult.noMessage(getTargetRequirement() != TargetRequirement.NONE && getTargetRequirement().checkTargetType(TargetType.BLOCK));
+        if (target.getType() != TargetType.EMPTY) {
+            if (getTargetRequirement() != TargetRequirement.NONE && getTargetRequirement().checkTargetType(target.getType())) {
+                return ActionConditionResult.POSITIVE;
+            }
+            return ActionConditionResult.noMessage(standKeepsTarget(target));
         }
         return super.checkTarget(target, user, power);
+    }
+    
+    protected boolean standKeepsTarget(ActionTarget target) {
+        return false;
     }
     
     public ActionConditionResult checkStandTarget(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
@@ -347,21 +354,11 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         return barrageVisuals.get() != null;
     }
     
-    @Override
-    public final void phaseTransition(World world, StandEntity standEntity, IStandPower standPower, 
-            @Nullable Phase from, @Nullable Phase to, StandEntityTask task, int nextPhaseTicks) {
-        barrageVisualsPhaseTransition(world, standEntity, standPower, to, task);
-        onPhaseTransition(world, standEntity, standPower, from, to, task, nextPhaseTicks);
-    }
-    
-    private void barrageVisualsPhaseTransition(World world, StandEntity standEntity, IStandPower standPower, @Nullable Phase to, StandEntityTask task) {
+    public void barrageVisualsPhaseTransition(World world, StandEntity standEntity, IStandPower standPower, @Nullable Phase to, StandEntityTask task) {
         if (world.isClientSide()) {
             standEntity.getBarrageHitSoundsHandler().setIsBarraging(to == Phase.PERFORM && barrageVisuals(standEntity, standPower, task));
         }
     }
-    
-    protected void onPhaseTransition(World world, StandEntity standEntity, IStandPower standPower, 
-            @Nullable Phase from, @Nullable Phase to, StandEntityTask task, int nextPhaseTicks) {}
     
     protected void barrageVisualsTick(StandEntity stand, boolean playSound, Vector3d soundPos) {
         if (!stand.level.isClientSide()) {

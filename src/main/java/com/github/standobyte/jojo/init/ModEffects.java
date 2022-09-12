@@ -64,7 +64,13 @@ public class ModEffects {
     public static final RegistryObject<Effect> SPIRIT_VISION = EFFECTS.register("spirit_vision", 
             () -> new StatusEffect(EffectType.BENEFICIAL, 0x8E45FF));
     
-    public static final RegistryObject<Effect> DISFIGURED_LEGS = EFFECTS.register("disfigured_legs", 
+    public static final RegistryObject<Effect> MISSHAPEN_FACE = EFFECTS.register("misshapen_face", 
+            () -> new StatusEffect(EffectType.HARMFUL, 0x808080));
+    
+    public static final RegistryObject<Effect> MISSHAPEN_ARMS = EFFECTS.register("misshapen_arms", 
+            () -> new StatusEffect(EffectType.HARMFUL, 0x808080));
+    
+    public static final RegistryObject<Effect> MISSHAPEN_LEGS = EFFECTS.register("misshapen_legs", 
             () -> new StatusEffect(EffectType.HARMFUL, 0x808080));
     
 //    public static final RegistryObject<Effect> STAND_SEALING = EFFECTS.register("stand_sealing", 

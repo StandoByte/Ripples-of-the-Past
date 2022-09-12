@@ -450,7 +450,7 @@ public class InputHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void invertMovementInput(InputUpdateEvent event) {
-        if (mc.player.hasEffect(ModEffects.DISFIGURED_LEGS.get())) {
+        if (event.getPlayer().hasEffect(ModEffects.MISSHAPEN_LEGS.get())) {
             MovementInput input = event.getMovementInput();
             input.forwardImpulse *= -1;
             input.leftImpulse *= -1;
@@ -466,6 +466,14 @@ public class InputHandler {
             tmp = input.jumping;
             input.jumping = input.shiftKeyDown;
             input.shiftKeyDown = tmp;
+        }
+    }
+    
+    @SubscribeEvent
+    public void invertMouse(ClientTickEvent event) {
+        boolean invert = mc.player != null && mc.player.hasEffect(ModEffects.MISSHAPEN_FACE.get());
+        if (invert ^ mc.options.sensitivity < 0) {
+            mc.options.sensitivity = -mc.options.sensitivity - 2.0 / 3.0;
         }
     }
     

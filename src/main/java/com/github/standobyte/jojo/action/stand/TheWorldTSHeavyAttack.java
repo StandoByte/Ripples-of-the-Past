@@ -199,11 +199,8 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
     }
     
     @Override
-    public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, IStandPower standPower) {
-        if (target.getType() == TargetType.BLOCK) {
-            return ActionConditionResult.POSITIVE;
-        }
-        return super.checkTarget(target, user, standPower);
+    protected boolean standKeepsTarget(ActionTarget target) {
+        return true;
     }
     
     

@@ -48,4 +48,9 @@ public class SilverChariotRapierLaunch extends StandEntityAction {
             }
         }
     }
+    
+    @Override
+    protected boolean standKeepsTarget(ActionTarget target) {
+        return true;
+    }
 }

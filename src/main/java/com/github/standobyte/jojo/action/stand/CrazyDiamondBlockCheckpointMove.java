@@ -63,13 +63,11 @@ public class CrazyDiamondBlockCheckpointMove extends StandEntityAction {
                             if (blockState != null) {
                                 world.setBlockAndUpdate(pos, blockState);
                             }
+                            standEntity.playSound(ModSounds.CRAZY_DIAMOND_FIX_ENDED.get(), 1.0F, 1.0F, null);
                         }
                     }
                     else if (willRestore) {
                         CrazyDiamondRestoreTerrain.addParticlesAroundBlock(world, pos, standEntity.getRandom());
-                        if (StandUtil.shouldHearStands(ClientUtil.getClientPlayer())) {
-                            standEntity.playSound(ModSounds.CRAZY_DIAMOND_FIX_ENDED.get(), 1.0F, 1.0F, ClientUtil.getClientPlayer());
-                        }
                     }
                 }
                 if (world.isClientSide() && StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) {
@@ -80,7 +78,7 @@ public class CrazyDiamondBlockCheckpointMove extends StandEntityAction {
     }
     
     @Override
-    protected void onPhaseTransition(World world, StandEntity standEntity, IStandPower standPower, 
+    public void phaseTransition(World world, StandEntity standEntity, IStandPower standPower, 
             @Nullable Phase from, @Nullable Phase to, StandEntityTask task, int nextPhaseTicks) {
         if (world.isClientSide()) {
             if (to == Phase.PERFORM) {

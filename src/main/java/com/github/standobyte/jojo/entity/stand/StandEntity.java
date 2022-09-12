@@ -251,7 +251,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             lastTask = taskOptional;
             
             taskOptional.ifPresent(task -> {
-                task.getAction().phaseTransition(level, this, userPower, null, task.getPhase(), task, task.getTicksLeft());
+                task.phaseTransition(this, userPower, null, task.getPhase(), task.getTicksLeft());
             });
         }
         else if (SWING_OFF_HAND.equals(dataParameter)) {

@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -141,6 +142,11 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     @Override
     public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
         return StandStatFormulas.getHeavyAttackRecovery(standEntity.getAttackSpeed());
+    }
+    
+    @Override
+    protected boolean standKeepsTarget(ActionTarget target) {
+        return target.getType() == TargetType.ENTITY;
     }
     
     @Override

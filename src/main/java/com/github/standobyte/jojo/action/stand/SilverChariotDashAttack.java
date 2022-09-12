@@ -45,7 +45,8 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
     }
     
     @Override
-    protected void onPhaseTransition(World world, StandEntity standEntity, IStandPower standPower, Phase from, Phase to, StandEntityTask task, int ticks) {
+    public void phaseTransition(World world, StandEntity standEntity, IStandPower standPower, 
+            Phase from, Phase to, StandEntityTask task, int ticks) {
         super.phaseTransition(world, standEntity, standPower, from, to, task, ticks);
         if (to == Phase.PERFORM) {
             if (standEntity.isFollowingUser() && standEntity.getAttackSpeed() < 24) {
@@ -101,6 +102,11 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
                     .knockbackXRot(-90F)
                     .impactSound(null);
         }
+    }
+    
+    @Override
+    protected boolean standKeepsTarget(ActionTarget target) {
+        return false;
     }
     
     @Override
