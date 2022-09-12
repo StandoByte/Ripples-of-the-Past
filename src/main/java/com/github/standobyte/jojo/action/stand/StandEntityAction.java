@@ -386,6 +386,14 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         return standEntity.isArmsOnlyMode() ? userOffsetArmsOnly : userOffset;
     }
     
+    public float yRotForOffset(LivingEntity user, StandEntityTask task) {
+        return user.yRot;
+    }
+    
+    public void rotateStand(StandEntity standEntity, StandEntityTask task) {
+        standEntity.defaultRotation();
+    }
+    
     protected Optional<StandRelativeOffset> offsetToTarget(IStandPower standPower, StandEntity standEntity, StandEntityTask task, 
             double minOffset, double maxOffset, @Nullable Supplier<ActionTarget> noTaskTarget) {
         if (standEntity.isArmsOnlyMode()) {
@@ -519,19 +527,19 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     }
     
     protected abstract static class AbstractBuilder<T extends StandEntityAction.AbstractBuilder<T>> extends StandAction.AbstractBuilder<T> {
-        private int standWindupDuration = 0;
-        private int standPerformDuration = 1;
-        private int standRecoveryDuration = 0;
-        private AutoSummonMode autoSummonMode = AutoSummonMode.FULL;
-        private float userMovementFactor = 0.5F;
-        private StandPose standPose = StandPose.IDLE;
+        protected int standWindupDuration = 0;
+        protected int standPerformDuration = 1;
+        protected int standRecoveryDuration = 0;
+        protected AutoSummonMode autoSummonMode = AutoSummonMode.FULL;
+        protected float userMovementFactor = 0.5F;
+        protected StandPose standPose = StandPose.IDLE;
         @Nullable
-        private StandRelativeOffset userOffset = null;
+        protected StandRelativeOffset userOffset = null;
         @Nullable
-        private StandRelativeOffset userOffsetArmsOnly = null;
-        private boolean enablePhysics = true;
-        private final Map<Phase, Supplier<SoundEvent>> standSounds = new EnumMap<>(Phase.class);
-        private Supplier<StandEntityMeleeBarrage> barrageVisuals = () -> null;
+        protected StandRelativeOffset userOffsetArmsOnly = null;
+        protected boolean enablePhysics = true;
+        protected final Map<Phase, Supplier<SoundEvent>> standSounds = new EnumMap<>(Phase.class);
+        protected Supplier<StandEntityMeleeBarrage> barrageVisuals = () -> null;
 
         @Override
         public T autoSummonStand() {

@@ -986,7 +986,25 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     // FIXME fix too far clockwise body rotation
     @Override
     protected float tickHeadTurn(float p_110146_1_, float p_110146_2_) {
-        return super.tickHeadTurn(p_110146_1_, p_110146_2_);
+        if (this.getCurrentTask().isPresent()) {
+            return 0;
+        }
+        else {
+            return super.tickHeadTurn(p_110146_1_, p_110146_2_);
+        }
+    }
+
+    @Override
+    public void setRot(float yRot, float xRot) {
+        super.setRot(yRot, xRot);
+    }
+    
+    public void defaultRotation() {
+        LivingEntity user = getUser();
+        if (user != null && !isRemotePositionFixed()) {
+            setRot(user.yRot, user.xRot);
+            setYHeadRot(user.yRot);
+        }
     }
     
     @Override
@@ -999,12 +1017,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         
         Optional<StandEntityTask> currentTask = getCurrentTask();
         
-        if (!currentTask.map(task -> task.rotateStand(this)).orElse(false)
-        		&& user != null && !isRemotePositionFixed()) {
-            float yRotSet = user.yRot;
-            setRot(yRotSet, user.xRot);
-            setYHeadRot(yRotSet);
-        }
+        JojoModUtil.ifPresentOrElse(currentTask, 
+                task -> task.rotateStand(this), 
+                () -> defaultRotation());
         
         updatePosition();
         updateStrengthMultipliers();
@@ -1102,8 +1117,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     	if (isFollowingUser()) {
     	    StandRelativeOffset relativeOffset = getOffsetFromUser();
     	    if (relativeOffset != null) {
-    	        Vector3d pos = user.position().add(taskOffset(user, relativeOffset, 
-    	                getCurrentTask().map(task -> task.getTarget()).orElse(ActionTarget.EMPTY)));
+    	        Optional<StandEntityTask> currentTask = getCurrentTask();
+    	        Vector3d pos = user.position().add(taskOffset(user, relativeOffset, currentTask));
     	        if (!isArmsOnlyMode()) {
     	            pos = collideNextPos(pos);
     	        }
@@ -1113,7 +1128,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     	}
     	else if (isBeingRetracted()) {
     	    if (!isCloseToUser()) {
-    	        setDeltaMovement(user.position().add(taskOffset(user, getDefaultOffsetFromUser(), ActionTarget.EMPTY)).subtract(position())
+    	        setDeltaMovement(user.position().add(taskOffset(user, getDefaultOffsetFromUser(), 
+    	                Optional.empty())).subtract(position())
     	                .normalize().scale(getAttributeValue(Attributes.MOVEMENT_SPEED)));
     	    }
     	    else {
@@ -1160,7 +1176,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     	return vector3d;
     }
     
-    private Vector3d taskOffset(LivingEntity user, StandRelativeOffset relativeOffset, ActionTarget target) {
+    private Vector3d taskOffset(LivingEntity user, StandRelativeOffset relativeOffset, Optional<StandEntityTask> currentTask) {
+        ActionTarget target = currentTask.map(StandEntityTask::getTarget).orElse(ActionTarget.EMPTY);
     	float yRot;
     	float xRot;
     	Vector3d targetPos = target.getTargetPos(true);
@@ -1170,7 +1187,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     		xRot = MathUtil.xRotDegFromVec(vecToTarget);
     	}
     	else {
-    		yRot = user.yRot;
+    		yRot = currentTask.map(task -> task.getAction().yRotForOffset(user, task)).orElse(user.yRot);
     		xRot = user.xRot;
     	}
     		
@@ -1178,6 +1195,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     	if (user.isShiftKeyDown()) {
     		offset = new Vector3d(offset.x, 0, offset.z);
     	}
+    	
     	return offset;
     }
     

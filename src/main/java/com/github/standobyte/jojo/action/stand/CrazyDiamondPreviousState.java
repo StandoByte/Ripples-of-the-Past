@@ -49,6 +49,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.Hand;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
@@ -57,9 +58,11 @@ import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class CrazyDiamondPreviousState extends StandEntityAction {
+    private final StandRelativeOffset userOffsetLeftArm;
 
     public CrazyDiamondPreviousState(StandEntityAction.Builder builder) {
         super(builder);
+        this.userOffsetLeftArm = builder.userOffset.copyScale(-1, 1, 1);
     }
 
     @Override
@@ -386,6 +389,28 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
     @Override
     public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
         return offsetToTarget(standPower, standEntity, task, 0, standEntity.getMaxEffectiveRange(), null)
-                .orElse(super.getOffsetFromUser(standPower, standEntity, task));
+                .orElse(!standEntity.isArmsOnlyMode() && standEntity.getUser().getMainArm() == HandSide.LEFT ? 
+                        userOffsetLeftArm
+                        : super.getOffsetFromUser(standPower, standEntity, task));
+    }
+
+    @Override
+    public float yRotForOffset(LivingEntity user, StandEntityTask task) {
+        return task.getTarget().getType() != TargetType.EMPTY ? super.yRotForOffset(user, task) : user.yBodyRot;
+    }
+    
+    @Override
+    public void rotateStand(StandEntity standEntity, StandEntityTask task) {
+        if (task.getTarget().getType() != TargetType.EMPTY) {
+            super.rotateStand(standEntity, task);
+        }
+        else if (!standEntity.isRemotePositionFixed()) {
+            LivingEntity user = standEntity.getUser();
+            if (user != null) {
+                float rotationOffset = user.getMainArm() == HandSide.RIGHT ? 15 : -15;
+                standEntity.setRot(user.yBodyRot + rotationOffset, user.xRot);
+                standEntity.setYHeadRot(user.yBodyRot + rotationOffset);
+            }
+        }
     }
 }

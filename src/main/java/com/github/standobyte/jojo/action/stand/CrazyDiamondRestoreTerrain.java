@@ -102,7 +102,6 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
     }
     
     
-    // FIXME !!! (restore terrain) tile entities (shulker (test for both dupes and item disappearance))
     private static boolean tryReplaceBlock(World world, BlockPos blockPos, BlockState blockState, Set<BlockPos> placedBlocks, 
             boolean isCreative, List<ItemStack> restorationCost, @Nullable IInventory userInventory, List<ItemEntity> itemEntities) {
         BlockState currentBlockState = world.getBlockState(blockPos);
@@ -197,7 +196,6 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
     }
     
     public static void rememberBrokenBlockCreative(World world, BlockPos pos, BlockState state, Optional<TileEntity> tileEntity) {
-        // FIXME !!! (restore terrain) remember blocks broken in creative
         IChunk chunk = world.getChunk(pos);
         if (chunk instanceof Chunk) {
             ((Chunk) chunk).getCapability(ChunkCapProvider.CAPABILITY).ifPresent(cap -> {
