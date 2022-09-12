@@ -103,7 +103,7 @@ public class HGStringEntity extends OwnerBoundProjectileEntity {
         return true;
     }
     
-    private static final Vector3d FRONT_OFFSET = new Vector3d(0.0D, 0.0D, 0.375D);
+    private static final Vector3d FRONT_OFFSET = new Vector3d(0.0D, 0.0D, 0.25D);
     @Override
     protected Vector3d getXRotOffset() {
         return FRONT_OFFSET;

@@ -263,7 +263,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
     }
     
     @Override
-    protected void onPhaseTransition(World world, StandEntity standEntity, IStandPower standPower, 
+    public void phaseTransition(World world, StandEntity standEntity, IStandPower standPower, 
             @Nullable Phase from, @Nullable Phase to, StandEntityTask task, int nextPhaseTicks) {
         if (world.isClientSide()) {
             if (to == Phase.PERFORM) {

@@ -150,7 +150,7 @@ public class StandEntityTask {
 
     public void moveToPhase(@Nullable StandEntityAction.Phase phase, IStandPower standPower, StandEntity standEntity) {
         if (phase == null) {
-            action.phaseTransition(standEntity.level, standEntity, standPower, this.phase, null, this, 0);
+            phaseTransition(standEntity, standPower, this.phase, null, 0);
             standEntity.stopTask();
             return;
         }
@@ -174,11 +174,18 @@ public class StandEntityTask {
         StandEntityAction.Phase prevPhase = this.phase;
         if (setPhase(phase, ticks)) {
             action.playSound(standEntity, standPower, phase, this);
-            action.phaseTransition(standEntity.level, standEntity, standPower, prevPhase, phase, this, ticks);
+            phaseTransition(standEntity, standPower, prevPhase, phase, ticks);
         }
         else {
             moveToPhase(phase.getNextPhase(), standPower, standEntity);
         }
+    }
+    
+    public void phaseTransition(StandEntity standEntity, IStandPower standPower, 
+            StandEntityAction.Phase prevPhase, StandEntityAction.Phase nextPhase, int nextPhaseTicks) {
+        action.barrageVisualsPhaseTransition(standEntity.level, standEntity, standPower, nextPhase, this);
+        action.phaseTransition(standEntity.level, standEntity, standPower, prevPhase, nextPhase, this, nextPhaseTicks);
+        taskModifiers.forEach(modifier -> tickAction(standPower, standEntity, modifier));
     }
     
     private boolean setPhase(StandEntityAction.Phase phase, int ticks) {
