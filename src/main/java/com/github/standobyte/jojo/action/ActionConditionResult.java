@@ -13,7 +13,7 @@ public class ActionConditionResult {
     public static final ActionConditionResult POSITIVE = new ActionConditionResult(true, false, false, null);
     public static final ActionConditionResult NEGATIVE = new ActionConditionResult(false, true, false, null);
     public static final ActionConditionResult NEGATIVE_CONTINUE_HOLD = new ActionConditionResult(false, false, false, null);
-    public static final ActionConditionResult NEGATIVE_HIGHLIGHTED = new ActionConditionResult(false, true, true, null);
+    public static final ActionConditionResult NEGATIVE_QUEUEABLE = new ActionConditionResult(false, true, true, null);
     
     public static ActionConditionResult createNegative(ITextComponent warning) {
         return new ActionConditionResult(false, true, false, warning);

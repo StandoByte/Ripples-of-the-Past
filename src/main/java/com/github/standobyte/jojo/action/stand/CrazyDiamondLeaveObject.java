@@ -154,7 +154,10 @@ public class CrazyDiamondLeaveObject extends StandEntityActionModifier {
     
 
     private static void chorusFruitTeleport(LivingEntity target, LivingEntity user) {
-        if (ModInteractionUtil.isEntityEnderman(target)) return;
+        if (ModInteractionUtil.isEntityEnderman(target)) {
+            target.heal(6);
+            return;
+        }
         double xPrev = target.getX();
         double yPrev = target.getY();
         double zPrev = target.getZ();

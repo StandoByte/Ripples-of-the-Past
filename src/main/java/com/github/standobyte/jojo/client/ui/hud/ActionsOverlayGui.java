@@ -418,17 +418,13 @@ public class ActionsOverlayGui extends AbstractGui {
                     x -= actions.size() * 20 + 2;
                 }
                 int selected = mode.getSelectedSlot(actionType);
+                boolean shift = mc.player.isShiftKeyDown();
                 float alpha = selected < 0 ? 0.5F : 1.0F;
                 // hotbar
                 renderHotbar(matrixStack, x, y, actions.size(), alpha);
-                // selected slot
-                if (selected >= 0) {
-                    blit(matrixStack, x - 1 + selected * 20, y - 1, 0, 22, 24, 22);
-                }
                 // action icons
                 x += 3;
                 y += 3;
-                boolean shift = mc.player.isShiftKeyDown();
                 for (int i = 0; i < actions.size(); i++) {
                     Action<P> action = power.getAction(actionType, i, shift);
                     renderActionIcon(matrixStack, actionType, mode, action, target, x + 20 * i, y, partialTick, i == selected, alpha);
@@ -532,6 +528,18 @@ public class ActionsOverlayGui extends AbstractGui {
                 RenderSystem.enableAlphaTest();
                 RenderSystem.enableTexture();
                 RenderSystem.enableDepthTest();
+            }
+            // selected slot
+            if (isSelected) {
+                mc.getTextureManager().bind(WIDGETS_LOCATION);
+                boolean greenSelection = action.greenSelection(power, result);
+                if (greenSelection) {
+                    RenderSystem.color4f(0.0F, 1.0F, 0.0F, 1.0F);
+                }
+                else {
+                    RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                }
+                blit(matrixStack, x - 4, y - 4, 0, 22, 24, 22);
             }
         }
     }

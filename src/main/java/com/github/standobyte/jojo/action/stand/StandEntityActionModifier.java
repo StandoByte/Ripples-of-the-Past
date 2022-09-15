@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.action.stand;
 
+import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -19,7 +20,12 @@ public abstract class StandEntityActionModifier extends StandAction implements I
             StandEntity stand = (StandEntity) power.getStandManifestation();
             stand.getCurrentTask().ifPresent(task -> task.addModifierAction(this, stand));
         }
-    }   
+    }
+    
+    @Override
+    public boolean greenSelection(IStandPower power, ActionConditionResult conditionCheck) {
+        return conditionCheck.isPositive();
+    }
     
     @Override
     public boolean validateInput() {

@@ -76,7 +76,7 @@ public class StandEntityTask {
         if (target.getType() == TargetType.ENTITY) {
             Entity targetEntity = target.getEntity();
             if (targetEntity == null || targetEntity.is(standEntity)
-                    || !targetEntity.isAlive() && !(targetEntity instanceof LivingEntity && ((LivingEntity) targetEntity).deathTime < 20)) {
+                    || !targetEntity.isAlive() && targetEntity.removed || !(targetEntity instanceof LivingEntity && ((LivingEntity) targetEntity).deathTime < 20)) {
                 return false;
             }
         }
@@ -185,7 +185,7 @@ public class StandEntityTask {
             StandEntityAction.Phase prevPhase, StandEntityAction.Phase nextPhase, int nextPhaseTicks) {
         action.barrageVisualsPhaseTransition(standEntity.level, standEntity, standPower, nextPhase, this);
         action.phaseTransition(standEntity.level, standEntity, standPower, prevPhase, nextPhase, this, nextPhaseTicks);
-        taskModifiers.forEach(modifier -> tickAction(standPower, standEntity, modifier));
+        taskModifiers.forEach(modifier -> modifier.phaseTransition(standEntity.level, standEntity, standPower, prevPhase, nextPhase, this, nextPhaseTicks));
     }
     
     private boolean setPhase(StandEntityAction.Phase phase, int ticks) {
@@ -208,6 +208,8 @@ public class StandEntityTask {
         }
         else {
             action.rotateStand(standEntity, this);
+//            standEntity.yBodyRot = standEntity.yHeadRot;
+//            standEntity.yBodyRotO = standEntity.yHeadRotO;
         }
     }
     

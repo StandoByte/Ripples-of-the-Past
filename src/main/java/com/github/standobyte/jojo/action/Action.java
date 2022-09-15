@@ -338,6 +338,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     public void appendWarnings(List<ITextComponent> warnings, P power, PlayerEntity clientPlayerUser) {}
     
+    public boolean greenSelection(P power, ActionConditionResult conditionCheck) {
+        return false;
+    }
+    
     public String getTranslationKey(P power, ActionTarget target) {
         if (translationKey == null) {
             translationKey = Util.makeDescriptionId("action", this.getRegistryName());

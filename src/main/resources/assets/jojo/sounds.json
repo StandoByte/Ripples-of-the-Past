@@ -684,11 +684,15 @@
   },
   "crazy_diamond_dora": {
     "subtitle": "jojo.subtitle.dora",
-    "sounds": [ "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" ]
+    "sounds": [ "jojo:stand/crazy_diamond_dora", "jojo:stand/crazy_diamond_dora_2" ]
+  },
+  "crazy_diamond_dora_long": {
+    "subtitle": "jojo.subtitle.dora",
+    "sounds": [ "jojo:stand/crazy_diamond_dora_long", "jojo:stand/crazy_diamond_dora_long_2", "jojo:stand/crazy_diamond_dora_long_3" ]
   },
   "crazy_diamond_dorarara": {
     "subtitle": "jojo.subtitle.dorarara",
-    "sounds": [ "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", "jojo:stand/crazy_diamond_dorarara_2" ]
+    "sounds": [ "jojo:stand/crazy_diamond_dorarara", "jojo:stand/crazy_diamond_dorarara_2" ]
   },
   "crazy_diamond_fix_started": {
     "subtitle": "jojo.subtitle.fixed",
