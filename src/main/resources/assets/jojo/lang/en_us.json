@@ -815,7 +815,7 @@
   "jojo.subtitle.red_bind_name": "\"Red Bind!\"",
   
   "entity.jojo.crazy_diamond": "Crazy Diamond",
-  "entity.jojo.cd_item_projectile": "Block Projectile",
+  "entity.jojo.cd_item_projectile": "Block Bullet",
   "entity.jojo.cd_blood_cutter": "Blood Cutter",
   "entity.jojo.eye_of_ender_inside": "Eye of Ender",
   "entity.jojo.firework_inside": "Firework Rocket",
@@ -828,7 +828,8 @@
   "action.jojo.crazy_diamond_misshape_arms": "Misshape arms",
   "action.jojo.crazy_diamond_misshape_legs": "Misshape legs",
   "action.jojo.crazy_diamond_barrage": "Barrage",
-  "action.jojo.crazy_diamond_item_projectile": "Block Projectile",
+  "action.jojo.crazy_diamond_item_projectile": "Block Bullet",
+  "action.jojo.crazy_diamond_item_projectile.homing": "Homing Bullet",
   "action.jojo.crazy_diamond_blood_cutter": "Blood Cutter",
   "action.jojo.crazy_diamond_block": "Block",
   "action.jojo.crazy_diamond_repair": "Repair item",

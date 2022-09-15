@@ -121,4 +121,13 @@ public class CrazyDiamondItemProjectile extends StandEntityAction {
                 lookAngle.dot(e2.getTarget().getBoundingBox().getCenter().subtract(user.getEyePosition(1.0F)).normalize()))
                 * 256));
     }
+    
+    @Override
+    public String getTranslationKey(IStandPower power, ActionTarget target) {
+        String key = super.getTranslationKey(power, target);
+        if (power.getUser() != null && !power.getUser().isShiftKeyDown() && getTarget(targets(power), power.getUser()).isPresent()) {
+            key += ".homing";
+        }
+        return key;
+    }
 }

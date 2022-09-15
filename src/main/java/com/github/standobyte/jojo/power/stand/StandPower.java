@@ -107,7 +107,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     protected void onNewPowerGiven(StandType<?> standType) {
         super.onNewPowerGiven(standType);
         serverPlayerUser.ifPresent(player -> {
-            PacketManager.sendToClientsTrackingAndSelf(new TrTypeStandInstancePacket(player.getId(), getStandInstance().get()), player);
+            PacketManager.sendToClientsTrackingAndSelf(new TrTypeStandInstancePacket(
+                    player.getId(), getStandInstance().get(), resolveCounter.getResolveLevel()), player);
         });
         setStamina(getMaxStamina() * 0.5F);
         if (user != null && (JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).skipStandProgression.get()
@@ -126,7 +127,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             stamina = isUserCreative() ? getMaxStamina() : 0;
         }
         if (usesResolve()) {
-            resolveCounter.onStandAcquired();
+            resolveCounter.onStandAcquired(standType);
         }
         if (standType != null) {
             tier = Math.max(tier, standType.getTier());
@@ -477,6 +478,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     public ActionLearningProgressMap<IStandPower> clearActionLearning() {
         ActionLearningProgressMap<IStandPower> previousMap = actionLearningProgressMap;
         this.actionLearningProgressMap = new ActionLearningProgressMap<>();
+        resolveCounter.clearLevels();
         serverPlayerUser.ifPresent(player -> {
             PacketManager.sendToClient(new StandActionsClearLearningPacket(), player);
         });
@@ -652,7 +654,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         super.syncWithTrackingOrUser(player);
         if (hasPower()) {
             if (user != null) {
-                PacketManager.sendToClient(new TrTypeStandInstancePacket(user.getId(), getStandInstance().get()), player);
+                PacketManager.sendToClient(new TrTypeStandInstancePacket(user.getId(), getStandInstance().get(), resolveCounter.getResolveLevel()), player);
             }
             if (usesStamina()) {
                 PacketManager.sendToClient(new TrStaminaPacket(user.getId(), stamina), player);
