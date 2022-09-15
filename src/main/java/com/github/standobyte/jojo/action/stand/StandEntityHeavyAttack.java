@@ -174,6 +174,11 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         return isCombo ? StandPose.HEAVY_ATTACK_COMBO : super.getStandPose(standPower, standEntity, task);
     }
     
+    @Override
+    public boolean greenSelection(IStandPower power, ActionConditionResult conditionCheck) {
+        return isCombo && conditionCheck.isPositive();
+    }
+    
     
     
     public static class Builder extends StandEntityAction.AbstractBuilder<StandEntityHeavyAttack.Builder> {

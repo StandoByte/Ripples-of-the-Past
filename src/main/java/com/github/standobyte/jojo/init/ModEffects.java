@@ -26,7 +26,6 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
-// FIXME !!!! effect & new action icons
 @EventBusSubscriber(modid = JojoMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public class ModEffects {
     public static final DeferredRegister<Effect> EFFECTS = DeferredRegister.create(ForgeRegistries.POTIONS, JojoMod.MOD_ID);
@@ -66,7 +65,8 @@ public class ModEffects {
     
     public static final RegistryObject<Effect> MISSHAPEN_FACE = EFFECTS.register("misshapen_face", 
             () -> new StatusEffect(EffectType.HARMFUL, 0x808080));
-    
+
+    // FIXME !!!!! (combo heavy) player effect
     public static final RegistryObject<Effect> MISSHAPEN_ARMS = EFFECTS.register("misshapen_arms", 
             () -> new StatusEffect(EffectType.HARMFUL, 0x808080));
     

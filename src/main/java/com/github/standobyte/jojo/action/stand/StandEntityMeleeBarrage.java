@@ -165,6 +165,11 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     }
     
     @Override
+    protected ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, IStandPower power) {
+        return ActionConditionResult.POSITIVE;
+    }
+    
+    @Override
     public ActionConditionResult checkStandTarget(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
         if (target.getType() == TargetType.ENTITY) {
             return ActionConditionResult.noMessage(standEntity.barrageClashOpponent().map(otherStand -> {

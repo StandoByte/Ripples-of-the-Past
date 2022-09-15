@@ -487,6 +487,9 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_DORA = SOUNDS.register("crazy_diamond_dora", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_dora")));
     
+    public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_DORA_LONG = SOUNDS.register("crazy_diamond_dora_long", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_dora_long")));
+    
     public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_DORARARA = SOUNDS.register("crazy_diamond_dorarara", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_dorarara")));
     

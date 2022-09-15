@@ -152,7 +152,6 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     }
 
     private void onPose(T entity, float ticks) {
-        entity.setYBodyRot(entity.yRot);
         idleLoopTickStamp = ticks;
     }
 

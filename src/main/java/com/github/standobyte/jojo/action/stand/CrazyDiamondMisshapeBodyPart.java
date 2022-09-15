@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -24,6 +25,8 @@ public class CrazyDiamondMisshapeBodyPart extends StandEntityActionModifier {
     public CrazyDiamondMisshapeBodyPart(Builder builder) {
         super(builder);
     }
+    
+    // FIXME misshaping body parts mob effects
     
     @Override
     public void standTickRecovery(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
@@ -66,18 +69,18 @@ public class CrazyDiamondMisshapeBodyPart extends StandEntityActionModifier {
         
         // FIXME !!!!! (combo heavy) determine the body part aimed at
         static TargetHitPart getHitTarget(EntityRayTraceResult rayTrace) {
-            return LEGS;
+            return TORSO_ARMS;
         }
 
-        // FIXME !!!!! (combo heavy) determine the body part position
         Vector3d getPartCenter(LivingEntity target) {
             switch (this) {
             case HEAD:
-                return target.getBoundingBox().getCenter().add(0, 1, 0);
+                return new Vector3d(target.getX(), target.getY(1.0), target.getZ());
             case TORSO_ARMS:
-                return target.getBoundingBox().getCenter().add(0, 0.25, 0);
+                return new Vector3d(target.getX(), target.getY(0.7), target.getZ())
+                        .add(new Vector3d(target.getBbWidth() * 0.375F, 0, 0).yRot((180 - target.yRot) * MathUtil.DEG_TO_RAD));
             case LEGS:
-                return target.getBoundingBox().getCenter().add(0, -1, 0);
+                return new Vector3d(target.getX(), target.getY(0.0), target.getZ());
             default:
                 return null;
             }
@@ -85,19 +88,15 @@ public class CrazyDiamondMisshapeBodyPart extends StandEntityActionModifier {
         
         void misshape(LivingEntity target) {
             switch (this) {
-                // FIXME !!!!! (combo heavy) mob effect
             case HEAD:
                 target.addEffect(new EffectInstance(Effects.CONFUSION, 60, 0, false, false, true));
                 target.addEffect(new EffectInstance(ModEffects.MISSHAPEN_FACE.get(), 200, 0, false, false, true));
                 break;
-                // FIXME !!!!! (combo heavy) player effect
-                // FIXME !!!!! (combo heavy) mob effect
             case TORSO_ARMS:
                 target.addEffect(new EffectInstance(Effects.WEAKNESS, 60, 0, false, false, true));
                 target.addEffect(new EffectInstance(Effects.DIG_SLOWDOWN, 60, 1, false, false, true));
                 target.addEffect(new EffectInstance(ModEffects.MISSHAPEN_ARMS.get(), 200, 0, false, false, true));
                 break;
-                // FIXME !!!!! (combo heavy) mob effect
             case LEGS:
                 target.addEffect(new EffectInstance(Effects.MOVEMENT_SLOWDOWN, 60, 1, false, false, true));
                 target.addEffect(new EffectInstance(ModEffects.MISSHAPEN_LEGS.get(), 200, 0, false, false, true));

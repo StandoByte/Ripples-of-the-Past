@@ -32,7 +32,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerChunkProvider;
 
-// FIXME !!! (restore terrain) sync it to players on loading the chunk
 // FIXME !!! (restore terrain) limit the storage
 public class ChunkCap {
     private final Chunk chunk;

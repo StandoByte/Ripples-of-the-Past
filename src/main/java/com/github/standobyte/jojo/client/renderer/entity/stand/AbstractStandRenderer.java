@@ -278,8 +278,6 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
             matrixStack.scale(-1.0F, -1.0F, 1.0F);
             scale(entity, matrixStack, partialTick);
             doRenderFirstPersonArm(model, handSide, matrixStack, vertexBuilder, packedLight, entity, partialTick);
-//            matrixStack.translate(0, -entity.getEyeHeight() / 2, 0);
-//            model.renderArmSwings(entity, matrixStack, vertexBuilder, packedLight, LivingRenderer.getOverlayCoords(entity, 0), 1, 1, 1, 1);
         }
         else {
             float f = handSide == HandSide.RIGHT ? 1.0F : -1.0F;

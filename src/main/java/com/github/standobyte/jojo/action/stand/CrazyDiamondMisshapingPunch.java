@@ -12,6 +12,8 @@ import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.monster.ZombieEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -42,9 +44,14 @@ public class CrazyDiamondMisshapingPunch extends StandEntityHeavyAttack {
     public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task, int ticks) {
         super.onTaskSet(world, standEntity, standPower, phase, task, ticks);
         if (!world.isClientSide() && task.getTarget().getType() == TargetType.ENTITY) {
-            // FIXME !!!!! (combo heavy) determine the body part aimed at 
-            TargetHitPart hitPart = TargetHitPart.getHitTarget(null);
-            task.getAdditionalData().push(TargetHitPart.class, hitPart);
+            Entity target = task.getTarget().getEntity();
+            if (target instanceof PlayerEntity
+                    || target instanceof ZombieEntity
+                    ) {
+                // FIXME !!!!! (combo heavy) determine the body part aimed at 
+                TargetHitPart hitPart = TargetHitPart.getHitTarget(null);
+                task.getAdditionalData().push(TargetHitPart.class, hitPart);
+            }
         }
     }
     

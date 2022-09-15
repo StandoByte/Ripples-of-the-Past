@@ -100,7 +100,11 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
         
         if (newStack != null && user instanceof PlayerEntity) {
             if (taskTicks % 10 == 9) {
-                user.setItemInHand(Hand.OFF_HAND, DrinkHelper.createFilledResult(itemStack, (PlayerEntity) user, newStack, false));
+                PlayerEntity player = (PlayerEntity) user;
+                user.setItemInHand(Hand.OFF_HAND, DrinkHelper.createFilledResult(itemStack, player, newStack, false));
+                if (player.abilities.instabuild) {
+                    itemStack.shrink(1);
+                }
                 damage += 500;
             }
             else {
