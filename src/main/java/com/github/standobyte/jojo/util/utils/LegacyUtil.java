@@ -4,6 +4,8 @@ import java.util.Optional;
 
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.power.IPowerType;
+import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.ResolveLevelsMap;
 import com.github.standobyte.jojo.power.stand.StandInstance;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 
@@ -39,5 +41,12 @@ public class LegacyUtil {
             }
         }
         return Optional.empty();
+    }
+    
+    public static void readOldResolveLevels(CompoundNBT mainCounterNBT, ResolveLevelsMap levelsMap, IStandPower standPower) {
+        int resolveLevel = mainCounterNBT.getByte("ResolveLevel");
+        int extraLevel = mainCounterNBT.getInt("ExtraLevel");
+        
+        levelsMap.readOldValues(standPower, resolveLevel, extraLevel);
     }
 }
