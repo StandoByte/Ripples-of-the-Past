@@ -31,17 +31,17 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
-public class CDItemProjectileEntity extends ModdedProjectileEntity {
+public class CDBlockBulletEntity extends ModdedProjectileEntity {
     private Block block;
     private ResourceLocation blockTex = null;
     private Optional<Entity> homingTarget = Optional.empty();
     private boolean soundStarted = false;
     
-    public CDItemProjectileEntity(LivingEntity shooter, World world) {
-        super(ModEntityTypes.CD_ITEM_PROJECTILE.get(), shooter, world);
+    public CDBlockBulletEntity(LivingEntity shooter, World world) {
+        super(ModEntityTypes.CD_BLOCK_BULLET.get(), shooter, world);
     }
 
-    public CDItemProjectileEntity(EntityType<? extends CDItemProjectileEntity> type, World world) {
+    public CDBlockBulletEntity(EntityType<? extends CDBlockBulletEntity> type, World world) {
         super(type, world);
     }
     

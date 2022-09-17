@@ -170,7 +170,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     public void onClick(World world, LivingEntity user, IStandPower power) {
         if (!world.isClientSide()) {
             if (!power.isActive()) {
-                switch (getAutoSummonMode()) {
+                switch (getAutoSummonMode(power, user)) {
                 case FULL:
                     ((EntityStandType<?>) power.getType()).summon(user, power, entity -> {}, true, false);
                     break;
@@ -190,7 +190,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
             else {
                 StandEntity stand = (StandEntity) power.getStandManifestation();
                 if (stand.isArmsOnlyMode()) {
-                    switch (getAutoSummonMode()) {
+                    switch (getAutoSummonMode(power, user)) {
                     case ARMS:
                         stand.setArmsOnlyMode();
                         break;
@@ -283,7 +283,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     
     protected void preTaskInit(World world, IStandPower standPower, StandEntity standEntity, ActionTarget target) {}
     
-    protected AutoSummonMode getAutoSummonMode() {
+    protected AutoSummonMode getAutoSummonMode(IStandPower standPower, LivingEntity user) {
         return autoSummonMode;
     }
     

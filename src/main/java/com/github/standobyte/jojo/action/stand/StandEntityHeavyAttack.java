@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
+import com.github.standobyte.jojo.action.stand.punch.StandMissedPunch;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandPose;
@@ -132,6 +133,11 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     public StandBlockPunch punchBlock(StandEntity stand, BlockPos pos, BlockState state) {
         return IHasStandPunch.super.punchBlock(stand, pos, state)
                 .impactSound(punchSound);
+    }
+    
+    @Override
+    public StandMissedPunch punchMissed(StandEntity stand) {
+        return IHasStandPunch.super.punchMissed(stand).swingSound(punchSound);
     }
 
     @Override

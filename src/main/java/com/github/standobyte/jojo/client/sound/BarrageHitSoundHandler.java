@@ -41,9 +41,7 @@ public class BarrageHitSoundHandler {
     public void playSound(StandEntity entity, float ticks) {
         if (isBarraging && sound != null && soundPos != null && soundTickLast + nextSoundGap <= ticks) {
             soundTickLast = ticks;
-            int hitsPerSecond = Math.max(StandStatFormulas.getBarrageHitsPerSecond(entity.getAttackSpeed()), 40);
-            float mean = 200.0F / (float) hitsPerSecond * 1.25F;
-            nextSoundGap = (float) random.nextGaussian() + mean;
+            nextSoundGap = getSoundGap(entity);
             entity.playSound(sound, 0.5F + random.nextFloat() * 0.25F, 0.85F + random.nextFloat() * 0.3F, ClientUtil.getClientPlayer(), soundPos);
             if (pauseAfterNext) {
                 sound = null;
@@ -51,5 +49,11 @@ public class BarrageHitSoundHandler {
                 pauseAfterNext = false;
             }
         }
+    }
+    
+    protected float getSoundGap(StandEntity entity) {
+        int hitsPerSecond = Math.max(StandStatFormulas.getBarrageHitsPerSecond(entity.getAttackSpeed()), 40);
+        float mean = 200.0F / (float) hitsPerSecond * 1.25F;
+        return (float) random.nextGaussian() + mean;
     }
 }

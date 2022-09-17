@@ -6,7 +6,9 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.stand.IHasStandPunch;
+import com.github.standobyte.jojo.action.stand.punch.IPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
+import com.github.standobyte.jojo.client.sound.BarrageHitSoundHandler;
 import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -87,6 +89,12 @@ public class SilverChariotEntity extends StandEntity {
         else {
             super.swing(hand);
         }
+    }
+
+    // FIXME render rapier in left arm if the user is left-handed
+    @Override
+    public HandSide getMainArm() {
+        return HandSide.RIGHT;
     }
     
     public boolean hasRapier() {
@@ -219,6 +227,13 @@ public class SilverChariotEntity extends StandEntity {
         return false;
     }
     
+    @Override
+    protected void onTargetHit(CallOrder called, IPunch punch) {
+        if (called == CallOrder.AFTER && hasRapier()) {
+            playPunchSound = true;
+        }
+    }
+    
     public void removeRapierFire() {
     	if (!level.isClientSide()) {
     		rapierFireTicks = 0;
@@ -243,5 +258,15 @@ public class SilverChariotEntity extends StandEntity {
     @Override
     protected SoundEvent getAttackBlockSound() {
     	return hasRapier() ? ModSounds.SILVER_CHARIOT_BLOCK.get() : super.getAttackBlockSound();
+    }
+    
+    @Override
+    protected BarrageHitSoundHandler initBarrageHitSoundHandler() {
+        return new BarrageHitSoundHandler() {
+            @Override
+            protected float getSoundGap(StandEntity entity) {
+                return Math.min(super.getSoundGap(entity) * 0.5F, 1.5F);
+            }
+        };
     }
 }

@@ -165,7 +165,7 @@ public class ModStandTypes {
                     new StandAction[] {
                             ModActions.CRAZY_DIAMOND_PUNCH.get(), 
                             ModActions.CRAZY_DIAMOND_BARRAGE.get(), 
-                            ModActions.CRAZY_DIAMOND_ITEM_PROJECTILE.get(), 
+                            ModActions.CRAZY_DIAMOND_BLOCK_BULLET.get(), 
                             ModActions.CRAZY_DIAMOND_BLOOD_CUTTER.get()
                             },
                     new StandAction[] {

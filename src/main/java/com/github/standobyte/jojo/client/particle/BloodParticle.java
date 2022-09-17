@@ -53,7 +53,7 @@ public class BloodParticle extends SpriteTexturedParticle {
             }
         }
         else if (xd > 0 || yd > 0 || zd > 0) {
-            if (ageRatio >= 0.35F) {
+            if (age >= 5) {
                 yd -= 0.04D * (double) gravity;
             }
             double xdPrev = xd;

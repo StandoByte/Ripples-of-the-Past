@@ -9,7 +9,7 @@ import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
-import com.github.standobyte.jojo.entity.damaging.projectile.CDItemProjectileEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.CDBlockBulletEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
@@ -25,14 +25,15 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
-public class CrazyDiamondItemProjectile extends StandEntityAction {
+public class CrazyDiamondBlockBullet extends StandEntityAction {
 
-    public CrazyDiamondItemProjectile(StandEntityAction.Builder builder) {
+    public CrazyDiamondBlockBullet(StandEntityAction.Builder builder) {
         super(builder);
     }
     
@@ -83,7 +84,7 @@ public class CrazyDiamondItemProjectile extends StandEntityAction {
         if (!world.isClientSide()) {
             LivingEntity user = userPower.getUser();
             if (user != null) {
-                CDItemProjectileEntity bullet = new CDItemProjectileEntity(standEntity, world);
+                CDBlockBulletEntity bullet = new CDBlockBulletEntity(standEntity, world);
                 bullet.setBlock(((BlockItem) user.getOffhandItem().getItem()).getBlock());
                 standEntity.shootProjectile(bullet, 2.0F, 0.25F);
                 if (!(user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild)) {
@@ -125,9 +126,32 @@ public class CrazyDiamondItemProjectile extends StandEntityAction {
     @Override
     public String getTranslationKey(IStandPower power, ActionTarget target) {
         String key = super.getTranslationKey(power, target);
-        if (power.getUser() != null && !power.getUser().isShiftKeyDown() && getTarget(targets(power), power.getUser()).isPresent()) {
+        if (isHoming(power)) {
             key += ".homing";
         }
         return key;
+    }
+    
+    private ResourceLocation homingTex;
+    @Override
+    public ResourceLocation getTexture(IStandPower power) {
+        ResourceLocation resLoc = getRegistryName();
+        if (isHoming(power)) {
+            if (homingTex == null) {
+                homingTex = new ResourceLocation(resLoc.getNamespace(), resLoc.getPath() + "_homing");
+            }
+            resLoc = homingTex;
+        }
+        return resLoc;
+    }
+
+    @Override
+    public Stream<ResourceLocation> getTexLocationstoLoad() {
+        ResourceLocation resLoc = getRegistryName();
+        return Stream.of(resLoc, new ResourceLocation(resLoc.getNamespace(), resLoc.getPath() + "_homing"));
+    }
+    
+    private boolean isHoming(IStandPower power) {
+        return power.getUser() != null && !power.getUser().isShiftKeyDown() && getTarget(targets(power), power.getUser()).isPresent();
     }
 }

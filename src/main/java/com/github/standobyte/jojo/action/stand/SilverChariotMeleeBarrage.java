@@ -57,5 +57,4 @@ public class SilverChariotMeleeBarrage extends StandEntityMeleeBarrage {
         }
         return stabBarrage;
     }
-    
 }

@@ -465,6 +465,24 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         }
         return null;
     }
+    
+    public ModelRenderer getHead() {
+        return head;
+    }
+    
+    public ModelRenderer getTorso() {
+        return torso;
+    }
+    
+    public ModelRenderer getLeg(HandSide side) {
+        switch (side) {
+        case LEFT:
+            return leftLeg;
+        case RIGHT:
+            return rightLeg;
+        }
+        return null;
+    }
 
     @Override
     protected ModelPose<T> initPoseReset() {

@@ -38,7 +38,7 @@ import com.github.standobyte.jojo.client.renderer.entity.damaging.extending.Sati
 import com.github.standobyte.jojo.client.renderer.entity.damaging.extending.SatiporojaScarfRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.extending.SnakeMufflerRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.CDBloodCutterRenderer;
-import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.CDItemProjectileRenderer;
+import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.CDBlockBulletRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.HGEmeraldRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.HamonBubbleBarrierRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.HamonBubbleCutterRenderer;
@@ -158,7 +158,7 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.MR_RED_BIND.get(), MRRedBindRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.MR_DETECTOR.get(), MRDetectorRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.CD_BLOOD_CUTTER.get(), CDBloodCutterRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.CD_ITEM_PROJECTILE.get(), CDItemProjectileRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.CD_BLOCK_BULLET.get(), CDBlockBulletRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.EYE_OF_ENDER_INSIDE.get(), manager -> new SpriteRenderer<>(manager, Minecraft.getInstance().getItemRenderer(), 1.0F, true));
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.FIREWORK_INSIDE.get(), manager -> new FireworkRocketRenderer(manager, Minecraft.getInstance().getItemRenderer()));
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HUNGRY_ZOMBIE.get(), HungryZombieRenderer::new);

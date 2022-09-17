@@ -117,8 +117,8 @@ public class TimeStopInstant extends StandAction {
             if (baseTimeStop.get() != null && power.hasPower()
                     && stats instanceof TimeStopperStandStats) {
                 TimeStopperStandStats tsStats = (TimeStopperStandStats) stats;
-                float learning = tsStats.timeStopLearningPerTick * impliedTicks;
-                power.addLearningProgressPoints(baseTimeStop.get(), learning);
+//                float learning = tsStats.timeStopLearningPerTick * impliedTicks;
+//                power.addLearningProgressPoints(baseTimeStop.get(), learning);
                 
                 int cooldown = (int) (TimeStopInstance.getTimeStopCooldown(power, tsStats, impliedTicks) * COOLDOWN_RATIO);
             	power.setCooldownTimer(this, cooldown);

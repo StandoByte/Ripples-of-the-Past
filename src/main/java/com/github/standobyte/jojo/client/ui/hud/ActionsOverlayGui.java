@@ -487,7 +487,7 @@ public class ActionsOverlayGui extends AbstractGui {
         P power = mode.getPower();
         
         if (action != null) {
-            TextureAtlasSprite textureAtlasSprite = CustomResources.getActionSprites().getSprite(action);
+            TextureAtlasSprite textureAtlasSprite = CustomResources.getActionSprites().getSprite(action, power);
             mc.getTextureManager().bind(textureAtlasSprite.atlas().location());
             
             ActionConditionResult result = actionAvailability(action, mode, actionType, target, isSelected);

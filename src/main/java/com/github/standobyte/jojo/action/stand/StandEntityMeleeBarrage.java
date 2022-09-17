@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack.HeavyPunch
 import com.github.standobyte.jojo.action.stand.punch.IPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
+import com.github.standobyte.jojo.action.stand.punch.StandMissedPunch;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandPose;
@@ -35,7 +36,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class StandEntityMeleeBarrage extends StandEntityAction implements IHasStandPunch {
-    private final Supplier<SoundEvent> hitSound;
+    protected final Supplier<SoundEvent> hitSound;
 
     public StandEntityMeleeBarrage(StandEntityMeleeBarrage.Builder builder) {
         super(builder);
@@ -98,6 +99,11 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     @Override
     public StandBlockPunch punchBlock(StandEntity stand, BlockPos pos, BlockState state) {
         return IHasStandPunch.super.punchBlock(stand, pos, state).impactSound(hitSound);
+    }
+    
+    @Override
+    public StandMissedPunch punchMissed(StandEntity stand) {
+        return IHasStandPunch.super.punchMissed(stand).swingSound(hitSound);
     }
     
     public SoundEvent getHitSound() {

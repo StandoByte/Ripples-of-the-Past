@@ -39,7 +39,7 @@ import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMove;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBloodCutter;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondHeal;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondHeavyPunch;
-import com.github.standobyte.jojo.action.stand.CrazyDiamondItemProjectile;
+import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockBullet;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondLeaveObject;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondMisshapeBodyPart;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondMisshapingPunch;
@@ -393,7 +393,7 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_RAPIER_BARRAGE = ACTIONS.register("silver_chariot_barrage", 
             () -> new SilverChariotMeleeBarrage(new StandEntityMeleeBarrage.Builder()
-                    .shout(ModSounds.POLNAREFF_HORA_HORA_HORA)
+                    .shout(ModSounds.POLNAREFF_HORA_HORA_HORA).barrageHitSound(ModSounds.SILVER_CHARIOT_BARRAGE)
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<StandEntityHeavyAttack> SILVER_CHARIOT_SWEEPING_ATTACK = ACTIONS.register("silver_chariot_sweeping_attack", 
@@ -517,8 +517,8 @@ public class ModActions {
     public static final RegistryObject<StandEntityActionModifier> CRAZY_DIAMOND_LEAVE_OBJECT = ACTIONS.register("crazy_diamond_leave_object", 
             () -> new CrazyDiamondLeaveObject(new StandAction.Builder()));
     
-    public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_ITEM_PROJECTILE = ACTIONS.register("crazy_diamond_item_projectile", 
-            () -> new CrazyDiamondItemProjectile(new StandEntityAction.Builder().standWindupDuration(15)
+    public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_BLOCK_BULLET = ACTIONS.register("crazy_diamond_block_bullet", 
+            () -> new CrazyDiamondBlockBullet(new StandEntityAction.Builder().standWindupDuration(15)
                     .resolveLevelToUnlock(4)
                     .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_FIX_STARTED).standSound(Phase.PERFORM, ModSounds.CRAZY_DIAMOND_BULLET_SHOT)
                     .standOffsetFromUser(0, -0.5)

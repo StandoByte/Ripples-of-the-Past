@@ -74,7 +74,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         initActionPoses();
     }
 
-    protected final void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
+    public static final void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
         modelRenderer.xRot = x;
         modelRenderer.yRot = y;
         modelRenderer.zRot = z;

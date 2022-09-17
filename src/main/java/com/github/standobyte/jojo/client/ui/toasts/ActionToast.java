@@ -61,7 +61,7 @@ public class ActionToast implements IToast {
             ToastGui.blit(matrixStack, 3, 3, 0, 0, 16, 16, 16, 16);
             RenderSystem.popMatrix();
             matrixStack.popPose();
-            TextureAtlasSprite textureAtlasSprite = CustomResources.getActionSprites().getSprite(action);
+            TextureAtlasSprite textureAtlasSprite = CustomResources.getActionSprites().getSprite(action.getRegistryName());
             mc.getTextureManager().bind(textureAtlasSprite.atlas().location());
             ToastGui.blit(matrixStack, 8, 8, 0, 16, 16, textureAtlasSprite);
             return delta - this.lastChanged >= 5000L ? IToast.Visibility.HIDE : IToast.Visibility.SHOW;

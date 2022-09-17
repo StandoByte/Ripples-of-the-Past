@@ -22,6 +22,7 @@ import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.item.ClothesSet;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket;
@@ -416,11 +417,16 @@ public class JojoModUtil {
     }
 
     public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine) {
-        sayVoiceLine(entity, voiceLine, 1.0F, 1.0F);
+        sayVoiceLine(entity, voiceLine, null);
     }
 
-    public static void sayVoiceLine(LivingEntity entity, SoundEvent sound, float volume, float pitch) {
-        if (entity.level.isClientSide() || entity.hasEffect(Effects.INVISIBILITY)) {
+    public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine, @Nullable ClothesSet character) {
+        sayVoiceLine(entity, voiceLine, character, 1.0F, 1.0F);
+    }
+
+    public static void sayVoiceLine(LivingEntity entity, SoundEvent sound, @Nullable ClothesSet character, float volume, float pitch) {
+        if (entity.level.isClientSide() || entity.hasEffect(Effects.INVISIBILITY) ||
+                character != null && character != ClothesSet.getClothesSet(entity)) {
             return;
         }
         SoundCategory category = SoundCategory.VOICE;
