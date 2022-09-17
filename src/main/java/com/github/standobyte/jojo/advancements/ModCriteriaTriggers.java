@@ -57,6 +57,7 @@ public class ModCriteriaTriggers {
             new CriteriaTriggerSupplier<>(() -> new StandArrowHitTrigger(new ResourceLocation(JojoMod.MOD_ID, "stand_arrow_hit")));
     public static final CriteriaTriggerSupplier<SoulAscensionTrigger> SOUL_ASCENSION = 
             new CriteriaTriggerSupplier<>(() -> new SoulAscensionTrigger(new ResourceLocation(JojoMod.MOD_ID, "soul_ascension")));
+    // FIXME (!!) un-hide the achievement
     public static final CriteriaTriggerSupplier<RPSGameTrigger> ROCK_PAPER_SCISSORS_GAME = 
             new CriteriaTriggerSupplier<>(() -> new RPSGameTrigger(new ResourceLocation(JojoMod.MOD_ID, "rps_game")));
     

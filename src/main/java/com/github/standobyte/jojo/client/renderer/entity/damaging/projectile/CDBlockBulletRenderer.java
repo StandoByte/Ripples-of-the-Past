@@ -3,9 +3,9 @@ package com.github.standobyte.jojo.client.renderer.entity.damaging.projectile;
 import java.util.List;
 import java.util.Random;
 
-import com.github.standobyte.jojo.client.model.entity.projectile.CDItemProjectileModel;
+import com.github.standobyte.jojo.client.model.entity.projectile.CDBlockBulletModel;
 import com.github.standobyte.jojo.client.renderer.entity.SimpleEntityRenderer;
-import com.github.standobyte.jojo.entity.damaging.projectile.CDItemProjectileEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.CDBlockBulletEntity;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -17,15 +17,14 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.data.EmptyModelData;
 
-// FIXME ! (item projectile) render a blood drop if it's homing
-public class CDItemProjectileRenderer extends SimpleEntityRenderer<CDItemProjectileEntity, CDItemProjectileModel> {
+public class CDBlockBulletRenderer extends SimpleEntityRenderer<CDBlockBulletEntity, CDBlockBulletModel> {
 
-    public CDItemProjectileRenderer(EntityRendererManager renderManager) {
-        super(renderManager, new CDItemProjectileModel(), null);
+    public CDBlockBulletRenderer(EntityRendererManager renderManager) {
+        super(renderManager, new CDBlockBulletModel(), null);
     }
     
     @Override
-    public ResourceLocation getTextureLocation(CDItemProjectileEntity entity) {
+    public ResourceLocation getTextureLocation(CDBlockBulletEntity entity) {
         ResourceLocation texture = entity.getBlockTex();
         if (texture == null) {
             texture = getBlockTexture(entity);
@@ -36,7 +35,7 @@ public class CDItemProjectileRenderer extends SimpleEntityRenderer<CDItemProject
     
     private static final Random RANDOM = new Random();
     private static final ResourceLocation GLASS_TEXTURE = new ResourceLocation("textures/block/glass.png");
-    private ResourceLocation getBlockTexture(CDItemProjectileEntity entity) {
+    private ResourceLocation getBlockTexture(CDBlockBulletEntity entity) {
         Block block = entity.getBlock();
         IBakedModel blockModel = Minecraft.getInstance().getBlockRenderer().getBlockModel(block.defaultBlockState());
         List<BakedQuad> quads = blockModel.getQuads(block.defaultBlockState(), Direction.NORTH, RANDOM, EmptyModelData.INSTANCE);

@@ -401,7 +401,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
     
     @Override
     public void rotateStand(StandEntity standEntity, StandEntityTask task) {
-        if (task.getTarget().getType() != TargetType.EMPTY) {
+        if (standEntity.isArmsOnlyMode() || task.getTarget().getType() != TargetType.EMPTY) {
             super.rotateStand(standEntity, task);
         }
         else if (!standEntity.isRemotePositionFixed()) {

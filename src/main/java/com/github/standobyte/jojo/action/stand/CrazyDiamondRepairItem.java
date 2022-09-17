@@ -86,14 +86,24 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
         int damage = 0;
 
         ItemStack newStack = null;
-        if (itemStack.getItem() == Items.CHIPPED_ANVIL)                             newStack = new ItemStack(Items.ANVIL);
-        else if (itemStack.getItem() == Items.DAMAGED_ANVIL)                        newStack = new ItemStack(Items.CHIPPED_ANVIL);
-        else if (itemStack.getItem() == Items.COBBLESTONE)                          newStack = new ItemStack(Items.STONE);
+        if (itemStack.getItem() == Items.CHIPPED_ANVIL) { 
+            newStack = new ItemStack(Items.ANVIL);
+            damage = 1000;
+        }
+        else if (itemStack.getItem() == Items.DAMAGED_ANVIL) {
+            newStack = new ItemStack(Items.CHIPPED_ANVIL);
+            damage = 1000;
+        }
+        else if (itemStack.getItem() == Items.COBBLESTONE) {
+            damage = 1;
+            newStack = new ItemStack(Items.STONE);
+        }
         else if (itemStack.getItem().getRegistryName().getPath().contains("cracked")) {
             ResourceLocation uncracked = new ResourceLocation(
                     itemStack.getItem().getRegistryName().getNamespace(), 
                     itemStack.getItem().getRegistryName().getPath().replace("cracked_", ""));
             if (ForgeRegistries.ITEMS.containsKey(uncracked)) {
+                damage = 1;
                 newStack = new ItemStack(ForgeRegistries.ITEMS.getValue(uncracked));
             }
         }
@@ -105,20 +115,22 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
                 if (player.abilities.instabuild) {
                     itemStack.shrink(1);
                 }
-                damage += 500;
             }
             else {
                 damage = -1;
             }
         }
         
-        itemStack.removeTagKey("Enchantments");
-        itemStack.removeTagKey("StoredEnchantments");
-        damage = Math.min(itemStack.getDamageValue(), 50);
-        itemStack.setDamageValue(itemStack.getDamageValue() - damage);
-        itemStack.setRepairCost(0);
+        if (!itemStack.isEmpty()) {
+            itemStack.removeTagKey("Enchantments");
+            itemStack.removeTagKey("StoredEnchantments");
+            int damageToRestore = Math.min(itemStack.getDamageValue(), 50);
+            itemStack.setDamageValue(itemStack.getDamageValue() - damageToRestore);
+            damage += damageToRestore;
+            itemStack.setRepairCost(0);
+        }
         
-        return (float) damage * 0.0001F;
+        return (float) damage * 0.000025F;
     }
     
     private boolean canBeRepaired(ItemStack itemStack) {
@@ -169,7 +181,10 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
     
     @Override
     public void rotateStand(StandEntity standEntity, StandEntityTask task) {
-        if (!standEntity.isRemotePositionFixed()) {
+        if (standEntity.isArmsOnlyMode()) {
+            super.rotateStand(standEntity, task);
+        }
+        else if (!standEntity.isRemotePositionFixed()) {
             LivingEntity user = standEntity.getUser();
             if (user != null) {
                 float rotationOffset = user.getMainArm() == HandSide.RIGHT ? 15 : -15;

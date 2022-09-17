@@ -185,7 +185,6 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
     
     
     
-    // FIXME !!! (restore terrain) multi-blocks
     public static void rememberBrokenBlock(World world, BlockPos pos, BlockState state, Optional<TileEntity> tileEntity, List<ItemStack> drops) {
         IChunk chunk = world.getChunk(pos);
         if (chunk instanceof Chunk) {

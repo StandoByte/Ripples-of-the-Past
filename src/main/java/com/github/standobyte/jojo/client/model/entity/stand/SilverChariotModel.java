@@ -303,8 +303,7 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
         
         rapierAnim.putIfAbsent(StandPose.BARRAGE, new OneHandedBarrageAnimation<SilverChariotEntity>(this, 
                 stabLoop, 
-                // FIXME !!!!!!!! SC barrage recovery anim
-                null, 
+                idlePose, 
                 Hand.MAIN_HAND));
         
         super.initActionPoses();

@@ -6,6 +6,7 @@ import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -24,6 +25,11 @@ public class CrazyDiamondMisshapeBodyPart extends StandEntityActionModifier {
 
     public CrazyDiamondMisshapeBodyPart(Builder builder) {
         super(builder);
+    }
+    
+    @Override
+    public boolean isUnlocked(IStandPower power) {
+        return ModActions.CRAZY_DIAMOND_HEAL.get().isUnlocked(power);
     }
     
     // FIXME misshaping body parts mob effects
@@ -67,7 +73,6 @@ public class CrazyDiamondMisshapeBodyPart extends StandEntityActionModifier {
         TORSO_ARMS,
         LEGS;
         
-        // FIXME !!!!! (combo heavy) determine the body part aimed at
         static TargetHitPart getHitTarget(EntityRayTraceResult rayTrace) {
             return TORSO_ARMS;
         }

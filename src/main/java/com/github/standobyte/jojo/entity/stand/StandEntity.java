@@ -188,7 +188,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         this.summonLockTicks = StandStatFormulas.getSummonLockTicks(stats.getBaseAttackSpeed());
         if (level.isClientSide()) {
             this.alphaTicks = this.summonLockTicks;
-            this.barrageSounds = new BarrageHitSoundHandler();
+            this.barrageSounds = initBarrageHitSoundHandler();
         }
         else {
             this.summonPoseRandomByte = random.nextInt(128);
@@ -422,6 +422,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         return StandStatFormulas.getLeapStrength(leapBaseStrength() * getStandEfficiency());
     }
     
+    // FIXME ATTACK_DAMAGE is not syncable, therefore the client doesn't know about the strength stat lvling
     protected double leapBaseStrength() {
         return getAttributeValue(Attributes.ATTACK_DAMAGE);
     }
@@ -1474,12 +1475,21 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             break;
         }
         
+        onTargetHit(CallOrder.BEFORE, punchInstance);
         punchInstance.doHit(task);
+        onTargetHit(CallOrder.AFTER, punchInstance);
         lastPunch = punchInstance;
         if (!level.isClientSide()) {
             punchAction.playPunchSound(punchInstance, target.getType(), playPunchSound == null || playPunchSound, playPunchSound != null && playPunchSound);
         }
         return punchInstance.targetWasHit();
+    }
+    
+    protected void onTargetHit(CallOrder called, IPunch punch) {}
+    
+    protected enum CallOrder {
+        BEFORE,
+        AFTER
     }
     
     @Nullable
@@ -1597,7 +1607,8 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 
     @Override
     public HandSide getMainArm() {
-        return HandSide.RIGHT;
+        LivingEntity user = getUser();
+        return user != null ? user.getMainArm() : HandSide.RIGHT;
     }
     
     public HandSide getArm(Hand arm) {
@@ -1729,6 +1740,10 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             throw new IllegalStateException("Barrage swing animating class is only available on the client!");
         }
         return this.barrageSwings;
+    }
+    
+    protected BarrageHitSoundHandler initBarrageHitSoundHandler() {
+        return new BarrageHitSoundHandler();
     }
     
     public BarrageHitSoundHandler getBarrageHitSoundsHandler() {

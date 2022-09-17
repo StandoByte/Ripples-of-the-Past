@@ -415,6 +415,9 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> SILVER_CHARIOT_UNSUMMON = SOUNDS.register("silver_chariot_unsummon",
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "silver_chariot_unsummon")));
 
+    public static final RegistryObject<SoundEvent> SILVER_CHARIOT_BARRAGE = SOUNDS.register("silver_chariot_barrage", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "silver_chariot_barrage")));
+
     public static final RegistryObject<SoundEvent> SILVER_CHARIOT_BLOCK = SOUNDS.register("silver_chariot_block", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "silver_chariot_block")));
     

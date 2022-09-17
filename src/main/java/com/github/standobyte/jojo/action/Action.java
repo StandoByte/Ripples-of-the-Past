@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -27,6 +28,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
@@ -356,6 +358,14 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     public ITextComponent getNameShortened(P power, String key) {
         return getTranslatedName(power, ClientUtil.shortenedTranslationExists(key) ? 
                 ClientUtil.getShortenedTranslationKey(key) : key);
+    }
+    
+    public ResourceLocation getTexture(P power) {
+        return getRegistryName();
+    }
+    
+    public Stream<ResourceLocation> getTexLocationstoLoad() {
+        return Stream.of(getRegistryName());
     }
     
     @Nullable

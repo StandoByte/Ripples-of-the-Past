@@ -596,6 +596,10 @@
     "subtitle": "jojo.subtitle.stand_unsummon",
     "sounds": [ "jojo:stand/silver_chariot_unsummon", "jojo:stand/silver_chariot_unsummon_2" ]
   },
+  "silver_chariot_barrage": {
+    "subtitle": "jojo.subtitle.stand_attack_light",
+    "sounds": [ "jojo:stand/silver_chariot_barrage", "jojo:stand/silver_chariot_barrage_2" ]
+  },
   "silver_chariot_block": {
     "subtitle": "jojo.subtitle.stand_damage_block",
     "sounds": [

@@ -6,6 +6,7 @@ import com.github.standobyte.jojo.client.model.pose.ConditionalModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseTransitionMultiple;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
+import com.github.standobyte.jojo.client.model.pose.anim.CopyBipedUserPose;
 import com.github.standobyte.jojo.client.model.pose.anim.PosedActionAnimation;
 import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.stands.CrazyDiamondEntity;
@@ -16,7 +17,6 @@ import net.minecraft.util.HandSide;
 // Made with Blockbench 4.1.3
 
 
-// FIXME ! (CD model) poses
 public class CrazyDiamondModel extends HumanoidStandModel<CrazyDiamondEntity> {
     private final ModelRenderer helmet;
     private final ModelRenderer bone2;
@@ -597,13 +597,14 @@ public class CrazyDiamondModel extends HumanoidStandModel<CrazyDiamondEntity> {
                 RotationAngle.fromDegrees(rightArm, -45.3923F, -27.0377F, 10.4828F),
                 RotationAngle.fromDegrees(rightForeArm, -38.0639F, -35.8085F, 4.6156F)
         };
-        // FIXME !!!! (item repair) arms only mode pose
         actionAnim.put(CrazyDiamondRepairItem.ITEM_FIX_POS, new PosedActionAnimation.Builder<CrazyDiamondEntity>()
                 .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ConditionalModelPose<CrazyDiamondEntity>()
                         .addPose(stand -> !stand.isArmsOnlyMode() && stand.getUser() != null && stand.getUser().getMainArm() == HandSide.RIGHT, 
-                        new ModelPose<CrazyDiamondEntity>(itemFixRotations))
+                                new ModelPose<CrazyDiamondEntity>(itemFixRotations))
                         .addPose(stand -> !stand.isArmsOnlyMode() && stand.getUser() != null && stand.getUser().getMainArm() == HandSide.LEFT, 
-                        new ModelPose<CrazyDiamondEntity>(mirrorAngles(itemFixRotations)))
+                                new ModelPose<CrazyDiamondEntity>(mirrorAngles(itemFixRotations)))
+                        .addPose(stand -> stand.isArmsOnlyMode(), 
+                                new CopyBipedUserPose<>(this))
                         )
                 .build(idlePose));
         

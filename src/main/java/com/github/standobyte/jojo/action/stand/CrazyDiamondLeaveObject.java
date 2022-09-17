@@ -18,6 +18,7 @@ import com.github.standobyte.jojo.entity.EyeOfEnderInsideEntity;
 import com.github.standobyte.jojo.entity.FireworkInsideEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -85,6 +86,11 @@ public class CrazyDiamondLeaveObject extends StandEntityActionModifier {
 
     public CrazyDiamondLeaveObject(Builder builder) {
         super(builder);
+    }
+    
+    @Override
+    public boolean isUnlocked(IStandPower power) {
+        return ModActions.CRAZY_DIAMOND_HEAL.get().isUnlocked(power);
     }
     
     @Override
