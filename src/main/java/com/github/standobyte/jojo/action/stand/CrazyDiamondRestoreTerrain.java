@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.action.stand;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,12 +14,22 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.action.ActionConditionResult;
+import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.capability.chunk.ChunkCap.PrevBlockInfo;
 import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
+import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModParticles;
+import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.stand_specific.CDBlocksRestoredPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandUtil;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -37,15 +48,24 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunk;
 
 public class CrazyDiamondRestoreTerrain extends StandEntityAction {
-    public static final int RESTORATION_RANGE = 9;
-    private static final int BLOCKS_PER_TICK = 3;
 
     public CrazyDiamondRestoreTerrain(StandEntityAction.Builder builder) {
         super(builder);
     }
     
-    // FIXME !!! (restore terrain) particles
-    // FIXME ! (restore terrain) CD restoration sound
+    @Override
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
+        Entity cameraEntity = restorationCenterEntity(user, power);
+        Vector3i eyePosI = eyePos(cameraEntity);
+        boolean hasResolveEffect = user.hasEffect(ModEffects.RESOLVE.get());
+        if (getBlocksInRange(user.level, user, eyePosI, restorationDistManhattan(hasResolveEffect), 
+                block -> blockPosSelectedForRestoration(block, cameraEntity, cameraEntity.getLookAngle(), 
+                        cameraEntity.getEyePosition(1.0F), eyePosI, hasResolveEffect)).count() == 0) {
+            return ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
+        }
+        return super.checkSpecificConditions(user, power, target);
+    }
+    
     @Override
     public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
@@ -62,31 +82,78 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
                 creative = false;
             }
             Entity cameraEntity = restorationCenterEntity(user, userPower);
-            List<ItemEntity> itemsAround = world.getEntitiesOfClass(ItemEntity.class, cameraEntity.getBoundingBox().inflate(RESTORATION_RANGE * 2));
+            boolean resolveEffect = user.hasEffect(ModEffects.RESOLVE.get());
+            int manhattanRange = restorationDistManhattan(resolveEffect);
+            List<ItemEntity> itemsAround = world.getEntitiesOfClass(ItemEntity.class, 
+                    cameraEntity.getBoundingBox().inflate(manhattanRange * 2));
             Set<BlockPos> blocksPlaced = new HashSet<>();
             Set<BlockPos> blocksToForget = new HashSet<>();
             Vector3i eyePos = eyePos(cameraEntity);
             Vector3d lookVec = cameraEntity.getLookAngle();
             Vector3d eyePosD = cameraEntity.getEyePosition(1.0F);
+            float staminaPerBlock = getStaminaCostPerBlock(userPower);
+            int blocksToRestore = resolveEffect ? 64 : 
+                Math.min(blocksPerTick(standEntity), (int) (staminaPerBlock * userPower.getStamina()));
             
-            getBlocksInRange(world, user, eyePos, RESTORATION_RANGE, block -> blockPosSelectedForRestoration(block, cameraEntity, lookVec, eyePosD, eyePos))
-            .sorted((bl1, bl2) -> bl1.pos.distManhattan(eyePos) - bl2.pos.distManhattan(eyePos))
-            .anyMatch(block -> {
-                if (tryReplaceBlock(world, block.pos, block.state, blocksPlaced, creative, block.drops, userInventory, itemsAround)) {
+            Stream<PrevBlockInfo> blocks = getBlocksInRange(world, user, eyePos, manhattanRange, 
+                    block -> blockPosSelectedForRestoration(block, cameraEntity, lookVec, eyePosD, eyePos, resolveEffect));
+            
+            blocks
+            
+            .filter(block -> {
+                BlockState blockState = world.getBlockState(block.pos);
+                if (blockState.isAir(world, block.pos)) {
+                    return true;
+                }
+                blocksToForget.add(block.pos);
+                return false;
+            })
+            
+            .sorted((bl1, bl2) -> {
+                return bl1.pos.distManhattan(eyePos) - bl2.pos.distManhattan(eyePos);
+            })
+            
+            .limit(blocksToRestore)
+            
+            .forEach(block -> {
+                if (tryPlaceBlock(world, block.pos, block.state, blocksPlaced, 
+                        creative, block.drops, userInventory, itemsAround, 
+                        resolveEffect)) {
                     blocksToForget.add(block.pos);
                 }
-                return blocksPlaced.size() >= BLOCKS_PER_TICK;
             });
             
+            userPower.consumeStamina(staminaPerBlock * blocksPlaced.size());
+            
+            if (!blocksPlaced.isEmpty()) {
+                PacketManager.sendToClientsTracking(new CDBlocksRestoredPacket(blocksPlaced), standEntity);
+            }
             forgetBrokenBlocks(world, blocksToForget);
         }
     }
     
+    private int blocksPerTick(StandEntity standEntity) {
+        return MathUtil.fractionRandomInc(CrazyDiamondHeal.healingSpeed(standEntity) * 3);
+    }
     
-    // FIXME !!! (restore terrain) tile entities (shulker (test for both dupes and item disappearance))
-    private static boolean tryReplaceBlock(World world, BlockPos blockPos, BlockState blockState, Set<BlockPos> placedBlocks, 
-            boolean isCreative, List<ItemStack> restorationCost, @Nullable IInventory userInventory, List<ItemEntity> itemEntities) {
+
+    private static final Random RANDOM = new Random();
+    private static boolean tryPlaceBlock(World world, BlockPos blockPos, BlockState blockState, Set<BlockPos> placedBlocks, 
+            boolean isCreative, List<ItemStack> restorationCost, @Nullable IInventory userInventory, List<ItemEntity> itemEntities, 
+            boolean randomizePos) {
         BlockState currentBlockState = world.getBlockState(blockPos);
+        if (randomizePos) {
+            BlockPos randomPos = blockPos = blockPos.offset(
+                    RANDOM.nextBoolean() ? RANDOM.nextInt(3) - 1 : 0, 
+                    RANDOM.nextInt(2) + 1,
+                    RANDOM.nextBoolean() ? RANDOM.nextInt(3) - 1 : 0);
+            if (currentBlockState.isAir(world, randomPos)) {
+                IChunk chunk = world.getChunk(randomPos);
+                if (!(chunk instanceof Chunk && ((Chunk) chunk).getCapability(ChunkCapProvider.CAPABILITY).map(cap -> cap.wasBlockBroken(randomPos)).orElse(false))) {
+                    blockPos = randomPos;
+                }
+            }
+        }
         if (currentBlockState.isAir(world, blockPos)) {
             if (!(isCreative || consumeNeededItems(restorationCost, userInventory, itemEntities))) {
                 return false;
@@ -96,7 +163,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
             return true;
         }
         else {
-            return true;
+            return false;
         }
     }
     
@@ -152,21 +219,21 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
     
     
 
-    // FIXME !!! (restore terrain) add particles & sounds (the task is server only)
     public static void addParticlesAroundBlock(World world, BlockPos blockPos, Random random) {
-        Vector3d posLLCorner = Vector3d.atLowerCornerOf(blockPos).subtract(0.25, 0.25, 0.25);
-        for (int i = 0; i < 24; i++) {
-            world.addParticle(ModParticles.CD_RESTORATION.get(), 
-                    posLLCorner.x + random.nextDouble() * 1.5, 
-                    posLLCorner.y + random.nextDouble() * 1.5, 
-                    posLLCorner.z + random.nextDouble() * 1.5, 
-                    0, 0, 0);
+        if (world.isClientSide() && StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) {
+            Vector3d posLLCorner = Vector3d.atLowerCornerOf(blockPos).subtract(0.25, 0.25, 0.25);
+            for (int i = 0; i < 24; i++) {
+                world.addParticle(ModParticles.CD_RESTORATION.get(), 
+                        posLLCorner.x + random.nextDouble() * 1.5, 
+                        posLLCorner.y + random.nextDouble() * 1.5, 
+                        posLLCorner.z + random.nextDouble() * 1.5, 
+                        0, 0, 0);
+            }
         }
     }
     
     
     
-    // FIXME !!! (restore terrain) multi-blocks
     public static void rememberBrokenBlock(World world, BlockPos pos, BlockState state, Optional<TileEntity> tileEntity, List<ItemStack> drops) {
         IChunk chunk = world.getChunk(pos);
         if (chunk instanceof Chunk) {
@@ -176,12 +243,11 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         }
     }
     
-    public static void rememberBrokenBlockCreative(World world, BlockPos pos, BlockState state) {
-        // FIXME !!! (restore terrain) remember blocks broken in creative
+    public static void rememberBrokenBlockCreative(World world, BlockPos pos, BlockState state, Optional<TileEntity> tileEntity) {
         IChunk chunk = world.getChunk(pos);
         if (chunk instanceof Chunk) {
             ((Chunk) chunk).getCapability(ChunkCapProvider.CAPABILITY).ifPresent(cap -> {
-//                cap.saveBrokenBlock(pos, state, tileEntity, drops);
+                cap.saveBrokenBlock(pos, state, tileEntity, Collections.emptyList());
             });
         }
     }
@@ -239,9 +305,35 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         return new Vector3i((int) Math.round(pos.x), (int) Math.round(pos.y), (int) Math.round(pos.z));
     }
     
-    public static boolean blockPosSelectedForRestoration(PrevBlockInfo block, Entity cameraEntity, Vector3d entityLookVec, Vector3d entityEyePos, Vector3i restorationCenter) {
-        return block.pos.distManhattan(restorationCenter) <= CrazyDiamondRestoreTerrain.RESTORATION_RANGE
-                && entityLookVec.dot(Vector3d.atCenterOf(block.pos).subtract(entityEyePos).normalize()) >= 0.5
-                ;
+    public static boolean blockPosSelectedForRestoration(PrevBlockInfo block, Entity cameraEntity, Vector3d entityLookVec, Vector3d entityEyePos, Vector3i restorationCenter, boolean resolve) {
+        return block.pos.distManhattan(restorationCenter) <= restorationDistManhattan(resolve)
+                && entityLookVec.dot(Vector3d.atCenterOf(block.pos).subtract(entityEyePos).normalize()) >= (resolve ? 0 : 0.7071);
+    }
+    
+    private static int restorationDistManhattan(boolean resolve) {
+        return 12;
+    }
+    
+    @Override
+    public void phaseTransition(World world, StandEntity standEntity, IStandPower standPower, 
+            @Nullable Phase from, @Nullable Phase to, StandEntityTask task, int nextPhaseTicks) {
+        if (world.isClientSide()) {
+            if (to == Phase.PERFORM) {
+                ClientTickingSoundsHelper.playStandEntityCancelableActionSound(standEntity, 
+                        ModSounds.CRAZY_DIAMOND_FIX_LOOP.get(), this, Phase.PERFORM, 1.0F, 1.0F, true);
+            }
+            else if (from == Phase.PERFORM) {
+                standEntity.playSound(ModSounds.CRAZY_DIAMOND_FIX_ENDED.get(), 1.0F, 1.0F, ClientUtil.getClientPlayer());
+            }
+        }
+    }
+    
+    @Override
+    public float getStaminaCostTicking(IStandPower power) {
+        return 0;
+    }
+    
+    private float getStaminaCostPerBlock(IStandPower power) {
+        return super.getStaminaCostTicking(power);
     }
 }

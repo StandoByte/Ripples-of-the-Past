@@ -2,12 +2,20 @@ package com.github.standobyte.jojo.action.stand;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
+import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.entity.stand.StandPose;
+import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -15,6 +23,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.DrinkHelper;
 import net.minecraft.util.Hand;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -22,9 +31,12 @@ import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class CrazyDiamondRepairItem extends StandEntityAction {
+    public static final StandPose ITEM_FIX_POS = new StandPose("CD_ITEM_FIX");
+    private final StandRelativeOffset userOffsetLeftArm;
 
     public CrazyDiamondRepairItem(StandEntityAction.Builder builder) {
         super(builder);
+        this.userOffsetLeftArm = builder.userOffset.copyScale(-1, 1, 1);
     }
     
     @Override
@@ -46,13 +58,13 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
             if (!world.isClientSide()) {
                 ItemStack itemToRepair = itemToRepair(user);
                 if (!itemToRepair.isEmpty()) {
-                    float points = repairTick(user, itemToRepair, task.getTick());
+                    float points = repairTick(user, standEntity, itemToRepair, task.getTick());
                     if (points > 0) {
                         userPower.addLearningProgressPoints(this, points);
                     }
                 }
             }
-            else {
+            else if (StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) {
                 CustomParticlesHelper.createCDRestorationParticle(user, Hand.OFF_HAND);
             }
         }
@@ -70,39 +82,60 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
         return entity.getOffhandItem();
     }
     
-    public float repairTick(LivingEntity user, ItemStack itemStack, int taskTicks) {
+    public float repairTick(LivingEntity user, StandEntity standEntity, ItemStack itemStack, int taskTicks) {
         int damage = 0;
 
         ItemStack newStack = null;
-        if (itemStack.getItem() == Items.CHIPPED_ANVIL)                             newStack = new ItemStack(Items.ANVIL);
-        else if (itemStack.getItem() == Items.DAMAGED_ANVIL)                        newStack = new ItemStack(Items.CHIPPED_ANVIL);
-        else if (itemStack.getItem() == Items.COBBLESTONE)                          newStack = new ItemStack(Items.STONE);
+        if (itemStack.getItem() == Items.CHIPPED_ANVIL) { 
+            newStack = new ItemStack(Items.ANVIL);
+            damage = 1000;
+        }
+        else if (itemStack.getItem() == Items.DAMAGED_ANVIL) {
+            newStack = new ItemStack(Items.CHIPPED_ANVIL);
+            damage = 1000;
+        }
+        else if (itemStack.getItem() == Items.COBBLESTONE) {
+            damage = 1;
+            newStack = new ItemStack(Items.STONE);
+        }
         else if (itemStack.getItem().getRegistryName().getPath().contains("cracked")) {
             ResourceLocation uncracked = new ResourceLocation(
                     itemStack.getItem().getRegistryName().getNamespace(), 
                     itemStack.getItem().getRegistryName().getPath().replace("cracked_", ""));
             if (ForgeRegistries.ITEMS.containsKey(uncracked)) {
+                damage = 1;
                 newStack = new ItemStack(ForgeRegistries.ITEMS.getValue(uncracked));
             }
         }
         
         if (newStack != null && user instanceof PlayerEntity) {
-            if (taskTicks % 10 == 9) {
-                user.setItemInHand(Hand.OFF_HAND, DrinkHelper.createFilledResult(itemStack, (PlayerEntity) user, newStack, false));
-                damage += 500;
+            if (itemTransformationTick(taskTicks, standEntity)) {
+                PlayerEntity player = (PlayerEntity) user;
+                user.setItemInHand(Hand.OFF_HAND, DrinkHelper.createFilledResult(itemStack, player, newStack, false));
+                if (player.abilities.instabuild) {
+                    itemStack.shrink(1);
+                }
             }
             else {
                 damage = -1;
             }
         }
         
-        itemStack.removeTagKey("Enchantments");
-        itemStack.removeTagKey("StoredEnchantments");
-        damage = Math.min(itemStack.getDamageValue(), 50);
-        itemStack.setDamageValue(itemStack.getDamageValue() - damage);
-        itemStack.setRepairCost(0);
+        if (!itemStack.isEmpty()) {
+            itemStack.removeTagKey("Enchantments");
+            itemStack.removeTagKey("StoredEnchantments");
+            int damageToRestore = Math.min(itemStack.getDamageValue(), (int) (CrazyDiamondHeal.healingSpeed(standEntity) * 40));
+            itemStack.setDamageValue(itemStack.getDamageValue() - damageToRestore);
+            damage += damageToRestore;
+            itemStack.setRepairCost(0);
+        }
         
-        return (float) damage * 0.0001F;
+        return (float) damage * 0.000025F;
+    }
+    
+    public static boolean itemTransformationTick(int taskTicks, StandEntity standEntity) {
+        int ticks = (int) (10 / CrazyDiamondHeal.healingSpeed(standEntity));
+        return taskTicks % ticks == ticks - 1;
     }
     
     private boolean canBeRepaired(ItemStack itemStack) {
@@ -119,5 +152,50 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
     @Override
     public void onMaxTraining(IStandPower power) {
         power.unlockAction(getShiftVariationIfPresent());
+    }
+    
+    @Override
+    public void phaseTransition(World world, StandEntity standEntity, IStandPower standPower, 
+            @Nullable Phase from, @Nullable Phase to, StandEntityTask task, int nextPhaseTicks) {
+        if (world.isClientSide()) {
+            if (to == Phase.PERFORM) {
+                ClientTickingSoundsHelper.playStandEntityCancelableActionSound(standEntity, 
+                        ModSounds.CRAZY_DIAMOND_FIX_LOOP.get(), this, Phase.PERFORM, 1.0F, 1.0F, true);
+            }
+            else if (from == Phase.PERFORM) {
+                standEntity.playSound(ModSounds.CRAZY_DIAMOND_FIX_ENDED.get(), 1.0F, 1.0F, ClientUtil.getClientPlayer());
+            }
+        }
+    }
+    
+    @Override
+    public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
+        if (!standEntity.isArmsOnlyMode()) {
+            LivingEntity user = standEntity.getUser();
+            if (user.getMainArm() == HandSide.LEFT) {
+                return userOffsetLeftArm;
+            }
+        }
+        return super.getOffsetFromUser(standPower, standEntity, task);
+    }
+
+    @Override
+    public float yRotForOffset(LivingEntity user, StandEntityTask task) {
+        return user.yBodyRot;
+    }
+    
+    @Override
+    public void rotateStand(StandEntity standEntity, StandEntityTask task) {
+        if (standEntity.isArmsOnlyMode()) {
+            super.rotateStand(standEntity, task);
+        }
+        else if (!standEntity.isRemotePositionFixed()) {
+            LivingEntity user = standEntity.getUser();
+            if (user != null) {
+                float rotationOffset = user.getMainArm() == HandSide.RIGHT ? 15 : -15;
+                standEntity.setRot(user.yBodyRot + rotationOffset, user.xRot);
+                standEntity.setYHeadRot(user.yBodyRot + rotationOffset);
+            }
+        }
     }
 }

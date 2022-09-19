@@ -45,9 +45,10 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
     }
     
     @Override
-    public void onPhaseSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task, int ticks) {
-        super.onPhaseSet(world, standEntity, standPower, phase, task, ticks);
-        if (phase == Phase.PERFORM) {
+    public void phaseTransition(World world, StandEntity standEntity, IStandPower standPower, 
+            Phase from, Phase to, StandEntityTask task, int ticks) {
+        super.phaseTransition(world, standEntity, standPower, from, to, task, ticks);
+        if (to == Phase.PERFORM) {
             if (standEntity.isFollowingUser() && standEntity.getAttackSpeed() < 24) {
                 LivingEntity user = standEntity.getUser();
                 if (user != null) {
@@ -63,7 +64,7 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
 
     @Override
     public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-        float completion = task.getTaskCompletion(1.0F);
+        float completion = task.getPhaseCompletion(1.0F);
         boolean lastTick = task.getTicksLeft() <= 1;
         boolean moveForward = completion <= 0.5F;
         if (moveForward) {
@@ -85,7 +86,7 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
     @Override
     public StandEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
         StandEntityPunch stab = super.punchEntity(stand, target, dmgSource);
-        stab.setPunchSound(null);
+        stab.impactSound(null);
         if (stand.getAttackSpeed() < 24) {
             boolean left = MathHelper.wrapDegrees(
                     MathUtil.yRotDegFromVec(stand.getLookAngle())
@@ -99,8 +100,13 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
             return stab
                     .addKnockback(0.25F)
                     .knockbackXRot(-90F)
-                    .setPunchSound(null);
+                    .impactSound(null);
         }
+    }
+    
+    @Override
+    protected boolean standKeepsTarget(ActionTarget target) {
+        return false;
     }
     
     @Override

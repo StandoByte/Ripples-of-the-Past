@@ -36,6 +36,8 @@ import net.minecraft.util.math.vector.Matrix3f;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.World;
 
@@ -69,6 +71,20 @@ public class ClientUtil {
     
     public static Entity getCrosshairPickEntity() {
         return Minecraft.getInstance().crosshairPickEntity;
+    }
+    
+    public static float getPartialTick() {
+        return Minecraft.getInstance().getFrameTime();
+    }
+    
+    public static void setCameraEntityPreventShaderSwitch(Minecraft mc, Entity entity) {
+        mc.setCameraEntity(entity);
+        if (mc.gameRenderer.currentEffect() == null) {
+            ResourceLocation shader = ClientEventHandler.getInstance().getCurrentShader();
+            if (shader != null) {
+                mc.gameRenderer.loadEffect(shader);
+            }
+        }
     }
     
     public static void openScreen(Screen screen) {
@@ -201,5 +217,9 @@ public class ClientUtil {
         } else {
             return DefaultPlayerSkin.getDefaultSkin(PlayerEntity.createPlayerUUID(gameProfile));
         }
+    }
+    
+    public static ITextComponent donoItemTooltip(String donoUsername) {
+        return new TranslationTextComponent("item.jojo.dono_tooltip", donoUsername).withStyle(TextFormatting.DARK_GRAY);
     }
 }

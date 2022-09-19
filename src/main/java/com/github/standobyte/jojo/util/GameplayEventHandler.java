@@ -15,8 +15,10 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.JojoModConfig.Common;
 import com.github.standobyte.jojo.action.non_stand.VampirismFreeze;
+import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.action.stand.effect.BoyIIManStandPartTakenEffect;
+import com.github.standobyte.jojo.action.stand.effect.DriedBloodDrops;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.block.StoneMaskBlock;
 import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
@@ -25,8 +27,10 @@ import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.entity.SoulEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.CDBloodCutterEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRCrossfireHurricaneEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
@@ -62,6 +66,7 @@ import com.github.standobyte.jojo.tileentity.StoneMaskTileEntity;
 import com.github.standobyte.jojo.util.damage.DamageUtil;
 import com.github.standobyte.jojo.util.damage.IModdedDamageSource;
 import com.github.standobyte.jojo.util.damage.IStandDamageSource;
+import com.github.standobyte.jojo.util.damage.StandLinkDamageSource;
 import com.github.standobyte.jojo.util.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 import com.github.standobyte.jojo.util.utils.MathUtil;
@@ -160,6 +165,8 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.player.PlayerWakeUpEvent;
+import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.event.world.ChunkWatchEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.Event.Result;
@@ -277,14 +284,21 @@ public class GameplayEventHandler {
                     }
                 });
             });
-            
+
             ((ServerWorld) event.world).getChunkSource().chunkMap.getChunks().forEach(chunkHolder -> {
                 Chunk chunk = chunkHolder.getTickingChunk();
-                if (chunk != null) { // FIXME !!! (restore terrain) and if it's loaded
-//                    JojoMod.LOGGER.debug(chunk.getPos());
+                if (chunk != null) {
                     chunk.getCapability(ChunkCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
                 }
             });
+        }
+    }
+    
+    @SubscribeEvent
+    public static void onChunkLoad(ChunkWatchEvent.Watch event) {
+        Chunk chunk = event.getWorld().getChunkSource().getChunk(event.getPos().x, event.getPos().z, false);
+        if (chunk != null) {
+            chunk.getCapability(ChunkCapProvider.CAPABILITY).ifPresent(cap -> cap.onChunkLoad(event.getPlayer()));
         }
     }
 
@@ -452,6 +466,7 @@ public class GameplayEventHandler {
         LivingEntity target = event.getEntityLiving();
         if (!target.level.isClientSide()) {
 	        DamageSource damageSrc = event.getSource();
+	        if (target.is(damageSrc.getEntity())) return;
 	        float points = Math.min(event.getAmount(), target.getHealth());
 	        
 	        if (damageSrc instanceof IStandDamageSource) {
@@ -599,7 +614,7 @@ public class GameplayEventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingDamage(LivingDamageEvent event) {
-        dropBlood(event.getSource(), event.getAmount(), event.getEntityLiving());
+        bleed(event.getSource(), event.getAmount(), event.getEntityLiving());
         StandType.onHurtByStand(event.getSource(), event.getAmount(), event.getEntityLiving());
         
         for (PowerClassification powerClassification : PowerClassification.values()) {
@@ -619,7 +634,6 @@ public class GameplayEventHandler {
         }
     }
 
-    // sucks that LivingKnockBackEvent doesn't receive DamageSource
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onEntityKnockback(LivingKnockBackEvent event) {
         event.getEntityLiving().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(util -> {
@@ -630,62 +644,87 @@ public class GameplayEventHandler {
         });
     }
 
-    private static void dropBlood(DamageSource dmgSource, float dmgAmount, LivingEntity target) {
+    private static void bleed(DamageSource dmgSource, float dmgAmount, LivingEntity target) {
+        if (dmgSource instanceof StandLinkDamageSource) {
+            dmgSource = ((StandLinkDamageSource) dmgSource).getOriginalDamageSource();
+        }
         World world = target.level;
-        if (world.isClientSide()) return;
-        if (dmgAmount >= 0.98F && 
-                (!dmgSource.isBypassArmor() && !dmgSource.isFire() && !dmgSource.isMagic() && !dmgSource.isBypassMagic() || dmgSource == DamageSource.FALL)) {
-            if (!JojoModUtil.canBleed(target) || dmgSource.getMsgId().startsWith(DamageUtil.PILLAR_MAN_ABSORPTION.getMsgId())) {
-                return;
+        if (world.isClientSide()
+                || dmgAmount < 0.98F
+                || dmgSource.isBypassArmor() && dmgSource != DamageSource.FALL
+                || dmgSource.isFire()
+                || dmgSource.isMagic()
+                || dmgSource.isBypassMagic()
+                || dmgSource.getMsgId().startsWith(DamageUtil.PILLAR_MAN_ABSORPTION.getMsgId())
+                || !JojoModUtil.canBleed(target)) return;
+
+        
+        IStandPower.getStandPowerOptional(target).ifPresent(power -> {
+            if (ModActions.CRAZY_DIAMOND_BLOOD_CUTTER.get().isUnlocked(power)) {
+                power.setCooldownTimer(ModActions.CRAZY_DIAMOND_BLOOD_CUTTER.get(), 0);
             }
-            double radius = 2;
-            BlockPos entityPos = target.blockPosition();
-            
-            List<Vector3d> particlePos = new ArrayList<>();
-            List<LivingEntity> entitiesAround = JojoModUtil.entitiesAround(LivingEntity.class, target, radius, true, EntityPredicates.NO_SPECTATORS);
-            entitiesAround.forEach(entity -> {
-                if (dropBloodOnEntity(dmgSource, entity)) {
-                    particlePos.add(entity.getEyePosition(1.0F));
-                }
-            });
-            
-            BlockPos.betweenClosedStream(entityPos.offset(-radius, -radius, -radius), entityPos.offset(radius, radius, radius))
-            .filter(pos -> world.getBlockState(pos).getBlock() == ModBlocks.STONE_MASK.get())
-            .forEach(pos -> {
-                BlockState blockState = world.getBlockState(pos);
-                world.playSound(null, pos, ModSounds.STONE_MASK_ACTIVATION.get(), SoundCategory.BLOCKS, 1.0F, 1.0F);
-                switch (blockState.getValue(HorizontalFaceBlock.FACE)) {
-                case FLOOR:
-                    TileEntity tileEntity = world.getBlockEntity(pos);
-                    if (tileEntity instanceof StoneMaskTileEntity) {
-                        ((StoneMaskTileEntity) tileEntity).activate();
-                    }
-                    particlePos.add(Vector3d.atBottomCenterOf(pos));
-                    break;
-                default:
-                    Block.popResource(world, pos, StoneMaskBlock.getItemFromBlock(world, pos, blockState));
-                    world.removeBlock(pos, false);
-                    particlePos.add(Vector3d.atCenterOf(pos));
-                    break;
-                }
-            });
-            
-            if (!particlePos.isEmpty()) {
-                Vector3d particleSource = target.getBoundingBox().getCenter();
-                int count = Math.min((int) (dmgAmount * 5), 50);
-                particlePos.forEach(pos -> {
-                    PacketManager.sendToClientsTracking(new BloodParticlesPacket(particleSource, pos, count), target);
-                });
+        });
+        
+        
+        double radius = 2;
+        BlockPos entityPos = target.blockPosition();
+
+        List<Vector3d> particlePos = new ArrayList<>();
+        List<LivingEntity> entitiesAround = JojoModUtil.entitiesAround(LivingEntity.class, target, radius, true, EntityPredicates.NO_SPECTATORS);
+        for (LivingEntity entity : entitiesAround) {
+            if (dropBloodOnEntity(dmgSource, dmgAmount, target, entity)) {
+                particlePos.add(entity.getEyePosition(1.0F));
             }
+        }
+
+        BlockPos.betweenClosedStream(entityPos.offset(-radius, -radius, -radius), entityPos.offset(radius, radius, radius))
+        .filter(pos -> world.getBlockState(pos).getBlock() == ModBlocks.STONE_MASK.get())
+        .forEach(pos -> {
+            BlockState blockState = world.getBlockState(pos);
+            world.playSound(null, pos, ModSounds.STONE_MASK_ACTIVATION.get(), SoundCategory.BLOCKS, 1.0F, 1.0F);
+            switch (blockState.getValue(HorizontalFaceBlock.FACE)) {
+            case FLOOR:
+                TileEntity tileEntity = world.getBlockEntity(pos);
+                if (tileEntity instanceof StoneMaskTileEntity) {
+                    ((StoneMaskTileEntity) tileEntity).activate();
+                }
+                particlePos.add(Vector3d.atBottomCenterOf(pos));
+                break;
+            default:
+                Block.popResource(world, pos, StoneMaskBlock.getItemFromBlock(world, pos, blockState));
+                world.removeBlock(pos, false);
+                particlePos.add(Vector3d.atCenterOf(pos));
+                break;
+            }
+        });
+
+        if (!particlePos.isEmpty()) {
+            Vector3d particleSource = target.getBoundingBox().getCenter();
+            int count = Math.min((int) (dmgAmount * 5), 50);
+            particlePos.forEach(pos -> {
+                PacketManager.sendToClientsTrackingAndSelf(new BloodParticlesPacket(particleSource, pos, count), target);
+            });
         }
     }
     
-    private static boolean dropBloodOnEntity(DamageSource dmgSource, LivingEntity entity) {
+    private static boolean dropBloodOnEntity(DamageSource dmgSource, float dmgAmount, LivingEntity bleedingEntity, LivingEntity nearbyEntity) {
         boolean dropped = false;
-        ItemStack headArmor = entity.getItemBySlot(EquipmentSlotType.HEAD);
-        if (headArmor.getItem() instanceof StoneMaskItem && applyStoneMask(entity, headArmor)) {
+        
+        ItemStack headArmor = nearbyEntity.getItemBySlot(EquipmentSlotType.HEAD);
+        if (headArmor.getItem() instanceof StoneMaskItem && applyStoneMask(nearbyEntity, headArmor)) {
             dropped = true;
         }
+        
+        if ((dropped || nearbyEntity.getRandom().nextFloat() < dmgAmount / 5)) {
+            dropped |= IStandPower.getStandPowerOptional(bleedingEntity).map(power -> {
+                if (ModActions.CRAZY_DIAMOND_BLOOD_CUTTER.get().isUnlocked(power) && CDBloodCutterEntity.canHaveBloodDropsOn(nearbyEntity, power)) {
+                    DriedBloodDrops bloodDrops = power.getContinuousEffects().getOrCreateEffect(ModStandEffects.DRIED_BLOOD_DROPS.get(), nearbyEntity);
+                    return bloodDrops.tickCount == 0;
+                }
+                return false;
+            }).orElse(false);
+        }
+        
         return dropped;
     }
 
@@ -964,6 +1003,8 @@ public class GameplayEventHandler {
                     20, (double) dead.getBbWidth() * 2D - 1D, (double) dead.getBbHeight(), (double) dead.getBbWidth() * 2D - 1D, 0.02D);
             dead.addEffect(new EffectInstance(Effects.INVISIBILITY, 200, 0, false, false, true));
             chorusFruitTeleport(dead);
+            dead.level.getEntitiesOfClass(MobEntity.class, dead.getBoundingBox().inflate(8), 
+                    mob -> mob.getTarget() == dead).forEach(mob -> mob.setTarget(null));
             INonStandPower.getNonStandPowerOptional(dead).ifPresent(power -> {
                 power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
                     if (hamon.getTechnique() == Technique.JOSEPH) {
@@ -1197,6 +1238,14 @@ public class GameplayEventHandler {
                     stand.setStamina(stand.getMaxStamina());
                 }
             });
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onBlockBreak(BlockEvent.BreakEvent event) {
+        if (!event.getWorld().isClientSide()) {
+            CrazyDiamondRestoreTerrain.rememberBrokenBlockCreative((World) event.getWorld(), 
+                    event.getPos(), event.getState(), Optional.ofNullable(event.getWorld().getBlockEntity(event.getPos())));
         }
     }
 }

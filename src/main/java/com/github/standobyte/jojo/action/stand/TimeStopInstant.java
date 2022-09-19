@@ -59,8 +59,11 @@ public class TimeStopInstant extends StandAction {
     @Override
     protected Action<IStandPower> replaceAction(IStandPower power) {
         LivingEntity user = power.getUser();
-        return user != null && TimeResume.userTimeStopInstance(user.level, user, null)
-                ? ModActions.TIME_RESUME.get() : this;
+        if (TimeUtil.isTimeStopped(user.level, user.blockPosition())) {
+            return user != null && TimeResume.userTimeStopInstance(user.level, user, null)
+                    ? ModActions.TIME_RESUME.get() : null;
+        }
+        return this;
     }
     
     
@@ -114,8 +117,8 @@ public class TimeStopInstant extends StandAction {
             if (baseTimeStop.get() != null && power.hasPower()
                     && stats instanceof TimeStopperStandStats) {
                 TimeStopperStandStats tsStats = (TimeStopperStandStats) stats;
-                float learning = tsStats.timeStopLearningPerTick * impliedTicks;
-                power.addLearningProgressPoints(baseTimeStop.get(), learning);
+//                float learning = tsStats.timeStopLearningPerTick * impliedTicks;
+//                power.addLearningProgressPoints(baseTimeStop.get(), learning);
                 
                 int cooldown = (int) (TimeStopInstance.getTimeStopCooldown(power, tsStats, impliedTicks) * COOLDOWN_RATIO);
             	power.setCooldownTimer(this, cooldown);

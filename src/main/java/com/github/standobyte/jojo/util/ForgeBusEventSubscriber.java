@@ -18,6 +18,7 @@ import com.github.standobyte.jojo.capability.entity.power.NonStandCapProvider;
 import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
+import com.github.standobyte.jojo.command.GenStandStatsCommand;
 import com.github.standobyte.jojo.command.HamonCommand;
 import com.github.standobyte.jojo.command.JojoControlsCommand;
 import com.github.standobyte.jojo.command.JojoEnergyCommand;
@@ -88,6 +89,7 @@ public class ForgeBusEventSubscriber {
         JojoControlsCommand.register(dispatcher);
         HamonCommand.register(dispatcher);
         RockPaperScissorsCommand.register(dispatcher);
+        GenStandStatsCommand.register(dispatcher);
     }
     
     @SubscribeEvent
@@ -209,7 +211,6 @@ public class ForgeBusEventSubscriber {
         if (event.getWorld() instanceof ServerWorld) {
             ServerWorld serverWorld = (ServerWorld) event.getWorld();
             addDimensionalSpacing(serverWorld);
-            StandStatsManager.getInstance().writeDefaultStandStats(serverWorld);
         }
     }
     

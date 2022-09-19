@@ -16,14 +16,16 @@ import net.minecraftforge.fml.network.NetworkEvent;
 public class TrTypeStandInstancePacket {
     private final int entityId;
     private final StandInstance standInstance;
+    private final int resolveLevel;
 
-    public TrTypeStandInstancePacket(int entityId, StandInstance standInstance) {
+    public TrTypeStandInstancePacket(int entityId, StandInstance standInstance, int resolveLevel) {
         this.entityId = entityId;
         this.standInstance = standInstance;
+        this.resolveLevel = resolveLevel;
     }
     
     public static TrTypeStandInstancePacket noStand(int entityId) {
-        return new TrTypeStandInstancePacket(entityId, null);
+        return new TrTypeStandInstancePacket(entityId, null, 0);
     }
 
     public static void encode(TrTypeStandInstancePacket msg, PacketBuffer buf) {
@@ -32,6 +34,11 @@ public class TrTypeStandInstancePacket {
         buf.writeInt(msg.entityId);
         if (!noStand) {
             msg.standInstance.toBuf(buf);
+            boolean setResolveLevel = msg.resolveLevel >= 0;
+            buf.writeBoolean(setResolveLevel);
+            if (setResolveLevel) {
+                buf.writeVarInt(msg.resolveLevel);
+            }
         }
     }
 
@@ -40,7 +47,7 @@ public class TrTypeStandInstancePacket {
         if (noStand) {
             return noStand(buf.readInt());
         }
-        return new TrTypeStandInstancePacket(buf.readInt(), StandInstance.fromBuf(buf));
+        return new TrTypeStandInstancePacket(buf.readInt(), StandInstance.fromBuf(buf), buf.readBoolean() ? buf.readVarInt() : -1);
     }
 
     public static void handle(TrTypeStandInstancePacket msg, Supplier<NetworkEvent.Context> ctx) {
@@ -59,6 +66,9 @@ public class TrTypeStandInstancePacket {
                     }
                     else {
                         stand.giveStand(msg.standInstance, false);
+                        if (msg.resolveLevel >= 0) {
+                            stand.setResolveLevel(msg.resolveLevel);
+                        }
                     }
                 });
             }

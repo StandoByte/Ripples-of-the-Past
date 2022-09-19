@@ -5,11 +5,13 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack.HeavyPunchInstance;
+import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -22,10 +24,12 @@ import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 import com.github.standobyte.jojo.util.utils.TimeUtil;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -170,7 +174,13 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
                 .addKnockback(4)
                 .disableBlocking(1.0F)
                 .setStandInvulTime(10)
-                .setPunchSound(ModSounds.STAND_STRONG_ATTACK);
+                .impactSound(ModSounds.THE_WORLD_PUNCH_HEAVY);
+    }
+    
+    @Override
+    public StandBlockPunch punchBlock(StandEntity stand, BlockPos pos, BlockState state) {
+        return IHasStandPunch.super.punchBlock(stand, pos, state)
+                .impactSound(ModSounds.THE_WORLD_PUNCH_HEAVY);
     }
     
     @Override
@@ -189,16 +199,13 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
     }
     
     @Override
-    public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, IStandPower standPower) {
-        if (target.getType() == TargetType.BLOCK) {
-            return ActionConditionResult.POSITIVE;
-        }
-        return super.checkTarget(target, user, standPower);
+    protected boolean standKeepsTarget(ActionTarget target) {
+        return true;
     }
     
     
     
-    public static class TheWorldTSHeavyPunch extends StandEntityPunch {
+    public static class TheWorldTSHeavyPunch extends HeavyPunchInstance {
 
         public TheWorldTSHeavyPunch(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
             super(stand, target, dmgSource);
@@ -212,6 +219,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
                     JojoModUtil.sayVoiceLine(user, ModSounds.DIO_THIS_IS_THE_WORLD.get());
                 }
             }
+            super.afterAttack(stand, target, dmgSource, task, hurt, killed);
         }
     }
 }

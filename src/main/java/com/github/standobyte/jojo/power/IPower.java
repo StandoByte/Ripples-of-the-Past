@@ -47,7 +47,7 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     ActionCooldownTracker getCooldowns();
 
     @Nullable Action<P> getAction(ActionType type, int index, boolean shift);
-    boolean onClickAction(Action<P> action, boolean shift, ActionTarget target);
+    boolean clickAction(Action<P> action, boolean shift, ActionTarget target);
     ActionConditionResult checkRequirements(Action<P> action, Container<ActionTarget> targetContainer, boolean checkTargetType);
     ActionConditionResult checkTarget(Action<P> action, Container<ActionTarget> targetContainer);
     boolean canUsePower();
@@ -89,7 +89,7 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     default boolean onClickAction(ActionType type, int index, boolean shift, ActionTarget target, Optional<Action<?>> inputValidation) {
         Action<P> action = this.getAction(type, index, shift);
         if (action != null && inputValidation.map(clientAction -> clientAction == action).orElse(true)) {
-            return onClickAction(action, shift, target);
+            return clickAction(action, shift, target);
         }
         return false;
     }

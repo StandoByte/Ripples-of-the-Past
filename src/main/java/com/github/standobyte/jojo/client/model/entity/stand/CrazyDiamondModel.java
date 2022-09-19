@@ -1,19 +1,22 @@
 package com.github.standobyte.jojo.client.model.entity.stand;
 
+import com.github.standobyte.jojo.action.stand.CrazyDiamondRepairItem;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
+import com.github.standobyte.jojo.client.model.pose.ConditionalModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseTransitionMultiple;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
-import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
-import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
+import com.github.standobyte.jojo.client.model.pose.anim.CopyBipedUserPose;
+import com.github.standobyte.jojo.client.model.pose.anim.PosedActionAnimation;
+import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.stands.CrazyDiamondEntity;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.util.HandSide;
 
 // Made with Blockbench 4.1.3
 
 
-// FIXME ! (CD model) poses
 public class CrazyDiamondModel extends HumanoidStandModel<CrazyDiamondEntity> {
     private final ModelRenderer helmet;
     private final ModelRenderer bone2;
@@ -570,7 +573,7 @@ public class CrazyDiamondModel extends HumanoidStandModel<CrazyDiamondEntity> {
                 RotationAngle.fromDegrees(rightLeg, 15, 30, 0),
                 RotationAngle.fromDegrees(rightLowerLeg, 30, 0, 0)
         });
-        actionAnim.put(StandPose.HEAVY_ATTACK, new StandActionAnimation.Builder<CrazyDiamondEntity>()
+        actionAnim.put(StandPose.HEAVY_ATTACK, new PosedActionAnimation.Builder<CrazyDiamondEntity>()
                 .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransitionMultiple.Builder<>(heavyPunchPose1)
                         .addPose(0.2222F, heavyPunchPose2)
                         .addPose(0.3333F, heavyPunchPose3)
@@ -583,7 +586,30 @@ public class CrazyDiamondModel extends HumanoidStandModel<CrazyDiamondEntity> {
                         .addPose(0.5F, heavyPunchPose8)
                         .build(idlePose))
                 .build(idlePose));
-            
+        
+        
+        RotationAngle[] itemFixRotations = new RotationAngle[] {
+                RotationAngle.fromDegrees(head, 31.301F, 27.0408F, 3.6059F),
+                RotationAngle.fromDegrees(body, 5.7686F, 29.8742F, 5.3807F),
+                RotationAngle.fromDegrees(upperPart, 0.0F, 6.0F, 0.0F),
+                RotationAngle.fromDegrees(leftArm, -33.6218F, 25.82F, -22.9983F),
+                RotationAngle.fromDegrees(leftForeArm, -53.621F, -34.2195F, 50.6576F),
+                RotationAngle.fromDegrees(rightArm, -45.3923F, -27.0377F, 10.4828F),
+                RotationAngle.fromDegrees(rightForeArm, -38.0639F, -35.8085F, 4.6156F)
+        };
+        actionAnim.put(CrazyDiamondRepairItem.ITEM_FIX_POS, new PosedActionAnimation.Builder<CrazyDiamondEntity>()
+                .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ConditionalModelPose<CrazyDiamondEntity>()
+                        .addPose(stand -> !stand.isArmsOnlyMode() && stand.getUser() != null && stand.getUser().getMainArm() == HandSide.RIGHT, 
+                                new ModelPose<CrazyDiamondEntity>(itemFixRotations))
+                        .addPose(stand -> !stand.isArmsOnlyMode() && stand.getUser() != null && stand.getUser().getMainArm() == HandSide.LEFT, 
+                                new ModelPose<CrazyDiamondEntity>(mirrorAngles(itemFixRotations)))
+                        .addPose(stand -> stand.isArmsOnlyMode(), 
+                                new CopyBipedUserPose<>(this))
+                        )
+                .build(idlePose));
+        
+        
+        
         super.initActionPoses();
     }
     

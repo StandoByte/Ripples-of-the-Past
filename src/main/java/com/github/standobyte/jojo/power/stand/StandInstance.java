@@ -68,7 +68,7 @@ public class StandInstance {
     public void tick(IStandPower standPower, LivingEntity standUser, World world) {
         if (isDirty) {
             if (!world.isClientSide()) {
-                PacketManager.sendToClientsTrackingAndSelf(new TrTypeStandInstancePacket(standUser.getId(), this), standUser);
+                PacketManager.sendToClientsTrackingAndSelf(new TrTypeStandInstancePacket(standUser.getId(), this, -1), standUser);
             }
             isDirty = false;
         }

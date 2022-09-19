@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -27,6 +28,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
@@ -150,7 +152,9 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         if (targetTooFar) {
             return conditionMessageContinueHold("target_too_far");
         }
-        return checkTarget(target, user, power);
+        
+        ActionConditionResult targetCheck = checkTarget(target, user, power);
+        return targetCheck;
     }
     
     protected ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, P power) {
@@ -189,11 +193,12 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     public final Action<P> getVisibleAction(P power) {
     	if (isUnlocked(power)) {
     		Action<P> replacingVariation = replaceAction(power);
-    		return replacingVariation.isUnlocked(power) ? replacingVariation : this;
+    		return replacingVariation == null || replacingVariation.isUnlocked(power) ? replacingVariation : this;
     	}
         return null;
     }
     
+    @Nullable
     protected Action<P> replaceAction(P power) {
     	return this;
     }
@@ -228,6 +233,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     public void onClick(World world, LivingEntity user, P power) {}
+    
+    public void afterClick(World world, LivingEntity user, P power, boolean passedRequirements) {}
     
     public ActionTarget targetBeforePerform(World world, LivingEntity user, P power, ActionTarget target) {
         return target;
@@ -333,6 +340,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     public void appendWarnings(List<ITextComponent> warnings, P power, PlayerEntity clientPlayerUser) {}
     
+    public boolean greenSelection(P power, ActionConditionResult conditionCheck) {
+        return false;
+    }
+    
     public String getTranslationKey(P power, ActionTarget target) {
         if (translationKey == null) {
             translationKey = Util.makeDescriptionId("action", this.getRegistryName());
@@ -347,6 +358,14 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     public ITextComponent getNameShortened(P power, String key) {
         return getTranslatedName(power, ClientUtil.shortenedTranslationExists(key) ? 
                 ClientUtil.getShortenedTranslationKey(key) : key);
+    }
+    
+    public ResourceLocation getTexture(P power) {
+        return getRegistryName();
+    }
+    
+    public Stream<ResourceLocation> getTexLocationstoLoad() {
+        return Stream.of(getRegistryName());
     }
     
     @Nullable
@@ -446,6 +465,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         private boolean cancelsVanillaClick = true;
         private Supplier<SoundEvent> shoutSupplier = () -> null;
         protected List<Supplier<? extends Action<?>>> shiftVariationOf = new ArrayList<>();
+        
+        public T cooldown(int cooldown) {
+            return cooldown(0, cooldown);
+        }
         
         public T cooldown(int technical, int additional) {
             this.cooldownTechnical = technical;

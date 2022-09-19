@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.action.stand;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.damaging.projectile.HGEmeraldEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
@@ -39,12 +38,6 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
 //    }
     
     @Override
-    public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-    	task.setOffsetFromUser(super.getOffsetFromUser(userPower, standEntity, task.getTarget()));
-    	standEntity.updatePosition();
-    }
-    
-    @Override
     public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
             boolean shift = isShiftVariation();
@@ -68,11 +61,6 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
                 }
             }
         }
-    }
-    
-    @Override
-    public void standTickRecovery(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-    	task.setOffsetFromUser(null);
     }
     
     private RayTraceResult aimForBarriers(HierophantGreenEntity stand) {
@@ -119,8 +107,8 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
     }
 
     @Override
-    public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, ActionTarget target) {
-        return null;
+    public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
+        return !standEntity.isArmsOnlyMode() && task.getPhase() != Phase.PERFORM ? null : super.getOffsetFromUser(standPower, standEntity, task);
     }
     
 }

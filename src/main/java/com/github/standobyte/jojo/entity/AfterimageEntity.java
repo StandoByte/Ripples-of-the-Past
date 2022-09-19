@@ -48,7 +48,7 @@ public class AfterimageEntity extends Entity implements IEntityAdditionalSpawnDa
         }
     }
     
-    public Entity getOriginEntity() {
+    public LivingEntity getOriginEntity() {
         return originEntity;
     }
     

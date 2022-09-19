@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.stand;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGStringEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
@@ -44,5 +45,10 @@ public class HierophantGreenStringAttack extends StandEntityAction {
     			(newAction == ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get()
     			|| newAction == ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED.get())
     			|| super.isCancelable(standPower, standEntity, newAction, phase);
+    }
+    
+    @Override
+    protected boolean standKeepsTarget(ActionTarget target) {
+        return true;
     }
 }
