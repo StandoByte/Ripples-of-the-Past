@@ -3,17 +3,16 @@ package com.github.standobyte.jojo.capability.chunk;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.BrokenChunkBlocksPacket;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
@@ -30,16 +29,14 @@ import net.minecraft.nbt.NBTUtil;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.server.ServerChunkProvider;
 
-// FIXME !!! (restore terrain) limit the storage
 public class ChunkCap {
     private final Chunk chunk;
     
     private boolean loadedNBT = false;
     private final Map<BlockPos, PrevBlockInfo> brokenBlocks = new HashMap<>();
     private final List<PrevBlockInfo> blocksToSync = new ArrayList<>();
-    private Set<ServerPlayerEntity> syncedTo = new HashSet<>();
+//    private Set<ServerPlayerEntity> syncedTo = new HashSet<>();
 
     public ChunkCap(Chunk chunk) {
         this.chunk = chunk;
@@ -89,24 +86,22 @@ public class ChunkCap {
                 loadedNBT = false;
             }
             
-            else {
-                Iterator<Map.Entry<BlockPos, PrevBlockInfo>> it = brokenBlocks.entrySet().iterator();
-                while (it.hasNext()) {
-                    Map.Entry<BlockPos, PrevBlockInfo> entry = it.next();
-                    if (entry.getValue().forget()) {
-                        it.remove();
-                        blocksToSync.add(PrevBlockInfo.clientInstance(entry.getKey(), Blocks.AIR.defaultBlockState()));
-                    }
-                }
-            }
+//            else {
+//                Iterator<Map.Entry<BlockPos, PrevBlockInfo>> it = brokenBlocks.entrySet().iterator();
+//                while (it.hasNext()) {
+//                    Map.Entry<BlockPos, PrevBlockInfo> entry = it.next();
+//                    if (entry.getValue().forget()) {
+//                        it.remove();
+//                        blocksToSync.add(PrevBlockInfo.clientInstance(entry.getKey(), Blocks.AIR.defaultBlockState()));
+//                    }
+//                }
+//            }
     
-            // FIXME !!! (restore terrain) the packet size might be too large
             if (!blocksToSync.isEmpty()) {
                 PacketManager.sendToTrackingChunk(new BrokenChunkBlocksPacket(blocksToSync, false), chunk);
-                syncedTo = ((ServerChunkProvider) chunk.getLevel().getChunkSource()).chunkMap.getPlayers(chunk.getPos(), false)
-                        .collect(Collectors.toSet());
+//                syncedTo = ((ServerChunkProvider) chunk.getLevel().getChunkSource()).chunkMap.getPlayers(chunk.getPos(), false)
+//                        .collect(Collectors.toSet());
             }
-            blocksToSync.clear();
         }
     }
 
@@ -122,14 +117,20 @@ public class ChunkCap {
         return brokenBlocks.values().stream();
     }
     
+    public boolean wasBlockBroken(BlockPos pos) {
+        return brokenBlocks.containsKey(pos);
+    }
+    
     
     CompoundNBT save() {
         CompoundNBT nbt = new CompoundNBT();
-        ListNBT blocksBroken = new ListNBT();
-        for (PrevBlockInfo block : brokenBlocks.values()) {
-            blocksBroken.add(block.toNBT());
+        if (JojoModConfig.getCommonConfigInstance(false).saveBrokenBlocks.get()) {
+            ListNBT blocksBroken = new ListNBT();
+            for (PrevBlockInfo block : brokenBlocks.values()) {
+                blocksBroken.add(block.toNBT());
+            }
+            nbt.put("Blocks", blocksBroken);
         }
-        nbt.put("Blocks", blocksBroken);
         return nbt;
     }
     

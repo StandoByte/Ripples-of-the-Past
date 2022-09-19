@@ -32,7 +32,7 @@ public class BrokenChunkBlocksPacket {
         NetworkUtil.writeCollection(buf, msg.blocks, (buffer, block) -> {
             buffer.writeBlockPos(block.pos);
             buf.writeVarInt(Block.getId(block.state));
-        });
+        }, true);
         buf.writeBoolean(msg.reset);
     }
 

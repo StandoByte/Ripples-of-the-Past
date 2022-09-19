@@ -1,14 +1,18 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStandEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
+import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.Entity;
@@ -78,6 +82,23 @@ public class CDBloodCutterEntity extends ModdedProjectileEntity {
                         (random.nextDouble() - 0.5) * 0.2);
             }
         }
+    }
+    
+    @Override
+    protected boolean hurtTarget(Entity target, @Nullable LivingEntity owner) {
+        if (target instanceof LivingEntity && INonStandPower.getNonStandPowerOptional((LivingEntity) target)
+                .map(power -> {
+                    if (power.getType() == ModNonStandPowers.VAMPIRISM.get()) {
+                        target.playSound(ModSounds.VAMPIRE_BLOOD_DRAIN.get(), 1.0F, 1.0F);
+                        power.addEnergy(5F);
+                        return true;
+                    }
+                    return false;
+                }).orElse(false)) {
+            remove();
+            return false;
+        }
+        return super.hurtTarget(target, owner);
     }
     
     public static boolean canHaveBloodDropsOn(Entity target, IStandPower bleedingEntityStand) {

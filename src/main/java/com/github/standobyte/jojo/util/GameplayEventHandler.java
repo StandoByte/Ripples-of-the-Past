@@ -284,11 +284,10 @@ public class GameplayEventHandler {
                     }
                 });
             });
-            
+
             ((ServerWorld) event.world).getChunkSource().chunkMap.getChunks().forEach(chunkHolder -> {
                 Chunk chunk = chunkHolder.getTickingChunk();
-                if (chunk != null) { // FIXME !!! (restore terrain) and if it's loaded
-//                    JojoMod.LOGGER.debug(chunk.getPos());
+                if (chunk != null) {
                     chunk.getCapability(ChunkCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
                 }
             });
@@ -1004,6 +1003,8 @@ public class GameplayEventHandler {
                     20, (double) dead.getBbWidth() * 2D - 1D, (double) dead.getBbHeight(), (double) dead.getBbWidth() * 2D - 1D, 0.02D);
             dead.addEffect(new EffectInstance(Effects.INVISIBILITY, 200, 0, false, false, true));
             chorusFruitTeleport(dead);
+            dead.level.getEntitiesOfClass(MobEntity.class, dead.getBoundingBox().inflate(8), 
+                    mob -> mob.getTarget() == dead).forEach(mob -> mob.setTarget(null));
             INonStandPower.getNonStandPowerOptional(dead).ifPresent(power -> {
                 power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
                     if (hamon.getTechnique() == Technique.JOSEPH) {

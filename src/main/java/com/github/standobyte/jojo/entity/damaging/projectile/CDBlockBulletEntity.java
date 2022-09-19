@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondHeal;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
+import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModParticles;
@@ -78,13 +79,14 @@ public class CDBlockBulletEntity extends ModdedProjectileEntity {
             if (!target.isAlive()) {
                 homingTarget = Optional.empty();
             }
-            else if (tickCount >= 8 || target.distanceToSqr(this) < 36) {
+            else if (tickCount >= 10) {
                 Vector3d targetPos = target.getBoundingBox().getCenter();
                 Vector3d vecToTarget = targetPos.subtract(this.position());
                 setDeltaMovement(vecToTarget.normalize().scale(this.getDeltaMovement().length()));
-                // FIXME !! (item projectile) use energy
                 if (!level.isClientSide()) {
-                    
+                    getUserStandPower().ifPresent(stand -> {
+                        stand.consumeStamina(stand.getStaminaTickGain() + ModActions.CRAZY_DIAMOND_BLOCK_BULLET.get().getStaminaCostTicking(stand));
+                    });
                 }
                 else {
                     if (StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) {

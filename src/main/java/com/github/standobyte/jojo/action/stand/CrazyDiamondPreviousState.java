@@ -148,7 +148,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                 }
 
                 else if (targetEntity.getType() == EntityType.SNOW_GOLEM) {
-                    if (!CrazyDiamondHeal.healLivingEntity(world, (LivingEntity) targetEntity)) {
+                    if (!CrazyDiamondHeal.healLivingEntity(world, (LivingEntity) targetEntity, standEntity)) {
                         CrazyDiamondHeal.heal(world, targetEntity, targetEntity, 
                                 (e, clientSide) -> {
                                     if (!clientSide && standEntity.getRandom().nextFloat() < 0.1F) {
@@ -165,7 +165,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
 
                 else if (userPower.getResolveLevel() >= 4) {
                     if (targetEntity.getType() == EntityType.IRON_GOLEM) {
-                        if (!CrazyDiamondHeal.healLivingEntity(world, (LivingEntity) targetEntity)) {
+                        if (!CrazyDiamondHeal.healLivingEntity(world, (LivingEntity) targetEntity, standEntity)) {
                             CrazyDiamondHeal.heal(world, targetEntity, targetEntity, 
                                     (e, clientSide) -> {
                                         if (!clientSide && standEntity.getRandom().nextFloat() < 0.05F) {
@@ -239,8 +239,8 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
         default:
             if (!world.isClientSide()) {
                 ItemStack heldItem = userPower.getUser().getOffhandItem();
-                if (ModActions.CRAZY_DIAMOND_REPAIR.get().repairTick(userPower.getUser(), heldItem, task.getTick()) == 0
-                        && userPower.getUser() instanceof PlayerEntity && task.getTick() % 10 == 9) {
+                if (ModActions.CRAZY_DIAMOND_REPAIR.get().repairTick(userPower.getUser(), standEntity, heldItem, task.getTick()) == 0
+                        && userPower.getUser() instanceof PlayerEntity && CrazyDiamondRepairItem.itemTransformationTick(task.getTick(), standEntity)) {
                     PlayerEntity player = (PlayerEntity) userPower.getUser();
                     convertTo(heldItem, world, null, standEntity.getRandom(), true).ifPresent(itemsAndCount -> {
                         boolean gaveIngredients = false;

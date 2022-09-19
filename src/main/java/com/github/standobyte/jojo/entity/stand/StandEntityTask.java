@@ -280,7 +280,7 @@ public class StandEntityTask {
                     task.offsetFromUserOverride.writeToBuf(buf);
                 }
                 
-                NetworkUtil.writeCollection(buf, task.taskModifiers, (buffer, action) -> buffer.writeRegistryId(action));
+                NetworkUtil.writeCollection(buf, task.taskModifiers, (buffer, action) -> buffer.writeRegistryId(action), false);
                 
                 task.action.taskWriteAdditional(task, buf);
             }

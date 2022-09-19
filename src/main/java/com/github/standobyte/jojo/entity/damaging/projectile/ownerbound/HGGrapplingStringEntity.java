@@ -169,13 +169,18 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
                 attachToBlockPos(blockRayTraceResult.getBlockPos());
             }
             
-            if (!level.isClientSide() && !placedBarrier && getOwner() instanceof HierophantGreenEntity) {
-                HierophantGreenEntity hierophant = (HierophantGreenEntity) getOwner();
-                if (hierophant.hasBarrierAttached()) {
-                    hierophant.attachBarrier(blockPosition());
-                }
-                placedBarrier = true;
+            placeBarrier();
+        }
+    }
+    
+    private void placeBarrier() {
+
+        if (!level.isClientSide() && !placedBarrier && getOwner() instanceof HierophantGreenEntity) {
+            HierophantGreenEntity hierophant = (HierophantGreenEntity) getOwner();
+            if (hierophant.hasBarrierAttached()) {
+                hierophant.attachBarrier(blockPosition());
             }
+            placedBarrier = true;
         }
     }
 

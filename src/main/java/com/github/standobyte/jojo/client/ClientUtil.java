@@ -77,6 +77,16 @@ public class ClientUtil {
         return Minecraft.getInstance().getFrameTime();
     }
     
+    public static void setCameraEntityPreventShaderSwitch(Minecraft mc, Entity entity) {
+        mc.setCameraEntity(entity);
+        if (mc.gameRenderer.currentEffect() == null) {
+            ResourceLocation shader = ClientEventHandler.getInstance().getCurrentShader();
+            if (shader != null) {
+                mc.gameRenderer.loadEffect(shader);
+            }
+        }
+    }
+    
     public static void openScreen(Screen screen) {
         Minecraft.getInstance().setScreen(screen);
     }

@@ -11,13 +11,13 @@ import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 import com.github.standobyte.jojo.util.utils.MathUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
-import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
@@ -73,8 +73,20 @@ public class CrazyDiamondMisshapeBodyPart extends StandEntityActionModifier {
         TORSO_ARMS,
         LEGS;
         
-        static TargetHitPart getHitTarget(EntityRayTraceResult rayTrace) {
-            return TORSO_ARMS;
+        public static TargetHitPart getHitTarget(Entity target, Entity player) {
+            double distanceToTarget = JojoModUtil.getDistance(player, target.getBoundingBox());
+            double targetY = player.getEyePosition(1.0F).add(player.getLookAngle().scale(distanceToTarget)).y;
+            if (targetY < target.getY(0.75)) {
+                if (targetY < target.getY(0.375)) {
+                    return LEGS;
+                }
+                else {
+                    return TORSO_ARMS;
+                }
+            }
+            else {
+                return HEAD;
+            }
         }
 
         Vector3d getPartCenter(LivingEntity target) {
