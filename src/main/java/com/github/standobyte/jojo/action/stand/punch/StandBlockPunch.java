@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.stand.punch;
 
 import java.util.function.Supplier;
 
+import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 
@@ -15,7 +16,6 @@ public class StandBlockPunch implements IPunch {
     public final BlockPos blockPos;
     public final BlockState blockState;
     private boolean targetHit;
-    // FIXME !! punch sound
     protected Supplier<SoundEvent> punchSound = () -> null;
     
     public StandBlockPunch(StandEntity stand, BlockPos targetPos, BlockState blockState) {
@@ -25,7 +25,7 @@ public class StandBlockPunch implements IPunch {
     }
 
     @Override
-    public boolean hit(StandEntity stand, StandEntityTask task) {
+    public boolean doHit(StandEntityTask task) {
         if (stand.level.isClientSide()) return false;
         targetHit = stand.breakBlock(blockPos, blockState, true);
         return targetHit;
@@ -36,7 +36,12 @@ public class StandBlockPunch implements IPunch {
         return targetHit;
     }
     
-    public StandBlockPunch setPunchSound(Supplier<SoundEvent> sound) {
+    @Override
+    public StandEntity getStand() {
+        return stand;
+    }
+    
+    public StandBlockPunch impactSound(Supplier<SoundEvent> sound) {
         this.punchSound = sound;
         return this;
     }
@@ -49,5 +54,10 @@ public class StandBlockPunch implements IPunch {
     @Override
     public Vector3d getSoundPos() {
         return Vector3d.atCenterOf(blockPos);
+    }
+    
+    @Override
+    public TargetType getType() {
+        return TargetType.BLOCK;
     }
 }

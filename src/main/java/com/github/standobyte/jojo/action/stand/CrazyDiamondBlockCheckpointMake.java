@@ -1,10 +1,16 @@
 package com.github.standobyte.jojo.action.stand;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.init.ModItems;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
@@ -17,7 +23,10 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
+import net.minecraft.nbt.StringNBT;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.Dimension;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
@@ -40,55 +49,83 @@ public class CrazyDiamondBlockCheckpointMake extends StandEntityAction {
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
             BlockPos pos = task.getTarget().getBlockPos();
-            // FIXME !!! (fast travel) handle the "no block breaking" config
             if (pos != null) {
-                BlockState blockState = world.getBlockState(pos);
-                // FIXME !!! (fast travel) block drops gathering
-                List<ItemStack> drops = Block.getDrops(blockState, (ServerWorld) world, pos, 
-                        blockState.hasTileEntity() ? world.getBlockEntity(pos) : null);
-                
-                if (standEntity.breakBlock(pos, blockState, false)) {
-                    drops.forEach(stack -> {
-                        boolean dropItem = true;
-                        if (stack.getItem() instanceof BlockItem) {
-                            CompoundNBT mainNBT = new CompoundNBT();
-                            
-                            CompoundNBT posNBT = new CompoundNBT();
-                            posNBT.putInt("x", pos.getX());
-                            posNBT.putInt("y", pos.getY());
-                            posNBT.putInt("z", pos.getZ());
-                            mainNBT.put("Pos", posNBT);
-                            
-                            mainNBT.put("BlockState", NBTUtil.writeBlockState(blockState));
-
-                            stack.getOrCreateTag().put("CDCheckpoint", mainNBT);
-                            LivingEntity user = standEntity.getUser();
-                            dropItem = !(user instanceof PlayerEntity && ((PlayerEntity) user).inventory.add(stack) && stack.isEmpty());
-                        }
-                        if (dropItem) {
-                            Block.popResource(world, pos, stack);
-                        }
-                    });
+                if (JojoModConfig.getCommonConfigInstance(false).abilitiesBreakBlocks.get()) {
+                    BlockState blockState = world.getBlockState(pos);
+                    List<ItemStack> drops = Block.getDrops(blockState, (ServerWorld) world, pos, 
+                            blockState.hasTileEntity() ? world.getBlockEntity(pos) : null);
+                    
+                    if (standEntity.breakBlock(pos, blockState, false)) {
+                        makeAnchor(standEntity, drops, world, pos, blockState);
+                    }
+                }
+                else {
+                    makeAnchor(standEntity, Util.make(new ArrayList<>(), list -> list.add(new ItemStack(ModItems.CRAZY_DIAMOND_NON_BLOCK_ANCHOR.get()))), world, pos, null);
                 }
             }
         }
+    }
+    
+    private void makeAnchor(StandEntity standEntity, List<ItemStack> drops, World world, BlockPos blockPos, BlockState blockState) {
+        standEntity.playSound(ModSounds.CRAZY_DIAMOND_PUNCH_HEAVY.get(), 1.0F, 1.0F);
+        drops.forEach(stack -> {
+            boolean dropItem = true;
+            if (blockState == null || stack.getItem() instanceof BlockItem) {
+                fillAnchorNbt(stack, world, blockPos, blockState);
+                LivingEntity user = standEntity.getUser();
+                dropItem = !(user instanceof PlayerEntity && ((PlayerEntity) user).inventory.add(stack) && stack.isEmpty());
+            }
+            if (dropItem) {
+                Block.popResource(world, blockPos, stack);
+            }
+        });
     }
 
     @Override
     public TargetRequirement getTargetRequirement() {
         return TargetRequirement.BLOCK;
     }
+    
+    private static void fillAnchorNbt(ItemStack stack, World world, BlockPos pos, @Nullable BlockState blockState) {
+        CompoundNBT mainNBT = new CompoundNBT();
+        
+        CompoundNBT posNBT = new CompoundNBT();
+        posNBT.putInt("x", pos.getX());
+        posNBT.putInt("y", pos.getY());
+        posNBT.putInt("z", pos.getZ());
+        mainNBT.put("Pos", posNBT);
+        
+        if (blockState != null) {
+            mainNBT.put("BlockState", NBTUtil.writeBlockState(blockState));
+        }
+        
+        mainNBT.putString("Dimension", world.dimension().location().toString());
 
-    // FIXME !!! (fast travel) dimension key
+        stack.getOrCreateTag().put("CDCheckpoint", mainNBT);
+    }
+
     public static Optional<BlockPos> getBlockPosMoveTo(World world, ItemStack stack) {
         if (stack.hasTag()) {
             CompoundNBT nbt = stack.getTag();
             if (nbt.contains("CDCheckpoint", JojoModUtil.getNbtId(CompoundNBT.class))) {
                 CompoundNBT checkpointNbt = nbt.getCompound("CDCheckpoint");
-                if (checkpointNbt.contains("Pos", JojoModUtil.getNbtId(CompoundNBT.class))) {
-                    CompoundNBT posNBT = checkpointNbt.getCompound("Pos");
-                    BlockPos pos = new BlockPos(posNBT.getInt("x"), posNBT.getInt("y"), posNBT.getInt("z"));
-                    return Optional.of(pos);
+                
+                if (checkpointNbt.contains("Dimension", JojoModUtil.getNbtId(StringNBT.class))) {
+                    String dimensionKey = checkpointNbt.getString("Dimension");
+                    if (!dimensionKey.equals(world.dimension().location().toString())) {
+                        return Optional.empty();
+                    }
+                    
+                    if (checkpointNbt.contains("Pos", JojoModUtil.getNbtId(CompoundNBT.class))) {
+                        CompoundNBT posNBT = checkpointNbt.getCompound("Pos");
+                        BlockPos pos = new BlockPos(posNBT.getInt("x"), posNBT.getInt("y"), posNBT.getInt("z"));
+                        return Optional.of(pos);
+                    }
+                }
+                
+                // FIXME ! delete in later patches
+                else if (!world.isClientSide()) {
+                    checkpointNbt.putString("Dimension", Dimension.OVERWORLD.location().toString());
                 }
             }
         }

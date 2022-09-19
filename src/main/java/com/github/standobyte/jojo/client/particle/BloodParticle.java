@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.github.standobyte.jojo.init.ModEntityTypes;
+
 import net.minecraft.client.particle.IAnimatedSprite;
 import net.minecraft.client.particle.IParticleFactory;
 import net.minecraft.client.particle.IParticleRenderType;
@@ -13,9 +15,11 @@ import net.minecraft.client.particle.SpriteTexturedParticle;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.particles.BasicParticleType;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 
 public class BloodParticle extends SpriteTexturedParticle {
+    private int waterDownTicks = 0;
     private Optional<Pair<Entity, Vector3d>> entityOffset = Optional.empty();
 
     protected BloodParticle(ClientWorld world, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
@@ -35,11 +39,13 @@ public class BloodParticle extends SpriteTexturedParticle {
         xo = x;
         yo = y;
         zo = z;
-        float ageRatio = (float) age / (float) lifetime;
-        this.alpha = Math.min((1 - ageRatio) * 4, 1);
-        if (age++ >= lifetime) {
+        float ageRatio = (float) (age + waterDownTicks) / (float) lifetime;
+        setAlpha(Math.min((1 - ageRatio) * 4, 1));
+        if ((age++ + waterDownTicks) >= lifetime) {
             remove();
+            return;
         }
+        
         else if (entityOffset.isPresent()) {
             Entity entity = entityOffset.get().getLeft();
             if (!entity.isAlive()) {
@@ -51,7 +57,7 @@ public class BloodParticle extends SpriteTexturedParticle {
             }
         }
         else if (xd > 0 || yd > 0 || zd > 0) {
-            if (ageRatio >= 0.35F) {
+            if (age >= 5) {
                 yd -= 0.04D * (double) gravity;
             }
             double xdPrev = xd;
@@ -65,12 +71,21 @@ public class BloodParticle extends SpriteTexturedParticle {
                 stopParticle();
             }
             else {
-                List<Entity> entities = level.getEntities(null, this.getBoundingBox());
+                List<Entity> entities = level.getEntities((Entity) null, this.getBoundingBox(), 
+                        entity -> entity.getType() != ModEntityTypes.CD_BLOOD_CUTTER.get());
                 if (!entities.isEmpty()) {
                     Entity entity = entities.get(0);
                     entityOffset = Optional.of(Pair.of(entity, entity.position().subtract(x, y, z)));
                 }
             }
+        }
+        
+        BlockPos pos = new BlockPos(getBoundingBox().getCenter());
+        if (!level.getFluidState(pos).isEmpty()) {
+            waterDownTicks = lifetime;
+        }
+        else if (level.isRainingAt(pos)) {
+            waterDownTicks += lifetime / 10;
         }
     }
     

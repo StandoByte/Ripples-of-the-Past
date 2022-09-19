@@ -1,19 +1,28 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStandEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
+import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.math.EntityRayTraceResult;
+import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class CDBloodCutterEntity extends ModdedProjectileEntity {
@@ -33,7 +42,7 @@ public class CDBloodCutterEntity extends ModdedProjectileEntity {
 
     @Override
     protected float getBaseDamage() {
-        return 5.0F;
+        return 4.0F;
     }
     
     protected void breakProjectile(TargetType targetType, RayTraceResult hitTarget) {
@@ -46,26 +55,56 @@ public class CDBloodCutterEntity extends ModdedProjectileEntity {
     private void splashBlood() {
         if (isInWaterOrBubble()) return;
         if (!level.isClientSide()) {
+            Vector3d thisPos = this.getBoundingBox().getCenter();
             IStandPower.getStandPowerOptional(getOwner()).ifPresent(stand -> {
                 level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(4), 
                         EntityPredicates.ENTITY_STILL_ALIVE.and(EntityPredicates.NO_SPECTATORS).and(
-                                entity -> !entity.is(stand.getUser()) && entity != stand.getStandManifestation()
-                                && !(entity instanceof StandEntity && !((StandEntity) entity).isVisibleForAll())
-                                && !entity.isInWaterOrBubble()
-                                        // FIXME !! (blood cutter) && isn't behind blocks
-                                && entity.getBoundingBox().clip(this.getBoundingBox().getCenter(), entity.getBoundingBox().getCenter()).isPresent()))
+                                entity -> canHaveBloodDropsOn(entity, stand)))
                 .forEach(entity -> {
-                    // FIXME !!! (blood cutter) refresh the timer
-                    stand.getContinuousEffects().getOrCreateEffect(ModStandEffects.DRIED_BLOOD_DROPS.get(), entity);
-
-                    PacketManager.sendToClientsTracking(new BloodParticlesPacket(
-                            this.getBoundingBox().getCenter(), entity.getBoundingBox().getCenter(), 32), this);
+                    Vector3d targetPos = entity.getBoundingBox().getCenter();
+                    if (level.clip(new RayTraceContext(thisPos, targetPos, 
+                            RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, this))
+                            .getType() == RayTraceResult.Type.MISS) {
+                        stand.getContinuousEffects().getOrCreateEffect(ModStandEffects.DRIED_BLOOD_DROPS.get(), entity).resetTicks();
+                        PacketManager.sendToClientsTracking(new BloodParticlesPacket(
+                                thisPos, targetPos, 32), this);
+                    }
                 });
             });
+            level.playSound(null, getX(), getY(), getZ(), ModSounds.WATER_SPLASH.get(), getSoundSource(), 1.0F, 1.0F);
         }
         else {
-            level.playLocalSound(getX(), getY(), getZ(), ModSounds.WATER_SPLASH.get(), getSoundSource(), 1.0F, 1.0F, false);
+            for (int i = 0; i < 32; i++) {
+                ClientUtil.getClientWorld().addParticle(ModParticles.BLOOD.get(), 
+                        getX(), getY(), getZ(), 
+                        (random.nextDouble() - 0.5) * 0.2, 
+                        (random.nextDouble() - 0.5) * 0.2, 
+                        (random.nextDouble() - 0.5) * 0.2);
+            }
         }
+    }
+    
+    @Override
+    protected boolean hurtTarget(Entity target, @Nullable LivingEntity owner) {
+        if (target instanceof LivingEntity && INonStandPower.getNonStandPowerOptional((LivingEntity) target)
+                .map(power -> {
+                    if (power.getType() == ModNonStandPowers.VAMPIRISM.get()) {
+                        target.playSound(ModSounds.VAMPIRE_BLOOD_DRAIN.get(), 1.0F, 1.0F);
+                        power.addEnergy(5F);
+                        return true;
+                    }
+                    return false;
+                }).orElse(false)) {
+            remove();
+            return false;
+        }
+        return super.hurtTarget(target, owner);
+    }
+    
+    public static boolean canHaveBloodDropsOn(Entity target, IStandPower bleedingEntityStand) {
+        return !target.is(bleedingEntityStand.getUser()) && target != bleedingEntityStand.getStandManifestation()
+                && !(target instanceof StandEntity && !((StandEntity) target).isVisibleForAll())
+                && !target.isInWaterOrBubble();
     }
     
     @Override

@@ -27,7 +27,8 @@ public class CDRestorationHandItemParticle extends EntityPosParticle {
     protected Vector3d getNextPos(Entity entity) {
         return livingEntity != null ? livingEntity.position().add(randomOffset).add(new Vector3d(
                 livingEntity.getBbWidth() * 0.6 * (livingEntity.getMainArm() == (hand == Hand.MAIN_HAND ? HandSide.RIGHT : HandSide.LEFT) ? -1 : 1), 
-                livingEntity.getBbHeight() * 0.45, livingEntity.getBbWidth() * 0.7)
+                livingEntity.getBbHeight() * (entity.isShiftKeyDown() ? 0.25 : 0.45), 
+                livingEntity.getBbWidth() * 0.7)
                 .yRot(-livingEntity.yBodyRot * MathUtil.DEG_TO_RAD)) : null;
     }
     

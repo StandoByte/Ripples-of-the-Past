@@ -108,7 +108,7 @@ public class MRRedBindRenderer extends ExtendingEntityRenderer<MRRedBindEntity, 
             StandEntity magiciansRed = (StandEntity) entity.getOwner();
             if (magiciansRed.getCurrentTask().isPresent()) {
                 StandEntityAction.Phase phase = magiciansRed.getCurrentTaskPhase().get();
-                float anim = magiciansRed.getCurrentTaskCompletion(partialTick);
+                float anim = magiciansRed.getCurrentTaskPhaseCompletion(partialTick);
                 originPos = JojoModUtil.getEntityPosition(entity.getOwner(), partialTick).add(0, entity.getOwner().getBbHeight() * 0.75F, 0);
                 Vector3d shoulder = new Vector3d(0, -0.234375, 0);
                 Vector3d foreArm = new Vector3d(0, -0.234375, 0);

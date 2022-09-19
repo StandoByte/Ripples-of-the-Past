@@ -182,7 +182,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
 
     
 
-    @Nullable   
+    @Nullable
     @Override
     public final Action<P> getAction(ActionType type, int index, boolean shift) {
         List<Action<P>> actions = getActions(type);
@@ -204,7 +204,13 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
     
     @Override
-    public final boolean onClickAction(Action<P> action, boolean shift, ActionTarget target) {
+    public final boolean clickAction(Action<P> action, boolean shift, ActionTarget target) {
+        boolean res = onClickAction(action, shift, target);
+        action.afterClick(user.level, user, getThis(), res);
+        return res;
+    }
+    
+    private boolean onClickAction(Action<P> action, boolean shift, ActionTarget target) {
         if (action == null || getHeldAction() == action) return false;
         boolean wasActive = isActive();
         action.onClick(user.level, user, getThis());
@@ -219,7 +225,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             if (!result.isPositive()) {
                 sendMessage(action, result);
             }
-            if (result.isPositive() || !result.shouldStopHeldAction()) {
+            if (result.isPositive()) {
                 if (!user.level.isClientSide()) {
                     action.playVoiceLine(user, getThis(), target, wasActive, shift);
                 }
@@ -305,7 +311,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                 || !action.getTargetRequirement().checkTargetType(targetContainer.get().getType())) {
             targetContainer.set(ActionTarget.EMPTY);
             if (!action.getTargetRequirement().checkTargetType(TargetType.EMPTY)) {
-                return ActionConditionResult.NEGATIVE;
+                return ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
             }
         }
         

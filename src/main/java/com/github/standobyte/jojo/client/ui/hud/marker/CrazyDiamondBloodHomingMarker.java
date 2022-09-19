@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.action.stand.CrazyDiamondItemProjectile;
+import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockBullet;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.ModActions;
@@ -24,15 +24,15 @@ public class CrazyDiamondBloodHomingMarker extends MarkerRenderer {
     
     @Override
     protected boolean shouldRender() {
-        return ActionsOverlayGui.getInstance().getSelectedAction(ActionType.ATTACK) == ModActions.CRAZY_DIAMOND_ITEM_PROJECTILE.get()
+        return ActionsOverlayGui.getInstance().getSelectedAction(ActionType.ATTACK) == ModActions.CRAZY_DIAMOND_BLOCK_BULLET.get()
                 && !mc.player.isShiftKeyDown();
     }
 
     @Override
     protected void updatePositions(List<MarkerInstance> list, float partialTick) {
         IStandPower.getStandPowerOptional(mc.player).ifPresent(stand -> {
-            Optional<StandEffectInstance> outlined = CrazyDiamondItemProjectile.getTarget(CrazyDiamondItemProjectile.targets(stand), mc.player);
-            CrazyDiamondItemProjectile.targets(stand).forEach(effect -> {
+            Optional<StandEffectInstance> outlined = CrazyDiamondBlockBullet.getTarget(CrazyDiamondBlockBullet.targets(stand), mc.player);
+            CrazyDiamondBlockBullet.targets(stand).forEach(effect -> {
                 LivingEntity target = effect.getTarget();
                 list.add(new MarkerInstance(target.getPosition(partialTick).add(0, target.getBbHeight() * 1.1, 0), 
                         outlined.map(outlinedEffect -> effect == outlinedEffect).orElse(false)));

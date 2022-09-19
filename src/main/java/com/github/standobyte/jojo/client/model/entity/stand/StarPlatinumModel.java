@@ -10,8 +10,8 @@ import com.github.standobyte.jojo.client.model.pose.ModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseTransition;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseTransitionMultiple;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
-import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
-import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
+import com.github.standobyte.jojo.client.model.pose.anim.PosedActionAnimation;
+import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.stands.StarPlatinumEntity;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -508,7 +508,7 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
     
     @Override
     protected void initActionPoses() {
-        actionAnim.put(StandPose.RANGED_ATTACK, new StandActionAnimation.Builder<StarPlatinumEntity>()
+        actionAnim.put(StandPose.RANGED_ATTACK, new PosedActionAnimation.Builder<StarPlatinumEntity>()
                 .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<>(new RotationAngle[] {
                         new RotationAngle(body, 0.0F, -0.48F, 0.0F),
                         new RotationAngle(leftArm, 0.0F, 0.0F, -0.7854F),
@@ -533,7 +533,7 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
                 RotationAngle.fromDegrees(rightArm, -135F, 45F, 0F), 
                 RotationAngle.fromDegrees(rightForeArm, -90F, 60F, -90F)
         });
-        actionAnim.put(StandPose.HEAVY_ATTACK_COMBO, new StandActionAnimation.Builder<StarPlatinumEntity>()
+        actionAnim.put(StandPose.HEAVY_ATTACK_COMBO, new PosedActionAnimation.Builder<StarPlatinumEntity>()
                 .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<>(idlePose, uppercutPose1))
                 .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransition<>(uppercutPose1, uppercutPose2))
                 .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransitionMultiple.Builder<>(uppercutPose2)

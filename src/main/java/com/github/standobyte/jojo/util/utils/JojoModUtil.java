@@ -22,6 +22,7 @@ import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.item.ClothesSet;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket;
@@ -147,36 +148,18 @@ public class JojoModUtil {
     	return partialTick == 1.0F ? entity.position() : entity.getPosition(partialTick);
     }
     
-    public static void giveItemTo(LivingEntity entity, ItemStack item) {
-        if (!entity.level.isClientSide()) {
+    public static void giveItemTo(LivingEntity entity, ItemStack item, boolean drop) {
+        if (!entity.level.isClientSide() && !item.isEmpty()) {
             if (entity instanceof PlayerEntity) {
-                giveItemToPlayer((PlayerEntity) entity, item);
+                drop = !(((PlayerEntity) entity).inventory.add(item) && item.isEmpty());
             }
-            else {
-                ItemEntity itemEntity = drop(entity, item);
-                if (itemEntity != null) {
-                    entity.level.addFreshEntity(itemEntity);
-                }
+            if (drop) {
+                entity.level.addFreshEntity(dropAt(entity, item));
             }
         }
     }
     
-    public static void giveItemToPlayer(PlayerEntity player, ItemStack item) {
-        if (!player.level.isClientSide()) {
-            if (player.inventory.add(item) && item.isEmpty()) {
-                player.inventoryMenu.broadcastChanges();
-            }
-            else {
-                ItemEntity itementity = player.drop(item, false);
-                if (itementity != null) {
-                    itementity.setNoPickUpDelay();
-                    itementity.setOwner(player.getUUID());
-                }
-            }
-        }
-    }
-    
-    private static ItemEntity drop(LivingEntity entity, ItemStack item) {
+    public static ItemEntity dropAt(LivingEntity entity, ItemStack item) {
         if (item.isEmpty()) {
             return null;
         }
@@ -265,7 +248,7 @@ public class JojoModUtil {
         
 //        return new EntityRayTraceResult(targetEntity, targetEntityPos);
     }
-
+    
     private static AxisAlignedBB standPrecisionTargetHitbox(AxisAlignedBB aabb, double precision) {
         if (precision > 0) {
             double smallAabbAddFraction = Math.min(precision, 16) / 16;
@@ -434,11 +417,16 @@ public class JojoModUtil {
     }
 
     public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine) {
-        sayVoiceLine(entity, voiceLine, 1.0F, 1.0F);
+        sayVoiceLine(entity, voiceLine, null);
     }
 
-    public static void sayVoiceLine(LivingEntity entity, SoundEvent sound, float volume, float pitch) {
-        if (entity.level.isClientSide() || entity.hasEffect(Effects.INVISIBILITY)) {
+    public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine, @Nullable ClothesSet character) {
+        sayVoiceLine(entity, voiceLine, character, 1.0F, 1.0F);
+    }
+
+    public static void sayVoiceLine(LivingEntity entity, SoundEvent sound, @Nullable ClothesSet character, float volume, float pitch) {
+        if (entity.level.isClientSide() || entity.hasEffect(Effects.INVISIBILITY) ||
+                character != null && character != ClothesSet.getClothesSet(entity)) {
             return;
         }
         SoundCategory category = SoundCategory.VOICE;
@@ -530,19 +518,12 @@ public class JojoModUtil {
     	if (times < 0) {
     		return 0;
     	}
-    	int timesInt = MathHelper.floor(times);
+    	int timesInt = MathUtil.fractionRandomInc(times);
     	for (int i = 0; i < timesInt; i++) {
     		if (breakCondition != null && breakCondition.get()) {
     			return i;
     		}
     		action.run();
-    	}
-		if (breakCondition != null && breakCondition.get()) {
-			return timesInt;
-		}
-    	if (Math.random() < times - (double) timesInt) {
-    		action.run();
-    		return timesInt + 1;
     	}
     	return timesInt;
     }

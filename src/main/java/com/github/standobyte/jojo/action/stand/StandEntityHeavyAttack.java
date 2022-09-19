@@ -8,21 +8,25 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
+import com.github.standobyte.jojo.action.stand.punch.StandMissedPunch;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
-import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.util.Container;
 import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class StandEntityHeavyAttack extends StandEntityAction implements IHasStandPunch {
@@ -118,11 +122,22 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     @Override
     public StandEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
         double strength = stand.getAttackDamage();
-        return IHasStandPunch.super.punchEntity(stand, target, dmgSource)
+        return new HeavyPunchInstance(stand, target, dmgSource)
                 .damage(StandStatFormulas.getHeavyAttackDamage(strength))
                 .addKnockback(0.5F + (float) strength / 8)
                 .setStandInvulTime(10)
-                .setPunchSound(ModSounds.STAND_STRONG_ATTACK);
+                .impactSound(punchSound);
+    }
+    
+    @Override
+    public StandBlockPunch punchBlock(StandEntity stand, BlockPos pos, BlockState state) {
+        return IHasStandPunch.super.punchBlock(stand, pos, state)
+                .impactSound(punchSound);
+    }
+    
+    @Override
+    public StandMissedPunch punchMissed(StandEntity stand) {
+        return IHasStandPunch.super.punchMissed(stand).swingSound(punchSound);
     }
 
     @Override
@@ -133,6 +148,11 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     @Override
     public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
         return StandStatFormulas.getHeavyAttackRecovery(standEntity.getAttackSpeed());
+    }
+    
+    @Override
+    protected boolean standKeepsTarget(ActionTarget target) {
+        return target.getType() == TargetType.ENTITY;
     }
     
     @Override
@@ -156,8 +176,13 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     }
     
     @Override
-    public StandPose getStandPose(IStandPower standPower, StandEntity standEntity) {
-        return isCombo ? StandPose.HEAVY_ATTACK_COMBO : super.getStandPose(standPower, standEntity);
+    public StandPose getStandPose(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
+        return isCombo ? StandPose.HEAVY_ATTACK_COMBO : super.getStandPose(standPower, standEntity, task);
+    }
+    
+    @Override
+    public boolean greenSelection(IStandPower power, ActionConditionResult conditionCheck) {
+        return isCombo && conditionCheck.isPositive();
     }
     
     
@@ -194,5 +219,25 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
 		protected Builder getThis() {
 			return this;
 		}
+    }
+    
+    
+    
+    public static class HeavyPunchInstance extends StandEntityPunch {
+
+        public HeavyPunchInstance(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
+            super(stand, target, dmgSource);
+        }
+
+        @Override
+        protected void afterAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, StandEntityTask task, boolean hurt, boolean killed) {
+            if (!stand.level.isClientSide() && target instanceof StandEntity && hurt && !killed) {
+                StandEntity standTarget = (StandEntity) target;
+                if (standTarget.getCurrentTask().isPresent() && standTarget.getCurrentTaskAction().stopOnHeavyAttack(this)) {
+                    standTarget.stopTaskWithRecovery();
+                }
+            }
+            super.afterAttack(stand, target, dmgSource, task, hurt, killed);
+        }
     }
 }

@@ -56,7 +56,7 @@ public class StandStatFormulas {
     }
     
     public static float getParryTiming(double precision) {
-        return Math.min(0.05F + (float) precision * 0.025F, 1F);
+        return Math.min(0.1F + (float) precision * 0.025F, 1F);
     }
     
     

@@ -300,8 +300,8 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     public static void overdriveAttack(LivingEntity user, LivingEntity targetEntity, INonStandPower power, HamonData hamon) {
         ActionTarget target = new ActionTarget(targetEntity);
         boolean shift = user.isShiftKeyDown();
-        if (!(shift && power.onClickAction(ModActions.HAMON_SUNLIGHT_YELLOW_OVERDRIVE.get(), true, target))) {
-            power.onClickAction(ModActions.HAMON_OVERDRIVE.get(), shift, target);
+        if (!(shift && power.clickAction(ModActions.HAMON_SUNLIGHT_YELLOW_OVERDRIVE.get(), true, target))) {
+            power.clickAction(ModActions.HAMON_OVERDRIVE.get(), shift, target);
         }
     }
     

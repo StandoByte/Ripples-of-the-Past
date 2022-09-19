@@ -74,4 +74,12 @@ public class MathUtil {
     public static float inverseLerp(float x, float a, float b) {
         return (x - a) / (b - a);
     }
+    
+    public static int fractionRandomInc(double num) {
+        int numInt = MathHelper.floor(num);
+        if (Math.random() < num - (double) numInt) {
+            numInt++;
+        }
+        return numInt;
+    }
 }

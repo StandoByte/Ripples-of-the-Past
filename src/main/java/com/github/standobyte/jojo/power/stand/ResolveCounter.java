@@ -13,8 +13,10 @@ import com.github.standobyte.jojo.network.packets.fromserver.ResolveBoostsPacket
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveLevelPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolvePacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.github.standobyte.jojo.util.DiscardingSortedMultisetWrapper;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.utils.LegacyUtil;
 import com.google.common.collect.BoundType;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.SortedMultiset;
@@ -31,7 +33,7 @@ import net.minecraft.util.math.MathHelper;
 
 public class ResolveCounter {
     public static final float RESOLVE_DMG_REDUCTION = 0.6667F;
-    public static final Double[] DEFAULT_MAX_RESOLVE_VALUES = {2500.0, 5000.0, 10000.0, 20000.0, 15000.0};
+    public static final Double[] DEFAULT_MAX_RESOLVE_VALUES = {2500.0, 10000.0, 25000.0, 50000.0, 32500.0};
     private static final float RESOLVE_DECAY = 2F;
     private static final int RESOLVE_NO_DECAY_TICKS = 400;
     private static final float RESOLVE_FOR_DMG_POINT = 1F;
@@ -58,11 +60,10 @@ public class ResolveCounter {
     private float resolve = 0;
     private int noResolveDecayTicks = 0;
     
-    private int resolveLevel = 0;
-    private int extraLevel = 0;
+    private ResolveLevelsMap levels = new ResolveLevelsMap();
     
     private DiscardingSortedMultisetWrapper<Float> resolveRecords = 
-            new DiscardingSortedMultisetWrapper<>(99);
+            new DiscardingSortedMultisetWrapper<>(10);
     private boolean saveNextRecord = true;
     private float maxAchievedValue;
     
@@ -79,7 +80,8 @@ public class ResolveCounter {
     }
 
 
-    void onStandAcquired() {
+    void onStandAcquired(StandType<?> standType) {
+        levels.onStandSet(standType);
     }
 
     void tick() {
@@ -146,7 +148,7 @@ public class ResolveCounter {
 
     float getMaxResolveValue() {
         return JojoModUtil.getOrLast(
-                JojoModConfig.getCommonConfigInstance(stand.getUser().level.isClientSide()).resolvePoints.get(), 
+                JojoModConfig.getCommonConfigInstance(stand.getUser().level.isClientSide()).resolveLvlPoints.get(), 
                 getResolveLevel()).floatValue();
     }
     
@@ -165,7 +167,11 @@ public class ResolveCounter {
     }
     
     int getResolveLevel() {
-        return resolveLevel;
+        return levels.getResolveLevel(stand);
+    }
+    
+    void clearLevels() {
+        levels.clear();
     }
     
 
@@ -187,6 +193,7 @@ public class ResolveCounter {
             });
         }
         
+        int resolveLevel = getResolveLevel();
         if (resolve == getMaxResolveValue() && stand.getUser() != null && !stand.getUser().level.isClientSide() && !stand.getUser().hasEffect(ModEffects.RESOLVE.get())) {
             stand.getUser().addEffect(new EffectInstance(ModEffects.RESOLVE.get(), 
                     RESOLVE_EFFECT_MAX[Math.min(resolveLevel, RESOLVE_EFFECT_MAX.length)], resolveLevel, false, 
@@ -212,17 +219,11 @@ public class ResolveCounter {
     private float multiplyRecords(float addedValue) {
         float totalBoostedValue = 0;
         SortedMultiset<Float> higherRecords = resolveRecords.getWrappedSet().tailMultiset(this.resolve, BoundType.OPEN);
-        float lowerBorder = getResolveValue();
+        float currentResolve = getResolveValue();
         for (Multiset.Entry<Float> entry : higherRecords.entrySet()) {
             float upperBorder = entry.getElement();
             float multiplier = 1 + entry.getCount();
-            float sectionValueBoosted = MathHelper.clamp(addedValue, 0, (upperBorder - lowerBorder) / multiplier);
-            if (sectionValueBoosted == 0) {
-                break;
-            }
-            addedValue -= sectionValueBoosted;
-            totalBoostedValue += sectionValueBoosted * multiplier;
-            lowerBorder = upperBorder;
+            totalBoostedValue += Math.min(addedValue, upperBorder - currentResolve) * multiplier;
         }
         return totalBoostedValue + addedValue;
     }
@@ -253,8 +254,7 @@ public class ResolveCounter {
     }
 
     void setResolveLevel(int level) {
-        boolean send = this.resolveLevel != level;
-        this.resolveLevel = level;
+        boolean send = levels.setResolveLevel(stand, level);
         if (send) {
             serverPlayerUser.ifPresent(player -> {
                 PacketManager.sendToClient(new ResolveLevelPacket(getResolveLevel()), player);
@@ -327,7 +327,7 @@ public class ResolveCounter {
     	int newLevel = amplifier + 1;
         stand.setResolveLevel(Math.min(newLevel, stand.getMaxResolveLevel()));
     	if (newLevel > stand.getMaxResolveLevel()) {
-    		extraLevel++;
+            levels.incExtraLevel(stand);
     	}
         setResolveValue(stand.getMaxResolve(), 0);
     }
@@ -360,7 +360,7 @@ public class ResolveCounter {
 
     void reset() {
         resolve = 0;
-        resolveLevel = 0;
+        levels.onStandSet(null);
         noResolveDecayTicks = 0;
         resolveRecords.clear();
         saveNextRecord = true;
@@ -384,7 +384,7 @@ public class ResolveCounter {
     
     void clone(ResolveCounter previous) {
         this.resolve = previous.resolve;
-        this.resolveLevel = previous.resolveLevel;
+        this.levels = previous.levels;
         this.noResolveDecayTicks = previous.noResolveDecayTicks;
         this.saveNextRecord = previous.saveNextRecord;
         this.resolveRecords = previous.resolveRecords;
@@ -409,7 +409,6 @@ public class ResolveCounter {
     }
 
     void syncWithUser(ServerPlayerEntity player) {
-        PacketManager.sendToClient(new ResolveLevelPacket(getResolveLevel()), player);
         PacketManager.sendToClient(new ResolvePacket(getResolveValue(), noResolveDecayTicks), player);
         PacketManager.sendToClient(new MaxAchievedResolvePacket(maxAchievedValue), player);
         PacketManager.sendToClient(new ResolveBoostsPacket(boostAttack, boostRemoteControl, boostChat, hpOnGettingAttacked), player);
@@ -417,14 +416,20 @@ public class ResolveCounter {
 
     void readNbt(CompoundNBT nbt) {
         resolve = nbt.getFloat("Resolve");
-        resolveLevel = nbt.getByte("ResolveLevel");
-        extraLevel = nbt.getInt("ExtraLevel");
         noResolveDecayTicks = nbt.getInt("ResolveTicks");
         saveNextRecord = nbt.getBoolean("SaveNextRecord");
         boostAttack = nbt.getFloat("BoostAttack");
         boostRemoteControl = nbt.getFloat("BoostRemoteControl");
         boostChat = nbt.getFloat("BoostChat");
         hpOnGettingAttacked = nbt.getFloat("HpOnGettingAttacked");
+        
+        if (nbt.contains("Levels", JojoModUtil.getNbtId(CompoundNBT.class))) {
+            levels.fromNBT(nbt.getCompound("Levels"));
+        }
+        
+        else {
+            LegacyUtil.readOldResolveLevels(nbt, levels, stand);
+        }
         
         if (nbt.contains("ResolveRecord", JojoModUtil.getNbtId(ListNBT.class))) {
             ListNBT listNBT = nbt.getList("ResolveRecord", JojoModUtil.getNbtId(FloatNBT.class));
@@ -437,14 +442,14 @@ public class ResolveCounter {
     CompoundNBT writeNBT() {
         CompoundNBT resolveNbt = new CompoundNBT();
         resolveNbt.putFloat("Resolve", resolve);
-        resolveNbt.putByte("ResolveLevel", (byte) resolveLevel);
-        resolveNbt.putInt("ExtraLevel", extraLevel);
         resolveNbt.putInt("ResolveTicks", noResolveDecayTicks);
         resolveNbt.putBoolean("SaveNextRecord", saveNextRecord);
         resolveNbt.putFloat("BoostAttack", boostAttack);
         resolveNbt.putFloat("BoostRemoteControl", boostRemoteControl);
         resolveNbt.putFloat("BoostChat", boostChat);
         resolveNbt.putFloat("HpOnGettingAttacked", hpOnGettingAttacked);
+
+        resolveNbt.put("Levels", levels.toNBT());
         
         ListNBT recordNbt = new ListNBT();
         for (float record : resolveRecords.getWrappedSet()) {

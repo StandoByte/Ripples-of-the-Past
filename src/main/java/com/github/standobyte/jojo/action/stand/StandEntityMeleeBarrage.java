@@ -7,32 +7,40 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack.HeavyPunchInstance;
+import com.github.standobyte.jojo.action.stand.punch.IPunch;
+import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
+import com.github.standobyte.jojo.action.stand.punch.StandMissedPunch;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModEffects;
-import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.TrBarrageHitSoundPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class StandEntityMeleeBarrage extends StandEntityAction implements IHasStandPunch {
-    private final Supplier<SoundEvent> barrageSound;
+    protected final Supplier<SoundEvent> hitSound;
 
     public StandEntityMeleeBarrage(StandEntityMeleeBarrage.Builder builder) {
         super(builder);
-        this.barrageSound = builder.barrageSound;
+        this.hitSound = builder.hitSound;
     }
 
     @Override
@@ -46,7 +54,6 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
         int hitsPerSecond = StandStatFormulas.getBarrageHitsPerSecond(standEntity.getAttackSpeed());
         int extraTickSwings = hitsPerSecond / 20;
         for (int i = 0; i < extraTickSwings; i++) {
-            swing(standEntity);
             hitsThisTick++;
         }
         hitsPerSecond -= extraTickSwings * 20;
@@ -67,7 +74,6 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
                         hitsThisTick++;
                     }
                 }
-                swing(standEntity);
             }
         }
         int barrageHits = hitsThisTick;
@@ -76,36 +82,59 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     }
     
     @Override
-    public BarrageEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
-        return new BarrageEntityPunch(stand, target, dmgSource).barrageHits(stand, stand.barrageHits);
+    public void phaseTransition(World world, StandEntity standEntity, IStandPower standPower, 
+            Phase from, Phase to, StandEntityTask task, int ticks) {
+        if (world.isClientSide()) {
+            standEntity.getBarrageHitSoundsHandler().setIsBarraging(to == Phase.PERFORM);
+        }
     }
     
     @Override
-    public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, ActionTarget target) {
-        if (standEntity.isArmsOnlyMode()) {
-            return super.getOffsetFromUser(standPower, standEntity, target);
-        }
-        double maxVariation = standEntity.getAttributeValue(Attributes.MOVEMENT_SPEED) * 1.5 * standEntity.getStaminaCondition();
-        Vector3d targetPos = target.getTargetPos(true);
-        double offset = 0.5;
-        if (targetPos == null) {
-            return StandRelativeOffset.withXRot(0, Math.min(offset + maxVariation, standEntity.getMaxEffectiveRange()));
-        }
-        else {
-            LivingEntity user = standEntity.getUser();
-            double backAway = 0.5 + (target.getType() == TargetType.ENTITY ? 
-                    target.getEntity().getBoundingBox().getXsize() / 2
-                    : 0.5);
-            double offsetToTarget = targetPos.subtract(user.position()).multiply(1, 0, 1).length() - backAway;
-            offset = MathHelper.clamp(offsetToTarget, offset, offset + maxVariation);
-            return StandRelativeOffset.withXRot(0, offset);
-        }
+    public BarrageEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
+        BarrageEntityPunch punch = new BarrageEntityPunch(stand, target, dmgSource).barrageHits(stand, stand.barrageHits);
+        punch.impactSound(hitSound);
+        return punch;
     }
     
-    private void swing(StandEntity standEntity) {
-        if (standEntity.level.isClientSide()) {
-            standEntity.swing(standEntity.alternateHands());
+    @Override
+    public StandBlockPunch punchBlock(StandEntity stand, BlockPos pos, BlockState state) {
+        return IHasStandPunch.super.punchBlock(stand, pos, state).impactSound(hitSound);
+    }
+    
+    @Override
+    public StandMissedPunch punchMissed(StandEntity stand) {
+        return IHasStandPunch.super.punchMissed(stand).swingSound(hitSound);
+    }
+    
+    public SoundEvent getHitSound() {
+        return hitSound == null ? null : hitSound.get();
+    }
+    
+    @Override
+    public void playPunchSound(IPunch punch, TargetType punchType, boolean canPlay, boolean playAlways) {
+        StandEntity stand = punch.getStand();
+        if (!stand.level.isClientSide()) {
+            SoundEvent sound = punch.getSound();
+            Vector3d pos = punch.getSoundPos();
+            PacketManager.sendToClientsTracking(
+                    sound != null && pos != null && canPlay && (playAlways || punch.targetWasHit()) ? 
+                            new TrBarrageHitSoundPacket(stand.getId(), sound, pos)
+                            : TrBarrageHitSoundPacket.noSound(stand.getId()), 
+            stand);
         }
+    }
+
+    @Override
+    public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
+        if (standEntity.isArmsOnlyMode()) {
+            return super.getOffsetFromUser(standPower, standEntity, task);
+        }
+        double minOffset = 0.5;
+        double maxOffset = minOffset + standEntity.getAttributeValue(Attributes.MOVEMENT_SPEED) * 1.5 * standEntity.getStaminaCondition();
+        return offsetToTarget(standPower, standEntity, task, 
+                minOffset, maxOffset, 
+                () -> ActionTarget.fromRayTraceResult(JojoModUtil.rayTrace(standPower.getUser(), maxOffset, standEntity::canHarm, 0.25, 0)))
+                .orElse(StandRelativeOffset.withXRot(0, Math.min(maxOffset, standEntity.getMaxEffectiveRange())));
     }
     
     @Override
@@ -122,15 +151,28 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     }
     
     @Override
-    public void onClear(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction) {
-    	if (newAction != this) {
+    protected void onTaskStopped(World world, StandEntity standEntity, IStandPower standPower, StandEntityTask task, @Nullable StandEntityAction newAction) {
+    	if (!world.isClientSide() && newAction != this) {
     		standEntity.barrageClashStopped();
     	}
+        if (world.isClientSide()) {
+            standEntity.getBarrageHitSoundsHandler().setIsBarraging(false);
+        }
     }
 
     @Override
     public boolean cancelHeldOnGettingAttacked(IStandPower power, DamageSource dmgSource, float dmgAmount) {
         return dmgAmount >= 4F && "healthLink".equals(dmgSource.msgId);
+    }
+    
+    @Override
+    public boolean stopOnHeavyAttack(HeavyPunchInstance punch) {
+        return true;
+    }
+    
+    @Override
+    protected ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, IStandPower power) {
+        return ActionConditionResult.POSITIVE;
     }
     
     @Override
@@ -162,27 +204,30 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     
     @Override
     public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
-        LivingEntity user = standPower.getUser();
-        if (user != null && user.hasEffect(ModEffects.RESOLVE.get())) {
-            return 0;
-        }
         return standEntity.isArmsOnlyMode() ? 0 : StandStatFormulas.getBarrageRecovery(standEntity.getSpeed());
+    }
+    
+    @Override
+    public boolean isFreeRecovery(IStandPower standPower, StandEntity standEntity) {
+        LivingEntity user = standPower.getUser();
+        return user != null && user.hasEffect(ModEffects.RESOLVE.get());
     }
     
     
     
     public static class Builder extends StandEntityAction.AbstractBuilder<StandEntityMeleeBarrage.Builder> {
-        private Supplier<SoundEvent> barrageSound = () -> null;
+        private Supplier<SoundEvent> hitSound = () -> null;
         
         public Builder() {
             super();
-            standAutoSummonMode(AutoSummonMode.ARMS).holdType().staminaCostTick(3F)
+            standPose(StandPose.BARRAGE)
+            .standAutoSummonMode(AutoSummonMode.ARMS).holdType().staminaCostTick(3F)
             .standUserSlowDownFactor(0.3F).standOffsetFront()
             .partsRequired(StandPart.ARMS);
         }
         
-        public Builder barrageSound(Supplier<SoundEvent> barrageSound) {
-            this.barrageSound = barrageSound != null ? barrageSound : () -> null;
+        public Builder barrageHitSound(Supplier<SoundEvent> barrageHitSound) {
+            this.hitSound = barrageHitSound != null ? barrageHitSound : () -> null;
             return getThis();
         }
         
@@ -194,7 +239,6 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     
     
 
-    // FIXME !! barrage sound
     public static class BarrageEntityPunch extends StandEntityPunch {
         private int barrageHits = 0;
 
@@ -203,8 +247,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
             this
             .damage(StandStatFormulas.getBarrageHitDamage(stand.getAttackDamage(), stand.getPrecision()))
             .addCombo(0.005F)
-            .reduceKnockback(0.1F)
-            .setPunchSound(ModSounds.STAND_BARRAGE_ATTACK);
+            .reduceKnockback(0);
         }
         
         public BarrageEntityPunch barrageHits(StandEntity stand, int hits) {
@@ -214,12 +257,12 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
         }
         
         @Override
-        public boolean hit(StandEntity stand, StandEntityTask task) {
+        public boolean doHit(StandEntityTask task) {
             if (stand.level.isClientSide()) return false;
             if (barrageHits > 0) {
                 dmgSource.setBarrageHitsCount(barrageHits);
             }
-            return super.hit(stand, task);
+            return super.doHit(task);
         }
 
         @Override

@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.stand.punch;
 
 import java.util.function.Supplier;
 
+import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
@@ -27,6 +28,7 @@ public class StandEntityPunch implements IPunch {
     public final Entity target;
     public final StandEntityDamageSource dmgSource;
     private boolean targetHit;
+    private float damageDealtToLiving;
     
     protected float damage;
     protected float addCombo;
@@ -39,13 +41,32 @@ public class StandEntityPunch implements IPunch {
     protected Vector3d sweepingAabb;
     protected float sweepingDamage;
     protected int standInvulTime = 0;
-    // FIXME !! punch sound
     protected Supplier<SoundEvent> punchSound = () -> null;
     
     public StandEntityPunch(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
         this.stand = stand;
         this.target = target;
         this.dmgSource = dmgSource;
+    }
+    
+    @Override
+    public TargetType getType() {
+        return TargetType.ENTITY;
+    }
+    
+    public StandEntityPunch copyProperties(StandEntityPunch original) {
+        return this
+        .damage(original.damage)
+        .addCombo(original.addCombo)
+        .knockbackVal(original.knockback)
+        .knockbackYRotDeg(original.knockbackXRot)
+        .knockbackXRot(original.knockbackXRot)
+        .armorPiercing(original.armorPiercing)
+        .disableBlocking(original.disableBlockingChance)
+        .parryTiming(original.parryTiming)
+        .sweepingAttack(original.sweepingAabb, original.sweepingDamage)
+        .setStandInvulTime(original.standInvulTime)
+        .impactSound(original.punchSound);
     }
     
     public StandEntityPunch damage(float damage) {
@@ -65,6 +86,11 @@ public class StandEntityPunch implements IPunch {
     
     public StandEntityPunch addKnockback(float knockback) {
         this.knockback = 1 + knockback;
+        return this;
+    }
+    
+    private StandEntityPunch knockbackVal(float knockback) {
+        this.knockback = knockback;
         return this;
     }
     
@@ -94,13 +120,15 @@ public class StandEntityPunch implements IPunch {
     }
     
     public StandEntityPunch sweepingAttack(double x, double y, double z, float damage) {
-        x = Math.max(x, 0);
-        y = Math.max(y, 0);
-        z = Math.max(z, 0);
         if ((x > 0 || y > 0 || z > 0) && damage > 0) {
-            this.sweepingAabb = new Vector3d(x, y, z);
-            this.sweepingDamage = damage;
+            return sweepingAttack(new Vector3d(Math.max(x, 0), Math.max(y, 0), Math.max(z, 0)), damage);
         }
+        return this;
+    }
+    
+    public StandEntityPunch sweepingAttack(Vector3d aabbRange, float damage) {
+        this.sweepingAabb = aabbRange;
+        this.sweepingDamage = damage;
         return this;
     }
     
@@ -109,7 +137,7 @@ public class StandEntityPunch implements IPunch {
         return this;
     }
     
-    public StandEntityPunch setPunchSound(Supplier<SoundEvent> sound) {
+    public StandEntityPunch impactSound(Supplier<SoundEvent> sound) {
         this.punchSound = sound;
         return this;
     }
@@ -150,18 +178,15 @@ public class StandEntityPunch implements IPunch {
         return targetAabb.inflate(sweepingAabb.x, sweepingAabb.y, sweepingAabb.z);
     }
     
-    
-
-    @Override
-    public boolean hit(StandEntity standEntity, StandEntityTask task) {
-        if (stand.level.isClientSide()) return false;
-        targetHit = attackEntity(standEntity, task);
-        return targetHit;
-    }
 
     @Override
     public boolean targetWasHit() {
         return targetHit;
+    }
+    
+    @Override
+    public StandEntity getStand() {
+        return stand;
     }
 
     @Override
@@ -174,13 +199,20 @@ public class StandEntityPunch implements IPunch {
         return target.getBoundingBox().getCenter();
     }
     
+    public float getDamageDealtToLiving() {
+        return damageDealtToLiving;
+    }
     
     
-    private boolean attackEntity(StandEntity stand, StandEntityTask task) {
-        boolean attacked = stand.attackEntity(() -> doAttack(stand, target, dmgSource, damage), this, task);
-        afterAttack(stand, target, dmgSource, task, attacked, !target.isAlive());
+    
+    @Override
+    public boolean doHit(StandEntityTask task) {
+        if (stand.level.isClientSide()) return false;
         
-        if (attacked) {
+        targetHit = stand.attackEntity(() -> doAttack(stand, target, dmgSource, damage), this, task);
+        afterAttack(stand, target, dmgSource, task, targetHit, !target.isAlive());
+        
+        if (targetHit) {
             if (isSweepingAttack()) {
                 for (LivingEntity sweepingTarget : stand.level.getEntitiesOfClass(LivingEntity.class, sweepingAttackAabb(target.getBoundingBox()), 
                         e -> !e.isSpectator() && e.isPickable()
@@ -191,7 +223,7 @@ public class StandEntityPunch implements IPunch {
             
             stand.addComboMeter(addCombo, StandEntity.COMBO_TICKS);
         }
-        return attacked;
+        return targetHit;
     }
 
     protected void afterAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, StandEntityTask task, boolean hurt, boolean killed) {}
@@ -202,8 +234,10 @@ public class StandEntityPunch implements IPunch {
         }
 
         LivingEntity targetLiving = null;
+        float hp = 0;
         if (target instanceof LivingEntity) {
             targetLiving = (LivingEntity) target;
+            hp = targetLiving.getHealth();
             
             dmgSource.setStandInvulTicks(standInvulTime);
             
@@ -215,7 +249,7 @@ public class StandEntityPunch implements IPunch {
                         if (targetStand.getCurrentTaskAction() instanceof StandEntityHeavyAttack
                                 && targetStand.getCurrentTaskPhase().get() == StandEntityAction.Phase.WINDUP
                                 && targetStand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())
-                                && 1F - targetStand.getCurrentTaskCompletion(0) < parryTiming) {
+                                && 1F - targetStand.getCurrentTaskPhaseCompletion(0) < parryTiming) {
                             targetStand.parryHeavyAttack();
                             return false;
                         }
@@ -259,6 +293,8 @@ public class StandEntityPunch implements IPunch {
                         targetLiving.getUseItem().isShield(targetLiving) && targetLiving instanceof PlayerEntity) {
                     DamageUtil.disableShield((PlayerEntity) targetLiving, disableBlockingChance);
                 }
+                
+                damageDealtToLiving = hp - targetLiving.getHealth();
             }
         }
         

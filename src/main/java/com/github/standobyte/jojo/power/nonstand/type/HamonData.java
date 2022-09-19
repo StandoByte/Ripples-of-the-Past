@@ -331,7 +331,7 @@ public class HamonData extends TypeSpecificData {
             if (!user.level.isClientSide()) {
                 if (updateMeditation(user.position(), user.yHeadRot, user.xRot)) {
                     if (user.tickCount % 800 == 400) {
-                        JojoModUtil.sayVoiceLine(user, getBreathingSound(), 0.75F, 1.0F);
+                        JojoModUtil.sayVoiceLine(user, getBreathingSound(), null, 0.75F, 1.0F);
                     }
                     user.addEffect(new EffectInstance(ModEffects.MEDITATION.get(), Math.max(Exercise.MEDITATION.getMaxTicks(this) - getExerciseTicks(Exercise.MEDITATION), 210)));
                     user.getFoodData().addExhaustion(-0.0025F);
@@ -450,7 +450,7 @@ public class HamonData extends TypeSpecificData {
             float lvlInc = (2 * MathHelper.clamp(getAverageExercisePoints(), 0F, 1F)) - 1F;
             recalcAvgExercisePoints();
             if (lvlInc < 0) {
-                if (!JojoModConfig.getCommonConfigInstance(false).breathingTechniqueDeterioration.get()) {
+                if (!JojoModConfig.getCommonConfigInstance(false).breathingTechniqueDeterioration.get() || user.abilities.instabuild) {
                     lvlInc = 0;
                 }
                 else {

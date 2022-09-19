@@ -73,13 +73,14 @@ public class JojoModConfig {
         public final ForgeConfigSpec.DoubleValue standDamageMultiplier;
         public final ForgeConfigSpec.BooleanValue skipStandProgression;
         public final ForgeConfigSpec.BooleanValue standStamina;
-        public final ForgeConfigSpec.ConfigValue<List<? extends Double>> resolvePoints;
+        public final ForgeConfigSpec.ConfigValue<List<? extends Double>> resolveLvlPoints;
         public final ForgeConfigSpec.BooleanValue soulAscension;
         public final ForgeConfigSpec.IntValue timeStopChunkRange;
         public final ForgeConfigSpec.DoubleValue timeStopDamageMultiplier;
 
         public final ForgeConfigSpec.DoubleValue hamonDamageMultiplier;
         public final ForgeConfigSpec.BooleanValue endermenBeyondTimeSpace;
+        public final ForgeConfigSpec.BooleanValue saveBrokenBlocks;
         
         private Common(ForgeConfigSpec.Builder builder) {
             builder.push("Keep Powers After Death");
@@ -201,12 +202,12 @@ public class JojoModConfig {
 	                        .translation("jojo.config.skipStandProgression")
 	                        .define("skipStandProgression", false);
 	                
-	                resolvePoints = builder
+	                resolveLvlPoints = builder
 	                        .comment("    Max resolve points at each Resolve level (starting from 0).", 
 	                                 "    Decrease these values to make getting to each level easier.", 
 	                                 "    All values must be higher than 0.")
 	                        .translation("jojo.config.resolvePoints")
-	                        .defineList("resolvePoints", Arrays.asList(ResolveCounter.DEFAULT_MAX_RESOLVE_VALUES), e -> isElementNonNegativeFloat(e, true));
+	                        .defineList("resolveLvlPoints", Arrays.asList(ResolveCounter.DEFAULT_MAX_RESOLVE_VALUES), e -> isElementNonNegativeFloat(e, true));
 	            builder.pop();
 
             	builder.push("Time Stop");
@@ -247,6 +248,11 @@ public class JojoModConfig {
                     .comment("    Damage multiplier applied to all Hamon attacks.")
                     .translation("jojo.config.hamonDamageMultiplier")
                     .defineInRange("hamonDamageMultiplier", 1.0, 0.0, 128.0);
+            
+            saveBrokenBlocks = builder
+                    .comment("    Whether or not blocks which can be restored by Crazy Diamond's terrain restoration ability are saved in the save files.")
+                    .translation("jojo.config.saveBrokenBlocks")
+                    .define("saveBrokenBlocks", true);
             
             endermenBeyondTimeSpace = builder
                     .comment("    Disable this if you're boring.")
@@ -430,7 +436,7 @@ public class JojoModConfig {
 //                standDamageMultiplier = config.standDamageMultiplier.get()
                 skipStandProgression = config.skipStandProgression.get();
                 standStamina = config.standStamina.get();
-                resolvePoints = Floats.toArray(config.resolvePoints.get());
+                resolvePoints = Floats.toArray(config.resolveLvlPoints.get());
                 soulAscension = config.soulAscension.get();
                 timeStopChunkRange = config.timeStopChunkRange.get();
                 endermenBeyondTimeSpace = config.endermenBeyondTimeSpace.get();
@@ -459,7 +465,7 @@ public class JojoModConfig {
 //                COMMON_SYNCED_TO_CLIENT.standDamageMultiplier.set(standDamageMultiplier);
                 COMMON_SYNCED_TO_CLIENT.skipStandProgression.set(skipStandProgression);
                 COMMON_SYNCED_TO_CLIENT.standStamina.set(standStamina);
-                COMMON_SYNCED_TO_CLIENT.resolvePoints.set(Floats.asList(resolvePoints).stream().map(Float::doubleValue).collect(Collectors.toList()));
+                COMMON_SYNCED_TO_CLIENT.resolveLvlPoints.set(Floats.asList(resolvePoints).stream().map(Float::doubleValue).collect(Collectors.toList()));
                 COMMON_SYNCED_TO_CLIENT.soulAscension.set(soulAscension);
                 COMMON_SYNCED_TO_CLIENT.timeStopChunkRange.set(timeStopChunkRange);
                 COMMON_SYNCED_TO_CLIENT.endermenBeyondTimeSpace.set(endermenBeyondTimeSpace);
@@ -490,7 +496,7 @@ public class JojoModConfig {
 //                COMMON_SYNCED_TO_CLIENT.standDamageMultiplier.clearCache();
                 COMMON_SYNCED_TO_CLIENT.skipStandProgression.clearCache();
                 COMMON_SYNCED_TO_CLIENT.standStamina.clearCache();
-                COMMON_SYNCED_TO_CLIENT.resolvePoints.clearCache();
+                COMMON_SYNCED_TO_CLIENT.resolveLvlPoints.clearCache();
                 COMMON_SYNCED_TO_CLIENT.soulAscension.clearCache();
                 COMMON_SYNCED_TO_CLIENT.timeStopChunkRange.clearCache();
                 COMMON_SYNCED_TO_CLIENT.endermenBeyondTimeSpace.clearCache();

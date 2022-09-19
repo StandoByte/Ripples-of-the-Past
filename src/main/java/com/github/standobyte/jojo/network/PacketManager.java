@@ -27,6 +27,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandSummon
 import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.BrokenChunkBlocksPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.CommonConfigPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.EntityTimeResumeSoundPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillLearnPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillsResetPacket;
@@ -35,8 +36,6 @@ import com.github.standobyte.jojo.network.packets.fromserver.LeapCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.MaxAchievedResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket;
-import com.github.standobyte.jojo.network.packets.fromserver.RPSGameStatePacket;
-import com.github.standobyte.jojo.network.packets.fromserver.RPSOpponentPickThoughtsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.RefreshMovementInTimeStopPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResetResolveValuePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResetSyncedCommonConfigPacket;
@@ -45,7 +44,6 @@ import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartP
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveLevelPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.StaminaPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandActionLearningPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandActionsClearLearningPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandCancelManualMovementPacket;
@@ -54,6 +52,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.StandStatsDataPacke
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopInstancePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerJoinPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerStatePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrBarrageHitSoundPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDirectEntityPosPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrEnergyPacket;
@@ -64,14 +63,16 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket
 import com.github.standobyte.jojo.network.packets.fromserver.TrNoMotionLerpPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrNonStandFlagPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandOffsetPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrStaminaPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandEffectPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntitySwingsPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntityTargetPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrStandEntityTaskModifierPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrStandTaskModifierPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrStandTaskTargetPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrTypeNonStandPowerPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrTypeStandInstancePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCachePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.stand_specific.CDBlocksRestoredPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.stand_specific.RPSGameStatePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.stand_specific.RPSOpponentPickThoughtsPacket;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -89,6 +90,7 @@ import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.fml.network.PacketDistributor.TargetPoint;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 
+// FIXME barrage clashes cause client logs getting spammed with network exceptions (either the payload is an EmptyByteBuf or "Received invalid discriminator byte" error)
 public class PacketManager {
     private static final String PROTOCOL_VERSION = "1";
     private static SimpleChannel channel;
@@ -259,10 +261,10 @@ public class PacketManager {
                 TrNonStandFlagPacket::decode,
                 TrNonStandFlagPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.registerMessage(index++, StaminaPacket.class,
-                StaminaPacket::encode,
-                StaminaPacket::decode,
-                StaminaPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        channel.registerMessage(index++, TrStaminaPacket.class,
+                TrStaminaPacket::encode,
+                TrStaminaPacket::decode,
+                TrStaminaPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
         channel.registerMessage(index++, ResolvePacket.class,
                 ResolvePacket::encode,
@@ -334,25 +336,15 @@ public class PacketManager {
                 StandCancelManualMovementPacket::decode,
                 StandCancelManualMovementPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.registerMessage(index++, TrStandEntityTargetPacket.class,
-                TrStandEntityTargetPacket::encode,
-                TrStandEntityTargetPacket::decode,
-                TrStandEntityTargetPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        channel.registerMessage(index++, TrStandTaskTargetPacket.class,
+                TrStandTaskTargetPacket::encode,
+                TrStandTaskTargetPacket::decode,
+                TrStandTaskTargetPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
-        channel.registerMessage(index++, TrStandEntityTaskModifierPacket.class,
-                TrStandEntityTaskModifierPacket::encode,
-                TrStandEntityTaskModifierPacket::decode,
-                TrStandEntityTaskModifierPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        
-        channel.registerMessage(index++, TrSetStandOffsetPacket.class,
-                TrSetStandOffsetPacket::encode,
-                TrSetStandOffsetPacket::decode,
-                TrSetStandOffsetPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        
-        channel.registerMessage(index++, TrStandEntitySwingsPacket.class,
-                TrStandEntitySwingsPacket::encode,
-                TrStandEntitySwingsPacket::decode,
-                TrStandEntitySwingsPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        channel.registerMessage(index++, TrStandTaskModifierPacket.class,
+                TrStandTaskModifierPacket::encode,
+                TrStandTaskModifierPacket::decode,
+                TrStandTaskModifierPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
         channel.registerMessage(index++, UpdateClientCapCachePacket.class,
                 UpdateClientCapCachePacket::encode,
@@ -379,6 +371,11 @@ public class PacketManager {
                 PlaySoundAtClientPacket::decode,
                 PlaySoundAtClientPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
+        channel.registerMessage(index++, TrBarrageHitSoundPacket.class,
+                TrBarrageHitSoundPacket::encode,
+                TrBarrageHitSoundPacket::decode,
+                TrBarrageHitSoundPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
         channel.registerMessage(index++, TimeStopInstancePacket.class,
                 TimeStopInstancePacket::encode,
                 TimeStopInstancePacket::decode,
@@ -398,6 +395,11 @@ public class PacketManager {
                 RefreshMovementInTimeStopPacket::encode,
                 RefreshMovementInTimeStopPacket::decode,
                 RefreshMovementInTimeStopPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, EntityTimeResumeSoundPacket.class,
+                EntityTimeResumeSoundPacket::encode,
+                EntityTimeResumeSoundPacket::decode,
+                EntityTimeResumeSoundPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
         channel.registerMessage(index++, TrNoMotionLerpPacket.class,
                 TrNoMotionLerpPacket::encode,
@@ -423,6 +425,11 @@ public class PacketManager {
                 BrokenChunkBlocksPacket::encode,
                 BrokenChunkBlocksPacket::decode,
                 BrokenChunkBlocksPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, CDBlocksRestoredPacket.class,
+                CDBlocksRestoredPacket::encode,
+                CDBlocksRestoredPacket::decode,
+                CDBlocksRestoredPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
         channel.registerMessage(index++, RPSGameStatePacket.class,
                 RPSGameStatePacket::encode,

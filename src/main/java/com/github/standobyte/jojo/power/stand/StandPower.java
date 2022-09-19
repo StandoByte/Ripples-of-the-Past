@@ -17,9 +17,9 @@ import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.StaminaPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandActionLearningPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandActionsClearLearningPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrStaminaPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrTypeStandInstancePacket;
 import com.github.standobyte.jojo.power.PowerBaseImpl;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
@@ -107,7 +107,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     protected void onNewPowerGiven(StandType<?> standType) {
         super.onNewPowerGiven(standType);
         serverPlayerUser.ifPresent(player -> {
-            PacketManager.sendToClientsTrackingAndSelf(new TrTypeStandInstancePacket(player.getId(), getStandInstance().get()), player);
+            PacketManager.sendToClientsTrackingAndSelf(new TrTypeStandInstancePacket(
+                    player.getId(), getStandInstance().get(), resolveCounter.getResolveLevel()), player);
         });
         setStamina(getMaxStamina() * 0.5F);
         if (user != null && (JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).skipStandProgression.get()
@@ -126,7 +127,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             stamina = isUserCreative() ? getMaxStamina() : 0;
         }
         if (usesResolve()) {
-            resolveCounter.onStandAcquired();
+            resolveCounter.onStandAcquired(standType);
         }
         if (standType != null) {
             tier = Math.max(tier, standType.getTier());
@@ -263,7 +264,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         this.stamina = amount;
         if (send) {
             serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new StaminaPacket(getStamina()), player);
+                PacketManager.sendToClientsTrackingAndSelf(new TrStaminaPacket(user.getId(), getStamina()), player);
             });
         }
     }
@@ -477,6 +478,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     public ActionLearningProgressMap<IStandPower> clearActionLearning() {
         ActionLearningProgressMap<IStandPower> previousMap = actionLearningProgressMap;
         this.actionLearningProgressMap = new ActionLearningProgressMap<>();
+        resolveCounter.clearLevels();
         serverPlayerUser.ifPresent(player -> {
             PacketManager.sendToClient(new StandActionsClearLearningPacket(), player);
         });
@@ -633,9 +635,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         super.syncWithUserOnly();
         serverPlayerUser.ifPresent(player -> {
             if (hasPower()) {
-                if (usesStamina()) {
-                    PacketManager.sendToClient(new StaminaPacket(stamina), player);
-                }
                 if (usesResolve()) {
                     resolveCounter.syncWithUser(player);
                 }
@@ -655,7 +654,10 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         super.syncWithTrackingOrUser(player);
         if (hasPower()) {
             if (user != null) {
-                PacketManager.sendToClient(new TrTypeStandInstancePacket(user.getId(), getStandInstance().get()), player);
+                PacketManager.sendToClient(new TrTypeStandInstancePacket(user.getId(), getStandInstance().get(), resolveCounter.getResolveLevel()), player);
+            }
+            if (usesStamina()) {
+                PacketManager.sendToClient(new TrStaminaPacket(user.getId(), stamina), player);
             }
             if (standManifestation != null) {
                 standManifestation.syncWithTrackingOrUser(player);

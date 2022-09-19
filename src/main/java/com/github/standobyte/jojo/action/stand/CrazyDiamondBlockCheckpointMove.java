@@ -1,12 +1,20 @@
 package com.github.standobyte.jojo.action.stand;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
+import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandUtil;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
@@ -37,23 +45,46 @@ public class CrazyDiamondBlockCheckpointMove extends StandEntityAction {
             ItemStack heldItem = user.getOffhandItem();
             CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(world, heldItem).ifPresent(pos -> {
                 Vector3d posD = Vector3d.atCenterOf(pos);
-                if (user.distanceToSqr(posD) > 16) {
-                    user.setDeltaMovement(posD.subtract(user.position()).normalize().scale(0.75));
-                    user.fallDistance = 0;
+                Entity entity = user.getRootVehicle();
+                if (entity.distanceToSqr(posD) > 16) {
+                    entity.setDeltaMovement(posD.subtract(entity.position()).normalize().scale(0.75));
+                    entity.fallDistance = 0;
                 }
                 else {
-                    if (heldItem.getItem() instanceof BlockItem && !world.isClientSide()) {
-                        world.setBlockAndUpdate(pos, CrazyDiamondBlockCheckpointMake.getBlockState(heldItem, 
-                                (BlockItem) heldItem.getItem()));
+                    BlockState blockState = null;
+                    if (heldItem.getItem() instanceof BlockItem) {
+                        blockState = CrazyDiamondBlockCheckpointMake.getBlockState(heldItem, (BlockItem) heldItem.getItem());
                     }
-                    CrazyDiamondRestoreTerrain.addParticlesAroundBlock(world, pos, standEntity.getRandom());
-                    heldItem.shrink(1);
+                    boolean willRestore = blockState == null || CrazyDiamondPreviousState.canReplaceBlock(world, pos, blockState);
+                    
+                    if (!world.isClientSide()) {
+                        if (willRestore) {
+                            heldItem.shrink(1);
+                            if (blockState != null) {
+                                world.setBlockAndUpdate(pos, blockState);
+                            }
+                            standEntity.playSound(ModSounds.CRAZY_DIAMOND_FIX_ENDED.get(), 1.0F, 1.0F, null);
+                        }
+                    }
+                    else if (willRestore) {
+                        CrazyDiamondRestoreTerrain.addParticlesAroundBlock(world, pos, standEntity.getRandom());
+                    }
                 }
-                if (world.isClientSide()) {
-                    // FIXME ! (fast travel) CD restore sound
+                if (world.isClientSide() && StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) {
                     CustomParticlesHelper.createCDRestorationParticle(user, Hand.OFF_HAND);
                 }
             });
+        }
+    }
+    
+    @Override
+    public void phaseTransition(World world, StandEntity standEntity, IStandPower standPower, 
+            @Nullable Phase from, @Nullable Phase to, StandEntityTask task, int nextPhaseTicks) {
+        if (world.isClientSide()) {
+            if (to == Phase.PERFORM) {
+                ClientTickingSoundsHelper.playStandEntityCancelableActionSound(standEntity, 
+                        ModSounds.CRAZY_DIAMOND_FIX_LOOP.get(), this, Phase.PERFORM, 1.0F, 1.0F, true);
+            }
         }
     }
     

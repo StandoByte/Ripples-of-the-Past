@@ -123,7 +123,7 @@ public class StandController {
 
         ClientPlayerEntity player = mc.player;
         if (!stand.isAlive()) {
-            mc.setCameraEntity(player);
+            ClientUtil.setCameraEntityPreventShaderSwitch(mc, player);
         }
         else {
             player.connection.send(new CPlayerPacket.PositionRotationPacket(player.getX(), player.getY(), player.getZ(), player.yRot, player.xRot, player.isOnGround()));

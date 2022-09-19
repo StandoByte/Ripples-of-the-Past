@@ -6,6 +6,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRFlameEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -15,6 +16,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeMod;
 
 public class MagiciansRedFlameBurst extends StandEntityAction {
+    public static final StandPose FLAME_BURST_POSE = new StandPose("MR_FLAME_BURST", true);
 
     public MagiciansRedFlameBurst(StandEntityAction.Builder builder) {
         super(builder);

@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.stand;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBloodCutterEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
@@ -9,6 +10,8 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public class CrazyDiamondBloodCutter extends StandEntityAction {
@@ -36,4 +39,23 @@ public class CrazyDiamondBloodCutter extends StandEntityAction {
         }
     }
 
+    @Override
+    protected int getCooldownAdditional(IStandPower power, int ticksHeld) {
+        int cooldown = super.getCooldownAdditional(power, ticksHeld);
+        if (!power.isUserCreative() && power.getUser() != null) {
+            LivingEntity user = power.getUser();
+            cooldown = MathHelper.ceil((float) cooldown * user.getHealth() / user.getMaxHealth());
+        }
+        return cooldown;
+    }
+    
+    @Override
+    protected void playSoundAtStand(World world, StandEntity standEntity, SoundEvent sound, IStandPower standPower, Phase phase) {
+        if (world.isClientSide() && phase == Phase.WINDUP) {
+            ClientTickingSoundsHelper.playStandEntityCancelableActionSound(standEntity, sound, this, phase, 1.0F, 1.0F, false);
+        }
+        else {
+            super.playSoundAtStand(world, standEntity, sound, standPower, phase);
+        }
+    }
 }

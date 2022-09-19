@@ -5,6 +5,8 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.power.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.util.damage.DamageUtil;
 import com.github.standobyte.jojo.util.damage.IStandDamageSource;
@@ -34,6 +36,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
@@ -44,6 +47,8 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     // only used for OwnerBoundProjectileEntity
     protected float speedFactor = 1F;
     private LivingEntity livingEntityOwner = null;
+    private LazyOptional<IStandPower> userStandPower = LazyOptional.empty();
+    private LazyOptional<INonStandPower> userNonStandPower = LazyOptional.empty();
 
     public DamagingEntity(EntityType<? extends DamagingEntity> entityType, @Nullable LivingEntity owner, World world) {
         this(entityType, world);
@@ -85,6 +90,27 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
             }
         }
         return livingEntityOwner;
+    }
+    
+    @Override
+    public void setOwner(Entity owner) {
+        super.setOwner(owner);
+        userStandPower = LazyOptional.empty();
+        userNonStandPower = LazyOptional.empty();
+    }
+    
+    protected LazyOptional<IStandPower> getUserStandPower() {
+        if (!userStandPower.isPresent()) {
+            userStandPower = IStandPower.getStandPowerOptional(StandUtil.getStandUser(getOwner()));
+        }
+        return userStandPower;
+    }
+    
+    protected LazyOptional<INonStandPower> getUserNonStandPower() {
+        if (!userNonStandPower.isPresent()) {
+            userNonStandPower = INonStandPower.getNonStandPowerOptional(StandUtil.getStandUser(getOwner()));
+        }
+        return userNonStandPower;
     }
     
     @Override

@@ -313,33 +313,6 @@
     "subtitle": "jojo.subtitle.stand_damage_block",
     "sounds": [ "jojo:attack_block_1", "jojo:attack_block_2" ]
   },
-  "stand_light_attack": {
-    "subtitle": "jojo.subtitle.stand_attack_light",
-    "sounds": [
-      {
-        "name": "minecraft:entity.player.attack.strong",
-        "type": "event"
-      }
-    ]
-  },
-  "stand_strong_attack": {
-    "subtitle": "jojo.subtitle.stand_attack_strong",
-    "sounds": [
-      {
-        "name": "minecraft:entity.player.attack.knockback",
-        "type": "event"
-      }
-    ]
-  },
-  "stand_barrage_attack": {
-    "subtitle": "jojo.subtitle.stand_attack_barrage",
-    "sounds": [
-      {
-        "name": "minecraft:entity.player.attack.weak",
-        "type": "event"
-      }
-    ]
-  },
   "stand_crash": {
     "subtitle": "jojo.subtitle.stand_crash",
     "sounds": [ "jojo:stand/stand_parry" ]
@@ -382,6 +355,27 @@
   "star_platinum_unsummon": {
     "subtitle": "jojo.subtitle.stand_unsummon",
     "sounds": [ "jojo:stand/star_platinum_unsummon" ]
+  },
+  "star_platinum_punch_light": {
+    "subtitle": "jojo.subtitle.stand_attack_light",
+    "sounds": [ "jojo:stand/star_platinum_punch_light" ]
+  },
+  "star_platinum_punch_barrage": {
+    "subtitle": "jojo.subtitle.stand_attack_light",
+    "sounds": [ 
+      {
+        "name": "jojo:stand/star_platinum_punch_light",
+        "weight" : 3
+      },
+      {
+        "name": "jojo:stand/star_platinum_punch_barrage",
+        "weight" : 1
+      }
+    ]
+  },
+  "star_platinum_punch_heavy": {
+    "subtitle": "jojo.subtitle.stand_attack_strong",
+    "sounds": [ "jojo:stand/star_platinum_punch_heavy", "jojo:stand/star_platinum_punch_heavy_2" ]
   },
   "star_platinum_ora": {
     "subtitle": "jojo.subtitle.ora",
@@ -497,6 +491,29 @@
     "subtitle": "jojo.subtitle.muda_muda_muda",
     "sounds": [ "jojo:stand/the_world_muda_muda_muda", "jojo:stand/the_world_muda_muda_muda_2" ]
   },
+  "the_world_punch_light": {
+    "subtitle": "jojo.subtitle.stand_attack_light",
+    "sounds": [ "jojo:stand/the_world_punch_light" ]
+  },
+  "the_world_punch_barrage": {
+    "subtitle": "jojo.subtitle.stand_attack_light",
+    "sounds": [ "jojo:stand/the_world_punch_light" ]
+  },
+  "the_world_punch_heavy": {
+    "subtitle": "jojo.subtitle.stand_attack_strong",
+    "sounds": [  "jojo:stand/the_world_punch_heavy"]
+  },
+  "the_world_punch_heavy_entity": {
+    "subtitle": "jojo.subtitle.stand_attack_strong",
+    "sounds": [ "jojo:stand/the_world_punch_heavy_entity" ]
+  },
+  "the_world_punch_heavy_ts_impact": {
+    "sounds": [ "jojo:stand/the_world_punch_heavy_impact" ]
+  },
+  "the_world_kick_heavy": {
+    "subtitle": "jojo.subtitle.stand_attack_strong",
+    "sounds": [ "jojo:stand/the_world_kick_heavy" ]
+  },
   "the_world_time_stop": {
     "sounds": [ "jojo:stand/the_world_time_stop" ]
   },
@@ -579,6 +596,10 @@
     "subtitle": "jojo.subtitle.stand_unsummon",
     "sounds": [ "jojo:stand/silver_chariot_unsummon", "jojo:stand/silver_chariot_unsummon_2" ]
   },
+  "silver_chariot_barrage": {
+    "subtitle": "jojo.subtitle.stand_attack_light",
+    "sounds": [ "jojo:stand/silver_chariot_barrage", "jojo:stand/silver_chariot_barrage_2" ]
+  },
   "silver_chariot_block": {
     "subtitle": "jojo.subtitle.stand_damage_block",
     "sounds": [
@@ -621,17 +642,29 @@
     "subtitle": "jojo.subtitle.stand_summon",
     "sounds": [ "jojo:stand/magicians_red_summon", "jojo:stand/magicians_red_summon_2" ]
   },
+  "magicians_red_punch_light": {
+    "subtitle": "jojo.subtitle.stand_attack_light",
+    "sounds": [ "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" ]
+  },
+  "magicians_red_punch_heavy": {
+    "subtitle": "jojo.subtitle.stand_attack_strong",
+    "sounds": [ "jojo:stand/magicians_red_punch_heavy" ]
+  },
+  "magicians_red_kick_heavy": {
+    "subtitle": "jojo.subtitle.stand_attack_strong",
+    "sounds": [ "jojo:stand/magicians_red_punch_heavy" ]
+  },
   "magicians_red_fire_ability": {
     "subtitle": "jojo.subtitle.fire_ability",
     "sounds": [ "minecraft:mob/ghast/fireball4" ]
   },
   "josuke_crazy_diamond": {
     "subtitle": "jojo.subtitle.crazy_diamond_name",
-    "sounds": [  ]
+    "sounds": [ "jojo:stand_user/josuke_crazy_diamond", "jojo:stand_user/josuke_crazy_diamond_2" ]
   },
   "josuke_fix": {
     "subtitle": "jojo.subtitle.fix",
-    "sounds": [  ]
+    "sounds": [ "jojo:stand_user/josuke_fix" ]
   },
   "crazy_diamond_summon": {
     "subtitle": "jojo.subtitle.stand_summon",
@@ -643,34 +676,46 @@
   },
   "crazy_diamond_punch_light": {
     "subtitle": "jojo.subtitle.stand_attack_light",
-    "sounds": [ "jojo:stand/crazy_diamond_punch_light" ]
+    "sounds": [ "jojo:stand/crazy_diamond_punch_light", "jojo:stand/crazy_diamond_punch_light_2", "jojo:stand/crazy_diamond_punch_light_3" ]
+  },
+  "crazy_diamond_punch_barrage": {
+    "subtitle": "jojo.subtitle.stand_attack_light",
+    "sounds": [ "jojo:stand/crazy_diamond_punch_light", "jojo:stand/crazy_diamond_punch_light_2", "jojo:stand/crazy_diamond_punch_light_3" ]
   },
   "crazy_diamond_punch_heavy": {
     "subtitle": "jojo.subtitle.stand_attack_strong",
-    "sounds": [ "jojo:stand/crazy_diamond_punch_heavy" ]
-  },
-  "crazy_diamond_punch_barrage": {
-    "subtitle": "jojo.subtitle.stand_attack_barrage",
-    "sounds": [ "jojo:stand/crazy_diamond_punch_barrage" ]
+    "sounds": [ "jojo:stand/crazy_diamond_punch_heavy", "jojo:stand/crazy_diamond_punch_heavy_2" ]
   },
   "crazy_diamond_dora": {
     "subtitle": "jojo.subtitle.dora",
-    "sounds": [  ]
+    "sounds": [ "jojo:stand/crazy_diamond_dora", "jojo:stand/crazy_diamond_dora_2" ]
+  },
+  "crazy_diamond_dora_long": {
+    "subtitle": "jojo.subtitle.dora",
+    "sounds": [ "jojo:stand/crazy_diamond_dora_long", "jojo:stand/crazy_diamond_dora_long_2", "jojo:stand/crazy_diamond_dora_long_3" ]
   },
   "crazy_diamond_dorarara": {
     "subtitle": "jojo.subtitle.dorarara",
-    "sounds": [  ]
+    "sounds": [ "jojo:stand/crazy_diamond_dorarara", "jojo:stand/crazy_diamond_dorarara_2" ]
   },
   "crazy_diamond_fix_started": {
     "subtitle": "jojo.subtitle.fixed",
     "sounds": [ "jojo:stand/crazy_diamond_restoration_start" ]
   },
-  "crazy_diamond_fix": {
+  "crazy_diamond_fix_loop": {
     "subtitle": "jojo.subtitle.fixed",
-    "sounds": [  ]
+    "sounds": [ "jojo:stand/crazy_diamond_restoration_loop" ]
   },
   "crazy_diamond_fix_ended": {
     "subtitle": "jojo.subtitle.fixed",
     "sounds": [ "jojo:stand/crazy_diamond_restoration_over" ]
+  },
+  "crazy_diamond_bullet_shot": {
+    "subtitle": "jojo.subtitle.shot",
+    "sounds": [ "jojo:stand/crazy_diamond_bullet_shot" ]
+  },
+  "crazy_diamond_blood_cutter_shot": {
+    "subtitle": "jojo.subtitle.shot",
+    "sounds": [ "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" ]
   }
 }

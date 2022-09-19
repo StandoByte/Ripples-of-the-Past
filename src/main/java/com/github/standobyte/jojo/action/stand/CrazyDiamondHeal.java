@@ -3,14 +3,22 @@ package com.github.standobyte.jojo.action.stand;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.IHasHealth;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
+import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModParticles;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -44,75 +52,128 @@ public class CrazyDiamondHeal extends StandEntityAction {
     }
     
     @Override
-    public boolean standCanTick(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
+    public boolean standCanTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         return task.getTarget().getType() == TargetType.ENTITY;
     }
     
     @Override
     public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         Entity targetEntity = task.getTarget().getEntity();
+        
+        boolean healedThisTick = false;
+        
         if (targetEntity instanceof LivingEntity) {
             LivingEntity targetLiving = (LivingEntity) targetEntity;
-            // FIXME disable it if the target is a dead body already
-            if (targetLiving.deathTime > 0) {
-                handle(world, targetEntity, targetLiving, 
-                        (e, clientSide) -> {
-                            if (targetLiving.deathTime == 1) {
-                                if (!clientSide) {
-                                    targetLiving.setHealth(0.001F);
-                                }
-                                targetLiving.deathTime--;
-                            }
-                        },
-                        e -> e.getHealth() < e.getMaxHealth());
-            }
-            else {
-                handleLivingEntity(world, targetLiving);
-            }
+            healedThisTick = healLivingEntity(world, targetLiving, standEntity);
         }
         else if (targetEntity instanceof IHasHealth) {
-            handle(world, targetEntity, (IHasHealth) targetEntity, 
+            healedThisTick = heal(world, targetEntity, (IHasHealth) targetEntity, 
                     (e, clientSide) -> {
                         if (!clientSide) {
-                            e.setHealth(e.getHealth() + e.getMaxHealth() / 40);
+                            e.setHealth(e.getHealth() + e.getMaxHealth() / 40 * (float) healingSpeed(standEntity));
                         }
                     },
                     e -> e.getHealth() < e.getMaxHealth());
         }
         else if (targetEntity instanceof BoatEntity) {
-            handle(world, targetEntity, (BoatEntity) targetEntity, 
+            healedThisTick = heal(world, targetEntity, (BoatEntity) targetEntity, 
                     (e, clientSide) -> {
-                        if (clientSide) {
-                            e.setDamage(Math.max(e.getDamage() - 1, 0));
+                        if (!clientSide) {
+                            e.setDamage(Math.max(e.getDamage() - (float) healingSpeed(standEntity), 0));
                         }
                     },
                     e -> e.getDamage() > 0);
         }
+        
+
+        if (!world.isClientSide()) {
+            barrageVisualsTick(standEntity, healedThisTick, targetEntity != null ? targetEntity.getBoundingBox().getCenter() : null);
+        }
     }
 
-    public static boolean handleLivingEntity(World world, LivingEntity entity) {
-        return handle(world, entity, 
+    public static double healingSpeed(StandEntity standEntity) {
+        return standEntity.getAttackSpeed() * 0.05F + 0.6;
+    }
+
+    public static boolean healLivingEntity(World world, LivingEntity entity, StandEntity standEntity) {
+        // FIXME disable it if the target is a dead body already
+        if (entity.deathTime > 0) {
+            boolean resolveEffect = standEntity.getUser() != null && standEntity.getUser().hasEffect(ModEffects.RESOLVE.get());
+            if (!resolveEffect && entity.deathTime > 1 || entity.deathTime > 15) {
+                return false;
+            }
+            return heal(world, entity, 
+                    entity, (e, clientSide) -> {
+                        LivingEntity toHeal = e;
+                        if (!clientSide) {
+                            StandUtil.getStandUser(e).setHealth(0.001F);
+                        }
+                        e.deathTime--;
+                        toHeal.deathTime--;
+                    }, e -> true);
+        }
+        
+        return heal(world, entity, 
                 entity, (e, clientSide) -> {
                     if (!clientSide) {
-                        e.setHealth(e.getHealth() + 0.5F);
+                        LivingEntity toHeal = StandUtil.getStandUser(e);
+                        toHeal.setHealth(toHeal.getHealth() + 0.5F * (float) healingSpeed(standEntity));
                     }
                 }, 
                 e -> e.getHealth() < e.getMaxHealth());
     }
-
-    // FIXME ! (heal) CD restore sound
-    public static <T> boolean handle(World world, Entity entity, T entityCasted, BiConsumer<T, Boolean> heal, Predicate<T> isHealthMissing) {
+    
+    public static <T> boolean heal(World world, Entity entity, T entityCasted, BiConsumer<T, Boolean> heal, Predicate<T> isHealthMissing) {
+        boolean healed = isHealthMissing.test(entityCasted);
         heal.accept(entityCasted, world.isClientSide());
-        if (world.isClientSide() && isHealthMissing.test(entityCasted)) {
+        if (world.isClientSide() && isHealthMissing.test(entityCasted) && StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) {
             addParticlesAround(entity);
         }
-        return !isHealthMissing.test(entityCasted);
+        return healed;
     }
     
     public static void addParticlesAround(Entity entity) {
-        int particlesCount = Math.max(MathHelper.ceil(entity.getBbWidth() * (entity.getBbHeight() * 2 * entity.getBbHeight())), 1);
-        for (int i = 0; i < particlesCount; i++) {
-            entity.level.addParticle(ModParticles.CD_RESTORATION.get(), entity.getRandomX(1), entity.getRandomY(), entity.getRandomZ(1), 0, 0, 0);
+        if (entity.level.isClientSide() && StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) {
+            int particlesCount = Math.max(MathHelper.ceil(entity.getBbWidth() * (entity.getBbHeight() * 2 * entity.getBbHeight())), 1);
+            for (int i = 0; i < particlesCount; i++) {
+                entity.level.addParticle(ModParticles.CD_RESTORATION.get(), entity.getRandomX(1), entity.getRandomY(), entity.getRandomZ(1), 0, 0, 0);
+            }
         }
+    }
+    
+    @Override
+    public void phaseTransition(World world, StandEntity standEntity, IStandPower standPower, 
+            @Nullable Phase from, @Nullable Phase to, StandEntityTask task, int nextPhaseTicks) {
+        if (world.isClientSide()) {
+            if (to == Phase.PERFORM) {
+                ClientTickingSoundsHelper.playStandEntityCancelableActionSound(standEntity, 
+                        ModSounds.CRAZY_DIAMOND_FIX_LOOP.get(), this, Phase.PERFORM, 1.0F, 1.0F, true);
+            }
+            else if (from == Phase.PERFORM) {
+                standEntity.playSound(ModSounds.CRAZY_DIAMOND_FIX_ENDED.get(), 1.0F, 1.0F, ClientUtil.getClientPlayer());
+            }
+        }
+    }
+    
+    @Override
+    protected boolean barrageVisuals(StandEntity standEntity, IStandPower standPower, StandEntityTask task) {
+        if (!super.barrageVisuals(standEntity, standPower, task)) return false;
+        
+        if (standPower.getUser() != null && standPower.getUser().hasEffect(ModEffects.RESOLVE.get())) {
+            return true;
+        }
+        
+        ActionTarget target = task.getTarget();
+        if (target.getType() == TargetType.ENTITY && target.getEntity() instanceof LivingEntity) {
+            LivingEntity targetLiving = (LivingEntity) target.getEntity();
+            return targetLiving.getHealth() / targetLiving.getMaxHealth() <= 0.5F;
+        }
+        return false;
+    }
+
+    @Override
+    public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
+        return offsetToTarget(standPower, standEntity, task, 0, standEntity.getMaxEffectiveRange(), null)
+                .orElse(super.getOffsetFromUser(standPower, standEntity, task));
     }
 }

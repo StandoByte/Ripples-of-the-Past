@@ -43,6 +43,7 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.client.util.InputMappings;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
@@ -226,6 +227,8 @@ public class InputHandler {
                     handleMouseClickPowerHud(null, ActionKey.STAND_BLOCK);
                 }
             }
+            
+            tickEffects();
         }
         else {
             pickMouseTarget();
@@ -450,7 +453,7 @@ public class InputHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void invertMovementInput(InputUpdateEvent event) {
-        if (mc.player.hasEffect(ModEffects.DISFIGURED_LEGS.get())) {
+        if (event.getPlayer().hasEffect(ModEffects.MISSHAPEN_LEGS.get())) {
             MovementInput input = event.getMovementInput();
             input.forwardImpulse *= -1;
             input.leftImpulse *= -1;
@@ -468,6 +471,51 @@ public class InputHandler {
             input.shiftKeyDown = tmp;
         }
     }
+    
+    @SubscribeEvent
+    public void invertMouse(ClientTickEvent event) {
+        boolean invert = mc.player != null && mc.player.hasEffect(ModEffects.MISSHAPEN_FACE.get());
+        if (invert ^ mc.options.sensitivity < 0) {
+            mc.options.sensitivity = -mc.options.sensitivity - 2.0 / 3.0;
+        }
+    }
+    
+    private boolean mouseButtonsSwapped = false;
+    private InputMappings.Input lmbKey;
+    private InputMappings.Input rmbKey;
+    
+    public void mouseButtonsInvertTick() {
+        if (!mouseButtonsSwapped) {
+            lmbKey = mc.options.keyAttack.getKey();
+            rmbKey = mc.options.keyUse.getKey();
+            mouseButtonsSwapped = true;
+        }
+        
+        if (mc.options.keyAttack.getKey() != rmbKey || mc.options.keyUse.getKey() != lmbKey) {
+            mc.options.keyAttack.setKey(rmbKey);
+            mc.options.keyUse.setKey(lmbKey);
+            KeyBinding.resetMapping();
+        }
+    }
+    
+    public void mouseButtonsInvertEnd() {
+        if (mouseButtonsSwapped) {
+            mc.options.keyAttack.setKey(lmbKey);
+            mc.options.keyUse.setKey(rmbKey);
+            mouseButtonsSwapped = false;
+            KeyBinding.resetMapping();
+        }
+    }
+    
+    private void tickEffects() {
+        if (mc.player != null && mc.player.hasEffect(ModEffects.MISSHAPEN_ARMS.get())) {
+            mouseButtonsInvertTick();
+        }
+        else {
+            mouseButtonsInvertEnd();
+        }
+    }
+    
     
     @SubscribeEvent(priority = EventPriority.LOW)
     public void onInputUpdate(InputUpdateEvent event) {
