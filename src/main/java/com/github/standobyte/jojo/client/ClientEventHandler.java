@@ -263,7 +263,7 @@ public class ClientEventHandler {
         }
     }
 
-    private ResourceLocation getCurrentShader() {
+    public ResourceLocation getCurrentShader() {
         if (mc.level == null) {
             return null;
         }
@@ -467,7 +467,7 @@ public class ClientEventHandler {
             TranslucentBlockRenderHelper.renderCDRestorationTranslucentBlocks(matrixStack, mc, 
                     CrazyDiamondRestoreTerrain.getBlocksInRange(mc.level, mc.player, pos, 32, 
                             block -> mc.level.getBlockState(block.pos).isAir(mc.level, block.pos)),
-                    block -> CrazyDiamondRestoreTerrain.blockPosSelectedForRestoration(block, entity, lookVec, eyePosD, pos));
+                    block -> CrazyDiamondRestoreTerrain.blockPosSelectedForRestoration(block, entity, lookVec, eyePosD, pos, mc.player.hasEffect(ModEffects.RESOLVE.get())));
         }
     }
 

@@ -6,8 +6,6 @@ import javax.annotation.Nonnull;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.StandAction;
-import com.github.standobyte.jojo.entity.itemprojectile.StandArrowEntity;
-import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsKidEntity;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;

@@ -1,10 +1,15 @@
 package com.github.standobyte.jojo.action.stand;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
@@ -19,6 +24,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.nbt.StringNBT;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Dimension;
 import net.minecraft.world.World;
@@ -43,29 +49,36 @@ public class CrazyDiamondBlockCheckpointMake extends StandEntityAction {
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
             BlockPos pos = task.getTarget().getBlockPos();
-            // FIXME !!! (fast travel) handle the "no block breaking" config
             if (pos != null) {
-                BlockState blockState = world.getBlockState(pos);
-                // FIXME !!! (fast travel) block drops gathering
-                List<ItemStack> drops = Block.getDrops(blockState, (ServerWorld) world, pos, 
-                        blockState.hasTileEntity() ? world.getBlockEntity(pos) : null);
-                
-                if (standEntity.breakBlock(pos, blockState, false)) {
-                    standEntity.playSound(ModSounds.CRAZY_DIAMOND_PUNCH_HEAVY.get(), 1.0F, 1.0F);
-                    drops.forEach(stack -> {
-                        boolean dropItem = true;
-                        if (stack.getItem() instanceof BlockItem) {
-                            fillAnchorNbt(stack, world, pos, blockState);
-                            LivingEntity user = standEntity.getUser();
-                            dropItem = !(user instanceof PlayerEntity && ((PlayerEntity) user).inventory.add(stack) && stack.isEmpty());
-                        }
-                        if (dropItem) {
-                            Block.popResource(world, pos, stack);
-                        }
-                    });
+                if (JojoModConfig.getCommonConfigInstance(false).abilitiesBreakBlocks.get()) {
+                    BlockState blockState = world.getBlockState(pos);
+                    List<ItemStack> drops = Block.getDrops(blockState, (ServerWorld) world, pos, 
+                            blockState.hasTileEntity() ? world.getBlockEntity(pos) : null);
+                    
+                    if (standEntity.breakBlock(pos, blockState, false)) {
+                        makeAnchor(standEntity, drops, world, pos, blockState);
+                    }
+                }
+                else {
+                    makeAnchor(standEntity, Util.make(new ArrayList<>(), list -> list.add(new ItemStack(ModItems.CRAZY_DIAMOND_NON_BLOCK_ANCHOR.get()))), world, pos, null);
                 }
             }
         }
+    }
+    
+    private void makeAnchor(StandEntity standEntity, List<ItemStack> drops, World world, BlockPos blockPos, BlockState blockState) {
+        standEntity.playSound(ModSounds.CRAZY_DIAMOND_PUNCH_HEAVY.get(), 1.0F, 1.0F);
+        drops.forEach(stack -> {
+            boolean dropItem = true;
+            if (blockState == null || stack.getItem() instanceof BlockItem) {
+                fillAnchorNbt(stack, world, blockPos, blockState);
+                LivingEntity user = standEntity.getUser();
+                dropItem = !(user instanceof PlayerEntity && ((PlayerEntity) user).inventory.add(stack) && stack.isEmpty());
+            }
+            if (dropItem) {
+                Block.popResource(world, blockPos, stack);
+            }
+        });
     }
 
     @Override
@@ -73,7 +86,7 @@ public class CrazyDiamondBlockCheckpointMake extends StandEntityAction {
         return TargetRequirement.BLOCK;
     }
     
-    private static void fillAnchorNbt(ItemStack stack, World world, BlockPos pos, BlockState blockState) {
+    private static void fillAnchorNbt(ItemStack stack, World world, BlockPos pos, @Nullable BlockState blockState) {
         CompoundNBT mainNBT = new CompoundNBT();
         
         CompoundNBT posNBT = new CompoundNBT();
@@ -82,7 +95,9 @@ public class CrazyDiamondBlockCheckpointMake extends StandEntityAction {
         posNBT.putInt("z", pos.getZ());
         mainNBT.put("Pos", posNBT);
         
-        mainNBT.put("BlockState", NBTUtil.writeBlockState(blockState));
+        if (blockState != null) {
+            mainNBT.put("BlockState", NBTUtil.writeBlockState(blockState));
+        }
         
         mainNBT.putString("Dimension", world.dimension().location().toString());
 

@@ -58,7 +58,7 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
             if (!world.isClientSide()) {
                 ItemStack itemToRepair = itemToRepair(user);
                 if (!itemToRepair.isEmpty()) {
-                    float points = repairTick(user, itemToRepair, task.getTick());
+                    float points = repairTick(user, standEntity, itemToRepair, task.getTick());
                     if (points > 0) {
                         userPower.addLearningProgressPoints(this, points);
                     }
@@ -82,7 +82,7 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
         return entity.getOffhandItem();
     }
     
-    public float repairTick(LivingEntity user, ItemStack itemStack, int taskTicks) {
+    public float repairTick(LivingEntity user, StandEntity standEntity, ItemStack itemStack, int taskTicks) {
         int damage = 0;
 
         ItemStack newStack = null;
@@ -109,7 +109,7 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
         }
         
         if (newStack != null && user instanceof PlayerEntity) {
-            if (taskTicks % 10 == 9) {
+            if (itemTransformationTick(taskTicks, standEntity)) {
                 PlayerEntity player = (PlayerEntity) user;
                 user.setItemInHand(Hand.OFF_HAND, DrinkHelper.createFilledResult(itemStack, player, newStack, false));
                 if (player.abilities.instabuild) {
@@ -124,13 +124,18 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
         if (!itemStack.isEmpty()) {
             itemStack.removeTagKey("Enchantments");
             itemStack.removeTagKey("StoredEnchantments");
-            int damageToRestore = Math.min(itemStack.getDamageValue(), 50);
+            int damageToRestore = Math.min(itemStack.getDamageValue(), (int) (CrazyDiamondHeal.healingSpeed(standEntity) * 40));
             itemStack.setDamageValue(itemStack.getDamageValue() - damageToRestore);
             damage += damageToRestore;
             itemStack.setRepairCost(0);
         }
         
         return (float) damage * 0.000025F;
+    }
+    
+    public static boolean itemTransformationTick(int taskTicks, StandEntity standEntity) {
+        int ticks = (int) (10 / CrazyDiamondHeal.healingSpeed(standEntity));
+        return taskTicks % ticks == ticks - 1;
     }
     
     private boolean canBeRepaired(ItemStack itemStack) {

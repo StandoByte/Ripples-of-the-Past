@@ -518,19 +518,12 @@ public class JojoModUtil {
     	if (times < 0) {
     		return 0;
     	}
-    	int timesInt = MathHelper.floor(times);
+    	int timesInt = MathUtil.fractionRandomInc(times);
     	for (int i = 0; i < timesInt; i++) {
     		if (breakCondition != null && breakCondition.get()) {
     			return i;
     		}
     		action.run();
-    	}
-		if (breakCondition != null && breakCondition.get()) {
-			return timesInt;
-		}
-    	if (Math.random() < times - (double) timesInt) {
-    		action.run();
-    		return timesInt + 1;
     	}
     	return timesInt;
     }

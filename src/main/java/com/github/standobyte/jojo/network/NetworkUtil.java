@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.network;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -180,13 +181,34 @@ public class NetworkUtil {
         return buf.readBoolean() ? Optional.of(read.apply(buf)) : Optional.empty();
     }
     
-    public static <T> void writeCollection(PacketBuffer buf, Collection<T> collection, BiConsumer<PacketBuffer, T> writeElement) {
-        buf.writeVarInt(collection.size());
-        collection.forEach(element -> writeElement.accept(buf, element));
+    public static <T> int writeCollection(PacketBuffer buf, Collection<T> collection, BiConsumer<PacketBuffer, T> writeElement, 
+            boolean removeWrittenFromCollection) {
+        int i = 0;
+        int initialWriterIndex = buf.writerIndex();
+        buf.writeInt(0);
+        
+        int lastWriterIndex = initialWriterIndex;
+        int maxElemSize = 0;
+        Iterator<T> iter = collection.iterator();
+        while (iter.hasNext()) {
+            if (buf.capacity() < maxElemSize) break;
+            T element = iter.next();
+            writeElement.accept(buf, element);
+            i++;
+            if (removeWrittenFromCollection) {
+                iter.remove();
+            }
+            int writerIndex = buf.writerIndex();
+            maxElemSize = Math.max(maxElemSize, writerIndex - lastWriterIndex);
+            lastWriterIndex = writerIndex;
+        }
+                
+        buf.setInt(initialWriterIndex, i);
+        return i;
     }
     
     public static <T> List<T> readCollection(PacketBuffer buf, Function<PacketBuffer, T> readElement) {
-        int size = buf.readVarInt();
+        int size = buf.readInt();
         if (size > 0) {
             List<T> list = new ArrayList<T>(size);
             for (int i = 0; i < size; i++) {

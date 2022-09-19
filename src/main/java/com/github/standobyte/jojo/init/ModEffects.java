@@ -66,7 +66,6 @@ public class ModEffects {
     public static final RegistryObject<Effect> MISSHAPEN_FACE = EFFECTS.register("misshapen_face", 
             () -> new StatusEffect(EffectType.HARMFUL, 0x808080));
 
-    // FIXME !!!!! (combo heavy) player effect
     public static final RegistryObject<Effect> MISSHAPEN_ARMS = EFFECTS.register("misshapen_arms", 
             () -> new StatusEffect(EffectType.HARMFUL, 0x808080));
     

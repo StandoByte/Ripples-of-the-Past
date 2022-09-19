@@ -21,7 +21,7 @@ public class CDBlocksRestoredPacket {
     }
 
     public static void encode(CDBlocksRestoredPacket msg, PacketBuffer buf) {
-        NetworkUtil.writeCollection(buf, msg.positions, (buffer, pos) -> buffer.writeBlockPos(pos));
+        NetworkUtil.writeCollection(buf, msg.positions, (buffer, pos) -> buffer.writeBlockPos(pos), false);
     }
 
     public static CDBlocksRestoredPacket decode(PacketBuffer buf) {

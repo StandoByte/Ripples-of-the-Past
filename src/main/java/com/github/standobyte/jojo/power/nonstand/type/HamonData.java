@@ -450,7 +450,7 @@ public class HamonData extends TypeSpecificData {
             float lvlInc = (2 * MathHelper.clamp(getAverageExercisePoints(), 0F, 1F)) - 1F;
             recalcAvgExercisePoints();
             if (lvlInc < 0) {
-                if (!JojoModConfig.getCommonConfigInstance(false).breathingTechniqueDeterioration.get()) {
+                if (!JojoModConfig.getCommonConfigInstance(false).breathingTechniqueDeterioration.get() || user.abilities.instabuild) {
                     lvlInc = 0;
                 }
                 else {

@@ -64,13 +64,13 @@ public class CrazyDiamondHeal extends StandEntityAction {
         
         if (targetEntity instanceof LivingEntity) {
             LivingEntity targetLiving = (LivingEntity) targetEntity;
-            healedThisTick = healLivingEntity(world, targetLiving);
+            healedThisTick = healLivingEntity(world, targetLiving, standEntity);
         }
         else if (targetEntity instanceof IHasHealth) {
             healedThisTick = heal(world, targetEntity, (IHasHealth) targetEntity, 
                     (e, clientSide) -> {
                         if (!clientSide) {
-                            e.setHealth(e.getHealth() + e.getMaxHealth() / 40);
+                            e.setHealth(e.getHealth() + e.getMaxHealth() / 40 * (float) healingSpeed(standEntity));
                         }
                     },
                     e -> e.getHealth() < e.getMaxHealth());
@@ -79,7 +79,7 @@ public class CrazyDiamondHeal extends StandEntityAction {
             healedThisTick = heal(world, targetEntity, (BoatEntity) targetEntity, 
                     (e, clientSide) -> {
                         if (!clientSide) {
-                            e.setDamage(Math.max(e.getDamage() - 1, 0));
+                            e.setDamage(Math.max(e.getDamage() - (float) healingSpeed(standEntity), 0));
                         }
                     },
                     e -> e.getDamage() > 0);
@@ -91,10 +91,15 @@ public class CrazyDiamondHeal extends StandEntityAction {
         }
     }
 
-    public static boolean healLivingEntity(World world, LivingEntity entity) {
+    public static double healingSpeed(StandEntity standEntity) {
+        return standEntity.getAttackSpeed() * 0.05F + 0.6;
+    }
+
+    public static boolean healLivingEntity(World world, LivingEntity entity, StandEntity standEntity) {
         // FIXME disable it if the target is a dead body already
         if (entity.deathTime > 0) {
-            if (entity.deathTime > 1) {
+            boolean resolveEffect = standEntity.getUser() != null && standEntity.getUser().hasEffect(ModEffects.RESOLVE.get());
+            if (!resolveEffect && entity.deathTime > 1 || entity.deathTime > 15) {
                 return false;
             }
             return heal(world, entity, 
@@ -112,7 +117,7 @@ public class CrazyDiamondHeal extends StandEntityAction {
                 entity, (e, clientSide) -> {
                     if (!clientSide) {
                         LivingEntity toHeal = StandUtil.getStandUser(e);
-                        toHeal.setHealth(toHeal.getHealth() + 0.5F);
+                        toHeal.setHealth(toHeal.getHealth() + 0.5F * (float) healingSpeed(standEntity));
                     }
                 }, 
                 e -> e.getHealth() < e.getMaxHealth());

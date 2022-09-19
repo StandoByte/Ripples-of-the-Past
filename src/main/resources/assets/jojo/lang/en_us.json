@@ -820,6 +820,7 @@
   "entity.jojo.eye_of_ender_inside": "Eye of Ender",
   "entity.jojo.firework_inside": "Firework Rocket",
   "stand.jojo.crazy_diamond": "Crazy Diamond",
+  "item.jojo.crazy_diamond_non_block_anchor": "Move to",
   "action.jojo.crazy_diamond_punch": "Punch",
   "action.jojo.crazy_diamond_heavy_punch": "Heavy Punch",
   "action.jojo.crazy_diamond_leave_object": "Leave %s inside",
