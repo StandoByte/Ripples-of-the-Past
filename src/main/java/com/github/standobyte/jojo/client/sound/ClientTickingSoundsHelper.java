@@ -106,10 +106,27 @@ public abstract class ClientTickingSoundsHelper {
                 category = event.getCategory();
                 volume = event.getVolume();
                 pitch = event.getPitch();
-                
+
                 mc.getSoundManager().play(new StandUnsummonTickableSound(sound, category, volume, pitch, user, stand));
             }
         }
+    }
+    
+    public static void playStandEntitySound(StandEntity stand, SoundEvent sound, float volume, float pitch) {
+        Minecraft mc = Minecraft.getInstance();
+        if (!stand.isVisibleForAll() && !StandUtil.shouldHearStands(mc.player)) {
+            return;
+        }
+
+        SoundCategory category = stand.getSoundSource();
+        PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(stand, sound, category, pitch, volume);
+        if (event.isCanceled() || event.getSound() == null) return;
+        sound = event.getSound();
+        category = event.getCategory();
+        volume = event.getVolume();
+        pitch = event.getPitch();
+        
+        mc.getSoundManager().play(new EntityTickableSound(sound, category, volume, pitch, stand));
     }
     
     public static void playHeldActionSound(SoundEvent sound, float volume, float pitch, boolean looping, 

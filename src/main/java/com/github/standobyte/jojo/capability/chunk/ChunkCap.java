@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.BrokenChunkBlocksPacket;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
@@ -76,7 +77,7 @@ public class ChunkCap {
                 Iterator<Map.Entry<BlockPos, PrevBlockInfo>> it = brokenBlocks.entrySet().iterator();
                 while (it.hasNext()) {
                     Map.Entry<BlockPos, PrevBlockInfo> entry = it.next();
-                    if (chunk.getBlockState(entry.getKey()).isAir(chunk.getLevel(), entry.getKey())) {
+                    if (CrazyDiamondRestoreTerrain.blockCanBePlaced(chunk.getLevel(), entry.getKey(), entry.getValue().state)) {
                         blocksToSync.add(entry.getValue());
                     }
                     else {

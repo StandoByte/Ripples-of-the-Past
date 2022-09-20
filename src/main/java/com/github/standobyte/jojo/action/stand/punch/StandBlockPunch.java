@@ -57,6 +57,11 @@ public class StandBlockPunch implements IPunch {
     }
     
     @Override
+    public boolean playSound() {
+        return IPunch.super.playSound() && blockState.getHarvestLevel() > 0;
+    }
+    
+    @Override
     public TargetType getType() {
         return TargetType.BLOCK;
     }

@@ -15,9 +15,13 @@ import net.minecraft.util.math.MathHelper;
 
 public class ActionLearningProgressMap<P extends IPower<P, ?>> {
     private final Map<Action<P>, Float> wrappedMap = new HashMap<>();
+    
+    boolean hasEntry(Action<P> action) {
+        return wrappedMap.containsKey(action);
+    }
 
     float getLearningProgressPoints(Action<P> action, P power, boolean maxLimit) {
-        if (!wrappedMap.containsKey(action)) {
+        if (!hasEntry(action)) {
             return -1F;
         }
         return maxLimit ? MathHelper.clamp(wrappedMap.get(action), 0F, action.getMaxTrainingPoints(power))

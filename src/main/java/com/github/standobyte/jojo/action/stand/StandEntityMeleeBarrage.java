@@ -117,7 +117,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
             SoundEvent sound = punch.getSound();
             Vector3d pos = punch.getSoundPos();
             PacketManager.sendToClientsTracking(
-                    sound != null && pos != null && canPlay && (playAlways || punch.targetWasHit()) ? 
+                    sound != null && pos != null && canPlay && (playAlways || punch.playSound()) ? 
                             new TrBarrageHitSoundPacket(stand.getId(), sound, pos)
                             : TrBarrageHitSoundPacket.noSound(stand.getId()), 
             stand);

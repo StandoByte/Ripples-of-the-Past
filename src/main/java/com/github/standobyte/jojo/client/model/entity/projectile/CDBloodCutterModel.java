@@ -14,11 +14,12 @@ public class CDBloodCutterModel extends EntityModel<CDBloodCutterEntity> {
     private final ModelRenderer cutter;
 
     public CDBloodCutterModel() {
-        texWidth = 32;
-        texHeight = 32;
+        texWidth = 16;
+        texHeight = 16;
+
         cutter = new ModelRenderer(this);
-        cutter.setPos(0.0F, 0.0F, 0.0F);
-        cutter.texOffs(0, 0).addBox(-0.5F, -3.1F, -0.4F, 1.0F, 6.0F, 6.0F, -0.4F, false);
+        cutter.setPos(0.0F, -3.1F, 0.0F);
+        cutter.texOffs(0, 0).addBox(-0.5F, -3.1F, -0.4F, 1.0F, 6.0F, 4.0F, -0.4F, false);
     }
 
     @Override

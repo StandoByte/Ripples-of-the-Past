@@ -101,8 +101,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
             blocks
             
             .filter(block -> {
-                BlockState blockState = world.getBlockState(block.pos);
-                if (blockState.isAir(world, block.pos)) {
+                if (blockCanBePlaced(world, block.pos, block.state)) {
                     return true;
                 }
                 blocksToForget.add(block.pos);
@@ -141,20 +140,19 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
     private static boolean tryPlaceBlock(World world, BlockPos blockPos, BlockState blockState, Set<BlockPos> placedBlocks, 
             boolean isCreative, List<ItemStack> restorationCost, @Nullable IInventory userInventory, List<ItemEntity> itemEntities, 
             boolean randomizePos) {
-        BlockState currentBlockState = world.getBlockState(blockPos);
         if (randomizePos) {
             BlockPos randomPos = blockPos = blockPos.offset(
                     RANDOM.nextBoolean() ? RANDOM.nextInt(3) - 1 : 0, 
                     RANDOM.nextInt(2) + 1,
                     RANDOM.nextBoolean() ? RANDOM.nextInt(3) - 1 : 0);
-            if (currentBlockState.isAir(world, randomPos)) {
+            if (blockCanBePlaced(world, blockPos, blockState)) {
                 IChunk chunk = world.getChunk(randomPos);
                 if (!(chunk instanceof Chunk && ((Chunk) chunk).getCapability(ChunkCapProvider.CAPABILITY).map(cap -> cap.wasBlockBroken(randomPos)).orElse(false))) {
                     blockPos = randomPos;
                 }
             }
         }
-        if (currentBlockState.isAir(world, blockPos)) {
+        if (blockCanBePlaced(world, blockPos, blockState)) {
             if (!(isCreative || consumeNeededItems(restorationCost, userInventory, itemEntities))) {
                 return false;
             }
@@ -165,6 +163,11 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         else {
             return false;
         }
+    }
+    
+    public static boolean blockCanBePlaced(World world, BlockPos pos, BlockState placedBlockState) {
+        BlockState currentBlockState = world.getBlockState(pos);
+        return currentBlockState.isAir(world, pos) || currentBlockState.getMaterial().isReplaceable();
     }
     
     private static boolean consumeNeededItems(List<ItemStack> restorationCost, @Nullable IInventory userInventory, List<ItemEntity> itemEntities) {
