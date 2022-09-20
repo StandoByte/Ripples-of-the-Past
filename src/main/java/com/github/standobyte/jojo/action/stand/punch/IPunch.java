@@ -15,6 +15,9 @@ public interface IPunch {
     
     SoundEvent getSound();
     Vector3d getSoundPos();
+    default boolean playSound() {
+        return targetWasHit();
+    }
     
     TargetType getType();
 }

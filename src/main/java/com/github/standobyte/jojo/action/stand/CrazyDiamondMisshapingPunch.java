@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.entity.Entity;
@@ -44,7 +45,7 @@ public class CrazyDiamondMisshapingPunch extends StandEntityHeavyAttack {
         super.onTaskSet(world, standEntity, standPower, phase, task, ticks);
         if (!world.isClientSide() && task.getTarget().getType() == TargetType.ENTITY) {
             Entity target = task.getTarget().getEntity();
-            if (target instanceof PlayerEntity) {
+            if (target instanceof LivingEntity && StandUtil.getStandUser((LivingEntity) target) instanceof PlayerEntity) {
                 LivingEntity aimingEntity = standPower.getUser();
                 if (aimingEntity == null) aimingEntity = standEntity;
                 

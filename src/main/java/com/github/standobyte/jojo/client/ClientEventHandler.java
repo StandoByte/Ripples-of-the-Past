@@ -466,7 +466,7 @@ public class ClientEventHandler {
             Vector3d eyePosD = entity.getEyePosition(1.0F);
             TranslucentBlockRenderHelper.renderCDRestorationTranslucentBlocks(matrixStack, mc, 
                     CrazyDiamondRestoreTerrain.getBlocksInRange(mc.level, mc.player, pos, 32, 
-                            block -> mc.level.getBlockState(block.pos).isAir(mc.level, block.pos)),
+                            block -> CrazyDiamondRestoreTerrain.blockCanBePlaced(mc.level, block.pos, block.state)),
                     block -> CrazyDiamondRestoreTerrain.blockPosSelectedForRestoration(block, entity, lookVec, eyePosD, pos, mc.player.hasEffect(ModEffects.RESOLVE.get())));
         }
     }
