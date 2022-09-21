@@ -29,7 +29,7 @@ public interface IHasStandPunch {
     }
     
     default void playPunchSound(IPunch punch, TargetType punchType, boolean canPlay, boolean playAlways) {
-        if (canPlay && (playAlways || punch.targetWasHit())) {
+        if (canPlay && (playAlways || punch.playSound())) {
             SoundEvent punchSound = punch.getSound();
             if (punchSound != null) {
                 Vector3d soundPos = punch.getSoundPos();

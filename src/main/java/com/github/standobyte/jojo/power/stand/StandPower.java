@@ -15,7 +15,9 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtStandEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandActionLearningPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandActionsClearLearningPacket;
@@ -427,7 +429,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
 
     @Override
     public boolean unlockAction(Action<IStandPower> action) {
-        if (!action.isUnlocked(this)) {
+        if (!actionLearningProgressMap.hasEntry(action)) {
             setLearningProgressPoints(action, 
                     isUserCreative() || !action.isTrained() ? 
                             action.getMaxTrainingPoints(this)
@@ -555,6 +557,14 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     public void onLeap() {
         super.onLeap();
         consumeStamina(250);
+        if (standManifestation instanceof StandEntity) {
+            StandEntity standEntity = (StandEntity) standManifestation;
+            ServerPlayerEntity except = serverPlayerUser.map(player -> {
+                PacketManager.sendToClient(new PlaySoundAtStandEntityPacket(ModSounds.STAND_LEAP.get(), standEntity.getId(), 1.0F, 1.0F), player);
+                return player;
+            }).orElse(null);
+            standEntity.playSound(ModSounds.STAND_LEAP.get(), 1.0F, 1.0F, except);
+        }
     }
     
     @Override

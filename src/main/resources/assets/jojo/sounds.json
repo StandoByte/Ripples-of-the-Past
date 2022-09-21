@@ -321,6 +321,9 @@
     "subtitle": "jojo.subtitle.stand_attack_parried",
     "sounds": [ "jojo:stand/stand_parry" ]
   },
+  "stand_leap": {
+    "sounds": [ "jojo:stand/stand_leap" ]
+  },
   
   
   
@@ -644,7 +647,7 @@
   },
   "magicians_red_punch_light": {
     "subtitle": "jojo.subtitle.stand_attack_light",
-    "sounds": [ "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" ]
+    "sounds": [ "jojo:stand/magicians_red_punch_light" ]
   },
   "magicians_red_punch_heavy": {
     "subtitle": "jojo.subtitle.stand_attack_strong",
@@ -716,6 +719,11 @@
   },
   "crazy_diamond_blood_cutter_shot": {
     "subtitle": "jojo.subtitle.shot",
-    "sounds": [ "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" ]
+    "sounds": [
+      {
+        "name": "jojo:water_splash",
+        "type": "event"
+      }
+    ]
   }
 }
