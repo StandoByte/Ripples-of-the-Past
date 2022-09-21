@@ -647,7 +647,7 @@
   },
   "magicians_red_punch_light": {
     "subtitle": "jojo.subtitle.stand_attack_light",
-    "sounds": [ "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" ]
+    "sounds": [ "jojo:stand/magicians_red_punch_light" ]
   },
   "magicians_red_punch_heavy": {
     "subtitle": "jojo.subtitle.stand_attack_strong",
