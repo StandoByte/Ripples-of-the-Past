@@ -6,6 +6,8 @@ import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBloodCutterEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.entity.stand.StandPose;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
@@ -15,6 +17,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public class CrazyDiamondBloodCutter extends StandEntityAction {
+    public static final StandPose BLOOD_CUTTER_SHOT_POSE = new StandPose("CD_BLOOD_CUTTER");
 
     public CrazyDiamondBloodCutter(StandEntityAction.Builder builder) {
         super(builder);
@@ -34,6 +37,7 @@ public class CrazyDiamondBloodCutter extends StandEntityAction {
         if (!world.isClientSide()) {
             LivingEntity user = userPower.getUser();
             CDBloodCutterEntity cutter = new CDBloodCutterEntity(user, world);
+            cutter.setShootingPosOf(user);
             cutter.shootFromRotation(user, 2.0F, standEntity.getProjectileInaccuracy(1.0F));
             standEntity.addProjectile(cutter);
         }
@@ -51,7 +55,7 @@ public class CrazyDiamondBloodCutter extends StandEntityAction {
     
     @Override
     protected void playSoundAtStand(World world, StandEntity standEntity, SoundEvent sound, IStandPower standPower, Phase phase) {
-        if (world.isClientSide() && phase == Phase.WINDUP) {
+        if (world.isClientSide() && phase == Phase.WINDUP && sound == ModSounds.CRAZY_DIAMOND_FIX_STARTED.get()) {
             ClientTickingSoundsHelper.playStandEntityCancelableActionSound(standEntity, sound, this, phase, 1.0F, 1.0F, false);
         }
         else {

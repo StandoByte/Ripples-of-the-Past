@@ -81,7 +81,7 @@ public final class StandEntityUnsummon extends StandEntityAction {
     }
     
     @Override
-    public SoundEvent getSound(StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task) {
+    public SoundEvent getSoundOverride(StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task) {
         return standEntity.getStandUnsummonSound();
     }
     

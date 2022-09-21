@@ -65,6 +65,12 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
         super(entityType, world);
     }
     
+    public void setShootingPosOf(LivingEntity entity) {
+        Vector3d pos = getPos(entity, 1.0F, entity.yRot, entity.xRot);
+        setPos(pos.x, pos.y, pos.z);
+        setRot(entity.yRot, entity.xRot);
+    }
+    
     protected final Vector3d getPos(LivingEntity owner, float partialTick, float yRot, float xRot) {
         return owner.getEyePosition(partialTick)
                 .add(MathUtil.relativeVecToAbsolute(getOwnerRelativeOffset().add(getXRotOffset().xRot(-owner.xRot * MathUtil.DEG_TO_RAD)), yRot));

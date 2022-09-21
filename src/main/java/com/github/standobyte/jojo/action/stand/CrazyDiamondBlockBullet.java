@@ -12,6 +12,8 @@ import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBlockBulletEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.entity.stand.StandPose;
+import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModStandEffects;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -25,6 +27,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
@@ -32,9 +35,12 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class CrazyDiamondBlockBullet extends StandEntityAction {
+    public static final StandPose BLOCK_BULLET_SHOT_POSE = new StandPose("CD_BLOCK_BULLET");
+    private final StandRelativeOffset userOffsetLeftArm;
 
     public CrazyDiamondBlockBullet(StandEntityAction.Builder builder) {
         super(builder);
+        this.userOffsetLeftArm = builder.userOffset.copyScale(-1, 1, 1);
     }
     
     @Override
@@ -85,6 +91,7 @@ public class CrazyDiamondBlockBullet extends StandEntityAction {
             LivingEntity user = userPower.getUser();
             if (user != null) {
                 CDBlockBulletEntity bullet = new CDBlockBulletEntity(standEntity, world);
+                bullet.setShootingPosOf(user);
                 bullet.setBlock(((BlockItem) user.getOffhandItem().getItem()).getBlock());
                 standEntity.shootProjectile(bullet, 2.0F, 0.25F);
                 if (!(user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild)) {
@@ -121,6 +128,17 @@ public class CrazyDiamondBlockBullet extends StandEntityAction {
                 (lookAngle.dot(e1.getTarget().getBoundingBox().getCenter().subtract(user.getEyePosition(1.0F)).normalize()) - 
                 lookAngle.dot(e2.getTarget().getBoundingBox().getCenter().subtract(user.getEyePosition(1.0F)).normalize()))
                 * 256));
+    }
+    
+    @Override
+    public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
+        if (!standEntity.isArmsOnlyMode()) {
+            LivingEntity user = standEntity.getUser();
+            if (user.getMainArm() == HandSide.LEFT) {
+                return userOffsetLeftArm;
+            }
+        }
+        return super.getOffsetFromUser(standPower, standEntity, task);
     }
     
     @Override
