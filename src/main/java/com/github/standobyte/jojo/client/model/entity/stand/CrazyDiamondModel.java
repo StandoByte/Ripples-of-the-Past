@@ -1,15 +1,20 @@
 package com.github.standobyte.jojo.client.model.entity.stand;
 
+import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockBullet;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRepairItem;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.client.model.pose.ConditionalModelPose;
+import com.github.standobyte.jojo.client.model.pose.IModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
+import com.github.standobyte.jojo.client.model.pose.ModelPose.ModelAnim;
+import com.github.standobyte.jojo.client.model.pose.ModelPoseTransition;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseTransitionMultiple;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
 import com.github.standobyte.jojo.client.model.pose.anim.CopyBipedUserPose;
 import com.github.standobyte.jojo.client.model.pose.anim.PosedActionAnimation;
 import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.stands.CrazyDiamondEntity;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.HandSide;
@@ -588,6 +593,62 @@ public class CrazyDiamondModel extends HumanoidStandModel<CrazyDiamondEntity> {
                 .build(idlePose));
         
         
+        
+        IModelPose<CrazyDiamondEntity> heavyComboPose1 = new ModelPose<>(new RotationAngle[] {
+                RotationAngle.fromDegrees(head, 5, 0, 6.36F), 
+                RotationAngle.fromDegrees(body, 4.2341F, 39.7845F, 6.5861F), 
+                RotationAngle.fromDegrees(upperPart, 0F, 5F, 0F), 
+                RotationAngle.fromDegrees(leftArm, 15F, -10F, -52.5F),
+                RotationAngle.fromDegrees(leftForeArm, -88.6703F, -3.8472F, 87.0901F),
+                RotationAngle.fromDegrees(rightArm, 10.1762F, 16.6443F, 93.1445F), 
+                RotationAngle.fromDegrees(rightForeArm, -77.4892F, -4.7192F, -74.0538F),
+                RotationAngle.fromDegrees(leftLeg, -52.5F, -37.5F, 0),
+                RotationAngle.fromDegrees(leftLowerLeg, 97.447F, -7.3536F, -2.2681F),
+                RotationAngle.fromDegrees(rightLeg, 8.2781F, -2.4033F, -0.0432F),
+                RotationAngle.fromDegrees(rightLowerLeg, 10, -5, 0)
+        });
+        IModelPose<CrazyDiamondEntity> heavyComboPose2 = new ModelPose<>(new RotationAngle[] {
+                RotationAngle.fromDegrees(head, -6.9176F, 15.7939F, 16.6495F), 
+                RotationAngle.fromDegrees(body, 16.7396F, 58.5251F, 19.4254F), 
+                RotationAngle.fromDegrees(upperPart, 0F, 15F, 0F), 
+                RotationAngle.fromDegrees(leftArm, -11.0864F, -27.2098F, -49.134F),
+                RotationAngle.fromDegrees(leftForeArm, -98.9572F, -21.4891F, 114.4737F),
+                RotationAngle.fromDegrees(rightArm, 37.9264F, 14.6364F, 103.3191F), 
+                RotationAngle.fromDegrees(rightForeArm, -89.3397F, -34.9867F, -92.8194F),
+                RotationAngle.fromDegrees(leftLeg, -36.5212F, -38.7805F, -7.0481F),
+                RotationAngle.fromDegrees(leftLowerLeg, 111.7619F, 4.0651F, 10.1255F),
+                RotationAngle.fromDegrees(rightLeg, 24.8305F, -0.7714F, 0),
+                RotationAngle.fromDegrees(rightLowerLeg, 0.7594F, -5, 0)
+        });
+        IModelPose<CrazyDiamondEntity> heavyComboPose3 = new ModelPose<>(new RotationAngle[] {
+                RotationAngle.fromDegrees(rightArm, -38.3F, 20.47F, 63.55F), 
+                RotationAngle.fromDegrees(rightForeArm, -67.5782F, 1.503F, -72.9104F),
+        });
+        IModelPose<CrazyDiamondEntity> heavyComboPose4 = new ModelPose<>(new RotationAngle[] {
+                RotationAngle.fromDegrees(body, 0, -30, 0), 
+                RotationAngle.fromDegrees(upperPart, 0F, -15F, 0F), 
+                RotationAngle.fromDegrees(leftArm, 17.8981F, 11.9128F, -21.186F),
+                RotationAngle.fromDegrees(leftForeArm, -83.3352F, 3.9942F, 28.1685F),
+                RotationAngle.fromDegrees(rightArm, -72.6819F, 35.6647F, 53.5229F), 
+                RotationAngle.fromDegrees(rightForeArm, 0, 0, -12.5F),
+                RotationAngle.fromDegrees(leftLeg, -48.4357F, 19.6329F, 0.1075F),
+                RotationAngle.fromDegrees(leftLowerLeg, 71.8824F, 15.9537F, 11.2591F),
+                RotationAngle.fromDegrees(rightLeg, 33.6661F, 23.9013F, 7.2025F),
+                RotationAngle.fromDegrees(rightLowerLeg, 22.5F, -5, 0)
+        });
+
+        actionAnim.put(StandPose.HEAVY_ATTACK_COMBO, new PosedActionAnimation.Builder<CrazyDiamondEntity>()
+                .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<>(heavyComboPose1, heavyComboPose2))
+                .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransitionMultiple.Builder<>(heavyComboPose2)
+                        .addPose(0.5F, heavyComboPose3)
+                        .build(heavyComboPose4))
+                .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransitionMultiple.Builder<>(heavyComboPose4)
+                        .addPose(0.5F, heavyComboPose4)
+                        .build(idlePose))
+                .build(idlePose));
+        
+        
+        
         RotationAngle[] itemFixRotations = new RotationAngle[] {
                 RotationAngle.fromDegrees(head, 31.301F, 27.0408F, 3.6059F),
                 RotationAngle.fromDegrees(body, 5.7686F, 29.8742F, 5.3807F),
@@ -597,7 +658,7 @@ public class CrazyDiamondModel extends HumanoidStandModel<CrazyDiamondEntity> {
                 RotationAngle.fromDegrees(rightArm, -45.3923F, -27.0377F, 10.4828F),
                 RotationAngle.fromDegrees(rightForeArm, -38.0639F, -35.8085F, 4.6156F)
         };
-        actionAnim.put(CrazyDiamondRepairItem.ITEM_FIX_POS, new PosedActionAnimation.Builder<CrazyDiamondEntity>()
+        actionAnim.put(CrazyDiamondRepairItem.ITEM_FIX_POSE, new PosedActionAnimation.Builder<CrazyDiamondEntity>()
                 .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ConditionalModelPose<CrazyDiamondEntity>()
                         .addPose(stand -> !stand.isArmsOnlyMode() && stand.getUser() != null && stand.getUser().getMainArm() == HandSide.RIGHT, 
                                 new ModelPose<CrazyDiamondEntity>(itemFixRotations))
@@ -608,7 +669,37 @@ public class CrazyDiamondModel extends HumanoidStandModel<CrazyDiamondEntity> {
                         )
                 .build(idlePose));
         
+
         
+        ModelAnim<CrazyDiamondEntity> armsRotationFull = (rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
+            leftArm.xRotSecond = xRotation * MathUtil.DEG_TO_RAD;
+            rightArm.xRotSecond = xRotation * MathUtil.DEG_TO_RAD;
+        };
+        
+        RotationAngle[] blockBulletRotations = new RotationAngle[] {
+                RotationAngle.fromDegrees(body, 30.7167F, 25.4083F, 17.1091F),
+                RotationAngle.fromDegrees(upperPart, 0.0F, -4.0F, 0.0F),
+                RotationAngle.fromDegrees(leftArm, -88.9066F, 18.1241F, -39.2738F),
+                RotationAngle.fromDegrees(leftForeArm, -45.6386F, -43.0305F, 61.5635F),
+                RotationAngle.fromDegrees(rightArm, -65.0702F, -23.5085F, 5.5623F),
+                RotationAngle.fromDegrees(rightForeArm, -97.8419F, 36.1268F, -102.0079F),
+                RotationAngle.fromDegrees(leftLeg, -50.8435F, -8.788F, -8.0132F),
+                RotationAngle.fromDegrees(leftLowerLeg, 97.5F, 10, 0),
+                RotationAngle.fromDegrees(rightLeg, 7.76F, -2.1895F, -3.2001F),
+                RotationAngle.fromDegrees(rightLowerLeg, 10, -5, 0)
+        };
+        actionAnim.put(CrazyDiamondBlockBullet.BLOCK_BULLET_SHOT_POSE, new PosedActionAnimation.Builder<CrazyDiamondEntity>()
+                .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ConditionalModelPose<CrazyDiamondEntity>()
+                        .addPose(stand -> !stand.isArmsOnlyMode() && stand.getUser() != null && stand.getUser().getMainArm() == HandSide.RIGHT, 
+                                new ModelPose<CrazyDiamondEntity>(mirrorAngles(blockBulletRotations))
+                                .setAdditionalAnim(armsRotationFull))
+                        .addPose(stand -> !stand.isArmsOnlyMode() && stand.getUser() != null && stand.getUser().getMainArm() == HandSide.LEFT, 
+                                new ModelPose<CrazyDiamondEntity>(blockBulletRotations)
+                                .setAdditionalAnim(armsRotationFull))
+                        .addPose(stand -> stand.isArmsOnlyMode(), 
+                                new CopyBipedUserPose<>(this))
+                        )
+                .build(idlePose));
         
         super.initActionPoses();
     }

@@ -35,6 +35,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.HamonTeachersSkills
 import com.github.standobyte.jojo.network.packets.fromserver.LeapCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.MaxAchievedResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtStandEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.RefreshMovementInTimeStopPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResetResolveValuePacket;
@@ -370,6 +371,11 @@ public class PacketManager {
                 PlaySoundAtClientPacket::encode,
                 PlaySoundAtClientPacket::decode,
                 PlaySoundAtClientPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        
+        channel.registerMessage(index++, PlaySoundAtStandEntityPacket.class,
+                PlaySoundAtStandEntityPacket::encode,
+                PlaySoundAtStandEntityPacket::decode,
+                PlaySoundAtStandEntityPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         
         channel.registerMessage(index++, TrBarrageHitSoundPacket.class,
                 TrBarrageHitSoundPacket::encode,

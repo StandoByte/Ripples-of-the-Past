@@ -222,6 +222,9 @@ public class ModSounds {
 
     public static final RegistryObject<SoundEvent> STAND_PARRY = SOUNDS.register("stand_parry", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_parry")));
+
+    public static final RegistryObject<SoundEvent> STAND_LEAP = SOUNDS.register("stand_leap", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_leap")));
     
     
     public static final RegistryObject<SoundEvent> JOTARO_STAR_PLATINUM = SOUNDS.register("jotaro_star_platinum", 
