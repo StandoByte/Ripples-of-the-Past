@@ -4,8 +4,6 @@ import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.FOOD;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import com.github.standobyte.jojo.JojoMod;
@@ -19,7 +17,6 @@ import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModStandTypes;
-import com.github.standobyte.jojo.network.packets.fromserver.EntityTimeResumeSoundPacket.SoundPos;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -49,7 +46,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Timer;
 import net.minecraft.util.math.BlockPos;
@@ -92,7 +88,6 @@ public class ClientEventHandler {
     private boolean canMoveInStoppedTime = true;
     private float partialTickStoppedAt;
     private static final ResourceLocation SHADER_TIME_STOP = new ResourceLocation("shaders/post/desaturate.json");
-    private final List<SoundPos> timeResumeSounds = new ArrayList<>();
 
     private Random random = new Random();
     private ResourceLocation resolveShader = null;
@@ -228,9 +223,6 @@ public class ClientEventHandler {
             }
             boolean timeWasStopped = isTimeStopped;
             isTimeStopped = isTimeStopped(mc.player.blockPosition());
-            if (timeWasStopped && !isTimeStopped) {
-                onTimeResume();
-            }
 
             switch (event.phase) {
             case START:
@@ -357,18 +349,6 @@ public class ClientEventHandler {
             ost = null;
         }
     }
-    
-    public void addTimeResumeSound(SoundPos soundPos) {
-        if (isTimeStopped) {
-            timeResumeSounds.add(soundPos);
-        }
-    }
-    
-    private void onTimeResume() {
-        timeResumeSounds.forEach(soundPos -> mc.level.playLocalSound(soundPos.pos.x, soundPos.pos.y, soundPos.pos.z, 
-                soundPos.sound, SoundCategory.PLAYERS, 1, 1, false));
-        timeResumeSounds.clear();
-    }
 
 
 
@@ -467,7 +447,8 @@ public class ClientEventHandler {
             TranslucentBlockRenderHelper.renderCDRestorationTranslucentBlocks(matrixStack, mc, 
                     CrazyDiamondRestoreTerrain.getBlocksInRange(mc.level, mc.player, pos, 32, 
                             block -> CrazyDiamondRestoreTerrain.blockCanBePlaced(mc.level, block.pos, block.state)),
-                    block -> CrazyDiamondRestoreTerrain.blockPosSelectedForRestoration(block, entity, lookVec, eyePosD, pos, mc.player.hasEffect(ModEffects.RESOLVE.get())));
+                    block -> CrazyDiamondRestoreTerrain.blockPosSelectedForRestoration(block, entity, lookVec, eyePosD, pos, 
+                            mc.player.hasEffect(ModEffects.RESOLVE.get()), mc.player.isShiftKeyDown()));
         }
     }
 

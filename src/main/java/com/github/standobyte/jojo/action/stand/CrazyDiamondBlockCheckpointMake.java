@@ -54,31 +54,35 @@ public class CrazyDiamondBlockCheckpointMake extends StandEntityAction {
                     BlockState blockState = world.getBlockState(pos);
                     List<ItemStack> drops = Block.getDrops(blockState, (ServerWorld) world, pos, 
                             blockState.hasTileEntity() ? world.getBlockEntity(pos) : null);
-                    
-                    if (standEntity.breakBlock(pos, blockState, false)) {
-                        makeAnchor(standEntity, drops, world, pos, blockState);
+                    ItemStack item = drops.isEmpty() ? ItemStack.EMPTY : drops.get(0);
+                    if (standEntity.breakBlockWithExternalDrops(pos, blockState, 
+                            item.isEmpty() ? null : Util.make(new ArrayList<>(), list -> list.add(item)))) {
+                        makeAnchor(standEntity, item, world, pos, blockState);
+                    }
+                    else {
+                        standEntity.playSound(ModSounds.CRAZY_DIAMOND_PUNCH_HEAVY.get(), 1.0F, 1.0F);
                     }
                 }
                 else {
-                    makeAnchor(standEntity, Util.make(new ArrayList<>(), list -> list.add(new ItemStack(ModItems.CRAZY_DIAMOND_NON_BLOCK_ANCHOR.get()))), world, pos, null);
+                    makeAnchor(standEntity, new ItemStack(ModItems.CRAZY_DIAMOND_NON_BLOCK_ANCHOR.get()), world, pos, null);
                 }
             }
         }
     }
     
-    private void makeAnchor(StandEntity standEntity, List<ItemStack> drops, World world, BlockPos blockPos, BlockState blockState) {
+    private void makeAnchor(StandEntity standEntity, ItemStack drop, World world, BlockPos blockPos, BlockState blockState) {
         standEntity.playSound(ModSounds.CRAZY_DIAMOND_PUNCH_HEAVY.get(), 1.0F, 1.0F);
-        drops.forEach(stack -> {
+        if (!drop.isEmpty()) {
             boolean dropItem = true;
-            if (blockState == null || stack.getItem() instanceof BlockItem) {
-                fillAnchorNbt(stack, world, blockPos, blockState);
+            if (blockState == null || drop.getItem() instanceof BlockItem) {
+                fillAnchorNbt(drop, world, blockPos, blockState);
                 LivingEntity user = standEntity.getUser();
-                dropItem = !(user instanceof PlayerEntity && ((PlayerEntity) user).inventory.add(stack) && stack.isEmpty());
+                dropItem = !(user instanceof PlayerEntity && ((PlayerEntity) user).inventory.add(drop) && drop.isEmpty());
             }
             if (dropItem) {
-                Block.popResource(world, blockPos, stack);
+                Block.popResource(world, blockPos, drop);
             }
-        });
+        }
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.util;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -22,6 +23,7 @@ import com.github.standobyte.jojo.action.stand.effect.DriedBloodDrops;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.block.StoneMaskBlock;
 import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
+import com.github.standobyte.jojo.capability.entity.EntityUtilCap;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
@@ -959,11 +961,13 @@ public class GameplayEventHandler {
             boolean givesResolve = user.level.getLevelData().isHardcore()
                     || !JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).keepStandOnDeath.get();
             
-            if (user instanceof ServerPlayerEntity) {
-                ModCriteriaTriggers.SOUL_ASCENSION.get().trigger((ServerPlayerEntity) user, stand, ticks);
-            }
-            SoulEntity soulEntity = new SoulEntity(user.level, user, ticks, givesResolve);
-            user.level.addFreshEntity(soulEntity);
+            EntityUtilCap.queueOnTimeResume(user, () -> {
+                if (user instanceof ServerPlayerEntity) {
+                    ModCriteriaTriggers.SOUL_ASCENSION.get().trigger((ServerPlayerEntity) user, stand, ticks);
+                }
+                SoulEntity soulEntity = new SoulEntity(user.level, user, ticks, givesResolve);
+                user.level.addFreshEntity(soulEntity);
+            });
         }
     }
     
@@ -1244,8 +1248,9 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onBlockBreak(BlockEvent.BreakEvent event) {
         if (!event.getWorld().isClientSide()) {
-            CrazyDiamondRestoreTerrain.rememberBrokenBlockCreative((World) event.getWorld(), 
-                    event.getPos(), event.getState(), Optional.ofNullable(event.getWorld().getBlockEntity(event.getPos())));
+            CrazyDiamondRestoreTerrain.rememberBrokenBlock((World) event.getWorld(), 
+                    event.getPos(), event.getState(), Optional.ofNullable(event.getWorld().getBlockEntity(event.getPos())), 
+                    Collections.emptyList());
         }
     }
 }

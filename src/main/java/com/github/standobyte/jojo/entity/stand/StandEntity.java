@@ -1686,6 +1686,14 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
 
     public boolean breakBlock(BlockPos blockPos, BlockState blockState, boolean canDropItems) {
+        return breakBlock(blockPos, blockState, canDropItems, null);
+    }
+    
+    public boolean breakBlockWithExternalDrops(BlockPos blockPos, BlockState blockState, List<ItemStack> createdDrops) {
+        return breakBlock(blockPos, blockState, false, createdDrops);
+    }
+    
+    protected boolean breakBlock(BlockPos blockPos, BlockState blockState, boolean dropLootTableItems, @Nullable List<ItemStack> createdDrops) {
         if (level.isClientSide() || !JojoModUtil.canEntityDestroy((ServerWorld) level, blockPos, blockState, this)) {
             return false;
         }
@@ -1693,14 +1701,15 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         if (canBreakBlock(blockPos, blockState)) {
             LivingEntity user = getUser();
             PlayerEntity playerUser = user instanceof PlayerEntity ? (PlayerEntity) user : null;
-            boolean dropItem = canDropItems;
+            boolean dropItem = dropLootTableItems;
             if (playerUser != null) {
                 blockState.getBlock().playerWillDestroy(level, blockPos, blockState, playerUser);
                 dropItem &= !playerUser.abilities.instabuild;
             }
             if (!dropItem) {
-                CrazyDiamondRestoreTerrain.rememberBrokenBlockCreative(level, blockPos, blockState, 
-                        Optional.ofNullable(level.getBlockEntity(blockPos)));
+                CrazyDiamondRestoreTerrain.rememberBrokenBlock(level, blockPos, blockState, 
+                        Optional.ofNullable(level.getBlockEntity(blockPos)), 
+                        createdDrops != null ? createdDrops : Collections.emptyList());
             }
             if (level.destroyBlock(blockPos, dropItem, this)) {
                 blockState.getBlock().destroy(level, blockPos, blockState);

@@ -19,7 +19,7 @@ public class LegacyUtil {
     // TODO remove 'clientSide' params from StandDiscItem methods
     public static Optional<StandInstance> oldStandDiscInstance(ItemStack disc, boolean clientSide) {
         CompoundNBT nbt = disc.getTag();
-        if (nbt.contains("Stand", JojoModUtil.getNbtId(StringNBT.class))) {
+        if (nbt != null && nbt.contains("Stand", JojoModUtil.getNbtId(StringNBT.class))) {
             StandType<?> standType = ModStandTypes.Registry.getRegistry().getValue(new ResourceLocation(nbt.getString("Stand")));
             if (standType != null) {
                 StandInstance standInstance = new StandInstance(standType);

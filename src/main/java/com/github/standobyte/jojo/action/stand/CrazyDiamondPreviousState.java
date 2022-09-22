@@ -242,6 +242,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                 if (ModActions.CRAZY_DIAMOND_REPAIR.get().repairTick(userPower.getUser(), standEntity, heldItem, task.getTick()) == 0
                         && userPower.getUser() instanceof PlayerEntity && CrazyDiamondRepairItem.itemTransformationTick(task.getTick(), standEntity)) {
                     PlayerEntity player = (PlayerEntity) userPower.getUser();
+                    CrazyDiamondRepairItem.dropExperience(player, heldItem);
                     convertTo(heldItem, world, null, standEntity.getRandom(), true).ifPresent(itemsAndCount -> {
                         boolean gaveIngredients = false;
                         for (ItemStack ingredient : itemsAndCount.getLeft()) {
