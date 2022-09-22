@@ -16,6 +16,7 @@ import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.client.model.ModelDataManager;
+import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.client.model.data.IModelData;
 
 // A helper class for rendering translucent blocks overlay
@@ -45,7 +46,9 @@ public class TranslucentBlockRenderHelper {
         blocks.forEach(block -> {
             BlockPos pos = block.pos;
             BlockState state = block.state;
-            IModelData model = renderer.getBlockModel(state).getModelData(mc.level, pos, state, ModelDataManager.getModelData(mc.level, pos));
+            IModelData tileData = ModelDataManager.getModelData(mc.level, pos);
+            if (tileData == null) tileData = EmptyModelData.INSTANCE;
+            IModelData model = renderer.getBlockModel(state).getModelData(mc.level, pos, state, tileData);
             matrixStack.pushPose();
             matrixStack.translate(
                     pos.getX(), 

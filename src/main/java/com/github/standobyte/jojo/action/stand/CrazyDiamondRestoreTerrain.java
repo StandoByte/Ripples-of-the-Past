@@ -1,7 +1,6 @@
 package com.github.standobyte.jojo.action.stand;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -60,7 +59,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         boolean hasResolveEffect = user.hasEffect(ModEffects.RESOLVE.get());
         if (getBlocksInRange(user.level, user, eyePosI, restorationDistManhattan(hasResolveEffect), 
                 block -> blockPosSelectedForRestoration(block, cameraEntity, cameraEntity.getLookAngle(), 
-                        cameraEntity.getEyePosition(1.0F), eyePosI, hasResolveEffect)).count() == 0) {
+                        cameraEntity.getEyePosition(1.0F), eyePosI, hasResolveEffect, user.isShiftKeyDown())).count() == 0) {
             return ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
         }
         return super.checkSpecificConditions(user, power, target);
@@ -96,7 +95,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
                 Math.min(blocksPerTick(standEntity), (int) (staminaPerBlock * userPower.getStamina()));
             
             Stream<PrevBlockInfo> blocks = getBlocksInRange(world, user, eyePos, manhattanRange, 
-                    block -> blockPosSelectedForRestoration(block, cameraEntity, lookVec, eyePosD, eyePos, resolveEffect));
+                    block -> blockPosSelectedForRestoration(block, cameraEntity, lookVec, eyePosD, eyePos, resolveEffect, user.isShiftKeyDown()));
             
             blocks
             
@@ -117,7 +116,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
             .forEach(block -> {
                 if (tryPlaceBlock(world, block.pos, block.state, blocksPlaced, 
                         creative, block.drops, userInventory, itemsAround, 
-                        resolveEffect)) {
+                        resolveEffect && !user.isShiftKeyDown())) {
                     blocksToForget.add(block.pos);
                 }
             });
@@ -152,7 +151,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
                 }
             }
         }
-        if (blockCanBePlaced(world, blockPos, blockState)) {
+        if (blockCanBePlaced(world, blockPos, blockState) && blockState.canSurvive(world, blockPos)) {
             if (!(isCreative || consumeNeededItems(restorationCost, userInventory, itemEntities))) {
                 return false;
             }
@@ -246,15 +245,6 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         }
     }
     
-    public static void rememberBrokenBlockCreative(World world, BlockPos pos, BlockState state, Optional<TileEntity> tileEntity) {
-        IChunk chunk = world.getChunk(pos);
-        if (chunk instanceof Chunk) {
-            ((Chunk) chunk).getCapability(ChunkCapProvider.CAPABILITY).ifPresent(cap -> {
-                cap.saveBrokenBlock(pos, state, tileEntity, Collections.emptyList());
-            });
-        }
-    }
-    
     private static void forgetBrokenBlocks(World world, Collection<BlockPos> posCollection) {
         posCollection.stream()
         .map(pos -> world.getChunk(pos))
@@ -308,9 +298,19 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         return new Vector3i((int) Math.round(pos.x), (int) Math.round(pos.y), (int) Math.round(pos.z));
     }
     
-    public static boolean blockPosSelectedForRestoration(PrevBlockInfo block, Entity cameraEntity, Vector3d entityLookVec, Vector3d entityEyePos, Vector3i restorationCenter, boolean resolve) {
-        return block.pos.distManhattan(restorationCenter) <= restorationDistManhattan(resolve)
-                && entityLookVec.dot(Vector3d.atCenterOf(block.pos).subtract(entityEyePos).normalize()) >= (resolve ? 0 : 0.7071);
+    public static boolean blockPosSelectedForRestoration(PrevBlockInfo block, Entity cameraEntity, 
+            Vector3d entityLookVec, Vector3d entityEyePos, Vector3i restorationCenter, boolean resolve, boolean aimedOnly) {
+        int rangeManhattan = restorationDistManhattan(resolve);
+        if (block.pos.distManhattan(restorationCenter) > rangeManhattan) {
+            return false;
+        }
+        if (aimedOnly) {
+            Vector3d pos2 = entityEyePos.add(entityLookVec.scale(rangeManhattan * 2));
+            return new AxisAlignedBB(block.pos).clip(entityEyePos, pos2).isPresent();
+        }
+        else {
+            return entityLookVec.dot(Vector3d.atCenterOf(block.pos).subtract(entityEyePos).normalize()) >= (resolve ? 0 : 0.7071);
+        }
     }
     
     private static int restorationDistManhattan(boolean resolve) {

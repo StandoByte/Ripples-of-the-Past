@@ -842,7 +842,7 @@
   "action.jojo.crazy_diamond_anchor_make": "Create anchor block",
   "jojo.crazy_diamond_fix.warning": "Fixing %s will clear all enchantments!",
   "jojo.crazy_diamond.block_checkpoint.tooltip": "(%s, %s, %s)",
-  "jojo.message.action_condition.full_health": "You need to not have full health",
+  "jojo.message.action_condition.full_health": "You have to be injured",
   "jojo.message.action_condition.block_offhand": "You need to hold a block in your off-hand",
   "jojo.message.action_condition.item_hard_material": "You need a block made of a hard material",
   "jojo.message.action_condition.stand_cant_break_block": "Your Stand can't break this block",

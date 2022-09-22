@@ -1,6 +1,8 @@
 package com.github.standobyte.jojo.action.stand;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.annotation.Nullable;
 
@@ -16,8 +18,12 @@ import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
+import com.github.standobyte.jojo.util.utils.MathUtil;
 
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.ExperienceOrbEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -25,6 +31,7 @@ import net.minecraft.util.DrinkHelper;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
@@ -122,6 +129,7 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
         }
         
         if (!itemStack.isEmpty()) {
+            dropExperience(user, itemStack);
             itemStack.removeTagKey("Enchantments");
             itemStack.removeTagKey("StoredEnchantments");
             int damageToRestore = Math.min(itemStack.getDamageValue(), (int) (CrazyDiamondHeal.healingSpeed(standEntity) * 40));
@@ -147,6 +155,44 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
                                 itemStack.getItem().getRegistryName().getNamespace(), 
                                 itemStack.getItem().getRegistryName().getPath().replace("cracked_", "")))
                         );
+    }
+    
+    public static void dropExperience(LivingEntity entity, ItemStack enchantedItem) {
+        if (!entity.level.isClientSide() && (enchantedItem.hasFoil() || enchantedItem.isEnchanted())) {
+            int xp = getExperienceAmount(entity.level, enchantedItem);
+    
+            if (xp > 0) {
+                Vector3d pos = entity.position().add(new Vector3d(
+                        entity.getBbWidth() * 0.6 * (entity.getMainArm() == HandSide.LEFT ? -1 : 1), 
+                        entity.getBbHeight() * (entity.isShiftKeyDown() ? 0.25 : 0.45), 
+                        entity.getBbWidth() * 0.7)
+                        .yRot(-entity.yBodyRot * MathUtil.DEG_TO_RAD));
+                while (xp > 0) {
+                    int xpThisOrb = ExperienceOrbEntity.getExperienceValue(xp);
+                    xp -= xpThisOrb;
+                    entity.level.addFreshEntity(new ExperienceOrbEntity(entity.level, pos.x, pos.y, pos.z, xpThisOrb));
+                }
+            }
+        }
+    }
+
+    private static int getExperienceAmount(World world, ItemStack item) {
+        int xp = 0;
+        Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(item);
+
+        for (Entry<Enchantment, Integer> entry : enchantments.entrySet()) {
+            Enchantment enchantment = entry.getKey();
+            Integer level = entry.getValue();
+            if (!enchantment.isCurse()) {
+                xp += enchantment.getMinCost(level);
+            }
+        }
+        if (xp > 0) {
+            int i1 = (int) Math.ceil((double)xp / 2.0D);
+            return i1 + world.random.nextInt(i1);
+        } else {
+            return 0;
+        }
     }
     
     @Override

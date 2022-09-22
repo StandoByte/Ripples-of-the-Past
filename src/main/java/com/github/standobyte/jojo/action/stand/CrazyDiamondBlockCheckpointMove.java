@@ -61,6 +61,9 @@ public class CrazyDiamondBlockCheckpointMove extends StandEntityAction {
                         if (willRestore) {
                             heldItem.shrink(1);
                             if (blockState != null) {
+                                if (!world.getBlockState(pos).isAir()) {
+                                    world.destroyBlock(pos, true);
+                                }
                                 world.setBlockAndUpdate(pos, blockState);
                             }
                             standEntity.playSound(ModSounds.CRAZY_DIAMOND_FIX_ENDED.get(), 1.0F, 1.0F, null);
