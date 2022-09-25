@@ -147,4 +147,13 @@ public class CommonReflection {
         }
         return FIREWORK_ROCKET_ENTITY_DATA_ID_FIREWORKS_ITEM;
     }
+    
+    private static final Field CREEPER_DATA_IS_POWERED_FIELD = ObfuscationReflectionHelper.findField(CreeperEntity.class, "field_184714_b");
+    private static DataParameter<Boolean> CREEPER_DATA_IS_POWERED = null;
+    public static DataParameter<Boolean> getCreeperPoweredParameter() {
+        if (CREEPER_DATA_IS_POWERED == null) {
+            CREEPER_DATA_IS_POWERED = ReflectionUtil.getFieldValue(CREEPER_DATA_IS_POWERED_FIELD, null);
+        }
+        return CREEPER_DATA_IS_POWERED;
+    }
 }

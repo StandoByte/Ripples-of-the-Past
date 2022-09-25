@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -150,5 +151,15 @@ public class CrazyDiamondBlockCheckpointMake extends StandEntityAction {
             }
         }
         return item.getBlock().defaultBlockState();
+    }
+
+    @Override
+    public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
+        return StandStatFormulas.getHeavyAttackRecovery(standEntity.getAttackSpeed());
+    }
+    
+    @Override
+    protected boolean isFreeRecovery(IStandPower standPower, StandEntity standEntity) {
+        return true;
     }
 }

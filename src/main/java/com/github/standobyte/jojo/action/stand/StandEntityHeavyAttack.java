@@ -30,14 +30,14 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class StandEntityHeavyAttack extends StandEntityAction implements IHasStandPunch {
-	private final Supplier<StandEntityHeavyAttack> comboAttack;
+	private final Supplier<StandEntityHeavyAttack> finisherVariation;
     private final Supplier<StandEntityActionModifier> recoveryAction;
-    boolean isCombo = false;
+    boolean isFinisher = false;
     private final Supplier<SoundEvent> punchSound;
 
     public StandEntityHeavyAttack(StandEntityHeavyAttack.Builder builder) {
         super(builder);
-        this.comboAttack = builder.comboAttack;
+        this.finisherVariation = builder.finisherVariation;
         this.recoveryAction = builder.recoveryAction;
         this.punchSound = builder.punchSound;
     }
@@ -46,9 +46,9 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     protected Action<IStandPower> replaceAction(IStandPower power) {
 	    StandEntity standEntity = power.isActive() ? (StandEntity) power.getStandManifestation() : null;
 	    
-	    StandEntityHeavyAttack attackWithCombo = getComboAttack(power, standEntity);
-	    if (attackWithCombo != this) {
-	        return attackWithCombo.replaceAction(power);
+	    StandEntityHeavyAttack finisherVariation = getFinisherVariationIfPresent(power, standEntity);
+	    if (finisherVariation != this) {
+	        return finisherVariation.replaceAction(power);
 	    }
 	    
 	    StandEntityActionModifier followUp = getRecoveryFollowup(power, standEntity);
@@ -63,14 +63,14 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
 	    return this;
     }
 	
-	private StandEntityHeavyAttack getComboAttack(IStandPower power, @Nullable StandEntity standEntity) {
-        StandEntityHeavyAttack comboAttack = this.comboAttack.get();
-        if (comboAttack != null) {
+	public StandEntityHeavyAttack getFinisherVariationIfPresent(IStandPower power, @Nullable StandEntity standEntity) {
+        StandEntityHeavyAttack finisherVariation = getFinisherVariation();
+        if (finisherVariation != null) {
             EnumSet<StandPart> missingParts = EnumSet.complementOf(power.getStandInstance().get().getAllParts());
             if (!missingParts.isEmpty()) {
                 boolean canUseThis = true;
                 for (StandPart missingPart : missingParts) {
-                    if (comboAttack.isPartRequired(missingPart)) {
+                    if (finisherVariation.isPartRequired(missingPart)) {
                         return this;
                     }
                     if (this.isPartRequired(missingPart)) {
@@ -78,15 +78,20 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
                     }
                 }
                 if (!canUseThis) {
-                    return comboAttack;
+                    return finisherVariation;
                 }
             }
             
-            if (standEntity != null && (standEntity.getCurrentTaskAction() == comboAttack || standEntity.willHeavyPunchCombo())) {
-                return comboAttack;
+            if (standEntity != null && (standEntity.getCurrentTaskAction() == finisherVariation || standEntity.willHeavyPunchCombo())) {
+                return finisherVariation;
             }
         }
         return this;
+	}
+	
+	@Nullable
+	public StandEntityHeavyAttack getFinisherVariation() {
+	    return finisherVariation.get();
 	}
 	
 	@Nullable
@@ -167,28 +172,32 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     
     @Override
     public boolean isUnlocked(IStandPower power) {
-        return isCombo ? StandUtil.isComboUnlocked(power) : super.isUnlocked(power);
+        return isFinisher ? StandUtil.isComboUnlocked(power) : super.isUnlocked(power);
     }
     
     @Override
     protected boolean playsVoiceLineOnShift() {
-        return isCombo || super.playsVoiceLineOnShift();
+        return isFinisher || super.playsVoiceLineOnShift();
     }
     
     @Override
     public StandPose getStandPose(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
-        return isCombo ? StandPose.HEAVY_ATTACK_COMBO : super.getStandPose(standPower, standEntity, task);
+        return isFinisher ? StandPose.HEAVY_ATTACK_COMBO : super.getStandPose(standPower, standEntity, task);
     }
     
     @Override
     public boolean greenSelection(IStandPower power, ActionConditionResult conditionCheck) {
-        return isCombo && conditionCheck.isPositive();
+        return isFinisher && conditionCheck.isPositive();
+    }
+    
+    public boolean isFinisher() {
+        return isFinisher;
     }
     
     
     
     public static class Builder extends StandEntityAction.AbstractBuilder<StandEntityHeavyAttack.Builder> {
-        private Supplier<StandEntityHeavyAttack> comboAttack = () -> null;
+        private Supplier<StandEntityHeavyAttack> finisherVariation = () -> null;
         private Supplier<StandEntityActionModifier> recoveryAction = () -> null;
         private Supplier<SoundEvent> punchSound = () -> null;
     	
@@ -197,10 +206,10 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
             .standOffsetFromUser(-0.75, 0.75);
     	}
         
-        public Builder setComboAttack(Supplier<StandEntityHeavyAttack> comboAttack) {
-            if (this.comboAttack.get() == null && comboAttack != null && comboAttack.get() != null) {
-                this.comboAttack = comboAttack;
-                comboAttack.get().isCombo = true;
+        public Builder setFinisherVariation(Supplier<StandEntityHeavyAttack> variation) {
+            if (this.finisherVariation.get() == null && variation != null && variation.get() != null) {
+                this.finisherVariation = variation;
+                variation.get().isFinisher = true;
             }
             return getThis();
         }

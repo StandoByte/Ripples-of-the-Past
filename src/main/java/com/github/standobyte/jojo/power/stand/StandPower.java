@@ -346,9 +346,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
     
     @Override
-    public void setResolveLevel(int level) {
+    public void setResolveLevel(int level, boolean fromEffect) {
         if (usesResolve()) {
-            resolveCounter.setResolveLevel(level);
+            resolveCounter.setResolveLevel(level, fromEffect);
             if (!user.level.isClientSide() && hasPower()) {
                 getType().onNewResolveLevel(this);
                 if (level >= getType().getMaxResolveLevel()) {
@@ -399,7 +399,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public void skipProgression(StandType<?> standType) {
     	setProgressionSkipped();
-        resolveCounter.setResolveLevel(getMaxResolveLevel());
+        resolveCounter.setResolveLevel(getMaxResolveLevel(), false);
         if (standType != null) {
             Stream.concat(
                     Arrays.stream(standType.getAttacks()), 
@@ -559,11 +559,13 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         consumeStamina(250);
         if (standManifestation instanceof StandEntity) {
             StandEntity standEntity = (StandEntity) standManifestation;
+            float volume = standEntity.getLeapStrength() / 2.4F;
             ServerPlayerEntity except = serverPlayerUser.map(player -> {
-                PacketManager.sendToClient(new PlaySoundAtStandEntityPacket(ModSounds.STAND_LEAP.get(), standEntity.getId(), 1.0F, 1.0F), player);
+                PacketManager.sendToClient(new PlaySoundAtStandEntityPacket(ModSounds.STAND_LEAP.get(), standEntity.getId(), 
+                        volume, 1.0F), player);
                 return player;
             }).orElse(null);
-            standEntity.playSound(ModSounds.STAND_LEAP.get(), 1.0F, 1.0F, except);
+            standEntity.playSound(ModSounds.STAND_LEAP.get(), volume, 1.0F, except);
         }
     }
     

@@ -4,12 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.github.standobyte.jojo.init.ModStandTypes;
-import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.ResolveLevelPacket;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -85,9 +82,9 @@ public class ResolveLevelsMap {
         });
     }
 
-    void syncWithUser(IStandPower standPower, ServerPlayerEntity player) {
-        PacketManager.sendToClient(new ResolveLevelPacket(getResolveLevel(standPower)), player);
-    }
+//    void syncWithUser(IStandPower standPower, ServerPlayerEntity player) {
+//        PacketManager.sendToClient(new ResolveLevelPacket(getResolveLevel(standPower), false), player);
+//    }
     
     
     

@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.client.renderer.entity.stand;
 
+import com.github.standobyte.jojo.client.ClientEventHandler;
 import com.github.standobyte.jojo.client.model.entity.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.model.entity.stand.StandEntityModel.VisibilityMode;
 import com.github.standobyte.jojo.client.renderer.entity.stand.layer.StandModelLayerRenderer;
@@ -82,11 +83,14 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
     }
     
     protected boolean obstructsView(T entity, float partialTick) {
-        if (entity.isFollowingUser() && !entity.isArmsOnlyMode()) {
-            Minecraft mc = Minecraft.getInstance();
-            if (mc.options.getCameraType().isFirstPerson()) {
-                Entity user = entity.getUser();
-                if (mc.player.is(user)) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.options.getCameraType().isFirstPerson()) {
+            Entity user = entity.getUser();
+            if (mc.player != null && mc.player.is(user)) {
+                if (ClientEventHandler.getInstance().isZooming) {
+                    return true;
+                }
+                if (entity.isFollowingUser() && !entity.isArmsOnlyMode()) {
                     Vector3d diffVec = entity.getPosition(partialTick).subtract(user.getPosition(partialTick));
                     return diffVec.lengthSqr() < 0.09 || diffVec.lengthSqr() < 1 && user.getViewVector(partialTick).dot(diffVec) > diffVec.lengthSqr() / 2;
                 }

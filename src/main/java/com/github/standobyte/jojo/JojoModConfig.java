@@ -80,7 +80,7 @@ public class JojoModConfig {
 
         public final ForgeConfigSpec.DoubleValue hamonDamageMultiplier;
         public final ForgeConfigSpec.BooleanValue endermenBeyondTimeSpace;
-        public final ForgeConfigSpec.BooleanValue saveBrokenBlocks;
+        public final ForgeConfigSpec.BooleanValue saveDestroyedBlocks;
         
         private Common(ForgeConfigSpec.Builder builder) {
             builder.push("Keep Powers After Death");
@@ -249,10 +249,10 @@ public class JojoModConfig {
                     .translation("jojo.config.hamonDamageMultiplier")
                     .defineInRange("hamonDamageMultiplier", 1.0, 0.0, 128.0);
             
-            saveBrokenBlocks = builder
+            saveDestroyedBlocks = builder
                     .comment("    Whether or not blocks which can be restored by Crazy Diamond's terrain restoration ability are saved in the save files.")
-                    .translation("jojo.config.saveBrokenBlocks")
-                    .define("saveBrokenBlocks", true);
+                    .translation("jojo.config.saveDestroyedBlocks")
+                    .define("saveDestroyedBlocks", false);
             
             endermenBeyondTimeSpace = builder
                     .comment("    Disable this if you're boring.")

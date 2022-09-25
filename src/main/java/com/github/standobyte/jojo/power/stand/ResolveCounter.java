@@ -253,11 +253,11 @@ public class ResolveCounter {
         return boost;
     }
 
-    void setResolveLevel(int level) {
+    void setResolveLevel(int level, boolean fromEffect) {
         boolean send = levels.setResolveLevel(stand, level);
         if (send) {
             serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new ResolveLevelPacket(getResolveLevel()), player);
+                PacketManager.sendToClient(new ResolveLevelPacket(getResolveLevel(), fromEffect), player);
             });
         }
     }
@@ -325,7 +325,7 @@ public class ResolveCounter {
 
     public void onResolveEffectStarted(int amplifier) {
     	int newLevel = amplifier + 1;
-        stand.setResolveLevel(Math.min(newLevel, stand.getMaxResolveLevel()));
+        stand.setResolveLevel(Math.min(newLevel, stand.getMaxResolveLevel()), true);
     	if (newLevel > stand.getMaxResolveLevel()) {
             levels.incExtraLevel(stand);
     	}

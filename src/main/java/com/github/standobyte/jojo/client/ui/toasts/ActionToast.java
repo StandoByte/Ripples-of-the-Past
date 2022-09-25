@@ -23,15 +23,15 @@ import net.minecraft.util.text.TranslationTextComponent;
 public class ActionToast implements IToast {
     private static final ITextComponent NAME = new TranslationTextComponent("jojo.action.toast.title");
     private final ITextComponent description;
-    private final Type type;
+    private final IActionToastType type;
     private final List<Action<?>> actions = Lists.newArrayList();
     private IPowerType<?, ?> powerType;
     private long lastChanged;
     private boolean changed;
 
-    private ActionToast(Type type, Action<?> action, IPowerType<?, ?> powerType) {
+    private ActionToast(IActionToastType type, Action<?> action, IPowerType<?, ?> powerType) {
         this.type = type;
-        this.description = new TranslationTextComponent("jojo.action.toast." + type.name + "description");
+        this.description = new TranslationTextComponent("jojo.action.toast." + type.getName() + ".description");
         this.powerType = powerType;
         this.actions.add(action);
     }
@@ -54,9 +54,9 @@ public class ActionToast implements IToast {
             mc.font.draw(matrixStack, description, 30.0F, 18.0F, -16777216);
             Action<?> action = actions.get((int)(delta / Math.max(1L, 5000L / (long)actions.size()) % (long)actions.size()));
             RenderSystem.pushMatrix();
-            RenderSystem.scalef(0.6F, 0.6F, 1.0F);
+//            RenderSystem.scalef(0.6F, 0.6F, 1.0F);
             matrixStack.pushPose();
-            matrixStack.scale(0.6F, 0.6F, 1.0F);
+            matrixStack.scale(0.5F, 0.5F, 1.0F);
             mc.getTextureManager().bind(powerType.getIconTexture());
             ToastGui.blit(matrixStack, 3, 3, 0, 0, 16, 16, 16, 16);
             RenderSystem.popMatrix();
@@ -75,6 +75,15 @@ public class ActionToast implements IToast {
         }
     }
 
+    public static void addOrUpdate(ToastGui toastGui, SpecialToastType type, Action<?> action, IPowerType<?, ?> powerType) {
+        ActionToast toast = toastGui.getToast(ActionToast.class, type);
+        if (toast == null) {
+            toastGui.addToast(new ActionToast(type, action, powerType));
+        } else {
+            toast.addAction(action, powerType);
+        }
+    }
+
     public static void addOrUpdate(ToastGui toastGui, Type type, Action<?> action, IPowerType<?, ?> powerType) {
         ActionToast toast = toastGui.getToast(ActionToast.class, type);
         if (toast == null) {
@@ -82,21 +91,20 @@ public class ActionToast implements IToast {
         } else {
             toast.addAction(action, powerType);
         }
-
     }
 
     @Override
-    public Type getToken() {
+    public IActionToastType getToken() {
         return type;
     }
 
-    public static enum Type {
-//        NON_STAND_ATTACK("non_stand.attack.", PowerClassification.NON_STAND, ActionType.ATTACK, false),
-//        NON_STAND_ABILITY("non_stand.ability.", PowerClassification.NON_STAND, ActionType.ABILITY, false),
-        STAND_ATTACK("stand.attack.", PowerClassification.STAND, ActionType.ATTACK, false),
-        STAND_ABILITY("stand.ability.", PowerClassification.STAND, ActionType.ABILITY, false),
-        STAND_ATTACK_VARIATION("stand.attack.shift.", PowerClassification.STAND, ActionType.ATTACK, true),
-        STAND_ABILITY_VARIATION("stand.ability.shift.", PowerClassification.STAND, ActionType.ABILITY, true);
+    public static enum Type implements IActionToastType {
+//        NON_STAND_ATTACK("non_stand.attack", PowerClassification.NON_STAND, ActionType.ATTACK, false),
+//        NON_STAND_ABILITY("non_stand.ability", PowerClassification.NON_STAND, ActionType.ABILITY, false),
+        STAND_ATTACK("stand.attack", PowerClassification.STAND, ActionType.ATTACK, false),
+        STAND_ABILITY("stand.ability", PowerClassification.STAND, ActionType.ABILITY, false),
+        STAND_ATTACK_VARIATION("stand.attack.shift", PowerClassification.STAND, ActionType.ATTACK, true),
+        STAND_ABILITY_VARIATION("stand.ability.shift", PowerClassification.STAND, ActionType.ABILITY, true);
         
         private final String name;
         private final PowerClassification classification;
@@ -121,5 +129,29 @@ public class ActionToast implements IToast {
             }
             return null;
         }
+        
+        @Override
+        public String getName() {
+            return name;
+        }
+    }
+    
+    public static enum SpecialToastType implements IActionToastType {
+        FINISHER_HEAVY_ATTACK("stand.attack.heavy_finisher");
+        
+        private final String name;
+        
+        private SpecialToastType(String name) {
+            this.name = name;
+        }
+        
+        @Override
+        public String getName() {
+            return name;
+        }
+    }
+    
+    private static interface IActionToastType {
+        String getName();
     }
 }
