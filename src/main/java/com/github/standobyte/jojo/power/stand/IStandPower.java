@@ -42,7 +42,7 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
         return getResolve() / getMaxResolve();
     }
     int getResolveLevel();
-    void setResolveLevel(int level);
+    void setResolveLevel(int level, boolean fromEffect);
     int getMaxResolveLevel();
     float getResolveDmgReduction();
     

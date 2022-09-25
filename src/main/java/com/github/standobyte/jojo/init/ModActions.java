@@ -242,7 +242,7 @@ public class ModActions {
                     .punchSound(ModSounds.STAR_PLATINUM_PUNCH_HEAVY)
                     .standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_ORA_LONG)
                     .partsRequired(StandPart.ARMS)
-                    .setComboAttack(STAR_PLATINUM_UPPERCUT)
+                    .setFinisherVariation(STAR_PLATINUM_UPPERCUT)
                     .shiftVariationOf(STAR_PLATINUM_PUNCH).shiftVariationOf(STAR_PLATINUM_BARRAGE)));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_STAR_FINGER = ACTIONS.register("star_platinum_star_finger", 
@@ -309,7 +309,7 @@ public class ModActions {
                     .punchSound(ModSounds.THE_WORLD_PUNCH_HEAVY)
                     .shout(ModSounds.DIO_DIE)
                     .partsRequired(StandPart.ARMS)
-                    .setComboAttack(THE_WORLD_KICK)
+                    .setFinisherVariation(THE_WORLD_KICK)
                     .shiftVariationOf(THE_WORLD_PUNCH).shiftVariationOf(THE_WORLD_BARRAGE)));
 
     public static final RegistryObject<StandEntityAction> THE_WORLD_BLOCK = ACTIONS.register("the_world_block", 
@@ -403,7 +403,7 @@ public class ModActions {
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_DASH_ATTACK = ACTIONS.register("silver_chariot_dash_attack", 
             () -> new SilverChariotDashAttack(new StandEntityHeavyAttack.Builder()
                     .partsRequired(StandPart.MAIN_BODY, StandPart.ARMS)
-                    .setComboAttack(SILVER_CHARIOT_SWEEPING_ATTACK)
+                    .setFinisherVariation(SILVER_CHARIOT_SWEEPING_ATTACK)
                     .shiftVariationOf(SILVER_CHARIOT_ATTACK).shiftVariationOf(SILVER_CHARIOT_RAPIER_BARRAGE)));
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_RAPIER_LAUNCH = ACTIONS.register("silver_chariot_rapier_launch", 
@@ -436,7 +436,7 @@ public class ModActions {
             () -> new StandEntityHeavyAttack(new StandEntityHeavyAttack.Builder()
                     .punchSound(ModSounds.MAGICIANS_RED_PUNCH_HEAVY)
                     .partsRequired(StandPart.ARMS)
-                    .setComboAttack(MAGICIANS_RED_KICK)
+                    .setFinisherVariation(MAGICIANS_RED_KICK)
                     .shiftVariationOf(MAGICIANS_RED_PUNCH)));
     
     public static final RegistryObject<StandEntityAction> MAGICIANS_RED_FLAME_BURST = ACTIONS.register("magicians_red_flame_burst", 
@@ -511,7 +511,7 @@ public class ModActions {
                     .punchSound(ModSounds.CRAZY_DIAMOND_PUNCH_HEAVY)
                     .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_DORA_LONG)
                     .partsRequired(StandPart.ARMS)
-                    .setComboAttack(CRAZY_DIAMOND_COMBO_PUNCH)
+                    .setFinisherVariation(CRAZY_DIAMOND_COMBO_PUNCH)
                     .shiftVariationOf(CRAZY_DIAMOND_PUNCH).shiftVariationOf(CRAZY_DIAMOND_BARRAGE)));
     
     public static final RegistryObject<StandEntityActionModifier> CRAZY_DIAMOND_LEAVE_OBJECT = ACTIONS.register("crazy_diamond_leave_object", 

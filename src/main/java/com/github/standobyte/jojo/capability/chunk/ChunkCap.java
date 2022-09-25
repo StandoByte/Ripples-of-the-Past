@@ -125,7 +125,7 @@ public class ChunkCap {
     
     CompoundNBT save() {
         CompoundNBT nbt = new CompoundNBT();
-        if (JojoModConfig.getCommonConfigInstance(false).saveBrokenBlocks.get()) {
+        if (JojoModConfig.getCommonConfigInstance(false).saveDestroyedBlocks.get()) {
             ListNBT blocksBroken = new ListNBT();
             for (PrevBlockInfo block : brokenBlocks.values()) {
                 blocksBroken.add(block.toNBT());
@@ -136,7 +136,8 @@ public class ChunkCap {
     }
     
     void load(CompoundNBT nbt) {
-        if (nbt.contains("Blocks", JojoModUtil.getNbtId(ListNBT.class))) {
+        if (JojoModConfig.getCommonConfigInstance(false).saveDestroyedBlocks.get()
+                && nbt.contains("Blocks", JojoModUtil.getNbtId(ListNBT.class))) {
             nbt.getList("Blocks", JojoModUtil.getNbtId(CompoundNBT.class)).forEach(blockNBT -> {
                 PrevBlockInfo block = PrevBlockInfo.fromNBT((CompoundNBT) blockNBT);
                 if (block != null) {

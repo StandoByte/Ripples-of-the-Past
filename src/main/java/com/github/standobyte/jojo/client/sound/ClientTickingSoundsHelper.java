@@ -78,7 +78,7 @@ public abstract class ClientTickingSoundsHelper {
         }
         
         SoundCategory category = stand.getSoundSource();
-        PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(stand, sound, category, pitch, volume);
+        PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(stand, sound, category, volume, pitch);
         if (event.isCanceled() || event.getSound() == null) return;
         sound = event.getSound();
         category = event.getCategory();
@@ -100,7 +100,7 @@ public abstract class ClientTickingSoundsHelper {
                 }
 
                 SoundCategory category = stand.getSoundSource();
-                PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(stand, sound, category, pitch, volume);
+                PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(stand, sound, category, volume, pitch);
                 if (event.isCanceled() || event.getSound() == null) return;
                 sound = event.getSound();
                 category = event.getCategory();
@@ -119,7 +119,7 @@ public abstract class ClientTickingSoundsHelper {
         }
 
         SoundCategory category = stand.getSoundSource();
-        PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(stand, sound, category, pitch, volume);
+        PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(stand, sound, category, volume, pitch);
         if (event.isCanceled() || event.getSound() == null) return;
         sound = event.getSound();
         category = event.getCategory();
