@@ -26,7 +26,6 @@ import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent;
 
 public class EntityStandType<T extends StandStats> extends StandType<T> {
     private final Supplier<? extends StandEntityType<? extends StandEntity>> entityTypeSupplier;
@@ -227,13 +226,23 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
     
 
     
-    public static void giveSharedEffectsFromUser(PotionAddedEvent event) {
-        IStandPower.getStandPowerOptional(event.getEntityLiving()).ifPresent(power -> {
+    public static void giveEffectSharedWithStand(LivingEntity user, EffectInstance effectInstance) {
+        IStandPower.getStandPowerOptional(user).ifPresent(power -> {
             if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
-                EffectInstance effectInstance = event.getPotionEffect();
                 StandEntity stand = (StandEntity) power.getStandManifestation();
                 if (stand.getEffectsSharedToStand().contains(effectInstance.getEffect())) {
                     stand.addEffect(new EffectInstance(effectInstance));
+                }
+            }
+        });
+    }
+    
+    public static void removeEffectSharedWithStand(LivingEntity user, Effect effect) {
+        IStandPower.getStandPowerOptional(user).ifPresent(power -> {
+            if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
+                StandEntity stand = (StandEntity) power.getStandManifestation();
+                if (stand.getEffectsSharedToStand().contains(effect)) {
+                    stand.removeEffect(effect);
                 }
             }
         });

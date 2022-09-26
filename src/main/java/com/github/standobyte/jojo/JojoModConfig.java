@@ -250,7 +250,8 @@ public class JojoModConfig {
                     .defineInRange("hamonDamageMultiplier", 1.0, 0.0, 128.0);
             
             saveDestroyedBlocks = builder
-                    .comment("    Whether or not blocks which can be restored by Crazy Diamond's terrain restoration ability are saved in the save files.")
+                    .comment("    Whether or not blocks which can be restored by Crazy Diamond's terrain restoration ability are saved in the save files.", 
+                             "     It may cause longer saving & loading time for larger worlds.")
                     .translation("jojo.config.saveDestroyedBlocks")
                     .define("saveDestroyedBlocks", false);
             

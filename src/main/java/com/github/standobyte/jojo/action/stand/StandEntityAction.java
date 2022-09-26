@@ -48,7 +48,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     @Nullable
     protected final StandRelativeOffset userOffsetArmsOnly;
     public final boolean enablePhysics;
-    private final Map<Phase, List<Supplier<SoundEvent>>> standSounds;
+    protected final Map<Phase, List<Supplier<SoundEvent>>> standSounds;
     protected final Supplier<StandEntityMeleeBarrage> barrageVisuals;
     
     public StandEntityAction(StandEntityAction.AbstractBuilder<?> builder) {

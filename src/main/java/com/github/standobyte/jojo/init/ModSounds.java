@@ -219,6 +219,12 @@ public class ModSounds {
 
     public static final RegistryObject<SoundEvent> STAND_DAMAGE_BLOCK = SOUNDS.register("stand_damage_block", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_damage_block")));
+    
+    public static final RegistryObject<SoundEvent> STAND_PUNCH_LIGHT = SOUNDS.register("stand_punch_light", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_punch_light")));
+    
+    public static final RegistryObject<SoundEvent> STAND_PUNCH_HEAVY = SOUNDS.register("stand_punch_heavy", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_punch_heavy")));
 
     public static final RegistryObject<SoundEvent> STAND_PARRY = SOUNDS.register("stand_parry", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_parry")));
@@ -418,8 +424,17 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> SILVER_CHARIOT_UNSUMMON = SOUNDS.register("silver_chariot_unsummon",
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "silver_chariot_unsummon")));
 
+    public static final RegistryObject<SoundEvent> SILVER_CHARIOT_SWEEP_LIGHT = SOUNDS.register("silver_chariot_sweep_light", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "silver_chariot_sweep_light")));
+
     public static final RegistryObject<SoundEvent> SILVER_CHARIOT_BARRAGE = SOUNDS.register("silver_chariot_barrage", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "silver_chariot_barrage")));
+
+    public static final RegistryObject<SoundEvent> SILVER_CHARIOT_DASH = SOUNDS.register("silver_chariot_dash", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "silver_chariot_dash")));
+
+    public static final RegistryObject<SoundEvent> SILVER_CHARIOT_SWEEP_HEAVY = SOUNDS.register("silver_chariot_sweep_heavy", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "silver_chariot_sweep_heavy")));
 
     public static final RegistryObject<SoundEvent> SILVER_CHARIOT_BLOCK = SOUNDS.register("silver_chariot_block", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "silver_chariot_block")));

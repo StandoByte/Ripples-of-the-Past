@@ -133,6 +133,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.GameRules;
+import net.minecraft.world.GameType;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerChunkProvider;
@@ -770,7 +771,7 @@ public class GameplayEventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onPotionAdded(PotionAddedEvent event) {
-        EntityStandType.giveSharedEffectsFromUser(event);
+        EntityStandType.giveEffectSharedWithStand(event.getEntityLiving(), event.getPotionEffect());
         
         Entity entity = event.getEntity();
         EffectInstance effectInstance = event.getPotionEffect();
@@ -792,6 +793,8 @@ public class GameplayEventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void trackedPotionRemoved(PotionRemoveEvent event) {
+        EntityStandType.removeEffectSharedWithStand(event.getEntityLiving(), event.getPotion());
+        
         Entity entity = event.getEntity();
         if (!entity.level.isClientSide() && event.getPotionEffect() != null && ModEffects.isEffectTracked(event.getPotionEffect().getEffect())) {
             ((ServerChunkProvider) entity.getCommandSenderWorld().getChunkSource()).broadcast(entity, 
@@ -801,8 +804,10 @@ public class GameplayEventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void trackedPotionExpired(PotionExpiryEvent event) {
+        EntityStandType.removeEffectSharedWithStand(event.getEntityLiving(), event.getPotionEffect().getEffect());
+        
         Entity entity = event.getEntity();
-        if (!entity.level.isClientSide() && event.getPotionEffect() != null && ModEffects.isEffectTracked(event.getPotionEffect().getEffect())) {
+        if (!entity.level.isClientSide() && ModEffects.isEffectTracked(event.getPotionEffect().getEffect())) {
             ((ServerChunkProvider) entity.getCommandSenderWorld().getChunkSource()).broadcast(entity, 
                     new SRemoveEntityEffectPacket(entity.getId(), event.getPotionEffect().getEffect()));
         }
@@ -1168,7 +1173,7 @@ public class GameplayEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onLivingFall(LivingFallEvent event) {
-        if (event.getDistance() > 4) {
+        if (event.getDistance() > 3) {
             LivingEntity entity = event.getEntityLiving();
             float leapStrength = Math.max(
                     IStandPower.getStandPowerOptional(entity).map(power -> 
@@ -1251,6 +1256,14 @@ public class GameplayEventHandler {
             CrazyDiamondRestoreTerrain.rememberBrokenBlock((World) event.getWorld(), 
                     event.getPos(), event.getState(), Optional.ofNullable(event.getWorld().getBlockEntity(event.getPos())), 
                     Collections.emptyList());
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onGameModeChange(PlayerEvent.PlayerChangeGameModeEvent event) {
+        if (event.getNewGameMode() == GameType.CREATIVE) {
+            INonStandPower.getNonStandPowerOptional(event.getPlayer()).ifPresent(power -> power.resetCooldowns());
+            IStandPower.getStandPowerOptional(event.getPlayer()).ifPresent(stand -> stand.resetCooldowns());
         }
     }
 }

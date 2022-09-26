@@ -313,6 +313,14 @@
     "subtitle": "jojo.subtitle.stand_damage_block",
     "sounds": [ "jojo:attack_block_1", "jojo:attack_block_2" ]
   },
+  "stand_punch_light": {
+    "subtitle": "jojo.subtitle.stand_attack_light",
+    "sounds": [ "jojo:stand/stand_punch_light", "jojo:stand/stand_punch_light_2", "jojo:stand/stand_punch_light_3", "jojo:stand/stand_punch_light_4" ]
+  },
+  "stand_punch_heavy": {
+    "subtitle": "jojo.subtitle.stand_attack_strong",
+    "sounds": [ "jojo:stand/stand_punch_heavy" ]
+  },
   "stand_crash": {
     "subtitle": "jojo.subtitle.stand_crash",
     "sounds": [ "jojo:stand/stand_parry" ]
@@ -603,6 +611,27 @@
     "subtitle": "jojo.subtitle.stand_attack_light",
     "sounds": [ "jojo:stand/silver_chariot_barrage", "jojo:stand/silver_chariot_barrage_2" ]
   },
+  "silver_chariot_sweep_light": {
+    "subtitle": "jojo.subtitle.stand_attack_light",
+    "sounds": [ 
+      {
+        "name": "entity.player.attack.sweep",
+        "type": "event"
+      } 
+    ]
+  },
+  "silver_chariot_dash": {
+    "sounds": [ "jojo:stand/silver_chariot_summon" ]
+  },
+  "silver_chariot_sweep_heavy": {
+    "subtitle": "jojo.subtitle.stand_attack_strong",
+    "sounds": [ 
+      {
+        "name": "entity.player.attack.sweep",
+        "type": "event"
+      } 
+    ]
+  },
   "silver_chariot_block": {
     "subtitle": "jojo.subtitle.stand_damage_block",
     "sounds": [
@@ -647,15 +676,30 @@
   },
   "magicians_red_punch_light": {
     "subtitle": "jojo.subtitle.stand_attack_light",
-    "sounds": [ "jojo:stand/magicians_red_punch_light" ]
+    "sounds": [
+      {
+        "name": "jojo:stand_punch_light",
+        "type": "event"
+      }
+    ]
   },
   "magicians_red_punch_heavy": {
     "subtitle": "jojo.subtitle.stand_attack_strong",
-    "sounds": [ "jojo:stand/magicians_red_punch_heavy" ]
+    "sounds": [
+      {
+        "name": "jojo:stand_punch_heavy",
+        "type": "event"
+      }
+    ]
   },
   "magicians_red_kick_heavy": {
     "subtitle": "jojo.subtitle.stand_attack_strong",
-    "sounds": [ "jojo:stand/magicians_red_punch_heavy" ]
+    "sounds": [
+      {
+        "name": "jojo:stand_punch_heavy",
+        "type": "event"
+      }
+    ]
   },
   "magicians_red_fire_ability": {
     "subtitle": "jojo.subtitle.fire_ability",

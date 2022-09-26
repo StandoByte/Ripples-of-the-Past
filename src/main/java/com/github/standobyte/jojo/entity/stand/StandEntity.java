@@ -1815,7 +1815,9 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public void retractStand(boolean toUnsummon) {
         LivingEntity user = getUser();
         if (user != null) {
-            setStandFlag(StandFlag.BEING_RETRACTED, true);
+            if (!(toUnsummon && isFollowingUser())) {
+                setStandFlag(StandFlag.BEING_RETRACTED, true);
+            }
             if (toUnsummon && userPower.getHeldAction() == null) {
                 startStandUnsummon();
             }

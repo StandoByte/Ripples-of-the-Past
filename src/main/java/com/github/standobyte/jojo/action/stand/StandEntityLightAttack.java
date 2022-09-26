@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
@@ -131,7 +132,7 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
     	public Builder() {
             staminaCost(10F).standUserSlowDownFactor(1.0F)
             .standOffsetFront().standOffsetFromUser(-0.75, 0.75)
-            .standPose(StandPose.LIGHT_ATTACK)
+            .standPose(StandPose.LIGHT_ATTACK).punchSound(ModSounds.STAND_PUNCH_LIGHT)
             .standAutoSummonMode(AutoSummonMode.MAIN_ARM)
             .partsRequired(StandPart.ARMS);
     	}
