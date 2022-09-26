@@ -16,6 +16,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.power.stand.StandUtil;
@@ -203,6 +204,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     	
     	public Builder() {
             standPose(StandPose.HEAVY_ATTACK).staminaCost(50F)
+            .punchSound(ModSounds.STAND_PUNCH_HEAVY)
             .standOffsetFromUser(-0.75, 0.75);
     	}
         

@@ -389,7 +389,9 @@ public class ModActions {
             () -> new StandEntityLightAttack(new StandEntityLightAttack.Builder()));
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_ATTACK = ACTIONS.register("silver_chariot_attack", 
-            () -> new SilverChariotLightAttack(new StandEntityLightAttack.Builder(), SILVER_CHARIOT_NO_RAPIER_ATTACK));
+            () -> new SilverChariotLightAttack(new StandEntityLightAttack.Builder()
+                    .punchSound(() -> null).standSound(ModSounds.SILVER_CHARIOT_SWEEP_LIGHT), 
+                    SILVER_CHARIOT_NO_RAPIER_ATTACK));
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_RAPIER_BARRAGE = ACTIONS.register("silver_chariot_barrage", 
             () -> new SilverChariotMeleeBarrage(new StandEntityMeleeBarrage.Builder()
@@ -398,10 +400,12 @@ public class ModActions {
     
     public static final RegistryObject<StandEntityHeavyAttack> SILVER_CHARIOT_SWEEPING_ATTACK = ACTIONS.register("silver_chariot_sweeping_attack", 
             () -> new SilverChariotSweepingAttack(new StandEntityHeavyAttack.Builder().standPerformDuration(3)
+                    .punchSound(() -> null)
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_DASH_ATTACK = ACTIONS.register("silver_chariot_dash_attack", 
             () -> new SilverChariotDashAttack(new StandEntityHeavyAttack.Builder()
+                    .punchSound(() -> null).standSound(ModSounds.SILVER_CHARIOT_DASH)
                     .partsRequired(StandPart.MAIN_BODY, StandPart.ARMS)
                     .setFinisherVariation(SILVER_CHARIOT_SWEEPING_ATTACK)
                     .shiftVariationOf(SILVER_CHARIOT_ATTACK).shiftVariationOf(SILVER_CHARIOT_RAPIER_BARRAGE)));

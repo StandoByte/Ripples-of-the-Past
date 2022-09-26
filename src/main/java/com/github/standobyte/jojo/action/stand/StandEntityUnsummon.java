@@ -22,7 +22,7 @@ public final class StandEntityUnsummon extends StandEntityAction {
     @Override
     public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         LivingEntity user = standEntity.getUser();
-        if (user != null && standEntity.isCloseToUser()) {
+        if (user != null && (standEntity.isCloseToUser() || standEntity.isFollowingUser() || standEntity.unsummonTicks > 0)) {
             int maxTicks = getUnsummonDuration(standEntity);
             if (standEntity.unsummonTicks == maxTicks) {
                 if (!world.isClientSide()) {

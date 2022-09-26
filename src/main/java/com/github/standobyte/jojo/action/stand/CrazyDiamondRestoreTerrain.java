@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.action.stand;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,9 +10,13 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.mutable.MutableInt;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
@@ -38,6 +43,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
@@ -84,7 +90,8 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
             boolean resolveEffect = user.hasEffect(ModEffects.RESOLVE.get());
             int manhattanRange = restorationDistManhattan(resolveEffect);
             List<ItemEntity> itemsAround = world.getEntitiesOfClass(ItemEntity.class, 
-                    cameraEntity.getBoundingBox().inflate(manhattanRange * 2));
+                    cameraEntity.getBoundingBox().inflate(manhattanRange * 2),
+                    entity -> entity.isAlive());
             Set<BlockPos> blocksPlaced = new HashSet<>();
             Set<BlockPos> blocksToForget = new HashSet<>();
             Vector3i eyePos = eyePos(cameraEntity);
@@ -151,10 +158,8 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
                 }
             }
         }
-        if (blockCanBePlaced(world, blockPos, blockState) && blockState.canSurvive(world, blockPos)) {
-            if (!(isCreative || consumeNeededItems(restorationCost, userInventory, itemEntities))) {
-                return false;
-            }
+        if (blockCanBePlaced(world, blockPos, blockState) && blockState.canSurvive(world, blockPos)
+                && (isCreative || consumeNeededItems(restorationCost, userInventory, itemEntities))) {
             world.setBlockAndUpdate(blockPos, blockState);
             placedBlocks.add(blockPos);
             return true;
@@ -170,53 +175,86 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
     }
     
     private static boolean consumeNeededItems(List<ItemStack> restorationCost, @Nullable IInventory userInventory, List<ItemEntity> itemEntities) {
-        Map<ItemStack, Integer> neededItemsGathered = new HashMap<>();
-        if (!restorationCost.stream().allMatch(costStack -> {
-            if (costStack.isEmpty()) {
-                return true;
-            }
-            int gatheredItemsCount = 0;
-            
-            for (ItemEntity itemEntity : itemEntities) {
-                ItemStack lyingStack = itemEntity.getItem();
-                gatheredItemsCount += gatherMatchingItems(costStack, lyingStack, gatheredItemsCount, neededItemsGathered);
-                if (gatheredItemsCount >= costStack.getCount()) return true;
-            }
-            
-            if (userInventory != null) {
-                int size = userInventory.getContainerSize();
-                for (int i = 0; i < size; i++) {
-                    ItemStack inventoryItem = userInventory.getItem(i);
-                    if (inventoryItem != null) {
-                        gatheredItemsCount += gatherMatchingItems(costStack, inventoryItem, gatheredItemsCount, neededItemsGathered);
-                        if (gatheredItemsCount >= costStack.getCount()) return true;
-                    }
-                }
-                
-            }
-            
-            return false;
-            
-        })) {
-            return false;
+        if (restorationCost.size() == 1 && restorationCost.get(0).getCount() == 1) {
+            return consumeSingleItem(restorationCost.get(0), userInventory, itemEntities);
         }
-        else {
-            neededItemsGathered.forEach((stack, cost) -> {
-                stack.shrink(cost);
+
+        List<ItemStack> costCopied = restorationCost.stream().map(ItemStack::copy).collect(Collectors.toList());
+        Map<ItemStack, Pair<List<ItemStack>, MutableInt>> itemsSorted = Util.make(new HashMap<>(), map -> {
+            costCopied.forEach(item -> map.put(item, Pair.of(new ArrayList<>(), new MutableInt())));
+        });
+        
+        for (ItemEntity itemEntity : itemEntities) {
+            ItemStack lyingStack = itemEntity.getItem();
+            sortItem(itemsSorted, costCopied, lyingStack);
+        }
+        
+        if (userInventory != null) {
+            int size = userInventory.getContainerSize();
+            for (int i = 0; i < size; i++) {
+                ItemStack inventoryItem = userInventory.getItem(i);
+                sortItem(itemsSorted, costCopied, inventoryItem);
+            }
+        }
+        
+        
+        if (itemsSorted.entrySet().stream().allMatch(entry -> {
+            ItemStack neededItem = entry.getKey();
+            Pair<List<ItemStack>, MutableInt> existingItems = entry.getValue();
+            return existingItems.getRight().getValue() >= neededItem.getCount();
+        })) {
+            itemsSorted.entrySet().stream().forEach(entry -> {
+                ItemStack neededItem = entry.getKey();
+                Pair<List<ItemStack>, MutableInt> existingItems = entry.getValue();
+                existingItems.getLeft().stream().anyMatch(consumedItem -> {
+                    int count = Math.min(neededItem.getCount(), consumedItem.getCount());
+                    consumedItem.shrink(count);
+                    neededItem.shrink(count);
+                    return neededItem.isEmpty();
+                });
             });
             return true;
         }
+        return false;
     }
     
-    private static int gatherMatchingItems(ItemStack neededItem, ItemStack item, int alreadyGathered, Map<ItemStack, Integer> gatheringMap) {
-        if (!item.isEmpty() && item.getItem() == neededItem.getItem() && ItemStack.tagMatches(item, neededItem)) {
-            int count = Math.min(item.getCount(), neededItem.getCount() - alreadyGathered);
-            if (count > 0) {
-                gatheringMap.put(item, count);
-                return count;
+    private static boolean consumeSingleItem(ItemStack neededSingleItem, @Nullable IInventory userInventory, List<ItemEntity> itemEntities) {
+        for (ItemEntity itemEntity : itemEntities) {
+            ItemStack lyingStack = itemEntity.getItem();
+            if (stacksMatch(neededSingleItem, lyingStack)) {
+                lyingStack.shrink(1);
+                return true;
             }
         }
-        return 0;
+        
+        if (userInventory != null) {
+            int size = userInventory.getContainerSize();
+            for (int i = 0; i < size; i++) {
+                ItemStack inventoryItem = userInventory.getItem(i);
+                if (inventoryItem != null && stacksMatch(neededSingleItem, inventoryItem)) {
+                    inventoryItem.shrink(1);
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+    
+    private static void sortItem(Map<ItemStack, Pair<List<ItemStack>, MutableInt>> sortMap, List<ItemStack> cost, ItemStack existingItem) {
+        cost.stream().filter(costItem -> stacksMatch(costItem, existingItem)).findFirst().ifPresent(neededItem -> {
+            if (!sortMap.containsKey(neededItem)) {
+                // i made sure to fill the map, so it should instead fail-fast if this actually happens somehow
+                return;
+            }
+            Pair<List<ItemStack>, MutableInt> entry = sortMap.get(neededItem);
+            entry.getLeft().add(existingItem);
+            entry.getRight().add(existingItem.getCount());
+        });
+    }
+    
+    private static boolean stacksMatch(ItemStack neededItem, ItemStack itemInQuestion) {
+        return (!itemInQuestion.isEmpty() && itemInQuestion.getItem() == neededItem.getItem() && ItemStack.tagMatches(itemInQuestion, neededItem));
     }
     
     

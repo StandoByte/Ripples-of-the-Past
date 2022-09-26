@@ -172,6 +172,14 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
     
     @Override
+    public void resetCooldowns() {
+        cooldowns.resetCooldowns();
+        if (!user.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(TrCooldownPacket.resetAll(user.getId(), getPowerClassification()), user);
+        }
+    }
+    
+    @Override
     public ActionCooldownTracker getCooldowns() {
         return cooldowns;
     }
