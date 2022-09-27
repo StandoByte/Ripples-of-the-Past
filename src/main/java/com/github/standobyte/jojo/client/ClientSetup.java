@@ -12,6 +12,7 @@ import com.github.standobyte.jojo.client.model.armor.StoneMaskModel;
 import com.github.standobyte.jojo.client.model.item.RoadRollerBakedModel;
 import com.github.standobyte.jojo.client.particle.AirStreamParticle;
 import com.github.standobyte.jojo.client.particle.BloodParticle;
+import com.github.standobyte.jojo.client.particle.CDRestorationParticle;
 import com.github.standobyte.jojo.client.particle.MeteoriteVirusParticle;
 import com.github.standobyte.jojo.client.particle.OneTickFlameParticle;
 import com.github.standobyte.jojo.client.particle.OnomatopoeiaParticle;
@@ -36,6 +37,8 @@ import com.github.standobyte.jojo.client.renderer.entity.damaging.extending.SPSt
 import com.github.standobyte.jojo.client.renderer.entity.damaging.extending.SatiporojaScarfBindingRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.extending.SatiporojaScarfRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.extending.SnakeMufflerRenderer;
+import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.CDBloodCutterRenderer;
+import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.CDBlockBulletRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.HGEmeraldRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.HamonBubbleBarrierRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.damaging.projectile.HamonBubbleCutterRenderer;
@@ -53,6 +56,8 @@ import com.github.standobyte.jojo.client.renderer.entity.itemprojectile.KnifeRen
 import com.github.standobyte.jojo.client.renderer.entity.itemprojectile.StandArrowRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.mob.HamonMasterRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.mob.HungryZombieRenderer;
+import com.github.standobyte.jojo.client.renderer.entity.mob.RockPaperScissorsKidRenderer;
+import com.github.standobyte.jojo.client.renderer.entity.stand.CrazyDiamondRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.stand.HierophantGreenRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.stand.MagiciansRedRenderer;
 import com.github.standobyte.jojo.client.renderer.entity.stand.SilverChariotRenderer;
@@ -62,6 +67,10 @@ import com.github.standobyte.jojo.client.renderer.player.layer.KnifeLayer;
 import com.github.standobyte.jojo.client.renderer.player.layer.TornadoOverdriveEffectLayer;
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
+import com.github.standobyte.jojo.client.ui.hud.marker.CrazyDiamondAnchorMarker;
+import com.github.standobyte.jojo.client.ui.hud.marker.CrazyDiamondBloodHomingMarker;
+import com.github.standobyte.jojo.client.ui.hud.marker.HierophantGreenBarrierDetectionMarker;
+import com.github.standobyte.jojo.client.ui.hud.marker.MarkerRenderer;
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
@@ -81,7 +90,9 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.color.ItemColors;
+import net.minecraft.client.renderer.entity.FireworkRocketRenderer;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
+import net.minecraft.client.renderer.entity.SpriteRenderer;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.client.world.ClientWorld;
@@ -146,14 +157,20 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.MR_CROSSFIRE_HURRICANE_SPECIAL.get(), MRCrossfireHurricaneSpecialRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.MR_RED_BIND.get(), MRRedBindRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.MR_DETECTOR.get(), MRDetectorRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.CD_BLOOD_CUTTER.get(), CDBloodCutterRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.CD_BLOCK_BULLET.get(), CDBlockBulletRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.EYE_OF_ENDER_INSIDE.get(), manager -> new SpriteRenderer<>(manager, Minecraft.getInstance().getItemRenderer(), 1.0F, true));
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.FIREWORK_INSIDE.get(), manager -> new FireworkRocketRenderer(manager, Minecraft.getInstance().getItemRenderer()));
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HUNGRY_ZOMBIE.get(), HungryZombieRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HAMON_MASTER.get(), HamonMasterRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.ROCK_PAPER_SCISSORS_KID.get(), RockPaperScissorsKidRenderer::new);
         
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STAR_PLATINUM.get(), StarPlatinumRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.THE_WORLD.get(), TheWorldRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HIEROPHANT_GREEN.get(), HierophantGreenRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SILVER_CHARIOT.get(), SilverChariotRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.MAGICIANS_RED.get(), MagiciansRedRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.CRAZY_DIAMOND.get(), CrazyDiamondRenderer::new);
         
         ArmorModelRegistry.registerArmorModel(StoneMaskModel::new, ModItems.STONE_MASK.get());
         ArmorModelRegistry.registerArmorModel(BladeHatArmorModel::new, ModItems.BLADE_HAT.get());
@@ -192,7 +209,7 @@ public class ClientSetup {
                         CrossbowItem.containsChargedProjectile(itemStack, ModItems.STAND_ARROW_BEETLE.get())) ? 1 : 0;
             });
             ItemModelsProperties.register(ModItems.STAND_DISC.get(), new ResourceLocation(JojoMod.MOD_ID, "stand_id"), (itemStack, clientWorld, livingEntity) -> {
-                return StandDiscItem.validStandDisc(itemStack) ? ModStandTypes.Registry.getNumericId(StandDiscItem.getStandResLocFromStack(itemStack)) : -1;
+                return StandDiscItem.validStandDisc(itemStack, true) ? ModStandTypes.Registry.getNumericId(StandDiscItem.getStandFromStack(itemStack, true).getType().getRegistryName()) : -1;
             });
 //            ItemModelsProperties.register(ModItems.EMPEROR.get(), new ResourceLocation(JojoMod.MOD_ID, "stand_invisible"), STAND_ITEM_INVISIBLE);
 
@@ -205,10 +222,14 @@ public class ClientSetup {
             SoulController.init(mc);
             InputHandler.init(mc);
             InputHandler.getInstance().setActionsOverlay(ActionsOverlayGui.getInstance());
-
+            
             Map<String, PlayerRenderer> skinMap = mc.getEntityRenderDispatcher().getSkinMap();
             addLayers(skinMap.get("default"));
             addLayers(skinMap.get("slim"));
+
+            MarkerRenderer.Handler.addRenderer(new HierophantGreenBarrierDetectionMarker(mc));
+            MarkerRenderer.Handler.addRenderer(new CrazyDiamondAnchorMarker(mc));
+            MarkerRenderer.Handler.addRenderer(new CrazyDiamondBloodHomingMarker(mc));
         });
     }
     
@@ -263,6 +284,7 @@ public class ClientSetup {
         mc.particleEngine.register(ModParticles.SOUL_CLOUD.get(), SoulCloudParticleFactory::new);
         mc.particleEngine.register(ModParticles.AIR_STREAM.get(), AirStreamParticle.Factory::new);
         mc.particleEngine.register(ModParticles.FLAME_ONE_TICK.get(), OneTickFlameParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.CD_RESTORATION.get(), CDRestorationParticle.Factory::new);
         // yep...
         CustomResources.initCustomResourceManagers(mc);
     }

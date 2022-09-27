@@ -2,6 +2,8 @@ package com.github.standobyte.jojo.entity.mob;
 
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
@@ -9,42 +11,38 @@ import com.github.standobyte.jojo.power.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
+import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ILivingEntityData;
 import net.minecraft.entity.INPC;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.IPacket;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
+import net.minecraftforge.fml.network.NetworkHooks;
 
-public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser {
-    private final INonStandPower hamonPower;
-    private final HamonData hamon;
+public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser, IEntityAdditionalSpawnData {
+    private final INonStandPower hamonPower = new NonStandPower(this);
+    @Deprecated
+    private boolean iAmDumbForNotUsingFinalizeSpawn; // TODO remove in later versions
     
     public HamonMasterEntity(EntityType<? extends HamonMasterEntity> type, World world) {
         super(type, world);
-        hamonPower = new NonStandPower(this);
-        hamonPower.givePower(ModNonStandPowers.HAMON.get());
-        hamon = hamonPower.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
-        hamon.setBreathingLevel(HamonData.MAX_BREATHING_LEVEL);
-        hamon.setHamonStatPoints(HamonSkill.HamonStat.STRENGTH, HamonData.MAX_HAMON_POINTS, true, true);
-        hamon.setHamonStatPoints(HamonSkill.HamonStat.CONTROL, HamonData.MAX_HAMON_POINTS, true, true);
-        for (HamonSkill skill : HamonSkill.values()) {
-            if (skill.getTechnique() == null) {
-                hamon.learnHamonSkill(skill, false);
-            }
-        }
-        hamonPower.setEnergy(hamonPower.getMaxEnergy());
-        setPersistenceRequired();
     }
 
     @Override
@@ -59,13 +57,10 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser 
 
     @Override
     public ActionResultType mobInteract(PlayerEntity player, Hand hand) {
-        ItemStack itemStack = player.getItemInHand(hand);
-        if (itemStack.getItem() == Items.NAME_TAG) {
-            itemStack.interactLivingEntity(player, this, hand);
-        }
         if (hand == Hand.MAIN_HAND) {
-            HamonPowerType.interactWithHamonTeacher(level, player, this, 
-                    getPower().getTypeSpecificData(ModNonStandPowers.HAMON.get()).get());
+            getPower().getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
+                HamonPowerType.interactWithHamonTeacher(level, player, this, hamon);
+            });
         }
         return super.mobInteract(player, hand);
     }
@@ -94,11 +89,77 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser 
     // FIXME liquid walking
     @Override
     public boolean canStandOnFluid(Fluid fluid) {
-        return hamon.isSkillLearned(HamonSkill.LAVA_WALKING) || hamon.isSkillLearned(HamonSkill.WATER_WALKING) && fluid.is(FluidTags.WATER);
+        return hamonPower.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(hamon -> 
+        hamon.isSkillLearned(HamonSkill.LAVA_WALKING) || hamon.isSkillLearned(HamonSkill.WATER_WALKING) && fluid.is(FluidTags.WATER))
+                .orElse(false);
     }
 
     @Override
     protected void lavaHurt() {}
+    
+    @Override
+    public ILivingEntityData finalizeSpawn(IServerWorld world, DifficultyInstance difficulty, SpawnReason reason, 
+            @Nullable ILivingEntityData additionalData, @Nullable CompoundNBT nbt) {
+        addMasterHamon(hamonPower);
+        setPersistenceRequired();
+        
+        return super.finalizeSpawn(world, difficulty, reason, additionalData, nbt);
+    }
+    
+    @Deprecated
+    private void restoreHamon() {
+        if (iAmDumbForNotUsingFinalizeSpawn && !level.isClientSide()) {
+            addMasterHamon(hamonPower);
+            iAmDumbForNotUsingFinalizeSpawn = false; // i still am
+        }
+    }
+    
+    public void addMasterHamon(INonStandPower power) {
+        hamonPower.givePower(ModNonStandPowers.HAMON.get());
+        HamonData hamon = hamonPower.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
+        hamon.setBreathingLevel(HamonData.MAX_BREATHING_LEVEL);
+        hamon.setHamonStatPoints(HamonSkill.HamonStat.STRENGTH, HamonData.MAX_HAMON_POINTS, true, true);
+        hamon.setHamonStatPoints(HamonSkill.HamonStat.CONTROL, HamonData.MAX_HAMON_POINTS, true, true);
+        for (HamonSkill skill : HamonSkill.values()) {
+            if (skill.getTechnique() == null) {
+                hamon.learnHamonSkill(skill, false);
+            }
+        }
+        hamonPower.setEnergy(hamonPower.getMaxEnergy());
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundNBT nbt) {
+        super.addAdditionalSaveData(nbt);
+        nbt.put("HamonPower", hamonPower.writeNBT());
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundNBT nbt) {
+        super.readAdditionalSaveData(nbt);
+        if (nbt.contains("HamonPower", JojoModUtil.getNbtId(CompoundNBT.class))) {
+            hamonPower.readNBT(nbt.getCompound("HamonPower"));
+        }
+        if (hamonPower.getType() != ModNonStandPowers.HAMON.get()) {
+            iAmDumbForNotUsingFinalizeSpawn = true;
+        }
+    }
+
+    @Deprecated
+    @Override
+    public void writeSpawnData(PacketBuffer buffer) {
+        restoreHamon();
+    }
+
+    @Deprecated
+    @Override
+    public IPacket<?> getAddEntityPacket() {
+        return NetworkHooks.getEntitySpawningPacket(this);
+    }
+
+    @Deprecated
+    @Override
+    public void readSpawnData(PacketBuffer additionalData) {}
 
     @Override
     protected void registerGoals() {} // TODO Hamon Master ai

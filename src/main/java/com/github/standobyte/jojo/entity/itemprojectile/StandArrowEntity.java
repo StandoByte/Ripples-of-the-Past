@@ -1,6 +1,15 @@
 package com.github.standobyte.jojo.entity.itemprojectile;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
 
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.init.ModEntityTypes;
@@ -62,7 +71,7 @@ public class StandArrowEntity extends AbstractArrowEntity {
 
     @Override
     protected void doPostHurtEffects(LivingEntity target) {
-        if (!level.isClientSide()) {
+        if (!level.isClientSide() && target.isAlive()) {
             boolean gaveStand = StandArrowItem.onPiercedByArrow(target, arrowItem, level);
             if (getOwner() instanceof ServerPlayerEntity) {
                 ModCriteriaTriggers.STAND_ARROW_HIT.get().trigger((ServerPlayerEntity) getOwner(), this, target, gaveStand);
@@ -175,6 +184,14 @@ public class StandArrowEntity extends AbstractArrowEntity {
     }
 
     @Override
+    public void playerTouch(PlayerEntity player) {
+        Entity owner = this.getOwner();
+        if (entityData.get(LOYALTY) == 0 || owner == null || owner.getUUID() == player.getUUID()) {
+            super.playerTouch(player);
+        }
+    }
+
+    @Override
     public void tickDespawn() {
         if (pickup != AbstractArrowEntity.PickupStatus.ALLOWED || entityData.get(LOYALTY) <= 0) {
             super.tickDespawn();
@@ -201,5 +218,39 @@ public class StandArrowEntity extends AbstractArrowEntity {
     @Override
     public IPacket<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
+    }
+    
+    public static class EntityPierce {
+        private static final List<PierceBehavior> ARROW_PIERCE_BEHAVIOR = new ArrayList<>();
+        private static final Random RANDOM = new Random();
+        
+        public static void addBehavior(@Nonnull Supplier<Predicate<LivingEntity>> entityCheck, @Nonnull Supplier<Consumer<LivingEntity>> entityConverter) {
+            ARROW_PIERCE_BEHAVIOR.add(new PierceBehavior(entityCheck, entityConverter));
+        }
+        
+        public static boolean onArrowPierce(LivingEntity entity) {
+            List<Consumer<LivingEntity>> converters = 
+                    ARROW_PIERCE_BEHAVIOR.stream()
+                    .filter(behavior -> behavior.entityCheck.get().test(entity))
+                    .map(behavior -> behavior.entityConverter.get())
+                    .collect(Collectors.toCollection(ArrayList::new));
+            if (!converters.isEmpty()) {
+                converters.get(RANDOM.nextInt(converters.size())).accept(entity);
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        
+        private static class PierceBehavior {
+            private final Supplier<Predicate<LivingEntity>> entityCheck;
+            private final Supplier<Consumer<LivingEntity>> entityConverter;
+            
+            private PierceBehavior(@Nonnull Supplier<Predicate<LivingEntity>> entityCheck, @Nonnull Supplier<Consumer<LivingEntity>> entityConverter) {
+                this.entityCheck = entityCheck;
+                this.entityConverter = entityConverter;
+            }
+        }
     }
 }

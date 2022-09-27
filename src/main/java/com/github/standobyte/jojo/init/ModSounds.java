@@ -60,6 +60,9 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> KNIFE_HIT = SOUNDS.register("knife_hit",
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "knife_hit")));
+    
+    public static final RegistryObject<SoundEvent> WATER_SPLASH = SOUNDS.register("water_splash",
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "water_splash")));
 
 
     public static final RegistryObject<SoundEvent> VAMPIRE_BLOOD_DRAIN = SOUNDS.register("vampire_blood_drain",
@@ -68,7 +71,7 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> VAMPIRE_FREEZE = SOUNDS.register("vampire_freeze",
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "vampire_freeze")));
 
-    public static final RegistryObject<SoundEvent> VAMPIRE_DARK_AURA = SOUNDS.register("vampire_dark_aura",
+    public static final RegistryObject<SoundEvent> VAMPIRE_EVIL_ATMOSPHERE = SOUNDS.register("vampire_dark_aura",
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "vampire_dark_aura")));
 
     
@@ -214,20 +217,20 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> STAND_UNSUMMON_DEFAULT = SOUNDS.register("stand_unsummon_default", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_unsummon_default")));
 
-    public static final RegistryObject<SoundEvent> STAND_LIGHT_ATTACK = SOUNDS.register("stand_light_attack", 
-            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_light_attack")));
-
-    public static final RegistryObject<SoundEvent> STAND_STRONG_ATTACK = SOUNDS.register("stand_strong_attack", 
-            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_strong_attack")));
-
-    public static final RegistryObject<SoundEvent> STAND_BARRAGE_ATTACK = SOUNDS.register("stand_barrage_attack", 
-            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_barrage_attack")));
-
     public static final RegistryObject<SoundEvent> STAND_DAMAGE_BLOCK = SOUNDS.register("stand_damage_block", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_damage_block")));
+    
+    public static final RegistryObject<SoundEvent> STAND_PUNCH_LIGHT = SOUNDS.register("stand_punch_light", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_punch_light")));
+    
+    public static final RegistryObject<SoundEvent> STAND_PUNCH_HEAVY = SOUNDS.register("stand_punch_heavy", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_punch_heavy")));
 
     public static final RegistryObject<SoundEvent> STAND_PARRY = SOUNDS.register("stand_parry", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_parry")));
+
+    public static final RegistryObject<SoundEvent> STAND_LEAP = SOUNDS.register("stand_leap", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_leap")));
     
     
     public static final RegistryObject<SoundEvent> JOTARO_STAR_PLATINUM = SOUNDS.register("jotaro_star_platinum", 
@@ -281,6 +284,15 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> STAR_PLATINUM_TIME_STOP_BLINK = SOUNDS.register("star_platinum_time_stop_blink", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "star_platinum_time_stop_blink")));
     
+    public static final RegistryObject<SoundEvent> STAR_PLATINUM_PUNCH_LIGHT = SOUNDS.register("star_platinum_punch_light", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "star_platinum_punch_light")));
+
+    public static final RegistryObject<SoundEvent> STAR_PLATINUM_PUNCH_HEAVY = SOUNDS.register("star_platinum_punch_heavy", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "star_platinum_punch_heavy")));
+
+    public static final Supplier<SoundEvent> STAR_PLATINUM_PUNCH_BARRAGE = SOUNDS.register("star_platinum_punch_barrage", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "star_platinum_punch_barrage")));
+    
     public static final OstSoundList STAR_PLATINUM_OST = new OstSoundList(new ResourceLocation(JojoMod.MOD_ID, "star_platinum_ost"), SOUNDS);
 
     public static final RegistryObject<SoundEvent> KAKYOIN_HIEROPHANT_GREEN = SOUNDS.register("kakyoin_hierophant_green", 
@@ -294,6 +306,9 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> HIEROPHANT_GREEN_SUMMON = SOUNDS.register("hierophant_green_summon", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "hierophant_green_summon")));
+    
+    public static final RegistryObject<SoundEvent> HIEROPHANT_GREEN_TENTACLES = SOUNDS.register("hierophant_green_tentacles", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "hierophant_green_tentacles")));
     
     public static final RegistryObject<SoundEvent> HIEROPHANT_GREEN_EMERALD_SPLASH = SOUNDS.register("hierophant_green_emerald_splash", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "hierophant_green_emerald_splash")));
@@ -366,10 +381,31 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> THE_WORLD_TIME_STOP_BLINK = SOUNDS.register("the_world_time_stop_blink", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "the_world_time_stop_blink")));
 
+    public static final RegistryObject<SoundEvent> THE_WORLD_TIME_STOP_UNREVEALED = SOUNDS.register("the_world_time_stop_unrevealed", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "the_world_time_stop_unrevealed")));
+    
+    public static final RegistryObject<SoundEvent> THE_WORLD_PUNCH_LIGHT = SOUNDS.register("the_world_punch_light", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "the_world_punch_light")));
+
+    public static final RegistryObject<SoundEvent> THE_WORLD_PUNCH_HEAVY = SOUNDS.register("the_world_punch_heavy", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "the_world_punch_heavy")));
+
+    public static final RegistryObject<SoundEvent> THE_WORLD_PUNCH_HEAVY_ENTITY = SOUNDS.register("the_world_punch_heavy_entity", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "the_world_punch_heavy_entity")));
+
+    public static final RegistryObject<SoundEvent> THE_WORLD_PUNCH_HEAVY_TS_IMPACT = SOUNDS.register("the_world_punch_heavy_ts_impact", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "the_world_punch_heavy_ts_impact")));
+
+    public static final RegistryObject<SoundEvent> THE_WORLD_KICK_HEAVY = SOUNDS.register("the_world_kick_heavy", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "the_world_kick_heavy")));
+
+    public static final Supplier<SoundEvent> THE_WORLD_PUNCH_BARRAGE = THE_WORLD_PUNCH_LIGHT;
+
     public static final RegistryObject<SoundEvent> ROAD_ROLLER_HIT = SOUNDS.register("road_roller_hit", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "road_roller_hit")));
 
-    public static final RegistryObject<SoundEvent> ROAD_ROLLER_LAND = ROAD_ROLLER_HIT;
+    public static final RegistryObject<SoundEvent> ROAD_ROLLER_LAND = SOUNDS.register("road_roller_land", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "road_roller_land")));
     
     public static final OstSoundList THE_WORLD_OST = new OstSoundList(new ResourceLocation(JojoMod.MOD_ID, "the_world_ost"), SOUNDS);
 
@@ -387,6 +423,18 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> SILVER_CHARIOT_UNSUMMON = SOUNDS.register("silver_chariot_unsummon",
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "silver_chariot_unsummon")));
+
+    public static final RegistryObject<SoundEvent> SILVER_CHARIOT_SWEEP_LIGHT = SOUNDS.register("silver_chariot_sweep_light", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "silver_chariot_sweep_light")));
+
+    public static final RegistryObject<SoundEvent> SILVER_CHARIOT_BARRAGE = SOUNDS.register("silver_chariot_barrage", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "silver_chariot_barrage")));
+
+    public static final RegistryObject<SoundEvent> SILVER_CHARIOT_DASH = SOUNDS.register("silver_chariot_dash", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "silver_chariot_dash")));
+
+    public static final RegistryObject<SoundEvent> SILVER_CHARIOT_SWEEP_HEAVY = SOUNDS.register("silver_chariot_sweep_heavy", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "silver_chariot_sweep_heavy")));
 
     public static final RegistryObject<SoundEvent> SILVER_CHARIOT_BLOCK = SOUNDS.register("silver_chariot_block", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "silver_chariot_block")));
@@ -426,5 +474,63 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> MAGICIANS_RED_RED_BIND = MAGICIANS_RED_FIRE_BLAST;
     
+    public static final RegistryObject<SoundEvent> MAGICIANS_RED_PUNCH_LIGHT = SOUNDS.register("magicians_red_punch_light", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "magicians_red_punch_light")));
+
+    public static final RegistryObject<SoundEvent> MAGICIANS_RED_PUNCH_HEAVY = SOUNDS.register("magicians_red_punch_heavy", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "magicians_red_punch_heavy")));
+
+    public static final RegistryObject<SoundEvent> MAGICIANS_RED_KICK_HEAVY = SOUNDS.register("magicians_red_kick_heavy", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "magicians_red_kick_heavy")));
+    
     public static final OstSoundList MAGICIANS_RED_OST = new OstSoundList(new ResourceLocation(JojoMod.MOD_ID, "magicians_red_ost"), SOUNDS);
+
+    public static final RegistryObject<SoundEvent> JOSUKE_CRAZY_DIAMOND = SOUNDS.register("josuke_crazy_diamond", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "josuke_crazy_diamond")));
+
+    public static final RegistryObject<SoundEvent> JOSUKE_FIX = SOUNDS.register("josuke_fix", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "josuke_fix")));
+
+    public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_SUMMON = SOUNDS.register("crazy_diamond_summon", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_summon")));
+    
+    public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_UNSUMMON = SOUNDS.register("crazy_diamond_unsummon", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_unsummon")));
+    
+    public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_PUNCH_LIGHT = SOUNDS.register("crazy_diamond_punch_light", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_punch_light")));
+
+    public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_PUNCH_HEAVY = SOUNDS.register("crazy_diamond_punch_heavy", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_punch_heavy")));
+
+    public static final Supplier<SoundEvent> CRAZY_DIAMOND_PUNCH_BARRAGE = CRAZY_DIAMOND_PUNCH_LIGHT;
+    
+    public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_DORA = SOUNDS.register("crazy_diamond_dora", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_dora")));
+    
+    public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_DORA_LONG = SOUNDS.register("crazy_diamond_dora_long", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_dora_long")));
+    
+    public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_DORARARA = SOUNDS.register("crazy_diamond_dorarara", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_dorarara")));
+    
+    public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_FIX_STARTED = SOUNDS.register("crazy_diamond_fix_started", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_fix_started")));
+    
+    public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_FIX_LOOP = SOUNDS.register("crazy_diamond_fix_loop", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_fix_loop")));
+    
+    public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_FIX_ENDED = SOUNDS.register("crazy_diamond_fix_ended", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_fix_ended")));
+    
+    public static final RegistryObject<SoundEvent> BLOOD_CUTTER_SPLASH = SOUNDS.register("blood_cutter_splash", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "blood_cutter_splash")));
+    
+    public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_BULLET_SHOT = SOUNDS.register("crazy_diamond_bullet_shot", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_bullet_shot")));
+    
+    public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_BLOOD_CUTTER_SHOT = SOUNDS.register("crazy_diamond_blood_cutter_shot", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_blood_cutter_shot")));
+    
+    public static final OstSoundList CRAZY_DIAMOND_OST = new OstSoundList(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_ost"), SOUNDS);
 }

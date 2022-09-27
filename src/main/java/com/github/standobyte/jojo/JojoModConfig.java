@@ -44,6 +44,7 @@ public class JojoModConfig {
         public final ForgeConfigSpec.BooleanValue keepStandOnDeath;
         public final ForgeConfigSpec.BooleanValue keepHamonOnDeath;
         public final ForgeConfigSpec.BooleanValue keepVampirismOnDeath;
+        public final ForgeConfigSpec.BooleanValue dropStandDisc;
         
         public final ForgeConfigSpec.BooleanValue hamonTempleSpawn;
         public final ForgeConfigSpec.BooleanValue meteoriteSpawn;
@@ -57,6 +58,7 @@ public class JojoModConfig {
         public final ForgeConfigSpec.ConfigValue<List<? extends Double>> bloodDrainMultiplier;
         public final ForgeConfigSpec.ConfigValue<List<? extends Double>> bloodTickDown;
         public final ForgeConfigSpec.ConfigValue<List<? extends Double>> bloodHealCost;
+        public final ForgeConfigSpec.BooleanValue undeadMobsSunDamage;
 
         public final ForgeConfigSpec.BooleanValue prioritizeLeastTakenStands;
         public final ForgeConfigSpec.BooleanValue standTiers;
@@ -71,31 +73,32 @@ public class JojoModConfig {
         public final ForgeConfigSpec.DoubleValue standDamageMultiplier;
         public final ForgeConfigSpec.BooleanValue skipStandProgression;
         public final ForgeConfigSpec.BooleanValue standStamina;
-        public final ForgeConfigSpec.BooleanValue dropStandDisc;
-        public final ForgeConfigSpec.ConfigValue<List<? extends Double>> resolvePoints;
+        public final ForgeConfigSpec.ConfigValue<List<? extends Double>> resolveLvlPoints;
         public final ForgeConfigSpec.BooleanValue soulAscension;
         public final ForgeConfigSpec.IntValue timeStopChunkRange;
         public final ForgeConfigSpec.DoubleValue timeStopDamageMultiplier;
 
         public final ForgeConfigSpec.DoubleValue hamonDamageMultiplier;
+        public final ForgeConfigSpec.BooleanValue endermenBeyondTimeSpace;
+        public final ForgeConfigSpec.BooleanValue saveDestroyedBlocks;
         
         private Common(ForgeConfigSpec.Builder builder) {
             builder.push("Keep Powers After Death");
                 keepHamonOnDeath = builder
                         .translation("jojo.config.keepHamonOnDeath")
-                        .define("keepHamonOnDeath", false);
+                        .define("keepHamonOnDeath", true);
                 
                 keepVampirismOnDeath = builder
                 		.comment("    The weak vampirism version from the 'Blood Gift' ability will not be kept.")
                         .translation("jojo.config.keepVampirismOnDeath")
-                        .define("keepVampirismOnDeath", false);
+                        .define("keepVampirismOnDeath", true);
                 
                 keepStandOnDeath = builder
                         .translation("jojo.config.keepStandOnDeath") 
-                        .define("keepStandOnDeath", false);
+                        .define("keepStandOnDeath", true);
             
                 dropStandDisc = builder
-                        .comment("    If enabled, Stand users who got their Stand from a Disc drop their Stand Disc upon death.", 
+                        .comment("    If enabled, Stand users drop their Stand's Disc upon death.", 
                         		 "    Works only when keepStandOnDeath is set to false.")
                         .translation("jojo.config.dropStandDisc")
                         .define("dropStandDisc", false);
@@ -152,6 +155,11 @@ public class JojoModConfig {
                         .comment("    Vampire energy cost per 1 hp of healing on each difficulty level.")
                         .translation("jojo.config.bloodHealCost")
                         .defineList("bloodHealCost", Arrays.asList(10D, 4D, 2D, 1D), e -> isElementNonNegativeFloat(e, false));
+                
+                undeadMobsSunDamage = builder
+                        .comment("    Whether or not undead mobs take damage under the sun similarly to vampires.")
+                        .translation("jojo.config.undeadMobsSunDamage")
+                        .define("undeadMobsSunDamage", false);
             builder.pop();
             
             builder.comment(" Settings of Stand Arrow and the Stands pool.").push("Stand Arrow");
@@ -194,12 +202,12 @@ public class JojoModConfig {
 	                        .translation("jojo.config.skipStandProgression")
 	                        .define("skipStandProgression", false);
 	                
-	                resolvePoints = builder
+	                resolveLvlPoints = builder
 	                        .comment("    Max resolve points at each Resolve level (starting from 0).", 
 	                                 "    Decrease these values to make getting to each level easier.", 
 	                                 "    All values must be higher than 0.")
 	                        .translation("jojo.config.resolvePoints")
-	                        .defineList("resolvePoints", Arrays.asList(ResolveCounter.DEFAULT_MAX_RESOLVE_VALUES), e -> isElementNonNegativeFloat(e, true));
+	                        .defineList("resolveLvlPoints", Arrays.asList(ResolveCounter.DEFAULT_MAX_RESOLVE_VALUES), e -> isElementNonNegativeFloat(e, true));
 	            builder.pop();
 
             	builder.push("Time Stop");
@@ -240,6 +248,17 @@ public class JojoModConfig {
                     .comment("    Damage multiplier applied to all Hamon attacks.")
                     .translation("jojo.config.hamonDamageMultiplier")
                     .defineInRange("hamonDamageMultiplier", 1.0, 0.0, 128.0);
+            
+            saveDestroyedBlocks = builder
+                    .comment("    Whether or not blocks which can be restored by Crazy Diamond's terrain restoration ability are saved in the save files.", 
+                             "     It may cause longer saving & loading time for larger worlds.")
+                    .translation("jojo.config.saveDestroyedBlocks")
+                    .define("saveDestroyedBlocks", false);
+            
+            endermenBeyondTimeSpace = builder
+                    .comment("    Disable this if you're boring.")
+                    .translation("jojo.config.endermenBeyondTimeSpace")
+                    .define("endermenBeyondTimeSpace", true);
         }
         
         public boolean isConfigLoaded() {
@@ -286,6 +305,8 @@ public class JojoModConfig {
         }
         
         public boolean isStandBanned(StandType<?> stand) {
+            // FIXME (!!!) temporary
+            if (stand == ModStandTypes.BOY_II_MAN.get()) return true;
             return bannedStandsResLocs.contains(stand.getRegistryName());
         }
         
@@ -328,6 +349,7 @@ public class JojoModConfig {
             private final int timeStopChunkRange;
 
 //            private final double hamonDamageMultiplier;
+            private final boolean endermenBeyondTimeSpace;
             
             public SyncedValues(PacketBuffer buf) {
 //                hamonPointsMultiplier = buf.readDouble();
@@ -356,6 +378,7 @@ public class JojoModConfig {
                 standStamina =                      (flags[1] & 8) > 0;
                 dropStandDisc =                     (flags[1] & 16) > 0;
                 soulAscension =                     (flags[1] & 32) > 0;
+                endermenBeyondTimeSpace =           (flags[1] & 64) > 0;
             }
 
             public void writeToBuf(PacketBuffer buf) {
@@ -385,6 +408,7 @@ public class JojoModConfig {
                 if (standStamina)                       flags[1] |= 8;
                 if (dropStandDisc)                      flags[1] |= 16;
                 if (soulAscension)                      flags[1] |= 32;
+                if (endermenBeyondTimeSpace)            flags[1] |= 64;
                 buf.writeByteArray(flags);
             }
 
@@ -392,6 +416,7 @@ public class JojoModConfig {
                 keepStandOnDeath = config.keepStandOnDeath.get();
                 keepHamonOnDeath = config.keepHamonOnDeath.get();
                 keepVampirismOnDeath = config.keepVampirismOnDeath.get();
+                dropStandDisc = config.dropStandDisc.get();
                 hamonTempleSpawn = config.hamonTempleSpawn.get();
                 meteoriteSpawn = config.meteoriteSpawn.get();
                 pillarManTempleSpawn = config.pillarManTempleSpawn.get();
@@ -412,16 +437,17 @@ public class JojoModConfig {
 //                standDamageMultiplier = config.standDamageMultiplier.get()
                 skipStandProgression = config.skipStandProgression.get();
                 standStamina = config.standStamina.get();
-                dropStandDisc = config.dropStandDisc.get();
-                resolvePoints = Floats.toArray(config.resolvePoints.get());
+                resolvePoints = Floats.toArray(config.resolveLvlPoints.get());
                 soulAscension = config.soulAscension.get();
                 timeStopChunkRange = config.timeStopChunkRange.get();
+                endermenBeyondTimeSpace = config.endermenBeyondTimeSpace.get();
             }
             
             public void changeConfigValues() {
                 COMMON_SYNCED_TO_CLIENT.keepStandOnDeath.set(keepStandOnDeath);
                 COMMON_SYNCED_TO_CLIENT.keepHamonOnDeath.set(keepHamonOnDeath);
                 COMMON_SYNCED_TO_CLIENT.keepVampirismOnDeath.set(keepVampirismOnDeath);
+                COMMON_SYNCED_TO_CLIENT.dropStandDisc.set(dropStandDisc);
                 COMMON_SYNCED_TO_CLIENT.hamonTempleSpawn.set(hamonTempleSpawn);
                 COMMON_SYNCED_TO_CLIENT.meteoriteSpawn.set(meteoriteSpawn);
                 COMMON_SYNCED_TO_CLIENT.pillarManTempleSpawn.set(pillarManTempleSpawn);
@@ -440,10 +466,10 @@ public class JojoModConfig {
 //                COMMON_SYNCED_TO_CLIENT.standDamageMultiplier.set(standDamageMultiplier);
                 COMMON_SYNCED_TO_CLIENT.skipStandProgression.set(skipStandProgression);
                 COMMON_SYNCED_TO_CLIENT.standStamina.set(standStamina);
-                COMMON_SYNCED_TO_CLIENT.dropStandDisc.set(dropStandDisc);
-                COMMON_SYNCED_TO_CLIENT.resolvePoints.set(Floats.asList(resolvePoints).stream().map(Float::doubleValue).collect(Collectors.toList()));
+                COMMON_SYNCED_TO_CLIENT.resolveLvlPoints.set(Floats.asList(resolvePoints).stream().map(Float::doubleValue).collect(Collectors.toList()));
                 COMMON_SYNCED_TO_CLIENT.soulAscension.set(soulAscension);
                 COMMON_SYNCED_TO_CLIENT.timeStopChunkRange.set(timeStopChunkRange);
+                COMMON_SYNCED_TO_CLIENT.endermenBeyondTimeSpace.set(endermenBeyondTimeSpace);
                 
                 COMMON_SYNCED_TO_CLIENT.onLoadOrReload();
             }
@@ -452,6 +478,7 @@ public class JojoModConfig {
                 COMMON_SYNCED_TO_CLIENT.keepStandOnDeath.clearCache();
                 COMMON_SYNCED_TO_CLIENT.keepHamonOnDeath.clearCache();
                 COMMON_SYNCED_TO_CLIENT.keepVampirismOnDeath.clearCache();
+                COMMON_SYNCED_TO_CLIENT.dropStandDisc.clearCache();
                 COMMON_SYNCED_TO_CLIENT.hamonTempleSpawn.clearCache();
                 COMMON_SYNCED_TO_CLIENT.meteoriteSpawn.clearCache();
                 COMMON_SYNCED_TO_CLIENT.pillarManTempleSpawn.clearCache();
@@ -470,10 +497,10 @@ public class JojoModConfig {
 //                COMMON_SYNCED_TO_CLIENT.standDamageMultiplier.clearCache();
                 COMMON_SYNCED_TO_CLIENT.skipStandProgression.clearCache();
                 COMMON_SYNCED_TO_CLIENT.standStamina.clearCache();
-                COMMON_SYNCED_TO_CLIENT.dropStandDisc.clearCache();
-                COMMON_SYNCED_TO_CLIENT.resolvePoints.clearCache();
+                COMMON_SYNCED_TO_CLIENT.resolveLvlPoints.clearCache();
                 COMMON_SYNCED_TO_CLIENT.soulAscension.clearCache();
                 COMMON_SYNCED_TO_CLIENT.timeStopChunkRange.clearCache();
+                COMMON_SYNCED_TO_CLIENT.endermenBeyondTimeSpace.clearCache();
                 
                 COMMON_SYNCED_TO_CLIENT.onLoadOrReload();
             }

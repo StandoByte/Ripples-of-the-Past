@@ -1,7 +1,10 @@
 package com.github.standobyte.jojo.entity.stand;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -9,13 +12,18 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
-import com.github.standobyte.jojo.action.actions.StandEntityAction;
+import com.github.standobyte.jojo.action.stand.IStandPhasedAction;
+import com.github.standobyte.jojo.action.stand.StandEntityAction;
+import com.github.standobyte.jojo.action.stand.StandEntityActionModifier;
 import com.github.standobyte.jojo.init.ModActions;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.network.NetworkUtil;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.TrStandTaskModifierPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.StacksTHC;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.IDataSerializer;
 import net.minecraftforge.registries.DataSerializerEntry;
@@ -29,37 +37,33 @@ public class StandEntityTask {
     private int ticksLeft;
     @Nonnull
     private StandEntityAction.Phase phase;
+    private Set<StandEntityActionModifier> taskModifiers = new HashSet<>();
     @Nullable
-    private StandRelativeOffset offsetFromUser;
+    private StandRelativeOffset offsetFromUserOverride;
     private StacksTHC additionalData = new StacksTHC();
     
     private StandEntityTask(StandEntityAction action, int ticks, 
-            StandEntityAction.Phase phase, boolean armsOnlyMode, ActionTarget target, 
-            StandRelativeOffset offset) {
+            StandEntityAction.Phase phase, boolean armsOnlyMode, ActionTarget target) {
         this.action = action;
         this.startingTicks = Math.max(ticks, 1);
         this.ticksLeft = this.startingTicks;
         this.phase = phase;
-        this.offsetFromUser = offset;
         this.target = target;
     }
     
     static StandEntityTask makeServerSideTask(StandEntity standEntity, IStandPower standPower, StandEntityAction action, int ticks, 
             StandEntityAction.Phase phase, boolean armsOnlyMode, ActionTarget target) {
-        StandRelativeOffset offset = standEntity.hasEffect(ModEffects.STUN.get()) || !standEntity.hasUser() ? 
-                null
-                : action.getOffsetFromUser(standPower, standEntity, target);
-        if (!canTarget(standEntity, target, standPower, action)) {
+        if (!keepTarget(standEntity, target, standPower, action)) {
             target = ActionTarget.EMPTY;
         }
         
-        StandEntityTask task = new StandEntityTask(action, ticks, phase, armsOnlyMode, target, offset);
+        StandEntityTask task = new StandEntityTask(action, ticks, phase, armsOnlyMode, target);
         
         return task;
     }
     
-    boolean setTarget(StandEntity standEntity, ActionTarget target, IStandPower standPower, boolean targetCheck) {
-        if (!targetCheck || canTarget(standEntity, target, standPower, action)) {
+    boolean setTarget(StandEntity standEntity, ActionTarget target, IStandPower standPower) {
+        if (keepTarget(standEntity, target, standPower, action)) {
             boolean targetChanged = !target.sameTarget(this.target);
             this.target = target;
             return targetChanged;
@@ -67,8 +71,27 @@ public class StandEntityTask {
         return false;
     }
 
-    private static boolean canTarget(StandEntity standEntity, ActionTarget target, IStandPower standPower, StandEntityAction action) {
-        return action.canStandKeepTarget(target, standEntity, standPower);
+    private static boolean keepTarget(StandEntity standEntity, ActionTarget target, IStandPower standPower, StandEntityAction action) {
+        if (target.getType() == TargetType.EMPTY || standEntity.level.isClientSide()) return true;
+        if (target.getType() == TargetType.ENTITY) {
+            Entity targetEntity = target.getEntity();
+            if (targetEntity == null || targetEntity.is(standEntity)
+                    || !targetEntity.isAlive() && targetEntity.removed || !(targetEntity instanceof LivingEntity && ((LivingEntity) targetEntity).deathTime < 20)) {
+                return false;
+            }
+        }
+        return action.checkRangeAndTarget(target, standPower.getUser(), standPower).isPositive();
+    }
+    
+    public void addModifierAction(StandEntityActionModifier action, StandEntity standEntity) {
+        taskModifiers.add(action);
+        if (!standEntity.level.isClientSide()) {
+            PacketManager.sendToClientsTracking(new TrStandTaskModifierPacket(standEntity.getId(), action), standEntity);
+        }
+    }
+    
+    public Stream<StandEntityActionModifier> getModifierActions() {
+        return taskModifiers.stream();
     }
     
     void tick(IStandPower standPower, StandEntity standEntity) {
@@ -80,13 +103,22 @@ public class StandEntityTask {
 //                setTarget(ActionTarget.EMPTY);
 //            }
 //        }
-        if (!standEntity.level.isClientSide() && target.getType() == TargetType.ENTITY) {
-            Entity targetEntity = target.getEntity();
-            if (targetEntity == null || !targetEntity.isAlive() || targetEntity.is(standEntity)) {
+        if (!standEntity.level.isClientSide()) {
+            if (!keepTarget(standEntity, target, standPower, action)) {
                 standEntity.setTaskTarget(ActionTarget.EMPTY);
             }
         }
         
+        tickAction(standPower, standEntity, action);
+        taskModifiers.forEach(modifier -> tickAction(standPower, standEntity, modifier));
+        
+        ticksLeft--;
+        if (ticksLeft <= 0 && phase != StandEntityAction.Phase.BUTTON_HOLD) {
+            moveToPhase(phase.getNextPhase(), standPower, standEntity);
+        }
+    }
+    
+    private void tickAction(IStandPower standPower, StandEntity standEntity, IStandPhasedAction action) {
         int phaseTicks = startingTicks - ticksLeft;
         switch (phase) {
         case BUTTON_HOLD:
@@ -96,31 +128,29 @@ public class StandEntityTask {
             action.standTickWindup(standEntity.level, standEntity, standPower, this);
             break;
         case PERFORM:
-            if (phaseTicks == 0) {
-            	action.standPerform(standEntity.level, standEntity, standPower, this);
+            if (phaseTicks == 0 && action.standCanPerform(standEntity.level, standEntity, standPower, this)) {
+                action.standPerform(standEntity.level, standEntity, standPower, this);
                 if (!standEntity.level.isClientSide()) {
-                	standPower.consumeStamina(action.getStaminaCost(standPower));
+                    standPower.consumeStamina(action.getStaminaCost(standPower));
                 }
             }
-            
-            action.standTickPerform(standEntity.level, standEntity, standPower, this);
-            if (!standEntity.level.isClientSide()) {
-            	standPower.consumeStamina(action.getStaminaCostTicking(standPower));
+
+            if (action.standCanTickPerform(standEntity.level, standEntity, standPower, this)) {
+                action.standTickPerform(standEntity.level, standEntity, standPower, this);
+                if (!standEntity.level.isClientSide()) {
+                    standPower.consumeStamina(action.getStaminaCostTicking(standPower));
+                }
             }
             break;
         case RECOVERY:
             action.standTickRecovery(standEntity.level, standEntity, standPower, this);
             break;
         }
-        
-        ticksLeft--;
-        if (ticksLeft <= 0 && phase != StandEntityAction.Phase.BUTTON_HOLD) {
-            moveToPhase(phase.getNextPhase(), standPower, standEntity);
-        }
     }
 
     public void moveToPhase(@Nullable StandEntityAction.Phase phase, IStandPower standPower, StandEntity standEntity) {
         if (phase == null) {
+            phaseTransition(standEntity, standPower, this.phase, null, 0);
             standEntity.stopTask();
             return;
         }
@@ -141,13 +171,21 @@ public class StandEntityTask {
         default:
             return;
         }
+        StandEntityAction.Phase prevPhase = this.phase;
         if (setPhase(phase, ticks)) {
             action.playSound(standEntity, standPower, phase, this);
-            action.onPhaseSet(standEntity.level, standEntity, standPower, phase, this, ticks);
+            phaseTransition(standEntity, standPower, prevPhase, phase, ticks);
         }
         else {
             moveToPhase(phase.getNextPhase(), standPower, standEntity);
         }
+    }
+    
+    public void phaseTransition(StandEntity standEntity, IStandPower standPower, 
+            StandEntityAction.Phase prevPhase, StandEntityAction.Phase nextPhase, int nextPhaseTicks) {
+        action.barrageVisualsPhaseTransition(standEntity.level, standEntity, standPower, nextPhase, this);
+        action.phaseTransition(standEntity.level, standEntity, standPower, prevPhase, nextPhase, this, nextPhaseTicks);
+        taskModifiers.forEach(modifier -> modifier.phaseTransition(standEntity.level, standEntity, standPower, prevPhase, nextPhase, this, nextPhaseTicks));
     }
     
     private boolean setPhase(StandEntityAction.Phase phase, int ticks) {
@@ -164,12 +202,15 @@ public class StandEntityTask {
         this.startingTicks += ticks;
     }
     
-    boolean rotateStand(StandEntity standEntity, boolean limitBySpeed) {
+    void rotateStand(StandEntity standEntity) {
         if (target.getType() != TargetType.EMPTY && !standEntity.isManuallyControlled()) {
-    		standEntity.rotateTowards(target, limitBySpeed);
-    		return true;
+            action.rotateStandTowardsTarget(standEntity, target, this);
         }
-        return false;
+        else {
+            action.rotateStand(standEntity, this);
+//            standEntity.yBodyRot = standEntity.yHeadRot;
+//            standEntity.yBodyRotO = standEntity.yHeadRotO;
+        }
     }
     
     public StandEntityAction getAction() {
@@ -188,7 +229,7 @@ public class StandEntityTask {
     	return startingTicks - ticksLeft;
     }
     
-    public float getTaskCompletion(float partialTick) {
+    public float getPhaseCompletion(float partialTick) {
         return Math.min(1F - ((float) ticksLeft - partialTick) / (float) startingTicks, 1F);
     }
     
@@ -200,13 +241,13 @@ public class StandEntityTask {
     	return target;
     }
     
-    public void setOffsetFromUser(StandRelativeOffset offset) {
-        this.offsetFromUser = offset;
+    public void overrideOffsetFromUser(StandRelativeOffset offset) {
+        this.offsetFromUserOverride = offset;
     }
     
     @Nullable
-    public StandRelativeOffset getOffsetFromUser() {
-        return offsetFromUser;
+    public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity) {
+        return offsetFromUserOverride != null ? offsetFromUserOverride : action.getOffsetFromUser(standPower, standEntity, this);
     }
     
     
@@ -234,10 +275,14 @@ public class StandEntityTask {
                 
                 task.target.writeToBuf(buf);
                 
-                buf.writeBoolean(task.offsetFromUser != null);
-                if (task.offsetFromUser != null) {
-                    task.offsetFromUser.writeToBuf(buf);
+                buf.writeBoolean(task.offsetFromUserOverride != null);
+                if (task.offsetFromUserOverride != null) {
+                    task.offsetFromUserOverride.writeToBuf(buf);
                 }
+                
+                NetworkUtil.writeCollection(buf, task.taskModifiers, (buffer, action) -> buffer.writeRegistryId(action), false);
+                
+                task.action.taskWriteAdditional(task, buf);
             }
         }
 
@@ -251,18 +296,28 @@ public class StandEntityTask {
             if (!(action instanceof StandEntityAction)) {
                 return Optional.empty();
             }
+            StandEntityAction standAction = (StandEntityAction) action;
             
             int ticks = buf.readVarInt();
             StandEntityAction.Phase phase = buf.readEnum(StandEntityAction.Phase.class);
             
             ActionTarget target = ActionTarget.readFromBuf(buf);
             
-            StandRelativeOffset offset = null;
+            StandEntityTask task = new StandEntityTask(standAction, ticks, phase, false, target);
+            
             if (buf.readBoolean()) {
-                offset = StandRelativeOffset.readFromBuf(buf);
+                StandRelativeOffset offset = StandRelativeOffset.readFromBuf(buf);
+                task.overrideOffsetFromUser(offset);
             }
             
-            StandEntityTask task = new StandEntityTask((StandEntityAction) action, ticks, phase, false, target, offset);
+            NetworkUtil.readCollection(buf, buffer -> buffer.readRegistryIdSafe(Action.class)).forEach(modifier -> {
+                if (modifier instanceof StandEntityActionModifier) {
+                    task.taskModifiers.add((StandEntityActionModifier) modifier);
+                }
+            });
+            
+            standAction.taskReadAdditional(task, buf);
+            
             return Optional.of(task);
         }
 
@@ -270,9 +325,13 @@ public class StandEntityTask {
         public Optional<StandEntityTask> copy(Optional<StandEntityTask> value) {
             if (value.isPresent()) {
                 StandEntityTask task = value.get();
-                StandEntityTask taskNew = new StandEntityTask(task.action, task.startingTicks, task.phase, false, task.target, task.offsetFromUser);
+                StandEntityTask taskNew = new StandEntityTask(task.action, task.startingTicks, task.phase, false, task.target.copy());
+                taskNew.offsetFromUserOverride = task.offsetFromUserOverride;
                 taskNew.ticksLeft = task.ticksLeft;
-                taskNew.offsetFromUser = task.offsetFromUser;
+                taskNew.offsetFromUserOverride = task.offsetFromUserOverride;
+                taskNew.taskModifiers = task.taskModifiers;
+                task.action.taskCopyAdditional(taskNew, task);
+                
                 return Optional.of(taskNew);
             }
             return Optional.empty();

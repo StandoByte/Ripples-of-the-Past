@@ -5,16 +5,17 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import com.github.standobyte.jojo.action.actions.StandAction;
-import com.github.standobyte.jojo.action.actions.StandEntityHeavyAttack;
-import com.github.standobyte.jojo.action.actions.StandEntityLightAttack;
-import com.github.standobyte.jojo.action.actions.StandEntityMeleeBarrage;
+import com.github.standobyte.jojo.action.stand.StandAction;
+import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack;
+import com.github.standobyte.jojo.action.stand.StandEntityLightAttack;
+import com.github.standobyte.jojo.action.stand.StandEntityMeleeBarrage;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
@@ -22,9 +23,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.Effects;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent;
 
 public class EntityStandType<T extends StandStats> extends StandType<T> {
     private final Supplier<? extends StandEntityType<? extends StandEntity>> entityTypeSupplier;
@@ -119,10 +120,10 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
 
     @Override
     public boolean summon(LivingEntity user, IStandPower standPower, boolean withoutNameVoiceLine) {
-        return summon(user, standPower, entity -> {}, withoutNameVoiceLine);
+        return summon(user, standPower, entity -> {}, withoutNameVoiceLine, true);
     }
 
-    public boolean summon(LivingEntity user, IStandPower standPower, Consumer<StandEntity> beforeTheSummon, boolean withoutNameVoiceLine) {
+    public boolean summon(LivingEntity user, IStandPower standPower, Consumer<StandEntity> beforeTheSummon, boolean withoutNameVoiceLine, boolean addToWorld) {
         if (!super.summon(user, standPower, withoutNameVoiceLine)) {
             return false;
         }
@@ -131,7 +132,10 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
             standEntity.copyPosition(user);
             standPower.setStandManifestation(standEntity);
             beforeTheSummon.accept(standEntity);
-            user.level.addFreshEntity(standEntity);
+            
+            if (addToWorld) {
+                finalizeStandSummonFromAction(user, standPower, standEntity, true);
+            }
             
             List<Effect> effectsToCopy = standEntity.getEffectsSharedToStand();
             for (Effect effect : effectsToCopy) {
@@ -140,14 +144,22 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
                     standEntity.addEffect(new EffectInstance(userEffectInstance));
                 }
             }
-            
-            standEntity.playStandSummonSound();
-            
-            PacketManager.sendToClientsTrackingAndSelf(new TrSetStandEntityPacket(user.getId(), standEntity.getId()), user);
-            
-            triggerAdvancement(standPower, standPower.getStandManifestation());
         }
         return true;
+    }
+    
+    public void finalizeStandSummonFromAction(LivingEntity user, IStandPower standPower, StandEntity standEntity, boolean addToWorld) {
+        if (!user.level.isClientSide() && !standEntity.isAddedToWorld()) {
+            if (addToWorld) {
+                user.level.addFreshEntity(standEntity);
+                standEntity.playStandSummonSound();
+                PacketManager.sendToClientsTrackingAndSelf(new TrSetStandEntityPacket(user.getId(), standEntity.getId()), user);
+                triggerAdvancement(standPower, standPower.getStandManifestation());
+            }
+            else {
+                forceUnsummon(user, standPower);
+            }
+        }
     }
     
     protected void triggerAdvancement(IStandPower standPower, IStandManifestation stand) {
@@ -183,6 +195,11 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
             }
         }
     }
+    
+    @Override
+    public boolean canBeManuallyControlled() {
+        return true;
+    }
 
     @Override
     public void tickUser(LivingEntity user, IStandPower power) {
@@ -194,17 +211,38 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
                 forceUnsummon(user, power);
             }
         }
+        if (!user.level.isClientSide()) {
+            power.getStandInstance().ifPresent(standInstance -> {
+                if (!standInstance.hasPart(StandPart.ARMS)) {
+                    user.addEffect(new EffectInstance(Effects.WEAKNESS, 300, 1));
+                    user.addEffect(new EffectInstance(Effects.DIG_SLOWDOWN, 300, 1));
+                }
+                if (!standInstance.hasPart(StandPart.LEGS)) {
+                    user.addEffect(new EffectInstance(Effects.MOVEMENT_SLOWDOWN, 300, 1));
+                }
+            });
+        }
     }
     
 
     
-    public static void giveSharedEffectsFromUser(PotionAddedEvent event) {
-        IStandPower.getStandPowerOptional(event.getEntityLiving()).ifPresent(power -> {
+    public static void giveEffectSharedWithStand(LivingEntity user, EffectInstance effectInstance) {
+        IStandPower.getStandPowerOptional(user).ifPresent(power -> {
             if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
-                EffectInstance effectInstance = event.getPotionEffect();
                 StandEntity stand = (StandEntity) power.getStandManifestation();
                 if (stand.getEffectsSharedToStand().contains(effectInstance.getEffect())) {
                     stand.addEffect(new EffectInstance(effectInstance));
+                }
+            }
+        });
+    }
+    
+    public static void removeEffectSharedWithStand(LivingEntity user, Effect effect) {
+        IStandPower.getStandPowerOptional(user).ifPresent(power -> {
+            if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
+                StandEntity stand = (StandEntity) power.getStandManifestation();
+                if (stand.getEffectsSharedToStand().contains(effect)) {
+                    stand.removeEffect(effect);
                 }
             }
         });

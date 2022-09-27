@@ -16,11 +16,14 @@ import net.minecraft.entity.ai.goal.PrioritizedGoal;
 import net.minecraft.entity.ai.goal.TargetGoal;
 import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.inventory.container.WorkbenchContainer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.gen.FlatGenerationSettings;
@@ -127,5 +130,30 @@ public class CommonReflection {
     
     public static void setLerpSteps(LivingEntity entity, int steps) {
         ReflectionUtil.setFieldValue(LIVING_ENTITY_LERP_STEPS, entity, steps);
+    }
+    
+    
+    
+    private static final Field FIREWORK_ROCKET_ENTITY_LIFETIME = ObfuscationReflectionHelper.findField(FireworkRocketEntity.class, "field_92055_b");
+    public static void setLifetime(FireworkRocketEntity entity, int ticks) {
+        ReflectionUtil.setFieldValue(FIREWORK_ROCKET_ENTITY_LIFETIME, entity, ticks);
+    }
+    
+    private static final Field FIREWORK_ROCKET_ENTITY_DATA_ID_FIREWORKS_ITEM_FIELD = ObfuscationReflectionHelper.findField(FireworkRocketEntity.class, "field_184566_a");
+    private static DataParameter<ItemStack> FIREWORK_ROCKET_ENTITY_DATA_ID_FIREWORKS_ITEM = null;
+    public static DataParameter<ItemStack> getFireworkItemParameter() {
+        if (FIREWORK_ROCKET_ENTITY_DATA_ID_FIREWORKS_ITEM == null) {
+            FIREWORK_ROCKET_ENTITY_DATA_ID_FIREWORKS_ITEM = ReflectionUtil.getFieldValue(FIREWORK_ROCKET_ENTITY_DATA_ID_FIREWORKS_ITEM_FIELD, null);
+        }
+        return FIREWORK_ROCKET_ENTITY_DATA_ID_FIREWORKS_ITEM;
+    }
+    
+    private static final Field CREEPER_DATA_IS_POWERED_FIELD = ObfuscationReflectionHelper.findField(CreeperEntity.class, "field_184714_b");
+    private static DataParameter<Boolean> CREEPER_DATA_IS_POWERED = null;
+    public static DataParameter<Boolean> getCreeperPoweredParameter() {
+        if (CREEPER_DATA_IS_POWERED == null) {
+            CREEPER_DATA_IS_POWERED = ReflectionUtil.getFieldValue(CREEPER_DATA_IS_POWERED_FIELD, null);
+        }
+        return CREEPER_DATA_IS_POWERED;
     }
 }

@@ -1,12 +1,13 @@
 package com.github.standobyte.jojo.entity.stand.stands;
 
-import com.github.standobyte.jojo.action.actions.StandEntityAction;
-import com.github.standobyte.jojo.entity.stand.StandAttackProperties;
+import java.util.function.Supplier;
+
+import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.util.damage.DamageUtil;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 
 public class MagiciansRedEntity extends StandEntity {
@@ -16,9 +17,9 @@ public class MagiciansRedEntity extends StandEntity {
     }
     
     @Override
-    public boolean attackEntity(Entity target, StandAttackProperties punch, StandEntityAction action) {
-        return DamageUtil.dealDamageAndSetOnFire(target, 
-                entity -> super.attackEntity(target, punch, action), 10, true);
+    public boolean attackEntity(Supplier<Boolean> doAttack, StandEntityPunch punch, StandEntityTask task) {
+        return DamageUtil.dealDamageAndSetOnFire(punch.target, 
+                entity -> super.attackEntity(doAttack, punch, task), 10, true);
     }
     
     @Override

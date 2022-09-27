@@ -1,13 +1,13 @@
 package com.github.standobyte.jojo.client.model.entity.stand;
 
-import com.github.standobyte.jojo.action.actions.StandEntityAction;
-import com.github.standobyte.jojo.action.actions.TheWorldTSHeavyAttack;
+import com.github.standobyte.jojo.action.stand.StandEntityAction;
+import com.github.standobyte.jojo.action.stand.TheWorldTSHeavyAttack;
 import com.github.standobyte.jojo.client.model.pose.ModelPose;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseTransition;
 import com.github.standobyte.jojo.client.model.pose.ModelPoseTransitionMultiple;
 import com.github.standobyte.jojo.client.model.pose.RotationAngle;
-import com.github.standobyte.jojo.client.model.pose.StandActionAnimation;
-import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
+import com.github.standobyte.jojo.client.model.pose.anim.PosedActionAnimation;
+import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.stands.TheWorldEntity;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -130,12 +130,14 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
 		head.addChild(leftCable);
 		setRotationAngle(leftCable, 0.0873F, 0.1309F, -1.1345F);
 		leftCable.texOffs(13, 16).addBox(-0.5F, 0.0F, 0.0F, 1.0F, 4.0F, 5.0F, 0.0F, true);
+        leftCable.texOffs(13, 25).addBox(-0.5F, 1.0F, 1.0F, 1.0F, 2.0F, 3.0F, 0.0F, true);
 
 		rightCable = new ModelRenderer(this);
 		rightCable.setPos(-1.25F, -3.3F, 0.25F);
 		head.addChild(rightCable);
 		setRotationAngle(rightCable, 0.0873F, -0.1309F, 1.2217F);
 		rightCable.texOffs(0, 16).addBox(-0.5F, 0.0F, 0.0F, 1.0F, 4.0F, 5.0F, 0.0F, false);
+        rightCable.texOffs(0, 25).addBox(-0.5F, 1.0F, 1.0F, 1.0F, 2.0F, 3.0F, 0.0F, false);
 
 		torso.texOffs(20, 64).addBox(-3.5F, 1.1F, -2.0F, 7.0F, 3.0F, 1.0F, 0.4F, false);
 		torso.texOffs(24, 73).addBox(-2.5F, 4.0F, -2.3F, 5.0F, 6.0F, 1.0F, 0.0F, false);
@@ -372,7 +374,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                 new RotationAngle(leftLowerLeg, 1.8326F, 0.0F, 0.0F),
                 new RotationAngle(rightLeg, 0.2618F, 0.2618F, 0.1309F)
         });
-        actionAnim.put(StandPose.HEAVY_ATTACK, new StandActionAnimation.Builder<TheWorldEntity>()
+        actionAnim.put(StandPose.HEAVY_ATTACK, new PosedActionAnimation.Builder<TheWorldEntity>()
                 .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<>(heavyPunchPose1, heavyPunchPose2).setEasing(pr -> Math.max(pr * 3F - 2F, 0F)))
                 .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransition<>(heavyPunchPose2, heavyPunchPose3))
                 .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransitionMultiple.Builder<>(heavyPunchPose3)
@@ -414,7 +416,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                 RotationAngle.fromDegrees(rightLeg, -30F, 0, 105F),
                 RotationAngle.fromDegrees(rightLowerLeg, 0F, 0F, 0F)
         });
-        actionAnim.put(StandPose.HEAVY_ATTACK_COMBO, new StandActionAnimation.Builder<TheWorldEntity>()
+        actionAnim.put(StandPose.HEAVY_ATTACK_COMBO, new PosedActionAnimation.Builder<TheWorldEntity>()
                 .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransitionMultiple.Builder<>(idlePose)
                         .addPose(0.5F, kickPose1)
                         .addPose(0.75F, kickPose2)
@@ -455,7 +457,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                 RotationAngle.fromDegrees(rightLeg, 0F, 0F, 10F),
                 RotationAngle.fromDegrees(rightLowerLeg, 45F, 0F, 0F)
         });
-        actionAnim.put(TheWorldTSHeavyAttack.TS_PUNCH_POSE, new StandActionAnimation.Builder<TheWorldEntity>()
+        actionAnim.put(TheWorldTSHeavyAttack.TS_PUNCH_POSE, new PosedActionAnimation.Builder<TheWorldEntity>()
                 .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<>(punchPose1, punchPose2))
                 .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransition<>(punchPose2, punchPose3))
                 .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransitionMultiple.Builder<>(punchPose3)

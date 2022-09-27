@@ -53,7 +53,7 @@ import net.minecraftforge.common.ForgeMod;
 public class HamonData extends TypeSpecificData {
     public static final int MAX_STAT_LEVEL = 60;
     public static final float MAX_BREATHING_LEVEL = 100;
-    public static final int MIN_BREATHING_EXCEED = 5;
+    public static final int MIN_BREATHING_EXCEED = 10;
     
     private static final int LVL_1_POINTS = 2;
     private static final int NEXT_LVL_DIFF = 3;
@@ -331,7 +331,7 @@ public class HamonData extends TypeSpecificData {
             if (!user.level.isClientSide()) {
                 if (updateMeditation(user.position(), user.yHeadRot, user.xRot)) {
                     if (user.tickCount % 800 == 400) {
-                        JojoModUtil.sayVoiceLine(user, getBreathingSound(), 0.75F, 1.0F);
+                        JojoModUtil.sayVoiceLine(user, getBreathingSound(), null, 0.75F, 1.0F);
                     }
                     user.addEffect(new EffectInstance(ModEffects.MEDITATION.get(), Math.max(Exercise.MEDITATION.getMaxTicks(this) - getExerciseTicks(Exercise.MEDITATION), 210)));
                     user.getFoodData().addExhaustion(-0.0025F);
@@ -450,7 +450,7 @@ public class HamonData extends TypeSpecificData {
             float lvlInc = (2 * MathHelper.clamp(getAverageExercisePoints(), 0F, 1F)) - 1F;
             recalcAvgExercisePoints();
             if (lvlInc < 0) {
-                if (!JojoModConfig.getCommonConfigInstance(false).breathingTechniqueDeterioration.get()) {
+                if (!JojoModConfig.getCommonConfigInstance(false).breathingTechniqueDeterioration.get() || user.abilities.instabuild) {
                     lvlInc = 0;
                 }
                 else {

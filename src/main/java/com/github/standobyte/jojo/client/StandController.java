@@ -33,7 +33,6 @@ import net.minecraft.network.play.client.CPlayerPacket;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
-import net.minecraft.util.HandSide;
 import net.minecraft.util.MovementInput;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
@@ -124,7 +123,7 @@ public class StandController {
 
         ClientPlayerEntity player = mc.player;
         if (!stand.isAlive()) {
-            mc.setCameraEntity(player);
+            ClientUtil.setCameraEntityPreventShaderSwitch(mc, player);
         }
         else {
             player.connection.send(new CPlayerPacket.PositionRotationPacket(player.getX(), player.getY(), player.getZ(), player.yRot, player.xRot, player.isOnGround()));
@@ -133,6 +132,7 @@ public class StandController {
     
     
 
+    // FIXME render items in hands
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void renderStandHands(RenderHandEvent event) {
         if (!isControllingStand()) {
@@ -149,8 +149,7 @@ public class StandController {
         float partialTick = event.getPartialTicks();
         int light = mc.getEntityRenderDispatcher().getPackedLightCoords(stand, partialTick);
         AbstractStandRenderer renderer = (AbstractStandRenderer<?, ?>)mc.getEntityRenderDispatcher().<StandEntity>getRenderer(stand);
-        renderer.renderFirstPersonArm(HandSide.RIGHT, matrixStack, buffer, light, stand, partialTick);
-        renderer.renderFirstPersonArm(HandSide.LEFT, matrixStack, buffer, light, stand, partialTick);
+        renderer.renderFirstPersonArms(matrixStack, buffer, light, stand, partialTick);
         event.setCanceled(true);
     }
     

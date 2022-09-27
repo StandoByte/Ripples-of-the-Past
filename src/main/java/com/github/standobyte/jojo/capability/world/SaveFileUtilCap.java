@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.entity.mob.rps.RPSPvpGamesMap;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 
 import net.minecraft.nbt.CompoundNBT;
@@ -22,6 +23,8 @@ public class SaveFileUtilCap {
 	private final ServerWorld overworld;
 	
     Map<StandType<?>, Integer> timesStandsTaken = new HashMap<>();
+    
+    private final RPSPvpGamesMap rpsPvpGames = new RPSPvpGamesMap();
     
     private boolean gameruleDayLightCycle;
     private boolean gameruleWeatherCycle;
@@ -90,6 +93,12 @@ public class SaveFileUtilCap {
     
     
     
+    public RPSPvpGamesMap getPvpRPSGames() {
+        return rpsPvpGames;
+    }
+    
+    
+    
     public void setTimeStopGamerules(ServerWorld world) {
     	if (noTimeStopInstances(world)) {
 	    	GameRules gameRules = overworld.getGameRules();
@@ -124,7 +133,9 @@ public class SaveFileUtilCap {
     	return true;
     }
     
-    CompoundNBT saveGamerules() {
+    
+    
+    CompoundNBT save() {
     	CompoundNBT nbt = new CompoundNBT();
     	nbt.putBoolean("GameruleDayLightCycle", gameruleDayLightCycle);
     	nbt.putBoolean("GameruleWeatherCycle", gameruleWeatherCycle);
@@ -132,7 +143,7 @@ public class SaveFileUtilCap {
     	return nbt;
     }
     
-    void loadGamerules(CompoundNBT nbt) {
+    void load(CompoundNBT nbt) {
     	usedTimeStop = nbt.getBoolean("UsedTimeStop");
     	refreshNextTick = usedTimeStop;
     	gameruleDayLightCycle = nbt.getBoolean("GameruleDayLightCycle");

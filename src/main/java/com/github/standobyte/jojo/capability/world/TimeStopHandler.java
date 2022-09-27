@@ -1,14 +1,14 @@
 package com.github.standobyte.jojo.capability.world;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -17,12 +17,12 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopInstancePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerStatePacket;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.utils.ModInteractionUtil;
 import com.github.standobyte.jojo.util.utils.TimeUtil;
 import com.google.common.collect.HashBiMap;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.ChunkPos;
@@ -139,7 +139,7 @@ public class TimeStopHandler {
         
         canMove = canMove || checkEffect && entityToCheck instanceof LivingEntity && ((LivingEntity) entityToCheck).hasEffect(ModEffects.TIME_STOP.get()) || 
                 entityToCheck instanceof PlayerEntity && TimeUtil.canPlayerMoveInStoppedTime((PlayerEntity) entityToCheck, false)
-                || entityToCheck instanceof EndermanEntity; // for the lulz
+                || JojoModConfig.getCommonConfigInstance(entity.level.isClientSide()).endermenBeyondTimeSpace.get() && ModInteractionUtil.isEntityEnderman(entityToCheck); // for even more lulz
         
         boolean stopInTime = !canMove;
         entity.getCapability(EntityUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.updateEntityTimeStop(stopInTime));
@@ -203,8 +203,8 @@ public class TimeStopHandler {
         PacketManager.sendToClient(new TimeStopPlayerStatePacket(canSee, canMove), player);
     }
     
-    public Collection<TimeStopInstance> getAllTimeStopInstances() {
-    	return Collections.unmodifiableCollection(timeStopInstances.values());
+    public Stream<TimeStopInstance> getAllTimeStopInstances() {
+        return timeStopInstances.values().stream();
     }
     
 

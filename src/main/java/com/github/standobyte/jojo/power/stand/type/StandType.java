@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
-import com.github.standobyte.jojo.action.actions.StandAction;
+import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.init.ModStandTypes;
@@ -42,6 +42,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     private final StandAction[] abilities;
     private final T defaultStats;
     private final Class<T> statsClass;
+    private boolean canPlayerGet = true;
     private String translationKey;
     private Supplier<SoundEvent> summonShoutSupplier = () -> null;
     private OstSoundList ostSupplier = null;
@@ -77,6 +78,11 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         if (item != null && !item.isEmpty()) {
             resolveLevelItems.computeIfAbsent(resolveLevel, lvl -> new ArrayList<>()).add(item);
         }
+        return this;
+    }
+    
+    public StandType<T> setPlayerAccess(boolean canPlayerGet) {
+        this.canPlayerGet = canPlayerGet;
         return this;
     }
     
@@ -139,7 +145,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     public float getStaminaRegen(IStandPower power) {
-        return 2.5F;
+        return 3F;
     }
     
     public boolean usesResolve() {
@@ -252,6 +258,10 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         return true;
     }
     
+    public boolean canBeManuallyControlled() {
+        return false;
+    }
+    
     @Nullable
     public SoundEvent getOst(int level) {
         if (ostSupplier == null) {
@@ -277,34 +287,4 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
             });
         }
     }
-
-//    public static void giveStandExp(LivingDeathEvent event) {
-//        LivingEntity dead = event.getEntityLiving();
-//        dead.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-//            IStandPower stand = cap.getLastHurtByStand();
-//            if (stand != null) {
-//                int expToAdd = 0;
-//                if (dead.getType().getCategory() == EntityClassification.MONSTER) {
-//                    expToAdd = 4;
-//                }
-//                else if (dead instanceof PlayerEntity) {
-//                    expToAdd = 20;
-//                }
-//                else {
-//                    return;
-//                }
-//                
-//                expToAdd *= IStandPower.getStandPowerOptional(dead).map(deadPower -> {
-//                    StandType<?> type = deadPower.getType();
-//                    return type != null ? type.getExpRewardMultiplier() : 1;
-//                }).orElse(1);
-//                expToAdd *= INonStandPower.getNonStandPowerOptional(dead).map(deadPower -> {
-//                    NonStandPowerType<?> type = deadPower.getType();
-//                    return type != null ? type.getExpRewardMultiplier() : 1;
-//                }).orElse(1);
-//                expToAdd = (int) ((float) expToAdd * dead.getMaxHealth() / 20F);
-//                stand.setXp(stand.getXp() + expToAdd);
-//            }
-//        });
-//    }
 }

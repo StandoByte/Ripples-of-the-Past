@@ -29,6 +29,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.boss.dragon.EnderDragonPartEntity;
+import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -47,6 +48,7 @@ public class DamageUtil {
     public static final DamageSource PILLAR_MAN_ABSORPTION = new DamageSource("pillarManAbsorption").setScalesWithDifficulty();
     public static final DamageSource STAND_VIRUS = new DamageSource("standVirus").bypassArmor();
     public static final DamageSource SUFFOCATION = new DamageSource("suffocation").bypassArmor();
+    public static final DamageSource EYE_OF_ENDER_SHARDS = new DamageSource("eyeOfEnderShards").bypassArmor();
     public static final String ROAD_ROLLER_MSG = "roadRoller";
     
     public static float knockbackReduction(DamageSource source) {
@@ -280,7 +282,8 @@ public class DamageUtil {
     }
     
     public static void suffocateTick(LivingEntity entity, float speed) {
-    	if (entity.canBreatheUnderwater() || entity instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) entity)) return;
+    	if (entity.canBreatheUnderwater() || entity instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) entity)
+    	        || entity instanceof IronGolemEntity) return;
     	
     	if (entity.getAirSupply() > 0) {
     		int airReduction = Math.max((int) ((float) entity.getMaxAirSupply() * MathHelper.clamp(speed, 0F, 1F)), 1);

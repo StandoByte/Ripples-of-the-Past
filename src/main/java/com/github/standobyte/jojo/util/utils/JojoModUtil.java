@@ -1,13 +1,18 @@
 package com.github.standobyte.jojo.util.utils;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
@@ -17,6 +22,7 @@ import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.item.ClothesSet;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket;
@@ -35,6 +41,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.INPC;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MoverType;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.monster.AbstractIllagerEntity;
 import net.minecraft.entity.passive.WaterMobEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -64,6 +71,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.EntityRayTraceResult;
@@ -119,14 +127,48 @@ public class JojoModUtil {
     
     
     
+    @Nullable
     public static <E> E getOrLast(List<E> list, int index) {
-        return list.get(Math.min(index, list.size() - 1));
+        return list.isEmpty() ? null : list.get(Math.min(index, list.size() - 1));
+    }
+    
+    @Nullable
+    public static <T extends Enum<T>> T enumValueOfNullable(Class<T> enumType, @Nonnull String name) {
+        try {
+            return Enum.valueOf(enumType, name);
+        }
+        catch (IllegalArgumentException e) {
+            return null;
+        }
     }
     
     
     
     public static Vector3d getEntityPosition(Entity entity, float partialTick) {
     	return partialTick == 1.0F ? entity.position() : entity.getPosition(partialTick);
+    }
+    
+    public static void giveItemTo(LivingEntity entity, ItemStack item, boolean drop) {
+        if (!entity.level.isClientSide() && !item.isEmpty()) {
+            if (entity instanceof PlayerEntity) {
+                drop = !(((PlayerEntity) entity).inventory.add(item) && item.isEmpty());
+            }
+            if (drop) {
+                entity.level.addFreshEntity(dropAt(entity, item));
+            }
+        }
+    }
+    
+    public static ItemEntity dropAt(LivingEntity entity, ItemStack item) {
+        if (item.isEmpty()) {
+            return null;
+        }
+        else {
+            ItemEntity itemEntity = new ItemEntity(entity.level, entity.getX(), entity.getEyeY() - 0.3, entity.getZ(), item);
+            itemEntity.setNoPickUpDelay();
+            itemEntity.setOwner(entity.getUUID());
+            return itemEntity;
+        }
     }
     
     
@@ -206,7 +248,7 @@ public class JojoModUtil {
         
 //        return new EntityRayTraceResult(targetEntity, targetEntityPos);
     }
-
+    
     private static AxisAlignedBB standPrecisionTargetHitbox(AxisAlignedBB aabb, double precision) {
         if (precision > 0) {
             double smallAabbAddFraction = Math.min(precision, 16) / 16;
@@ -288,11 +330,10 @@ public class JojoModUtil {
 
 
 
-    public static boolean canEntityDestroy(ServerWorld world, BlockPos pos, LivingEntity entity) {
-        BlockState state = world.getBlockState(pos);
+    public static boolean canEntityDestroy(ServerWorld world, BlockPos blockPos, BlockState blockState, LivingEntity entity) {
         if (JojoModConfig.getCommonConfigInstance(world.isClientSide()).abilitiesBreakBlocks.get()
-                && state.canEntityDestroy(world, pos, entity)
-                && ForgeEventFactory.onEntityDestroyBlock(entity, pos, state)) {
+                && blockState.canEntityDestroy(world, blockPos, entity)
+                && ForgeEventFactory.onEntityDestroyBlock(entity, blockPos, blockState)) {
         	PlayerEntity player = null;
         	if (entity instanceof PlayerEntity) {
         		player = (PlayerEntity) entity;
@@ -303,7 +344,7 @@ public class JojoModUtil {
             		player = (PlayerEntity) standUser;
             	}
         	}
-        	return player == null || world.mayInteract(player, pos);
+        	return player == null || world.mayInteract(player, blockPos);
         }
         return false;
     }
@@ -376,11 +417,16 @@ public class JojoModUtil {
     }
 
     public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine) {
-        sayVoiceLine(entity, voiceLine, 1.0F, 1.0F);
+        sayVoiceLine(entity, voiceLine, null);
     }
 
-    public static void sayVoiceLine(LivingEntity entity, SoundEvent sound, float volume, float pitch) {
-        if (entity.level.isClientSide() || entity.hasEffect(Effects.INVISIBILITY)) {
+    public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine, @Nullable ClothesSet character) {
+        sayVoiceLine(entity, voiceLine, character, 1.0F, 1.0F);
+    }
+
+    public static void sayVoiceLine(LivingEntity entity, SoundEvent sound, @Nullable ClothesSet character, float volume, float pitch) {
+        if (entity.level.isClientSide() || entity.hasEffect(Effects.INVISIBILITY) ||
+                character != null && character != ClothesSet.getClothesSet(entity)) {
             return;
         }
         SoundCategory category = SoundCategory.VOICE;
@@ -438,6 +484,12 @@ public class JojoModUtil {
         }
     }
 
+    public static void playEitherSound(World world, @Nullable PlayerEntity clientHandled, double x, double y, double z, 
+            Predicate<PlayerEntity> predicate, SoundEvent soundTrue, SoundEvent soundFalse, SoundCategory category, float volume, float pitch) {
+        if (soundTrue != null) playSound(world, clientHandled, x, y, z, soundTrue, category, volume, pitch, predicate);
+        if (soundFalse != null) playSound(world, clientHandled, x, y, z, soundFalse, category, volume, pitch, predicate.negate());
+    }
+
     public static void playSound(World world, @Nullable PlayerEntity clientHandled, Entity entity, 
             SoundEvent sound, SoundCategory category, float volume, float pitch, Predicate<PlayerEntity> condition) {
         if (!world.isClientSide()) {
@@ -466,20 +518,41 @@ public class JojoModUtil {
     	if (times < 0) {
     		return 0;
     	}
-    	int timesInt = MathHelper.floor(times);
+    	int timesInt = MathUtil.fractionRandomInc(times);
     	for (int i = 0; i < timesInt; i++) {
     		if (breakCondition != null && breakCondition.get()) {
     			return i;
     		}
     		action.run();
     	}
-		if (breakCondition != null && breakCondition.get()) {
-			return timesInt;
-		}
-    	if (Math.random() < times - (double) timesInt) {
-    		action.run();
-    		return timesInt + 1;
-    	}
     	return timesInt;
+    }
+
+    public static <T> void ifPresentOrElse(Optional<T> optional, Consumer<? super T> action, Runnable emptyAction) {
+        if (optional.isPresent()) {
+            action.accept(optional.get());
+        } else {
+            emptyAction.run();
+        }
+    }
+    
+    public static <T> LinkedHashMap<Predicate<T>, List<T>> groupByPredicatesOrdered(Stream<T> elements, List<Predicate<T>> predicates, 
+            @Nullable Predicate<T> commonCondition, boolean elementRepeats) {
+        LinkedHashMap<Predicate<T>, List<T>> map = Util.make(new LinkedHashMap<>(), m -> {
+            predicates.forEach(key -> m.put(key, new ArrayList<>()));
+        });
+        elements.forEach(element -> {
+            if (commonCondition == null || commonCondition.test(element)) {
+                for (Predicate<T> predicate : predicates) {
+                    if (predicate.test(element)) {
+                        map.get(predicate).add(element);
+                        if (!elementRepeats) {
+                            break;
+                        }
+                    }
+                }
+            }
+        });
+        return map;
     }
 }

@@ -13,7 +13,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.action.actions.HamonAction;
+import com.github.standobyte.jojo.action.non_stand.HamonAction;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
@@ -300,8 +300,8 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     public static void overdriveAttack(LivingEntity user, LivingEntity targetEntity, INonStandPower power, HamonData hamon) {
         ActionTarget target = new ActionTarget(targetEntity);
         boolean shift = user.isShiftKeyDown();
-        if (!(shift && power.onClickAction(ModActions.HAMON_SUNLIGHT_YELLOW_OVERDRIVE.get(), true, target))) {
-            power.onClickAction(ModActions.HAMON_OVERDRIVE.get(), shift, target);
+        if (!(shift && power.clickAction(ModActions.HAMON_SUNLIGHT_YELLOW_OVERDRIVE.get(), true, target))) {
+            power.clickAction(ModActions.HAMON_OVERDRIVE.get(), shift, target);
         }
     }
     
@@ -519,7 +519,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
             }
             else {
                 for (int i = (int) (intensity * 9.5F); i >= 0; i--) {
-                    ClientUtil.createHamonSparksEmitter(entity, Math.max(1, (int) (intensity * 9.5) - i));
+                    ClientUtil.createParticlesEmitter(entity, ModParticles.HAMON_SPARK.get(), Math.max(1, (int) (intensity * 9.5) - i));
                     if (i % 2 == 0) {
                         ClientTickingSoundsHelper.playHamonSparksSound(entity, intensity * 2, 1.0F + (world.random.nextFloat() - 0.5F) * 0.15F);
                     }

@@ -20,6 +20,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.command.GenStandStatsCommand;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.StandStatsDataPacket;
@@ -41,6 +42,7 @@ import net.minecraft.resources.IResourceManager;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.FileUtil;
 import net.minecraft.util.JSONUtils;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.ResourceLocationException;
 import net.minecraft.world.server.ServerWorld;
@@ -96,28 +98,27 @@ public class StandStatsManager extends JsonReloadListener {
         JojoModConfig.getCommonConfigInstance(false).onStatsDataPackLoad();
     }
 
-    private static final FolderName OUTPUT_DIR = new FolderName("standstats");
+    private static final FolderName OUTPUT_DIR = new FolderName(GenStandStatsCommand.PACK_NAME);
     private final Set<Path> savedStatsWorlds = new HashSet<>();
-    public void writeDefaultStandStats(ServerWorld world) {
+    public void writeDefaultStandStats(ServerWorld world) throws StatsStatsSaveException {
         Path folderPath = world.getServer().getWorldPath(OUTPUT_DIR);
         if (!savedStatsWorlds.contains(folderPath)) {
             Path dataFolderPath = folderPath.resolve("data");
-            IForgeRegistry<StandType<?>> registry = ModStandTypes.Registry.getRegistry();
-            registry.getEntries().forEach(entry -> {
+            Set<Map.Entry<RegistryKey<StandType<?>>, StandType<?>>> standTypes = ModStandTypes.Registry.getRegistry().getEntries();
+            for (Map.Entry<RegistryKey<StandType<?>>, StandType<?>> entry : standTypes) {
                 Path jsonFilePath = getJsonPath(dataFolderPath, entry.getKey().location());
                 File jsonFile = jsonFilePath.toFile();
                 if (jsonFile.getParentFile() != null) {
                     jsonFile.getParentFile().mkdirs();
                 }
-                try (
-                        OutputStream outputStream = new FileOutputStream(jsonFile);
-                        Writer writer = new OutputStreamWriter(outputStream, Charsets.UTF_8.newEncoder());
-                        ) {
+                try (OutputStream outputStream = new FileOutputStream(jsonFile);
+                    Writer writer = new OutputStreamWriter(outputStream, Charsets.UTF_8.newEncoder())) {
                     GSON.toJson(entry.getValue().getDefaultStats(), writer);
                 } catch (IOException e) {
                     LOGGER.error("Couldn't save default stand stats to {}", jsonFile, e);
+                    throw new StatsStatsSaveException("Couldn't save default stand stats of " + entry.getKey().location());
                 }
-            });
+            }
             savedStatsWorlds.add(folderPath);
             try {
                 Files.write(
@@ -131,15 +132,16 @@ public class StandStatsManager extends JsonReloadListener {
                         StandardCharsets.UTF_8);
             } catch (IOException e) {
                 LOGGER.error("Couldn't write pack.mcmeta file for Stand stats", e);
+                throw new StatsStatsSaveException("Couldn't write pack.mcmeta file for Stand stats");
             }
 
-            try {
-            	InputStream inputStream = JojoMod.class.getResourceAsStream("/statsreadme.txt");
-            	File dataPackFile = folderPath.resolve("readme.txt").toFile();
-            	Files.asByteSink(dataPackFile).writeFrom(inputStream);
-            	inputStream.close();
+            try (InputStream inputStream = JojoMod.class.getResourceAsStream("/statsreadme.txt")) {
+                File dataPackFile = folderPath.resolve("readme.txt").toFile();
+                Files.asByteSink(dataPackFile).writeFrom(inputStream);
+                inputStream.close();
             } catch (IOException e) {
                 LOGGER.error("Couldn't write readme.txt file for Stand stats", e);
+                throw new StatsStatsSaveException("Couldn't write readme.txt file for Stand stats");
             }
         }
     }
@@ -191,5 +193,12 @@ public class StandStatsManager extends JsonReloadListener {
             return (T) overridenStats.get(stand);
         }
         return stand.getDefaultStats();
+    }
+    
+    public static class StatsStatsSaveException extends Exception {
+        
+        private StatsStatsSaveException(String message) {
+            super(message);
+        }
     }
 }
