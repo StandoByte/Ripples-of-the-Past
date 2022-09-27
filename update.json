@@ -3,10 +3,10 @@
   "1.16.5": {
     "0.1.0": "First publicly released version!",
     "0.2.0": "Stand progression and combat reworks, Resolve mechanic, Various tweaks, fixes and improvements",
-    "0.2.0.1": "Fixed Quark incompatibility"
+    "0.2.1": "Added Crazy Diamond"
   },
   "promos": {
-    "1.16.5-latest": "0.2.0.1",
-    "1.16.5-recommended": "0.2"
+    "1.16.5-latest": "0.2.1",
+    "1.16.5-recommended": "0.2.0"
   }
 }
