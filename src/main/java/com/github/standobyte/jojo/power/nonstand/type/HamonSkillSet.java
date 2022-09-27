@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.action.actions.HamonAction;
+import com.github.standobyte.jojo.action.non_stand.HamonAction;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
 
 public class HamonSkillSet {

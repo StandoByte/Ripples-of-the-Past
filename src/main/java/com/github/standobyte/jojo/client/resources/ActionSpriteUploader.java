@@ -4,6 +4,7 @@ import java.util.stream.Stream;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.init.ModActions;
+import com.github.standobyte.jojo.power.IPower;
 
 import net.minecraft.client.renderer.texture.SpriteUploader;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -17,10 +18,20 @@ public class ActionSpriteUploader extends SpriteUploader {
 
     @Override
     protected Stream<ResourceLocation> getResourcesToLoad() {
-        return ModActions.Registry.getRegistry().getKeys().stream();
+        return ModActions.Registry.getRegistry().getValues().stream().flatMap(Action::getTexLocationstoLoad);
     }
 
-    public TextureAtlasSprite getSprite(Action<?> action) {
-        return getSprite(ModActions.Registry.getRegistry().getKey(action));
+    public <P extends IPower<P, ?>> TextureAtlasSprite getSprite(Action<P> action, P power) {
+        return getSprite(action.getTexture(power));
+    }
+    
+    @Override
+    public TextureAtlasSprite getSprite(ResourceLocation texLocation) {
+        return super.getSprite(texLocation);
+    }
+    
+    public static ResourceLocation getIcon(Action<?> action) {
+        ResourceLocation key = action.getRegistryName();
+        return new ResourceLocation(key.getNamespace(), "textures/action/" + key.getPath() + ".png");
     }
 }

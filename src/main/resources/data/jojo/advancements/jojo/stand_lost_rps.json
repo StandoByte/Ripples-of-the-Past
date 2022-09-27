@@ -1,0 +1,33 @@
+{
+  "parent": "jojo:jojo/stand_arrow_shot",
+  "display": {
+    "icon": {
+      "item": "jojo:meteoric_scrap",
+      "nbt": "{Icon:11}"
+    },
+    "title": {
+      "translate": "advancements.jojo.stand_lost_rps.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.stand_lost_rps.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": true
+  },
+  "criteria": {
+    "lost_stand": {
+      "trigger": "jojo:rps_game",
+      "conditions": {
+        "won_game": false,
+        "stand_taken": true
+      }
+    }
+  },
+  "requirements": [
+    [
+      "lost_stand"
+    ]
+  ]
+}

@@ -57,7 +57,7 @@ public class MRFlameEntity extends ModdedProjectileEntity {
     @Override
     protected boolean hurtTarget(Entity target, LivingEntity owner) {
         return DamageUtil.dealDamageAndSetOnFire(target, 
-                entity -> super.hurtTarget(entity, owner), 5, true);
+                entity -> super.hurtTarget(entity, owner), 10, true);
     }
 
     @Override

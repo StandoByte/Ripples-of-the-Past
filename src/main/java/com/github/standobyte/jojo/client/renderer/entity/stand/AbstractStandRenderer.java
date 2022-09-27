@@ -1,10 +1,11 @@
 package com.github.standobyte.jojo.client.renderer.entity.stand;
 
+import com.github.standobyte.jojo.client.ClientEventHandler;
 import com.github.standobyte.jojo.client.model.entity.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.model.entity.stand.StandEntityModel.VisibilityMode;
 import com.github.standobyte.jojo.client.renderer.entity.stand.layer.StandModelLayerRenderer;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.entity.stand.StandEntity.StandPose;
+import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
@@ -13,6 +14,7 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.LivingRenderer;
+import net.minecraft.client.renderer.entity.layers.HeldItemLayer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.Entity;
@@ -35,6 +37,7 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
     public AbstractStandRenderer(EntityRendererManager rendererManager, M entityModel, float shadowRadius) {
         super(rendererManager, entityModel, shadowRadius);
         entityModel.afterInit();
+        addLayer(new HeldItemLayer<>(this));
     }
 
     @Override
@@ -76,19 +79,24 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
         if (visibleForSpectator(entity)) {
             return 0.15F;
         }
-        if (entity.isFollowingUser() && !entity.isArmsOnlyMode()) {
-            Minecraft mc = Minecraft.getInstance();
-            if (mc.options.getCameraType().isFirstPerson()) {
-                Entity user = entity.getUser();
-                if (mc.player.is(user)) {
+        return entity.getAlpha(partialTick);
+    }
+    
+    protected boolean obstructsView(T entity, float partialTick) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.options.getCameraType().isFirstPerson()) {
+            Entity user = entity.getUser();
+            if (mc.player != null && mc.player.is(user)) {
+                if (ClientEventHandler.getInstance().isZooming) {
+                    return true;
+                }
+                if (entity.isFollowingUser() && !entity.isArmsOnlyMode()) {
                     Vector3d diffVec = entity.getPosition(partialTick).subtract(user.getPosition(partialTick));
-                    if (diffVec.lengthSqr() < 0.09 || diffVec.lengthSqr() < 1 && user.getViewVector(partialTick).dot(diffVec) > diffVec.lengthSqr() / 2) {
-                        return 0.1F;
-                    }
+                    return diffVec.lengthSqr() < 0.09 || diffVec.lengthSqr() < 1 && user.getViewVector(partialTick).dot(diffVec) > diffVec.lengthSqr() / 2;
                 }
             }
         }
-        return entity.getAlpha(partialTick);
+        return false;
     }
 
     private static final float PLAYER_RENDER_SCALE = 0.9375F;
@@ -111,11 +119,12 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
     public void render(T entity, float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
         if (MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Pre<T, M>(entity, this, partialTick, matrixStack, buffer, packedLight))) return;
         matrixStack.pushPose();
+        model.layerRenderer = false;
         model.attackTime = this.getAttackAnim(entity, partialTick);
         boolean shouldSit = entity.isPassenger() && (entity.getVehicle() != null && entity.getVehicle().shouldRiderSit());
         model.riding = shouldSit;
         model.young = entity.isBaby();
-        model.setVisibilityMode(visibilityMode(entity));
+        model.setVisibility(entity, visibilityMode(entity), obstructsView(entity, partialTick));
         float yBodyRotation = MathHelper.rotLerp(partialTick, entity.yBodyRotO, entity.yBodyRot);
         float yHeadRotation = MathHelper.rotLerp(partialTick, entity.yHeadRotO, entity.yHeadRot);
         float f2 = yHeadRotation - yBodyRotation;
@@ -159,7 +168,7 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
         }
 
         if (!entity.isVisibleForAll() && entity.getStandPose() == StandPose.IDLE && model.attackTime == 0 && 
-                entity.isFollowingUser() && !Minecraft.getInstance().player.isShiftKeyDown()) {
+                entity.isFollowingUser() && !Minecraft.getInstance().player.isShiftKeyDown() || true) {
             float idleY = MathHelper.sin((ticks - model.idleLoopTickStamp) * 0.04F) * 0.04F;
             matrixStack.translate(0.0D, idleY, 0.0D);
         }
@@ -171,12 +180,12 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
             IVertexBuilder vertexBuilder = buffer.getBuffer(renderType);
             int packedOverlay = getOverlayCoords(entity, getWhiteOverlayProgress(entity, partialTick));
             float alpha = getAlpha(entity, partialTick);
-            model.renderToBuffer(matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
-            model.renderArmSwings(entity, matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
-            if (!entity.isSpectator()) {
-                for (LayerRenderer<T, M> layerRenderer : this.layers) {
-                    layerRenderer.render(matrixStack, buffer, packedLight, entity, walkAnimPos, walkAnimSpeed, partialTick, ticks, f2, xRotation);
-                }
+            model.render(entity, matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
+        }
+        
+        if (!entity.isSpectator()) {
+            for (LayerRenderer<T, M> layerRenderer : this.layers) {
+                layerRenderer.render(matrixStack, buffer, packedLight, entity, walkAnimPos, walkAnimSpeed, partialTick, ticks, f2, xRotation);
             }
         }
 
@@ -196,13 +205,13 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
             float ticks, float yRotationOffset, float xRotation, 
             ResourceLocation layerModelTexture, M model) {
         getModel().copyPropertiesTo(model);
-        model.setVisibilityMode(visibilityMode(entity));
+        model.setVisibility(entity, visibilityMode(entity), obstructsView(entity, partialTick));
         model.prepareMobModel(entity, walkAnimSpeed, walkAnimPos, partialTick);
+        model.layerRenderer = true;
         model.setupAnim(entity, walkAnimSpeed, walkAnimPos, ticks, yRotationOffset, xRotation);
         int packedOverlay = getOverlayCoords(entity, getWhiteOverlayProgress(entity, partialTick));
         float alpha = getAlpha(entity, partialTick);
-        model.renderToBuffer(matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
-        model.renderArmSwings(entity, matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
+        model.render(entity, matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
     }
 
     private VisibilityMode visibilityMode(T entity) {
@@ -223,11 +232,19 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
         }
     }
     
+    
+    public void renderFirstPersonArms(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, T entity, float partialTick) {
+        if (entity.getStandPose().armsObstructView) return;
+        
+        model.setVisibility(entity, VisibilityMode.ARMS_ONLY, false);
+        renderFirstPersonArm(HandSide.LEFT, matrixStack, buffer, packedLight, entity, partialTick);
+        renderFirstPersonArm(HandSide.RIGHT, matrixStack, buffer, packedLight, entity, partialTick);
+    }
 
-    public void renderFirstPersonArm(HandSide handSide, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, T entity, float partialTick) {
+    protected void renderFirstPersonArm(HandSide handSide, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, T entity, float partialTick) {
         RenderType renderType = getRenderType(entity, getTextureLocation(entity));
         if (renderType != null) {
-            renderSeparateLayerArm(getModel(), handSide, matrixStack, buffer.getBuffer(renderType), packedLight, entity, partialTick);
+            renderSeparateLayerArm(model, handSide, matrixStack, buffer.getBuffer(renderType), packedLight, entity, partialTick);
             for (LayerRenderer<T, M> layer : layers) {
                 if (layer instanceof StandModelLayerRenderer) {
                     StandModelLayerRenderer<T, M> standLayer = (StandModelLayerRenderer<T, M>) layer;
@@ -283,7 +300,7 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
 
     protected void doRenderFirstPersonArm(M model, HandSide handSide, 
             MatrixStack matrixStack, IVertexBuilder vertexBuilder, int packedLight, T entity, float partialTick) {
-        ModelRenderer armModelRenderer = model.armModel(handSide);
+        ModelRenderer armModelRenderer = model.getArm(handSide);
         armModelRenderer.render(matrixStack, vertexBuilder, packedLight, 
                 LivingRenderer.getOverlayCoords(entity, getWhiteOverlayProgress(entity, partialTick)), 1.0F, 1.0F, 1.0F, entity.getAlpha(partialTick));
     }

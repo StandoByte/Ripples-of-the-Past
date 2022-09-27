@@ -4,8 +4,6 @@ import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
-import com.github.standobyte.jojo.client.ClientUtil;
-
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;
@@ -143,12 +141,47 @@ public class ActionTarget {
         TargetType type = buf.readEnum(TargetType.class);
         switch (type) {
         case ENTITY:
-            return new ActionTarget(buf.readInt(), ClientUtil.getClientWorld());
+            return new ActionTarget(buf.readInt());
         case BLOCK:
             return new ActionTarget(buf.readBlockPos(), buf.readEnum(Direction.class));
         default:
             return ActionTarget.EMPTY;
         }
+    }
+    
+    public static ActionTarget readFromBuf(PacketBuffer buf, World clientWorld) {
+        ActionTarget target = readFromBuf(buf);
+        return target.resolveEntityId(clientWorld);
+    }
+    
+    public ActionTarget resolveEntityId(World world) {
+        if (getType() == TargetType.ENTITY) {
+            this.entity = world.getEntity(entityId);
+            return this.entity != null ? this : ActionTarget.EMPTY;
+        }
+        return this;
+    }
+    
+    public ActionTarget copy() {
+        switch (type) {
+        case EMPTY:
+            return ActionTarget.EMPTY;
+        case BLOCK:
+            return new ActionTarget(blockPos, face);
+        case ENTITY:
+            return new ActionTarget(entityId);
+        default:
+            return null;
+        }
+    }
+    
+    private ActionTarget(int entityIdOnly) {
+        type = TargetType.ENTITY;
+        this.blockPos = null;
+        this.face = null;
+        this.entity = null;
+        this.entityId = entityIdOnly;
+        this.targetPos = null;
     }
     
     @Override

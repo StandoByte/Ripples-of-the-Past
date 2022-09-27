@@ -82,6 +82,10 @@ public class ActionCooldownTracker {
         return cooldowns.remove(action) != null;
     }
     
+    public void resetCooldowns() {
+        cooldowns.clear();
+    }
+    
     void syncWithTrackingOrUser(int userId, PowerClassification classification, ServerPlayerEntity player) {
         for (Entry<Action<?>, ActionCooldownTracker.Cooldown> entry : cooldowns.entrySet()) {
             Cooldown cooldown = entry.getValue();

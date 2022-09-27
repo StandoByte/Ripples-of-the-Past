@@ -2,13 +2,17 @@ package com.github.standobyte.jojo.entity.stand.stands;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.action.actions.StandEntityAction;
+import com.github.standobyte.jojo.action.stand.IHasStandPunch;
+import com.github.standobyte.jojo.action.stand.punch.IPunch;
+import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
+import com.github.standobyte.jojo.client.sound.BarrageHitSoundHandler;
 import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
-import com.github.standobyte.jojo.entity.stand.StandAttackProperties;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModEntityAttributes;
@@ -86,6 +90,12 @@ public class SilverChariotEntity extends StandEntity {
             super.swing(hand);
         }
     }
+
+    // FIXME render rapier in left arm if the user is left-handed
+    @Override
+    public HandSide getMainArm() {
+        return HandSide.RIGHT;
+    }
     
     public boolean hasRapier() {
         return entityData.get(HAS_RAPIER);
@@ -150,12 +160,12 @@ public class SilverChariotEntity extends StandEntity {
     }
     
     @Override
-    public HandSide getSwingingHand() {
-        return hasRapier() ? HandSide.RIGHT : super.getSwingingHand();
+    public HandSide getPunchingHand() {
+        return hasRapier() ? HandSide.RIGHT : super.getPunchingHand();
     }
     
     @Override
-    protected boolean canBreakBlock(float blockHardness, int blockHarvestLevel) {
+    public boolean canBreakBlock(float blockHardness, int blockHarvestLevel) {
         if (hasRapier()) {
             return blockHardness <= 1 && blockHarvestLevel <= 0;
         }
@@ -167,27 +177,27 @@ public class SilverChariotEntity extends StandEntity {
     }
     
     @Override
-    public boolean attackEntity(Entity target, StandAttackProperties punch, StandEntityAction action) {
+    public boolean attackEntity(Supplier<Boolean> doAttack, StandEntityPunch punch, StandEntityTask task) {
     	if (hasRapier() && isRapierOnFire()) {
-            return DamageUtil.dealDamageAndSetOnFire(target, 
-                    entity -> attackOrDeflect(target, punch, action), 4, true);
+            return DamageUtil.dealDamageAndSetOnFire(punch.target, 
+                    entity -> attackOrDeflect(doAttack, punch, task), 4, true);
     	}
     	else {
-    		return attackOrDeflect(target, punch, action);
+    		return attackOrDeflect(doAttack, punch, task);
     	}
     }
 
-    private boolean attackOrDeflect(Entity target, StandAttackProperties punch, StandEntityAction action) {
-        if (canDeflectProjectiles() && hasRapier() && target instanceof ProjectileEntity) {
-        	return deflectProjectile(target);
+    private boolean attackOrDeflect(Supplier<Boolean> doAttack, StandEntityPunch punch, StandEntityTask task) {
+        if (canDeflectProjectiles() && hasRapier() && punch.target instanceof ProjectileEntity) {
+        	return deflectProjectile(punch.target);
         }
         else {
-            return super.attackEntity(target, punch, action);
+            return super.attackEntity(doAttack, punch, task);
         }
     }
     
     @Override
-    public boolean attackTarget(ActionTarget target, StandAttackProperties.Factory createPunch, StandEntityAction action) {
+    public boolean attackTarget(ActionTarget target, IHasStandPunch punch, StandEntityTask task) {
     	if (canDeflectProjectiles()) {
     		level.getEntitiesOfClass(ProjectileEntity.class, getBoundingBox().inflate(getAttributeValue(ForgeMod.REACH_DISTANCE.get())), 
     				entity -> entity.isAlive() && !entity.isPickable()).forEach(projectile -> {
@@ -198,7 +208,7 @@ public class SilverChariotEntity extends StandEntity {
     				});
     	}
     	
-    	return super.attackTarget(target, createPunch, action);
+    	return super.attackTarget(target, punch, task);
     }
     
     private boolean canDeflectProjectiles() {
@@ -215,6 +225,13 @@ public class SilverChariotEntity extends StandEntity {
             return true;
         }
         return false;
+    }
+    
+    @Override
+    protected void onTargetHit(CallOrder called, IPunch punch) {
+        if (called == CallOrder.AFTER && hasRapier()) {
+            playPunchSound = true;
+        }
     }
     
     public void removeRapierFire() {
@@ -241,5 +258,15 @@ public class SilverChariotEntity extends StandEntity {
     @Override
     protected SoundEvent getAttackBlockSound() {
     	return hasRapier() ? ModSounds.SILVER_CHARIOT_BLOCK.get() : super.getAttackBlockSound();
+    }
+    
+    @Override
+    protected BarrageHitSoundHandler initBarrageHitSoundHandler() {
+        return new BarrageHitSoundHandler() {
+            @Override
+            protected float getSoundGap(StandEntity entity) {
+                return Math.min(super.getSoundGap(entity) * 0.5F, 1.5F);
+            }
+        };
     }
 }

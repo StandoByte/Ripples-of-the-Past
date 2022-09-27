@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.power.stand;
 
+import java.util.Optional;
+
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
@@ -13,10 +15,9 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.common.util.LazyOptional;
 
 public interface IStandPower extends IPower<IStandPower, StandType<?>> {
-    public static final int MAX_EXP = 1000;
-    
-    boolean givePower(StandType<?> standType, boolean countTaken);
-    @Nullable StandType<?> putOutStand();
+    Optional<StandInstance> getStandInstance();
+    boolean giveStand(StandInstance standInstance, boolean newInstance);
+    Optional<StandInstance> putOutStand();
     public void setGivenByDisc();
     public boolean wasGivenByDisc();
 
@@ -41,19 +42,16 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
         return getResolve() / getMaxResolve();
     }
     int getResolveLevel();
-    void setResolveLevel(int level);
+    void setResolveLevel(int level, boolean fromEffect);
     int getMaxResolveLevel();
     float getResolveDmgReduction();
     
+    StandEffectsTracker getContinuousEffects();
+
     void skipProgression(StandType<?> standType);
     void setProgressionSkipped();
     boolean wasProgressionSkipped();
     float getStatsDevelopment();
-    
-    @Deprecated
-    int getXp();
-    @Deprecated
-    void setXp(int xp);
     
     boolean unlockAction(Action<IStandPower> action);
     void setLearningProgressPoints(Action<IStandPower> action, float progress, boolean clamp, boolean notLess);

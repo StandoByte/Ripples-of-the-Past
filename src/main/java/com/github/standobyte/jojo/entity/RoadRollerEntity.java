@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.entity;
 
+import java.util.UUID;
+
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -26,13 +28,15 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.network.NetworkHooks;
 
-public class RoadRollerEntity extends Entity {
+public class RoadRollerEntity extends Entity implements IHasHealth {
     private static final DataParameter<Float> HEALTH = EntityDataManager.defineId(RoadRollerEntity.class, DataSerializers.FLOAT);
     private static final float MAX_HEALTH = 50;
     private int ticksBeforeExplosion = -1;
     private int ticksInAir = 0;
     @Nullable
     private Entity owner;
+    @Nullable
+    private UUID ownerId;
     private double tickDamageMotion = 0;
     private boolean punchedFromBelow = false;
 
@@ -46,6 +50,7 @@ public class RoadRollerEntity extends Entity {
     
     public void setOwner(Entity entity) {
     	this.owner = entity;
+    	this.ownerId = entity != null ? entity.getUUID() : null;
     }
 
     @Override
@@ -78,6 +83,7 @@ public class RoadRollerEntity extends Entity {
 
     @Override
     public void tick() {
+        boolean wasOnGround = onGround;
         super.tick();
         if (!super.canUpdate()) {
             tickCount--;
@@ -89,17 +95,6 @@ public class RoadRollerEntity extends Entity {
         
         tickDamageMotion = 0;
         punchedFromBelow = false;
-        boolean wasOnGround = onGround;
-        if (level.isClientSide()) {
-            if (!wasOnGround) {
-                ticksInAir++;
-                if (onGround) {
-                    level.playSound(ClientUtil.getClientPlayer(), getX(), getY(), getZ(), ModSounds.ROAD_ROLLER_LAND.get(), 
-                            getSoundSource(), (float) ticksInAir * 0.025F, 1.0F);
-                    ticksInAir = 0;
-                }
-            }
-        }
         
         DamageSource dmgSource = DamageUtil.roadRollerDamage(this);
         float damage = (float) -getDeltaMovement().y * 10F;
@@ -126,6 +121,14 @@ public class RoadRollerEntity extends Entity {
                 xRot = Math.min(xRot + 6, 0);
             }
         }
+        if (level.isClientSide() && !wasOnGround) {
+            ticksInAir++;
+            if (onGround) {
+                level.playSound(ClientUtil.getClientPlayer(), getX(), getY(), getZ(), ModSounds.ROAD_ROLLER_LAND.get(), 
+                        getSoundSource(), (float) ticksInAir * 0.05F, 1.0F);
+                ticksInAir = 0;
+            }
+        }
         
         if (ticksBeforeExplosion > 0) {
         	ticksBeforeExplosion--;
@@ -133,11 +136,19 @@ public class RoadRollerEntity extends Entity {
         else if (ticksBeforeExplosion == 0) {
             remove();
         }
+        Entity owner = getOwner();
         if (!level.isClientSide() && (ticksBeforeExplosion == 0 || 
         		(ticksBeforeExplosion > 0 && ticksBeforeExplosion < 40 && owner != null && distanceToSqr(owner) > 100))) {
         	explode();
         	remove();
         }
+    }
+    
+    private Entity getOwner() {
+        if (!level.isClientSide() && owner == null && ownerId != null) {
+            owner = ((ServerWorld) level).getEntity(ownerId);
+        }
+        return owner;
     }
 
     private void explode() {
@@ -179,7 +190,9 @@ public class RoadRollerEntity extends Entity {
                     setDeltaMovement(getDeltaMovement().add(0, damageMotion, 0));
                     this.tickDamageMotion += damageMotion;
                 }
-                setHealth(cos < 0 ? getHealth() - amount : getHealth() + amount);
+                if (getHealth() > 0) {
+                    setHealth(cos < 0 ? getHealth() - amount : getHealth() + amount);
+                }
                 markHurt();
                 level.playSound(null, getX(), getY(), getZ(), ModSounds.ROAD_ROLLER_HIT.get(), 
                         getSoundSource(), amount * 0.25F, 1.0F + (random.nextFloat() - 0.5F) * 0.3F);
@@ -188,19 +201,34 @@ public class RoadRollerEntity extends Entity {
         }
     }
 
+    @Override
     public float getHealth() {
         return entityData.get(HEALTH);
     }
 
+    @Override
     public void setHealth(float health) {
-        entityData.set(HEALTH, MathHelper.clamp(health, 0.0F, MAX_HEALTH));
+        entityData.set(HEALTH, MathHelper.clamp(health, 0.0F, getMaxHealth()));
+    }
+
+    @Override
+    public float getMaxHealth() {
+        return MAX_HEALTH;
     }
 
     @Override
     public void onSyncedDataUpdated(DataParameter<?> dataParameter) {
         super.onSyncedDataUpdated(dataParameter);
-        if (HEALTH.equals(dataParameter) && getHealth() == 0.0F) {
-        	ticksBeforeExplosion = 60;
+        if (HEALTH.equals(dataParameter)) {
+            if (getHealth() <= 0.0F) {
+                ticksBeforeExplosion = 60;
+                if (!level.isClientSide()) {
+                    ejectPassengers();
+                }
+            }
+            else {
+                ticksBeforeExplosion = -1;
+            }
         }
     }
     
@@ -223,7 +251,7 @@ public class RoadRollerEntity extends Entity {
         	ticksBeforeExplosion = nbt.getInt("ExplosionTime");
         }
         if (nbt.hasUUID("Owner")) {
-        	owner = ((ServerWorld) level).getEntity(nbt.getUUID("Owner"));
+            ownerId = nbt.getUUID("Owner");
         }
     }
 
@@ -233,7 +261,7 @@ public class RoadRollerEntity extends Entity {
         nbt.putInt("Age", tickCount);
         nbt.putInt("ExplosionTime", ticksBeforeExplosion);
         if (owner != null) {
-        	nbt.putUUID("Owner", owner.getUUID());
+        	nbt.putUUID("Owner", ownerId);
         }
     }
 

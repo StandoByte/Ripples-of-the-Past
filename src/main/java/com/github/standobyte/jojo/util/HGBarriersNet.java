@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.standobyte.jojo.entity.damaging.projectile.HGEmeraldEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGBarrierEntity;
@@ -111,6 +112,11 @@ public class HGBarriersNet {
     				StandStatFormulas.projectileFireRateScaling(stand, standPower));
     	}
     	canShoot = false;
+    }
+    
+    public Stream<Vector3d> wasRippedAt() {
+        return placedBarriers.keySet().stream()
+                .flatMap(barrier -> barrier.wasRippedAt().map(point -> Stream.of(point)).orElse(Stream.empty()));
     }
     
     public enum PointsChoice {

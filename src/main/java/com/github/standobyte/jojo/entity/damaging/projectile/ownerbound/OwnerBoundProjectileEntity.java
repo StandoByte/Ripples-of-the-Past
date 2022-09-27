@@ -252,7 +252,7 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     }
     
     @Override
-    protected void breakProjectile(TargetType targetType) {}
+    protected void breakProjectile(TargetType targetType, RayTraceResult hitTarget) {}
 
     @Override
     protected void afterBlockHit(BlockRayTraceResult blockRayTraceResult, boolean blockDestroyed) {
@@ -295,6 +295,7 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     
     private final Set<Entity> dragged = new HashSet<>();
     protected void dragTarget(Entity entity, Vector3d vec) {
+        entity = entity.getRootVehicle();
         doDragEntity(entity, vec);
         if (entity instanceof StandEntity) {
             LivingEntity standUser = ((StandEntity) entity).getUser();

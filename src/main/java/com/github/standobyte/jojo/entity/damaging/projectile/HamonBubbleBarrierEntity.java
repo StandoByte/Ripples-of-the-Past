@@ -21,6 +21,7 @@ import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.Direction.Axis;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.EntityRayTraceResult;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
@@ -74,7 +75,7 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
     @Override
     public void remove() {
         super.remove();
-        if (level.isClientSide()) {
+        if (!level.isClientSide()) {
 	        getPassengers().forEach(entity -> {
 	            if (entity instanceof LivingEntity) {
 	                ((LivingEntity) entity).removeEffect(ModEffects.STUN.get());
@@ -120,9 +121,9 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
     }
     
     @Override
-    protected void breakProjectile(TargetType targetType) {
+    protected void breakProjectile(TargetType targetType, RayTraceResult hitTarget) {
         if (targetType != TargetType.ENTITY && !isVehicle()) {
-            super.breakProjectile(targetType);
+            super.breakProjectile(targetType, hitTarget);
         }
     }
 

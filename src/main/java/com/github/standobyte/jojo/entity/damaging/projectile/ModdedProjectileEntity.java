@@ -8,6 +8,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
@@ -17,6 +18,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
@@ -166,8 +168,10 @@ public abstract class ModdedProjectileEntity extends DamagingEntity {
         return 0.8D;
     }
     
-    protected void breakProjectile(TargetType targetType) {
-        remove();
+    protected void breakProjectile(TargetType targetType, RayTraceResult hitTarget) {
+        if (!level.isClientSide()) {
+            remove();
+        }
     }
 
     @Override
@@ -198,13 +202,13 @@ public abstract class ModdedProjectileEntity extends DamagingEntity {
     @Override
     protected void onHitEntity(EntityRayTraceResult entityRayTraceResult) {
         super.onHitEntity(entityRayTraceResult);
-        breakProjectile(TargetType.ENTITY);
+        breakProjectile(TargetType.ENTITY, entityRayTraceResult);
     }
     
     @Override
     protected void onHitBlock(BlockRayTraceResult blockRayTraceResult) {
         super.onHitBlock(blockRayTraceResult);
-        breakProjectile(TargetType.BLOCK);
+        breakProjectile(TargetType.BLOCK, blockRayTraceResult);
     }
     
     protected void rotateTowardsMovement(float rotationSpeed) {
@@ -235,7 +239,7 @@ public abstract class ModdedProjectileEntity extends DamagingEntity {
             return false;
         }
         markHurt();
-        breakProjectile(TargetType.EMPTY);
+        breakProjectile(TargetType.EMPTY, null);
         return true;
     }
 
@@ -291,5 +295,17 @@ public abstract class ModdedProjectileEntity extends DamagingEntity {
     public void readSpawnData(PacketBuffer additionalData) {
         super.readSpawnData(additionalData);
         this.ownerId = additionalData.readInt();
+    }
+
+    @Override
+    protected void addAdditionalSaveData(CompoundNBT nbt) {
+        super.addAdditionalSaveData(nbt);
+        nbt.putBoolean("IsDeflected", entityData.get(IS_DEFLECTED));
+    }
+
+    @Override
+    protected void readAdditionalSaveData(CompoundNBT nbt) {
+        super.readAdditionalSaveData(nbt);
+        entityData.set(IS_DEFLECTED, nbt.getBoolean("IsDeflected"));
     }
 }

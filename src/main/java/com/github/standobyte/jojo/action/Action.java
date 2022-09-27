@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -18,13 +19,19 @@ import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.util.utils.JojoModUtil;
 
+import net.minecraft.block.Blocks;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -111,8 +118,47 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return TargetRequirement.NONE;
     }
     
-    public boolean appropriateTarget(ActionTarget.TargetType targetType) {
-        return getTargetRequirement().checkTargetType(targetType);
+    public ActionConditionResult checkRangeAndTarget(ActionTarget target, LivingEntity user, P power) {
+        LivingEntity performer = getPerformer(power.getUser(), power);
+        boolean targetTooFar = false;
+        switch (target.getType()) {
+        case ENTITY:
+            Entity targetEntity = target.getEntity();
+            double rangeSq = getMaxRangeSqEntityTarget();
+            if (!performer.canSee(targetEntity)) {
+                rangeSq /= 4.0D;
+            }
+            if (performer.distanceToSqr(targetEntity) > rangeSq) {
+                targetTooFar = true;
+            }
+            break;
+        case BLOCK:
+            BlockPos targetPos = target.getBlockPos();
+            int buildLimit = 256;
+            if (targetPos.getY() < buildLimit - 1 || target.getFace() != Direction.UP && targetPos.getY() < buildLimit) {
+                double distSq = getMaxRangeSqBlockTarget();
+                if (user.level.getBlockState(targetPos).getBlock() == Blocks.AIR) {
+                    return ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
+                }
+                if (performer.distanceToSqr((double)targetPos.getX() + 0.5D, (double)targetPos.getY() + 0.5D, (double)targetPos.getZ() + 0.5D) > distSq) {
+                    targetTooFar = true;
+                }
+            }
+            break;
+        default:
+            break;
+        }
+
+        if (targetTooFar) {
+            return conditionMessageContinueHold("target_too_far");
+        }
+        
+        ActionConditionResult targetCheck = checkTarget(target, user, power);
+        return targetCheck;
+    }
+    
+    protected ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, P power) {
+        return ActionConditionResult.POSITIVE;
     }
     
     public double getMaxRangeSqEntityTarget() {
@@ -147,17 +193,26 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     public final Action<P> getVisibleAction(P power) {
     	if (isUnlocked(power)) {
     		Action<P> replacingVariation = replaceAction(power);
-    		return replacingVariation.isUnlocked(power) ? replacingVariation : this;
+    		return replacingVariation == null || replacingVariation.isUnlocked(power) ? replacingVariation : this;
     	}
         return null;
     }
     
+    @Nullable
     protected Action<P> replaceAction(P power) {
     	return this;
     }
     
-    protected static ActionConditionResult conditionMessage(String postfix) {
+    public boolean validateInput() {
+        return false;
+    }
+    
+    public static ActionConditionResult conditionMessage(String postfix) {
         return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition." + postfix));
+    }
+    
+    public static ActionConditionResult conditionMessageContinueHold(String postfix) {
+        return ActionConditionResult.createNegativeContinueHold(new TranslationTextComponent("jojo.message.action_condition." + postfix));
     }
     
     public Action<P> getShiftVariationIfPresent() {
@@ -178,6 +233,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     public void onClick(World world, LivingEntity user, P power) {}
+    
+    public void afterClick(World world, LivingEntity user, P power, boolean passedRequirements) {}
     
     public ActionTarget targetBeforePerform(World world, LivingEntity user, P power, ActionTarget target) {
         return target;
@@ -281,6 +338,12 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return false;
     }
     
+    public void appendWarnings(List<ITextComponent> warnings, P power, PlayerEntity clientPlayerUser) {}
+    
+    public boolean greenSelection(P power, ActionConditionResult conditionCheck) {
+        return false;
+    }
+    
     public String getTranslationKey(P power, ActionTarget target) {
         if (translationKey == null) {
             translationKey = Util.makeDescriptionId("action", this.getRegistryName());
@@ -295,6 +358,14 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     public ITextComponent getNameShortened(P power, String key) {
         return getTranslatedName(power, ClientUtil.shortenedTranslationExists(key) ? 
                 ClientUtil.getShortenedTranslationKey(key) : key);
+    }
+    
+    public ResourceLocation getTexture(P power) {
+        return getRegistryName();
+    }
+    
+    public Stream<ResourceLocation> getTexLocationstoLoad() {
+        return Stream.of(getRegistryName());
     }
     
     @Nullable
@@ -334,7 +405,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     
     
-    public static void initShiftVariationsMap() {
+    public static void prepareShiftVariationsMap() {
         SHIFT_VARIATIONS = new HashMap<>();
     }
     
@@ -394,6 +465,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         private boolean cancelsVanillaClick = true;
         private Supplier<SoundEvent> shoutSupplier = () -> null;
         protected List<Supplier<? extends Action<?>>> shiftVariationOf = new ArrayList<>();
+        
+        public T cooldown(int cooldown) {
+            return cooldown(0, cooldown);
+        }
         
         public T cooldown(int technical, int additional) {
             this.cooldownTechnical = technical;

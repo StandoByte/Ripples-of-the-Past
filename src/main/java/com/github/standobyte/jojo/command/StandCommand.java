@@ -130,12 +130,10 @@ public class StandCommand {
         for (ServerPlayerEntity player : targets) {
             IStandPower power = IStandPower.getStandPowerOptional(player).orElse(null);
             if (power != null) {
-                StandType<?> toBeRemoved = power.getType();
-                if (power.clear()) {
-                    power.clearActionLearning();
-                    i++;
-                    removedStand = toBeRemoved;
-                }
+                removedStand = power.getType();
+                power.clear();
+                power.clearActionLearning();
+                i++;
             }
         }
         if (i == 0) {

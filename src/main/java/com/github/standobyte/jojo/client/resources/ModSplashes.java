@@ -25,7 +25,6 @@ import net.minecraft.util.Session;
 public class ModSplashes extends ReloadListener<List<String>> {
 	private static final Random RANDOM = new Random();
 	private final List<String> splashes = new ArrayList<>();
-	@SuppressWarnings("unused")
 	private final Session user;
 	private final ResourceLocation location;
 
@@ -68,7 +67,10 @@ public class ModSplashes extends ReloadListener<List<String>> {
 			return "ゴ ゴ ゴ ゴ ゴ ゴ ゴ ゴ ゴ ゴ";
 		}
 		if (!splashes.isEmpty() && RANDOM.nextInt(420 + splashes.size()) < splashes.size()) {
-			return this.splashes.get(RANDOM.nextInt(this.splashes.size()));
+		    String splash = splashes.get(RANDOM.nextInt(splashes.size()));
+		    if (splash.contains("@p")) {
+		        return user != null ? splash.replace("@p", user.getName()) : null;
+		    }
 		}
 		return null;
 	}

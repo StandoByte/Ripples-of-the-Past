@@ -1,15 +1,16 @@
 package com.github.standobyte.jojo.power;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.action.ActionTargetContainer;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.util.Container;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -43,19 +44,13 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     float getCooldownRatio(Action<?> action, float partialTick);
     void setCooldownTimer(Action<?> action, int value);
     void updateCooldownTimer(Action<?> action, int value, int totalCooldown);
+    void resetCooldowns();
     ActionCooldownTracker getCooldowns();
 
     @Nullable Action<P> getAction(ActionType type, int index, boolean shift);
-    boolean onClickAction(Action<P> action, boolean shift, ActionTarget target);
-    default boolean onClickAction(ActionType type, int index, boolean shift, ActionTarget target) {
-        Action<P> action = this.getAction(type, index, shift);
-        if (action != null) {
-            return onClickAction(action, shift, target);
-        }
-        return false;
-    }
-    ActionConditionResult checkRequirements(Action<P> action, ActionTargetContainer targetContainer, boolean checkTargetType);
-    ActionConditionResult checkTargetType(Action<P> action, ActionTargetContainer targetContainer);
+    boolean clickAction(Action<P> action, boolean shift, ActionTarget target);
+    ActionConditionResult checkRequirements(Action<P> action, Container<ActionTarget> targetContainer, boolean checkTargetType);
+    ActionConditionResult checkTarget(Action<P> action, Container<ActionTarget> targetContainer);
     boolean canUsePower();
     
     default RayTraceResult clientHitResult(Entity cameraEntity, RayTraceResult mcHitResult) {
@@ -92,6 +87,13 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     void syncWithUserOnly();
     void syncWithTrackingOrUser(ServerPlayerEntity player);
 
+    default boolean onClickAction(ActionType type, int index, boolean shift, ActionTarget target, Optional<Action<?>> inputValidation) {
+        Action<P> action = this.getAction(type, index, shift);
+        if (action != null && inputValidation.map(clientAction -> clientAction == action).orElse(true)) {
+            return clickAction(action, shift, target);
+        }
+        return false;
+    }
 
     public static LazyOptional<? extends IPower<?, ?>> getPowerOptional(LivingEntity entity, PowerClassification classification) {
         return classification == PowerClassification.STAND ? IStandPower.getStandPowerOptional(entity) : INonStandPower.getNonStandPowerOptional(entity);

@@ -4,7 +4,7 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.action.actions.TimeStop;
+import com.github.standobyte.jojo.action.stand.TimeStop;
 import com.github.standobyte.jojo.capability.world.TimeStopInstance;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.util.utils.TimeUtil;

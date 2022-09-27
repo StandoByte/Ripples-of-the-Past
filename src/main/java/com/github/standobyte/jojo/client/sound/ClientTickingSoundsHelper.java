@@ -5,7 +5,7 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.action.actions.StandEntityAction;
+import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.entity.MRDetectorEntity;
@@ -71,14 +71,14 @@ public abstract class ClientTickingSoundsHelper {
     }
     
     public static void playStandEntityCancelableActionSound(StandEntity stand, SoundEvent sound, 
-            StandEntityAction action, @Nullable StandEntityAction.Phase phase, float volume, float pitch) {
+            StandEntityAction action, @Nullable StandEntityAction.Phase phase, float volume, float pitch, boolean looping) {
         Minecraft mc = Minecraft.getInstance();
         if (!stand.isVisibleForAll() && !StandUtil.shouldHearStands(mc.player)) {
             return;
         }
         
         SoundCategory category = stand.getSoundSource();
-        PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(stand, sound, category, pitch, volume);
+        PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(stand, sound, category, volume, pitch);
         if (event.isCanceled() || event.getSound() == null) return;
         sound = event.getSound();
         category = event.getCategory();
@@ -86,7 +86,7 @@ public abstract class ClientTickingSoundsHelper {
         pitch = event.getPitch();
         
         mc.getSoundManager().play(new StoppableEntityTickableSound<StandEntity>(sound, category, 
-                volume, pitch, false, stand, e -> e.getCurrentTaskAction() != action
+                volume, pitch, looping, stand, e -> e.getCurrentTaskAction() != action
                         || phase != null && e.getCurrentTaskPhase().map(stPhase -> stPhase != phase).orElse(true)));
     }
     
@@ -100,16 +100,33 @@ public abstract class ClientTickingSoundsHelper {
                 }
 
                 SoundCategory category = stand.getSoundSource();
-                PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(stand, sound, category, pitch, volume);
+                PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(stand, sound, category, volume, pitch);
                 if (event.isCanceled() || event.getSound() == null) return;
                 sound = event.getSound();
                 category = event.getCategory();
                 volume = event.getVolume();
                 pitch = event.getPitch();
-                
+
                 mc.getSoundManager().play(new StandUnsummonTickableSound(sound, category, volume, pitch, user, stand));
             }
         }
+    }
+    
+    public static void playStandEntitySound(StandEntity stand, SoundEvent sound, float volume, float pitch) {
+        Minecraft mc = Minecraft.getInstance();
+        if (!stand.isVisibleForAll() && !StandUtil.shouldHearStands(mc.player)) {
+            return;
+        }
+
+        SoundCategory category = stand.getSoundSource();
+        PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(stand, sound, category, volume, pitch);
+        if (event.isCanceled() || event.getSound() == null) return;
+        sound = event.getSound();
+        category = event.getCategory();
+        volume = event.getVolume();
+        pitch = event.getPitch();
+        
+        mc.getSoundManager().play(new EntityTickableSound(sound, category, volume, pitch, stand));
     }
     
     public static void playHeldActionSound(SoundEvent sound, float volume, float pitch, boolean looping, 
@@ -117,6 +134,16 @@ public abstract class ClientTickingSoundsHelper {
         Minecraft.getInstance().getSoundManager().play(new StoppableEntityTickableSound<LivingEntity>(sound, entity.getSoundSource(), 
                 volume, pitch, looping, entity, 
                 e -> power.getHeldAction(true) != action));
+    }
+    
+    public static void playEntitySound(Entity entity, SoundEvent sound, float volume, float pitch, boolean looping) {
+        Minecraft.getInstance().getSoundManager().play(new LoopingEntityTickableSound(sound, entity.getSoundSource(), volume, pitch, looping, entity));
+    }
+    
+    public static <T extends Entity> void playStoppableEntitySound(T entity, SoundEvent sound, 
+            float volume, float pitch, boolean looping, Predicate<T> stopCondition) {
+        Minecraft.getInstance().getSoundManager().play(new StoppableEntityTickableSound<T>(sound, entity.getSoundSource(), 
+                volume, pitch, looping, entity, stopCondition));
     }
     
     public static void playHamonSparksSound(Entity entity, float volume, float pitch) {

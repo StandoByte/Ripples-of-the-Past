@@ -1,10 +1,14 @@
 package com.github.standobyte.jojo.network.packets.fromclient;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
@@ -24,6 +28,7 @@ public class ClClickActionPacket {
     private final ActionType actionType;
     private final boolean shift;
     private final int index;
+    private Optional<Action<?>> inputValidation = Optional.empty();
     private int targetEntityId = -1;
     @Nullable
     private BlockPos targetBlock;
@@ -59,6 +64,11 @@ public class ClClickActionPacket {
             return new ClClickActionPacket(classification, actionType, shift, index);
         }
     }
+    
+    public ClClickActionPacket validateInput(@Nonnull Action<?> clientClickedAction) {
+        this.inputValidation = Optional.of(clientClickedAction);
+        return this;
+    }
 
     public static void encode(ClClickActionPacket msg, PacketBuffer buf) {
         byte flags = 0;
@@ -82,21 +92,28 @@ public class ClClickActionPacket {
         else if (msg.targetEntityId > 0){
             buf.writeInt(msg.targetEntityId);
         }
+        NetworkUtil.writeOptional(buf, msg.inputValidation, (buffer, action) -> buffer.writeRegistryId(action));
     }
 
     public static ClClickActionPacket decode(PacketBuffer buf) {
         byte flags = buf.readByte();
+        ClClickActionPacket packet;
         switch (flags & 3) {
         case 1:
-            return new ClClickActionPacket(buf.readEnum(PowerClassification.class), buf.readEnum(ActionType.class), 
+            packet = new ClClickActionPacket(buf.readEnum(PowerClassification.class), buf.readEnum(ActionType.class), 
                     (flags & 4) > 0, buf.readVarInt(), buf.readBlockPos(), buf.readEnum(Direction.class));
+            break;
         case 2:
-            return new ClClickActionPacket(buf.readEnum(PowerClassification.class), buf.readEnum(ActionType.class), 
+            packet = new ClClickActionPacket(buf.readEnum(PowerClassification.class), buf.readEnum(ActionType.class), 
                     (flags & 4) > 0, buf.readVarInt(), buf.readInt());
+            break;
         default: // 0
-            return new ClClickActionPacket(buf.readEnum(PowerClassification.class), buf.readEnum(ActionType.class), 
+            packet = new ClClickActionPacket(buf.readEnum(PowerClassification.class), buf.readEnum(ActionType.class), 
                     (flags & 4) > 0, buf.readVarInt());
+            break;
         }
+        packet.inputValidation = NetworkUtil.readOptional(buf, buffer -> buffer.readRegistryIdSafe(Action.class));
+        return packet;
     }
 
     public static void handle(ClClickActionPacket msg, Supplier<NetworkEvent.Context> ctx) {
@@ -109,7 +126,7 @@ public class ClClickActionPacket {
                             ActionTarget.EMPTY
                             : new ActionTarget(msg.targetBlock, msg.blockFace)
                             : new ActionTarget(targetEntity);
-                    power.onClickAction(msg.actionType, msg.index, msg.shift, target);
+                    power.onClickAction(msg.actionType, msg.index, msg.shift, target, msg.inputValidation);
                 });
             }
         });

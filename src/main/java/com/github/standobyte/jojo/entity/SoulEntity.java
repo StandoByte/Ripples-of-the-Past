@@ -43,11 +43,13 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
     private LivingEntity originEntity;
     private UUID originUuid;
     private int lifeSpan;
+    private boolean givesResolve;
     
-    public SoulEntity(World world, LivingEntity originEntity, int lifeSpan) {
+    public SoulEntity(World world, LivingEntity originEntity, int lifeSpan, boolean givesResolve) {
         this(ModEntityTypes.SOUL.get(), world);
         setOriginEntity(originEntity);
         this.lifeSpan = lifeSpan;
+        this.givesResolve = givesResolve;
     }
 
     public SoulEntity(EntityType<?> type, World world) {
@@ -97,7 +99,7 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
                         random.nextGaussian() * 0.02D);
             }
         }
-        else {
+        else if (givesResolve) {
             level.getEntitiesOfClass(LivingEntity.class, 
                     new AxisAlignedBB(getBoundingBox().getCenter(), getBoundingBox().getCenter()).inflate(24), 
                     entity -> !entity.is(originEntity) && originEntity.isAlliedTo(entity)).forEach(entity -> {
@@ -195,6 +197,7 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
     protected void readAdditionalSaveData(CompoundNBT nbt) {
         this.tickCount = nbt.getInt("Age");
         this.lifeSpan = nbt.getInt("LifeSpan");
+        this.givesResolve = nbt.getBoolean("Resolve");
         if (nbt.hasUUID("Origin")) {
             this.originUuid = nbt.getUUID("Origin");
         }
@@ -204,6 +207,7 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
     protected void addAdditionalSaveData(CompoundNBT nbt) {
         nbt.putInt("Age", tickCount);
         nbt.putInt("LifeSpan", lifeSpan);
+        nbt.putBoolean("Resolve", givesResolve);
         if (originUuid != null) {
             nbt.putUUID("Origin", originEntity.getUUID());
         }

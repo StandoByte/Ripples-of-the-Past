@@ -14,6 +14,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.StandController;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEffects;
@@ -139,7 +140,7 @@ public class StandUtil {
                 }
                 else {
                 	Minecraft mc = Minecraft.getInstance();
-                    mc.setCameraEntity(manualControl ? standEntity : player);
+                	ClientUtil.setCameraEntityPreventShaderSwitch(mc, manualControl ? standEntity : player);
                     if (manualControl) {
                     	mc.player.xxa = 0;
                     	mc.player.zza = 0;
@@ -174,9 +175,11 @@ public class StandUtil {
                     return 1F;
                 }).orElse(1F);
             }
+            if (target.hasEffect(ModEffects.RESOLVE.get())) {
+                points *= Math.max(1 / (stand.getResolveRatio() + 0.2F), 1);
+            }
             
-            float pts = points;
-            stand.getResolveCounter().addResolveOnAttack(pts);
+            stand.getResolveCounter().addResolveOnAttack(points);
         }
     }
     

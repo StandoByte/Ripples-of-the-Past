@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.action.actions.StandAction;
+import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.power.IPower;
 
@@ -15,9 +15,13 @@ import net.minecraft.util.math.MathHelper;
 
 public class ActionLearningProgressMap<P extends IPower<P, ?>> {
     private final Map<Action<P>, Float> wrappedMap = new HashMap<>();
+    
+    boolean hasEntry(Action<P> action) {
+        return wrappedMap.containsKey(action);
+    }
 
     float getLearningProgressPoints(Action<P> action, P power, boolean maxLimit) {
-        if (!wrappedMap.containsKey(action)) {
+        if (!hasEntry(action)) {
             return -1F;
         }
         return maxLimit ? MathHelper.clamp(wrappedMap.get(action), 0F, action.getMaxTrainingPoints(power))
@@ -36,23 +40,20 @@ public class ActionLearningProgressMap<P extends IPower<P, ?>> {
         wrappedMap.forEach(consumer);
     }
     
-    void readFromNbt(CompoundNBT cnbt) {
-        if (cnbt.contains("ActionLearning", 10)) {
-            CompoundNBT nbt = cnbt.getCompound("ActionLearning");
-            nbt.getAllKeys().forEach(actionName -> {
-                Action<?> action = ModActions.Registry.getRegistry().getValue(new ResourceLocation(actionName));
-                if (action instanceof StandAction && nbt.contains(actionName, 5)) {
-                    wrappedMap.put((Action<P>) action, nbt.getFloat(actionName));
-                }
-            });
-        }
+    void fromNBT(CompoundNBT nbt) {
+        nbt.getAllKeys().forEach(actionName -> {
+            Action<?> action = ModActions.Registry.getRegistry().getValue(new ResourceLocation(actionName));
+            if (action instanceof StandAction && nbt.contains(actionName, 5)) {
+                wrappedMap.put((Action<P>) action, nbt.getFloat(actionName));
+            }
+        });
     }
     
-    void writeToNbt(CompoundNBT cnbt) {
+    CompoundNBT toNBT() {
         CompoundNBT nbt = new CompoundNBT();
         forEach((action, progress) -> {
             nbt.putFloat(action.getRegistryName().toString(), progress);
         });
-        cnbt.put("ActionLearning", nbt);
+        return nbt;
     }
 }
