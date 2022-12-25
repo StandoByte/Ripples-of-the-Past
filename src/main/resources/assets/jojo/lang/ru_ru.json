@@ -1221,6 +1221,9 @@
   "jojo.rps.too_far": "%s слишком далеко",
   "jojo.rps.game_invite.text": "%s хочет сыграть с вами в \"камень, ножницы, бумага\"! Введите %s, чтобы принять приглашение",
   "jojo.rps.game_invite.sent": "Отправлено приглашение %s",
+  "jojo.rps.rock": "Камень",
+  "jojo.rps.paper": "Бумага",
+  "jojo.rps.scissors": "Ножницы",
   
   "stand.jojo.mr_president": "Mr.President",
   "_entity.jojo.coco_jumbo_turtle": "Coco Jumbo",

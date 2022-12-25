@@ -40,4 +40,8 @@ public class ModParticles {
     public static final RegistryObject<BasicParticleType> FLAME_ONE_TICK = PARTICLES.register("flame", () -> new BasicParticleType(false));
     
     public static final RegistryObject<BasicParticleType> CD_RESTORATION = PARTICLES.register("cd_restoration", () -> new BasicParticleType(false));
+    
+    public static final RegistryObject<BasicParticleType> RPS_ROCK = PARTICLES.register("rps_rock", () -> new BasicParticleType(false));
+    public static final RegistryObject<BasicParticleType> RPS_PAPER = PARTICLES.register("rps_paper", () -> new BasicParticleType(false));
+    public static final RegistryObject<BasicParticleType> RPS_SCISSORS = PARTICLES.register("rps_scissors", () -> new BasicParticleType(false));
 }

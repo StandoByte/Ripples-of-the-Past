@@ -108,6 +108,7 @@ public class RockPaperScissorsScreen extends ChatScreen {
         renderElements(matrixStack, windowX, windowY, mouseX, mouseY);
         super.render(matrixStack, mouseX, mouseY, partialTick);
         renderCheatIcon(matrixStack, windowX, windowY, mouseX, mouseY);
+        renderTooltips(matrixStack, windowX, windowY, mouseX, mouseY);
     }
 
     @SuppressWarnings("deprecation")
@@ -129,7 +130,7 @@ public class RockPaperScissorsScreen extends ChatScreen {
             Pick pick1 = game.player1.getPreviousPicks().get(i);
             blit(matrixStack, windowX + 66, windowY + y, getIconTexX(pick1), HEIGHT, 16, 16);
             Pick pick2 = game.player2.getPreviousPicks().get(i);
-            blit(matrixStack, windowX + 101, windowY + y, getIconTexX(pick2), HEIGHT, 16, 16);
+            blit(matrixStack, windowX + 101, windowY + y, getIconTexX(pick2), HEIGHT + 16, 16, 16);
             if (pick1.beats(pick2)) {
                 blit(matrixStack, windowX + 84, windowY + y, 15, HEIGHT + 18, 15, 15);
             }
@@ -153,15 +154,15 @@ public class RockPaperScissorsScreen extends ChatScreen {
             blit(matrixStack, windowX + 44, windowY + 26 + nonTieRound * 18, getIconTexX(Pick.SCISSORS), HEIGHT, 16, 16);
         }
         else {
-            blit(matrixStack, windowX + 66, windowY + 26 + nonTieRound * 18, getIconTexX(game.player1.getCurrentPick()), HEIGHT, 18, 18);
+            blit(matrixStack, windowX + 66, windowY + 26 + nonTieRound * 18, getIconTexX(game.player1.getCurrentPick()), HEIGHT, 16, 16);
         }
         Pick opponentPick = game.player2.getCurrentPick();
         if (opponentPick != null) {
-            blit(matrixStack, windowX + 101, windowY + 26 + nonTieRound * 18, getIconTexX(opponentPick), HEIGHT, 18, 18);
+            blit(matrixStack, windowX + 101, windowY + 26 + nonTieRound * 18, getIconTexX(opponentPick), HEIGHT + 16, 16, 16);
         }
         blit(matrixStack, windowX + 121, windowY + 11 + nonTieRound * 18, 173, 0, 24, 26);
         Pick opponentPickThoughts = opponentPick != null ? opponentPick : game.player2.getPickThoughts();
-        blit(matrixStack, windowX + 128, windowY + 12 + nonTieRound * 18, opponentPickThoughts != null ? getIconTexX(opponentPickThoughts) : 102, HEIGHT, 16, 16);
+        blit(matrixStack, windowX + 128, windowY + 12 + nonTieRound * 18, opponentPickThoughts != null ? getIconTexX(opponentPickThoughts) : 102, HEIGHT + 16, 16, 16);
 
         RenderSystem.disableRescaleNormal();
         RenderSystem.disableDepthTest();
@@ -188,6 +189,12 @@ public class RockPaperScissorsScreen extends ChatScreen {
                 renderTooltip(matrixStack, minecraft.font.split(new TranslationTextComponent(
                         "jojo.rps.cheat." + cheatPowerCap.getType().getRegistryName().toString().replace(":", ".")), 150), mouseX, mouseY);
             }
+        }
+    }
+
+    private void renderTooltips(MatrixStack matrixStack, int windowX, int windowY, int mouseX, int mouseY) {
+        if (game.player1.getCurrentPick() == null && pickMouseOver != null) {
+            renderTooltip(matrixStack, new TranslationTextComponent("jojo.rps." + pickMouseOver.name().toLowerCase()), mouseX, mouseY);
         }
     }
     

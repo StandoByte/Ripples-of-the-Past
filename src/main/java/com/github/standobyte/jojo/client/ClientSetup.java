@@ -17,6 +17,7 @@ import com.github.standobyte.jojo.client.particle.HamonSparkParticle;
 import com.github.standobyte.jojo.client.particle.MeteoriteVirusParticle;
 import com.github.standobyte.jojo.client.particle.OneTickFlameParticle;
 import com.github.standobyte.jojo.client.particle.OnomatopoeiaParticle;
+import com.github.standobyte.jojo.client.particle.RPSPickPartile;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.particle.custom.FirstPersonHamonAura;
 import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
@@ -423,6 +424,9 @@ public class ClientSetup {
         mc.particleEngine.register(ModParticles.AIR_STREAM.get(),           AirStreamParticle.Factory::new);
         mc.particleEngine.register(ModParticles.FLAME_ONE_TICK.get(),       OneTickFlameParticle.Factory::new);
         mc.particleEngine.register(ModParticles.CD_RESTORATION.get(),       CDRestorationParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.RPS_ROCK.get(),             RPSPickPartile.Factory::new);
+        mc.particleEngine.register(ModParticles.RPS_PAPER.get(),            RPSPickPartile.Factory::new);
+        mc.particleEngine.register(ModParticles.RPS_SCISSORS.get(),         RPSPickPartile.Factory::new);
 
         CustomParticlesHelper.saveSprites(mc);
         // yep...

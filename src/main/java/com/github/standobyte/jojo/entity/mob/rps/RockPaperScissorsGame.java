@@ -16,6 +16,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import com.github.standobyte.jojo.action.stand.effect.BoyIIManStandPartTakenEffect;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.init.ModCustomStats;
+import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
@@ -38,8 +39,12 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.particles.IParticleData;
 import net.minecraft.potion.Effects;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
@@ -90,6 +95,7 @@ public class RockPaperScissorsGame {
 
     public void makeAPick(Entity entity, @Nullable Pick pick, boolean canChange) {
         Pair<RockPaperScissorsPlayerData, RockPaperScissorsPlayerData> players = playersPair(entity);
+        World world = entity.level;
         if (players == null) return;
         RockPaperScissorsPlayerData player = players.getLeft();
         RockPaperScissorsPlayerData opponent = players.getRight();
@@ -98,6 +104,14 @@ public class RockPaperScissorsGame {
         if (player.pick != null && opponent.pick != null) {
             comparePicks(player, opponent);
             comparePicks(opponent, player);
+            
+            if (!world.isClientSide()) {
+                ((ServerWorld) world).sendParticles(player1.pick.getParticle(), player1.entity.getX(), player1.entity.getY() + player1.entity.getBbHeight(), player1.entity.getZ(), 
+                        0, 0, 0, 0, 0);
+                ((ServerWorld) world).sendParticles(player2.pick.getParticle(), player2.entity.getX(), player2.entity.getY() + player2.entity.getBbHeight(), player2.entity.getZ(), 
+                        0, 0, 0, 0, 0);
+            }
+            
             player1.pick = null;
             player1.canOpponentReadThoughts = false;
             player1.pickThoughts = null;
@@ -106,16 +120,16 @@ public class RockPaperScissorsGame {
             player2.canOpponentReadThoughts = false;
             player2.pickThoughts = null;
             
-            onRoundEnd(entity.level);
+            onRoundEnd(world);
             if (gameWinner != null) {
-                onGameOver(entity.level, gameWinner);
+                onGameOver(world, gameWinner);
             }
             round++;
             newRound = true;
             lastRoundWinner = null;
         }
-        if (player.canOpponentReadThoughts && !entity.level.isClientSide()) {
-            this.sendPick((ServerWorld) entity.level, player, true);
+        if (player.canOpponentReadThoughts && !world.isClientSide()) {
+            this.sendPick((ServerWorld) world, player, true);
         }
     }
     
@@ -136,6 +150,10 @@ public class RockPaperScissorsGame {
             else {
                 roundTie();
             }
+            
+            Vector3d pos = player1.entity.position().scale(0.5).add(player2.entity.position().scale(0.5));
+            world.playSound(null, pos.x, pos.y, pos.z, 
+                    SoundEvents.UI_STONECUTTER_SELECT_RECIPE, SoundCategory.AMBIENT, 1.0F, 2.0F);
         }
     }
 
@@ -570,22 +588,42 @@ public class RockPaperScissorsGame {
     }
 
     public enum Pick {
-        ROCK,
-        PAPER,
-        SCISSORS;
-
-        public boolean beats(Pick opponentPick) {
-            switch (this) {
-            case ROCK:
+        ROCK {
+            @Override
+            public boolean beats(Pick opponentPick) {
                 return opponentPick == SCISSORS;
-            case PAPER:
-                return opponentPick == ROCK;
-            case SCISSORS:
-                return opponentPick == PAPER;
-            default:
-                throw new IllegalStateException("Rock-paper-scissors game only supports three shapes");
             }
-        }
+
+            @Override
+            public IParticleData getParticle() {
+                return ModParticles.RPS_ROCK.get();
+            }
+        },
+        PAPER {
+            @Override
+            public boolean beats(Pick opponentPick) {
+                return opponentPick == ROCK;
+            }
+
+            @Override
+            public IParticleData getParticle() {
+                return ModParticles.RPS_PAPER.get();
+            }
+        },
+        SCISSORS {
+            @Override
+            public boolean beats(Pick opponentPick) {
+                return opponentPick == PAPER;
+            }
+
+            @Override
+            public IParticleData getParticle() {
+                return ModParticles.RPS_SCISSORS.get();
+            }
+        };
+
+        public abstract boolean beats(Pick opponentPick);
+        public abstract IParticleData getParticle();
 
         public boolean ties(Pick opponentPick) {
             return this == opponentPick;
