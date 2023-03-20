@@ -196,7 +196,7 @@ public class ResolveCounter {
         int resolveLevel = getResolveLevel();
         if (resolve == getMaxResolveValue() && stand.getUser() != null && !stand.getUser().level.isClientSide() && !stand.getUser().hasEffect(ModEffects.RESOLVE.get())) {
             stand.getUser().addEffect(new EffectInstance(ModEffects.RESOLVE.get(), 
-                    RESOLVE_EFFECT_MAX[Math.min(resolveLevel, RESOLVE_EFFECT_MAX.length)], resolveLevel, false, 
+                    RESOLVE_EFFECT_MAX[Math.min(resolveLevel, RESOLVE_EFFECT_MAX.length - 1)], resolveLevel, false, 
                     false, true));
         }
     }
