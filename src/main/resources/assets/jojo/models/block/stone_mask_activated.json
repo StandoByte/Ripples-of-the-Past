@@ -1,7 +1,7 @@
 {
   "ambientocclusion": false,
   "textures": {
-  	"particle": "jojo:block/stone_mask_face",
+      "particle": "jojo:block/stone_mask_face",
     "face": "jojo:block/stone_mask_face",
     "left": "jojo:block/stone_mask_left",
     "right": "jojo:block/stone_mask_right",

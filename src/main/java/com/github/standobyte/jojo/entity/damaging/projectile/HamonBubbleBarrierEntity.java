@@ -37,7 +37,7 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
         super(ModEntityTypes.HAMON_BUBBLE_BARRIER.get(), shooter, world);
         this.power = power;
         barrierMaxTicks = (int) (100F * power.getTypeSpecificData(ModNonStandPowers.HAMON.get())
-        		.map(hamon -> hamon.getBloodstreamEfficiency()).orElse(1F));
+                .map(hamon -> hamon.getBloodstreamEfficiency()).orElse(1F));
     }
 
     public HamonBubbleBarrierEntity(EntityType<? extends HamonBubbleBarrierEntity> type, World world) {
@@ -76,11 +76,11 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
     public void remove() {
         super.remove();
         if (!level.isClientSide()) {
-	        getPassengers().forEach(entity -> {
-	            if (entity instanceof LivingEntity) {
-	                ((LivingEntity) entity).removeEffect(ModEffects.STUN.get());
-	            }
-	        });
+            getPassengers().forEach(entity -> {
+                if (entity instanceof LivingEntity) {
+                    ((LivingEntity) entity).removeEffect(ModEffects.STUN.get());
+                }
+            });
         }
     }
     
@@ -189,7 +189,7 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
     }
 
     @Override
-	public int ticksLifespan() {
+    public int ticksLifespan() {
         return barrier ? 100 : 100 + barrierMaxTicks;
     }
 

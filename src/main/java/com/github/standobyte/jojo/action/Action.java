@@ -105,7 +105,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
             return itemCheck;
         }
         if (!user.canUpdate() && !canBeUsedByStoppedInTime(user, power)) {
-        	return ActionConditionResult.NEGATIVE;
+            return ActionConditionResult.NEGATIVE;
         }
         return checkSpecificConditions(user, power, target);
     }
@@ -191,16 +191,16 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     @Nullable
     public final Action<P> getVisibleAction(P power) {
-    	if (isUnlocked(power)) {
-    		Action<P> replacingVariation = replaceAction(power);
-    		return replacingVariation == null || replacingVariation.isUnlocked(power) ? replacingVariation : this;
-    	}
+        if (isUnlocked(power)) {
+            Action<P> replacingVariation = replaceAction(power);
+            return replacingVariation == null || replacingVariation.isUnlocked(power) ? replacingVariation : this;
+        }
         return null;
     }
     
     @Nullable
     protected Action<P> replaceAction(P power) {
-    	return this;
+        return this;
     }
     
     public boolean validateInput() {
@@ -311,7 +311,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     protected boolean playsVoiceLineOnShift() {
-    	return isShiftVariation();
+        return isShiftVariation();
     }
     
     public float getHeldSlowDownFactor() {

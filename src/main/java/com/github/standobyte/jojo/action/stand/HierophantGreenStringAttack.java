@@ -33,18 +33,18 @@ public class HierophantGreenStringAttack extends StandEntityAction {
     }
 
     private void addProjectile(World world, StandEntity standEntity, float yRotDelta, float xRotDelta, boolean shift) {
-    	HGStringEntity string = new HGStringEntity(world, standEntity, yRotDelta, xRotDelta, shift);
-    	if (!shift) {
-    		string.addKnockback(standEntity.guardCounter());
-    	}
-    	standEntity.addProjectile(string);
+        HGStringEntity string = new HGStringEntity(world, standEntity, yRotDelta, xRotDelta, shift);
+        if (!shift) {
+            string.addKnockback(standEntity.guardCounter());
+        }
+        standEntity.addProjectile(string);
     }
     
     protected boolean isCancelable(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction, Phase phase) {
-    	return !this.hasShiftVariation() && 
-    			(newAction == ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get()
-    			|| newAction == ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED.get())
-    			|| super.isCancelable(standPower, standEntity, newAction, phase);
+        return !this.hasShiftVariation() && 
+                (newAction == ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get()
+                || newAction == ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED.get())
+                || super.isCancelable(standPower, standEntity, newAction, phase);
     }
     
     @Override

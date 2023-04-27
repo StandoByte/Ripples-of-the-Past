@@ -10,11 +10,11 @@ import net.minecraft.entity.LivingEntity;
 
 
 public class BladeHatArmorModel extends BipedModel<LivingEntity> {
-	private final ModelRenderer pink_left;
-	private final ModelRenderer pink_right;
+    private final ModelRenderer pink_left;
+    private final ModelRenderer pink_right;
 
-	public BladeHatArmorModel(float size) {
-	    super(size);
+    public BladeHatArmorModel(float size) {
+        super(size);
         texWidth = 32;
         texHeight = 32;
 
@@ -35,16 +35,16 @@ public class BladeHatArmorModel extends BipedModel<LivingEntity> {
         head.addChild(pink_right);
         setRotationAngle(pink_right, 0.0F, 0.0F, 0.3491F);
         pink_right.texOffs(0, 25).addBox(0.0F, -1.5F, -1.5F, 0.0F, 3.0F, 3.0F, 0.0F, false);
-	}
+    }
     
     @Override
     protected Iterable<ModelRenderer> bodyParts() {
         return Collections.emptyList();
     }
 
-	public void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
-		modelRenderer.xRot = x;
-		modelRenderer.yRot = y;
-		modelRenderer.zRot = z;
-	}
+    public void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
+        modelRenderer.xRot = x;
+        modelRenderer.yRot = y;
+        modelRenderer.zRot = z;
+    }
 }

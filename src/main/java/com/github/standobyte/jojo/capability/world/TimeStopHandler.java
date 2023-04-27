@@ -47,9 +47,9 @@ public class TimeStopHandler {
             }
             
             else if (entity instanceof LivingEntity && !entity.canUpdate()) {
-            	if (entity.invulnerableTime > 0) {
-            		entity.invulnerableTime--;
-            	}
+                if (entity.invulnerableTime > 0) {
+                    entity.invulnerableTime--;
+                }
                 entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.lastHurtByStandTick());
             }
         }
@@ -116,7 +116,7 @@ public class TimeStopHandler {
             });
             
             if (timeStopInstances.size() == 1) {
-            	SaveFileUtilCapProvider.getSaveFileCap(serverWorld.getServer()).setTimeStopGamerules(serverWorld);
+                SaveFileUtilCapProvider.getSaveFileCap(serverWorld.getServer()).setTimeStopGamerules(serverWorld);
             }
             else {
                 timeStopInstances.values().forEach(existingInstance -> existingInstance.removeSoundsIfCrosses(instance));
@@ -125,7 +125,7 @@ public class TimeStopHandler {
     }
     
     boolean hasTimeStopInstances() {
-    	return !timeStopInstances.isEmpty();
+        return !timeStopInstances.isEmpty();
     }
 
     public void updateEntityTimeStop(Entity entity, boolean canMove, boolean checkEffect) {
@@ -159,7 +159,7 @@ public class TimeStopHandler {
     }
     
     public void reset() {
-    	timeStopInstances.clear();
+        timeStopInstances.clear();
         MCUtil.getAllEntities(world).forEach(entity -> {
             updateEntityTimeStop(entity, true, true);
         });
@@ -182,7 +182,7 @@ public class TimeStopHandler {
                 }
             });
             if (timeStopInstances.isEmpty()) {
-            	SaveFileUtilCapProvider.getSaveFileCap(serverWorld.getServer()).restoreTimeStopGamerules(serverWorld);
+                SaveFileUtilCapProvider.getSaveFileCap(serverWorld.getServer()).restoreTimeStopGamerules(serverWorld);
             }
         }
         
@@ -194,12 +194,12 @@ public class TimeStopHandler {
     }
     
     public void sendPlayerState(ServerPlayerEntity player) {
-    	boolean canMove = true;
-    	boolean canSee = true;
-    	if (TimeUtil.isTimeStopped(player.level, player.blockPosition())) {
-        	canMove = TimeUtil.canPlayerMoveInStoppedTime(player, true);
-        	canSee = TimeUtil.canPlayerSeeInStoppedTime(canMove, TimeUtil.hasTimeStopAbility(player));
-    	}
+        boolean canMove = true;
+        boolean canSee = true;
+        if (TimeUtil.isTimeStopped(player.level, player.blockPosition())) {
+            canMove = TimeUtil.canPlayerMoveInStoppedTime(player, true);
+            canSee = TimeUtil.canPlayerSeeInStoppedTime(canMove, TimeUtil.hasTimeStopAbility(player));
+        }
         PacketManager.sendToClient(new TimeStopPlayerStatePacket(canSee, canMove), player);
     }
     

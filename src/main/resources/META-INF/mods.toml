@@ -4,15 +4,15 @@ license="GNU GPL v3.0"
 issueTrackerURL="https://github.com/StandoByte/Ripples-of-the-Past/issues"
 
 [[mods]]
-	modId="jojo"
-	version="${file.jarVersion}"
-	displayName="Ripples of the Past"
-	updateJSONURL="https://raw.githubusercontent.com/StandoByte/Ripples-of-the-Past/1.16.5/update.json"
-	displayURL="https://curseforge.com/minecraft/mc-mods/ripples-of-the-past/"
-	logoFile="logo.png"
-	credits="\n  Stand sound effects:\n    Spybreak001 - https://youtube.com/user/Spybreak001\n    dendy - https://www.youtube.com/channel/UCfFQSPN-Zxx8jEALchUPpPw\n    Folzy SFX Sound Design (the channel has been renamed and all the videos seem to be removed from the public access)\n    JoJo SFX Green Screen & Blue Screen - https://www.youtube.com/channel/UCkxl6FSocj8mHEIJRw5KjYg  \n  Voice lines from Eyes of Heaven and All Star Battle games: https://sounds-resource.com/\n  Boosty subscribers:\n    YetDarker"
-	authors="StandoByte"
-	description='''
+    modId="jojo"
+    version="${file.jarVersion}"
+    displayName="Ripples of the Past"
+    updateJSONURL="https://raw.githubusercontent.com/StandoByte/Ripples-of-the-Past/1.16.5/update.json"
+    displayURL="https://curseforge.com/minecraft/mc-mods/ripples-of-the-past/"
+    logoFile="logo.png"
+    credits="\n  Stand sound effects:\n    Spybreak001 - https://youtube.com/user/Spybreak001\n    dendy - https://www.youtube.com/channel/UCfFQSPN-Zxx8jEALchUPpPw\n    Folzy SFX Sound Design (the channel has been renamed and all the videos seem to be removed from the public access)\n    JoJo SFX Green Screen & Blue Screen - https://www.youtube.com/channel/UCkxl6FSocj8mHEIJRw5KjYg  \n  Voice lines from Eyes of Heaven and All Star Battle games: https://sounds-resource.com/\n  Boosty subscribers:\n    YetDarker"
+    authors="StandoByte"
+    description='''
     This mod adds items and supernatural powers (Hamon, vampirism and Stands) from the JoJo's Bizarre Adventure manga and anime series.'''
 
 [[dependencies.jojo]]

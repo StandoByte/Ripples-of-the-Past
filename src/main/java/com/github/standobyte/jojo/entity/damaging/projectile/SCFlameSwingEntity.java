@@ -25,7 +25,7 @@ public class SCFlameSwingEntity extends MRFlameEntity {
     }
     
     @Override
-	public int ticksLifespan() {
+    public int ticksLifespan() {
         return 20;
     }
 
@@ -39,7 +39,7 @@ public class SCFlameSwingEntity extends MRFlameEntity {
     protected void afterBlockHit(BlockRayTraceResult blockRayTraceResult, boolean blockDestroyed) {
         if (!level.isClientSide) {
             if (ForgeEventFactory.getMobGriefingEvent(level, getEntity())) {
-            	super.afterBlockHit(blockRayTraceResult, blockDestroyed);
+                super.afterBlockHit(blockRayTraceResult, blockDestroyed);
             }
         }
     }

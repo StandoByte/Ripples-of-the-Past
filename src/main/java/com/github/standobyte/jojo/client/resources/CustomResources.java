@@ -34,11 +34,11 @@ public class CustomResources {
     }
     
     public static ResolveShadersListManager getResolveShadersListManager() {
-    	return resolveShadersListManager;
+        return resolveShadersListManager;
     }
     
     public static ModSplashes getModSplashes() {
-    	return modSplashes;
+        return modSplashes;
     }
 
 }

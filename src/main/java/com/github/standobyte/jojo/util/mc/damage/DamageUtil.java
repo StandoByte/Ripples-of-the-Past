@@ -228,16 +228,16 @@ public class DamageUtil {
         
         target.invulnerableTime = invulTime;
         if (targetLiving != null) {
-        	targetLiving.lastHurt = lastHurt;
+            targetLiving.lastHurt = lastHurt;
         }
         return dealtDamage;
     }
     
     public static DamageSource enderDragonDamageHack(DamageSource damageSource, Entity target) {
-    	if (target instanceof EnderDragonEntity || target instanceof EnderDragonPartEntity) {
-    		damageSource.setExplosion();
-    	}
-    	return damageSource;
+        if (target instanceof EnderDragonEntity || target instanceof EnderDragonPartEntity) {
+            damageSource.setExplosion();
+        }
+        return damageSource;
     }
     
     public static float addArmorPiercing(float damage, float armorPiercing, @Nullable LivingEntity armoredTarget) {
@@ -262,7 +262,7 @@ public class DamageUtil {
     }
     
     public static void knockback(LivingEntity target, float strength, float yRot) {
-    	target.knockback(strength, 
+        target.knockback(strength, 
                 (double) MathHelper.sin(yRot * MathUtil.DEG_TO_RAD), 
                 (double) (-MathHelper.cos(yRot * MathUtil.DEG_TO_RAD)));
     }
@@ -282,15 +282,15 @@ public class DamageUtil {
     }
     
     public static void suffocateTick(LivingEntity entity, float speed) {
-    	if (entity.canBreatheUnderwater() || entity instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) entity)
-    	        || entity instanceof IronGolemEntity) return;
-    	
-    	if (entity.getAirSupply() > 0) {
-    		int airReduction = Math.max((int) ((float) entity.getMaxAirSupply() * MathHelper.clamp(speed, 0F, 1F)), 1);
-    		entity.setAirSupply(Math.max(entity.getAirSupply() - airReduction, -18));
-    	}
-    	else {
-    		entity.hurt(SUFFOCATION, 1F);
-    	}
+        if (entity.canBreatheUnderwater() || entity instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) entity)
+                || entity instanceof IronGolemEntity) return;
+        
+        if (entity.getAirSupply() > 0) {
+            int airReduction = Math.max((int) ((float) entity.getMaxAirSupply() * MathHelper.clamp(speed, 0F, 1F)), 1);
+            entity.setAirSupply(Math.max(entity.getAirSupply() - airReduction, -18));
+        }
+        else {
+            entity.hurt(SUFFOCATION, 1F);
+        }
     }
 }

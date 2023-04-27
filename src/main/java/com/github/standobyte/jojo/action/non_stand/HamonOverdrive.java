@@ -95,7 +95,7 @@ public class HamonOverdrive extends HamonAction {
                 if (DamageUtil.dealHamonDamage(targetEntity, damage, user, null)) {
                     hamon.hamonPointsFromAction(HamonStat.STRENGTH, getEnergyCost(power) * dmgScale);
                     if (knockback > 0) {
-                    	DamageUtil.knockback(targetEntity, knockback, user.yRot);
+                        DamageUtil.knockback(targetEntity, knockback, user.yRot);
                     }
                 }
             }

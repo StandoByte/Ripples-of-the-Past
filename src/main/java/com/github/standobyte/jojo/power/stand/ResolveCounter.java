@@ -101,9 +101,9 @@ public class ResolveCounter {
             if (noResolveDecayTicks > 0) {
                 noResolveDecayTicks--;
                 if (noResolveDecayTicks > 0) {
-                	if (!stand.isActive()) {
-                		noResolveDecayTicks--;
-                	}
+                    if (!stand.isActive()) {
+                        noResolveDecayTicks--;
+                    }
                 }
                 else {
                     if (saveNextRecord) {
@@ -325,11 +325,11 @@ public class ResolveCounter {
     }
 
     public void onResolveEffectStarted(int amplifier) {
-    	int newLevel = amplifier + 1;
+        int newLevel = amplifier + 1;
         stand.setResolveLevel(Math.min(newLevel, stand.getMaxResolveLevel()), true);
-    	if (newLevel > stand.getMaxResolveLevel()) {
+        if (newLevel > stand.getMaxResolveLevel()) {
             levels.incExtraLevel(stand);
-    	}
+        }
         setResolveValue(stand.getMaxResolve(), 0);
     }
 

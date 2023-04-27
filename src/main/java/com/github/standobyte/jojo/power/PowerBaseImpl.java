@@ -118,24 +118,24 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
 
     private void newDayCheck() {
-    	if (user != null) {
-	        long day = user.level.getDayTime() / 24000;
-	        long prevDay = lastTickedDay;
-	        lastTickedDay = day;
-	        if (prevDay == -1) {
-	        	return;
-	        }
-	        // FIXME (?) ticks for offline players on servers?
-	        if (prevDay != day) {
-	        	onNewDay(prevDay, day);
-	        }
-    	}
+        if (user != null) {
+            long day = user.level.getDayTime() / 24000;
+            long prevDay = lastTickedDay;
+            lastTickedDay = day;
+            if (prevDay == -1) {
+                return;
+            }
+            // FIXME (?) ticks for offline players on servers?
+            if (prevDay != day) {
+                onNewDay(prevDay, day);
+            }
+        }
     }
     
     protected void onNewDay(long prevDay, long day) {
-    	if (hasPower()) {
-    		getType().onNewDay(user, getThis(), prevDay, day);
-    	}
+        if (hasPower()) {
+            getType().onNewDay(user, getThis(), prevDay, day);
+        }
     }
     
     @Override
@@ -251,7 +251,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                     action.playVoiceLine(user, getThis(), target, wasActive, shift);
                 }
                 performAction(action, target);
-            	stopHeldAction(false);
+                stopHeldAction(false);
                 return true;
             }
             else {
@@ -510,9 +510,9 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     
     @Override
     public void onLeap() {
-    	if (!isUserCreative()) {
-    		setLeapCooldown(getLeapCooldownPeriod());
-    	}
+        if (!isUserCreative()) {
+            setLeapCooldown(getLeapCooldownPeriod());
+        }
     }
     
     @Override
@@ -542,7 +542,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
 
     @Override
     public void readNBT(CompoundNBT nbt) {
-    	lastTickedDay = nbt.getLong("LastDay");
+        lastTickedDay = nbt.getLong("LastDay");
         cooldowns = new ActionCooldownTracker(nbt.getCompound("Cooldowns"));
         leapCooldown = nbt.getInt("LeapCd");
     }

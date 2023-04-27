@@ -11,8 +11,8 @@ public class MRFlameRenderer extends FlameRenderer<MRFlameEntity> {
         super(renderManager);
     }
     
-	@Override
-	protected Vector3d getStartingPos(MRFlameEntity entity) {
-		return entity.getStartingPos();
-	}
+    @Override
+    protected Vector3d getStartingPos(MRFlameEntity entity) {
+        return entity.getStartingPos();
+    }
 }

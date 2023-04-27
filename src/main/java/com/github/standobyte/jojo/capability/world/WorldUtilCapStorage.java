@@ -10,8 +10,8 @@ public class WorldUtilCapStorage implements IStorage<WorldUtilCap> {
 
     @Override
     public INBT writeNBT(Capability<WorldUtilCap> capability, WorldUtilCap instance, Direction side) {
-    	CompoundNBT nbt = new CompoundNBT();
-    	return nbt;
+        CompoundNBT nbt = new CompoundNBT();
+        return nbt;
     }
 
     @Override

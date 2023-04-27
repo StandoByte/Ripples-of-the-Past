@@ -68,17 +68,17 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
         boolean lastTick = task.getTicksLeft() <= 1;
         boolean moveForward = completion <= 0.5F;
         if (moveForward) {
-        	for (RayTraceResult rayTraceResult : JojoModUtil.rayTraceMultipleEntities(standEntity, 
-        			standEntity.getAttributeValue(ForgeMod.REACH_DISTANCE.get()), 
-        			standEntity.canTarget(), 0.25, standEntity.getPrecision())) {
-            	standEntity.punch(task, this, ActionTarget.fromRayTraceResult(rayTraceResult));
-        	}
+            for (RayTraceResult rayTraceResult : JojoModUtil.rayTraceMultipleEntities(standEntity, 
+                    standEntity.getAttributeValue(ForgeMod.REACH_DISTANCE.get()), 
+                    standEntity.canTarget(), 0.25, standEntity.getPrecision())) {
+                standEntity.punch(task, this, ActionTarget.fromRayTraceResult(rayTraceResult));
+            }
         }
         else if (!Vector3d.ZERO.equals(standEntity.getDeltaMovement())) {
-        	standEntity.punch(task, this, task.getTarget());
+            standEntity.punch(task, this, task.getTarget());
         }
         if (!world.isClientSide() && lastTick && standEntity.isFollowingUser()) {
-        	standEntity.retractStand(false);
+            standEntity.retractStand(false);
         }
         standEntity.setDeltaMovement(moveForward ? task.getAdditionalData().peek(Vector3d.class) : Vector3d.ZERO);
     }
@@ -111,7 +111,7 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
     
     @Override
     public boolean isChainable(IStandPower standPower, StandEntity standEntity) {
-    	return true;
+        return true;
     }
     
     @Override
@@ -120,7 +120,7 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
     }
 
     protected boolean lastTargetCheck(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
-		return false;
+        return false;
     }
     
     @Override

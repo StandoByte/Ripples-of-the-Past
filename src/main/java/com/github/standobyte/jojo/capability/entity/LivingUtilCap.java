@@ -168,13 +168,13 @@ public class LivingUtilCap {
     
     
     public void setNoLerpTicks(int ticks) {
-    	this.noLerpTicks = ticks;
+        this.noLerpTicks = ticks;
     }
     
     private void tickNoLerp() {
-    	if (noLerpTicks > 0 && CommonReflection.getLerpSteps(entity) > 1) {
-    		CommonReflection.setLerpSteps(entity, 1);
-    		noLerpTicks--;
-    	}
+        if (noLerpTicks > 0 && CommonReflection.getLerpSteps(entity) > 1) {
+            CommonReflection.setLerpSteps(entity, 1);
+            noLerpTicks--;
+        }
     }
 }

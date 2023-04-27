@@ -36,17 +36,17 @@ public class AdditionalSingleItemLootModifier extends LootModifier {
 
         @Override
         public AdditionalSingleItemLootModifier read(ResourceLocation location, JsonObject object, ILootCondition[] conditions) {
-        	JsonObject itemObject = JSONUtils.getAsJsonObject(object, "additional_item");
-        	
+            JsonObject itemObject = JSONUtils.getAsJsonObject(object, "additional_item");
+            
             Item additionalItem = JSONUtils.getAsItem(itemObject, "name");
             ItemStack itemStack = new ItemStack(additionalItem);
             if (itemObject.has("nbt")) {
-            	try {
-            		CompoundNBT nbt = JsonToNBT.parseTag(JSONUtils.convertToString(itemObject.get("nbt"), "nbt"));
-            		itemStack.setTag(nbt);
-            	} catch (CommandSyntaxException commandsyntaxexception) {
-            		throw new JsonSyntaxException("Invalid nbt tag: " + commandsyntaxexception.getMessage());
-            	}
+                try {
+                    CompoundNBT nbt = JsonToNBT.parseTag(JSONUtils.convertToString(itemObject.get("nbt"), "nbt"));
+                    itemStack.setTag(nbt);
+                } catch (CommandSyntaxException commandsyntaxexception) {
+                    throw new JsonSyntaxException("Invalid nbt tag: " + commandsyntaxexception.getMessage());
+                }
             }
             
             return new AdditionalSingleItemLootModifier(conditions, itemStack);
@@ -55,13 +55,13 @@ public class AdditionalSingleItemLootModifier extends LootModifier {
         @Override
         public JsonObject write(AdditionalSingleItemLootModifier instance) {
             JsonObject json = makeConditions(instance.conditions);
-        	JsonObject itemObject = new JsonObject();
-        	
-        	itemObject.addProperty("name", ForgeRegistries.ITEMS.getKey(instance.additionalItem.getItem()).toString());
-        	if (instance.additionalItem.hasTag()) {
-            	itemObject.addProperty("nbt", instance.additionalItem.getTag().toString());
-        	}
-        	
+            JsonObject itemObject = new JsonObject();
+            
+            itemObject.addProperty("name", ForgeRegistries.ITEMS.getKey(instance.additionalItem.getItem()).toString());
+            if (instance.additionalItem.hasTag()) {
+                itemObject.addProperty("nbt", instance.additionalItem.getTag().toString());
+            }
+            
             json.add("additional_item", itemObject);
             return json;
         }

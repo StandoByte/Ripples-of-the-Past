@@ -54,16 +54,16 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
     }
     
     public void setScale(float scale) {
-    	this.scale = scale;
+        this.scale = scale;
     }
     
     public float getScale() {
-    	return scale;
+        return scale;
     }
 
     @Override
     public EntitySize getDimensions(Pose pose) {
-    	return super.getDimensions(pose).scale(scale);
+        return super.getDimensions(pose).scale(scale);
     }
 
     @Override
@@ -129,7 +129,7 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
     }
     
     @Override
-	public int ticksLifespan() {
+    public int ticksLifespan() {
         return 100;
     }
     

@@ -48,7 +48,7 @@ public class StandUtil {
     
     public static StandType<?> randomStandFromTiers(@Nullable int[] tiers, LivingEntity entity, Random random) {
         if (!entity.level.isClientSide()) {
-        	List<StandType<?>> stands = availableStands(tiers, entity);
+            List<StandType<?>> stands = availableStands(tiers, entity);
 
             if (stands.isEmpty()) {
                 return null;
@@ -66,13 +66,13 @@ public class StandUtil {
     }
     
     public static List<StandType<?>> availableStands(int[] tiers, LivingEntity entity) {
-    	Collection<StandType<?>> stands = ModStandTypes.Registry.getRegistry().getValues();
-    	return stands.stream()
-    			.filter(stand -> (
-    					tiers == null ||
-    					Arrays.stream(tiers).anyMatch(tier -> tier == stand.getTier()))
-    					&& !JojoModConfig.getCommonConfigInstance(entity.level.isClientSide()).isStandBanned(stand))
-    			.collect(Collectors.toList());
+        Collection<StandType<?>> stands = ModStandTypes.Registry.getRegistry().getValues();
+        return stands.stream()
+                .filter(stand -> (
+                        tiers == null ||
+                        Arrays.stream(tiers).anyMatch(tier -> tier == stand.getTier()))
+                        && !JojoModConfig.getCommonConfigInstance(entity.level.isClientSide()).isStandBanned(stand))
+                .collect(Collectors.toList());
     }
     
     public static int[] standTiersFromXp(int playerXpLvl, boolean withConfigBans, boolean isClientSide) {
@@ -109,7 +109,7 @@ public class StandUtil {
     }
     
     public static Set<Integer> getAvailableTiers(JojoModConfig.Common config) {
-    	return ModStandTypes.Registry.getRegistry().getValues()
+        return ModStandTypes.Registry.getRegistry().getValues()
                 .stream()
                 .filter(stand -> !config.isStandBanned(stand))
                 .map(StandType::getTier)
@@ -125,7 +125,7 @@ public class StandUtil {
     }
     
     public static boolean shouldHearStands(PlayerEntity player) {
-    	return shouldStandsRender(player);
+        return shouldStandsRender(player);
     }
     
     public static void setManualControl(PlayerEntity player, boolean manualControl, boolean keepPosition) {
@@ -139,12 +139,12 @@ public class StandUtil {
                     PacketManager.sendToClient(new StandControlStatusPacket(manualControl, keepPosition), (ServerPlayerEntity) player);
                 }
                 else {
-                	Minecraft mc = Minecraft.getInstance();
-                	ClientUtil.setCameraEntityPreventShaderSwitch(mc, manualControl ? standEntity : player);
+                    Minecraft mc = Minecraft.getInstance();
+                    ClientUtil.setCameraEntityPreventShaderSwitch(mc, manualControl ? standEntity : player);
                     if (manualControl) {
-                    	mc.player.xxa = 0;
-                    	mc.player.zza = 0;
-                    	mc.player.setJumping(false);
+                        mc.player.xxa = 0;
+                        mc.player.zza = 0;
+                        mc.player.setJumping(false);
                         StandController.setStartedControllingStand();
                     }
                 }
@@ -157,10 +157,10 @@ public class StandUtil {
     }
     
     public static LivingEntity getStandUser(LivingEntity standOrUser) {
-    	if (standOrUser instanceof StandEntity) {
-    		LivingEntity user = ((StandEntity) standOrUser).getUser();
-    		if (user != null) standOrUser = user;
-    	}
+        if (standOrUser instanceof StandEntity) {
+            LivingEntity user = ((StandEntity) standOrUser).getUser();
+            if (user != null) standOrUser = user;
+        }
         return standOrUser;
     }
     
@@ -204,6 +204,6 @@ public class StandUtil {
     }
     
     public static boolean isComboUnlocked(IStandPower power) {
-    	return power.getResolveLevel() >= 1;
+        return power.getResolveLevel() >= 1;
     }
 }

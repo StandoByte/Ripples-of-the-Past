@@ -96,22 +96,22 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
     @Override
     public List<Supplier<SoundEvent>> getSounds(StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task) {
         return task.getTarget().getType() != TargetType.ENTITY || standEntity.isArmsOnlyMode() || standEntity.getComboMeter() > 0
-        		? null : super.getSounds(standEntity, standPower, phase, task);
+                ? null : super.getSounds(standEntity, standPower, phase, task);
     }
     
     @Override
-	protected boolean isCancelable(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction, Phase phase) {
+    protected boolean isCancelable(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction, Phase phase) {
         return phase == Phase.RECOVERY || super.isCancelable(standPower, standEntity, newAction, phase);
     }
     
     @Override
     protected boolean isChainable(IStandPower standPower, StandEntity standEntity) {
-    	return true;
+        return true;
     }
     
     @Override
     public boolean isFreeRecovery(IStandPower standPower, StandEntity standEntity) {
-    	return true;
+        return true;
     }
     
     @Override
@@ -128,23 +128,23 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
     
     public static class Builder extends StandEntityAction.AbstractBuilder<StandEntityLightAttack.Builder>  {
         private Supplier<SoundEvent> punchSound = () -> null;
-    	
-    	public Builder() {
+        
+        public Builder() {
             staminaCost(10F).standUserSlowDownFactor(1.0F)
             .standOffsetFront().standOffsetFromUser(-0.75, 0.75)
             .standPose(StandPose.LIGHT_ATTACK).punchSound(ModSounds.STAND_PUNCH_LIGHT)
             .standAutoSummonMode(AutoSummonMode.MAIN_ARM)
             .partsRequired(StandPart.ARMS);
-    	}
-    	
-    	public Builder punchSound(Supplier<SoundEvent> punchSound) {
-    	    this.punchSound = punchSound != null ? punchSound : () -> null;
-    	    return getThis();
-    	}
-    	
-		@Override
-		protected Builder getThis() {
-			return this;
-		}
+        }
+        
+        public Builder punchSound(Supplier<SoundEvent> punchSound) {
+            this.punchSound = punchSound != null ? punchSound : () -> null;
+            return getThis();
+        }
+        
+        @Override
+        protected Builder getThis() {
+            return this;
+        }
     }
 }

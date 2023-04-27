@@ -106,7 +106,7 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
     }
     
     @Override
-	public boolean isBodyPart() {
+    public boolean isBodyPart() {
         return true;
     }
     
@@ -180,8 +180,8 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
                 if (getOwner() instanceof HierophantGreenEntity) {
                     HierophantGreenEntity stand = (HierophantGreenEntity) getOwner();
                     stand.getBarriersNet().shootEmeraldsFromBarriers(stand.getUserPower(), stand, 
-                    		target.getBoundingBox().getCenter(), 0, 20 * stand.getStaminaCondition(), 
-                    		ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get().getStaminaCostTicking(stand.getUserPower()) * 0.5F, 2, false);
+                            target.getBoundingBox().getCenter(), 0, 20 * stand.getStaminaCondition(), 
+                            ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get().getStaminaCostTicking(stand.getUserPower()) * 0.5F, 2, false);
                 }
                 MCUtil.playSound(level, null, target.getX(), target.getY(), target.getZ(), 
                         ModSounds.HIEROPHANT_GREEN_BARRIER_RIPPED.get(), getSoundSource(), 1.0F, 1.0F, StandUtil::shouldHearStands);
@@ -190,7 +190,7 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
     }
 
     @Override
-	public int ticksLifespan() {
+    public int ticksLifespan() {
         return Integer.MAX_VALUE;
     }
     

@@ -128,7 +128,7 @@ public class TimeStopInstance {
     }
     
     public int getStartingTicks() {
-    	return startingTicks;
+        return startingTicks;
     }
 
     public int getTicksLeft() {
@@ -180,17 +180,17 @@ public class TimeStopInstance {
         if (!world.isClientSide()) {
             if (action != null) {
                 userPower.ifPresent(power -> {
-                	if (power.hasPower()) {
-	                    statsOptional.ifPresent(stats -> {
-	                    	float cooldown = getTimeStopCooldown(power, stats, ticksPassed);
-	                        power.setCooldownTimer(action, (int) cooldown);
-	                        if (action.hasShiftVariation()) {
-	                            power.setCooldownTimer(action.getShiftVariationIfPresent(), (int) (cooldown * TimeStopInstant.COOLDOWN_RATIO));
-	                        }
-	
-	                        power.addLearningProgressPoints(action, stats.timeStopLearningPerTick * ticksPassed);
-	                    });
-                	}
+                    if (power.hasPower()) {
+                        statsOptional.ifPresent(stats -> {
+                            float cooldown = getTimeStopCooldown(power, stats, ticksPassed);
+                            power.setCooldownTimer(action, (int) cooldown);
+                            if (action.hasShiftVariation()) {
+                                power.setCooldownTimer(action.getShiftVariationIfPresent(), (int) (cooldown * TimeStopInstant.COOLDOWN_RATIO));
+                            }
+    
+                            power.addLearningProgressPoints(action, stats.timeStopLearningPerTick * ticksPassed);
+                        });
+                    }
                 });
             }
             if (user != null && statusEffectInstance != null) {

@@ -138,23 +138,23 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     }
     
     @Override
-	protected boolean isCancelable(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction, Phase phase) {
-    	if (standEntity.barrageClashOpponent().isPresent()) {
-    		return true;
-    	}
+    protected boolean isCancelable(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction, Phase phase) {
+        if (standEntity.barrageClashOpponent().isPresent()) {
+            return true;
+        }
         if (phase == Phase.RECOVERY) {
             return newAction != null && newAction.canFollowUpBarrage();
         }
         else {
-        	return super.isCancelable(standPower, standEntity, newAction, phase);
+            return super.isCancelable(standPower, standEntity, newAction, phase);
         }
     }
     
     @Override
     protected void onTaskStopped(World world, StandEntity standEntity, IStandPower standPower, StandEntityTask task, @Nullable StandEntityAction newAction) {
-    	if (!world.isClientSide() && newAction != this) {
-    		standEntity.barrageClashStopped();
-    	}
+        if (!world.isClientSide() && newAction != this) {
+            standEntity.barrageClashStopped();
+        }
         if (world.isClientSide()) {
             standEntity.getBarrageHitSoundsHandler().setIsBarraging(false);
         }

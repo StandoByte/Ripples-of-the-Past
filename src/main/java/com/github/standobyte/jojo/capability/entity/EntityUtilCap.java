@@ -19,27 +19,27 @@ public class EntityUtilCap {
     }
     
     public void updateEntityTimeStop(boolean stopInTime) {
-    	if (stopInTime) {
-			stoppedInTime = true;
-			entity.canUpdate(false);
-    	}
-    	else if (stoppedInTime) {
-    		entity.canUpdate(true);
-    		runOnTimeResume.forEach(Runnable::run);
-    		runOnTimeResume.clear();
-    	}
+        if (stopInTime) {
+            stoppedInTime = true;
+            entity.canUpdate(false);
+        }
+        else if (stoppedInTime) {
+            entity.canUpdate(true);
+            runOnTimeResume.forEach(Runnable::run);
+            runOnTimeResume.clear();
+        }
     }
     
     public boolean wasStoppedInTime() {
-    	return stoppedInTime;
+        return stoppedInTime;
     }
     
     void nbtSetWasStoppedInTime(boolean wasStoppedInTime) {
-    	if (wasStoppedInTime) {
-        	stoppedInTime = true;
-    		wasStoppedInTime = TimeUtil.isTimeStopped(entity.level, entity.blockPosition());
-        	updateEntityTimeStop(wasStoppedInTime);
-    	}
+        if (wasStoppedInTime) {
+            stoppedInTime = true;
+            wasStoppedInTime = TimeUtil.isTimeStopped(entity.level, entity.blockPosition());
+            updateEntityTimeStop(wasStoppedInTime);
+        }
     }
     
     

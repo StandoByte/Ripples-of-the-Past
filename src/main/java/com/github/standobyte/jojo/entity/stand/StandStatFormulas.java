@@ -162,6 +162,6 @@ public class StandStatFormulas {
     }
     
     public static double projectileFireRateScaling(StandEntity standEntity, IStandPower standPower) {
-    	return standEntity.getAttackSpeed() / standPower.getType().getDefaultStats().getBaseAttackSpeed();
+        return standEntity.getAttackSpeed() / standPower.getType().getDefaultStats().getBaseAttackSpeed();
     }
 }

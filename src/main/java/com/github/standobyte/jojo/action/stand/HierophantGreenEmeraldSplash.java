@@ -26,16 +26,16 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
 //    
 //    @Override
 //    protected SoundEvent getShout(LivingEntity user, IStandPower power, ActionTarget target, boolean wasActive) {
-//    	if (power.getStandManifestation() instanceof HierophantGreenEntity) {
-//    		HierophantGreenEntity stand = (HierophantGreenEntity) power.getStandManifestation();
-//    		if (stand.getPlacedBarriersCount() > 0) {
-//    			RayTraceResult aimTarget = aimForBarriers(stand);
-//				if (aimTarget.getType() == RayTraceResult.Type.ENTITY && stand.getBarriersNet().doBarriersSurround(aimTarget.getLocation())) {
-//		    		return ModSounds.KAKYOIN_20M_EMERALD_SPLASH.get();
-//				}
-//    		}
-//    	}
-//    	return super.getShout(user, power, target, wasActive);
+//        if (power.getStandManifestation() instanceof HierophantGreenEntity) {
+//            HierophantGreenEntity stand = (HierophantGreenEntity) power.getStandManifestation();
+//            if (stand.getPlacedBarriersCount() > 0) {
+//                RayTraceResult aimTarget = aimForBarriers(stand);
+//                if (aimTarget.getType() == RayTraceResult.Type.ENTITY && stand.getBarriersNet().doBarriersSurround(aimTarget.getLocation())) {
+//                    return ModSounds.KAKYOIN_20M_EMERALD_SPLASH.get();
+//                }
+//            }
+//        }
+//        return super.getShout(user, power, target, wasActive);
 //    }
     
     @Override
@@ -44,12 +44,12 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
             boolean shift = isShiftVariation();
             double fireRate = StandStatFormulas.projectileFireRateScaling(standEntity, userPower);
             if (shift) fireRate *= 2.5;
-        	GeneralUtil.doFractionTimes(() -> {
+            GeneralUtil.doFractionTimes(() -> {
                 HGEmeraldEntity emerald = new HGEmeraldEntity(standEntity, world, userPower);
                 emerald.setBreakBlocks(shift);
                 emerald.setLowerKnockback(!shift);
                 standEntity.shootProjectile(emerald, shift ? 2.5F : 1.5F, shift ? 1.0F : 8.0F);
-        	}, fireRate);
+            }, fireRate);
             
             HierophantGreenEntity hierophant = (HierophantGreenEntity) standEntity;
             int barriers = hierophant.getPlacedBarriersCount();
@@ -57,16 +57,16 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
                 RayTraceResult rayTrace = aimForBarriers(hierophant);
                 if (rayTrace.getType() != RayTraceResult.Type.MISS) {
                     hierophant.getBarriersNet().shootEmeraldsFromBarriers(userPower, hierophant, rayTrace.getLocation(), task.getTick(), 
-                    		Math.min((hierophant.getPlacedBarriersCount() / 5), 9) * hierophant.getStaminaCondition(), 
-                    		ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED.get().getStaminaCostTicking(userPower) * 0.5F, 8, true);
+                            Math.min((hierophant.getPlacedBarriersCount() / 5), 9) * hierophant.getStaminaCondition(), 
+                            ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED.get().getStaminaCostTicking(userPower) * 0.5F, 8, true);
                 }
             }
         }
     }
     
     private RayTraceResult aimForBarriers(HierophantGreenEntity stand) {
-    	return JojoModUtil.rayTrace(stand.isManuallyControlled() ? stand : stand.getUser(), 
-    			stand.getMaxRange(), entity -> entity instanceof LivingEntity && stand.canAttack((LivingEntity) entity));
+        return JojoModUtil.rayTrace(stand.isManuallyControlled() ? stand : stand.getUser(), 
+                stand.getMaxRange(), entity -> entity instanceof LivingEntity && stand.canAttack((LivingEntity) entity));
     }
     
     @Override
@@ -76,35 +76,35 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
     
     @Override
     public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
-    	return noPhases(standPower, standEntity) || (standEntity.getCurrentTaskAction() != null
-    			&& standEntity.getCurrentTaskAction().getShiftVariationIfPresent() == this.getShiftVariationIfPresent()) ?
-    			0 : StandStatFormulas.getHeavyAttackWindup(standEntity.getAttackSpeed(), 0);
+        return noPhases(standPower, standEntity) || (standEntity.getCurrentTaskAction() != null
+                && standEntity.getCurrentTaskAction().getShiftVariationIfPresent() == this.getShiftVariationIfPresent()) ?
+                0 : StandStatFormulas.getHeavyAttackWindup(standEntity.getAttackSpeed(), 0);
     }
 
     @Override
     public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
         return noPhases(standPower, standEntity) ? 
-        		0 : super.getStandRecoveryTicks(standPower, standEntity) * 2;
+                0 : super.getStandRecoveryTicks(standPower, standEntity) * 2;
     }
     
     private boolean noPhases(IStandPower standPower, StandEntity standEntity) {
         return standPower.getResolveLevel() > 2
-        		|| standPower.getUser() != null && standPower.getUser().hasEffect(ModEffects.RESOLVE.get());
+                || standPower.getUser() != null && standPower.getUser().hasEffect(ModEffects.RESOLVE.get());
     }
     
     @Override
     protected boolean isChainable(IStandPower standPower, StandEntity standEntity) {
-    	return true;
+        return true;
     }
     
     @Override
     public boolean isFreeRecovery(IStandPower standPower, StandEntity standEntity) {
-    	return true;
+        return true;
     }
     
     @Override
     protected boolean isCancelable(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction, Phase phase) {
-    	return phase == Phase.RECOVERY || super.isCancelable(standPower, standEntity, newAction, phase);
+        return phase == Phase.RECOVERY || super.isCancelable(standPower, standEntity, newAction, phase);
     }
 
     @Override

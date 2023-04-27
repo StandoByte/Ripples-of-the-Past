@@ -27,38 +27,38 @@ public class RockPaperScissorsCommand {
     }
     
     private static int game(CommandSource source, ServerPlayerEntity opponent, CommandContext<CommandSource> ctx) {
-    	Entity entity = source.getEntity();
-    	if (opponent.is(entity)) {
+        Entity entity = source.getEntity();
+        if (opponent.is(entity)) {
             ctx.getSource().sendFailure(new TranslationTextComponent("jojo.rps.self"));
-    	    return 0;
-    	}
-    	if (entity instanceof ServerPlayerEntity) {
-    	    if (entity.distanceToSqr(opponent) >= 16) {
-    	        ctx.getSource().sendFailure(new TranslationTextComponent("jojo.rps.too_far", opponent.getDisplayName()));
-    	        return 0;
-    	    }
-    	    ServerPlayerEntity player = (ServerPlayerEntity) entity;
-    	    RPSPvpGamesMap games = SaveFileUtilCapProvider.getSaveFileCap(opponent.server).getPvpRPSGames();
-    	    RockPaperScissorsGame game = games.getOrCreateGame(player, opponent);
-    	    game.getPlayer(player).setIsReady(true);
-    	    if (game.getPlayer(opponent).isReady()) {
-    	        player.getCapability(PlayerUtilCapProvider.CAPABILITY).orElseGet(null).setCurrentRockPaperScissorsGame(game);
-    	        opponent.getCapability(PlayerUtilCapProvider.CAPABILITY).orElseGet(null).setCurrentRockPaperScissorsGame(game);
-    	        game.gameStarted(opponent.getLevel());
-    	    }
-    	    else {
-    	        String name = player.getGameProfile().getName();
-    	        String command = "/" + LITERAL + " " + name;
-    	        opponent.sendMessage(new TranslationTextComponent("jojo.rps.game_invite.text", player.getDisplayName(), 
-    	                new StringTextComponent(command).withStyle(style -> {
-    	                    return style.withColor(TextFormatting.GREEN)
-    	                            .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command))
-    	                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent(command)));
-    	                })), player.getUUID()); 
-    	        ctx.getSource().sendSuccess(new TranslationTextComponent("jojo.rps.game_invite.sent", opponent.getDisplayName()), false);
-    	    }
+            return 0;
+        }
+        if (entity instanceof ServerPlayerEntity) {
+            if (entity.distanceToSqr(opponent) >= 16) {
+                ctx.getSource().sendFailure(new TranslationTextComponent("jojo.rps.too_far", opponent.getDisplayName()));
+                return 0;
+            }
+            ServerPlayerEntity player = (ServerPlayerEntity) entity;
+            RPSPvpGamesMap games = SaveFileUtilCapProvider.getSaveFileCap(opponent.server).getPvpRPSGames();
+            RockPaperScissorsGame game = games.getOrCreateGame(player, opponent);
+            game.getPlayer(player).setIsReady(true);
+            if (game.getPlayer(opponent).isReady()) {
+                player.getCapability(PlayerUtilCapProvider.CAPABILITY).orElseGet(null).setCurrentRockPaperScissorsGame(game);
+                opponent.getCapability(PlayerUtilCapProvider.CAPABILITY).orElseGet(null).setCurrentRockPaperScissorsGame(game);
+                game.gameStarted(opponent.getLevel());
+            }
+            else {
+                String name = player.getGameProfile().getName();
+                String command = "/" + LITERAL + " " + name;
+                opponent.sendMessage(new TranslationTextComponent("jojo.rps.game_invite.text", player.getDisplayName(), 
+                        new StringTextComponent(command).withStyle(style -> {
+                            return style.withColor(TextFormatting.GREEN)
+                                    .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, command))
+                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new StringTextComponent(command)));
+                        })), player.getUUID()); 
+                ctx.getSource().sendSuccess(new TranslationTextComponent("jojo.rps.game_invite.sent", opponent.getDisplayName()), false);
+            }
             return 1;
-    	}
-    	return 0;
+        }
+        return 0;
     }
 }

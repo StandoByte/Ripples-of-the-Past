@@ -16,7 +16,7 @@ public class TrDirectEntityPosPacket {
     private final double z;
     
     public TrDirectEntityPosPacket(int entityId, Vector3d pos) {
-    	this(entityId, pos.x, pos.y, pos.z);
+        this(entityId, pos.x, pos.y, pos.z);
     }
     
     public TrDirectEntityPosPacket(int entityId, double x, double y, double z) {
@@ -42,7 +42,7 @@ public class TrDirectEntityPosPacket {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity != null) {
                 entity.setPacketCoordinates(msg.x, msg.y, msg.z);
-            	entity.moveTo(msg.x, msg.y, msg.z);
+                entity.moveTo(msg.x, msg.y, msg.z);
             }
         });
         ctx.get().setPacketHandled(true);

@@ -26,7 +26,7 @@ public class MagiciansRedFlameBurst extends StandEntityAction {
     public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         Random random = standEntity.getRandom();
         if (!world.isClientSide()) {
-        	GeneralUtil.doFractionTimes(() -> {
+            GeneralUtil.doFractionTimes(() -> {
                 MRFlameEntity flame = new MRFlameEntity(standEntity, world);
                 float velocity = (float) standEntity.getAttributeValue(ForgeMod.REACH_DISTANCE.get()) / 5F;
                 if (userPower.getResolveLevel() >= 3) {
@@ -36,7 +36,7 @@ public class MagiciansRedFlameBurst extends StandEntityAction {
                         standEntity.yRot + (random.nextFloat() - 0.5F) * 10F, 
                         0, velocity, 0.0F);
                 standEntity.addProjectile(flame);
-        	}, StandStatFormulas.projectileFireRateScaling(standEntity, userPower));
+            }, StandStatFormulas.projectileFireRateScaling(standEntity, userPower));
         }
         else {
             standEntity.playSound(ModSounds.MAGICIANS_RED_FIRE_BLAST.get(), 0.5F, 0.3F + random.nextFloat() * 0.4F, ClientUtil.getClientPlayer());

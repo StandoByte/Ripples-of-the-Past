@@ -29,22 +29,22 @@ public class SilverChariotRapierLaunch extends StandEntityAction {
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
-        	SilverChariotEntity chariot = (SilverChariotEntity) standEntity;
-        	SCRapierEntity rapier = new SCRapierEntity(standEntity, world);
-        	Entity aimingEntity = chariot;
-        	if (chariot.isFollowingUser()) {
-	        	LivingEntity user = userPower.getUser();
-	        	if (user != null) {
-	        		aimingEntity = user;
-	        	}
-        	}
-        	rapier.setPos(aimingEntity.getX(), aimingEntity.getEyeY(), aimingEntity.getZ());
-        	if (chariot.isRapierOnFire()) {
-        		rapier.setSecondsOnFire(rapier.ticksLifespan() / 20);
-        	}
+            SilverChariotEntity chariot = (SilverChariotEntity) standEntity;
+            SCRapierEntity rapier = new SCRapierEntity(standEntity, world);
+            Entity aimingEntity = chariot;
+            if (chariot.isFollowingUser()) {
+                LivingEntity user = userPower.getUser();
+                if (user != null) {
+                    aimingEntity = user;
+                }
+            }
+            rapier.setPos(aimingEntity.getX(), aimingEntity.getEyeY(), aimingEntity.getZ());
+            if (chariot.isRapierOnFire()) {
+                rapier.setSecondsOnFire(rapier.ticksLifespan() / 20);
+            }
             standEntity.shootProjectile(rapier, 2F, 0);
             if (!userPower.isUserCreative()) {
-            	chariot.setRapier(false);
+                chariot.setRapier(false);
             }
         }
     }

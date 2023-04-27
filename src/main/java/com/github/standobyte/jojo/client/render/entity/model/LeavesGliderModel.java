@@ -11,30 +11,30 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 
 
 public class LeavesGliderModel extends EntityModel<LeavesGliderEntity> {
-	private final ModelRenderer glider;
+    private final ModelRenderer glider;
     private final ModelRenderer frontLeft;
-	private final ModelRenderer frontRight;
+    private final ModelRenderer frontRight;
 
-	public LeavesGliderModel() {
-		texWidth = 128;
-		texHeight = 128;
+    public LeavesGliderModel() {
+        texWidth = 128;
+        texHeight = 128;
 
-		glider = new ModelRenderer(this);
-		glider.setPos(0.0F, 0.0F, 0.0F);
-		glider.texOffs(0, 0).addBox(-20.0F, -0.5F, -4.11F, 40.0F, 1.0F, 24.0F, -0.375F, false);
-		
-		frontLeft = new ModelRenderer(this);
-		frontLeft.setPos(0.0F, 0.0F, -19.625F);
-		glider.addChild(frontLeft);
-		setRotationAngle(frontLeft, 0.0F, -0.6806F, 0.0F);
-		frontLeft.texOffs(0, 25).addBox(-0.375F, -0.5F, -0.375F, 26.0F, 1.0F, 16.0F, -0.375F, false);
+        glider = new ModelRenderer(this);
+        glider.setPos(0.0F, 0.0F, 0.0F);
+        glider.texOffs(0, 0).addBox(-20.0F, -0.5F, -4.11F, 40.0F, 1.0F, 24.0F, -0.375F, false);
+        
+        frontLeft = new ModelRenderer(this);
+        frontLeft.setPos(0.0F, 0.0F, -19.625F);
+        glider.addChild(frontLeft);
+        setRotationAngle(frontLeft, 0.0F, -0.6806F, 0.0F);
+        frontLeft.texOffs(0, 25).addBox(-0.375F, -0.5F, -0.375F, 26.0F, 1.0F, 16.0F, -0.375F, false);
 
         frontRight = new ModelRenderer(this);
         frontRight.setPos(0.0F, 0.0F, -19.625F);
         glider.addChild(frontRight);
         setRotationAngle(frontRight, 0.0F, 0.6806F, 0.0F);
         frontRight.texOffs(0, 42).addBox(-25.625F, -0.5F, -0.375F, 26.0F, 1.0F, 16.0F, -0.375F, false);
-	}
+    }
 
     @Override
     public void setupAnim(LeavesGliderEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
@@ -46,9 +46,9 @@ public class LeavesGliderModel extends EntityModel<LeavesGliderEntity> {
         glider.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
     }
 
-	public void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
-		modelRenderer.xRot = x;
-		modelRenderer.yRot = y;
-		modelRenderer.zRot = z;
-	}
+    public void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
+        modelRenderer.xRot = x;
+        modelRenderer.yRot = y;
+        modelRenderer.zRot = z;
+    }
 }

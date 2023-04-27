@@ -30,7 +30,7 @@ public class HierophantGreenGrapple extends StandEntityAction {
     
     @Override
     public boolean standRetractsAfterTask(IStandPower standPower, StandEntity standEntity) {
-    	return isShiftVariation();
+        return isShiftVariation();
     }
     
     @Override

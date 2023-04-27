@@ -31,14 +31,14 @@ public class TrNoMotionLerpPacket {
 
     public static void handle(TrNoMotionLerpPacket msg, Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
-        	if (!TimeUtil.canPlayerSeeInStoppedTime(ClientUtil.getClientPlayer())) {
-	            Entity entity = ClientUtil.getEntityById(msg.entityId);
-	            if (entity instanceof LivingEntity) {
-	            	entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-	            		cap.setNoLerpTicks(msg.ticks);
-	            	});
-	            }
-        	}
+            if (!TimeUtil.canPlayerSeeInStoppedTime(ClientUtil.getClientPlayer())) {
+                Entity entity = ClientUtil.getEntityById(msg.entityId);
+                if (entity instanceof LivingEntity) {
+                    entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                        cap.setNoLerpTicks(msg.ticks);
+                    });
+                }
+            }
         });
         ctx.get().setPacketHandled(true);
     }

@@ -49,17 +49,17 @@ public class TimeStopperStandStats extends StandStats {
     
     @Override
     public void onNewDay(LivingEntity user, IStandPower power) {
-    	if (!user.level.isClientSide()) {
-    		LivingUtilCap cap = user.getCapability(LivingUtilCapProvider.CAPABILITY).resolve().get();
-    		if (!cap.hasUsedTimeStopToday && timeStopDecayPerDay > 0) {
-    			power.getAbilities().forEach(ability -> {
-    				if (ability.isUnlocked(power) && ability instanceof TimeStop) {
-    					power.setLearningProgressPoints(ability, power.getLearningProgressPoints(ability) - timeStopDecayPerDay, true, false);
-    				}
-    			});
-    		}
-    		cap.hasUsedTimeStopToday = false;
-    	}
+        if (!user.level.isClientSide()) {
+            LivingUtilCap cap = user.getCapability(LivingUtilCapProvider.CAPABILITY).resolve().get();
+            if (!cap.hasUsedTimeStopToday && timeStopDecayPerDay > 0) {
+                power.getAbilities().forEach(ability -> {
+                    if (ability.isUnlocked(power) && ability instanceof TimeStop) {
+                        power.setLearningProgressPoints(ability, power.getLearningProgressPoints(ability) - timeStopDecayPerDay, true, false);
+                    }
+                });
+            }
+            cap.hasUsedTimeStopToday = false;
+        }
     }
     
     static {
@@ -105,7 +105,7 @@ public class TimeStopperStandStats extends StandStats {
         
         @Override
         protected TimeStopperStandStats createStats() {
-        	return new TimeStopperStandStats(this);
+            return new TimeStopperStandStats(this);
         }
     }
 }

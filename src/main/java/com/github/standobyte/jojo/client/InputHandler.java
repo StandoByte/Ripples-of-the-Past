@@ -381,8 +381,8 @@ public class InputHandler {
         
         if (key == ActionKey.ATTACK && leftClickBlockDelay > 0) {
             event.setSwingHand(false);
-        	event.setCanceled(true);
-        	return;
+            event.setCanceled(true);
+            return;
         }
 
         IPower<?, ?> power = actionsOverlay.getCurrentPower();
@@ -390,9 +390,9 @@ public class InputHandler {
         boolean actionClick = !actionsOverlay.noActionSelected(actionType)
                 || key == ActionKey.STAND_BLOCK && power != null && !power.getAbilities().isEmpty();
         if (!actionClick) {
-        	if (handleStun(event)) {
-        		event.setSwingHand(false);
-        	}
+            if (handleStun(event)) {
+                event.setSwingHand(false);
+            }
             return;
         }
 
@@ -423,22 +423,22 @@ public class InputHandler {
             }
         }
         else {
-        	if (heldKeys.get(power) == key) {
+            if (heldKeys.get(power) == key) {
                 event.setSwingHand(false);
-            	event.setCanceled(true);
+                event.setCanceled(true);
             }
-        	else if (handleStun(event)) {
-        		event.setSwingHand(false);
-        	}
+            else if (handleStun(event)) {
+                event.setSwingHand(false);
+            }
         }
     }
     
     private boolean handleStun(InputEvent event) {
-    	if (event != null && event.isCancelable() && (mc.player.hasEffect(ModEffects.STUN.get()) || !mc.player.canUpdate())) {
-    		event.setCanceled(true);
-    		return true;
-    	}
-    	return false;
+        if (event != null && event.isCancelable() && (mc.player.hasEffect(ModEffects.STUN.get()) || !mc.player.canUpdate())) {
+            event.setCanceled(true);
+            return true;
+        }
+        return false;
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -536,22 +536,22 @@ public class InputHandler {
                 IPower<?, ?> power = actionsOverlay.getCurrentPower();
                 if (power != null) {
                     if (power.canLeap() && !actionSlowedDown && !standSlowedDown) {
-                    	boolean onGround = mc.player.isOnGround();
-                    	boolean atWall = mc.player.horizontalCollision && !mc.player.abilities.flying && false;
-                    	
+                        boolean onGround = mc.player.isOnGround();
+                        boolean atWall = mc.player.horizontalCollision && !mc.player.abilities.flying && false;
+                        
                         if ((input.shiftKeyDown || !onGround && atWall) && input.jumping) {
                             float leapStrength = power.leapStrength();
                             if (leapStrength > 0) {
                                 input.shiftKeyDown = false;
                                 input.jumping = false;
                                 if (onGround || atWall) {
-	                                PacketManager.sendToServer(new ClOnLeapPacket(power.getPowerClassification()));
-	                                if (onGround) {
-	                                	leap(mc.player, leapStrength);
-	                                }
-	                                else {
-	                                	wallLeap(mc.player, input, leapStrength);
-	                                }
+                                    PacketManager.sendToServer(new ClOnLeapPacket(power.getPowerClassification()));
+                                    if (onGround) {
+                                        leap(mc.player, leapStrength);
+                                    }
+                                    else {
+                                        wallLeap(mc.player, input, leapStrength);
+                                    }
                                 }
                             }
                         }
@@ -563,14 +563,14 @@ public class InputHandler {
                         canLeap = onGround || atWall;
                     }
                     else {
-                    	canLeap = false;
+                        canLeap = false;
                     }
                 }
                 return;
             }
         }
         else {
-        	canLeap = false;
+            canLeap = false;
         }
         
         Entity vehicle = mc.player.getVehicle();
@@ -580,7 +580,7 @@ public class InputHandler {
     }
     
     public boolean canPlayerLeap() {
-    	return canLeap;
+        return canLeap;
     }
     
     private boolean slowDownFromStandEntity(PlayerEntity player, MovementInput input) {

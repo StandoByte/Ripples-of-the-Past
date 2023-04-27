@@ -31,7 +31,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class StandEntityHeavyAttack extends StandEntityAction implements IHasStandPunch {
-	private final Supplier<StandEntityHeavyAttack> finisherVariation;
+    private final Supplier<StandEntityHeavyAttack> finisherVariation;
     private final Supplier<StandEntityActionModifier> recoveryAction;
     boolean isFinisher = false;
     private final Supplier<SoundEvent> punchSound;
@@ -43,28 +43,28 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         this.punchSound = builder.punchSound;
     }
 
-	@Override
+    @Override
     protected Action<IStandPower> replaceAction(IStandPower power) {
-	    StandEntity standEntity = power.isActive() ? (StandEntity) power.getStandManifestation() : null;
-	    
-	    StandEntityHeavyAttack finisherVariation = getFinisherVariationIfPresent(power, standEntity);
-	    if (finisherVariation != this) {
-	        return finisherVariation.replaceAction(power);
-	    }
-	    
-	    StandEntityActionModifier followUp = getRecoveryFollowup(power, standEntity);
-	    if (followUp != null && standEntity != null && standEntity.getCurrentTask().map(task -> {
-	        return task.getAction() == this && 
-	                !task.getModifierActions().filter(action -> action == followUp).findAny().isPresent() &&
-	                power.checkRequirements(followUp, new Container<>(task.getTarget()), true).isPositive();
-	    }).orElse(false)) {
-	        return followUp;
-	    };
-	    
-	    return this;
+        StandEntity standEntity = power.isActive() ? (StandEntity) power.getStandManifestation() : null;
+        
+        StandEntityHeavyAttack finisherVariation = getFinisherVariationIfPresent(power, standEntity);
+        if (finisherVariation != this) {
+            return finisherVariation.replaceAction(power);
+        }
+        
+        StandEntityActionModifier followUp = getRecoveryFollowup(power, standEntity);
+        if (followUp != null && standEntity != null && standEntity.getCurrentTask().map(task -> {
+            return task.getAction() == this && 
+                    !task.getModifierActions().filter(action -> action == followUp).findAny().isPresent() &&
+                    power.checkRequirements(followUp, new Container<>(task.getTarget()), true).isPositive();
+        }).orElse(false)) {
+            return followUp;
+        };
+        
+        return this;
     }
-	
-	public StandEntityHeavyAttack getFinisherVariationIfPresent(IStandPower power, @Nullable StandEntity standEntity) {
+    
+    public StandEntityHeavyAttack getFinisherVariationIfPresent(IStandPower power, @Nullable StandEntity standEntity) {
         StandEntityHeavyAttack finisherVariation = getFinisherVariation();
         if (finisherVariation != null) {
             EnumSet<StandPart> missingParts = EnumSet.complementOf(power.getStandInstance().get().getAllParts());
@@ -88,28 +88,28 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
             }
         }
         return this;
-	}
-	
-	@Nullable
-	public StandEntityHeavyAttack getFinisherVariation() {
-	    return finisherVariation.get();
-	}
-	
-	@Nullable
-	protected StandEntityActionModifier getRecoveryFollowup(IStandPower standPower, StandEntity standEntity) {
-	    return recoveryAction.get();
-	}
-	
+    }
+    
+    @Nullable
+    public StandEntityHeavyAttack getFinisherVariation() {
+        return finisherVariation.get();
+    }
+    
+    @Nullable
+    protected StandEntityActionModifier getRecoveryFollowup(IStandPower standPower, StandEntity standEntity) {
+        return recoveryAction.get();
+    }
+    
     @Override
     protected ActionConditionResult checkStandConditions(StandEntity stand, IStandPower power, ActionTarget target) {
         return !stand.canAttackMelee() ? ActionConditionResult.NEGATIVE : super.checkStandConditions(stand, power, target);
     }
     
     public void onClick(World world, LivingEntity user, IStandPower power) {
-    	super.onClick(world, user, power);
-    	if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
-    		((StandEntity) power.getStandManifestation()).setHeavyPunchCombo();
-    	}
+        super.onClick(world, user, power);
+        if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
+            ((StandEntity) power.getStandManifestation()).setHeavyPunchCombo();
+        }
     }
     
     @Override
@@ -201,12 +201,12 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         private Supplier<StandEntityHeavyAttack> finisherVariation = () -> null;
         private Supplier<StandEntityActionModifier> recoveryAction = () -> null;
         private Supplier<SoundEvent> punchSound = () -> null;
-    	
-    	public Builder() {
+        
+        public Builder() {
             standPose(StandPose.HEAVY_ATTACK).staminaCost(50F)
             .punchSound(ModSounds.STAND_PUNCH_HEAVY)
             .standOffsetFromUser(-0.75, 0.75);
-    	}
+        }
         
         public Builder setFinisherVariation(Supplier<StandEntityHeavyAttack> variation) {
             if (this.finisherVariation.get() == null && variation != null && variation.get() != null) {
@@ -226,10 +226,10 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
             return getThis();
         }
 
-		@Override
-		protected Builder getThis() {
-			return this;
-		}
+        @Override
+        protected Builder getThis() {
+            return this;
+        }
     }
     
     

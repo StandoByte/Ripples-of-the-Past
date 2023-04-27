@@ -249,11 +249,11 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
                 if (layer instanceof StandModelLayerRenderer) {
                     StandModelLayerRenderer<T, M> standLayer = (StandModelLayerRenderer<T, M>) layer;
                     if (standLayer.shouldRender(entity)) {
-                    	RenderType layerRenderType = standLayer.getRenderType(entity);
-                    	if (layerRenderType != null) {
-	                        renderSeparateLayerArm(standLayer.getLayerModel(), handSide, matrixStack, 
-	                        		buffer.getBuffer(layerRenderType), standLayer.getPackedLight(packedLight), entity, partialTick);
-                    	}
+                        RenderType layerRenderType = standLayer.getRenderType(entity);
+                        if (layerRenderType != null) {
+                            renderSeparateLayerArm(standLayer.getLayerModel(), handSide, matrixStack, 
+                                    buffer.getBuffer(layerRenderType), standLayer.getPackedLight(packedLight), entity, partialTick);
+                        }
                     }
                 }
             }

@@ -50,8 +50,8 @@ public class MRFlameEntity extends ModdedProjectileEntity {
     
     @Override
     public void shoot(double x, double y, double z, float velocity, float inaccuracy) {
-    	super.shoot(x, y, z, velocity, inaccuracy);
-    	startingPos = position();
+        super.shoot(x, y, z, velocity, inaccuracy);
+        startingPos = position();
     }
     
     @Override
@@ -135,7 +135,7 @@ public class MRFlameEntity extends ModdedProjectileEntity {
     }
     
     @Override
-	public int ticksLifespan() {
+    public int ticksLifespan() {
         return 8;
     }
     
@@ -156,24 +156,24 @@ public class MRFlameEntity extends ModdedProjectileEntity {
 
     @Override
     public void writeSpawnData(PacketBuffer buffer) {
-    	super.writeSpawnData(buffer);
-    	boolean hasStartingPos = startingPos != null;
-    	buffer.writeBoolean(hasStartingPos);
-    	if (hasStartingPos) {
-    		buffer.writeDouble(startingPos.x);
-    		buffer.writeDouble(startingPos.y);
-    		buffer.writeDouble(startingPos.z);
-    	}
+        super.writeSpawnData(buffer);
+        boolean hasStartingPos = startingPos != null;
+        buffer.writeBoolean(hasStartingPos);
+        if (hasStartingPos) {
+            buffer.writeDouble(startingPos.x);
+            buffer.writeDouble(startingPos.y);
+            buffer.writeDouble(startingPos.z);
+        }
     }
 
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
         super.readSpawnData(additionalData);
         if (additionalData.readBoolean()) {
-        	startingPos = new Vector3d(additionalData.readDouble(), additionalData.readDouble(), additionalData.readDouble());
+            startingPos = new Vector3d(additionalData.readDouble(), additionalData.readDouble(), additionalData.readDouble());
         }
         else {
-        	startingPos = position();
+            startingPos = position();
         }
     }
 }

@@ -17,7 +17,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
-	private static final UUID MANUAL_MOVEMENT_LOCK = UUID.fromString("ccf94bd5-8f0f-4d1e-b606-ba0773d963f3");
+    private static final UUID MANUAL_MOVEMENT_LOCK = UUID.fromString("ccf94bd5-8f0f-4d1e-b606-ba0773d963f3");
     private IStandPower userStandPower;
     private boolean bindEntities;
     private StandEntity stand;
@@ -36,10 +36,10 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
     
     @Override
     public void remove() {
-    	super.remove();
-    	if (!level.isClientSide() && stand != null && caughtAnEntity) {
-    		stand.getManualMovementLocks().removeLock(MANUAL_MOVEMENT_LOCK);
-    	}
+        super.remove();
+        if (!level.isClientSide() && stand != null && caughtAnEntity) {
+            stand.getManualMovementLocks().removeLock(MANUAL_MOVEMENT_LOCK);
+        }
     }
     
     @Override
@@ -49,10 +49,10 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
             return;
         }
         if (!level.isClientSide() && (userStandPower == null || userStandPower.getHeldAction() != (
-        		bindEntities ? ModActions.HIEROPHANT_GREEN_GRAPPLE_ENTITY.get() : 
-        			ModActions.HIEROPHANT_GREEN_GRAPPLE.get()))) {
-        	remove();
-        	return;
+                bindEntities ? ModActions.HIEROPHANT_GREEN_GRAPPLE_ENTITY.get() : 
+                    ModActions.HIEROPHANT_GREEN_GRAPPLE.get()))) {
+            remove();
+            return;
         }
         LivingEntity bound = getEntityAttachedTo();
         if (bound != null) {
@@ -66,13 +66,13 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
                 Vector3d vecToOwner = owner.position().subtract(bound.position());
                 double length = vecToOwner.length();
                 if (length < 2) {
-                	if (!level.isClientSide()) {
-                		remove();
-                	}
+                    if (!level.isClientSide()) {
+                        remove();
+                    }
                 }
                 else {
-                	dragTarget(bound, vecToOwner.normalize().scale(2));
-                	bound.fallDistance = 0;
+                    dragTarget(bound, vecToOwner.normalize().scale(2));
+                    bound.fallDistance = 0;
                 }
             }
         }
@@ -91,12 +91,12 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
                 Vector3d grappleVec = vecFromOwner.normalize().scale(2);
                 Entity entity = owner;
                 if (stand == null && owner instanceof StandEntity) {
-                	stand = (StandEntity) owner;
+                    stand = (StandEntity) owner;
                 }
                 if (stand != null && stand.isFollowingUser()) {
                     LivingEntity user = stand.getUser();
                     if (user != null) {
-                    	entity = user;
+                        entity = user;
                     }
                 }
                 entity = entity.getRootVehicle();
@@ -104,7 +104,7 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
                 entity.fallDistance = 0;
             }
             else if (!level.isClientSide()) {
-            	remove();
+                remove();
             }
             return true;
         }
@@ -112,7 +112,7 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
     }
     
     @Override
-	public boolean isBodyPart() {
+    public boolean isBodyPart() {
         return true;
     }
 
@@ -123,7 +123,7 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
     }
 
     @Override
-	public int ticksLifespan() {
+    public int ticksLifespan() {
         return getEntityAttachedTo() == null && !getBlockPosAttachedTo().isPresent() ? 40 : Integer.MAX_VALUE;
     }
     
@@ -134,14 +134,14 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
     
     @Override
     protected boolean canHitEntity(Entity entity) {
-    	LivingEntity owner = getOwner();
-    	if (entity.is(owner) || !(entity instanceof LivingEntity)) {
-    		return false;
-    	}
-    	if (owner instanceof StandEntity) {
-    		StandEntity stand = (StandEntity) getOwner();
-    		return !entity.is(stand.getUser()) || !stand.isFollowingUser();
-    	}
+        LivingEntity owner = getOwner();
+        if (entity.is(owner) || !(entity instanceof LivingEntity)) {
+            return false;
+        }
+        if (owner instanceof StandEntity) {
+            StandEntity stand = (StandEntity) getOwner();
+            return !entity.is(stand.getUser()) || !stand.isFollowingUser();
+        }
         return true;
     }
     
@@ -151,7 +151,7 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
             if (target instanceof LivingEntity) {
                 attachToEntity((LivingEntity) target);
                 playSound(ModSounds.HIEROPHANT_GREEN_GRAPPLE_CATCH.get(), 1.0F, 1.0F);
-            	caughtAnEntity = true;
+                caughtAnEntity = true;
                 return true;
             }
         }

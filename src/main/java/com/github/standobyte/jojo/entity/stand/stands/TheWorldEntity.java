@@ -14,12 +14,12 @@ public class TheWorldEntity extends StandEntity {
     private boolean prevLerp = false;
     @Override
     public void lerpTo(double lerpX, double lerpY, double lerpZ, float lerpYRot, float lerpXRot, int lerpSteps, boolean teleport) {
-    	if (prevLerp) {
-    		if (lerpX == getX()) lerpX = this.lerpX;
-    		if (lerpY == getY()) lerpY = this.lerpY;
-    		if (lerpZ == getZ()) lerpZ = this.lerpZ;
-    	}
-		super.lerpTo(lerpX, lerpY, lerpZ, lerpYRot, lerpXRot, lerpSteps, teleport);
-    	prevLerp = true;
+        if (prevLerp) {
+            if (lerpX == getX()) lerpX = this.lerpX;
+            if (lerpY == getY()) lerpY = this.lerpY;
+            if (lerpZ == getZ()) lerpZ = this.lerpZ;
+        }
+        super.lerpTo(lerpX, lerpY, lerpZ, lerpYRot, lerpXRot, lerpSteps, teleport);
+        prevLerp = true;
     }
 }

@@ -58,7 +58,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
     @Override
     protected ActionConditionResult checkStandConditions(StandEntity stand, IStandPower power, ActionTarget target) {
         return !stand.canAttackMelee() || stand.isBeingRetracted()
-        		? ActionConditionResult.NEGATIVE : super.checkStandConditions(stand, power, target);
+                ? ActionConditionResult.NEGATIVE : super.checkStandConditions(stand, power, target);
     }
     
     @Override
@@ -69,86 +69,86 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
     @Override
     public ActionTarget targetBeforePerform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
         if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
-        	StandEntity stand = (StandEntity) power.getStandManifestation();
-        	return ActionTarget.fromRayTraceResult(
-        			JojoModUtil.rayTrace(stand.isManuallyControlled() ? stand : user, 
-        					stand.getMaxRange(), stand.canTarget(), stand.getPrecision() / 16F, stand.getPrecision()));
+            StandEntity stand = (StandEntity) power.getStandManifestation();
+            return ActionTarget.fromRayTraceResult(
+                    JojoModUtil.rayTrace(stand.isManuallyControlled() ? stand : user, 
+                            stand.getMaxRange(), stand.canTarget(), stand.getPrecision() / 16F, stand.getPrecision()));
         }
         return super.targetBeforePerform(world, user, power, target);
     }
     
     @Override
     protected void preTaskInit(World world, IStandPower standPower, StandEntity standEntity, ActionTarget target) {
-    	if (!world.isClientSide() || standEntity.isManuallyControlled()) {
-	    	LivingEntity aimingEntity = standEntity.isManuallyControlled() ? standEntity : standPower.getUser();
-	    	if (aimingEntity != null) {
-    			TimeStopInstant blink = theWorldTimeStopBlink.get();
+        if (!world.isClientSide() || standEntity.isManuallyControlled()) {
+            LivingEntity aimingEntity = standEntity.isManuallyControlled() ? standEntity : standPower.getUser();
+            if (aimingEntity != null) {
+                TimeStopInstant blink = theWorldTimeStopBlink.get();
                 float staminaCostTS = blink.getStaminaCost(standPower) * 0.5F;
-    			float staminaCostTicking = blink.getStaminaCostTicking(standPower);
-    			TimeStop timeStop = blink.getBaseTimeStop();
+                float staminaCostTicking = blink.getStaminaCostTicking(standPower);
+                TimeStop timeStop = blink.getBaseTimeStop();
 
-	            int timeStopTicks = TimeStop.getTimeStopTicks(standPower, timeStop);
-	            if (!StandUtil.standIgnoresStaminaDebuff(standPower) && blink != null && staminaCostTicking > 0) {
-	                timeStopTicks = MathHelper.clamp(MathHelper.floor(
-	                		(standPower.getStamina() - staminaCostTS) / staminaCostTicking
-	                		), 0, timeStopTicks);
-	            }
+                int timeStopTicks = TimeStop.getTimeStopTicks(standPower, timeStop);
+                if (!StandUtil.standIgnoresStaminaDebuff(standPower) && blink != null && staminaCostTicking > 0) {
+                    timeStopTicks = MathHelper.clamp(MathHelper.floor(
+                            (standPower.getStamina() - staminaCostTS) / staminaCostTicking
+                            ), 0, timeStopTicks);
+                }
 
-	            int ticksForWindup = 10;
-	            if (standEntity.getCurrentTask().isPresent()) {
-	            	ticksForWindup += 20;
-	            }
-	    		if (standEntity.getAttributeValue(Attributes.MOVEMENT_SPEED) > 0) {
-	    			Vector3d pos = target.getTargetPos(true);
-	    			if (pos != null) {
-	    				double offset = 0.5 + standEntity.getBbWidth();
-	    				if (target.getType() == TargetType.ENTITY) {
-	    					offset += target.getEntity().getBoundingBox().getXsize() / 2;
-	    				}
-	    				pos = pos.subtract(pos.subtract(aimingEntity.getEyePosition(1.0F)).normalize().scale(offset)).subtract(0, standEntity.getEyeHeight(), 0);
-	    			}
-	    			else {
-	    				pos = aimingEntity.position().add(standEntity.getLookAngle().scale(standEntity.getMaxRange()));
-	    			}
-	    			
+                int ticksForWindup = 10;
+                if (standEntity.getCurrentTask().isPresent()) {
+                    ticksForWindup += 20;
+                }
+                if (standEntity.getAttributeValue(Attributes.MOVEMENT_SPEED) > 0) {
+                    Vector3d pos = target.getTargetPos(true);
+                    if (pos != null) {
+                        double offset = 0.5 + standEntity.getBbWidth();
+                        if (target.getType() == TargetType.ENTITY) {
+                            offset += target.getEntity().getBoundingBox().getXsize() / 2;
+                        }
+                        pos = pos.subtract(pos.subtract(aimingEntity.getEyePosition(1.0F)).normalize().scale(offset)).subtract(0, standEntity.getEyeHeight(), 0);
+                    }
+                    else {
+                        pos = aimingEntity.position().add(standEntity.getLookAngle().scale(standEntity.getMaxRange()));
+                    }
+                    
 
-		            double ticksForDistance = pos.subtract(standEntity.position()).length() / TimeStopInstant.getDistancePerTick(standEntity);
-		            
-		            if (timeStopTicks < ticksForDistance + ticksForWindup) {
-		            	pos = timeStopTicks > ticksForWindup ? pos.subtract(standEntity.position()).scale((double) timeStopTicks - ticksForWindup / ticksForDistance).add(standEntity.position()) : standEntity.position();
-		            }
-		            else {
-		            	timeStopTicks = MathHelper.ceil(ticksForDistance) + ticksForWindup;
-		            }
-		    		
-		            pos = standEntity.collideNextPos(pos);
-//		    		if (!world.isClientSide() ^ standEntity.isManuallyControlled()) {
-		    			standEntity.moveTo(pos);
-		    			if (standEntity.tickCount == 0 && !world.isClientSide()) {
-		    				PacketManager.sendToClientsTracking(new TrDirectEntityPosPacket(standEntity.getId(), pos), standEntity);
-		    			}
-//		    		}
-	    		}
-	    		else {
-	    			timeStopTicks = ticksForWindup;
-	    		}
+                    double ticksForDistance = pos.subtract(standEntity.position()).length() / TimeStopInstant.getDistancePerTick(standEntity);
+                    
+                    if (timeStopTicks < ticksForDistance + ticksForWindup) {
+                        pos = timeStopTicks > ticksForWindup ? pos.subtract(standEntity.position()).scale((double) timeStopTicks - ticksForWindup / ticksForDistance).add(standEntity.position()) : standEntity.position();
+                    }
+                    else {
+                        timeStopTicks = MathHelper.ceil(ticksForDistance) + ticksForWindup;
+                    }
+                    
+                    pos = standEntity.collideNextPos(pos);
+//                    if (!world.isClientSide() ^ standEntity.isManuallyControlled()) {
+                        standEntity.moveTo(pos);
+                        if (standEntity.tickCount == 0 && !world.isClientSide()) {
+                            PacketManager.sendToClientsTracking(new TrDirectEntityPosPacket(standEntity.getId(), pos), standEntity);
+                        }
+//                    }
+                }
+                else {
+                    timeStopTicks = ticksForWindup;
+                }
 
-	    		TimeStopInstant.skipTicksForStandAndUser(standPower, timeStopTicks);
-	    		if (!world.isClientSide()) {
+                TimeStopInstant.skipTicksForStandAndUser(standPower, timeStopTicks);
+                if (!world.isClientSide()) {
                     MCUtil.playEitherSound(world, null, standEntity.getX(), standEntity.getY(), standEntity.getZ(), 
                             TimeUtil::canPlayerSeeInStoppedTime, blink.blinkSound.get(), ModSounds.THE_WORLD_TIME_STOP_UNREVEALED.get(), 
                             SoundCategory.AMBIENT, 1.0F, 1.0F);
-	    			standPower.consumeStamina(staminaCostTS + timeStopTicks * staminaCostTicking);
-	    			if (standPower.hasPower()) {
-		    			StandStats stats = standPower.getType().getStats();
-		    			if (stats instanceof TimeStopperStandStats) {
-		    				standPower.addLearningProgressPoints(theWorldTimeStopBlink.get().getBaseTimeStop(), 
-		    						(int) (((TimeStopperStandStats) stats).timeStopLearningPerTick * timeStopTicks));
-		    			}
-	    			}
-	    		}
-	    	}
-    	}
+                    standPower.consumeStamina(staminaCostTS + timeStopTicks * staminaCostTicking);
+                    if (standPower.hasPower()) {
+                        StandStats stats = standPower.getType().getStats();
+                        if (stats instanceof TimeStopperStandStats) {
+                            standPower.addLearningProgressPoints(theWorldTimeStopBlink.get().getBaseTimeStop(), 
+                                    (int) (((TimeStopperStandStats) stats).timeStopLearningPerTick * timeStopTicks));
+                        }
+                    }
+                }
+            }
+        }
     }
     
     @Override
@@ -163,8 +163,8 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
     
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-    	standEntity.punch(task, this, task.getTarget());
-    	userPower.getUser().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.hasUsedTimeStopToday = true);
+        standEntity.punch(task, this, task.getTarget());
+        userPower.getUser().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.hasUsedTimeStopToday = true);
     }
 
     @Override
@@ -195,7 +195,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
     }
     
     @Override
-	protected boolean cancels(StandEntityAction currentAction, IStandPower standPower, StandEntity standEntity, Phase currentPhase) {
+    protected boolean cancels(StandEntityAction currentAction, IStandPower standPower, StandEntity standEntity, Phase currentPhase) {
         return currentAction != this && currentPhase == Phase.RECOVERY;
     }
     

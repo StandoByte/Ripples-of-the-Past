@@ -60,108 +60,108 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         ModelRenderer heartCube9;
 
 
-		heartSmallHead = new ModelRenderer(this);
-		heartSmallHead.setPos(0.0F, 0.55F, -4.0F);
-		head.addChild(heartSmallHead);
+        heartSmallHead = new ModelRenderer(this);
+        heartSmallHead.setPos(0.0F, 0.55F, -4.0F);
+        head.addChild(heartSmallHead);
 
-		smallHeartCube4 = new ModelRenderer(this);
-		smallHeartCube4.setPos(0.0F, 0.0F, 0.0F);
-		heartSmallHead.addChild(smallHeartCube4);
-		setRotationAngle(smallHeartCube4, 0.0F, 0.0F, -0.7854F);
-		smallHeartCube4.texOffs(4, 6).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
+        smallHeartCube4 = new ModelRenderer(this);
+        smallHeartCube4.setPos(0.0F, 0.0F, 0.0F);
+        heartSmallHead.addChild(smallHeartCube4);
+        setRotationAngle(smallHeartCube4, 0.0F, 0.0F, -0.7854F);
+        smallHeartCube4.texOffs(4, 6).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
 
-		smallHeartCube5 = new ModelRenderer(this);
-		smallHeartCube5.setPos(0.3F, -0.3F, 0.0F);
-		heartSmallHead.addChild(smallHeartCube5);
-		setRotationAngle(smallHeartCube5, 0.0F, 0.0F, -0.7854F);
-		smallHeartCube5.texOffs(4, 6).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
+        smallHeartCube5 = new ModelRenderer(this);
+        smallHeartCube5.setPos(0.3F, -0.3F, 0.0F);
+        heartSmallHead.addChild(smallHeartCube5);
+        setRotationAngle(smallHeartCube5, 0.0F, 0.0F, -0.7854F);
+        smallHeartCube5.texOffs(4, 6).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
 
-		smallHeartCube6 = new ModelRenderer(this);
-		smallHeartCube6.setPos(-0.3F, -0.3F, 0.0F);
-		heartSmallHead.addChild(smallHeartCube6);
-		setRotationAngle(smallHeartCube6, 0.0F, 0.0F, -0.7854F);
-		smallHeartCube6.texOffs(4, 6).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
+        smallHeartCube6 = new ModelRenderer(this);
+        smallHeartCube6.setPos(-0.3F, -0.3F, 0.0F);
+        heartSmallHead.addChild(smallHeartCube6);
+        setRotationAngle(smallHeartCube6, 0.0F, 0.0F, -0.7854F);
+        smallHeartCube6.texOffs(4, 6).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
         
         
-		headpiece = new ModelRenderer(this);
-		headpiece.setPos(0.0F, -2.0F, -5.3F);
-		head.addChild(headpiece);
-		headpiece.texOffs(82, 2).addBox(-4.0F, -1.2F, 1.5F, 8.0F, 1.0F, 1.0F, 0.2F, false);
-		headpiece.texOffs(90, 22).addBox(3.0F, -6.2F, 1.5F, 1.0F, 5.0F, 1.0F, 0.2F, true);
-		headpiece.texOffs(65, 22).addBox(-4.0F, -6.2F, 1.5F, 1.0F, 5.0F, 1.0F, 0.2F, false);
+        headpiece = new ModelRenderer(this);
+        headpiece.setPos(0.0F, -2.0F, -5.3F);
+        head.addChild(headpiece);
+        headpiece.texOffs(82, 2).addBox(-4.0F, -1.2F, 1.5F, 8.0F, 1.0F, 1.0F, 0.2F, false);
+        headpiece.texOffs(90, 22).addBox(3.0F, -6.2F, 1.5F, 1.0F, 5.0F, 1.0F, 0.2F, true);
+        headpiece.texOffs(65, 22).addBox(-4.0F, -6.2F, 1.5F, 1.0F, 5.0F, 1.0F, 0.2F, false);
 
-		slope = new ModelRenderer(this);
-		slope.setPos(0.0F, -6.4F, 1.3F);
-		headpiece.addChild(slope);
-		setRotationAngle(slope, 0.3578F, 0.0F, 0.0F);
-		slope.texOffs(64, 9).addBox(-4.0F, 0.2F, 0.2F, 8.0F, 4.0F, 8.0F, 0.2F, false);
-		slope.texOffs(56, 7).addBox(-4.2F, 0.06F, 6.35F, 1.0F, 4.0F, 3.0F, -1.0F, true);
-		slope.texOffs(56, 14).addBox(-4.2F, 2.21F, 5.25F, 1.0F, 4.0F, 3.0F, -1.0F, true);
-		slope.texOffs(96, 14).addBox(3.2F, 2.21F, 5.25F, 1.0F, 4.0F, 3.0F, -1.0F, false);
-		slope.texOffs(96, 7).addBox(3.2F, 0.06F, 6.35F, 1.0F, 4.0F, 3.0F, -1.0F, false);
+        slope = new ModelRenderer(this);
+        slope.setPos(0.0F, -6.4F, 1.3F);
+        headpiece.addChild(slope);
+        setRotationAngle(slope, 0.3578F, 0.0F, 0.0F);
+        slope.texOffs(64, 9).addBox(-4.0F, 0.2F, 0.2F, 8.0F, 4.0F, 8.0F, 0.2F, false);
+        slope.texOffs(56, 7).addBox(-4.2F, 0.06F, 6.35F, 1.0F, 4.0F, 3.0F, -1.0F, true);
+        slope.texOffs(56, 14).addBox(-4.2F, 2.21F, 5.25F, 1.0F, 4.0F, 3.0F, -1.0F, true);
+        slope.texOffs(96, 14).addBox(3.2F, 2.21F, 5.25F, 1.0F, 4.0F, 3.0F, -1.0F, false);
+        slope.texOffs(96, 7).addBox(3.2F, 0.06F, 6.35F, 1.0F, 4.0F, 3.0F, -1.0F, false);
 
-		slopeBack = new ModelRenderer(this);
-		slopeBack.setPos(0.0F, 0.0F, 8.4F);
-		slope.addChild(slopeBack);
-		setRotationAngle(slopeBack, -0.3578F, 0.0F, 0.0F);
-		slopeBack.texOffs(65, 1).addBox(-4.0F, 0.2F, 0.2F, 8.0F, 7.0F, 0.0F, 0.2F, false);
+        slopeBack = new ModelRenderer(this);
+        slopeBack.setPos(0.0F, 0.0F, 8.4F);
+        slope.addChild(slopeBack);
+        setRotationAngle(slopeBack, -0.3578F, 0.0F, 0.0F);
+        slopeBack.texOffs(65, 1).addBox(-4.0F, 0.2F, 0.2F, 8.0F, 7.0F, 0.0F, 0.2F, false);
 
-		slope2 = new ModelRenderer(this);
-		slope2.setPos(0.0F, 0.0F, 2.7F);
-		headpiece.addChild(slope2);
-		setRotationAngle(slope2, 0.2755F, 0.0F, 0.0F);
-		slope2.texOffs(98, 14).addBox(-4.0F, -3.2F, 0.2F, 8.0F, 3.0F, 7.0F, 0.2F, false);
-		slope2.texOffs(82, 0).addBox(-4.0F, -1.2F, 5.9372F, 8.0F, 1.0F, 1.0F, 0.2F, false);
+        slope2 = new ModelRenderer(this);
+        slope2.setPos(0.0F, 0.0F, 2.7F);
+        headpiece.addChild(slope2);
+        setRotationAngle(slope2, 0.2755F, 0.0F, 0.0F);
+        slope2.texOffs(98, 14).addBox(-4.0F, -3.2F, 0.2F, 8.0F, 3.0F, 7.0F, 0.2F, false);
+        slope2.texOffs(82, 0).addBox(-4.0F, -1.2F, 5.9372F, 8.0F, 1.0F, 1.0F, 0.2F, false);
 
-		faceRight = new ModelRenderer(this);
-		faceRight.setPos(-4.2F, -6.4F, 1.3F);
-		headpiece.addChild(faceRight);
-		setRotationAngle(faceRight, 0.0F, 0.3023F, 0.0F);
-		faceRight.texOffs(69, 21).addBox(0.2F, 0.2F, 0.2F, 4.0F, 6.0F, 1.0F, 0.2F, false);
+        faceRight = new ModelRenderer(this);
+        faceRight.setPos(-4.2F, -6.4F, 1.3F);
+        headpiece.addChild(faceRight);
+        setRotationAngle(faceRight, 0.0F, 0.3023F, 0.0F);
+        faceRight.texOffs(69, 21).addBox(0.2F, 0.2F, 0.2F, 4.0F, 6.0F, 1.0F, 0.2F, false);
 
-		faceLeft = new ModelRenderer(this);
-		faceLeft.setPos(4.2F, -6.4F, 1.3F);
-		headpiece.addChild(faceLeft);
-		setRotationAngle(faceLeft, 0.0F, -0.3023F, 0.0F);
-		faceLeft.texOffs(80, 21).addBox(-4.2F, 0.2F, 0.2F, 4.0F, 6.0F, 1.0F, 0.2F, true);
+        faceLeft = new ModelRenderer(this);
+        faceLeft.setPos(4.2F, -6.4F, 1.3F);
+        headpiece.addChild(faceLeft);
+        setRotationAngle(faceLeft, 0.0F, -0.3023F, 0.0F);
+        faceLeft.texOffs(80, 21).addBox(-4.2F, 0.2F, 0.2F, 4.0F, 6.0F, 1.0F, 0.2F, true);
 
-		leftCable = new ModelRenderer(this);
-		leftCable.setPos(1.25F, -3.3F, 0.25F);
-		head.addChild(leftCable);
-		setRotationAngle(leftCable, 0.0873F, 0.1309F, -1.1345F);
-		leftCable.texOffs(13, 16).addBox(-0.5F, 0.0F, 0.0F, 1.0F, 4.0F, 5.0F, 0.0F, true);
+        leftCable = new ModelRenderer(this);
+        leftCable.setPos(1.25F, -3.3F, 0.25F);
+        head.addChild(leftCable);
+        setRotationAngle(leftCable, 0.0873F, 0.1309F, -1.1345F);
+        leftCable.texOffs(13, 16).addBox(-0.5F, 0.0F, 0.0F, 1.0F, 4.0F, 5.0F, 0.0F, true);
         leftCable.texOffs(13, 25).addBox(-0.5F, 1.0F, 1.0F, 1.0F, 2.0F, 3.0F, 0.0F, true);
 
-		rightCable = new ModelRenderer(this);
-		rightCable.setPos(-1.25F, -3.3F, 0.25F);
-		head.addChild(rightCable);
-		setRotationAngle(rightCable, 0.0873F, -0.1309F, 1.2217F);
-		rightCable.texOffs(0, 16).addBox(-0.5F, 0.0F, 0.0F, 1.0F, 4.0F, 5.0F, 0.0F, false);
+        rightCable = new ModelRenderer(this);
+        rightCable.setPos(-1.25F, -3.3F, 0.25F);
+        head.addChild(rightCable);
+        setRotationAngle(rightCable, 0.0873F, -0.1309F, 1.2217F);
+        rightCable.texOffs(0, 16).addBox(-0.5F, 0.0F, 0.0F, 1.0F, 4.0F, 5.0F, 0.0F, false);
         rightCable.texOffs(0, 25).addBox(-0.5F, 1.0F, 1.0F, 1.0F, 2.0F, 3.0F, 0.0F, false);
 
-		torso.texOffs(20, 64).addBox(-3.5F, 1.1F, -2.0F, 7.0F, 3.0F, 1.0F, 0.4F, false);
-		torso.texOffs(24, 73).addBox(-2.5F, 4.0F, -2.3F, 5.0F, 6.0F, 1.0F, 0.0F, false);
-		torso.texOffs(49, 65).addBox(2.0F, 0.0F, -2.5F, 1.0F, 10.0F, 5.0F, 0.25F, true);
-		torso.texOffs(36, 65).addBox(-3.0F, 0.0F, -2.5F, 1.0F, 10.0F, 5.0F, 0.25F, false);
-		torso.texOffs(9, 80).addBox(0.5F, 1.0F, 2.0F, 2.0F, 6.0F, 2.0F, 0.0F, true);
-		torso.texOffs(0, 80).addBox(-2.5F, 1.0F, 2.0F, 2.0F, 6.0F, 2.0F, 0.0F, false);
+        torso.texOffs(20, 64).addBox(-3.5F, 1.1F, -2.0F, 7.0F, 3.0F, 1.0F, 0.4F, false);
+        torso.texOffs(24, 73).addBox(-2.5F, 4.0F, -2.3F, 5.0F, 6.0F, 1.0F, 0.0F, false);
+        torso.texOffs(49, 65).addBox(2.0F, 0.0F, -2.5F, 1.0F, 10.0F, 5.0F, 0.25F, true);
+        torso.texOffs(36, 65).addBox(-3.0F, 0.0F, -2.5F, 1.0F, 10.0F, 5.0F, 0.25F, false);
+        torso.texOffs(9, 80).addBox(0.5F, 1.0F, 2.0F, 2.0F, 6.0F, 2.0F, 0.0F, true);
+        torso.texOffs(0, 80).addBox(-2.5F, 1.0F, 2.0F, 2.0F, 6.0F, 2.0F, 0.0F, false);
 
-		
-		heartLargeAbdomen = new ModelRenderer(this);
-		heartLargeAbdomen.setPos(0.0F, 13.5F, -1.75F);
-		torso.addChild(heartLargeAbdomen);
+        
+        heartLargeAbdomen = new ModelRenderer(this);
+        heartLargeAbdomen.setPos(0.0F, 13.5F, -1.75F);
+        torso.addChild(heartLargeAbdomen);
 
-		largeHeartCube1 = new ModelRenderer(this);
-		largeHeartCube1.setPos(0.0F, 0.0F, 0.0F);
-		heartLargeAbdomen.addChild(largeHeartCube1);
-		setRotationAngle(largeHeartCube1, 0.0F, 0.0F, 0.7854F);
-		largeHeartCube1.texOffs(21, 80).addBox(-1.0F, -2.0F, -0.5F, 1.0F, 2.0F, 1.0F, 0.25F, false);
+        largeHeartCube1 = new ModelRenderer(this);
+        largeHeartCube1.setPos(0.0F, 0.0F, 0.0F);
+        heartLargeAbdomen.addChild(largeHeartCube1);
+        setRotationAngle(largeHeartCube1, 0.0F, 0.0F, 0.7854F);
+        largeHeartCube1.texOffs(21, 80).addBox(-1.0F, -2.0F, -0.5F, 1.0F, 2.0F, 1.0F, 0.25F, false);
 
-		largeHeartCube2 = new ModelRenderer(this);
-		largeHeartCube2.setPos(0.0F, 0.0F, 0.0F);
-		heartLargeAbdomen.addChild(largeHeartCube2);
-		setRotationAngle(largeHeartCube2, 0.0F, 0.0F, -0.7854F);
-		largeHeartCube2.texOffs(21, 80).addBox(0.0F, -2.0F, -0.5F, 1.0F, 2.0F, 1.0F, 0.25F, false);
+        largeHeartCube2 = new ModelRenderer(this);
+        largeHeartCube2.setPos(0.0F, 0.0F, 0.0F);
+        heartLargeAbdomen.addChild(largeHeartCube2);
+        setRotationAngle(largeHeartCube2, 0.0F, 0.0F, -0.7854F);
+        largeHeartCube2.texOffs(21, 80).addBox(0.0F, -2.0F, -0.5F, 1.0F, 2.0F, 1.0F, 0.25F, false);
 
 
         heartSmallAbdomen = new ModelRenderer(this);
@@ -186,111 +186,111 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         setRotationAngle(smallHeartCube3, 0.0F, 0.0F, -0.7854F);
         smallHeartCube3.texOffs(48, 1).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
 
-		leftArm.texOffs(48, 110).addBox(0.0F, -2.0F, -2.0F, 2.0F, 4.0F, 4.0F, 0.25F, true);
+        leftArm.texOffs(48, 110).addBox(0.0F, -2.0F, -2.0F, 2.0F, 4.0F, 4.0F, 0.25F, true);
 
-		heartLeftArm = new ModelRenderer(this);
-		heartLeftArm.setPos(0.0F, 3.8F, 1.8F);
-		leftArm.addChild(heartLeftArm);
+        heartLeftArm = new ModelRenderer(this);
+        heartLeftArm.setPos(0.0F, 3.8F, 1.8F);
+        leftArm.addChild(heartLeftArm);
 
-		heartCube4 = new ModelRenderer(this);
-		heartCube4.setPos(0.0F, 0.0F, 0.0F);
-		heartLeftArm.addChild(heartCube4);
-		setRotationAngle(heartCube4, 0.0F, 0.0F, -0.7854F);
-		heartCube4.texOffs(48, 121).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
+        heartCube4 = new ModelRenderer(this);
+        heartCube4.setPos(0.0F, 0.0F, 0.0F);
+        heartLeftArm.addChild(heartCube4);
+        setRotationAngle(heartCube4, 0.0F, 0.0F, -0.7854F);
+        heartCube4.texOffs(48, 121).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
 
-		heartCube5 = new ModelRenderer(this);
-		heartCube5.setPos(0.5F, -0.5F, 0.0F);
-		heartLeftArm.addChild(heartCube5);
-		setRotationAngle(heartCube5, 0.0F, 0.0F, -0.7854F);
-		heartCube5.texOffs(48, 121).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
+        heartCube5 = new ModelRenderer(this);
+        heartCube5.setPos(0.5F, -0.5F, 0.0F);
+        heartLeftArm.addChild(heartCube5);
+        setRotationAngle(heartCube5, 0.0F, 0.0F, -0.7854F);
+        heartCube5.texOffs(48, 121).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
 
-		heartCube6 = new ModelRenderer(this);
-		heartCube6.setPos(-0.5F, -0.5F, 0.0F);
-		heartLeftArm.addChild(heartCube6);
-		setRotationAngle(heartCube6, 0.0F, 0.0F, -0.7854F);
-		heartCube6.texOffs(48, 121).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
-
-
-		leftForeArm.texOffs(48, 119).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 5.0F, 4.0F, 0.25F, true);
-		leftForeArm.texOffs(32, 96).addBox(1.0F, 2.0F, -1.5F, 2.0F, 3.0F, 3.0F, -0.4F, true);
-		leftForeArm.texOffs(42, 97).addBox(1.5F, 5.1F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, true);
-
-		rightArm.texOffs(16, 110).addBox(-2.0F, -2.0F, -2.0F, 2.0F, 4.0F, 4.0F, 0.25F, false);
-
-		heartRightArm = new ModelRenderer(this);
-		heartRightArm.setPos(0.0F, 3.8F, 1.8F);
-		rightArm.addChild(heartRightArm);
-
-		heartCube1 = new ModelRenderer(this);
-		heartCube1.setPos(0.0F, 0.0F, 0.0F);
-		heartRightArm.addChild(heartCube1);
-		setRotationAngle(heartCube1, 0.0F, 0.0F, -0.7854F);
-		heartCube1.texOffs(16, 121).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
-
-		heartCube2 = new ModelRenderer(this);
-		heartCube2.setPos(0.5F, -0.5F, 0.0F);
-		heartRightArm.addChild(heartCube2);
-		setRotationAngle(heartCube2, 0.0F, 0.0F, -0.7854F);
-		heartCube2.texOffs(16, 121).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
-
-		heartCube3 = new ModelRenderer(this);
-		heartCube3.setPos(-0.5F, -0.5F, 0.0F);
-		heartRightArm.addChild(heartCube3);
-		setRotationAngle(heartCube3, 0.0F, 0.0F, -0.7854F);
-		heartCube3.texOffs(16, 121).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
+        heartCube6 = new ModelRenderer(this);
+        heartCube6.setPos(-0.5F, -0.5F, 0.0F);
+        heartLeftArm.addChild(heartCube6);
+        setRotationAngle(heartCube6, 0.0F, 0.0F, -0.7854F);
+        heartCube6.texOffs(48, 121).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
 
 
-		rightForeArm.texOffs(16, 119).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 5.0F, 4.0F, 0.25F, false);
-		rightForeArm.texOffs(0, 96).addBox(-3.0F, 2.0F, -1.5F, 2.0F, 3.0F, 3.0F, -0.4F, false);
-		rightForeArm.texOffs(10, 97).addBox(-2.5F, 5.1F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, false);
+        leftForeArm.texOffs(48, 119).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 5.0F, 4.0F, 0.25F, true);
+        leftForeArm.texOffs(32, 96).addBox(1.0F, 2.0F, -1.5F, 2.0F, 3.0F, 3.0F, -0.4F, true);
+        leftForeArm.texOffs(42, 97).addBox(1.5F, 5.1F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, true);
 
-		leftLeg.texOffs(112, 108).addBox(1.6F, -1.75F, -1.5F, 1.0F, 3.0F, 3.0F, 0.0F, true);
+        rightArm.texOffs(16, 110).addBox(-2.0F, -2.0F, -2.0F, 2.0F, 4.0F, 4.0F, 0.25F, false);
 
-		heartLeftLeg = new ModelRenderer(this);
-		heartLeftLeg.setPos(0.0F, 6.0F, -1.8F);
-		leftLeg.addChild(heartLeftLeg);
+        heartRightArm = new ModelRenderer(this);
+        heartRightArm.setPos(0.0F, 3.8F, 1.8F);
+        rightArm.addChild(heartRightArm);
 
-		heartCube10 = new ModelRenderer(this);
-		heartCube10.setPos(0.0F, 0.05F, 0.0F);
-		heartLeftLeg.addChild(heartCube10);
-		setRotationAngle(heartCube10, 0.0F, 0.0F, -0.7854F);
-		heartCube10.texOffs(96, 120).addBox(0.0F, -1.05F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
+        heartCube1 = new ModelRenderer(this);
+        heartCube1.setPos(0.0F, 0.0F, 0.0F);
+        heartRightArm.addChild(heartCube1);
+        setRotationAngle(heartCube1, 0.0F, 0.0F, -0.7854F);
+        heartCube1.texOffs(16, 121).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
 
-		heartCube11 = new ModelRenderer(this);
-		heartCube11.setPos(0.5F, -0.45F, 0.0F);
-		heartLeftLeg.addChild(heartCube11);
-		setRotationAngle(heartCube11, 0.0F, 0.0F, -0.7854F);
-		heartCube11.texOffs(96, 120).addBox(0.0F, -1.05F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
+        heartCube2 = new ModelRenderer(this);
+        heartCube2.setPos(0.5F, -0.5F, 0.0F);
+        heartRightArm.addChild(heartCube2);
+        setRotationAngle(heartCube2, 0.0F, 0.0F, -0.7854F);
+        heartCube2.texOffs(16, 121).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
 
-		heartCube12 = new ModelRenderer(this);
-		heartCube12.setPos(-0.5F, -0.45F, 0.0F);
-		heartLeftLeg.addChild(heartCube12);
-		setRotationAngle(heartCube12, 0.0F, 0.0F, -0.7854F);
-		heartCube12.texOffs(96, 120).addBox(0.0F, -1.05F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
-		
-		rightLeg.texOffs(80, 108).addBox(-2.6F, -1.25F, -1.5F, 1.0F, 3.0F, 3.0F, 0.0F, false);
+        heartCube3 = new ModelRenderer(this);
+        heartCube3.setPos(-0.5F, -0.5F, 0.0F);
+        heartRightArm.addChild(heartCube3);
+        setRotationAngle(heartCube3, 0.0F, 0.0F, -0.7854F);
+        heartCube3.texOffs(16, 121).addBox(0.0F, -1.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
 
-		heartRightLeg = new ModelRenderer(this);
-		heartRightLeg.setPos(0.0F, 6.0F, -1.8F);
-		rightLeg.addChild(heartRightLeg);
-		
-		heartCube7 = new ModelRenderer(this);
-		heartCube7.setPos(0.0F, 0.05F, 0.0F);
-		heartRightLeg.addChild(heartCube7);
-		setRotationAngle(heartCube7, 0.0F, 0.0F, -0.7854F);
-		heartCube7.texOffs(64, 120).addBox(0.0F, -1.05F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
 
-		heartCube8 = new ModelRenderer(this);
-		heartCube8.setPos(0.5F, -0.45F, 0.0F);
-		heartRightLeg.addChild(heartCube8);
-		setRotationAngle(heartCube8, 0.0F, 0.0F, -0.7854F);
-		heartCube8.texOffs(64, 120).addBox(0.0F, -1.05F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
+        rightForeArm.texOffs(16, 119).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 5.0F, 4.0F, 0.25F, false);
+        rightForeArm.texOffs(0, 96).addBox(-3.0F, 2.0F, -1.5F, 2.0F, 3.0F, 3.0F, -0.4F, false);
+        rightForeArm.texOffs(10, 97).addBox(-2.5F, 5.1F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, false);
 
-		heartCube9 = new ModelRenderer(this);
-		heartCube9.setPos(-0.5F, -0.45F, 0.0F);
-		heartRightLeg.addChild(heartCube9);
-		setRotationAngle(heartCube9, 0.0F, 0.0F, -0.7854F);
-		heartCube9.texOffs(64, 120).addBox(0.0F, -1.05F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
+        leftLeg.texOffs(112, 108).addBox(1.6F, -1.75F, -1.5F, 1.0F, 3.0F, 3.0F, 0.0F, true);
+
+        heartLeftLeg = new ModelRenderer(this);
+        heartLeftLeg.setPos(0.0F, 6.0F, -1.8F);
+        leftLeg.addChild(heartLeftLeg);
+
+        heartCube10 = new ModelRenderer(this);
+        heartCube10.setPos(0.0F, 0.05F, 0.0F);
+        heartLeftLeg.addChild(heartCube10);
+        setRotationAngle(heartCube10, 0.0F, 0.0F, -0.7854F);
+        heartCube10.texOffs(96, 120).addBox(0.0F, -1.05F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
+
+        heartCube11 = new ModelRenderer(this);
+        heartCube11.setPos(0.5F, -0.45F, 0.0F);
+        heartLeftLeg.addChild(heartCube11);
+        setRotationAngle(heartCube11, 0.0F, 0.0F, -0.7854F);
+        heartCube11.texOffs(96, 120).addBox(0.0F, -1.05F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
+
+        heartCube12 = new ModelRenderer(this);
+        heartCube12.setPos(-0.5F, -0.45F, 0.0F);
+        heartLeftLeg.addChild(heartCube12);
+        setRotationAngle(heartCube12, 0.0F, 0.0F, -0.7854F);
+        heartCube12.texOffs(96, 120).addBox(0.0F, -1.05F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
+        
+        rightLeg.texOffs(80, 108).addBox(-2.6F, -1.25F, -1.5F, 1.0F, 3.0F, 3.0F, 0.0F, false);
+
+        heartRightLeg = new ModelRenderer(this);
+        heartRightLeg.setPos(0.0F, 6.0F, -1.8F);
+        rightLeg.addChild(heartRightLeg);
+        
+        heartCube7 = new ModelRenderer(this);
+        heartCube7.setPos(0.0F, 0.05F, 0.0F);
+        heartRightLeg.addChild(heartCube7);
+        setRotationAngle(heartCube7, 0.0F, 0.0F, -0.7854F);
+        heartCube7.texOffs(64, 120).addBox(0.0F, -1.05F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
+
+        heartCube8 = new ModelRenderer(this);
+        heartCube8.setPos(0.5F, -0.45F, 0.0F);
+        heartRightLeg.addChild(heartCube8);
+        setRotationAngle(heartCube8, 0.0F, 0.0F, -0.7854F);
+        heartCube8.texOffs(64, 120).addBox(0.0F, -1.05F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
+
+        heartCube9 = new ModelRenderer(this);
+        heartCube9.setPos(-0.5F, -0.45F, 0.0F);
+        heartRightLeg.addChild(heartCube9);
+        setRotationAngle(heartCube9, 0.0F, 0.0F, -0.7854F);
+        heartCube9.texOffs(64, 120).addBox(0.0F, -1.05F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
     }
 
     @Override

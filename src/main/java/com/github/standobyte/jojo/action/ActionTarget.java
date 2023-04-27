@@ -65,7 +65,7 @@ public class ActionTarget {
     }
     
     public ActionTarget(int entityId, World world) {
-    	this(world.getEntity(entityId));
+        this(world.getEntity(entityId));
     }
     
     public static ActionTarget fromRayTraceResult(RayTraceResult result) {
@@ -103,22 +103,22 @@ public class ActionTarget {
     }
     
     public Optional<AxisAlignedBB> getBoundingBox(World world) {
-    	AxisAlignedBB aabb = null;
-    	switch (type) {
-    	case ENTITY:
+        AxisAlignedBB aabb = null;
+        switch (type) {
+        case ENTITY:
             aabb = getEntity().getBoundingBox();
-    		break;
-    	case BLOCK:
+            break;
+        case BLOCK:
             BlockState blockState = world.getBlockState(blockPos);
             VoxelShape blockShape = blockState.getCollisionShape(world, blockPos);
             if (!blockShape.isEmpty()) {
                 aabb = blockShape.bounds().move(blockPos);
             }
-    		break;
-		default:
-			break;
-    	}
-    	return Optional.ofNullable(aabb);
+            break;
+        default:
+            break;
+        }
+        return Optional.ofNullable(aabb);
     }
     
 

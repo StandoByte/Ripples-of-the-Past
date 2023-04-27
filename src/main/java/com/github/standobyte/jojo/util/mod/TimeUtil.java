@@ -104,7 +104,7 @@ public class TimeUtil {
     public static void onEntityJoinWorld(EntityJoinWorldEvent event) {
         Entity entity = event.getEntity();
         if (!(entity instanceof PlayerEntity)) {
-        	stopNewEntityInTime(entity, event.getWorld());
+            stopNewEntityInTime(entity, event.getWorld());
         }
     }
     
@@ -134,15 +134,15 @@ public class TimeUtil {
     
     private static void sendWorldTimeStopData(ServerPlayerEntity player) {
         player.level.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-        	PacketManager.sendToClient(new TimeStopPlayerJoinPacket(Phase.PRE), player);
+            PacketManager.sendToClient(new TimeStopPlayerJoinPacket(Phase.PRE), player);
             cap.getTimeStopHandler().getInstancesInPos(new ChunkPos(player.blockPosition())).forEach(instance -> {
                 instance.syncToClient(player);
             });
             
             cap.getTimeStopHandler().sendPlayerState(player);
             
-        	TimeUtil.stopNewEntityInTime(player, player.level);
-        	PacketManager.sendToClient(new TimeStopPlayerJoinPacket(Phase.POST), player);
+            TimeUtil.stopNewEntityInTime(player, player.level);
+            PacketManager.sendToClient(new TimeStopPlayerJoinPacket(Phase.POST), player);
         });
     }
     
@@ -150,24 +150,24 @@ public class TimeUtil {
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onPlayerLogout(PlayerLoggedOutEvent event) {
-    	PlayerEntity player = event.getPlayer();
-    	if (player instanceof ServerPlayerEntity) {
-    		ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
-    		if (serverPlayer.getServer().getPlayerList().getPlayerCount() <= 1) {
-    			serverPlayer.getServer().getAllLevels().forEach(world -> {
-        	    	world.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-        	    		TimeStopHandler handler = cap.getTimeStopHandler();
-        	    		handler.getAllTimeStopInstances().forEach(instance -> handler.removeTimeStop(instance));
-        	    	});
-    			});
-    		}
-    		else {
-    			player.level.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-    				TimeStopHandler handler = cap.getTimeStopHandler();
-    				handler.userStoppedTime(player).ifPresent(instance -> handler.removeTimeStop(instance));
-    			});
-    		}
-    	}
+        PlayerEntity player = event.getPlayer();
+        if (player instanceof ServerPlayerEntity) {
+            ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
+            if (serverPlayer.getServer().getPlayerList().getPlayerCount() <= 1) {
+                serverPlayer.getServer().getAllLevels().forEach(world -> {
+                    world.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                        TimeStopHandler handler = cap.getTimeStopHandler();
+                        handler.getAllTimeStopInstances().forEach(instance -> handler.removeTimeStop(instance));
+                    });
+                });
+            }
+            else {
+                player.level.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                    TimeStopHandler handler = cap.getTimeStopHandler();
+                    handler.userStoppedTime(player).ifPresent(instance -> handler.removeTimeStop(instance));
+                });
+            }
+        }
     }
 
 
@@ -181,9 +181,9 @@ public class TimeUtil {
             cap.tick();
         });
         if (event.world.dimension() == World.OVERWORLD) {
-	        event.world.getCapability(SaveFileUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-	        	cap.tick();
-	        });
+            event.world.getCapability(SaveFileUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                cap.tick();
+            });
         }
     }
 

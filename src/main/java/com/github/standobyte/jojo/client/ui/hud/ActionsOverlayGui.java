@@ -492,12 +492,12 @@ public class ActionsOverlayGui extends AbstractGui {
             
             ActionConditionResult result = actionAvailability(action, mode, actionType, target, isSelected);
             if (!result.isPositive()) {
-            	if (!result.isHighlighted()) {
-            		RenderSystem.color4f(0.2F, 0.2F, 0.2F, 0.5F * hotbarAlpha);
-            	}
-            	else {
-            		RenderSystem.color4f(0.75F, 0.75F, 0.75F, 0.75F * hotbarAlpha);
-            	}
+                if (!result.isHighlighted()) {
+                    RenderSystem.color4f(0.2F, 0.2F, 0.2F, 0.5F * hotbarAlpha);
+                }
+                else {
+                    RenderSystem.color4f(0.75F, 0.75F, 0.75F, 0.75F * hotbarAlpha);
+                }
                 blit(matrixStack, x, y, 0, 16, 16, textureAtlasSprite);
                 // cooldown
                 float ratio = power.getCooldownRatio(action, partialTick);
@@ -549,13 +549,13 @@ public class ActionsOverlayGui extends AbstractGui {
         P power = mode.getPower();
         Container<ActionTarget> targetContainer = new Container<>(mouseTarget);
         if (isSelected) {
-        	ActionConditionResult targetCheck = power.checkTarget(action, targetContainer);
+            ActionConditionResult targetCheck = power.checkTarget(action, targetContainer);
             mode.getTargetIcon(hotbar).update(action.getTargetRequirement(), targetCheck.isPositive());
             if (!targetCheck.isPositive()) {
                 return targetCheck;
             }
         }
-    	return power.checkRequirements(action, targetContainer, !isSelected);
+        return power.checkRequirements(action, targetContainer, !isSelected);
     }
     
     private void fillRect(BufferBuilder bufferBuilder, int x, double y, int width, double height, int red, int green, int blue, int alpha) {
@@ -1053,23 +1053,23 @@ public class ActionsOverlayGui extends AbstractGui {
 
     private boolean switchOffStandHud = false;
     public void onStandUnsummon() {
-    	switchOffStandHud = true;
+        switchOffStandHud = true;
     }
     
     private void tickStandUnsummonCheck() {
-    	if (currentMode == standUiMode && standUiMode.autoOpened) {
-    		IStandPower standPower = standUiMode.getPower();
-    		if (standPower == null || !standPower.hasPower() || !standPower.isActive()) {
-    			if (switchOffStandHud) {
-    				setMode(null);
-    				standUiMode.autoOpened = false;
-    			}
+        if (currentMode == standUiMode && standUiMode.autoOpened) {
+            IStandPower standPower = standUiMode.getPower();
+            if (standPower == null || !standPower.hasPower() || !standPower.isActive()) {
+                if (switchOffStandHud) {
+                    setMode(null);
+                    standUiMode.autoOpened = false;
+                }
                 switchOffStandHud = false;
-    		}
-    	}
-    	else {
-    		switchOffStandHud = false;
-    	}
+            }
+        }
+        else {
+            switchOffStandHud = false;
+        }
     }
     
     

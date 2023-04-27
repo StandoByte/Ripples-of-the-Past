@@ -63,12 +63,12 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
     }
 
     @Override
-	public boolean isBodyPart() {
+    public boolean isBodyPart() {
         return true;
     }
 
     @Override
-	public int ticksLifespan() {
+    public int ticksLifespan() {
         return ModActions.HAMON_ZOOM_PUNCH.get().getCooldownTechnical(null);
     }
     

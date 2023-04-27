@@ -38,7 +38,7 @@ public class StarPlatinumZoom extends StandEntityAction {
     @Override
     public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (world.isClientSide) {
-        	int ticks = task.getTick();
+            int ticks = task.getTick();
             if (ticks % 16 == 3 && ticks > 32 && ticks < 80) {
                 PlayerEntity player = ClientUtil.getClientPlayer();
                 if (player.is(standEntity.getUser())) {

@@ -44,10 +44,10 @@ public class StandRelativeOffset {
     }
     
     public Vector3d getAbsoluteVec(StandRelativeOffset offsetDefault, float yRot, float xRot, StandEntity standEntity, LivingEntity user) {
-    	double yOffset = 0;
-    	if (standEntity.isArmsOnlyMode() && user.getPose() != Pose.STANDING) {
-    		yOffset = (user.getDimensions(user.getPose()).height - user.getDimensions(Pose.STANDING).height) * 0.85F;
-    	}
+        double yOffset = 0;
+        if (standEntity.isArmsOnlyMode() && user.getPose() != Pose.STANDING) {
+            yOffset = (user.getDimensions(user.getPose()).height - user.getDimensions(Pose.STANDING).height) * 0.85F;
+        }
         Vector3d vec;
         if (useXRot) {
             vec = new Vector3d(left, 0, forward).xRot(-xRot * MathUtil.DEG_TO_RAD).yRot(-yRot * MathUtil.DEG_TO_RAD);
@@ -63,7 +63,7 @@ public class StandRelativeOffset {
     }
     
     public StandRelativeOffset withRelativeVec(Vector3d vec) {
-    	return new StandRelativeOffset(vec.x, vec.y, vec.z, this.doYOffset, this.useXRot);
+        return new StandRelativeOffset(vec.x, vec.y, vec.z, this.doYOffset, this.useXRot);
     }
     
     public double getLeft() {

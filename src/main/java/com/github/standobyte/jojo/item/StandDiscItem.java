@@ -76,13 +76,13 @@ public class StandDiscItem extends Item {
                     return ActionResult.fail(stack);
                 }
                 if (power.wasGivenByDisc()) {
-                	if (!player.abilities.instabuild) {
-	                    Optional<StandInstance> previousDiscStand = power.putOutStand();
-	                    previousDiscStand.ifPresent(prevStand -> player.drop(withStand(new ItemStack(this), prevStand), false));
-                	}
-                	else {
-                		power.clear();
-                	}
+                    if (!player.abilities.instabuild) {
+                        Optional<StandInstance> previousDiscStand = power.putOutStand();
+                        previousDiscStand.ifPresent(prevStand -> player.drop(withStand(new ItemStack(this), prevStand), false));
+                    }
+                    else {
+                        power.clear();
+                    }
                 }
                 if (power.giveStand(stand, !stack.getTag().getBoolean(WS_TAG))) {
                     power.setGivenByDisc();
@@ -107,7 +107,7 @@ public class StandDiscItem extends Item {
         if (entity instanceof PlayerEntity) {
             PlayerEntity player = (PlayerEntity) entity;
             return player.abilities.instabuild
-            		|| !JojoModConfig.getCommonConfigInstance(entity.level.isClientSide()).standTiers.get()
+                    || !JojoModConfig.getCommonConfigInstance(entity.level.isClientSide()).standTiers.get()
                     || playerTier >= stand.getTier()
                     || Arrays.stream(StandUtil.standTiersFromXp(player.experienceLevel, false, entity.level.isClientSide()))
                     .anyMatch(tier -> tier >= stand.getTier());
@@ -137,24 +137,24 @@ public class StandDiscItem extends Item {
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
         PlayerEntity player = ClientUtil.getClientPlayer();
         if (player != null) {
-        	if (validStandDisc(stack, true)) {
-        	    StandInstance stand = getStandFromStack(stack, true);
-        		tooltip.add(stand.getCustomName().orElse(new TranslationTextComponent(stand.getType().getTranslationKey())));
-        		tooltip.add(stand.getType().getPartName());
-        		if (JojoModConfig.getCommonConfigInstance(true).standTiers.get()) {
-        			int standTier = stand.getType().getTier();
-        			int playerXpLevel = ClientUtil.getClientPlayer().experienceLevel;
-        			int xpForTier = GeneralUtil.getOrLast(JojoModConfig.getCommonConfigInstance(true).standTierXpLevels.get(), standTier).intValue();
-        			tooltip.add(new TranslationTextComponent("jojo.disc.tier", standTier, 
-        					new TranslationTextComponent("jojo.disc.tier_level", xpForTier)
-        					.withStyle(playerXpLevel < xpForTier ? TextFormatting.RED : TextFormatting.GREEN)).withStyle(TextFormatting.GRAY));
-        		}
-        		for (StandPart standPart : StandPart.values()) {
-        		    if (!stand.hasPart(standPart)) {
+            if (validStandDisc(stack, true)) {
+                StandInstance stand = getStandFromStack(stack, true);
+                tooltip.add(stand.getCustomName().orElse(new TranslationTextComponent(stand.getType().getTranslationKey())));
+                tooltip.add(stand.getType().getPartName());
+                if (JojoModConfig.getCommonConfigInstance(true).standTiers.get()) {
+                    int standTier = stand.getType().getTier();
+                    int playerXpLevel = ClientUtil.getClientPlayer().experienceLevel;
+                    int xpForTier = GeneralUtil.getOrLast(JojoModConfig.getCommonConfigInstance(true).standTierXpLevels.get(), standTier).intValue();
+                    tooltip.add(new TranslationTextComponent("jojo.disc.tier", standTier, 
+                            new TranslationTextComponent("jojo.disc.tier_level", xpForTier)
+                            .withStyle(playerXpLevel < xpForTier ? TextFormatting.RED : TextFormatting.GREEN)).withStyle(TextFormatting.GRAY));
+                }
+                for (StandPart standPart : StandPart.values()) {
+                    if (!stand.hasPart(standPart)) {
                         tooltip.add(new TranslationTextComponent("jojo.disc.missing_part." + standPart.name().toLowerCase()).withStyle(TextFormatting.DARK_GRAY));
-        		    }
-        		}
-        	}
+                    }
+                }
+            }
         }
     }
     

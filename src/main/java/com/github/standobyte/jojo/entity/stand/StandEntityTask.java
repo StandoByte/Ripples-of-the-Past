@@ -158,7 +158,7 @@ public class StandEntityTask {
         int ticks;
         switch (phase) {
         case BUTTON_HOLD:
-        	return;
+            return;
         case WINDUP:
             ticks = action.getStandWindupTicks(standPower, standEntity);
             break;
@@ -226,7 +226,7 @@ public class StandEntityTask {
     }
     
     public int getTick() {
-    	return startingTicks - ticksLeft;
+        return startingTicks - ticksLeft;
     }
     
     public float getPhaseCompletion(float partialTick) {
@@ -238,7 +238,7 @@ public class StandEntityTask {
     }
     
     public ActionTarget getTarget() {
-    	return target;
+        return target;
     }
     
     public void overrideOffsetFromUser(StandRelativeOffset offset) {
@@ -253,7 +253,7 @@ public class StandEntityTask {
     
     
     public StacksTHC getAdditionalData() {
-    	return additionalData;
+        return additionalData;
     }
     
     

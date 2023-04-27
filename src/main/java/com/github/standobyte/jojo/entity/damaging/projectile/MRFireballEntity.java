@@ -98,7 +98,7 @@ public class MRFireballEntity extends ModdedProjectileEntity implements IRenders
     }
     
     @Override
-	public int ticksLifespan() {
+    public int ticksLifespan() {
         return 100;
     }
 }

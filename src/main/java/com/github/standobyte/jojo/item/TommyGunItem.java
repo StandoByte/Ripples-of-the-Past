@@ -254,14 +254,14 @@ public class TommyGunItem extends Item {
     @Override
     public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlotType slot, ItemStack stack) {
         if (slot == EquipmentSlotType.MAINHAND) {
-        	if (attributeModifiers == null) {
+            if (attributeModifiers == null) {
                 Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
                 builder.put(ForgeMod.REACH_DISTANCE.get(), new AttributeModifier(UUID.fromString("9b14156e-7ba3-446a-b18b-4c81a7d47a8b"), 
                         "Weapon modifier", 0.5, AttributeModifier.Operation.ADDITION));
                 builder.put(Attributes.ATTACK_SPEED, new AttributeModifier(BASE_ATTACK_SPEED_UUID, 
                         "Weapon modifier", -2, AttributeModifier.Operation.ADDITION));
                 attributeModifiers = builder.build();
-        	}
+            }
             return attributeModifiers;
         }
         return super.getAttributeModifiers(slot, stack);
@@ -270,7 +270,7 @@ public class TommyGunItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
         tooltip.add(new TranslationTextComponent("item.jojo.tommy_gun.reload_prompt", 
-        		new KeybindTextComponent("key.sneak"), new KeybindTextComponent("key.use")).withStyle(TextFormatting.GRAY));
+                new KeybindTextComponent("key.sneak"), new KeybindTextComponent("key.use")).withStyle(TextFormatting.GRAY));
         tooltip.add(ClientUtil.donoItemTooltip("KingKKrill"));
     }
 }

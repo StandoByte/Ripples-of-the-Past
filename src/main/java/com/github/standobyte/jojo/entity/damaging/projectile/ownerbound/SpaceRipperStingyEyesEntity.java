@@ -107,7 +107,7 @@ public class SpaceRipperStingyEyesEntity extends OwnerBoundProjectileEntity {
     }
 
     @Override
-	public int ticksLifespan() {
+    public int ticksLifespan() {
         if (isBoundToOwner()) {
             return 50;
         }

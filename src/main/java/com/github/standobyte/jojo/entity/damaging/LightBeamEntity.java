@@ -146,7 +146,7 @@ public class LightBeamEntity extends DamagingEntity {
     protected void defineSynchedData() {}
 
     @Override
-	public int ticksLifespan() {
+    public int ticksLifespan() {
         return 1;
     }
 

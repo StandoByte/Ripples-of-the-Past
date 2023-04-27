@@ -18,7 +18,7 @@ public class MRCrossfireHurricaneRenderer extends SimpleEntityRenderer<MRCrossfi
     @Override
     protected void doRender(MRCrossfireHurricaneEntity entity, MRCrossfireHurricaneModel model, 
             float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
-    	float scale = entity.getScale();
+        float scale = entity.getScale();
         matrixStack.pushPose();
         matrixStack.scale(scale, scale, scale);
         renderModel(entity, model, partialTick, matrixStack, buffer.getBuffer(Atlases.cutoutBlockSheet()), packedLight);

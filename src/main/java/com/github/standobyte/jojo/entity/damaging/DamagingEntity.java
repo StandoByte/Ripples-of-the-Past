@@ -268,7 +268,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
         float configMultiplier = standDamage() || getOwner() instanceof StandEntity ? JojoModConfig.getCommonConfigInstance(false).standDamageMultiplier.get().floatValue() : 1;
         float damage = getBaseDamage() * configMultiplier;
         if (debuffsFromStand()) {
-        	damage *= damageFactor;
+            damage *= damageFactor;
         }
         return damage;
     }
@@ -282,7 +282,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     }
     
     public float getDamageFactor() {
-    	return damageFactor;
+        return damageFactor;
     }
     
     public void setSpeedFactor(float speedFactor) {
@@ -290,11 +290,11 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     }
     
     public float getSpeedFactor() {
-    	return speedFactor;
+        return speedFactor;
     }
     
     protected boolean debuffsFromStand() {
-    	return true;
+        return true;
     }
     
     protected abstract float getMaxHardnessBreakable();

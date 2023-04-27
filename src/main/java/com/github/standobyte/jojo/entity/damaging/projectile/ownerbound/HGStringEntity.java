@@ -47,7 +47,7 @@ public class HGStringEntity extends OwnerBoundProjectileEntity {
     }
     
     public void addKnockback(float knockback) {
-    	this.knockback = knockback;
+        this.knockback = knockback;
     }
     
     @Override
@@ -74,7 +74,7 @@ public class HGStringEntity extends OwnerBoundProjectileEntity {
             }
             else {
                 if (target instanceof LivingEntity) {
-                	DamageUtil.knockback((LivingEntity) target, knockback, yRot);
+                    DamageUtil.knockback((LivingEntity) target, knockback, yRot);
                 }
                 setIsRetracting(true);
             }
@@ -87,7 +87,7 @@ public class HGStringEntity extends OwnerBoundProjectileEntity {
     }
 
     @Override
-	public int ticksLifespan() {
+    public int ticksLifespan() {
         return isBinding ? ModActions.HIEROPHANT_GREEN_STRING_BIND.get().getStandActionTicks(null, null) 
                 + (isAttachedToAnEntity() ? 10 : 0)
                 : ModActions.HIEROPHANT_GREEN_STRING_ATTACK.get().getStandActionTicks(null, null);
@@ -99,7 +99,7 @@ public class HGStringEntity extends OwnerBoundProjectileEntity {
     }
     
     @Override
-	public boolean isBodyPart() {
+    public boolean isBodyPart() {
         return true;
     }
     

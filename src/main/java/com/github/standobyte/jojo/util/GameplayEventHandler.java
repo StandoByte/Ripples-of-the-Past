@@ -182,7 +182,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 //FIXME move all event handlers to their respective classes, leave the method links here
 @EventBusSubscriber(modid = JojoMod.MOD_ID)
 public class GameplayEventHandler {
-	
+    
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingTick(LivingUpdateEvent event) {
         LivingEntity entity = event.getEntityLiving();
@@ -323,16 +323,16 @@ public class GameplayEventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void addEntityDrops(LivingDropsEvent event) {
-    	Common config = JojoModConfig.getCommonConfigInstance(false);
-    	if (config.dropStandDisc.get() && !config.keepStandOnDeath.get()) {
-        	LivingEntity entity = event.getEntityLiving();
-    		IStandPower.getStandPowerOptional(entity).ifPresent(power -> {
-    			if (power.hasPower()) {
-    				ItemStack disc = StandDiscItem.withStand(new ItemStack(ModItems.STAND_DISC.get()), power.getStandInstance().get());
-    				event.getDrops().add(new ItemEntity(entity.level, entity.getX(), entity.getY(), entity.getZ(), disc));
-    			}
-    		});
-    	}
+        Common config = JojoModConfig.getCommonConfigInstance(false);
+        if (config.dropStandDisc.get() && !config.keepStandOnDeath.get()) {
+            LivingEntity entity = event.getEntityLiving();
+            IStandPower.getStandPowerOptional(entity).ifPresent(power -> {
+                if (power.hasPower()) {
+                    ItemStack disc = StandDiscItem.withStand(new ItemStack(ModItems.STAND_DISC.get()), power.getStandInstance().get());
+                    event.getDrops().add(new ItemEntity(entity.level, entity.getX(), entity.getY(), entity.getZ(), disc));
+                }
+            });
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
@@ -469,23 +469,23 @@ public class GameplayEventHandler {
     public static void addResolveOnAttack(LivingAttackEvent event) {
         LivingEntity target = event.getEntityLiving();
         if (!target.level.isClientSide()) {
-	        DamageSource damageSrc = event.getSource();
-	        if (target.is(damageSrc.getEntity())) return;
-	        float points = Math.min(event.getAmount(), target.getHealth());
-	        
-	        if (damageSrc instanceof IStandDamageSource) {
-	            IStandDamageSource standDamageSrc = (IStandDamageSource) damageSrc;
-	            IStandPower attackerStand = standDamageSrc.getStandPower();
-	            StandUtil.addResolve(attackerStand, target, points);
-	        }
-	        
-	        else if (damageSrc.getEntity() instanceof LivingEntity) {
-	            IStandPower.getStandPowerOptional(StandUtil.getStandUser((LivingEntity) damageSrc.getEntity())).ifPresent(attackerStand -> {
-	                if (attackerStand.isActive()) {
-	                    StandUtil.addResolve(attackerStand, target, points * 0.5F);
-	                }
-	            });
-	        }
+            DamageSource damageSrc = event.getSource();
+            if (target.is(damageSrc.getEntity())) return;
+            float points = Math.min(event.getAmount(), target.getHealth());
+            
+            if (damageSrc instanceof IStandDamageSource) {
+                IStandDamageSource standDamageSrc = (IStandDamageSource) damageSrc;
+                IStandPower attackerStand = standDamageSrc.getStandPower();
+                StandUtil.addResolve(attackerStand, target, points);
+            }
+            
+            else if (damageSrc.getEntity() instanceof LivingEntity) {
+                IStandPower.getStandPowerOptional(StandUtil.getStandUser((LivingEntity) damageSrc.getEntity())).ifPresent(attackerStand -> {
+                    if (attackerStand.isActive()) {
+                        StandUtil.addResolve(attackerStand, target, points * 0.5F);
+                    }
+                });
+            }
         }
     }
     
@@ -534,12 +534,12 @@ public class GameplayEventHandler {
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onLivingHurt(LivingHurtEvent event) {
-    	LivingEntity target = event.getEntityLiving();
-    	if (!target.canUpdate() && target.getCapability(EntityUtilCapProvider.CAPABILITY)
-    			.map(cap -> cap.wasStoppedInTime()).orElse(false)) {
-    		event.setAmount(event.getAmount() * JojoModConfig.getCommonConfigInstance(false)
-    				.timeStopDamageMultiplier.get().floatValue());
-    	}
+        LivingEntity target = event.getEntityLiving();
+        if (!target.canUpdate() && target.getCapability(EntityUtilCapProvider.CAPABILITY)
+                .map(cap -> cap.wasStoppedInTime()).orElse(false)) {
+            event.setAmount(event.getAmount() * JojoModConfig.getCommonConfigInstance(false)
+                    .timeStopDamageMultiplier.get().floatValue());
+        }
     }
     
     @SubscribeEvent(priority = EventPriority.HIGH)

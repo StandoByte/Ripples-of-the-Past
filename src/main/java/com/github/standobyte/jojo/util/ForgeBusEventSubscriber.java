@@ -155,9 +155,9 @@ public class ForgeBusEventSubscriber {
         PlayerEntity player = event.getPlayer();
         
         cloneCap(INonStandPower.getNonStandPowerOptional(original), INonStandPower.getNonStandPowerOptional(player), 
-        		event.isWasDeath(), "Stand capability");
+                event.isWasDeath(), "Stand capability");
         cloneCap(IStandPower.getStandPowerOptional(original), IStandPower.getStandPowerOptional(player), 
-        		event.isWasDeath(), "non-Stand capability");
+                event.isWasDeath(), "non-Stand capability");
         
         original.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(oldCap -> {
             player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(newCap -> {
@@ -167,12 +167,12 @@ public class ForgeBusEventSubscriber {
     }
     
     private static <T extends IPower<T, ?>> void cloneCap(LazyOptional<T> oldCap, LazyOptional<T> newCap, boolean wasDeath, String warning) {
-    	if (oldCap.isPresent() && newCap.isPresent()) {
-    		newCap.resolve().get().onClone(oldCap.resolve().get(), wasDeath);
-    	}
-    	else {
-    		JojoMod.getLogger().warn("Failed to copy " + " data!");
-    	}
+        if (oldCap.isPresent() && newCap.isPresent()) {
+            newCap.resolve().get().onClone(oldCap.resolve().get(), wasDeath);
+        }
+        else {
+            JojoMod.getLogger().warn("Failed to copy " + " data!");
+        }
     }
 
     @SubscribeEvent

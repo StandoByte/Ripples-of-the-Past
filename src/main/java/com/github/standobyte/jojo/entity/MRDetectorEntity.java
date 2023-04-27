@@ -89,9 +89,9 @@ public class MRDetectorEntity extends Entity implements IEntityAdditionalSpawnDa
                 !(entity.isAlliedTo(owner) || IStandPower.getStandPowerOptional(owner).map(stand -> entity == stand.getStandManifestation()).orElse(false)))));
         Optional<LivingEntity> closestDetected = entities.stream().min((e1, e2) -> (int) (e1.distanceToSqr(this) - e2.distanceToSqr(this)));
         closestDetected.ifPresent(entity -> {
-        	if (this.getBoundingBox().intersects(entity.getBoundingBox())) {
-        		DamageUtil.setOnFire(entity, 4, true);
-        	}
+            if (this.getBoundingBox().intersects(entity.getBoundingBox())) {
+                DamageUtil.setOnFire(entity, 4, true);
+            }
         });
         return closestDetected.isPresent() ? closestDetected.get().position().subtract(position()) : null;
     }
@@ -111,7 +111,7 @@ public class MRDetectorEntity extends Entity implements IEntityAdditionalSpawnDa
     @Override
     public void onSyncedDataUpdated(DataParameter<?> parameter) {
         if (level.isClientSide() && ENTITY_DETECTED.equals(parameter) && isEntityDetected()
-        		&& StandUtil.shouldHearStands(ClientUtil.getClientPlayer())) {
+                && StandUtil.shouldHearStands(ClientUtil.getClientPlayer())) {
             ClientTickingSoundsHelper.playMagiciansRedDetectorSound(this);
         }
         super.onSyncedDataUpdated(parameter);
@@ -166,7 +166,7 @@ public class MRDetectorEntity extends Entity implements IEntityAdditionalSpawnDa
     public void readSpawnData(PacketBuffer additionalData) {
         Entity owner = level.getEntity(additionalData.readInt());
         if (owner instanceof LivingEntity) {
-        	this.owner = (LivingEntity) owner;
+            this.owner = (LivingEntity) owner;
         }
     }
 

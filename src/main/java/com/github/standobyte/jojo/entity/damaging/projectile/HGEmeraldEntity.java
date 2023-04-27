@@ -43,11 +43,11 @@ public class HGEmeraldEntity extends ModdedProjectileEntity {
     
     @Override
     protected DamageSource getDamageSource(LivingEntity owner) {
-    	DamageSource dmgSource = super.getDamageSource(owner);
-    	if (lowerKnockback) {
-    		((IModdedDamageSource) dmgSource).setKnockbackReduction(0.5F);
-    	}
-    	return dmgSource;
+        DamageSource dmgSource = super.getDamageSource(owner);
+        if (lowerKnockback) {
+            ((IModdedDamageSource) dmgSource).setKnockbackReduction(0.5F);
+        }
+        return dmgSource;
     }
 
     @Override
@@ -56,12 +56,12 @@ public class HGEmeraldEntity extends ModdedProjectileEntity {
     }
 
     @Override
-	public int ticksLifespan() {
+    public int ticksLifespan() {
         return 100;
     }
     
     public void setLowerKnockback(boolean lowerKnockback) {
-    	this.lowerKnockback = lowerKnockback;
+        this.lowerKnockback = lowerKnockback;
     }
     
     public void setBreakBlocks(boolean breakBlocks) {

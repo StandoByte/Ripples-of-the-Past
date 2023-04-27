@@ -45,7 +45,7 @@ public class PlayerUtilCap {
         tickClientInputTimer();
         
         if (knivesThrewTicks > 0) {
-        	knivesThrewTicks--;
+            knivesThrewTicks--;
         }
     }
     

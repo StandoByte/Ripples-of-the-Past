@@ -63,7 +63,7 @@ public class SCRapierEntity extends ModdedProjectileEntity {
     
     @Override
     protected boolean debuffsFromStand() {
-    	return false;
+        return false;
     }
 
     @Override
@@ -77,7 +77,7 @@ public class SCRapierEntity extends ModdedProjectileEntity {
     }
     
     @Override
-	public int ticksLifespan() {
+    public int ticksLifespan() {
         return Integer.MAX_VALUE;
     }
 
@@ -141,8 +141,8 @@ public class SCRapierEntity extends ModdedProjectileEntity {
                 return false;
             }
             if (JojoModUtil.rayTrace(position(), motionNew, 16, level, this, 
-            		EntityPredicates.NO_SPECTATORS.and(EntityPredicates.ENTITY_STILL_ALIVE), 1.0, 0).getType() == RayTraceResult.Type.MISS) {
-            	return false;
+                    EntityPredicates.NO_SPECTATORS.and(EntityPredicates.ENTITY_STILL_ALIVE), 1.0, 0).getType() == RayTraceResult.Type.MISS) {
+                return false;
             }
             setDeltaMovement(motionNew);
             rotateTowardsMovement(1.0F);
@@ -174,7 +174,7 @@ public class SCRapierEntity extends ModdedProjectileEntity {
     
     @Override
     public boolean displayFireAnimation() {
-    	return false;
+        return false;
     }
     
     

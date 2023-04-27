@@ -38,31 +38,31 @@ public class MagiciansRedKick extends StandEntityHeavyAttack {
 
     @Override
     protected void setAction(IStandPower standPower, StandEntity standEntity, int ticks, Phase phase, ActionTarget target) {
-    	MagiciansRedRedBind.getLandedRedBind(standEntity).ifPresent(redBind -> {
-    		redBind.setKickCombo();
-    	});
+        MagiciansRedRedBind.getLandedRedBind(standEntity).ifPresent(redBind -> {
+            redBind.setKickCombo();
+        });
         super.setAction(standPower, standEntity, ticks, phase, target);
     }
     
     private static final double SLIDE_DISTANCE = 3;
     @Override
     public void standTickWindup(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-    	int ticksLeft = task.getTicksLeft();
-    	if (ticksLeft == 2) {
-    		Vector3d targetPos = task.getTarget().getTargetPos(true);
-    		Vector3d slideVec;
-    		if (targetPos != null) {
-    			slideVec = targetPos.subtract(standEntity.getEyePosition(1.0F));
-    			slideVec = slideVec.normalize().scale(MathHelper.clamp(slideVec.length() - standEntity.getBbWidth(), 0, SLIDE_DISTANCE));
-    		}
-    		else {
-    			slideVec = standEntity.getLookAngle().scale(SLIDE_DISTANCE);
-    		}
-    		standEntity.setDeltaMovement(slideVec);
-    	}
-    	else if (ticksLeft == 1) {
-    		standEntity.setDeltaMovement(Vector3d.ZERO);
-    		
+        int ticksLeft = task.getTicksLeft();
+        if (ticksLeft == 2) {
+            Vector3d targetPos = task.getTarget().getTargetPos(true);
+            Vector3d slideVec;
+            if (targetPos != null) {
+                slideVec = targetPos.subtract(standEntity.getEyePosition(1.0F));
+                slideVec = slideVec.normalize().scale(MathHelper.clamp(slideVec.length() - standEntity.getBbWidth(), 0, SLIDE_DISTANCE));
+            }
+            else {
+                slideVec = standEntity.getLookAngle().scale(SLIDE_DISTANCE);
+            }
+            standEntity.setDeltaMovement(slideVec);
+        }
+        else if (ticksLeft == 1) {
+            standEntity.setDeltaMovement(Vector3d.ZERO);
+            
             if (!world.isClientSide()) {
                 MagiciansRedRedBind.getLandedRedBind(standEntity).ifPresent(redBind -> {
                     if (redBind.isInKickCombo()) {
@@ -70,7 +70,7 @@ public class MagiciansRedKick extends StandEntityHeavyAttack {
                     }
                 });
             }
-    	}
+        }
     }
 
     @Override
@@ -81,25 +81,25 @@ public class MagiciansRedKick extends StandEntityHeavyAttack {
     
     @Override
     protected boolean standMovesByItself(IStandPower standPower, StandEntity standEntity) {
-    	Phase phase = standEntity.getCurrentTaskPhase().get();
-    	return phase == Phase.WINDUP && standEntity.getCurrentTask().map(StandEntityTask::getTicksLeft).get() <= 2
-    			|| phase == Phase.PERFORM || phase == Phase.RECOVERY;
+        Phase phase = standEntity.getCurrentTaskPhase().get();
+        return phase == Phase.WINDUP && standEntity.getCurrentTask().map(StandEntityTask::getTicksLeft).get() <= 2
+                || phase == Phase.PERFORM || phase == Phase.RECOVERY;
     }
     
     @Override
     public String getTranslationKey(IStandPower power, ActionTarget target) {
         String key = super.getTranslationKey(power, target);
         if (power.isActive() && MagiciansRedRedBind.getLandedRedBind((StandEntity) power.getStandManifestation()).isPresent()) {
-        	key += "_bind";
+            key += "_bind";
         }
         return key;
     }
     
     @Override
     protected SoundEvent getShout(LivingEntity user, IStandPower power, ActionTarget target, boolean wasActive) {
-    	if (power.isActive() && MagiciansRedRedBind.getLandedRedBind((StandEntity) power.getStandManifestation()).isPresent()) {
-    		return ModSounds.AVDOL_HELL_2_U.get();
-    	}
-    	return super.getShout(user, power, target, wasActive);
+        if (power.isActive() && MagiciansRedRedBind.getLandedRedBind((StandEntity) power.getStandManifestation()).isPresent()) {
+            return ModSounds.AVDOL_HELL_2_U.get();
+        }
+        return super.getShout(user, power, target, wasActive);
     }
 }

@@ -68,7 +68,7 @@ public class ClientReflection {
     
     private static Field MAIN_MENU_SCREEN_SPLASH;
     public static void setSplash(MainMenuScreen screen, String splash) {
-    	ReflectionUtil.setFieldValue(MAIN_MENU_SCREEN_SPLASH, screen, splash);
+        ReflectionUtil.setFieldValue(MAIN_MENU_SCREEN_SPLASH, screen, splash);
     }
     
     

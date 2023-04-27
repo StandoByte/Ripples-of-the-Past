@@ -80,7 +80,7 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     @Override
     public void remove() {
         dragged.forEach(entity -> entity.setDeltaMovement(Vector3d.ZERO));
-    	super.remove();
+        super.remove();
     }
     
     @Override
@@ -111,10 +111,10 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
             double nextY = originPoint.y + nextOriginOffset.y;
             double nextZ = originPoint.z + nextOriginOffset.z;
             if (!level.getChunkSource().hasChunk(MathHelper.floor(nextX) >> 4, MathHelper.floor(nextZ) >> 4)) {
-            	if (level.isClientSide()) {
-            		remove();
-            	}
-            	return false;
+                if (level.isClientSide()) {
+                    remove();
+                }
+                return false;
             }
             setDeltaMovement(new Vector3d(nextX - getX(), nextY - getY(), nextZ - getZ()));
     
@@ -307,13 +307,13 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     }
     
     private void doDragEntity(Entity entity, Vector3d vec) {
-    	if (entity instanceof LivingEntity && ((LivingEntity) entity).hasEffect(ModEffects.STUN.get())) {
-    		entity.move(MoverType.PLAYER, vec);
-    	}
-    	else {
+        if (entity instanceof LivingEntity && ((LivingEntity) entity).hasEffect(ModEffects.STUN.get())) {
+            entity.move(MoverType.PLAYER, vec);
+        }
+        else {
             entity.setDeltaMovement(vec);
             dragged.add(entity);
-    	}
+        }
     }
     
     public void attachToBlockPos(BlockPos blockPos) {

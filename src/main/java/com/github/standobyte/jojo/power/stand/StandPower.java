@@ -398,7 +398,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
 
     @Override
     public void skipProgression(StandType<?> standType) {
-    	setProgressionSkipped();
+        setProgressionSkipped();
         resolveCounter.setResolveLevel(getMaxResolveLevel(), false);
         if (standType != null) {
             Stream.concat(
@@ -535,9 +535,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     @Override
     public boolean canLeap() {
-    	if (super.canLeap()) {
-    		return !(standManifestation instanceof StandEntity && ((StandEntity) standManifestation).getCurrentTask().isPresent());
-    	}
+        if (super.canLeap()) {
+            return !(standManifestation instanceof StandEntity && ((StandEntity) standManifestation).getCurrentTask().isPresent());
+        }
         return false;
     }
     

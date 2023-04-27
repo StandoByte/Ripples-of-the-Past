@@ -16,8 +16,8 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 
 public class AirStreamParticle extends SpriteTexturedParticle {
-	private final float yRot;
-	private final float xRot;
+    private final float yRot;
+    private final float xRot;
 
     protected AirStreamParticle(ClientWorld world, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
         super(world, x, y, z, xSpeed, ySpeed, zSpeed);
@@ -35,59 +35,59 @@ public class AirStreamParticle extends SpriteTexturedParticle {
 
     @Override
     public void render(IVertexBuilder vertexBuilder, ActiveRenderInfo renderInfo, float partialTick) {
-    	renderFromRotation(vertexBuilder, renderInfo, partialTick, yRot, xRot, true);
-    	renderFromRotation(vertexBuilder, renderInfo, partialTick, yRot, xRot, false);
+        renderFromRotation(vertexBuilder, renderInfo, partialTick, yRot, xRot, true);
+        renderFromRotation(vertexBuilder, renderInfo, partialTick, yRot, xRot, false);
     }
     
     private void renderFromRotation(IVertexBuilder vertexBuilder, ActiveRenderInfo renderInfo, float partialTick, float yRot, float xRot, boolean mirror) {
-    	Vector3d pos = renderInfo.getPosition();
-    	float f = (float) (MathHelper.lerp(partialTick, xo, x) - pos.x());
-    	float f1 = (float) (MathHelper.lerp(partialTick, yo, y) - pos.y());
-    	float f2 = (float) (MathHelper.lerp(partialTick, zo, z) - pos.z());
-    	Quaternion quaternion = new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
-		quaternion.mul(Vector3f.YP.rotation(yRot));
-		quaternion.mul(Vector3f.XP.rotation(-xRot));
-		if (mirror) {
-			quaternion.mul(Vector3f.YP.rotation((float) Math.PI / 2F));
-		}
-		else {
-			quaternion.mul(Vector3f.YP.rotation(-(float) Math.PI / 2F));
-		}
-		
+        Vector3d pos = renderInfo.getPosition();
+        float f = (float) (MathHelper.lerp(partialTick, xo, x) - pos.x());
+        float f1 = (float) (MathHelper.lerp(partialTick, yo, y) - pos.y());
+        float f2 = (float) (MathHelper.lerp(partialTick, zo, z) - pos.z());
+        Quaternion quaternion = new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
+        quaternion.mul(Vector3f.YP.rotation(yRot));
+        quaternion.mul(Vector3f.XP.rotation(-xRot));
+        if (mirror) {
+            quaternion.mul(Vector3f.YP.rotation((float) Math.PI / 2F));
+        }
+        else {
+            quaternion.mul(Vector3f.YP.rotation(-(float) Math.PI / 2F));
+        }
+        
 
-    	Vector3f vector3f1 = new Vector3f(-1.0F, -1.0F, 0.0F);
-    	vector3f1.transform(quaternion);
-    	Vector3f[] avector3f = new Vector3f[]{new Vector3f(-1.0F, -1.0F, 0.0F), new Vector3f(-1.0F, 1.0F, 0.0F), new Vector3f(1.0F, 1.0F, 0.0F), new Vector3f(1.0F, -1.0F, 0.0F)};
-    	float f4 = getQuadSize(partialTick);
+        Vector3f vector3f1 = new Vector3f(-1.0F, -1.0F, 0.0F);
+        vector3f1.transform(quaternion);
+        Vector3f[] avector3f = new Vector3f[]{new Vector3f(-1.0F, -1.0F, 0.0F), new Vector3f(-1.0F, 1.0F, 0.0F), new Vector3f(1.0F, 1.0F, 0.0F), new Vector3f(1.0F, -1.0F, 0.0F)};
+        float f4 = getQuadSize(partialTick);
 
-    	for(int i = 0; i < 4; ++i) {
-    		Vector3f vector3f = avector3f[i];
-    		vector3f.transform(quaternion);
-    		vector3f.mul(f4);
-    		vector3f.add(f, f1, f2);
-    	}
+        for(int i = 0; i < 4; ++i) {
+            Vector3f vector3f = avector3f[i];
+            vector3f.transform(quaternion);
+            vector3f.mul(f4);
+            vector3f.add(f, f1, f2);
+        }
 
-    	float u0 = mirror ? getU1() : getU0();
-    	float u1 = mirror ? getU0() : getU1();
-    	float v0 = getV0();
-    	float v1 = getV1();
-    	int light = getLightColor(partialTick);
-    	vertexBuilder.vertex(avector3f[0].x(), avector3f[0].y(), avector3f[0].z()).uv(u1, v1).color(rCol, gCol, bCol, alpha).uv2(light).endVertex();
-    	vertexBuilder.vertex(avector3f[1].x(), avector3f[1].y(), avector3f[1].z()).uv(u1, v0).color(rCol, gCol, bCol, alpha).uv2(light).endVertex();
-    	vertexBuilder.vertex(avector3f[2].x(), avector3f[2].y(), avector3f[2].z()).uv(u0, v0).color(rCol, gCol, bCol, alpha).uv2(light).endVertex();
-    	vertexBuilder.vertex(avector3f[3].x(), avector3f[3].y(), avector3f[3].z()).uv(u0, v1).color(rCol, gCol, bCol, alpha).uv2(light).endVertex();
+        float u0 = mirror ? getU1() : getU0();
+        float u1 = mirror ? getU0() : getU1();
+        float v0 = getV0();
+        float v1 = getV1();
+        int light = getLightColor(partialTick);
+        vertexBuilder.vertex(avector3f[0].x(), avector3f[0].y(), avector3f[0].z()).uv(u1, v1).color(rCol, gCol, bCol, alpha).uv2(light).endVertex();
+        vertexBuilder.vertex(avector3f[1].x(), avector3f[1].y(), avector3f[1].z()).uv(u1, v0).color(rCol, gCol, bCol, alpha).uv2(light).endVertex();
+        vertexBuilder.vertex(avector3f[2].x(), avector3f[2].y(), avector3f[2].z()).uv(u0, v0).color(rCol, gCol, bCol, alpha).uv2(light).endVertex();
+        vertexBuilder.vertex(avector3f[3].x(), avector3f[3].y(), avector3f[3].z()).uv(u0, v1).color(rCol, gCol, bCol, alpha).uv2(light).endVertex();
     }
 
     @Override
     public void tick() {
-    	xo = x;
-    	yo = y;
-    	zo = z;
-    	if (age++ >= lifetime) {
-    		remove();
-    	} else {
-    		move(xd, yd, zd);
-    	}
+        xo = x;
+        yo = y;
+        zo = z;
+        if (age++ >= lifetime) {
+            remove();
+        } else {
+            move(xd, yd, zd);
+        }
     }
 
 

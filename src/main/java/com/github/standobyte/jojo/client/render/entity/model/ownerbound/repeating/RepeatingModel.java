@@ -22,7 +22,7 @@ public abstract class RepeatingModel<T extends Entity> extends EntityModel<T> {
     private float xRotation;
 
     protected RepeatingModel() {
-    	super(RenderType::entityTranslucent);
+        super(RenderType::entityTranslucent);
     }
 
     @Nullable

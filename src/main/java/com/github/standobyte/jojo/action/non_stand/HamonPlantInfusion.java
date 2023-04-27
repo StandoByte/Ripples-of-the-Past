@@ -21,20 +21,20 @@ public class HamonPlantInfusion extends HamonOrganismInfusion {
     
     @Override
     public HamonAction replaceAction(INonStandPower power) {
-    	return ModActions.HAMON_ORGANISM_INFUSION.get();
+        return ModActions.HAMON_ORGANISM_INFUSION.get();
     }
 
     @Override
     public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, INonStandPower power) {
-    	BlockPos blockPos = target.getBlockPos();
-    	BlockState blockState = user.level.getBlockState(blockPos);
-    	if (blockState.getMaterial() == Material.EGG) {
-    		return conditionMessage("animal_infusion");
-    	}
-    	Block block = blockState.getBlock();
-    	if (!(isBlockLiving(blockState) || block instanceof FlowerPotBlock && blockState.getBlock() != Blocks.FLOWER_POT)) {
-    		return conditionMessage("living_plant");
-    	}
+        BlockPos blockPos = target.getBlockPos();
+        BlockState blockState = user.level.getBlockState(blockPos);
+        if (blockState.getMaterial() == Material.EGG) {
+            return conditionMessage("animal_infusion");
+        }
+        Block block = blockState.getBlock();
+        if (!(isBlockLiving(blockState) || block instanceof FlowerPotBlock && blockState.getBlock() != Blocks.FLOWER_POT)) {
+            return conditionMessage("living_plant");
+        }
         return ActionConditionResult.POSITIVE;
     }
     

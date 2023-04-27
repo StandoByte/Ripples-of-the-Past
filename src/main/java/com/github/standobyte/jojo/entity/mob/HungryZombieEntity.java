@@ -199,7 +199,7 @@ public class HungryZombieEntity extends ZombieEntity {
     
     @Override
     public boolean canBeLeashed(PlayerEntity player) {
-    	return !this.isLeashed() && isEntityOwner(player);
+        return !this.isLeashed() && isEntityOwner(player);
     }
 
     @Override

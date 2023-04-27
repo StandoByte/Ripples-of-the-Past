@@ -13,7 +13,7 @@ public class SCRapierFlameModel extends EntityModel<SCRapierEntity> {
     private FlameModelRenderer flame;
 
     public SCRapierFlameModel() {
-    	super(tex -> Atlases.translucentCullBlockSheet());
+        super(tex -> Atlases.translucentCullBlockSheet());
         
         flame = new FlameModelRenderer(this);
         flame.setPos(-0.5F, 0.0F, 0.0F);
@@ -29,12 +29,12 @@ public class SCRapierFlameModel extends EntityModel<SCRapierEntity> {
 
     @Override
     public void setupAnim(SCRapierEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
-    	flame.yRot = yRotationOffset * ((float)Math.PI / 180F);
-    	flame.xRot = xRotation * ((float)Math.PI / 180F);
+        flame.yRot = yRotationOffset * ((float)Math.PI / 180F);
+        flame.xRot = xRotation * ((float)Math.PI / 180F);
     }
 
     @Override
     public void renderToBuffer(MatrixStack matrixStack, IVertexBuilder buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
-    	flame.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+        flame.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
     }
 }

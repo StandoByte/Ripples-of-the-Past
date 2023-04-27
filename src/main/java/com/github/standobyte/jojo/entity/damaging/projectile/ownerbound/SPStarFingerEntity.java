@@ -34,7 +34,7 @@ public class SPStarFingerEntity extends OwnerBoundProjectileEntity {
     }
 
     @Override
-	public int ticksLifespan() {
+    public int ticksLifespan() {
         return ModActions.STAR_PLATINUM_STAR_FINGER.get().getStandActionTicks(null, null);
     }
     
@@ -54,7 +54,7 @@ public class SPStarFingerEntity extends OwnerBoundProjectileEntity {
     }
     
     @Override
-	public boolean isBodyPart() {
+    public boolean isBodyPart() {
         return true;
     }
 

@@ -393,7 +393,7 @@
   "jojo.config.prioritizeLeastTakenStands.tooltip": "Whether or not random Stand gain effects (Stand Arrow, /stand random) give Stands that less players already have.",
   "jojo.config.standTiers": "Stand tiers",
   "jojo.config.standTiers.tooltip": "Whether or not the Stand tiers mechanic is enabled.",
-  "jojo.config.standTierXpLevels": "Stand tier xp levels",	
+  "jojo.config.standTierXpLevels": "Stand tier xp levels",
   "jojo.config.standTierXpLevels.tooltip": "Experience levels nesessary to get a Stand from each tier. If the list is shorter than the default, next tiers use the last value.",
   "jojo.config.bannedStands": "Banned Stands",
   "jojo.config.bannedStands.tooltip": "List of Stands excluded from Stand Arrow and /stand random pool. The format is the same as for /stand give command (e.g., \"jojo:star_platinum\").",

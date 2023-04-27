@@ -201,14 +201,14 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     
     @Override
     public float leapStrength() {
-    	float strength = type.getLeapStrength(this);
-    	if (user != null) {
-    		ModifiableAttributeInstance speedAttribute = user.getAttribute(Attributes.MOVEMENT_SPEED);
-    		if (speedAttribute != null) {
-    			strength *= speedAttribute.getValue() / speedAttribute.getBaseValue();
-    		}
-    	}
-    	return strength;
+        float strength = type.getLeapStrength(this);
+        if (user != null) {
+            ModifiableAttributeInstance speedAttribute = user.getAttribute(Attributes.MOVEMENT_SPEED);
+            if (speedAttribute != null) {
+                strength *= speedAttribute.getValue() / speedAttribute.getBaseValue();
+            }
+        }
+        return strength;
     }
     
     @Override

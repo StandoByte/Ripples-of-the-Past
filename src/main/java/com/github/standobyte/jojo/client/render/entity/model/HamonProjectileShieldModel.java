@@ -12,23 +12,23 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 
 
 public class HamonProjectileShieldModel extends EntityModel<HamonProjectileShieldEntity> {
-	private final ModelRenderer shield;
-	
-	public HamonProjectileShieldModel() {
-	    super(RenderType::entityTranslucent);
+    private final ModelRenderer shield;
+    
+    public HamonProjectileShieldModel() {
+        super(RenderType::entityTranslucent);
         texWidth = 64;
         texHeight = 64;
 
         shield = new ModelRenderer(this);
         shield.setPos(0.0F, -24.0F, 0.0F);
         shield.texOffs(0, 0).addBox(-8.0F, -8.0F, -8.0F, 16.0F, 16.0F, 16.0F, 16.0F, false);
-	}
+    }
 
     @Override
     public void setupAnim(HamonProjectileShieldEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {}
 
-	@Override
-	public void renderToBuffer(MatrixStack matrixStack, IVertexBuilder buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
-		shield.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
-	}
+    @Override
+    public void renderToBuffer(MatrixStack matrixStack, IVertexBuilder buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+        shield.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+    }
 }

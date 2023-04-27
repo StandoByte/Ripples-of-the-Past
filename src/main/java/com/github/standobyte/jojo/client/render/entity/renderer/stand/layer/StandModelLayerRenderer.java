@@ -31,7 +31,7 @@ public abstract class StandModelLayerRenderer<T extends StandEntity, M extends S
     }
     
     public RenderType getRenderType(T entity) {
-    	return entityRenderer.getRenderType(entity, model, getLayerTexture());
+        return entityRenderer.getRenderType(entity, model, getLayerTexture());
     }
 
     public M getLayerModel() {
@@ -45,13 +45,13 @@ public abstract class StandModelLayerRenderer<T extends StandEntity, M extends S
             T entity, float walkAnimPos, float walkAnimSpeed, float partialTick,
             float ticks, float headYRotation, float headXRotation) {
         if (shouldRender(entity)) {
-        	RenderType renderType = getRenderType(entity);
-        	if (renderType != null) {
+            RenderType renderType = getRenderType(entity);
+            if (renderType != null) {
                 entityRenderer.renderLayer(matrixStack, buffer.getBuffer(renderType), getPackedLight(packedLight), 
                         entity, walkAnimPos, walkAnimSpeed, partialTick, 
                         ticks, headYRotation, headXRotation, 
                         getLayerTexture(), getLayerModel());
-        	}
+            }
         }
     }
 }

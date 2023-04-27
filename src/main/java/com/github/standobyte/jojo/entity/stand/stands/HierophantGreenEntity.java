@@ -34,14 +34,14 @@ public class HierophantGreenEntity extends StandEntity {
     @Override
     public void tick() {
         if (!level.isClientSide()) {
-        	placedBarriers.tick();
+            placedBarriers.tick();
             setPlacedBarriersCount(placedBarriers.getSize());
         }
         super.tick();
     }
     
     public HGBarriersNet getBarriersNet() {
-    	return placedBarriers;
+        return placedBarriers;
     }
     
     @Override

@@ -49,8 +49,8 @@ public class RoadRollerEntity extends Entity implements IHasHealth {
     }
     
     public void setOwner(Entity entity) {
-    	this.owner = entity;
-    	this.ownerId = entity != null ? entity.getUUID() : null;
+        this.owner = entity;
+        this.ownerId = entity != null ? entity.getUUID() : null;
     }
 
     @Override
@@ -99,16 +99,16 @@ public class RoadRollerEntity extends Entity implements IHasHealth {
         DamageSource dmgSource = DamageUtil.roadRollerDamage(this);
         float damage = (float) -getDeltaMovement().y * 10F;
         if (damage > 0) {
-        	AxisAlignedBB aabb = getBoundingBox().contract(0, getBbHeight() * 0.75, 0).expandTowards(0, -getBbHeight() * 0.25, 0);
-        	level.getEntitiesOfClass(LivingEntity.class, aabb, 
-        			EntityPredicates.LIVING_ENTITY_STILL_ALIVE.and(entity -> !this.is(entity.getVehicle()))).forEach(entity -> {
-        				if (!entity.isInvulnerableTo(dmgSource)) {
-	            			if (!level.isClientSide()) {
-	            				entity.hurt(dmgSource, damage);
-	            			}
-	            			entity.setDeltaMovement(Vector3d.ZERO);
-        				}
-        			});
+            AxisAlignedBB aabb = getBoundingBox().contract(0, getBbHeight() * 0.75, 0).expandTowards(0, -getBbHeight() * 0.25, 0);
+            level.getEntitiesOfClass(LivingEntity.class, aabb, 
+                    EntityPredicates.LIVING_ENTITY_STILL_ALIVE.and(entity -> !this.is(entity.getVehicle()))).forEach(entity -> {
+                        if (!entity.isInvulnerableTo(dmgSource)) {
+                            if (!level.isClientSide()) {
+                                entity.hurt(dmgSource, damage);
+                            }
+                            entity.setDeltaMovement(Vector3d.ZERO);
+                        }
+                    });
         }
         
         move(MoverType.SELF, getDeltaMovement());
@@ -131,16 +131,16 @@ public class RoadRollerEntity extends Entity implements IHasHealth {
         }
         
         if (ticksBeforeExplosion > 0) {
-        	ticksBeforeExplosion--;
+            ticksBeforeExplosion--;
         }
         else if (ticksBeforeExplosion == 0) {
             remove();
         }
         Entity owner = getOwner();
         if (!level.isClientSide() && (ticksBeforeExplosion == 0 || 
-        		(ticksBeforeExplosion > 0 && ticksBeforeExplosion < 40 && owner != null && distanceToSqr(owner) > 100))) {
-        	explode();
-        	remove();
+                (ticksBeforeExplosion > 0 && ticksBeforeExplosion < 40 && owner != null && distanceToSqr(owner) > 100))) {
+            explode();
+            remove();
         }
     }
     
@@ -184,8 +184,8 @@ public class RoadRollerEntity extends Entity implements IHasHealth {
                     cos = dmgVec.dot(UPWARDS_VECTOR);
                     double damageMotion = cos * amount * 0.08D;
                     if (damageMotion > 0) {
-                    	damageMotion = Math.min(-this.tickDamageMotion, damageMotion);
-                    	punchedFromBelow = true;
+                        damageMotion = Math.min(-this.tickDamageMotion, damageMotion);
+                        punchedFromBelow = true;
                     }
                     setDeltaMovement(getDeltaMovement().add(0, damageMotion, 0));
                     this.tickDamageMotion += damageMotion;
@@ -244,11 +244,11 @@ public class RoadRollerEntity extends Entity implements IHasHealth {
     @Override
     protected void readAdditionalSaveData(CompoundNBT nbt) {
         if (nbt.contains("Health")) {
-        	setHealth(nbt.getFloat("Health"));
+            setHealth(nbt.getFloat("Health"));
         }
         tickCount = nbt.getInt("Age");
         if (nbt.contains("ExplosionTime")) {
-        	ticksBeforeExplosion = nbt.getInt("ExplosionTime");
+            ticksBeforeExplosion = nbt.getInt("ExplosionTime");
         }
         if (nbt.hasUUID("Owner")) {
             ownerId = nbt.getUUID("Owner");
@@ -261,7 +261,7 @@ public class RoadRollerEntity extends Entity implements IHasHealth {
         nbt.putInt("Age", tickCount);
         nbt.putInt("ExplosionTime", ticksBeforeExplosion);
         if (owner != null) {
-        	nbt.putUUID("Owner", ownerId);
+            nbt.putUUID("Owner", ownerId);
         }
     }
 

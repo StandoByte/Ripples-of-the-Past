@@ -146,7 +146,7 @@ public class VampirismBloodDrain extends VampirismAction {
     
     @Override
     public double getMaxRangeSqEntityTarget() {
-    	return 4;
+        return 4;
     }
     
     @Override

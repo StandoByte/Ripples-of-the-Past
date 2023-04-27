@@ -11,28 +11,28 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 
 
 public class RoadRollerModel extends EntityModel<RoadRollerEntity> {
-	private final ModelRenderer roadRoller;
-	private final ModelRenderer frontWheel;
-	private final ModelRenderer frontWheel2;
-	private final ModelRenderer frontWheel3;
-	private final ModelRenderer frontWheel4;
-	private final ModelRenderer frontSlope;
+    private final ModelRenderer roadRoller;
+    private final ModelRenderer frontWheel;
+    private final ModelRenderer frontWheel2;
+    private final ModelRenderer frontWheel3;
+    private final ModelRenderer frontWheel4;
+    private final ModelRenderer frontSlope;
     private final ModelRenderer mirrorLeft;
     private final ModelRenderer mirrorRight;
-	private final ModelRenderer gamingChair;
-	private final ModelRenderer steeringWheel;
-	private final ModelRenderer lever1;
-	private final ModelRenderer lever2;
-	private final ModelRenderer backWheel;
-	private final ModelRenderer backWheel2;
-	private final ModelRenderer backWheel3;
-	private final ModelRenderer backWheel4;
-	private final ModelRenderer backWheelThing;
-	private final ModelRenderer back;
+    private final ModelRenderer gamingChair;
+    private final ModelRenderer steeringWheel;
+    private final ModelRenderer lever1;
+    private final ModelRenderer lever2;
+    private final ModelRenderer backWheel;
+    private final ModelRenderer backWheel2;
+    private final ModelRenderer backWheel3;
+    private final ModelRenderer backWheel4;
+    private final ModelRenderer backWheelThing;
+    private final ModelRenderer back;
 
-	public RoadRollerModel() {
-		texWidth = 256;
-		texHeight = 256;
+    public RoadRollerModel() {
+        texWidth = 256;
+        texHeight = 256;
 
         roadRoller = new ModelRenderer(this);
         roadRoller.setPos(0.0F, -20.0F, 0.0F);
@@ -169,7 +169,7 @@ public class RoadRollerModel extends EntityModel<RoadRollerEntity> {
         setRotationAngle(back, 0.5236F, 0.0F, 0.0F);
         back.texOffs(84, 196).addBox(-15.0F, 0.0F, -4.0F, 30.0F, 16.0F, 4.0F, 0.0F, false);
         back.texOffs(8, 37).addBox(-5.0F, 0.0F, 0.0F, 3.0F, 1.0F, 1.0F, 0.0F, false);
-	}
+    }
 
     @Override
     public void setupAnim(RoadRollerEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
@@ -177,14 +177,14 @@ public class RoadRollerModel extends EntityModel<RoadRollerEntity> {
         roadRoller.xRot = xRotation * ((float)Math.PI / 180F);
     }
 
-	@Override
-	public void renderToBuffer(MatrixStack matrixStack, IVertexBuilder buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
-		roadRoller.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
-	}
+    @Override
+    public void renderToBuffer(MatrixStack matrixStack, IVertexBuilder buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+        roadRoller.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+    }
 
-	public void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
-		modelRenderer.xRot = x;
-		modelRenderer.yRot = y;
-		modelRenderer.zRot = z;
-	}
+    public void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
+        modelRenderer.xRot = x;
+        modelRenderer.yRot = y;
+        modelRenderer.zRot = z;
+    }
 }

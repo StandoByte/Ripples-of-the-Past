@@ -61,11 +61,11 @@ public class ModelPose<T extends Entity> implements IModelPose<T> {
     }
     
     public ModelPose<T> copy() {
-    	ModelPose<T> pose = new ModelPose<T>();
-    	this.rotations.forEach((key, value) -> pose.rotations.put(key, value));
-    	pose.easingFunc = this.easingFunc;
-    	pose.additionalAnim = this.additionalAnim;
-    	return pose;
+        ModelPose<T> pose = new ModelPose<T>();
+        this.rotations.forEach((key, value) -> pose.rotations.put(key, value));
+        pose.easingFunc = this.easingFunc;
+        pose.additionalAnim = this.additionalAnim;
+        return pose;
     }
     
     

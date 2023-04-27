@@ -28,8 +28,8 @@ import net.minecraft.util.math.vector.Vector3i;
 
 
 public class MRDetectorModel extends EntityModel<MRDetectorEntity> {
-	private final ModelRenderer detector;
-	private final Map<Direction, Float> flamesStrength;
+    private final ModelRenderer detector;
+    private final Map<Direction, Float> flamesStrength;
 
     public MRDetectorModel() {
         texWidth = 32;

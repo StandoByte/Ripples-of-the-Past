@@ -219,39 +219,39 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
         }
         
         if (!world.isClientSide() || user.is(ClientUtil.getClientPlayer())) {
-	        if (hamon.getTechnique() == Technique.JOSEPH) {
-	            if (user.isSprinting()) {
-	                Vector3d vecBehind = Vector3d.directionFromRotation(0, 180F + user.yRot).scale(8D);
-	                AxisAlignedBB aabb = new AxisAlignedBB(user.position().subtract(0, 2D, 0), user.position().add(vecBehind.x, 2D, vecBehind.z));
-	                List<LivingEntity> entitiesBehind = world.getEntitiesOfClass(LivingEntity.class, aabb, entity -> entity != user)
-	                        .stream().filter(entity -> !(entity instanceof StandEntity)).collect(Collectors.toList());
-	                if (!entitiesBehind.isEmpty()) {
-	                    if (world.isClientSide()) {
-	                        if (user instanceof ClientPlayerEntity && ((ClientPlayerEntity) user).sprintTime == 0) {
-	                            PacketManager.sendToServer(new ClRunAwayPacket());
-	                        }
-	                    }
-	                    else {
-	                        EffectInstance speed = user.getEffect(Effects.MOVEMENT_SPEED);
-	                        int speedAmplifier = speed != null && speed.getDuration() > 100 ? speed.getAmplifier() + 2 : 1;
-	                        user.addEffect(new EffectInstance(Effects.MOVEMENT_SPEED, 100, speedAmplifier, false, false, true));
-	                    }
-	                }
-	            }
-	        }
-	        if (user instanceof PlayerEntity) {
-	            hamon.tickExercises((PlayerEntity) user);
-	        }
+            if (hamon.getTechnique() == Technique.JOSEPH) {
+                if (user.isSprinting()) {
+                    Vector3d vecBehind = Vector3d.directionFromRotation(0, 180F + user.yRot).scale(8D);
+                    AxisAlignedBB aabb = new AxisAlignedBB(user.position().subtract(0, 2D, 0), user.position().add(vecBehind.x, 2D, vecBehind.z));
+                    List<LivingEntity> entitiesBehind = world.getEntitiesOfClass(LivingEntity.class, aabb, entity -> entity != user)
+                            .stream().filter(entity -> !(entity instanceof StandEntity)).collect(Collectors.toList());
+                    if (!entitiesBehind.isEmpty()) {
+                        if (world.isClientSide()) {
+                            if (user instanceof ClientPlayerEntity && ((ClientPlayerEntity) user).sprintTime == 0) {
+                                PacketManager.sendToServer(new ClRunAwayPacket());
+                            }
+                        }
+                        else {
+                            EffectInstance speed = user.getEffect(Effects.MOVEMENT_SPEED);
+                            int speedAmplifier = speed != null && speed.getDuration() > 100 ? speed.getAmplifier() + 2 : 1;
+                            user.addEffect(new EffectInstance(Effects.MOVEMENT_SPEED, 100, speedAmplifier, false, false, true));
+                        }
+                    }
+                }
+            }
+            if (user instanceof PlayerEntity) {
+                hamon.tickExercises((PlayerEntity) user);
+            }
         }
     }
     
     @Override
     public void onNewDay(LivingEntity user, INonStandPower power, long prevDay, long day) {
-    	if (user instanceof PlayerEntity) {
-    		HamonData hamon = power.getTypeSpecificData(this).get();
+        if (user instanceof PlayerEntity) {
+            HamonData hamon = power.getTypeSpecificData(this).get();
             JojoMod.LOGGER.debug(power.getUser().getDisplayName().getString() + ": Day " + day + " (from " + prevDay + "), Hamon exercise training: " + hamon.getAverageExercisePoints());
-    		hamon.breathingTrainingDay((PlayerEntity) user);
-    	}
+            hamon.breathingTrainingDay((PlayerEntity) user);
+        }
     }
 
     @Override
@@ -326,18 +326,18 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                         power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
                             if (hamon.isSkillLearned(HamonSkill.SNAKE_MUFFLER)) {
                                 playerTarget.getCooldowns().addCooldown(ModItems.SATIPOROJA_SCARF.get(), 80);
-                            	float efficiency = hamon.getBloodstreamEfficiency();
-                            	if (efficiency == 1 || efficiency >= event.getAmount() / target.getMaxHealth()) {
-	                                JojoModUtil.sayVoiceLine(target, ModSounds.LISA_LISA_SNAKE_MUFFLER.get());
-	                                power.consumeEnergy(energyCost);
-	                                DamageUtil.dealHamonDamage(attacker, 0.75F, target, null);
-	                                livingAttacker.addEffect(new EffectInstance(Effects.GLOWING, 200));
-	                                event.setCanceled(true);
-	                                SnakeMufflerEntity snakeMuffler = new SnakeMufflerEntity(target.level, target);
-	                                snakeMuffler.setEntityToJumpOver(attacker);
-	                                target.level.addFreshEntity(snakeMuffler);
-	                                snakeMuffler.attachToBlockPos(target.blockPosition());
-                            	}
+                                float efficiency = hamon.getBloodstreamEfficiency();
+                                if (efficiency == 1 || efficiency >= event.getAmount() / target.getMaxHealth()) {
+                                    JojoModUtil.sayVoiceLine(target, ModSounds.LISA_LISA_SNAKE_MUFFLER.get());
+                                    power.consumeEnergy(energyCost);
+                                    DamageUtil.dealHamonDamage(attacker, 0.75F, target, null);
+                                    livingAttacker.addEffect(new EffectInstance(Effects.GLOWING, 200));
+                                    event.setCanceled(true);
+                                    SnakeMufflerEntity snakeMuffler = new SnakeMufflerEntity(target.level, target);
+                                    snakeMuffler.setEntityToJumpOver(attacker);
+                                    target.level.addFreshEntity(snakeMuffler);
+                                    snakeMuffler.attachToBlockPos(target.blockPosition());
+                                }
                             }
                         });
                     }

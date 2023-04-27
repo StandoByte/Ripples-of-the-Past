@@ -123,7 +123,7 @@ public class StandStats {
     }
     
     public int getTier() {
-    	return tier;
+        return tier;
     }
     
     
@@ -137,7 +137,7 @@ public class StandStats {
         
         @Override
         protected StandStats createStats() {
-        	return new StandStats(this);
+            return new StandStats(this);
         }
     }
     
@@ -155,8 +155,8 @@ public class StandStats {
         private int tier = -1;
         
         public B tier(int tier) {
-        	this.tier = tier;
-        	return getThis();
+            this.tier = tier;
+            return getThis();
         }
         
         public B power(double power) {
@@ -217,13 +217,13 @@ public class StandStats {
         protected abstract B getThis();
         
         public S build() {
-        	return build("A stand");
+            return build("A stand");
         }
         
         public S build(String standName) {
-        	if (tier < 0) {
-        		throw new IllegalStateException(standName + "'s tier has not beed initialized!");
-        	}
+            if (tier < 0) {
+                throw new IllegalStateException(standName + "'s tier has not beed initialized!");
+            }
             return createStats();
         }
         

@@ -445,7 +445,7 @@ public class HamonData extends TypeSpecificData {
     }
 
     public void breathingTrainingDay(PlayerEntity user) {
-    	World world = user.level;
+        World world = user.level;
         if (!world.isClientSide()) {
             float lvlInc = (2 * MathHelper.clamp(getAverageExercisePoints(), 0F, 1F)) - 1F;
             recalcAvgExercisePoints();

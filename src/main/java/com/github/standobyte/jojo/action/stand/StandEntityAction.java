@@ -88,7 +88,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     
     @Override
     public ActionConditionResult checkConditions(LivingEntity user, IStandPower power, ActionTarget target) {
-    	StandEntity stand = power.isActive() ? (StandEntity) power.getStandManifestation() : null;
+        StandEntity stand = power.isActive() ? (StandEntity) power.getStandManifestation() : null;
         if (stand != null) {
             ActionConditionResult checkStand = checkStandConditions(stand, power, target);
             if (!checkStand.isPositive()) {
@@ -116,22 +116,22 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     }
     
     private ActionConditionResult checkTaskCancelling(StandEntity standEntity, IStandPower standPower) {
-    	if (standEntity.getCurrentTask().isPresent() && standPower.getHeldAction() != this) {
-    		StandEntityTask task = standEntity.getCurrentTask().get();
-    		if (!task.getAction().canClickDuringTask(this, standPower, standEntity, task)) {
-    			return ActionConditionResult.NEGATIVE;
-    		}
-    		if (!task.getAction().canBeCanceled(standPower, standEntity, task.getPhase(), this)) {
-    			if (this.canBeQueued(standPower, standEntity)) {
-    				if (!standEntity.level.isClientSide()) {
-    					standEntity.queueNextAction(this);
-    				}
-    				return ActionConditionResult.NEGATIVE_QUEUEABLE;
-    			}
-            	return ActionConditionResult.NEGATIVE;
-    		}
-    	}
-    	return ActionConditionResult.POSITIVE;
+        if (standEntity.getCurrentTask().isPresent() && standPower.getHeldAction() != this) {
+            StandEntityTask task = standEntity.getCurrentTask().get();
+            if (!task.getAction().canClickDuringTask(this, standPower, standEntity, task)) {
+                return ActionConditionResult.NEGATIVE;
+            }
+            if (!task.getAction().canBeCanceled(standPower, standEntity, task.getPhase(), this)) {
+                if (this.canBeQueued(standPower, standEntity)) {
+                    if (!standEntity.level.isClientSide()) {
+                        standEntity.queueNextAction(this);
+                    }
+                    return ActionConditionResult.NEGATIVE_QUEUEABLE;
+                }
+                return ActionConditionResult.NEGATIVE;
+            }
+        }
+        return ActionConditionResult.POSITIVE;
     }
     
     @Override
@@ -233,13 +233,13 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     public void startedHolding(World world, LivingEntity user, IStandPower power, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
             invokeForStand(power, stand -> {
-	    		preTaskInit(world, power, stand, target);
-	    		if (!world.isClientSide()) {
-		    		setAction(power, stand, 
-	                    !holdOnly() ? getHoldDurationToFire(power) : getHoldDurationMax(power), 
-	                    !holdOnly() ? Phase.BUTTON_HOLD : Phase.PERFORM, 
-	                    target);
-	    		}
+                preTaskInit(world, power, stand, target);
+                if (!world.isClientSide()) {
+                    setAction(power, stand, 
+                        !holdOnly() ? getHoldDurationToFire(power) : getHoldDurationMax(power), 
+                        !holdOnly() ? Phase.BUTTON_HOLD : Phase.PERFORM, 
+                        target);
+                }
             });
         }
     }
@@ -254,34 +254,34 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
 
     @Override
     public void stoppedHolding(World world, LivingEntity user, IStandPower power, int ticksHeld, boolean willFire) {
-    	if (!willFire) {
-	        invokeForStand(power, stand -> {
-	            if (stand.getCurrentTaskAction() == this) {
-	                stand.stopTaskWithRecovery();
-	            }
-	        });
-    	}
+        if (!willFire) {
+            invokeForStand(power, stand -> {
+                if (stand.getCurrentTaskAction() == this) {
+                    stand.stopTaskWithRecovery();
+                }
+            });
+        }
     }
 
     @Override
     protected final void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
-    	invokeForStand(power, stand -> {
-    		if (stand.getCurrentTask().map(task -> {
-    			if (task.getPhase() == Phase.BUTTON_HOLD) {
-    				task.moveToPhase(Phase.WINDUP, power, stand);
-    				return false;
-    			}
-    			return true;
-    		}).orElse(true)) {
-	    		preTaskInit(world, power, stand, target);
-	    		if (!world.isClientSide()) {
-	    			int windupTicks = getStandWindupTicks(power, stand);
-	    			int ticks = windupTicks > 0 ? windupTicks : getStandActionTicks(power, stand);
-	    			Phase phase = windupTicks > 0 ? Phase.WINDUP : Phase.PERFORM;
-	    			setAction(power, stand, ticks, phase, target);
-	    		}
-    		}
-    	});
+        invokeForStand(power, stand -> {
+            if (stand.getCurrentTask().map(task -> {
+                if (task.getPhase() == Phase.BUTTON_HOLD) {
+                    task.moveToPhase(Phase.WINDUP, power, stand);
+                    return false;
+                }
+                return true;
+            }).orElse(true)) {
+                preTaskInit(world, power, stand, target);
+                if (!world.isClientSide()) {
+                    int windupTicks = getStandWindupTicks(power, stand);
+                    int ticks = windupTicks > 0 ? windupTicks : getStandActionTicks(power, stand);
+                    Phase phase = windupTicks > 0 ? Phase.WINDUP : Phase.PERFORM;
+                    setAction(power, stand, ticks, phase, target);
+                }
+            }
+        });
     }
     
     protected void preTaskInit(World world, IStandPower standPower, StandEntity standEntity, ActionTarget target) {}
@@ -434,7 +434,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     }
     
     public boolean transfersPreviousOffset(IStandPower standPower, StandEntity standEntity, StandEntityTask previousTask) {
-    	return true;
+        return true;
     }
     
     protected final void invokeForStand(IStandPower power, Consumer<StandEntity> consumer) {
@@ -452,18 +452,18 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     }
     
     protected boolean isChainable(IStandPower standPower, StandEntity standEntity) {
-    	return false;
+        return false;
     }
     
     protected boolean isFreeRecovery(IStandPower standPower, StandEntity standEntity) {
-    	return false;
+        return false;
     }
     
     public final boolean canBeCanceled(IStandPower standPower, StandEntity standEntity, Phase phase, @Nullable StandEntityAction newAction) {
-    	return isCancelable(standPower, standEntity, newAction, phase)
-    			|| newAction != null && newAction.cancels(this, standPower, standEntity, phase)
-    			|| phase == Phase.RECOVERY && (newAction == this && isChainable(standPower, standEntity)
-    			|| isFreeRecovery(standPower, standEntity));
+        return isCancelable(standPower, standEntity, newAction, phase)
+                || newAction != null && newAction.cancels(this, standPower, standEntity, phase)
+                || phase == Phase.RECOVERY && (newAction == this && isChainable(standPower, standEntity)
+                || isFreeRecovery(standPower, standEntity));
     }
     
     protected boolean isCancelable(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction, Phase phase) {
@@ -595,8 +595,8 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         }
 
         public T standOffsetFront() {
-        	// FIXME (!) barrage-like offset
-        	setStandOffset(StandRelativeOffset.noYOffset(0, 0.5), false);
+            // FIXME (!) barrage-like offset
+            setStandOffset(StandRelativeOffset.noYOffset(0, 0.5), false);
             return getThis();
         }
 

@@ -92,7 +92,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     public T getStats() {
-    	StandStatsManager statsManager = StandStatsManager.getInstance();
+        StandStatsManager statsManager = StandStatsManager.getInstance();
         return statsManager != null ? statsManager.getStats(this) : getDefaultStats();
     }
     
@@ -123,7 +123,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     
     @Override
     public void onNewDay(LivingEntity user, IStandPower power, long prevDay, long day) {
-    	getStats().onNewDay(user, power);
+        getStats().onNewDay(user, power);
     }
     
     @Override
@@ -193,10 +193,10 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     
     @Override
     public float getTargetResolveMultiplier(IStandPower power, IStandPower attackingStand) {
-    	float multiplier = getTier() + 1;
-    	if (attackingStand.hasPower()) {
-    		multiplier = Math.max(multiplier - attackingStand.getType().getTier(), 1);
-    	}
+        float multiplier = getTier() + 1;
+        if (attackingStand.hasPower()) {
+            multiplier = Math.max(multiplier - attackingStand.getType().getTier(), 1);
+        }
         return multiplier;
     }
     

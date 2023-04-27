@@ -16,6 +16,6 @@ public class TheWorldTimeStopInstant extends TimeStopInstant {
     
     @Override
     protected Vector3d getEntityTargetTeleportPos(Entity user, Entity target) {
-    	return target.position().subtract(target.getLookAngle().scale(target.getBbWidth() + user.getBbWidth()));
+        return target.position().subtract(target.getLookAngle().scale(target.getBbWidth() + user.getBbWidth()));
     }
 }

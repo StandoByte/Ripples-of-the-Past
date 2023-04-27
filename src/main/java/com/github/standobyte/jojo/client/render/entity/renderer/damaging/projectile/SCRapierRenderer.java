@@ -22,16 +22,16 @@ public class SCRapierRenderer extends SimpleEntityRenderer<SCRapierEntity, SCRap
     }
     
     protected void rotateModel(SCRapierModel model, SCRapierEntity entity, float partialTick, float yRotation, float xRotation, MatrixStack matrixStack) {
-    	super.rotateModel(model, entity, partialTick, yRotation, xRotation, matrixStack);
-    	flameModel.setupAnim(entity, 0, 0, entity.tickCount + partialTick, yRotation, xRotation);
+        super.rotateModel(model, entity, partialTick, yRotation, xRotation, matrixStack);
+        flameModel.setupAnim(entity, 0, 0, entity.tickCount + partialTick, yRotation, xRotation);
     }
     
     @Override
     protected void doRender(SCRapierEntity entity, SCRapierModel model, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
-    	super.doRender(entity, model, partialTick, matrixStack, buffer, packedLight);
+        super.doRender(entity, model, partialTick, matrixStack, buffer, packedLight);
         if (entity.isOnFire()) {
-        	flameModel.renderToBuffer(matrixStack, buffer.getBuffer(flameModel.renderType(null)), 
-        			ClientUtil.MAX_MODEL_LIGHT, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+            flameModel.renderToBuffer(matrixStack, buffer.getBuffer(flameModel.renderType(null)), 
+                    ClientUtil.MAX_MODEL_LIGHT, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
 

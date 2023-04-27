@@ -28,22 +28,22 @@ public class RotationAngle {
     }
     
     public RotationAngle noDegreesWrapping() {
-    	wrapDegrees = false;
-    	return this;
+        wrapDegrees = false;
+        return this;
     }
     
     public void applyRotation(float rotationAmount) {
-    	TernaryOperator<Float> lerp = getLerp();
+        TernaryOperator<Float> lerp = getLerp();
         modelRenderer.xRot = lerp.apply(rotationAmount, modelRenderer.xRot, angleX);
         modelRenderer.yRot = lerp.apply(rotationAmount, modelRenderer.yRot, angleY);
         modelRenderer.zRot = lerp.apply(rotationAmount, modelRenderer.zRot, angleZ);
     }
     
     private TernaryOperator<Float> getLerp() {
-    	return wrapDegrees ? MathUtil::rotLerpRad : MathHelper::lerp;
+        return wrapDegrees ? MathUtil::rotLerpRad : MathHelper::lerp;
     }
     
     private static interface TernaryOperator<T> {
-    	T apply(T a, T b, T c);
+        T apply(T a, T b, T c);
     }
 }

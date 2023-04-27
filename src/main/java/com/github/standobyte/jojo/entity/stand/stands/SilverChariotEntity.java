@@ -107,7 +107,7 @@ public class SilverChariotEntity extends StandEntity {
         updateModifier(getAttribute(Attributes.ATTACK_SPEED), NO_RAPIER_ATTACK_SPEED_DECREASE, !rapier);
         updateModifier(getAttribute(ForgeMod.REACH_DISTANCE.get()), NO_RAPIER_ATTACK_RANGE_DECREASE, !rapier);
         if (!rapier) {
-        	entityData.set(RAPIER_ON_FIRE, false);
+            entityData.set(RAPIER_ON_FIRE, false);
         }
     }
 
@@ -147,10 +147,10 @@ public class SilverChariotEntity extends StandEntity {
             }
             
             if (rapierFireTicks > 0) {
-            	rapierFireTicks--;
-            	if (rapierFireTicks == 0) {
-            		entityData.set(RAPIER_ON_FIRE, false);
-            	}
+                rapierFireTicks--;
+                if (rapierFireTicks == 0) {
+                    entityData.set(RAPIER_ON_FIRE, false);
+                }
             }
         }
     }
@@ -173,23 +173,23 @@ public class SilverChariotEntity extends StandEntity {
     }
     
     public boolean isRapierOnFire() {
-    	return entityData.get(RAPIER_ON_FIRE);
+        return entityData.get(RAPIER_ON_FIRE);
     }
     
     @Override
     public boolean attackEntity(Supplier<Boolean> doAttack, StandEntityPunch punch, StandEntityTask task) {
-    	if (hasRapier() && isRapierOnFire()) {
+        if (hasRapier() && isRapierOnFire()) {
             return DamageUtil.dealDamageAndSetOnFire(punch.target, 
                     entity -> attackOrDeflect(doAttack, punch, task), 4, true);
-    	}
-    	else {
-    		return attackOrDeflect(doAttack, punch, task);
-    	}
+        }
+        else {
+            return attackOrDeflect(doAttack, punch, task);
+        }
     }
 
     private boolean attackOrDeflect(Supplier<Boolean> doAttack, StandEntityPunch punch, StandEntityTask task) {
         if (canDeflectProjectiles() && hasRapier() && punch.target instanceof ProjectileEntity) {
-        	return deflectProjectile(punch.target);
+            return deflectProjectile(punch.target);
         }
         else {
             return super.attackEntity(doAttack, punch, task);
@@ -198,29 +198,29 @@ public class SilverChariotEntity extends StandEntity {
     
     @Override
     public boolean attackTarget(ActionTarget target, IHasStandPunch punch, StandEntityTask task) {
-    	if (canDeflectProjectiles()) {
-    		level.getEntitiesOfClass(ProjectileEntity.class, getBoundingBox().inflate(getAttributeValue(ForgeMod.REACH_DISTANCE.get())), 
-    				entity -> entity.isAlive() && !entity.isPickable()).forEach(projectile -> {
-    					if (this.getLookAngle().dot(projectile.getDeltaMovement().reverse().normalize())
-    							>= MathHelper.cos((float) (30.0 + MathHelper.clamp(getPrecision(), 0, 16) * 30.0 / 16.0) * MathUtil.DEG_TO_RAD)) {
-    						deflectProjectile(projectile);
-    					}
-    				});
-    	}
-    	
-    	return super.attackTarget(target, punch, task);
+        if (canDeflectProjectiles()) {
+            level.getEntitiesOfClass(ProjectileEntity.class, getBoundingBox().inflate(getAttributeValue(ForgeMod.REACH_DISTANCE.get())), 
+                    entity -> entity.isAlive() && !entity.isPickable()).forEach(projectile -> {
+                        if (this.getLookAngle().dot(projectile.getDeltaMovement().reverse().normalize())
+                                >= MathHelper.cos((float) (30.0 + MathHelper.clamp(getPrecision(), 0, 16) * 30.0 / 16.0) * MathUtil.DEG_TO_RAD)) {
+                            deflectProjectile(projectile);
+                        }
+                    });
+        }
+        
+        return super.attackTarget(target, punch, task);
     }
     
     private boolean canDeflectProjectiles() {
-    	return getUserPower() == null || getUserPower().getResolveLevel() >= 4;
+        return getUserPower() == null || getUserPower().getResolveLevel() >= 4;
     }
     
     private boolean deflectProjectile(Entity projectile) {
         if (projectile.getType() != ModEntityTypes.SPACE_RIPPER_STINGY_EYES.get()) {
             JojoModUtil.deflectProjectile(projectile, getLookAngle());
             if (projectile instanceof DamagingEntity && ((DamagingEntity) projectile).isFiery()) {
-            	entityData.set(RAPIER_ON_FIRE, true);
-            	rapierFireTicks = 300;
+                entityData.set(RAPIER_ON_FIRE, true);
+                rapierFireTicks = 300;
             }
             return true;
         }
@@ -235,10 +235,10 @@ public class SilverChariotEntity extends StandEntity {
     }
     
     public void removeRapierFire() {
-    	if (!level.isClientSide()) {
-    		rapierFireTicks = 0;
-        	entityData.set(RAPIER_ON_FIRE, false);
-    	}
+        if (!level.isClientSide()) {
+            rapierFireTicks = 0;
+            entityData.set(RAPIER_ON_FIRE, false);
+        }
     }
     
     @Override
@@ -257,7 +257,7 @@ public class SilverChariotEntity extends StandEntity {
     
     @Override
     protected SoundEvent getAttackBlockSound() {
-    	return hasRapier() ? ModSounds.SILVER_CHARIOT_BLOCK.get() : super.getAttackBlockSound();
+        return hasRapier() ? ModSounds.SILVER_CHARIOT_BLOCK.get() : super.getAttackBlockSound();
     }
     
     @Override

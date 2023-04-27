@@ -11,24 +11,24 @@ import net.minecraft.entity.LivingEntity;
 
 public class StoneMaskModel extends BipedModel<LivingEntity> {
 
-	public StoneMaskModel(float size) {
-	    super(size);
-		texWidth = 32;
-		texHeight = 32;
+    public StoneMaskModel(float size) {
+        super(size);
+        texWidth = 32;
+        texHeight = 32;
 
-		head = new ModelRenderer(this);
-		head.setPos(0.0F, 0.0F, 0.0F);
-		head.texOffs(2, 2).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 6.0F, 0.55F, false);
-	}
+        head = new ModelRenderer(this);
+        head.setPos(0.0F, 0.0F, 0.0F);
+        head.texOffs(2, 2).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 6.0F, 0.55F, false);
+    }
     
     @Override
     protected Iterable<ModelRenderer> bodyParts() {
         return Collections.emptyList();
     }
 
-	public void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
-		modelRenderer.xRot = x;
-		modelRenderer.yRot = y;
-		modelRenderer.zRot = z;
-	}
+    public void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
+        modelRenderer.xRot = x;
+        modelRenderer.yRot = y;
+        modelRenderer.zRot = z;
+    }
 }

@@ -76,7 +76,7 @@ public class TimeStopInstancePacket {
                                 msg.instanceId));
             }
             else {
-        		TimeUtil.resumeTime(world, msg.instanceId);
+                TimeUtil.resumeTime(world, msg.instanceId);
             }
         });
         ctx.get().setPacketHandled(true);

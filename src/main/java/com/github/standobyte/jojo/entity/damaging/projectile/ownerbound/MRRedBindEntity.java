@@ -65,7 +65,7 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
                         DamageUtil.setOnFire(bound, 3, true);
                     }
                     if (isInKickCombo()) {
-                    	DamageUtil.suffocateTick(bound, 1);
+                        DamageUtil.suffocateTick(bound, 1);
                     }
                 }
                 Vector3d vecToOwner = owner.position().subtract(bound.position());
@@ -105,11 +105,11 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
                 LivingEntity targetLiving = (LivingEntity) target;
                 attachToEntity(targetLiving);
                 if (!level.isClientSide()) {
-                	boolean thisEffect = stunEffect == targetLiving.getEffect(ModEffects.STUN.get());
-                	targetLiving.addEffect(new EffectInstance(ModEffects.STUN.get(), ticksLifespan() - tickCount));
-                	if (thisEffect) {
-                		stunEffect = targetLiving.getEffect(ModEffects.STUN.get());
-                	}
+                    boolean thisEffect = stunEffect == targetLiving.getEffect(ModEffects.STUN.get());
+                    targetLiving.addEffect(new EffectInstance(ModEffects.STUN.get(), ticksLifespan() - tickCount));
+                    if (thisEffect) {
+                        stunEffect = targetLiving.getEffect(ModEffects.STUN.get());
+                    }
                 }
                 return true;
             }
@@ -143,11 +143,11 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
         entityData.set(KICK_COMBO, true);
         LivingEntity target = getEntityAttachedTo();
         if (target != null) {
-        	boolean thisEffect = stunEffect == target.getEffect(ModEffects.STUN.get());
-        	target.addEffect(new EffectInstance(ModEffects.STUN.get(), ticksLifespan() - tickCount));
-        	if (thisEffect) {
-        		stunEffect = target.getEffect(ModEffects.STUN.get());
-        	}
+            boolean thisEffect = stunEffect == target.getEffect(ModEffects.STUN.get());
+            target.addEffect(new EffectInstance(ModEffects.STUN.get(), ticksLifespan() - tickCount));
+            if (thisEffect) {
+                stunEffect = target.getEffect(ModEffects.STUN.get());
+            }
         }
     }
     

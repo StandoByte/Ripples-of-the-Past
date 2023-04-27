@@ -52,10 +52,10 @@ public class MagiciansRedRedBind extends StandEntityAction {
     
     @Override
     protected SoundEvent getShout(LivingEntity user, IStandPower power, ActionTarget target, boolean wasActive) {
-    	if (power.isActive() && ((StandEntity) power.getStandManifestation()).willHeavyPunchCombo()) {
-    		return null;
-    	}
-    	return super.getShout(user, power, target, wasActive);
+        if (power.isActive() && ((StandEntity) power.getStandManifestation()).willHeavyPunchCombo()) {
+            return null;
+        }
+        return super.getShout(user, power, target, wasActive);
     }
     
     @Override

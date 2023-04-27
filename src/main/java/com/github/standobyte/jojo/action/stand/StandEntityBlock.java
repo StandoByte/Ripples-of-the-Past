@@ -26,6 +26,6 @@ public class StandEntityBlock extends StandEntityAction {
     
     @Override
     public boolean transfersPreviousOffset(IStandPower standPower, StandEntity standEntity, StandEntityTask previousTask) {
-    	return false;
+        return false;
     }
 }

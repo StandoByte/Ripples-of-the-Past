@@ -51,7 +51,7 @@ public class TimeStopInstant extends StandAction {
             return ActionConditionResult.NEGATIVE;
         }
         if (power.isActive() && power.getStandManifestation() instanceof StandEntity
-        		&& ((StandEntity) power.getStandManifestation()).getCurrentTask().isPresent()) {
+                && ((StandEntity) power.getStandManifestation()).getCurrentTask().isPresent()) {
             return ActionConditionResult.NEGATIVE;
         }
         return super.checkSpecificConditions(user, power, target);
@@ -70,7 +70,7 @@ public class TimeStopInstant extends StandAction {
     
     @Override
     protected void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
-    	playSound(world, user);
+        playSound(world, user);
         
         int timeStopTicks = TimeStop.getTimeStopTicks(power, this);
         if (!StandUtil.standIgnoresStaminaDebuff(power)) {
@@ -89,9 +89,9 @@ public class TimeStopInstant extends StandAction {
         switch (target.getType()) {
         case ENTITY:
             blinkPos = getEntityTargetTeleportPos(user, target.getEntity());
-    		Vector3d toTarget = target.getEntity().position().subtract(blinkPos);
-    		user.yRot = MathUtil.yRotDegFromVec(toTarget);
-    		user.yRotO = user.yRot;
+            Vector3d toTarget = target.getEntity().position().subtract(blinkPos);
+            user.yRot = MathUtil.yRotDegFromVec(toTarget);
+            user.yRotO = user.yRot;
             break;
         case BLOCK:
             BlockPos blockPosTargeted = target.getBlockPos();
@@ -122,10 +122,10 @@ public class TimeStopInstant extends StandAction {
 //                power.addLearningProgressPoints(baseTimeStop.get(), learning);
                 
                 int cooldown = (int) (TimeStopInstance.getTimeStopCooldown(power, tsStats, impliedTicks) * COOLDOWN_RATIO);
-            	power.setCooldownTimer(this, cooldown);
-            	if (!power.isActionOnCooldown(baseTimeStop.get())) {
-            		power.setCooldownTimer(baseTimeStop.get(), cooldown);
-            	}
+                power.setCooldownTimer(this, cooldown);
+                if (!power.isActionOnCooldown(baseTimeStop.get())) {
+                    power.setCooldownTimer(baseTimeStop.get(), cooldown);
+                }
             }
         }
         
@@ -135,7 +135,7 @@ public class TimeStopInstant extends StandAction {
     public static final float COOLDOWN_RATIO = 1F / 6F;
     
     public static double getDistancePerTick(LivingEntity entity) {
-    	return entity.getAttributeValue(Attributes.MOVEMENT_SPEED) * 2.1585;
+        return entity.getAttributeValue(Attributes.MOVEMENT_SPEED) * 2.1585;
     }
     
     void playSound(World world, Entity entity) {
@@ -147,12 +147,12 @@ public class TimeStopInstant extends StandAction {
     }
     
     TimeStop getBaseTimeStop() {
-    	return baseTimeStop.get();
+        return baseTimeStop.get();
     }
     
     protected Vector3d getEntityTargetTeleportPos(Entity user, Entity target) {
-    	double distance = target.getBbWidth() + user.getBbWidth();
-    	return user.distanceToSqr(target) > distance * distance ? target.position().subtract(user.getLookAngle().scale(distance)) : user.position();
+        double distance = target.getBbWidth() + user.getBbWidth();
+        return user.distanceToSqr(target) > distance * distance ? target.position().subtract(user.getLookAngle().scale(distance)) : user.position();
     }
     
     @Override
@@ -185,16 +185,16 @@ public class TimeStopInstant extends StandAction {
     }
     
     private static void skipTicks(LivingEntity entity, int ticks) {
-    	if (!entity.level.isClientSide()) {
-    		PacketManager.sendToClientsTracking(new TrNoMotionLerpPacket(entity.getId(), 3), entity);
-    	}
+        if (!entity.level.isClientSide()) {
+            PacketManager.sendToClientsTracking(new TrNoMotionLerpPacket(entity.getId(), 3), entity);
+        }
         // also clear user's movement input before tick skipping
-//    	if (entity.canUpdate()) {
-//    		for (int i = 0; i < ticks; i++) {
-//    			entity.tickCount++;
-//    			entity.tick();
-//    		}
-//    	}
+//        if (entity.canUpdate()) {
+//            for (int i = 0; i < ticks; i++) {
+//                entity.tickCount++;
+//                entity.tick();
+//            }
+//        }
 //        else {
             entity.tickCount += ticks;
 //        }

@@ -16,7 +16,7 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import net.minecraft.util.SoundEvent;
 
 public class SilverChariotLightAttack extends StandEntityLightAttack {
-	private final Supplier<StandEntityLightAttack> noRapierAttack;
+    private final Supplier<StandEntityLightAttack> noRapierAttack;
 
     public SilverChariotLightAttack(StandEntityLightAttack.Builder builder, Supplier<StandEntityLightAttack> noRapierAttack) {
         super(builder);
@@ -33,9 +33,9 @@ public class SilverChariotLightAttack extends StandEntityLightAttack {
 
     @Override
     protected Action<IStandPower> replaceAction(IStandPower power) {
-    	return power.isActive() && power.getStandManifestation() instanceof SilverChariotEntity
-    			&& !((SilverChariotEntity) power.getStandManifestation()).hasRapier() && noRapierAttack.get() != null
-    			? noRapierAttack.get() : this;
+        return power.isActive() && power.getStandManifestation() instanceof SilverChariotEntity
+                && !((SilverChariotEntity) power.getStandManifestation()).hasRapier() && noRapierAttack.get() != null
+                ? noRapierAttack.get() : this;
     }
     
     @Nullable

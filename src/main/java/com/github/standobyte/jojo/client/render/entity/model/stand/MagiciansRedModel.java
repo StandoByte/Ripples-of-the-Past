@@ -45,7 +45,7 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
     }
 
     protected void addLayerSpecificBoxes() {
-		head.texOffs(0, 0).addBox(-3.5F, -7.0F, -4.0F, 7.0F, 7.0F, 8.0F, 0.0F, false);
+        head.texOffs(0, 0).addBox(-3.5F, -7.0F, -4.0F, 7.0F, 7.0F, 8.0F, 0.0F, false);
         addHumanoidBaseBoxes(part -> part != head);
         
         head.texOffs(0, 15).addBox(-4.1F, -7.4F, -4.4F, 1.0F, 7.0F, 2.0F, -0.4F, false);
@@ -104,38 +104,38 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
         beakLower = new ModelRenderer(this);
         beakLower.setPos(0.0F, -0.75F, -4.75F);
         head.addChild(beakLower);
-		beakLower.texOffs(79, 17).addBox(-1.0F, 0.0F, -4.75F, 2.0F, 1.0F, 6.0F, 0.0F, false);
-		beakLower.texOffs(65, 20).addBox(-1.5F, 0.0F, -1.75F, 3.0F, 1.0F, 3.0F, 0.0F, false);
-		beakLower.texOffs(72, 25).addBox(-1.0F, -0.3F, -3.75F, 2.0F, 1.0F, 4.0F, 0.0F, false);
+        beakLower.texOffs(79, 17).addBox(-1.0F, 0.0F, -4.75F, 2.0F, 1.0F, 6.0F, 0.0F, false);
+        beakLower.texOffs(65, 20).addBox(-1.5F, 0.0F, -1.75F, 3.0F, 1.0F, 3.0F, 0.0F, false);
+        beakLower.texOffs(72, 25).addBox(-1.0F, -0.3F, -3.75F, 2.0F, 1.0F, 4.0F, 0.0F, false);
 
-		beakLowerLeft = new ModelRenderer(this);
-		beakLowerLeft.setPos(1.0F, 0.5F, -4.75F);
-		beakLower.addChild(beakLowerLeft);
-		setRotationAngle(beakLowerLeft, 0.0F, 0.2618F, 0.0F);
-		beakLowerLeft.texOffs(90, 19).addBox(-1.0F, -0.5F, 0.0F, 1.0F, 1.0F, 5.0F, 0.0F, true);
+        beakLowerLeft = new ModelRenderer(this);
+        beakLowerLeft.setPos(1.0F, 0.5F, -4.75F);
+        beakLower.addChild(beakLowerLeft);
+        setRotationAngle(beakLowerLeft, 0.0F, 0.2618F, 0.0F);
+        beakLowerLeft.texOffs(90, 19).addBox(-1.0F, -0.5F, 0.0F, 1.0F, 1.0F, 5.0F, 0.0F, true);
 
-		beakLowerRight = new ModelRenderer(this);
-		beakLowerRight.setPos(-1.0F, 0.5F, -4.75F);
-		beakLower.addChild(beakLowerRight);
-		setRotationAngle(beakLowerRight, 0.0F, -0.2618F, 0.0F);
-		beakLowerRight.texOffs(72, 19).addBox(0.0F, -0.5F, 0.0F, 1.0F, 1.0F, 5.0F, 0.0F, false);
+        beakLowerRight = new ModelRenderer(this);
+        beakLowerRight.setPos(-1.0F, 0.5F, -4.75F);
+        beakLower.addChild(beakLowerRight);
+        setRotationAngle(beakLowerRight, 0.0F, -0.2618F, 0.0F);
+        beakLowerRight.texOffs(72, 19).addBox(0.0F, -0.5F, 0.0F, 1.0F, 1.0F, 5.0F, 0.0F, false);
 
-		feather = new ModelRenderer(this);
-		feather.setPos(0.0F, -6.5F, 4.5F);
-		head.addChild(feather);
-		setRotationAngle(feather, 0.3927F, 0.0F, 0.0F);
-		feather.texOffs(30, 8).addBox(-1.0F, -0.5F, -1.0F, 2.0F, 1.0F, 6.0F, 0.0F, false);
-		feather.texOffs(40, 12).addBox(-1.0F, 0.5F, 4.0F, 2.0F, 1.0F, 1.0F, 0.0F, false);
+        feather = new ModelRenderer(this);
+        feather.setPos(0.0F, -6.5F, 4.5F);
+        head.addChild(feather);
+        setRotationAngle(feather, 0.3927F, 0.0F, 0.0F);
+        feather.texOffs(30, 8).addBox(-1.0F, -0.5F, -1.0F, 2.0F, 1.0F, 6.0F, 0.0F, false);
+        feather.texOffs(40, 12).addBox(-1.0F, 0.5F, 4.0F, 2.0F, 1.0F, 1.0F, 0.0F, false);
 
-		feather2 = new ModelRenderer(this);
-		feather2.setPos(0.0F, -1.0F, -2.5F);
-		feather.addChild(feather2);
-		setRotationAngle(feather2, 0.3491F, 0.0F, 0.0F);
-		feather2.texOffs(30, 0).addBox(-1.0F, -0.5F, 0.0F, 2.0F, 1.0F, 6.0F, 0.0F, false);
-		feather2.texOffs(40, 4).addBox(-1.0F, 0.5F, 5.0F, 2.0F, 1.0F, 1.0F, 0.0F, false);
+        feather2 = new ModelRenderer(this);
+        feather2.setPos(0.0F, -1.0F, -2.5F);
+        feather.addChild(feather2);
+        setRotationAngle(feather2, 0.3491F, 0.0F, 0.0F);
+        feather2.texOffs(30, 0).addBox(-1.0F, -0.5F, 0.0F, 2.0F, 1.0F, 6.0F, 0.0F, false);
+        feather2.texOffs(40, 4).addBox(-1.0F, 0.5F, 5.0F, 2.0F, 1.0F, 1.0F, 0.0F, false);
 
-		torso.texOffs(20, 64).addBox(-3.5F, 1.1F, -2.0F, 7.0F, 3.0F, 1.0F, 0.4F, false);
-		torso.texOffs(24, 73).addBox(-2.5F, 4.0F, -2.3F, 5.0F, 6.0F, 1.0F, 0.0F, false);
+        torso.texOffs(20, 64).addBox(-3.5F, 1.1F, -2.0F, 7.0F, 3.0F, 1.0F, 0.4F, false);
+        torso.texOffs(24, 73).addBox(-2.5F, 4.0F, -2.3F, 5.0F, 6.0F, 1.0F, 0.0F, false);
     }
 
     @Override
@@ -231,7 +231,7 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
                 RotationAngle.fromDegrees(rightLowerLeg, 0F, 0F, 0F)
         });
         ModelPose<MagiciansRedEntity> kickRecoveryArmHackyFix = ((ModelPose<MagiciansRedEntity>) idlePose).copy()
-        		.putRotation(new RotationAngle(rightArm, 0.1309F, 0.0F, 0.4363F).noDegreesWrapping());
+                .putRotation(new RotationAngle(rightArm, 0.1309F, 0.0F, 0.4363F).noDegreesWrapping());
         actionAnim.put(StandPose.HEAVY_ATTACK_COMBO, new PosedActionAnimation.Builder<MagiciansRedEntity>()
                 .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<>(kickPose1, kickPose2))
                 .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransition<>(kickPose2, kickPose3))

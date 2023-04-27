@@ -211,13 +211,13 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
     }
     
     public boolean isHighOnBlood(LivingEntity entity) {
-    	return INonStandPower.getNonStandPowerOptional(entity).map(power -> {
-        	return power.getType() == this && power.getEnergy() / power.getMaxEnergy() >= 0.8F;
+        return INonStandPower.getNonStandPowerOptional(entity).map(power -> {
+            return power.getType() == this && power.getEnergy() / power.getMaxEnergy() >= 0.8F;
         }).orElse(false);
     }
     
     public static float healCost(World world) {
-    	return GeneralUtil.getOrLast(
+        return GeneralUtil.getOrLast(
                 JojoModConfig.getCommonConfigInstance(world.isClientSide()).bloodHealCost.get(), 
                 world.getDifficulty().getId()).floatValue();
     }

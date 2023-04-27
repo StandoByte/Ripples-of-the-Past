@@ -35,20 +35,20 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 @Mod(JojoMod.MOD_ID)
 public class JojoMod {
-	public static final String MOD_ID = "jojo";
-	public static final Logger LOGGER = LogManager.getLogger();
+    public static final String MOD_ID = "jojo";
+    public static final Logger LOGGER = LogManager.getLogger();
     
-	public static final ItemGroup MAIN_TAB = (new ItemGroup("jojo_tab") {
-	    @Override
+    public static final ItemGroup MAIN_TAB = (new ItemGroup("jojo_tab") {
+        @Override
         public ItemStack makeIcon() {
             return new ItemStack(ModItems.STONE_MASK.get());
         }
-	}).setEnchantmentCategories(new EnchantmentType[]{ModEnchantments.STAND_ARROW});
-	
-	public static Logger getLogger() {
-	    return LOGGER;
-	}
-	
+    }).setEnchantmentCategories(new EnchantmentType[]{ModEnchantments.STAND_ARROW});
+    
+    public static Logger getLogger() {
+        return LOGGER;
+    }
+    
     public JojoMod() {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, JojoModConfig.commonSpec);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, JojoModConfig.clientSpec);

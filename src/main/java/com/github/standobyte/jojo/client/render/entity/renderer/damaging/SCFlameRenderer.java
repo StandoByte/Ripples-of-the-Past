@@ -11,8 +11,8 @@ public class SCFlameRenderer extends FlameRenderer<SCFlameSwingEntity> {
         super(renderManager);
     }
     
-	@Override
-	protected Vector3d getStartingPos(SCFlameSwingEntity entity) {
-		return entity.getStartingPos();
-	}
+    @Override
+    protected Vector3d getStartingPos(SCFlameSwingEntity entity) {
+        return entity.getStartingPos();
+    }
 }

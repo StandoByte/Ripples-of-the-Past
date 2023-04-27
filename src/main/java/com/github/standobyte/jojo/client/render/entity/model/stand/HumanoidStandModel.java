@@ -59,7 +59,7 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
     }
     
     public HumanoidStandModel(int textureWidth, int textureHeight) {
-    	this(RenderType::entityTranslucent, textureWidth, textureHeight);
+        this(RenderType::entityTranslucent, textureWidth, textureHeight);
     }
     
     public HumanoidStandModel(Function<ResourceLocation, RenderType> renderType, int textureWidth, int textureHeight) {
