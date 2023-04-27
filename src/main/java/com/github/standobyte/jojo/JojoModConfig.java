@@ -51,8 +51,8 @@ public class JojoModConfig {
         public final ForgeConfigSpec.BooleanValue pillarManTempleSpawn;
 
         public final ForgeConfigSpec.DoubleValue hamonPointsMultiplier;
-        public final ForgeConfigSpec.DoubleValue breathingTechniqueMultiplier;
-        public final ForgeConfigSpec.BooleanValue breathingTechniqueDeterioration;
+        public final ForgeConfigSpec.DoubleValue breathingTrainingMultiplier;
+        public final ForgeConfigSpec.BooleanValue breathingTrainingDeterioration;
         
         public final ForgeConfigSpec.ConfigValue<List<? extends Double>> maxBloodMultiplier;
         public final ForgeConfigSpec.ConfigValue<List<? extends Double>> bloodDrainMultiplier;
@@ -124,15 +124,15 @@ public class JojoModConfig {
                         .translation("jojo.config.hamonPointsMultiplier")
                         .defineInRange("hamonPointsMultiplier", 1.0, 0.0, 5000.0);
                 
-                breathingTechniqueMultiplier = builder
-                        .comment("    Breathing technique growth multiplier.")
-                        .translation("jojo.config.breathingTechniqueMultiplier")
-                        .defineInRange("breathingTechniqueMultiplier", 1.0, 0.0, HamonData.MAX_BREATHING_LEVEL);
+                breathingTrainingMultiplier = builder
+                        .comment("    Breathing training growth multiplier.")
+                        .translation("jojo.config.breathingTrainingMultiplier")
+                        .defineInRange("breathingTrainingMultiplier", 1.0, 0.0, HamonData.MAX_BREATHING_LEVEL);
                 
-                breathingTechniqueDeterioration = builder
-                        .comment("    Whether or not breathing technique deteriorates over time.")
-                        .translation("jojo.config.breathingTechniqueDeterioration")
-                        .define("breathingTechniqueDeterioration", true);
+                breathingTrainingDeterioration = builder
+                        .comment("    Whether or not breathing training deteriorates over time.")
+                        .translation("jojo.config.breathingTrainingDeterioration")
+                        .define("breathingTrainingDeterioration", true);
             builder.pop();
             
             builder.push("Vampirism settings");
@@ -326,8 +326,8 @@ public class JojoModConfig {
             private final boolean pillarManTempleSpawn;
 
 //            private final double hamonPointsMultiplier;
-//            private final double breathingTechniqueMultiplier;
-            private final boolean breathingTechniqueDeterioration;
+//            private final double breathingTrainingMultiplier;
+            private final boolean breathingTrainingDeterioration;
 
             private final float[] maxBloodMultiplier;
 //            private final float[] bloodDrainMultiplier;
@@ -353,7 +353,7 @@ public class JojoModConfig {
             
             public SyncedValues(PacketBuffer buf) {
 //                hamonPointsMultiplier = buf.readDouble();
-//                breathingTechniqueMultiplier = buf.readDouble();
+//                breathingTrainingMultiplier = buf.readDouble();
                 maxBloodMultiplier = NetworkUtil.readFloatArray(buf);
 //                bloodDrainMultiplier = NetworkUtil.readFloatArray(buf);
                 bloodTickDown = NetworkUtil.readFloatArray(buf);
@@ -370,7 +370,7 @@ public class JojoModConfig {
                 hamonTempleSpawn =                  (flags[0] & 8) > 0;
                 meteoriteSpawn =                    (flags[0] & 16) > 0;
                 pillarManTempleSpawn =              (flags[0] & 32) > 0;
-                breathingTechniqueDeterioration =   (flags[0] & 64) > 0;
+                breathingTrainingDeterioration =    (flags[0] & 64) > 0;
                 prioritizeLeastTakenStands =        (flags[0] & 128) > 0;
                 standTiers =                        (flags[1] & 1) > 0;
                 abilitiesBreakBlocks =              (flags[1] & 2) > 0;
@@ -383,7 +383,7 @@ public class JojoModConfig {
 
             public void writeToBuf(PacketBuffer buf) {
 //                buf.writeDouble(hamonPointsMultiplier);
-//                buf.writeDouble(breathingTechniqueMultiplier);
+//                buf.writeDouble(breathingTrainingMultiplier);
                 NetworkUtil.writeFloatArray(buf, maxBloodMultiplier);
 //                NetworkUtil.writeFloatArray(buf, bloodDrainMultiplier);
                 NetworkUtil.writeFloatArray(buf, bloodTickDown);
@@ -400,7 +400,7 @@ public class JojoModConfig {
                 if (hamonTempleSpawn)                   flags[0] |= 8;
                 if (meteoriteSpawn)                     flags[0] |= 16;
                 if (pillarManTempleSpawn)               flags[0] |= 32;
-                if (breathingTechniqueDeterioration)    flags[0] |= 64;
+                if (breathingTrainingDeterioration)    flags[0] |= 64;
                 if (prioritizeLeastTakenStands)         flags[0] |= 128;
                 if (standTiers)                         flags[1] |= 1;
                 if (abilitiesBreakBlocks)               flags[1] |= 2;
@@ -421,8 +421,8 @@ public class JojoModConfig {
                 meteoriteSpawn = config.meteoriteSpawn.get();
                 pillarManTempleSpawn = config.pillarManTempleSpawn.get();
 //                hamonPointsMultiplier = config.standDamageMultiplier.get();
-//                breathingTechniqueMultiplier = config.breathingTechniqueMultiplier.get();
-                breathingTechniqueDeterioration = config.breathingTechniqueDeterioration.get();
+//                breathingTrainingMultiplier = config.breathingTrainingMultiplier.get();
+                breathingTrainingDeterioration = config.breathingTrainingDeterioration.get();
                 maxBloodMultiplier = Floats.toArray(config.maxBloodMultiplier.get());
 //                bloodDrainMultiplier = Floats.toArray(config.bloodDrainMultiplier.get());
                 bloodTickDown = Floats.toArray(config.bloodTickDown.get());
@@ -452,8 +452,8 @@ public class JojoModConfig {
                 COMMON_SYNCED_TO_CLIENT.meteoriteSpawn.set(meteoriteSpawn);
                 COMMON_SYNCED_TO_CLIENT.pillarManTempleSpawn.set(pillarManTempleSpawn);
 //                COMMON_SYNCED_TO_CLIENT.hamonPointsMultiplier.set(hamonPointsMultiplier);
-//                COMMON_SYNCED_TO_CLIENT.breathingTechniqueMultiplier.set(breathingTechniqueMultiplier);
-                COMMON_SYNCED_TO_CLIENT.breathingTechniqueDeterioration.set(breathingTechniqueDeterioration);
+//                COMMON_SYNCED_TO_CLIENT.breathingTrainingMultiplier.set(breathingTrainingMultiplier);
+                COMMON_SYNCED_TO_CLIENT.breathingTrainingDeterioration.set(breathingTrainingDeterioration);
                 COMMON_SYNCED_TO_CLIENT.maxBloodMultiplier.set(Floats.asList(maxBloodMultiplier).stream().map(Float::doubleValue).collect(Collectors.toList()));
 //                COMMON_SYNCED_TO_CLIENT.bloodDrainMultiplier.set(Floats.asList(bloodDrainMultiplier).stream().map(Float::doubleValue).collect(Collectors.toList()));
                 COMMON_SYNCED_TO_CLIENT.bloodTickDown.set(Floats.asList(bloodTickDown).stream().map(Float::doubleValue).collect(Collectors.toList()));
@@ -483,8 +483,8 @@ public class JojoModConfig {
                 COMMON_SYNCED_TO_CLIENT.meteoriteSpawn.clearCache();
                 COMMON_SYNCED_TO_CLIENT.pillarManTempleSpawn.clearCache();
 //                COMMON_SYNCED_TO_CLIENT.hamonPointsMultiplier.clearCache();
-//                COMMON_SYNCED_TO_CLIENT.breathingTechniqueMultiplier.clearCache();
-                COMMON_SYNCED_TO_CLIENT.breathingTechniqueDeterioration.clearCache();
+//                COMMON_SYNCED_TO_CLIENT.breathingTrainingMultiplier.clearCache();
+                COMMON_SYNCED_TO_CLIENT.breathingTrainingDeterioration.clearCache();
                 COMMON_SYNCED_TO_CLIENT.maxBloodMultiplier.clearCache();
                 COMMON_SYNCED_TO_CLIENT.bloodDrainMultiplier.clearCache();
                 COMMON_SYNCED_TO_CLIENT.bloodTickDown.clearCache();

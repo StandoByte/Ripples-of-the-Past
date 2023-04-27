@@ -16,22 +16,22 @@ public class HamonStatsPredicate {
     @Nullable
     private final MinMaxBounds.IntBound controlLevel;
     @Nullable
-    private final MinMaxBounds.FloatBound breathingTechniqueLevel;
+    private final MinMaxBounds.FloatBound breathingTrainingLevel;
     
     public HamonStatsPredicate(MinMaxBounds.IntBound strengthLevel, 
-            MinMaxBounds.IntBound controlLevel, MinMaxBounds.FloatBound breathingTechniqueLevel) {
+            MinMaxBounds.IntBound controlLevel, MinMaxBounds.FloatBound breathingTrainingLevel) {
         this.strengthLevel = strengthLevel;
         this.controlLevel = controlLevel;
-        this.breathingTechniqueLevel = breathingTechniqueLevel;
+        this.breathingTrainingLevel = breathingTrainingLevel;
     }
     
-    public boolean matches(int strengthLevel, int controlLevel, float breathingTechniqueLevel) {
+    public boolean matches(int strengthLevel, int controlLevel, float breathingTrainingLevel) {
         if (this == ANY) {
             return true;
         }
         return (this.strengthLevel == null || this.strengthLevel.matches(strengthLevel)) 
                 && (this.controlLevel == null || this.controlLevel.matches(controlLevel)) 
-                && (this.breathingTechniqueLevel == null || this.breathingTechniqueLevel.matches(breathingTechniqueLevel));
+                && (this.breathingTrainingLevel == null || this.breathingTrainingLevel.matches(breathingTrainingLevel));
     }
     
     public static HamonStatsPredicate fromJson(@Nullable JsonElement json) {
@@ -43,9 +43,9 @@ public class HamonStatsPredicate {
             
             MinMaxBounds.IntBound strength = MinMaxBounds.IntBound.fromJson(jsonObject.get("strength_level"));
             MinMaxBounds.IntBound control = MinMaxBounds.IntBound.fromJson(jsonObject.get("control_level"));
-            MinMaxBounds.FloatBound breathingTechnique = MinMaxBounds.FloatBound.fromJson(jsonObject.get("breathing_technique_level"));
+            MinMaxBounds.FloatBound breathingTraining = MinMaxBounds.FloatBound.fromJson(jsonObject.get("breathing_training_level"));
             
-            return new HamonStatsPredicate(strength, control, breathingTechnique);
+            return new HamonStatsPredicate(strength, control, breathingTraining);
         }
     }
 
@@ -61,8 +61,8 @@ public class HamonStatsPredicate {
             if (controlLevel != null) {
                 jsonobject.add("control_level", controlLevel.serializeToJson());
             }
-            if (breathingTechniqueLevel != null) {
-                jsonobject.add("breathing_technique_level", breathingTechniqueLevel.serializeToJson());
+            if (breathingTrainingLevel != null) {
+                jsonobject.add("breathing_training_level", breathingTrainingLevel.serializeToJson());
             }
             return jsonobject;
         }

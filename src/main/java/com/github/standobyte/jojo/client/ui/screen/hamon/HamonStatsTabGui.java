@@ -46,7 +46,7 @@ public class HamonStatsTabGui extends HamonTabGui {
         int textWidth = HamonScreen.WINDOW_WIDTH - 30;
         strengthDescLines = minecraft.font.split(new TranslationTextComponent("hamon.strength_stat.desc"), textWidth);
         controlDescLines = minecraft.font.split(new TranslationTextComponent("hamon.control_stat.desc"), textWidth);
-        ITextComponent desc = JojoModConfig.getCommonConfigInstance(true).breathingTechniqueDeterioration.get() ? 
+        ITextComponent desc = JojoModConfig.getCommonConfigInstance(true).breathingTrainingDeterioration.get() ? 
                 new TranslationTextComponent("hamon.breathing_stat.desc", new TranslationTextComponent("hamon.breathing_stat.notice"))
                 : new TranslationTextComponent("hamon.breathing_stat.desc");
         breathingDescLines = minecraft.font.split(desc, textWidth);
@@ -78,7 +78,7 @@ public class HamonStatsTabGui extends HamonTabGui {
     @Override
     protected void drawActualContents(MatrixStack matrixStack) {
         minecraft.getTextureManager().bind(HamonScreen.WINDOW);
-        float breathingTechnique = screen.hamon.getBreathingLevel();
+        float breathingTraining = screen.hamon.getBreathingLevel();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -95,7 +95,7 @@ public class HamonStatsTabGui extends HamonTabGui {
         }
         blit(matrixStack, intScrollX + 154, strengthStatY + 1, 200, 235, (int) (50 * pts), 5);
         blit(matrixStack, intScrollX + 153, strengthStatY, 199, 228 , 52, 7);
-        if (hamonStrengthLimited = level >= (int) breathingTechnique + HamonData.MIN_BREATHING_EXCEED) {
+        if (hamonStrengthLimited = level >= (int) breathingTraining + HamonData.MIN_BREATHING_EXCEED) {
             blit(matrixStack, intScrollX + 142, strengthStatY, 230, 156, 8, 8);
         }
 
@@ -110,12 +110,12 @@ public class HamonStatsTabGui extends HamonTabGui {
         }
         blit(matrixStack, intScrollX + 154, controlStatY + 1, 200, 240, (int) (50 * pts), 5);
         blit(matrixStack, intScrollX + 153, controlStatY, 199, 228, 52, 7);
-        if (hamonControlLimited = level >= (int) breathingTechnique + HamonData.MIN_BREATHING_EXCEED) {
+        if (hamonControlLimited = level >= (int) breathingTraining + HamonData.MIN_BREATHING_EXCEED) {
             blit(matrixStack, intScrollX + 142, controlStatY, 230, 156, 8, 8);
         }
 
-        // breathing technique bar
-        pts = breathingTechnique == HamonData.MAX_BREATHING_LEVEL ? 1.0F : breathingTechnique - (int)breathingTechnique;
+        // breathing training bar
+        pts = breathingTraining == HamonData.MAX_BREATHING_LEVEL ? 1.0F : breathingTraining - (int)breathingTraining;
         blit(matrixStack, intScrollX + 154, breathingStatY + 1, 200, 245, (int) (50 * pts), 5);
         blit(matrixStack, intScrollX + 153, breathingStatY, 199, 228, 52, 7);
         // bonus icon

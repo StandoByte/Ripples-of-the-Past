@@ -23,8 +23,8 @@ public class HamonStatsTrigger extends AbstractCriterionTrigger<HamonStatsTrigge
         return id;
     }
 
-    public void trigger(ServerPlayerEntity player, int strengthLevel, int controlLevel, float breathingTechniqueLevel) {
-        trigger(player, criterion -> criterion.matches(strengthLevel, controlLevel, breathingTechniqueLevel));
+    public void trigger(ServerPlayerEntity player, int strengthLevel, int controlLevel, float breathingTrainingLevel) {
+        trigger(player, criterion -> criterion.matches(strengthLevel, controlLevel, breathingTrainingLevel));
     }
 
     @Override
@@ -49,8 +49,8 @@ public class HamonStatsTrigger extends AbstractCriterionTrigger<HamonStatsTrigge
             return jsonobject;
         }
 
-        private boolean matches(int strengthLevel, int controlLevel, float breathingTechniqueLevel) {
-            return this.statsPredicate.matches(strengthLevel, controlLevel, breathingTechniqueLevel);
+        private boolean matches(int strengthLevel, int controlLevel, float breathingTrainingLevel) {
+            return this.statsPredicate.matches(strengthLevel, controlLevel, breathingTrainingLevel);
         }
     }
 

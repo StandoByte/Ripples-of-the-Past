@@ -66,7 +66,7 @@ public class HamonData extends TypeSpecificData {
     private int hamonStrengthLevel;
     private int hamonControlPoints;
     private int hamonControlLevel;
-    private float breathingTechniqueLevel;
+    private float breathingTrainingLevel;
     private float breathingTrainingBonus;
     private float hamonDamageFactor = 1F;
     private HamonSkillSet hamonSkills;
@@ -155,7 +155,7 @@ public class HamonData extends TypeSpecificData {
         if (oldPoints != newPoints) {
             serverPlayer.ifPresent(player -> {
                 PacketManager.sendToClientsTrackingAndSelf(new TrHamonStatsPacket(player.getId(), true, stat, newPoints), player);
-                ModCriteriaTriggers.HAMON_STATS.get().trigger(player, hamonStrengthLevel, hamonControlLevel, breathingTechniqueLevel);
+                ModCriteriaTriggers.HAMON_STATS.get().trigger(player, hamonStrengthLevel, hamonControlLevel, breathingTrainingLevel);
             });
             if (oldLevel != getStatLevel(stat)) {
                 switch (stat) {
@@ -255,13 +255,13 @@ public class HamonData extends TypeSpecificData {
     
     public static final float MAX_HAMON_DAMAGE = dmgFormula(MAX_STAT_LEVEL, MAX_BREATHING_LEVEL); // 35.6908
     private void recalcHamonDamage() {
-        hamonDamageFactor = dmgFormula(hamonStrengthLevel, breathingTechniqueLevel);
+        hamonDamageFactor = dmgFormula(hamonStrengthLevel, breathingTrainingLevel);
     }
 
     private static final double STR_EXP_SCALING = 1.0333;
     private static final double BRTH_SCALING = 0.04;
-    private static float dmgFormula(float strength, float breathingTechnique) {
-        return (float) (Math.pow(STR_EXP_SCALING, strength) * (1 + BRTH_SCALING * breathingTechnique));
+    private static float dmgFormula(float strength, float breathingTraining) {
+        return (float) (Math.pow(STR_EXP_SCALING, strength) * (1 + BRTH_SCALING * breathingTraining));
     }
 
     public float getEnergyLimitFactor() {
@@ -284,20 +284,20 @@ public class HamonData extends TypeSpecificData {
     }
 
     public float getBreathingLevel() {
-        return breathingTechniqueLevel;
+        return breathingTrainingLevel;
     }
 
     public void setBreathingLevel(float level) {
-        float oldLevel = breathingTechniqueLevel;
-        breathingTechniqueLevel = MathHelper.clamp(level, 0, MAX_BREATHING_LEVEL);
-        if (oldLevel != breathingTechniqueLevel) {
+        float oldLevel = breathingTrainingLevel;
+        breathingTrainingLevel = MathHelper.clamp(level, 0, MAX_BREATHING_LEVEL);
+        if (oldLevel != breathingTrainingLevel) {
             recalcHamonDamage();
             serverPlayer.ifPresent(player -> {
                 PacketManager.sendToClientsTrackingAndSelf(new TrHamonStatsPacket(player.getId(), true, getBreathingLevel()), player);
-                ModCriteriaTriggers.HAMON_STATS.get().trigger(player, hamonStrengthLevel, hamonControlLevel, breathingTechniqueLevel);
+                ModCriteriaTriggers.HAMON_STATS.get().trigger(player, hamonStrengthLevel, hamonControlLevel, breathingTrainingLevel);
             });
         }
-        giveBreathingTechniqueBuffs(power.getUser());
+        giveBreathingTrainingBuffs(power.getUser());
     }
 
     private static final AttributeModifier ATTACK_DAMAGE = new AttributeModifier(
@@ -309,7 +309,7 @@ public class HamonData extends TypeSpecificData {
     private static final AttributeModifier SWIMMING_SPEED = new AttributeModifier(
             UUID.fromString("34dcb563-6759-4a2b-9dd8-ad2dd7e70404"), "Swimming speed from Hamon Training", 0.01D, AttributeModifier.Operation.ADDITION);
 
-    private void giveBreathingTechniqueBuffs(LivingEntity entity) {
+    private void giveBreathingTrainingBuffs(LivingEntity entity) {
         int lvl = (int) getBreathingLevel();
         applyAttributeModifier(entity, Attributes.ATTACK_DAMAGE, ATTACK_DAMAGE, lvl);
         applyAttributeModifier(entity, Attributes.ATTACK_SPEED, ATTACK_SPEED, lvl);
@@ -450,7 +450,7 @@ public class HamonData extends TypeSpecificData {
             if (isSkillLearned(HamonSkill.NATURAL_TALENT)) {
                 training *= 2;
             }
-            training *= JojoModConfig.getCommonConfigInstance(false).breathingTechniqueMultiplier.get().floatValue();
+            training *= JojoModConfig.getCommonConfigInstance(false).breathingTrainingMultiplier.get().floatValue();
         }
         return training;
     }
@@ -465,7 +465,7 @@ public class HamonData extends TypeSpecificData {
             float lvlInc = (2 * MathHelper.clamp(getAverageExercisePoints(), 0F, 1F)) - 1F;
             recalcAvgExercisePoints();
             if (lvlInc < 0) {
-                if (!JojoModConfig.getCommonConfigInstance(false).breathingTechniqueDeterioration.get() || user.abilities.instabuild) {
+                if (!JojoModConfig.getCommonConfigInstance(false).breathingTrainingDeterioration.get() || user.abilities.instabuild) {
                     lvlInc = 0;
                 }
                 else {
@@ -683,7 +683,7 @@ public class HamonData extends TypeSpecificData {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putInt("StrengthPoints", hamonStrengthPoints);
         nbt.putInt("ControlPoints", hamonControlPoints);
-        nbt.putFloat("BreathingTechnique", breathingTechniqueLevel);
+        nbt.putFloat("BreathingTechnique", breathingTrainingLevel);
         CompoundNBT skillsMapNbt = new CompoundNBT();
         for (HamonSkill skill : HamonSkill.values()) {
             skillsMapNbt.putBoolean(skill.getName(), hamonSkills.isSkillLearned(skill));
@@ -704,7 +704,7 @@ public class HamonData extends TypeSpecificData {
         hamonStrengthLevel = levelFromPoints(hamonStrengthPoints);
         hamonControlPoints = nbt.getInt("ControlPoints");
         hamonControlLevel = levelFromPoints(hamonControlPoints);
-        breathingTechniqueLevel = nbt.getFloat("BreathingTechnique");
+        breathingTrainingLevel = nbt.getFloat("BreathingTechnique");
         recalcHamonDamage();
         fillSkillsFromNbt(nbt.getCompound("Skills"));
         CompoundNBT exercises = nbt.getCompound("Exercises");
@@ -726,7 +726,7 @@ public class HamonData extends TypeSpecificData {
 
     @Override
     public void syncWithUserOnly(ServerPlayerEntity user) {
-        giveBreathingTechniqueBuffs(user);
+        giveBreathingTrainingBuffs(user);
         for (HamonSkill skill : HamonSkill.values()) {
             if (isSkillLearned(skill)) {
                 PacketManager.sendToClient(new HamonSkillLearnPacket(skill), user);
@@ -734,7 +734,7 @@ public class HamonData extends TypeSpecificData {
             }
         }
         PacketManager.sendToClient(new HamonExercisesPacket(this), user);
-        ModCriteriaTriggers.HAMON_STATS.get().trigger(user, hamonStrengthLevel, hamonControlLevel, breathingTechniqueLevel);
+        ModCriteriaTriggers.HAMON_STATS.get().trigger(user, hamonStrengthLevel, hamonControlLevel, breathingTrainingLevel);
     }
 
     @Override
