@@ -9,7 +9,7 @@ import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.entity.LivingEntity;
@@ -60,7 +60,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
     @Override
     public float getMaxEnergyFactor(INonStandPower power) {
         World world = power.getUser().level;
-        return JojoModUtil.getOrLast(
+        return GeneralUtil.getOrLast(
                 JojoModConfig.getCommonConfigInstance(world.isClientSide()).maxBloodMultiplier.get(), world.getDifficulty().getId())
                 .floatValue();
     }
@@ -68,7 +68,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
     @Override
     public float getEnergyTickInc(INonStandPower power) {
         World world = power.getUser().level;
-        return -JojoModUtil.getOrLast(
+        return -GeneralUtil.getOrLast(
                 JojoModConfig.getCommonConfigInstance(world.isClientSide()).bloodTickDown.get(), world.getDifficulty().getId())
                 .floatValue();
     }
@@ -217,7 +217,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
     }
     
     public static float healCost(World world) {
-    	return JojoModUtil.getOrLast(
+    	return GeneralUtil.getOrLast(
                 JojoModConfig.getCommonConfigInstance(world.isClientSide()).bloodHealCost.get(), 
                 world.getDifficulty().getId()).floatValue();
     }

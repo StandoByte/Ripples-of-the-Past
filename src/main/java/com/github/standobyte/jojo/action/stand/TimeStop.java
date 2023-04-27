@@ -16,7 +16,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
-import com.github.standobyte.jojo.util.utils.TimeUtil;
+import com.github.standobyte.jojo.util.mod.TimeUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.EffectInstance;

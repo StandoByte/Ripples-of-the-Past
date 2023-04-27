@@ -20,9 +20,10 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
-import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
-import com.github.standobyte.jojo.util.utils.TimeUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
+import com.github.standobyte.jojo.util.mod.TimeUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -134,7 +135,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
 
 	    		TimeStopInstant.skipTicksForStandAndUser(standPower, timeStopTicks);
 	    		if (!world.isClientSide()) {
-                    JojoModUtil.playEitherSound(world, null, standEntity.getX(), standEntity.getY(), standEntity.getZ(), 
+                    MCUtil.playEitherSound(world, null, standEntity.getX(), standEntity.getY(), standEntity.getZ(), 
                             TimeUtil::canPlayerSeeInStoppedTime, blink.blinkSound.get(), ModSounds.THE_WORLD_TIME_STOP_UNREVEALED.get(), 
                             SoundCategory.AMBIENT, 1.0F, 1.0F);
 	    			standPower.consumeStamina(staminaCostTS + timeStopTicks * staminaCostTicking);

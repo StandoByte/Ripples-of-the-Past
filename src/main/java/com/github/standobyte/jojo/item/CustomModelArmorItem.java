@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.item;
 
-import com.github.standobyte.jojo.client.model.ArmorModelRegistry;
+import com.github.standobyte.jojo.client.render.armor.ArmorModelRegistry;
 
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.entity.Entity;

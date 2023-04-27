@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-import com.github.standobyte.jojo.client.renderer.entity.stand.AbstractStandRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.stand.AbstractStandRenderer;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEffects;

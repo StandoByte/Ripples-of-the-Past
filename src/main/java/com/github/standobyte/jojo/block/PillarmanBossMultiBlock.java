@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModTileEntities;
 import com.github.standobyte.jojo.tileentity.PillarmanBossTileEntity;
-import com.github.standobyte.jojo.util.damage.DamageUtil;
+import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;

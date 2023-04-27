@@ -9,7 +9,7 @@ import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -86,7 +86,7 @@ public class CrazyDiamondMisshapingPunch extends StandEntityHeavyAttack {
                 if (hitPart != null) {
                     Vector3d pos = hitPart.getPartCenter((LivingEntity) entity);
                     if (pos != null) {
-                        JojoModUtil.rotateTowards(standEntity, pos, 360F);
+                        MCUtil.rotateTowards(standEntity, pos, 360F);
                         return;
                     }
                 }

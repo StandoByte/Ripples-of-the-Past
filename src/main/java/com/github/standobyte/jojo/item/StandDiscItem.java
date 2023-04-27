@@ -14,8 +14,9 @@ import com.github.standobyte.jojo.power.stand.StandInstance;
 import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.type.StandType;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
-import com.github.standobyte.jojo.util.utils.LegacyUtil;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mod.LegacyUtil;
 
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.client.util.ITooltipFlag;
@@ -47,7 +48,7 @@ public class StandDiscItem extends Item {
             protected ItemStack execute(IBlockSource blockSource, ItemStack stack) {
                 if (validStandDisc(stack, false)) {
                     StandInstance stand = getStandFromStack(stack, false);
-                    if (JojoModUtil.dispenseOnNearbyEntity(blockSource, stack, entity -> {
+                    if (MCUtil.dispenseOnNearbyEntity(blockSource, stack, entity -> {
                         return IStandPower.getStandPowerOptional(entity).map(power -> {
                             return standFitsTier(entity, power.getUserTier(), stand.getType()) && power.giveStand(stand, false);
                         }).orElse(false);
@@ -143,7 +144,7 @@ public class StandDiscItem extends Item {
         		if (JojoModConfig.getCommonConfigInstance(true).standTiers.get()) {
         			int standTier = stand.getType().getTier();
         			int playerXpLevel = ClientUtil.getClientPlayer().experienceLevel;
-        			int xpForTier = JojoModUtil.getOrLast(JojoModConfig.getCommonConfigInstance(true).standTierXpLevels.get(), standTier).intValue();
+        			int xpForTier = GeneralUtil.getOrLast(JojoModConfig.getCommonConfigInstance(true).standTierXpLevels.get(), standTier).intValue();
         			tooltip.add(new TranslationTextComponent("jojo.disc.tier", standTier, 
         					new TranslationTextComponent("jojo.disc.tier_level", xpForTier)
         					.withStyle(playerXpLevel < xpForTier ? TextFormatting.RED : TextFormatting.GREEN)).withStyle(TextFormatting.GRAY));
@@ -161,7 +162,7 @@ public class StandDiscItem extends Item {
     public static StandInstance getStandFromStack(ItemStack stack, boolean clientSide) {
         return LegacyUtil.oldStandDiscInstance(stack, clientSide).orElseGet(() -> {
             CompoundNBT nbt = stack.getTag();
-            if (nbt == null || !nbt.contains(STAND_TAG, JojoModUtil.getNbtId(CompoundNBT.class))) {
+            if (nbt == null || !nbt.contains(STAND_TAG, MCUtil.getNbtId(CompoundNBT.class))) {
                 return null;
             }
             return StandInstance.fromNBT((CompoundNBT) nbt.get(STAND_TAG));

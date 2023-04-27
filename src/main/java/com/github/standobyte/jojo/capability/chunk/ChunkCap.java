@@ -14,9 +14,10 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
+import com.github.standobyte.jojo.capability.chunk.ChunkCap.PrevBlockInfo;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.BrokenChunkBlocksPacket;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -137,8 +138,8 @@ public class ChunkCap {
     
     void load(CompoundNBT nbt) {
         if (JojoModConfig.getCommonConfigInstance(false).saveDestroyedBlocks.get()
-                && nbt.contains("Blocks", JojoModUtil.getNbtId(ListNBT.class))) {
-            nbt.getList("Blocks", JojoModUtil.getNbtId(CompoundNBT.class)).forEach(blockNBT -> {
+                && nbt.contains("Blocks", MCUtil.getNbtId(ListNBT.class))) {
+            nbt.getList("Blocks", MCUtil.getNbtId(CompoundNBT.class)).forEach(blockNBT -> {
                 PrevBlockInfo block = PrevBlockInfo.fromNBT((CompoundNBT) blockNBT);
                 if (block != null) {
                     brokenBlocks.put(block.pos, block);
@@ -191,14 +192,14 @@ public class ChunkCap {
         @Nullable
         private static PrevBlockInfo fromNBT(CompoundNBT nbt) {
             if (!(
-                    nbt.contains("Pos", JojoModUtil.getNbtId(CompoundNBT.class)) &&
-                    nbt.contains("State", JojoModUtil.getNbtId(CompoundNBT.class)) && 
-                    nbt.contains("Drops", JojoModUtil.getNbtId(ListNBT.class)))) {
+                    nbt.contains("Pos", MCUtil.getNbtId(CompoundNBT.class)) &&
+                    nbt.contains("State", MCUtil.getNbtId(CompoundNBT.class)) && 
+                    nbt.contains("Drops", MCUtil.getNbtId(ListNBT.class)))) {
                 return null;
             }
             
             List<ItemStack> drops = new ArrayList<>();
-            ListNBT dropsNBT = nbt.getList("Drops", JojoModUtil.getNbtId(CompoundNBT.class));
+            ListNBT dropsNBT = nbt.getList("Drops", MCUtil.getNbtId(CompoundNBT.class));
             for (INBT nbtElement : dropsNBT) {
                 CompoundNBT itemNBT = (CompoundNBT) nbtElement;
                 ItemStack item = ItemStack.of(itemNBT);

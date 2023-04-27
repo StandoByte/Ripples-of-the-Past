@@ -6,7 +6,7 @@ import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.util.damage.DamageUtil;
+import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;

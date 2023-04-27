@@ -1,8 +1,8 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.util.damage.DamageUtil;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.entity.Entity;

@@ -5,8 +5,8 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.util.damage.DamageUtil;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;

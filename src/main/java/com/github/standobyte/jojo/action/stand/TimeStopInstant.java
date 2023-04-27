@@ -18,9 +18,10 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
-import com.github.standobyte.jojo.util.utils.MathUtil;
-import com.github.standobyte.jojo.util.utils.TimeUtil;
+import com.github.standobyte.jojo.util.general.MathUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
+import com.github.standobyte.jojo.util.mod.TimeUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -140,7 +141,7 @@ public class TimeStopInstant extends StandAction {
     void playSound(World world, Entity entity) {
         SoundEvent sound = blinkSound.get();
         if (sound != null) {
-            JojoModUtil.playSound(world, entity instanceof PlayerEntity ? (PlayerEntity) entity : null, entity.getX(), entity.getY(), entity.getZ(), 
+            MCUtil.playSound(world, entity instanceof PlayerEntity ? (PlayerEntity) entity : null, entity.getX(), entity.getY(), entity.getZ(), 
                     sound, SoundCategory.AMBIENT, 5.0F, 1.0F, TimeUtil::canPlayerSeeInStoppedTime);
         }
     }

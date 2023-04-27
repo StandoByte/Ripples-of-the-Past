@@ -23,8 +23,8 @@ import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
-import com.github.standobyte.jojo.util.damage.DamageUtil;
-import com.github.standobyte.jojo.util.utils.ModInteractionUtil;
+import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
+import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
 
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.enchantment.EnchantmentHelper;

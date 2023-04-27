@@ -4,7 +4,7 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.init.ModStandEffects;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandInstance;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -94,7 +94,7 @@ public class BoyIIManStandPartTakenEffect extends StandEffectInstance {
 
     @Override
     protected void readAdditionalSaveData(CompoundNBT nbt) {
-        if (nbt.contains("PartsTaken", JojoModUtil.getNbtId(CompoundNBT.class))) {
+        if (nbt.contains("PartsTaken", MCUtil.getNbtId(CompoundNBT.class))) {
             partsTaken = StandInstance.fromNBT(nbt.getCompound("PartsTaken"));
         }
     }

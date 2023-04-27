@@ -11,7 +11,7 @@ import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrTypeStandInstancePacket;
 import com.github.standobyte.jojo.power.stand.type.StandType;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -107,7 +107,7 @@ public class StandInstance {
         
         StandInstance instance = new StandInstance(standType);
         
-        if (nbt.contains("MissingLimbs", JojoModUtil.getNbtId(CompoundNBT.class))) {
+        if (nbt.contains("MissingLimbs", MCUtil.getNbtId(CompoundNBT.class))) {
             CompoundNBT missingLimbsNbt = nbt.getCompound("MissingLimbs");
             for (StandPart limbs : StandPart.values()) {
                 if (missingLimbsNbt.getBoolean(limbs.name())) {
@@ -116,7 +116,7 @@ public class StandInstance {
             }
         }
 
-        if (nbt.contains("CustomName", JojoModUtil.getNbtId(StringNBT.class))) {
+        if (nbt.contains("CustomName", MCUtil.getNbtId(StringNBT.class))) {
             String name = nbt.getString("CustomName");
             try {
                 instance.setCustomName(ITextComponent.Serializer.fromJson(name));

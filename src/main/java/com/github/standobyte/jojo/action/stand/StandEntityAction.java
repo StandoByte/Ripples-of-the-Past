@@ -25,7 +25,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrBarrageHitSoundPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.type.EntityStandType;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -510,7 +510,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     public void rotateStandTowardsTarget(StandEntity standEntity, ActionTarget target, StandEntityTask task) {
         Vector3d targetPos = target.getTargetPos(true);
         if (targetPos != null) {
-            JojoModUtil.rotateTowards(standEntity, targetPos, 360F);
+            MCUtil.rotateTowards(standEntity, targetPos, 360F);
         }
     }
     

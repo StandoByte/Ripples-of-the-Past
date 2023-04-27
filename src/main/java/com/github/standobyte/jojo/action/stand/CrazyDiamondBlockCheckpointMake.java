@@ -13,7 +13,7 @@ import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -112,16 +112,16 @@ public class CrazyDiamondBlockCheckpointMake extends StandEntityAction {
     public static Optional<BlockPos> getBlockPosMoveTo(World world, ItemStack stack) {
         if (stack.hasTag()) {
             CompoundNBT nbt = stack.getTag();
-            if (nbt.contains("CDCheckpoint", JojoModUtil.getNbtId(CompoundNBT.class))) {
+            if (nbt.contains("CDCheckpoint", MCUtil.getNbtId(CompoundNBT.class))) {
                 CompoundNBT checkpointNbt = nbt.getCompound("CDCheckpoint");
                 
-                if (checkpointNbt.contains("Dimension", JojoModUtil.getNbtId(StringNBT.class))) {
+                if (checkpointNbt.contains("Dimension", MCUtil.getNbtId(StringNBT.class))) {
                     String dimensionKey = checkpointNbt.getString("Dimension");
                     if (!dimensionKey.equals(world.dimension().location().toString())) {
                         return Optional.empty();
                     }
                     
-                    if (checkpointNbt.contains("Pos", JojoModUtil.getNbtId(CompoundNBT.class))) {
+                    if (checkpointNbt.contains("Pos", MCUtil.getNbtId(CompoundNBT.class))) {
                         CompoundNBT posNBT = checkpointNbt.getCompound("Pos");
                         BlockPos pos = new BlockPos(posNBT.getInt("x"), posNBT.getInt("y"), posNBT.getInt("z"));
                         return Optional.of(pos);
@@ -140,9 +140,9 @@ public class CrazyDiamondBlockCheckpointMake extends StandEntityAction {
     public static BlockState getBlockState(ItemStack stack, BlockItem item) {
         if (stack.hasTag()) {
             CompoundNBT nbt = stack.getTag();
-            if (nbt.contains("CDCheckpoint", JojoModUtil.getNbtId(CompoundNBT.class))) {
+            if (nbt.contains("CDCheckpoint", MCUtil.getNbtId(CompoundNBT.class))) {
                 CompoundNBT checkpointNbt = nbt.getCompound("CDCheckpoint");
-                if (checkpointNbt.contains("BlockState", JojoModUtil.getNbtId(CompoundNBT.class))) {
+                if (checkpointNbt.contains("BlockState", MCUtil.getNbtId(CompoundNBT.class))) {
                     BlockState blockState = NBTUtil.readBlockState(checkpointNbt.getCompound("BlockState"));
                     if (blockState != Blocks.AIR.defaultBlockState()) {
                         return blockState;

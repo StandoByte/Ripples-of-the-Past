@@ -24,7 +24,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.StandControlStatusP
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.stand.type.StandType;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -105,7 +105,7 @@ public class StandUtil {
     
     public static int tierLowerBorder(int tier, boolean isClientSide) {
         List<? extends Integer> xpBorders = JojoModConfig.getCommonConfigInstance(isClientSide).standTierXpLevels.get();
-        return JojoModUtil.getOrLast(xpBorders, tier).intValue();
+        return GeneralUtil.getOrLast(xpBorders, tier).intValue();
     }
     
     public static Set<Integer> getAvailableTiers(JojoModConfig.Common config) {

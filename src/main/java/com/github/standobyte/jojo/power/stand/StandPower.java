@@ -28,8 +28,8 @@ import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.stand.type.StandType;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
-import com.github.standobyte.jojo.util.utils.LegacyUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mod.LegacyUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
@@ -605,7 +605,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
 
     @Override
     public void readNBT(CompoundNBT nbt) {
-        StandInstance standInstance = nbt.contains("StandInstance", JojoModUtil.getNbtId(CompoundNBT.class))
+        StandInstance standInstance = nbt.contains("StandInstance", MCUtil.getNbtId(CompoundNBT.class))
                 ? StandInstance.fromNBT(nbt.getCompound("StandInstance"))
                         : LegacyUtil.readOldStandCapType(nbt).orElse(null);
         setStandInstance(standInstance);
@@ -618,10 +618,10 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
         skippedProgression = nbt.getBoolean("Skipped");
         givenByDisc = nbt.getBoolean("Disc");
-        if (nbt.contains("ActionLearning", JojoModUtil.getNbtId(CompoundNBT.class))) {
+        if (nbt.contains("ActionLearning", MCUtil.getNbtId(CompoundNBT.class))) {
             actionLearningProgressMap.fromNBT(nbt.getCompound("ActionLearning"));
         }
-        if (nbt.contains("Effects", JojoModUtil.getNbtId(CompoundNBT.class))) {
+        if (nbt.contains("Effects", MCUtil.getNbtId(CompoundNBT.class))) {
             continuousEffects.fromNBT(nbt.getCompound("Effects"));
         }
         super.readNBT(nbt);

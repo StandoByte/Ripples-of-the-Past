@@ -29,7 +29,8 @@ import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.stand.StandInstance;
 import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.google.common.collect.Maps;
 
 import net.minecraft.entity.Entity;
@@ -424,11 +425,11 @@ public class RockPaperScissorsGame {
 
     @Nullable
     public static RockPaperScissorsGame fromNBT(CompoundNBT nbt) {
-        if (!nbt.contains("Player1", JojoModUtil.getNbtId(CompoundNBT.class))) return null;
+        if (!nbt.contains("Player1", MCUtil.getNbtId(CompoundNBT.class))) return null;
         RockPaperScissorsPlayerData player1 = RockPaperScissorsPlayerData.fromNBT(nbt.getCompound("Player1"));
         if (player1 == null) return null;
         
-        if (!nbt.contains("Player2", JojoModUtil.getNbtId(CompoundNBT.class))) return null;
+        if (!nbt.contains("Player2", MCUtil.getNbtId(CompoundNBT.class))) return null;
         RockPaperScissorsPlayerData player2 = RockPaperScissorsPlayerData.fromNBT(nbt.getCompound("Player2"));
         if (player2 == null) return null;
         
@@ -526,9 +527,9 @@ public class RockPaperScissorsGame {
             UUID uuid = nbt.getUUID("Player");
             RockPaperScissorsPlayerData player = new RockPaperScissorsPlayerData(uuid);
             player.score = nbt.getByte("Score");
-            player.pick = JojoModUtil.enumValueOfNullable(Pick.class, nbt.getString("Pick"));
+            player.pick = GeneralUtil.enumValueOfNullable(Pick.class, nbt.getString("Pick"));
 
-            if (nbt.contains("PreviousPicks", JojoModUtil.getNbtId(CompoundNBT.class))) {
+            if (nbt.contains("PreviousPicks", MCUtil.getNbtId(CompoundNBT.class))) {
                 CompoundNBT previousPicksNBT = nbt.getCompound("PreviousPicks");
                 int size = previousPicksNBT.getInt("Size");
                 for (int i = 0; i < size; i++) {

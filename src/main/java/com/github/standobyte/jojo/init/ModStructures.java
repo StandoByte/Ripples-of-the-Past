@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.util.ForgeBusEventSubscriber;
-import com.github.standobyte.jojo.util.reflection.CommonReflection;
+import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.world.gen.ConfiguredStructureSupplier;
 import com.github.standobyte.jojo.world.gen.structures.HamonTemplePieces;
 import com.github.standobyte.jojo.world.gen.structures.HamonTempleStructure;

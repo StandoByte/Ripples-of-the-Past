@@ -38,7 +38,7 @@ import com.github.standobyte.jojo.power.nonstand.type.HamonData.Exercise;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
-import com.github.standobyte.jojo.util.Container;
+import com.github.standobyte.jojo.util.general.Container;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.matrix.MatrixStack;

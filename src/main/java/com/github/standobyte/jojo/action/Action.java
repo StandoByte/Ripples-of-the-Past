@@ -17,7 +17,7 @@ import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.ActionType;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;

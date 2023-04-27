@@ -4,9 +4,9 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.util.damage.DamageUtil;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
-import com.github.standobyte.jojo.util.utils.MathUtil;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
+import com.github.standobyte.jojo.util.general.MathUtil;
+import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.vector.Vector3d;
@@ -42,7 +42,7 @@ public class StarPlatinumInhale extends StandEntityAction {
     				}
     			});
     	if (world.isClientSide()) {
-    		JojoModUtil.doFractionTimes(() -> {
+    		GeneralUtil.doFractionTimes(() -> {
         		Vector3d particlePos = mouthPos.add(spLookVec.scale(RANGE)
         				.xRot((float) ((Math.random() * 2 - 1) * Math.PI / 6))
         				.yRot((float) ((Math.random() * 2 - 1) * Math.PI / 6)));

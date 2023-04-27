@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.action.non_stand;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.util.damage.DamageUtil;
+import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.EffectInstance;

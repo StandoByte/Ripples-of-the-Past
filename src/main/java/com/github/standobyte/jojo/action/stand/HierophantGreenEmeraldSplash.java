@@ -11,7 +11,8 @@ import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.RayTraceResult;
@@ -43,7 +44,7 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
             boolean shift = isShiftVariation();
             double fireRate = StandStatFormulas.projectileFireRateScaling(standEntity, userPower);
             if (shift) fireRate *= 2.5;
-        	JojoModUtil.doFractionTimes(() -> {
+        	GeneralUtil.doFractionTimes(() -> {
                 HGEmeraldEntity emerald = new HGEmeraldEntity(standEntity, world, userPower);
                 emerald.setBreakBlocks(shift);
                 emerald.setLowerKnockback(!shift);

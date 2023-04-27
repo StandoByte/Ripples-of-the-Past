@@ -22,8 +22,8 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrBarrageHitSoundPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
-import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;

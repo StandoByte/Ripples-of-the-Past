@@ -6,7 +6,7 @@ import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandMissedPunch;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
+import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;

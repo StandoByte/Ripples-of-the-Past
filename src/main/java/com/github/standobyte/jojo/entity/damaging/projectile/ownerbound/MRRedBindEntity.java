@@ -4,8 +4,9 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.util.damage.DamageUtil;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -126,7 +127,7 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
         if (!level.isClientSide() && stunEffect != null) {
             LivingEntity bound = getEntityAttachedTo();
             if (bound != null) {
-                JojoModUtil.removeEffectInstance(bound, stunEffect);
+                MCUtil.removeEffectInstance(bound, stunEffect);
             }
         }
         super.remove();

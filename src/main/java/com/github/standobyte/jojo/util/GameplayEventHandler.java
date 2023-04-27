@@ -65,13 +65,14 @@ import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.type.EntityStandType;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.github.standobyte.jojo.tileentity.StoneMaskTileEntity;
-import com.github.standobyte.jojo.util.damage.DamageUtil;
-import com.github.standobyte.jojo.util.damage.IModdedDamageSource;
-import com.github.standobyte.jojo.util.damage.IStandDamageSource;
-import com.github.standobyte.jojo.util.damage.StandLinkDamageSource;
-import com.github.standobyte.jojo.util.reflection.CommonReflection;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
-import com.github.standobyte.jojo.util.utils.MathUtil;
+import com.github.standobyte.jojo.util.general.MathUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
+import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
+import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
+import com.github.standobyte.jojo.util.mc.damage.StandLinkDamageSource;
+import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.Block;
@@ -673,7 +674,7 @@ public class GameplayEventHandler {
         BlockPos entityPos = target.blockPosition();
 
         List<Vector3d> particlePos = new ArrayList<>();
-        List<LivingEntity> entitiesAround = JojoModUtil.entitiesAround(LivingEntity.class, target, radius, true, EntityPredicates.NO_SPECTATORS);
+        List<LivingEntity> entitiesAround = MCUtil.entitiesAround(LivingEntity.class, target, radius, true, EntityPredicates.NO_SPECTATORS);
         for (LivingEntity entity : entitiesAround) {
             if (dropBloodOnEntity(dmgSource, dmgAmount, target, entity)) {
                 particlePos.add(entity.getEyePosition(1.0F));
@@ -1188,7 +1189,7 @@ public class GameplayEventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onChatMessage(ServerChatEvent event) {
-        List<ServerPlayerEntity> josephTechniqueUsers = JojoModUtil.entitiesAround(ServerPlayerEntity.class, event.getPlayer(), 8, false, 
+        List<ServerPlayerEntity> josephTechniqueUsers = MCUtil.entitiesAround(ServerPlayerEntity.class, event.getPlayer(), 8, false, 
                 pl -> INonStandPower.getNonStandPowerOptional(pl).map(power -> 
                 power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(hamon -> 
                 hamon.getTechnique() == Technique.JOSEPH).orElse(false)).orElse(false));

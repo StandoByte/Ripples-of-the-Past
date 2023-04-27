@@ -18,9 +18,9 @@ import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModEntityAttributes;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.util.damage.DamageUtil;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
-import com.github.standobyte.jojo.util.utils.MathUtil;
+import com.github.standobyte.jojo.util.general.MathUtil;
+import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.attributes.AttributeModifier;

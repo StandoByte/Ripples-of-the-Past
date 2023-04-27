@@ -3,8 +3,8 @@ package com.github.standobyte.jojo.init;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.util.MultiSoundEvent;
-import com.github.standobyte.jojo.util.OstSoundList;
+import com.github.standobyte.jojo.util.mc.MultiSoundEvent;
+import com.github.standobyte.jojo.util.mc.OstSoundList;
 
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;

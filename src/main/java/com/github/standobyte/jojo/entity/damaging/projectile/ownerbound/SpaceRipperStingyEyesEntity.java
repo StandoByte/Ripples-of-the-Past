@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -160,8 +160,8 @@ public class SpaceRipperStingyEyesEntity extends OwnerBoundProjectileEntity {
 
     @Override
     protected void readAdditionalSaveData(CompoundNBT nbt) {
-        if (nbt.contains("DetachedOrigin", JojoModUtil.getNbtId(ListNBT.class))) {
-            ListNBT detachedPosList = nbt.getList("DetachedOrigin", JojoModUtil.getNbtId(DoubleNBT.class));
+        if (nbt.contains("DetachedOrigin", MCUtil.getNbtId(ListNBT.class))) {
+            ListNBT detachedPosList = nbt.getList("DetachedOrigin", MCUtil.getNbtId(DoubleNBT.class));
             if (detachedPosList.size() >= 3) {
                 detachedOriginPos = new Vector3d(detachedPosList.getDouble(0), detachedPosList.getDouble(1), detachedPosList.getDouble(2));
             }

@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.init;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.client.renderer.RoadRollerISTER;
+import com.github.standobyte.jojo.client.render.item.RoadRollerISTER;
 import com.github.standobyte.jojo.item.AjaStoneItem;
 import com.github.standobyte.jojo.item.BladeHatItem;
 import com.github.standobyte.jojo.item.ClackersItem;

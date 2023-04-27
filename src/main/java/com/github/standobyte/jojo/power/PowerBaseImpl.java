@@ -24,7 +24,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.LeapCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHeldActionPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.util.Container;
+import com.github.standobyte.jojo.util.general.Container;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;

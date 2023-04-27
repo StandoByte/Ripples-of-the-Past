@@ -13,7 +13,7 @@ import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.type.StandType;
-import com.github.standobyte.jojo.util.damage.DamageUtil;
+import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.client.util.ITooltipFlag;

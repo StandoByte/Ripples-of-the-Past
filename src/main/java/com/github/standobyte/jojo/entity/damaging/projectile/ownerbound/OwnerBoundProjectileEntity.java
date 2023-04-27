@@ -13,7 +13,8 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEffects;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -170,7 +171,7 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
                     useBodyRotation ? MathHelper.lerp(partialTick, owner.yBodyRotO, owner.yBodyRot) : MathHelper.lerp(partialTick, owner.yRotO, owner.yRot), 
                             MathHelper.lerp(partialTick, owner.xRotO, owner.xRot));
         }
-        return JojoModUtil.getEntityPosition(this, partialTick);
+        return MCUtil.getEntityPosition(this, partialTick);
     }
     
     public boolean isBodyPart() {

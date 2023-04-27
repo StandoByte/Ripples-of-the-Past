@@ -16,9 +16,9 @@ import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopInstancePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerStatePacket;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
-import com.github.standobyte.jojo.util.utils.ModInteractionUtil;
-import com.github.standobyte.jojo.util.utils.TimeUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
+import com.github.standobyte.jojo.util.mod.TimeUtil;
 import com.google.common.collect.HashBiMap;
 
 import net.minecraft.entity.Entity;
@@ -99,7 +99,7 @@ public class TimeStopHandler {
     }
     
     private void onAddedTimeStop(TimeStopInstance instance) {
-        JojoModUtil.getAllEntities(world).forEach(entity -> {
+        MCUtil.getAllEntities(world).forEach(entity -> {
             if (instance.inRange(TimeStopHandler.getChunkPos(entity))) {
                 updateEntityTimeStop(entity, false, true);
             }
@@ -160,13 +160,13 @@ public class TimeStopHandler {
     
     public void reset() {
     	timeStopInstances.clear();
-        JojoModUtil.getAllEntities(world).forEach(entity -> {
+        MCUtil.getAllEntities(world).forEach(entity -> {
             updateEntityTimeStop(entity, true, true);
         });
     }
     
     private void onRemovedTimeStop(TimeStopInstance instance) {
-        JojoModUtil.getAllEntities(world).forEach(entity -> {
+        MCUtil.getAllEntities(world).forEach(entity -> {
             ChunkPos pos = TimeStopHandler.getChunkPos(entity);
             if (instance.inRange(pos)) {
                 updateEntityTimeStop(entity, !isTimeStopped(pos), true);

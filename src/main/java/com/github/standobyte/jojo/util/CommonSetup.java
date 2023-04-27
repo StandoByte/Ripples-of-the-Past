@@ -26,7 +26,7 @@ import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandPower;
-import com.github.standobyte.jojo.util.data.StandStatsManager;
+import com.github.standobyte.jojo.util.mc.data.StandStatsManager;
 
 import net.minecraft.command.arguments.ArgumentSerializer;
 import net.minecraft.command.arguments.ArgumentTypes;

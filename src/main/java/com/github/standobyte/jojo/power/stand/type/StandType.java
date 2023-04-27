@@ -19,10 +19,10 @@ import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
-import com.github.standobyte.jojo.util.OstSoundList;
-import com.github.standobyte.jojo.util.damage.IStandDamageSource;
-import com.github.standobyte.jojo.util.data.StandStatsManager;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mc.OstSoundList;
+import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
+import com.github.standobyte.jojo.util.mc.data.StandStatsManager;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;

@@ -8,7 +8,7 @@ import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.PlayerEntity;

@@ -10,7 +10,7 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.stand.type.StandType;
-import com.github.standobyte.jojo.util.data.StandStatsManager;
+import com.github.standobyte.jojo.util.mc.data.StandStatsManager;
 
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;

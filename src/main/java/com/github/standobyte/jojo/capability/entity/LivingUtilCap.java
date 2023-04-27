@@ -10,7 +10,7 @@ import com.github.standobyte.jojo.entity.AfterimageEntity;
 import com.github.standobyte.jojo.power.nonstand.type.HamonCharge;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.util.reflection.CommonReflection;
+import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;

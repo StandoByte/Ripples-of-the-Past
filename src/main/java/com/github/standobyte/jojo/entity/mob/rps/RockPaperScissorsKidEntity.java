@@ -15,7 +15,7 @@ import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandPower;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.Entity;
@@ -144,24 +144,24 @@ public class RockPaperScissorsKidEntity extends VillagerEntity implements IMobSt
     @Override
     public void readAdditionalSaveData(CompoundNBT nbt) {
         super.readAdditionalSaveData(nbt);
-        if (nbt.contains("StandPower", JojoModUtil.getNbtId(CompoundNBT.class))) {
+        if (nbt.contains("StandPower", MCUtil.getNbtId(CompoundNBT.class))) {
             standPower.readNBT(nbt.getCompound("StandPower"));
         }
 
-        if (nbt.contains("LostTo", JojoModUtil.getNbtId(ListNBT.class))) {
-            nbt.getList("LostTo", JojoModUtil.getNbtId(IntArrayNBT.class)).forEach(uuidNBT -> {
+        if (nbt.contains("LostTo", MCUtil.getNbtId(ListNBT.class))) {
+            nbt.getList("LostTo", MCUtil.getNbtId(IntArrayNBT.class)).forEach(uuidNBT -> {
                 if (uuidNBT != null && uuidNBT.getType() == IntArrayNBT.TYPE && ((IntArrayNBT) uuidNBT).getAsIntArray().length == 4) {
                     lostTo.add(NBTUtil.loadUUID(uuidNBT));
                 }
             });
         }
 
-        if (nbt.contains("UnfinishedGames", JojoModUtil.getNbtId(CompoundNBT.class))) {
+        if (nbt.contains("UnfinishedGames", MCUtil.getNbtId(CompoundNBT.class))) {
             CompoundNBT unfinishedGamesNBT = nbt.getCompound("UnfinishedGames");
             unfinishedGamesNBT.getAllKeys().forEach(key -> {
                 try {
                     UUID id = UUID.fromString(key);
-                    if (unfinishedGamesNBT.contains(key, JojoModUtil.getNbtId(CompoundNBT.class))) {
+                    if (unfinishedGamesNBT.contains(key, MCUtil.getNbtId(CompoundNBT.class))) {
                         RockPaperScissorsGame game = RockPaperScissorsGame.fromNBT(unfinishedGamesNBT.getCompound(key));
                         if (game != null) {
                             games.put(id, game);

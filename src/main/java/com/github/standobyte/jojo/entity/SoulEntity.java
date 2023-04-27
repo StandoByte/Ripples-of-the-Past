@@ -12,7 +12,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClRemovePlayerSoulE
 import com.github.standobyte.jojo.network.packets.fromclient.ClSoulRotationPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.command.arguments.EntityAnchorArgument;
 import net.minecraft.entity.Entity;

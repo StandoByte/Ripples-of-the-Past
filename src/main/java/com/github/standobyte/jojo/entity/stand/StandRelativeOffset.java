@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.entity.stand;
 
-import com.github.standobyte.jojo.util.utils.MathUtil;
+import com.github.standobyte.jojo.util.general.MathUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Pose;

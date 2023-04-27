@@ -31,8 +31,8 @@ import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCach
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.util.data.StandStatsManager;
-import com.github.standobyte.jojo.util.reflection.CommonReflection;
+import com.github.standobyte.jojo.util.mc.data.StandStatsManager;
+import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.mojang.brigadier.CommandDispatcher;
 
 import net.minecraft.command.CommandSource;

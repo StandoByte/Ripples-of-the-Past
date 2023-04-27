@@ -6,7 +6,7 @@ import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
-import com.github.standobyte.jojo.util.damage.DamageUtil;
+import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.world.World;
 

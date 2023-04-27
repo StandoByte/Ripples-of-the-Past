@@ -14,9 +14,10 @@ import com.github.standobyte.jojo.network.packets.fromserver.ResolveLevelPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolvePacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.type.StandType;
-import com.github.standobyte.jojo.util.DiscardingSortedMultisetWrapper;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
-import com.github.standobyte.jojo.util.utils.LegacyUtil;
+import com.github.standobyte.jojo.util.general.DiscardingSortedMultisetWrapper;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mod.LegacyUtil;
 import com.google.common.collect.BoundType;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.SortedMultiset;
@@ -147,7 +148,7 @@ public class ResolveCounter {
     }
 
     float getMaxResolveValue() {
-        return JojoModUtil.getOrLast(
+        return GeneralUtil.getOrLast(
                 JojoModConfig.getCommonConfigInstance(stand.getUser().level.isClientSide()).resolveLvlPoints.get(), 
                 getResolveLevel()).floatValue();
     }
@@ -423,7 +424,7 @@ public class ResolveCounter {
         boostChat = nbt.getFloat("BoostChat");
         hpOnGettingAttacked = nbt.getFloat("HpOnGettingAttacked");
         
-        if (nbt.contains("Levels", JojoModUtil.getNbtId(CompoundNBT.class))) {
+        if (nbt.contains("Levels", MCUtil.getNbtId(CompoundNBT.class))) {
             levels.fromNBT(nbt.getCompound("Levels"));
         }
         
@@ -431,8 +432,8 @@ public class ResolveCounter {
             LegacyUtil.readOldResolveLevels(nbt, levels, stand);
         }
         
-        if (nbt.contains("ResolveRecord", JojoModUtil.getNbtId(ListNBT.class))) {
-            ListNBT listNBT = nbt.getList("ResolveRecord", JojoModUtil.getNbtId(FloatNBT.class));
+        if (nbt.contains("ResolveRecord", MCUtil.getNbtId(ListNBT.class))) {
+            ListNBT listNBT = nbt.getList("ResolveRecord", MCUtil.getNbtId(FloatNBT.class));
             for (int i = 0; i < listNBT.size(); i++) {
                 this.resolveRecords.add(listNBT.getFloat(i));
             }

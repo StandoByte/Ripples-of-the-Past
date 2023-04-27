@@ -6,7 +6,8 @@ import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.LivingEntity;
@@ -35,7 +36,7 @@ public class VampirismDarkAura extends VampirismAction {
         int difficulty = world.getDifficulty().getId();
         int range = 16 * difficulty - 8;
         if (!world.isClientSide()) {
-            for (LivingEntity entity : JojoModUtil.entitiesAround(
+            for (LivingEntity entity : MCUtil.entitiesAround(
                     LivingEntity.class, user, range, false, entity -> !JojoModUtil.isUndead(entity))) {
                 boolean passive = entity instanceof AgeableEntity;
                 int amplifier = MathHelper.floor((difficulty - 1) * 1.5);
@@ -48,7 +49,7 @@ public class VampirismDarkAura extends VampirismAction {
                 }
             }
             if (world.getDifficulty() == Difficulty.HARD) {
-                for (HungryZombieEntity zombie : JojoModUtil.entitiesAround(
+                for (HungryZombieEntity zombie : MCUtil.entitiesAround(
                         HungryZombieEntity.class, user, range, false, zombie -> zombie.isEntityOwner(user))) {
                     zombie.addEffect(new EffectInstance(Effects.MOVEMENT_SPEED, 300, 1));
                     zombie.addEffect(new EffectInstance(Effects.DAMAGE_BOOST, 300, 0));

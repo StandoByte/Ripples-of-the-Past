@@ -11,7 +11,7 @@ import com.github.standobyte.jojo.power.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ILivingEntityData;
@@ -137,7 +137,7 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser,
     @Override
     public void readAdditionalSaveData(CompoundNBT nbt) {
         super.readAdditionalSaveData(nbt);
-        if (nbt.contains("HamonPower", JojoModUtil.getNbtId(CompoundNBT.class))) {
+        if (nbt.contains("HamonPower", MCUtil.getNbtId(CompoundNBT.class))) {
             hamonPower.readNBT(nbt.getCompound("HamonPower"));
         }
         if (hamonPower.getType() != ModNonStandPowers.HAMON.get()) {

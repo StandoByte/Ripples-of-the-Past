@@ -18,7 +18,7 @@ import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
-import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
+import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;

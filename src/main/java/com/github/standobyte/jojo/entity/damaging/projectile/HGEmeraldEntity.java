@@ -6,7 +6,7 @@ import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
-import com.github.standobyte.jojo.util.damage.IModdedDamageSource;
+import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;

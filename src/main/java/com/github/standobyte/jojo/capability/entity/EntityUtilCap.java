@@ -3,8 +3,8 @@ package com.github.standobyte.jojo.capability.entity;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
-import com.github.standobyte.jojo.util.utils.TimeUtil;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
+import com.github.standobyte.jojo.util.mod.TimeUtil;
 
 import net.minecraft.entity.Entity;
 
@@ -45,7 +45,7 @@ public class EntityUtilCap {
     
     
     public static void queueOnTimeResume(Entity entity, Runnable action) {
-        JojoModUtil.ifPresentOrElse(entity.getCapability(EntityUtilCapProvider.CAPABILITY).resolve(), 
+        GeneralUtil.ifPresentOrElse(entity.getCapability(EntityUtilCapProvider.CAPABILITY).resolve(), 
                 cap -> {
                     if (cap.stoppedInTime) {
                         cap.runOnTimeResume.add(action);

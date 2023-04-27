@@ -7,7 +7,7 @@ import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGBarrie
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.util.HGBarriersNet;
+import com.github.standobyte.jojo.util.mod.HGBarriersNet;
 
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;

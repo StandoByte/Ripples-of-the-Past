@@ -12,8 +12,9 @@ import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.VampirismPowerType;
-import com.github.standobyte.jojo.util.damage.DamageUtil;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
+import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.INPC;
@@ -67,7 +68,7 @@ public class VampirismBloodDrain extends VampirismAction {
             if (!world.isClientSide() && target.getEntity() instanceof LivingEntity) {
                 LivingEntity targetEntity = (LivingEntity) target.getEntity();
                 if (!targetEntity.isDeadOrDying()) {
-                    float bloodAndHealModifier = JojoModUtil.getOrLast(
+                    float bloodAndHealModifier = GeneralUtil.getOrLast(
                             JojoModConfig.getCommonConfigInstance(false).bloodDrainMultiplier.get(), 
                             world.getDifficulty().getId()).floatValue();
                     boolean isHuman = false;

@@ -4,7 +4,7 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.util.utils.TimeUtil;
+import com.github.standobyte.jojo.util.mod.TimeUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;

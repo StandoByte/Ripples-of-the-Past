@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -39,8 +39,8 @@ public class RPSPvpGamesMap {
     }
     
     public void load(CompoundNBT nbt) {
-        if (nbt.contains("Games", JojoModUtil.getNbtId(ListNBT.class))) {
-            nbt.getList("Games", JojoModUtil.getNbtId(CompoundNBT.class)).forEach(gameNBT -> {
+        if (nbt.contains("Games", MCUtil.getNbtId(ListNBT.class))) {
+            nbt.getList("Games", MCUtil.getNbtId(CompoundNBT.class)).forEach(gameNBT -> {
                 RockPaperScissorsGame game = RockPaperScissorsGame.fromNBT((CompoundNBT) gameNBT);
                 if (game != null) {
                     addGame(game);

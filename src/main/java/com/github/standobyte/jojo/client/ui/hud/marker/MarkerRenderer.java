@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.util.utils.MathUtil;
+import com.github.standobyte.jojo.util.general.MathUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 

@@ -8,7 +8,7 @@ import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -30,7 +30,7 @@ public class HamonDetector extends HamonAction {
                 double controlRatio = (double) hamon.getHamonControlLevel() / (double) HamonData.MAX_STAT_LEVEL * hamon.getBloodstreamEfficiency();
                 double radius = (double) ticksHeld * (controlRatio * 0.8D + 0.2D);
                 double maxRadius = 8D + controlRatio * 24D;
-                List<LivingEntity> entitiesAround = JojoModUtil.entitiesAround(LivingEntity.class, user, Math.min(radius, maxRadius), false, null);
+                List<LivingEntity> entitiesAround = MCUtil.entitiesAround(LivingEntity.class, user, Math.min(radius, maxRadius), false, null);
                 entitiesAround.forEach(entity -> entity.addEffect(new EffectInstance(Effects.GLOWING, 80)));
                 if (!entitiesAround.isEmpty()) {
                     hamon.hamonPointsFromAction(HamonStat.CONTROL, getHeldTickEnergyCost()); 

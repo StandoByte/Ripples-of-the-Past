@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.potion;
 
-import com.github.standobyte.jojo.util.reflection.CommonReflection;
+import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;

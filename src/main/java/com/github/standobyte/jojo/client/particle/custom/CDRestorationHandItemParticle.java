@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.client.particle.custom;
 
 import com.github.standobyte.jojo.client.particle.CDRestorationParticle;
-import com.github.standobyte.jojo.util.utils.MathUtil;
+import com.github.standobyte.jojo.util.general.MathUtil;
 
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;

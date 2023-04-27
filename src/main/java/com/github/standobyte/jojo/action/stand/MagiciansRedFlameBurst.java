@@ -10,7 +10,7 @@ import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeMod;
@@ -26,7 +26,7 @@ public class MagiciansRedFlameBurst extends StandEntityAction {
     public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         Random random = standEntity.getRandom();
         if (!world.isClientSide()) {
-        	JojoModUtil.doFractionTimes(() -> {
+        	GeneralUtil.doFractionTimes(() -> {
                 MRFlameEntity flame = new MRFlameEntity(standEntity, world);
                 float velocity = (float) standEntity.getAttributeValue(ForgeMod.REACH_DISTANCE.get()) / 5F;
                 if (userPower.getResolveLevel() >= 3) {

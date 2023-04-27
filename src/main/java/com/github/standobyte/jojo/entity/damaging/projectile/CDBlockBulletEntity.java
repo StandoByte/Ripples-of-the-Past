@@ -14,7 +14,7 @@ import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.stand.StandUtil;
-import com.github.standobyte.jojo.util.damage.DamageUtil;
+import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;

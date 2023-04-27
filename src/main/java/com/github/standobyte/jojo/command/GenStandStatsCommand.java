@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.command;
 
-import com.github.standobyte.jojo.util.data.StandStatsManager;
-import com.github.standobyte.jojo.util.data.StandStatsManager.StatsStatsSaveException;
+import com.github.standobyte.jojo.util.mc.data.StandStatsManager;
+import com.github.standobyte.jojo.util.mc.data.StandStatsManager.StatsStatsSaveException;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;

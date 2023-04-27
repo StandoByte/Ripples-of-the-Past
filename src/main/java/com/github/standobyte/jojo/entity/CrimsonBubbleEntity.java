@@ -12,8 +12,9 @@ import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
-import com.github.standobyte.jojo.util.damage.DamageUtil;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -166,8 +167,8 @@ public class CrimsonBubbleEntity extends Entity {
     protected void readAdditionalSaveData(CompoundNBT compound) {
         this.hamonStrengthPoints = compound.getInt("StrengthPoints");
         this.hamonControlPoints = compound.getInt("ControlPoints");
-        if (compound.contains("InitialPoint", JojoModUtil.getNbtId(ListNBT.class))) {
-            ListNBT listNBT = compound.getList("InitialPoint", JojoModUtil.getNbtId(DoubleNBT.class));
+        if (compound.contains("InitialPoint", MCUtil.getNbtId(ListNBT.class))) {
+            ListNBT listNBT = compound.getList("InitialPoint", MCUtil.getNbtId(DoubleNBT.class));
             if (listNBT.size() >= 3) {
                 this.initialPoint = new Vector3d(listNBT.getDouble(0), listNBT.getDouble(1), listNBT.getDouble(2));
             }

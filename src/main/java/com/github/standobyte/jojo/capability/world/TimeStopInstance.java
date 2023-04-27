@@ -13,8 +13,9 @@ import com.github.standobyte.jojo.network.packets.fromserver.TimeStopInstancePac
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
-import com.github.standobyte.jojo.util.utils.TimeUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
+import com.github.standobyte.jojo.util.mod.TimeUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -193,7 +194,7 @@ public class TimeStopInstance {
                 });
             }
             if (user != null && statusEffectInstance != null) {
-                JojoModUtil.removeEffectInstance(user, statusEffectInstance);
+                MCUtil.removeEffectInstance(user, statusEffectInstance);
             }
         }
     }

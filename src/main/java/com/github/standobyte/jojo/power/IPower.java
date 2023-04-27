@@ -10,7 +10,7 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.util.Container;
+import com.github.standobyte.jojo.util.general.Container;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;

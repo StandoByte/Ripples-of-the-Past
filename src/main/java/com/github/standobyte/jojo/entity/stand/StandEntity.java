@@ -25,7 +25,7 @@ import com.github.standobyte.jojo.action.stand.punch.StandMissedPunch;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.model.pose.anim.barrage.BarrageSwingsHolder;
+import com.github.standobyte.jojo.client.render.entity.pose.anim.barrage.BarrageSwingsHolder;
 import com.github.standobyte.jojo.client.sound.BarrageHitSoundHandler;
 import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
@@ -43,12 +43,14 @@ import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
-import com.github.standobyte.jojo.util.damage.DamageUtil;
-import com.github.standobyte.jojo.util.damage.IStandDamageSource;
-import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
-import com.github.standobyte.jojo.util.damage.StandLinkDamageSource;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
-import com.github.standobyte.jojo.util.utils.MathUtil;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
+import com.github.standobyte.jojo.util.general.MathUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
+import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
+import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
+import com.github.standobyte.jojo.util.mc.damage.StandLinkDamageSource;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.collect.ImmutableList;
 
 import net.minecraft.block.BlockRenderType;
@@ -666,7 +668,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public void playSound(SoundEvent sound, float volume, float pitch, @Nullable PlayerEntity player, Vector3d pos) {
         if (!this.isSilent()) {
             if (!isVisibleForAll()) {
-                JojoModUtil.playSound(level, player, pos.x, pos.y, pos.z, sound, getSoundSource(), volume, pitch, StandUtil::shouldHearStands);
+                MCUtil.playSound(level, player, pos.x, pos.y, pos.z, sound, getSoundSource(), volume, pitch, StandUtil::shouldHearStands);
             }
             else {
                 level.playSound(player, pos.x, pos.y, pos.z, sound, getSoundSource(), volume, pitch);
@@ -1019,7 +1021,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         
         Optional<StandEntityTask> currentTask = getCurrentTask();
         
-        JojoModUtil.ifPresentOrElse(currentTask, 
+        GeneralUtil.ifPresentOrElse(currentTask, 
                 task -> task.rotateStand(this), 
                 () -> defaultRotation());
         
@@ -1400,7 +1402,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                         || currentTarget.getType() == TargetType.EMPTY && aim.getType() != RayTraceResult.Type.MISS) {
                     Vector3d targetPos = ActionTarget.fromRayTraceResult(aim).getTargetPos(true);
                     if (targetPos != null) {
-                        JojoModUtil.rotateTowards(this, targetPos, (float) getAttackSpeed() / 16F * 18F);
+                        MCUtil.rotateTowards(this, targetPos, (float) getAttackSpeed() / 16F * 18F);
                     }
                 }
             }
@@ -2154,7 +2156,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
                 ItemStack heldItem = getItemBySlot(slot);
                 if (!heldItem.isEmpty()) {
                     setItemSlot(slot, ItemStack.EMPTY);
-                    JojoModUtil.giveItemTo(entity, heldItem, true);
+                    MCUtil.giveItemTo(entity, heldItem, true);
                 }
             }
         }

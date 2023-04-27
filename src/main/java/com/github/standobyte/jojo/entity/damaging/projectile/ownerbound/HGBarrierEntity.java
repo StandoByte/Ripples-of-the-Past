@@ -12,8 +12,8 @@ import com.github.standobyte.jojo.init.ModDataSerializers;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.StandUtil;
-import com.github.standobyte.jojo.util.damage.DamageUtil;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -113,7 +113,7 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
     @Override
     public Vector3d getOriginPoint(float partialTick) {
         return originBlockPos == null
-                ? standUser == null ? position() : JojoModUtil.getEntityPosition(standUser, partialTick)
+                ? standUser == null ? position() : MCUtil.getEntityPosition(standUser, partialTick)
                         : Vector3d.atCenterOf(originBlockPos);
     }
 
@@ -183,7 +183,7 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
                     		target.getBoundingBox().getCenter(), 0, 20 * stand.getStaminaCondition(), 
                     		ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get().getStaminaCostTicking(stand.getUserPower()) * 0.5F, 2, false);
                 }
-                JojoModUtil.playSound(level, null, target.getX(), target.getY(), target.getZ(), 
+                MCUtil.playSound(level, null, target.getX(), target.getY(), target.getZ(), 
                         ModSounds.HIEROPHANT_GREEN_BARRIER_RIPPED.get(), getSoundSource(), 1.0F, 1.0F, StandUtil::shouldHearStands);
             }
         }

@@ -23,8 +23,9 @@ import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
-import com.github.standobyte.jojo.util.reflection.CommonReflection;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -271,7 +272,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                         boolean gaveIngredients = false;
                         for (ItemStack ingredient : itemsAndCount.getLeft()) {
                             if (!ingredient.isEmpty()) {
-                                JojoModUtil.giveItemTo(player, ingredient, true);
+                                MCUtil.giveItemTo(player, ingredient, true);
                                 gaveIngredients = true;
                             }
                         }
@@ -308,7 +309,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
         }
 
         // FIXME revert brewing recipes
-        return JojoModUtil.groupByPredicatesOrdered(
+        return GeneralUtil.groupByPredicatesOrdered(
                 world.getRecipeManager().getRecipes().stream(), Util.make(new ArrayList<>(), list -> {
                     // FIXME revert nbt recipes (including netherite armor)
                     list.add(recipe -> recipe instanceof SmithingRecipe);
@@ -350,11 +351,11 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
     
     private CompoundNBT revertBookPagesNBT(CompoundNBT signedBookNBT) {
         CompoundNBT nbt = new CompoundNBT();
-        if (signedBookNBT.contains("pages", JojoModUtil.getNbtId(ListNBT.class))) {
+        if (signedBookNBT.contains("pages", MCUtil.getNbtId(ListNBT.class))) {
             ListNBT textPagesClean = new ListNBT();
             
-            signedBookNBT.getList("pages", JojoModUtil.getNbtId(StringNBT.class)).forEach(pageNBT -> {
-                if (pageNBT.getId() == JojoModUtil.getNbtId(StringNBT.class)) {
+            signedBookNBT.getList("pages", MCUtil.getNbtId(StringNBT.class)).forEach(pageNBT -> {
+                if (pageNBT.getId() == MCUtil.getNbtId(StringNBT.class)) {
                     ITextComponent text = ITextComponent.Serializer.fromJson(((StringNBT) pageNBT).getAsString());
                     if (text != null) {
                         textPagesClean.add(StringNBT.valueOf(text.getString()));

@@ -38,8 +38,9 @@ import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.util.damage.DamageUtil;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.block.BlockState;
@@ -349,7 +350,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     @Nullable
     public static EnumSet<HamonSkill> nearbyTeachersSkills(LivingEntity learner) {
         EnumSet<HamonSkill> skills = EnumSet.noneOf(HamonSkill.class);
-        JojoModUtil.entitiesAround(LivingEntity.class, learner, 3D, false, 
+        MCUtil.entitiesAround(LivingEntity.class, learner, 3D, false, 
                 entity -> INonStandPower.getNonStandPowerOptional((LivingEntity) entity).map(power -> 
                 power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(hamon -> {
                     for (HamonSkill learnedSkill : hamon.getSkillSetImmutable()) {
@@ -460,7 +461,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                         break;
                     case ZEPPELI:
                         if (hamon.isSkillLearned(HamonSkill.DEEP_PASS)) {
-                            PlayerEntity closestHamonUser = JojoModUtil.entitiesAround(PlayerEntity.class, dead, 8, false, player -> 
+                            PlayerEntity closestHamonUser = MCUtil.entitiesAround(PlayerEntity.class, dead, 8, false, player -> 
                             INonStandPower.getNonStandPowerOptional(player).map(pwr -> pwr.getType() == ModNonStandPowers.HAMON.get()).orElse(false))
                                     .stream()
                                     .min(Comparator.comparingDouble(player -> player.distanceToSqr(dead)))

@@ -8,11 +8,11 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
-import com.github.standobyte.jojo.util.damage.DamageUtil;
-import com.github.standobyte.jojo.util.damage.IStandDamageSource;
-import com.github.standobyte.jojo.util.damage.IndirectStandEntityDamageSource;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
-import com.github.standobyte.jojo.util.utils.MathUtil;
+import com.github.standobyte.jojo.util.general.MathUtil;
+import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
+import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
+import com.github.standobyte.jojo.util.mc.damage.IndirectStandEntityDamageSource;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.TNTBlock;

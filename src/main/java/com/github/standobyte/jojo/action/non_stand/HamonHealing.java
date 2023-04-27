@@ -8,7 +8,7 @@ import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;

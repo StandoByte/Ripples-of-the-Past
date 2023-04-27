@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.github.standobyte.jojo.init.ModStandTypes;
 import com.github.standobyte.jojo.power.stand.type.StandType;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
@@ -74,7 +74,7 @@ public class ResolveLevelsMap {
                 StandType<?> stand = registry.getValue(location);
                 if (stand != null) {
                     ResolveLevel levelEntry = wrappedMap.computeIfAbsent(stand, ResolveLevel::new);
-                    if (nbt.contains(key, JojoModUtil.getNbtId(CompoundNBT.class))) {
+                    if (nbt.contains(key, MCUtil.getNbtId(CompoundNBT.class))) {
                         levelEntry.fromNBT(nbt.getCompound(key));
                     }
                 }

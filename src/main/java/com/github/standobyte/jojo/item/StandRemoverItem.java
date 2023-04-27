@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.item;
 
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.dispenser.DefaultDispenseItemBehavior;
@@ -20,7 +20,7 @@ public class StandRemoverItem extends Item {
 
         DispenserBlock.registerBehavior(this, new DefaultDispenseItemBehavior() {
             protected ItemStack execute(IBlockSource blockSource, ItemStack stack) {
-                if (JojoModUtil.dispenseOnNearbyEntity(blockSource, stack, entity -> {
+                if (MCUtil.dispenseOnNearbyEntity(blockSource, stack, entity -> {
                     return IStandPower.getStandPowerOptional(entity).map(power -> {
                         return power.hasPower() && power.clear();
                     }).orElse(false);

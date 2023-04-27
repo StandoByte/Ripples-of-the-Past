@@ -14,7 +14,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrTypeNonStandPower
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.PowerBaseImpl;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
-import com.github.standobyte.jojo.util.Container;
+import com.github.standobyte.jojo.util.general.Container;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;

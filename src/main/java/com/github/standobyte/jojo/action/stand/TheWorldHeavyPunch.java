@@ -5,7 +5,7 @@ import com.github.standobyte.jojo.capability.entity.EntityUtilCap;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.util.damage.StandEntityDamageSource;
+import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 
 import net.minecraft.entity.Entity;
 

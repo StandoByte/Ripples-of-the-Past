@@ -12,7 +12,7 @@ import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectType;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandEffectPacket;
-import com.github.standobyte.jojo.util.utils.JojoModUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -175,8 +175,8 @@ public class StandEffectsTracker {
     }
     
     public void fromNBT(CompoundNBT nbt) {
-        if (nbt.contains("Effects", JojoModUtil.getNbtId(ListNBT.class))) {
-            nbt.getList("Effects", JojoModUtil.getNbtId(CompoundNBT.class)).forEach(effectNBT -> {
+        if (nbt.contains("Effects", MCUtil.getNbtId(ListNBT.class))) {
+            nbt.getList("Effects", MCUtil.getNbtId(CompoundNBT.class)).forEach(effectNBT -> {
                 StandEffectInstance effect = StandEffectInstance.fromNBT((CompoundNBT) effectNBT);
                 if (effect != null) {
                     putEffectInstance(effect.withId(EFFECTS_COUNTER.incrementAndGet()));

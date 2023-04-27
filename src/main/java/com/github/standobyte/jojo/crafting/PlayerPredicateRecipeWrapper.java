@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.crafting;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.util.reflection.CommonReflection;
+import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.CraftingInventory;
