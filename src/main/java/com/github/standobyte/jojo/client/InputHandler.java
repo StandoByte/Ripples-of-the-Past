@@ -587,7 +587,7 @@ public class InputHandler {
         IStandManifestation stand = standPower.getStandManifestation();
         if (stand instanceof StandEntity) {
             StandEntity standEntity = (StandEntity) stand;
-            float slowDown = standEntity.getUserMovementFactor();
+            float slowDown = standEntity.getUserWalkSpeed();
             if (slowDown < 1.0F) {
                 input.leftImpulse *= slowDown;
                 input.forwardImpulse *= slowDown;

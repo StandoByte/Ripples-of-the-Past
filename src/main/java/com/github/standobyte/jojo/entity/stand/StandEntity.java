@@ -1369,7 +1369,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return getCurrentTask().map(task -> task.getPhaseCompletion(partialTick)).orElse(0F);
     }
 
-    public float getUserMovementFactor() {
+    public float getUserWalkSpeed() {
         return getCurrentTask().map(task -> task.getAction().getUserWalkSpeed(getUserPower(), this, task)).orElse(1F);
     }
     
@@ -1919,7 +1919,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
                     strafe *= 0.5;
                     forward *= 0.5;
                 }
-                setDeltaMovement(getAbsoluteMotion(new Vector3d((double)strafe, y, (double)forward), speed, this.yRot).scale(getUserMovementFactor()));
+                setDeltaMovement(getAbsoluteMotion(new Vector3d((double)strafe, y, (double)forward), speed, this.yRot).scale(getUserWalkSpeed()));
                 
                 if (!prevTickInput) {
                     setDeltaMovement(Vector3d.ZERO);

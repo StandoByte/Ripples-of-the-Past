@@ -247,8 +247,8 @@ public class SilverChariotEntity extends StandEntity {
     }
     
     @Override
-    public float getUserMovementFactor() {
-        float factor = super.getUserMovementFactor();
+    public float getUserWalkSpeed() {
+        float factor = super.getUserWalkSpeed();
         if (getUserPower() != null && getUserPower().getResolveLevel() >= 4) {
             factor += (1 - factor) * (hasArmor() ? 0.5F : 1F);
         }

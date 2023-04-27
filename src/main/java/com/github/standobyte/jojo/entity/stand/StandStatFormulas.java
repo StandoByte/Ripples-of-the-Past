@@ -103,7 +103,7 @@ public class StandStatFormulas {
     }
     
     public static int getBlockingBreakTicks(double durability) {
-        return Math.max(120 - (int) (durability * 5), 1);
+        return Math.max(240 - (int) (durability * 10), 1);
     }
     
     public static float getMaxBarrageParryTickDamage(double durability) {
