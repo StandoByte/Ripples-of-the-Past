@@ -111,7 +111,7 @@ public class MRDetectorEntity extends Entity implements IEntityAdditionalSpawnDa
     @Override
     public void onSyncedDataUpdated(DataParameter<?> parameter) {
         if (level.isClientSide() && ENTITY_DETECTED.equals(parameter) && isEntityDetected()
-                && StandUtil.shouldHearStands(ClientUtil.getClientPlayer())) {
+                && ClientUtil.canHearStands()) {
             ClientTickingSoundsHelper.playMagiciansRedDetectorSound(this);
         }
         super.onSyncedDataUpdated(parameter);
@@ -124,7 +124,7 @@ public class MRDetectorEntity extends Entity implements IEntityAdditionalSpawnDa
 
     @Override
     public boolean isInvisibleTo(PlayerEntity player) {
-        return !player.isSpectator() && (!StandUtil.shouldStandsRender(player) || super.isInvisible());
+        return !player.isSpectator() && (!StandUtil.playerCanSeeStands(player) || super.isInvisible());
     }
 
     @Override

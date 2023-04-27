@@ -22,6 +22,7 @@ import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import com.github.standobyte.jojo.util.mod.TimeUtil;
 import com.google.common.base.MoreObjects;
@@ -210,9 +211,15 @@ public class ClientEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onRenderTick(RenderTickEvent event) {
-        if (mc.level != null && mc.player.isAlive() && isTimeStopped(mc.player.blockPosition()) && event.phase == TickEvent.Phase.START) {
-            if (!canSeeInStoppedTime) {
-                clientTimer.partialTick = 0.0F;
+        if (mc.level != null && event.phase == TickEvent.Phase.START) {
+            ClientUtil.canSeeStands = StandUtil.playerCanSeeStands(mc.player);
+            ClientUtil.canHearStands = /*StandUtil.playerCanHearStands(mc.player)*/ ClientUtil.canSeeStands;
+            if (mc.player.isAlive()) {
+                if (isTimeStopped(mc.player.blockPosition())) {
+                    if (!canSeeInStoppedTime) {
+                        clientTimer.partialTick = 0.0F;
+                    }
+                }
             }
         }
     }

@@ -22,7 +22,6 @@ import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
@@ -282,7 +281,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                     });
                 }
             }
-            else if (StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) {
+            else if (ClientUtil.canSeeStands()) {
                 CustomParticlesHelper.createCDRestorationParticle(userPower.getUser(), Hand.OFF_HAND);
             }
             break;

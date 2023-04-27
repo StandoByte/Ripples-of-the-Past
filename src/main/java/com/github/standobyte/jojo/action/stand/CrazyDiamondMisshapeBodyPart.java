@@ -44,10 +44,10 @@ public class CrazyDiamondMisshapeBodyPart extends StandEntityActionModifier {
             Entity entity = task.getTarget().getEntity();
             if (entity.isAlive() && entity instanceof LivingEntity) {
                 if (world.isClientSide()) {
-                    if (StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) {
+                    if (ClientUtil.canSeeStands()) {
                         CrazyDiamondHeal.addParticlesAround(entity);
                     }
-                    if (task.getTick() == 0 && StandUtil.shouldHearStands(ClientUtil.getClientPlayer())) {
+                    if (task.getTick() == 0 && ClientUtil.canHearStands()) {
                         world.playLocalSound(entity.getX(), entity.getY(0.5), entity.getZ(), ModSounds.CRAZY_DIAMOND_FIX_STARTED.get(), 
                                 standEntity.getSoundSource(), 1.0F, 1.0F, false);
                     }

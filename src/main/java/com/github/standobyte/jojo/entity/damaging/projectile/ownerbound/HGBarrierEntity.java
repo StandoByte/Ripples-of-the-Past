@@ -184,7 +184,7 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
                             ModStandActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get().getStaminaCostTicking(stand.getUserPower()) * 0.5F, 2, false);
                 }
                 MCUtil.playSound(level, null, target.getX(), target.getY(), target.getZ(), 
-                        ModSounds.HIEROPHANT_GREEN_BARRIER_RIPPED.get(), getSoundSource(), 1.0F, 1.0F, StandUtil::shouldHearStands);
+                        ModSounds.HIEROPHANT_GREEN_BARRIER_RIPPED.get(), getSoundSource(), 1.0F, 1.0F, StandUtil::playerCanHearStands);
             }
         }
     }

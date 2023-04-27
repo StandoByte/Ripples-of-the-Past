@@ -644,7 +644,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     @Override
     public boolean isInvisibleTo(PlayerEntity player) {
-        return !player.isSpectator() && (!isVisibleForAll() && !StandUtil.shouldStandsRender(player) || underInvisibilityEffect());
+        return !player.isSpectator() && (!isVisibleForAll() && !StandUtil.playerCanSeeStands(player) || underInvisibilityEffect());
     }
 
     @Override
@@ -668,7 +668,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     public void playSound(SoundEvent sound, float volume, float pitch, @Nullable PlayerEntity player, Vector3d pos) {
         if (!this.isSilent()) {
             if (!isVisibleForAll()) {
-                MCUtil.playSound(level, player, pos.x, pos.y, pos.z, sound, getSoundSource(), volume, pitch, StandUtil::shouldHearStands);
+                MCUtil.playSound(level, player, pos.x, pos.y, pos.z, sound, getSoundSource(), volume, pitch, StandUtil::playerCanHearStands);
             }
             else {
                 level.playSound(player, pos.x, pos.y, pos.z, sound, getSoundSource(), volume, pitch);
@@ -2004,7 +2004,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     @Override
     public boolean isPickable() {
         return super.isPickable() && 
-                !(level.isClientSide() && (ClientUtil.getClientPlayer().is(getUser()) || !StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())));
+                !(level.isClientSide() && (ClientUtil.getClientPlayer().is(getUser()) || !ClientUtil.canSeeStands()));
     }
 
     @Override

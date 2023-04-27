@@ -17,7 +17,6 @@ import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.power.stand.StandUtil;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -80,7 +79,7 @@ public class CrazyDiamondBlockBullet extends StandEntityAction {
 
     @Override
     public void standTickWindup(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-        if (world.isClientSide() && userPower.getUser() != null && StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) {
+        if (world.isClientSide() && userPower.getUser() != null && ClientUtil.canSeeStands()) {
             CustomParticlesHelper.createCDRestorationParticle(userPower.getUser(), Hand.OFF_HAND);
         }
     }

@@ -1,7 +1,6 @@
 package com.github.standobyte.jojo.client.particle.custom;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.power.stand.StandUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
@@ -15,7 +14,7 @@ import net.minecraft.util.math.vector.Vector3d;
 public class CustomParticlesHelper {
     
     public static boolean createCDRestorationParticle(LivingEntity entity, Hand hand) {
-        if (!StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) return false;
+        if (!ClientUtil.canSeeStands()) return false;
         
         EntityPosParticle particle = CDRestorationHandItemParticle.createCustomParticle((ClientWorld) entity.level, entity, hand);
         return addParticle(particle, particle.getPos(), false, false);

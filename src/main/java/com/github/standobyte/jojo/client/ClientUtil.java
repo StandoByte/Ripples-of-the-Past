@@ -44,6 +44,8 @@ import net.minecraft.world.World;
 public class ClientUtil {
     public static final ResourceLocation ADDITIONAL_UI = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/additional.png");
     public static final int MAX_MODEL_LIGHT = LightTexture.pack(15, 15);
+    static boolean canSeeStands;
+    static boolean canHearStands;
 
     public static PlayerEntity getClientPlayer() {
         return Minecraft.getInstance().player;
@@ -75,6 +77,14 @@ public class ClientUtil {
     
     public static float getPartialTick() {
         return Minecraft.getInstance().getFrameTime();
+    }
+    
+    public static boolean canSeeStands() {
+        return canSeeStands;
+    }
+    
+    public static boolean canHearStands() {
+        return canHearStands;
     }
     
     public static void setCameraEntityPreventShaderSwitch(Minecraft mc, Entity entity) {

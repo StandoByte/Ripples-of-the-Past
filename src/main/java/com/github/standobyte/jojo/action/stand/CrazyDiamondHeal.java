@@ -126,14 +126,14 @@ public class CrazyDiamondHeal extends StandEntityAction {
     public static <T> boolean heal(World world, Entity entity, T entityCasted, BiConsumer<T, Boolean> heal, Predicate<T> isHealthMissing) {
         boolean healed = isHealthMissing.test(entityCasted);
         heal.accept(entityCasted, world.isClientSide());
-        if (world.isClientSide() && isHealthMissing.test(entityCasted) && StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) {
+        if (world.isClientSide() && isHealthMissing.test(entityCasted) && ClientUtil.canSeeStands()) {
             addParticlesAround(entity);
         }
         return healed;
     }
     
     public static void addParticlesAround(Entity entity) {
-        if (entity.level.isClientSide() && StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) {
+        if (entity.level.isClientSide() && ClientUtil.canSeeStands()) {
             int particlesCount = Math.max(MathHelper.ceil(entity.getBbWidth() * (entity.getBbHeight() * 2 * entity.getBbHeight())), 1);
             for (int i = 0; i < particlesCount; i++) {
                 entity.level.addParticle(ModParticles.CD_RESTORATION.get(), entity.getRandomX(1), entity.getRandomY(), entity.getRandomZ(1), 0, 0, 0);

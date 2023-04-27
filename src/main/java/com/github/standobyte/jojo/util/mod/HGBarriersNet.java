@@ -139,7 +139,7 @@ public class HGBarriersNet {
             if (playSound) {
                 MCUtil.playSound(stand.level, null, shootingPos.x, shootingPos.y, shootingPos.z, 
                         ModSounds.HIEROPHANT_GREEN_EMERALD_SPLASH.get(), 
-                        stand.getSoundSource(), 1.0F, 1.0F, StandUtil::shouldHearStands);
+                        stand.getSoundSource(), 1.0F, 1.0F, StandUtil::playerCanHearStands);
             }
         }
     }

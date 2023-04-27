@@ -22,7 +22,6 @@ import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
 
@@ -110,10 +109,10 @@ public class CrazyDiamondLeaveObject extends StandEntityActionModifier {
             Entity entity = task.getTarget().getEntity();
             if (entity.isAlive() && entity instanceof LivingEntity && !(entity instanceof SkeletonEntity) && !(entity instanceof StandEntity)) {
                 if (world.isClientSide()) {
-                    if (StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) {
+                    if (ClientUtil.canSeeStands()) {
                         CrazyDiamondHeal.addParticlesAround(entity);
                     }
-                    if (task.getTick() == 0 && StandUtil.shouldHearStands(ClientUtil.getClientPlayer())) {
+                    if (task.getTick() == 0 && ClientUtil.canHearStands()) {
                         world.playLocalSound(entity.getX(), entity.getY(0.5), entity.getZ(), ModSounds.CRAZY_DIAMOND_FIX_STARTED.get(), 
                                 standEntity.getSoundSource(), 1.0F, 1.0F, false);
                     }

@@ -7,13 +7,13 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.entity.MRDetectorEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.BladeHatEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.IPower;
-import com.github.standobyte.jojo.power.stand.StandUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.EntityTickableSound;
@@ -73,7 +73,7 @@ public abstract class ClientTickingSoundsHelper {
     public static void playStandEntityCancelableActionSound(StandEntity stand, SoundEvent sound, 
             StandEntityAction action, @Nullable StandEntityAction.Phase phase, float volume, float pitch, boolean looping) {
         Minecraft mc = Minecraft.getInstance();
-        if (!stand.isVisibleForAll() && !StandUtil.shouldHearStands(mc.player)) {
+        if (!stand.isVisibleForAll() && !ClientUtil.canHearStands()) {
             return;
         }
         
@@ -95,7 +95,7 @@ public abstract class ClientTickingSoundsHelper {
             LivingEntity user = stand.getUser();
             if (user != null) {
                 Minecraft mc = Minecraft.getInstance();
-                if (!stand.isVisibleForAll() && !StandUtil.shouldHearStands(mc.player)) {
+                if (!stand.isVisibleForAll() && !ClientUtil.canHearStands()) {
                     return;
                 }
 
@@ -114,7 +114,7 @@ public abstract class ClientTickingSoundsHelper {
     
     public static void playStandEntitySound(StandEntity stand, SoundEvent sound, float volume, float pitch) {
         Minecraft mc = Minecraft.getInstance();
-        if (!stand.isVisibleForAll() && !StandUtil.shouldHearStands(mc.player)) {
+        if (!stand.isVisibleForAll() && !ClientUtil.canHearStands()) {
             return;
         }
 

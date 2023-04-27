@@ -11,7 +11,6 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.power.stand.StandUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -73,7 +72,7 @@ public class CrazyDiamondBlockCheckpointMove extends StandEntityAction {
                         CrazyDiamondRestoreTerrain.addParticlesAroundBlock(world, pos, standEntity.getRandom());
                     }
                 }
-                if (world.isClientSide() && StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) {
+                if (world.isClientSide() && ClientUtil.canSeeStands()) {
                     CustomParticlesHelper.createCDRestorationParticle(user, Hand.OFF_HAND);
                 }
             });

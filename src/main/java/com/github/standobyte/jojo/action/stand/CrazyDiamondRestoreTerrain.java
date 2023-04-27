@@ -32,7 +32,6 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.stand_specific.CDBlocksRestoredPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 
 import net.minecraft.block.BlockState;
@@ -260,7 +259,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
     
 
     public static void addParticlesAroundBlock(World world, BlockPos blockPos, Random random) {
-        if (world.isClientSide() && StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) {
+        if (world.isClientSide() && ClientUtil.canSeeStands()) {
             Vector3d posLLCorner = Vector3d.atLowerCornerOf(blockPos).subtract(0.25, 0.25, 0.25);
             for (int i = 0; i < 24; i++) {
                 world.addParticle(ModParticles.CD_RESTORATION.get(), 

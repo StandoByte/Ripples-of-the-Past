@@ -13,7 +13,6 @@ import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.network.NetworkUtil;
-import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.block.Block;
@@ -89,7 +88,7 @@ public class CDBlockBulletEntity extends ModdedProjectileEntity {
                     });
                 }
                 else {
-                    if (StandUtil.shouldStandsRender(ClientUtil.getClientPlayer())) {
+                    if (ClientUtil.canSeeStands()) {
                         CrazyDiamondHeal.addParticlesAround(this);
                         
                         target.getBoundingBox().clip(position(), targetPos).ifPresent(pos -> {
@@ -100,7 +99,7 @@ public class CDBlockBulletEntity extends ModdedProjectileEntity {
                                     0, 0, 0);
                         });
                     }
-                    if (!soundStarted && StandUtil.shouldHearStands(ClientUtil.getClientPlayer())) {
+                    if (!soundStarted && ClientUtil.canHearStands()) {
                         ClientTickingSoundsHelper.playEntitySound(this, ModSounds.CRAZY_DIAMOND_FIX_STARTED.get(), 1, 1, false);
                         ClientTickingSoundsHelper.playEntitySound(this, ModSounds.CRAZY_DIAMOND_FIX_LOOP.get(), 1, 1, true);
                         

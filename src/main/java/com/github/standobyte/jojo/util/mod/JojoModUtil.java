@@ -237,7 +237,7 @@ public class JojoModUtil {
 
     public static void extinguishFieryStandEntity(Entity entity, ServerWorld world) {
         MCUtil.playSound(world, null, entity.getX(), entity.getY(), entity.getZ(), 
-                SoundEvents.FIRE_EXTINGUISH, entity.getSoundSource(), 1.0F, 1.0F, StandUtil::shouldHearStands);
+                SoundEvents.FIRE_EXTINGUISH, entity.getSoundSource(), 1.0F, 1.0F, StandUtil::playerCanHearStands);
         world.sendParticles(ParticleTypes.LARGE_SMOKE, entity.getX(), entity.getY(), entity.getZ(), 
                 8, entity.getBbWidth() / 2F, entity.getBbHeight() / 2F, entity.getBbWidth() / 2F, 0);
         entity.remove();
