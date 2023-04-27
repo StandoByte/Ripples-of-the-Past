@@ -45,6 +45,23 @@ public class ModItems {
     public static final RegistryObject<StoneMaskItem> STONE_MASK = ITEMS.register("stone_mask", 
             () -> new StoneMaskItem(ModArmorMaterials.STONE_MASK, EquipmentSlotType.HEAD, new Item.Properties().tab(JojoMod.MAIN_TAB).rarity(Rarity.RARE), ModBlocks.STONE_MASK.get()));
 
+    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_WHITE = ITEMS.register("wooden_coffin_oak_white", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_WHITE.get(), new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_ORANGE = ITEMS.register("wooden_coffin_oak_orange", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_ORANGE.get(), new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_MAGENTA = ITEMS.register("wooden_coffin_oak_magenta", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_MAGENTA.get(), new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_LIGHT_BLUE = ITEMS.register("wooden_coffin_oak_light_blue", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_LIGHT_BLUE.get(), new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_YELLOW = ITEMS.register("wooden_coffin_oak_yellow", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_YELLOW.get(), new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_LIME = ITEMS.register("wooden_coffin_oak_lime", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_LIME.get(), new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_PINK = ITEMS.register("wooden_coffin_oak_pink", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_PINK.get(), new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_GRAY = ITEMS.register("wooden_coffin_oak_gray", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_GRAY.get(), new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_LIGHT_GRAY = ITEMS.register("wooden_coffin_oak_light_gray", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_LIGHT_GRAY.get(), new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_CYAN = ITEMS.register("wooden_coffin_oak_cyan", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_CYAN.get(), new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_PURPLE = ITEMS.register("wooden_coffin_oak_purple", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_PURPLE.get(), new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_BLUE = ITEMS.register("wooden_coffin_oak_blue", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_BLUE.get(), new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_BROWN = ITEMS.register("wooden_coffin_oak_brown", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_BROWN.get(), new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_GREEN = ITEMS.register("wooden_coffin_oak_green", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_GREEN.get(), new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_RED = ITEMS.register("wooden_coffin_oak_red", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_RED.get(), new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1)));
+    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_BLACK = ITEMS.register("wooden_coffin_oak_black", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_BLACK.get(), new Item.Properties().stacksTo(1)));
+
     public static final RegistryObject<CustomModelArmorItem> BREATH_CONTROL_MASK = ITEMS.register("breath_control_mask", 
             () -> new CustomModelArmorItem(ModArmorMaterials.BREATH_CONTROL_MASK, EquipmentSlotType.HEAD, new Item.Properties().tab(JojoMod.MAIN_TAB)));
 

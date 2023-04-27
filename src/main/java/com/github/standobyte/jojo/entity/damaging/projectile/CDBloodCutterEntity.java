@@ -1,28 +1,23 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
+import java.util.Optional;
+
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
-import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
-import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
-import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.util.GameplayEventHandler;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.math.EntityRayTraceResult;
-import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class CDBloodCutterEntity extends ModdedProjectileEntity {
@@ -55,32 +50,8 @@ public class CDBloodCutterEntity extends ModdedProjectileEntity {
     private void splashBlood() {
         if (isInWaterOrBubble()) return;
         if (!level.isClientSide()) {
-            Vector3d thisPos = this.getBoundingBox().getCenter();
-            IStandPower.getStandPowerOptional(getOwner()).ifPresent(stand -> {
-                level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(4), 
-                        EntityPredicates.ENTITY_STILL_ALIVE.and(EntityPredicates.NO_SPECTATORS).and(
-                                entity -> canHaveBloodDropsOn(entity, stand)))
-                .forEach(entity -> {
-                    Vector3d targetPos = entity.getBoundingBox().getCenter();
-                    if (level.clip(new RayTraceContext(thisPos, targetPos, 
-                            RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, this))
-                            .getType() == RayTraceResult.Type.MISS) {
-                        stand.getContinuousEffects().getOrCreateEffect(ModStandEffects.DRIED_BLOOD_DROPS.get(), entity).resetTicks();
-                        PacketManager.sendToClientsTracking(new BloodParticlesPacket(
-                                thisPos, targetPos, 32), this);
-                    }
-                });
-            });
+            GameplayEventHandler.splashBlood(level, getBoundingBox().getCenter(), 4, 6.4F, Optional.ofNullable(getOwner()));
             level.playSound(null, getX(), getY(), getZ(), ModSounds.WATER_SPLASH.get(), getSoundSource(), 1.0F, 1.0F);
-        }
-        else {
-            for (int i = 0; i < 32; i++) {
-                ClientUtil.getClientWorld().addParticle(ModParticles.BLOOD.get(), 
-                        getX(), getY(), getZ(), 
-                        (random.nextDouble() - 0.5) * 0.2, 
-                        (random.nextDouble() - 0.5) * 0.2, 
-                        (random.nextDouble() - 0.5) * 0.2);
-            }
         }
     }
     

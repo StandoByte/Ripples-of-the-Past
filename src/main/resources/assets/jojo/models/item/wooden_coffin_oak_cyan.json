@@ -1,0 +1,6 @@
+{
+  "parent": "jojo:item/coffin",
+  "textures": {
+    "1": "block/cyan_wool"
+  }
+}

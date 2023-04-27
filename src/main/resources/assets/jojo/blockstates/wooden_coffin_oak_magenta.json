@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=east,part=head,coffin_lid_closed=true": { "model": "jojo:block/coffin1_magenta", "y": 90 },
+    "facing=east,part=foot,coffin_lid_closed=true": { "model": "jojo:block/coffin2_magenta", "y": 90 },
+    "facing=east,part=head,coffin_lid_closed=false": { "model": "jojo:block/coffin1_open_magenta", "y": 90 },
+    "facing=east,part=foot,coffin_lid_closed=false": { "model": "jojo:block/coffin2_open_magenta", "y": 90 },
+    "facing=south,part=head,coffin_lid_closed=true": { "model": "jojo:block/coffin1_magenta", "y": 180 },
+    "facing=south,part=foot,coffin_lid_closed=true": { "model": "jojo:block/coffin2_magenta", "y": 180 },
+    "facing=south,part=head,coffin_lid_closed=false": { "model": "jojo:block/coffin1_open_magenta", "y": 180 },
+    "facing=south,part=foot,coffin_lid_closed=false": { "model": "jojo:block/coffin2_open_magenta", "y": 180 },
+    "facing=west,part=head,coffin_lid_closed=true": { "model": "jojo:block/coffin1_magenta", "y": 270 },
+    "facing=west,part=foot,coffin_lid_closed=true": { "model": "jojo:block/coffin2_magenta", "y": 270 },
+    "facing=west,part=head,coffin_lid_closed=false": { "model": "jojo:block/coffin1_open_magenta", "y": 270 },
+    "facing=west,part=foot,coffin_lid_closed=false": { "model": "jojo:block/coffin2_open_magenta", "y": 270 },
+    "facing=north,part=head,coffin_lid_closed=true": { "model": "jojo:block/coffin1_magenta", "y": 0 },
+    "facing=north,part=foot,coffin_lid_closed=true": { "model": "jojo:block/coffin2_magenta", "y": 0 },
+    "facing=north,part=head,coffin_lid_closed=false": { "model": "jojo:block/coffin1_open_magenta", "y": 0 },
+    "facing=north,part=foot,coffin_lid_closed=false": { "model": "jojo:block/coffin2_open_magenta", "y": 0 }
+  }
+}

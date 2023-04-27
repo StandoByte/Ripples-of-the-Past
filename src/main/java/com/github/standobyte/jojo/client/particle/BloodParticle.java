@@ -71,8 +71,7 @@ public class BloodParticle extends SpriteTexturedParticle {
                 stopParticle();
             }
             else {
-                List<Entity> entities = level.getEntities((Entity) null, this.getBoundingBox(), 
-                        entity -> entity.getType() != ModEntityTypes.CD_BLOOD_CUTTER.get());
+                List<Entity> entities = checkEntity();
                 if (!entities.isEmpty()) {
                     Entity entity = entities.get(0);
                     entityOffset = Optional.of(Pair.of(entity, entity.position().subtract(x, y, z)));
@@ -88,6 +87,11 @@ public class BloodParticle extends SpriteTexturedParticle {
             waterDownTicks += lifetime / 10;
         }
     }
+
+    protected List<Entity> checkEntity() {
+        return level.getEntities((Entity) null, this.getBoundingBox(), 
+                entity -> entity.getType() != ModEntityTypes.CD_BLOOD_CUTTER.get());
+    }
     
     private void stopParticle() {
         xd = 0;
@@ -97,9 +101,11 @@ public class BloodParticle extends SpriteTexturedParticle {
 
     public static class Factory implements IParticleFactory<BasicParticleType> {
         private final IAnimatedSprite spriteSet;
+        private static IAnimatedSprite spriteStatic;
 
         public Factory(IAnimatedSprite sprite) {
             this.spriteSet = sprite;
+            spriteStatic = sprite;
         }
 
         @Override
@@ -110,6 +116,10 @@ public class BloodParticle extends SpriteTexturedParticle {
             particle.scale(0.5F);
             particle.gravity = 1;
             return particle;
+        }
+        
+        public static IAnimatedSprite getSprite() {
+            return spriteStatic;
         }
     }
 

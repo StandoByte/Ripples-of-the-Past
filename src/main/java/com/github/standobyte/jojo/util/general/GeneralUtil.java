@@ -13,6 +13,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import net.minecraft.util.Util;
+import net.minecraftforge.common.util.LazyOptional;
 
 public class GeneralUtil {
     
@@ -40,6 +41,14 @@ public class GeneralUtil {
         } else {
             emptyAction.run();
         }
+    }
+    
+    public static <T> boolean orElseFalse(LazyOptional<T> optional, Predicate<T> predicate) {
+        return orElseFalse(optional.resolve(), predicate);
+    }
+    
+    public static <T> boolean orElseFalse(Optional<T> optional, Predicate<T> predicate) {
+        return optional.map(element -> predicate.test(element)).orElse(false);
     }
     
     public static <T> LinkedHashMap<Predicate<T>, List<T>> groupByPredicatesOrdered(Stream<T> elements, List<Predicate<T>> predicates, 

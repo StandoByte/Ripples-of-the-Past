@@ -23,6 +23,7 @@ import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.play.server.SSpawnParticlePacket;
@@ -167,6 +168,10 @@ public class ClientUtil {
     
     public static void createParticlesEmitter(Entity entity, IParticleData type, int ticks) {
         Minecraft.getInstance().particleEngine.createTrackingEmitter(entity, type, ticks);
+    }
+    
+    public static boolean decreasedParticlesSetting() {
+        return Minecraft.getInstance().options.particles == ParticleStatus.DECREASED;
     }
     
     public static float[] rgb(int color) {

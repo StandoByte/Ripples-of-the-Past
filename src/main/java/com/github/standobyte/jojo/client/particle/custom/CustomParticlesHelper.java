@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.client.particle.custom;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.client.ClientUtil;
 
 import net.minecraft.client.Minecraft;
@@ -7,7 +9,9 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.particles.BasicParticleType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.vector.Vector3d;
 
@@ -18,6 +22,14 @@ public class CustomParticlesHelper {
         
         EntityPosParticle particle = CDRestorationHandItemParticle.createCustomParticle((ClientWorld) entity.level, entity, hand);
         return addParticle(particle, particle.getPos(), false, false);
+    }
+
+    @SuppressWarnings("resource")
+    public static boolean createBloodParticle(BasicParticleType type, @Nullable Entity entity, 
+            double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+        BloodFromEntityParticle particle = BloodFromEntityParticle.createCustomParticle(
+                type, Minecraft.getInstance().level, entity, x, y, z, xSpeed, ySpeed, zSpeed);
+        return addParticle(particle, new Vector3d(x, y, z), false, false);
     }
     
     public static boolean addParticle(Particle particle, Vector3d particlePos, boolean overrideLimiter, boolean alwaysVisible) {

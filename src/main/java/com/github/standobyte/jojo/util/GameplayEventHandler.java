@@ -22,6 +22,7 @@ import com.github.standobyte.jojo.action.stand.effect.BoyIIManStandPartTakenEffe
 import com.github.standobyte.jojo.action.stand.effect.DriedBloodDrops;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.block.StoneMaskBlock;
+import com.github.standobyte.jojo.block.WoodenCoffinBlock;
 import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCap;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
@@ -65,6 +66,7 @@ import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.type.EntityStandType;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.github.standobyte.jojo.tileentity.StoneMaskTileEntity;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
@@ -122,9 +124,11 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ChatType;
@@ -233,7 +237,12 @@ public class GameplayEventHandler {
     private static final float MAX_SUN_DAMAGE = 10;
     private static final float MIN_SUN_DAMAGE = 2;
     private static float getSunDamage(LivingEntity entity) {
-        if (entity.hasEffect(ModEffects.SUN_RESISTANCE.get()) || !(entity instanceof PlayerEntity || JojoModConfig.getCommonConfigInstance(false).undeadMobsSunDamage.get())) {
+        if (entity.hasEffect(ModEffects.SUN_RESISTANCE.get())
+                || !(entity instanceof PlayerEntity || JojoModConfig.getCommonConfigInstance(false).undeadMobsSunDamage.get())
+                || entity.isSleeping() && entity.getSleepingPos().map(sleepingPos -> {
+                    BlockState blockState = entity.level.getBlockState(sleepingPos);
+                    return blockState.getBlock() instanceof WoodenCoffinBlock && blockState.getValue(WoodenCoffinBlock.CLOSED);
+                }).orElse(false)) {
             return 0;
         }
         World world = entity.level;
@@ -669,19 +678,31 @@ public class GameplayEventHandler {
             }
         });
         
-        
-        double radius = 2;
-        BlockPos entityPos = target.blockPosition();
+        splashBlood(world, target.getBoundingBox().getCenter(), 2, dmgAmount, Optional.of(target));
+    }
+    
+    public static boolean splashBlood(World world, Vector3d splashPos, double radius, float bleedAmount, Optional<LivingEntity> ownerEntity) {
+        if (world.isClientSide()) {
+            return false;
+        }
 
+        AxisAlignedBB aabb = new AxisAlignedBB(splashPos.subtract(radius, radius, radius), splashPos.add(radius, radius, radius));
         List<Vector3d> particlePos = new ArrayList<>();
-        List<LivingEntity> entitiesAround = MCUtil.entitiesAround(LivingEntity.class, target, radius, true, EntityPredicates.NO_SPECTATORS);
+        List<LivingEntity> entitiesAround = world.getEntitiesOfClass(LivingEntity.class, aabb, 
+                EntityPredicates.ENTITY_STILL_ALIVE.and(EntityPredicates.NO_SPECTATORS)
+                .and(entity -> {
+                    return world.clip(new RayTraceContext(splashPos, entity.getBoundingBox().getCenter(), 
+                          RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, entity))
+                          .getType() == RayTraceResult.Type.MISS;
+                }));
         for (LivingEntity entity : entitiesAround) {
-            if (dropBloodOnEntity(dmgSource, dmgAmount, target, entity)) {
+            if (dropBloodOnEntity(ownerEntity, entity, bleedAmount)) {
                 particlePos.add(entity.getEyePosition(1.0F));
             }
         }
 
-        BlockPos.betweenClosedStream(entityPos.offset(-radius, -radius, -radius), entityPos.offset(radius, radius, radius))
+        BlockPos blockPos = new BlockPos(splashPos);
+        BlockPos.betweenClosedStream(blockPos.offset(-radius, -radius, -radius), blockPos.offset(radius, radius, radius))
         .filter(pos -> world.getBlockState(pos).getBlock() == ModBlocks.STONE_MASK.get())
         .forEach(pos -> {
             BlockState blockState = world.getBlockState(pos);
@@ -703,31 +724,33 @@ public class GameplayEventHandler {
         });
 
         if (!particlePos.isEmpty()) {
-            Vector3d particleSource = target.getBoundingBox().getCenter();
-            int count = Math.min((int) (dmgAmount * 5), 50);
-            particlePos.forEach(pos -> {
-                PacketManager.sendToClientsTrackingAndSelf(new BloodParticlesPacket(particleSource, pos, count), target);
+            int count = Math.min((int) (bleedAmount * 5), 50);
+            particlePos.forEach(posTo -> {
+                PacketManager.sendToTrackingChunk(new BloodParticlesPacket(splashPos, posTo, count, ownerEntity.map(Entity::getId).orElse(-1)), world.getChunkAt(blockPos));
             });
         }
+        
+        return !particlePos.isEmpty();
     }
     
-    private static boolean dropBloodOnEntity(DamageSource dmgSource, float dmgAmount, LivingEntity bleedingEntity, LivingEntity nearbyEntity) {
+    private static boolean dropBloodOnEntity(Optional<LivingEntity> bleedingEntity, LivingEntity nearbyEntity, float bleedAmount) {
         boolean dropped = false;
         
         ItemStack headArmor = nearbyEntity.getItemBySlot(EquipmentSlotType.HEAD);
         if (headArmor.getItem() instanceof StoneMaskItem && applyStoneMask(nearbyEntity, headArmor)) {
             dropped = true;
         }
-        
-        if ((dropped || nearbyEntity.getRandom().nextFloat() < dmgAmount / 5)) {
-            dropped |= IStandPower.getStandPowerOptional(bleedingEntity).map(power -> {
-                if (ModStandActions.CRAZY_DIAMOND_BLOOD_CUTTER.get().isUnlocked(power) && CDBloodCutterEntity.canHaveBloodDropsOn(nearbyEntity, power)) {
-                    DriedBloodDrops bloodDrops = power.getContinuousEffects().getOrCreateEffect(ModStandEffects.DRIED_BLOOD_DROPS.get(), nearbyEntity);
-                    return bloodDrops.tickCount == 0;
-                }
-                return false;
-            }).orElse(false);
-        }
+
+        dropped |= GeneralUtil.orElseFalse(bleedingEntity, entity -> {
+            return nearbyEntity.getRandom().nextFloat() < bleedAmount / 5 && 
+                    GeneralUtil.orElseFalse(IStandPower.getStandPowerOptional(entity), (IStandPower power) -> {
+                        if (ModStandActions.CRAZY_DIAMOND_BLOOD_CUTTER.get().isUnlocked(power) && CDBloodCutterEntity.canHaveBloodDropsOn(nearbyEntity, power)) {
+                            DriedBloodDrops bloodDrops = power.getContinuousEffects().getOrCreateEffect(ModStandEffects.DRIED_BLOOD_DROPS.get(), nearbyEntity);
+                            return bloodDrops.tickCount > 0;
+                        }
+                        return false;
+                    });
+        });
         
         return dropped;
     }

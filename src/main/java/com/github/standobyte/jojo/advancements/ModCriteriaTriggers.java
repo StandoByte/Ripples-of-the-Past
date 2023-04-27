@@ -45,6 +45,8 @@ public class ModCriteriaTriggers {
             new CriteriaTriggerSupplier<>(() -> new KilledPowerUserTrigger(new ResourceLocation(JojoMod.MOD_ID, "player_killed_entity"), false));
     public static final CriteriaTriggerSupplier<KilledPowerUserTrigger> ENTITY_KILLED_PLAYER = 
             new CriteriaTriggerSupplier<>(() -> new KilledPowerUserTrigger(new ResourceLocation(JojoMod.MOD_ID, "entity_killed_player"), true));
+    public static final CriteriaTriggerSupplier<UnconditionalTrigger> SLEPT_IN_COFFIN = 
+            new CriteriaTriggerSupplier<>(() -> new UnconditionalTrigger(new ResourceLocation(JojoMod.MOD_ID, "coffin_sleep")));
     public static final CriteriaTriggerSupplier<StoneMaskDestroyedTrigger> STONE_MASK_DESTROYED = 
             new CriteriaTriggerSupplier<>(() -> new StoneMaskDestroyedTrigger(new ResourceLocation(JojoMod.MOD_ID, "destroy_stone_mask")));
     public static final CriteriaTriggerSupplier<UnconditionalTrigger> AFK = 

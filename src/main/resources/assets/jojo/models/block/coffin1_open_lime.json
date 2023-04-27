@@ -1,0 +1,6 @@
+{
+  "parent": "jojo:block/coffin1_open",
+  "textures": {
+    "1": "block/lime_wool"
+  }
+}

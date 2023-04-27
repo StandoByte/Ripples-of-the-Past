@@ -156,4 +156,11 @@ public class CommonReflection {
         }
         return CREEPER_DATA_IS_POWERED;
     }
+    
+    
+    
+    private static final Field PLAYER_ENTITY_SLEEP_COUNTER = ObfuscationReflectionHelper.findField(PlayerEntity.class, "field_71076_b");
+    public static void setSleepCounter(PlayerEntity entity, int sleepCounter) {
+        ReflectionUtil.setFieldValue(PLAYER_ENTITY_SLEEP_COUNTER, entity, sleepCounter);
+    }
 }
