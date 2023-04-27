@@ -10,7 +10,37 @@ issueTrackerURL="https://github.com/StandoByte/Ripples-of-the-Past/issues"
     updateJSONURL="https://raw.githubusercontent.com/StandoByte/Ripples-of-the-Past/1.16.5/update.json"
     displayURL="https://curseforge.com/minecraft/mc-mods/ripples-of-the-past/"
     logoFile="logo.png"
-    credits="\n  Stand sound effects:\n    Spybreak001 - https://youtube.com/user/Spybreak001\n    dendy - https://www.youtube.com/channel/UCfFQSPN-Zxx8jEALchUPpPw\n    Folzy SFX Sound Design (the channel has been renamed and all the videos seem to be removed from the public access)\n    JoJo SFX Green Screen & Blue Screen - https://www.youtube.com/channel/UCkxl6FSocj8mHEIJRw5KjYg  \n  Voice lines from Eyes of Heaven and All Star Battle games: https://sounds-resource.com/\n  Boosty subscribers:\n    YetDarker"
+    credits='''
+    
+  Stand sound effects:
+    Spybreak001 - https://youtube.com/user/Spybreak001
+    dendy - https://www.youtube.com/channel/UCfFQSPN-Zxx8jEALchUPpPw
+    Folzy SFX Sound Design (the channel has been renamed and all the videos seem to be removed from the public access)
+    JoJo SFX Green Screen & Blue Screen - https://www.youtube.com/channel/UCkxl6FSocj8mHEIJRw5KjYg
+  Voice lines from Eyes of Heaven and All Star Battle games: https://sounds-resource.com/
+  Translations:
+    Brazilian Portuguese: Complexo
+    Chinese Simplified: GeziGG233
+    Italian: Giancarlo Esposito
+    Russian: Ivan Zakharov
+    Spanish: dhilansyt
+    Ukrainian: kage0100
+  Boosty subscribers:
+    YetDarker
+    ThE ReVeRsE_FlAsH
+    potato valentine
+    Кхъ
+    Pr1tcha
+    _Taske
+    ArmorForm
+    NIKKI102
+    ko1n
+    Yujin
+    Robert E.O. Scorpivan
+    999hhh20
+    wain-Beluga_UwU
+    adel
+'''
     authors="StandoByte"
     description='''
     This mod adds items and supernatural powers (Hamon, vampirism and Stands) from the JoJo's Bizarre Adventure manga and anime series.'''
@@ -21,3 +51,17 @@ issueTrackerURL="https://github.com/StandoByte/Ripples-of-the-Past/issues"
     versionRange="[36.2.20,)"
     ordering="NONE"
     side="BOTH"
+
+[[dependencies.jojo]]
+    modId="playeranimator"
+    mandatory=false
+    versionRange="[0.4.0+1.16.5,)"
+    ordering="NONE"
+    side="CLIENT"
+
+[[dependencies.jojo]]
+    modId="bendylib"
+    mandatory=false
+    versionRange="[1.2.1,)"
+    ordering="NONE"
+    side="CLIENT"
