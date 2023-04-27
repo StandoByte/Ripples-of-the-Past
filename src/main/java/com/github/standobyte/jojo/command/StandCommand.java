@@ -38,9 +38,10 @@ public class StandCommand {
                         .executes(ctx -> giveRandomStands(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets")))))
                 .then(Commands.literal("clear").then(Commands.argument("targets", EntityArgument.players())
                         .executes(ctx -> removeStands(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets")))))
-                .then(Commands.literal("name").then(Commands.argument("targets", EntityArgument.player())
+                .then(Commands.literal("type").then(Commands.argument("targets", EntityArgument.player())
                         .executes(ctx -> queryStand(ctx.getSource(), EntityArgument.getPlayer(ctx, "targets")))))
                 );
+        JojoCommandsCommand.addCommand("stand");
     }
 
     private static int giveStands(CommandSource source, Collection<ServerPlayerEntity> targets, StandType<?> standType) throws CommandSyntaxException {
@@ -67,12 +68,12 @@ public class StandCommand {
             if (targets.size() == 1) {
                 source.sendSuccess(new TranslationTextComponent(
                         "commands.stand.give.success.single", 
-                        new TranslationTextComponent(standType.getTranslationKey()), targets.iterator().next().getDisplayName()), true);
+                        standType.getName(), targets.iterator().next().getDisplayName()), true);
             }
             else {
                 source.sendSuccess(new TranslationTextComponent(
                         "commands.stand.give.success.multiple", 
-                        new TranslationTextComponent(standType.getTranslationKey()), i), true);
+                        standType.getName(), i), true);
             }
             return i;
         }
@@ -113,7 +114,7 @@ public class StandCommand {
         else {
             if (targets.size() == 1) {
                 source.sendSuccess(new TranslationTextComponent("commands.stand.give.success.single", 
-                        stand != null ? new TranslationTextComponent(stand.getTranslationKey()) : "", 
+                        stand != null ? stand.getName() : "", 
                                 targets.iterator().next().getDisplayName()), true);
             }
             else {
@@ -145,7 +146,7 @@ public class StandCommand {
         } else {
             if (targets.size() == 1) {
                 source.sendSuccess(new TranslationTextComponent("commands.stand.remove.success.single", 
-                        removedStand != null ? new TranslationTextComponent(removedStand.getTranslationKey()) : "", 
+                        removedStand != null ? removedStand.getName() : "", 
                                 targets.iterator().next().getDisplayName()), true);
             } else {
                 source.sendSuccess(new TranslationTextComponent("commands.stand.remove.success.multiple", i), true);
@@ -159,7 +160,7 @@ public class StandCommand {
         if (power != null) {
             if (power.hasPower()) {
                 StandType<?> type = power.getType();
-                source.sendSuccess(new TranslationTextComponent("commands.stand.query.success", player.getDisplayName(), new TranslationTextComponent(type.getTranslationKey())), false);
+                source.sendSuccess(new TranslationTextComponent("commands.stand.query.success", player.getDisplayName(), type.getName()), false);
                 return ModStandActions.STANDS.getNumericId(type.getRegistryName());
             }
         }

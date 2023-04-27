@@ -39,6 +39,7 @@ import net.minecraft.client.resources.JsonReloadListener;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResourceManager;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.FileUtil;
 import net.minecraft.util.JSONUtils;
@@ -97,11 +98,14 @@ public class StandStatsManager extends JsonReloadListener {
         
         JojoModConfig.getCommonConfigInstance(false).onStatsDataPackLoad();
     }
+    
+    public static Path getPackFolderPath(MinecraftServer server) {
+        return server.getWorldPath(FolderName.DATAPACK_DIR).resolve(GenStandStatsCommand.PACK_NAME);
+    }
 
-    private static final FolderName OUTPUT_DIR = new FolderName(GenStandStatsCommand.PACK_NAME);
     private final Set<Path> savedStatsWorlds = new HashSet<>();
     public void writeDefaultStandStats(ServerWorld world) throws StatsStatsSaveException {
-        Path folderPath = world.getServer().getWorldPath(OUTPUT_DIR);
+        Path folderPath = getPackFolderPath(world.getServer());
         if (!savedStatsWorlds.contains(folderPath)) {
             Path dataFolderPath = folderPath.resolve("data");
             Set<Map.Entry<RegistryKey<StandType<?>>, StandType<?>>> standTypes = ModStandActions.STANDS.getRegistry().getEntries();
@@ -124,7 +128,7 @@ public class StandStatsManager extends JsonReloadListener {
                 Files.write(
                         "{\n" + 
                         "  \"pack\": {\n" + 
-                        "    \"pack_format\": 7,\n" + 
+                        "    \"pack_format\": 6,\n" + 
                         "    \"description\": \"Stand stats for Ripples of the Past mod\"\n" + 
                         "  }\n" + 
                         "}", 

@@ -31,6 +31,8 @@ public class JojoControlsCommand {
             new TranslationTextComponent("jojo.chat.command.controls.stand", 
                     new KeybindTextComponent("jojo.key.toggle_stand").withStyle(TextFormatting.ITALIC),
                     new KeybindTextComponent("jojo.key.stand_remote_control").withStyle(TextFormatting.ITALIC)).withStyle(TextFormatting.GRAY),
+            new TranslationTextComponent("jojo.chat.command.controls.layout_edit", 
+                    new KeybindTextComponent("jojo.key.edit_hud").withStyle(TextFormatting.ITALIC)).withStyle(TextFormatting.GRAY),
             new TranslationTextComponent("jojo.chat.command.controls.changeable").withStyle(TextFormatting.GRAY)
     };
 
@@ -40,6 +42,7 @@ public class JojoControlsCommand {
         })).then(Commands.argument("page", IntegerArgumentType.integer(1, Integer.MAX_VALUE)).executes((ctx -> {
             return writePage(IntegerArgumentType.getInteger(ctx, "page"), ctx);
         }))));
+        JojoCommandsCommand.addCommand(LITERAL);
     }
 
     private static int writePage(int page, CommandContext<CommandSource> ctx) {

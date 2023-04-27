@@ -33,6 +33,7 @@ public class JojoPowerCommand {
                 .then(Commands.literal("clear").then(Commands.argument("targets", EntityArgument.players())
                         .executes(ctx -> removeNonStandPowers(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets")))))
                 );
+        JojoCommandsCommand.addCommand("jojopower");
     }
     
     private static int giveNonStandPowers(CommandSource source, Collection<ServerPlayerEntity> targets, NonStandPowerType<?> powerType) throws CommandSyntaxException {

@@ -103,16 +103,30 @@ public class HamonData extends TypeSpecificData {
         hamonSkills.addSkill(HamonSkill.HEALING);
     }
 
+
     public static int pointsAtLevel(int level) {
         return level * (
                 LVL_1_POINTS
                 + LVL_1_POINTS + (level - 1) * NEXT_LVL_DIFF)
                 / 2;
     }
-
     public static int levelFromPoints(int points) {
         int b = 2 * LVL_1_POINTS - NEXT_LVL_DIFF;
         return MathHelper.floor(Math.sqrt((b * b + 8 * NEXT_LVL_DIFF * points)) - b) / (2 * NEXT_LVL_DIFF);
+    }
+
+    public static int pointsAtLevelFraction(float level) {
+        int lvlFloored = MathHelper.floor(level);
+        int pointsFullLvls = pointsAtLevel(lvlFloored);
+        int pointsNextLvl = pointsAtLevel(lvlFloored + 1);
+        return pointsFullLvls + MathHelper.floor((float) (pointsNextLvl - pointsFullLvls) * MathHelper.frac(level));
+    }
+
+    public static float levelFractionFromPoints(int points) {
+        int curLvl = levelFromPoints(points);
+        int curLvlPointsInt = pointsAtLevel(curLvl);
+        int pointsNextLvl = pointsAtLevel(curLvl + 1);
+        return (float) curLvl + (float) (points - curLvlPointsInt) / (float) (pointsNextLvl - curLvlPointsInt);
     }
     
     public void setHamonStatPoints(HamonStat stat, int points, boolean ignoreTraining, boolean allowLesserValue) {

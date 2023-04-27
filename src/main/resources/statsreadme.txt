@@ -1,12 +1,7 @@
-This is a template for a data pack which configures Stand stats in Ripples of the Past mod.
+This is a data pack which configures Stand stats in Ripples of the Past mod.
 To change the stats of a Stand using this data pack, you'll need to:
-1) IMPORTANT: Move/copy the "standstatspack" folder (the one where this file is located) to your world's "datapacks" folder.
-----
-It is a data pack. The game WILL NOT see it if you do not do this step.
-The "standstatspack" folder always generates with default values whenever you type /getstandstats command.
-----
-2) Inside this data pack, find a .json file for a Stand you want to configure.
-3) Open it with any text editor and change the values you need.
+1) Find a .json file for a Stand you want to configure (inside data/jojo/stand_stats folder).
+2) Open it with any text editor and change the values you need.
 ----
 The file has two main blocks of variables:
     statsBase - stats the Stand will have at the start of its progression (Resolve levels, up to 4)
@@ -35,7 +30,7 @@ Currently, The World and Star Platinum have additional settings which affect the
 Important: if you remove a value from the file, it will be automatically set to 0 in game, so make sure the file has the same amount of lines as it had before.
 However, if you do not want to change a certain Stand's stats, its whole file can be deleted.
 ----
-4) Save the edited file(s).
-5) Open the world, or type /reload command in the chat if you're editing it while playing in that world (basically the standard process of data pack loading).
+3) Save the edited file(s).
+4) Open the world, or type /reload command in the chat if you're editing it while playing in that world (basically the standard process of data pack loading).
 
 This data pack's format will stay the same throughout v0.2.X versions of the mod, however, it may or may not change by the time v0.3 comes out.

@@ -24,6 +24,7 @@ public class RockPaperScissorsCommand {
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         dispatcher.register(Commands.literal(LITERAL).then(Commands.argument("target", EntityArgument.player())
                 .executes(ctx -> game(ctx.getSource(), EntityArgument.getPlayer(ctx, "target"), ctx))));
+        JojoCommandsCommand.addCommand("rockpaperscissors");
     }
     
     private static int game(CommandSource source, ServerPlayerEntity opponent, CommandContext<CommandSource> ctx) {

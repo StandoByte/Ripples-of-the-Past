@@ -7,6 +7,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 public interface IPowerType<P extends IPower<P, T>, T extends IPowerType<P, T>> extends IForgeRegistryEntry<T> {
@@ -23,6 +25,9 @@ public interface IPowerType<P extends IPower<P, T>, T extends IPowerType<P, T>> 
     Action<P>[] getAbilities();
     float getTargetResolveMultiplier(P power, IStandPower attackingStand);
     String getTranslationKey();
+    default IFormattableTextComponent getName() {
+        return new TranslationTextComponent(getTranslationKey());
+    }
     ResourceLocation getIconTexture();
     String getEnergyString();
 }

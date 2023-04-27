@@ -42,6 +42,7 @@ public class JojoEnergyCommand {
                 .then(Commands.literal("get").then(Commands.argument("target", EntityArgument.entity())
                         .executes(ctx -> getEnergy(ctx.getSource(), EntityArgument.getEntity(ctx, "target")))))
                 );
+        JojoCommandsCommand.addCommand("jojoenergy");
     }
     
     private enum NumType {
