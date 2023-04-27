@@ -7,8 +7,8 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockBullet;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
-import com.github.standobyte.jojo.init.ModActions;
-import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
@@ -19,12 +19,12 @@ import net.minecraft.util.ResourceLocation;
 public class CrazyDiamondBloodHomingMarker extends MarkerRenderer {
     
     public CrazyDiamondBloodHomingMarker(Minecraft mc) {
-        super(ModStandTypes.CRAZY_DIAMOND.get().getColor(), new ResourceLocation(JojoMod.MOD_ID, "textures/icons/blood_drops.png"), mc);
+        super(ModStands.CRAZY_DIAMOND.getStandType().getColor(), new ResourceLocation(JojoMod.MOD_ID, "textures/icons/blood_drops.png"), mc);
     }
     
     @Override
     protected boolean shouldRender() {
-        return ActionsOverlayGui.getInstance().getSelectedAction(ActionType.ATTACK) == ModActions.CRAZY_DIAMOND_BLOCK_BULLET.get()
+        return ActionsOverlayGui.getInstance().getSelectedAction(ActionType.ATTACK) == ModStandActions.CRAZY_DIAMOND_BLOCK_BULLET.get()
                 && !mc.player.isShiftKeyDown();
     }
 

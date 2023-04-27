@@ -16,7 +16,7 @@ import net.minecraft.world.World;
 public final class StandEntityUnsummon extends StandEntityAction {
 
     public StandEntityUnsummon() {
-        super(new StandEntityAction.Builder().standUserSlowDownFactor(1.0F));
+        super(new StandEntityAction.Builder().standUserWalkSpeed(1.0F));
     }
 
     @Override

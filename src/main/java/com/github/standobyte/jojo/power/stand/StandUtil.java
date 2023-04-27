@@ -18,7 +18,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.StandController;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEffects;
-import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.StandControlStatusPacket;
 import com.github.standobyte.jojo.power.IPower;
@@ -66,7 +66,7 @@ public class StandUtil {
     }
     
     public static List<StandType<?>> availableStands(int[] tiers, LivingEntity entity) {
-        Collection<StandType<?>> stands = ModStandTypes.Registry.getRegistry().getValues();
+        Collection<StandType<?>> stands = ModStandActions.STANDS.getRegistry().getValues();
         return stands.stream()
                 .filter(stand -> (
                         tiers == null ||
@@ -109,7 +109,7 @@ public class StandUtil {
     }
     
     public static Set<Integer> getAvailableTiers(JojoModConfig.Common config) {
-        return ModStandTypes.Registry.getRegistry().getValues()
+        return ModStandActions.STANDS.getRegistry().getValues()
                 .stream()
                 .filter(stand -> !config.isStandBanned(stand))
                 .map(StandType::getTier)

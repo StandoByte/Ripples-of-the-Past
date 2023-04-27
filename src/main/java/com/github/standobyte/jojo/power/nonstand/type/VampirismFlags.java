@@ -4,8 +4,8 @@ import java.util.List;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.non_stand.VampirismAction;
-import com.github.standobyte.jojo.init.ModActions;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.vampirism.ModVampirismActions;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrNonStandFlagPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrNonStandFlagPacket.Flag;
@@ -24,7 +24,7 @@ public class VampirismFlags extends TypeSpecificData {
     @Override
     public void onPowerGiven(NonStandPowerType<?> oldType) {
         if (!power.getUser().level.isClientSide()) {
-            if (oldType == ModNonStandPowers.HAMON.get()) {
+            if (oldType == ModPowers.HAMON.get()) {
                 setVampireHamonUser(true);
             }
             power.addEnergy(300);
@@ -34,9 +34,9 @@ public class VampirismFlags extends TypeSpecificData {
     @Override
     public boolean isActionUnlocked(Action<INonStandPower> action, INonStandPower power) {
         return vampireFullPower || 
-                action == ModActions.VAMPIRISM_BLOOD_DRAIN.get() || 
-                action == ModActions.VAMPIRISM_BLOOD_GIFT.get() || 
-                vampireHamonUser && action == ModActions.VAMPIRISM_HAMON_SUICIDE.get();
+                action == ModVampirismActions.VAMPIRISM_BLOOD_DRAIN.get() || 
+                action == ModVampirismActions.VAMPIRISM_BLOOD_GIFT.get() || 
+                vampireHamonUser && action == ModVampirismActions.VAMPIRISM_HAMON_SUICIDE.get();
     }
 
     public boolean isVampireHamonUser() {
@@ -57,7 +57,7 @@ public class VampirismFlags extends TypeSpecificData {
     }
     
     private void addHamonSuicideAbility() {
-        VampirismAction hamonAbility = ModActions.VAMPIRISM_HAMON_SUICIDE.get();
+        VampirismAction hamonAbility = ModVampirismActions.VAMPIRISM_HAMON_SUICIDE.get();
         List<Action<INonStandPower>> abilities = power.getAbilities();
         if (vampireHamonUser && !abilities.contains(hamonAbility)) {
             abilities.add(hamonAbility);

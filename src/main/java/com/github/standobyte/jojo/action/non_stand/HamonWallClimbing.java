@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.action.non_stand;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
@@ -37,7 +37,7 @@ public class HamonWallClimbing extends HamonAction {
     @Override
     protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
-            HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
+            HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
             double speed = 0.1D + (hamon.getBreathingLevel() * 0.0015 + hamon.getHamonControlLevel() * 0.0025) * hamon.getBloodstreamEfficiency();
             Vector3d movement = user.getDeltaMovement();
             user.setDeltaMovement(movement.x, speed, movement.z);

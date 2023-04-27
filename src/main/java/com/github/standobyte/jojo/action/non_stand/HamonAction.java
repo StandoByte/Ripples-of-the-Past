@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
@@ -26,7 +26,7 @@ public abstract class HamonAction extends NonStandAction {
     
     @Override
     public ActionConditionResult checkConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
-        if (power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(
+        if (power.getTypeSpecificData(ModPowers.HAMON.get()).map(
                 hamon -> hamon.getBloodstreamEfficiency() <= 0F)
                 .orElseThrow(() -> new IllegalStateException("Non-Hamon users can't have Hamon actions!"))) {
             return conditionMessage("hamon_no_bloodstream");
@@ -39,7 +39,7 @@ public abstract class HamonAction extends NonStandAction {
     protected SoundEvent getShout(LivingEntity user, INonStandPower power, ActionTarget target, boolean wasActive) {
         SoundEvent shout = super.getShout(user, power, target, wasActive);
         if (shout == null) {
-            Technique technique = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get().getTechnique();
+            Technique technique = power.getTypeSpecificData(ModPowers.HAMON.get()).get().getTechnique();
             if (technique != null) {
                 Supplier<SoundEvent> shoutSupplier = voiceLines.get(technique);
                 if (shoutSupplier != null) {

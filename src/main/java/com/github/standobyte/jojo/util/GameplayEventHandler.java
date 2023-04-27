@@ -32,17 +32,17 @@ import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBloodCutterEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRCrossfireHurricaneEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModPaintings;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.init.ModStandEffects;
-import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
+import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -381,7 +381,7 @@ public class GameplayEventHandler {
                 List<LivingEntity> KQUsers = painting.level.getEntitiesOfClass(
                         LivingEntity.class, painting.getBoundingBox().expandTowards(painting.getLookAngle().scale(3)).inflate(1), 
                             entity -> IStandPower.getStandPowerOptional(entity).map(
-                                    stand -> stand.hasPower() && stand.getType() == ModStandTypes.KILLER_QUEEN.get())
+                                    stand -> stand.hasPower() && stand.getType() == ModStandActions.KILLER_QUEEN.get())
                             .orElse(false));
                 if (!KQUsers.isEmpty()) {
                     if (monaLisaFull) {
@@ -664,8 +664,8 @@ public class GameplayEventHandler {
 
         
         IStandPower.getStandPowerOptional(target).ifPresent(power -> {
-            if (ModActions.CRAZY_DIAMOND_BLOOD_CUTTER.get().isUnlocked(power)) {
-                power.setCooldownTimer(ModActions.CRAZY_DIAMOND_BLOOD_CUTTER.get(), 0);
+            if (ModStandActions.CRAZY_DIAMOND_BLOOD_CUTTER.get().isUnlocked(power)) {
+                power.setCooldownTimer(ModStandActions.CRAZY_DIAMOND_BLOOD_CUTTER.get(), 0);
             }
         });
         
@@ -721,7 +721,7 @@ public class GameplayEventHandler {
         
         if ((dropped || nearbyEntity.getRandom().nextFloat() < dmgAmount / 5)) {
             dropped |= IStandPower.getStandPowerOptional(bleedingEntity).map(power -> {
-                if (ModActions.CRAZY_DIAMOND_BLOOD_CUTTER.get().isUnlocked(power) && CDBloodCutterEntity.canHaveBloodDropsOn(nearbyEntity, power)) {
+                if (ModStandActions.CRAZY_DIAMOND_BLOOD_CUTTER.get().isUnlocked(power) && CDBloodCutterEntity.canHaveBloodDropsOn(nearbyEntity, power)) {
                     DriedBloodDrops bloodDrops = power.getContinuousEffects().getOrCreateEffect(ModStandEffects.DRIED_BLOOD_DROPS.get(), nearbyEntity);
                     return bloodDrops.tickCount == 0;
                 }
@@ -742,7 +742,7 @@ public class GameplayEventHandler {
         }
         if (entity instanceof PlayerEntity) {
             PlayerEntity player = (PlayerEntity) entity;
-            VampirismPowerType vampirism = ModNonStandPowers.VAMPIRISM.get();
+            VampirismPowerType vampirism = ModPowers.VAMPIRISM.get();
             return INonStandPower.getNonStandPowerOptional(player).map(power -> {
                 if (power.getTypeSpecificData(vampirism).map(vamp -> !vamp.isVampireAtFullPower()).orElse(false) || power.givePower(vampirism)) {
                     entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.STONE_MASK_ACTIVATION_ENTITY.get(), entity.getSoundSource(), 1.0F, 1.0F);
@@ -832,7 +832,7 @@ public class GameplayEventHandler {
         if (event.getTarget() instanceof LivingEntity) {
             INonStandPower.getNonStandPowerOptional(event.getPlayer()).ifPresent(power -> {
                 if (power.getHeldAction() == null) {
-                    power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
+                    power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                         HamonPowerType.overdriveAttack(event.getPlayer(), (LivingEntity) event.getTarget(), power, hamon);
                     });
                 }
@@ -849,15 +849,15 @@ public class GameplayEventHandler {
                 INonStandPower targetPower = INonStandPower.getNonStandPowerOptional(targetPlayer).orElse(null);
                 INonStandPower playerPower = INonStandPower.getNonStandPowerOptional(event.getPlayer()).orElse(null);
                 if (targetPower != null && playerPower != null && 
-                        targetPower.getType() == ModNonStandPowers.HAMON.get()
-                        && (!playerPower.hasPower() || playerPower.getType().isReplaceableWith(ModNonStandPowers.HAMON.get()))) {
+                        targetPower.getType() == ModPowers.HAMON.get()
+                        && (!playerPower.hasPower() || playerPower.getType().isReplaceableWith(ModPowers.HAMON.get()))) {
                     HamonPowerType.interactWithHamonTeacher(target.level, event.getPlayer(), targetPlayer, 
-                            targetPower.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get());
+                            targetPower.getTypeSpecificData(ModPowers.HAMON.get()).get());
                     event.setCanceled(true);
                     event.setCancellationResult(ActionResultType.sidedSuccess(target.level.isClientSide));
                 }
                 else {
-                    playerPower.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
+                    playerPower.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                         hamon.interactWithNewLearner(targetPlayer);
                         event.setCanceled(true);
                         event.setCancellationResult(ActionResultType.sidedSuccess(target.level.isClientSide));
@@ -877,7 +877,7 @@ public class GameplayEventHandler {
                 BlockState blockState = world.getBlockState(pos);
                 if (blockState.getBlock() == Blocks.TRIPWIRE) {
                     INonStandPower.getNonStandPowerOptional(event.getPlayer()).ifPresent(power -> {
-                        power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
+                        power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                             if (hamon.isSkillLearned(HamonSkill.ROPE_TRAP)) {
                                 event.setCanceled(true);
                                 event.setCancellationResult(ActionResultType.SUCCESS);
@@ -903,7 +903,7 @@ public class GameplayEventHandler {
                 BlockState blockState = world.getBlockState(pos);
                 if (blockState.getBlock() instanceof AbstractFurnaceBlock) {
                     IStandPower.getStandPowerOptional(event.getPlayer()).ifPresent(power -> {
-                        if (power.isActive() && power.getType() == ModStandTypes.MAGICIANS_RED.get()) {
+                        if (power.isActive() && power.getType() == ModStands.MAGICIANS_RED.getStandType()) {
                             TileEntity tileEntity = world.getBlockEntity(pos);
                             if (tileEntity instanceof AbstractFurnaceTileEntity) {
                                 AbstractFurnaceTileEntity furnace = (AbstractFurnaceTileEntity) tileEntity;
@@ -1016,7 +1016,7 @@ public class GameplayEventHandler {
             dead.level.getEntitiesOfClass(MobEntity.class, dead.getBoundingBox().inflate(8), 
                     mob -> mob.getTarget() == dead).forEach(mob -> mob.setTarget(null));
             INonStandPower.getNonStandPowerOptional(dead).ifPresent(power -> {
-                power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
+                power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                     if (hamon.getTechnique() == Technique.JOSEPH) {
                         if (dead instanceof ServerPlayerEntity) {
                             ServerPlayerEntity joseph = (ServerPlayerEntity) dead;
@@ -1083,7 +1083,7 @@ public class GameplayEventHandler {
                     Entity shooter = projectile.getOwner();
                     if (shooter instanceof LivingEntity) {
                         INonStandPower.getNonStandPowerOptional((LivingEntity) shooter).ifPresent(power -> {
-                            power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
+                            power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                                 float energyCost = -1;
                                 HamonSkill requiredSkill;
                                 float hamonBaseDmg = 0;
@@ -1161,7 +1161,7 @@ public class GameplayEventHandler {
             return;
         }
         INonStandPower.getNonStandPowerOptional((LivingEntity) thrower).ifPresent(power -> {
-            power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
+            power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                 float dmgCheckWater = damage;
                 if (waterProjectile && hamon.isSkillLearned(HamonSkill.TURQUOISE_BLUE_OVERDRIVE)) {
                     dmgCheckWater *= 1.25;
@@ -1191,7 +1191,7 @@ public class GameplayEventHandler {
     public static void onChatMessage(ServerChatEvent event) {
         List<ServerPlayerEntity> josephTechniqueUsers = MCUtil.entitiesAround(ServerPlayerEntity.class, event.getPlayer(), 8, false, 
                 pl -> INonStandPower.getNonStandPowerOptional(pl).map(power -> 
-                power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(hamon -> 
+                power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> 
                 hamon.getTechnique() == Technique.JOSEPH).orElse(false)).orElse(false));
         for (ServerPlayerEntity joseph : josephTechniqueUsers) {
             if (joseph.getChatVisibility() != ChatVisibility.HIDDEN && joseph.getRandom().nextFloat() < 0.05F) {

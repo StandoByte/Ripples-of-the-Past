@@ -7,10 +7,10 @@ import javax.annotation.Nonnull;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
-import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModDataSerializers;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
@@ -181,7 +181,7 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
                     HierophantGreenEntity stand = (HierophantGreenEntity) getOwner();
                     stand.getBarriersNet().shootEmeraldsFromBarriers(stand.getUserPower(), stand, 
                             target.getBoundingBox().getCenter(), 0, 20 * stand.getStaminaCondition(), 
-                            ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get().getStaminaCostTicking(stand.getUserPower()) * 0.5F, 2, false);
+                            ModStandActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get().getStaminaCostTicking(stand.getUserPower()) * 0.5F, 2, false);
                 }
                 MCUtil.playSound(level, null, target.getX(), target.getY(), target.getZ(), 
                         ModSounds.HIEROPHANT_GREEN_BARRIER_RIPPED.get(), getSoundSource(), 1.0F, 1.0F, StandUtil::shouldHearStands);

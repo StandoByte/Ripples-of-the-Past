@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.command;
 import java.util.Collection;
 import java.util.Optional;
 
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
@@ -46,7 +46,7 @@ public class HamonCommand {
         int success = 0;
         for (ServerPlayerEntity player : targets) {
             success += INonStandPower.getNonStandPowerOptional(player).map(power -> {
-                Optional<HamonData> hamonOptional = power.getTypeSpecificData(ModNonStandPowers.HAMON.get());
+                Optional<HamonData> hamonOptional = power.getTypeSpecificData(ModPowers.HAMON.get());
                 hamonOptional.ifPresent(hamon -> {
                     hamon.setHamonStatPoints(stat, points, ignoreBreathing, true);
                 });
@@ -76,7 +76,7 @@ public class HamonCommand {
         int success = 0;
         for (ServerPlayerEntity player : targets) {
             success += INonStandPower.getNonStandPowerOptional(player).map(power -> {
-                Optional<HamonData> hamonOptional = power.getTypeSpecificData(ModNonStandPowers.HAMON.get());
+                Optional<HamonData> hamonOptional = power.getTypeSpecificData(ModPowers.HAMON.get());
                 hamonOptional.ifPresent(hamon -> {
                     hamon.setBreathingLevel(level);
                 });

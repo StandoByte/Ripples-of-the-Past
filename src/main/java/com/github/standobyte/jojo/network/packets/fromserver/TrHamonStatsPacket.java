@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.toasts.HamonSkillToast;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
 
@@ -100,7 +100,7 @@ public class TrHamonStatsPacket {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity instanceof LivingEntity) {
                 INonStandPower.getNonStandPowerOptional((LivingEntity) entity).ifPresent(power -> {
-                    power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
+                    power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                         final boolean showToasts = msg.showToasts && entity == ClientUtil.getClientPlayer();
                         Predicate<HamonSkill> canBeLearned = skill -> !hamon.isSkillLearned(skill) && hamon.canLearnSkill(skill, null);
                         List<HamonSkill> oldSkills = Collections.emptyList();

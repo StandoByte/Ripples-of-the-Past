@@ -7,7 +7,7 @@ import java.util.Set;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.InputHandler;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonWindowOpenedPacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
@@ -49,7 +49,7 @@ public class HamonScreen extends Screen {
     @Override
     protected void init() {
         hamon = INonStandPower.getPlayerNonStandPower(minecraft.player)
-                .getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
+                .getTypeSpecificData(ModPowers.HAMON.get()).get();
         int i = 0;
         tabs = new HamonTabGui[] {
                 new HamonStatsTabGui(minecraft, this, i++, "hamon.stats.tab"),

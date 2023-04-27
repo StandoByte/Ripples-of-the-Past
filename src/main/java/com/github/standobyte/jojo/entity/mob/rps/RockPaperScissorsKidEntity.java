@@ -12,7 +12,7 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.entity.mob.IMobStandUser;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame.Pick;
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandPower;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -114,7 +114,7 @@ public class RockPaperScissorsKidEntity extends VillagerEntity implements IMobSt
     @Override
     public ILivingEntityData finalizeSpawn(IServerWorld world, DifficultyInstance difficulty, SpawnReason reason, 
             @Nullable ILivingEntityData additionalData, @Nullable CompoundNBT nbt) {
-        standPower.givePower(ModStandTypes.BOY_II_MAN.get());
+        standPower.givePower(ModStandActions.BOY_II_MAN.get());
         AgeableEntity.AgeableData ageableData = new AgeableEntity.AgeableData(1);
         ageableData.increaseGroupSizeByOne();
         additionalData = ageableData;

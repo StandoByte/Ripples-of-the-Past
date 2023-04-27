@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.network.packets.fromclient;
 
 import java.util.function.Supplier;
 
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonSkillType;
 
@@ -29,7 +29,7 @@ public class ClHamonResetSkillsButtonPacket {
         ctx.get().enqueueWork(() -> {
             ServerPlayerEntity player = ctx.get().getSender();
             INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
-                power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
+                power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                     hamon.resetHamonSkills(msg.type);
                 });
             });

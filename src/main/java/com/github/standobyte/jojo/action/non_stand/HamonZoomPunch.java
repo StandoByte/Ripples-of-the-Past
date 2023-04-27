@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.action.non_stand;
 
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.ZoomPunchEntity;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 
@@ -18,7 +18,7 @@ public class HamonZoomPunch extends HamonAction {
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
-            HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
+            HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
             ZoomPunchEntity zoomPunch = new ZoomPunchEntity(world, user, 
                     hamon.getHamonControlLevel() * hamon.getBloodstreamEfficiency());
             world.addFreshEntity(zoomPunch);

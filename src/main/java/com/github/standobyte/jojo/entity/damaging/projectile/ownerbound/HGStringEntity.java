@@ -1,8 +1,8 @@
 package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 
-import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
@@ -88,9 +88,9 @@ public class HGStringEntity extends OwnerBoundProjectileEntity {
 
     @Override
     public int ticksLifespan() {
-        return isBinding ? ModActions.HIEROPHANT_GREEN_STRING_BIND.get().getStandActionTicks(null, null) 
+        return isBinding ? ModStandActions.HIEROPHANT_GREEN_STRING_BIND.get().getStandActionTicks(null, null) 
                 + (isAttachedToAnEntity() ? 10 : 0)
-                : ModActions.HIEROPHANT_GREEN_STRING_ATTACK.get().getStandActionTicks(null, null);
+                : ModStandActions.HIEROPHANT_GREEN_STRING_ATTACK.get().getStandActionTicks(null, null);
     }
     
     @Override

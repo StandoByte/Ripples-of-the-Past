@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.action.non_stand;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.init.ModActions;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 
 import net.minecraft.block.Block;
@@ -21,7 +21,7 @@ public class HamonPlantInfusion extends HamonOrganismInfusion {
     
     @Override
     public HamonAction replaceAction(INonStandPower power) {
-        return ModActions.HAMON_ORGANISM_INFUSION.get();
+        return ModHamonActions.HAMON_ORGANISM_INFUSION.get();
     }
 
     @Override

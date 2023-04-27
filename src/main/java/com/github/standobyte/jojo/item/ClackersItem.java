@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.item;
 
 import com.github.standobyte.jojo.entity.itemprojectile.ClackersEntity;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
@@ -44,7 +44,7 @@ public class ClackersItem extends Item {
     public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         ItemStack stack = player.getItemInHand(hand);
         INonStandPower power = INonStandPower.getPlayerNonStandPower(player);
-        if (power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(hamon -> {
+        if (power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
             if (hamon.isSkillLearned(HamonSkill.CLACKER_VOLLEY)) {
                 return true;
             }
@@ -140,7 +140,7 @@ public class ClackersItem extends Item {
     @Override
     public boolean hurtEnemy(ItemStack itemStack, LivingEntity target, LivingEntity user) {
         return INonStandPower.getNonStandPowerOptional(user).map(power -> 
-        power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(hamon -> {
+        power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
             if (hamon.isSkillLearned(HamonSkill.CLACKER_VOLLEY)) {
                 if (!user.level.isClientSide()) {
                     if (power.consumeEnergy(200) && DamageUtil.dealHamonDamage(target, 0.15F, user, null)) {

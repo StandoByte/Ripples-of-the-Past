@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.action.non_stand;
 
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
@@ -23,7 +23,7 @@ public class HamonScarletOverdrive extends HamonAction {
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             if (target.getType() == TargetType.ENTITY) {
-                HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
+                HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
                 Entity targetEntity = target.getEntity();
                 if (DamageUtil.dealDamageAndSetOnFire(targetEntity, 
                         entity -> DamageUtil.dealHamonDamage(entity, 0.1F, user, null), 

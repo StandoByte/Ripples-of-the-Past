@@ -23,7 +23,7 @@ import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.ItemProjectileEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEffects;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonStartMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHasInputPacket;
@@ -265,7 +265,7 @@ public class InputHandler {
             }
             
             if (hamonSkillsWindow.consumeClick()) {
-                if (nonStandPower.hasPower() && nonStandPower.getType() == ModNonStandPowers.HAMON.get()) {
+                if (nonStandPower.hasPower() && nonStandPower.getType() == ModPowers.HAMON.get()) {
                     if (mc.player.isShiftKeyDown()) {
                         PacketManager.sendToServer(new ClHamonStartMeditationPacket());
                     }
@@ -275,7 +275,7 @@ public class InputHandler {
                 }
                 else {
                     mc.gui.handleChat(ChatType.GAME_INFO, new TranslationTextComponent(
-                            nonStandPower.getTypeSpecificData(ModNonStandPowers.VAMPIRISM.get())
+                            nonStandPower.getTypeSpecificData(ModPowers.VAMPIRISM.get())
                             .map(vampirism -> vampirism.isVampireHamonUser()).orElse(false) ? 
                                     "jojo.chat.message.no_hamon_vampire"
                                     : "jojo.chat.message.no_hamon"), Util.NIL_UUID);
@@ -601,9 +601,9 @@ public class InputHandler {
     
     private boolean slowDownFromHeldAction(PlayerEntity player, MovementInput input, IPower<?, ?> power) {
         Action<?> heldAction = power.getHeldAction();
-        if (heldAction != null && heldAction.getHeldSlowDownFactor() < 1.0F) {
-            input.leftImpulse *= heldAction.getHeldSlowDownFactor();
-            input.forwardImpulse *= heldAction.getHeldSlowDownFactor();
+        if (heldAction != null && heldAction.getHeldWalkSpeed() < 1.0F) {
+            input.leftImpulse *= heldAction.getHeldWalkSpeed();
+            input.forwardImpulse *= heldAction.getHeldWalkSpeed();
             player.setSprinting(false);
             KeyBinding.set(mc.options.keySprint.getKey(), false);
             return true;

@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 
-import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.power.non_stand.vampirism.ModVampirismActions;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
@@ -45,7 +45,7 @@ public class SpaceRipperStingyEyesEntity extends OwnerBoundProjectileEntity {
             detachedOriginPos = detachedOriginPos.add(position().subtract(xOld, yOld, zOld));
         }
         if (!level.isClientSide()) {
-            if (isBoundToOwner() && (ownerPower == null || ownerPower.getHeldAction() != ModActions.VAMPIRISM_SPACE_RIPPER_STINGY_EYES.get())) {
+            if (isBoundToOwner() && (ownerPower == null || ownerPower.getHeldAction() != ModVampirismActions.VAMPIRISM_SPACE_RIPPER_STINGY_EYES.get())) {
                 setBoundToOwner(false);
                 setDeltaMovement(position().subtract(getOriginPoint()).normalize().scale(movementSpeed()));
             }

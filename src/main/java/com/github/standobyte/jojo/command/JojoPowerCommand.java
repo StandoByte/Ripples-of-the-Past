@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.command;
 
 import java.util.Collection;
 
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
 import com.mojang.brigadier.CommandDispatcher;
@@ -28,8 +28,8 @@ public class JojoPowerCommand {
     public static void register(CommandDispatcher<CommandSource> dispatcher) { // TODO use the registry
         dispatcher.register(Commands.literal("jojopower").requires(ctx -> ctx.hasPermission(2))
                 .then(Commands.literal("give").then(Commands.argument("targets", EntityArgument.players())
-                        .then(Commands.literal("hamon").executes(ctx -> giveNonStandPowers(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), ModNonStandPowers.HAMON.get())))
-                        .then(Commands.literal("vampirism").executes(ctx -> giveNonStandPowers(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), ModNonStandPowers.VAMPIRISM.get())))))
+                        .then(Commands.literal("hamon").executes(ctx -> giveNonStandPowers(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), ModPowers.HAMON.get())))
+                        .then(Commands.literal("vampirism").executes(ctx -> giveNonStandPowers(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), ModPowers.VAMPIRISM.get())))))
                 .then(Commands.literal("clear").then(Commands.argument("targets", EntityArgument.players())
                         .executes(ctx -> removeNonStandPowers(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets")))))
                 );
@@ -42,7 +42,7 @@ public class JojoPowerCommand {
             if (power != null) {
                 if (!power.hasPower() && power.givePower(powerType)) {
                     i++;
-                    power.getTypeSpecificData(ModNonStandPowers.VAMPIRISM.get()).ifPresent(vampirism -> vampirism.setVampireFullPower(true));
+                    power.getTypeSpecificData(ModPowers.VAMPIRISM.get()).ifPresent(vampirism -> vampirism.setVampireFullPower(true));
                 }
                 else if (targets.size() == 1) {
                     throw GIVE_SINGLE_EXCEPTION.create(targets.iterator().next().getName());

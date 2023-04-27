@@ -5,7 +5,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
@@ -58,7 +58,7 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser,
     @Override
     public ActionResultType mobInteract(PlayerEntity player, Hand hand) {
         if (hand == Hand.MAIN_HAND) {
-            getPower().getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
+            getPower().getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                 HamonPowerType.interactWithHamonTeacher(level, player, this, hamon);
             });
         }
@@ -89,7 +89,7 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser,
     // FIXME liquid walking
     @Override
     public boolean canStandOnFluid(Fluid fluid) {
-        return hamonPower.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(hamon -> 
+        return hamonPower.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> 
         hamon.isSkillLearned(HamonSkill.LAVA_WALKING) || hamon.isSkillLearned(HamonSkill.WATER_WALKING) && fluid.is(FluidTags.WATER))
                 .orElse(false);
     }
@@ -115,8 +115,8 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser,
     }
     
     public void addMasterHamon(INonStandPower power) {
-        hamonPower.givePower(ModNonStandPowers.HAMON.get());
-        HamonData hamon = hamonPower.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
+        hamonPower.givePower(ModPowers.HAMON.get());
+        HamonData hamon = hamonPower.getTypeSpecificData(ModPowers.HAMON.get()).get();
         hamon.setBreathingLevel(HamonData.MAX_BREATHING_LEVEL);
         hamon.setHamonStatPoints(HamonSkill.HamonStat.STRENGTH, HamonData.MAX_HAMON_POINTS, true, true);
         hamon.setHamonStatPoints(HamonSkill.HamonStat.CONTROL, HamonData.MAX_HAMON_POINTS, true, true);
@@ -140,7 +140,7 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser,
         if (nbt.contains("HamonPower", MCUtil.getNbtId(CompoundNBT.class))) {
             hamonPower.readNBT(nbt.getCompound("HamonPower"));
         }
-        if (hamonPower.getType() != ModNonStandPowers.HAMON.get()) {
+        if (hamonPower.getType() != ModPowers.HAMON.get()) {
             iAmDumbForNotUsingFinalizeSpawn = true;
         }
     }

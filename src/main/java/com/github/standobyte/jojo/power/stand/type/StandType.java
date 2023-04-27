@@ -14,7 +14,7 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
-import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -37,53 +37,34 @@ import net.minecraftforge.registries.ForgeRegistryEntry;
 
 public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry<StandType<?>> implements IPowerType<IStandPower, StandType<?>> {
     private final int color;
-    private final ITextComponent partName;
     private final StandAction[] attacks;
     private final StandAction[] abilities;
+    private String translationKey;
+    private ResourceLocation iconTexture;
+    
+    private final ITextComponent partName;
     private final T defaultStats;
     private final Class<T> statsClass;
-    private boolean canPlayerGet = true;
-    private String translationKey;
-    private Supplier<SoundEvent> summonShoutSupplier = () -> null;
-    private OstSoundList ostSupplier = null;
-    private Map<Integer, List<ItemStack>> resolveLevelItems = new HashMap<>();
-    private ResourceLocation iconTexture;
+    private final boolean canPlayerGet;
+    private final Supplier<SoundEvent> summonShoutSupplier;
+    private final OstSoundList ostSupplier;
+    private final Map<Integer, List<ItemStack>> resolveLevelItems;
     
     public StandType(int color, ITextComponent partName, 
             StandAction[] attacks, StandAction[] abilities, 
-            Class<T> statsClass, T defaultStats) {
+            Class<T> statsClass, T defaultStats, @Nullable StandTypeOptionals additions) {
         this.color = color;
         this.partName = partName;
         this.attacks = attacks;
         this.abilities = abilities;
         this.statsClass = statsClass;
         this.defaultStats = defaultStats;
-    }
-    
-    public StandType<T> addSummonShout(Supplier<SoundEvent> summonShoutSupplier) {
-        if (summonShoutSupplier != null) {
-            this.summonShoutSupplier = summonShoutSupplier;
-        }
-        return this;
-    }
-    
-    public StandType<T> addOst(OstSoundList ostSupplier) {
-        if (ostSupplier != null) {
-            this.ostSupplier = ostSupplier;
-        }
-        return this;
-    }
-    
-    public StandType<T> addItemOnResolveLevel(int resolveLevel, ItemStack item) {
-        if (item != null && !item.isEmpty()) {
-            resolveLevelItems.computeIfAbsent(resolveLevel, lvl -> new ArrayList<>()).add(item);
-        }
-        return this;
-    }
-    
-    public StandType<T> setPlayerAccess(boolean canPlayerGet) {
-        this.canPlayerGet = canPlayerGet;
-        return this;
+        
+        if (additions == null) additions = new StandTypeOptionals();
+        this.ostSupplier = additions.ostSupplier;
+        this.summonShoutSupplier = additions.summonShoutSupplier;
+        this.canPlayerGet = additions.canPlayerGet;
+        this.resolveLevelItems = additions.resolveLevelItems;
     }
     
     @Override
@@ -203,7 +184,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     @Override
     public String getTranslationKey() {
         if (translationKey == null) {
-            translationKey = Util.makeDescriptionId("stand", ModStandTypes.Registry.getRegistry().getKey(this));
+            translationKey = Util.makeDescriptionId("stand", ModStandActions.STANDS.getRegistry().getKey(this));
         }
         return this.translationKey;
     }
@@ -286,5 +267,41 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
                 cap.setLastHurtByStand(attackerStand, dmgAmount, standDmgSource.getStandInvulTicks());
             });
         }
+    }
+    
+    
+    
+    public static class StandTypeOptionals {
+        private boolean canPlayerGet = true;
+        private Supplier<SoundEvent> summonShoutSupplier = () -> null;
+        private OstSoundList ostSupplier = null;
+        private Map<Integer, List<ItemStack>> resolveLevelItems = new HashMap<>();
+        
+        public StandTypeOptionals addSummonShout(Supplier<SoundEvent> summonShoutSupplier) {
+            if (summonShoutSupplier != null) {
+                this.summonShoutSupplier = summonShoutSupplier;
+            }
+            return this;
+        }
+        
+        public StandTypeOptionals addOst(OstSoundList ostSupplier) {
+            if (ostSupplier != null) {
+                this.ostSupplier = ostSupplier;
+            }
+            return this;
+        }
+        
+        public StandTypeOptionals addItemOnResolveLevel(int resolveLevel, ItemStack item) {
+            if (item != null && !item.isEmpty()) {
+                resolveLevelItems.computeIfAbsent(resolveLevel, lvl -> new ArrayList<>()).add(item);
+            }
+            return this;
+        }
+        
+        public StandTypeOptionals setPlayerAccess(boolean canPlayerGet) {
+            this.canPlayerGet = canPlayerGet;
+            return this;
+        }
+        
     }
 }

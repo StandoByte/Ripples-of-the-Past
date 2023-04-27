@@ -14,7 +14,6 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
-import com.github.standobyte.jojo.capability.chunk.ChunkCap.PrevBlockInfo;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.BrokenChunkBlocksPacket;
 import com.github.standobyte.jojo.util.mc.MCUtil;

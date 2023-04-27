@@ -6,8 +6,8 @@ import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.damaging.LightBeamEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
@@ -41,7 +41,7 @@ public class AjaStoneItem extends Item {
 //        if (player.isShiftKeyDown()) {
             INonStandPower power = INonStandPower.getPlayerNonStandPower(player);
             if (power.hasEnergy(getHamonChargeCost())) {
-                Optional<HamonData> hamonOptional = power.getTypeSpecificData(ModNonStandPowers.HAMON.get());
+                Optional<HamonData> hamonOptional = power.getTypeSpecificData(ModPowers.HAMON.get());
                 if (hamonOptional.isPresent()) {
                     HamonData hamon = hamonOptional.get();
                     if (hamon.isSkillLearned(HamonSkill.AJA_STONE_KEEPER) && power.consumeEnergy(getHamonChargeCost())) {
@@ -68,7 +68,7 @@ public class AjaStoneItem extends Item {
 
     @Override
     public ItemStack finishUsingItem(ItemStack stack, World world, LivingEntity entity) {
-        boolean perk = INonStandPower.getNonStandPowerOptional(entity).map(power -> power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(
+        boolean perk = INonStandPower.getNonStandPowerOptional(entity).map(power -> power.getTypeSpecificData(ModPowers.HAMON.get()).map(
                 hamon -> hamon.isSkillLearned(HamonSkill.AJA_STONE_KEEPER)).orElse(false)).orElse(false);
         useStone(world, entity, stack, 10F, perk, true);
         return stack;

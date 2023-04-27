@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.github.standobyte.jojo.JojoModConfig;
-import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.github.standobyte.jojo.util.mc.data.StandStatsManager;
@@ -65,7 +65,7 @@ public class StandStatsDataPacket {
         
         private static StandStatsDataEntry read(PacketBuffer buf) {
             ResourceLocation location = buf.readResourceLocation();
-            StandType<?> stand = ModStandTypes.Registry.getRegistry().getValue(location);
+            StandType<?> stand = ModStandActions.STANDS.getRegistry().getValue(location);
             if (stand == null) {
                 throw new IllegalStateException("Stand stats synchronization error: " + location + " not registered");
             }

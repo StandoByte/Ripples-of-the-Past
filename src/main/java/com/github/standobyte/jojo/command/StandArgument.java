@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -30,7 +30,7 @@ public class StandArgument implements ArgumentType<StandType<?>> {
     @Override
     public StandType<?> parse(StringReader reader) throws CommandSyntaxException {
         ResourceLocation resourceLocation = read(reader);
-        StandType<?> standType = ModStandTypes.Registry.getRegistry().getValue(resourceLocation);
+        StandType<?> standType = ModStandActions.STANDS.getRegistry().getValue(resourceLocation);
         if (standType == null) {
             throw STAND_UNKNOWN.create(resourceLocation);
         }
@@ -67,7 +67,7 @@ public class StandArgument implements ArgumentType<StandType<?>> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(final CommandContext<S> context, final SuggestionsBuilder builder) {
-        return suggestIterable(ModStandTypes.Registry.getRegistry().getKeys(), builder);
+        return suggestIterable(ModStandActions.STANDS.getRegistry().getKeys(), builder);
     }
 
     private static CompletableFuture<Suggestions> suggestIterable(Iterable<ResourceLocation> registryKeys, SuggestionsBuilder builder) {

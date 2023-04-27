@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 
 import net.minecraft.entity.Entity;
@@ -39,12 +39,12 @@ public class TrNonStandFlagPacket {
                 INonStandPower.getNonStandPowerOptional((LivingEntity) entity).ifPresent(power -> {
                     switch(msg.flag) {
                     case VAMPIRE_HAMON_USER:
-                        power.getTypeSpecificData(ModNonStandPowers.VAMPIRISM.get()).ifPresent(vampirism -> {
+                        power.getTypeSpecificData(ModPowers.VAMPIRISM.get()).ifPresent(vampirism -> {
                             vampirism.setVampireHamonUser(msg.value);
                         });
                         break;
                     case VAMPIRE_FULL_POWER:
-                        power.getTypeSpecificData(ModNonStandPowers.VAMPIRISM.get()).ifPresent(vampirism -> {
+                        power.getTypeSpecificData(ModPowers.VAMPIRISM.get()).ifPresent(vampirism -> {
                             vampirism.setVampireFullPower(msg.value);
                         });
                         break;

@@ -7,11 +7,11 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondHeal;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
-import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
@@ -85,7 +85,7 @@ public class CDBlockBulletEntity extends ModdedProjectileEntity {
                 setDeltaMovement(vecToTarget.normalize().scale(this.getDeltaMovement().length()));
                 if (!level.isClientSide()) {
                     getUserStandPower().ifPresent(stand -> {
-                        stand.consumeStamina(stand.getStaminaTickGain() + ModActions.CRAZY_DIAMOND_BLOCK_BULLET.get().getStaminaCostTicking(stand));
+                        stand.consumeStamina(stand.getStaminaTickGain() + ModStandActions.CRAZY_DIAMOND_BLOCK_BULLET.get().getStaminaCostTicking(stand));
                     });
                 }
                 else {

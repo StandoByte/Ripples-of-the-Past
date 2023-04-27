@@ -8,8 +8,8 @@ import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
-import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -58,7 +58,7 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
                 if (rayTrace.getType() != RayTraceResult.Type.MISS) {
                     hierophant.getBarriersNet().shootEmeraldsFromBarriers(userPower, hierophant, rayTrace.getLocation(), task.getTick(), 
                             Math.min((hierophant.getPlacedBarriersCount() / 5), 9) * hierophant.getStaminaCondition(), 
-                            ModActions.HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED.get().getStaminaCostTicking(userPower) * 0.5F, 8, true);
+                            ModStandActions.HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED.get().getStaminaCostTicking(userPower) * 0.5F, 8, true);
                 }
             }
         }

@@ -2,10 +2,10 @@ package com.github.standobyte.jojo.entity.damaging.projectile;
 
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
@@ -36,7 +36,7 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
     public HamonBubbleBarrierEntity(World world, LivingEntity shooter, INonStandPower power) {
         super(ModEntityTypes.HAMON_BUBBLE_BARRIER.get(), shooter, world);
         this.power = power;
-        barrierMaxTicks = (int) (100F * power.getTypeSpecificData(ModNonStandPowers.HAMON.get())
+        barrierMaxTicks = (int) (100F * power.getTypeSpecificData(ModPowers.HAMON.get())
                 .map(hamon -> hamon.getBloodstreamEfficiency()).orElse(1F));
     }
 
@@ -52,10 +52,10 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
                 remove();
             }
             else if (!shot) {
-                if (power.getHeldAction() != ModActions.CAESAR_BUBBLE_BARRIER.get()) {
+                if (power.getHeldAction() != ModHamonActions.CAESAR_BUBBLE_BARRIER.get()) {
                     remove();
                 }
-                else if (power.getHeldActionTicks() >= ModActions.CAESAR_BUBBLE_BARRIER.get().getHoldDurationToFire(power) - 1) {
+                else if (power.getHeldActionTicks() >= ModHamonActions.CAESAR_BUBBLE_BARRIER.get().getHoldDurationToFire(power) - 1) {
                     Entity owner = getOwner();
                     shootFromRotation(owner != null ? owner : this, 1.0F, 0.0F);
                     shot = true;
@@ -101,8 +101,8 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
             LivingEntity owner = getOwner();
             if (owner != null) {
                 INonStandPower.getNonStandPowerOptional(owner).ifPresent(power -> {
-                    power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
-                        hamon.hamonPointsFromAction(HamonStat.STRENGTH, ModActions.CAESAR_BUBBLE_BARRIER.get().getHeldTickEnergyCost() / 4F);
+                    power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
+                        hamon.hamonPointsFromAction(HamonStat.STRENGTH, ModHamonActions.CAESAR_BUBBLE_BARRIER.get().getHeldTickEnergyCost() / 4F);
                     });
                 });
             }
@@ -143,7 +143,7 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
     }
     
     public float getSize(float partialTick) {
-        return Math.min((tickCount + partialTick) / (float) ModActions.CAESAR_BUBBLE_BARRIER.get().getHoldDurationToFire(null), 1);
+        return Math.min((tickCount + partialTick) / (float) ModHamonActions.CAESAR_BUBBLE_BARRIER.get().getHoldDurationToFire(null), 1);
     }
 
     @Override

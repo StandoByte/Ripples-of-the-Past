@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.client.render.entity.layerrenderer;
 
-import com.github.standobyte.jojo.init.ModActions;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -29,7 +29,7 @@ public class TornadoOverdriveEffectLayer<T extends LivingEntity> extends LayerRe
             T entity, float walkAnimPos, float walkAnimSpeed, float partialTick, 
             float ticks, float headYRotation, float headXRotation) {
         if (INonStandPower.getNonStandPowerOptional(entity)
-                .map(power -> power.getHeldAction(true) == ModActions.ZEPPELI_TORNADO_OVERDRIVE.get())
+                .map(power -> power.getHeldAction(true) == ModHamonActions.ZEPPELI_TORNADO_OVERDRIVE.get())
                 .orElse(false)) {
             IVertexBuilder ivertexbuilder = buffer.getBuffer(RenderType.entityCutoutNoCull(TEXTURE));
             for (int i = 0; i < 3; ++i) {

@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.client.resources;
 import java.util.stream.Stream;
 
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.init.ModActions;
+import com.github.standobyte.jojo.init.power.ModCommonRegistries;
 import com.github.standobyte.jojo.power.IPower;
 
 import net.minecraft.client.renderer.texture.SpriteUploader;
@@ -18,7 +18,7 @@ public class ActionSpriteUploader extends SpriteUploader {
 
     @Override
     protected Stream<ResourceLocation> getResourcesToLoad() {
-        return ModActions.Registry.getRegistry().getValues().stream().flatMap(Action::getTexLocationstoLoad);
+        return ModCommonRegistries.ACTIONS.getRegistry().getValues().stream().flatMap(Action::getTexLocationstoLoad);
     }
 
     public <P extends IPower<P, ?>> TextureAtlasSprite getSprite(Action<P> action, P power) {

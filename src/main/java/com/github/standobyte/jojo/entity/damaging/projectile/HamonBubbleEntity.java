@@ -1,8 +1,8 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
-import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
@@ -36,8 +36,8 @@ public class HamonBubbleEntity extends ModdedProjectileEntity {
             LivingEntity owner = getOwner();
             if (owner != null) {
                 INonStandPower.getNonStandPowerOptional(owner).ifPresent(power -> {
-                    power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
-                        hamon.hamonPointsFromAction(HamonStat.STRENGTH, ModActions.CAESAR_BUBBLE_LAUNCHER.get().getHeldTickEnergyCost() / 4F);
+                    power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
+                        hamon.hamonPointsFromAction(HamonStat.STRENGTH, ModHamonActions.CAESAR_BUBBLE_LAUNCHER.get().getHeldTickEnergyCost() / 4F);
                     });
                 });
             }

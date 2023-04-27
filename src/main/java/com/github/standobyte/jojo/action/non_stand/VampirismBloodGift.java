@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.action.non_stand;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 
 import net.minecraft.entity.Entity;
@@ -53,7 +53,7 @@ public class VampirismBloodGift extends VampirismAction {
         if (!world.isClientSide()) {
             PlayerEntity targetPlayer = (PlayerEntity) target.getEntity();
             if (INonStandPower.getNonStandPowerOptional(targetPlayer).map(
-                    targetPower -> targetPower.givePower(ModNonStandPowers.VAMPIRISM.get())).orElse(false)) {
+                    targetPower -> targetPower.givePower(ModPowers.VAMPIRISM.get())).orElse(false)) {
                 user.hurt(new DamageSource("blood_gift").bypassArmor(), 10.0F);
                 targetPlayer.heal(targetPlayer.getMaxHealth());
             }

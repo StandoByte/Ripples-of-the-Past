@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.entity.itemprojectile;
 
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
@@ -56,7 +56,7 @@ public class ClackersEntity extends ItemProjectileEntity {
             Entity owner = getOwner();
             if (owner instanceof LivingEntity) {
                 INonStandPower.getNonStandPowerOptional((LivingEntity) owner).ifPresent(power -> {
-                    power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
+                    power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                         hamon.hamonPointsFromAction(HamonStat.STRENGTH, hamonEnergySpent);
                     });
                 });

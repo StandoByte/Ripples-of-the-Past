@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
-import com.github.standobyte.jojo.init.ModActions;
+import com.github.standobyte.jojo.init.power.ModCommonRegistries;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 
@@ -39,7 +39,7 @@ public class TrHeldActionPacket {
         buf.writeInt(msg.userId);
         buf.writeEnum(msg.classification);
         if (!stopHeld) {
-            buf.writeRegistryIdUnsafe(ModActions.Registry.getRegistry(), msg.action);
+            buf.writeRegistryIdUnsafe(ModCommonRegistries.ACTIONS.getRegistry(), msg.action);
             buf.writeBoolean(msg.requirementsFulfilled);
         }
     }
@@ -49,7 +49,7 @@ public class TrHeldActionPacket {
         if (stopHeld) {
             return actionStopped(buf.readInt(), buf.readEnum(PowerClassification.class));
         }
-        return new TrHeldActionPacket(buf.readInt(), buf.readEnum(PowerClassification.class), buf.readRegistryIdUnsafe(ModActions.Registry.getRegistry()), buf.readBoolean());
+        return new TrHeldActionPacket(buf.readInt(), buf.readEnum(PowerClassification.class), buf.readRegistryIdUnsafe(ModCommonRegistries.ACTIONS.getRegistry()), buf.readBoolean());
     }
 
     public static void handle(TrHeldActionPacket msg, Supplier<NetworkEvent.Context> ctx) {

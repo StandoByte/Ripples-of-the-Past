@@ -9,7 +9,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui.Alignment;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui.BarsOrientation;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui.ElementTransparency;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
@@ -154,11 +154,11 @@ public abstract class BarsRenderer {
         case ENERGY:
             int texY = 160;
             int horizontalYOffset = 0;
-            if (powerType == ModNonStandPowers.VAMPIRISM.get()) {
+            if (powerType == ModPowers.VAMPIRISM.get()) {
                 texY = 0;
                 horizontalYOffset = -3;
             }
-            else if (powerType == ModNonStandPowers.HAMON.get()) {
+            else if (powerType == ModPowers.HAMON.get()) {
                 texY = 16;
                 horizontalYOffset = -7;
             }

@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.capability.world;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 
 import net.minecraft.nbt.CompoundNBT;
@@ -19,7 +19,7 @@ public class SaveFileUtilCapStorage implements IStorage<SaveFileUtilCap> {
         CompoundNBT cnbt = new CompoundNBT();
         CompoundNBT timesStandsTakenMap = new CompoundNBT();
         for (Map.Entry<StandType<?>, Integer> entry : instance.timesStandsTaken.entrySet()) {
-            timesStandsTakenMap.putInt(ModStandTypes.Registry.getKeyAsString(entry.getKey()), entry.getValue());
+            timesStandsTakenMap.putInt(ModStandActions.STANDS.getKeyAsString(entry.getKey()), entry.getValue());
         }
         cnbt.put("StandsTaken", timesStandsTakenMap);
         
@@ -34,8 +34,8 @@ public class SaveFileUtilCapStorage implements IStorage<SaveFileUtilCap> {
         if (cnbt.contains("StandsTaken", 10)) {
             Map<StandType<?>, Integer> stands = new HashMap<>();
             CompoundNBT timesStandsTakenNBT = cnbt.getCompound("StandsTaken");
-            ModStandTypes.Registry.getRegistry().forEach(stand -> {
-                int timesTaken = timesStandsTakenNBT.getInt(ModStandTypes.Registry.getKeyAsString(stand));
+            ModStandActions.STANDS.getRegistry().forEach(stand -> {
+                int timesTaken = timesStandsTakenNBT.getInt(ModStandActions.STANDS.getKeyAsString(stand));
                 if (timesTaken > 0) {
                     stands.put(stand, timesTaken);
                 }

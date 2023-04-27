@@ -4,8 +4,8 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
@@ -30,7 +30,7 @@ public class HamonOverdrive extends HamonAction {
     @Override
     protected ActionConditionResult checkHeldItems(LivingEntity user, INonStandPower power) {
         ItemStack heldItemStack = user.getMainHandItem();
-        if (!heldItemStack.isEmpty() && !metalSilverOverdrive(power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get(), heldItemStack)) {
+        if (!heldItemStack.isEmpty() && !metalSilverOverdrive(power.getTypeSpecificData(ModPowers.HAMON.get()).get(), heldItemStack)) {
             return ActionConditionResult.NEGATIVE;
         }
         return ActionConditionResult.POSITIVE;
@@ -44,7 +44,7 @@ public class HamonOverdrive extends HamonAction {
     @Override
     @Nullable
     protected SoundEvent getShout(LivingEntity user, INonStandPower power, ActionTarget target, boolean wasActive) {
-        HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
+        HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
         ItemStack heldItemStack = user.getMainHandItem();
         if (metalSilverOverdrive(hamon, heldItemStack)) {
             if (heldItemStack.getItem() instanceof SwordItem && heldItemStack.hasCustomHoverName() && "pluck".equals(heldItemStack.getHoverName().getString().toLowerCase())) {
@@ -61,7 +61,7 @@ public class HamonOverdrive extends HamonAction {
      
     private float getMaxEnergyCost(INonStandPower power) {
         float energyCost = super.getEnergyCost(power);
-        if (metalSilverOverdrive(power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get(), power.getUser().getMainHandItem())) {
+        if (metalSilverOverdrive(power.getTypeSpecificData(ModPowers.HAMON.get()).get(), power.getUser().getMainHandItem())) {
             energyCost += 250;
         }
         return energyCost;
@@ -73,7 +73,7 @@ public class HamonOverdrive extends HamonAction {
             Entity entity = target.getEntity();
             if (entity instanceof LivingEntity) {
                 LivingEntity targetEntity = (LivingEntity) entity;
-                HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
+                HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
                 
                 float damage = 0.5F;
                 float knockback = 0;

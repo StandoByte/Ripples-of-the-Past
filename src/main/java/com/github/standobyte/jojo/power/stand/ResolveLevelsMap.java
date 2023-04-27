@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.power.stand;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
@@ -69,7 +69,7 @@ public class ResolveLevelsMap {
     public void fromNBT(CompoundNBT nbt) {
         nbt.getAllKeys().forEach(key -> {
             ResourceLocation location = new ResourceLocation(key);
-            IForgeRegistry<StandType<?>> registry = ModStandTypes.Registry.getRegistry();
+            IForgeRegistry<StandType<?>> registry = ModStandActions.STANDS.getRegistry();
             if (registry.containsKey(location)) {
                 StandType<?> stand = registry.getValue(location);
                 if (stand != null) {

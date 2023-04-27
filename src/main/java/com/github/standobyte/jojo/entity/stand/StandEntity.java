@@ -30,12 +30,12 @@ import com.github.standobyte.jojo.client.sound.BarrageHitSoundHandler;
 import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
 import com.github.standobyte.jojo.entity.mob.IMobStandUser;
-import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModDataSerializers;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityAttributes;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandTaskTargetPacket;
@@ -118,7 +118,7 @@ import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.FMLPlayMessages;
 import net.minecraftforge.fml.network.NetworkHooks;
 
-abstract public class StandEntity extends LivingEntity implements IStandManifestation, IEntityAdditionalSpawnData {
+public class StandEntity extends LivingEntity implements IStandManifestation, IEntityAdditionalSpawnData {
     private static final List<Effect> SHARED_EFFECTS = new ArrayList<>();
 
     protected static final DataParameter<Byte> STAND_FLAGS = EntityDataManager.defineId(StandEntity.class, DataSerializers.BYTE);
@@ -400,7 +400,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     
     public double getDurability() {
         double durability = getAttributeValue(ModEntityAttributes.STAND_DURABILITY.get());
-        if (ModNonStandPowers.VAMPIRISM.get().isHighOnBlood(getUser())) {
+        if (ModPowers.VAMPIRISM.get().isHighOnBlood(getUser())) {
             durability *= 2;
         }
         return durability * rangeEfficiency;
@@ -499,7 +499,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
 //            scheduledTask = null;
             getCurrentTask().ifPresent(task -> {
                 StandEntityAction action = task.getAction();
-                if (action == ModActions.STAND_ENTITY_UNSUMMON.get()) {
+                if (action == ModStandActions.UNSUMMON_STAND_ENTITY.get()) {
                     stopTask();
                 }
             });
@@ -773,7 +773,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         boolean blockableAngle = canBlockOrParryFromAngle(dmgSource.getSourcePosition());
         if (!isManuallyControlled() && canBlockDamage(dmgSource) && blockableAngle && !getCurrentTask().isPresent() && canStartBlocking()) {
             // FIXME extend the task if it's already blocking
-            setTask(ModActions.STAND_ENTITY_BLOCK.get(), 5, StandEntityAction.Phase.PERFORM, ActionTarget.EMPTY);
+            setTask(ModStandActions.BLOCK_STAND_ENTITY.get(), 5, StandEntityAction.Phase.PERFORM, ActionTarget.EMPTY);
         }
         if (transfersDamage() && hasUser()) {
             LivingEntity user = getUser();
@@ -874,7 +874,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
             return false;
         }
         return getCurrentTask().map(task -> task.getAction().canBeCanceled(userPower, 
-                this, task.getPhase(), ModActions.STAND_ENTITY_BLOCK.get())).orElse(true);
+                this, task.getPhase(), ModStandActions.BLOCK_STAND_ENTITY.get())).orElse(true);
     }
 
     public boolean isStandBlocking() {
@@ -1329,7 +1329,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
         
         if (newAction == null && !checkInputBuffer()) {
             if (isArmsOnlyMode()) {
-                StandEntityAction unsummon = ModActions.STAND_ENTITY_UNSUMMON.get();
+                StandEntityAction unsummon = ModStandActions.UNSUMMON_STAND_ENTITY.get();
                 setTask(StandEntityTask.makeServerSideTask(this, userPower, unsummon, unsummon.getStandActionTicks(userPower, this), 
                         StandEntityAction.Phase.PERFORM, isArmsOnlyMode(), ActionTarget.EMPTY));
             }
@@ -1370,7 +1370,7 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     }
 
     public float getUserMovementFactor() {
-        return getCurrentTask().map(task -> task.getAction().getUserMovementFactor(getUserPower(), this, task)).orElse(1F);
+        return getCurrentTask().map(task -> task.getAction().getUserWalkSpeed(getUserPower(), this, task)).orElse(1F);
     }
     
     public void queueNextAction(StandEntityAction action) {
@@ -1829,14 +1829,14 @@ abstract public class StandEntity extends LivingEntity implements IStandManifest
     public void stopRetraction() {
         setStandFlag(StandFlag.BEING_RETRACTED, false);
         getCurrentTask().ifPresent(task -> {
-            if (task.getAction() == ModActions.STAND_ENTITY_UNSUMMON.get()) {
+            if (task.getAction() == ModStandActions.UNSUMMON_STAND_ENTITY.get()) {
                 this.stopTask();
             }
         });
     }
     
     private void startStandUnsummon() {
-        StandEntityAction unsummon = ModActions.STAND_ENTITY_UNSUMMON.get();
+        StandEntityAction unsummon = ModStandActions.UNSUMMON_STAND_ENTITY.get();
         setTask(unsummon, unsummon.getStandActionTicks(userPower, this), StandEntityAction.Phase.PERFORM, ActionTarget.EMPTY);
     }
     

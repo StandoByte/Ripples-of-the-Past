@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
-import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.client.Minecraft;
@@ -13,7 +13,7 @@ import net.minecraft.util.ResourceLocation;
 public class HierophantGreenBarrierDetectionMarker extends MarkerRenderer {
 
     public HierophantGreenBarrierDetectionMarker(Minecraft mc) {
-        super(ModStandTypes.HIEROPHANT_GREEN.get().getColor(), new ResourceLocation(JojoMod.MOD_ID, "textures/action/hierophant_green_barrier.png"), mc);
+        super(ModStands.HIEROPHANT_GREEN.getStandType().getColor(), new ResourceLocation(JojoMod.MOD_ID, "textures/action/hierophant_green_barrier.png"), mc);
     }
     
     @Override

@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.action.stand;
 
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
@@ -21,7 +21,7 @@ public class TheWorldTimeStop extends TimeStop {
     protected SoundEvent getShout(LivingEntity user, IStandPower power, ActionTarget target, boolean wasActive) {
         if (user.getRandom().nextFloat() < 0.05F && 
                 INonStandPower.getNonStandPowerOptional(user).map(otherPower -> 
-                otherPower.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(hamon -> 
+                otherPower.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> 
                 hamon.getTechnique() == Technique.JONATHAN).orElse(false)).orElse(false)) {
             return ModSounds.JONATHAN_THE_WORLD.get();
         }

@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandInstance;
 import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
@@ -119,7 +119,7 @@ public class StandDiscItem extends Item {
     public void fillItemCategory(ItemGroup group, NonNullList<ItemStack> items) {
         if (this.allowdedIn(group)) {
             boolean isClientSide = Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT;
-            for (StandType<?> standType : ModStandTypes.Registry.getRegistry()) {
+            for (StandType<?> standType : ModStandActions.STANDS.getRegistry()) {
                 if (!JojoModConfig.getCommonConfigInstance(isClientSide).isConfigLoaded()
                         || !JojoModConfig.getCommonConfigInstance(isClientSide).isStandBanned(standType)) {
                     items.add(withStand(new ItemStack(this), new StandInstance(standType)));

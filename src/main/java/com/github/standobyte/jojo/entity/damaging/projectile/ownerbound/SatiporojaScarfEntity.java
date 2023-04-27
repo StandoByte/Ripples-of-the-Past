@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.item.SatiporojaScarfItem;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
@@ -75,7 +75,7 @@ public class SatiporojaScarfEntity extends OwnerBoundProjectileEntity {
     protected void afterEntityHit(EntityRayTraceResult entityRayTraceResult, boolean entityHurt) {
         if (entityHurt && !gaveHamonPoints) {
             INonStandPower.getNonStandPowerOptional(getOwner()).ifPresent(power -> {
-                power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
+                power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                     gaveHamonPoints = true;
                     hamon.hamonPointsFromAction(HamonStat.STRENGTH, SatiporojaScarfItem.SCARF_SWING_ENERGY_COST);
                 });

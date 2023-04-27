@@ -4,7 +4,7 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.init.ModActions;
+import com.github.standobyte.jojo.init.power.ModCommonRegistries;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 
@@ -47,7 +47,7 @@ public class TrCooldownPacket {
         buf.writeInt(msg.entityId);
         buf.writeEnum(msg.classification);
         if (!msg.resetAll) {
-            buf.writeRegistryIdUnsafe(ModActions.Registry.getRegistry(), msg.action);
+            buf.writeRegistryIdUnsafe(ModCommonRegistries.ACTIONS.getRegistry(), msg.action);
             buf.writeVarInt(msg.value);
             buf.writeVarInt(msg.totalCooldown);
         }
@@ -59,7 +59,7 @@ public class TrCooldownPacket {
             return resetAll(buf.readInt(), buf.readEnum(PowerClassification.class));
         }
         return new TrCooldownPacket(buf.readInt(), buf.readEnum(PowerClassification.class), 
-                buf.readRegistryIdUnsafe(ModActions.Registry.getRegistry()), buf.readVarInt(), buf.readVarInt());
+                buf.readRegistryIdUnsafe(ModCommonRegistries.ACTIONS.getRegistry()), buf.readVarInt(), buf.readVarInt());
     }
 
     public static void handle(TrCooldownPacket msg, Supplier<NetworkEvent.Context> ctx) {

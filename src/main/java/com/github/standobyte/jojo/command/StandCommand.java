@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.command;
 
 import java.util.Collection;
 
-import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.power.stand.type.StandType;
@@ -160,7 +160,7 @@ public class StandCommand {
             if (power.hasPower()) {
                 StandType<?> type = power.getType();
                 source.sendSuccess(new TranslationTextComponent("commands.stand.query.success", player.getDisplayName(), new TranslationTextComponent(type.getTranslationKey())), false);
-                return ModStandTypes.Registry.getNumericId(type.getRegistryName());
+                return ModStandActions.STANDS.getNumericId(type.getRegistryName());
             }
         }
         throw QUERY_SINGLE_FAILED_EXCEPTION.create(player.getName());

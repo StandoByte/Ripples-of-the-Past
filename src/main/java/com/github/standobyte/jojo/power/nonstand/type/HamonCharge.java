@@ -6,7 +6,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
@@ -77,7 +77,7 @@ public class HamonCharge {
                         if (!gavePoints) {
                             if (user instanceof LivingEntity) {
                                 INonStandPower.getNonStandPowerOptional((LivingEntity) user).ifPresent(power -> {
-                                    power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
+                                    power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                                         hamon.hamonPointsFromAction(HamonStat.STRENGTH, energySpent);
                                     });
                                 });

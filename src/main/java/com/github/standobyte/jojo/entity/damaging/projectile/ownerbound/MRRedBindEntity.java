@@ -1,9 +1,9 @@
 package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -46,7 +46,7 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
             return;
         }
         if (!level.isClientSide()) {
-            if (ownerStand == null || ownerStand.getCurrentTaskAction() != ModActions.MAGICIANS_RED_RED_BIND.get() && !isInKickCombo()) {
+            if (ownerStand == null || ownerStand.getCurrentTaskAction() != ModStandActions.MAGICIANS_RED_RED_BIND.get() && !isInKickCombo()) {
                 remove();
                 return;
             }

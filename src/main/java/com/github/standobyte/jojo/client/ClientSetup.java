@@ -75,7 +75,8 @@ import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModParticles;
-import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.item.ClackersItem;
 import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
@@ -165,12 +166,12 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HAMON_MASTER.get(), HamonMasterRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.ROCK_PAPER_SCISSORS_KID.get(), RockPaperScissorsKidRenderer::new);
         
-        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STAR_PLATINUM.get(), StarPlatinumRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.THE_WORLD.get(), TheWorldRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HIEROPHANT_GREEN.get(), HierophantGreenRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SILVER_CHARIOT.get(), SilverChariotRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.MAGICIANS_RED.get(), MagiciansRedRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.CRAZY_DIAMOND.get(), CrazyDiamondRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModStands.STAR_PLATINUM.getEntityType(), StarPlatinumRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModStands.THE_WORLD.getEntityType(), TheWorldRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModStands.HIEROPHANT_GREEN.getEntityType(), HierophantGreenRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModStands.SILVER_CHARIOT.getEntityType(), SilverChariotRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModStands.MAGICIANS_RED.getEntityType(), MagiciansRedRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModStands.CRAZY_DIAMOND.getEntityType(), CrazyDiamondRenderer::new);
         
         ArmorModelRegistry.registerArmorModel(StoneMaskModel::new, ModItems.STONE_MASK.get());
         ArmorModelRegistry.registerArmorModel(BladeHatArmorModel::new, ModItems.BLADE_HAT.get());
@@ -209,7 +210,7 @@ public class ClientSetup {
                         CrossbowItem.containsChargedProjectile(itemStack, ModItems.STAND_ARROW_BEETLE.get())) ? 1 : 0;
             });
             ItemModelsProperties.register(ModItems.STAND_DISC.get(), new ResourceLocation(JojoMod.MOD_ID, "stand_id"), (itemStack, clientWorld, livingEntity) -> {
-                return StandDiscItem.validStandDisc(itemStack, true) ? ModStandTypes.Registry.getNumericId(StandDiscItem.getStandFromStack(itemStack, true).getType().getRegistryName()) : -1;
+                return StandDiscItem.validStandDisc(itemStack, true) ? ModStandActions.STANDS.getNumericId(StandDiscItem.getStandFromStack(itemStack, true).getType().getRegistryName()) : -1;
             });
 //            ItemModelsProperties.register(ModItems.EMPEROR.get(), new ResourceLocation(JojoMod.MOD_ID, "stand_invisible"), STAND_ITEM_INVISIBLE);
 

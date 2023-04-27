@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack;
 import com.github.standobyte.jojo.action.stand.StandEntityLightAttack;
@@ -28,22 +30,27 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 
 public class EntityStandType<T extends StandStats> extends StandType<T> {
-    private final Supplier<? extends StandEntityType<? extends StandEntity>> entityTypeSupplier;
+    private Supplier<? extends StandEntityType<? extends StandEntity>> entityTypeSupplier = null;
     private final boolean hasHeavyAttack;
     private final boolean hasFastAttack;
 
     public EntityStandType(int color, ITextComponent partName, 
             StandAction[] attacks, StandAction[] abilities, 
-            Class<T> statsClass, T defaultStats, 
-            Supplier<? extends StandEntityType<? extends StandEntity>> entityTypeSupplier) {
-        super(color, partName, attacks, abilities, statsClass, defaultStats);
-        this.entityTypeSupplier = entityTypeSupplier;
+            Class<T> statsClass, T defaultStats, @Nullable StandTypeOptionals additions) {
+        super(color, partName, attacks, abilities, statsClass, defaultStats, additions);
         
         hasHeavyAttack = Arrays.stream(attacks).anyMatch(
                 attack -> attack instanceof StandEntityHeavyAttack || attack.getShiftVariationIfPresent() instanceof StandEntityHeavyAttack);
         hasFastAttack = Arrays.stream(attacks).anyMatch(
                 attack -> attack instanceof StandEntityLightAttack || attack instanceof StandEntityMeleeBarrage);
     }
+    
+    public void setEntityType(Supplier<? extends StandEntityType<? extends StandEntity>> entityTypeSupplier) {
+        if (this.entityTypeSupplier == null) {
+            this.entityTypeSupplier = entityTypeSupplier;
+        }
+    }
+
 
     public StandEntityType<? extends StandEntity> getEntityType() {
         return entityTypeSupplier.get();

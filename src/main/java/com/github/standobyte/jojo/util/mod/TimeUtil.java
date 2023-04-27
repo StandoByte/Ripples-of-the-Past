@@ -9,7 +9,7 @@ import com.github.standobyte.jojo.capability.world.WorldUtilCap;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.RefreshMovementInTimeStopPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerJoinPacket;
@@ -17,7 +17,6 @@ import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerJoinP
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.collect.Streams;
 
 import net.minecraft.entity.Entity;
@@ -212,7 +211,7 @@ public class TimeUtil {
             if (!entity.level.isClientSide()) {
                 PacketManager.sendToClientsTrackingAndSelf(new RefreshMovementInTimeStopPacket(entity.getId(), chunkPos, false), entity);
                 if (worldCap.getTimeStopHandler().getTimeStopTicks(new ChunkPos(entity.blockPosition())) >= 40 && 
-                        IStandPower.getStandPowerOptional(entity).map(stand -> stand.hasPower() && stand.getType() == ModStandTypes.THE_WORLD.get()).orElse(false)) {
+                        IStandPower.getStandPowerOptional(entity).map(stand -> stand.hasPower() && stand.getType() == ModStands.THE_WORLD.getStandType()).orElse(false)) {
                     JojoModUtil.sayVoiceLine(entity, ModSounds.DIO_CANT_MOVE.get());
                 };
             }

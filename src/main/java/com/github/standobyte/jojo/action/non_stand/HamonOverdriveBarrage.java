@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.action.non_stand;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
@@ -61,7 +61,7 @@ public class HamonOverdriveBarrage extends HamonAction {
                         }
                         if (digDuration >= 0 && digDuration <= 2.5F * Math.sqrt(user.getAttributeValue(Attributes.ATTACK_DAMAGE))) {
                             world.destroyBlock(pos, dropItem);
-                            power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get().hamonPointsFromAction(HamonStat.STRENGTH, getHeldTickEnergyCost());
+                            power.getTypeSpecificData(ModPowers.HAMON.get()).get().hamonPointsFromAction(HamonStat.STRENGTH, getHeldTickEnergyCost());
                         }
                         else {
                             SoundType soundType = blockState.getSoundType(world, pos, user);

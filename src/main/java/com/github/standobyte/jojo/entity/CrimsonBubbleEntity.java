@@ -5,8 +5,8 @@ import java.util.Optional;
 
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
@@ -115,7 +115,7 @@ public class CrimsonBubbleEntity extends Entity {
 
     private void collideWithEntity(LivingEntity entity) {
         Optional<HamonData> hamonOptional = INonStandPower.getNonStandPowerOptional(entity).map(power -> 
-        power.getTypeSpecificData(ModNonStandPowers.HAMON.get())).orElse(Optional.empty());
+        power.getTypeSpecificData(ModPowers.HAMON.get())).orElse(Optional.empty());
         if (hamonOptional.isPresent()) {
             HamonData hamon = hamonOptional.get();
             hamon.setHamonStatPoints(HamonSkill.HamonStat.STRENGTH, hamon.getHamonStrengthPoints() + (int) (hamonStrengthPoints * 0.8), true, false);

@@ -6,10 +6,10 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.init.ModStandEffects;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
@@ -88,7 +88,7 @@ public class CDBloodCutterEntity extends ModdedProjectileEntity {
     protected boolean hurtTarget(Entity target, @Nullable LivingEntity owner) {
         if (target instanceof LivingEntity && INonStandPower.getNonStandPowerOptional((LivingEntity) target)
                 .map(power -> {
-                    if (power.getType() == ModNonStandPowers.VAMPIRISM.get()) {
+                    if (power.getType() == ModPowers.VAMPIRISM.get()) {
                         target.playSound(ModSounds.VAMPIRE_BLOOD_DRAIN.get(), 1.0F, 1.0F);
                         power.addEnergy(5F);
                         return true;

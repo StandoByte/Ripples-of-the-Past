@@ -3,9 +3,9 @@ package com.github.standobyte.jojo.entity;
 import javax.annotation.Nonnull;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
@@ -38,7 +38,7 @@ public class HamonProjectileShieldEntity extends Entity implements IEntityAdditi
         this.user = hamonUser;
         this.power = INonStandPower.getNonStandPowerOptional(hamonUser).orElse(null);
         if (power != null) {
-            hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).orElse(null);
+            hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).orElse(null);
         }
         copyPosition(user);
     }
@@ -51,7 +51,7 @@ public class HamonProjectileShieldEntity extends Entity implements IEntityAdditi
     public void tick() {
         super.tick();
         if (user == null || !user.isAlive() || !level.isClientSide() && 
-                (power == null || power.getHeldAction() != ModActions.HAMON_PROJECTILE_SHIELD.get() || hamon == null)) {
+                (power == null || power.getHeldAction() != ModHamonActions.HAMON_PROJECTILE_SHIELD.get() || hamon == null)) {
             if (!level.isClientSide()) remove();
             return;
         }
@@ -147,7 +147,7 @@ public class HamonProjectileShieldEntity extends Entity implements IEntityAdditi
             user = (LivingEntity) entity;
             this.power = INonStandPower.getNonStandPowerOptional(user).orElse(null);
             if (power != null) {
-                hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).orElse(null);
+                hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).orElse(null);
             }
         }
     }

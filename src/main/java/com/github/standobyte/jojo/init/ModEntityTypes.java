@@ -13,8 +13,8 @@ import com.github.standobyte.jojo.entity.PillarmanTempleEngravingEntity;
 import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.damaging.LightBeamEntity;
-import com.github.standobyte.jojo.entity.damaging.projectile.CDBloodCutterEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBlockBulletEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.CDBloodCutterEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.HGEmeraldEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.HamonBubbleBarrierEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.HamonBubbleCutterEntity;
@@ -43,14 +43,6 @@ import com.github.standobyte.jojo.entity.itemprojectile.StandArrowEntity;
 import com.github.standobyte.jojo.entity.mob.HamonMasterEntity;
 import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsKidEntity;
-import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.entity.stand.StandEntityType;
-import com.github.standobyte.jojo.entity.stand.stands.CrazyDiamondEntity;
-import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
-import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
-import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
-import com.github.standobyte.jojo.entity.stand.stands.StarPlatinumEntity;
-import com.github.standobyte.jojo.entity.stand.stands.TheWorldEntity;
 
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
@@ -244,36 +236,6 @@ public class ModEntityTypes {
     public static final RegistryObject<EntityType<FireworkInsideEntity>> FIREWORK_INSIDE = ENTITIES.register("firework_inside", 
             () -> EntityType.Builder.<FireworkInsideEntity>of(FireworkInsideEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10)
             .build(new ResourceLocation(JojoMod.MOD_ID, "firework_inside").toString()));
-    
-    
-    
-    public static final RegistryObject<StandEntityType<StarPlatinumEntity>> STAR_PLATINUM = ENTITIES.register("star_platinum", 
-            () -> new StandEntityType<StarPlatinumEntity>(StarPlatinumEntity::new, ModStandTypes.STAR_PLATINUM, false, 0.7F, 2.1F)
-            .summonSound(ModSounds.STAR_PLATINUM_SUMMON)
-            .unsummonSound(ModSounds.STAR_PLATINUM_UNSUMMON));
-    
-    public static final RegistryObject<StandEntityType<TheWorldEntity>> THE_WORLD = ENTITIES.register("the_world", 
-            () -> new StandEntityType<TheWorldEntity>(TheWorldEntity::new, ModStandTypes.THE_WORLD, false, 0.7F, 2.1F)
-            .summonSound(ModSounds.THE_WORLD_SUMMON));
-    
-    public static final RegistryObject<StandEntityType<HierophantGreenEntity>> HIEROPHANT_GREEN = ENTITIES.register("hierophant_green", 
-            () -> new StandEntityType<HierophantGreenEntity>(HierophantGreenEntity::new, ModStandTypes.HIEROPHANT_GREEN, false, 0.6F, 1.9F)
-            .summonSound(ModSounds.HIEROPHANT_GREEN_SUMMON));
-    
-    public static final RegistryObject<StandEntityType<SilverChariotEntity>> SILVER_CHARIOT = ENTITIES.register("silver_chariot", 
-            () -> new StandEntityType<SilverChariotEntity>(SilverChariotEntity::new, ModStandTypes.SILVER_CHARIOT, false, 0.6F, 1.95F)
-            .summonSound(ModSounds.SILVER_CHARIOT_SUMMON)
-            .unsummonSound(ModSounds.SILVER_CHARIOT_UNSUMMON));
-    
-    public static final RegistryObject<StandEntityType<MagiciansRedEntity>> MAGICIANS_RED = ENTITIES.register("magicians_red", 
-            () -> new StandEntityType<MagiciansRedEntity>(MagiciansRedEntity::new, ModStandTypes.MAGICIANS_RED, false, 0.65F, 1.95F)
-            .summonSound(ModSounds.MAGICIANS_RED_SUMMON));
-    
-    public static final RegistryObject<StandEntityType<CrazyDiamondEntity>> CRAZY_DIAMOND = ENTITIES.register("crazy_diamond", 
-            () -> new StandEntityType<CrazyDiamondEntity>(CrazyDiamondEntity::new, ModStandTypes.CRAZY_DIAMOND, false, 0.65F, 1.95F)
-            .summonSound(ModSounds.CRAZY_DIAMOND_SUMMON)
-            .unsummonSound(ModSounds.CRAZY_DIAMOND_UNSUMMON)
-            );
 
     
     
@@ -282,12 +244,5 @@ public class ModEntityTypes {
         event.put(ModEntityTypes.HAMON_MASTER.get(), HamonMasterEntity.createAttributes().build());
         event.put(ModEntityTypes.HUNGRY_ZOMBIE.get(), HungryZombieEntity.createAttributes().build());
         event.put(ModEntityTypes.ROCK_PAPER_SCISSORS_KID.get(), VillagerEntity.createAttributes().build());
-        
-        event.put(ModEntityTypes.STAR_PLATINUM.get(), StandEntity.createAttributes().build());
-        event.put(ModEntityTypes.THE_WORLD.get(), StandEntity.createAttributes().build());
-        event.put(ModEntityTypes.HIEROPHANT_GREEN.get(), StandEntity.createAttributes().build());
-        event.put(ModEntityTypes.SILVER_CHARIOT.get(), StandEntity.createAttributes().build());
-        event.put(ModEntityTypes.MAGICIANS_RED.get(), StandEntity.createAttributes().build());
-        event.put(ModEntityTypes.CRAZY_DIAMOND.get(), StandEntity.createAttributes().build());
     }
 }

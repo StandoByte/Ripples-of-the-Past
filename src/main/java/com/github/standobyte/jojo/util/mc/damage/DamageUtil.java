@@ -10,10 +10,10 @@ import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModItems;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
@@ -58,7 +58,7 @@ public class DamageUtil {
         if (source instanceof EntityDamageSource) {
             if (source.getDirectEntity() instanceof LivingEntity && 
                     INonStandPower.getNonStandPowerOptional((LivingEntity) source.getDirectEntity())
-                    .map(power -> power.getHeldAction() == ModActions.JONATHAN_OVERDRIVE_BARRAGE.get()).orElse(false)) {
+                    .map(power -> power.getHeldAction() == ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get()).orElse(false)) {
                 return 0.1F;
             }
             String msgId = source.getMsgId();
@@ -125,7 +125,7 @@ public class DamageUtil {
             boolean scarf = livingTarget.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.SATIPOROJA_SCARF.get();
             if (scarf) {
                 if (INonStandPower.getNonStandPowerOptional(livingTarget)
-                        .map(power -> power.getType() == ModNonStandPowers.HAMON.get()).orElse(false)) {
+                        .map(power -> power.getType() == ModPowers.HAMON.get()).orElse(false)) {
                     return false;
                 }
                 amount *= 0.25F;
@@ -144,7 +144,7 @@ public class DamageUtil {
             if (dmgSource.getEntity() instanceof LivingEntity) {
                 LivingEntity sourceLiving = (LivingEntity) dmgSource.getEntity();
                 float hamonMultiplier = INonStandPower.getNonStandPowerOptional(sourceLiving).map(power -> 
-                power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(hamon -> {
+                power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
                     if (undeadTarget && !scarf && hamon.isSkillLearned(HamonSkill.HAMON_SPREAD)) {
                         float effectStr = (hamon.getHamonDamageMultiplier() - 1) / (HamonData.MAX_HAMON_DAMAGE - 1) * hamon.getBloodstreamEfficiency();
                         int effectDuration = 25 + MathHelper.floor(125F * effectStr);
@@ -179,7 +179,7 @@ public class DamageUtil {
                     return true;
                 }
                 NonStandPowerType<?> powerType = power.getType();
-                if (powerType == ModNonStandPowers.HAMON.get() && power.consumeEnergy(2F)) {
+                if (powerType == ModPowers.HAMON.get() && power.consumeEnergy(2F)) {
                     HamonPowerType.createHamonSparkParticles(target.level, null, target.getX(), target.getY(0.5), target.getZ(), 0.1F);
                     return false;
                 }

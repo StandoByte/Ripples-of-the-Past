@@ -14,10 +14,10 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
-import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillLearnPacket;
@@ -28,8 +28,8 @@ import com.github.standobyte.jojo.power.nonstand.TypeSpecificData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonSkillType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
-import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
+import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attribute;
@@ -90,10 +90,10 @@ public class HamonData extends TypeSpecificData {
 
     @Override
     public boolean isActionUnlocked(Action<INonStandPower> action, INonStandPower powerData) {
-        if (action == ModActions.HAMON_SUNLIGHT_YELLOW_OVERDRIVE.get()) {
+        if (action == ModHamonActions.HAMON_SUNLIGHT_YELLOW_OVERDRIVE.get()) {
             return hamonSkills.isSkillLearned(HamonSkill.SUNLIGHT_YELLOW_OVERDRIVE);
         }
-        return action == ModActions.HAMON_OVERDRIVE.get() || action == ModActions.HAMON_HEALING.get() || hamonSkills.unlockedActions.contains(action);
+        return action == ModHamonActions.HAMON_OVERDRIVE.get() || action == ModHamonActions.HAMON_HEALING.get() || hamonSkills.unlockedActions.contains(action);
     }
 
     @Override

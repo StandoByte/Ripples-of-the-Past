@@ -26,7 +26,7 @@ import com.github.standobyte.jojo.client.ui.hud.ActionsModeConfig.SelectedTarget
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonStatsTabGui;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClClickActionPacket;
 import com.github.standobyte.jojo.power.IPower;
@@ -209,7 +209,7 @@ public class ActionsOverlayGui extends AbstractGui {
             }
             
             if (nonStandUiMode != null && nonStandUiMode.getPower() != null) {
-                nonStandUiMode.getPower().getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
+                nonStandUiMode.getPower().getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                     renderHamonExerciseBars(matrixStack, hamonExerciseBarsPosition, hamon, partialTick);
                 });
             }

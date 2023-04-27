@@ -6,8 +6,8 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.client.resources.ActionSpriteUploader;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
-import com.github.standobyte.jojo.init.ModActions;
-import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 
 import net.minecraft.client.Minecraft;
@@ -16,7 +16,7 @@ import net.minecraft.util.math.vector.Vector3d;
 public class CrazyDiamondAnchorMarker extends MarkerRenderer {
     
     public CrazyDiamondAnchorMarker(Minecraft mc) {
-        super(ModStandTypes.CRAZY_DIAMOND.get().getColor(), ActionSpriteUploader.getIcon(ModActions.CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE.get()), mc);
+        super(ModStands.CRAZY_DIAMOND.getStandType().getColor(), ActionSpriteUploader.getIcon(ModStandActions.CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE.get()), mc);
     }
     
     @Override
@@ -31,7 +31,7 @@ public class CrazyDiamondAnchorMarker extends MarkerRenderer {
         CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(mc.level, mc.player.getOffhandItem()).ifPresent(pos -> {
             Action<?> selectedAbility = ActionsOverlayGui.getInstance().getSelectedAction(ActionType.ABILITY);
             boolean abilitySelected = selectedAbility != null && selectedAbility.getShiftVariationIfPresent()
-                    == ModActions.CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE.get().getShiftVariationIfPresent();
+                    == ModStandActions.CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE.get().getShiftVariationIfPresent();
             list.add(new MarkerInstance(Vector3d.atCenterOf(pos), abilitySelected));
         });
     }

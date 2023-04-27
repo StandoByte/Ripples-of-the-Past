@@ -130,7 +130,7 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
         private Supplier<SoundEvent> punchSound = () -> null;
         
         public Builder() {
-            staminaCost(10F).standUserSlowDownFactor(1.0F)
+            staminaCost(10F).standUserWalkSpeed(1.0F)
             .standOffsetFront().standOffsetFromUser(-0.75, 0.75)
             .standPose(StandPose.LIGHT_ATTACK).punchSound(ModSounds.STAND_PUNCH_LIGHT)
             .standAutoSummonMode(AutoSummonMode.MAIN_ARM)

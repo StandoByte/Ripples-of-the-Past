@@ -11,7 +11,7 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.TimeStopInstance;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.init.ModActions;
+import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrNoMotionLerpPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -62,7 +62,7 @@ public class TimeStopInstant extends StandAction {
         LivingEntity user = power.getUser();
         if (TimeUtil.isTimeStopped(user.level, user.blockPosition())) {
             return user != null && TimeResume.userTimeStopInstance(user.level, user, null)
-                    ? ModActions.TIME_RESUME.get() : null;
+                    ? ModStandActions.TIME_RESUME.get() : null;
         }
         return this;
     }

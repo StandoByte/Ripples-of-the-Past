@@ -8,7 +8,7 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.entity.HamonBlockChargeEntity;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.google.common.collect.ImmutableSet;
@@ -80,7 +80,7 @@ public class HamonOrganismInfusion extends HamonAction {
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
-            HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
+            HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
             int chargeTicks = 100 + MathHelper.floor((float) (1100 * hamon.getHamonStrengthLevel())
                     / (float) HamonData.MAX_STAT_LEVEL * hamon.getBloodstreamEfficiency() * hamon.getBloodstreamEfficiency());
             switch(target.getType()) {

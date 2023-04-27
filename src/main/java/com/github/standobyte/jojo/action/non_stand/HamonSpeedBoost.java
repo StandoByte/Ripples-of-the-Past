@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.action.non_stand;
 
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
@@ -24,7 +24,7 @@ public class HamonSpeedBoost extends HamonAction {
     
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
-        HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
+        HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
         float effectStr = (float) hamon.getHamonControlLevel() / (float) HamonData.MAX_STAT_LEVEL * hamon.getBloodstreamEfficiency();
         int speedLvl = MathHelper.floor(1.5F * effectStr);
         int hasteLvl = MathHelper.floor(1.5F * effectStr);

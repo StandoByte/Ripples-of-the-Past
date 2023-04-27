@@ -6,7 +6,7 @@ import java.util.function.IntBinaryOperator;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.non_stand.VampirismAction;
 import com.github.standobyte.jojo.init.ModEffects;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
@@ -94,7 +94,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
         }
         int bloodLevel = Math.min((int) (power.getEnergy() / power.getMaxEnergy() * 5F), 4);
         bloodLevel += difficulty;
-        if (!power.getTypeSpecificData(ModNonStandPowers.VAMPIRISM.get()).get().isVampireAtFullPower()) {
+        if (!power.getTypeSpecificData(ModPowers.VAMPIRISM.get()).get().isVampireAtFullPower()) {
             bloodLevel = Math.max(bloodLevel - 2, 1);
         }
         return bloodLevel;
@@ -175,7 +175,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
         if (effectInstance != null) {
             LivingEntity entity = event.getEntityLiving();
             INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
-                if (power.getTypeSpecificData(ModNonStandPowers.VAMPIRISM.get()).isPresent()) {
+                if (power.getTypeSpecificData(ModPowers.VAMPIRISM.get()).isPresent()) {
                     int difficulty = entity.level.getDifficulty().getId();
                     int bloodLevel = bloodLevel(power, difficulty);
                     Effect effect = event.getPotion();
@@ -192,7 +192,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
         LivingEntity entity = event.getEntityLiving();
         if (entity.isAlive()) {
             INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
-                if (power.getType() == ModNonStandPowers.VAMPIRISM.get()) {
+                if (power.getType() == ModPowers.VAMPIRISM.get()) {
                     float healCost = healCost(entity.level);
                     if (healCost > 0) {
                         float actualHeal = Math.min(event.getAmount(), power.getEnergy() / healCost);

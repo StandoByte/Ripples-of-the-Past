@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.init.ModActions;
+import com.github.standobyte.jojo.init.power.ModCommonRegistries;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrCooldownPacket;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
@@ -27,7 +27,7 @@ public class ActionCooldownTracker {
         for (String key : nbt.getAllKeys()) {
             int[] array = nbt.getIntArray(key);
             if (array.length == 2) {
-                Action<?> action = ModActions.Registry.getRegistry().getValue(new ResourceLocation(key));
+                Action<?> action = ModCommonRegistries.ACTIONS.getRegistry().getValue(new ResourceLocation(key));
                 if (action != null) {
                     cooldowns.put(action, new ActionCooldownTracker.Cooldown(array[0], array[1]));
                 }

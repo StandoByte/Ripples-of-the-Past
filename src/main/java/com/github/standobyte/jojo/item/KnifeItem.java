@@ -7,7 +7,7 @@ import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.entity.itemprojectile.KnifeEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.GameplayEventHandler;
 import com.github.standobyte.jojo.util.mod.TimeUtil;
@@ -72,7 +72,7 @@ public class KnifeItem extends Item {
             }
 
             IStandPower standPower = IStandPower.getPlayerStandPower(player);
-            boolean hasTheWorld = standPower.getType() == ModStandTypes.THE_WORLD.get();
+            boolean hasTheWorld = standPower.getType() == ModStands.THE_WORLD.getStandType();
             Optional<StandEntity> theWorld = hasTheWorld && standPower.isActive()
                     ? Optional.of((StandEntity) standPower.getStandManifestation()) : Optional.empty();
             

@@ -21,24 +21,40 @@ import net.minecraftforge.fml.network.FMLPlayMessages.SpawnEntity;
 
 public class StandEntityType<T extends StandEntity> extends EntityType<T> {
     private final StandEntityType.IStandFactory<T> factory;
-    private final Supplier<? extends StandType<?>> standTypeSupplier;
+    private Supplier<? extends StandType<?>> standTypeSupplier = null;
     private Supplier<SoundEvent> summonSound = ModSounds.STAND_SUMMON_DEFAULT;
     private Supplier<SoundEvent> unsummonSound = ModSounds.STAND_UNSUMMON_DEFAULT;
 
-    public StandEntityType(IStandFactory<T> factory, Supplier<? extends StandType<?>> standType, 
-            boolean immuneToFire, float width, float height) {
-        this(factory, standType, immuneToFire, width, height, 
-                t -> true, t -> 8, t -> 2, null);
+    public StandEntityType(IStandFactory<T> factory) {
+        this(factory, 0.65F, 1.95F);
     }
 
-    protected StandEntityType(IStandFactory<T> factory, Supplier<? extends StandType<?>> standType, 
+    public StandEntityType(IStandFactory<T> factory, float width, float height) {
+        this(factory, false, width, height, 
+                t -> true, t -> 8, t -> 2, null);
+    }
+    
+    public static StandEntityType<StandEntity> basicEntity() {
+        return new StandEntityType<StandEntity>(StandEntity::new);
+    }
+    
+    public static StandEntityType<StandEntity> basicEntity(float width, float height) {
+        return new StandEntityType<StandEntity>(StandEntity::new, width, height);
+    }
+
+    protected StandEntityType(IStandFactory<T> factory, 
             boolean immuneToFire, float width, float height,
             Predicate<EntityType<?>> velocityUpdateSupplier, ToIntFunction<EntityType<?>> trackingRangeSupplier,
             ToIntFunction<EntityType<?>> updateIntervalSupplier, BiFunction<SpawnEntity, World, T> customClientFactory) {
         super(null, EntityClassification.MISC, false, false, immuneToFire, false, null, EntitySize.scalable(width, height),
                 -1, -1, velocityUpdateSupplier, trackingRangeSupplier, updateIntervalSupplier, customClientFactory);
         this.factory = factory;
-        this.standTypeSupplier = standType;
+    }
+    
+    public void setStandType(Supplier<? extends StandType<?>> standTypeSupplier) {
+        if (this.standTypeSupplier == null) {
+            this.standTypeSupplier = standTypeSupplier;
+        }
     }
     
     public StandEntityType<T> summonSound(Supplier<SoundEvent> soundSupplier) {

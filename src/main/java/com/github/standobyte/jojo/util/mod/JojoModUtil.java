@@ -14,7 +14,7 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.item.ClothesSet;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket;
@@ -226,7 +226,7 @@ public class JojoModUtil {
     public static boolean isPlayerUndead(PlayerEntity player) {
         return INonStandPower.getNonStandPowerOptional(player).map(power -> {
             NonStandPowerType<?> powerType = power.getType();
-            return powerType == ModNonStandPowers.VAMPIRISM.get();
+            return powerType == ModPowers.VAMPIRISM.get();
         }).orElse(false); 
     }
 

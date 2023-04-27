@@ -6,9 +6,9 @@ import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
-import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
@@ -29,7 +29,7 @@ public class CrazyDiamondMisshapeBodyPart extends StandEntityActionModifier {
     
     @Override
     public boolean isUnlocked(IStandPower power) {
-        return ModActions.CRAZY_DIAMOND_HEAL.get().isUnlocked(power);
+        return ModStandActions.CRAZY_DIAMOND_HEAL.get().isUnlocked(power);
     }
     
     // FIXME misshaping body parts mob effects

@@ -2,8 +2,8 @@ package com.github.standobyte.jojo.network.packets.fromclient;
 
 import java.util.function.Supplier;
 
-import com.github.standobyte.jojo.init.ModNonStandPowers;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -25,7 +25,7 @@ public class ClRunAwayPacket {
             PlayerEntity player = ctx.get().getSender();
                 if (player.isSprinting()) {
                 INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
-                    power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
+                    power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                         if (hamon.getTechnique() == Technique.JOSEPH) {
                             JojoModUtil.sayVoiceLine(player, ModSounds.JOSEPH_RUN_AWAY.get());
                         }

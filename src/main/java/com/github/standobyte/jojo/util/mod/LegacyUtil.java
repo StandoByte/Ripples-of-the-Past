@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.util.mod;
 
 import java.util.Optional;
 
-import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.ResolveLevelsMap;
@@ -21,7 +21,7 @@ public class LegacyUtil {
     public static Optional<StandInstance> oldStandDiscInstance(ItemStack disc, boolean clientSide) {
         CompoundNBT nbt = disc.getTag();
         if (nbt != null && nbt.contains("Stand", MCUtil.getNbtId(StringNBT.class))) {
-            StandType<?> standType = ModStandTypes.Registry.getRegistry().getValue(new ResourceLocation(nbt.getString("Stand")));
+            StandType<?> standType = ModStandActions.STANDS.getRegistry().getValue(new ResourceLocation(nbt.getString("Stand")));
             if (standType != null) {
                 StandInstance standInstance = new StandInstance(standType);
                 if (!clientSide) {
@@ -37,7 +37,7 @@ public class LegacyUtil {
         if (capNbt.contains("StandType", MCUtil.getNbtId(StringNBT.class))) {
             String standName = capNbt.getString("StandType");
             if (standName != IPowerType.NO_POWER_NAME) {
-                StandType<?> stand = ModStandTypes.Registry.getRegistry().getValue(new ResourceLocation(standName));
+                StandType<?> stand = ModStandActions.STANDS.getRegistry().getValue(new ResourceLocation(standName));
                 return Optional.ofNullable(new StandInstance(stand));
             }
         }

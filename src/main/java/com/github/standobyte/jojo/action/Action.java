@@ -44,7 +44,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     private final int holdDurationToFire;
     private final int holdDurationMax;
     private final boolean continueHolding;
-    private final float heldSlowDownFactor;
+    private final float heldWalkSpeed;
     private final int cooldownTechnical;
     private final int cooldownAdditional;
     private final Map<Hand, Function<ItemStack, String>> itemChecks;
@@ -60,7 +60,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         this.holdDurationMax = builder.holdDurationMax;
         this.holdDurationToFire = builder.holdDurationToFire;
         this.continueHolding = builder.continueHolding;
-        this.heldSlowDownFactor = builder.heldSlowDownFactor;
+        this.heldWalkSpeed = builder.heldWalkSpeed;
         this.cooldownTechnical = builder.cooldownTechnical;
         this.cooldownAdditional = builder.cooldownAdditional;
         this.itemChecks = builder.itemChecks;
@@ -314,8 +314,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return isShiftVariation();
     }
     
-    public float getHeldSlowDownFactor() {
-        return heldSlowDownFactor;
+    public float getHeldWalkSpeed() {
+        return heldWalkSpeed;
     }
     
     public int getHoldDurationToFire(P power) { 
@@ -449,7 +449,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         private int holdDurationToFire = 0;
         private int holdDurationMax = 0;
         private boolean continueHolding = false;
-        private float heldSlowDownFactor = 1.0F;
+        private float heldWalkSpeed = 1.0F;
         
         private int cooldownTechnical;
         private int cooldownAdditional;
@@ -505,8 +505,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
             return getThis();
         }
         
-        public T heldSlowDownFactor(float slowDownFactor) {
-            this.heldSlowDownFactor = MathHelper.clamp(slowDownFactor, 0, 1);
+        public T heldWalkSpeed(float walkSpeed) {
+            this.heldWalkSpeed = MathHelper.clamp(walkSpeed, 0, 1);
             return getThis();
         }
         

@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.entity.damaging.projectile;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
@@ -51,7 +51,7 @@ public class SCRapierEntity extends ModdedProjectileEntity {
             damage = (float) owner.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
         }
         else {
-            damage = (float) ModStandTypes.SILVER_CHARIOT.get().getStats().getBasePower();
+            damage = (float) ModStands.SILVER_CHARIOT.getStandType().getStats().getBasePower();
         }
         return damage * 1.5F;
     }

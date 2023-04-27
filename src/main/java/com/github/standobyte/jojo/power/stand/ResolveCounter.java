@@ -5,7 +5,7 @@ import java.util.Optional;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEffects;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.MaxAchievedResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResetResolveValuePacket;
@@ -234,7 +234,7 @@ public class ResolveCounter {
     }
     
     private float boostFromGettingAttacked(LivingEntity user) {
-        if (INonStandPower.getNonStandPowerOptional(user).map(power -> power.getType() == ModNonStandPowers.VAMPIRISM.get()).orElse(false)) {
+        if (INonStandPower.getNonStandPowerOptional(user).map(power -> power.getType() == ModPowers.VAMPIRISM.get()).orElse(false)) {
            return BOOST_MISSING_HP_MAX / 2;
         }
         float hp = user.getHealth();

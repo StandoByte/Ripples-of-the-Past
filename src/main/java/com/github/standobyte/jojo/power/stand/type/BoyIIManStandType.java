@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.power.stand.type;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
@@ -11,8 +13,8 @@ public class BoyIIManStandType<T extends StandStats> extends StandType<T> {
     
     public BoyIIManStandType(int color, ITextComponent partName, 
             StandAction[] attacks, StandAction[] abilities, 
-            Class<T> statsClass, T defaultStats) {
-        super(color, partName, attacks, abilities, statsClass, defaultStats);
+            Class<T> statsClass, T defaultStats, @Nullable StandTypeOptionals additions) {
+        super(color, partName, attacks, abilities, statsClass, defaultStats, additions);
     }
 
     @Override

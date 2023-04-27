@@ -41,7 +41,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     protected final int standPerformDuration;
     protected final int standRecoveryDuration;
     private final AutoSummonMode autoSummonMode;
-    private final float userMovementFactor;
+    private final float userWalkSpeed;
     private final StandPose standPose;
     @Nullable
     protected final StandRelativeOffset userOffset;
@@ -57,7 +57,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         this.standPerformDuration = builder.standPerformDuration;
         this.standRecoveryDuration = builder.standRecoveryDuration;
         this.autoSummonMode = builder.autoSummonMode;
-        this.userMovementFactor = builder.userMovementFactor;
+        this.userWalkSpeed = builder.userWalkSpeed;
         this.standPose = builder.standPose;
         this.userOffset = builder.userOffset;
         this.userOffsetArmsOnly = builder.userOffsetArmsOnly;
@@ -496,8 +496,8 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         return 1F;
     }
     
-    public float getUserMovementFactor(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
-        return task.getPhase() == Phase.RECOVERY && isFreeRecovery(standPower, standEntity) ? 1F : userMovementFactor;
+    public float getUserWalkSpeed(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
+        return task.getPhase() == Phase.RECOVERY && isFreeRecovery(standPower, standEntity) ? 1F : userWalkSpeed;
     }
     
     public StandPose getStandPose(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
@@ -545,7 +545,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         protected int standPerformDuration = 1;
         protected int standRecoveryDuration = 0;
         protected AutoSummonMode autoSummonMode = AutoSummonMode.FULL;
-        protected float userMovementFactor = 0.5F;
+        protected float userWalkSpeed = 0.5F;
         protected StandPose standPose = StandPose.IDLE;
         @Nullable
         protected StandRelativeOffset userOffset = null;
@@ -582,8 +582,8 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
             return getThis();
         }
         
-        public T standUserSlowDownFactor(float factor) {
-            this.userMovementFactor = MathHelper.clamp(factor, 0F, 1F);
+        public T standUserWalkSpeed(float factor) {
+            this.userWalkSpeed = MathHelper.clamp(factor, 0F, 1F);
             return getThis();
         }
         

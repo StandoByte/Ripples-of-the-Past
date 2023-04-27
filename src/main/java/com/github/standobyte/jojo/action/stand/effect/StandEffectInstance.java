@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
-import com.github.standobyte.jojo.init.ModStandEffects;
+import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandEffectPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -202,7 +202,7 @@ public abstract class StandEffectInstance {
     }
     
     public static StandEffectInstance fromNBT(CompoundNBT nbt) {
-        StandEffectType<?> effectType = ModStandEffects.Registry.getRegistry().getValue(new ResourceLocation(nbt.getString("Type")));
+        StandEffectType<?> effectType = ModStandEffects.STAND_EFFECTS.getRegistry().getValue(new ResourceLocation(nbt.getString("Type")));
         if (effectType == null) return null;
         StandEffectInstance effect = effectType.create();
         effect.tickCount = nbt.getInt("TickCount");

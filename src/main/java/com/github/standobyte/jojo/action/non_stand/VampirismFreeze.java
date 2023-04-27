@@ -3,9 +3,9 @@ package com.github.standobyte.jojo.action.non_stand;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
-import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.power.non_stand.vampirism.ModVampirismActions;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
@@ -140,7 +140,7 @@ public class VampirismFreeze extends VampirismAction {
         if (attacker instanceof LivingEntity && !attacker.isOnFire() && !DamageUtil.isImmuneToCold(attacker)) {
             LivingEntity targetLiving = event.getEntityLiving();
             return INonStandPower.getNonStandPowerOptional(targetLiving).map(power -> {
-                if (power.getHeldAction(true) == ModActions.VAMPIRISM_FREEZE.get()) {
+                if (power.getHeldAction(true) == ModVampirismActions.VAMPIRISM_FREEZE.get()) {
                     World world = attacker.level;
                     int difficulty = world.getDifficulty().getId();
                     ((LivingEntity) attacker).addEffect(new EffectInstance(ModEffects.FREEZE.get(), difficulty * 100, difficulty));

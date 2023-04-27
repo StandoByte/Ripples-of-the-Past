@@ -7,9 +7,9 @@ import java.util.List;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
-import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
@@ -41,7 +41,7 @@ import net.minecraftforge.fml.network.NetworkHooks;
 
 public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawnData, IHasHealth {
     private static final double GRAVITY = -0.05D;
-    private static final float MAX_ENERGY = ModActions.HAMON_LIFE_MAGNETISM.get().getEnergyNeeded(0, null);
+    private static final float MAX_ENERGY = ModHamonActions.HAMON_LIFE_MAGNETISM.get().getEnergyNeeded(0, null);
     private static final float MAX_HEALTH = 4F;
 
     private static final DataParameter<Boolean> IS_FLYING = EntityDataManager.defineId(LeavesGliderEntity.class, DataSerializers.BOOLEAN);
@@ -101,7 +101,7 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
             boolean infiniteEnergy = false;
             while (iter.hasNext()) {
                 INonStandPower power = iter.next();
-                if (power.getType() != ModNonStandPowers.HAMON.get()) {
+                if (power.getType() != ModPowers.HAMON.get()) {
                     iter.remove();
                 }
                 else if (!infiniteEnergy && power.isUserCreative()) {
@@ -151,7 +151,7 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
     
     private float consumeEnergy(INonStandPower power, float energy) {
         energy = Math.min(energy, power.getEnergy());
-        power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get().hamonPointsFromAction(HamonStat.CONTROL, energy);
+        power.getTypeSpecificData(ModPowers.HAMON.get()).get().hamonPointsFromAction(HamonStat.CONTROL, energy);
         power.consumeEnergy(energy);
         return energy;
     }
@@ -261,7 +261,7 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
         updateBbHeight();
         if (!level.isClientSide() && entity instanceof LivingEntity) {
             INonStandPower.getNonStandPowerOptional((LivingEntity) entity).ifPresent(power -> {
-                if (power.getType() == ModNonStandPowers.HAMON.get()) {
+                if (power.getType() == ModPowers.HAMON.get()) {
                     passengerPowers.add(power);
                 }
             });

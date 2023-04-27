@@ -3,9 +3,9 @@ package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 import java.util.Collection;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
@@ -69,7 +69,7 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
 
     @Override
     public int ticksLifespan() {
-        return ModActions.HAMON_ZOOM_PUNCH.get().getCooldownTechnical(null);
+        return ModHamonActions.HAMON_ZOOM_PUNCH.get().getCooldownTechnical(null);
     }
     
     @Override
@@ -90,7 +90,7 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
         super.remove();
         if (tickCount < ticksLifespan()) {
             INonStandPower.getNonStandPowerOptional(getOwner()).ifPresent(power -> {
-                power.updateCooldownTimer(ModActions.HAMON_ZOOM_PUNCH.get(), 0, ModActions.HAMON_ZOOM_PUNCH.get().getCooldownTechnical(null));
+                power.updateCooldownTimer(ModHamonActions.HAMON_ZOOM_PUNCH.get(), 0, ModHamonActions.HAMON_ZOOM_PUNCH.get().getCooldownTechnical(null));
             });
         }
     }
@@ -142,9 +142,9 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
     protected void afterEntityHit(EntityRayTraceResult entityRayTraceResult, boolean entityHurt) {
         if (entityHurt && !gaveHamonPoints) {
             INonStandPower.getNonStandPowerOptional(getOwner()).ifPresent(power -> {
-                power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).ifPresent(hamon -> {
+                power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                     gaveHamonPoints = true;
-                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, ModActions.HAMON_ZOOM_PUNCH.get().getEnergyCost(power));
+                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, ModHamonActions.HAMON_ZOOM_PUNCH.get().getEnergyCost(power));
                 });
             });
         }

@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
@@ -36,7 +36,7 @@ public class RoadRollerItem extends Item {
             player.startRiding(roadRoller);
             roadRoller.setOwner(player);
             if (IStandPower.getStandPowerOptional(player)
-                    .map(stand -> stand.getType() == ModStandTypes.THE_WORLD.get())
+                    .map(stand -> stand.getType() == ModStands.THE_WORLD.getStandType())
                     .orElse(false)) {
                 JojoModUtil.sayVoiceLine(player, ModSounds.DIO_ROAD_ROLLER.get());
             }

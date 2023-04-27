@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.damaging.projectile.TommyGunBulletEntity;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
@@ -226,7 +226,7 @@ public class TommyGunItem extends Item {
     @Override
     public boolean hurtEnemy(ItemStack itemStack, LivingEntity target, LivingEntity user) {
         return INonStandPower.getNonStandPowerOptional(user).map(power -> 
-        power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).map(hamon -> {
+        power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
             if (hamon.getTechnique() == Technique.JOSEPH) {
                 if (!user.level.isClientSide()) {
                     if (power.consumeEnergy(200) && DamageUtil.dealHamonDamage(target, 0.15F, user, null)) {
@@ -245,7 +245,7 @@ public class TommyGunItem extends Item {
     
     private boolean josephVoiceLine(LivingEntity entity) {
         return INonStandPower.getNonStandPowerOptional(entity)
-                .map(power -> power.getTypeSpecificData(ModNonStandPowers.HAMON.get())
+                .map(power -> power.getTypeSpecificData(ModPowers.HAMON.get())
                         .map(hamon -> hamon.getTechnique() == Technique.JOSEPH)
                         .orElse(false))
                 .orElse(false);

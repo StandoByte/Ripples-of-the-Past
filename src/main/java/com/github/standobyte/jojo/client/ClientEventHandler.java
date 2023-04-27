@@ -14,10 +14,11 @@ import com.github.standobyte.jojo.client.render.block.overlay.TranslucentBlockRe
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
-import com.github.standobyte.jojo.init.ModActions;
 import com.github.standobyte.jojo.init.ModEffects;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
-import com.github.standobyte.jojo.init.ModStandTypes;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
+import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -174,10 +175,10 @@ public class ClientEventHandler {
         }
 
         INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
-            if (power.getHeldAction(true) == ModActions.ZEPPELI_TORNADO_OVERDRIVE.get()) {
+            if (power.getHeldAction(true) == ModHamonActions.ZEPPELI_TORNADO_OVERDRIVE.get()) {
                 event.getMatrixStack().mulPose(Vector3f.YP.rotation((power.getHeldActionTicks() + event.getPartialRenderTick()) * 2F % 360F));
             }
-            if (power.isActionOnCooldown(ModActions.HAMON_ZOOM_PUNCH.get())) {
+            if (power.isActionOnCooldown(ModHamonActions.HAMON_ZOOM_PUNCH.get())) {
                 M model = event.getRenderer().getModel();
                 if (model instanceof BipedModel) {
                     ModelRenderer arm = entity.getMainArm() == HandSide.LEFT ? ((BipedModel<?>) model).leftArm : ((BipedModel<?>) model).rightArm;
@@ -200,7 +201,7 @@ public class ClientEventHandler {
         Entity entity = event.getEntity();
         if (entity instanceof LivingEntity) {
             INonStandPower.getNonStandPowerOptional((LivingEntity) entity).ifPresent(power -> {
-                if (power.getHeldAction(true) == ModActions.ZEPPELI_TORNADO_OVERDRIVE.get()) {
+                if (power.getHeldAction(true) == ModHamonActions.ZEPPELI_TORNADO_OVERDRIVE.get()) {
                     event.getMatrixStack().mulPose(Vector3f.YP.rotation((power.getHeldActionTicks() + event.getPartialTicks()) * -2F % 360F));
                 }
             });
@@ -370,7 +371,7 @@ public class ClientEventHandler {
     public void disableFoodBar(RenderGameOverlayEvent.Pre event) {
         if (event.getType() == FOOD || event.getType() == AIR) {
             INonStandPower.getNonStandPowerOptional(mc.player).ifPresent(power -> {
-                if (power.getType() == ModNonStandPowers.VAMPIRISM.get()) {
+                if (power.getType() == ModPowers.VAMPIRISM.get()) {
                     event.setCanceled(true);
                 }
             });
@@ -384,12 +385,12 @@ public class ClientEventHandler {
             if (entity instanceof LivingEntity) {
                 LivingEntity livingEntity = (LivingEntity) entity;
                 INonStandPower.getNonStandPowerOptional(livingEntity).ifPresent(power -> {
-                    if (power.isActionOnCooldown(ModActions.HAMON_ZOOM_PUNCH.get())) {
+                    if (power.isActionOnCooldown(ModHamonActions.HAMON_ZOOM_PUNCH.get())) {
                         event.setCanceled(true);
                     }
                     else {
                         ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-                        if (hud.getSelectedAction(ActionType.ATTACK) == ModActions.JONATHAN_OVERDRIVE_BARRAGE.get()
+                        if (hud.getSelectedAction(ActionType.ATTACK) == ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get()
                                 && livingEntity.getMainHandItem().isEmpty() && livingEntity.getOffhandItem().isEmpty()) {
                             FirstPersonRenderer renderer = mc.getItemInHandRenderer();
                             ClientPlayerEntity player = mc.player;
@@ -438,7 +439,7 @@ public class ClientEventHandler {
 
     @SubscribeEvent
     public void renderBlocksOverlay(RenderWorldLastEvent event) {
-        if (ActionsOverlayGui.getInstance().getSelectedAction(ActionType.ABILITY) == ModActions.CRAZY_DIAMOND_RESTORE_TERRAIN.get()) {
+        if (ActionsOverlayGui.getInstance().getSelectedAction(ActionType.ABILITY) == ModStandActions.CRAZY_DIAMOND_RESTORE_TERRAIN.get()) {
             MatrixStack matrixStack = event.getMatrixStack();
             IStandPower stand = ActionsOverlayGui.getInstance().standUiMode.getPower();
             Entity entity = CrazyDiamondRestoreTerrain.restorationCenterEntity(mc.player, stand);
@@ -458,7 +459,7 @@ public class ClientEventHandler {
         PlayerEntity player = event.getPlayer();
         if (player != null) {
             CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(player.level, event.getItemStack()).ifPresent(pos -> {
-                if (IStandPower.getStandPowerOptional(player).map(power -> power.getType() == ModStandTypes.CRAZY_DIAMOND.get()).orElse(false)) {
+                if (IStandPower.getStandPowerOptional(player).map(power -> power.getType() == ModStands.CRAZY_DIAMOND.getStandType()).orElse(false)) {
                     event.getToolTip().add(new TranslationTextComponent("jojo.crazy_diamond.block_checkpoint.tooltip", 
                             pos.getX(), pos.getY(), pos.getZ()).withStyle(TextFormatting.RED));
                 }
@@ -473,7 +474,7 @@ public class ClientEventHandler {
     //            if (((itemName.contains("berry") || itemName.contains("berries")) && event.getEntityLiving().getRandom().nextFloat() < 0.125F ||
     //                (itemName.contains("cherry") || itemName.contains("cherries")))
     //                    && IStandPower.getStandPowerOptional(event.getEntityLiving()).map(stand -> {
-    //                        return stand.getType() == ModStandTypes.HIEROPHANT_GREEN.get();
+    //                        return stand.getType() == ModStands.HIEROPHANT_GREEN.get();
     //                    }).orElse(false)) {
     //                ClientTickingSoundsHelper.playItemUseSound(event.getEntityLiving(), ModSounds.RERO.get(), 1.0F, 1.0F, true, event.getItem());
     //            }

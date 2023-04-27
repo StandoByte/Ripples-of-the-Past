@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.init.ModNonStandPowers;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
@@ -30,7 +30,7 @@ public class HamonSendoOverdrive extends HamonAction {
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
-            HamonData hamon = power.getTypeSpecificData(ModNonStandPowers.HAMON.get()).get();
+            HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
             BlockPos pos = target.getBlockPos();
             Direction face = target.getFace();
             double diameter = 2 + (double) (hamon.getHamonStrengthLevel() * 6) / (double) HamonData.MAX_STAT_LEVEL
