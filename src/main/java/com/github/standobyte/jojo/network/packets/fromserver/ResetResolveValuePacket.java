@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.network.PacketBuffer;
@@ -13,19 +14,29 @@ public class ResetResolveValuePacket {
     public ResetResolveValuePacket() {
     }
     
-    public static void encode(ResetResolveValuePacket msg, PacketBuffer buf) {
-    }
     
-    public static ResetResolveValuePacket decode(PacketBuffer buf) {
-        return new ResetResolveValuePacket();
-    }
+    
+    public static class Handler implements IModPacketHandler<ResetResolveValuePacket> {
 
-    public static void handle(ResetResolveValuePacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void encode(ResetResolveValuePacket msg, PacketBuffer buf) {
+        }
+
+        @Override
+        public ResetResolveValuePacket decode(PacketBuffer buf) {
+            return new ResetResolveValuePacket();
+        }
+
+        @Override
+        public void handle(ResetResolveValuePacket msg, Supplier<NetworkEvent.Context> ctx) {
             IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
                 power.getResolveCounter().resetResolveValue();
             });
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<ResetResolveValuePacket> getPacketClass() {
+            return ResetResolveValuePacket.class;
+        }
     }
 }

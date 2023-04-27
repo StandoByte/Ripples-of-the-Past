@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.network.packets.fromserver.stand_specific;
+package com.github.standobyte.jojo.network.packets.fromserver.ability_specific;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame.Pick;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -82,85 +83,91 @@ public class RPSGameStatePacket {
         this.packetType = packetType;
     }
     
-    public static void encode(RPSGameStatePacket msg, PacketBuffer buf) {
-        buf.writeEnum(msg.packetType);
-        switch (msg.packetType) {
-        case UPDATE:
-            writePickLists(msg, buf);
-            break;
-        case ENTER:
-            writePickLists(msg, buf);
-            buf.writeInt(msg.opponentId);
-            break;
-        case LEAVE:
-            break;
-        case GAME_OVER:
-            buf.writeBoolean(msg.playerWon);
-            break;
-        case SET_PICK:
-            buf.writeBoolean(msg.opponentPick);
-            buf.writeBoolean(msg.pick != null);
-            if (msg.pick != null) {
-                buf.writeEnum(msg.pick);
-            }
-            if (msg.opponentPick) {
-                buf.writeInt(msg.opponentId);
-            }
-            break;
-        case MIND_READ:
-            buf.writeInt(msg.opponentId);
-            break;
-        }
-    }
     
-    private static void writePickLists(RPSGameStatePacket msg, PacketBuffer buf) {
-        int size = msg.playerPicks.size();
-        buf.writeVarInt(size);
-        for (int i = 0; i < size; i++) {
-            buf.writeEnum(msg.playerPicks.get(i));
-        }
-        for (int i = 0; i < size; i++) {
-            buf.writeEnum(msg.opponentPicks.get(i));
-        }
-    }
     
-    public static RPSGameStatePacket decode(PacketBuffer buf) {
-        Type type = buf.readEnum(Type.class);
-        List<Pick> playerPicks = new ArrayList<>();
-        List<Pick> opponentPicks = new ArrayList<>();
-        switch (type) {
-        case UPDATE:
-            readPickLists(playerPicks, opponentPicks, buf);
-            return RPSGameStatePacket.stateUpdated(playerPicks, opponentPicks);
-        case ENTER:
-            readPickLists(playerPicks, opponentPicks, buf);
-            return RPSGameStatePacket.enteredGame(buf.readInt(), playerPicks, opponentPicks);
-        case LEAVE:
-            return RPSGameStatePacket.leftGame();
-        case GAME_OVER:
-            return RPSGameStatePacket.gameOver(buf.readBoolean());
-        case SET_PICK:
-            boolean opponentPick = buf.readBoolean();
-            Pick pick = buf.readBoolean() ? buf.readEnum(Pick.class) : null;
-            return opponentPick ? RPSGameStatePacket.setOpponentPick(pick, buf.readInt()) : RPSGameStatePacket.setOwnPick(pick);
-        case MIND_READ:
-            return RPSGameStatePacket.mindRead(buf.readInt());
-        }
-        throw new IllegalStateException();
-    }
-    
-    private static void readPickLists(List<Pick> playerPicks, List<Pick> opponentPicks, PacketBuffer buf) {
-        int size = buf.readVarInt();
-        for (int i = 0; i < size; i++) {
-            playerPicks.add(buf.readEnum(Pick.class));
-        }
-        for (int i = 0; i < size; i++) {
-            opponentPicks.add(buf.readEnum(Pick.class));
-        }
-    }
+    public static class Handler implements IModPacketHandler<RPSGameStatePacket> {
 
-    public static void handle(RPSGameStatePacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void encode(RPSGameStatePacket msg, PacketBuffer buf) {
+            buf.writeEnum(msg.packetType);
+            switch (msg.packetType) {
+            case UPDATE:
+                writePickLists(msg, buf);
+                break;
+            case ENTER:
+                writePickLists(msg, buf);
+                buf.writeInt(msg.opponentId);
+                break;
+            case LEAVE:
+                break;
+            case GAME_OVER:
+                buf.writeBoolean(msg.playerWon);
+                break;
+            case SET_PICK:
+                buf.writeBoolean(msg.opponentPick);
+                buf.writeBoolean(msg.pick != null);
+                if (msg.pick != null) {
+                    buf.writeEnum(msg.pick);
+                }
+                if (msg.opponentPick) {
+                    buf.writeInt(msg.opponentId);
+                }
+                break;
+            case MIND_READ:
+                buf.writeInt(msg.opponentId);
+                break;
+            }
+        }
+    
+        private static void writePickLists(RPSGameStatePacket msg, PacketBuffer buf) {
+            int size = msg.playerPicks.size();
+            buf.writeVarInt(size);
+            for (int i = 0; i < size; i++) {
+                buf.writeEnum(msg.playerPicks.get(i));
+            }
+            for (int i = 0; i < size; i++) {
+                buf.writeEnum(msg.opponentPicks.get(i));
+            }
+        }
+
+        @Override
+        public RPSGameStatePacket decode(PacketBuffer buf) {
+            Type type = buf.readEnum(Type.class);
+            List<Pick> playerPicks = new ArrayList<>();
+            List<Pick> opponentPicks = new ArrayList<>();
+            switch (type) {
+            case UPDATE:
+                readPickLists(playerPicks, opponentPicks, buf);
+                return RPSGameStatePacket.stateUpdated(playerPicks, opponentPicks);
+            case ENTER:
+                readPickLists(playerPicks, opponentPicks, buf);
+                return RPSGameStatePacket.enteredGame(buf.readInt(), playerPicks, opponentPicks);
+            case LEAVE:
+                return RPSGameStatePacket.leftGame();
+            case GAME_OVER:
+                return RPSGameStatePacket.gameOver(buf.readBoolean());
+            case SET_PICK:
+                boolean opponentPick = buf.readBoolean();
+                Pick pick = buf.readBoolean() ? buf.readEnum(Pick.class) : null;
+                return opponentPick ? RPSGameStatePacket.setOpponentPick(pick, buf.readInt()) : RPSGameStatePacket.setOwnPick(pick);
+            case MIND_READ:
+                return RPSGameStatePacket.mindRead(buf.readInt());
+            }
+            throw new IllegalStateException();
+        }
+    
+        private static void readPickLists(List<Pick> playerPicks, List<Pick> opponentPicks, PacketBuffer buf) {
+            int size = buf.readVarInt();
+            for (int i = 0; i < size; i++) {
+                playerPicks.add(buf.readEnum(Pick.class));
+            }
+            for (int i = 0; i < size; i++) {
+                opponentPicks.add(buf.readEnum(Pick.class));
+            }
+        }
+
+        @Override
+        public void handle(RPSGameStatePacket msg, Supplier<NetworkEvent.Context> ctx) {
             PlayerEntity player = ClientUtil.getClientPlayer();
             switch (msg.packetType) {
             case UPDATE:
@@ -204,8 +211,12 @@ public class RPSGameStatePacket {
                 });
                 break;
             }
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<RPSGameStatePacket> getPacketClass() {
+            return RPSGameStatePacket.class;
+        }
     }
     
     private enum Type {

@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;
@@ -26,25 +27,35 @@ public class TrDirectEntityPosPacket {
         this.z = z;
     }
     
-    public static void encode(TrDirectEntityPosPacket msg, PacketBuffer buf) {
-        buf.writeInt(msg.entityId);
-        buf.writeDouble(msg.x);
-        buf.writeDouble(msg.y);
-        buf.writeDouble(msg.z);
-    }
     
-    public static TrDirectEntityPosPacket decode(PacketBuffer buf) {
-        return new TrDirectEntityPosPacket(buf.readInt(), buf.readDouble(), buf.readDouble(), buf.readDouble());
-    }
+    
+    public static class Handler implements IModPacketHandler<TrDirectEntityPosPacket> {
 
-    public static void handle(TrDirectEntityPosPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void encode(TrDirectEntityPosPacket msg, PacketBuffer buf) {
+            buf.writeInt(msg.entityId);
+            buf.writeDouble(msg.x);
+            buf.writeDouble(msg.y);
+            buf.writeDouble(msg.z);
+        }
+
+        @Override
+        public TrDirectEntityPosPacket decode(PacketBuffer buf) {
+            return new TrDirectEntityPosPacket(buf.readInt(), buf.readDouble(), buf.readDouble(), buf.readDouble());
+        }
+
+        @Override
+        public void handle(TrDirectEntityPosPacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity != null) {
                 entity.setPacketCoordinates(msg.x, msg.y, msg.z);
                 entity.moveTo(msg.x, msg.y, msg.z);
             }
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<TrDirectEntityPosPacket> getPacketClass() {
+            return TrDirectEntityPosPacket.class;
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -14,18 +15,28 @@ public class CommonConfigPacket {
         this.values = values;
     }
     
-    public static void encode(CommonConfigPacket msg, PacketBuffer buf) {
-        msg.values.writeToBuf(buf);
-    }
     
-    public static CommonConfigPacket decode(PacketBuffer buf) {
-        return new CommonConfigPacket(new JojoModConfig.Common.SyncedValues(buf));
-    }
+    
+    public static class Handler implements IModPacketHandler<CommonConfigPacket> {
+        
+        @Override
+        public void encode(CommonConfigPacket msg, PacketBuffer buf) {
+            msg.values.writeToBuf(buf);
+        }
 
-    public static void handle(CommonConfigPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public CommonConfigPacket decode(PacketBuffer buf) {
+            return new CommonConfigPacket(new JojoModConfig.Common.SyncedValues(buf));
+        }
+
+        @Override
+        public void handle(CommonConfigPacket msg, Supplier<NetworkEvent.Context> ctx) {
             msg.values.changeConfigValues();
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<CommonConfigPacket> getPacketClass() {
+            return CommonConfigPacket.class;
+        }
     }
 }

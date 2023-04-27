@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.init.power.ModCommonRegistries;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 
@@ -32,28 +33,34 @@ public class TrHeldActionPacket {
     public static TrHeldActionPacket actionStopped(int userId, PowerClassification classification) {
         return new TrHeldActionPacket(userId, classification, null, false);
     }
+    
+    
+    
+    public static class Handler implements IModPacketHandler<TrHeldActionPacket> {
 
-    public static void encode(TrHeldActionPacket msg, PacketBuffer buf) {
-        boolean stopHeld = msg.action == null;
-        buf.writeBoolean(stopHeld);
-        buf.writeInt(msg.userId);
-        buf.writeEnum(msg.classification);
-        if (!stopHeld) {
-            buf.writeRegistryIdUnsafe(ModCommonRegistries.ACTIONS.getRegistry(), msg.action);
-            buf.writeBoolean(msg.requirementsFulfilled);
+        @Override
+        public void encode(TrHeldActionPacket msg, PacketBuffer buf) {
+            boolean stopHeld = msg.action == null;
+            buf.writeBoolean(stopHeld);
+            buf.writeInt(msg.userId);
+            buf.writeEnum(msg.classification);
+            if (!stopHeld) {
+                buf.writeRegistryIdUnsafe(ModCommonRegistries.ACTIONS.getRegistry(), msg.action);
+                buf.writeBoolean(msg.requirementsFulfilled);
+            }
         }
-    }
 
-    public static TrHeldActionPacket decode(PacketBuffer buf) {
-        boolean stopHeld = buf.readBoolean();
-        if (stopHeld) {
-            return actionStopped(buf.readInt(), buf.readEnum(PowerClassification.class));
+        @Override
+        public TrHeldActionPacket decode(PacketBuffer buf) {
+            boolean stopHeld = buf.readBoolean();
+            if (stopHeld) {
+                return actionStopped(buf.readInt(), buf.readEnum(PowerClassification.class));
+            }
+            return new TrHeldActionPacket(buf.readInt(), buf.readEnum(PowerClassification.class), buf.readRegistryIdUnsafe(ModCommonRegistries.ACTIONS.getRegistry()), buf.readBoolean());
         }
-        return new TrHeldActionPacket(buf.readInt(), buf.readEnum(PowerClassification.class), buf.readRegistryIdUnsafe(ModCommonRegistries.ACTIONS.getRegistry()), buf.readBoolean());
-    }
 
-    public static void handle(TrHeldActionPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void handle(TrHeldActionPacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity user = ClientUtil.getEntityById(msg.userId);
             if (user instanceof LivingEntity) {
                 IPower.getPowerOptional((LivingEntity) user, msg.classification).ifPresent(power -> {
@@ -71,11 +78,15 @@ public class TrHeldActionPacket {
                     }
                 });
             }
-        });
-        ctx.get().setPacketHandled(true);
-    }
-    
-    private static <P extends IPower<P, ?>> void setHeldAction(IPower<?, ?> power, Action<?> action) {
-        ((P) power).setHeldAction((Action<P>) action);
+        }
+        
+        private <P extends IPower<P, ?>> void setHeldAction(IPower<?, ?> power, Action<?> action) {
+            ((P) power).setHeldAction((Action<P>) action);
+        }
+
+        @Override
+        public Class<TrHeldActionPacket> getPacketClass() {
+            return TrHeldActionPacket.class;
+        }
     }
 }

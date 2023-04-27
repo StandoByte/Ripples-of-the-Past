@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonData.Exercise;
@@ -43,40 +44,47 @@ public class HamonExercisesPacket {
         this.meditationTicks = meditationTicks;
         this.trainingBonus = trainingBonus;
     }
+    
+    
+    
+    public static class Handler implements IModPacketHandler<HamonExercisesPacket> {
 
-    public static void encode(HamonExercisesPacket msg, PacketBuffer buf) {
-        long l = msg.miningTicks;
-        l <<= BITS_RUNNING;
-        l |= msg.runningTicks;
-        l <<= BITS_SWIMMING;
-        l |= msg.swimmingTicks;
-        l <<= BITS_MEDITATION;
-        l |= msg.meditationTicks;
-        buf.writeLong(l);
-        buf.writeFloat(msg.trainingBonus);
-    }
-
-    public static HamonExercisesPacket decode(PacketBuffer buf) {
-        long l = buf.readLong();
-        int meditation = (int) (l & MASK_MEDITATION);
-        l >>= BITS_MEDITATION;
-        int swimming = (int) (l & MASK_SWIMMING);
-        l >>= BITS_SWIMMING;
-        int running = (int) (l & MASK_RUNNING);
-        l >>= BITS_RUNNING;
-        int mining = (int) (l & MASK_MINING);
-        return new HamonExercisesPacket(mining, running, swimming, meditation, buf.readFloat());
-    }
-
-    public static void handle(HamonExercisesPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        public void encode(HamonExercisesPacket msg, PacketBuffer buf) {
+            long l = msg.miningTicks;
+            l <<= BITS_RUNNING;
+            l |= msg.runningTicks;
+            l <<= BITS_SWIMMING;
+            l |= msg.swimmingTicks;
+            l <<= BITS_MEDITATION;
+            l |= msg.meditationTicks;
+            buf.writeLong(l);
+            buf.writeFloat(msg.trainingBonus);
+        }
+    
+        public HamonExercisesPacket decode(PacketBuffer buf) {
+            long l = buf.readLong();
+            int meditation = (int) (l & MASK_MEDITATION);
+            l >>= BITS_MEDITATION;
+            int swimming = (int) (l & MASK_SWIMMING);
+            l >>= BITS_SWIMMING;
+            int running = (int) (l & MASK_RUNNING);
+            l >>= BITS_RUNNING;
+            int mining = (int) (l & MASK_MINING);
+            return new HamonExercisesPacket(mining, running, swimming, meditation, buf.readFloat());
+        }
+    
+        public void handle(HamonExercisesPacket msg, Supplier<NetworkEvent.Context> ctx) {
             INonStandPower.getNonStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
                 power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                     hamon.setExerciseTicks(msg.miningTicks, msg.runningTicks, msg.swimmingTicks, msg.meditationTicks, true);
                     hamon.setTrainingBonus(msg.trainingBonus);
                 });
             });
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<HamonExercisesPacket> getPacketClass() {
+            return HamonExercisesPacket.class;
+        }
     }
 }

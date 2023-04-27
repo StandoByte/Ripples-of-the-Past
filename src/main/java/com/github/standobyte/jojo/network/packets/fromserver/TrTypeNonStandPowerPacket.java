@@ -4,9 +4,8 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
-import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
-import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
 
@@ -27,24 +26,30 @@ public class TrTypeNonStandPowerPacket {
     public static TrTypeNonStandPowerPacket noPowerType(int entityId) {
         return new TrTypeNonStandPowerPacket(entityId, null);
     }
+    
+    
+    
+    public static class Handler implements IModPacketHandler<TrTypeNonStandPowerPacket> {
 
-    public static <P extends IPower<P, T>, T extends IPowerType<P, T>> void encode(TrTypeNonStandPowerPacket msg, PacketBuffer buf) {
-        boolean noPowerType = msg.powerType == null;
-        buf.writeBoolean(noPowerType);
-        buf.writeInt(msg.entityId);
-        if (!noPowerType) buf.writeRegistryId(msg.powerType);
-    }
-
-    public static TrTypeNonStandPowerPacket decode(PacketBuffer buf) {
-        boolean noPowerType = buf.readBoolean();
-        if (noPowerType) {
-            return noPowerType(buf.readInt());
+        @Override
+        public void encode(TrTypeNonStandPowerPacket msg, PacketBuffer buf) {
+            boolean noPowerType = msg.powerType == null;
+            buf.writeBoolean(noPowerType);
+            buf.writeInt(msg.entityId);
+            if (!noPowerType) buf.writeRegistryId(msg.powerType);
         }
-        return new TrTypeNonStandPowerPacket(buf.readInt(), buf.readRegistryIdSafe(NonStandPowerType.class));
-    }
 
-    public static void handle(TrTypeNonStandPowerPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public TrTypeNonStandPowerPacket decode(PacketBuffer buf) {
+            boolean noPowerType = buf.readBoolean();
+            if (noPowerType) {
+                return noPowerType(buf.readInt());
+            }
+            return new TrTypeNonStandPowerPacket(buf.readInt(), buf.readRegistryIdSafe(NonStandPowerType.class));
+        }
+
+        @Override
+        public void handle(TrTypeNonStandPowerPacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity instanceof LivingEntity) {
                 INonStandPower.getNonStandPowerOptional((LivingEntity) entity).ifPresent(power -> {
@@ -62,8 +67,12 @@ public class TrTypeNonStandPowerPacket {
                     }
                 });
             }
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<TrTypeNonStandPowerPacket> getPacketClass() {
+            return TrTypeNonStandPowerPacket.class;
+        }
     }
 
 }

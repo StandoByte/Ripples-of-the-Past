@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.Entity;
@@ -19,18 +20,24 @@ public class TrSetStandEntityPacket {
         this.userId = userId;
         this.standEntityId = standEntityId;
     }
+    
+    
+    
+    public static class Handler implements IModPacketHandler<TrSetStandEntityPacket> {
 
-    public static void encode(TrSetStandEntityPacket msg, PacketBuffer buf) {
-        buf.writeInt(msg.userId);
-        buf.writeInt(msg.standEntityId);
-    }
+        @Override
+        public void encode(TrSetStandEntityPacket msg, PacketBuffer buf) {
+            buf.writeInt(msg.userId);
+            buf.writeInt(msg.standEntityId);
+        }
 
-    public static TrSetStandEntityPacket decode(PacketBuffer buf) {
-        return new TrSetStandEntityPacket(buf.readInt(), buf.readInt());
-    }
+        @Override
+        public TrSetStandEntityPacket decode(PacketBuffer buf) {
+            return new TrSetStandEntityPacket(buf.readInt(), buf.readInt());
+        }
 
-    public static void handle(TrSetStandEntityPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void handle(TrSetStandEntityPacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity userEntity = ClientUtil.getEntityById(msg.userId);
             if (userEntity instanceof LivingEntity) {
                 LivingEntity userLiving = (LivingEntity) userEntity;
@@ -47,7 +54,11 @@ public class TrSetStandEntityPacket {
                     }
                 });
             }
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<TrSetStandEntityPacket> getPacketClass() {
+            return TrSetStandEntityPacket.class;
+        }
     }
 }

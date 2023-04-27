@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 
@@ -51,40 +52,46 @@ public class ClHeldActionTargetPacket {
         this.targetBlock = targetBlock;
         this.blockFace = blockFace;
     }
+    
+    
+    
+    public static class Handler implements IModPacketHandler<ClHeldActionTargetPacket> {
 
-    public static void encode(ClHeldActionTargetPacket msg, PacketBuffer buf) {
-        byte targetType = 0;
-        if (msg.targetBlock != null) {
-            targetType |= 1;
+        @Override
+        public void encode(ClHeldActionTargetPacket msg, PacketBuffer buf) {
+            byte targetType = 0;
+            if (msg.targetBlock != null) {
+                targetType |= 1;
+            }
+            else if (msg.targetEntityId > 0){
+                targetType |= 2;
+            }
+            buf.writeByte(targetType);
+            buf.writeEnum(msg.classification);
+            if (msg.targetBlock != null) {
+                buf.writeBlockPos(msg.targetBlock);
+                buf.writeEnum(msg.blockFace);
+            }
+            else if (msg.targetEntityId > 0){
+                buf.writeInt(msg.targetEntityId);
+            }
         }
-        else if (msg.targetEntityId > 0){
-            targetType |= 2;
-        }
-        buf.writeByte(targetType);
-        buf.writeEnum(msg.classification);
-        if (msg.targetBlock != null) {
-            buf.writeBlockPos(msg.targetBlock);
-            buf.writeEnum(msg.blockFace);
-        }
-        else if (msg.targetEntityId > 0){
-            buf.writeInt(msg.targetEntityId);
-        }
-    }
 
-    public static ClHeldActionTargetPacket decode(PacketBuffer buf) {
-        byte targetType = buf.readByte();
-        switch (targetType & 3) {
-        case 1:
-            return new ClHeldActionTargetPacket(buf.readEnum(PowerClassification.class), buf.readBlockPos(), buf.readEnum(Direction.class));
-        case 2:
-            return new ClHeldActionTargetPacket(buf.readEnum(PowerClassification.class), buf.readInt());
-        default: // 0
-            return new ClHeldActionTargetPacket(buf.readEnum(PowerClassification.class));
+        @Override
+        public ClHeldActionTargetPacket decode(PacketBuffer buf) {
+            byte targetType = buf.readByte();
+            switch (targetType & 3) {
+            case 1:
+                return new ClHeldActionTargetPacket(buf.readEnum(PowerClassification.class), buf.readBlockPos(), buf.readEnum(Direction.class));
+            case 2:
+                return new ClHeldActionTargetPacket(buf.readEnum(PowerClassification.class), buf.readInt());
+            default: // 0
+                return new ClHeldActionTargetPacket(buf.readEnum(PowerClassification.class));
+            }
         }
-    }
 
-    public static void handle(ClHeldActionTargetPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void handle(ClHeldActionTargetPacket msg, Supplier<NetworkEvent.Context> ctx) {
             PlayerEntity player = ctx.get().getSender();
             if (!player.isSpectator()) {
                 IPower.getPowerOptional(player, msg.classification).ifPresent(power -> {
@@ -95,8 +102,12 @@ public class ClHeldActionTargetPacket {
                             power.setHeldActionTarget(target);
                 });
             }
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<ClHeldActionTargetPacket> getPacketClass() {
+            return ClHeldActionTargetPacket.class;
+        }
     }
 
 }

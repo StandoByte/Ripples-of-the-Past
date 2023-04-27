@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.network.packets.fromclient;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
 
@@ -17,24 +18,34 @@ public class ClHamonLearnButtonPacket {
         this.skill = skill;
     }
     
-    public static void encode(ClHamonLearnButtonPacket msg, PacketBuffer buf) {
-        buf.writeEnum(msg.skill);
-    }
     
-    public static ClHamonLearnButtonPacket decode(PacketBuffer buf) {
-        return new ClHamonLearnButtonPacket(buf.readEnum(HamonSkill.class));
-    }
     
-    public static void handle(ClHamonLearnButtonPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+    public static class Handler implements IModPacketHandler<ClHamonLearnButtonPacket> {
+
+        @Override
+        public void encode(ClHamonLearnButtonPacket msg, PacketBuffer buf) {
+            buf.writeEnum(msg.skill);
+        }
+
+        @Override
+        public ClHamonLearnButtonPacket decode(PacketBuffer buf) {
+            return new ClHamonLearnButtonPacket(buf.readEnum(HamonSkill.class));
+        }
+
+        @Override
+        public void handle(ClHamonLearnButtonPacket msg, Supplier<NetworkEvent.Context> ctx) {
             ServerPlayerEntity player = ctx.get().getSender();
             INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
                 power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                     hamon.learnHamonSkill(msg.skill, true);
                 });
             });
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<ClHamonLearnButtonPacket> getPacketClass() {
+            return ClHamonLearnButtonPacket.class;
+        }
     }
 
 }

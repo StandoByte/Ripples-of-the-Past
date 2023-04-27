@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.toasts.HamonSkillToast;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
 
@@ -58,45 +59,51 @@ public class TrHamonStatsPacket {
         this.stat = Stat.BREATHING;
         this.breathing = breathing;
     }
+    
+    
+    
+    public static class Handler implements IModPacketHandler<TrHamonStatsPacket> {
 
-    public static void encode(TrHamonStatsPacket msg, PacketBuffer buf) {
-        buf.writeEnum(msg.stat);
-        buf.writeInt(msg.entityId);
-        buf.writeBoolean(msg.showToasts);
-        switch (msg.stat) {
-        case BREATHING:
-            buf.writeFloat(msg.breathing);
-            break;
-        case STRENGTH:
-            buf.writeShort(msg.strength);
-            break;
-        case CONTROL:
-            buf.writeShort(msg.control);
-            break;
-        case ALL:
-            buf.writeShort(msg.strength);
-            buf.writeShort(msg.control);
-            buf.writeFloat(msg.breathing);
-            break;
+        @Override
+        public void encode(TrHamonStatsPacket msg, PacketBuffer buf) {
+            buf.writeEnum(msg.stat);
+            buf.writeInt(msg.entityId);
+            buf.writeBoolean(msg.showToasts);
+            switch (msg.stat) {
+            case BREATHING:
+                buf.writeFloat(msg.breathing);
+                break;
+            case STRENGTH:
+                buf.writeShort(msg.strength);
+                break;
+            case CONTROL:
+                buf.writeShort(msg.control);
+                break;
+            case ALL:
+                buf.writeShort(msg.strength);
+                buf.writeShort(msg.control);
+                buf.writeFloat(msg.breathing);
+                break;
+            }
         }
-    }
 
-    public static TrHamonStatsPacket decode(PacketBuffer buf) {
-        Stat stat = buf.readEnum(Stat.class);
-        switch (stat) {
-        case BREATHING:
-            return new TrHamonStatsPacket(buf.readInt(), buf.readBoolean(), buf.readFloat());
-        case STRENGTH:
-            return new TrHamonStatsPacket(buf.readInt(), buf.readBoolean(), HamonSkill.HamonStat.STRENGTH, buf.readShort());
-        case CONTROL:
-            return new TrHamonStatsPacket(buf.readInt(), buf.readBoolean(), HamonSkill.HamonStat.CONTROL, buf.readShort());
-        default:
-            return new TrHamonStatsPacket(buf.readInt(), buf.readBoolean(), buf.readShort(), buf.readShort(), buf.readFloat());
+        @Override
+        public TrHamonStatsPacket decode(PacketBuffer buf) {
+            Stat stat = buf.readEnum(Stat.class);
+            switch (stat) {
+            case BREATHING:
+                return new TrHamonStatsPacket(buf.readInt(), buf.readBoolean(), buf.readFloat());
+            case STRENGTH:
+                return new TrHamonStatsPacket(buf.readInt(), buf.readBoolean(), HamonSkill.HamonStat.STRENGTH, buf.readShort());
+            case CONTROL:
+                return new TrHamonStatsPacket(buf.readInt(), buf.readBoolean(), HamonSkill.HamonStat.CONTROL, buf.readShort());
+            default:
+                return new TrHamonStatsPacket(buf.readInt(), buf.readBoolean(), buf.readShort(), buf.readShort(), buf.readFloat());
+            }
         }
-    }
 
-    public static void handle(TrHamonStatsPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void handle(TrHamonStatsPacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity instanceof LivingEntity) {
                 INonStandPower.getNonStandPowerOptional((LivingEntity) entity).ifPresent(power -> {
@@ -131,8 +138,12 @@ public class TrHamonStatsPacket {
                     });
                 });
             }
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<TrHamonStatsPacket> getPacketClass() {
+            return TrHamonStatsPacket.class;
+        }
     }
 
     private enum Stat {

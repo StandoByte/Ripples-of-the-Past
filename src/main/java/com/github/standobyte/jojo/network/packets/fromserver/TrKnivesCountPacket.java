@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;
@@ -17,24 +18,34 @@ public class TrKnivesCountPacket {
         this.entityId = entityId;
         this.knives = knives;
     }
+    
+    
+    
+    public static class Handler implements IModPacketHandler<TrKnivesCountPacket> {
 
-    public static void encode(TrKnivesCountPacket msg, PacketBuffer buf) {
-        buf.writeInt(msg.entityId);
-        buf.writeVarInt(msg.knives);
-    }
+        @Override
+        public void encode(TrKnivesCountPacket msg, PacketBuffer buf) {
+            buf.writeInt(msg.entityId);
+            buf.writeVarInt(msg.knives);
+        }
 
-    public static TrKnivesCountPacket decode(PacketBuffer buf) {
-        return new TrKnivesCountPacket(buf.readInt(), buf.readVarInt());
-    }
+        @Override
+        public TrKnivesCountPacket decode(PacketBuffer buf) {
+            return new TrKnivesCountPacket(buf.readInt(), buf.readVarInt());
+        }
 
-    public static void handle(TrKnivesCountPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void handle(TrKnivesCountPacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity != null) {
                 entity.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.setKnives(msg.knives));
             }
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<TrKnivesCountPacket> getPacketClass() {
+            return TrKnivesCountPacket.class;
+        }
     }
 
 }

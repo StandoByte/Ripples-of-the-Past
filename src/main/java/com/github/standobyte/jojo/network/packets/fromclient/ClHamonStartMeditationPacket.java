@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 
 import net.minecraft.entity.player.PlayerEntity;
@@ -15,14 +16,20 @@ public class ClHamonStartMeditationPacket {
     
     public ClHamonStartMeditationPacket() {}
     
-    public static void encode(ClHamonStartMeditationPacket msg, PacketBuffer buf) {}
     
-    public static ClHamonStartMeditationPacket decode(PacketBuffer buf) {
-        return new ClHamonStartMeditationPacket();
-    }
     
-    public static void handle(ClHamonStartMeditationPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+    public static class Handler implements IModPacketHandler<ClHamonStartMeditationPacket> {
+
+        @Override
+        public void encode(ClHamonStartMeditationPacket msg, PacketBuffer buf) {}
+
+        @Override
+        public ClHamonStartMeditationPacket decode(PacketBuffer buf) {
+            return new ClHamonStartMeditationPacket();
+        }
+
+        @Override
+        public void handle(ClHamonStartMeditationPacket msg, Supplier<NetworkEvent.Context> ctx) {
             PlayerEntity player = ctx.get().getSender();
             INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
                 power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
@@ -30,8 +37,12 @@ public class ClHamonStartMeditationPacket {
                     hamon.startMeditating(player.position(), player.yHeadRot, player.xRot);
                 });
             });
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<ClHamonStartMeditationPacket> getPacketClass() {
+            return ClHamonStartMeditationPacket.class;
+        }
     }
 
 }

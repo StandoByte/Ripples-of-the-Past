@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.toasts.ActionToast;
 import com.github.standobyte.jojo.init.power.ModCommonRegistries;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
@@ -26,19 +27,25 @@ public class StandActionLearningPacket {
         this.showToast = showToast;
     }
     
-    public static void encode(StandActionLearningPacket msg, PacketBuffer buf) {
-        buf.writeRegistryIdUnsafe(ModCommonRegistries.ACTIONS.getRegistry(), msg.action);
-        buf.writeFloat(msg.progress);
-        buf.writeBoolean(msg.showToast);
-    }
+    
+    
+    public static class Handler implements IModPacketHandler<StandActionLearningPacket> {
 
-    public static StandActionLearningPacket decode(PacketBuffer buf) {
-        return new StandActionLearningPacket(buf.readRegistryIdUnsafe(ModCommonRegistries.ACTIONS.getRegistry()), 
-                buf.readFloat(), buf.readBoolean());
-    }
+        @Override
+        public void encode(StandActionLearningPacket msg, PacketBuffer buf) {
+            buf.writeRegistryIdUnsafe(ModCommonRegistries.ACTIONS.getRegistry(), msg.action);
+            buf.writeFloat(msg.progress);
+            buf.writeBoolean(msg.showToast);
+        }
 
-    public static void handle(StandActionLearningPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public StandActionLearningPacket decode(PacketBuffer buf) {
+            return new StandActionLearningPacket(buf.readRegistryIdUnsafe(ModCommonRegistries.ACTIONS.getRegistry()), 
+                    buf.readFloat(), buf.readBoolean());
+        }
+
+        @Override
+        public void handle(StandActionLearningPacket msg, Supplier<NetworkEvent.Context> ctx) {
             if (msg.action instanceof StandAction) {
                 Action<IStandPower> standAction = (StandAction) msg.action;
                 IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
@@ -54,7 +61,11 @@ public class StandActionLearningPacket {
                     }
                 });
             }
-        });
-        ctx.get().setPacketHandled(true);
-    }    
+        }
+
+        @Override
+        public Class<StandActionLearningPacket> getPacketClass() {
+            return StandActionLearningPacket.class;
+        }    
+    }
 }

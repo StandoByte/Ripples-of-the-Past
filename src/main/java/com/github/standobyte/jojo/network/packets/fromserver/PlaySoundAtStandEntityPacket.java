@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;
@@ -24,26 +25,36 @@ public class PlaySoundAtStandEntityPacket {
         this.volume = volume;
         this.pitch = pitch;
     }
+    
+    
+    
+    public static class Handler implements IModPacketHandler<PlaySoundAtStandEntityPacket> {
 
-    public static void encode(PlaySoundAtStandEntityPacket msg, PacketBuffer buf) {
-        buf.writeRegistryIdUnsafe(ForgeRegistries.SOUND_EVENTS, msg.sound);
-        buf.writeInt(msg.entityId);
-        buf.writeFloat(msg.volume);
-        buf.writeFloat(msg.pitch);
-    }
+        @Override
+        public void encode(PlaySoundAtStandEntityPacket msg, PacketBuffer buf) {
+            buf.writeRegistryIdUnsafe(ForgeRegistries.SOUND_EVENTS, msg.sound);
+            buf.writeInt(msg.entityId);
+            buf.writeFloat(msg.volume);
+            buf.writeFloat(msg.pitch);
+        }
 
-    public static PlaySoundAtStandEntityPacket decode(PacketBuffer buf) {
-        return new PlaySoundAtStandEntityPacket(buf.readRegistryIdUnsafe(ForgeRegistries.SOUND_EVENTS), buf.readInt(), buf.readFloat(), buf.readFloat());
-    }
+        @Override
+        public PlaySoundAtStandEntityPacket decode(PacketBuffer buf) {
+            return new PlaySoundAtStandEntityPacket(buf.readRegistryIdUnsafe(ForgeRegistries.SOUND_EVENTS), buf.readInt(), buf.readFloat(), buf.readFloat());
+        }
 
-    public static void handle(PlaySoundAtStandEntityPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void handle(PlaySoundAtStandEntityPacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity instanceof StandEntity) {
                 ClientTickingSoundsHelper.playStandEntitySound((StandEntity) entity, msg.sound, msg.volume, msg.pitch);
             }
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<PlaySoundAtStandEntityPacket> getPacketClass() {
+            return PlaySoundAtStandEntityPacket.class;
+        }
     }
 
 }

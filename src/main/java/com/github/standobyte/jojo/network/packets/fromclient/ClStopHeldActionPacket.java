@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.network.packets.fromclient;
 
 import java.util.function.Supplier;
 
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 
@@ -17,26 +18,36 @@ public class ClStopHeldActionPacket {
         this.classification = classification;
         this.shouldFire = shouldFire;
     }
+    
+    
+    
+    public static class Handler implements IModPacketHandler<ClStopHeldActionPacket> {
 
-    public static void encode(ClStopHeldActionPacket msg, PacketBuffer buf) {
-        buf.writeEnum(msg.classification);
-        buf.writeBoolean(msg.shouldFire);
-    }
+        @Override
+        public void encode(ClStopHeldActionPacket msg, PacketBuffer buf) {
+            buf.writeEnum(msg.classification);
+            buf.writeBoolean(msg.shouldFire);
+        }
 
-    public static ClStopHeldActionPacket decode(PacketBuffer buf) {
-        return new ClStopHeldActionPacket(buf.readEnum(PowerClassification.class), buf.readBoolean());
-    }
+        @Override
+        public ClStopHeldActionPacket decode(PacketBuffer buf) {
+            return new ClStopHeldActionPacket(buf.readEnum(PowerClassification.class), buf.readBoolean());
+        }
 
-    public static void handle(ClStopHeldActionPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void handle(ClStopHeldActionPacket msg, Supplier<NetworkEvent.Context> ctx) {
             PlayerEntity player = ctx.get().getSender();
             IPower.getPowerOptional(player, msg.classification).ifPresent(power -> {
                 if (power.getHeldAction() != null) {
                     power.stopHeldAction(msg.shouldFire);
                 }
             });
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<ClStopHeldActionPacket> getPacketClass() {
+            return ClStopHeldActionPacket.class;
+        }
     }
 
 }

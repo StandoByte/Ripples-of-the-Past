@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import org.apache.commons.lang3.Validate;
 
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.SoundCategory;
@@ -28,25 +29,35 @@ public class PlaySoundAtClientPacket {
         this.volume = volume;
         this.pitch = pitch;
     }
+    
+    
+    
+    public static class Handler implements IModPacketHandler<PlaySoundAtClientPacket> {
 
-    public static void encode(PlaySoundAtClientPacket msg, PacketBuffer buf) {
-        buf.writeRegistryIdUnsafe(ForgeRegistries.SOUND_EVENTS, msg.sound);
-        buf.writeEnum(msg.source);
-        buf.writeBlockPos(msg.soundPos);
-        buf.writeFloat(msg.volume);
-        buf.writeFloat(msg.pitch);
-    }
+        @Override
+        public void encode(PlaySoundAtClientPacket msg, PacketBuffer buf) {
+            buf.writeRegistryIdUnsafe(ForgeRegistries.SOUND_EVENTS, msg.sound);
+            buf.writeEnum(msg.source);
+            buf.writeBlockPos(msg.soundPos);
+            buf.writeFloat(msg.volume);
+            buf.writeFloat(msg.pitch);
+        }
 
-    public static PlaySoundAtClientPacket decode(PacketBuffer buf) {
-        return new PlaySoundAtClientPacket(buf.readRegistryIdUnsafe(ForgeRegistries.SOUND_EVENTS), 
-                buf.readEnum(SoundCategory.class), buf.readBlockPos(), buf.readFloat(), buf.readFloat());
-    }
+        @Override
+        public PlaySoundAtClientPacket decode(PacketBuffer buf) {
+            return new PlaySoundAtClientPacket(buf.readRegistryIdUnsafe(ForgeRegistries.SOUND_EVENTS), 
+                    buf.readEnum(SoundCategory.class), buf.readBlockPos(), buf.readFloat(), buf.readFloat());
+        }
 
-    public static void handle(PlaySoundAtClientPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void handle(PlaySoundAtClientPacket msg, Supplier<NetworkEvent.Context> ctx) {
             ClientUtil.playSoundAtClient(msg.sound, msg.source, msg.soundPos, msg.volume, msg.pitch);
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<PlaySoundAtClientPacket> getPacketClass() {
+            return PlaySoundAtClientPacket.class;
+        }
     }
 
 }

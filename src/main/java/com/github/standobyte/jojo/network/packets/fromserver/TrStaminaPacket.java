@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.Entity;
@@ -19,17 +20,23 @@ public class TrStaminaPacket {
         this.stamina = stamina;
     }
     
-    public static void encode(TrStaminaPacket msg, PacketBuffer buf) {
-        buf.writeInt(msg.userId);
-        buf.writeFloat(msg.stamina);
-    }
     
-    public static TrStaminaPacket decode(PacketBuffer buf) {
-        return new TrStaminaPacket(buf.readInt(), buf.readFloat());
-    }
+    
+    public static class Handler implements IModPacketHandler<TrStaminaPacket> {
 
-    public static void handle(TrStaminaPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void encode(TrStaminaPacket msg, PacketBuffer buf) {
+            buf.writeInt(msg.userId);
+            buf.writeFloat(msg.stamina);
+        }
+
+        @Override
+        public TrStaminaPacket decode(PacketBuffer buf) {
+            return new TrStaminaPacket(buf.readInt(), buf.readFloat());
+        }
+
+        @Override
+        public void handle(TrStaminaPacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity userEntity = ClientUtil.getEntityById(msg.userId);
             if (userEntity instanceof LivingEntity) {
                 LivingEntity userLiving = (LivingEntity) userEntity;
@@ -37,7 +44,11 @@ public class TrStaminaPacket {
                     power.setStamina(msg.stamina);
                 });
             }
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<TrStaminaPacket> getPacketClass() {
+            return TrStaminaPacket.class;
+        }
     }
 }

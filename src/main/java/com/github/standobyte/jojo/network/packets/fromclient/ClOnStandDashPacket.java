@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.network.packets.fromclient;
 
 import java.util.function.Supplier;
 
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -13,15 +14,21 @@ public class ClOnStandDashPacket {
     public ClOnStandDashPacket() {
     }
     
-    public static void encode(ClOnStandDashPacket msg, PacketBuffer buf) {
-    }
     
-    public static ClOnStandDashPacket decode(PacketBuffer buf) {
-        return new ClOnStandDashPacket();
-    }
     
-    public static void handle(ClOnStandDashPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+    public static class Handler implements IModPacketHandler<ClOnStandDashPacket> {
+
+        @Override
+        public void encode(ClOnStandDashPacket msg, PacketBuffer buf) {
+        }
+
+        @Override
+        public ClOnStandDashPacket decode(PacketBuffer buf) {
+            return new ClOnStandDashPacket();
+        }
+        
+        @Override
+        public void handle(ClOnStandDashPacket msg, Supplier<NetworkEvent.Context> ctx) {
             ServerPlayerEntity player = ctx.get().getSender();
             IStandPower.getStandPowerOptional(player).ifPresent(power -> {
                 if (power.canLeap()) {
@@ -29,7 +36,11 @@ public class ClOnStandDashPacket {
                     player.hasImpulse = true;
                 }
             });
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<ClOnStandDashPacket> getPacketClass() {
+            return ClOnStandDashPacket.class;
+        }
     }
 }

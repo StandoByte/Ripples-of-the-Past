@@ -6,6 +6,7 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.StandEntityActionModifier;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;
@@ -19,18 +20,24 @@ public class TrStandTaskModifierPacket {
         this.standEntityId = standEntityId;
         this.action = action;
     }
+    
+    
+    
+    public static class Handler implements IModPacketHandler<TrStandTaskModifierPacket> {
 
-    public static void encode(TrStandTaskModifierPacket msg, PacketBuffer buf) {
-        buf.writeInt(msg.standEntityId);
-        buf.writeRegistryId(msg.action);
-    }
+        @Override
+        public void encode(TrStandTaskModifierPacket msg, PacketBuffer buf) {
+            buf.writeInt(msg.standEntityId);
+            buf.writeRegistryId(msg.action);
+        }
 
-    public static TrStandTaskModifierPacket decode(PacketBuffer buf) {
-        return new TrStandTaskModifierPacket(buf.readInt(), buf.readRegistryIdSafe(Action.class));
-    }
+        @Override
+        public TrStandTaskModifierPacket decode(PacketBuffer buf) {
+            return new TrStandTaskModifierPacket(buf.readInt(), buf.readRegistryIdSafe(Action.class));
+        }
 
-    public static void handle(TrStandTaskModifierPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void handle(TrStandTaskModifierPacket msg, Supplier<NetworkEvent.Context> ctx) {
             if (msg.action instanceof StandEntityActionModifier) {
                 Entity entity = ClientUtil.getEntityById(msg.standEntityId);
                 if (entity instanceof StandEntity) {
@@ -40,7 +47,11 @@ public class TrStandTaskModifierPacket {
                     });
                 }
             }
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<TrStandTaskModifierPacket> getPacketClass() {
+            return TrStandTaskModifierPacket.class;
+        }
     }
 }

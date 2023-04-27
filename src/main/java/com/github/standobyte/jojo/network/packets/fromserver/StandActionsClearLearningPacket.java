@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.network.PacketBuffer;
@@ -13,19 +14,26 @@ public class StandActionsClearLearningPacket {
     public StandActionsClearLearningPacket() {
     }
     
-    public static void encode(StandActionsClearLearningPacket msg, PacketBuffer buf) {
-    }
-
-    public static StandActionsClearLearningPacket decode(PacketBuffer buf) {
-        return new StandActionsClearLearningPacket();
-    }
-
-    public static void handle(StandActionsClearLearningPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+    
+    
+    public static class Handler implements IModPacketHandler<StandActionsClearLearningPacket> {
+    
+        public void encode(StandActionsClearLearningPacket msg, PacketBuffer buf) {
+        }
+    
+        public StandActionsClearLearningPacket decode(PacketBuffer buf) {
+            return new StandActionsClearLearningPacket();
+        }
+    
+        public void handle(StandActionsClearLearningPacket msg, Supplier<NetworkEvent.Context> ctx) {
             IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
                 power.clearActionLearning();
             });
-        });
-        ctx.get().setPacketHandled(true);
-    }    
+        }
+
+        @Override
+        public Class<StandActionsClearLearningPacket> getPacketClass() {
+            return StandActionsClearLearningPacket.class;
+        }
+    }
 }

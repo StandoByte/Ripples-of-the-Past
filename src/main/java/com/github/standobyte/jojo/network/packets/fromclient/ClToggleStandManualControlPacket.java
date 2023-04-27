@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.network.packets.fromclient;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 
@@ -12,15 +13,21 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 public class ClToggleStandManualControlPacket {
+    
+    
+    
+    public static class Handler implements IModPacketHandler<ClToggleStandManualControlPacket> {
 
-    public static void encode(ClToggleStandManualControlPacket msg, PacketBuffer buf) {}
+        @Override
+        public void encode(ClToggleStandManualControlPacket msg, PacketBuffer buf) {}
 
-    public static ClToggleStandManualControlPacket decode(PacketBuffer buf) {
-        return new ClToggleStandManualControlPacket();
-    }
-
-    public static void handle(ClToggleStandManualControlPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public ClToggleStandManualControlPacket decode(PacketBuffer buf) {
+            return new ClToggleStandManualControlPacket();
+        }
+    
+        @Override
+        public void handle(ClToggleStandManualControlPacket msg, Supplier<NetworkEvent.Context> ctx) {
             PlayerEntity player = ctx.get().getSender();
             if (player.isAlive()) {
                 IStandPower.getStandPowerOptional(player).ifPresent(power -> {
@@ -39,8 +46,12 @@ public class ClToggleStandManualControlPacket {
                     }
                 });
             }
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<ClToggleStandManualControlPacket> getPacketClass() {
+            return ClToggleStandManualControlPacket.class;
+        }
     }
 
 }

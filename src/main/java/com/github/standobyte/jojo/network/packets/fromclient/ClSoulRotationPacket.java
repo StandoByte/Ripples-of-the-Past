@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.network.packets.fromclient;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.entity.SoulEntity;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.google.common.primitives.Floats;
 
 import net.minecraft.entity.Entity;
@@ -19,26 +20,36 @@ public class ClSoulRotationPacket {
         this.yRot = yRot;
         this.xRot = xRot;
     }
+    
+    
+    
+    public static class Handler implements IModPacketHandler<ClSoulRotationPacket> {
 
-    public static void encode(ClSoulRotationPacket msg, PacketBuffer buf) {
-        buf.writeInt(msg.entityId);
-        buf.writeFloat(msg.yRot);
-        buf.writeFloat(msg.xRot);
-    }
+        @Override
+        public void encode(ClSoulRotationPacket msg, PacketBuffer buf) {
+            buf.writeInt(msg.entityId);
+            buf.writeFloat(msg.yRot);
+            buf.writeFloat(msg.xRot);
+        }
 
-    public static ClSoulRotationPacket decode(PacketBuffer buf) {
-        return new ClSoulRotationPacket(buf.readInt(), buf.readFloat(), buf.readFloat());
-    }
+        @Override
+        public ClSoulRotationPacket decode(PacketBuffer buf) {
+            return new ClSoulRotationPacket(buf.readInt(), buf.readFloat(), buf.readFloat());
+        }
 
-    public static void handle(ClSoulRotationPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void handle(ClSoulRotationPacket msg, Supplier<NetworkEvent.Context> ctx) {
             if (Floats.isFinite(msg.xRot) && Floats.isFinite(msg.yRot)) {
                 Entity entity = ctx.get().getSender().level.getEntity(msg.entityId);
                 if (entity instanceof SoulEntity) {
                     ((SoulEntity) entity).handleRotationPacket(msg.yRot, msg.xRot);
                 }
             }
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<ClSoulRotationPacket> getPacketClass() {
+            return ClSoulRotationPacket.class;
+        }
     }
 }

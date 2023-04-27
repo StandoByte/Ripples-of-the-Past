@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.network.PacketBuffer;
@@ -15,20 +16,30 @@ public class MaxAchievedResolvePacket {
         this.value = value;
     }
     
-    public static void encode(MaxAchievedResolvePacket msg, PacketBuffer buf) {
-        buf.writeFloat(msg.value);
-    }
     
-    public static MaxAchievedResolvePacket decode(PacketBuffer buf) {
-        return new MaxAchievedResolvePacket(buf.readFloat());
-    }
+    
+    public static class Handler implements IModPacketHandler<MaxAchievedResolvePacket> {
 
-    public static void handle(MaxAchievedResolvePacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void encode(MaxAchievedResolvePacket msg, PacketBuffer buf) {
+            buf.writeFloat(msg.value);
+        }
+
+        @Override
+        public MaxAchievedResolvePacket decode(PacketBuffer buf) {
+            return new MaxAchievedResolvePacket(buf.readFloat());
+        }
+
+        @Override
+        public void handle(MaxAchievedResolvePacket msg, Supplier<NetworkEvent.Context> ctx) {
             IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
                 power.getResolveCounter().setMaxAchievedValue(msg.value);
             });
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<MaxAchievedResolvePacket> getPacketClass() {
+            return MaxAchievedResolvePacket.class;
+        }
     }
 }

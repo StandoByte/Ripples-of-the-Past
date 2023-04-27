@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandInstance;
@@ -27,31 +28,37 @@ public class TrTypeStandInstancePacket {
     public static TrTypeStandInstancePacket noStand(int entityId) {
         return new TrTypeStandInstancePacket(entityId, null, 0);
     }
+    
+    
+    
+    public static class Handler implements IModPacketHandler<TrTypeStandInstancePacket> {
 
-    public static void encode(TrTypeStandInstancePacket msg, PacketBuffer buf) {
-        boolean noStand = msg.standInstance == null;
-        buf.writeBoolean(noStand);
-        buf.writeInt(msg.entityId);
-        if (!noStand) {
-            msg.standInstance.toBuf(buf);
-            boolean setResolveLevel = msg.resolveLevel >= 0;
-            buf.writeBoolean(setResolveLevel);
-            if (setResolveLevel) {
-                buf.writeVarInt(msg.resolveLevel);
+        @Override
+        public void encode(TrTypeStandInstancePacket msg, PacketBuffer buf) {
+            boolean noStand = msg.standInstance == null;
+            buf.writeBoolean(noStand);
+            buf.writeInt(msg.entityId);
+            if (!noStand) {
+                msg.standInstance.toBuf(buf);
+                boolean setResolveLevel = msg.resolveLevel >= 0;
+                buf.writeBoolean(setResolveLevel);
+                if (setResolveLevel) {
+                    buf.writeVarInt(msg.resolveLevel);
+                }
             }
         }
-    }
 
-    public static TrTypeStandInstancePacket decode(PacketBuffer buf) {
-        boolean noStand = buf.readBoolean();
-        if (noStand) {
-            return noStand(buf.readInt());
+        @Override
+        public TrTypeStandInstancePacket decode(PacketBuffer buf) {
+            boolean noStand = buf.readBoolean();
+            if (noStand) {
+                return noStand(buf.readInt());
+            }
+            return new TrTypeStandInstancePacket(buf.readInt(), StandInstance.fromBuf(buf), buf.readBoolean() ? buf.readVarInt() : -1);
         }
-        return new TrTypeStandInstancePacket(buf.readInt(), StandInstance.fromBuf(buf), buf.readBoolean() ? buf.readVarInt() : -1);
-    }
 
-    public static void handle(TrTypeStandInstancePacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void handle(TrTypeStandInstancePacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity instanceof LivingEntity) {
                 IStandPower.getStandPowerOptional((LivingEntity) entity).ifPresent(stand -> {
@@ -72,8 +79,12 @@ public class TrTypeStandInstancePacket {
                     }
                 });
             }
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<TrTypeStandInstancePacket> getPacketClass() {
+            return TrTypeStandInstancePacket.class;
+        }
     }
 
 }

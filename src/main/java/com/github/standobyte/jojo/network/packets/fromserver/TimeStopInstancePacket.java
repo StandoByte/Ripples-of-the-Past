@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.TimeStop;
 import com.github.standobyte.jojo.capability.world.TimeStopInstance;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.util.mod.TimeUtil;
 
 import net.minecraft.entity.Entity;
@@ -35,38 +36,44 @@ public class TimeStopInstancePacket {
         this.instanceId = instanceId;
     }
     
-    public static void encode(TimeStopInstancePacket msg, PacketBuffer buf) {
-        buf.writeVarInt(msg.timeStopTicks);
-        buf.writeInt(msg.instanceId);
-        
-        if (msg.timeStopTicks > 0) {
-            buf.writeInt(msg.chunkPos.x);
-            buf.writeInt(msg.chunkPos.z);
-            buf.writeInt(msg.timeStopperId);
-            buf.writeBoolean(msg.action != null);
-            if (msg.action != null) {
-                buf.writeRegistryId(msg.action);
+    
+    
+    public static class Handler implements IModPacketHandler<TimeStopInstancePacket> {
+
+        @Override
+        public void encode(TimeStopInstancePacket msg, PacketBuffer buf) {
+            buf.writeVarInt(msg.timeStopTicks);
+            buf.writeInt(msg.instanceId);
+            
+            if (msg.timeStopTicks > 0) {
+                buf.writeInt(msg.chunkPos.x);
+                buf.writeInt(msg.chunkPos.z);
+                buf.writeInt(msg.timeStopperId);
+                buf.writeBoolean(msg.action != null);
+                if (msg.action != null) {
+                    buf.writeRegistryId(msg.action);
+                }
             }
         }
-    }
-    
-    public static TimeStopInstancePacket decode(PacketBuffer buf) {
-        int ticks = buf.readVarInt();
-        int id = buf.readInt();
-        if (ticks > 0) {
-            ChunkPos pos = new ChunkPos(buf.readInt(), buf.readInt());
-            int timeStopperId = buf.readInt();
-            Action<?> action = buf.readBoolean() ? buf.readRegistryIdSafe(Action.class) : null;
-            TimeStop timeStop = action instanceof TimeStop ? (TimeStop) action : null;
-            return new TimeStopInstancePacket(ticks, id, pos, timeStopperId, timeStop);
-        }
-        else {
-            return TimeStopInstancePacket.timeResumed(id);
-        }
-    }
 
-    public static void handle(TimeStopInstancePacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public TimeStopInstancePacket decode(PacketBuffer buf) {
+            int ticks = buf.readVarInt();
+            int id = buf.readInt();
+            if (ticks > 0) {
+                ChunkPos pos = new ChunkPos(buf.readInt(), buf.readInt());
+                int timeStopperId = buf.readInt();
+                Action<?> action = buf.readBoolean() ? buf.readRegistryIdSafe(Action.class) : null;
+                TimeStop timeStop = action instanceof TimeStop ? (TimeStop) action : null;
+                return new TimeStopInstancePacket(ticks, id, pos, timeStopperId, timeStop);
+            }
+            else {
+                return TimeStopInstancePacket.timeResumed(id);
+            }
+        }
+
+        @Override
+        public void handle(TimeStopInstancePacket msg, Supplier<NetworkEvent.Context> ctx) {
             World world = ClientUtil.getClientWorld();
             if (msg.timeStopTicks > 0) {
                 Entity entity = ClientUtil.getEntityById(msg.timeStopperId);
@@ -78,7 +85,11 @@ public class TimeStopInstancePacket {
             else {
                 TimeUtil.resumeTime(world, msg.instanceId);
             }
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<TimeStopInstancePacket> getPacketClass() {
+            return TimeStopInstancePacket.class;
+        }
     }
 }

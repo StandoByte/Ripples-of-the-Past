@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.network.packets.fromclient;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonSkillType;
 
@@ -17,23 +18,33 @@ public class ClHamonResetSkillsButtonPacket {
         this.type = type;
     }
     
-    public static void encode(ClHamonResetSkillsButtonPacket msg, PacketBuffer buf) {
-        buf.writeEnum(msg.type);
-    }
     
-    public static ClHamonResetSkillsButtonPacket decode(PacketBuffer buf) {
-        return new ClHamonResetSkillsButtonPacket(buf.readEnum(HamonSkillType.class));
-    }
     
-    public static void handle(ClHamonResetSkillsButtonPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+    public static class Handler implements IModPacketHandler<ClHamonResetSkillsButtonPacket> {
+
+        @Override
+        public void encode(ClHamonResetSkillsButtonPacket msg, PacketBuffer buf) {
+            buf.writeEnum(msg.type);
+        }
+
+        @Override
+        public ClHamonResetSkillsButtonPacket decode(PacketBuffer buf) {
+            return new ClHamonResetSkillsButtonPacket(buf.readEnum(HamonSkillType.class));
+        }
+
+        @Override
+        public void handle(ClHamonResetSkillsButtonPacket msg, Supplier<NetworkEvent.Context> ctx) {
             ServerPlayerEntity player = ctx.get().getSender();
             INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
                 power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                     hamon.resetHamonSkills(msg.type);
                 });
             });
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<ClHamonResetSkillsButtonPacket> getPacketClass() {
+            return ClHamonResetSkillsButtonPacket.class;
+        }
     }
 }

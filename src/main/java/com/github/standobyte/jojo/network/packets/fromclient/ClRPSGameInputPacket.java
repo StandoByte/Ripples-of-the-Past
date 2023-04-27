@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame.Pick;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame.RPSCheat;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 
 import net.minecraft.entity.player.PlayerEntity;
@@ -33,36 +34,42 @@ public class ClRPSGameInputPacket {
         this.playerPick = playerPick;
         this.cheatPower = cheatPower;
     }
+    
+    
+    
+    public static class Handler implements IModPacketHandler<ClRPSGameInputPacket> {
 
-    public static void encode(ClRPSGameInputPacket msg, PacketBuffer buf) {
-        buf.writeEnum(msg.packetType);
-        switch (msg.packetType) {
-        case PICK:
-            buf.writeEnum(msg.playerPick);
-            break;
-        case CHEAT:
-            buf.writeEnum(msg.cheatPower);
-            break;
-        case QUIT:
-            break;
+        @Override
+        public void encode(ClRPSGameInputPacket msg, PacketBuffer buf) {
+            buf.writeEnum(msg.packetType);
+            switch (msg.packetType) {
+            case PICK:
+                buf.writeEnum(msg.playerPick);
+                break;
+            case CHEAT:
+                buf.writeEnum(msg.cheatPower);
+                break;
+            case QUIT:
+                break;
+            }
         }
-    }
 
-    public static ClRPSGameInputPacket decode(PacketBuffer buf) {
-        PacketType packetType = buf.readEnum(PacketType.class);
-        switch (packetType) {
-        case PICK:
-            return pick(buf.readEnum(Pick.class));
-        case CHEAT:
-            return cheat(buf.readEnum(PowerClassification.class));
-        case QUIT:
-            return quitGame();
+        @Override
+        public ClRPSGameInputPacket decode(PacketBuffer buf) {
+            PacketType packetType = buf.readEnum(PacketType.class);
+            switch (packetType) {
+            case PICK:
+                return pick(buf.readEnum(Pick.class));
+            case CHEAT:
+                return cheat(buf.readEnum(PowerClassification.class));
+            case QUIT:
+                return quitGame();
+            }
+            throw new IllegalStateException();
         }
-        throw new IllegalStateException();
-    }
 
-    public static void handle(ClRPSGameInputPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void handle(ClRPSGameInputPacket msg, Supplier<NetworkEvent.Context> ctx) {
             PlayerEntity player = ctx.get().getSender();
             switch (msg.packetType) {
             case PICK:
@@ -89,8 +96,12 @@ public class ClRPSGameInputPacket {
                 });
                 break;
             }
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<ClRPSGameInputPacket> getPacketClass() {
+            return ClRPSGameInputPacket.class;
+        }
     }
 
     private enum PacketType {

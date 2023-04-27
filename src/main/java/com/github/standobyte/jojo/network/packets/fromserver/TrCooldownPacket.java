@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.power.ModCommonRegistries;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 
@@ -41,29 +42,32 @@ public class TrCooldownPacket {
         this.value = value;
         this.totalCooldown = totalCooldown;
     }
+    
+    
+    
+    public static class Handler implements IModPacketHandler<TrCooldownPacket> {
 
-    public static void encode(TrCooldownPacket msg, PacketBuffer buf) {
-        buf.writeBoolean(msg.resetAll);
-        buf.writeInt(msg.entityId);
-        buf.writeEnum(msg.classification);
-        if (!msg.resetAll) {
-            buf.writeRegistryIdUnsafe(ModCommonRegistries.ACTIONS.getRegistry(), msg.action);
-            buf.writeVarInt(msg.value);
-            buf.writeVarInt(msg.totalCooldown);
+        public void encode(TrCooldownPacket msg, PacketBuffer buf) {
+            buf.writeBoolean(msg.resetAll);
+            buf.writeInt(msg.entityId);
+            buf.writeEnum(msg.classification);
+            if (!msg.resetAll) {
+                buf.writeRegistryIdUnsafe(ModCommonRegistries.ACTIONS.getRegistry(), msg.action);
+                buf.writeVarInt(msg.value);
+                buf.writeVarInt(msg.totalCooldown);
+            }
         }
-    }
-
-    public static TrCooldownPacket decode(PacketBuffer buf) {
-        boolean resetAll = buf.readBoolean();
-        if (resetAll) {
-            return resetAll(buf.readInt(), buf.readEnum(PowerClassification.class));
+    
+        public TrCooldownPacket decode(PacketBuffer buf) {
+            boolean resetAll = buf.readBoolean();
+            if (resetAll) {
+                return resetAll(buf.readInt(), buf.readEnum(PowerClassification.class));
+            }
+            return new TrCooldownPacket(buf.readInt(), buf.readEnum(PowerClassification.class), 
+                    buf.readRegistryIdUnsafe(ModCommonRegistries.ACTIONS.getRegistry()), buf.readVarInt(), buf.readVarInt());
         }
-        return new TrCooldownPacket(buf.readInt(), buf.readEnum(PowerClassification.class), 
-                buf.readRegistryIdUnsafe(ModCommonRegistries.ACTIONS.getRegistry()), buf.readVarInt(), buf.readVarInt());
-    }
-
-    public static void handle(TrCooldownPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+    
+        public void handle(TrCooldownPacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity instanceof LivingEntity) {
                 IPower.getPowerOptional((LivingEntity) entity, msg.classification).ifPresent(power -> {
@@ -75,7 +79,11 @@ public class TrCooldownPacket {
                     }
                 });
             }
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<TrCooldownPacket> getPacketClass() {
+            return TrCooldownPacket.class;
+        }
     }
 }

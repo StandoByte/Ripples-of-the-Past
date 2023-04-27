@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonPowerType;
 
 import net.minecraft.entity.Entity;
@@ -17,23 +18,33 @@ public class TrHamonParticlesPacket {
         this.entityId = entityId;
         this.intensity = intensity;
     }
+    
+    
+    
+    public static class Handler implements IModPacketHandler<TrHamonParticlesPacket> {
 
-    public static void encode(TrHamonParticlesPacket msg, PacketBuffer buf) {
-        buf.writeInt(msg.entityId);
-        buf.writeFloat(msg.intensity);
-    }
+        @Override
+        public void encode(TrHamonParticlesPacket msg, PacketBuffer buf) {
+            buf.writeInt(msg.entityId);
+            buf.writeFloat(msg.intensity);
+        }
 
-    public static TrHamonParticlesPacket decode(PacketBuffer buf) {
-        return new TrHamonParticlesPacket(buf.readInt(), buf.readFloat());
-    }
+        @Override
+        public TrHamonParticlesPacket decode(PacketBuffer buf) {
+            return new TrHamonParticlesPacket(buf.readInt(), buf.readFloat());
+        }
 
-    public static void handle(TrHamonParticlesPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void handle(TrHamonParticlesPacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity != null) {
                 HamonPowerType.createHamonSparkParticlesEmitter(entity, msg.intensity);
             }
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<TrHamonParticlesPacket> getPacketClass() {
+            return TrHamonParticlesPacket.class;
+        }
     }
 }

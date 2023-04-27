@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.github.standobyte.jojo.util.mc.data.StandStatsManager;
@@ -30,26 +31,36 @@ public class StandStatsDataPacket {
         this.stats = stats;
     }
     
-    public static void encode(StandStatsDataPacket msg, PacketBuffer buf) {
-        buf.writeVarInt(msg.stats.size());
-        msg.stats.forEach(entry -> entry.write(buf));
-    }
     
-    public static StandStatsDataPacket decode(PacketBuffer buf) {
-        int size = buf.readVarInt();
-        List<StandStatsDataEntry> stats = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
-            stats.add(StandStatsDataEntry.read(buf));
-        }
-        return new StandStatsDataPacket(stats);
-    }
+    
+    public static class Handler implements IModPacketHandler<StandStatsDataPacket> {
 
-    public static void handle(StandStatsDataPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void encode(StandStatsDataPacket msg, PacketBuffer buf) {
+            buf.writeVarInt(msg.stats.size());
+            msg.stats.forEach(entry -> entry.write(buf));
+        }
+
+        @Override
+        public StandStatsDataPacket decode(PacketBuffer buf) {
+            int size = buf.readVarInt();
+            List<StandStatsDataEntry> stats = new ArrayList<>();
+            for (int i = 0; i < size; i++) {
+                stats.add(StandStatsDataEntry.read(buf));
+            }
+            return new StandStatsDataPacket(stats);
+        }
+
+        @Override
+        public void handle(StandStatsDataPacket msg, Supplier<NetworkEvent.Context> ctx) {
             StandStatsManager.getInstance().clSetStats(msg.stats);
             JojoModConfig.getCommonConfigInstance(true).onStatsDataPackLoad();
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<StandStatsDataPacket> getPacketClass() {
+            return StandStatsDataPacket.class;
+        }
     }
     
     

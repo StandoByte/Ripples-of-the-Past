@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectType;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandEffectsTracker;
 
@@ -48,47 +49,53 @@ public class TrStandEffectPacket {
         this.effect = effect;
         this.buf = buf;
     }
+    
+    
+    
+    public static class Handler implements IModPacketHandler<TrStandEffectPacket> {
 
-    public static void encode(TrStandEffectPacket msg, PacketBuffer buf) {
-        buf.writeEnum(msg.packetType);
-        switch (msg.packetType) {
-        case ADD:
-            buf.writeInt(msg.userId);
-            buf.writeInt(msg.effectId);
-            buf.writeInt(msg.targetId);
-            buf.writeRegistryId(msg.effectFactory);
-            msg.effect.writeAdditionalPacketData(buf);
-            break;
-        case REMOVE:
-            buf.writeInt(msg.userId);
-            buf.writeInt(msg.effectId);
-            break;
-        case UPDATE_TARGET:
-            buf.writeInt(msg.userId);
-            buf.writeInt(msg.effectId);
-            buf.writeInt(msg.targetId);
-            break;
+        @Override
+        public void encode(TrStandEffectPacket msg, PacketBuffer buf) {
+            buf.writeEnum(msg.packetType);
+            switch (msg.packetType) {
+            case ADD:
+                buf.writeInt(msg.userId);
+                buf.writeInt(msg.effectId);
+                buf.writeInt(msg.targetId);
+                buf.writeRegistryId(msg.effectFactory);
+                msg.effect.writeAdditionalPacketData(buf);
+                break;
+            case REMOVE:
+                buf.writeInt(msg.userId);
+                buf.writeInt(msg.effectId);
+                break;
+            case UPDATE_TARGET:
+                buf.writeInt(msg.userId);
+                buf.writeInt(msg.effectId);
+                buf.writeInt(msg.targetId);
+                break;
+            }
         }
-    }
 
-    public static TrStandEffectPacket decode(PacketBuffer buf) {
-        PacketType type = buf.readEnum(PacketType.class);
-        switch (type) {
-        case ADD:
-            return new TrStandEffectPacket(type, buf.readInt(), buf.readInt(), 
-                    buf.readInt(), buf.readRegistryIdSafe(StandEffectType.class), null, buf);
-        case REMOVE:
-            return new TrStandEffectPacket(type, buf.readInt(), buf.readInt(), 
-                    -1, null, null, null);
-        case UPDATE_TARGET:
-            return new TrStandEffectPacket(type, buf.readInt(), buf.readInt(), 
-                    buf.readInt(), null, null, null);
+        @Override
+        public TrStandEffectPacket decode(PacketBuffer buf) {
+            PacketType type = buf.readEnum(PacketType.class);
+            switch (type) {
+            case ADD:
+                return new TrStandEffectPacket(type, buf.readInt(), buf.readInt(), 
+                        buf.readInt(), buf.readRegistryIdSafe(StandEffectType.class), null, buf);
+            case REMOVE:
+                return new TrStandEffectPacket(type, buf.readInt(), buf.readInt(), 
+                        -1, null, null, null);
+            case UPDATE_TARGET:
+                return new TrStandEffectPacket(type, buf.readInt(), buf.readInt(), 
+                        buf.readInt(), null, null, null);
+            }
+            return null;
         }
-        return null;
-    }
 
-    public static void handle(TrStandEffectPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void handle(TrStandEffectPacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity entity = ClientUtil.getEntityById(msg.userId);
             if (entity instanceof LivingEntity) {
                 LivingEntity livingEntity = (LivingEntity) entity;
@@ -113,8 +120,12 @@ public class TrStandEffectPacket {
                     }
                 });
             }
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<TrStandEffectPacket> getPacketClass() {
+            return TrStandEffectPacket.class;
+        }
     }
     
     private enum PacketType {

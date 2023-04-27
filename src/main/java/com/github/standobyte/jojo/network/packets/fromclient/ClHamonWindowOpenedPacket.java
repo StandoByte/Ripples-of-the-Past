@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonTeachersSkillsPacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
@@ -19,24 +20,34 @@ public class ClHamonWindowOpenedPacket {
     
     public ClHamonWindowOpenedPacket() {}
     
-    public static void encode(ClHamonWindowOpenedPacket msg, PacketBuffer buf) {}
     
-    public static ClHamonWindowOpenedPacket decode(PacketBuffer buf) {
-        return new ClHamonWindowOpenedPacket();
-    }
     
-    public static void handle(ClHamonWindowOpenedPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+    public static class Handler implements IModPacketHandler<ClHamonWindowOpenedPacket> {
+
+        @Override
+        public void encode(ClHamonWindowOpenedPacket msg, PacketBuffer buf) {}
+
+        @Override
+        public ClHamonWindowOpenedPacket decode(PacketBuffer buf) {
+            return new ClHamonWindowOpenedPacket();
+        }
+
+        @Override
+        public void handle(ClHamonWindowOpenedPacket msg, Supplier<NetworkEvent.Context> ctx) {
             ServerPlayerEntity player = ctx.get().getSender();
             INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
                 power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                     PacketManager.sendToClient(new HamonExercisesPacket(hamon), player);
                     EnumSet<HamonSkill> skills = HamonPowerType.nearbyTeachersSkills(player);
-                    PacketManager.sendToClient(skills.isEmpty() ? new HamonTeachersSkillsPacket() : new HamonTeachersSkillsPacket(HamonTeachersSkillsPacket.encodeSkills(skills)), player);
+                    PacketManager.sendToClient(skills.isEmpty() ? new HamonTeachersSkillsPacket() : new HamonTeachersSkillsPacket(HamonTeachersSkillsPacket.Handler.encodeSkills(skills)), player);
                 });
             });
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<ClHamonWindowOpenedPacket> getPacketClass() {
+            return ClHamonWindowOpenedPacket.class;
+        }
     }
 
 }

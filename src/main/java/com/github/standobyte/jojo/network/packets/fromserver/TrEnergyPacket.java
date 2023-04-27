@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 
 import net.minecraft.entity.Entity;
@@ -19,24 +20,34 @@ public class TrEnergyPacket {
         this.energy = energy;
     }
     
-    public static void encode(TrEnergyPacket msg, PacketBuffer buf) {
-        buf.writeInt(msg.entityId);
-        buf.writeFloat(msg.energy);
-    }
     
-    public static TrEnergyPacket decode(PacketBuffer buf) {
-        return new TrEnergyPacket(buf.readInt(), buf.readFloat());
-    }
+    
+    public static class Handler implements IModPacketHandler<TrEnergyPacket> {
 
-    public static void handle(TrEnergyPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void encode(TrEnergyPacket msg, PacketBuffer buf) {
+            buf.writeInt(msg.entityId);
+            buf.writeFloat(msg.energy);
+        }
+
+        @Override
+        public TrEnergyPacket decode(PacketBuffer buf) {
+            return new TrEnergyPacket(buf.readInt(), buf.readFloat());
+        }
+
+        @Override
+        public void handle(TrEnergyPacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity instanceof LivingEntity) {
                 INonStandPower.getNonStandPowerOptional((LivingEntity) entity).ifPresent(power -> {
                     power.setEnergy(msg.energy);
                 });
             }
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<TrEnergyPacket> getPacketClass() {
+            return TrEnergyPacket.class;
+        }
     }
 }

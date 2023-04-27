@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.toasts.ActionToast;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 
@@ -22,18 +23,25 @@ public class ResolveLevelPacket {
         this.fromEffect = fromEffect;
     }
     
-    public static void encode(ResolveLevelPacket msg, PacketBuffer buf) {
-        buf.writeVarInt(msg.level);
-        buf.writeBoolean(msg.fromEffect);
-    }
     
-    public static ResolveLevelPacket decode(PacketBuffer buf) {
-        return new ResolveLevelPacket(buf.readVarInt(), buf.readBoolean());
-    }
+    
+    public static class Handler implements IModPacketHandler<ResolveLevelPacket> {
 
-    public static void handle(ResolveLevelPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void encode(ResolveLevelPacket msg, PacketBuffer buf) {
+            buf.writeVarInt(msg.level);
+            buf.writeBoolean(msg.fromEffect);
+        }
+
+        @Override
+        public ResolveLevelPacket decode(PacketBuffer buf) {
+            return new ResolveLevelPacket(buf.readVarInt(), buf.readBoolean());
+        }
+
+        @Override
+        public void handle(ResolveLevelPacket msg, Supplier<NetworkEvent.Context> ctx) {
             IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
+                // FIXME !! make the toast show up when getting the level up from /standlevel command
                 boolean wasComboUnlocked = msg.fromEffect && StandUtil.isComboUnlocked(power);
                 power.setResolveLevel(msg.level, msg.fromEffect);
                 if (msg.fromEffect && !wasComboUnlocked && StandUtil.isComboUnlocked(power)) {
@@ -54,7 +62,11 @@ public class ResolveLevelPacket {
                             ActionToast.SpecialToastType.FINISHER_HEAVY_ATTACK, finisher, power.getType()));
                 }
             });
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<ResolveLevelPacket> getPacketClass() {
+            return ResolveLevelPacket.class;
+        }
     }
 }

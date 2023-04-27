@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.network.packets.fromclient;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.entity.SoulEntity;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;
@@ -15,21 +16,31 @@ public class ClRemovePlayerSoulEntityPacket {
         this.soulEntityId = soulEntityId;
     }
     
-    public static void encode(ClRemovePlayerSoulEntityPacket msg, PacketBuffer buf) {
-        buf.writeInt(msg.soulEntityId);
-    }
     
-    public static ClRemovePlayerSoulEntityPacket decode(PacketBuffer buf) {
-        return new ClRemovePlayerSoulEntityPacket(buf.readInt());
-    }
     
-    public static void handle(ClRemovePlayerSoulEntityPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+    public static class Handler implements IModPacketHandler<ClRemovePlayerSoulEntityPacket> {
+
+        @Override
+        public void encode(ClRemovePlayerSoulEntityPacket msg, PacketBuffer buf) {
+            buf.writeInt(msg.soulEntityId);
+        }
+
+        @Override
+        public ClRemovePlayerSoulEntityPacket decode(PacketBuffer buf) {
+            return new ClRemovePlayerSoulEntityPacket(buf.readInt());
+        }
+
+        @Override
+        public void handle(ClRemovePlayerSoulEntityPacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity entity = ctx.get().getSender().level.getEntity(msg.soulEntityId);
             if (entity instanceof SoulEntity) {
                 ((SoulEntity) entity).skipAscension();
             }
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<ClRemovePlayerSoulEntityPacket> getPacketClass() {
+            return ClRemovePlayerSoulEntityPacket.class;
+        }
     }
 }

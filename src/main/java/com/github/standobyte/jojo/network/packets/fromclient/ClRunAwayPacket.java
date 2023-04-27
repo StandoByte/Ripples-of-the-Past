@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.Technique;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -13,15 +14,21 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 public class ClRunAwayPacket {
+    
+    
+    
+    public static class Handler implements IModPacketHandler<ClRunAwayPacket> {
 
-    public static void encode(ClRunAwayPacket msg, PacketBuffer buf) {}
+        @Override
+        public void encode(ClRunAwayPacket msg, PacketBuffer buf) {}
 
-    public static ClRunAwayPacket decode(PacketBuffer buf) {
-        return new ClRunAwayPacket();
-    }
+        @Override
+        public ClRunAwayPacket decode(PacketBuffer buf) {
+            return new ClRunAwayPacket();
+        }
 
-    public static void handle(ClRunAwayPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void handle(ClRunAwayPacket msg, Supplier<NetworkEvent.Context> ctx) {
             PlayerEntity player = ctx.get().getSender();
                 if (player.isSprinting()) {
                 INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
@@ -32,8 +39,12 @@ public class ClRunAwayPacket {
                     });
                 });
             }
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<ClRunAwayPacket> getPacketClass() {
+            return ClRunAwayPacket.class;
+        }
     }
 
 }

@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.util.mod.TimeUtil;
 
 import net.minecraft.entity.Entity;
@@ -19,18 +20,24 @@ public class TrNoMotionLerpPacket {
         this.entityId = entityId;
         this.ticks = ticks;
     }
+    
+    
+    
+    public static class Handler implements IModPacketHandler<TrNoMotionLerpPacket> {
 
-    public static void encode(TrNoMotionLerpPacket msg, PacketBuffer buf) {
-        buf.writeInt(msg.entityId);
-        buf.writeVarInt(msg.ticks);
-    }
+        @Override
+        public void encode(TrNoMotionLerpPacket msg, PacketBuffer buf) {
+            buf.writeInt(msg.entityId);
+            buf.writeVarInt(msg.ticks);
+        }
 
-    public static TrNoMotionLerpPacket decode(PacketBuffer buf) {
-        return new TrNoMotionLerpPacket(buf.readInt(), buf.readVarInt());
-    }
+        @Override
+        public TrNoMotionLerpPacket decode(PacketBuffer buf) {
+            return new TrNoMotionLerpPacket(buf.readInt(), buf.readVarInt());
+        }
 
-    public static void handle(TrNoMotionLerpPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void handle(TrNoMotionLerpPacket msg, Supplier<NetworkEvent.Context> ctx) {
             if (!TimeUtil.canPlayerSeeInStoppedTime(ClientUtil.getClientPlayer())) {
                 Entity entity = ClientUtil.getEntityById(msg.entityId);
                 if (entity instanceof LivingEntity) {
@@ -39,8 +46,12 @@ public class TrNoMotionLerpPacket {
                     });
                 }
             }
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<TrNoMotionLerpPacket> getPacketClass() {
+            return TrNoMotionLerpPacket.class;
+        }
     }
 
 }

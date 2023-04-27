@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.capability.world.TimeStopHandler;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.util.mod.TimeUtil;
 
 import net.minecraft.network.PacketBuffer;
@@ -17,16 +18,22 @@ public class TimeStopPlayerJoinPacket {
         this.phase = phase;
     }
     
-    public static void encode(TimeStopPlayerJoinPacket msg, PacketBuffer buf) {
-        buf.writeBoolean(msg.phase == Phase.PRE);
-    }
     
-    public static TimeStopPlayerJoinPacket decode(PacketBuffer buf) {
-        return new TimeStopPlayerJoinPacket(buf.readBoolean() ? Phase.PRE : Phase.POST);
-    }
+    
+    public static class Handler implements IModPacketHandler<TimeStopPlayerJoinPacket> {
 
-    public static void handle(TimeStopPlayerJoinPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void encode(TimeStopPlayerJoinPacket msg, PacketBuffer buf) {
+            buf.writeBoolean(msg.phase == Phase.PRE);
+        }
+
+        @Override
+        public TimeStopPlayerJoinPacket decode(PacketBuffer buf) {
+            return new TimeStopPlayerJoinPacket(buf.readBoolean() ? Phase.PRE : Phase.POST);
+        }
+
+        @Override
+        public void handle(TimeStopPlayerJoinPacket msg, Supplier<NetworkEvent.Context> ctx) {
             switch (msg.phase) {
             case PRE:
                 TimeStopHandler handler = ClientUtil.getClientWorld().getCapability(WorldUtilCapProvider.CAPABILITY).map(
@@ -37,8 +44,12 @@ public class TimeStopPlayerJoinPacket {
                 TimeUtil.stopNewEntityInTime(ClientUtil.getClientPlayer(), ClientUtil.getClientWorld());
                 break;
             }
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<TimeStopPlayerJoinPacket> getPacketClass() {
+            return TimeStopPlayerJoinPacket.class;
+        }
     }
     
     public enum Phase {

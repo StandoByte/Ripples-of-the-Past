@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 
 import net.minecraft.network.PacketBuffer;
@@ -17,27 +18,37 @@ public class StandControlStatusPacket {
         this.keepPosition = keepPosition;
     }
     
-    public static void encode(StandControlStatusPacket msg, PacketBuffer buf) {
-        byte flags = 0;
-        if (msg.manualControl) {
-            flags |= 1;
-        }
-        if (msg.keepPosition) {
-            flags |= 2;
-        }
-        buf.writeByte(flags);
-    }
     
-    public static StandControlStatusPacket decode(PacketBuffer buf) {
-        byte flags = buf.readByte();
-        return new StandControlStatusPacket((flags & 1) > 0, (flags & 2) > 0);
-    }
+    
+    public static class Handler implements IModPacketHandler<StandControlStatusPacket> {
 
-    public static void handle(StandControlStatusPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void encode(StandControlStatusPacket msg, PacketBuffer buf) {
+            byte flags = 0;
+            if (msg.manualControl) {
+                flags |= 1;
+            }
+            if (msg.keepPosition) {
+                flags |= 2;
+            }
+            buf.writeByte(flags);
+        }
+
+        @Override
+        public StandControlStatusPacket decode(PacketBuffer buf) {
+            byte flags = buf.readByte();
+            return new StandControlStatusPacket((flags & 1) > 0, (flags & 2) > 0);
+        }
+
+        @Override
+        public void handle(StandControlStatusPacket msg, Supplier<NetworkEvent.Context> ctx) {
             // FIXME when a player dies with the stand summoned, throws "java.lang.IllegalStateException: Player's stand power capability is empty."
             StandUtil.setManualControl(ClientUtil.getClientPlayer(), msg.manualControl, msg.keepPosition);
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<StandControlStatusPacket> getPacketClass() {
+            return StandControlStatusPacket.class;
+        }
     }
 }

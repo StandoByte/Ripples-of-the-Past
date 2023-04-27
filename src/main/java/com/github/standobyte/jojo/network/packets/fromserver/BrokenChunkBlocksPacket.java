@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.capability.chunk.ChunkCap.PrevBlockInfo;
 import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.network.NetworkUtil;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.block.Block;
@@ -27,23 +28,29 @@ public class BrokenChunkBlocksPacket {
         this.blocks = blocks;
         this.reset = reset;
     }
+    
+    
+    
+    public static class Handler implements IModPacketHandler<BrokenChunkBlocksPacket> {
 
-    public static void encode(BrokenChunkBlocksPacket msg, PacketBuffer buf) {
-        NetworkUtil.writeCollection(buf, msg.blocks, (buffer, block) -> {
-            buffer.writeBlockPos(block.pos);
-            buf.writeVarInt(Block.getId(block.state));
-        }, true);
-        buf.writeBoolean(msg.reset);
-    }
+        @Override
+        public void encode(BrokenChunkBlocksPacket msg, PacketBuffer buf) {
+            NetworkUtil.writeCollection(buf, msg.blocks, (buffer, block) -> {
+                buffer.writeBlockPos(block.pos);
+                buf.writeVarInt(Block.getId(block.state));
+            }, true);
+            buf.writeBoolean(msg.reset);
+        }
 
-    public static BrokenChunkBlocksPacket decode(PacketBuffer buf) {
-        return new BrokenChunkBlocksPacket(NetworkUtil.readCollection(buf, buffer -> 
-        PrevBlockInfo.clientInstance(buffer.readBlockPos(), Block.stateById(buf.readVarInt()))), 
-                buf.readBoolean());
-    }
+        @Override
+        public BrokenChunkBlocksPacket decode(PacketBuffer buf) {
+            return new BrokenChunkBlocksPacket(NetworkUtil.readCollection(buf, buffer -> 
+            PrevBlockInfo.clientInstance(buffer.readBlockPos(), Block.stateById(buf.readVarInt()))), 
+                    buf.readBoolean());
+        }
 
-    public static void handle(BrokenChunkBlocksPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void handle(BrokenChunkBlocksPacket msg, Supplier<NetworkEvent.Context> ctx) {
             IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
                 World world = ClientUtil.getClientWorld();
                 msg.blocks.forEach(block -> {
@@ -63,7 +70,11 @@ public class BrokenChunkBlocksPacket {
                     }
                 });
             });
-        });
-        ctx.get().setPacketHandled(true);
+        }
+
+        @Override
+        public Class<BrokenChunkBlocksPacket> getPacketClass() {
+            return BrokenChunkBlocksPacket.class;
+        }
     }
 }

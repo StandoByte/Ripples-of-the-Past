@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.network.packets.fromserver.StandCancelManualMovementPacket;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -29,20 +30,26 @@ public class ClStandManualMovementPacket {
         this.z = z;
         this.resetDeltaMovement = resetDeltaMovement;
     }
+    
+    
+    
+    public static class Handler implements IModPacketHandler<ClStandManualMovementPacket> {
+    
+        @Override
+        public void encode(ClStandManualMovementPacket msg, PacketBuffer buf) {
+            buf.writeDouble(msg.x);
+            buf.writeDouble(msg.y);
+            buf.writeDouble(msg.z);
+            buf.writeBoolean(msg.resetDeltaMovement);
+        }
 
-    public static void encode(ClStandManualMovementPacket msg, PacketBuffer buf) {
-        buf.writeDouble(msg.x);
-        buf.writeDouble(msg.y);
-        buf.writeDouble(msg.z);
-        buf.writeBoolean(msg.resetDeltaMovement);
-    }
+        @Override
+        public ClStandManualMovementPacket decode(PacketBuffer buf) {
+            return new ClStandManualMovementPacket(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readBoolean());
+        }
 
-    public static ClStandManualMovementPacket decode(PacketBuffer buf) {
-        return new ClStandManualMovementPacket(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readBoolean());
-    }
-
-    public static void handle(ClStandManualMovementPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+        @Override
+        public void handle(ClStandManualMovementPacket msg, Supplier<NetworkEvent.Context> ctx) {
             ServerPlayerEntity player = ctx.get().getSender();
             if (!isValid(msg)) {
                 player.connection.disconnect(new TranslationTextComponent("multiplayer.disconnect.invalid_stand_movement"));
@@ -103,11 +110,15 @@ public class ClStandManualMovementPacket {
                     }
                 }
             });
-        });
-        ctx.get().setPacketHandled(true);
-    }
+        }
+    
+        private boolean isValid(ClStandManualMovementPacket msg) {
+            return Doubles.isFinite(msg.x) && Doubles.isFinite(msg.y) && Doubles.isFinite(msg.z);
+        }
 
-    private static boolean isValid(ClStandManualMovementPacket msg) {
-        return Doubles.isFinite(msg.x) && Doubles.isFinite(msg.y) && Doubles.isFinite(msg.z);
+        @Override
+        public Class<ClStandManualMovementPacket> getPacketClass() {
+            return ClStandManualMovementPacket.class;
+        }
     }
 }
