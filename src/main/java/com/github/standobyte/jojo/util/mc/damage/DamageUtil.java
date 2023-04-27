@@ -15,10 +15,10 @@ import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.nonstand.type.HamonData;
-import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
-import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonData;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 

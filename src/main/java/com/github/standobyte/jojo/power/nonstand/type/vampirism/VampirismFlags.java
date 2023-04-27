@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.power.nonstand.type;
+package com.github.standobyte.jojo.power.nonstand.type.vampirism;
 
 import java.util.List;
 
@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrNonStandFlagPacke
 import com.github.standobyte.jojo.network.packets.fromserver.TrNonStandFlagPacket.Flag;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.TypeSpecificData;
+import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;

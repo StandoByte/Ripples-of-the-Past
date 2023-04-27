@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
-import com.github.standobyte.jojo.power.nonstand.type.HamonSkillSet;
-import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonSkillType;
-import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkillSet;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonSkillType;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.Technique;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.matrix.MatrixStack;
 

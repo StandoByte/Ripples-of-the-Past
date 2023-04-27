@@ -4,7 +4,7 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.ZoomPunchEntity;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.nonstand.type.HamonData;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonData;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.World;

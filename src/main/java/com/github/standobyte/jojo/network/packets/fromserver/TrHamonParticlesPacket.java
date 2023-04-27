@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonPowerType;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;

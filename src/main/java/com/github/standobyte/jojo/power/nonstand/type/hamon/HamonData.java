@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.power.nonstand.type;
+package com.github.standobyte.jojo.power.nonstand.type.hamon;
 
 import java.util.Collections;
 import java.util.EnumMap;
@@ -25,9 +25,10 @@ import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillsResetPac
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonStatsPacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.TypeSpecificData;
-import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonSkillType;
-import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
+import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonSkillType;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.Technique;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
 

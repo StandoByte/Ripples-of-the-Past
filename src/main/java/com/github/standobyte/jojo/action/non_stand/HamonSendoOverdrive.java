@@ -6,9 +6,9 @@ import java.util.Random;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.nonstand.type.HamonData;
-import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
-import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonData;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;

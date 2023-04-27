@@ -11,7 +11,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.toasts.HamonSkillToast;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.toasts.ToastGui;

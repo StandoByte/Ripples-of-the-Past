@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.client.ui.toasts;
 import java.util.List;
 
 import com.github.standobyte.jojo.client.resources.CustomResources;
-import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;

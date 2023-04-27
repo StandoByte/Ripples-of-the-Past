@@ -3,10 +3,10 @@ package com.github.standobyte.jojo.client.ui.screen.hamon;
 import java.util.List;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.power.nonstand.type.HamonData;
-import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
-import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonSkillType;
-import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonData;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonSkillType;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonStat;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;

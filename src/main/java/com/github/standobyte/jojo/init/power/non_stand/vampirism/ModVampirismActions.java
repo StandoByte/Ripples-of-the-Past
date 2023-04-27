@@ -12,7 +12,7 @@ import com.github.standobyte.jojo.action.non_stand.VampirismFreeze;
 import com.github.standobyte.jojo.action.non_stand.VampirismHamonSuicide;
 import com.github.standobyte.jojo.action.non_stand.VampirismSpaceRipperStingyEyes;
 import com.github.standobyte.jojo.action.non_stand.VampirismZombieSummon;
-import com.github.standobyte.jojo.power.nonstand.type.VampirismPowerType;
+import com.github.standobyte.jojo.power.nonstand.type.vampirism.VampirismPowerType;
 
 import net.minecraftforge.fml.RegistryObject;
 

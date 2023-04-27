@@ -4,8 +4,8 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.init.power.non_stand.vampirism.ModVampirismActions;
-import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
-import com.github.standobyte.jojo.power.nonstand.type.VampirismPowerType;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.nonstand.type.vampirism.VampirismPowerType;
 
 public class ModPowers {
 

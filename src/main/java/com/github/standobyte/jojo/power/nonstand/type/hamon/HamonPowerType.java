@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.power.nonstand.type;
+package com.github.standobyte.jojo.power.nonstand.type.hamon;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -35,8 +35,9 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRunAwayPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonParticlesPacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.Technique;
+import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.Technique;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;

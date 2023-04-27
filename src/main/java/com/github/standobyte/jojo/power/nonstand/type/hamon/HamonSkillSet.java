@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.power.nonstand.type;
+package com.github.standobyte.jojo.power.nonstand.type.hamon;
 
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -6,7 +6,7 @@ import java.util.Set;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.non_stand.HamonAction;
-import com.github.standobyte.jojo.power.nonstand.type.HamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonStat;
 
 public class HamonSkillSet {
     final Set<HamonSkill> wrappedSkillSet;

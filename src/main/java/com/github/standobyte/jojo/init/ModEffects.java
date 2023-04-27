@@ -12,7 +12,7 @@ import com.github.standobyte.jojo.potion.StatusEffect;
 import com.github.standobyte.jojo.potion.StunEffect;
 import com.github.standobyte.jojo.potion.UncurableEffect;
 import com.github.standobyte.jojo.potion.UndeadRegenerationEffect;
-import com.github.standobyte.jojo.power.nonstand.type.VampirismPowerType;
+import com.github.standobyte.jojo.power.nonstand.type.vampirism.VampirismPowerType;
 import com.google.common.collect.ImmutableSet;
 
 import net.minecraft.potion.Effect;

@@ -5,7 +5,7 @@ import java.util.EnumSet;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
-import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
 
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;

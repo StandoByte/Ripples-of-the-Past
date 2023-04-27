@@ -8,8 +8,8 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonTeachersSkillsPacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.nonstand.type.HamonPowerType;
-import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;

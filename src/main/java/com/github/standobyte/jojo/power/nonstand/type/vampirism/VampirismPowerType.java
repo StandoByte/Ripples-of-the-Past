@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.power.nonstand.type;
+package com.github.standobyte.jojo.power.nonstand.type.vampirism;
 
 import java.util.Map;
 import java.util.function.IntBinaryOperator;
@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.action.non_stand.VampirismAction;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.google.common.collect.ImmutableMap;

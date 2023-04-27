@@ -5,8 +5,8 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.nonstand.type.HamonData;
-import com.github.standobyte.jojo.power.nonstand.type.HamonData.Exercise;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonData;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonData.Exercise;
 
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.MathHelper;

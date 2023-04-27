@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.power.nonstand.type;
+package com.github.standobyte.jojo.power.nonstand.type.hamon;
 
 import java.util.Map;
 import java.util.function.Supplier;

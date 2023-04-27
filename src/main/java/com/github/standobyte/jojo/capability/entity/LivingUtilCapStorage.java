@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.capability.entity;
 
-import com.github.standobyte.jojo.power.nonstand.type.HamonCharge;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonCharge;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;

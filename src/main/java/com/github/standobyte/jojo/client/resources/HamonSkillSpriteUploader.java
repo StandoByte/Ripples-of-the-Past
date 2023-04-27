@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.client.resources;
 
 import java.util.stream.Stream;
 
-import com.github.standobyte.jojo.power.nonstand.type.HamonSkill;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
 
 import net.minecraft.client.renderer.texture.SpriteUploader;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
