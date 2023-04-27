@@ -36,6 +36,7 @@ public class ActionToast implements IToast {
         this.actions.add(action);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public IToast.Visibility render(MatrixStack matrixStack, ToastGui toastGui, long delta) {
         if (changed) {

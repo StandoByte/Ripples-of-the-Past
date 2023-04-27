@@ -164,6 +164,7 @@ public class HamonScreen extends Screen {
         return (height - WINDOW_HEIGHT) / 2;
     }
 
+    @SuppressWarnings("deprecation")
     private void renderInside(MatrixStack matrixStack, int mouseX, int mouseY, int windowX, int windowY) {
         if (selectedTab != null) {
             RenderSystem.pushMatrix();
@@ -175,6 +176,7 @@ public class HamonScreen extends Screen {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public void renderWindow(MatrixStack matrixStack, int windowX, int windowY) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.enableBlend();
@@ -194,6 +196,7 @@ public class HamonScreen extends Screen {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private void renderToolTips(MatrixStack matrixStack, int mouseX, int mouseY, int windowX, int windowY) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         if (selectedTab != null) {
@@ -215,6 +218,7 @@ public class HamonScreen extends Screen {
         }
     }
 
+    @SuppressWarnings("resource")
     public static void setTeacherSkills(Set<HamonSkill> skills) {
         Screen screen = Minecraft.getInstance().screen;
         if (screen instanceof HamonScreen) {
@@ -224,6 +228,7 @@ public class HamonScreen extends Screen {
         }
     }
     
+    @SuppressWarnings("resource")
     public static void updateTabs() {
         Screen screen = Minecraft.getInstance().screen;
         if (screen instanceof HamonScreen) {

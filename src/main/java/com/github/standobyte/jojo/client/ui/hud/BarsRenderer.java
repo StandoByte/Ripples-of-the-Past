@@ -99,7 +99,8 @@ public abstract class BarsRenderer {
             float value, float maxValue, float iconFill, 
             float attackCostValue, float abilityCostValue, float tranclucentBarValue, 
             float alpha, int ticks, float partialTick);
-    
+
+    @SuppressWarnings("deprecation")
     protected final void renderBar(MatrixStack matrixStack, int x, int y, Alignment alignment, 
             int texX, int texY, int width, int length, int fill, int barColor, float barAlpha, 
             int borderTexX, int borderTexY, int scaleTexX, int scaleTexY, 

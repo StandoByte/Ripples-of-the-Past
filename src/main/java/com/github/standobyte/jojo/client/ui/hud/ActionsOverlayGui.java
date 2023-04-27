@@ -178,7 +178,8 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     
-    
+
+    @SuppressWarnings("deprecation")
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public void render(RenderGameOverlayEvent.Pre event) {
         if (mc.gameMode.getPlayerMode() == GameType.SPECTATOR || mc.options.hideGui) {
@@ -401,7 +402,8 @@ public class ActionsOverlayGui extends AbstractGui {
     }
 
     
-    
+
+    @SuppressWarnings("deprecation")
     private <P extends IPower<P, ?>> void renderActionsHotbar(MatrixStack matrixStack, 
             ElementPosition position, ActionType actionType, ActionsModeConfig<P> mode, ActionTarget target, float partialTick) {
         P power = mode.getPower();
@@ -474,14 +476,16 @@ public class ActionsOverlayGui extends AbstractGui {
     private int getHotbarsYDiff() {
         return 2 * 2 + 22 + mc.font.lineHeight;
     }
-    
+
+    @SuppressWarnings("deprecation")
     private void renderHotbar(MatrixStack matrixStack, int x, int y, int slots, float alpha) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
         int hotbarLength = 20 * slots + 1;
         blit(matrixStack, x, y, 0, 0, hotbarLength, 22);
         blit(matrixStack, x + hotbarLength, y, 181, 0, 1, 22);
     }
-    
+
+    @SuppressWarnings("deprecation")
     private <P extends IPower<P, ?>> void renderActionIcon(MatrixStack matrixStack, ActionType actionType, ActionsModeConfig<P> mode, 
             Action<P> action, ActionTarget target, int x, int y, float partialTick, boolean isSelected, float hotbarAlpha) {
         P power = mode.getPower();
@@ -571,7 +575,8 @@ public class ActionsOverlayGui extends AbstractGui {
         this.attackSelection = attack;
         this.abilitySelection = ability;
     }
-    
+
+    @SuppressWarnings("deprecation")
     private <P extends IPower<P, ?>> void drawHotbarText(MatrixStack matrixStack, ElementPosition position, ActionType actionType, @Nonnull ActionsModeConfig<P> mode, ActionTarget target) {
         P power = mode.getPower();
         int x = position.x;
@@ -661,7 +666,8 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     
-    
+
+    @SuppressWarnings("deprecation")
     private void renderPowerIcon(MatrixStack matrixStack, ElementPosition position, @Nullable ActionsModeConfig<?> mode, float alpha) {
         int x = position.x;
         if (position.alignment == Alignment.RIGHT) {
@@ -743,6 +749,7 @@ public class ActionsOverlayGui extends AbstractGui {
             nonStandUiMode,
             standUiMode
             ));
+    @SuppressWarnings("deprecation")
     private void renderModeSelector(MatrixStack matrixStack, ElementPosition position, float partialTick) {
         if (modeSelectorTransparency.shouldRender()) {
             mc.getTextureManager().bind(WIDGETS_LOCATION);
@@ -881,7 +888,8 @@ public class ActionsOverlayGui extends AbstractGui {
             }
         }
     }
-    
+
+    @SuppressWarnings("deprecation")
     private void renderFilledIcon(MatrixStack matrixStack, int x, int y, boolean translucent, float fill, 
             int texX, int texY, int texWidth, int texHeight, int color) {
         blit(matrixStack, x, y, texX, texY, texWidth, texHeight);

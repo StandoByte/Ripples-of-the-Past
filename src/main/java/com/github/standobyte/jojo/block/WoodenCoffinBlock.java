@@ -280,6 +280,7 @@ public class WoodenCoffinBlock extends HorizontalBlock {
     protected static final VoxelShape SHAPE_OPEN_E = VoxelShapes.or(BOTTOM, WALL_1, WALL_3, WALL_4);
     protected static final VoxelShape SHAPE_OPEN_N = VoxelShapes.or(BOTTOM, WALL_1, WALL_2, WALL_4);
     protected static final VoxelShape SHAPE_OPEN_S = VoxelShapes.or(BOTTOM, WALL_1, WALL_2, WALL_3);
+    @Deprecated
     @Override
     public VoxelShape getShape(BlockState blockState, IBlockReader world, BlockPos pos, ISelectionContext p_220053_4_) {
         if (blockState.getValue(CLOSED)) {

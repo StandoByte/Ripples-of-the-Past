@@ -176,7 +176,8 @@ public class StandController {
             renderStandPotionEffects(matrixStack, gui, event, width, height);     
         }
     }
-    
+
+    @SuppressWarnings("deprecation")
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void renderStandGui(RenderGameOverlayEvent.Pre event) {
         if (!isControllingStand()) {
@@ -339,6 +340,7 @@ public class StandController {
         mc.getProfiler().pop();
     }
 
+    @SuppressWarnings("deprecation")
     private void renderStandPotionEffects(MatrixStack matrixStack, IngameGui gui, RenderGameOverlayEvent event, int width, int height) {
         Collection<EffectInstance> collection = stand.getActiveEffects();
         if (!collection.isEmpty()) {

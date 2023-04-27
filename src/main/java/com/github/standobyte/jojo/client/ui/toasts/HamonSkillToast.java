@@ -32,6 +32,7 @@ public class HamonSkillToast implements IToast {
         this.skills.add(skill);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public IToast.Visibility render(MatrixStack matrixStack, ToastGui toastGui, long delta) {
         if (changed) {

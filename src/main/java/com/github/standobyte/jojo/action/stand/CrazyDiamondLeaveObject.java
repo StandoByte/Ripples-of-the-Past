@@ -62,26 +62,26 @@ import net.minecraftforge.event.entity.living.EntityTeleportEvent;
 public class CrazyDiamondLeaveObject extends StandEntityActionModifier {
     
     static final Map<Predicate<ItemStack>, TriConsumer<LivingEntity, ItemStack, LivingEntity>> ITEM_ACTION = Util.make(new HashMap<>(), map -> {
-        map.put(item -> item.getItem() == Items.CHORUS_FRUIT, (target, item, user) ->       chorusFruitTeleport(target, user));
-        map.put(item -> item.getItem() == Items.ENDER_EYE, (target, item, user) ->          enderEyeFlight(target, item, user));
-        map.put(item -> item.getItem() == Items.FIREWORK_ROCKET, (target, item, user) ->    fireworkFlight(target, item, user));
-        map.put(item -> item.getItem() == Items.SNOWBALL, (target, item, user) ->           target.addEffect(new EffectInstance(ModEffects.FREEZE.get(), 40, 0)));
-        map.put(item -> item.getItem() == Items.SNOW, (target, item, user) ->               target.addEffect(new EffectInstance(ModEffects.FREEZE.get(), 80, 0)));
-        map.put(item -> item.getItem() == Items.SNOW_BLOCK, (target, item, user) ->         target.addEffect(new EffectInstance(ModEffects.FREEZE.get(), 120, 1)));
-        map.put(item -> item.getItem() == Items.ICE, (target, item, user) ->                target.addEffect(new EffectInstance(ModEffects.FREEZE.get(), 200, 1)));
-        map.put(item -> item.getItem() == Items.PACKED_ICE, (target, item, user) ->         target.addEffect(new EffectInstance(ModEffects.FREEZE.get(), 200, 2)));
-        map.put(item -> item.getItem() == Items.BLUE_ICE, (target, item, user) ->           target.addEffect(new EffectInstance(ModEffects.FREEZE.get(), 200, 3)));
-        map.put(item -> item.getItem() == Items.FIRE_CHARGE, (target, item, user) ->        DamageUtil.setOnFire(target, 5, false));
-        map.put(item -> item.getItem() == Items.BLAZE_POWDER, (target, item, user) ->       DamageUtil.setOnFire(target, 10, false));
-        map.put(item -> item.getItem() == Items.BLAZE_ROD, (target, item, user) ->          DamageUtil.setOnFire(target, 20, false));
-        map.put(item -> item.getItem() == Items.LAVA_BUCKET, (target, item, user) ->        DamageUtil.setOnFire(target, 20, false));
-        map.put(item -> item.getItem() == Items.GLOWSTONE_DUST, (target, item, user) ->     target.addEffect(new EffectInstance(Effects.GLOWING, 100)));
-        map.put(item -> item.getItem() == Items.SPECTRAL_ARROW, (target, item, user) ->     target.addEffect(new EffectInstance(Effects.GLOWING, 200)));
-        map.put(item -> item.getItem() == Items.GLOWSTONE, (target, item, user) ->          target.addEffect(new EffectInstance(Effects.GLOWING, 400)));
-        map.put(item -> item.getItem() == Items.EXPERIENCE_BOTTLE, (target, item, user) ->  giveXp(target));
-        map.put(item -> item.getItem() == Items.MILK_BUCKET, (target, item, user) ->        target.curePotionEffects(item));
-        map.put(item -> !PotionUtils.getMobEffects(item).isEmpty(), (target, item, user) -> PotionUtils.getMobEffects(item).forEach(effect -> target.addEffect(effect)));
-        map.put(item -> item.isEdible(), (target, item, user) ->                            target.eat(target.level, item.copy()));
+        map.put(item -> item.getItem() == Items.CHORUS_FRUIT, (target, item, user) ->           chorusFruitTeleport(target, user));
+        map.put(item -> item.getItem() == Items.ENDER_EYE, (target, item, user) ->              enderEyeFlight(target, item, user));
+        map.put(item -> item.getItem() == Items.FIREWORK_ROCKET, (target, item, user) ->        fireworkFlight(target, item, user));
+        map.put(item -> item.getItem() == Items.SNOWBALL, (target, item, user) ->               target.addEffect(new EffectInstance(ModEffects.FREEZE.get(), 40, 0)));
+        map.put(item -> item.getItem() == Items.SNOW, (target, item, user) ->                   target.addEffect(new EffectInstance(ModEffects.FREEZE.get(), 80, 0)));
+        map.put(item -> item.getItem() == Items.SNOW_BLOCK, (target, item, user) ->             target.addEffect(new EffectInstance(ModEffects.FREEZE.get(), 120, 1)));
+        map.put(item -> item.getItem() == Items.ICE, (target, item, user) ->                    target.addEffect(new EffectInstance(ModEffects.FREEZE.get(), 200, 1)));
+        map.put(item -> item.getItem() == Items.PACKED_ICE, (target, item, user) ->             target.addEffect(new EffectInstance(ModEffects.FREEZE.get(), 200, 2)));
+        map.put(item -> item.getItem() == Items.BLUE_ICE, (target, item, user) ->               target.addEffect(new EffectInstance(ModEffects.FREEZE.get(), 200, 3)));
+        map.put(item -> item.getItem() == Items.FIRE_CHARGE, (target, item, user) ->            DamageUtil.setOnFire(target, 5, false));
+        map.put(item -> item.getItem() == Items.BLAZE_POWDER, (target, item, user) ->           DamageUtil.setOnFire(target, 10, false));
+        map.put(item -> item.getItem() == Items.BLAZE_ROD, (target, item, user) ->              DamageUtil.setOnFire(target, 20, false));
+        map.put(item -> item.getItem() == Items.LAVA_BUCKET, (target, item, user) ->            DamageUtil.setOnFire(target, 20, false));
+        map.put(item -> item.getItem() == Items.GLOWSTONE_DUST, (target, item, user) ->         target.addEffect(new EffectInstance(Effects.GLOWING, 100)));
+        map.put(item -> item.getItem() == Items.SPECTRAL_ARROW, (target, item, user) ->         target.addEffect(new EffectInstance(Effects.GLOWING, 200)));
+        map.put(item -> item.getItem() == Items.GLOWSTONE, (target, item, user) ->              target.addEffect(new EffectInstance(Effects.GLOWING, 400)));
+        map.put(item -> item.getItem() == Items.EXPERIENCE_BOTTLE, (target, item, user) ->      giveXp(target));
+        map.put(item -> item.getItem() == Items.MILK_BUCKET, (target, item, user) ->            target.curePotionEffects(item));
+        map.put(item -> !PotionUtils.getMobEffects(item).isEmpty(), (target, item, user) ->     PotionUtils.getMobEffects(item).forEach(effect -> target.addEffect(effect)));
+        map.put(item -> item.isEdible(), (target, item, user) ->                                target.eat(target.level, item.copy()));
     });
 
     public CrazyDiamondLeaveObject(Builder builder) {

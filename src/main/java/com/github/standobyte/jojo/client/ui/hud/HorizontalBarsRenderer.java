@@ -28,6 +28,7 @@ public class HorizontalBarsRenderer extends BarsRenderer {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected void renderBarWithIcon(MatrixStack matrixStack, BarType barType, NonStandPowerType<?> powerType, 
             boolean highlight, int color, float iconFill, 

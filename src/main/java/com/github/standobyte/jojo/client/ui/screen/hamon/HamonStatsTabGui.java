@@ -75,6 +75,7 @@ public class HamonStatsTabGui extends HamonTabGui {
         return ImmutableList.of(meditationButton);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected void drawActualContents(MatrixStack matrixStack) {
         minecraft.getTextureManager().bind(HamonScreen.WINDOW);
@@ -142,7 +143,8 @@ public class HamonStatsTabGui extends HamonTabGui {
 
         RenderSystem.disableBlend();
     }
-    
+
+    @SuppressWarnings("deprecation")
     public static void drawExerciseBar(AbstractGui gui, MatrixStack matrixStack, int x, int y, HamonData hamon, Exercise exercise, float alpha) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
         int ticks = hamon.getExerciseTicks(exercise);

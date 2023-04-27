@@ -111,6 +111,7 @@ public class PillarmanBossMultiBlock extends Block {
         return state.setValue(FACING, rot.rotate(state.getValue(FACING)));
     }
     
+    @Deprecated
     @Override
     public BlockState mirror(BlockState state, Mirror mirror) {
         return mirror == Mirror.NONE ? state : state.rotate(mirror.getRotation(state.getValue(FACING)));

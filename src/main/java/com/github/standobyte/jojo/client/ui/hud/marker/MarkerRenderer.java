@@ -49,7 +49,8 @@ public abstract class MarkerRenderer {
             }
         }
     }
-    
+
+    @SuppressWarnings("deprecation")
     protected void renderAt(Vector3d worldPos, MatrixStack matrixStack, ActiveRenderInfo camera, float partialTick, float[] rgb, boolean outline) {
         matrixStack.pushPose();
         Vector3d diff = worldPos.subtract(camera.getPosition())

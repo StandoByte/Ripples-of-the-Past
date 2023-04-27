@@ -61,6 +61,7 @@ public class MeteoricOreBlock extends OreBlock {
         world.addParticle(ModParticles.METEORITE_VIRUS.get(), d0, d1, d2, 0.0D, 0.0D, 0.0D);
     }
 
+    @Deprecated
     @Override
     public BlockState updateShape(BlockState state, Direction facing, BlockState facingState, IWorld world, BlockPos currentPos, BlockPos facingPos) {
         world.getBlockTicks().scheduleTick(currentPos, this, 10);

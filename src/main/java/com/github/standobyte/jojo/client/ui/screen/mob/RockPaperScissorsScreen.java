@@ -111,6 +111,7 @@ public class RockPaperScissorsScreen extends ChatScreen {
         renderCheatIcon(matrixStack, windowX, windowY, mouseX, mouseY);
     }
 
+    @SuppressWarnings("deprecation")
     private void renderScreen(MatrixStack matrixStack, int windowX, int windowY) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.enableBlend();
@@ -121,6 +122,7 @@ public class RockPaperScissorsScreen extends ChatScreen {
         RenderSystem.disableBlend();
     }
 
+    @SuppressWarnings("deprecation")
     private void renderElements(MatrixStack matrixStack, int windowX, int windowY, int mouseX, int mouseY) {
         nonTieRound = game.player1.getPreviousPicks().size();
         int y = 26;

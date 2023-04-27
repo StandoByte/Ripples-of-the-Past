@@ -81,6 +81,7 @@ public abstract class HamonTabGui extends AbstractGui {
         return 28 * index;
     }
     
+    @SuppressWarnings("deprecation")
     void drawContents(MatrixStack matrixStack) {
         if (!leftUpperCorner) {
             scrollX = 0;

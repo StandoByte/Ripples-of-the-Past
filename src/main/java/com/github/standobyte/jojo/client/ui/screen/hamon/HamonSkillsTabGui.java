@@ -68,6 +68,7 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
         return false;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected void drawActualContents(MatrixStack matrixStack) {
         int yOffset = isLocked() ? -40 : 0;
