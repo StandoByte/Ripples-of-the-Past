@@ -17,6 +17,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.ByteArrayNBT;
 import net.minecraft.nbt.ByteNBT;
@@ -47,12 +48,15 @@ import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 
 public class MCUtil {
+    public static final IFormattableTextComponent EMPTY_TEXT = new StringTextComponent("");
     private static final ImmutableMap<Class<? extends INBT>, Integer> NBT_ID = new ImmutableMap.Builder<Class<? extends INBT>, Integer>()
             .put(EndNBT.class, 0)
             .put(ByteNBT.class, 1)
@@ -94,6 +98,18 @@ public class MCUtil {
     }
     
     
+    
+    public static ItemStack findInInventory(IInventory inventory, Predicate<ItemStack> itemMatches) {
+        int size = inventory.getContainerSize();
+        for (int i = 0; i < size; i++) {
+            ItemStack item = inventory.getItem(i);
+            if (itemMatches.test(item)) {
+                return item;
+            }
+        }
+
+        return ItemStack.EMPTY;
+    }
     
     public static boolean dispenseOnNearbyEntity(IBlockSource blockSource, ItemStack itemStack, Predicate<LivingEntity> action, boolean shrinkStack) {
         BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));

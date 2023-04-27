@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "jojo:cassette_recorded"
+    }
+  ],
+  "result": {
+    "item": "jojo:cassette_blank"
+  }
+}

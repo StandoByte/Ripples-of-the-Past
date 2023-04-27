@@ -4,6 +4,8 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.render.item.RoadRollerISTER;
 import com.github.standobyte.jojo.item.AjaStoneItem;
 import com.github.standobyte.jojo.item.BladeHatItem;
+import com.github.standobyte.jojo.item.CassetteBlankItem;
+import com.github.standobyte.jojo.item.CassetteRecordedItem;
 import com.github.standobyte.jojo.item.ClackersItem;
 import com.github.standobyte.jojo.item.CustomModelArmorItem;
 import com.github.standobyte.jojo.item.GumItem;
@@ -18,6 +20,7 @@ import com.github.standobyte.jojo.item.StandRemoverItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
 import com.github.standobyte.jojo.item.SuperAjaStoneItem;
 import com.github.standobyte.jojo.item.TommyGunItem;
+import com.github.standobyte.jojo.item.WalkmanItem;
 
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.BlockItem;
@@ -128,5 +131,14 @@ public class ModItems {
 
     public static final RegistryObject<Item> COCOA_GUM = ITEMS.register("cocoa_gum", 
             () -> new GumItem(new Item.Properties()/*.tab(JojoMod.MAIN_TAB)*/.food(new Food.Builder().nutrition(2).saturationMod(0.1F).build())));
+
+    public static final RegistryObject<Item> WALKMAN = ITEMS.register("walkman", 
+            () -> new WalkmanItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1)));
+
+    public static final RegistryObject<Item> CASSETTE_BLANK = ITEMS.register("cassette_blank", 
+            () -> new CassetteBlankItem(new Item.Properties().tab(JojoMod.MAIN_TAB)));
+
+    public static final RegistryObject<CassetteRecordedItem> CASSETTE_RECORDED = ITEMS.register("cassette_recorded", 
+            () -> new CassetteRecordedItem(new Item.Properties().stacksTo(1)));
 
 }

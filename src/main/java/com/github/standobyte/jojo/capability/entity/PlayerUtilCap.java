@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrWalkmanEarbudsPacket;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -32,6 +33,8 @@ public class PlayerUtilCap {
     private int noClientInputTimer;
     
     private Optional<RockPaperScissorsGame> currentGame = Optional.empty();
+
+    private boolean walkmanEarbuds = false;
     
     public PlayerUtilCap(PlayerEntity player) {
         this.player = player;
@@ -109,6 +112,7 @@ public class PlayerUtilCap {
     
     public void onTracking(ServerPlayerEntity tracking) {
         PacketManager.sendToClient(new TrKnivesCountPacket(player.getId(), knives), tracking);
+        PacketManager.sendToClient(new TrWalkmanEarbudsPacket(player.getId(), walkmanEarbuds), tracking);
     }
     
     
@@ -145,7 +149,22 @@ public class PlayerUtilCap {
     }
     
     
+    
+    public void setEarbuds(boolean earbuds) {
+        if (this.walkmanEarbuds != earbuds) {
+            this.walkmanEarbuds = earbuds;
+            if (!player.level.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(new TrWalkmanEarbudsPacket(player.getId(), walkmanEarbuds), player);
+            }
+        }
+    }
 
+    public boolean hasEarbuds() {
+        return walkmanEarbuds;
+    }
+    
+    
+    
     private Map<SoundEvent, Integer> recentlyPlayedVoiceLines = new HashMap<>();
     
     @Nullable

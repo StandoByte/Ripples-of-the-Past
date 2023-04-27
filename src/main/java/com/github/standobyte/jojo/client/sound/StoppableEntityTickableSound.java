@@ -11,6 +11,7 @@ public class StoppableEntityTickableSound<T extends Entity> extends TickableSoun
     protected final T entity;
     protected final Predicate<T> stopCondition;
 
+    // FIXME invert the predicate args (rename stopCondition to playWhile)
     public StoppableEntityTickableSound(SoundEvent sound, SoundCategory category, T entity, 
             Predicate<T> stopCondition) {
         this(sound, category, 1.0F, 1.0F, false, entity, stopCondition);

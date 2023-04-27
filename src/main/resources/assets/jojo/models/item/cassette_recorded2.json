@@ -1,0 +1,7 @@
+{
+  "parent": "jojo:item/cassette_recorded",
+  "textures": {
+    "layer0": "jojo:item/cassette_recorded2",
+    "layer1": "jojo:item/cassette_recording_dyed"
+  }
+}

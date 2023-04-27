@@ -1,9 +1,12 @@
 package com.github.standobyte.jojo.client;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.UnaryOperator;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.capability.item.cassette.CassetteCap;
+import com.github.standobyte.jojo.capability.item.cassette.CassetteCapProvider;
 import com.github.standobyte.jojo.client.particle.AirStreamParticle;
 import com.github.standobyte.jojo.client.particle.BloodParticle;
 import com.github.standobyte.jojo.client.particle.CDRestorationParticle;
@@ -71,7 +74,9 @@ import com.github.standobyte.jojo.client.ui.hud.marker.CrazyDiamondAnchorMarker;
 import com.github.standobyte.jojo.client.ui.hud.marker.CrazyDiamondBloodHomingMarker;
 import com.github.standobyte.jojo.client.ui.hud.marker.HierophantGreenBarrierDetectionMarker;
 import com.github.standobyte.jojo.client.ui.hud.marker.MarkerRenderer;
+import com.github.standobyte.jojo.client.ui.screen.walkman.WalkmanScreen;
 import com.github.standobyte.jojo.init.ModBlocks;
+import com.github.standobyte.jojo.init.ModContainers;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModParticles;
@@ -83,6 +88,7 @@ import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.particle.CloudParticle;
 import net.minecraft.client.particle.CritParticle;
 import net.minecraft.client.particle.IAnimatedSprite;
@@ -97,11 +103,13 @@ import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.CrossbowItem;
+import net.minecraft.item.DyeColor;
 import net.minecraft.item.IItemPropertyGetter;
 import net.minecraft.item.ItemModelsProperties;
 import net.minecraft.item.Items;
 import net.minecraft.particles.BasicParticleType;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.ModelBakeEvent;
@@ -211,10 +219,17 @@ public class ClientSetup {
             ItemModelsProperties.register(ModItems.STAND_DISC.get(), new ResourceLocation(JojoMod.MOD_ID, "stand_id"), (itemStack, clientWorld, livingEntity) -> {
                 return StandDiscItem.validStandDisc(itemStack, true) ? ModStandActions.STANDS.getNumericId(StandDiscItem.getStandFromStack(itemStack, true).getType().getRegistryName()) : -1;
             });
+            ItemModelsProperties.register(ModItems.CASSETTE_RECORDED.get(), new ResourceLocation(JojoMod.MOD_ID, "cassette_distortion"), (itemStack, clientWorld, livingEntity) -> {
+                return itemStack.getCapability(CassetteCapProvider.CAPABILITY)
+                        .map(cap -> MathHelper.clamp(cap.getGeneration(), 0, CassetteCap.MAX_GENERATION))
+                        .orElse(0).floatValue();
+            });
 //            ItemModelsProperties.register(ModItems.EMPEROR.get(), new ResourceLocation(JojoMod.MOD_ID, "stand_invisible"), STAND_ITEM_INVISIBLE);
 
             RenderTypeLookup.setRenderLayer(ModBlocks.STONE_MASK.get(), RenderType.cutoutMipped());
             RenderTypeLookup.setRenderLayer(ModBlocks.SLUMBERING_PILLARMAN.get(), RenderType.cutoutMipped());
+            
+            ScreenManager.register(ModContainers.WALKMAN.get(), WalkmanScreen::new);
 
             ClientEventHandler.init(mc);
             ActionsOverlayGui.init(mc);
@@ -248,8 +263,19 @@ public class ClientSetup {
     @SubscribeEvent
     public static void registerItemColoring(ColorHandlerEvent.Item event) {
         ItemColors itemColors = event.getItemColors();
-        itemColors.register((stack, layer) -> layer == 0 ? -1 : 
-            ClientUtil.discColor(StandDiscItem.getColor(stack)), ModItems.STAND_DISC.get());
+
+        itemColors.register((stack, layer) -> {
+            if (layer != 1) return -1;
+
+            return ClientUtil.discColor(StandDiscItem.getColor(stack));
+        }, ModItems.STAND_DISC.get());
+
+        itemColors.register((stack, layer) -> {
+            if (layer != 1) return -1;
+
+            Optional<DyeColor> dye = stack.getCapability(CassetteCapProvider.CAPABILITY).map(cap -> cap.getDye()).orElse(Optional.empty());
+            return dye.isPresent() ? dye.get().getColorValue() : 0xeff0e0;
+        }, ModItems.CASSETTE_RECORDED.get());
     }
     
     @SubscribeEvent

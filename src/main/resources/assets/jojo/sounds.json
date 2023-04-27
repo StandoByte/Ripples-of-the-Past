@@ -68,6 +68,9 @@
     "subtitle": "jojo.subtitle.liquid_splash",
     "sounds": [ "jojo:water_splash" ]
   },
+  "walkman_rewind": {
+    "sounds": [ "jojo:walkman_rewind" ]
+  },
   "vampire_blood_drain": {
     "subtitle": "jojo.subtitle.blood_drain",
     "sounds": [ "jojo:vampire_blood_drain" ]

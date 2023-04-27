@@ -31,6 +31,9 @@ public class SaveFileUtilCap {
     private boolean usedTimeStop = false;
     private boolean refreshNextTick = false;
     
+    private int walkmanId;
+    private int cassetteId;
+    
     public SaveFileUtilCap(ServerWorld overworld) {
         this.overworld = overworld;
     }
@@ -135,11 +138,23 @@ public class SaveFileUtilCap {
     
     
     
+    public int incWalkmanId() {
+        return ++walkmanId;
+    }
+    
+    public int incCassetteId() {
+        return ++cassetteId;
+    }
+    
+    
+    
     CompoundNBT save() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putBoolean("GameruleDayLightCycle", gameruleDayLightCycle);
         nbt.putBoolean("GameruleWeatherCycle", gameruleWeatherCycle);
         nbt.putBoolean("UsedTimeStop", usedTimeStop);
+        nbt.putInt("WalkmanId", walkmanId);
+        nbt.putInt("CassetteId", cassetteId);
         return nbt;
     }
     
@@ -148,5 +163,7 @@ public class SaveFileUtilCap {
         refreshNextTick = usedTimeStop;
         gameruleDayLightCycle = nbt.getBoolean("GameruleDayLightCycle");
         gameruleWeatherCycle = nbt.getBoolean("GameruleWeatherCycle");
+        walkmanId = nbt.getInt("WalkmanId");
+        cassetteId = nbt.getInt("CassetteId");
     }
 }

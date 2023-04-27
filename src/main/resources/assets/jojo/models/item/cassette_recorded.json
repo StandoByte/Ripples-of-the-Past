@@ -1,0 +1,33 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "jojo:item/cassette_recorded",
+    "layer1": "jojo:item/cassette_recording_dyed"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "jojo:cassette_distortion": 1
+      },
+      "model": "jojo:item/cassette_recorded1"
+    },
+    {
+      "predicate": {
+        "jojo:cassette_distortion": 2
+      },
+      "model": "jojo:item/cassette_recorded2"
+    },
+    {
+      "predicate": {
+        "jojo:cassette_distortion": 3
+      },
+      "model": "jojo:item/cassette_recorded3"
+    },
+    {
+      "predicate": {
+        "jojo:cassette_distortion": 4
+      },
+      "model": "jojo:item/cassette_recorded4"
+    }
+  ]
+}

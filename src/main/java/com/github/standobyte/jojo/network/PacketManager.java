@@ -25,6 +25,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClStandManualMoveme
 import com.github.standobyte.jojo.network.packets.fromclient.ClStopHeldActionPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandManualControlPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandSummonPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClWalkmanControlsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.BrokenChunkBlocksPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.CommonConfigPacket;
@@ -70,6 +71,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrStandTaskTargetPa
 import com.github.standobyte.jojo.network.packets.fromserver.TrTypeNonStandPowerPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrTypeStandInstancePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrVampirismDataPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrWalkmanEarbudsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCachePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.CDBlocksRestoredPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.RPSGameStatePacket;
@@ -104,7 +106,6 @@ public class PacketManager {
                 .serverAcceptedVersions(PROTOCOL_VERSION::equals)
                 .networkProtocolVersion(() -> PROTOCOL_VERSION)
                 .simpleChannel();
-        int index = 0;
         
         registerMessage(channel, new ClHasInputPacket.Handler(),                     Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClToggleStandSummonPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_SERVER));
@@ -122,6 +123,7 @@ public class PacketManager {
         registerMessage(channel, new ClOnStandDashPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClSoulRotationPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClRemovePlayerSoulEntityPacket.Handler(),       Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        registerMessage(channel, new ClWalkmanControlsPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClRPSGameInputPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClRPSPickThoughtsPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_SERVER));
         
@@ -157,6 +159,7 @@ public class PacketManager {
         registerMessage(channel, new TrStandTaskModifierPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new UpdateClientCapCachePacket.Handler(),           Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrKnivesCountPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(channel, new TrWalkmanEarbudsPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new LeapCooldownPacket.Handler(),                   Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new PlayVoiceLinePacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new PlaySoundAtClientPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_CLIENT));

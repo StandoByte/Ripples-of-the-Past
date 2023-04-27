@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "jojo:walkman"
+    ]
+  },
+  "criteria": {
+    "has_jukebox": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "minecraft:jukebox"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "jojo:walkman"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_jukebox",
+      "has_the_recipe"
+    ]
+  ]
+}

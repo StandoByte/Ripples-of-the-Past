@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "n n",
+    "sis",
+    "rjr"
+  ],
+  "key": {
+    "j": {
+      "item": "minecraft:jukebox"
+    },
+    "s": {
+      "item": "minecraft:string"
+    },
+    "n": {
+      "tag": "forge:nuggets/iron"
+    },
+    "i": {
+      "tag": "forge:ingots/iron"
+    },
+    "r": {
+      "tag": "forge:dusts/redstone"
+    }
+  },
+  "result": {
+    "item": "jojo:walkman"
+  }
+}

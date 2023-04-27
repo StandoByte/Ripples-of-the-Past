@@ -244,11 +244,8 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     @Nullable
-    public SoundEvent getOst(int level) {
-        if (ostSupplier == null) {
-            return null;
-        }
-        return ostSupplier.get(level);
+    public OstSoundList getOst() {
+        return ostSupplier;
     }
     
     public abstract void unsummon(LivingEntity user, IStandPower standPower);

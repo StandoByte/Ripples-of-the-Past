@@ -23,6 +23,7 @@ import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
+import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import com.github.standobyte.jojo.util.mod.TimeUtil;
 import com.google.common.base.MoreObjects;
@@ -310,10 +311,13 @@ public class ClientEventHandler {
             ost = null;
             IStandPower.getStandPowerOptional(mc.player).ifPresent(stand -> {
                 if (stand.hasPower()) {
-                    SoundEvent ostSound = stand.getType().getOst(level);
-                    if (ostSound != null) {
-                        ost = new StandOstSound(ostSound, mc);
-                        mc.getSoundManager().play(ost);
+                    OstSoundList ostList = stand.getType().getOst();
+                    if (ostList != null) {
+                        SoundEvent ostSound = ostList.get(level);
+                        if (ostSound != null) {
+                            ost = new StandOstSound(ostSound, mc);
+                            mc.getSoundManager().play(ost);
+                        }
                     }
                 }
             });

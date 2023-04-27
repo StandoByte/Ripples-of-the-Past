@@ -63,6 +63,26 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> WATER_SPLASH = SOUNDS.register("water_splash",
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "water_splash")));
+    
+    public static final RegistryObject<SoundEvent> WALKMAN_REWIND = SOUNDS.register("walkman_rewind",
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "walkman_rewind")));
+    
+    public static final RegistryObject<SoundEvent> CASSETTE_WHITE = SOUNDS.register("cassette_white", () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "cassette_white")));
+    public static final RegistryObject<SoundEvent> CASSETTE_ORANGE = SOUNDS.register("cassette_orange", () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "cassette_orange")));
+    public static final RegistryObject<SoundEvent> CASSETTE_MAGENTA = SOUNDS.register("cassette_magenta", () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "cassette_magenta")));
+    public static final RegistryObject<SoundEvent> CASSETTE_LIGHT_BLUE = SOUNDS.register("cassette_light_blue", () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "cassette_light_blue")));
+    public static final RegistryObject<SoundEvent> CASSETTE_YELLOW = SOUNDS.register("cassette_yellow", () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "cassette_yellow")));
+    public static final RegistryObject<SoundEvent> CASSETTE_LIME = SOUNDS.register("cassette_lime", () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "cassette_lime")));
+    public static final RegistryObject<SoundEvent> CASSETTE_PINK = SOUNDS.register("cassette_pink", () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "cassette_pink")));
+    public static final RegistryObject<SoundEvent> CASSETTE_GRAY = SOUNDS.register("cassette_gray", () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "cassette_gray")));
+    public static final RegistryObject<SoundEvent> CASSETTE_LIGHT_GRAY = SOUNDS.register("cassette_light_gray", () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "cassette_light_gray")));
+    public static final RegistryObject<SoundEvent> CASSETTE_CYAN = SOUNDS.register("cassette_cyan", () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "cassette_cyan")));
+    public static final RegistryObject<SoundEvent> CASSETTE_PURPLE = SOUNDS.register("cassette_purple", () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "cassette_purple")));
+    public static final RegistryObject<SoundEvent> CASSETTE_BLUE = SOUNDS.register("cassette_blue", () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "cassette_blue")));
+    public static final RegistryObject<SoundEvent> CASSETTE_BROWN = SOUNDS.register("cassette_brown", () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "cassette_brown")));
+    public static final RegistryObject<SoundEvent> CASSETTE_GREEN = SOUNDS.register("cassette_green", () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "cassette_green")));
+    public static final RegistryObject<SoundEvent> CASSETTE_RED = SOUNDS.register("cassette_red", () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "cassette_red")));
+    public static final RegistryObject<SoundEvent> CASSETTE_BLACK = SOUNDS.register("cassette_black", () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "cassette_black")));
 
 
     public static final RegistryObject<SoundEvent> VAMPIRE_BLOOD_DRAIN = SOUNDS.register("vampire_blood_drain",

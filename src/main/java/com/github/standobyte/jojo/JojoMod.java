@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.github.standobyte.jojo.init.ModBlocks;
+import com.github.standobyte.jojo.init.ModContainers;
 import com.github.standobyte.jojo.init.ModDataSerializers;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEnchantments;
@@ -63,6 +64,7 @@ public class JojoMod {
         ModStandEffects.STAND_EFFECTS.initRegister(modEventBus);
         
         ModEntityAttributes.ATTRIBUTES.register(modEventBus);
+        ModContainers.CONTAINERS.register(modEventBus);
         ModDataSerializers.DATA_SERIALIZERS.register(modEventBus);
         ModEffects.EFFECTS.register(modEventBus);
         ModEnchantments.ENCHANTMENTS.register(modEventBus);
