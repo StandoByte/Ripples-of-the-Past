@@ -16,7 +16,7 @@ import com.github.standobyte.jojo.client.render.entity.pose.RotationAngle;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose.ModelAnim;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.IActionAnimation;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.PosedActionAnimation;
-import com.github.standobyte.jojo.client.render.entity.pose.anim.barrage.OneHandedBarrageAnimation;
+import com.github.standobyte.jojo.client.render.entity.pose.anim.barrage.StandOneHandedBarrageAnimation;
 import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.util.general.MathUtil;
@@ -301,7 +301,7 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
             return halfSwing * halfSwing * halfSwing;
         });
         
-        rapierAnim.putIfAbsent(StandPose.BARRAGE, new OneHandedBarrageAnimation<SilverChariotEntity>(this, 
+        rapierAnim.putIfAbsent(StandPose.BARRAGE, new StandOneHandedBarrageAnimation<SilverChariotEntity>(this, 
                 stabLoop, 
                 idlePose, 
                 Hand.MAIN_HAND));

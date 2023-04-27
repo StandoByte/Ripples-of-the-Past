@@ -4,27 +4,27 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
-import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.entity.model.EntityModel;
+import net.minecraft.entity.Entity;
 
-public class BarrageSwingsHolder<T extends StandEntity> {
-    private List<AdditionalBarrageSwing<T>> barrageSwings = new LinkedList<>();
+public class BarrageSwingsHolder<T extends Entity, M extends EntityModel<T>> {
+    private List<AdditionalBarrageSwing<T, M>> barrageSwings = new LinkedList<>();
     private float loopLast = -1;
 
-    public void addSwing(AdditionalBarrageSwing<T> swing) {
+    public void addSwing(AdditionalBarrageSwing<T, M> swing) {
         barrageSwings.add(swing);
     }
     
     public void updateSwings(Minecraft mc) {
-        if (!mc.isPaused() && !barrageSwings.isEmpty()) {
+        if (!mc.isPaused() && hasSwings()) {
             float timeDelta = mc.getDeltaFrameTime();
-            Iterator<AdditionalBarrageSwing<T>> iter = barrageSwings.iterator();
+            Iterator<AdditionalBarrageSwing<T, M>> iter = barrageSwings.iterator();
             while (iter.hasNext()) {
-                AdditionalBarrageSwing<T> swing = iter.next();
+                AdditionalBarrageSwing<T, M> swing = iter.next();
                 swing.addDelta(timeDelta);
                 if (swing.removeSwing()) {
                     iter.remove();
@@ -32,13 +32,15 @@ public class BarrageSwingsHolder<T extends StandEntity> {
             }
         }
     }
+    
+    public boolean hasSwings() {
+        return !barrageSwings.isEmpty();
+    }
 
-    public void renderBarrageSwings(StandEntityModel<T> model, T entity, MatrixStack matrixStack, IVertexBuilder buffer, 
+    public void renderBarrageSwings(M model, T entity, MatrixStack matrixStack, IVertexBuilder buffer, 
             int packedLight, int packedOverlay, float yRotation, float xRotation, float red, float green, float blue, float alpha) {
-        if (!barrageSwings.isEmpty()) {
-            for (AdditionalBarrageSwing<T> swing : barrageSwings) {
-                swing.poseAndRender(entity, model, matrixStack, buffer, yRotation, xRotation, packedLight, packedOverlay, red, green, blue, alpha);
-            }
+        for (AdditionalBarrageSwing<T, M> swing : barrageSwings) {
+            swing.poseAndRender(entity, model, matrixStack, buffer, yRotation, xRotation, packedLight, packedOverlay, red, green, blue, alpha);
         }
     }
     
@@ -48,5 +50,9 @@ public class BarrageSwingsHolder<T extends StandEntity> {
     
     public float getLoopCount() {
         return loopLast;
+    }
+    
+    public void resetSwingTime() {
+        loopLast = -1;
     }
 }

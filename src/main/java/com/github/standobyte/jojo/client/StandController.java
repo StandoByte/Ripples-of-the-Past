@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-import com.github.standobyte.jojo.client.render.entity.renderer.stand.AbstractStandRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.stand.StandEntityRenderer;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEffects;
@@ -148,7 +148,7 @@ public class StandController {
         IRenderTypeBuffer buffer = event.getBuffers();
         float partialTick = event.getPartialTicks();
         int light = mc.getEntityRenderDispatcher().getPackedLightCoords(stand, partialTick);
-        AbstractStandRenderer renderer = (AbstractStandRenderer<?, ?>)mc.getEntityRenderDispatcher().<StandEntity>getRenderer(stand);
+        StandEntityRenderer renderer = (StandEntityRenderer<?, ?>)mc.getEntityRenderDispatcher().<StandEntity>getRenderer(stand);
         renderer.renderFirstPersonArms(matrixStack, buffer, light, stand, partialTick);
         event.setCanceled(true);
     }

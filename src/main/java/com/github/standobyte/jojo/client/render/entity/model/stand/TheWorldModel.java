@@ -141,8 +141,8 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
 
         torso.texOffs(20, 64).addBox(-3.5F, 1.1F, -2.0F, 7.0F, 3.0F, 1.0F, 0.4F, false);
         torso.texOffs(24, 73).addBox(-2.5F, 4.0F, -2.3F, 5.0F, 6.0F, 1.0F, 0.0F, false);
-        torso.texOffs(49, 65).addBox(2.0F, 0.0F, -2.5F, 1.0F, 10.0F, 5.0F, 0.25F, true);
-        torso.texOffs(36, 65).addBox(-3.0F, 0.0F, -2.5F, 1.0F, 10.0F, 5.0F, 0.25F, false);
+        torso.texOffs(49, 65).addBox(2.7F, 0.0F, -2.5F, 1.0F, 10.0F, 5.0F, 0.25F, true);
+        torso.texOffs(36, 65).addBox(-3.7F, 0.0F, -2.5F, 1.0F, 10.0F, 5.0F, 0.25F, false);
         torso.texOffs(9, 80).addBox(0.5F, 1.0F, 2.0F, 2.0F, 6.0F, 2.0F, 0.0F, true);
         torso.texOffs(0, 80).addBox(-2.5F, 1.0F, 2.0F, 2.0F, 6.0F, 2.0F, 0.0F, false);
 

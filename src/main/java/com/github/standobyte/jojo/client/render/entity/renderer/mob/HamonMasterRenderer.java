@@ -9,7 +9,7 @@ import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.util.ResourceLocation;
 
 public class HamonMasterRenderer extends BipedRenderer<HamonMasterEntity, HamonMasterModel> {
-    private static final ResourceLocation TEXTURE = new ResourceLocation(JojoMod.MOD_ID, "textures/entity/hamon_master.png");
+    private static final ResourceLocation TEXTURE = new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/hamon_master.png");
 
     public HamonMasterRenderer(EntityRendererManager renderManager) {
         super(renderManager, new HamonMasterModel(), 0.5F);
@@ -19,5 +19,4 @@ public class HamonMasterRenderer extends BipedRenderer<HamonMasterEntity, HamonM
     public ResourceLocation getTextureLocation(HamonMasterEntity entity) {
         return TEXTURE;
     }
-
 }

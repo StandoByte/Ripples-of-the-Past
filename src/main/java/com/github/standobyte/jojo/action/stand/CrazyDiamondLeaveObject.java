@@ -51,6 +51,7 @@ import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.structure.Structure;
@@ -146,7 +147,7 @@ public class CrazyDiamondLeaveObject extends StandEntityActionModifier {
     }
     
     @Override
-    public TranslationTextComponent getTranslatedName(IStandPower power, String key) {
+    public IFormattableTextComponent getTranslatedName(IStandPower power, String key) {
         if (power.getStandManifestation() instanceof StandEntity) {
             ItemStack item = ((StandEntity) power.getStandManifestation()).getMainHandItem();
             if (!item.isEmpty()) {

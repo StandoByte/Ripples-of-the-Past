@@ -7,16 +7,9 @@ import com.github.standobyte.jojo.entity.stand.stands.TheWorldEntity;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.util.ResourceLocation;
 
-public class TheWorldRenderer extends AbstractStandRenderer<TheWorldEntity, TheWorldModel> {
+public class TheWorldRenderer extends StandEntityRenderer<TheWorldEntity, TheWorldModel> {
     
-    private static final ResourceLocation TEXTURE = new ResourceLocation(JojoMod.MOD_ID, "textures/entity/stand/the_world.png");
-
     public TheWorldRenderer(EntityRendererManager renderManager) {
-        super(renderManager, new TheWorldModel(), 0);
-    }
-
-    @Override
-    public ResourceLocation getTextureLocation(TheWorldEntity entity) {
-        return TEXTURE;
+        super(renderManager, new TheWorldModel(), new ResourceLocation(JojoMod.MOD_ID, "textures/entity/stand/the_world.png"), 0);
     }
 }

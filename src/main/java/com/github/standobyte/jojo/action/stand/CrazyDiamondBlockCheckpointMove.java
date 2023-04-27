@@ -19,6 +19,7 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
@@ -102,8 +103,10 @@ public class CrazyDiamondBlockCheckpointMove extends StandEntityAction {
     }
 
     
-    public TranslationTextComponent getTranslatedName(IStandPower power, String key) {
+    @Override
+    public IFormattableTextComponent getTranslatedName(IStandPower power, String key) {
         return CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(power.getUser().level, power.getUser().getOffhandItem()).map(pos -> 
-        new TranslationTextComponent(key, pos.getX(), pos.getY(), pos.getZ())).orElse(super.getTranslatedName(power, key));
+        (IFormattableTextComponent) new TranslationTextComponent(key, pos.getX(), pos.getY(), pos.getZ()))
+                .orElse(super.getTranslatedName(power, key));
     }
 }

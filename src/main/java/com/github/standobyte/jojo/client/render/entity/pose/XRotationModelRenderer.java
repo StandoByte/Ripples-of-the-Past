@@ -1,10 +1,10 @@
 package com.github.standobyte.jojo.client.render.entity.pose;
 
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.util.math.vector.Vector3f;
 
 public class XRotationModelRenderer extends ModelRenderer {
     public float xRotSecond = 0;
@@ -23,22 +23,10 @@ public class XRotationModelRenderer extends ModelRenderer {
 
     @Override
     public void translateAndRotate(MatrixStack matrixStack) {
-        matrixStack.translate(x / 16.0, y / 16.0, z / 16.0);
         if (xRotSecond != 0.0F) {
-            matrixStack.mulPose(Vector3f.XP.rotation(xRotSecond));
+            ClientUtil.rotateAngles(this, xRotSecond);
+            xRotSecond = 0;
         }
-        
-        if (zRot != 0.0F) {
-            matrixStack.mulPose(Vector3f.ZP.rotation(zRot));
-        }
-
-        if (yRot != 0.0F) {
-            matrixStack.mulPose(Vector3f.YP.rotation(yRot));
-        }
-
-        if (xRot != 0.0F) {
-            matrixStack.mulPose(Vector3f.XP.rotation(xRot));
-        }
-
+        super.translateAndRotate(matrixStack);
     }
 }

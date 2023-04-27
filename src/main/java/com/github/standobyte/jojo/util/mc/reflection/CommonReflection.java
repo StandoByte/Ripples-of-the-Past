@@ -159,6 +159,17 @@ public class CommonReflection {
     
     
     
+    private static final Field LIVING_ENTITY_ATTACK_STRENGTH_TICKER = ObfuscationReflectionHelper.findField(LivingEntity.class, "field_184617_aD");
+    public static int getAttackStrengthTicker(LivingEntity entity) {
+        return ReflectionUtil.getFieldValue(LIVING_ENTITY_ATTACK_STRENGTH_TICKER, entity);
+    }
+    
+    public static void setAttackStrengthTicker(LivingEntity entity, int attackStrengthTicker) {
+        ReflectionUtil.setFieldValue(LIVING_ENTITY_ATTACK_STRENGTH_TICKER, entity, attackStrengthTicker);
+    }
+    
+    
+    
     private static final Field PLAYER_ENTITY_SLEEP_COUNTER = ObfuscationReflectionHelper.findField(PlayerEntity.class, "field_71076_b");
     public static void setSleepCounter(PlayerEntity entity, int sleepCounter) {
         ReflectionUtil.setFieldValue(PLAYER_ENTITY_SLEEP_COUNTER, entity, sleepCounter);

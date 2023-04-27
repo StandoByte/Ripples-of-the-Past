@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.potion.UndeadRegenerationEffect;
 import com.github.standobyte.jojo.power.nonstand.type.vampirism.VampirismPowerType;
 import com.google.common.collect.ImmutableSet;
 
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectType;
 import net.minecraft.potion.Effects;
@@ -85,5 +86,11 @@ public class ModEffects {
     
     public static boolean isEffectTracked(Effect effect) {
         return TRACKED_EFFECTS.contains(effect);
+    }
+    
+    
+    
+    public static boolean isStunned(LivingEntity entity) {
+        return entity.hasEffect(STUN.get());
     }
 }

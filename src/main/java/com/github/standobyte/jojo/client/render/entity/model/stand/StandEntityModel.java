@@ -19,6 +19,7 @@ import com.github.standobyte.jojo.client.render.entity.pose.RotationAngle;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose.ModelAnim;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.IActionAnimation;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.barrage.BarrageSwingsHolder;
+import com.github.standobyte.jojo.client.render.entity.pose.anim.barrage.IBarrageAnimation;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -29,7 +30,6 @@ import com.google.common.collect.HashBiMap;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.model.AgeableModel;
 import net.minecraft.client.renderer.entity.model.IHasArm;
@@ -43,7 +43,6 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     protected float yRotation;
     protected float xRotation;
     protected float ticks;
-    public boolean layerRenderer;
 
     public float idleLoopTickStamp = 0;
     private ModelPose<T> poseReset;
@@ -124,7 +123,6 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         this.yRotation = yRotationOffset;
         this.xRotation = xRotation;
         this.ticks = ticks;
-        if (!layerRenderer) entity.getBarrageSwingsHolder().updateSwings(Minecraft.getInstance());
     }
 
     protected void poseStand(T entity, float ticks, float yRotationOffset, float xRotation, 
@@ -133,10 +131,14 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
             idlePose.poseModel(1.0F, entity, ticks, yRotationOffset, xRotation, swingingHand);
             onPose(entity, ticks);
             
+            IActionAnimation<T> prevAnim = currentActionAnim;
             currentActionAnim = getActionAnim(entity, standPose);
             if (currentActionAnim != null) {
+                if (prevAnim != currentActionAnim) {
+                    currentActionAnim.onAnimStart(entity, yRotationOffset, xRotation);
+                }
                 currentActionAnim.animate(actionPhase.get(), phaseCompletion, 
-                        entity, ticks, yRotationOffset, xRotation, swingingHand, layerRenderer);
+                        entity, ticks, yRotationOffset, xRotation, swingingHand);
             }
         }
         else if (standPose == StandPose.SUMMON && summonPoses.size() > 0) {
@@ -237,22 +239,29 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     public abstract ModelRenderer getArm(HandSide side);
 
 
+
     
+    public void addBarrageSwings(T entity) {
+        if (entity.getStandPose() == StandPose.BARRAGE && entity.getCurrentTaskPhase().map(phase -> phase == Phase.PERFORM).orElse(false)
+                && currentActionAnim instanceof IBarrageAnimation) {
+            ((IBarrageAnimation<T, StandEntityModel<T>>) currentActionAnim).addSwings(entity, entity.getPunchingHand(), ticks);
+        }
+    }
     
     public void render(T entity, MatrixStack matrixStack, IVertexBuilder buffer, 
             int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
-        renderToBuffer(matrixStack, buffer, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
+        renderToBuffer(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
 //        if (currentActionAnim != null) {
 //            currentActionAnim.renderAdditional(entity, matrixStack, buffer, 
 //                    packedLight, packedOverlay, red, green, blue, alpha);
 //        }
-        renderBarrageSwings(entity, matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+        renderBarrageSwings(entity, this, matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
     }
-
-    protected void renderBarrageSwings(T entity, MatrixStack matrixStack, IVertexBuilder buffer, int packedLight,
+    
+    protected <M extends StandEntityModel<T>> void renderBarrageSwings(T entity, M thisModel, MatrixStack matrixStack, IVertexBuilder buffer, int packedLight,
             int packedOverlay, float red, float green, float blue, float alpha) {
-        BarrageSwingsHolder<T> barrageSwings = (BarrageSwingsHolder<T>) entity.getBarrageSwingsHolder();
-        barrageSwings.renderBarrageSwings(this, entity, matrixStack, buffer, 
+        BarrageSwingsHolder<T, M> barrageSwings = (BarrageSwingsHolder<T, M>) entity.getBarrageSwingsHolder();
+        barrageSwings.renderBarrageSwings(thisModel, entity, matrixStack, buffer, 
                 packedLight, packedOverlay, yRotation, xRotation, red, green, blue, alpha);
     }
 

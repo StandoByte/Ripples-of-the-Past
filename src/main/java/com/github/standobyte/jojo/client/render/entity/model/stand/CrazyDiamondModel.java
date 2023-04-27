@@ -378,8 +378,8 @@ public class CrazyDiamondModel extends HumanoidStandModel<CrazyDiamondEntity> {
         leftLowerLeg.texOffs(118, 117).addBox(1.3F, 0.05F, -1.0F, 1.0F, 3.0F, 2.0F, 0.0F, false);
         leftLowerLeg.texOffs(112, 118).addBox(-2.3F, 0.05F, -1.0F, 1.0F, 3.0F, 2.0F, 0.0F, false);
         leftLowerLeg.texOffs(112, 123).addBox(-2.0F, 3.0F, -2.0F, 4.0F, 1.0F, 4.0F, 0.249F, false);
-        leftLowerLeg.texOffs(92, 125).addBox(-2.8F, 3.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
-        leftLowerLeg.texOffs(124, 125).addBox(2.2F, 3.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
+        leftLowerLeg.texOffs(92, 125).addBox(-2.9F, 3.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
+        leftLowerLeg.texOffs(124, 125).addBox(1.9F, 3.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
 
         rightLeg.texOffs(80, 112).addBox(-2.3F, 0.95F, -1.0F, 1.0F, 3.0F, 2.0F, 0.0F, false);
         rightLeg.texOffs(86, 112).addBox(1.3F, 0.75F, -1.0F, 1.0F, 4.0F, 2.0F, 0.0F, false);
@@ -408,10 +408,10 @@ public class CrazyDiamondModel extends HumanoidStandModel<CrazyDiamondEntity> {
         heartCube4.texOffs(92, 114).addBox(0.0F, -0.95F, -0.5F, 1.0F, 1.0F, 1.0F, -0.05F, false);
 
         rightLowerLeg.texOffs(80, 123).addBox(-2.0F, 3.0F, -2.0F, 4.0F, 1.0F, 4.0F, 0.249F, false);
-        rightLowerLeg.texOffs(80, 125).addBox(-3.0F, 3.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
-        rightLowerLeg.texOffs(112, 125).addBox(2.0F, 3.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
         rightLowerLeg.texOffs(80, 117).addBox(-2.3F, 0.05F, -1.0F, 1.0F, 3.0F, 2.0F, 0.0F, false);
         rightLowerLeg.texOffs(86, 118).addBox(1.3F, 0.05F, -1.0F, 1.0F, 3.0F, 2.0F, 0.0F, false);
+        rightLowerLeg.texOffs(80, 125).addBox(-2.9F, 3.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
+        rightLowerLeg.texOffs(112, 125).addBox(1.9F, 3.0F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
     }
 
     @Override

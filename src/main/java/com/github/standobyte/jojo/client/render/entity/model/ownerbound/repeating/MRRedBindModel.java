@@ -17,7 +17,7 @@ public class MRRedBindModel extends RepeatingModel<MRRedBindEntity> {
         texWidth = 32;
         texHeight = 32;
 
-        flameRope = new FlameModelRenderer(this).setFireSprites(MagiciansRedRenderer.FIRE_0, MagiciansRedRenderer.FIRE_1);
+        flameRope = new FlameModelRenderer(this).setFireSprites(MagiciansRedRenderer.FIRE_0_SPRITE, MagiciansRedRenderer.FIRE_1_SPRITE);
         flameRope.setPos(0.0F, 0.0F, 0.0F);
         flameRope.addFlame(0, 1.0F, 0, 2F, 3F, Direction.NORTH);
     }

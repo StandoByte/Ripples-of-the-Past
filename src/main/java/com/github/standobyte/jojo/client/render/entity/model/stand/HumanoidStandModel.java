@@ -17,7 +17,7 @@ import com.github.standobyte.jojo.client.render.entity.pose.RotationAngle;
 import com.github.standobyte.jojo.client.render.entity.pose.XRotationModelRenderer;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose.ModelAnim;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.PosedActionAnimation;
-import com.github.standobyte.jojo.client.render.entity.pose.anim.barrage.TwoHandedBarrageAnimation;
+import com.github.standobyte.jojo.client.render.entity.pose.anim.barrage.StandTwoHandedBarrageAnimation;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
@@ -35,7 +35,7 @@ import net.minecraft.util.math.MathHelper;
 // Made with Blockbench 3.9.2
 
 
-public abstract class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<T> {
+public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<T> {
     protected ModelRenderer head;
     protected ModelRenderer body;
     protected ModelRenderer upperPart;
@@ -60,6 +60,12 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
     
     public HumanoidStandModel(int textureWidth, int textureHeight) {
         this(RenderType::entityTranslucent, textureWidth, textureHeight);
+    }
+    
+    public static <T extends StandEntity> HumanoidStandModel<T> createBasic() {
+        HumanoidStandModel<T> model = new HumanoidStandModel<>();
+        model.addHumanoidBaseBoxes(null);
+        return model;
     }
     
     public HumanoidStandModel(Function<ResourceLocation, RenderType> renderType, int textureWidth, int textureHeight) {
@@ -259,18 +265,21 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
         };
         
         ModelAnim<T> armsRotation = (rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
-            leftArm.xRotSecond = xRotation * MathUtil.DEG_TO_RAD * rotationAmount;
-            rightArm.xRotSecond = xRotation * MathUtil.DEG_TO_RAD * rotationAmount;
+            float xRot = xRotation * MathUtil.DEG_TO_RAD * rotationAmount;
+            leftArm.xRotSecond = xRot;
+            rightArm.xRotSecond = xRot;
         };
         
         ModelAnim<T> armsRotationFull = (rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
-            leftArm.xRotSecond = xRotation * MathUtil.DEG_TO_RAD;
-            rightArm.xRotSecond = xRotation * MathUtil.DEG_TO_RAD;
+            float xRot = xRotation * MathUtil.DEG_TO_RAD;
+            leftArm.xRotSecond = xRot;
+            rightArm.xRotSecond = xRot;
         };
         
         ModelAnim<T> armsRotationBack = (rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
-            leftArm.xRotSecond = xRotation * MathUtil.DEG_TO_RAD * (1 - rotationAmount);
-            rightArm.xRotSecond = xRotation * MathUtil.DEG_TO_RAD * (1 - rotationAmount);
+            float xRot = xRotation * MathUtil.DEG_TO_RAD * (1 - rotationAmount);
+            leftArm.xRotSecond = xRot;
+            rightArm.xRotSecond = xRot;
         };
         
         IModelPose<T> jabStart = new ModelPoseSided<>(
@@ -411,7 +420,7 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
                 RotationAngle.fromDegrees(rightForeArm, -75, -7.5F, -22.5F)
         });
         
-        actionAnim.putIfAbsent(StandPose.BARRAGE, new TwoHandedBarrageAnimation<T>(this, 
+        actionAnim.putIfAbsent(StandPose.BARRAGE, new StandTwoHandedBarrageAnimation<T>(this, 
                 new ModelPoseTransition<T>(barrageHitStart, barrageHitImpact).setEasing(HumanoidStandModel::barrageHitEasing), 
                 new ModelPoseTransitionMultiple.Builder<T>(new ModelPose<T>(
                         RotationAngle.fromDegrees(body, 0, 0, 0),
@@ -490,6 +499,7 @@ public abstract class HumanoidStandModel<T extends StandEntity> extends StandEnt
                 new RotationAngle[] {
                         new RotationAngle(body, 0, 0, 0),
                         new RotationAngle(upperPart, 0, 0, 0),
+                        new RotationAngle(torso, 0, 0, 0),
                         new RotationAngle(rightArm, 0, 0, 0),
                         new RotationAngle(rightForeArm, 0, 0, 0),
                         new RotationAngle(leftArm, 0, 0, 0),

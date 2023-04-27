@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.client.render.entity.renderer.stand;
 import com.github.standobyte.jojo.client.ClientEventHandler;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel.VisibilityMode;
+import com.github.standobyte.jojo.client.render.entity.renderer.stand.layer.StandGlowLayer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.layer.StandModelLayerRenderer;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandPose;
@@ -32,12 +33,20 @@ import net.minecraftforge.client.event.RenderNameplateEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
 
-public abstract class AbstractStandRenderer<T extends StandEntity, M extends StandEntityModel<T>> extends LivingRenderer<T, M> {
+public class StandEntityRenderer<T extends StandEntity, M extends StandEntityModel<T>> extends LivingRenderer<T, M> {
+    private final ResourceLocation texture;
 
-    public AbstractStandRenderer(EntityRendererManager rendererManager, M entityModel, float shadowRadius) {
+    public StandEntityRenderer(EntityRendererManager rendererManager, M entityModel, ResourceLocation texture, float shadowRadius) {
         super(rendererManager, entityModel, shadowRadius);
+        this.texture = texture;
         entityModel.afterInit();
         addLayer(new HeldItemLayer<>(this));
+        addLayer(new StandGlowLayer<>(this, texture));
+    }
+
+    @Override
+    public ResourceLocation getTextureLocation(T entity) {
+        return texture;
     }
 
     @Override
@@ -103,9 +112,9 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
     @Override
     protected void scale(T entity, MatrixStack matrixStack, float partialTick) {
         matrixStack.scale(
-                PLAYER_RENDER_SCALE * entity.getBbWidth() / 0.6F, 
-                PLAYER_RENDER_SCALE * entity.getBbHeight() / 1.8F, 
-                PLAYER_RENDER_SCALE * entity.getBbWidth() / 0.6F);
+                PLAYER_RENDER_SCALE * entity.getType().getDimensions().width / 0.6F, 
+                PLAYER_RENDER_SCALE * entity.getType().getDimensions().height / 1.8F, 
+                PLAYER_RENDER_SCALE * entity.getType().getDimensions().width / 0.6F);
     }
 
     private static final float OVERLAY_TICKS = 10.0F;
@@ -119,7 +128,6 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
     public void render(T entity, float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
         if (MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Pre<T, M>(entity, this, partialTick, matrixStack, buffer, packedLight))) return;
         matrixStack.pushPose();
-        model.layerRenderer = false;
         model.attackTime = this.getAttackAnim(entity, partialTick);
         boolean shouldSit = entity.isPassenger() && (entity.getVehicle() != null && entity.getVehicle().shouldRiderSit());
         model.riding = shouldSit;
@@ -175,6 +183,8 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
         
         model.prepareMobModel(entity, walkAnimPos, walkAnimSpeed, partialTick);
         model.setupAnim(entity, walkAnimPos, walkAnimSpeed, ticks, f2, xRotation);
+        entity.getBarrageSwingsHolder().updateSwings(Minecraft.getInstance());
+        model.addBarrageSwings(entity);
         RenderType renderType = getRenderType(entity, getTextureLocation(entity));
         if (renderType != null) {
             IVertexBuilder vertexBuilder = buffer.getBuffer(renderType);
@@ -207,7 +217,6 @@ public abstract class AbstractStandRenderer<T extends StandEntity, M extends Sta
         getModel().copyPropertiesTo(model);
         model.setVisibility(entity, visibilityMode(entity), obstructsView(entity, partialTick));
         model.prepareMobModel(entity, walkAnimSpeed, walkAnimPos, partialTick);
-        model.layerRenderer = true;
         model.setupAnim(entity, walkAnimSpeed, walkAnimPos, ticks, yRotationOffset, xRotation);
         int packedOverlay = getOverlayCoords(entity, getWhiteOverlayProgress(entity, partialTick));
         float alpha = getAlpha(entity, partialTick);

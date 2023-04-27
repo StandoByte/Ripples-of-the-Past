@@ -2,17 +2,32 @@ package com.github.standobyte.jojo.util.mc.reflection;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 
+import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.ISoundEventAccessor;
+import net.minecraft.client.audio.Sound;
+import net.minecraft.client.audio.SoundEventAccessor;
+import net.minecraft.client.gui.screen.IngameMenuScreen;
 import net.minecraft.client.gui.screen.MainMenuScreen;
+import net.minecraft.client.particle.IAnimatedSprite;
+import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.FirstPersonRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.model.ModelBakery;
+import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.client.renderer.model.RenderMaterial;
+import net.minecraft.client.renderer.texture.ITickable;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.HandSide;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Timer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
@@ -33,6 +48,15 @@ public class ClientReflection {
                 MAIN_MENU_SCREEN_SPLASH = ObfuscationReflectionHelper.findField(MainMenuScreen.class, "field_73975_c");
                 RENDER_TYPE_BUFFER_IMPL_BUILDER = ObfuscationReflectionHelper.findField(IRenderTypeBuffer.Impl.class, "field_228457_a_");
                 RENDER_TYPE_BUFFER_IMPL_FIXED_BUFFERS = ObfuscationReflectionHelper.findField(IRenderTypeBuffer.Impl.class, "field_228458_b_");
+                MODEL_RENDERER_CUBES = ObfuscationReflectionHelper.findField(ModelRenderer.class, "field_78804_l");
+                MODEL_BOX_POLYGONS = ObfuscationReflectionHelper.findField(ModelRenderer.ModelBox.class, "field_78254_i");
+                SOUND_EVENT_ACCESSOR_LIST = ObfuscationReflectionHelper.findField(SoundEventAccessor.class, "field_188716_a");
+                INGAME_MENU_SCREEN_SHOW_PAUSE_MENU = ObfuscationReflectionHelper.findField(IngameMenuScreen.class, "field_222813_a");
+                PARTICLE_MANAGER_SPRITE_SETS = ObfuscationReflectionHelper.findField(ParticleManager.class, "field_215242_i");
+                MODEL_BAKERY_UNREFERENCED_TEXTURES = ObfuscationReflectionHelper.findField(ModelBakery.class, "field_177602_b");
+                TEXTURE_MANAGER_TICKABLE_TEXTURES = ObfuscationReflectionHelper.findField(TextureManager.class, "field_110583_b");
+                MINECRAFT_PARTICLE_ENGINE = ObfuscationReflectionHelper.findField(Minecraft.class, "field_71452_i");
+                PARTICLE_MANAGER_TEXTURE_MANAGER = ObfuscationReflectionHelper.findField(ParticleManager.class, "field_78877_c");
             }
         });
     }
@@ -80,5 +104,68 @@ public class ClientReflection {
     private static Field RENDER_TYPE_BUFFER_IMPL_FIXED_BUFFERS;
     public static Map<RenderType, BufferBuilder> getFixedBuffers(IRenderTypeBuffer.Impl buffers) {
         return ReflectionUtil.getFieldValue(RENDER_TYPE_BUFFER_IMPL_FIXED_BUFFERS, buffers);
+    }
+
+    
+    private static Field MODEL_RENDERER_CUBES;
+    public static void setCubes(ModelRenderer modelRenderer, ObjectList<ModelRenderer.ModelBox> cubes) {
+        ReflectionUtil.setFieldValue(MODEL_RENDERER_CUBES, modelRenderer, cubes);
+    }
+
+    
+    private static Field MODEL_BOX_POLYGONS;
+    @Deprecated
+    public static ModelRenderer.TexturedQuad[] getPolygons(ModelRenderer.ModelBox modelBox) {
+        return ReflectionUtil.getFieldValue(MODEL_BOX_POLYGONS, modelBox);
+    }
+
+    @Deprecated
+    public static void setPolygons(ModelRenderer.ModelBox modelBox, ModelRenderer.TexturedQuad[] polygons) {
+        ReflectionUtil.setFieldValue(MODEL_BOX_POLYGONS, modelBox, polygons);
+    }
+    
+    
+    private static Field SOUND_EVENT_ACCESSOR_LIST;
+    public static List<ISoundEventAccessor<Sound>> getSubAccessorsList(SoundEventAccessor accessor) {
+        return ReflectionUtil.getFieldValue(SOUND_EVENT_ACCESSOR_LIST, accessor);
+    }
+    
+    
+    private static Field INGAME_MENU_SCREEN_SHOW_PAUSE_MENU;
+    public static boolean showsPauseMenu(IngameMenuScreen screen) {
+        return ReflectionUtil.getFieldValue(INGAME_MENU_SCREEN_SHOW_PAUSE_MENU, screen);
+    }
+    
+    
+    private static Field PARTICLE_MANAGER_SPRITE_SETS;
+    public static Map<ResourceLocation, ? extends IAnimatedSprite> getSpriteSets(ParticleManager particleManager) {
+        return ReflectionUtil.getFieldValue(PARTICLE_MANAGER_SPRITE_SETS, particleManager);
+    }
+    
+    
+    private static Field MODEL_BAKERY_UNREFERENCED_TEXTURES;
+    public static Set<RenderMaterial> getModelBakeryUnreferencedTextures() {
+        return ReflectionUtil.getFieldValue(MODEL_BAKERY_UNREFERENCED_TEXTURES, null);
+    }
+
+    
+    private static Field TEXTURE_MANAGER_TICKABLE_TEXTURES;
+    public static Set<ITickable> getTickableTextures(TextureManager textureManager) {
+        return ReflectionUtil.getFieldValue(TEXTURE_MANAGER_TICKABLE_TEXTURES, textureManager);
+    }
+    
+    public static void setTickableTextures(TextureManager textureManager, Set<ITickable> textures) {
+        ReflectionUtil.setFieldValue(TEXTURE_MANAGER_TICKABLE_TEXTURES, textureManager, textures);
+    }
+    
+    
+    private static Field MINECRAFT_PARTICLE_ENGINE;
+    public static void setParticleEngine(Minecraft mc, ParticleManager particleEngine) {
+        ReflectionUtil.setFieldValue(MINECRAFT_PARTICLE_ENGINE, mc, particleEngine);
+    }
+    
+    private static Field PARTICLE_MANAGER_TEXTURE_MANAGER;
+    public static void setTextureManager(ParticleManager particleManager, TextureManager textureManager) {
+        ReflectionUtil.setFieldValue(PARTICLE_MANAGER_TEXTURE_MANAGER, particleManager, textureManager);
     }
 }

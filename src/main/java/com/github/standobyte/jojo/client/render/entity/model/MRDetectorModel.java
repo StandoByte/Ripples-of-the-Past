@@ -100,8 +100,8 @@ public class MRDetectorModel extends EntityModel<MRDetectorEntity> {
     }
     
     private void renderFlame(MatrixStack matrixStack, IRenderTypeBuffer buffer, Vector3d offset, float strength, ActiveRenderInfo camera) {
-        TextureAtlasSprite spriteFire0 = MagiciansRedRenderer.FIRE_0.get();
-        TextureAtlasSprite spriteFire1 = MagiciansRedRenderer.FIRE_1.get();
+        TextureAtlasSprite spriteFire0 = MagiciansRedRenderer.FIRE_0_SPRITE.get();
+        TextureAtlasSprite spriteFire1 = MagiciansRedRenderer.FIRE_1_SPRITE.get();
         matrixStack.pushPose();
         matrixStack.translate(offset.x, offset.y, offset.z);
         float scale = strength * 0.2F;

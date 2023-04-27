@@ -1,16 +1,17 @@
 package com.github.standobyte.jojo.client.render.entity.pose.anim.barrage;
 
-import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
-import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
-public abstract class AdditionalBarrageSwing<T extends StandEntity> {
-    protected final IBarrageAnimation<T> barrageAnim;
+import net.minecraft.client.renderer.entity.model.EntityModel;
+import net.minecraft.entity.Entity;
+
+public abstract class AdditionalBarrageSwing<T extends Entity, M extends EntityModel<T>> {
+    protected final IBarrageAnimation<T, M> barrageAnim;
     protected float ticks;
     protected final float ticksMax;
     
-    public AdditionalBarrageSwing(IBarrageAnimation<T> barrageAnim, float startingAnim, float animMax) {
+    public AdditionalBarrageSwing(IBarrageAnimation<T, M> barrageAnim, float startingAnim, float animMax) {
         this.barrageAnim = barrageAnim;
         this.ticks = startingAnim;
         this.ticksMax = animMax;
@@ -26,7 +27,7 @@ public abstract class AdditionalBarrageSwing<T extends StandEntity> {
     
     
     
-    public abstract void poseAndRender(T entity, StandEntityModel<T> model, MatrixStack matrixStack, IVertexBuilder buffer, 
+    public abstract void poseAndRender(T entity, M model, MatrixStack matrixStack, IVertexBuilder buffer, 
             float yRotationOffset, float xRotation, 
             int packedLight, int packedOverlay, float red, float green, float blue, float alpha);
 }

@@ -18,7 +18,7 @@ public class MRCrossfireHurricaneModel extends EntityModel<MRCrossfireHurricaneE
     public MRCrossfireHurricaneModel() {
         texWidth = 64;
         texHeight = 64;
-        ankh = new FlameModelRenderer(this).setFireSprites(MagiciansRedRenderer.FIRE_0, MagiciansRedRenderer.FIRE_1);
+        ankh = new FlameModelRenderer(this).setFireSprites(MagiciansRedRenderer.FIRE_0_SPRITE, MagiciansRedRenderer.FIRE_1_SPRITE);
         ankh.setPos(0.0F, 0.0F, 0.0F);
 
         ankh.addFlame(0.0F, -1.0F, 0.0F, 3, 10, Direction.UP);

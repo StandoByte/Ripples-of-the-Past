@@ -33,6 +33,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
@@ -351,13 +352,16 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return this.translationKey;
     }
     
-    public TranslationTextComponent getTranslatedName(P power, String key) {
+    public IFormattableTextComponent getTranslatedName(P power, String key) {
         return new TranslationTextComponent(key);
     }
+
+    public IFormattableTextComponent getNameShortened(P power, String key) {
+        return getTranslatedName(power, ClientUtil.getShortenedTranslationKey(key));
+    }
     
-    public ITextComponent getNameShortened(P power, String key) {
-        return getTranslatedName(power, ClientUtil.shortenedTranslationExists(key) ? 
-                ClientUtil.getShortenedTranslationKey(key) : key);
+    public IFormattableTextComponent getNameLocked(P power) {
+        return new TranslationTextComponent("jojo.layout_edit.locked");
     }
     
     public ResourceLocation getTexture(P power) {
