@@ -16,7 +16,8 @@ import net.minecraft.util.math.vector.Vector3d;
 public class CrazyDiamondAnchorMarker extends MarkerRenderer {
     
     public CrazyDiamondAnchorMarker(Minecraft mc) {
-        super(ModStands.CRAZY_DIAMOND.getStandType().getColor(), ActionSpriteUploader.getIcon(ModStandActions.CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE.get()), mc);
+        super(ModStands.CRAZY_DIAMOND.getStandType().getColor(), 
+                ActionSpriteUploader.getIcon(ModStandActions.CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE.get()), mc);
     }
     
     @Override
@@ -29,7 +30,7 @@ public class CrazyDiamondAnchorMarker extends MarkerRenderer {
         CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(mc.level, mc.player.getMainHandItem()).ifPresent(pos -> 
             list.add(new MarkerInstance(Vector3d.atCenterOf(pos), false)));
         CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(mc.level, mc.player.getOffhandItem()).ifPresent(pos -> {
-            Action<?> selectedAbility = ActionsOverlayGui.getInstance().getSelectedAction(ActionType.ABILITY);
+            Action<?> selectedAbility = ActionsOverlayGui.getInstance().getSelectedActionIfEnabled(ActionType.ABILITY);
             boolean abilitySelected = selectedAbility != null && selectedAbility.getShiftVariationIfPresent()
                     == ModStandActions.CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE.get().getShiftVariationIfPresent();
             list.add(new MarkerInstance(Vector3d.atCenterOf(pos), abilitySelected));

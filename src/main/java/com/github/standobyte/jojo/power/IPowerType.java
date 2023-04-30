@@ -29,5 +29,4 @@ public interface IPowerType<P extends IPower<P, T>, T extends IPowerType<P, T>> 
         return new TranslationTextComponent(getTranslationKey());
     }
     ResourceLocation getIconTexture();
-    String getEnergyString();
 }

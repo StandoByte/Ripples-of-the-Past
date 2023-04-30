@@ -31,14 +31,16 @@ public class StarPlatinumInhale extends StandEntityAction {
                 entity -> spLookVec.dot(entity.position().subtract(standEntity.position()).normalize()) > 0.886 && standEntity.canSee(entity)
                 && entity.distanceToSqr(standEntity) > 0.5
                 && (/*standEntity.isManuallyControlled() || */!entity.is(standEntity.getUser()))).forEach(entity -> {
-                    double distance = entity.distanceTo(standEntity);
-                    Vector3d suctionVec = mouthPos.subtract(entity.getBoundingBox().getCenter())
-                            .normalize().scale(0.5 * standEntity.getStandEfficiency());
-                    entity.setDeltaMovement(distance > 2 ? 
-                            entity.getDeltaMovement().add(suctionVec.scale(1 / distance))
-                            : suctionVec.scale(Math.max(distance - 1, 0)));
-                    if (!world.isClientSide() && distance < 4 && entity instanceof LivingEntity) {
-                        DamageUtil.suffocateTick((LivingEntity) entity, 0.05F);
+                    if (entity.canUpdate()) {
+                        double distance = entity.distanceTo(standEntity);
+                        Vector3d suctionVec = mouthPos.subtract(entity.getBoundingBox().getCenter())
+                                .normalize().scale(0.5 * standEntity.getStandEfficiency());
+                        entity.setDeltaMovement(distance > 2 ? 
+                                entity.getDeltaMovement().add(suctionVec.scale(1 / distance))
+                                : suctionVec.scale(Math.max(distance - 1, 0)));
+                        if (!world.isClientSide() && distance < 4 && entity instanceof LivingEntity) {
+                            DamageUtil.suffocateTick((LivingEntity) entity, 0.05F);
+                        }
                     }
                 });
         if (world.isClientSide()) {
@@ -55,7 +57,7 @@ public class StarPlatinumInhale extends StandEntityAction {
     @Override
     public int getCooldownAdditional(IStandPower power, int ticksHeld) {
         int cooldown = super.getCooldownAdditional(power, ticksHeld);
-        return cooldown / 4 + cooldownFromHoldDuration(cooldown * 3 / 4, power, ticksHeld);
+        return cooldownFromHoldDuration(cooldown, power, ticksHeld);
     }
 
 }

@@ -9,7 +9,6 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
-import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonStat;
@@ -40,8 +39,8 @@ import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawnData, IHasHealth {
-    private static final double GRAVITY = -0.05D;
-    private static final float MAX_ENERGY = ModHamonActions.HAMON_LIFE_MAGNETISM.get().getEnergyNeeded(0, null);
+    private static final double GRAVITY = -0.01D;
+    public static final float MAX_ENERGY = 200;
     private static final float MAX_HEALTH = 4F;
 
     private static final DataParameter<Boolean> IS_FLYING = EntityDataManager.defineId(LeavesGliderEntity.class, DataSerializers.BOOLEAN);
@@ -49,7 +48,7 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
     private static final DataParameter<Float> HEALTH = EntityDataManager.defineId(LeavesGliderEntity.class, DataSerializers.FLOAT);
     
  // TODO texture matching the leaves block
-//    private LeavesBlock leavesBlock = (LeavesBlock) Blocks.OAK_LEAVES;
+//    private Block leavesBlock = Blocks.OAK_LEAVES;
     private int foliageColor;
     private List<INonStandPower> passengerPowers = new ArrayList<>();
     private float passengersHeight;
@@ -250,7 +249,7 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
         if (!isVehicle()) {
             xRot = entity.xRot;
             yRot = entity.yRot;
-            move(MoverType.SELF, new Vector3d(0, entity.getBbHeight() + 1F, 0));
+            move(MoverType.SELF, new Vector3d(0, entity.getBbHeight() + 2F, 0));
             setDeltaMovement(Vector3d.directionFromRotation(0, yRot).scale(0.05D));
         }
         super.addPassenger(entity);

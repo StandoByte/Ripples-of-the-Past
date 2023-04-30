@@ -34,7 +34,9 @@ import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.CD
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.MathUtil;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.FireBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
@@ -76,10 +78,10 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
             LivingEntity user = userPower.getUser();
             IInventory userInventory;
             boolean creative;
-            if (user instanceof PlayerEntity) {
-                PlayerEntity player = (PlayerEntity) user;
-                userInventory = player.inventory;
-                creative = player.abilities.instabuild;
+            PlayerEntity playerUser = user instanceof PlayerEntity ? (PlayerEntity) user : null;
+            if (playerUser != null) {
+                userInventory = playerUser.inventory;
+                creative = playerUser.abilities.instabuild;
             }
             else {
                 userInventory = null;
@@ -121,7 +123,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
             
             .forEach(block -> {
                 if (tryPlaceBlock(world, block.pos, block.state, blocksPlaced, 
-                        creative, block.drops, userInventory, itemsAround, 
+                        creative, block.drops, block.getDroppedXp(), playerUser, userInventory, itemsAround, 
                         resolveEffect && !user.isShiftKeyDown())) {
                     blocksToForget.add(block.pos);
                 }
@@ -142,9 +144,12 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
     
 
     private static final Random RANDOM = new Random();
-    private static boolean tryPlaceBlock(World world, BlockPos blockPos, BlockState blockState, Set<BlockPos> placedBlocks, 
-            boolean isCreative, List<ItemStack> restorationCost, @Nullable IInventory userInventory, List<ItemEntity> itemEntities, 
+    private static boolean tryPlaceBlock(World world, BlockPos blockPos, BlockState blockState, Set<BlockPos> placedBlocks, boolean isCreative, 
+            List<ItemStack> restorationCost, int xpCost, @Nullable PlayerEntity playerWithXp, @Nullable IInventory userInventory, List<ItemEntity> itemEntities, 
             boolean randomizePos) {
+        if (xpCost > 0 && (playerWithXp == null || playerWithXp.totalExperience < xpCost)) {
+            return false;
+        }
         if (randomizePos) {
             BlockPos randomPos = blockPos = blockPos.offset(
                     RANDOM.nextBoolean() ? RANDOM.nextInt(3) - 1 : 0, 
@@ -159,6 +164,9 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         }
         if (blockCanBePlaced(world, blockPos, blockState) && blockState.canSurvive(world, blockPos)
                 && (isCreative || consumeNeededItems(restorationCost, userInventory, itemEntities))) {
+            if (!isCreative && playerWithXp != null && xpCost > 0) {
+                playerWithXp.giveExperiencePoints(-xpCost);
+            }
             world.setBlockAndUpdate(blockPos, blockState);
             placedBlocks.add(blockPos);
             return true;
@@ -274,6 +282,9 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
     
     
     public static void rememberBrokenBlock(World world, BlockPos pos, BlockState state, Optional<TileEntity> tileEntity, List<ItemStack> drops) {
+        Block block = state.getBlock();
+        if (block instanceof FireBlock) return;
+        
         IChunk chunk = world.getChunk(pos);
         if (chunk instanceof Chunk) {
             ((Chunk) chunk).getCapability(ChunkCapProvider.CAPABILITY).ifPresent(cap -> {

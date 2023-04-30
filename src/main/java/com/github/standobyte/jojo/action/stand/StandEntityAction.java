@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
@@ -236,8 +237,8 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
                 preTaskInit(world, power, stand, target);
                 if (!world.isClientSide()) {
                     setAction(power, stand, 
-                        !holdOnly() ? getHoldDurationToFire(power) : getHoldDurationMax(power), 
-                        !holdOnly() ? Phase.BUTTON_HOLD : Phase.PERFORM, 
+                        !holdOnly(power) ? getHoldDurationToFire(power) : getHoldDurationMax(power), 
+                        !holdOnly(power) ? Phase.BUTTON_HOLD : Phase.PERFORM, 
                         target);
                 }
             });
@@ -381,7 +382,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         if (!stand.level.isClientSide()) {
             SoundEvent hitSound = barrageVisuals.get() != null ? barrageVisuals.get().getHitSound() : null;
             if (hitSound != null) {
-                PacketManager.sendToClientsTracking(playSound ? 
+                PacketManager.sendToClientsTracking(playSound && soundPos != null ? 
                         new TrBarrageHitSoundPacket(stand.getId(), hitSound, soundPos)
                         : TrBarrageHitSoundPacket.noSound(stand.getId()), stand);
             }
@@ -480,7 +481,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     }
     
     @Override
-    public boolean heldAllowsOtherActions(IStandPower standPower) {
+    public boolean heldAllowsOtherAction(IStandPower standPower, Action<IStandPower> action) {
         return getHoldDurationToFire(standPower) == 0;
     }
     
@@ -595,7 +596,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         }
 
         public T standOffsetFront() {
-            // FIXME (!) barrage-like offset
+            // FIXME barrage-like offset
             setStandOffset(StandRelativeOffset.noYOffset(0, 0.5), false);
             return getThis();
         }

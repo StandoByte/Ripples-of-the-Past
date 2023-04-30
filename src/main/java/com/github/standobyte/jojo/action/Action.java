@@ -17,6 +17,7 @@ import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.ActionType;
+import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.Blocks;
@@ -76,6 +77,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         }
     }
     
+    public abstract PowerClassification getPowerClassification();
+    
     void setShiftVariation(Action<?> action) {
         Action<P> newShiftVariation = (Action<P>) action;
         if (newShiftVariation != this) {
@@ -129,7 +132,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
             if (!performer.canSee(targetEntity)) {
                 rangeSq /= 4.0D;
             }
-            if (performer.distanceToSqr(targetEntity) > rangeSq) {
+            if (JojoModUtil.getDistance(performer, targetEntity.getBoundingBox()) > rangeSq) {
                 targetTooFar = true;
             }
             break;
@@ -141,9 +144,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
                 if (user.level.getBlockState(targetPos).getBlock() == Blocks.AIR) {
                     return ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
                 }
-                if (performer.distanceToSqr((double)targetPos.getX() + 0.5D, (double)targetPos.getY() + 0.5D, (double)targetPos.getZ() + 0.5D) > distSq) {
-                    targetTooFar = true;
-                }
+                targetTooFar = target.getBoundingBox(performer.level).map(aabb -> JojoModUtil.getDistance(performer, aabb) > distSq).orElse(true);
             }
             break;
         default:
@@ -170,6 +171,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return 100;
     }
     
+    public abstract float getCostToRender(P power);
+    
     protected ActionConditionResult checkHeldItems(LivingEntity user, P power) {
         for (Map.Entry<Hand, Function<ItemStack, String>> check : itemChecks.entrySet()) {
             String message = check.getValue().apply(user.getItemInHand(check.getKey()));
@@ -191,7 +194,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     public abstract boolean isUnlocked(P power);
     
     @Nullable
-    public final Action<P> getVisibleAction(P power) {
+    public Action<P> getVisibleAction(P power) {
         if (isUnlocked(power)) {
             Action<P> replacingVariation = replaceAction(power);
             return replacingVariation == null || replacingVariation.isUnlocked(power) ? replacingVariation : this;
@@ -265,7 +268,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     public void onHoldTickClientEffect(LivingEntity user, P power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {}
-
+    
     public LivingEntity getPerformer(LivingEntity user, P power) {
         return user;
     }
@@ -324,10 +327,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     public int getHoldDurationMax(P power) {
-        return holdOnly() || continueHolding ? holdDurationMax : getHoldDurationToFire(power);
+        return holdOnly(power) || continueHolding ? holdDurationMax : getHoldDurationToFire(power);
     }
     
-    public boolean holdOnly() {
+    public boolean holdOnly(P power) {
         return holdDurationToFire == 0 && holdDurationMax > 0;
     }
     
@@ -335,7 +338,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return false;
     }
     
-    public boolean heldAllowsOtherActions(P power) {
+    public boolean heldAllowsOtherAction(P power, Action<P> action) {
         return false;
     }
     
@@ -355,7 +358,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     public IFormattableTextComponent getTranslatedName(P power, String key) {
         return new TranslationTextComponent(key);
     }
-
+    
     public IFormattableTextComponent getNameShortened(P power, String key) {
         return getTranslatedName(power, ClientUtil.getShortenedTranslationKey(key));
     }
@@ -374,14 +377,11 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     @Nullable
     public ActionType getActionType(P power) {
-        for (Action<P> attack : power.getAttacks()) {
-            if (attack == this || attack.getShiftVariationIfPresent() == this) {
-                return ActionType.ATTACK;
-            }
-        }
-        for (Action<P> ability : power.getAbilities()) {
-            if (ability == this || ability.getShiftVariationIfPresent() == this) {
-                return ActionType.ABILITY;
+        for (ActionType actionType : ActionType.values()) {
+            for (Action<P> action : power.getActions(actionType)) {
+                if (action == this || action.getShiftVariationIfPresent() == this) {
+                    return actionType;
+                }
             }
         }
         return null;

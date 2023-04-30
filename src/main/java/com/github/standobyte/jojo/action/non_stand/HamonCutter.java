@@ -54,6 +54,7 @@ public class HamonCutter extends HamonAction {
 
             for (int i = 0; i < 8; i++) {
                 HamonCutterEntity hamonCutterEntity = new HamonCutterEntity(user, world, potionItem);
+                hamonCutterEntity.setHamonStatPoints(getEnergyCost(power) / 8F);
                 hamonCutterEntity.shootFromRotation(user, 1.35F + user.getRandom().nextFloat() * 0.3F, 10.0F);
                 world.addFreshEntity(hamonCutterEntity);
             }

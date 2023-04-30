@@ -54,7 +54,7 @@ public class MagiciansRedCrossfireHurricane extends StandEntityAction {
             int n = special ? MathHelper.floor(8 * (fireConsumed + 1)) : 1;
             ActionTarget target = task.getTarget();
             if (special && target.getType() == TargetType.EMPTY) {
-                target = ActionTarget.fromRayTraceResult(standEntity.aimWithStandOrUser(32, target));
+                target = ActionTarget.fromRayTraceResult(standEntity.aimWithStandOrUser(64, target));
             }
             for (int i = 0; i < n; i++) {
                 MRCrossfireHurricaneEntity ankh = new MRCrossfireHurricaneEntity(special, standEntity, world, userPower);
@@ -64,7 +64,7 @@ public class MagiciansRedCrossfireHurricane extends StandEntityAction {
                     ankh.setSpecial(target.getTargetPos(true));
                 }
                 ankh.shootFromRotation(standEntity, standEntity.xRot + rotOffsets.x, standEntity.yRot + rotOffsets.y, 
-                        0, special ? 1.0F : 0.75F, 0.0F);
+                        0, special ? 2.0F : 1.25F, 0.0F);
                 ankh.setScale((float) standEntity.getStandEfficiency());
                 if (!special) {
                     ankh.setScale(ankh.getScale() * (fireConsumed + 1));

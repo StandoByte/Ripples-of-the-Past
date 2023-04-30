@@ -19,17 +19,19 @@ public class PlayVoiceLinePacket {
     private final int entityId;
     private final float volume;
     private final float pitch;
+    private final boolean interrupt;
 
-    public PlayVoiceLinePacket(SoundEvent sound, SoundCategory source, int entityId, float volume, float pitch) {
+    public PlayVoiceLinePacket(SoundEvent sound, SoundCategory source, int entityId, float volume, float pitch, boolean interrupt) {
         this.sound = sound;
         this.source = source;
         this.entityId = entityId;
         this.volume = volume;
         this.pitch = pitch;
+        this.interrupt = interrupt;
     }
     
     public static PlayVoiceLinePacket notTriggered(int entityId) {
-        return new PlayVoiceLinePacket(null, null, entityId, 0, 0);
+        return new PlayVoiceLinePacket(null, null, entityId, 0, 0, false);
     }
     
     
@@ -46,6 +48,7 @@ public class PlayVoiceLinePacket {
                 buf.writeEnum(msg.source);
                 buf.writeFloat(msg.volume);
                 buf.writeFloat(msg.pitch);
+                buf.writeBoolean(msg.interrupt);
             }
         }
 
@@ -54,7 +57,7 @@ public class PlayVoiceLinePacket {
             boolean triggerVoiceLine = buf.readBoolean();
             int entityId = buf.readInt();
             return triggerVoiceLine ? new PlayVoiceLinePacket(buf.readRegistryIdUnsafe(ForgeRegistries.SOUND_EVENTS), 
-                    buf.readEnum(SoundCategory.class), entityId, buf.readFloat(), buf.readFloat())
+                    buf.readEnum(SoundCategory.class), entityId, buf.readFloat(), buf.readFloat(), buf.readBoolean())
                     : notTriggered(entityId);
         }
 
@@ -63,7 +66,7 @@ public class PlayVoiceLinePacket {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity != null) {
                 if (msg.sound != null) {
-                    ClientTickingSoundsHelper.playVoiceLine(entity, msg.sound, msg.source, msg.volume, msg.pitch);
+                    ClientTickingSoundsHelper.playVoiceLine(entity, msg.sound, msg.source, msg.volume, msg.pitch, msg.interrupt);
                 }
                 else {
                     ClientTickingSoundsHelper.voiceLineNotTriggered(entity);

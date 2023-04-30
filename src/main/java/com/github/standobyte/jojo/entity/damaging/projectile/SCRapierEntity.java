@@ -1,9 +1,13 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
+import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
@@ -168,8 +172,19 @@ public class SCRapierEntity extends ModdedProjectileEntity {
         if (stand.is(getOwner()) && CommonReflection.getProjectileLeftOwner(this)) {
             stand.playSound(SoundEvents.ITEM_PICKUP, 1.0F, 1.0F);
             stand.setRapier(true);
+            IStandPower.getStandPowerOptional(stand.getUser()).ifPresent(power -> {
+                if (ModStandActions.SILVER_CHARIOT_RAPIER_LAUNCH.get().isUnlocked(power)) {
+                    power.setCooldownTimer(ModStandActions.SILVER_CHARIOT_RAPIER_LAUNCH.get(), 0);
+                }
+            });
             remove();
         }
+    }
+    
+    @Override
+    public boolean isGlowing() {
+        return level.isClientSide() && getOwner() instanceof StandEntity && 
+                ((StandEntity) getOwner()).getUser() == ClientUtil.getClientPlayer() || super.isGlowing();
     }
     
     @Override

@@ -49,6 +49,7 @@ import com.github.standobyte.jojo.item.StoneMaskItem;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket;
 import com.github.standobyte.jojo.potion.IApplicableEffect;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
@@ -97,6 +98,7 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.PaintingEntity;
 import net.minecraft.entity.item.PaintingType;
 import net.minecraft.entity.monster.StrayEntity;
+import net.minecraft.entity.passive.ChickenEntity;
 import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.entity.player.ChatVisibility;
 import net.minecraft.entity.player.PlayerEntity;
@@ -192,8 +194,24 @@ public class GameplayEventHandler {
         LivingEntity entity = event.getEntityLiving();
         if (!entity.level.isClientSide() && entity.invulnerableTime <= 10) {
             float sunDamage = getSunDamage(entity);
-            if (sunDamage > 0) {
-                DamageUtil.dealUltravioletDamage(entity, sunDamage, null, null, true);
+            if (    
+                    sunDamage > 0
+                    && DamageUtil.dealUltravioletDamage(entity, sunDamage, null, null, true)
+                    && entity instanceof PlayerEntity) {
+                EffectInstance weaknessEffect = entity.getEffect(Effects.WEAKNESS);
+                int duration;
+                int amplifier;
+                if (weaknessEffect == null) {
+                    duration = 60;
+                    amplifier = 0;
+                }
+                else {
+                    int difficulty = Math.max(entity.level.getDifficulty().getId(), 1);
+                    duration = weaknessEffect.getDuration() + 60 / difficulty;
+                    amplifier = duration / 60;
+                }
+                entity.addEffect(new EffectInstance(Effects.WEAKNESS, duration, amplifier, false, false, true));
+                entity.addEffect(new EffectInstance(ModEffects.VAMPIRE_SUN_BURN.get(), duration, amplifier, false, false, false));
             }
         }
         entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
@@ -208,20 +226,21 @@ public class GameplayEventHandler {
             return;
         }
         PlayerEntity player = event.player;
-        if (player.hasEffect(ModEffects.STUN.get())) {
+        if (ModEffects.isStunned(player)) {
             player.setSprinting(false);
         }
+        player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+            cap.tick();
+        });
         if (event.side == LogicalSide.SERVER) {
-            player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                cap.tick();
-            });
             if (player.tickCount % 60 == 0 && !player.isInvisible() && player instanceof ServerPlayerEntity) {
                 ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
                 long timeNotActive = Util.getMillis() - serverPlayer.getLastActionTime();
                 if (timeNotActive > AFK_PARTICLE_SECONDS * 1000 &&
                         serverPlayer.getCapability(PlayerUtilCapProvider.CAPABILITY).map(cap -> cap.getNoClientInputTimer() > AFK_PARTICLE_SECONDS * 20).orElse(true)) {
-                    ((ServerWorld) player.level).sendParticles(ModParticles.MENACING.get(), player.getX(), player.getEyeY(), player.getZ(), 
-                            0,  MathHelper.cos(player.yRot * MathUtil.DEG_TO_RAD), 0.5D, MathHelper.sin(player.yRot * MathUtil.DEG_TO_RAD), 0.005D);
+                    MCUtil.sendParticles((ServerWorld) player.level, ModParticles.MENACING.get(), player.getX(), player.getEyeY(), player.getZ(), 
+                            0, MathHelper.cos(player.yRot * MathUtil.DEG_TO_RAD), 0.5F, MathHelper.sin(player.yRot * MathUtil.DEG_TO_RAD), 0.005F, 
+                            SpawnParticlePacket.SpecialContext.AFK);
                     ModCriteriaTriggers.AFK.get().trigger(serverPlayer);
                 }
             }
@@ -234,8 +253,8 @@ public class GameplayEventHandler {
         }); 
     }
 
-    private static final float MAX_SUN_DAMAGE = 10;
-    private static final float MIN_SUN_DAMAGE = 2;
+//    private static final float MAX_SUN_DAMAGE = 10;
+//    private static final float MIN_SUN_DAMAGE = 2;
     private static float getSunDamage(LivingEntity entity) {
         if (entity.hasEffect(ModEffects.SUN_RESISTANCE.get())
                 || !(entity instanceof PlayerEntity || JojoModConfig.getCommonConfigInstance(false).undeadMobsSunDamage.get())
@@ -252,24 +271,25 @@ public class GameplayEventHandler {
                     (new BlockPos(entity.getX(), (double)Math.round(entity.getY(1.0)), entity.getZ())).above()
                     : new BlockPos(entity.getX(), (double)Math.round(entity.getY(1.0)), entity.getZ());
             if (brightness > 0.5F && world.canSeeSky(blockPos)) {
-                int time = (int) (world.getDayTime() % 24000L);
-                float damage = MAX_SUN_DAMAGE;
-                float diff = MAX_SUN_DAMAGE - MIN_SUN_DAMAGE;
-                
-                // sunrise
-                if (time > 23460) { 
-                    time -= 24000;
-                }
-                if (time <= 60) {
-                    damage -= diff * (1F - (float) (time + 540) / 600F);
-                }
-                
-                // sunset
-                else if (time > 11940 && time <= 12540) {
-                    damage -= diff * (float) (time - 11940) / 600F;
-                }
-                
-                return damage;
+                return 4;
+//                int time = (int) (world.getDayTime() % 24000L);
+//                float damage = MAX_SUN_DAMAGE;
+//                float diff = MAX_SUN_DAMAGE - MIN_SUN_DAMAGE;
+//                
+//                // sunrise
+//                if (time > 23460) { 
+//                    time -= 24000;
+//                }
+//                if (time <= 60) {
+//                    damage -= diff * (1F - (float) (time + 540) / 600F);
+//                }
+//                
+//                // sunset
+//                else if (time > 11940 && time <= 12540) {
+//                    damage -= diff * (float) (time - 11940) / 600F;
+//                }
+//                
+//                return damage;
             }
         }
         return 0;
@@ -284,8 +304,34 @@ public class GameplayEventHandler {
                 arrow.addEffect(new EffectInstance(ModEffects.FREEZE.get(), 300));
             }
         }
+        
+        else if (!event.getWorld().isClientSide()) {
+            if (event.getEntity() instanceof ChickenEntity) {
+//                List<EggEntity> eggList = event.getWorld().getEntitiesOfClass(EggEntity.class, event.getEntity().getBoundingBox());
+//                if (!eggList.isEmpty()) {
+//                    eggList.stream()
+//                    .map(egg -> egg.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).resolve())
+//                    .filter(chargeOptional -> chargeOptional.map(charge -> charge.hamonBaseDmg > 0).orElse(false))
+//                    .findAny().ifPresent(chargeOptional -> {
+//                        event.getEntity().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+//                            ProjectileHamonChargeCap eggCharge = chargeOptional.get();
+//                            Entity eggThrower = ((EggEntity) eggCharge.projectile).getOwner();
+//                            LivingEntity throwerLiving = eggThrower instanceof LivingEntity ? (LivingEntity) eggThrower : null;
+//                            Optional<HamonData> userHamon = throwerLiving != null ? INonStandPower.getNonStandPowerOptional(throwerLiving)
+//                                    .map(power -> power.getTypeSpecificData(ModNonStandPowers.HAMON.get())).map(Optional::get)
+//                                    : Optional.empty();
+//                            cap.setHamonCharge(
+//                                    eggCharge.hamonBaseDmg * userHamon.map(hamon -> hamon.getHamonDamageMultiplier() * hamon.getBloodstreamEfficiency()).orElse(1F), 
+//                                    100 + userHamon.map(hamon -> MathHelper.floor((float) (1100 * hamon.getHamonStrengthLevel())
+//                                            / (float) HamonData.MAX_STAT_LEVEL * hamon.getBloodstreamEfficiency() * hamon.getBloodstreamEfficiency())).orElse(0), throwerLiving, 0);
+//                        });
+//                    });
+//                }
+            }
+        }
     }
-    
+
+    @SuppressWarnings("resource")
     @SubscribeEvent
     public static void onWorldTick(WorldTickEvent event) {
         if (event.side == LogicalSide.SERVER && event.phase == TickEvent.Phase.END) {
@@ -317,7 +363,7 @@ public class GameplayEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void cancelStunnedPlayerInteraction(PlayerInteractEvent event) {
-        if (event.isCancelable() && event.getPlayer().hasEffect(ModEffects.STUN.get())) {
+        if (event.isCancelable() && ModEffects.isStunned(event.getPlayer())) {
             event.setCanceled(true);
             event.setCancellationResult(ActionResultType.FAIL);
         }
@@ -325,7 +371,7 @@ public class GameplayEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onItemPickup(EntityItemPickupEvent event) {
-        if (event.getPlayer().hasEffect(ModEffects.STUN.get())) {
+        if (ModEffects.isStunned(event.getPlayer())) {
             event.setCanceled(true);
         }
     }
@@ -347,7 +393,7 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onEntityJoinWorld(EntityJoinWorldEvent event) {
         Entity entity = event.getEntity();
-        if (entity instanceof MobEntity) {
+        if (!entity.level.isClientSide() && entity instanceof MobEntity) {
             MobEntity mob = (MobEntity) entity;
             if (entity.getClassification(false) == EntityClassification.MONSTER) {
                 makeMobNeutralToVampirePlayers(mob);
@@ -363,17 +409,20 @@ public class GameplayEventHandler {
     }
 
     private static void makeMobNeutralToVampirePlayers(MobEntity mob) {
+        if (JojoModConfig.getCommonConfigInstance(false).vampiresAggroMobs.get()) return;
         Set<PrioritizedGoal> goals = CommonReflection.getGoalsSet(mob.targetSelector);
         for (PrioritizedGoal prGoal : goals) {
             Goal goal = prGoal.getGoal();
             if (goal instanceof NearestAttackableTargetGoal) {
                 NearestAttackableTargetGoal<?> targetGoal = (NearestAttackableTargetGoal<?>) goal;
                 Class<? extends LivingEntity> targetClass = CommonReflection.getTargetClass(targetGoal);
+                
                 if (targetClass == PlayerEntity.class) {
                     EntityPredicate selector = CommonReflection.getTargetConditions(targetGoal);
                     if (selector != null) {
                         Predicate<LivingEntity> oldPredicate = CommonReflection.getTargetSelector(selector);
-                        Predicate<LivingEntity> undeadPredicate = target -> target instanceof PlayerEntity && !JojoModUtil.isPlayerUndead((PlayerEntity) target);
+                        Predicate<LivingEntity> undeadPredicate = target -> 
+                            target instanceof PlayerEntity && !(JojoModUtil.isPlayerUndead((PlayerEntity) target));
                         CommonReflection.setTargetConditions(targetGoal, new EntityPredicate().range(CommonReflection.getTargetDistance(targetGoal)).selector(
                                 oldPredicate != null ? oldPredicate.and(undeadPredicate) : undeadPredicate));
                     }
@@ -412,7 +461,14 @@ public class GameplayEventHandler {
             }
         }
     }
-
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void cancelLivingHeal(LivingHealEvent event) {
+        if (event.getEntityLiving().hasEffect(ModEffects.VAMPIRE_SUN_BURN.get())) {
+            event.setCanceled(true);
+        }
+    }
+    
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingHeal(LivingHealEvent event) {
         VampirismPowerType.consumeEnergyOnHeal(event);
@@ -423,7 +479,7 @@ public class GameplayEventHandler {
         if (event.getOutcome() instanceof MobEntity) {
             LivingEntity pre = event.getEntityLiving();
             MobEntity converted = (MobEntity) event.getOutcome();
-            if (converted.isNoAi() && pre.hasEffect(ModEffects.STUN.get()) && !converted.hasEffect(ModEffects.STUN.get())) {
+            if (converted.isNoAi() && ModEffects.isStunned(pre) && !ModEffects.isStunned(converted)) {
                 converted.setNoAi(false);
             }
         }
@@ -531,7 +587,7 @@ public class GameplayEventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void cancelLivingAttack(LivingAttackEvent event) {
-        HamonPowerType.snakeMuffler(event);
+        HamonPowerType.snakeMuffler(event.getEntityLiving(), event.getSource(), event.getAmount());
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
@@ -987,25 +1043,25 @@ public class GameplayEventHandler {
         int ticks = getSoulAscensionTicks(user, stand);
 
         if (ticks > 0) {
-            boolean givesResolve = user.level.getLevelData().isHardcore()
+            boolean resolveCanLvlUp = user.level.getLevelData().isHardcore()
                     || !JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).keepStandOnDeath.get();
             
             EntityUtilCap.queueOnTimeResume(user, () -> {
                 if (user instanceof ServerPlayerEntity) {
                     ModCriteriaTriggers.SOUL_ASCENSION.get().trigger((ServerPlayerEntity) user, stand, ticks);
                 }
-                SoulEntity soulEntity = new SoulEntity(user.level, user, ticks, givesResolve);
+                SoulEntity soulEntity = new SoulEntity(user.level, user, ticks, resolveCanLvlUp);
                 user.level.addFreshEntity(soulEntity);
             });
         }
     }
     
     public static int getSoulAscensionTicks(LivingEntity user, IStandPower stand) {
-        if (!stand.usesResolve() || stand.getResolveLevel() == 0 ||
-                !JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).soulAscension.get() || JojoModUtil.isUndead(user) || 
-                user instanceof PlayerEntity && (
-                        user.level.getGameRules().getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN) || 
-                        stand.wasProgressionSkipped())) {
+        if (    !stand.usesResolve() || 
+                stand.getResolveLevel() == 0 ||
+                !JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).soulAscension.get() || 
+                JojoModUtil.isUndead(user) || 
+                user instanceof PlayerEntity && user.level.getGameRules().getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN)) {
             return 0;
         }
 
@@ -1072,17 +1128,16 @@ public class GameplayEventHandler {
 
     private static void sendMemeDeathMessage(ServerPlayerEntity player, ITextComponent deathMessage) {
         if (player.level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES)) {
-            ITextComponent fakeDeathMessage = new TranslationTextComponent("chat.type.text", player.getDisplayName(), deathMessage);
             Team team = player.getTeam();
             if (team != null && team.getDeathMessageVisibility() != Team.Visible.ALWAYS) {
                 if (team.getDeathMessageVisibility() == Team.Visible.HIDE_FOR_OTHER_TEAMS) {
-                    player.server.getPlayerList().broadcastToTeam(player, fakeDeathMessage);
+                    player.server.getPlayerList().broadcastToTeam(player, deathMessage);
                 }
                 else if (team.getDeathMessageVisibility() == Team.Visible.HIDE_FOR_OWN_TEAM) {
-                    player.server.getPlayerList().broadcastToAllExceptTeam(player, fakeDeathMessage);
+                    player.server.getPlayerList().broadcastToAllExceptTeam(player, deathMessage);
                 }
             } else {
-                player.server.getPlayerList().broadcastMessage(fakeDeathMessage, ChatType.CHAT, player.getUUID());
+                player.server.getPlayerList().broadcastMessage(deathMessage, ChatType.CHAT, player.getUUID());
             }
         }
     }
@@ -1131,7 +1186,7 @@ public class GameplayEventHandler {
                                     else if (type == EntityType.EGG) {
                                         energyCost = 600;
                                         hamonBaseDmg = 0.125F;
-                                        maxChargeTicks = 100;
+                                        maxChargeTicks = Integer.MAX_VALUE;
                                     }
                                     else if (type == EntityType.POTION) {
                                         energyCost = 800;
@@ -1276,7 +1331,7 @@ public class GameplayEventHandler {
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onBlockBreak(BlockEvent.BreakEvent event) {
-        if (!event.getWorld().isClientSide()) {
+        if (!event.getWorld().isClientSide() && event.getPlayer().abilities.instabuild) {
             CrazyDiamondRestoreTerrain.rememberBrokenBlock((World) event.getWorld(), 
                     event.getPos(), event.getState(), Optional.ofNullable(event.getWorld().getBlockEntity(event.getPos())), 
                     Collections.emptyList());

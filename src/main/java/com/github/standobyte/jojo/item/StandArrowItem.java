@@ -201,19 +201,19 @@ public class StandArrowItem extends ArrowItem {
                 }
             }
             if (mainText != null) {
-                mainText.withStyle(TextFormatting.ITALIC, TextFormatting.GRAY);
+                mainText.withStyle(TextFormatting.GRAY);
             }
 
             if (canBeUsed) {
                 boolean shift = ClientUtil.isShiftPressed();
                 if (shift) {
-                    tooltip.add(new TranslationTextComponent("jojo.arrow.stands_list").withStyle(TextFormatting.DARK_GRAY));
+                    tooltip.add(new TranslationTextComponent("jojo.arrow.stands_list"));
                     StandUtil.availableStands(currentTiers, player).forEach(
-                            stand -> tooltip.add(new TranslationTextComponent(stand.getTranslationKey())));
+                            stand -> tooltip.add(stand.getName().withStyle(TextFormatting.GRAY)));
                 }
                 else {
                     tooltip.add(new TranslationTextComponent("jojo.arrow.stands_hint", new KeybindTextComponent("key.sneak"))
-                            .withStyle(TextFormatting.DARK_GRAY));
+                            .withStyle(TextFormatting.GRAY));
                 }
             }
         }

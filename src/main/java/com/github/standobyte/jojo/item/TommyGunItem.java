@@ -9,8 +9,8 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.damaging.projectile.TommyGunBulletEntity;
-import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.Technique;
@@ -271,6 +271,8 @@ public class TommyGunItem extends Item {
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
         tooltip.add(new TranslationTextComponent("item.jojo.tommy_gun.reload_prompt", 
                 new KeybindTextComponent("key.sneak"), new KeybindTextComponent("key.use")).withStyle(TextFormatting.GRAY));
+        
+        ClientUtil.addItemReferenceQuote(tooltip, this);
         tooltip.add(ClientUtil.donoItemTooltip("KingKKrill"));
     }
 }

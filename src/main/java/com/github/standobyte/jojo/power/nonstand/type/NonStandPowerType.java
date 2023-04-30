@@ -6,11 +6,11 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.init.power.ModCommonRegistries;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.nonstand.TypeSpecificData;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraftforge.registries.ForgeRegistryEntry;
@@ -56,11 +56,6 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
     }
     
     @Override
-    public String getEnergyString() {
-        return getRegistryName().getPath();
-    }
-    
-    @Override
     public Action<INonStandPower>[] getAttacks() {
         return attacks;
     }
@@ -70,14 +65,25 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
         return abilities;
     }
 
-    public float getMaxEnergyFactor(INonStandPower power) {
-        return 1;
+    public float getMaxEnergy(INonStandPower power) {
+        return NonStandPower.BASE_MAX_ENERGY;
     }
     
-    public abstract float getEnergyTickInc(INonStandPower power);
+    public abstract float tickEnergy(INonStandPower power);
     
-    public float reduceEnergyConsumed(float amount, INonStandPower power, LivingEntity user) {
-        return amount;
+    public boolean hasEnergy(INonStandPower power, float amount) {
+        return power.getEnergy() >= amount;
+    }
+    
+    public boolean consumeEnergy(INonStandPower power, float amount) {
+        if (power.isUserCreative()) {
+            return true;
+        }
+        if (power.hasEnergy(amount)) {
+            power.setEnergy(power.getEnergy() - amount);
+            return true;
+        }
+        return false;
     }
     
     public float getMaxStaminaFactor(INonStandPower power, IStandPower standPower) {

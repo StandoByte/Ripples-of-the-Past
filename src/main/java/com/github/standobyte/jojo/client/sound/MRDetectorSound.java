@@ -18,7 +18,10 @@ public class MRDetectorSound extends TickableSound {
     }
 
     public void tick() {
-        if (detector.isAlive() && detector.isEntityDetected()) {
+        if (!detector.canUpdate()) {
+            volume = 0;
+        }
+        else if (detector.isAlive() && detector.isEntityDetected()) {
             x = detector.getX();
             y = detector.getY();
             z = detector.getZ();

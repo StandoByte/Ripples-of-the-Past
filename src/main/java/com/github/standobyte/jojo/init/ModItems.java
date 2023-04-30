@@ -4,6 +4,7 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.render.item.RoadRollerISTER;
 import com.github.standobyte.jojo.item.AjaStoneItem;
 import com.github.standobyte.jojo.item.BladeHatItem;
+import com.github.standobyte.jojo.item.BreathControlMaskItem;
 import com.github.standobyte.jojo.item.CassetteBlankItem;
 import com.github.standobyte.jojo.item.CassetteRecordedItem;
 import com.github.standobyte.jojo.item.ClackersItem;
@@ -64,9 +65,9 @@ public class ModItems {
     public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_GREEN = ITEMS.register("wooden_coffin_oak_green", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_GREEN.get(), new Item.Properties().stacksTo(1)));
     public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_RED = ITEMS.register("wooden_coffin_oak_red", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_RED.get(), new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1)));
     public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_BLACK = ITEMS.register("wooden_coffin_oak_black", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_BLACK.get(), new Item.Properties().stacksTo(1)));
-
+    
     public static final RegistryObject<CustomModelArmorItem> BREATH_CONTROL_MASK = ITEMS.register("breath_control_mask", 
-            () -> new CustomModelArmorItem(ModArmorMaterials.BREATH_CONTROL_MASK, EquipmentSlotType.HEAD, new Item.Properties().tab(JojoMod.MAIN_TAB)));
+            () -> new BreathControlMaskItem(new Item.Properties().tab(JojoMod.MAIN_TAB)));
 
     public static final RegistryObject<SpawnEggItem> HAMON_MASTER_SPAWN_EGG = ITEMS.register("hamon_master_spawn_egg", 
             () -> new ForgeSpawnEggItem(ModEntityTypes.HAMON_MASTER, 0xF8D100, 0x542722, new Item.Properties().tab(JojoMod.MAIN_TAB)));

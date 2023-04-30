@@ -128,7 +128,6 @@ public class CrazyDiamondBlockCheckpointMake extends StandEntityAction {
                     }
                 }
                 
-                // FIXME ! delete in later patches
                 else if (!world.isClientSide()) {
                     checkpointNbt.putString("Dimension", Dimension.OVERWORLD.location().toString());
                 }

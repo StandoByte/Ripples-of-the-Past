@@ -23,7 +23,7 @@ public class RPSOpponentPickThoughtsPacket {
     
     
     public static class Handler implements IModPacketHandler<RPSOpponentPickThoughtsPacket> {
-
+        
         @Override
         public void encode(RPSOpponentPickThoughtsPacket msg, PacketBuffer buf) {
             buf.writeBoolean(msg.pickThoughts != null);

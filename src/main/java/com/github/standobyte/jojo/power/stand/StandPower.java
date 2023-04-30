@@ -14,8 +14,8 @@ import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModEffects;
-import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtStandEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
@@ -37,6 +37,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 
 public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> implements IStandPower {
     private Optional<StandInstance> standInstance = Optional.empty();
@@ -47,7 +49,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     private final ResolveCounter resolveCounter;
     private boolean skippedProgression;
-    private boolean givenByDisc;
     
     private StandEffectsTracker continuousEffects = new StandEffectsTracker(this);
     
@@ -115,7 +116,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         setStamina(getMaxStamina() * 0.5F);
         if (user != null && (JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).skipStandProgression.get()
                 || user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild)) {
-            skipProgression(standType);
+            skipProgression();
         }
         else {
             standType.unlockNewActions(this);
@@ -163,7 +164,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             stamina = 0;
             resolveCounter.reset();
             skippedProgression = false;
-            givenByDisc = false;
             if (countTaken) {
                 serverPlayerUser.ifPresent(player -> {
                     SaveFileUtilCapProvider.getSaveFileCap(player).removePlayerStand(standType);
@@ -178,13 +178,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
     
     @Override
-    public void setGivenByDisc() {
-        givenByDisc = true;
-    }
-    
-    @Override
-    public boolean wasGivenByDisc() {
-        return givenByDisc;
+    public ITextComponent getName() {
+        return hasPower() ? getStandInstance().map(stand -> stand.getName())
+                .orElse(StringTextComponent.EMPTY) : StringTextComponent.EMPTY;
     }
     
     @Override
@@ -280,17 +276,19 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public float getStaminaTickGain() {
         float staminaRegen = getType().getStaminaRegen(this);
-        staminaRegen *= INonStandPower.getNonStandPowerOptional(getUser()).map(power -> {
-            if (power.hasPower()) {
-                return power.getType().getStaminaRegenFactor(power, this);
-            }
-            return 1F;
-        }).orElse(1F);
-        
-        if (getUser() instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity) getUser();
-            if (player.getFoodData().getFoodLevel() > 17) {
-                staminaRegen *= 1.25F;
+        if (staminaRegen > 0) {
+            staminaRegen *= INonStandPower.getNonStandPowerOptional(getUser()).map(power -> {
+                if (power.hasPower()) {
+                    return power.getType().getStaminaRegenFactor(power, this);
+                }
+                return 1F;
+            }).orElse(1F);
+            
+            if (getUser() instanceof PlayerEntity) {
+                PlayerEntity player = (PlayerEntity) getUser();
+                if (player.getFoodData().getFoodLevel() > 17) {
+                    staminaRegen *= 1.25F;
+                }
             }
         }
         return staminaRegen * getStaminaDurabilityModifier();
@@ -389,6 +387,14 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
     }
     
+    @Override
+    public float getPrevTickResolve() {
+        if (!usesResolve()) {
+            return 0;
+        }
+        return resolveCounter.getPrevTickResolveValue();
+    }
+    
 
     @Override
     public StandEffectsTracker getContinuousEffects() {
@@ -397,10 +403,11 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
 
     @Override
-    public void skipProgression(StandType<?> standType) {
-        setProgressionSkipped();
-        resolveCounter.setResolveLevel(getMaxResolveLevel(), false);
+    public void skipProgression() {
+        StandType<?> standType = getType();
         if (standType != null) {
+            setProgressionSkipped();
+            resolveCounter.setResolveLevel(getMaxResolveLevel(), false);
             Stream.concat(
                     Arrays.stream(standType.getAttacks()), 
                     Arrays.stream(standType.getAbilities()))
@@ -597,7 +604,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             cnbt.put("Resolve", resolveCounter.writeNBT());
         }
         cnbt.putBoolean("Skipped", skippedProgression);
-        cnbt.putBoolean("Disc", givenByDisc);
         cnbt.put("ActionLearning", actionLearningProgressMap.toNBT());
         cnbt.put("Effects", continuousEffects.toNBT());
         return cnbt;
@@ -617,7 +623,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             resolveCounter.readNbt(nbt.getCompound("Resolve"));
         }
         skippedProgression = nbt.getBoolean("Skipped");
-        givenByDisc = nbt.getBoolean("Disc");
         if (nbt.contains("ActionLearning", MCUtil.getNbtId(CompoundNBT.class))) {
             actionLearningProgressMap.fromNBT(nbt.getCompound("ActionLearning"));
         }
@@ -636,7 +641,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             this.resolveCounter.alwaysResetOnDeath();
         }
         this.skippedProgression = oldPower.wasProgressionSkipped();
-        this.givenByDisc = oldPower.wasGivenByDisc();
         this.actionLearningProgressMap = ((StandPower) oldPower).actionLearningProgressMap; // FIXME can i remove this cast?
         this.continuousEffects = oldPower.getContinuousEffects();
         this.stamina = getMaxStamina();

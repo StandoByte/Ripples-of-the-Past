@@ -1,0 +1,29 @@
+{
+  "parent": "jojo:jojo/get_hamon",
+  "display": {
+    "icon": {
+      "item": "jojo:breath_control_mask"
+    },
+    "title": {
+      "translate": "advancements.jojo.abandon_hamon.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.abandon_hamon.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "abandon_hamon": {
+      "trigger": "jojo:abandon_hamon",
+      "conditions": {}
+    }
+  },
+  "requirements": [
+    [
+      "abandon_hamon"
+    ]
+  ]
+}

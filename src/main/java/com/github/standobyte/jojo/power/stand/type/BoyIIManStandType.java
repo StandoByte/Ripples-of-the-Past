@@ -13,8 +13,13 @@ public class BoyIIManStandType<T extends StandStats> extends StandType<T> {
     
     public BoyIIManStandType(int color, ITextComponent partName, 
             StandAction[] attacks, StandAction[] abilities, 
-            Class<T> statsClass, T defaultStats, @Nullable StandTypeOptionals additions) {
+            Class<T> statsClass, T defaultStats,  @Nullable StandTypeOptionals additions) {
         super(color, partName, attacks, abilities, statsClass, defaultStats, additions);
+    }
+
+    @Override
+    public boolean summon(LivingEntity user, IStandPower standPower, boolean withoutNameVoiceLine) {
+        return false;
     }
 
     @Override

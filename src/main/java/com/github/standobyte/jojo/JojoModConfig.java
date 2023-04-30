@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.electronwill.nightconfig.core.CommentedConfig;
@@ -28,11 +30,13 @@ import com.google.common.primitives.Floats;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import net.minecraftforge.registries.IForgeRegistry;
 
 @EventBusSubscriber(modid = JojoMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
@@ -58,6 +62,7 @@ public class JojoModConfig {
         public final ForgeConfigSpec.ConfigValue<List<? extends Double>> bloodDrainMultiplier;
         public final ForgeConfigSpec.ConfigValue<List<? extends Double>> bloodTickDown;
         public final ForgeConfigSpec.ConfigValue<List<? extends Double>> bloodHealCost;
+        public final ForgeConfigSpec.BooleanValue vampiresAggroMobs;
         public final ForgeConfigSpec.BooleanValue undeadMobsSunDamage;
 
         public final ForgeConfigSpec.BooleanValue prioritizeLeastTakenStands;
@@ -83,6 +88,14 @@ public class JojoModConfig {
         public final ForgeConfigSpec.BooleanValue saveDestroyedBlocks;
         
         private Common(ForgeConfigSpec.Builder builder) {
+            this(builder, null);
+        }
+        
+        private Common(ForgeConfigSpec.Builder builder, @Nullable String mainPath) {
+            if (mainPath != null) {
+                builder.push(mainPath);
+            }
+            
             builder.push("Keep Powers After Death");
                 keepHamonOnDeath = builder
                         .translation("jojo.config.keepHamonOnDeath")
@@ -156,6 +169,11 @@ public class JojoModConfig {
                         .translation("jojo.config.bloodHealCost")
                         .defineList("bloodHealCost", Arrays.asList(10D, 4D, 2D, 1D), e -> isElementNonNegativeFloat(e, false));
                 
+                vampiresAggroMobs = builder
+                        .comment("    Whether or not hostile mobs are agressive towards vampire players.")
+                        .translation("jojo.config.vampiresAggroMobs")
+                        .define("vampiresAggroMobs", false);
+                
                 undeadMobsSunDamage = builder
                         .comment("    Whether or not undead mobs take damage under the sun similarly to vampires.")
                         .translation("jojo.config.undeadMobsSunDamage")
@@ -165,15 +183,15 @@ public class JojoModConfig {
             builder.comment(" Settings of Stand Arrow and the Stands pool.").push("Stand Arrow");
                 prioritizeLeastTakenStands = builder
                         .comment("    If enabled, random Stand gain effects (Stand Arrow, /stand random) give Stands that less players already have.", 
-                                 "    Otherwise the Stand selection is random.")
+                                 "     Otherwise the Stand selection is random.")
                         .translation("jojo.config.prioritizeLeastTakenStands")
                         .define("prioritizeLeastTakenStands", false);
                 
                 bannedStands = builder
                         .comment("    List of Stands excluded from Stand Arrow and /stand random pool.",
-                                 "    These stands will still be available via /stand give command",
-                                 "    Their Discs won't be added to the mod's Creative tab, but they can still be found in the Search tab (although they can't be used to gain a banned Stand).\"",
-                                 "    The format is the same as for /stand give command (e.g., \"jojo:star_platinum\").")
+                                 "     These stands will still be available via /stand give command",
+                                 "     Their Discs won't be added to the mod's Creative tab, but they can still be found in the Search tab (although they can't be used to gain a banned Stand).\"",
+                                 "     The format is the same as for /stand give command (e.g., \"jojo:star_platinum\").")
                         .translation("jojo.config.bannedStands")
                         .defineListAllowEmpty(Lists.newArrayList("bannedStands"), 
                                 () -> Arrays.asList("jojo:example_1", "jojo:example_2"), 
@@ -186,11 +204,11 @@ public class JojoModConfig {
                 
                 standTierXpLevels = builder
                         .comment("    Experience levels nesessary to get a Stand from each tier.", 
-                                 "    If the list is shorter than the default, next tiers use the last value.",
-                                 "    For example, if the list only contains number 15, you'll be able to get any Stand as long as you have 15 experience levels.", 
-                                 "    Making a value lower that the previous one might lead to an unexpected result.")
+                                 "     If the list is shorter than the default, next tiers use the last value.",
+                                 "     For example, if the list only contains number 15, you'll be able to get any Stand as long as you have 15 experience levels.", 
+                                 "     Making a value lower that the previous one might lead to an unexpected result.")
                         .translation("jojo.config.standTierXpLevels")
-                        .defineList(Lists.newArrayList("standTierXpLevels"), 
+                        .defineList("standTierXpLevels", 
                                 () -> Arrays.asList(0, 1, 5, 10, 20, 30, 45), 
                                 s -> s instanceof Integer && (Integer) s >= 0);
             builder.pop();
@@ -204,8 +222,8 @@ public class JojoModConfig {
                     
                     resolveLvlPoints = builder
                             .comment("    Max resolve points at each Resolve level (starting from 0).", 
-                                     "    Decrease these values to make getting to each level easier.", 
-                                     "    All values must be higher than 0.")
+                                     "     Decrease these values to make getting to each level easier.", 
+                                     "     All values must be higher than 0.")
                             .translation("jojo.config.resolvePoints")
                             .defineList("resolveLvlPoints", Arrays.asList(ResolveCounter.DEFAULT_MAX_RESOLVE_VALUES), e -> isElementNonNegativeFloat(e, true));
                 builder.pop();
@@ -221,7 +239,7 @@ public class JojoModConfig {
                     timeStopDamageMultiplier = builder
                             .comment("    Damage multiplier for entities frozen in time.")
                             .translation("jojo.config.timeStopDamageMultiplier")
-                            .defineInRange("timeStopDamageMultiplier", 1.0, 0.0, 1000000.0);
+                            .defineInRange("timeStopDamageMultiplier", 1.0, 0.0, 1.0);
                 builder.pop();
                 
                 abilitiesBreakBlocks = builder
@@ -259,6 +277,10 @@ public class JojoModConfig {
                     .comment("    Disable this if you're boring.")
                     .translation("jojo.config.endermenBeyondTimeSpace")
                     .define("endermenBeyondTimeSpace", true);
+            
+            if (mainPath != null) {
+                builder.pop();
+            }
         }
         
         public boolean isConfigLoaded() {
@@ -305,7 +327,7 @@ public class JojoModConfig {
         }
         
         public boolean isStandBanned(StandType<?> stand) {
-            // FIXME (!!!) temporary
+            // FIXME (BIIM) temporary
             if (stand == ModStandActions.BOY_II_MAN.get()) return true;
             return bannedStandsResLocs.contains(stand.getRegistryName());
         }
@@ -400,7 +422,7 @@ public class JojoModConfig {
                 if (hamonTempleSpawn)                   flags[0] |= 8;
                 if (meteoriteSpawn)                     flags[0] |= 16;
                 if (pillarManTempleSpawn)               flags[0] |= 32;
-                if (breathingTrainingDeterioration)    flags[0] |= 64;
+                if (breathingTrainingDeterioration)     flags[0] |= 64;
                 if (prioritizeLeastTakenStands)         flags[0] |= 128;
                 if (standTiers)                         flags[1] |= 1;
                 if (abilitiesBreakBlocks)               flags[1] |= 2;
@@ -427,6 +449,8 @@ public class JojoModConfig {
 //                bloodDrainMultiplier = Floats.toArray(config.bloodDrainMultiplier.get());
                 bloodTickDown = Floats.toArray(config.bloodTickDown.get());
 //                bloodHealCost = Floats.toArray(config.bloodHealCost.get());
+//                vampiresAggroMobs = config.vampiresAggroMobs.get();
+//                undeadMobsSunDamage = config.undeadMobsSunDamage.get();
                 prioritizeLeastTakenStands = config.prioritizeLeastTakenStands.get();
                 standTiers = config.standTiers.get();
                 standTierXpLevels = config.standTierXpLevels.get().stream().mapToInt(Integer::intValue).toArray();
@@ -531,10 +555,14 @@ public class JojoModConfig {
         
         public final ForgeConfigSpec.EnumValue<ActionsOverlayGui.PositionConfig> barsPosition;
         public final ForgeConfigSpec.EnumValue<ActionsOverlayGui.PositionConfig> hotbarsPosition;
+        public final ForgeConfigSpec.EnumValue<ActionsOverlayGui.HudNamesRender> hudNamesRender;
         
         public final ForgeConfigSpec.BooleanValue slotHotkeys;
         
         public final ForgeConfigSpec.BooleanValue resolveShaders;
+        public final ForgeConfigSpec.BooleanValue menacingParticles;
+        public final ForgeConfigSpec.BooleanValue timeStopFreezesVisuals;
+        public final ForgeConfigSpec.DoubleValue standStatsTranslucency;
         
         private Client(ForgeConfigSpec.Builder builder) {
             barsPosition = builder
@@ -547,6 +575,11 @@ public class JojoModConfig {
                     .translation("jojo.config.client.hotbarsPosition")
                     .defineEnum("hotbarsPosition", ActionsOverlayGui.PositionConfig.TOP_LEFT);
             
+            hudNamesRender = builder
+                    .comment(" How Power, Attack and Ability names should render in the HUD.")
+                    .translation("jojo.config.client.hudNamesRender")
+                    .defineEnum("hudNamesRender", ActionsOverlayGui.HudNamesRender.ALWAYS);
+            
             slotHotkeys = builder
                     .comment(" Enable hotkey settings for each individual attack and ability from 1 to 9.", 
                             "  If your client is launched, changing the setting requires restarting the game.")
@@ -557,6 +590,23 @@ public class JojoModConfig {
                     .comment(" Enable shaders during Resolve effect.")
                     .translation("jojo.config.client.resolveShaders")
                     .define("resolveShaders", true);
+            
+            menacingParticles = builder
+                    .comment(" Enable particles spawning from the player when AFK.")
+                    .translation("jojo.config.client.menacingParticles")
+                    .define("menacingParticles", true);
+            
+            timeStopFreezesVisuals = builder
+                    .comment(" Freeze particles, block texture animations and rain/snow during time stop.",
+                            "  Experimental feature - it may cause errors, so the option is disabled by default.")
+                    .translation("jojo.config.client.timeStopFreezesParticles")
+                    .define("timeStopFreezesParticles", false);
+            
+            standStatsTranslucency = builder
+                    .comment(" Translucency of Stand stats hexagon in the pause menu.", 
+                            "  If set to 0, it will not show up.")
+                    .translation("jojo.config.standStatsTranslucency")
+                    .defineInRange("standStatsTranslucency", 1.0, 0.0, 1.0);
         }
     }
 
@@ -569,8 +619,12 @@ public class JojoModConfig {
         commonSpec = specPair.getRight();
         COMMON_FROM_FILE = specPair.getLeft();
 
-        final Pair<Common, ForgeConfigSpec> syncedSpecPair = new ForgeConfigSpec.Builder().configure(Common::new);
-        syncedSpecPair.getRight().setConfig(CommentedConfig.of(InMemoryCommentedFormat.defaultInstance()));
+        // how tf do the configs work?
+        final Pair<Common, ForgeConfigSpec> syncedSpecPair = new ForgeConfigSpec.Builder().configure(builder -> new Common(builder, "synced"));
+        CommentedConfig config = CommentedConfig.of(InMemoryCommentedFormat.defaultInstance());
+        ForgeConfigSpec syncedSpec = syncedSpecPair.getRight();
+        syncedSpec.correct(config);
+        syncedSpec.setConfig(config);
         COMMON_SYNCED_TO_CLIENT = syncedSpecPair.getLeft();
     }
     
@@ -599,6 +653,12 @@ public class JojoModConfig {
         ModConfig config = event.getConfig();
         if (JojoMod.MOD_ID.equals(config.getModId()) && config.getType() == ModConfig.Type.COMMON) {
             // FIXME sync the config to all players on the server
+            MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+            if (server != null) {
+                server.getPlayerList().getPlayers().forEach(player -> {
+                    Common.SyncedValues.syncWithClient(player);
+                });
+            }
         }
     }
 }

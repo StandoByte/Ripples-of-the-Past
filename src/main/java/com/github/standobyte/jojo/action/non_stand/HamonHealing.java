@@ -33,15 +33,16 @@ public class HamonHealing extends HamonAction {
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
-        float effectStr = (float) hamon.getHamonControlLevel() / (float) HamonData.MAX_STAT_LEVEL * hamon.getBloodstreamEfficiency();
+        float hamonEfficiency = hamon.getHamonEfficiency();
+        float hamonControl = hamon.getHamonControlLevelRatio();
         if (!world.isClientSide()) {
             Entity targetEntity = target.getType() == TargetType.ENTITY && hamon.isSkillLearned(HamonSkill.HEALING_TOUCH) ? target.getEntity() : null;
             LivingEntity targetLiving = targetEntity instanceof LivingEntity ? (LivingEntity) targetEntity : null;
             LivingEntity entityToHeal = targetEntity != null && canBeHealed(targetLiving, user) ? targetLiving : user;
-            int regenDuration = 80 + MathHelper.floor(120F * effectStr);
-            int regenLvl = MathHelper.floor(2.9F * effectStr);
+            int regenDuration = (int) ((50F + hamonEfficiency * 50F) * (1 + hamonControl));
+            int regenLvl = MathHelper.clamp((int) ((hamonControl - 0.0001F) * 3 + (hamonEfficiency - 0.25F) * 4F/3F - 1), 0, 2);
 //            if (entityToHeal.getHealth() < entityToHeal.getMaxHealth()) {
-                hamon.hamonPointsFromAction(HamonStat.CONTROL, getEnergyCost(power));
+                hamon.hamonPointsFromAction(HamonStat.CONTROL, getEnergyCost(power) * hamonEfficiency);
 //            }
             entityToHeal.addEffect(new EffectInstance(Effects.REGENERATION, regenDuration, regenLvl));
             if (hamon.isSkillLearned(HamonSkill.EXPEL_VENOM)) {
@@ -55,7 +56,7 @@ public class HamonHealing extends HamonAction {
                 bonemealEffect(user.level, (PlayerEntity) user, target.getBlockPos(), face);
             }
             Vector3d sparksPos = new Vector3d(entityToHeal.getX(), entityToHeal.getY(0.5), entityToHeal.getZ());
-            HamonPowerType.createHamonSparkParticles(world, null, sparksPos, Math.max(0.5F * effectStr, 0.1F));
+            HamonPowerType.createHamonSparkParticles(world, null, sparksPos, Math.max(0.5F * hamonControl * hamonEfficiency, 0.1F));
         }
     }
     

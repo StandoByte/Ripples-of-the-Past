@@ -177,9 +177,9 @@ public class RoadRollerEntity extends Entity implements IHasHealth {
             return false;
         } else {
             if (!level.isClientSide()) {
-                Vector3d dmgPos = dmgSource.getSourcePosition();
                 double cos = -1;
-                if (dmgPos != null) {
+                if (dmgSource.getDirectEntity() != null) {
+                    Vector3d dmgPos = dmgSource.getDirectEntity().getEyePosition(1.0F);
                     Vector3d dmgVec = dmgPos.vectorTo(position()).normalize();
                     cos = dmgVec.dot(UPWARDS_VECTOR);
                     double damageMotion = cos * amount * 0.08D;

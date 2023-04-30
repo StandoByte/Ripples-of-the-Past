@@ -27,13 +27,13 @@ public class HamonDetector extends HamonAction {
         if (requirementsFulfilled) {
             if (!world.isClientSide() && ticksHeld < 160 || ticksHeld % 20 == 0) {
                 HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
-                double controlRatio = (double) hamon.getHamonControlLevel() / (double) HamonData.MAX_STAT_LEVEL * hamon.getBloodstreamEfficiency();
+                double controlRatio = (double) hamon.getHamonControlLevel() / (double) HamonData.MAX_STAT_LEVEL * hamon.getHamonEfficiency();
                 double radius = (double) ticksHeld * (controlRatio * 0.8D + 0.2D);
                 double maxRadius = 8D + controlRatio * 24D;
                 List<LivingEntity> entitiesAround = MCUtil.entitiesAround(LivingEntity.class, user, Math.min(radius, maxRadius), false, null);
                 entitiesAround.forEach(entity -> entity.addEffect(new EffectInstance(Effects.GLOWING, 80)));
                 if (!entitiesAround.isEmpty()) {
-                    hamon.hamonPointsFromAction(HamonStat.CONTROL, getHeldTickEnergyCost()); 
+                    hamon.hamonPointsFromAction(HamonStat.CONTROL, getHeldTickEnergyCost(power)); 
                 }
             }
             if (ticksHeld % 3 == 0) {

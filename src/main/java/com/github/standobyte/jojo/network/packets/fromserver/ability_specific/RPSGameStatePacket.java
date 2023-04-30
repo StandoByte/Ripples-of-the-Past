@@ -86,7 +86,7 @@ public class RPSGameStatePacket {
     
     
     public static class Handler implements IModPacketHandler<RPSGameStatePacket> {
-
+        
         @Override
         public void encode(RPSGameStatePacket msg, PacketBuffer buf) {
             buf.writeEnum(msg.packetType);
@@ -118,8 +118,8 @@ public class RPSGameStatePacket {
                 break;
             }
         }
-    
-        private static void writePickLists(RPSGameStatePacket msg, PacketBuffer buf) {
+        
+        private void writePickLists(RPSGameStatePacket msg, PacketBuffer buf) {
             int size = msg.playerPicks.size();
             buf.writeVarInt(size);
             for (int i = 0; i < size; i++) {
@@ -129,7 +129,7 @@ public class RPSGameStatePacket {
                 buf.writeEnum(msg.opponentPicks.get(i));
             }
         }
-
+        
         @Override
         public RPSGameStatePacket decode(PacketBuffer buf) {
             Type type = buf.readEnum(Type.class);
@@ -155,8 +155,8 @@ public class RPSGameStatePacket {
             }
             throw new IllegalStateException();
         }
-    
-        private static void readPickLists(List<Pick> playerPicks, List<Pick> opponentPicks, PacketBuffer buf) {
+        
+        private void readPickLists(List<Pick> playerPicks, List<Pick> opponentPicks, PacketBuffer buf) {
             int size = buf.readVarInt();
             for (int i = 0; i < size; i++) {
                 playerPicks.add(buf.readEnum(Pick.class));
@@ -165,7 +165,7 @@ public class RPSGameStatePacket {
                 opponentPicks.add(buf.readEnum(Pick.class));
             }
         }
-
+        
         @Override
         public void handle(RPSGameStatePacket msg, Supplier<NetworkEvent.Context> ctx) {
             PlayerEntity player = ClientUtil.getClientPlayer();
@@ -191,8 +191,8 @@ public class RPSGameStatePacket {
             case LEAVE:
                 player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                     cap.getCurrentRockPaperScissorsGame().ifPresent(game -> {
-                       game.leaveGame(player); 
-                       ClientUtil.closeRockPaperScissorsScreen(game);
+                        game.leaveGame(player); 
+                        ClientUtil.closeRockPaperScissorsScreen(game);
                     });
                 });
                 break;
@@ -212,7 +212,7 @@ public class RPSGameStatePacket {
                 break;
             }
         }
-
+        
         @Override
         public Class<RPSGameStatePacket> getPacketClass() {
             return RPSGameStatePacket.class;

@@ -106,10 +106,12 @@ public class TrHamonStatsPacket {
         public void handle(TrHamonStatsPacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity instanceof LivingEntity) {
-                INonStandPower.getNonStandPowerOptional((LivingEntity) entity).ifPresent(power -> {
+                LivingEntity user = (LivingEntity) entity;
+                INonStandPower.getNonStandPowerOptional(user).ifPresent(power -> {
                     power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                         final boolean showToasts = msg.showToasts && entity == ClientUtil.getClientPlayer();
-                        Predicate<HamonSkill> canBeLearned = skill -> !hamon.isSkillLearned(skill) && hamon.canLearnSkill(skill, null);
+                        Predicate<HamonSkill> canBeLearned = skill -> !hamon.isSkillLearned(skill)
+                                && hamon.canLearnSkillTeacherIrrelevant(user, skill).isPositive();
                         List<HamonSkill> oldSkills = Collections.emptyList();
                         if (showToasts) {
                             oldSkills = Arrays.stream(HamonSkill.values()).filter(skill -> canBeLearned.test(skill)).collect(Collectors.toList());

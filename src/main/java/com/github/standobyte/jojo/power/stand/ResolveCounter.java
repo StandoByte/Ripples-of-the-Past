@@ -59,6 +59,7 @@ public class ResolveCounter {
     private final Optional<ServerPlayerEntity> serverPlayerUser;
     
     private float resolve = 0;
+    private float prevTickResolve;
     private int noResolveDecayTicks = 0;
     
     private ResolveLevelsMap levels = new ResolveLevelsMap();
@@ -86,6 +87,7 @@ public class ResolveCounter {
     }
 
     void tick() {
+        prevTickResolve = resolve;
         LivingEntity user = stand.getUser();
         if (user != null && user.hasEffect(ModEffects.RESOLVE.get())) {
             EffectInstance effect = user.getEffect(ModEffects.RESOLVE.get());
@@ -141,6 +143,10 @@ public class ResolveCounter {
         return RESOLVE_DECAY;
     }
     
+    float getPrevTickResolveValue() {
+        return prevTickResolve;
+    }
+    
     
     
     float getResolveValue() {
@@ -185,6 +191,7 @@ public class ResolveCounter {
         
         boolean send = this.resolve != resolve || this.noResolveDecayTicks != noDecayTicks;
         this.resolve = resolve;
+        this.prevTickResolve = resolve;
         this.noResolveDecayTicks = noDecayTicks;
         
         int ticks = noDecayTicks;
@@ -361,6 +368,7 @@ public class ResolveCounter {
 
     void reset() {
         resolve = 0;
+        prevTickResolve = 0;
         levels.onStandSet(null);
         noResolveDecayTicks = 0;
         resolveRecords.clear();
@@ -372,6 +380,7 @@ public class ResolveCounter {
     
     public void resetResolveValue() {
         resolve = 0;
+        prevTickResolve = 0;
         noResolveDecayTicks = 0;
         resolveRecords.clear();
         saveNextRecord = true;
@@ -403,6 +412,7 @@ public class ResolveCounter {
         this.maxAchievedValue = Optional.ofNullable(resolveRecords.getMax()).orElse(0F);
         
         resolve = 0;
+        prevTickResolve = 0;
         noResolveDecayTicks = 0;
         saveNextRecord = true;
         setBoosts(1, 1, 1);
@@ -417,6 +427,7 @@ public class ResolveCounter {
 
     void readNbt(CompoundNBT nbt) {
         resolve = nbt.getFloat("Resolve");
+        prevTickResolve = resolve;
         noResolveDecayTicks = nbt.getInt("ResolveTicks");
         saveNextRecord = nbt.getBoolean("SaveNextRecord");
         boostAttack = nbt.getFloat("BoostAttack");

@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.action.non_stand;
 
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
@@ -7,6 +8,7 @@ import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.vampirism.ModVampirismActions;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
+import com.github.standobyte.jojo.util.mc.LiquidOnlyRayTraceContext;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.block.BlockState;
@@ -22,7 +24,10 @@ import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceContext;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.Difficulty;
@@ -114,24 +119,36 @@ public class VampirismFreeze extends VampirismAction {
     
     private void frostWalkerImitation(LivingEntity entity, World world, BlockPos entityPos, float radius) {
         if (entity.isOnGround()) {
-            BlockState ice = Blocks.FROSTED_ICE.defaultBlockState();
             BlockPos.Mutable posMutable = new BlockPos.Mutable();
             for (BlockPos blockPos : BlockPos.betweenClosed(entityPos.offset(-radius, -1.0, -radius), entityPos.offset(radius, -1.0, radius))) {
                 if (blockPos.closerThan(entity.position(), (double) radius)) {
                     posMutable.set(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ());
                     BlockState blockState = world.getBlockState(posMutable);
                     if (blockState.getBlock().isAir(blockState, world, posMutable)) {
-                        blockState = world.getBlockState(blockPos);
-                        boolean isFull = blockState.getBlock() == Blocks.WATER && blockState.getValue(FlowingFluidBlock.LEVEL) == 0;
-                        if (blockState.getMaterial() == Material.WATER && isFull && ice.canSurvive(world, blockPos)
-                                && world.isUnobstructed(ice, blockPos, ISelectionContext.empty())
-                                && !ForgeEventFactory.onBlockPlace(entity, BlockSnapshot.create(world.dimension(), world, blockPos), Direction.UP)) {
-                            world.setBlockAndUpdate(blockPos, ice);
-                            world.getBlockTicks().scheduleTick(blockPos, Blocks.FROSTED_ICE, MathHelper.nextInt(entity.getRandom(), 20, 40));
-                        }
+                        freezeWaterBlock(world, blockPos, entity);
                     }
                 }
             }
+        }
+
+        Vector3d eyePos = entity.getEyePosition(1.0F);
+        Vector3d lookVec = entity.getLookAngle();
+        RayTraceResult rayTraceResult = world.clip(new LiquidOnlyRayTraceContext(
+                eyePos.add(lookVec), eyePos.add(lookVec.scale(8)), RayTraceContext.FluidMode.SOURCE_ONLY, entity));
+        if (rayTraceResult.getType() == RayTraceResult.Type.BLOCK) {
+            freezeWaterBlock(world, ((BlockRayTraceResult) rayTraceResult).getBlockPos(), entity);
+        }
+    }
+
+    private static final BlockState ICE = Blocks.FROSTED_ICE.defaultBlockState();
+    private void freezeWaterBlock(World world, BlockPos blockPos, LivingEntity vampireEntity) {
+        BlockState blockState = world.getBlockState(blockPos);
+        boolean isFull = blockState.getBlock() == Blocks.WATER && blockState.getValue(FlowingFluidBlock.LEVEL) == 0;
+        if (blockState.getMaterial() == Material.WATER && isFull && ICE.canSurvive(world, blockPos)
+                && world.isUnobstructed(ICE, blockPos, ISelectionContext.empty())
+                && !ForgeEventFactory.onBlockPlace(vampireEntity, BlockSnapshot.create(world.dimension(), world, blockPos), Direction.UP)) {
+            world.setBlockAndUpdate(blockPos, ICE);
+            world.getBlockTicks().scheduleTick(blockPos, Blocks.FROSTED_ICE, MathHelper.nextInt(vampireEntity.getRandom(), 20, 40));
         }
     }
 
@@ -175,7 +192,7 @@ public class VampirismFreeze extends VampirismAction {
     }
     
     @Override
-    public boolean heldAllowsOtherActions(INonStandPower power) {
+    public boolean heldAllowsOtherAction(INonStandPower power, Action<INonStandPower> action) {
         return true;
     }
 }

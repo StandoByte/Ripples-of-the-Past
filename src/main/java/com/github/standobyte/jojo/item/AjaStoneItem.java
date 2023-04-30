@@ -46,14 +46,14 @@ public class AjaStoneItem extends Item {
                     HamonData hamon = hamonOptional.get();
                     if (hamon.isSkillLearned(HamonSkill.AJA_STONE_KEEPER) && power.consumeEnergy(getHamonChargeCost())) {
                         if (!world.isClientSide()) {
-                            useStone(world, player, stack, 0.75F * hamon.getHamonDamageMultiplier() * hamon.getBloodstreamEfficiency(), true, false);
+                            useStone(world, player, stack, 0.75F * hamon.getHamonDamageMultiplier() * hamon.getHamonEfficiency(), true, false);
                             hamon.hamonPointsFromAction(HamonStat.STRENGTH, getHamonChargeCost());
                             JojoModUtil.sayVoiceLine(player, getHamonChargeVoiceLine());
                         }
                         Vector3d sparkVec = player.getLookAngle().scale(0.75)
                                 .add(player.getX(), player.getY(0.6), player.getZ());
                         HamonPowerType.createHamonSparkParticles(world, player, sparkVec, 
-                                hamon.getHamonDamageMultiplier() / HamonData.MAX_HAMON_DAMAGE * 1.5F);
+                                hamon.getHamonDamageMultiplier() / HamonData.MAX_HAMON_STRENGTH_MULTIPLIER * 1.5F);
                         return ActionResult.success(stack);
                     }
                 }

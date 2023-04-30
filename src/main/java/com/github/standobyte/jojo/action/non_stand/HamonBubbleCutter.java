@@ -21,8 +21,9 @@ public class HamonBubbleCutter extends HamonAction {
             for (int i = 0; i < bubbles; i++) {
                 HamonBubbleCutterEntity bubbleCutterEntity = new HamonBubbleCutterEntity(user, world);
                 float velocity = 1.35F + user.getRandom().nextFloat() * 0.3F;
-                bubbleCutterEntity.shootFromRotation(user, velocity, shift ? 2.0F : 8.0F);
                 bubbleCutterEntity.setGliding(shift);
+                bubbleCutterEntity.setHamonStatPoints(getEnergyCost(power) / 10F);
+                bubbleCutterEntity.shootFromRotation(user, velocity, shift ? 2.0F : 8.0F);
                 world.addFreshEntity(bubbleCutterEntity);
             }
         }

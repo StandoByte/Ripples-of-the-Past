@@ -1,10 +1,16 @@
 package com.github.standobyte.jojo.client.particle.custom;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.init.ModParticles;
+import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.IAnimatedSprite;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.settings.ParticleStatus;
@@ -12,10 +18,36 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.particles.BasicParticleType;
+import net.minecraft.particles.ParticleType;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class CustomParticlesHelper {
+    
+    private static final Map<ResourceLocation, IAnimatedSprite> SPRITE_SETS = new HashMap<>();
+    
+    public static void saveSprites(Minecraft mc) {
+        Map<ResourceLocation, ? extends IAnimatedSprite> spritesMap = ClientReflection.getSpriteSets(mc.particleEngine);
+        CustomParticlesHelper.saveSprites(spritesMap, ModParticles.CD_RESTORATION.get());
+        CustomParticlesHelper.saveSprites(spritesMap, ModParticles.HAMON_SPARK.get());
+        CustomParticlesHelper.saveSprites(spritesMap, ModParticles.HAMON_SPARK_BLUE.get());
+        CustomParticlesHelper.saveSprites(spritesMap, ModParticles.HAMON_SPARK_YELLOW.get());
+        CustomParticlesHelper.saveSprites(spritesMap, ModParticles.HAMON_SPARK_RED.get());
+        CustomParticlesHelper.saveSprites(spritesMap, ModParticles.HAMON_SPARK_SILVER.get());
+    }
+    
+    public static IAnimatedSprite getSavedSpriteSet(ParticleType<?> particleType) {
+        return SPRITE_SETS.get(ForgeRegistries.PARTICLE_TYPES.getKey(particleType));
+    }
+    
+    private static void saveSprites(Map<ResourceLocation, ? extends IAnimatedSprite> sprites, ParticleType<?> particleType) {
+        ResourceLocation key = ForgeRegistries.PARTICLE_TYPES.getKey(particleType);
+        SPRITE_SETS.put(key, sprites.get(key));
+    }
+    
+    
     
     public static boolean createCDRestorationParticle(LivingEntity entity, Hand hand) {
         if (!ClientUtil.canSeeStands()) return false;

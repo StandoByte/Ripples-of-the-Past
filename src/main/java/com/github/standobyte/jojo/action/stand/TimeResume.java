@@ -8,13 +8,14 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.capability.world.TimeStopInstance;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.util.mod.TimeUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.World;
 
 public class TimeResume extends StandAction {
 
-    public TimeResume(AbstractBuilder<?> builder) {
+    public TimeResume(StandAction.Builder builder) {
         super(builder);
     }
     
@@ -40,5 +41,15 @@ public class TimeResume extends StandAction {
     @Override
     public boolean isUnlocked(IStandPower power) {
         return true;
+    }
+    
+    @Nullable
+    public StandAction getVisibleAction(IStandPower power) {
+        LivingEntity user = power.getUser();
+        if (user != null && TimeUtil.isTimeStopped(user.level, user.blockPosition()) 
+                && TimeResume.userTimeStopInstance(user.level, user, null)) {
+            return this;
+        }
+        return null;
     }
 }

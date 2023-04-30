@@ -4,7 +4,6 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.block.Block;
@@ -15,8 +14,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.DoubleNBT;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -30,6 +28,7 @@ import net.minecraft.world.World;
 public class KnifeEntity extends ItemProjectileEntity {
     private boolean timeStop = false;
     private Vector3d timeStopHitMotion;
+    private int tsFlightTicks = 0;
 
     public KnifeEntity(World world, LivingEntity shooter) {
        super(ModEntityTypes.KNIFE.get(), shooter, world);
@@ -42,7 +41,7 @@ public class KnifeEntity extends ItemProjectileEntity {
     public KnifeEntity(EntityType<? extends KnifeEntity> type, World world) {
        super(type, world);
     }
-
+    
     @Override
     protected ItemStack getPickupItem() {
         return new ItemStack(ModItems.KNIFE.get());
@@ -58,41 +57,71 @@ public class KnifeEntity extends ItemProjectileEntity {
        return ModSounds.KNIFE_HIT.get();
     }
     
+    public void setTimeStopFlightTicks(int ticks) {
+        this.tsFlightTicks = ticks;
+    }
+    
     @Override
     public void tick() {
-        if (!timeStop || timeStopHitMotion == null && tickCount < 5) {
-            super.tick();
-            if (!inGround && !level.isClientSide()) {
-                Vector3d posVec = position();
-                RayTraceResult rayTraceResult = level.clip(new RayTraceContext(posVec, posVec.add(getDeltaMovement()), RayTraceContext.BlockMode.OUTLINE, RayTraceContext.FluidMode.NONE, this));
-                if (rayTraceResult.getType() == Type.BLOCK) {
-                    BlockPos blockPos = ((BlockRayTraceResult) rayTraceResult).getBlockPos();
-                    Block block = level.getBlockState(blockPos).getBlock();
-                    if (block == Blocks.COBWEB) {
-                        level.destroyBlock(blockPos, true);
-                        setDeltaMovement(getDeltaMovement().scale(0.8D));
-                    }
-                    if (block == Blocks.TRIPWIRE) {
-                        level.destroyBlock(blockPos, true);
-                    }
+        if (timeStop) {
+            if (tsFlightTicks > 0) {
+                tsFlightTicks--;
+            }
+            else {
+                super.canUpdate(false);
+                return;
+            }
+        }
+        
+        super.tick();
+        
+        if (timeStopHitMotion != null) {
+            setDeltaMovement(timeStopHitMotion);
+            timeStopHitMotion = null;
+        }
+        
+        if (!inGround && !level.isClientSide()) {
+            Vector3d posVec = position();
+            RayTraceResult rayTraceResult = level.clip(new RayTraceContext(posVec, posVec.add(getDeltaMovement()), RayTraceContext.BlockMode.OUTLINE, RayTraceContext.FluidMode.NONE, this));
+            if (rayTraceResult.getType() == Type.BLOCK) {
+                BlockPos blockPos = ((BlockRayTraceResult) rayTraceResult).getBlockPos();
+                Block block = level.getBlockState(blockPos).getBlock();
+                if (block == Blocks.COBWEB) {
+                    level.destroyBlock(blockPos, true);
+                    setDeltaMovement(getDeltaMovement().scale(0.8D));
+                }
+                if (block == Blocks.TRIPWIRE) {
+                    level.destroyBlock(blockPos, true);
                 }
             }
         }
     }
-    
+
     @Override
     protected void onHit(RayTraceResult rayTraceResult) {
-        if (!(timeStop && rayTraceResult.getType() == RayTraceResult.Type.ENTITY)) {
+        if (timeStop && rayTraceResult.getType() == RayTraceResult.Type.ENTITY) {
+            if (!level.isClientSide()) {
+                timeStopHitMotion = getDeltaMovement();
+                setDeltaMovement(Vector3d.ZERO);
+            }
+            tsFlightTicks = 0;
+            super.canUpdate(false);
+        }
+        else {
             super.onHit(rayTraceResult);
         }
-        else if (timeStopHitMotion == null) {
-            timeStopHitMotion = getDeltaMovement();
-            setDeltaMovement(Vector3d.ZERO);
+    }
+
+    @Override
+    public void canUpdate(boolean canUpdate) {
+        this.timeStop = !canUpdate;
+        if (canUpdate) {
+            super.canUpdate(canUpdate);
         }
     }
-    
-    @Override
-    public void setSecondsOnFire(int seconds) {}
+//    
+//    @Override
+//    public void setSecondsOnFire(int seconds) {}
     
     @Override
     protected boolean hurtTarget(Entity target, Entity thrower) {
@@ -116,43 +145,30 @@ public class KnifeEntity extends ItemProjectileEntity {
     }
     
     @Override
-    public void canUpdate(boolean canUpdate) {
-        if (canUpdate) {
-            if (timeStop) {
-                timeStop = false;
-                if (timeStopHitMotion != null) {
-                    setDeltaMovement(timeStopHitMotion);
-                }
-            }
-            else {
-                super.canUpdate(canUpdate);
-            }
-        }
-        else if (tickCount == 0 && !timeStop) {
-            timeStop = true;
-        }
-        else {
-            super.canUpdate(canUpdate);
-        }
-    }
-    
-    @Override
     public void readAdditionalSaveData(CompoundNBT nbt) {
         super.readAdditionalSaveData(nbt);
-        if (nbt.contains("TSHitMotion", MCUtil.getNbtId(ListNBT.class))) {
-            ListNBT listNBT = nbt.getList("TSHitMotion", MCUtil.getNbtId(DoubleNBT.class));
-            if (listNBT.size() >= 3) {
-                timeStopHitMotion = new Vector3d(listNBT.getDouble(0), listNBT.getDouble(1), listNBT.getDouble(2));
-            }
-        }
+        timeStop = nbt.getBoolean("TimeStop");
+        tsFlightTicks = nbt.getInt("TimeStopTicks");
     }
 
     @Override
     public void addAdditionalSaveData(CompoundNBT nbt) {
         super.addAdditionalSaveData(nbt);
-        if (timeStopHitMotion != null) {
-            nbt.putBoolean("TimeStopHit", true);
-            nbt.put("TSHitMotion", newDoubleList(timeStopHitMotion.x, timeStopHitMotion.y, timeStopHitMotion.z));
-        }
+        nbt.putBoolean("TimeStop", timeStop);
+        nbt.putInt("TimeStopTicks", tsFlightTicks);
+    }
+    
+    @Override
+    public void writeSpawnData(PacketBuffer buffer) {
+        super.writeSpawnData(buffer);
+        buffer.writeBoolean(timeStop);
+        buffer.writeVarInt(tsFlightTicks);
+    }
+
+    @Override
+    public void readSpawnData(PacketBuffer additionalData) {
+        super.readSpawnData(additionalData);
+        timeStop = additionalData.readBoolean();
+        tsFlightTicks = additionalData.readVarInt();
     }
 }

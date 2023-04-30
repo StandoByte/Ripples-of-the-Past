@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.action.non_stand;
 
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
@@ -8,8 +9,8 @@ import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
 import com.github.standobyte.jojo.init.ModCustomStats;
 import com.github.standobyte.jojo.init.ModEffects;
-import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.vampirism.VampirismPowerType;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
@@ -89,8 +90,9 @@ public class VampirismBloodDrain extends VampirismAction {
                         bloodAndHealModifier *= 1 - Math.min((freeze.getAmplifier() + 1) * 0.2F, 1);
                     }
                     power.addEnergy(bloodAndHealModifier);
-                    float healed = user.getHealth();
-                    if (drainBlood(user, targetEntity, 4, bloodAndHealModifier * 0.5F)) {
+                    if (drainBlood(user, targetEntity, 4)) {
+                        float healed = user.getHealth();
+                        user.heal(bloodAndHealModifier * 0.5F);
                         healed = user.getHealth() - healed;
                         if (healed > 0) {
                             power.addEnergy(healed * VampirismPowerType.healCost(world));
@@ -120,10 +122,9 @@ public class VampirismBloodDrain extends VampirismAction {
             Effects.WEAKNESS,
             Effects.CONFUSION
     };
-    public static boolean drainBlood(LivingEntity attacker, LivingEntity target, float bloodDrainDamage, float healAmount) {
+    public static boolean drainBlood(LivingEntity attacker, LivingEntity target, float bloodDrainDamage) {
         boolean hurt = target.hurt(DamageUtil.bloodDrainDamage(attacker), bloodDrainDamage);
         if (hurt) {
-            attacker.heal(healAmount);
             int effectsLvl = attacker.level.getDifficulty().getId() - 1;
             if (effectsLvl >= 0) {
                 for (Effect effect : BLOOD_DRAIN_EFFECTS) {
@@ -162,7 +163,7 @@ public class VampirismBloodDrain extends VampirismAction {
     }
     
     @Override
-    public boolean heldAllowsOtherActions(INonStandPower power) {
+    public boolean heldAllowsOtherAction(INonStandPower power, Action<INonStandPower> action) {
         return true;
     }
 }

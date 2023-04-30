@@ -17,6 +17,21 @@ public class ModParticles {
     public static final RegistryObject<BasicParticleType> HAMON_SPARK = PARTICLES.register("hamon_spark", 
             () -> new BasicParticleType(false));
     
+    public static final RegistryObject<BasicParticleType> HAMON_SPARK_BLUE = PARTICLES.register("hamon_spark_blue", 
+            () -> new BasicParticleType(false));
+    
+    public static final RegistryObject<BasicParticleType> HAMON_SPARK_YELLOW = PARTICLES.register("hamon_spark_yellow", 
+            () -> new BasicParticleType(false));
+    
+    public static final RegistryObject<BasicParticleType> HAMON_SPARK_RED = PARTICLES.register("hamon_spark_red", 
+            () -> new BasicParticleType(false));
+    
+    public static final RegistryObject<BasicParticleType> HAMON_SPARK_SILVER = PARTICLES.register("hamon_spark_silver", 
+            () -> new BasicParticleType(false));
+    
+    public static final RegistryObject<BasicParticleType> HAMON_AURA = PARTICLES.register("hamon_aura", 
+            () -> new BasicParticleType(false));
+    
     public static final RegistryObject<BasicParticleType> METEORITE_VIRUS = PARTICLES.register("meteorite_virus", 
             () -> new BasicParticleType(false));
     

@@ -29,7 +29,7 @@ public class HamonPlantInfusion extends HamonOrganismInfusion {
         BlockPos blockPos = target.getBlockPos();
         BlockState blockState = user.level.getBlockState(blockPos);
         if (blockState.getMaterial() == Material.EGG) {
-            return conditionMessage("animal_infusion");
+            return conditionMessage("turtle_egg");
         }
         Block block = blockState.getBlock();
         if (!(isBlockLiving(blockState) || block instanceof FlowerPotBlock && blockState.getBlock() != Blocks.FLOWER_POT)) {

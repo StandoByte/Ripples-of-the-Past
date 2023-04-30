@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
 import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.TrDoubleShiftPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrWalkmanEarbudsPacket;
 
@@ -33,8 +34,11 @@ public class PlayerUtilCap {
     private int noClientInputTimer;
     
     private Optional<RockPaperScissorsGame> currentGame = Optional.empty();
-
+    
     private boolean walkmanEarbuds = false;
+    
+    private boolean doubleShiftPress = false;
+    private boolean shiftSynced = false;
     
     public PlayerUtilCap(PlayerEntity player) {
         this.player = player;
@@ -43,16 +47,47 @@ public class PlayerUtilCap {
     
     
     public void tick() {
-        tickKnivesRemoval();
-        tickVoiceLines();
-        tickClientInputTimer();
+        if (!player.level.isClientSide()) {
+            tickKnivesRemoval();
+            tickVoiceLines();
+            tickClientInputTimer();
+            
+            if (knivesThrewTicks > 0) {
+                knivesThrewTicks--;
+            }
+        }
         
-        if (knivesThrewTicks > 0) {
-            knivesThrewTicks--;
+        tickDoubleShift();
+    }
+    
+    
+    
+    public void setDoubleShiftPress() {
+        doubleShiftPress = true;
+        shiftSynced = player.isShiftKeyDown();
+        if (!player.level.isClientSide()) {
+            PacketManager.sendToClientsTracking(new TrDoubleShiftPacket(player.getId()), player);
         }
     }
     
-
+    private void tickDoubleShift() {
+        if (doubleShiftPress) {
+            if (!shiftSynced) {
+                if (player.isShiftKeyDown()) {
+                    shiftSynced = true;
+                }
+            }
+            else if (!player.isShiftKeyDown()) {
+                doubleShiftPress = false;
+            }
+        }
+    }
+    
+    public boolean getDoubleShiftPress() {
+        return doubleShiftPress;
+    }
+    
+    
     
     public void sendNotification(OneTimeNotification notification, ITextComponent message) {
         if (!sentNotification(notification)) {
@@ -78,8 +113,14 @@ public class PlayerUtilCap {
         this.notificationsSent = cap.notificationsSent;
     }
     
+    public static enum OneTimeNotification {
+        POWER_CONTROLS,
+        HAMON_WINDOW,
+        HIGH_STAND_RANGE
+    }
     
-
+    
+    
     public void setKnives(int knives) {
         knives = Math.max(knives, 0);
         if (this.knives != knives) {
@@ -168,11 +209,11 @@ public class PlayerUtilCap {
     private Map<SoundEvent, Integer> recentlyPlayedVoiceLines = new HashMap<>();
     
     @Nullable
-    public boolean checkNotRepeatingVoiceLine(SoundEvent voiceLine) {
+    public boolean checkNotRepeatingVoiceLine(SoundEvent voiceLine, int voiceLineDelay) {
         if (recentlyPlayedVoiceLines.containsKey(voiceLine) && recentlyPlayedVoiceLines.get(voiceLine) > 0) {
             return false;
         }
-        recentlyPlayedVoiceLines.put(voiceLine, 200);
+        recentlyPlayedVoiceLines.put(voiceLine, voiceLineDelay);
         return true;
     }
     
@@ -184,12 +225,5 @@ public class PlayerUtilCap {
             }
         }
     }
-    
-    
-    
-    public static enum OneTimeNotification {
-        POWER_CONTROLS,
-        HAMON_WINDOW,
-        HIGH_STAND_RANGE
-    }
+
 }

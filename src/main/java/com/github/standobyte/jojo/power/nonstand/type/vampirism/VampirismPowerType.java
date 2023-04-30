@@ -22,7 +22,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
 
-public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
+public class VampirismPowerType extends NonStandPowerType<VampirismData> {
     private static Map<Effect, IntBinaryOperator> EFFECTS_AMPLIFIERS;
     
     public static void initVampiricEffectsMap() {
@@ -39,7 +39,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
     }
 
     public VampirismPowerType(int color, VampirismAction[] startingAttacks, VampirismAction[] startingAbilities) {
-        super(color, startingAttacks, startingAbilities, VampirismFlags::new);
+        super(color, startingAttacks, startingAbilities, VampirismData::new);
     }
     
     @Override
@@ -59,29 +59,33 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
     }
     
     @Override
-    public float getMaxEnergyFactor(INonStandPower power) {
+    public float getMaxEnergy(INonStandPower power) {
         World world = power.getUser().level;
-        return GeneralUtil.getOrLast(
+        return super.getMaxEnergy(power) * GeneralUtil.getOrLast(
                 JojoModConfig.getCommonConfigInstance(world.isClientSide()).maxBloodMultiplier.get(), world.getDifficulty().getId())
                 .floatValue();
     }
 
     @Override
-    public float getEnergyTickInc(INonStandPower power) {
+    public float tickEnergy(INonStandPower power) {
         World world = power.getUser().level;
-        return -GeneralUtil.getOrLast(
+        float inc = -GeneralUtil.getOrLast(
                 JojoModConfig.getCommonConfigInstance(world.isClientSide()).bloodTickDown.get(), world.getDifficulty().getId())
                 .floatValue();
+        if (power.isUserCreative()) {
+            inc = Math.max(inc, 0);
+        }
+        return power.getEnergy() + inc;
     }
     
     @Override
     public float getMaxStaminaFactor(INonStandPower power, IStandPower standPower) {
-        return Math.max((bloodLevel(power) - 3) * 2, 1);
+        return Math.max((bloodLevel(power) - 4) * 2, 1);
     }
 
     @Override
     public float getStaminaRegenFactor(INonStandPower power, IStandPower standPower) {
-        return Math.max((bloodLevel(power) - 3) * 4, 1);
+        return Math.max((bloodLevel(power) - 4) * 4, 1);
     }
 
     private static int bloodLevel(INonStandPower power) {
@@ -151,7 +155,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismFlags> {
     
     @Override
     public float getLeapStrength(INonStandPower power) {
-        VampirismFlags vampirism = power.getTypeSpecificData(this).get();
+        VampirismData vampirism = power.getTypeSpecificData(this).get();
         float leapStrength = Math.max(bloodLevel(power), 0);
         if (!vampirism.isVampireAtFullPower()) {
             leapStrength *= 0.25F;

@@ -25,6 +25,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
@@ -145,7 +146,7 @@ public class TimeStop extends StandAction {
     }
     
     @Override
-    public TranslationTextComponent getTranslatedName(IStandPower power, String key) {
+    public IFormattableTextComponent getTranslatedName(IStandPower power, String key) {
         int timeStopTicks = getTimeStopTicks(power, this);
         return new TranslationTextComponent(key, String.format("%.2f", (float) timeStopTicks / 20F));
     }

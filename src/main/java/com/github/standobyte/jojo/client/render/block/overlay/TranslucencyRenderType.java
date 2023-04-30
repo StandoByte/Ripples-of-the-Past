@@ -5,9 +5,9 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.renderer.RenderType;
 
-public class TranslusencyRenderType extends ModifiedRenderType {
+public class TranslucencyRenderType extends ModifiedRenderType {
 
-    public TranslusencyRenderType(RenderType original) {
+    public TranslucencyRenderType(RenderType original) {
         super(original, 
                 () -> {
                     RenderSystem.disableDepthTest();

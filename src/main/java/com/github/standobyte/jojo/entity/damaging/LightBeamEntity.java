@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.entity.damaging;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
-import net.minecraft.block.Blocks;
+import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -71,7 +71,7 @@ public class LightBeamEntity extends DamagingEntity {
         if (!level.isClientSide()) {
             BlockPos blockPos = blockRayTraceResult.getBlockPos().relative(blockRayTraceResult.getDirection());
             if (level.isEmptyBlock(blockPos)) {
-                level.setBlockAndUpdate(blockPos, Blocks.FIRE.defaultBlockState());
+                level.setBlockAndUpdate(blockPos, AbstractFireBlock.getState(level, blockPos));
             }
         }
     }

@@ -16,6 +16,7 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
     
     private int selectedAttack = 0;
     private int selectedAbility = 0;
+    int costOverlayTick = 0;
     
     private final SelectedTargetIcon attackTargetIcon = new SelectedTargetIcon();
     private final SelectedTargetIcon abilityTargetIcon = new SelectedTargetIcon();
@@ -42,7 +43,7 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
         return -1;
     }
     
-    boolean setSelectedSlot(ActionType hotbar, int slot) {
+    void setSelectedSlot(ActionType hotbar, int slot) {
         if (slot > -1) {
             List<Action<P>> actions = power.getActions(hotbar);
             if (slot >= actions.size() || actions.get(slot).getVisibleAction(power) == null) {
@@ -61,7 +62,7 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
             selectedAbility = slot;
             break;
         }
-        return true;
+        resetSelectedTick();
     }
     
     @Nullable
@@ -75,6 +76,18 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
             setSelectedSlot(hotbar, -1);
         }
         return action;
+    }
+    
+    void tick() {
+        costOverlayTick++;
+    }
+    
+    void resetSelectedTick() {
+        costOverlayTick = 0;
+    }
+
+    int getSelectedTick() {
+        return costOverlayTick;
     }
     
     SelectedTargetIcon getTargetIcon(ActionType hotbar) {

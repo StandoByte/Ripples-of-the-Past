@@ -14,6 +14,7 @@ import com.github.standobyte.jojo.entity.itemprojectile.BladeHatEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.EntityTickableSound;
@@ -29,7 +30,7 @@ import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 
 public abstract class ClientTickingSoundsHelper {
     
-    public static boolean playVoiceLine(Entity entity, SoundEvent soundEvent, SoundCategory category, float volume, float pitch) {
+    public static boolean playVoiceLine(Entity entity, SoundEvent soundEvent, SoundCategory category, float volume, float pitch, boolean interrupt) {
         Minecraft mc = Minecraft.getInstance();
         
         PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(mc.player, soundEvent, category, volume, pitch);
@@ -43,8 +44,8 @@ public abstract class ClientTickingSoundsHelper {
         pitch = event.getPitch();
 
         ISound sound = new EntityTickableSound(soundEvent, category, volume, pitch, entity);
-        if (entity instanceof AbstractClientPlayerEntity && entity.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).map(cap -> {
-            boolean alreadyPlaying = cap.isVoiceLinePlaying();
+        if (entity instanceof AbstractClientPlayerEntity && GeneralUtil.orElseFalse(entity.getCapability(ClientPlayerUtilCapProvider.CAPABILITY), cap -> {
+            boolean alreadyPlaying = !interrupt && cap.isVoiceLinePlaying();
             if (alreadyPlaying) {
                 cap.lastVoiceLineTriggered = false;
             }
@@ -53,7 +54,7 @@ public abstract class ClientTickingSoundsHelper {
                 cap.setCurrentVoiceLine(sound);
             }
             return !alreadyPlaying;
-        }).orElse(false)) {
+        })) {
             mc.getSoundManager().play(sound);
             return true;
         }
@@ -150,17 +151,21 @@ public abstract class ClientTickingSoundsHelper {
         Minecraft.getInstance().getSoundManager().play(new HamonSparksSound(entity, volume, pitch));
     }
     
+    public static <T extends Entity> void playHamonSparksLoopSound(T entity, Predicate<T> stopCondition, float volume) {
+        Minecraft.getInstance().getSoundManager().play(new HamonSparksLoopSound<>(entity, stopCondition, volume, 1.0F));
+    }
+    
+    public static void playHamonConcentrationSound(LivingEntity hamonUser, Predicate<LivingEntity> stopCondition, float volume) {
+        Minecraft.getInstance().getSoundManager().play(new StoppableEntityTickableSound<LivingEntity>(
+                ModSounds.HAMON_CONCENTRATION.get(), hamonUser.getSoundSource(), volume, 1.0F, false, hamonUser, stopCondition));
+    }
+    
     public static void playGliderFlightSound(LeavesGliderEntity entity) {
         Minecraft.getInstance().getSoundManager().play(new GliderFlightSound(entity));
     }
     
     public static void playBladeHatSound(BladeHatEntity entity) {
         Minecraft.getInstance().getSoundManager().play(new BladeHatSound(entity));
-    }
-    
-    public static void playHamonConcentrationSound(LivingEntity hamonUser, Predicate<LivingEntity> stopCondition) {
-        Minecraft.getInstance().getSoundManager().play(new StoppableEntityTickableSound<LivingEntity>(
-                ModSounds.HAMON_CONCENTRATION.get(), hamonUser.getSoundSource(), 1.0F, 1.0F, false, hamonUser, stopCondition));
     }
     
     public static void playItemUseSound(LivingEntity entity, SoundEvent sound, float volume, float pitch, boolean looping, ItemStack stack) {

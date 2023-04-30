@@ -16,18 +16,18 @@ public class PlayerUtilCapProvider implements ICapabilitySerializable<INBT> {
     public PlayerUtilCapProvider(PlayerEntity player) {
         this.instance = LazyOptional.of(() -> new PlayerUtilCap(player));
     }
-
+    
     @Override
     public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
         return CAPABILITY.orEmpty(cap, instance);
     }
-
+    
     @Override
     public INBT serializeNBT() {
         return CAPABILITY.getStorage().writeNBT(CAPABILITY, instance.orElseThrow(
                 () -> new IllegalArgumentException("Player capability LazyOptional is not attached.")), null);
     }
-
+    
     @Override
     public void deserializeNBT(INBT nbt) {
         CAPABILITY.getStorage().readNBT(CAPABILITY, instance.orElseThrow(

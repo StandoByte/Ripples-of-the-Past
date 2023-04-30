@@ -12,8 +12,9 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.potion.ImmobilizeEffect;
 import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.Entity;
@@ -22,9 +23,11 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.potion.Effect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -45,6 +48,7 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     private static final DataParameter<Float> DISTANCE = EntityDataManager.defineId(OwnerBoundProjectileEntity.class, DataSerializers.FLOAT);
     private LivingEntity attachedEntity;
     private UUID attachedEntityUUID;
+    private int lifeSpan;
 
     public OwnerBoundProjectileEntity(EntityType<? extends OwnerBoundProjectileEntity> entityType, @Nonnull LivingEntity owner, World world) {
         super(entityType, owner, world);
@@ -186,16 +190,16 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
         if (isRetracting() && distance <= 0) {
             return null;
         }
-        setDistance(distance);
+        if (!level.isClientSide()) setDistance(distance);
         return originOffset(owner.yRot, owner.xRot, distance);
     }
     
     protected float updateDistance() {
-        if (isMovingForward()) {
-            return getDistance() + movementSpeed() * speedFactor;
-        }
         if (isRetracting()) {
             return getDistance() - retractSpeed() * speedFactor;
+        }
+        if (isMovingForward()) {
+            return getDistance() + movementSpeed() * speedFactor;
         }
         return getDistance();
     }
@@ -245,7 +249,8 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     
     @Override
     protected boolean hurtTarget(Entity target, DamageSource dmgSource, float dmgAmount) {
-        return shouldHurtThroughInvulTicks() ? super.hurtTarget(target, dmgSource, dmgAmount) : target.hurt(dmgSource, dmgAmount);
+        return shouldHurtThroughInvulTicks() ? super.hurtTarget(target, dmgSource, dmgAmount) : 
+            target.hurt(DamageUtil.enderDragonDamageHack(dmgSource, target), dmgAmount);
     }
     
     protected boolean shouldHurtThroughInvulTicks() {
@@ -307,8 +312,14 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     }
     
     private void doDragEntity(Entity entity, Vector3d vec) {
-        if (entity instanceof LivingEntity && ((LivingEntity) entity).hasEffect(ModEffects.STUN.get())) {
-            entity.move(MoverType.PLAYER, vec);
+        if (entity instanceof LivingEntity) {
+            LivingEntity target = (LivingEntity) entity;
+            for (Effect effect : target.getActiveEffectsMap().keySet()) {
+                if (effect instanceof ImmobilizeEffect && ((ImmobilizeEffect) effect).resetsDeltaMovement()) {
+                    entity.move(MoverType.PLAYER, vec);
+                    return;
+                }
+            }
         }
         else {
             entity.setDeltaMovement(vec);
@@ -346,6 +357,15 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     
     protected boolean isRetracting() {
         return entityData.get(IS_RETRACTING);
+    }
+    
+    public void setLifeSpan(int lifeSpan) {
+        this.lifeSpan = lifeSpan;
+    }
+    
+    @Override
+    public int ticksLifespan() {
+        return lifeSpan;
     }
 
     @Override
@@ -422,6 +442,7 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
         nbt.putFloat("Distance", getDistance());
         nbt.putBoolean("IsMovingForward", isMovingForward());
         nbt.putBoolean("IsRetracting", isRetracting());
+        nbt.putInt("LifeSpan", lifeSpan);
     }
 
     @Override
@@ -438,5 +459,18 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
         setDistance(nbt.getFloat("Distance"));
         setIsMovingForward(nbt.getBoolean("IsMovingForward"));
         setIsRetracting(nbt.getBoolean("IsRetracting"));
+        lifeSpan = nbt.getInt("LifeSpan");
      }
+    
+    @Override
+    public void writeSpawnData(PacketBuffer buffer) {
+        super.writeSpawnData(buffer);
+        buffer.writeVarInt(lifeSpan);
+    }
+
+    @Override
+    public void readSpawnData(PacketBuffer additionalData) {
+        super.readSpawnData(additionalData);
+        lifeSpan = additionalData.readVarInt();
+    }
 }

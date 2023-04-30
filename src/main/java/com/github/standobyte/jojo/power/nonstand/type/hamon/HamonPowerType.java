@@ -58,6 +58,7 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.particles.IParticleData;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.state.BooleanProperty;
@@ -66,6 +67,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -101,8 +103,21 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     }
     
     @Override
-    public float reduceEnergyConsumed(float amount, INonStandPower power, LivingEntity user) {
-        return user.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.SATIPOROJA_SCARF.get() ? amount * 0.6F : super.reduceEnergyConsumed(amount, power, user);
+    public boolean hasEnergy(INonStandPower power, float amount) {
+        return amount == 0 || power.getEnergy() >= HamonData.reduceEnergyConsumed(amount, power, power.getUser());
+    }
+
+    @Override
+    public boolean consumeEnergy(INonStandPower power, float amount) {
+        if (power.isUserCreative()) {
+            return true;
+        }
+        amount = HamonData.reduceEnergyConsumed(amount, power, power.getUser());
+        if (power.hasEnergy(amount)) {
+            power.setEnergy(power.getEnergy() - amount);
+            return true;
+        }
+        return false;
     }
     
     @Override
@@ -133,24 +148,13 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     }
     
     @Override
-    public float getMaxEnergyFactor(INonStandPower power) {
-        return power.getTypeSpecificData(this).get().getEnergyLimitFactor();
+    public float getMaxEnergy(INonStandPower power) {
+        return power.getTypeSpecificData(this).get().getMaxEnergy();
     }
 
     @Override
-    public float getEnergyTickInc(INonStandPower power) {
-        LivingEntity user = power.getUser();
-        if (user.getAirSupply() < user.getMaxAirSupply() || user.hasEffect(ModEffects.FREEZE.get())) {
-            return 0;
-        }
-        float amount = power.getTypeSpecificData(this).get().getEnergyRegenPoints();
-        if (user.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.BREATH_CONTROL_MASK.get()) {
-            amount *= 2F / 3F;
-        }
-        if (user.hasEffect(ModEffects.MEDITATION.get())) {
-            amount *= 2F;
-        }
-        return amount;
+    public float tickEnergy(INonStandPower power) {
+        return power.getTypeSpecificData(this).get().tickEnergy();
     }
 
     @Override
@@ -163,10 +167,10 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
         HamonData hamon = power.getTypeSpecificData(this).get();
         float breathing = hamon.getBreathingLevel();
         World world = user.level;
+        hamon.tick();
         if (!world.isClientSide()) {
-            hamon.tick();
             int air = user.getAirSupply();
-            if (air < user.getMaxAirSupply() && user.tickCount % 100 < (int) breathing - 1) {
+            if (air < user.getMaxAirSupply() && air > 0 && user.tickCount % 100 < (int) breathing - 1) {
                 user.setAirSupply(air + 1);
             }
             if (user instanceof PlayerEntity) {
@@ -214,7 +218,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                 HamonAction SYOverdrive = ModHamonActions.HAMON_SUNLIGHT_YELLOW_OVERDRIVE.get();
                 cap.syoSound = user.isShiftKeyDown() && SYOverdrive.checkConditions(user, power, new ActionTarget(ClientUtil.getCrosshairPickEntity())).isPositive();
                 if (!prevTickSound && cap.syoSound) {
-                    ClientTickingSoundsHelper.playHamonConcentrationSound(user, entity -> !cap.syoSound);
+                    ClientTickingSoundsHelper.playHamonConcentrationSound(user, entity -> !cap.syoSound, 1.0F);
                 }
             });
         }
@@ -263,8 +267,8 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     public static boolean ropeTrap(LivingEntity user, BlockPos pos, BlockState blockState, World world, INonStandPower power, HamonData hamon) {
         if (hamon.isSkillLearned(HamonSkill.ROPE_TRAP)) {
             createChargedCobweb(user, pos, blockState, world, 64, null, power, 
-                    40 + (int) ((float) (160 * hamon.getHamonStrengthLevel()) / (float) HamonData.MAX_STAT_LEVEL * hamon.getBloodstreamEfficiency()), 
-                    0.02F * hamon.getHamonDamageMultiplier() * hamon.getBloodstreamEfficiency(), hamon);
+                    40 + (int) ((float) (160 * hamon.getHamonStrengthLevel()) / (float) HamonData.MAX_STAT_LEVEL * hamon.getHamonEfficiency()), 
+                    0.02F * hamon.getHamonDamageMultiplier() * hamon.getHamonEfficiency(), hamon);
             return true;
         }
         return false;
@@ -311,10 +315,8 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
         user.addEffect(new EffectInstance(ModEffects.CHEAT_DEATH.get(), 120000, 0, false, false, true));
     }
     
-    public static void snakeMuffler(LivingAttackEvent event) {
-        LivingEntity target = event.getEntityLiving();
+    public static boolean snakeMuffler(LivingEntity target, DamageSource dmgSource, float dmgAmount) {
         if (!target.level.isClientSide() && target.canUpdate() && target.isOnGround()) {
-            DamageSource dmgSource = event.getSource();
             Entity attacker = dmgSource.getEntity();
             if (attacker != null && dmgSource.getDirectEntity() == attacker && attacker instanceof LivingEntity
                     && target instanceof PlayerEntity && target.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.SATIPOROJA_SCARF.get()) {
@@ -324,27 +326,29 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                     INonStandPower power = INonStandPower.getPlayerNonStandPower(playerTarget);
                     float energyCost = 500F;
                     if (power.hasEnergy(energyCost)) {
-                        power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
+                        if (power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
                             if (hamon.isSkillLearned(HamonSkill.SNAKE_MUFFLER)) {
                                 playerTarget.getCooldowns().addCooldown(ModItems.SATIPOROJA_SCARF.get(), 80);
-                                float efficiency = hamon.getBloodstreamEfficiency();
-                                if (efficiency == 1 || efficiency >= event.getAmount() / target.getMaxHealth()) {
+                                float efficiency = hamon.getHamonEfficiency();
+                                if (efficiency == 1 || efficiency >= dmgAmount / target.getMaxHealth()) {
                                     JojoModUtil.sayVoiceLine(target, ModSounds.LISA_LISA_SNAKE_MUFFLER.get());
                                     power.consumeEnergy(energyCost);
                                     DamageUtil.dealHamonDamage(attacker, 0.75F, target, null);
                                     livingAttacker.addEffect(new EffectInstance(Effects.GLOWING, 200));
-                                    event.setCanceled(true);
                                     SnakeMufflerEntity snakeMuffler = new SnakeMufflerEntity(target.level, target);
                                     snakeMuffler.setEntityToJumpOver(attacker);
                                     target.level.addFreshEntity(snakeMuffler);
                                     snakeMuffler.attachToBlockPos(target.blockPosition());
+                                    return true;
                                 }
                             }
-                        });
+                            return false;
+                        }).orElse(false)) return true;
                     }
                 }
             }
         }
+        return false;
     }
     
 
@@ -493,7 +497,8 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
         });
     }
 
-    public static void createHamonSparkParticles(World world, @Nullable PlayerEntity clientHandled, double x, double y, double z, float intensity) {
+    public static void createHamonSparkParticles(World world, @Nullable PlayerEntity clientHandled, 
+            double x, double y, double z, float intensity, @Nullable SoundEvent hamonSound) {
         if (intensity > 0) {
             intensity = Math.min(intensity, 4F);
             int count = Math.max((int) (intensity * 16.5F), 1);
@@ -503,27 +508,42 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
             else if (clientHandled == ClientUtil.getClientPlayer()) {
                 ClientUtil.createHamonSparkParticles(x, y, z, count);
             }
-            world.playSound(clientHandled, x, y, z, ModSounds.HAMON_SPARK.get(), 
-                    SoundCategory.AMBIENT, intensity * 2, 1.0F + (world.random.nextFloat() - 0.5F) * 0.15F);
+            if (hamonSound != null) {
+                world.playSound(clientHandled, x, y, z, hamonSound, 
+                        SoundCategory.AMBIENT, intensity * 2, 1.0F + (world.random.nextFloat() - 0.5F) * 0.15F);
+            }
         }
+    }
+    
+    public static void createHamonSparkParticles(World world, @Nullable PlayerEntity clientHandled, double x, double y, double z, float intensity) {
+        createHamonSparkParticles(world, clientHandled, x, y, z, intensity, ModSounds.HAMON_SPARK.get());
     }
     
     public static void createHamonSparkParticles(World world, @Nullable PlayerEntity clientHandled, Vector3d vec, float intensity) {
         createHamonSparkParticles(world, clientHandled, vec.x, vec.y, vec.z, intensity);
     }
     
+    public static void createHamonSparkParticles(World world, @Nullable PlayerEntity clientHandled, Vector3d vec, float intensity, @Nullable SoundEvent hamonSound) {
+        createHamonSparkParticles(world, clientHandled, vec.x, vec.y, vec.z, intensity, hamonSound);
+    }
+    
     public static void createHamonSparkParticlesEmitter(Entity entity, float intensity) {
+        createHamonSparkParticlesEmitter(entity, intensity, 1, ModParticles.HAMON_SPARK.get());
+    }
+    
+    public static void createHamonSparkParticlesEmitter(Entity entity, float intensity, float soundVolumeMultiplier, IParticleData hamonParticle) {
         if (intensity > 0) {
             intensity = Math.min(intensity, 4F);
             World world = entity.level;
             if (!world.isClientSide()) {
-                PacketManager.sendToClientsTrackingAndSelf(new TrHamonParticlesPacket(entity.getId(), intensity), entity);
+                PacketManager.sendToClientsTrackingAndSelf(new TrHamonParticlesPacket(entity.getId(), intensity, soundVolumeMultiplier, 
+                        hamonParticle != ModParticles.HAMON_SPARK.get() ? hamonParticle : null), entity);
             }
             else {
                 for (int i = (int) (intensity * 9.5F); i >= 0; i--) {
-                    ClientUtil.createParticlesEmitter(entity, ModParticles.HAMON_SPARK.get(), Math.max(1, (int) (intensity * 9.5) - i));
+                    ClientUtil.createParticlesEmitter(entity, hamonParticle, Math.max(1, (int) (intensity * 9.5) - i));
                     if (i % 2 == 0) {
-                        ClientTickingSoundsHelper.playHamonSparksSound(entity, intensity * 2, 1.0F + (world.random.nextFloat() - 0.5F) * 0.15F);
+                        ClientTickingSoundsHelper.playHamonSparksSound(entity, intensity * 2 * soundVolumeMultiplier, 1.0F + (world.random.nextFloat() - 0.5F) * 0.15F);
                     }
                 }
             }

@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.non_stand;
 
 import java.util.List;
 import java.util.Random;
+import java.util.function.Predicate;
 
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
@@ -13,6 +14,7 @@ import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -33,8 +35,8 @@ public class HamonSendoOverdrive extends HamonAction {
             HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
             BlockPos pos = target.getBlockPos();
             Direction face = target.getFace();
-            double diameter = 2 + (double) (hamon.getHamonStrengthLevel() * 6) / (double) HamonData.MAX_STAT_LEVEL
-                    * hamon.getBloodstreamEfficiency();
+            double diameter = 4 + (double) (hamon.getHamonStrengthLevel() * 8) / (double) HamonData.MAX_STAT_LEVEL
+                    * hamon.getHamonEfficiency();
             double radiusMinus1 = (diameter - 1) / 2;
             AxisAlignedBB aabb = new AxisAlignedBB(pos).inflate(radiusMinus1).expandTowards(Vector3d.atLowerCornerOf(face.getNormal()))
                     .move(Vector3d.atLowerCornerOf(face.getNormal()).scale(-radiusMinus1));
@@ -47,7 +49,12 @@ public class HamonSendoOverdrive extends HamonAction {
                         aabb.minZ + random.nextDouble() * (aabb.maxZ - aabb.minZ), 
                         0.1F);
             }
-            List<Entity> entities = world.getEntitiesOfClass(LivingEntity.class, aabb, EntityPredicates.NO_CREATIVE_OR_SPECTATOR);
+            Predicate<LivingEntity> filter = EntityPredicates.LIVING_ENTITY_STILL_ALIVE.and(EntityPredicates.NO_CREATIVE_OR_SPECTATOR);
+            if (user instanceof PlayerEntity) {
+                PlayerEntity player = (PlayerEntity) user;
+                filter = filter.and(entity -> player.canAttack(entity));
+            }
+            List<LivingEntity> entities = world.getEntitiesOfClass(LivingEntity.class, aabb, filter);
             boolean givePoints = false;
             for (Entity entity : entities) {
                 if (!entity.is(user) && DamageUtil.dealHamonDamage(entity, 0.25F, user, null)) {

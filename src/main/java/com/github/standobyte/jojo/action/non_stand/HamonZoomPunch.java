@@ -19,8 +19,13 @@ public class HamonZoomPunch extends HamonAction {
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
+            float hamonEfficiency = hamon.getHamonEfficiency();
+            float length = (8 + hamon.getHamonControlLevel() * 0.1F);
+            int duration = Math.max(getCooldownTechnical(power), 1);
             ZoomPunchEntity zoomPunch = new ZoomPunchEntity(world, user, 
-                    hamon.getHamonControlLevel() * hamon.getBloodstreamEfficiency());
+                    length / (float) duration * (0.4F + 0.6F * hamonEfficiency), duration,
+                    0.75F, getEnergyCost(power), 
+                    getEnergyCost(power) * hamonEfficiency);
             world.addFreshEntity(zoomPunch);
         }
     }

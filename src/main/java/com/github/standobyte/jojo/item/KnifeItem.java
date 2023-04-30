@@ -10,8 +10,8 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.GameplayEventHandler;
-import com.github.standobyte.jojo.util.mod.TimeUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
+import com.github.standobyte.jojo.util.mod.TimeUtil;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableMultimap.Builder;
 import com.google.common.collect.Multimap;
@@ -86,6 +86,7 @@ public class KnifeItem extends Item {
                         }
                     });
                 }
+                knifeEntity.setTimeStopFlightTicks(5);
                 knifeEntity.shootFromRotation(player, 1.5F, i == 0 ? 1.0F : 16.0F);
                 world.addFreshEntity(knifeEntity);
             }

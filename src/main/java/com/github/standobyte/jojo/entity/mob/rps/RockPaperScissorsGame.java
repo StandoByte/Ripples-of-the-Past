@@ -127,7 +127,7 @@ public class RockPaperScissorsGame {
     private void onRoundEnd(World world) {
         if (!world.isClientSide()) {
             ServerWorld serverWorld = (ServerWorld) world;
-            // FIXME (!!) show ties in the ui
+            // FIXME (BIIM) show ties in the ui
             this.sendToBothPlayers(serverWorld, (player, opponent) -> RPSGameStatePacket.stateUpdated(player.previousPicks, opponent.previousPicks));
             if (lastRoundWinner != null) {
                 roundWon(serverWorld, lastRoundWinner, getOpponent(lastRoundWinner));
@@ -191,7 +191,7 @@ public class RockPaperScissorsGame {
         IStandPower loserStand = IStandPower.getStandPowerOptional(roundLoser).orElse(null);
         if (winnerStand == null || loserStand == null) return;
         if (loserStand.hasPower() && winnerStand.getType() == ModStandActions.BOY_II_MAN.get()) {
-            // FIXME (!!) BIIM
+            // FIXME (BIIM)
             if (round < ROUNDS_TO_WIN) {
                 StandPart limbs = round == 1 ? StandPart.ARMS : round == 2 ? StandPart.LEGS : null;
                 if (limbs != null) {
@@ -210,7 +210,7 @@ public class RockPaperScissorsGame {
                 }
             }
             else if (round == ROUNDS_TO_WIN) {
-                // FIXME (!!) BIIM
+                // FIXME (BIIM)
                 StandInstance mainStandBody = loserStand.putOutStand().get();
                 winnerStand.getContinuousEffects().addEffect(new BoyIIManStandPartTakenEffect(mainStandBody).withTarget(roundLoser));
                 boyIIManTookStand = true;
@@ -221,14 +221,14 @@ public class RockPaperScissorsGame {
             boyIIManEffects.getEffects(effect -> effect.effectType == ModStandEffects.BOY_II_MAN_PART_TAKE.get()
                     && roundWinner.is(effect.getTarget())).forEach(effect -> {
                         if (winnerStand.hasPower()) {
-                            // FIXME (!!) BIIM
+                            // FIXME (BIIM)
                             StandInstance winnerStandPartsLeft = winnerStand.getStandInstance().get();
                             StandInstance partsTaken = ((BoyIIManStandPartTakenEffect) effect).getPartsTaken();
                             if (partsTaken.getType() == winnerStand.getType()) {
                                 Set<StandPart> partsToReturn = partsTaken.getAllParts();
                                 if (partsToReturn.stream().allMatch(part -> !winnerStandPartsLeft.hasPart(part))) {
                                     boyIIManEffects.removeEffect(effect);
-                                    // FIXME (!!) remove the effects more precisely
+                                    // FIXME (BIIM) remove the effects more precisely
                                     if (partsToReturn.contains(StandPart.ARMS)) {
                                         roundWinner.removeEffect(Effects.WEAKNESS);
                                         roundWinner.removeEffect(Effects.DIG_SLOWDOWN);
@@ -240,7 +240,7 @@ public class RockPaperScissorsGame {
                             }
                         }
                         else {
-                            // FIXME (!!) BIIM
+                            // FIXME (BIIM)
                             boyIIManEffects.removeEffect(effect);
                         }
                     });

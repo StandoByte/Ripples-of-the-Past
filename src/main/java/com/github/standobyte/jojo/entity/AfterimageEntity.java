@@ -11,6 +11,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
@@ -90,6 +91,21 @@ public class AfterimageEntity extends Entity implements IEntityAdditionalSpawnDa
 
     @Override
     protected void defineSynchedData() {}
+    
+    @Override
+    public boolean isInvisible() {
+        return super.isInvisible() || originEntity != null && originEntity.isInvisible();
+    }
+    
+    @Override
+    public boolean isInvisibleTo(PlayerEntity player) {
+        return super.isInvisibleTo(player) || originEntity != null && originEntity.isInvisibleTo(player);
+    }
+    
+    @Override
+    public boolean displayFireAnimation() {
+        return originEntity != null && originEntity.displayFireAnimation();
+    }
 
     @Override
     protected void readAdditionalSaveData(CompoundNBT nbt) {

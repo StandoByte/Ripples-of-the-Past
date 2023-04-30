@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromclient.ClHamonStartMeditationPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClHamonMeditationPacket;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonData.Exercise;
 import com.google.common.collect.ImmutableList;
@@ -63,7 +63,7 @@ public class HamonStatsTabGui extends HamonTabGui {
     @Override
     void addButtons() {
         meditationButton = new Button(screen.windowPosX() + 213, screen.windowPosY() - 1, 7, 7, new StringTextComponent(""), button -> {
-            PacketManager.sendToServer(new ClHamonStartMeditationPacket());
+            PacketManager.sendToServer(new ClHamonMeditationPacket(true));
             screen.onClose();
         });
         buttonY = meditationButton.y;
@@ -125,10 +125,10 @@ public class HamonStatsTabGui extends HamonTabGui {
         }
 
         // exercise bars
-        drawExerciseBar(this, matrixStack, intScrollX + 15, exercises1Y, screen.hamon, Exercise.MINING, 1.0F);
-        drawExerciseBar(this, matrixStack, intScrollX + 111, exercises1Y, screen.hamon, Exercise.RUNNING, 1.0F);
-        drawExerciseBar(this, matrixStack, intScrollX + 15, exercises2Y, screen.hamon, Exercise.SWIMMING, 1.0F);
-        drawExerciseBar(this, matrixStack, intScrollX + 111, exercises2Y, screen.hamon, Exercise.MEDITATION, 1.0F);
+        drawExerciseBar(this, matrixStack, intScrollX + 15, exercises1Y, screen.hamon, Exercise.MINING, 1.0F, true);
+        drawExerciseBar(this, matrixStack, intScrollX + 111, exercises1Y, screen.hamon, Exercise.RUNNING, 1.0F, true);
+        drawExerciseBar(this, matrixStack, intScrollX + 15, exercises2Y, screen.hamon, Exercise.SWIMMING, 1.0F, true);
+        drawExerciseBar(this, matrixStack, intScrollX + 111, exercises2Y, screen.hamon, Exercise.MEDITATION, 1.0F, true);
 
         // total exercises bar
         blit(matrixStack, intScrollX + 6, exercisesAvgY + 1, 1, 235, (int) (198 * screen.hamon.getAverageExercisePoints()), 5);
@@ -145,20 +145,24 @@ public class HamonStatsTabGui extends HamonTabGui {
     }
 
     @SuppressWarnings("deprecation")
-    public static void drawExerciseBar(AbstractGui gui, MatrixStack matrixStack, int x, int y, HamonData hamon, Exercise exercise, float alpha) {
+    public static void drawExerciseBar(AbstractGui gui, MatrixStack matrixStack, int x, int y, HamonData hamon, 
+            Exercise exercise, float alpha, boolean renderShadowCheckmark) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
         int ticks = hamon.getExerciseTicks(exercise);
         int ticksMax = exercise.getMaxTicks(hamon);
-        gui.blit(matrixStack, x + 1, y + 1, 1, 247, 90 * ticks / ticksMax, 5);
-        gui.blit(matrixStack, x, y, 0, 240, 92, 7);
+        gui.blit(matrixStack, x + 1, y + 1, 93, 250, 90 * ticks / ticksMax, 5);
+        gui.blit(matrixStack, x, y, 0, 249, 92, 7);
         
         matrixStack.pushPose();
         matrixStack.scale(0.5F, 0.5F, 0.5F);
 
-        gui.blit(matrixStack, (x - 3) * 2, (y - 1) * 2, 96 + exercise.ordinal() * 16, 240, 16, 16);
+        gui.blit(matrixStack, (x - 3) * 2, (y - 1) * 2, 230, 124 + exercise.ordinal() * 16, 16, 16);
         
-        if (ticks >= ticksMax) {
-            gui.blit(matrixStack, (x + 85) * 2, (y - 1) * 2, 160, 240, 16, 16);
+        if (renderShadowCheckmark || ticks >= ticksMax) {
+            if (ticks < ticksMax) {
+                RenderSystem.color4f(0.0F, 0.0F, 0.0F, alpha);
+            }
+            gui.blit(matrixStack, (x + 85) * 2, (y - 1) * 2, 230, 188, 16, 16);
         }
         
         matrixStack.popPose();

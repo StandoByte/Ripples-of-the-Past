@@ -1,10 +1,10 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
+import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
-import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.IRendersAsItem;
@@ -53,7 +53,7 @@ public class MRFireballEntity extends ModdedProjectileEntity implements IRenders
                 BlockPos blockPos = blockDestroyed ? blockRayTraceResult.getBlockPos() : 
                     blockRayTraceResult.getBlockPos().relative(blockRayTraceResult.getDirection());
                 if (level.isEmptyBlock(blockPos)) {
-                    level.setBlockAndUpdate(blockPos, AbstractFireBlock.getState(level, blockPos));
+                    level.setBlockAndUpdate(blockPos, ModBlocks.MAGICIANS_RED_FIRE.get().getStateForPlacement(level, blockPos));
                 }
             }
         }

@@ -58,7 +58,7 @@ public class StandBlockPunch implements IPunch {
     
     @Override
     public boolean playSound() {
-        return IPunch.super.playSound() && blockState.getDestroySpeed(stand.level, blockPos) > 0;
+        return blockState.getDestroySpeed(stand.level, blockPos) != 0;
     }
     
     @Override

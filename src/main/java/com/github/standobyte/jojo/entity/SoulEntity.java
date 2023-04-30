@@ -43,13 +43,13 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
     private LivingEntity originEntity;
     private UUID originUuid;
     private int lifeSpan;
-    private boolean givesResolve;
+    private boolean resolveCanLvlUp;
     
-    public SoulEntity(World world, LivingEntity originEntity, int lifeSpan, boolean givesResolve) {
+    public SoulEntity(World world, LivingEntity originEntity, int lifeSpan, boolean resolveCanLvlUp) {
         this(ModEntityTypes.SOUL.get(), world);
         setOriginEntity(originEntity);
         this.lifeSpan = lifeSpan;
-        this.givesResolve = givesResolve;
+        this.resolveCanLvlUp = resolveCanLvlUp;
     }
 
     public SoulEntity(EntityType<?> type, World world) {
@@ -99,19 +99,27 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
                         random.nextGaussian() * 0.02D);
             }
         }
-        else if (givesResolve) {
+        else {
             level.getEntitiesOfClass(LivingEntity.class, 
                     new AxisAlignedBB(getBoundingBox().getCenter(), getBoundingBox().getCenter()).inflate(24), 
                     entity -> !entity.is(originEntity) && originEntity.isAlliedTo(entity)).forEach(entity -> {
-                        IStandPower.getStandPowerOptional(entity).ifPresent(stand -> 
-                        stand.getResolveCounter().soulAddResolveTeammate());
+                        IStandPower.getStandPowerOptional(entity).ifPresent(stand -> {
+                            if (giveResolve(entity, stand)) {
+                                stand.getResolveCounter().soulAddResolveTeammate();
+                            }
+                        });
                     });
             RayTraceResult rayTrace = JojoModUtil.rayTrace(this, 32, entity -> !entity.is(originEntity), 1.0);
             if (rayTrace.getType() == RayTraceResult.Type.ENTITY) {
                 Entity lookEntity = ((EntityRayTraceResult) rayTrace).getEntity();
                 if (lookEntity instanceof LivingEntity) {
-                    IStandPower.getStandPowerOptional(lookEntity instanceof StandEntity ? ((StandEntity) lookEntity).getUser() : (LivingEntity) lookEntity)
-                    .ifPresent(stand -> stand.getResolveCounter().soulAddResolveLook());
+                    LivingEntity entity = (LivingEntity) lookEntity;
+                    IStandPower.getStandPowerOptional(lookEntity instanceof StandEntity ? ((StandEntity) entity).getUser() : entity)
+                    .ifPresent(stand -> {
+                        if (giveResolve(entity, stand)) {
+                            stand.getResolveCounter().soulAddResolveLook();
+                        }
+                    });
                 }
             }
         }
@@ -123,6 +131,10 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
         tickRotation();
         originEntity.deathTime = Math.min(originEntity.deathTime, 18);
         move(MoverType.SELF, getDeltaMovement());
+    }
+    
+    private boolean giveResolve(LivingEntity target, IStandPower targetStandPower) {
+        return resolveCanLvlUp || targetStandPower.getResolveLevel() >= targetStandPower.getMaxResolveLevel();
     }
     
     
@@ -197,7 +209,7 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
     protected void readAdditionalSaveData(CompoundNBT nbt) {
         this.tickCount = nbt.getInt("Age");
         this.lifeSpan = nbt.getInt("LifeSpan");
-        this.givesResolve = nbt.getBoolean("Resolve");
+        this.resolveCanLvlUp = nbt.getBoolean("Resolve");
         if (nbt.hasUUID("Origin")) {
             this.originUuid = nbt.getUUID("Origin");
         }
@@ -207,7 +219,7 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
     protected void addAdditionalSaveData(CompoundNBT nbt) {
         nbt.putInt("Age", tickCount);
         nbt.putInt("LifeSpan", lifeSpan);
-        nbt.putBoolean("Resolve", givesResolve);
+        nbt.putBoolean("Resolve", resolveCanLvlUp);
         if (originUuid != null) {
             nbt.putUUID("Origin", originEntity.getUUID());
         }

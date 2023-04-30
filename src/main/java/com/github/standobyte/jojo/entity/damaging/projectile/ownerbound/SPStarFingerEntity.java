@@ -1,7 +1,6 @@
 package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -31,11 +30,6 @@ public class SPStarFingerEntity extends OwnerBoundProjectileEntity {
     @Override
     protected float getMaxHardnessBreakable() {
         return 5.0F;
-    }
-
-    @Override
-    public int ticksLifespan() {
-        return ModStandActions.STAR_PLATINUM_STAR_FINGER.get().getStandActionTicks(null, null);
     }
     
     @Override

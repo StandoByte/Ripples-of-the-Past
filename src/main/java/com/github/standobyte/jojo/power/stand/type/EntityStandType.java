@@ -84,7 +84,7 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
             StandEntity stand = (StandEntity) power.getStandManifestation();
             return stand.getCurrentTaskActionOptional()
                     .map(action -> action.canStaminaRegen(power, stand))
-                    .orElse(true) ? 1F : 0;
+                    .orElse(true) ? 1.5F : 0;
         }
         return super.getStaminaRegen(power);
     }

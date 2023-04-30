@@ -45,14 +45,14 @@ public class HamonTornadoOverdrive extends HamonAction {
                     }
                 }
                 if (points) {
-                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, getHeldTickEnergyCost());
+                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, getHeldTickEnergyCost(power));
                 }
             }
             if (user.isShiftKeyDown()) {
                 user.setDeltaMovement(0, movement.y < 0 ? movement.y * 1.05 : 0, 0);
             }
             HamonPowerType.createHamonSparkParticles(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, user.position(), 
-                    hamon.getHamonDamageMultiplier() / HamonData.MAX_HAMON_DAMAGE * 0.25F);
+                    hamon.getHamonDamageMultiplier() / HamonData.MAX_HAMON_STRENGTH_MULTIPLIER * 0.25F);
         }
     }
     

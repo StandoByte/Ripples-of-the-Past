@@ -126,7 +126,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
         checkHit();
     }
     
-    protected final void checkHit() {
+    protected void checkHit() {
         RayTraceResult[] rayTrace = rayTrace();
         for (RayTraceResult result : rayTrace) {
             if (result.getType() != RayTraceResult.Type.MISS && !ForgeEventFactory.onProjectileImpact(this, result)) {

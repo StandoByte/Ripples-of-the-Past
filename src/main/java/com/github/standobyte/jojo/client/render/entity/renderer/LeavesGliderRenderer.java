@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.client.render.entity.renderer;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.render.entity.model.LeavesGliderModel;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -21,12 +22,9 @@ public class LeavesGliderRenderer extends SimpleEntityRenderer<LeavesGliderEntit
             MatrixStack matrixStack, IVertexBuilder vertexBuilder, int packedLight) {
         matrixStack.pushPose();
         matrixStack.translate(0, -entity.getBbHeight(), 0);
-        int color = entity.getFoliageColor();
-        int red = (color & 0xFF0000) >> 16;
-        int green = (color & 0x00FF00) >> 8;
-        int blue = color & 0x0000FF;
+        float[] rgb = ClientUtil.rgb(entity.getFoliageColor());
         model.renderToBuffer(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, 
-                (float) red / 255F, (float) green / 255F, (float) blue / 255F, 1.0F);
+                rgb[0], rgb[1], rgb[2], 1.0F);
         matrixStack.popPose();
     }
 

@@ -129,16 +129,18 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
 
     @Override
     public float getMaxEnergy() {
-        float maxAmount = BASE_MAX_ENERGY;
         if (type != null) {
-            maxAmount *= Math.max(type.getMaxEnergyFactor(this), 0.001F);
+            return Math.max(type.getMaxEnergy(this), 1F);
         }
-        return maxAmount;
+        return BASE_MAX_ENERGY;
     }
     
     @Override
     public boolean hasEnergy(float amount) {
-        return getEnergy() >= reduceEnergyConsumed(amount) || isUserCreative();
+        if (getType() == null) {
+            return false;
+        }
+        return isUserCreative() || getType().hasEnergy(this, amount);
     }
 
     @Override
@@ -148,18 +150,10 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
 
     @Override
     public boolean consumeEnergy(float amount) {
-        if (isUserCreative()) {
-            return true;
+        if (getType() == null) {
+            return false;
         }
-        if (hasEnergy(amount)) {
-            setEnergy(this.energy - reduceEnergyConsumed(amount));
-            return true;
-        }
-        return false;
-    }
-    
-    protected float reduceEnergyConsumed(float amount) {
-        return getType() == null ? amount : getType().reduceEnergyConsumed(amount, this, user);
+        return getType().consumeEnergy(this, amount);
     }
 
     @Override
@@ -175,11 +169,8 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     }
     
     private void tickEnergy() {
-        float inc = type.getEnergyTickInc(this);
-        if (isUserCreative()) {
-            inc = Math.max(inc, 0);
-        }
-        energy = MathHelper.clamp(energy + inc, 0, getMaxEnergy());
+        float energy = type.tickEnergy(this);
+        this.energy = MathHelper.clamp(energy, 0, getMaxEnergy());
     }
     
     @Override
@@ -288,10 +279,10 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
         super.syncWithTrackingOrUser(player);
         if (hasPower() && user != null) {
             PacketManager.sendToClient(new TrTypeNonStandPowerPacket(user.getId(), getType()), player);
-            PacketManager.sendToClient(new TrEnergyPacket(user.getId(), energy), player);
             getTypeSpecificData(null).ifPresent(data -> {
                 data.syncWithTrackingOrUser(user, player);
             });
+            PacketManager.sendToClient(new TrEnergyPacket(user.getId(), energy), player);
         }
     }
     

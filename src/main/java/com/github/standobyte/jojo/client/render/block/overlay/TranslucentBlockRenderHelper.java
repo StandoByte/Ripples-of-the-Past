@@ -4,13 +4,17 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import com.github.standobyte.jojo.capability.chunk.ChunkCap.PrevBlockInfo;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
+import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderTypeLookup;
+import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
@@ -31,7 +35,7 @@ public class TranslucentBlockRenderHelper {
     public static void renderCDRestorationTranslucentBlocks(MatrixStack matrixStack, Minecraft mc, 
             Stream<PrevBlockInfo> blocks, Predicate<PrevBlockInfo> inAbilityRange) {
         if (buffers == null) {
-            buffers = ModifiedRenderTypeBuffers.create(mc.renderBuffers().bufferSource(), TranslusencyRenderType::new);
+            buffers = ModifiedRenderTypeBuffers.create(mc.renderBuffers().bufferSource(), TranslucencyRenderType::new);
         }
         ActiveRenderInfo renderInfo = mc.gameRenderer.getMainCamera();
         Vector3d projectedView = renderInfo.getPosition();
@@ -45,16 +49,26 @@ public class TranslucentBlockRenderHelper {
         int overlayTexture = OverlayTexture.pack(Math.abs((int) (Util.getMillis() % 2000) / 100 - 10), 10);
         blocks.forEach(block -> {
             BlockPos pos = block.pos;
-            BlockState state = block.state;
+            BlockState blockState = block.state;
             IModelData tileData = ModelDataManager.getModelData(mc.level, pos);
             if (tileData == null) tileData = EmptyModelData.INSTANCE;
-            IModelData model = renderer.getBlockModel(state).getModelData(mc.level, pos, state, tileData);
+            IModelData model = renderer.getBlockModel(blockState).getModelData(mc.level, pos, blockState, tileData);
             matrixStack.pushPose();
             matrixStack.translate(
                     pos.getX(), 
                     pos.getY(), 
                     pos.getZ());
-            renderer.renderBlock(state, matrixStack, buffers, 0xF000F0, inAbilityRange.test(block) ? overlayTexture : OverlayTexture.NO_OVERLAY, model);
+            int overlay = inAbilityRange.test(block) ? overlayTexture : OverlayTexture.NO_OVERLAY;
+            
+            BlockRenderType renderType = blockState.getRenderShape();
+            if (renderType == BlockRenderType.MODEL) {
+                IBakedModel bakedModel = renderer.getBlockModel(blockState);
+                int color = mc.getBlockColors().getColor(blockState, mc.level, pos, 0);
+                float[] rgb = ClientUtil.rgb(color);
+                renderer.getModelRenderer().renderModel(matrixStack.last(), buffers.getBuffer(RenderTypeLookup.getRenderType(blockState, false)), 
+                        blockState, bakedModel, rgb[0], rgb[1], rgb[2], 0xF000F0, overlay, model);
+            }
+            
             matrixStack.popPose();
         });
 

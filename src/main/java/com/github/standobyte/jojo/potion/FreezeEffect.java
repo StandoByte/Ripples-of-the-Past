@@ -1,5 +1,8 @@
 package com.github.standobyte.jojo.potion;
 
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.power.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.entity.LivingEntity;
@@ -28,6 +31,10 @@ public class FreezeEffect extends Effect implements IApplicableEffect {
 
     @Override
     public boolean isApplicable(LivingEntity entity) {
-        return !DamageUtil.isImmuneToCold(entity);
+        return !DamageUtil.isImmuneToCold(entity) || 
+                INonStandPower.getNonStandPowerOptional(entity).map(power -> {
+                    NonStandPowerType<?> powerType = power.getType();
+                    return powerType == ModPowers.VAMPIRISM.get();
+                }).orElse(false);
     }
 }

@@ -59,12 +59,9 @@ public class TimeStopInstant extends StandAction {
 
     @Override
     protected Action<IStandPower> replaceAction(IStandPower power) {
-        LivingEntity user = power.getUser();
-        if (TimeUtil.isTimeStopped(user.level, user.blockPosition())) {
-            return user != null && TimeResume.userTimeStopInstance(user.level, user, null)
-                    ? ModStandActions.TIME_RESUME.get() : null;
-        }
-        return this;
+        Action<IStandPower> timeResume = ModStandActions.TIME_RESUME.get();
+        timeResume = timeResume.getVisibleAction(power);
+        return timeResume != null ? timeResume : this;
     }
     
     
@@ -80,7 +77,7 @@ public class TimeStopInstant extends StandAction {
         Vector3d blinkPos = null;
         double speed = getDistancePerTick(user);
         if (target.getType() == TargetType.EMPTY) {
-            RayTraceResult rayTrace = JojoModUtil.rayTrace(user, Math.min(speed * timeStopTicks, 192), null);
+            RayTraceResult rayTrace = JojoModUtil.rayTrace(user, Math.min(speed * timeStopTicks, 192), entity -> entity instanceof LivingEntity);
             if (rayTrace.getType() == RayTraceResult.Type.MISS) {
                 blinkPos = rayTrace.getLocation();
             }

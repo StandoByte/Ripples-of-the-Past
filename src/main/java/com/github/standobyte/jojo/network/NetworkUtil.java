@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -207,15 +208,18 @@ public class NetworkUtil {
         return i;
     }
     
-    public static <T> List<T> readCollection(PacketBuffer buf, Function<PacketBuffer, T> readElement) {
+    public static <T, C extends Collection<T>> C readCollection(Supplier<C> createCollection, PacketBuffer buf, Function<PacketBuffer, T> readElement) {
+        C collection = createCollection.get();
         int size = buf.readInt();
         if (size > 0) {
-            List<T> list = new ArrayList<T>(size);
             for (int i = 0; i < size; i++) {
-                list.add(readElement.apply(buf));
+                collection.add(readElement.apply(buf));
             }
-            return list;
         }
-        return Collections.emptyList();
+        return collection;
+    }
+    
+    public static <T> List<T> readCollection(PacketBuffer buf, Function<PacketBuffer, T> readElement) {
+        return readCollection(ArrayList::new, buf, readElement);
     }
 }

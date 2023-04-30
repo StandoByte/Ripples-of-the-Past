@@ -88,19 +88,20 @@ public class CrazyDiamondBlockBullet extends StandEntityAction {
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
             LivingEntity user = userPower.getUser();
-            if (user != null) {
-                CDBlockBulletEntity bullet = new CDBlockBulletEntity(standEntity, world);
-                bullet.setShootingPosOf(user);
-                bullet.setBlock(((BlockItem) user.getOffhandItem().getItem()).getBlock());
-                standEntity.shootProjectile(bullet, 2.0F, 0.25F);
-                if (!(user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild)) {
-                    user.getOffhandItem().shrink(1);
-                }
-                if (!user.isShiftKeyDown()) {
-                    getTarget(targets(userPower), user).ifPresent(effect -> {
-                        bullet.setTarget(effect.getTarget());
-                    });
-                }
+            if (user == null) return;
+            ItemStack item = user.getOffhandItem();
+            if (!(item.getItem() instanceof BlockItem)) return;
+            CDBlockBulletEntity bullet = new CDBlockBulletEntity(standEntity, world);
+            bullet.setShootingPosOf(user);
+            bullet.setBlock(((BlockItem) item.getItem()).getBlock());
+            standEntity.shootProjectile(bullet, 2.0F, 0.25F);
+            if (!(user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild)) {
+                user.getOffhandItem().shrink(1);
+            }
+            if (!user.isShiftKeyDown()) {
+                getTarget(targets(userPower), user).ifPresent(effect -> {
+                    bullet.setTarget(effect.getTarget());
+                });
             }
         }
     }

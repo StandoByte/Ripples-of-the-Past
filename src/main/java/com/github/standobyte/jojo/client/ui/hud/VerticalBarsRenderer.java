@@ -1,10 +1,8 @@
 package com.github.standobyte.jojo.client.ui.hud;
 
-import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui.Alignment;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui.BarsOrientation;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui.ElementTransparency;
-import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -26,22 +24,27 @@ public class VerticalBarsRenderer extends BarsRenderer {
     }
 
     @Override
-    protected void renderBarWithIcon(MatrixStack matrixStack, BarType barType, NonStandPowerType<?> powerType, 
-            boolean highlight, int color, float iconFill, 
-            float value, float maxValue, float attackCostValue, float abilityCostValue, float tranclucentBarValue, 
+    protected void renderBarWithIcon(MatrixStack matrixStack, BarType barType, 
+            boolean fullSize, int color, float iconFill, 
+            float value, float maxValue, 
+            float attackCostValue, float abilityCostValue, float costTick, 
+            float tranclucentBarValue, 
             float alpha, int ticks, float partialTick) {
-        int barHeight = highlight ? BAR_HEIGHT : BAR_HEIGHT_SHORTENED;
+        int barHeight = fullSize ? BAR_HEIGHT : BAR_HEIGHT_SHORTENED;
         int fill = (int) ((float) barHeight * (value / maxValue));
+        fill = Math.min(fill, barHeight);
+        int translucentFill = (int) ((float) barHeight * (tranclucentBarValue / maxValue));
+        fill = Math.min(fill, barHeight);
         int texX = barType == BarType.STAMINA ? 48 : 32;
         
-        if (highlight) {
+        if (fullSize) {
             renderBar(matrixStack, x, y, null, 
                     texX, 0, 8, barHeight, fill, color, alpha, 
                     0, 0, 17, 1, 
-                    (int) ((float) barHeight * (tranclucentBarValue / maxValue)), 
-                    (int) (attackCostValue / maxValue), (int) (attackCostValue / maxValue), 
-                    ClientUtil.getHighlightAlpha(ticks + partialTick, 80F, 30F, 1.25F, 0.25F));
-            int[] iconTex = getIconTex(barType, powerType, BarsOrientation.VERTICAL);
+                    translucentFill, 
+                    (int) (barHeight * attackCostValue / maxValue), (int) (barHeight * abilityCostValue / maxValue), costTick, 
+                    fullSize, barType);
+            int[] iconTex = getIconTex(barType, BarsOrientation.VERTICAL);
             renderIcon(matrixStack, x - 2, y - iconTex[3] - 1, 
                     iconTex[0], iconTex[1], iconTex[2], iconTex[3], iconTex[4]);
             if (barType == BarType.RESOLVE && iconFill > 0) {
@@ -56,7 +59,8 @@ public class VerticalBarsRenderer extends BarsRenderer {
                 renderBar(matrixStack, x, y + BAR_HEIGHT - BAR_HEIGHT_SHORTENED, null, 
                         texX + 8, 0, 5, barHeight, fill, color, transparency.getAlpha(partialTick) * alpha, 
                         8, 0, 25, 1, 
-                        0, 0, 0, 0);
+                        translucentFill, 0, 0, 0, 
+                        fullSize, barType);
             }
             x += 9;
         }
@@ -68,17 +72,26 @@ public class VerticalBarsRenderer extends BarsRenderer {
         gui.blit(matrixStack, x + 1, y + length - fill + 1, 
                 texX + 1, texY + length - fill + 1, width - 2, fill);
     }
+    
+    @Override
+    protected void barFillEffect(MatrixStack matrixStack, int x, int y, Alignment alignment, 
+            int width, int length, int fill, BarType barType) {
+        if (barType == BarType.ENERGY_HAMON) {
+            // TODO particles effect
+        }
+    }
 
-//    renderCost(matrixStack, x, y, cost1Fill, fill, length, 0, costAlpha);
-//    renderCost(matrixStack, x, y, cost2Fill, fill, length, width / 2 - 1, costAlpha);
-    private void renderCost(MatrixStack matrixStack, int barX, int barY, 
-            int costFill, int barFill, int barHeight, int xOffset, float alpha) {
+    @Override
+    protected void renderCost(MatrixStack matrixStack, int x, int y, Alignment alignment, 
+            int texX, int texY, int width, int height, 
+            int costFill, int barFill, 
+            int xOffset, float alpha) {
         if (costFill > 0) {
-            boolean notEnough = costFill > barFill;
+            int diff = Math.max(barFill - costFill, 0);
             AbstractGui.fill(matrixStack, 
-                    barX + xOffset + 1, notEnough ? barY + barHeight - costFill + 1 : barY - barFill + barHeight + 1, 
-                    barX + xOffset + 4, notEnough ? barY + barHeight + 1 : barY - barFill + barHeight + costFill + 1, 
-                    ElementTransparency.addAlpha(0xFFFFFF, alpha * 0.5F));
+                    x + xOffset + 1, y - diff + height + 1 - costFill, 
+                    x + xOffset + 4, y - diff + height + 1, 
+                    ElementTransparency.addAlpha(0xFFFFFF, alpha));
             RenderSystem.enableBlend();
         }
     }

@@ -84,7 +84,6 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> CASSETTE_RED = SOUNDS.register("cassette_red", () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "cassette_red")));
     public static final RegistryObject<SoundEvent> CASSETTE_BLACK = SOUNDS.register("cassette_black", () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "cassette_black")));
 
-
     public static final RegistryObject<SoundEvent> VAMPIRE_BLOOD_DRAIN = SOUNDS.register("vampire_blood_drain",
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "vampire_blood_drain")));
     
@@ -94,6 +93,23 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> VAMPIRE_EVIL_ATMOSPHERE = SOUNDS.register("vampire_dark_aura",
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "vampire_dark_aura")));
 
+    public static final RegistryObject<SoundEvent> VAMPIRE_CURE_START = SOUNDS.register("vampire_cure_start",
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "vampire_cure_start")));
+
+    public static final RegistryObject<SoundEvent> VAMPIRE_CURE_END = SOUNDS.register("vampire_cure_end",
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "vampire_cure_end")));
+
+
+    public static final RegistryObject<SoundEvent> HAMON_PICK_JONATHAN = SOUNDS.register("hamon_pick_jonathan",
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "hamon_pick_jonathan")));
+    public static final RegistryObject<SoundEvent> HAMON_PICK_ZEPPELI = SOUNDS.register("hamon_pick_zeppeli",
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "hamon_pick_zeppeli")));
+    public static final RegistryObject<SoundEvent> HAMON_PICK_JOSEPH = SOUNDS.register("hamon_pick_joseph",
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "hamon_pick_joseph")));
+    public static final RegistryObject<SoundEvent> HAMON_PICK_CAESAR = SOUNDS.register("hamon_pick_caesar",
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "hamon_pick_caesar")));
+    public static final RegistryObject<SoundEvent> HAMON_PICK_LISA_LISA = SOUNDS.register("hamon_pick_lisa_lisa",
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "hamon_pick_lisa_lisa")));
     
     public static final RegistryObject<SoundEvent> HAMON_SPARK = SOUNDS.register("hamon_spark",
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "hamon_spark")));
@@ -101,8 +117,17 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> HAMON_SPARKS_LONG = SOUNDS.register("hamon_sparks_long",
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "hamon_sparks_long")));
     
+    public static final RegistryObject<SoundEvent> HAMON_SPARKS_LOOP = SOUNDS.register("hamon_sparks_loop",
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "hamon_sparks_loop")));
+    
     public static final RegistryObject<SoundEvent> HAMON_CONCENTRATION = SOUNDS.register("hamon_concentration",
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "hamon_concentration")));
+    
+    public static final RegistryObject<SoundEvent> HAMON_SYO_CHARGE = SOUNDS.register("hamon_syo_charge",
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "hamon_syo_charge")));
+    
+    public static final RegistryObject<SoundEvent> HAMON_SYO_PUNCH = SOUNDS.register("hamon_syo_punch",
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "hamon_syo_punch")));
     
     public static final RegistryObject<SoundEvent> BREATH_DEFAULT = SOUNDS.register("player_breath", 
             () -> new SoundEvent(new ResourceLocation("entity.player.breath")));
@@ -146,7 +171,7 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> JOSEPH_SUNLIGHT_YELLOW_OVERDRIVE = SOUNDS.register("joseph_sunlight_yellow_overdrive", 
             () -> new MultiSoundEvent(new ResourceLocation(JojoMod.MOD_ID, "joseph_hamon_overdrive_beat"), 
-                    new ResourceLocation(JojoMod.MOD_ID, "joseph_hamon_punch"), new ResourceLocation(JojoMod.MOD_ID, "joseph_rebuff_overdrive")));
+                    new ResourceLocation(JojoMod.MOD_ID, "joseph_hamon_punch")));
     
     public static final RegistryObject<SoundEvent> JOSEPH_ZOOM_PUNCH = SOUNDS.register("joseph_zoom_punch", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "joseph_zoom_punch")));
@@ -161,6 +186,12 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> JONATHAN_OVERDRIVE_BARRAGE = SOUNDS.register("jonathan_overdrive_barrage", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "jonathan_overdrive_barrage")));
     
+    public static final RegistryObject<SoundEvent> JONATHAN_SYO_BARRAGE_START = SOUNDS.register("jonathan_syo_barrage_start", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "jonathan_syo_barrage_start")));
+    
+    public static final RegistryObject<SoundEvent> JONATHAN_SYO_BARRAGE = SOUNDS.register("jonathan_syo_barrage", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "jonathan_syo_barrage")));
+    
     public static final RegistryObject<SoundEvent> JONATHAN_SCARLET_OVERDRIVE = SOUNDS.register("jonathan_scarlet_overdrive", 
             () -> new MultiSoundEvent(new ResourceLocation(JojoMod.MOD_ID, "jonathan_scarlet_overdrive"), new ResourceLocation(JojoMod.MOD_ID, "jonathan_hamon_of_flame")));
     
@@ -170,6 +201,9 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> ZEPPELI_HAMON_CUTTER = SOUNDS.register("zeppeli_hamon_cutter", 
             () -> new MultiSoundEvent(new ResourceLocation(JojoMod.MOD_ID, "zeppeli_hamon_cutter"), new ResourceLocation(JojoMod.MOD_ID, "zeppeli_popow_pow_pow")));
     
+    public static final RegistryObject<SoundEvent> ZEPPELI_SENDO_WAVE_KICK = SOUNDS.register("zeppeli_sendo_wave_kick", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "zeppeli_sendo_wave_kick")));
+    
     public static final RegistryObject<SoundEvent> ZEPPELI_TORNADO_OVERDRIVE = SOUNDS.register("zeppeli_tornado_overdrive", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "zeppeli_tornado_overdrive")));
     
@@ -178,6 +212,9 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> JONATHAN_DEEP_PASS_REACTION = SOUNDS.register("jonathan_deep_pass_reaction", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "jonathan_deep_pass_reaction")));
+    
+    public static final RegistryObject<SoundEvent> JOSEPH_REBUFF_OVERDRIVE = SOUNDS.register("joseph_rebuff_overdrive", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "joseph_rebuff_overdrive")));
     
     public static final RegistryObject<SoundEvent> JOSEPH_OH_NO = SOUNDS.register("joseph_oh_no", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "joseph_oh_no")));
@@ -258,9 +295,6 @@ public class ModSounds {
 
     public static final RegistryObject<SoundEvent> JOTARO_STAR_FINGER = SOUNDS.register("jotaro_star_finger", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "jotaro_star_finger")));
-
-    public static final RegistryObject<SoundEvent> JOTARO_THE_WORLD = SOUNDS.register("jotaro_the_world", 
-            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "jotaro_the_world")));
 
     public static final RegistryObject<SoundEvent> JOTARO_STAR_PLATINUM_THE_WORLD = SOUNDS.register("jotaro_star_platinum_the_world", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "jotaro_star_platinum_the_world")));
@@ -542,9 +576,6 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_FIX_ENDED = SOUNDS.register("crazy_diamond_fix_ended", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_fix_ended")));
-    
-    public static final RegistryObject<SoundEvent> BLOOD_CUTTER_SPLASH = SOUNDS.register("blood_cutter_splash", 
-            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "blood_cutter_splash")));
     
     public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_BULLET_SHOT = SOUNDS.register("crazy_diamond_bullet_shot", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_bullet_shot")));

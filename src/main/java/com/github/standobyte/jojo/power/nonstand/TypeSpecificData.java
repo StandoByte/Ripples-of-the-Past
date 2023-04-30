@@ -13,7 +13,7 @@ public abstract class TypeSpecificData {
     protected INonStandPower power;
     protected Optional<ServerPlayerEntity> serverPlayer;
     
-    public final void setPower(INonStandPower power) {
+    public void setPower(INonStandPower power) {
         this.power = power;
         LivingEntity user = power.getUser();
         this.serverPlayer = user instanceof ServerPlayerEntity ? Optional.of((ServerPlayerEntity) user) : Optional.empty();

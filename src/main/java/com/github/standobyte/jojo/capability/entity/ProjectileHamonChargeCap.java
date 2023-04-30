@@ -4,7 +4,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
 
 public class ProjectileHamonChargeCap {
-    private final Entity projectile;
+    public final Entity projectile;
     public float hamonBaseDmg;
     public int maxChargeTicks;
     public boolean water;

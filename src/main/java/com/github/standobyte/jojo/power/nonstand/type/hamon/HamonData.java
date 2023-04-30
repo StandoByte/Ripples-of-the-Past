@@ -10,28 +10,34 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModItems;
-import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillLearnPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillAddPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillsResetPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHamonMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonStatsPacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.nonstand.TypeSpecificData;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonSkillType;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.Technique;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
 
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -43,14 +49,18 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.EffectInstance;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.event.entity.EntityEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
+@EventBusSubscriber(modid = JojoMod.MOD_ID)
 public class HamonData extends TypeSpecificData {
     public static final int MAX_STAT_LEVEL = 60;
     public static final float MAX_BREATHING_LEVEL = 100;
@@ -66,16 +76,18 @@ public class HamonData extends TypeSpecificData {
     private int hamonStrengthLevel;
     private int hamonControlPoints;
     private int hamonControlLevel;
+    
     private float breathingTrainingLevel;
-    private float breathingTrainingBonus;
+    private float breathingTrainingDayBonus;
     private float hamonDamageFactor = 1F;
-    private HamonSkillSet hamonSkills;
     private EnumMap<Exercise, Integer> exerciseTicks = new EnumMap<Exercise, Integer>(Exercise.class);
-    private boolean isMeditating;
-    private Vector3d meditationPosition;
-    private float meditationYRot;
-    private float meditationXRot;
     private float avgExercisePoints;
+    
+    private HamonSkillSet hamonSkills;
+    
+    private boolean isMeditating;
+    private int meditationTicks;
+    
     private Set<PlayerEntity> newLearners = new HashSet<>();
 
     public HamonData() {
@@ -86,9 +98,69 @@ public class HamonData extends TypeSpecificData {
     }
     
     public void tick() {
-        tickNewPlayerLearners(power.getUser());
+        if (!power.getUser().level.isClientSide()) {
+            tickNewPlayerLearners(power.getUser());
+        }
+    }
+    
+    public float tickEnergy() {
+        return power.getEnergy() + (1F + getHamonControlLevel() * 0.033F) * (1F + (int) getBreathingLevel() * 0.08F);
     }
 
+    public float getMaxEnergy() {
+        return NonStandPower.BASE_MAX_ENERGY * (1F + getHamonControlLevel() * 0.033F);
+    }
+    
+    public static final float ALL_EXERCISES_EFFICIENCY_MULTIPLIER = 1.05F;
+    public float getHamonEfficiency() {
+        float efficiency = getBloodstreamEfficiency();
+        if (allExercisesCompleted) {
+            efficiency *= ALL_EXERCISES_EFFICIENCY_MULTIPLIER;
+        }
+        return efficiency;
+    }
+
+    public float getHamonDamageMultiplier() {
+        return hamonDamageFactor;
+    }
+    
+    
+    
+    private static final double STR_EXP_SCALING = 1.0333;
+    private static final double BRTH_SCALING = 0.04;
+    private static float dmgFormula(float strength, float breathingTraining) {
+        return (float) (Math.pow(STR_EXP_SCALING, strength) * (1 + BRTH_SCALING * breathingTraining));
+    }
+    
+    public static float reduceEnergyConsumed(float amount, INonStandPower power, LivingEntity user) {
+        if (user.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.SATIPOROJA_SCARF.get()) {
+            amount *= 0.6F;
+        }
+        return amount;
+    }
+    
+    public float getBloodstreamEfficiency() {
+        float efficiency = 1;
+        LivingEntity user = power.getUser();
+        
+        float healthRatio = user.getHealth() / user.getMaxHealth();
+        if (healthRatio < 0.5F) {
+            efficiency *= healthRatio * 1.5F + 0.25F;
+        }
+        
+        float freeze = 0;
+        EffectInstance freezeEffect = user.getEffect(ModEffects.FREEZE.get());
+        if (freezeEffect != null) {
+            freeze = Math.min((freezeEffect.getAmplifier() + 1) * 0.25F, 1);
+        }
+        freeze = Math.max(ModInteractionUtil.getEntityFreeze(user), freeze);
+        efficiency *= (1F - freeze);
+        
+        return efficiency;
+    }
+    
+    
+    
     @Override
     public boolean isActionUnlocked(Action<INonStandPower> action, INonStandPower powerData) {
         if (action == ModHamonActions.HAMON_SUNLIGHT_YELLOW_OVERDRIVE.get()) {
@@ -96,32 +168,33 @@ public class HamonData extends TypeSpecificData {
         }
         return action == ModHamonActions.HAMON_OVERDRIVE.get() || action == ModHamonActions.HAMON_HEALING.get() || hamonSkills.unlockedActions.contains(action);
     }
-
+    
     @Override
     public void onPowerGiven(NonStandPowerType<?> oldType) {
         hamonSkills.addSkill(HamonSkill.OVERDRIVE);
         hamonSkills.addSkill(HamonSkill.HEALING);
     }
-
-
+    
+    
     public static int pointsAtLevel(int level) {
         return level * (
                 LVL_1_POINTS
                 + LVL_1_POINTS + (level - 1) * NEXT_LVL_DIFF)
                 / 2;
     }
+    
     public static int levelFromPoints(int points) {
         int b = 2 * LVL_1_POINTS - NEXT_LVL_DIFF;
         return MathHelper.floor(Math.sqrt((b * b + 8 * NEXT_LVL_DIFF * points)) - b) / (2 * NEXT_LVL_DIFF);
     }
-
+    
     public static int pointsAtLevelFraction(float level) {
         int lvlFloored = MathHelper.floor(level);
         int pointsFullLvls = pointsAtLevel(lvlFloored);
         int pointsNextLvl = pointsAtLevel(lvlFloored + 1);
         return pointsFullLvls + MathHelper.floor((float) (pointsNextLvl - pointsFullLvls) * MathHelper.frac(level));
     }
-
+    
     public static float levelFractionFromPoints(int points) {
         int curLvl = levelFromPoints(points);
         int curLvlPointsInt = pointsAtLevel(curLvl);
@@ -167,23 +240,35 @@ public class HamonData extends TypeSpecificData {
                 }
             }
         }
-        
     }
-
+    
+    public static final float MAX_HAMON_STRENGTH_MULTIPLIER = dmgFormula(MAX_STAT_LEVEL, MAX_BREATHING_LEVEL); // 35.6908
+    private void recalcHamonDamage() {
+        hamonDamageFactor = dmgFormula(hamonStrengthLevel, breathingTrainingLevel);
+    }
+    
     public int getHamonStrengthPoints() {
         return hamonStrengthPoints;
     }
-
+    
     public int getHamonStrengthLevel() {
         return hamonStrengthLevel;
     }
-
+    
     public int getHamonControlPoints() {
         return hamonControlPoints;
     }
-
+    
     public int getHamonControlLevel() {
         return hamonControlLevel;
+    }
+    
+    public float getHamonStrengthLevelRatio() {
+        return (float) getHamonStrengthLevel() / (float) MAX_STAT_LEVEL;
+    }
+    
+    public float getHamonControlLevelRatio() {
+        return (float) getHamonControlLevel() / (float) MAX_STAT_LEVEL;
     }
     
     private int getStatPoints(HamonStat stat) {
@@ -207,7 +292,7 @@ public class HamonData extends TypeSpecificData {
             throw new IllegalArgumentException("Unexpected HamonStat constant: " + stat.name());
         }
     }
-
+    
     public static final int MAX_SKILL_POINTS_LVL = 55;
     public int getSkillPoints(HamonStat stat) {
         int lvl = getStatLevel(stat);
@@ -224,54 +309,11 @@ public class HamonData extends TypeSpecificData {
         }
         return MathHelper.clamp(lvl, 0, MAX_SKILL_POINTS_LVL) / 5 - spentPoints;
     }
-
+    
     public int nextSkillPointLvl(HamonStat stat) {
         return MathHelper.clamp(getStatLevel(stat), 0, MAX_SKILL_POINTS_LVL - 1) / 5 * 5 + 5;
     }
-
-    public float getHamonDamageMultiplier() {
-        return hamonDamageFactor;
-    }
     
-    public float getBloodstreamEfficiency() {
-        float efficiency = 1;
-        LivingEntity user = power.getUser();
-        
-        float healthRatio = user.getHealth() / user.getMaxHealth();
-        if (healthRatio < 0.5F) {
-            efficiency *= healthRatio * 1.5F + 0.25F;
-        }
-        
-        float freeze = 0;
-        EffectInstance freezeEffect = user.getEffect(ModEffects.FREEZE.get());
-        if (freezeEffect != null) {
-            freeze = Math.min((freezeEffect.getAmplifier() + 1) * 0.25F, 1);
-        }
-        freeze = Math.max(ModInteractionUtil.getEntityFreeze(user), freeze);
-        efficiency *= (1F - freeze);
-        
-        return efficiency;
-    }
-    
-    public static final float MAX_HAMON_DAMAGE = dmgFormula(MAX_STAT_LEVEL, MAX_BREATHING_LEVEL); // 35.6908
-    private void recalcHamonDamage() {
-        hamonDamageFactor = dmgFormula(hamonStrengthLevel, breathingTrainingLevel);
-    }
-
-    private static final double STR_EXP_SCALING = 1.0333;
-    private static final double BRTH_SCALING = 0.04;
-    private static float dmgFormula(float strength, float breathingTraining) {
-        return (float) (Math.pow(STR_EXP_SCALING, strength) * (1 + BRTH_SCALING * breathingTraining));
-    }
-
-    public float getEnergyLimitFactor() {
-        return 1F + getHamonControlLevel() * 0.033F;
-    }
-
-    public float getEnergyRegenPoints() {
-        return (1F + getHamonControlLevel() * 0.033F) * (1F + (int) getBreathingLevel() * 0.08F);
-    }
-
     private static final float ENERGY_PER_POINT = 750F;
     public void hamonPointsFromAction(HamonStat stat, float energyCost) {
         if (isSkillLearned(HamonSkill.NATURAL_TALENT)) {
@@ -282,11 +324,11 @@ public class HamonData extends TypeSpecificData {
         if (random.nextFloat() < (energyCost % ENERGY_PER_POINT) / ENERGY_PER_POINT) points++;
         setHamonStatPoints(stat, getStatPoints(stat) + points, false, false);
     }
-
+    
     public float getBreathingLevel() {
         return breathingTrainingLevel;
     }
-
+    
     public void setBreathingLevel(float level) {
         float oldLevel = breathingTrainingLevel;
         breathingTrainingLevel = MathHelper.clamp(level, 0, MAX_BREATHING_LEVEL);
@@ -297,18 +339,20 @@ public class HamonData extends TypeSpecificData {
                 ModCriteriaTriggers.HAMON_STATS.get().trigger(player, hamonStrengthLevel, hamonControlLevel, breathingTrainingLevel);
             });
         }
-        giveBreathingTrainingBuffs(power.getUser());
+        if (!power.getUser().level.isClientSide()) {
+            giveBreathingTrainingBuffs(power.getUser());
+        }
     }
-
+    
     private static final AttributeModifier ATTACK_DAMAGE = new AttributeModifier(
-            UUID.fromString("8dcb2ad7-6067-4615-b7b6-af5256537c10"), "Attack damage from Hamon Training", 0.03D, AttributeModifier.Operation.ADDITION);
+            UUID.fromString("8dcb2ad7-6067-4615-b7b6-af5256537c10"), "Attack damage from Hamon Training", 0.02D, AttributeModifier.Operation.ADDITION);
     private static final AttributeModifier ATTACK_SPEED = new AttributeModifier(
-            UUID.fromString("995b2915-9053-472c-834c-f94251e81659"), "Attack speed from Hamon Training", 0.03D, AttributeModifier.Operation.ADDITION);
+            UUID.fromString("995b2915-9053-472c-834c-f94251e81659"), "Attack speed from Hamon Training", 0.025D, AttributeModifier.Operation.ADDITION);
     private static final AttributeModifier MOVEMENT_SPEED = new AttributeModifier(
-            UUID.fromString("ffa9ba4e-3811-44f7-a4a9-887ffbd47390"), "Movement speed from Hamon Training", 0.0005D, AttributeModifier.Operation.ADDITION);
+            UUID.fromString("ffa9ba4e-3811-44f7-a4a9-887ffbd47390"), "Movement speed from Hamon Training", 0.0004D, AttributeModifier.Operation.ADDITION);
     private static final AttributeModifier SWIMMING_SPEED = new AttributeModifier(
             UUID.fromString("34dcb563-6759-4a2b-9dd8-ad2dd7e70404"), "Swimming speed from Hamon Training", 0.01D, AttributeModifier.Operation.ADDITION);
-
+    
     private void giveBreathingTrainingBuffs(LivingEntity entity) {
         int lvl = (int) getBreathingLevel();
         applyAttributeModifier(entity, Attributes.ATTACK_DAMAGE, ATTACK_DAMAGE, lvl);
@@ -316,7 +360,7 @@ public class HamonData extends TypeSpecificData {
         applyAttributeModifier(entity, Attributes.MOVEMENT_SPEED, MOVEMENT_SPEED, lvl);
         applyAttributeModifier(entity, ForgeMod.SWIM_SPEED.get(), SWIMMING_SPEED, lvl);
     }
-
+    
     private static void applyAttributeModifier(LivingEntity entity, Attribute attribute, AttributeModifier modifier, int lvl) {
         ModifiableAttributeInstance attributeInstance = entity.getAttribute(attribute);
         if (attributeInstance != null) {
@@ -324,41 +368,137 @@ public class HamonData extends TypeSpecificData {
             attributeInstance.addTransientModifier(new AttributeModifier(modifier.getId(), modifier.getName() + " " + lvl, modifier.getAmount() * lvl, modifier.getOperation()));
         }
     }
-
-    private boolean incExerciseLastTick;
-    private boolean incExerciseThisTick;
-    private boolean exerciseCompleted;
-    public void tickExercises(PlayerEntity user) {
-        incExerciseThisTick = false;
-        exerciseCompleted = false;
-        float multiplier = user.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.BREATH_CONTROL_MASK.get() ? 2F : 0;
-        if (user.swinging) {
-            incExerciseTicks(Exercise.MINING, multiplier, user.level.isClientSide());
-        }
-        if (user.isSwimming() && JojoModUtil.playerHasClientInput(user)) {
-            incExerciseTicks(Exercise.SWIMMING, multiplier, user.level.isClientSide());
-        }
-        else if (user.isSprinting() && user.isOnGround() && !user.isSwimming()) {
-            incExerciseTicks(Exercise.RUNNING, multiplier, user.level.isClientSide());
-        }
-        if (user.hasEffect(ModEffects.MEDITATION.get())) {
-            incExerciseTicks(Exercise.MEDITATION, multiplier, user.level.isClientSide());
-            if (!user.level.isClientSide()) {
-                if (updateMeditation(user.position(), user.yHeadRot, user.xRot)) {
-                    if (user.tickCount % 800 == 400) {
-                        JojoModUtil.sayVoiceLine(user, getBreathingSound(), null, 0.75F, 1.0F);
+    
+    public static final AttributeModifier RUNNING_COMPLETED = new AttributeModifier(
+            UUID.fromString("b730b24e-e970-4a94-b300-57e2555b42b5"), "Movement speed from running exercise", 0.1D, AttributeModifier.Operation.MULTIPLY_BASE);
+    public static final AttributeModifier MINING_COMPLETED = new AttributeModifier(
+            UUID.fromString("8674ea35-6eaf-4e22-98da-4ec0c5a4d20d"), "Attack speed from running exercise", 0.05D, AttributeModifier.Operation.MULTIPLY_BASE);
+    public static final float SWIMMING_COMPLETED_BREATH_STABILITY_TIME_MULTIPLIER = 0.8F;
+    public static final float MEDITATION_COMPLETED_ENERGY_REGEN_TIME_REDUCTION = 10;
+    private boolean swimmingCompleted = false;
+    private boolean meditationCompleted = false;
+    private boolean allExercisesCompleted = false;
+    
+    private void updateExerciseAttributes(LivingEntity entity) {
+        boolean allComplete = true;
+        for (Exercise exercise : Exercise.values()) {
+            if (isExerciseComplete(exercise)) {
+                switch (exercise) {
+                case RUNNING:
+                    if (!entity.level.isClientSide()) {
+                        applyAttributeModifier(entity, Attributes.MOVEMENT_SPEED, RUNNING_COMPLETED, 1);
                     }
-                    user.addEffect(new EffectInstance(ModEffects.MEDITATION.get(), Math.max(Exercise.MEDITATION.getMaxTicks(this) - getExerciseTicks(Exercise.MEDITATION), 210)));
-                    user.getFoodData().addExhaustion(-0.0025F);
-                    if (user.tickCount % 200 == 0 && user.isHurt() && user.level.getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION)) {
-                        user.heal(1.0F);
+                    break;
+                case MINING:
+                    if (!entity.level.isClientSide()) {
+                        applyAttributeModifier(entity, Attributes.ATTACK_SPEED, MINING_COMPLETED, 1);
                     }
+                    break;
+                case SWIMMING:
+                    swimmingCompleted = true;
+                    break;
+                case MEDITATION:
+                    meditationCompleted = true;            
+                    break;
                 }
-                else {
-                    user.removeEffect(ModEffects.MEDITATION.get());
+            }
+            
+            else {
+                allComplete = false;
+                switch (exercise) {
+                case RUNNING:
+                    if (!entity.level.isClientSide()) {
+                        ModifiableAttributeInstance attributeInstance = entity.getAttribute(Attributes.MOVEMENT_SPEED);
+                        if (attributeInstance != null) {
+                            attributeInstance.removeModifier(RUNNING_COMPLETED);
+                        }
+                    }
+                    break;
+                case MINING:
+                    if (!entity.level.isClientSide()) {
+                        ModifiableAttributeInstance attributeInstance = entity.getAttribute(Attributes.ATTACK_SPEED);
+                        if (attributeInstance != null) {
+                            attributeInstance.removeModifier(MINING_COMPLETED);
+                        }
+                    }
+                    break;
+                case SWIMMING:
+                    swimmingCompleted = false;
+                    break;
+                case MEDITATION:
+                    meditationCompleted = false;
+                    break;
                 }
             }
         }
+        
+        allExercisesCompleted = allComplete;
+    }
+    
+    public boolean isExerciseComplete(Exercise exercise) {
+        return getExerciseTicks(exercise) >= exercise.getMaxTicks(this);
+    }
+    
+    public boolean allExercisesCompleted() {
+        return allExercisesCompleted;
+    }
+    
+    private boolean incExerciseLastTick;
+    private boolean incExerciseThisTick;
+    private boolean exerciseCompleted;
+    private Vector3d prevPos = null;
+    
+    private int blocksMiningDelay;
+    public void tickExercises(PlayerEntity user) {
+        Vector3d pos = user.position();
+        boolean positionChanged = prevPos == null || prevPos.x != pos.x || prevPos.y != pos.y;
+        this.prevPos = pos;
+        incExerciseThisTick = false;
+        exerciseCompleted = false;
+        
+        float multiplier = user.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.BREATH_CONTROL_MASK.get() ? 2F : 0;
+        
+        boolean isMining;
+        if (!user.level.isClientSide()) {
+            PlayerInteractionManager gamemode = ((ServerPlayerEntity) user).gameMode;
+            boolean isDestroying = gamemode.isDestroyingBlock;
+            boolean delayedDestroy = gamemode.hasDelayedDestroy;
+            isMining = isDestroying || delayedDestroy;
+        }
+        else {
+            isMining = ClientUtil.isDestroyingBlock();
+        }
+        if (isMining) {
+            blocksMiningDelay = 6;
+        }
+        else {
+            isMining = blocksMiningDelay-- > 0;
+        }
+        if (isMining) {
+            incExerciseTicks(Exercise.MINING, multiplier, user.level.isClientSide());
+        }
+        
+        if (positionChanged && user.isSwimming() && JojoModUtil.playerHasClientInput(user)) {
+            incExerciseTicks(Exercise.SWIMMING, multiplier, user.level.isClientSide());
+        }
+        
+        else if (positionChanged && user.isSprinting() && user.isOnGround() && !user.isSwimming()) {
+            incExerciseTicks(Exercise.RUNNING, multiplier, user.level.isClientSide());
+        }
+        
+        if (isMeditating) {
+            if (++meditationTicks >= 40) {
+                incExerciseTicks(Exercise.MEDITATION, multiplier, user.level.isClientSide());
+            }
+            updateBbHeight(user);
+            if (!user.level.isClientSide()) {
+                user.getFoodData().addExhaustion(-0.0025F);
+                if (user.tickCount % 200 == 0 && user.isHurt() && user.level.getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION)) {
+                    user.heal(1.0F);
+                }
+            }
+        }
+        
         if (incExerciseThisTick) {
             recalcAvgExercisePoints();
         }
@@ -367,13 +507,64 @@ public class HamonData extends TypeSpecificData {
                 PacketManager.sendToClient(new HamonExercisesPacket(this), player);
             });
         }
+        if (exerciseCompleted) {
+            updateExerciseAttributes(user);
+        }
         incExerciseLastTick = incExerciseThisTick;
     }
-
+    
+    // FIXME !!! do not update if playerAnimator isn't installed
+    private float bbHeightMult = 1;
+    private boolean updateHeight = false;
+    private void updateBbHeight(LivingEntity user) {
+        if (isMeditating) {
+            if (meditationTicks <= 35) {
+                bbHeightMult = 1 - meditationTicks * 0.0085F;
+                updateHeight = true;
+                user.refreshDimensions();
+            }
+        }
+        else {
+            bbHeightMult = 1;
+            updateHeight = true;
+            user.refreshDimensions();
+        }
+    }
+    
+    private void actuallyUpdateBbHeight(EntityEvent.Size event) {
+        if (updateHeight) {
+            EntitySize size = event.getNewSize();
+            float width = size.width;
+            float height = size.height * bbHeightMult;
+            float heightDiff = size.height - height;
+            size = size.fixed ? EntitySize.fixed(width, height) : EntitySize.scalable(width, height);
+            event.setNewSize(size, bbHeightMult == 1);
+            if (bbHeightMult != 1) {
+                event.setNewEyeHeight(1.62F - heightDiff);
+            }
+        }
+    }
+    
+    @SubscribeEvent
+    public static void updateBoundingBox(EntityEvent.Size event) {
+        Entity entity = event.getEntity();
+        if (entity instanceof LivingEntity) {
+            LivingEntity user = (LivingEntity) entity;
+            if (user.getAttributes() == null) { // means that the event was created in the constructor, when capabilities haven't been initialized yet
+                return;
+            }
+            INonStandPower.getNonStandPowerOptional(user).ifPresent(cap -> {
+                cap.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
+                    hamon.actuallyUpdateBbHeight(event);
+                });
+            });
+        }
+    }
+    
     public int getExerciseTicks(Exercise exercise) {
         return exerciseTicks.get(exercise);
     }
-
+    
     private void incExerciseTicks(Exercise exercise, float multiplier, boolean clientSide) {
         int ticks = exerciseTicks.get(exercise);
         int maxTicks = exercise.getMaxTicks(this);
@@ -396,13 +587,14 @@ public class HamonData extends TypeSpecificData {
             this.incExerciseThisTick = true;
         }
     }
-
+    
     public void setExerciseTicks(int mining, int running, int swimming, int meditation, boolean clientSide) {
         setExerciseValue(Exercise.MINING, mining, clientSide);
         setExerciseValue(Exercise.RUNNING, running, clientSide);
         setExerciseValue(Exercise.SWIMMING, swimming, clientSide);
         setExerciseValue(Exercise.MEDITATION, meditation, clientSide);
         recalcAvgExercisePoints();
+        updateExerciseAttributes(power.getUser());
     }
     
     private void setExerciseValue(Exercise exercise, int value, boolean clientSide) {
@@ -419,30 +611,30 @@ public class HamonData extends TypeSpecificData {
                 .getAsDouble()
                 / (float) exerciseTicks.size();
     }
-
-    public void startMeditating(Vector3d position, float headYRot, float headXRot) {
-        this.isMeditating = true;
-        this.meditationPosition = position;
-        this.meditationYRot = headYRot;
-        this.meditationXRot = headXRot;
-    }
-
-    private boolean updateMeditation(Vector3d position, float headYRot, float headXRot) {
-        if (isMeditating) {
-            isMeditating = meditationPosition.closerThan(position, 0.1D)
-                    && (headYRot - meditationYRot) < 1F
-                    && (headXRot - meditationXRot) < 1F;
-            if (isMeditating) {
-                meditationPosition = position;
-                meditationYRot = headYRot;
-                meditationXRot = headXRot;
+    
+    public void setIsMeditating(LivingEntity user, boolean isMeditating) {
+        if (this.isMeditating != isMeditating) {
+            this.isMeditating = isMeditating;
+            this.meditationTicks = 0;
+            if (!user.level.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(new TrHamonMeditationPacket(user.getId(), isMeditating), user);
+            }
+            if (!isMeditating) {
+                updateBbHeight(user);
             }
         }
+    }
+    
+    public boolean isMeditating() {
         return isMeditating;
     }
     
+    public int getMeditationTicks() {
+        return meditationTicks;
+    }
+    
     public float getTrainingBonus() {
-        return breathingTrainingBonus;
+        return breathingTrainingDayBonus;
     }
     
     public float multiplyPositiveBreathingTraining(float training) {
@@ -456,9 +648,9 @@ public class HamonData extends TypeSpecificData {
     }
     
     public void setTrainingBonus(float trainingBonus) {
-        this.breathingTrainingBonus = trainingBonus;
+        this.breathingTrainingDayBonus = trainingBonus;
     }
-
+    
     public void breathingTrainingDay(PlayerEntity user) {
         World world = user.level;
         if (!world.isClientSide()) {
@@ -471,11 +663,11 @@ public class HamonData extends TypeSpecificData {
                 else {
                     lvlInc *= 0.25F;
                 }
-                breathingTrainingBonus = 0;
+                breathingTrainingDayBonus = 0;
             }
             else {
-                float bonus = breathingTrainingBonus;
-                breathingTrainingBonus += lvlInc * 0.25F;
+                float bonus = breathingTrainingDayBonus;
+                breathingTrainingDayBonus += lvlInc * 0.25F;
                 lvlInc = multiplyPositiveBreathingTraining(lvlInc + bonus);
             }
             setBreathingLevel(getBreathingLevel() + lvlInc);
@@ -488,55 +680,55 @@ public class HamonData extends TypeSpecificData {
             setExerciseValue(exercise, 0, world.isClientSide());
             avgExercisePoints = 0;
         }
+        updateExerciseAttributes(user);
     }
-
+    
     public float getAverageExercisePoints() {
         return avgExercisePoints;
     }
-
-
-
+    
+    
+    
     public Set<HamonSkill> getSkillSetImmutable() {
         return Collections.unmodifiableSet(hamonSkills.wrappedSkillSet);
     }
-
+    
     public HamonSkill.Technique getTechnique() {
         return hamonSkills.technique;
     }
-
+    
     public boolean isSkillLearned(HamonSkill skill) {
         return hamonSkills.isSkillLearned(skill);
     }
 
-    public boolean canLearnSkill(HamonSkill skill, @Nullable Set<HamonSkill> teachersSkills) {
-        return hamonSkills.parentsLearned(skill) && haveSkillPoints(skill) && techniqueSkillRequirement(skill) 
-                && rightTechnique(skill) && (teachersSkills == null || !skill.requiresTeacher() || teachersSkills.contains(skill));
+    public ActionConditionResult canLearnSkillTeacherIrrelevant(LivingEntity user, HamonSkill skill) {
+        return canLearnSkill(user, skill, false, null);
     }
-
-    public String skillClosedReason(HamonSkill skill, boolean isTeacherNearby, Set<HamonSkill> teachersSkills) {
+    
+    public ActionConditionResult canLearnSkill(LivingEntity user, HamonSkill skill, boolean isTeacherNearby, @Nullable Set<HamonSkill> teachersSkills) {
         if (!hamonSkills.parentsLearned(skill)) {
-            return "hamon.closed.parents";
+            return ActionConditionResult.createNegative(new TranslationTextComponent("hamon.closed.parents"));
         }
         if (!haveSkillPoints(skill)) {
-            return "hamon.closed.points";
+            return ActionConditionResult.createNegative(new TranslationTextComponent("hamon.closed.points"));
         }
         if (!techniqueSkillRequirement(skill)) {
-            return "hamon.closed.technique.locked";
+            return ActionConditionResult.createNegative(new TranslationTextComponent("hamon.closed.technique.locked"));
         }
-        if (!(skill.getTechnique() == null) && hamonSkills.technique != null && skill.getTechnique() != hamonSkills.technique) {
-            return "hamon.closed.technique.bug";
+        if (!rightTechnique(skill)) {
+            return ActionConditionResult.createNegative(new TranslationTextComponent("hamon.closed.technique.bug"));
         }
-        if (skill.requiresTeacher()) {
+        if (teachersSkills != null && skill.requiresTeacher()) {
             if (!isTeacherNearby) {
-                return "hamon.closed.teacher.required";
+                return ActionConditionResult.createNegative(new TranslationTextComponent("hamon.closed.teacher.required"));
             }
             else if (!teachersSkills.contains(skill)) {
-                return "hamon.closed.teacher.no_skill";
+                return ActionConditionResult.createNegative(new TranslationTextComponent("hamon.closed.teacher.no_skill"));
             }
         }
-        return "";
+        return ActionConditionResult.POSITIVE;
     }
-
+    
     private boolean haveSkillPoints(HamonSkill skill) {
         return skill.getStat() == null || getSkillPoints(skill.getStat()) > 0;
     }
@@ -563,8 +755,9 @@ public class HamonData extends TypeSpecificData {
         return skill.getTechnique() == null || hamonSkills.technique == null || skill.getTechnique() == hamonSkills.technique;
     }
 
-    public boolean learnHamonSkill(HamonSkill skill, boolean checkRequirements) {
-        if (!isSkillLearned(skill) && (!checkRequirements || canLearnSkill(skill, HamonPowerType.nearbyTeachersSkills(power.getUser())))) {
+    public boolean learnHamonSkill(LivingEntity user, HamonSkill skill, boolean checkRequirements) {
+        if (!isSkillLearned(skill) && (!checkRequirements
+                || canLearnSkill(user, skill, true, HamonPowerType.nearbyTeachersSkills(power.getUser())).isPositive())) {
             hamonSkills.addSkill(skill);
             onSkillAdded(skill);
             serverPlayer.ifPresent(player -> {
@@ -578,7 +771,7 @@ public class HamonData extends TypeSpecificData {
                 default:
                     break;
                 }
-                PacketManager.sendToClient(new HamonSkillLearnPacket(skill), (ServerPlayerEntity) player);
+                PacketManager.sendToClient(new HamonSkillAddPacket(skill), (ServerPlayerEntity) player);
             });
             return true;
         }
@@ -633,27 +826,6 @@ public class HamonData extends TypeSpecificData {
         }
     }
     
-    private SoundEvent getBreathingSound() {
-        Technique technique = getTechnique();
-        if (technique == null) {
-            return ModSounds.BREATH_DEFAULT.get();
-        }
-        switch (getTechnique()) {
-        case JONATHAN:
-            return ModSounds.BREATH_JONATHAN.get();
-        case ZEPPELI:
-            return ModSounds.BREATH_ZEPPELI.get();
-        case JOSEPH:
-            return ModSounds.BREATH_JOSEPH.get();
-        case CAESAR:
-            return ModSounds.BREATH_CAESAR.get();
-        case LISA_LISA:
-            return ModSounds.BREATH_LISA_LISA.get();
-        default:
-            return ModSounds.BREATH_DEFAULT.get();
-        }
-    }
-    
     public void addNewPlayerLearner(PlayerEntity player) {
         newLearners.add(player);
         LivingEntity user = power.getUser();
@@ -691,10 +863,10 @@ public class HamonData extends TypeSpecificData {
         nbt.put("Skills", skillsMapNbt);
         CompoundNBT exercises = new CompoundNBT();
         for (Exercise exercise : Exercise.values()) {
-            exercises.putInt(exercise.toString(), exerciseTicks.get(exercise));
+            exercises.putInt(exercise.toString(), Math.min(exerciseTicks.get(exercise), exercise.getMaxTicks(this)));
         }
         nbt.put("Exercises", exercises);
-        nbt.putFloat("TrainingBonus", breathingTrainingBonus);
+        nbt.putFloat("TrainingBonus", breathingTrainingDayBonus);
         return nbt;
     }
 
@@ -713,7 +885,7 @@ public class HamonData extends TypeSpecificData {
             exercisesNbt[exercise.ordinal()] = exercises.getInt(exercise.toString());
         }
         setExerciseTicks(exercisesNbt[0], exercisesNbt[1], exercisesNbt[2], exercisesNbt[3], false);
-        breathingTrainingBonus = nbt.getFloat("TrainingBonus");
+        breathingTrainingDayBonus = nbt.getFloat("TrainingBonus");
     }
 
     private void fillSkillsFromNbt(CompoundNBT nbt) {
@@ -729,10 +901,11 @@ public class HamonData extends TypeSpecificData {
         giveBreathingTrainingBuffs(user);
         for (HamonSkill skill : HamonSkill.values()) {
             if (isSkillLearned(skill)) {
-                PacketManager.sendToClient(new HamonSkillLearnPacket(skill), user);
+                PacketManager.sendToClient(new HamonSkillAddPacket(skill), user);
                 onSkillAdded(skill);
             }
         }
+        updateExerciseAttributes(user);
         PacketManager.sendToClient(new HamonExercisesPacket(this), user);
         ModCriteriaTriggers.HAMON_STATS.get().trigger(user, hamonStrengthLevel, hamonControlLevel, breathingTrainingLevel);
     }

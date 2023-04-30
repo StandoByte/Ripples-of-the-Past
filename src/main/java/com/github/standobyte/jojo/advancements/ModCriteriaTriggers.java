@@ -37,6 +37,8 @@ public class ModCriteriaTriggers {
             new CriteriaTriggerSupplier<>(() -> new HamonStatsTrigger(new ResourceLocation(JojoMod.MOD_ID, "hamon_stats")));
     public static final CriteriaTriggerSupplier<HamonChargeKillTrigger> HAMON_CHARGE_KILL = 
             new CriteriaTriggerSupplier<>(() -> new HamonChargeKillTrigger(new ResourceLocation(JojoMod.MOD_ID, "hamon_charge_kill")));
+    public static final CriteriaTriggerSupplier<UnconditionalTrigger> ABANDON_HAMON = 
+            new CriteriaTriggerSupplier<>(() -> new UnconditionalTrigger(new ResourceLocation(JojoMod.MOD_ID, "abandon_hamon")));
     public static final CriteriaTriggerSupplier<PeopleDrainedTrigger> VAMPIRE_PEOPLE_DRAINED = 
             new CriteriaTriggerSupplier<>(() -> new PeopleDrainedTrigger(new ResourceLocation(JojoMod.MOD_ID, "vampire_people_drained")));
     public static final CriteriaTriggerSupplier<UnconditionalTrigger> VAMPIRE_HAMON_DAMAGE_SCARF = 
@@ -47,6 +49,8 @@ public class ModCriteriaTriggers {
             new CriteriaTriggerSupplier<>(() -> new KilledPowerUserTrigger(new ResourceLocation(JojoMod.MOD_ID, "entity_killed_player"), true));
     public static final CriteriaTriggerSupplier<UnconditionalTrigger> SLEPT_IN_COFFIN = 
             new CriteriaTriggerSupplier<>(() -> new UnconditionalTrigger(new ResourceLocation(JojoMod.MOD_ID, "coffin_sleep")));
+    public static final CriteriaTriggerSupplier<UnconditionalTrigger> VAMPIRISM_CURED = 
+            new CriteriaTriggerSupplier<>(() -> new UnconditionalTrigger(new ResourceLocation(JojoMod.MOD_ID, "cure_vampirism")));
     public static final CriteriaTriggerSupplier<StoneMaskDestroyedTrigger> STONE_MASK_DESTROYED = 
             new CriteriaTriggerSupplier<>(() -> new StoneMaskDestroyedTrigger(new ResourceLocation(JojoMod.MOD_ID, "destroy_stone_mask")));
     public static final CriteriaTriggerSupplier<UnconditionalTrigger> AFK = 
@@ -59,7 +63,7 @@ public class ModCriteriaTriggers {
             new CriteriaTriggerSupplier<>(() -> new StandArrowHitTrigger(new ResourceLocation(JojoMod.MOD_ID, "stand_arrow_hit")));
     public static final CriteriaTriggerSupplier<SoulAscensionTrigger> SOUL_ASCENSION = 
             new CriteriaTriggerSupplier<>(() -> new SoulAscensionTrigger(new ResourceLocation(JojoMod.MOD_ID, "soul_ascension")));
-    // FIXME (!!) un-hide the achievement
+    // FIXME (BIIM) un-hide the achievement
     public static final CriteriaTriggerSupplier<RPSGameTrigger> ROCK_PAPER_SCISSORS_GAME = 
             new CriteriaTriggerSupplier<>(() -> new RPSGameTrigger(new ResourceLocation(JojoMod.MOD_ID, "rps_game")));
     

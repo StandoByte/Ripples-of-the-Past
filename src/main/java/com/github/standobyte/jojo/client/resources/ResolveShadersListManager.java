@@ -43,7 +43,7 @@ public class ResolveShadersListManager extends ReloadListener<Map<ResourceLocati
         ModStandActions.STANDS.getRegistry().getKeys().forEach(stand -> {
             JsonArray jsonArray = readArray(resourceManager, stand);
             if (jsonArray != null) {
-                map.put(stand, readArray(resourceManager, stand));
+                map.put(stand, jsonArray);
             }
         });
         return map;

@@ -36,6 +36,7 @@ public class ChunkCap {
     
     private boolean loadedNBT = false;
     private final Map<BlockPos, PrevBlockInfo> brokenBlocks = new HashMap<>();
+    private final Map<BlockPos, Integer> brokenBlocksXp = new HashMap<>();
     private final List<PrevBlockInfo> blocksToSync = new ArrayList<>();
 //    private Set<ServerPlayerEntity> syncedTo = new HashSet<>();
 
@@ -51,6 +52,9 @@ public class ChunkCap {
     }
     
     private void saveBrokenBlock(PrevBlockInfo prevBlock) {
+        if (!chunk.getLevel().isClientSide() && brokenBlocksXp.containsKey(prevBlock.pos)) {
+            prevBlock.setDroppedXp(brokenBlocksXp.remove(prevBlock.pos));
+        }
         brokenBlocks.put(prevBlock.pos, prevBlock);
         if (!chunk.getLevel().isClientSide()) {
             blocksToSync.add(prevBlock);
@@ -122,6 +126,10 @@ public class ChunkCap {
         return brokenBlocks.containsKey(pos);
     }
     
+    public void setDroppedXp(BlockPos blockPos, int xp) {
+        brokenBlocksXp.put(blockPos, xp);
+    }
+    
     
     CompoundNBT save() {
         CompoundNBT nbt = new CompoundNBT();
@@ -156,6 +164,7 @@ public class ChunkCap {
         public final List<ItemStack> drops;
         public final boolean keep;
         private int tickCount = 0;
+        private int xp = 0;
         
         private PrevBlockInfo(BlockPos pos, BlockState state, List<ItemStack> drops, boolean keep) {
             this.pos = pos;
@@ -166,6 +175,14 @@ public class ChunkCap {
         
         public static PrevBlockInfo clientInstance(BlockPos pos, BlockState state) {
             return new PrevBlockInfo(pos, state, new ArrayList<>(), true);
+        }
+        
+        public void setDroppedXp(int xp) {
+            this.xp = xp;
+        }
+        
+        public int getDroppedXp() {
+            return xp;
         }
         
         private boolean forget() {
@@ -183,6 +200,7 @@ public class ChunkCap {
             for (ItemStack stack : drops) {
                 itemsNBT.add(stack.save(new CompoundNBT()));
             }
+            nbt.putInt("Xp", xp);
             nbt.put("Drops", itemsNBT);
             
             return nbt;
@@ -213,6 +231,7 @@ public class ChunkCap {
                     drops, 
                     nbt.getBoolean("Keep"));
             block.tickCount = nbt.getInt("TickCount");
+            block.xp = nbt.getInt("Xp");
             return block;
         }
     }

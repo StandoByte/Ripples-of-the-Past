@@ -47,7 +47,7 @@ public class BladeHatEntityModel extends EntityModel<BladeHatEntity> {
 
     @Override
     public void setupAnim(BladeHatEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
-        if (!entity.isInGround()) {
+        if (!entity.isInGround() && entity.canUpdate()) {
             yRotationOffset = (yRotationOffset + ticks * 36.0F) % 360.0F;
         }
         hat.yRot = yRotationOffset * MathUtil.DEG_TO_RAD;

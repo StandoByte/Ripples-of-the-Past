@@ -75,17 +75,14 @@ public class StandDiscItem extends Item {
                     player.displayClientMessage(new TranslationTextComponent("jojo.chat.message.low_tier"), true);
                     return ActionResult.fail(stack);
                 }
-                if (power.wasGivenByDisc()) {
-                    if (!player.abilities.instabuild) {
-                        Optional<StandInstance> previousDiscStand = power.putOutStand();
-                        previousDiscStand.ifPresent(prevStand -> player.drop(withStand(new ItemStack(this), prevStand), false));
-                    }
-                    else {
-                        power.clear();
-                    }
+                if (!player.abilities.instabuild) {
+                    Optional<StandInstance> previousDiscStand = power.putOutStand();
+                    previousDiscStand.ifPresent(prevStand -> player.drop(withStand(new ItemStack(this), prevStand), false));
+                }
+                else {
+                    power.clear();
                 }
                 if (power.giveStand(stand, !stack.getTag().getBoolean(WS_TAG))) {
-                    power.setGivenByDisc();
                     if (!player.abilities.instabuild) {
                         stack.shrink(1);
                     }
@@ -139,7 +136,7 @@ public class StandDiscItem extends Item {
         if (player != null) {
             if (validStandDisc(stack, true)) {
                 StandInstance stand = getStandFromStack(stack, true);
-                tooltip.add(stand.getCustomName().orElse(new TranslationTextComponent(stand.getType().getTranslationKey())));
+                tooltip.add(stand.getName());
                 tooltip.add(stand.getType().getPartName());
                 if (JojoModConfig.getCommonConfigInstance(true).standTiers.get()) {
                     int standTier = stand.getType().getTier();

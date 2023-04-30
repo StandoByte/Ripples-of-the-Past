@@ -5,7 +5,6 @@ import java.util.List;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
-import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonStat;
@@ -29,6 +28,7 @@ public class HamonCutterEntity extends ModdedProjectileEntity {
     private static final Vector3d MOUTH_POS_OFFSET = new Vector3d(0.0D, -0.1D, 0.0D);
     private ItemStack potionItem;
     private int color = -1;
+    private float hamonStatPoints;
 
     public HamonCutterEntity(LivingEntity shooter, World world, ItemStack potionItem) {
         super(ModEntityTypes.HAMON_CUTTER.get(), shooter, world);
@@ -38,6 +38,10 @@ public class HamonCutterEntity extends ModdedProjectileEntity {
 
     public HamonCutterEntity(EntityType<? extends HamonCutterEntity> type, World world) {
         super(type, world);
+    }
+    
+    public void setHamonStatPoints(float points) {
+        this.hamonStatPoints = points;
     }
     
     @Override
@@ -84,7 +88,7 @@ public class HamonCutterEntity extends ModdedProjectileEntity {
             if (owner != null) {
                 INonStandPower.getNonStandPowerOptional(owner).ifPresent(power -> {
                     power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                        hamon.hamonPointsFromAction(HamonStat.STRENGTH, ModHamonActions.ZEPPELI_HAMON_CUTTER.get().getEnergyCost(null) / 8F);
+                        hamon.hamonPointsFromAction(HamonStat.STRENGTH, hamonStatPoints);
                     });
                 });
             }
@@ -121,6 +125,7 @@ public class HamonCutterEntity extends ModdedProjectileEntity {
         if (!potionItem.isEmpty()) {
             nbt.put("Potion", potionItem.save(new CompoundNBT()));
         }
+        nbt.putFloat("Points", hamonStatPoints);
     }
 
     @Override
@@ -128,6 +133,7 @@ public class HamonCutterEntity extends ModdedProjectileEntity {
         super.readAdditionalSaveData(nbt);
         potionItem = ItemStack.of(nbt.getCompound("Potion"));
         color = PotionUtils.getColor(potionItem);
+        hamonStatPoints = nbt.getFloat("Points");
     }
 
     @Override

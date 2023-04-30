@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.init;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.block.MagiciansRedFireBlock;
 import com.github.standobyte.jojo.block.MeteoricOreBlock;
 import com.github.standobyte.jojo.block.PillarmanBossMultiBlock;
 import com.github.standobyte.jojo.block.StoneMaskBlock;
@@ -10,6 +11,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.material.MaterialColor;
 import net.minecraft.item.DyeColor;
 import net.minecraftforge.common.ToolType;
 import net.minecraftforge.fml.RegistryObject;
@@ -31,6 +33,11 @@ public class ModBlocks {
     
     public static final RegistryObject<MeteoricOreBlock> METEORIC_ORE = BLOCKS.register("meteoric_ore", 
            () -> new MeteoricOreBlock(Block.Properties.of(Material.METAL).strength(10.0F, 3.0F).harvestTool(ToolType.PICKAXE).harvestLevel(3).requiresCorrectToolForDrops().sound(SoundType.METAL)));
+    
+    public static final RegistryObject<MagiciansRedFireBlock> MAGICIANS_RED_FIRE = BLOCKS.register("magicians_red_fire", 
+            () -> new MagiciansRedFireBlock(Block.Properties.of(Material.FIRE, MaterialColor.FIRE).noCollission().instabreak().lightLevel((blockState) -> {
+                return 15;
+            }).sound(SoundType.WOOL)));
     
     public static final RegistryObject<WoodenCoffinBlock> WOODEN_COFFIN_OAK_WHITE = BLOCKS.register("wooden_coffin_oak_white", () -> woodenCoffin(DyeColor.WHITE));
     public static final RegistryObject<WoodenCoffinBlock> WOODEN_COFFIN_OAK_ORANGE = BLOCKS.register("wooden_coffin_oak_orange", () -> woodenCoffin(DyeColor.ORANGE));

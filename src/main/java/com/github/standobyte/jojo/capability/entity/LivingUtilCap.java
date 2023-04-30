@@ -7,6 +7,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.entity.AfterimageEntity;
+import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonCharge;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -15,6 +16,7 @@ import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 
@@ -31,21 +33,23 @@ public class LivingUtilCap {
     private Vector3d latestExplosionPos = null;
     
     HamonCharge hamonCharge;
-    
     private final List<AfterimageEntity> afterimages = new ArrayList<>();
-    
     public boolean hasUsedTimeStopToday = false;
-    
     private int noLerpTicks = 0;
+    private int hurtTimeSaved;
+    private int airLast;
     
     public LivingUtilCap(LivingEntity entity) {
         this.entity = entity;
+        airLast = entity.getMaxAirSupply();
     }
     
     public void tick() {
         lastHurtByStandTick();
         hamonChargeTick();
         tickNoLerp();
+        tickHurtAnim();
+        tickAir();
         
         Iterator<AfterimageEntity> it = afterimages.iterator();
         while (it.hasNext()) {
@@ -151,7 +155,7 @@ public class LivingUtilCap {
             double minSpeed = entity.getAttributeBaseValue(Attributes.MOVEMENT_SPEED);
             double speed = entity.getAttributeValue(Attributes.MOVEMENT_SPEED);
             for (; i < count; i++) {
-                AfterimageEntity afterimage = new AfterimageEntity(entity.level, entity, i);
+                AfterimageEntity afterimage = new AfterimageEntity(entity.level, entity, i + 1);
                 afterimage.setLifeSpan(lifespan);
                 afterimage.setMinSpeed(minSpeed + (speed - minSpeed) * (double) (i + 1) / (double) count);
                 afterimages.add(afterimage);
@@ -175,6 +179,34 @@ public class LivingUtilCap {
         if (noLerpTicks > 0 && CommonReflection.getLerpSteps(entity) > 1) {
             CommonReflection.setLerpSteps(entity, 1);
             noLerpTicks--;
+        }
+    }
+    
+    
+    
+    private void tickHurtAnim() {
+        if (!entity.canUpdate()) {
+            if (entity.hurtTime > 0) {
+                hurtTimeSaved = entity.hurtTime;
+                entity.hurtTime = 0;
+            }
+        }
+        else if (hurtTimeSaved > 0) {
+            entity.hurtTime = hurtTimeSaved;
+            hurtTimeSaved = 0;
+        }
+    }
+    
+    
+    
+    private void tickAir() {
+        if (!entity.level.isClientSide()) {
+            int air = entity.getAirSupply();
+            if (air > 0 && air < airLast && entity.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.BREATH_CONTROL_MASK.get()) {
+                air = Math.max(air - (airLast - air) * 3, 0);
+                entity.setAirSupply(air);
+            }
+            airLast = air;
         }
     }
 }

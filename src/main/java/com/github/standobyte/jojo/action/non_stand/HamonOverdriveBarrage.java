@@ -61,7 +61,7 @@ public class HamonOverdriveBarrage extends HamonAction {
                         }
                         if (digDuration >= 0 && digDuration <= 2.5F * Math.sqrt(user.getAttributeValue(Attributes.ATTACK_DAMAGE))) {
                             world.destroyBlock(pos, dropItem);
-                            power.getTypeSpecificData(ModPowers.HAMON.get()).get().hamonPointsFromAction(HamonStat.STRENGTH, getHeldTickEnergyCost());
+                            power.getTypeSpecificData(ModPowers.HAMON.get()).get().hamonPointsFromAction(HamonStat.STRENGTH, getHeldTickEnergyCost(power));
                         }
                         else {
                             SoundType soundType = blockState.getSoundType(world, pos, user);
@@ -78,7 +78,7 @@ public class HamonOverdriveBarrage extends HamonAction {
                     targetEntity.invulnerableTime = invulTicks;
                 }
                 if (!world.isClientSide()) {
-                    DamageUtil.dealHamonDamage(targetEntity, 0.1F, user, null);
+                    DamageUtil.dealHamonDamage(targetEntity, 0.1F, user, null, null);
                 }
                 break;
             default:

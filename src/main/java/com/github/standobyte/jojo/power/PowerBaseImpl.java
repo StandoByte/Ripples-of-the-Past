@@ -43,11 +43,13 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     @Nonnull
     protected final LivingEntity user;
     protected final Optional<ServerPlayerEntity> serverPlayerUser;
+    
     protected List<Action<P>> attacks = new ArrayList<>();
     protected List<Action<P>> abilities = new ArrayList<>();
     private ActionCooldownTracker cooldowns = new ActionCooldownTracker();
     private int leapCooldown;
     protected HeldActionData<P> heldActionData;
+    protected ActionTarget mouseTarget = ActionTarget.EMPTY;
     private long lastTickedDay = -1;
 
     public PowerBaseImpl(LivingEntity user) {
@@ -213,6 +215,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     
     @Override
     public final boolean clickAction(Action<P> action, boolean shift, ActionTarget target) {
+        if (action == null) return false;
         boolean res = onClickAction(action, shift, target);
         action.afterClick(user.level, user, getThis(), res);
         return res;
@@ -238,7 +241,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                     action.playVoiceLine(user, getThis(), target, wasActive, shift);
                 }
                 setHeldAction(action);
-                setHeldActionTarget(target);
+                setMouseTarget(target);
                 return true;
             }
             else {
@@ -279,7 +282,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             return ActionConditionResult.NEGATIVE;
         }
         
-        if (heldActionData != null && !heldActionData.action.heldAllowsOtherActions(getThis()) && heldActionData.action != action) {
+        if (heldActionData != null && !heldActionData.action.heldAllowsOtherAction(getThis(), action) && heldActionData.action != action) {
             return ActionConditionResult.NEGATIVE;
         }
 
@@ -288,7 +291,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         }
 
         LivingEntity performer = action.getPerformer(user, getThis());
-        if (!action.ignoresPerformerStun() && performer != null && performer.getEffect(ModEffects.STUN.get()) != null) {
+        if (!action.ignoresPerformerStun() && performer != null && ModEffects.isStunned(performer)) {
             return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition.stun"));
         }
 
@@ -351,7 +354,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
     
     protected void performAction(Action<P> action, ActionTarget target) {
-        if (!action.holdOnly()) {
+        if (!action.holdOnly(getThis())) {
             World world = user.level;
             target = action.targetBeforePerform(world, user, getThis(), target);
             action.onPerform(world, user, getThis(), target);
@@ -380,14 +383,6 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         return heldActionData.action;
     }
 
-
-    @Override
-    public void setHeldActionTarget(ActionTarget target) {
-        if (heldActionData != null) {
-            heldActionData.setActionTarget(target);
-        }
-    }
-
     private void tickHeldAction() {
         if (heldActionData != null) {
             Action<P> heldAction = heldActionData.action;
@@ -405,7 +400,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                     stopHeldAction(true);
                     return;
                 }
-                ActionTarget target = heldActionData.getActionTarget();
+                ActionTarget target = getMouseTarget();
                 Container<ActionTarget> targetContainer = new Container<>(target);
                 ActionConditionResult result = checkRequirements(heldActionData.action, targetContainer, true);
                 target = targetContainer.get();
@@ -440,7 +435,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             }
         }
     }
-
+    
     @Override
     public int getHeldActionTicks() {
         return heldActionData == null ? 0 : heldActionData.getTicks();
@@ -450,12 +445,10 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     public void stopHeldAction(boolean shouldFire) {
         if (heldActionData != null) {
             Action<P> heldAction = heldActionData.action;
-            ActionTarget target = heldActionData.getActionTarget();
+            ActionTarget target = getMouseTarget();
             int ticksHeld = getHeldActionTicks();
             
-            
-            
-            if (heldAction.holdOnly()) {
+            if (heldAction.holdOnly(getThis())) {
                 heldAction.stoppedHolding(user.level, user, getThis(), ticksHeld, false);
                 
                 int cooldown = heldAction.getCooldown(getThis(), ticksHeld);
@@ -487,6 +480,25 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             }
         }
     }
+    
+
+    @Override
+    public void setMouseTarget(ActionTarget target) {
+        if (target != null) {
+            this.mouseTarget = target;
+        }
+    }
+    
+    @Override
+    public ActionTarget getMouseTarget() {
+        return mouseTarget;
+    }
+    
+    @Override
+    public boolean isTargetUpdateTick() {
+        return getHeldAction() != null;
+    }
+    
     
     @Override
     public void onUserGettingAttacked(DamageSource dmgSource, float dmgAmount) {

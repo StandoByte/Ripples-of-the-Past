@@ -20,6 +20,8 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.common.util.LazyOptional;
 
 public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
@@ -32,6 +34,13 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     boolean isUserCreative();
     void tick();
     boolean isActive();
+    
+    default int getColor() {
+        return hasPower() ? getType().getColor() : -1;
+    }
+    default ITextComponent getName() {
+        return hasPower() ? getType().getName() : StringTextComponent.EMPTY;
+    }
 
     List<Action<P>> getAttacks();
     List<Action<P>> getAbilities();
@@ -61,15 +70,18 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     float getLearningProgressRatio(Action<P> action);
 
     void setHeldAction(Action<P> action);
-    default Action<P> getHeldAction() {
+    @Nullable default Action<P> getHeldAction() {
         return getHeldAction(false);
     }
-    Action<P> getHeldAction(boolean checkRequirements);
+    @Nullable Action<P> getHeldAction(boolean checkRequirements);
     void refreshHeldActionTickState(boolean requirementsFulfilled);
     int getHeldActionTicks();
-    void setHeldActionTarget(ActionTarget target);
     void stopHeldAction(boolean shouldFire);
 
+    void setMouseTarget(ActionTarget target);
+    @Nullable ActionTarget getMouseTarget();
+    boolean isTargetUpdateTick();
+    
     void onUserGettingAttacked(DamageSource dmgSource, float dmgAmount);
     float getTargetResolveMultiplier(IStandPower attackingStand);
     
@@ -88,7 +100,10 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     void syncWithTrackingOrUser(ServerPlayerEntity player);
 
     default boolean onClickAction(ActionType type, int index, boolean shift, ActionTarget target, Optional<Action<?>> inputValidation) {
-        Action<P> action = this.getAction(type, index, shift);
+        return onClickAction(this.getAction(type, index, shift), shift, target, inputValidation);
+    }
+    
+    default boolean onClickAction(Action<P> action, boolean shift, ActionTarget target, Optional<Action<?>> inputValidation) {
         if (action != null && inputValidation.map(clientAction -> clientAction == action).orElse(true)) {
             return clickAction(action, shift, target);
         }

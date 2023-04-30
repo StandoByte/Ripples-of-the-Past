@@ -12,7 +12,7 @@ import com.github.standobyte.jojo.potion.StatusEffect;
 import com.github.standobyte.jojo.potion.StunEffect;
 import com.github.standobyte.jojo.potion.UncurableEffect;
 import com.github.standobyte.jojo.potion.UndeadRegenerationEffect;
-import com.github.standobyte.jojo.power.nonstand.type.vampirism.VampirismPowerType;
+import com.github.standobyte.jojo.potion.VampireSunBurnEffect;
 import com.google.common.collect.ImmutableSet;
 
 import net.minecraft.entity.LivingEntity;
@@ -31,20 +31,30 @@ import net.minecraftforge.registries.ForgeRegistries;
 public class ModEffects {
     public static final DeferredRegister<Effect> EFFECTS = DeferredRegister.create(ForgeRegistries.POTIONS, JojoMod.MOD_ID);
     
+    // TODO update invisibility status
+    public static final RegistryObject<Effect> FULL_INVISIBILITY = EFFECTS.register("full_invisibility", 
+            () -> new StatusEffect(EffectType.BENEFICIAL, Effects.INVISIBILITY.getColor()));
+    
     public static final RegistryObject<FreezeEffect> FREEZE = EFFECTS.register("freeze", 
             () -> new FreezeEffect(EffectType.HARMFUL, 0xD6D6FF));
     
     public static final RegistryObject<UndeadRegenerationEffect> UNDEAD_REGENERATION = EFFECTS.register("undead_regeneration", 
             () -> new UndeadRegenerationEffect(EffectType.BENEFICIAL, Effects.REGENERATION.getColor()));
     
+    public static final RegistryObject<VampireSunBurnEffect> VAMPIRE_SUN_BURN = EFFECTS.register("sun_burn", 
+            () -> new VampireSunBurnEffect());
+    
     public static final RegistryObject<HamonSpreadEffect> HAMON_SPREAD = EFFECTS.register("hamon_spread", 
             () -> new HamonSpreadEffect(EffectType.HARMFUL, 0xFFC10A));
     
     public static final RegistryObject<StunEffect> STUN = EFFECTS.register("stun", 
-            () -> new StunEffect(EffectType.HARMFUL, 0x404040));
+            () -> new StunEffect(0x404040));
     
     public static final RegistryObject<UncurableEffect> MEDITATION = EFFECTS.register("meditation", 
             () -> new UncurableEffect(EffectType.NEUTRAL, 0xDD6000));
+    
+    public static final RegistryObject<StunEffect> IMMOBILIZE = EFFECTS.register("immobilize", 
+            () -> new StunEffect(0x404040));
     
     public static final RegistryObject<UncurableEffect> CHEAT_DEATH = EFFECTS.register("cheat_death", 
             () -> new UncurableEffect(EffectType.BENEFICIAL, 0xEADB84));
@@ -79,9 +89,8 @@ public class ModEffects {
     private static Set<Effect> TRACKED_EFFECTS;
     @SubscribeEvent(priority = EventPriority.LOW)
     public static final void afterEffectsRegister(RegistryEvent.Register<Effect> event) {
-        VampirismPowerType.initVampiricEffectsMap();
         StandEntity.addSharedEffects(TIME_STOP.get(), Effects.BLINDNESS);
-        TRACKED_EFFECTS = ImmutableSet.of(RESOLVE.get(), TIME_STOP.get(), STUN.get());
+        TRACKED_EFFECTS = ImmutableSet.of(RESOLVE.get(), TIME_STOP.get(), IMMOBILIZE.get(), STUN.get(), HAMON_SPREAD.get(), FULL_INVISIBILITY.get());
     }
     
     public static boolean isEffectTracked(Effect effect) {

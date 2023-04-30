@@ -38,10 +38,10 @@ public class HamonWallClimbing extends HamonAction {
     protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
             HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
-            double speed = 0.1D + (hamon.getBreathingLevel() * 0.0015 + hamon.getHamonControlLevel() * 0.0025) * hamon.getBloodstreamEfficiency();
+            double speed = 0.1D + (hamon.getBreathingLevel() * 0.0015 + hamon.getHamonControlLevel() * 0.0025) * hamon.getHamonEfficiency();
             Vector3d movement = user.getDeltaMovement();
             user.setDeltaMovement(movement.x, speed, movement.z);
-            hamon.hamonPointsFromAction(HamonStat.CONTROL, getHeldTickEnergyCost());
+            hamon.hamonPointsFromAction(HamonStat.CONTROL, getHeldTickEnergyCost(power));
         }
         if (ticksHeld % 4 == 0) {
             Vector3d sparkVec = user.getLookAngle().scale(0.25).add(user.getX(), user.getY(1.0), user.getZ());

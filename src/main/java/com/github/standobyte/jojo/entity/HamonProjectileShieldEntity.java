@@ -97,7 +97,7 @@ public class HamonProjectileShieldEntity extends Entity implements IEntityAdditi
         if (projectile == null) return;
         float speed = (float) projectile.getDeltaMovement().length();
         if (power != null && hamon != null) {
-            float energyCost = speed * 60;
+            float energyCost = speed * 20;
             if (power.hasEnergy(energyCost)) {
                 JojoModUtil.deflectProjectile(projectile, null);
             }

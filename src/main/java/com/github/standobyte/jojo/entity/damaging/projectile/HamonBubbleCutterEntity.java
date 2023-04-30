@@ -3,7 +3,6 @@ package com.github.standobyte.jojo.entity.damaging.projectile;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
-import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonStat;
@@ -22,6 +21,7 @@ import net.minecraft.world.World;
 
 public class HamonBubbleCutterEntity extends ModdedProjectileEntity { // TODO bubble lenses
     private boolean gliding;
+    private float hamonStatPoints;
     
     public HamonBubbleCutterEntity(LivingEntity shooter, World world) {
         super(ModEntityTypes.HAMON_BUBBLE_CUTTER.get(), shooter, world);
@@ -33,6 +33,10 @@ public class HamonBubbleCutterEntity extends ModdedProjectileEntity { // TODO bu
     
     public void setGliding(boolean gliding) {
         this.gliding = gliding;
+    }
+    
+    public void setHamonStatPoints(float points) {
+        this.hamonStatPoints = points;
     }
     
     @Override
@@ -57,9 +61,7 @@ public class HamonBubbleCutterEntity extends ModdedProjectileEntity { // TODO bu
             if (owner != null) {
                 INonStandPower.getNonStandPowerOptional(owner).ifPresent(power -> {
                     power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                        hamon.hamonPointsFromAction(HamonStat.STRENGTH, 
-                                gliding ? ModHamonActions.CAESAR_BUBBLE_CUTTER_GLIDING.get().getEnergyCost(null) / 10F
-                                        : ModHamonActions.CAESAR_BUBBLE_CUTTER.get().getEnergyCost(null) / 10F);
+                        hamon.hamonPointsFromAction(HamonStat.STRENGTH, hamonStatPoints);
                     });
                 });
             }
@@ -102,12 +104,14 @@ public class HamonBubbleCutterEntity extends ModdedProjectileEntity { // TODO bu
     protected void addAdditionalSaveData(CompoundNBT nbt) {
         super.addAdditionalSaveData(nbt);
         nbt.putBoolean("Gliding", gliding);
+        nbt.putFloat("Points", hamonStatPoints);
     }
 
     @Override
     protected void readAdditionalSaveData(CompoundNBT nbt) {
         super.readAdditionalSaveData(nbt);
         gliding = nbt.getBoolean("Gliding");
+        hamonStatPoints = nbt.getFloat("Points");
     }
 
     @Override

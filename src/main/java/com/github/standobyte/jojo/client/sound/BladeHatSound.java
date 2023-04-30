@@ -16,7 +16,10 @@ public class BladeHatSound extends TickableSound {
     }
 
     public void tick() {
-        if (hat.isAlive() && !hat.isInGround()) {
+        if (!hat.canUpdate()) {
+            volume = 0;
+        }
+        else if (hat.isAlive() && !hat.isInGround()) {
             x = hat.getX();
             y = hat.getY();
             z = hat.getZ();

@@ -89,8 +89,7 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
         stab.impactSound(null);
         if (stand.getAttackSpeed() < 24) {
             boolean left = MathHelper.wrapDegrees(
-                    MathUtil.yRotDegFromVec(stand.getLookAngle())
-                    - MathUtil.yRotDegFromVec(stab.target.position().subtract(stand.position())))
+                    stand.yRot - MathUtil.yRotDegFromVec(stab.target.position().subtract(stand.position())))
                     < 0;
             return stab
                     .addKnockback(1.5F)

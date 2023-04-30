@@ -197,11 +197,6 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         return this.iconTexture;
     }
     
-    @Override
-    public String getEnergyString() {
-        return "stand";
-    }
-    
     public ITextComponent getPartName() {
         return partName;
     }

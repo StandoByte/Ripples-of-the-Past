@@ -18,8 +18,6 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     Optional<StandInstance> getStandInstance();
     boolean giveStand(StandInstance standInstance, boolean newInstance);
     Optional<StandInstance> putOutStand();
-    public void setGivenByDisc();
-    public boolean wasGivenByDisc();
 
     boolean usesStamina();
     float getStamina();
@@ -45,10 +43,11 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     void setResolveLevel(int level, boolean fromEffect);
     int getMaxResolveLevel();
     float getResolveDmgReduction();
+    float getPrevTickResolve();
     
     StandEffectsTracker getContinuousEffects();
 
-    void skipProgression(StandType<?> standType);
+    void skipProgression();
     void setProgressionSkipped();
     boolean wasProgressionSkipped();
     float getStatsDevelopment();

@@ -61,8 +61,8 @@ public class StandInstance {
         this.customName = Optional.ofNullable(customName);
     }
     
-    public Optional<ITextComponent> getCustomName() {
-        return customName;
+    public ITextComponent getName() {
+        return customName.orElse(standType.getName());
     }
     
     public void tick(IStandPower standPower, LivingEntity standUser, World world) {

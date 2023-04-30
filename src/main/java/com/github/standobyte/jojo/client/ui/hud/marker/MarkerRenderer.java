@@ -82,6 +82,7 @@ public abstract class MarkerRenderer {
     protected abstract boolean shouldRender();
     protected abstract void updatePositions(List<MarkerInstance> list, float partialTick);
     
+    // TODO use IPower#getColor();
     protected int getColor() {
         return color;
     }

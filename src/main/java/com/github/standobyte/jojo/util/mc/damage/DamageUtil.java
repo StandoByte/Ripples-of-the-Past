@@ -1,5 +1,8 @@
 package com.github.standobyte.jojo.util.mc.damage;
 
+import java.util.Collection;
+import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
@@ -12,6 +15,7 @@ import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModItems;
+import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
@@ -21,24 +25,33 @@ import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
+import com.google.common.collect.Multimap;
 
 import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.Attribute;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.boss.dragon.EnderDragonPartEntity;
 import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.ItemStack;
+import net.minecraft.particles.IParticleData;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.CombatRules;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.IndirectEntityDamageSource;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 
 public class DamageUtil {
     public static final DamageSource ULTRAVIOLET = new DamageSource("ultraviolet").bypassArmor();
@@ -59,7 +72,7 @@ public class DamageUtil {
             if (source.getDirectEntity() instanceof LivingEntity && 
                     INonStandPower.getNonStandPowerOptional((LivingEntity) source.getDirectEntity())
                     .map(power -> power.getHeldAction() == ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get()).orElse(false)) {
-                return 0.1F;
+                return 0.05F;
             }
             String msgId = source.getMsgId();
             if (msgId != null && (msgId.startsWith(BLOOD_DRAIN_MSG) || msgId.startsWith(COLD.msgId) || msgId.startsWith(ROAD_ROLLER_MSG))) {
@@ -113,10 +126,19 @@ public class DamageUtil {
         }
         return false;
     }
-
+    
     public static boolean dealHamonDamage(Entity target, float amount, @Nullable Entity srcDirect, @Nullable Entity srcIndirect) {
+        return dealHamonDamage(target, amount, srcDirect, srcIndirect, null);
+    }
+
+    public static boolean dealHamonDamage(Entity target, float amount, @Nullable Entity srcDirect, @Nullable Entity srcIndirect, @Nullable Consumer<HamonAttackProperties> attackProperties) {
         if (target instanceof LivingEntity) {
             LivingEntity livingTarget = (LivingEntity) target;
+            
+            HamonAttackProperties attack = new HamonAttackProperties();
+            if (attackProperties != null) {
+                attackProperties.accept(attack);
+            }
             
             if (livingTarget.getCapability(LivingUtilCapProvider.CAPABILITY).map(LivingUtilCap::hasHamonCharge).orElse(false)) {
                 return false;
@@ -143,22 +165,29 @@ public class DamageUtil {
             final float dmgAmount = amount;
             if (dmgSource.getEntity() instanceof LivingEntity) {
                 LivingEntity sourceLiving = (LivingEntity) dmgSource.getEntity();
-                float hamonMultiplier = INonStandPower.getNonStandPowerOptional(sourceLiving).map(power -> 
-                power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
+                Optional<HamonData> hamonOptional = INonStandPower.getNonStandPowerOptional(sourceLiving).resolve()
+                        .flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()));
+                hamonOptional.ifPresent(hamon -> {
                     if (undeadTarget && !scarf && hamon.isSkillLearned(HamonSkill.HAMON_SPREAD)) {
-                        float effectStr = (hamon.getHamonDamageMultiplier() - 1) / (HamonData.MAX_HAMON_DAMAGE - 1) * hamon.getBloodstreamEfficiency();
+                        float effectStr = (hamon.getHamonDamageMultiplier() - 1) / (HamonData.MAX_HAMON_STRENGTH_MULTIPLIER - 1) * hamon.getHamonEfficiency();
                         int effectDuration = 25 + MathHelper.floor(125F * effectStr);
-                        int effectLvl = MathHelper.clamp(MathHelper.floor(1.5F * effectStr * dmgAmount * hamon.getBloodstreamEfficiency()), 0, 3);
+                        int effectLvl = MathHelper.clamp(MathHelper.floor(1.5F * effectStr * dmgAmount * hamon.getHamonEfficiency()), 0, 3);
                         livingTarget.addEffect(new EffectInstance(ModEffects.HAMON_SPREAD.get(), effectDuration, effectLvl));
                     }
-                    return hamon.getHamonDamageMultiplier() * hamon.getBloodstreamEfficiency();
-                }).orElse(1F)).orElse(1F);
-                amount *= hamonMultiplier;
+                });
+                if (attack.srcEntityHamonMultiplier) {
+                    float hamonMultiplier = INonStandPower.getNonStandPowerOptional(sourceLiving).map(power -> 
+                        power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
+                            return hamon.getHamonDamageMultiplier() * hamon.getHamonEfficiency();
+                        })
+                        .orElse(1F)).orElse(1F);
+                    amount *= hamonMultiplier;
+                }
             }
             amount *= JojoModConfig.getCommonConfigInstance(false).hamonDamageMultiplier.get().floatValue();
             
             if (hurtThroughInvulTicks(target, dmgSource, amount)) {
-                HamonPowerType.createHamonSparkParticlesEmitter(target, amount / HamonData.MAX_HAMON_DAMAGE);
+                HamonPowerType.createHamonSparkParticlesEmitter(target, amount / HamonData.MAX_HAMON_STRENGTH_MULTIPLIER, attack.soundVolumeMultiplier, attack.hamonParticle);
                 if (scarf && undeadTarget && livingTarget instanceof ServerPlayerEntity) {
                     ModCriteriaTriggers.VAMPIRE_HAMON_DAMAGE_SCARF.get().trigger((ServerPlayerEntity) livingTarget);
                 }
@@ -167,7 +196,28 @@ public class DamageUtil {
         }
         return false;
     }
-
+    
+    public static class HamonAttackProperties {
+        private IParticleData hamonParticle = ModParticles.HAMON_SPARK.get();
+        private boolean srcEntityHamonMultiplier = true;
+        private float soundVolumeMultiplier = 1.0F;
+        
+        public HamonAttackProperties hamonParticle(IParticleData particleType) {
+            this.hamonParticle = particleType != null ? particleType : ModParticles.HAMON_SPARK.get();
+            return this;
+        }
+        
+        public HamonAttackProperties noSrcEntityHamonMultiplier() {
+            this.srcEntityHamonMultiplier = false;
+            return this;
+        }
+        
+        public HamonAttackProperties soundVolumeMultiplier(float multiplier) {
+            this.soundVolumeMultiplier = multiplier;
+            return this;
+        }
+    }
+    
     public static boolean dealPillarmanAbsorptionDamage(Entity target, float amount, @Nullable Entity src) {
         if (target instanceof LivingEntity) {
             LivingEntity livingTarget = (LivingEntity) target;
@@ -266,7 +316,7 @@ public class DamageUtil {
                 (double) MathHelper.sin(yRot * MathUtil.DEG_TO_RAD), 
                 (double) (-MathHelper.cos(yRot * MathUtil.DEG_TO_RAD)));
     }
-
+    
     public static void upwardsKnockback(LivingEntity target, float strength) {
         strength *= (1.0F - (float) target.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
         if (strength != 0) {
@@ -277,6 +327,26 @@ public class DamageUtil {
             LivingEntity standUser = ((StandEntity) target).getUser();
             if (standUser != null && !standUser.is(target)) {
                 upwardsKnockback(standUser, strength);
+            }
+        }
+    }
+    
+    public static void knockback3d(LivingEntity target, float strength, float xRot, float yRot) {
+        Vector3d knockbackVec = Vector3d.directionFromRotation(xRot, yRot);
+        LivingKnockBackEvent event = ForgeHooks.onLivingKnockBack(target, strength, knockbackVec.x, knockbackVec.z);
+        if (event.isCanceled()) return;
+        strength = event.getStrength();
+        knockbackVec = new Vector3d(event.getRatioX(), knockbackVec.y, event.getRatioZ()).normalize();
+        strength *= (1.0F - (float) target.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
+        
+        if (strength != 0) {
+            target.setDeltaMovement(target.getDeltaMovement().add(knockbackVec.scale(strength)));
+        }
+        
+        if (target instanceof StandEntity) {
+            LivingEntity standUser = ((StandEntity) target).getUser();
+            if (standUser != null && !standUser.is(target)) {
+                upwardsKnockback(standUser, (float) knockbackVec.y * strength);
             }
         }
     }
@@ -292,5 +362,24 @@ public class DamageUtil {
         else {
             entity.hurt(SUFFOCATION, 1F);
         }
+    }
+    
+    public static float getDamageWithoutHeldItem(@Nullable LivingEntity entity) {
+        if (entity == null) {
+            return (float) Attributes.ATTACK_DAMAGE.getDefaultValue();
+        }
+        ItemStack heldItem = entity.getMainHandItem();
+        if (!heldItem.isEmpty()) {
+            Multimap<Attribute, AttributeModifier> itemModifiers = heldItem.getAttributeModifiers(EquipmentSlotType.MAINHAND);
+            if (itemModifiers.containsKey(Attributes.ATTACK_DAMAGE)) {
+                ModifiableAttributeInstance attackDamageAttribute = entity.getAttribute(Attributes.ATTACK_DAMAGE);
+                Collection<AttributeModifier> attackDamageModifiers = itemModifiers.get(Attributes.ATTACK_DAMAGE);
+                attackDamageModifiers.forEach(attackDamageAttribute::removeModifier);
+                float damage = (float) attackDamageAttribute.getValue();
+                attackDamageModifiers.forEach(attackDamageAttribute::addTransientModifier);
+                return damage;
+            }
+        }
+        return (float) entity.getAttributeValue(Attributes.ATTACK_DAMAGE);
     }
 }

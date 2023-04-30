@@ -1,15 +1,14 @@
 package com.github.standobyte.jojo.client.ui.hud;
 
-import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui.Alignment;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui.BarsOrientation;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui.ElementTransparency;
-import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.gui.AbstractGui;
 
+@SuppressWarnings("deprecation")
 public class HorizontalBarsRenderer extends BarsRenderer {
     private static final int BAR_LENGTH = 200;
     private static final int BAR_LENGTH_SHORTENED = 150;
@@ -28,14 +27,18 @@ public class HorizontalBarsRenderer extends BarsRenderer {
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    protected void renderBarWithIcon(MatrixStack matrixStack, BarType barType, NonStandPowerType<?> powerType, 
-            boolean highlight, int color, float iconFill, 
-            float value, float maxValue, float attackCostValue, float abilityCostValue, float tranclucentBarValue, 
+    protected void renderBarWithIcon(MatrixStack matrixStack, BarType barType, 
+            boolean fullSize, int color, float iconFill, 
+            float value, float maxValue, 
+            float attackCostValue, float abilityCostValue, float costTick, 
+            float tranclucentBarValue, 
             float alpha, int ticks, float partialTick) {
-        int barLength = highlight ? BAR_LENGTH : BAR_LENGTH_SHORTENED;
+        int barLength = fullSize ? BAR_LENGTH : BAR_LENGTH_SHORTENED;
         int fill = (int) ((float) barLength * (value / maxValue));
+        fill = Math.min(fill, barLength);
+        int translucentFill = (int) ((float) barLength * (tranclucentBarValue / maxValue));
+        translucentFill = Math.min(translucentFill, barLength);
         int texY = barType == BarType.STAMINA ? 176 : 160;
         
         int barX = x;
@@ -43,14 +46,14 @@ public class HorizontalBarsRenderer extends BarsRenderer {
             barX += ICON_WIDTH + 1;
         }
         
-        if (highlight) {
+        if (fullSize) {
             renderBar(matrixStack, barX, y, alignment, 
                     0, texY, 8, barLength, fill, color, alpha, 
                     0, 128, 1, 145, 
-                    (int) ((float) barLength * (tranclucentBarValue / maxValue)), 
-                    (int) (attackCostValue / maxValue), (int) (attackCostValue / maxValue), 
-                    ClientUtil.getHighlightAlpha(ticks + partialTick, 80F, 30F, 1.25F, 0.25F));
-            int[] iconTex = getIconTex(barType, powerType, BarsOrientation.HORIZONTAL);
+                    translucentFill, 
+                    (int) (barLength * attackCostValue / maxValue), (int) (barLength * abilityCostValue / maxValue), costTick, 
+                    fullSize, barType);
+            int[] iconTex = getIconTex(barType, BarsOrientation.HORIZONTAL);
             int iconX = x;
             if (alignment == Alignment.RIGHT) {
                 iconX += BAR_LENGTH + 3;
@@ -74,7 +77,8 @@ public class HorizontalBarsRenderer extends BarsRenderer {
                 renderBar(matrixStack, barX + xOffset, y, alignment, 
                         0, texY + 8, 5, barLength, fill, color, transparency.getAlpha(partialTick) * alpha, 
                         0, 136, 1, 153, 
-                        0, 0, 0, 0);
+                        translucentFill, 0, 0, 0, 
+                        fullSize, barType);
             }
             y += 9;
         }
@@ -99,6 +103,37 @@ public class HorizontalBarsRenderer extends BarsRenderer {
                     x + 1, y + 1, 
                     texX + 1, texY + 1, 
                     fill, width - 2);
+        }
+    }
+    
+    @Override
+    protected void barFillEffect(MatrixStack matrixStack, int x, int y, Alignment alignment, 
+            int width, int length, int fill, BarType barType) {
+        if (barType == BarType.ENERGY_HAMON) {
+            // TODO particles effect
+        }
+    }
+
+    @Override
+    protected void renderCost(MatrixStack matrixStack, int x, int y, Alignment alignment, 
+            int texX, int texY, int height, int length, 
+            int costFill, int barFill, 
+            int yOffset, float alpha) {
+        if (costFill > 0) {
+            int diff = Math.max(barFill - costFill, 0);
+            if (alignment == Alignment.RIGHT) {
+                AbstractGui.fill(matrixStack, 
+                        x + 1 - diff + length - costFill,  y + yOffset + 1, 
+                        x + 1 - diff + length,             y + yOffset + 4, 
+                        ElementTransparency.addAlpha(0xFFFFFF, alpha));
+            }
+            else {
+                AbstractGui.fill(matrixStack, 
+                        x + 1 + diff,                y + yOffset + 1, 
+                        x + 1 + diff + costFill,     y + yOffset + 4, 
+                        ElementTransparency.addAlpha(0xFFFFFF, alpha));
+            }
+            RenderSystem.enableBlend();
         }
     }
     

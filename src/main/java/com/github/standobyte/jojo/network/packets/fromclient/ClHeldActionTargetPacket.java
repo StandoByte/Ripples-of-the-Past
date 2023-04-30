@@ -99,7 +99,7 @@ public class ClHeldActionTargetPacket {
                             ActionTarget.EMPTY
                             : new ActionTarget(msg.targetBlock, msg.blockFace)
                             : new ActionTarget(player.level.getEntity(msg.targetEntityId));
-                            power.setHeldActionTarget(target);
+                    power.setMouseTarget(target);
                 });
             }
         }

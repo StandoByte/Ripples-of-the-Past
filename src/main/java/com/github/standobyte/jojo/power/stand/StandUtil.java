@@ -119,7 +119,7 @@ public class StandUtil {
     public static boolean isEntityStandUser(LivingEntity entity) {
         return entity.getCapability(StandCapProvider.STAND_CAP).map(cap -> cap.hasPower()).orElse(false);
     }
-
+    
     public static boolean playerCanSeeStands(PlayerEntity player) {
         return isEntityStandUser(player) || player.hasEffect(ModEffects.SPIRIT_VISION.get());
     }
@@ -166,7 +166,8 @@ public class StandUtil {
     
     public static void addResolve(IStandPower stand, LivingEntity target, float points) {
         target = getStandUser(target);
-        if (StandUtil.worthyTarget(target)) {
+        boolean hitSelf = target != null && stand.getUser() != null && getStandUser(target).is(stand.getUser());
+        if (!hitSelf && worthyTarget(target)) {
             for (PowerClassification classification : PowerClassification.values()) {
                 points *= IPower.getPowerOptional(target, classification).map(power -> {
                     if (power.hasPower()) {

@@ -93,6 +93,9 @@ public class TimeStopInstance {
             
             if (userPower.map(power -> {
                 if (power.hasPower()) {
+                    if (!(power.getType().getStats() instanceof TimeStopperStandStats)) {
+                        return true;
+                    }
                     float staminaCost = power.getStaminaTickGain();
                     if (action != null) {
                         staminaCost += action.getStaminaCostTicking(power);
@@ -187,8 +190,10 @@ public class TimeStopInstance {
                             if (action.hasShiftVariation()) {
                                 power.setCooldownTimer(action.getShiftVariationIfPresent(), (int) (cooldown * TimeStopInstant.COOLDOWN_RATIO));
                             }
-    
-                            power.addLearningProgressPoints(action, stats.timeStopLearningPerTick * ticksPassed);
+
+                            if (power.getType().getStats() instanceof TimeStopperStandStats) {
+                                power.addLearningProgressPoints(action, stats.timeStopLearningPerTick * ticksPassed);
+                            }
                         });
                     }
                 });

@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.InputHandler;
@@ -18,10 +19,13 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.item.ClothesSet;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket;
+import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.google.common.collect.Streams;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.AgeableEntity;
@@ -30,6 +34,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.INPC;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MoverType;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.monster.AbstractIllagerEntity;
 import net.minecraft.entity.passive.WaterMobEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -42,6 +47,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceContext;
@@ -49,6 +55,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 
@@ -57,12 +64,12 @@ public class JojoModUtil {
     public static RayTraceResult rayTrace(Entity entity, double reachDistance, @Nullable Predicate<Entity> entityFilter) {
         return rayTrace(entity, reachDistance, entityFilter, 0);
     }
-    
+
     public static RayTraceResult rayTrace(Entity entity, double reachDistance, @Nullable Predicate<Entity> entityFilter, 
             double rayTraceInflate) {
         return rayTrace(entity, reachDistance, entityFilter, rayTraceInflate, 0);
     }
-    
+
     public static RayTraceResult rayTrace(Entity entity, double reachDistance, @Nullable Predicate<Entity> entityFilter, 
             double rayTraceInflate, double standPrecision) {
         return rayTraceMultipleEntities(entity, reachDistance, entityFilter, rayTraceInflate, standPrecision)[0];
@@ -82,13 +89,13 @@ public class JojoModUtil {
         AxisAlignedBB aabb = entity.getBoundingBox().expandTowards(rtVec).inflate(1.0D);
         return rayTraceMultipleEntities(startPos, endPos, aabb, distance, entity.level, entity, entityFilter, rayTraceInflate, standPrecision);
     }
-    
+
     public static RayTraceResult rayTrace(Vector3d startPos, Vector3d rayVec, double distance, 
             World world, @Nullable Entity entity, @Nullable Predicate<Entity> entityFilter, 
             double rayTraceInflate, double standPrecision) {
         return rayTraceMultipleEntities(startPos, rayVec, distance, world, entity, entityFilter, rayTraceInflate, standPrecision)[0];
     }
-    
+
     public static RayTraceResult[] rayTraceMultipleEntities(Vector3d startPos, Vector3d endPos, AxisAlignedBB aabb, 
             double minDistance, World world, @Nullable Entity entity, @Nullable Predicate<Entity> entityFilter, 
             double rayTraceInflate, double standPrecision) {
@@ -141,7 +148,7 @@ public class JojoModUtil {
         }
         return aabb;
     }
-    
+
     public static RayTraceResult getHitResult(Entity projectile, @Nullable Predicate<Entity> targetPredicate, RayTraceContext.BlockMode blockMode) {
         World world = projectile.level;
         Vector3d pos = projectile.position();
@@ -156,6 +163,22 @@ public class JojoModUtil {
             rayTraceResult = entityRayTraceResult;
         }
         return rayTraceResult;
+    }
+    
+    // Item.getPlayerPOVHitResult
+    protected static BlockRayTraceResult getPlayerPOVHitResult(World world, LivingEntity entity, RayTraceContext.FluidMode fluidMode) {
+        float xRot = entity.xRot;
+        float yRot = entity.yRot;
+        Vector3d eyePos = entity.getEyePosition(1.0F);
+        float f2 = MathHelper.cos(-yRot * ((float)Math.PI / 180F) - (float)Math.PI);
+        float f3 = MathHelper.sin(-yRot * ((float)Math.PI / 180F) - (float)Math.PI);
+        float f4 = -MathHelper.cos(-xRot * ((float)Math.PI / 180F));
+        float f5 = MathHelper.sin(-xRot * ((float)Math.PI / 180F));
+        float f6 = f3 * f4;
+        float f7 = f2 * f4;
+        double distance = Optional.ofNullable(entity.getAttribute(ForgeMod.REACH_DISTANCE.get())).map(ModifiableAttributeInstance::getValue).orElse(5D);
+        Vector3d vector3d1 = eyePos.add((double)f6 * distance, (double)f5 * distance, (double)f7 * distance);
+        return world.clip(new RayTraceContext(eyePos, vector3d1, RayTraceContext.BlockMode.OUTLINE, fluidMode, entity));
     }
 
     public static boolean isAnotherEntityTargeted(RayTraceResult rayTraceResult, Entity targettingEntity) {
@@ -176,9 +199,9 @@ public class JojoModUtil {
         Optional<Vector3d> clipOptional = targetAabb.clip(startPos, endPos);
         return clipOptional.map(clipVec -> startPos.distanceTo(clipVec) - entity.getBbWidth() / 2).orElse(-1D);
     }
-    
-    
-    
+
+
+
     public static boolean canEntityDestroy(ServerWorld world, BlockPos blockPos, BlockState blockState, LivingEntity entity) {
         if (JojoModConfig.getCommonConfigInstance(world.isClientSide()).abilitiesBreakBlocks.get()
                 && blockState.canEntityDestroy(world, blockPos, entity)
@@ -197,9 +220,9 @@ public class JojoModUtil {
         }
         return false;
     }
-    
-    
-    
+
+
+
     public static ResourceLocation makeTextureLocation(String folderName, String namespace, String path) {
         return new ResourceLocation(namespace, "textures/"+ folderName + "/" + path + ".png");
     }
@@ -212,7 +235,7 @@ public class JojoModUtil {
     }
     
     
-    
+
     public static boolean isUndead(LivingEntity entity) {
         if (entity.getMobType() == CreatureAttribute.UNDEAD) {
             return true;
@@ -254,16 +277,28 @@ public class JojoModUtil {
     }
     
     
-    
+
     public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine) {
         sayVoiceLine(entity, voiceLine, null);
     }
 
-    public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine, @Nullable ClothesSet character) {
-        sayVoiceLine(entity, voiceLine, character, 1.0F, 1.0F);
+    public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine, 
+            @Nullable ClothesSet character) {
+        sayVoiceLine(entity, voiceLine, character, 1.0F, 1.0F, false);
     }
 
-    public static void sayVoiceLine(LivingEntity entity, SoundEvent sound, @Nullable ClothesSet character, float volume, float pitch) {
+    public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine, 
+            @Nullable ClothesSet character, boolean interrupt) {
+        sayVoiceLine(entity, voiceLine, character, 1.0F, 1.0F, interrupt);
+    }
+
+    public static void sayVoiceLine(LivingEntity entity, SoundEvent sound, 
+            @Nullable ClothesSet character, float volume, float pitch, boolean interrupt) {
+        sayVoiceLine(entity, sound, character, volume, pitch, 200, interrupt);
+    }
+
+    public static void sayVoiceLine(LivingEntity entity, SoundEvent sound, 
+            @Nullable ClothesSet character, float volume, float pitch, int voiceLineDelay, boolean interrupt) {
         if (entity.level.isClientSide() || entity.hasEffect(Effects.INVISIBILITY) ||
                 character != null && character != ClothesSet.getClothesSet(entity)) {
             return;
@@ -271,7 +306,7 @@ public class JojoModUtil {
         SoundCategory category = SoundCategory.VOICE;
         if (entity instanceof PlayerEntity) {
             PlayVoiceLinePacket packet;
-            if (!canPlayVoiceLine((PlayerEntity) entity, sound)) {
+            if (!canPlayVoiceLine((PlayerEntity) entity, sound, voiceLineDelay)) {
                 packet = PlayVoiceLinePacket.notTriggered(entity.getId());
             }
             else {
@@ -283,7 +318,7 @@ public class JojoModUtil {
                     sound = event.getSound();
                     category = event.getCategory();
                     volume = event.getVolume();
-                    packet = new PlayVoiceLinePacket(sound, category, entity.getId(), volume, pitch);
+                    packet = new PlayVoiceLinePacket(sound, category, entity.getId(), volume, pitch, interrupt);
                 }
             }
             PacketManager.sendToNearby(packet, null, entity.getX(), entity.getY(), entity.getZ(), 
@@ -294,9 +329,17 @@ public class JojoModUtil {
         }
     }
 
-    private static boolean canPlayVoiceLine(PlayerEntity entity, SoundEvent voiceLine) {
+    private static boolean canPlayVoiceLine(PlayerEntity entity, SoundEvent voiceLine, int voiceLineDelay) {
         return entity.getCapability(PlayerUtilCapProvider.CAPABILITY)
-                .map(cap -> cap.checkNotRepeatingVoiceLine(voiceLine)).orElse(true);
+                .map(cap -> cap.checkNotRepeatingVoiceLine(voiceLine, voiceLineDelay)).orElse(true);
     }
-
+    
+    
+    
+    public static <T extends IPower<T, ?>> boolean hasAction(T power, Predicate<Action<T>> find) {
+        return Streams.concat(
+                power.getActions(ActionType.ATTACK).stream(), 
+                power.getActions(ActionType.ABILITY).stream())
+                .anyMatch(find);
+    }
 }

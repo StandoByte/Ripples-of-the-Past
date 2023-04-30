@@ -67,8 +67,12 @@ public class StandEntityType<T extends StandEntity> extends EntityType<T> {
         return this;
     }
     
+    private StandType<?> getStandType() {
+        return standTypeSupplier.get();
+    }
+    
     public StandStats getStats() {
-        return standTypeSupplier.get().getStats();
+        return getStandType().getStats();
     }
     
     @Nullable

@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.action.non_stand;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
@@ -37,7 +38,8 @@ public class VampirismDarkAura extends VampirismAction {
         int range = 16 * difficulty - 8;
         if (!world.isClientSide()) {
             for (LivingEntity entity : MCUtil.entitiesAround(
-                    LivingEntity.class, user, range, false, entity -> !JojoModUtil.isUndead(entity))) {
+                    LivingEntity.class, user, range, false, entity -> 
+                    !JojoModUtil.isUndead(entity) && !(entity instanceof StandEntity && user.is(((StandEntity) entity).getUser())))) {
                 boolean passive = entity instanceof AgeableEntity;
                 int amplifier = MathHelper.floor((difficulty - 1) * 1.5);
                 int duration = passive ? 600 : 200;

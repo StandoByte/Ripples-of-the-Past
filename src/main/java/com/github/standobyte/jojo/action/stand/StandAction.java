@@ -7,18 +7,21 @@ import java.util.Set;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandInstance.StandPart;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
 public abstract class StandAction extends Action<IStandPower> {
-    private final float resolveLevelToUnlock;
+    private final int resolveLevelToUnlock;
     private final float resolveCooldownMultiplier;
     private final boolean isTrained;
     private final boolean autoSummonStand;
@@ -35,6 +38,11 @@ public abstract class StandAction extends Action<IStandPower> {
         this.staminaCost = builder.staminaCost;
         this.staminaCostTick = builder.staminaCostTick;
         this.partsRequired = builder.partsRequired;
+    }
+
+    @Override
+    public PowerClassification getPowerClassification() {
+        return PowerClassification.STAND;
     }
     
     @Override
@@ -88,6 +96,15 @@ public abstract class StandAction extends Action<IStandPower> {
     }
     
     @Override
+    public float getCostToRender(IStandPower power) {
+        int ticksHeld = power.getHeldAction() == this ? power.getHeldActionTicks() : 0;
+        if (getHoldDurationMax(power) > 0) {
+            return getStaminaCost(power) + getStaminaCostTicking(power) * Math.max((getHoldDurationToFire(power) - ticksHeld), 1);
+        }
+        return getStaminaCost(power);
+    }
+    
+    @Override
     public void onPerform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
         if (!world.isClientSide() && !staminaConsumedDifferently(power)) {
             power.consumeStamina(getStaminaCost(power));
@@ -108,6 +125,16 @@ public abstract class StandAction extends Action<IStandPower> {
     
     public boolean staminaConsumedDifferently(IStandPower power) {
         return false;
+    }
+    
+    @Override
+    public IFormattableTextComponent getNameLocked(IStandPower power) {
+        if (resolveLevelToUnlock > power.getResolveLevel()) {
+            return new TranslationTextComponent("jojo.layout_edit.locked.stand", 
+                    new TranslationTextComponent("jojo.layout_edit.locked.stand.resolve").withStyle(ClientUtil.textColor(ModEffects.RESOLVE.get().getColor())), 
+                    (int) resolveLevelToUnlock);
+        }
+        return super.getNameLocked(power);
     }
     
     

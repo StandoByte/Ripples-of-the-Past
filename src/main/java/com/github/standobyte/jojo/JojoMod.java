@@ -24,6 +24,7 @@ import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.init.power.non_stand.vampirism.ModVampirismActions;
 import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
+import com.github.standobyte.jojo.util.mod.JojoModVersion;
 
 import net.minecraft.enchantment.EnchantmentType;
 import net.minecraft.item.ItemGroup;
@@ -38,6 +39,8 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 public class JojoMod {
     public static final String MOD_ID = "jojo";
     public static final Logger LOGGER = LogManager.getLogger();
+    // implemented a simple class so that mod version is available in debug too
+    public static final JojoModVersion CURRENT_VERSION = new JojoModVersion(2, 1, 1);
     
     public static final ItemGroup MAIN_TAB = (new ItemGroup("jojo_tab") {
         @Override

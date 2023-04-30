@@ -5,6 +5,7 @@ import java.util.Optional;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.TypeSpecificData;
 
@@ -23,9 +24,14 @@ public abstract class NonStandAction extends Action<INonStandPower> {
         this.heldTickEnergyCost = builder.heldTickEnergyCost;
     }
     
+    @Override
+    public PowerClassification getPowerClassification() {
+        return PowerClassification.NON_STAND;
+    }
+    
     public float getEnergyNeeded(int ticksHeld, INonStandPower power) {
         if (getHoldDurationMax(power) > 0) {
-            return getEnergyCost(power) + getHeldTickEnergyCost() * Math.max((getHoldDurationToFire(power) - ticksHeld), 1);
+            return getEnergyCost(power) + getHeldTickEnergyCost(power) * Math.max((getHoldDurationToFire(power) - ticksHeld), 1);
         }
         return getEnergyCost(power);
     }
@@ -34,19 +40,33 @@ public abstract class NonStandAction extends Action<INonStandPower> {
         return energyCost;
     }
     
-    public float getHeldTickEnergyCost() {
+    public float getHeldTickEnergyCost(INonStandPower power) {
         return heldTickEnergyCost;
     }
     
     @Override
+    public float getCostToRender(INonStandPower power) {
+        int ticksHeld = power.getHeldAction() == this ? power.getHeldActionTicks() : 0;
+        return getEnergyNeeded(ticksHeld, power);
+    }
+    
+    @Override
     public ActionConditionResult checkConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
+        ActionConditionResult energyCheck = checkEnergy(user, power, target);
+        if (!energyCheck.isPositive()) {
+            return energyCheck;
+        }
+        return super.checkConditions(user, power, target);
+    }
+    
+    protected ActionConditionResult checkEnergy(LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!power.isUserCreative()) {
-            if (power.getEnergy() < getEnergyNeeded(power.getHeldActionTicks(), power)) {
-                ITextComponent message = new TranslationTextComponent("jojo.message.action_condition.no_energy_" + power.getType().getEnergyString());
+            if (!power.hasEnergy(getEnergyNeeded(power.getHeldActionTicks(), power))) {
+                ITextComponent message = new TranslationTextComponent("jojo.message.action_condition.no_energy_" + power.getType().getRegistryName().getPath());
                 return ActionConditionResult.createNegative(message);
             }
         }
-        return super.checkConditions(user, power, target);
+        return ActionConditionResult.POSITIVE;
     }
     
     @Override
@@ -66,7 +86,7 @@ public abstract class NonStandAction extends Action<INonStandPower> {
     @Override
     public void onHoldTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
-            power.consumeEnergy(getHeldTickEnergyCost());
+            power.consumeEnergy(getHeldTickEnergyCost(power));
         }
         super.onHoldTick(world, user, power, ticksHeld, target, requirementsFulfilled);
     }

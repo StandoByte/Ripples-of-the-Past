@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
@@ -43,7 +44,7 @@ public class HierophantGreenBarrier extends StandEntityAction {
     }
     
     @Override
-    public TranslationTextComponent getTranslatedName(IStandPower power, String key) {
+    public IFormattableTextComponent getTranslatedName(IStandPower power, String key) {
         IStandManifestation stand = power.getStandManifestation();
         int barriers = stand instanceof HierophantGreenEntity ? ((HierophantGreenEntity) stand).getPlacedBarriersCount() : 0;
         return new TranslationTextComponent(key, barriers, getMaxBarriersPlaceable(power));

@@ -102,7 +102,6 @@ public class CrazyDiamondBlockCheckpointMove extends StandEntityAction {
         return key + ".pos";
     }
 
-    
     @Override
     public IFormattableTextComponent getTranslatedName(IStandPower power, String key) {
         return CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(power.getUser().level, power.getUser().getOffhandItem()).map(pos -> 

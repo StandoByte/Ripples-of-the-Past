@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
+import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -71,24 +73,42 @@ public class MRFlameEntity extends ModdedProjectileEntity {
             if (ForgeEventFactory.getMobGriefingEvent(level, getEntity())) {
                 BlockPos blockPos = blockRayTraceResult.getBlockPos();
                 BlockState blockState = level.getBlockState(blockPos);
-                if (blockState.getMaterial() == Material.SNOW || blockState.getMaterial() == Material.TOP_SNOW 
-                        || blockState.getMaterial() == Material.ICE || blockState.getMaterial() == Material.ICE_SOLID) {
-                    if (level.dimensionType().ultraWarm() || !blockState.isCollisionShapeFullBlock(level, blockPos)) {
-                        level.removeBlock(blockPos, false);
-                    } 
-                    else {
-                        level.setBlockAndUpdate(blockPos, Blocks.WATER.defaultBlockState());
-                        level.neighborChanged(blockPos, Blocks.WATER, blockPos);
-                    }
-                }
-                else if (blockState.getCollisionShape(level, blockPos) != VoxelShapes.empty()) {
+                if (!meltIceAndSnow(level, blockState, blockPos) && 
+                        blockState.getCollisionShape(level, blockPos) != VoxelShapes.empty()) {
                     blockPos = blockPos.relative(blockRayTraceResult.getDirection());
                     if (level.isEmptyBlock(blockPos)) {
-                        level.setBlockAndUpdate(blockPos, AbstractFireBlock.getState(level, blockPos));
+                        level.setBlockAndUpdate(blockPos, ModBlocks.MAGICIANS_RED_FIRE.get().getStateForPlacement(level, blockPos));
                     }
                 }
             }
         }
+    }
+    
+    public static boolean meltIceAndSnow(World world, BlockState blockState, BlockPos blockPos) {
+        if (world.isClientSide()) return false;
+        if (blockState.getMaterial() == Material.SNOW || blockState.getMaterial() == Material.TOP_SNOW 
+                || blockState.getMaterial() == Material.ICE || blockState.getMaterial() == Material.ICE_SOLID) {
+            if (world.dimensionType().ultraWarm() || !blockState.isCollisionShapeFullBlock(world, blockPos)) {
+                world.removeBlock(blockPos, false);
+            }
+            else {
+                world.setBlockAndUpdate(blockPos, Blocks.WATER.defaultBlockState());
+                world.neighborChanged(blockPos, Blocks.WATER, blockPos);
+            }
+            return true;
+        }
+        return false;
+    }
+    
+    @Override
+    protected void breakProjectile(TargetType targetType, RayTraceResult hitTarget) {
+        if (targetType == TargetType.BLOCK) {
+            BlockRayTraceResult blockHit = (BlockRayTraceResult) hitTarget;
+            BlockPos blockPos = blockHit.getBlockPos();
+            BlockState blockState = level.getBlockState(blockPos);
+            if (!blockState.isCollisionShapeFullBlock(level, blockPos)) return;
+        }
+        super.breakProjectile(targetType, hitTarget);
     }
 
     @Override

@@ -17,7 +17,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 
-public class VampirismFlags extends TypeSpecificData {
+public class VampirismData extends TypeSpecificData {
     private boolean vampireHamonUser = false;
     private boolean vampireFullPower = false;
     private int lastBloodLevel = -999;

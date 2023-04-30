@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
@@ -11,6 +12,7 @@ import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
+import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -28,9 +30,17 @@ public class HamonOverdrive extends HamonAction {
     }
     
     @Override
-    protected ActionConditionResult checkHeldItems(LivingEntity user, INonStandPower power) {
+    public ActionConditionResult checkHeldItems(LivingEntity user, INonStandPower power) {
         ItemStack heldItemStack = user.getMainHandItem();
         if (!heldItemStack.isEmpty() && !metalSilverOverdrive(power.getTypeSpecificData(ModPowers.HAMON.get()).get(), heldItemStack)) {
+            return ActionConditionResult.NEGATIVE;
+        }
+        return ActionConditionResult.POSITIVE;
+    }
+    
+    @Override
+    public ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
+        if (user instanceof PlayerEntity && ((PlayerEntity) user).getAttackStrengthScale(0.5F) < 0.9F) {
             return ActionConditionResult.NEGATIVE;
         }
         return ActionConditionResult.POSITIVE;
@@ -77,8 +87,9 @@ public class HamonOverdrive extends HamonAction {
                 
                 float damage = 0.5F;
                 float knockback = 0;
+                boolean metalSilverOverdrive = metalSilverOverdrive(hamon, user.getMainHandItem());
                 
-                if (metalSilverOverdrive(hamon, user.getMainHandItem())) {
+                if (metalSilverOverdrive) {
 //                    damage *= 0.75F;
                 }
                 else if (turquoiseBlueOverdrive(hamon, user, targetEntity)) {
@@ -92,12 +103,31 @@ public class HamonOverdrive extends HamonAction {
                 }
                 dmgScale *= getEnergyCost(power) / getMaxEnergyCost(power);
                 damage *= dmgScale;
-                if (DamageUtil.dealHamonDamage(targetEntity, damage, user, null)) {
+                
+                int attackStrengthTicker = CommonReflection.getAttackStrengthTicker(user);
+                if (DamageUtil.dealHamonDamage(targetEntity, damage, user, null, 
+                        metalSilverOverdrive ? attack -> attack.hamonParticle(ModParticles.HAMON_SPARK_SILVER.get()) : null)) {
                     hamon.hamonPointsFromAction(HamonStat.STRENGTH, getEnergyCost(power) * dmgScale);
-                    if (knockback > 0) {
-                        DamageUtil.knockback(targetEntity, knockback, user.yRot);
-                    }
                 }
+                // FIXME (hamon) !! ClientPlayerEntity#swing sends the packet to server, and THEN ServerPlayerEntity#swing resets attackStrengthTicker
+                /*
+                 * ⣀⣠⣤⣤⣤⣤⢤⣤⣄⣀⣀⣀⣀⡀⡀⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄
+                 * ⠄⠉⠹⣾⣿⣛⣿⣿⣞⣿⣛⣺⣻⢾⣾⣿⣿⣿⣶⣶⣶⣄⡀⠄⠄⠄
+                 * ⠄⠄⠠⣿⣷⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣯⣿⣿⣿⣿⣿⣿⣆⠄⠄
+                 * ⠄⠄⠘⠛⠛⠛⠛⠋⠿⣷⣿⣿⡿⣿⢿⠟⠟⠟⠻⠻⣿⣿⣿⣿⡀⠄
+                 * ⠄⢀⠄⠄⠄⠄⠄⠄⠄⠄⢛⣿⣁⠄⠄⠒⠂⠄⠄⣀⣰⣿⣿⣿⣿⡀
+                 * ⠄⠉⠛⠺⢶⣷⡶⠃⠄⠄⠨⣿⣿⡇⠄⡺⣾⣾⣾⣿⣿⣿⣿⣽⣿⣿
+                 * ⠄⠄⠄⠄⠄⠛⠁⠄⠄⠄⢀⣿⣿⣧⡀⠄⠹⣿⣿⣿⣿⣿⡿⣿⣻⣿
+                 * ⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠉⠛⠟⠇⢀⢰⣿⣿⣿⣏⠉⢿⣽⢿⡏
+                 * ⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠠⠤⣤⣴⣾⣿⣿⣾⣿⣿⣦⠄⢹⡿⠄
+                 * ⠄⠄⠄⠄⠄⠄⠄⠄⠒⣳⣶⣤⣤⣄⣀⣀⡈⣀⢁⢁⢁⣈⣄⢐⠃⠄
+                 * ⠄⠄⠄⠄⠄⠄⠄⠄⠄⣰⣿⣛⣻⡿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡯⠄⠄
+                 * ⠄⠄⠄⠄⠄⠄⠄⠄⠄⣬⣽⣿⣻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠁⠄⠄
+                 * ⠄⠄⠄⠄⠄⠄⠄⠄⠄⢘⣿⣿⣻⣛⣿⡿⣟⣻⣿⣿⣿⣿⡟⠄⠄⠄
+                 * ⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠛⢛⢿⣿⣿⣿⣿⣿⣿⣷⡿⠁⠄⠄⠄
+                 * ⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠉⠉⠉⠉⠈⠄⠄⠄⠄⠄⠄
+                 */
+                CommonReflection.setAttackStrengthTicker(user, attackStrengthTicker);
             }
         }
     }

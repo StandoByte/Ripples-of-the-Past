@@ -7,6 +7,8 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.network.NetworkUtil;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.google.common.collect.ImmutableMap;
 
@@ -17,6 +19,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.ByteArrayNBT;
@@ -35,6 +38,7 @@ import net.minecraft.nbt.ShortNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.play.server.SPlaySoundEffectPacket;
 import net.minecraft.network.play.server.SSpawnMovingSoundEffectPacket;
+import net.minecraft.particles.IParticleData;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.ReuseableStream;
@@ -107,10 +111,10 @@ public class MCUtil {
                 return item;
             }
         }
-
+        
         return ItemStack.EMPTY;
     }
-    
+
     public static boolean dispenseOnNearbyEntity(IBlockSource blockSource, ItemStack itemStack, Predicate<LivingEntity> action, boolean shrinkStack) {
         BlockPos blockPos = blockSource.getPos().relative(blockSource.getBlockState().getValue(DispenserBlock.FACING));
         List<LivingEntity> entities = blockSource.getLevel().getEntitiesOfClass(LivingEntity.class, new AxisAlignedBB(blockPos), EntityPredicates.NO_SPECTATORS);
@@ -181,7 +185,7 @@ public class MCUtil {
 
         return vector3d;
     }
-    
+
     public static void rotateTowards(Entity entity, Vector3d targetPos, float maxAngle) {
         Vector3d targetVec = targetPos.subtract(entity.getEyePosition(1.0F));
 
@@ -197,10 +201,11 @@ public class MCUtil {
     }
     
     public static <T extends Entity> List<T> entitiesAround(Class<? extends T> clazz, Entity centerEntity, double radius, boolean includeSelf, @Nullable Predicate<? super T> filter) {
-        AxisAlignedBB aabb = new AxisAlignedBB(centerEntity.position().subtract(radius, radius, radius), centerEntity.position().add(radius, radius, radius));
+        Vector3d centerPos = centerEntity.getBoundingBox().getCenter();
+        AxisAlignedBB aabb = new AxisAlignedBB(centerPos.subtract(radius, radius, radius), centerPos.add(radius, radius, radius));
         return centerEntity.level.getEntitiesOfClass(clazz, aabb, entity -> (includeSelf || entity != centerEntity) && (filter == null || filter.test(entity)));
     }
-    
+
     public static Iterable<Entity> getAllEntities(World world) {
         return world.isClientSide() ? ((ClientWorld) world).entitiesForRendering() : ((ServerWorld) world).getAllEntities();
     }
@@ -210,7 +215,7 @@ public class MCUtil {
     }
     
     
-    
+
     public static void playSound(World world, @Nullable PlayerEntity clientHandled, BlockPos blockPos, 
             SoundEvent sound, SoundCategory category, float volume, float pitch, Predicate<PlayerEntity> condition) {
         playSound(world, clientHandled, (double) blockPos.getX() + 0.5D, (double) blockPos.getY() + 0.5D, (double)blockPos.getZ() + 0.5D, 
@@ -267,4 +272,36 @@ public class MCUtil {
         }
         return false;
     }
+    
+    
+    
+    public static <T extends IParticleData> int sendParticles(ServerWorld world, T particleType, 
+            double x, double y, double z, int count, float xDist, float yDist, float zDist, float maxSpeed, 
+            SpawnParticlePacket.SpecialContext context) {
+        SpawnParticlePacket packet = new SpawnParticlePacket(particleType, false, x, y, z, xDist, yDist, zDist, maxSpeed, count, context);
+        int i = 0;
+
+        for (ServerPlayerEntity player : world.players()) {
+            if (sendParticles(world, player, false, x, y, z, packet)) {
+                ++i;
+            }
+        }
+
+        return i;
+    }
+
+    private static boolean sendParticles(ServerWorld world, ServerPlayerEntity player, boolean force, double x, double y, double z, Object packet) {
+        if (player.getLevel() != world) {
+            return false;
+        } else {
+            BlockPos blockpos = player.blockPosition();
+            if (blockpos.closerThan(new Vector3d(x, y, z), force ? 512.0D : 32.0D)) {
+                PacketManager.sendToClient(packet, player);
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
 }

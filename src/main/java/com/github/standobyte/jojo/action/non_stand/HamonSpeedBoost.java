@@ -25,7 +25,8 @@ public class HamonSpeedBoost extends HamonAction {
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
-        float effectStr = (float) hamon.getHamonControlLevel() / (float) HamonData.MAX_STAT_LEVEL * hamon.getBloodstreamEfficiency();
+        float hamonEfficiency = hamon.getHamonEfficiency();
+        float effectStr = (float) hamon.getHamonControlLevel() / (float) HamonData.MAX_STAT_LEVEL * hamonEfficiency;
         int speedLvl = MathHelper.floor(1.5F * effectStr);
         int hasteLvl = MathHelper.floor(1.5F * effectStr);
         if (hamon.isSkillLearned(HamonSkill.AFTERIMAGES)) {
@@ -34,7 +35,7 @@ public class HamonSpeedBoost extends HamonAction {
         }
         if (!world.isClientSide()) {
             int duration = 20 + MathHelper.floor(180F * effectStr);
-            if (hamon.isSkillLearned(HamonSkill.AFTERIMAGES)) {
+            if (hamonEfficiency == 1 && hamon.isSkillLearned(HamonSkill.AFTERIMAGES)) {
                 user.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                     cap.addAfterimages(Math.min((int) (effectStr * 7F / 1.5F), 7), duration);
                 });

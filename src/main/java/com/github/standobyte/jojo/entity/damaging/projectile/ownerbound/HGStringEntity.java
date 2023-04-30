@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
@@ -69,7 +68,7 @@ public class HGStringEntity extends OwnerBoundProjectileEntity {
                 if (target instanceof LivingEntity) {
                     LivingEntity livingTarget = (LivingEntity) target;
                     attachToEntity(livingTarget);
-                    livingTarget.addEffect(new EffectInstance(ModEffects.STUN.get(), ticksLifespan() - tickCount));
+                    livingTarget.addEffect(new EffectInstance(ModEffects.IMMOBILIZE.get(), ticksLifespan() - tickCount));
                 }
             }
             else {
@@ -88,14 +87,16 @@ public class HGStringEntity extends OwnerBoundProjectileEntity {
 
     @Override
     public int ticksLifespan() {
-        return isBinding ? ModStandActions.HIEROPHANT_GREEN_STRING_BIND.get().getStandActionTicks(null, null) 
-                + (isAttachedToAnEntity() ? 10 : 0)
-                : ModStandActions.HIEROPHANT_GREEN_STRING_ATTACK.get().getStandActionTicks(null, null);
+        int ticks = super.ticksLifespan();
+        if (isBinding && isAttachedToAnEntity()) {
+            ticks += 10;
+        }
+        return ticks;
     }
     
     @Override
     protected float movementSpeed() {
-        return isBinding ? 0.9F : 2.25F;
+        return 16 / (float) ticksLifespan();
     }
     
     @Override

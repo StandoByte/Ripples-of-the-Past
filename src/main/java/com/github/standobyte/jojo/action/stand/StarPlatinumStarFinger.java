@@ -16,7 +16,9 @@ public class StarPlatinumStarFinger extends StandEntityAction {
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
-            standEntity.addProjectile(new SPStarFingerEntity(world, standEntity));
+            SPStarFingerEntity starFinger = new SPStarFingerEntity(world, standEntity);
+            starFinger.setLifeSpan(getStandActionTicks(userPower, standEntity));
+            standEntity.addProjectile(starFinger);
         }
     }
 }

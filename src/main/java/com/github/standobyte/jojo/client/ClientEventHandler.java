@@ -4,13 +4,21 @@ import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.FOOD;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.client.render.block.overlay.TranslucentBlockRenderHelper;
+import com.github.standobyte.jojo.client.render.world.ParticleManagerWrapperTS;
+import com.github.standobyte.jojo.client.render.world.TimeStopWeatherHandler;
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
@@ -23,10 +31,12 @@ import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import com.github.standobyte.jojo.util.mod.TimeUtil;
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
@@ -36,6 +46,7 @@ import net.minecraft.client.audio.ISound.AttenuationType;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.DeathScreen;
+import net.minecraft.client.gui.screen.IngameMenuScreen;
 import net.minecraft.client.gui.screen.MainMenuScreen;
 import net.minecraft.client.renderer.FirstPersonRenderer;
 import net.minecraft.client.renderer.OutlineLayerBuffer;
@@ -43,15 +54,22 @@ import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.client.renderer.texture.ITickable;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.shader.ShaderGroup;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.client.world.DimensionRenderInfo;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.EnchantedBookItem;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Timer;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
@@ -62,6 +80,8 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.IWeatherParticleRenderHandler;
+import net.minecraftforge.client.IWeatherRenderHandler;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
@@ -78,6 +98,7 @@ import net.minecraftforge.event.TickEvent.RenderTickEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 @EventBusSubscriber(modid = JojoMod.MOD_ID, value = Dist.CLIENT)
@@ -103,6 +124,7 @@ public class ClientEventHandler {
     public boolean isZooming;
 
     private int deathScreenTick;
+    private int pauseMenuScreenTick;
 
     private ClientEventHandler(Minecraft mc) {
         this.mc = mc;
@@ -156,6 +178,11 @@ public class ClientEventHandler {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public <T extends LivingEntity, M extends EntityModel<T>> void onRenderLiving(RenderLivingEvent.Pre<T, M> event) {
         LivingEntity entity = event.getEntity();
+        if (entity.hasEffect(ModEffects.FULL_INVISIBILITY.get())) {
+            event.setCanceled(true);
+            return;
+        }
+        
         if (isTimeStopped(entity.blockPosition())) {
             if (!entity.canUpdate()) {
                 if (event.getPartialRenderTick() != partialTickStoppedAt) {
@@ -166,8 +193,15 @@ public class ClientEventHandler {
                 return;
             }
         }
+        // FIXME (vampire\curing) shake vampire while curing
+        // yRot += (float) (Math.cos((double)entity.tickCount * 3.25) * Math.PI * 0.4);
+    }
 
-        // FIXME (!) reset the glowing flag after outline is no longer needed
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public <T extends LivingEntity, M extends EntityModel<T>> void onRenderLiving2(RenderLivingEvent.Pre<T, M> event) {
+        LivingEntity entity = event.getEntity();
+
+        // FIXME reset the glowing flag after outline is no longer needed
         int outlineColor = outlineColor(entity);
         if (outlineColor > 0) {
             entity.setGlowing(true);
@@ -186,7 +220,7 @@ public class ClientEventHandler {
                     ModelRenderer arm = entity.getMainArm() == HandSide.LEFT ? ((BipedModel<?>) model).leftArm : ((BipedModel<?>) model).rightArm;
                     arm.visible = false;
                     if (model instanceof PlayerModel) {
-                        arm = entity.getMainArm() == HandSide.LEFT ? ((PlayerModel<?>) model).leftArm : ((PlayerModel<?>) model).rightArm;
+                        arm = entity.getMainArm() == HandSide.LEFT ? ((PlayerModel<?>) model).leftSleeve : ((PlayerModel<?>) model).rightSleeve;
                         arm.visible = false;
                     }
                 }
@@ -231,8 +265,7 @@ public class ClientEventHandler {
             if (event.phase == TickEvent.Phase.START) {
                 ActionsOverlayGui.getInstance().tick();
             }
-            boolean timeWasStopped = isTimeStopped;
-            isTimeStopped = isTimeStopped(mc.player.blockPosition());
+            setTimeStoppedState(isTimeStopped(mc.player.blockPosition()));
 
             switch (event.phase) {
             case START:
@@ -249,6 +282,9 @@ public class ClientEventHandler {
                 break;
             }
         }
+        else if (isTimeStopped) {
+            setTimeStoppedState(false);
+        }
 
         if (mc.gameRenderer.currentEffect() == null) {
             ResourceLocation shader = getCurrentShader();
@@ -257,14 +293,54 @@ public class ClientEventHandler {
             }
         }
 
-        if (mc.screen instanceof DeathScreen) {
-            deathScreenTick++;
-        }
-        else {
-            deathScreenTick = 0;
+        deathScreenTick = mc.screen instanceof DeathScreen ? deathScreenTick + 1 : 0;
+        pauseMenuScreenTick = mc.screen instanceof IngameMenuScreen ? pauseMenuScreenTick + 1 : 0;
+    }
+    
+    private final Map<ClientWorld, Pair<IWeatherRenderHandler, IWeatherParticleRenderHandler>> prevWeatherRender = new HashMap<>();
+    private final TimeStopWeatherHandler timeStopWeatherHandler = new TimeStopWeatherHandler();
+    private Set<ITickable> prevTickableTextures = new HashSet<>();
+    private void setTimeStoppedState(boolean isTimeStopped) {
+        if (this.isTimeStopped != isTimeStopped) {
+            this.isTimeStopped = isTimeStopped;
+            if (JojoModConfig.CLIENT.timeStopFreezesVisuals.get()) {
+                if (isTimeStopped) {
+                    if (mc.level != null) {
+                        DimensionRenderInfo effects = mc.level.effects();
+                        prevWeatherRender.put(mc.level, Pair.of(effects.getWeatherRenderHandler(), effects.getWeatherParticleRenderHandler()));
+                        effects.setWeatherRenderHandler(timeStopWeatherHandler);
+                        effects.setWeatherParticleRenderHandler(timeStopWeatherHandler);
+    
+                        TextureManager textureManager = mc.getTextureManager();
+                        prevTickableTextures = ClientReflection.getTickableTextures(textureManager);
+                        ClientReflection.setTickableTextures(textureManager, new HashSet<>());
+                        
+                        ParticleManagerWrapperTS.onTimeStopStart(mc);
+                    }
+                }
+                else {
+                    if (mc.level != null && prevWeatherRender.containsKey(mc.level)) {
+                        timeStopWeatherHandler.onTimeStopEnd();
+                        Pair<IWeatherRenderHandler, IWeatherParticleRenderHandler> prevEffects = prevWeatherRender.get(mc.level);
+                        DimensionRenderInfo effects = mc.level.effects();
+                        effects.setWeatherRenderHandler(prevEffects.getLeft());
+                        effects.setWeatherParticleRenderHandler(prevEffects.getRight());
+                    }
+    
+                    TextureManager textureManager = mc.getTextureManager();
+                    Set<ITickable> allTickableTextures = Util.make(new HashSet<>(), set -> {
+                        set.addAll(prevTickableTextures);
+                        set.addAll(ClientReflection.getTickableTextures(textureManager));
+                    });
+                    ClientReflection.setTickableTextures(textureManager, allTickableTextures);
+                    prevTickableTextures = new HashSet<>();
+    
+                    ParticleManagerWrapperTS.onTimeStopEnd(mc);
+                }
+            }
         }
     }
-
+    
     public ResourceLocation getCurrentShader() {
         if (mc.level == null) {
             return null;
@@ -296,6 +372,10 @@ public class ClientEventHandler {
 
             if (mc.player.getEffect(ModEffects.RESOLVE.get()).getDuration() == 100) {
                 fadeAwayOst(150);
+            }
+            
+            if (mc.player.tickCount % 100 == 0) {
+                Minecraft.getInstance().getMusicManager().stopPlaying();
             }
         }
         else {
@@ -389,9 +469,22 @@ public class ClientEventHandler {
         }
     }
 
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void cancelHandRender(RenderHandEvent event) {
+        Entity entity = Minecraft.getInstance().getCameraEntity();
+        if (entity instanceof LivingEntity) {
+            LivingEntity livingEntity = (LivingEntity) entity;
+            INonStandPower.getNonStandPowerOptional(livingEntity).ifPresent(power -> {
+                if (event.getHand() == Hand.MAIN_HAND && power.isActionOnCooldown(ModHamonActions.HAMON_ZOOM_PUNCH.get())) {
+                    event.setCanceled(true);
+                }
+            });
+        }
+    }
+
     @SubscribeEvent(priority = EventPriority.LOW)
     public void onRenderHand(RenderHandEvent event) {
-        if (event.getHand() == Hand.MAIN_HAND) {
+        if (!event.isCanceled() && event.getHand() == Hand.MAIN_HAND) {
             Entity entity = Minecraft.getInstance().getCameraEntity();
             if (entity instanceof LivingEntity) {
                 LivingEntity livingEntity = (LivingEntity) entity;
@@ -401,7 +494,7 @@ public class ClientEventHandler {
                     }
                     else {
                         ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-                        if (hud.getSelectedAction(ActionType.ATTACK) == ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get()
+                        if ((hud.getSelectedAction(ActionType.ATTACK) == ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get())
                                 && livingEntity.getMainHandItem().isEmpty() && livingEntity.getOffhandItem().isEmpty()) {
                             FirstPersonRenderer renderer = mc.getItemInHandRenderer();
                             ClientPlayerEntity player = mc.player;
@@ -450,7 +543,8 @@ public class ClientEventHandler {
 
     @SubscribeEvent
     public void renderBlocksOverlay(RenderWorldLastEvent event) {
-        if (ActionsOverlayGui.getInstance().getSelectedAction(ActionType.ABILITY) == ModStandActions.CRAZY_DIAMOND_RESTORE_TERRAIN.get()) {
+        ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
+        if (hud.getSelectedActionIfEnabled(ActionType.ABILITY) == ModStandActions.CRAZY_DIAMOND_RESTORE_TERRAIN.get()) {
             MatrixStack matrixStack = event.getMatrixStack();
             IStandPower stand = ActionsOverlayGui.getInstance().standUiMode.getPower();
             Entity entity = CrazyDiamondRestoreTerrain.restorationCenterEntity(mc.player, stand);
@@ -465,6 +559,8 @@ public class ClientEventHandler {
         }
     }
 
+    private static final Set<ResourceLocation> ENCHANTMENTS_DESC = ImmutableSet.of(
+            new ResourceLocation(JojoMod.MOD_ID, "virus_inhibition"));
     @SubscribeEvent
     public void addTooltipLines(ItemTooltipEvent event) {
         PlayerEntity player = event.getPlayer();
@@ -476,7 +572,22 @@ public class ClientEventHandler {
                 }
             });
         }
+
+        if (event.getItemStack().getItem() instanceof EnchantedBookItem && !ModList.get().isLoaded("enchdesc")) {
+            EnchantedBookItem.getEnchantments(event.getItemStack()).forEach(nbt -> {
+                if (nbt.getId() == MCUtil.getNbtId(CompoundNBT.class)) {
+                    CompoundNBT enchNbt = (CompoundNBT) nbt;
+                    ResourceLocation enchId = ResourceLocation.tryParse(enchNbt.getString("id"));
+                    if (enchId != null && ENCHANTMENTS_DESC.contains(enchId)) {
+                        event.getToolTip().add(new TranslationTextComponent(
+                                String.format("enchantment.%s.%s.desc", enchId.getNamespace(), enchId.getPath()))
+                                .withStyle(TextFormatting.GRAY));
+                    }
+                }
+            });
+        }
     }
+    
 
     //    @SubscribeEvent(priority = EventPriority.LOWEST)
     //    public void onUseItemStart(LivingEntityUseItemEvent.Start event) {
@@ -485,7 +596,7 @@ public class ClientEventHandler {
     //            if (((itemName.contains("berry") || itemName.contains("berries")) && event.getEntityLiving().getRandom().nextFloat() < 0.125F ||
     //                (itemName.contains("cherry") || itemName.contains("cherries")))
     //                    && IStandPower.getStandPowerOptional(event.getEntityLiving()).map(stand -> {
-    //                        return stand.getType() == ModStands.HIEROPHANT_GREEN.get();
+    //                        return stand.getType() == ModStandTypes.HIEROPHANT_GREEN.get();
     //                    }).orElse(false)) {
     //                ClientTickingSoundsHelper.playItemUseSound(event.getEntityLiving(), ModSounds.RERO.get(), 1.0F, 1.0F, true, event.getItem());
     //            }

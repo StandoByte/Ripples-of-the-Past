@@ -1,0 +1,30 @@
+{
+  "parent": "jojo:jojo/get_vampirism",
+  "display": {
+    "icon": {
+      "item": "minecraft:enchanted_golden_apple"
+    },
+    "title": {
+      "translate": "advancements.jojo.cure_vampirism.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.cure_vampirism.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "cure_vampirism": {
+      "trigger": "jojo:cure_vampirism",
+      "conditions": {
+      }
+    }
+  },
+  "requirements": [
+    [
+      "cure_vampirism"
+    ]
+  ]
+}

@@ -82,6 +82,29 @@
   "vampire_dark_aura": {
     "sounds": [ "minecraft:mob/wither/spawn" ]
   },
+  "vampire_cure_start": {
+    "subtitle": "jojo.subtitle.vampire_cure_start",
+    "sounds": [ "minecraft:mob/zombie/remedy" ]
+  },
+  "vampire_cure_end": {
+    "subtitle": "jojo.subtitle.vampire_cure_end",
+    "sounds": [ "minecraft:mob/zombie/unfect" ]
+  },
+  "hamon_pick_jonathan": {
+    "sounds": [ "jojo:hamon_pick_jonathan" ]
+  },
+  "hamon_pick_zeppeli": {
+    "sounds": [ "jojo:hamon_pick_zeppeli" ]
+  },
+  "hamon_pick_joseph": {
+    "sounds": [ "jojo:hamon_pick_joseph" ]
+  },
+  "hamon_pick_caesar": {
+    "sounds": [ "jojo:hamon_pick_caesar" ]
+  },
+  "hamon_pick_lisa_lisa": {
+    "sounds": [ "jojo:hamon_pick_lisa_lisa" ]
+  },
   "hamon_spark": {
     "subtitle": "jojo.subtitle.hamon_sparks",
     "sounds": [ "jojo:hamon_spark", "jojo:hamon_spark_2" ]
@@ -90,11 +113,27 @@
     "subtitle": "jojo.subtitle.hamon_sparks",
     "sounds": [ "jojo:hamon_sparks_long", "jojo:hamon_sparks_long_2", "jojo:hamon_sparks_long_3" ]
   },
+  "hamon_sparks_loop": {
+    "subtitle": "jojo.subtitle.hamon_sparks",
+    "sounds": [ "jojo:hamon_sparks_loop" ]
+  },
+  "hamon_syo_charge": {
+    "subtitle": "jojo.subtitle.hamon_syo_charge",
+    "sounds": [ "jojo:hamon_syo_charge" ]
+  },
+  "hamon_syo_punch": {
+    "subtitle": "subtitles.entity.player.attack.strong",
+    "sounds": [ "jojo:punch_heavy" ]
+  },
   "hamon_concentration": {
     "subtitle": "jojo.subtitle.hamon_concentration",
     "sounds": [ "jojo:hamon_concentration" ]
   },
   
+  "hamon_breath": {
+    "subtitle": "jojo.subtitle.hamon_breath",
+    "sounds": [ "minecraft:entity.player.breath" ]
+  },
   "jonathan_breath": {
     "subtitle": "jojo.subtitle.hamon_breath",
     "sounds": [ "jojo:hamon_user/jonathan_breath" ]
@@ -122,6 +161,14 @@
   "jonathan_sunlight_yellow_overdrive": {
     "subtitle": "jojo.subtitle.sunlight_yellow_overdrive",
     "sounds": [ "jojo:hamon_user/jonathan_sunlight_yellow_overdrive", "jojo:hamon_user/jonathan_sunlight_yellow_overdrive_2" ] 
+  },
+  "jonathan_syo_barrage_start": {
+    "subtitle": "jojo.subtitle.syo_barrage_start",
+    "sounds": [ "jojo:hamon_user/jonathan_syo_barrage_start" ] 
+  },
+  "jonathan_syo_barrage": {
+    "subtitle": "jojo.subtitle.sunlight_yellow_overdrive",
+    "sounds": [ "jojo:hamon_user/jonathan_sunlight_yellow_overdrive" ] 
   },
   "jonathan_zoom_punch": {
     "subtitle": "jojo.subtitle.zoom_punch",
@@ -205,15 +252,19 @@
   },
   "zeppeli_hamon_cutter": {
     "subtitle": "jojo.subtitle.hamon_cutter",
-    "sounds": [ "jojo:hamon_user/zeppeli_hamon_cutter" ]
+    "sounds": [ "jojo:hamon_user/zeppeli_hamon_cutter", "jojo:hamon_user/zeppeli_hamon_cutter_2" ]
   },
   "zeppeli_popow_pow_pow": {
     "subtitle": "jojo.subtitle.popow_pow_pow",
     "sounds": [ "jojo:hamon_user/zeppeli_popow_pow_pow" ]
   },
+  "zeppeli_sendo_wave_kick": {
+    "subtitle": "jojo.subtitle.sendo_wave_kick",
+    "sounds": [ "jojo:hamon_user/zeppeli_sendo_wave_kick", "jojo:hamon_user/zeppeli_sendo_wave_kick_2" ]
+  },
   "zeppeli_tornado_overdrive": {
     "subtitle": "jojo.subtitle.tornado_overdrive",
-    "sounds": [ "jojo:hamon_user/zeppeli_tornado_overdrive" ]
+    "sounds": [ "jojo:hamon_user/zeppeli_tornado_overdrive", "jojo:hamon_user/zeppeli_tornado_overdrive_2" ]
   },
   "zeppeli_deep_pass": {
     "subtitle": "jojo.subtitle.deep_pass",
@@ -345,10 +396,6 @@
   "jotaro_star_finger": {
     "subtitle": "jojo.subtitle.star_finger_name",
     "sounds": [ "jojo:stand_user/jotaro_star_finger" ]
-  },
-  "jotaro_the_world": {
-    "subtitle": "jojo.subtitle.the_world_name",
-    "sounds": [ "jojo:stand_user/jotaro_the_world" ] 
   },
   "jotaro_star_platinum_the_world": {
     "subtitle": "jojo.subtitle.star_platinum_the_world",

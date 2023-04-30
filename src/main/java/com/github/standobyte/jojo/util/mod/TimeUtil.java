@@ -15,9 +15,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.RefreshMovementInTi
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerJoinPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerJoinPacket.Phase;
 import com.github.standobyte.jojo.power.IPower;
-import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.google.common.collect.Streams;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -81,16 +79,9 @@ public class TimeUtil {
     }
     
     public static boolean hasTimeStopAbility(LivingEntity entity) {
-        return 
-                IStandPower.getStandPowerOptional(entity).map(stand -> {
-                    return Streams.concat(stand.getAttacks().stream(), stand.getAbilities().stream())
-                            .anyMatch(action -> allowsToSeeInStoppedTime(action, stand, entity));
-                }).orElse(false) 
-                ||
-                INonStandPower.getNonStandPowerOptional(entity).map(power -> {
-                    return Streams.concat(power.getAttacks().stream(), power.getAbilities().stream())
-                            .anyMatch(action -> allowsToSeeInStoppedTime(action, power, entity));
-                }).orElse(false);
+        return IStandPower.getStandPowerOptional(entity).map(stand -> 
+        JojoModUtil.hasAction(stand, action -> allowsToSeeInStoppedTime(action, stand, entity)))
+                .orElse(false);
     }
     
     private static <P extends IPower<P, ?>> boolean allowsToSeeInStoppedTime(Action<P> action, P power, LivingEntity user) {
@@ -156,7 +147,7 @@ public class TimeUtil {
                 serverPlayer.getServer().getAllLevels().forEach(world -> {
                     world.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                         TimeStopHandler handler = cap.getTimeStopHandler();
-                        handler.getAllTimeStopInstances().forEach(instance -> handler.removeTimeStop(instance));
+                        handler.reset();
                     });
                 });
             }
@@ -211,7 +202,8 @@ public class TimeUtil {
             if (!entity.level.isClientSide()) {
                 PacketManager.sendToClientsTrackingAndSelf(new RefreshMovementInTimeStopPacket(entity.getId(), chunkPos, false), entity);
                 if (worldCap.getTimeStopHandler().getTimeStopTicks(new ChunkPos(entity.blockPosition())) >= 40 && 
-                        IStandPower.getStandPowerOptional(entity).map(stand -> stand.hasPower() && stand.getType() == ModStands.THE_WORLD.getStandType()).orElse(false)) {
+                        IStandPower.getStandPowerOptional(entity).map(stand -> 
+                        stand.hasPower() && stand.getType() == ModStands.THE_WORLD.getStandType()).orElse(false)) {
                     JojoModUtil.sayVoiceLine(entity, ModSounds.DIO_CANT_MOVE.get());
                 };
             }

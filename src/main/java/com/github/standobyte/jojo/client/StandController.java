@@ -103,7 +103,7 @@ public class StandController {
             PacketManager.sendToServer(new ClStandManualMovementPacket(stand.getX(), stand.getY(), stand.getZ(), stand.hadInput()));
         }
         else {
-            if ((mc.getCameraEntity() == mc.player || mc.getCameraEntity() == null) && mc.player.hasEffect(ModEffects.STUN.get())) {
+            if ((mc.getCameraEntity() == mc.player || mc.getCameraEntity() == null) && ModEffects.isStunned(mc.player)) {
                 MovementInput input = event.getMovementInput();
                 input.forwardImpulse = 0;
                 input.leftImpulse = 0;

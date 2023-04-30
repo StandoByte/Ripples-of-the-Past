@@ -1,7 +1,9 @@
 package com.github.standobyte.jojo.client;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.UnaryOperator;
 
 import com.github.standobyte.jojo.JojoMod;
@@ -10,9 +12,12 @@ import com.github.standobyte.jojo.capability.item.cassette.CassetteCapProvider;
 import com.github.standobyte.jojo.client.particle.AirStreamParticle;
 import com.github.standobyte.jojo.client.particle.BloodParticle;
 import com.github.standobyte.jojo.client.particle.CDRestorationParticle;
+import com.github.standobyte.jojo.client.particle.HamonAuraParticle;
+import com.github.standobyte.jojo.client.particle.HamonSparkParticle;
 import com.github.standobyte.jojo.client.particle.MeteoriteVirusParticle;
 import com.github.standobyte.jojo.client.particle.OneTickFlameParticle;
 import com.github.standobyte.jojo.client.particle.OnomatopoeiaParticle;
+import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.render.armor.ArmorModelRegistry;
 import com.github.standobyte.jojo.client.render.armor.model.BladeHatArmorModel;
 import com.github.standobyte.jojo.client.render.armor.model.BreathControlMaskModel;
@@ -86,22 +91,28 @@ import com.github.standobyte.jojo.item.ClackersItem;
 import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
+import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.particle.CloudParticle;
-import net.minecraft.client.particle.CritParticle;
 import net.minecraft.client.particle.IAnimatedSprite;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.color.ItemColors;
+import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.FireworkRocketRenderer;
+import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.renderer.entity.SpriteRenderer;
+import net.minecraft.client.renderer.entity.model.BipedModel;
+import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
+import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.CrossbowItem;
 import net.minecraft.item.DyeColor;
 import net.minecraft.item.IItemPropertyGetter;
@@ -113,6 +124,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.ModelBakeEvent;
+import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -228,6 +240,7 @@ public class ClientSetup {
 
             RenderTypeLookup.setRenderLayer(ModBlocks.STONE_MASK.get(), RenderType.cutoutMipped());
             RenderTypeLookup.setRenderLayer(ModBlocks.SLUMBERING_PILLARMAN.get(), RenderType.cutoutMipped());
+            RenderTypeLookup.setRenderLayer(ModBlocks.MAGICIANS_RED_FIRE.get(), RenderType.cutout());
             
             ScreenManager.register(ModContainers.WALKMAN.get(), WalkmanScreen::new);
 
@@ -241,35 +254,58 @@ public class ClientSetup {
             Map<String, PlayerRenderer> skinMap = mc.getEntityRenderDispatcher().getSkinMap();
             addLayers(skinMap.get("default"));
             addLayers(skinMap.get("slim"));
+            mc.getEntityRenderDispatcher().renderers.forEach((entityType, renderer) -> addLayersToEntities(renderer));
 
             MarkerRenderer.Handler.addRenderer(new HierophantGreenBarrierDetectionMarker(mc));
             MarkerRenderer.Handler.addRenderer(new CrazyDiamondAnchorMarker(mc));
             MarkerRenderer.Handler.addRenderer(new CrazyDiamondBloodHomingMarker(mc));
         });
     }
-    
+
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void loadCustomArmorModels(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
             ArmorModelRegistry.loadArmorModels();
         });
     }
+    
+//    @SubscribeEvent(priority = EventPriority.LOWEST)
+//    public static void finalizeCustomPlayerRenderers(FMLClientSetupEvent event) {
+//        Map<String, PlayerRenderer> skinMap = event.getMinecraftSupplier().get().getEntityRenderDispatcher().getSkinMap();
+//    }
 
     private static void addLayers(PlayerRenderer renderer) {
         renderer.addLayer(new KnifeLayer<>(renderer));
         renderer.addLayer(new TornadoOverdriveEffectLayer<>(renderer));
+        addLivingLayers(renderer);
+//        addBipedLayers(renderer);
     }
+    
+    private static <T extends LivingEntity, M extends BipedModel<T>> void addLayersToEntities(EntityRenderer<?> renderer) {
+        if (renderer instanceof LivingRenderer<?, ?>) {
+            addLivingLayers((LivingRenderer<T, ?>) renderer);
+//            if (((LivingRenderer<?, ?>) renderer).getModel() instanceof BipedModel<?>) {
+//                addBipedLayers((LivingRenderer<T, M>) renderer);
+//            }
+        }
+    }
+    
+    private static <T extends LivingEntity, M extends EntityModel<T>> void addLivingLayers(LivingRenderer<T, M> renderer) {
+    }
+    
+//    private static <T extends LivingEntity, M extends BipedModel<T>> void addBipedLayers(LivingRenderer<T, M> renderer) {
+//    }
 
     @SubscribeEvent
     public static void registerItemColoring(ColorHandlerEvent.Item event) {
         ItemColors itemColors = event.getItemColors();
-
+        
         itemColors.register((stack, layer) -> {
             if (layer != 1) return -1;
-
+            
             return ClientUtil.discColor(StandDiscItem.getColor(stack));
         }, ModItems.STAND_DISC.get());
-
+        
         itemColors.register((stack, layer) -> {
             if (layer != 1) return -1;
 
@@ -298,19 +334,40 @@ public class ClientSetup {
             modelRegistry.put(modelResLoc, newModel.apply(existingModel));
         }
     }
+    
+    private static boolean spritesAdded = false;
+    @SubscribeEvent
+    public static void addSprites(ModelRegistryEvent event) {
+        if (!spritesAdded) {
+            addUnreferencedBlockModels(MagiciansRedRenderer.MR_FIRE_0, MagiciansRedRenderer.MR_FIRE_1);
+            spritesAdded = true;
+        }
+    }
+    
+    public static void addUnreferencedBlockModels(RenderMaterial... renderMaterials) {
+        Set<RenderMaterial> textures = ClientReflection.getModelBakeryUnreferencedTextures();
+        Collections.addAll(textures, renderMaterials);
+    }
 
     @SubscribeEvent
     public static void onMcConstructor(ParticleFactoryRegisterEvent event) {
         Minecraft mc = Minecraft.getInstance();
-        mc.particleEngine.register(ModParticles.BLOOD.get(), BloodParticle.Factory::new);
-        mc.particleEngine.register(ModParticles.HAMON_SPARK.get(), CritParticle.Factory::new);
-        mc.particleEngine.register(ModParticles.METEORITE_VIRUS.get(), MeteoriteVirusParticle.Factory::new);
-        mc.particleEngine.register(ModParticles.MENACING.get(), OnomatopoeiaParticle.GoFactory::new);
-        mc.particleEngine.register(ModParticles.RESOLVE.get(), OnomatopoeiaParticle.DoFactory::new);
-        mc.particleEngine.register(ModParticles.SOUL_CLOUD.get(), SoulCloudParticleFactory::new);
-        mc.particleEngine.register(ModParticles.AIR_STREAM.get(), AirStreamParticle.Factory::new);
-        mc.particleEngine.register(ModParticles.FLAME_ONE_TICK.get(), OneTickFlameParticle.Factory::new);
-        mc.particleEngine.register(ModParticles.CD_RESTORATION.get(), CDRestorationParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.BLOOD.get(),                BloodParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.HAMON_SPARK.get(),          HamonSparkParticle.HamonParticleFactory::new);
+        mc.particleEngine.register(ModParticles.HAMON_SPARK_BLUE.get(),     HamonSparkParticle.HamonParticleFactory::new);
+        mc.particleEngine.register(ModParticles.HAMON_SPARK_YELLOW.get(),   HamonSparkParticle.HamonParticleFactory::new);
+        mc.particleEngine.register(ModParticles.HAMON_SPARK_RED.get(),      HamonSparkParticle.HamonParticleFactory::new);
+        mc.particleEngine.register(ModParticles.HAMON_SPARK_SILVER.get(),   HamonSparkParticle.HamonParticleFactory::new);
+        mc.particleEngine.register(ModParticles.HAMON_AURA.get(),           HamonAuraParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.METEORITE_VIRUS.get(),      MeteoriteVirusParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.MENACING.get(),             OnomatopoeiaParticle.GoFactory::new);
+        mc.particleEngine.register(ModParticles.RESOLVE.get(),              OnomatopoeiaParticle.DoFactory::new);
+        mc.particleEngine.register(ModParticles.SOUL_CLOUD.get(),           SoulCloudParticleFactory::new);
+        mc.particleEngine.register(ModParticles.AIR_STREAM.get(),           AirStreamParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.FLAME_ONE_TICK.get(),       OneTickFlameParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.CD_RESTORATION.get(),       CDRestorationParticle.Factory::new);
+
+        CustomParticlesHelper.saveSprites(mc);
         // yep...
         CustomResources.initCustomResourceManagers(mc);
     }

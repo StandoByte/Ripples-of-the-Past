@@ -217,7 +217,9 @@ public class HungryZombieEntity extends ZombieEntity {
                 LivingEntity livingTarget = (LivingEntity) target;
                 if (livingTarget.getArmorCoverPercentage() <= random.nextFloat() && JojoModUtil.canBleed(livingTarget)) {
                     float damage = (float) getAttributeValue(Attributes.ATTACK_DAMAGE);
-                    VampirismBloodDrain.drainBlood(this, livingTarget, damage / 5F, damage / 2F);
+                    if (VampirismBloodDrain.drainBlood(this, livingTarget, damage / 5F)) {
+                        heal(damage / 2F);
+                    }
                 }
             }
             return true;

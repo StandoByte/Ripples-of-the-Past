@@ -8,10 +8,11 @@ import net.minecraft.entity.EntityPredicate;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.TargetGoal;
+import net.minecraft.util.DamageSource;
 
 public class ZombieOwnerHurtTargetGoal extends TargetGoal {
     private final HungryZombieEntity zombie;
-    private LivingEntity attacker;
+    private LivingEntity attacked;
     private int timestamp;
 
     public ZombieOwnerHurtTargetGoal(HungryZombieEntity zombie) {
@@ -26,16 +27,17 @@ public class ZombieOwnerHurtTargetGoal extends TargetGoal {
         if (owner == null || zombie.farFromOwner(12)) {
             return false;
         } else {
-            this.attacker = owner.getLastHurtMob();
+            this.attacked = owner.getLastHurtMob();
             int i = owner.getLastHurtMobTimestamp();
-            return i != timestamp && canAttack(attacker, EntityPredicate.DEFAULT) && zombie.wantsToAttack(attacker, owner);
+            DamageSource attackedBy = attacked != null ? attacked.getLastDamageSource() : null;
+            return i != timestamp && !(attackedBy != null && !attackedBy.getMsgId().startsWith("bloodDrain")) &&
+                    canAttack(attacked, EntityPredicate.DEFAULT) && zombie.wantsToAttack(attacked, owner);
         }
     }
 
-
     @Override
     public void start() {
-        mob.setTarget(attacker);
+        mob.setTarget(attacked);
         LivingEntity owner = zombie.getOwner();
         if (owner != null) {
             timestamp = owner.getLastHurtMobTimestamp();

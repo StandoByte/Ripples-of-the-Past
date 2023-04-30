@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -134,6 +135,12 @@ public class TimeStopHandler {
             StandEntity standEntity = (StandEntity) entity;
             if (standEntity.getUser() != null) {
                 entityToCheck = standEntity.getUser();
+            }
+        }
+        else if (entity instanceof SoulEntity) {
+            SoulEntity soulEntity = (SoulEntity) entity;
+            if (soulEntity.getOriginEntity() != null) {
+                entityToCheck = soulEntity.getOriginEntity();
             }
         }
         

@@ -23,7 +23,7 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
     protected static final DataParameter<Boolean> KICK_COMBO = EntityDataManager.defineId(MRRedBindEntity.class, DataSerializers.BOOLEAN);
     
     private StandEntity ownerStand;
-    private EffectInstance stunEffect = null;
+    private EffectInstance immobilizedEffect = null;
     private int ticksTargetClose = 0;
 
     public MRRedBindEntity(World world, StandEntity entity) {
@@ -105,10 +105,10 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
                 LivingEntity targetLiving = (LivingEntity) target;
                 attachToEntity(targetLiving);
                 if (!level.isClientSide()) {
-                    boolean thisEffect = stunEffect == targetLiving.getEffect(ModEffects.STUN.get());
-                    targetLiving.addEffect(new EffectInstance(ModEffects.STUN.get(), ticksLifespan() - tickCount));
+                    boolean thisEffect = immobilizedEffect == targetLiving.getEffect(ModEffects.IMMOBILIZE.get());
+                    targetLiving.addEffect(new EffectInstance(ModEffects.IMMOBILIZE.get(), ticksLifespan() - tickCount));
                     if (thisEffect) {
-                        stunEffect = targetLiving.getEffect(ModEffects.STUN.get());
+                        immobilizedEffect = targetLiving.getEffect(ModEffects.IMMOBILIZE.get());
                     }
                 }
                 return true;
@@ -124,10 +124,10 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
     
     @Override
     public void remove() {
-        if (!level.isClientSide() && stunEffect != null) {
+        if (!level.isClientSide() && immobilizedEffect != null) {
             LivingEntity bound = getEntityAttachedTo();
             if (bound != null) {
-                MCUtil.removeEffectInstance(bound, stunEffect);
+                MCUtil.removeEffectInstance(bound, immobilizedEffect);
             }
         }
         super.remove();
@@ -143,11 +143,9 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
         entityData.set(KICK_COMBO, true);
         LivingEntity target = getEntityAttachedTo();
         if (target != null) {
-            boolean thisEffect = stunEffect == target.getEffect(ModEffects.STUN.get());
+            MCUtil.removeEffectInstance(target, immobilizedEffect);
             target.addEffect(new EffectInstance(ModEffects.STUN.get(), ticksLifespan() - tickCount));
-            if (thisEffect) {
-                stunEffect = target.getEffect(ModEffects.STUN.get());
-            }
+            immobilizedEffect = target.getEffect(ModEffects.STUN.get());
         }
     }
     
