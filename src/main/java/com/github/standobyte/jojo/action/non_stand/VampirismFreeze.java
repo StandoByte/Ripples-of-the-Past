@@ -195,4 +195,9 @@ public class VampirismFreeze extends VampirismAction {
     public boolean heldAllowsOtherAction(INonStandPower power, Action<INonStandPower> action) {
         return true;
     }
+    
+    @Override
+    protected int maxCuringStage() {
+        return 1;
+    }
 }

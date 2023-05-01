@@ -11,6 +11,8 @@ import com.github.standobyte.jojo.entity.ai.ZombieNearestAttackableTargetGoal;
 import com.github.standobyte.jojo.entity.ai.ZombieOwnerHurtByTargetGoal;
 import com.github.standobyte.jojo.entity.ai.ZombieOwnerHurtTargetGoal;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.Entity;
@@ -131,7 +133,15 @@ public class HungryZombieEntity extends ZombieEntity {
     public LivingEntity getOwner() {
         try {
             UUID uuid = this.getOwnerUUID();
-            return uuid == null ? null : this.level.getPlayerByUUID(uuid);
+            if (uuid == null) return null;
+            PlayerEntity owner = level.getPlayerByUUID(uuid);
+            if (INonStandPower.getNonStandPowerOptional(owner).map(
+                    power -> power.getTypeSpecificData(ModPowers.VAMPIRISM.get()).map(
+                    vampirism -> vampirism.getCuringStage() >= 4).orElse(true)).orElse(false)) {
+                setOwner(null);
+                return null;
+            }
+            return owner;
         } catch (IllegalArgumentException e) {
             return null;
         }

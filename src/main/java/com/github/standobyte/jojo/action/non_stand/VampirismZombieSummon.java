@@ -51,4 +51,9 @@ public class VampirismZombieSummon extends VampirismAction {
             }
         }
     }
+    
+    @Override
+    protected int maxCuringStage() {
+        return 3;
+    }
 }

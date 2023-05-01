@@ -69,4 +69,9 @@ public class VampirismBloodGift extends VampirismAction {
     public double getMaxRangeSqEntityTarget() {
         return 4;
     }
+    
+    @Override
+    protected int maxCuringStage() {
+        return 3;
+    }
 }

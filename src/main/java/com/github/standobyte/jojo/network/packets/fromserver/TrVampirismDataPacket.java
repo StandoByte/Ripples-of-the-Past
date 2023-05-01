@@ -14,13 +14,27 @@ import net.minecraftforge.fml.network.NetworkEvent;
 
 public class TrVampirismDataPacket {
     private final int entityId;
-    private final Flag flag;
-    private final boolean value;
+    private final VampireField field;
+    private final boolean valueBool;
+    private final int valueInt;
     
-    public TrVampirismDataPacket(int entityId, Flag flag, boolean value) {
+    public static TrVampirismDataPacket wasHamonUser(int entityId, boolean value) {
+        return new TrVampirismDataPacket(entityId, VampireField.WAS_HAMON_USER, value, 0);
+    }
+    
+    public static TrVampirismDataPacket atFullPower(int entityId, boolean value) {
+        return new TrVampirismDataPacket(entityId, VampireField.AT_FULL_POWER, value, 0);
+    }
+    
+    public static TrVampirismDataPacket curingTicks(int entityId, int ticks) {
+        return new TrVampirismDataPacket(entityId, VampireField.CURING_TICKS, false, ticks);
+    }
+    
+    private TrVampirismDataPacket(int entityId, VampireField flag, boolean valueBool, int valueInt) {
         this.entityId = entityId;
-        this.flag = flag;
-        this.value = value;
+        this.field = flag;
+        this.valueBool = valueBool;
+        this.valueInt = valueInt;
     }
     
     
@@ -30,13 +44,28 @@ public class TrVampirismDataPacket {
         @Override
         public void encode(TrVampirismDataPacket msg, PacketBuffer buf) {
             buf.writeInt(msg.entityId);
-            buf.writeEnum(msg.flag);
-            buf.writeBoolean(msg.value);
+            buf.writeEnum(msg.field);
+            switch (msg.field) {
+            case WAS_HAMON_USER: case AT_FULL_POWER:
+                buf.writeBoolean(msg.valueBool);
+                break;
+            case CURING_TICKS:
+                buf.writeInt(msg.valueInt);
+                break;
+            }
         }
 
         @Override
         public TrVampirismDataPacket decode(PacketBuffer buf) {
-            return new TrVampirismDataPacket(buf.readInt(), buf.readEnum(Flag.class), buf.readBoolean());
+            int entityId = buf.readInt();
+            VampireField field = buf.readEnum(VampireField.class);
+            switch (field) {
+            case WAS_HAMON_USER: case AT_FULL_POWER:
+                return new TrVampirismDataPacket(entityId, field, buf.readBoolean(), 0);
+            case CURING_TICKS:
+                return new TrVampirismDataPacket(entityId, field, false, buf.readInt());
+            }
+            throw new IllegalStateException("Unknown JoJo vampirism field being sent!");
         }
 
         @Override
@@ -44,15 +73,20 @@ public class TrVampirismDataPacket {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity instanceof LivingEntity) {
                 INonStandPower.getNonStandPowerOptional((LivingEntity) entity).ifPresent(power -> {
-                    switch(msg.flag) {
-                    case VAMPIRE_HAMON_USER:
+                    switch(msg.field) {
+                    case WAS_HAMON_USER:
                         power.getTypeSpecificData(ModPowers.VAMPIRISM.get()).ifPresent(vampirism -> {
-                            vampirism.setVampireHamonUser(msg.value);
+                            vampirism.setVampireHamonUser(msg.valueBool);
                         });
                         break;
-                    case VAMPIRE_FULL_POWER:
+                    case AT_FULL_POWER:
                         power.getTypeSpecificData(ModPowers.VAMPIRISM.get()).ifPresent(vampirism -> {
-                            vampirism.setVampireFullPower(msg.value);
+                            vampirism.setVampireFullPower(msg.valueBool);
+                        });
+                        break;
+                    case CURING_TICKS:
+                        power.getTypeSpecificData(ModPowers.VAMPIRISM.get()).ifPresent(vampirism -> {
+                            vampirism.setCuringTicks(msg.valueInt);
                         });
                         break;
                     }
@@ -66,8 +100,9 @@ public class TrVampirismDataPacket {
         }
     }
     
-    public static enum Flag {
-        VAMPIRE_HAMON_USER,
-        VAMPIRE_FULL_POWER
+    private static enum VampireField {
+        WAS_HAMON_USER,
+        AT_FULL_POWER,
+        CURING_TICKS
     }
 }

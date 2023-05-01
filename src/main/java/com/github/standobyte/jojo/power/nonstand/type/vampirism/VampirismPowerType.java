@@ -1,7 +1,9 @@
 package com.github.standobyte.jojo.power.nonstand.type.vampirism;
 
-import java.util.Map;
-import java.util.function.IntBinaryOperator;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.non_stand.VampirismAction;
@@ -11,32 +13,18 @@ import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
-import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.EffectType;
 import net.minecraft.potion.Effects;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
 
 public class VampirismPowerType extends NonStandPowerType<VampirismData> {
-    private static Map<Effect, IntBinaryOperator> EFFECTS_AMPLIFIERS;
-    
-    public static void initVampiricEffectsMap() {
-        EFFECTS_AMPLIFIERS = ImmutableMap.<Effect, IntBinaryOperator>builder()
-                .put(ModEffects.UNDEAD_REGENERATION.get(), (bl, diff) -> bl - 2)
-                .put(Effects.HEALTH_BOOST, (bl, diff) -> diff * 5 - 1)
-                .put(Effects.DAMAGE_BOOST, (bl, diff) -> bl - 4)
-                .put(Effects.MOVEMENT_SPEED, (bl, diff) -> bl - 4)
-                .put(Effects.DIG_SPEED, (bl, diff) -> bl - 4)
-                .put(Effects.JUMP, (bl, diff) -> bl - 4)
-                .put(Effects.DAMAGE_RESISTANCE, (bl, diff) -> bl - 5)
-                .put(Effects.NIGHT_VISION, (bl, diff) -> 0)
-                .build();
-    }
 
     public VampirismPowerType(int color, VampirismAction[] startingAttacks, VampirismAction[] startingAbilities) {
         super(color, startingAttacks, startingAbilities, startingAttacks[0], VampirismData::new);
@@ -50,8 +38,8 @@ public class VampirismPowerType extends NonStandPowerType<VampirismData> {
     @Override
     public void afterClear(INonStandPower power) {
         LivingEntity user = power.getUser();
-        for (Map.Entry<Effect, IntBinaryOperator> entry : EFFECTS_AMPLIFIERS.entrySet()) {
-            EffectInstance effectInstance = user.getEffect(entry.getKey());
+        for (Effect effect : EFFECTS) {
+            EffectInstance effectInstance = user.getEffect(effect);
             if (effectInstance != null && !effectInstance.isVisible() && !effectInstance.showIcon()) {
                 user.removeEffect(effectInstance.getEffect());
             }
@@ -65,9 +53,17 @@ public class VampirismPowerType extends NonStandPowerType<VampirismData> {
                 JojoModConfig.getCommonConfigInstance(world.isClientSide()).maxBloodMultiplier.get(), world.getDifficulty().getId())
                 .floatValue();
     }
-
+    
     @Override
     public float tickEnergy(INonStandPower power) {
+        VampirismData vampirism = power.getTypeSpecificData(this).get();
+        if (vampirism.isBeingCured()) {
+            if (vampirism.getCuringStage() >= 4) {
+                return 0;
+            }
+            return power.getEnergy() - power.getMaxEnergy() * Math.max(vampirism.getCuringProgress(), 0.25F) / 200;
+        }
+        
         World world = power.getUser().level;
         float inc = -GeneralUtil.getOrLast(
                 JojoModConfig.getCommonConfigInstance(world.isClientSide()).bloodTickDown.get(), world.getDifficulty().getId())
@@ -82,12 +78,12 @@ public class VampirismPowerType extends NonStandPowerType<VampirismData> {
     public float getMaxStaminaFactor(INonStandPower power, IStandPower standPower) {
         return Math.max((bloodLevel(power) - 4) * 2, 1);
     }
-
+    
     @Override
     public float getStaminaRegenFactor(INonStandPower power, IStandPower standPower) {
         return Math.max((bloodLevel(power) - 4) * 4, 1);
     }
-
+    
     private static int bloodLevel(INonStandPower power) {
         return bloodLevel(power, power.getUser().level.getDifficulty().getId());
     }
@@ -104,9 +100,10 @@ public class VampirismPowerType extends NonStandPowerType<VampirismData> {
         }
         return bloodLevel;
     }
-
+    
     @Override
     public void tickUser(LivingEntity entity, INonStandPower power) {
+        VampirismData vampirism = power.getTypeSpecificData(this).get();
         if (!entity.level.isClientSide()) {
             if (entity instanceof PlayerEntity) {
                 ((PlayerEntity) entity).getFoodData().setFoodLevel(17);
@@ -114,31 +111,81 @@ public class VampirismPowerType extends NonStandPowerType<VampirismData> {
             entity.setAirSupply(entity.getMaxAirSupply());
             int difficulty = entity.level.getDifficulty().getId();
             int bloodLevel = bloodLevel(power, difficulty);
-            if (power.getTypeSpecificData(this).get().refreshBloodLevel(bloodLevel)) {
-                for (Map.Entry<Effect, IntBinaryOperator> entry : EFFECTS_AMPLIFIERS.entrySet()) {
-                    Effect effect = entry.getKey();
-                    int amplifier = entry.getValue().applyAsInt(bloodLevel, difficulty);
-                    float missingHp = effect == Effects.HEALTH_BOOST ? entity.getMaxHealth() - entity.getHealth() : -1;
+            int curingStage = vampirism.getCuringStage();
+            if (vampirism.refreshBloodLevel(bloodLevel)) {
+                for (Effect effect : EFFECTS) {
+                    int amplifier = getEffectAmplifier(effect, bloodLevel, difficulty, curingStage, power);
+                    float missingHp = -1;
+                    boolean maxHpIncreased = false;
+                    if (effect == Effects.HEALTH_BOOST) {
+                        missingHp = entity.getMaxHealth() - entity.getHealth();
+                        maxHpIncreased = amplifier >= 0 && 
+                                amplifier > Optional.ofNullable(entity.getEffect(Effects.HEALTH_BOOST)).map(EffectInstance::getAmplifier).orElse(-1);
+                    }
                     if (amplifier >= 0) {
                         entity.removeEffectNoUpdate(effect);
-                        entity.addEffect(new EffectInstance(entry.getKey(), Integer.MAX_VALUE, amplifier, false, false));
+                        entity.addEffect(new EffectInstance(effect, Integer.MAX_VALUE, amplifier, false, false));
                     }
                     else {
                         entity.removeEffect(effect);
                     }
                     if (missingHp > -1) {
-                        entity.setHealth(entity.getMaxHealth() - missingHp);
+                        if (maxHpIncreased) {
+                            entity.setHealth(entity.getMaxHealth() - missingHp);
+                        }
+                        else {
+                            entity.setHealth(Math.min(entity.getHealth(), entity.getMaxHealth()));
+                        }
                     }
                 }
             }
         }
+        vampirism.tickCuring(entity, power);
     }
-
+    
+    private static int getEffectAmplifier(Effect effect, int bloodLevel, int difficulty, int curingStage, INonStandPower power) {
+        if (effect.isBeneficial() && curingStage > 0) {
+            if (curingStage >= 3) {
+                bloodLevel = -1;
+            } else {
+                bloodLevel -= curingStage;
+            }
+        }
+        if (effect.getCategory() == EffectType.HARMFUL)                     return curingStage >= 4 ? effect == Effects.BLINDNESS ? 0 : 3 - difficulty : -1;
+        if (effect == Effects.HEALTH_BOOST)                                 return difficulty * (curingStage > 0 ? 5 - curingStage * 2 : 5) - 1;
+        if (effect == ModEffects.UNDEAD_REGENERATION.get())                 return Math.min(bloodLevel - 2, 4);
+        if (effect == Effects.DAMAGE_BOOST)                                 return bloodLevel - 4;
+        if (effect == Effects.MOVEMENT_SPEED)                               return bloodLevel - 4;
+        if (effect == Effects.DIG_SPEED)                                    return bloodLevel - 4;
+        if (effect == Effects.JUMP)                                         return bloodLevel - 4;
+        if (effect == Effects.DAMAGE_RESISTANCE)                            return bloodLevel - 6;
+        if (effect == Effects.NIGHT_VISION)                                 return 0;
+        return -1;
+    }
+    
+    private static final Set<Effect> EFFECTS = new HashSet<>();
+    public static void initVampiricEffects() {
+        Collections.addAll(EFFECTS, 
+                Effects.HEALTH_BOOST,
+                ModEffects.UNDEAD_REGENERATION.get(),
+                Effects.DAMAGE_BOOST,
+                Effects.MOVEMENT_SPEED,
+                Effects.DIG_SPEED,
+                Effects.JUMP,
+                Effects.DAMAGE_RESISTANCE,
+                Effects.NIGHT_VISION,
+                
+                Effects.MOVEMENT_SLOWDOWN,
+                Effects.DIG_SLOWDOWN,
+                Effects.WEAKNESS,
+                Effects.BLINDNESS);
+    }
+    
     @Override
     public boolean isReplaceableWith(NonStandPowerType<?> newType) {
         return false;
     }
-
+    
     @Override
     public float getTargetResolveMultiplier(INonStandPower power, IStandPower attackingStand) {
         LivingEntity entity = power.getUser();
@@ -150,7 +197,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismData> {
     
     @Override
     public boolean isLeapUnlocked(INonStandPower power) {
-        return true;
+        return power.getTypeSpecificData(this).get().getCuringStage() < 3;
     }
     
     @Override
@@ -172,7 +219,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismData> {
     public float getLeapEnergyCost() {
         return 0;
     }
-
+    
     
     
     public static void cancelVampiricEffectRemoval(PotionRemoveEvent event) {
@@ -180,15 +227,17 @@ public class VampirismPowerType extends NonStandPowerType<VampirismData> {
         if (effectInstance != null) {
             LivingEntity entity = event.getEntityLiving();
             INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
-                if (power.getTypeSpecificData(ModPowers.VAMPIRISM.get()).isPresent()) {
+                power.getTypeSpecificData(ModPowers.VAMPIRISM.get()).ifPresent(vampirism -> {
                     int difficulty = entity.level.getDifficulty().getId();
                     int bloodLevel = bloodLevel(power, difficulty);
+                    int curingStage = vampirism.getCuringStage();
                     Effect effect = event.getPotion();
-                    if (EFFECTS_AMPLIFIERS.containsKey(effect) && EFFECTS_AMPLIFIERS.get(effect).applyAsInt(bloodLevel, difficulty) == effectInstance.getAmplifier() && 
+                    if (EFFECTS.contains(effect) && 
+                            getEffectAmplifier(effect, bloodLevel, difficulty, curingStage, power) == effectInstance.getAmplifier() && 
                             !effectInstance.isVisible() && !effectInstance.showIcon()) {
                         event.setCanceled(true);
                     }
-                }
+                });
             });
         }
     }

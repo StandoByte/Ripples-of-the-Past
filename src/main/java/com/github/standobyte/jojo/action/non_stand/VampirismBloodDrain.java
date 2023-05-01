@@ -27,6 +27,7 @@ import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.World;
@@ -91,11 +92,17 @@ public class VampirismBloodDrain extends VampirismAction {
                     }
                     power.addEnergy(bloodAndHealModifier);
                     if (drainBlood(user, targetEntity, 4)) {
-                        float healed = user.getHealth();
-                        user.heal(bloodAndHealModifier * 0.5F);
-                        healed = user.getHealth() - healed;
-                        if (healed > 0) {
-                            power.addEnergy(healed * VampirismPowerType.healCost(world));
+                        if (power.getTypeSpecificData(ModPowers.VAMPIRISM.get()).map(
+                                vampirism -> vampirism.isBeingCured() && vampirism.getCuringStage() >= 3).orElse(false)) {
+                            user.hurt(new DamageSource("curedVampireBlood"), Math.min(bloodAndHealModifier * 0.5F, user.getHealth() - 1));
+                        }
+                        else {
+                            float healed = user.getHealth();
+                            user.heal(bloodAndHealModifier * 0.5F);
+                            healed = user.getHealth() - healed;
+                            if (healed > 0) {
+                                power.addEnergy(healed * VampirismPowerType.healCost(world));
+                            }
                         }
                         if (targetEntity.isDeadOrDying()) {
                             boolean zombieCreated = HungryZombieEntity.createZombie((ServerWorld) world, user, targetEntity, false);
@@ -165,5 +172,10 @@ public class VampirismBloodDrain extends VampirismAction {
     @Override
     public boolean heldAllowsOtherAction(INonStandPower power, Action<INonStandPower> action) {
         return true;
+    }
+
+    @Override
+    protected int maxCuringStage() {
+        return 2;
     }
 }

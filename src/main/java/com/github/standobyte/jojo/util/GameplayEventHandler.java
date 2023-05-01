@@ -58,6 +58,7 @@ import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.Technique;
+import com.github.standobyte.jojo.power.nonstand.type.vampirism.VampirismData;
 import com.github.standobyte.jojo.power.nonstand.type.vampirism.VampirismPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandEffectsTracker;
@@ -160,6 +161,7 @@ import net.minecraftforge.event.entity.living.LivingConversionEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
+import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
@@ -407,7 +409,7 @@ public class GameplayEventHandler {
 //            cutOutHands((PaintingEntity) event.getEntity());
 //        }
     }
-
+    
     private static void makeMobNeutralToVampirePlayers(MobEntity mob) {
         if (JojoModConfig.getCommonConfigInstance(false).vampiresAggroMobs.get()) return;
         Set<PrioritizedGoal> goals = CommonReflection.getGoalsSet(mob.targetSelector);
@@ -422,12 +424,23 @@ public class GameplayEventHandler {
                     if (selector != null) {
                         Predicate<LivingEntity> oldPredicate = CommonReflection.getTargetSelector(selector);
                         Predicate<LivingEntity> undeadPredicate = target -> 
-                            target instanceof PlayerEntity && !(JojoModUtil.isPlayerUndead((PlayerEntity) target));
+                            target instanceof PlayerEntity && !(
+//                                    JojoModUtil.isPlayerUndead((PlayerEntity) target) &&
+                                    INonStandPower.getNonStandPowerOptional(target).map(
+                                            power -> power.getTypeSpecificData(ModPowers.VAMPIRISM.get())
+                                            .map(vampirism -> vampirism.getCuringStage() < 3).orElse(false)).orElse(false));
                         CommonReflection.setTargetConditions(targetGoal, new EntityPredicate().range(CommonReflection.getTargetDistance(targetGoal)).selector(
                                 oldPredicate != null ? oldPredicate.and(undeadPredicate) : undeadPredicate));
                     }
                 }
             }
+        }
+    }
+    
+    @SubscribeEvent
+    public static void onFoodEaten(LivingEntityUseItemEvent.Finish event) {
+        if (event.getItem().getItem() == Items.ENCHANTED_GOLDEN_APPLE) {
+            VampirismData.onEnchantedGoldenAppleEaten(event.getEntityLiving());
         }
     }
     
