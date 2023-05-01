@@ -199,7 +199,7 @@ public class PlayerUtilCap {
             }
         }
     }
-
+    
     public boolean hasEarbuds() {
         return walkmanEarbuds;
     }

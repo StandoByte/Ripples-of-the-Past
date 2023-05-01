@@ -61,4 +61,9 @@ public class VampirismDarkAura extends VampirismAction {
         }
         user.playSound(ModSounds.VAMPIRE_EVIL_ATMOSPHERE.get(), (float) (range + 16) / 16F, 1.0F);
     }
+    
+    @Override
+    protected int maxCuringStage() {
+        return 3;
+    }
 }

@@ -61,21 +61,22 @@ public abstract class BarsRenderer {
 
         float attackCost = 0;
         float abilityCost = 0;
-        if (currentMode != null) {
-            boolean shift = mc.player.isShiftKeyDown();
-            attackCost = getActionCost(currentMode, ActionType.ATTACK, mc.player, shift);
-            abilityCost = getActionCost(currentMode, ActionType.ABILITY, mc.player, shift);
-            if (abilityCost < 0) {
-                abilityCost = attackCost;
-            }
-            else if (attackCost < 0) {
-                attackCost = abilityCost;
-            }
-            if (attackCost < 0/* && abilityCost < 0*/) {
-                attackCost = 0;
-                abilityCost = 0;
-            }
-        }
+        // FIXME get energy/stamina costs
+//        if (currentMode != null) {
+//            boolean shift = mc.player.isShiftKeyDown();
+//            attackCost = getActionCost(currentMode, ActionType.ATTACK, mc.player, shift);
+//            abilityCost = getActionCost(currentMode, ActionType.ABILITY, mc.player, shift);
+//            if (abilityCost < 0) {
+//                abilityCost = attackCost;
+//            }
+//            else if (attackCost < 0) {
+//                attackCost = abilityCost;
+//            }
+//            if (attackCost < 0/* && abilityCost < 0*/) {
+//                attackCost = 0;
+//                abilityCost = 0;
+//            }
+//        }
         
         if (nonStandPower != null && nonStandPower.hasPower()) {
             float energy = nonStandPower.getEnergy();
@@ -104,7 +105,6 @@ public abstract class BarsRenderer {
         if (standPower != null && standPower.hasPower()) {
             if (standPower.usesStamina() && !standPower.isStaminaInfinite()) {
                 float stamina = standPower.getStamina();
-                // FIXME get stamina costs
                 renderBarWithIcon(matrixStack, BarType.STAMINA, 
                         currentModeType == PowerClassification.STAND, 0xFFFFFF, 1, 
                         stamina, standPower.getMaxStamina(), 

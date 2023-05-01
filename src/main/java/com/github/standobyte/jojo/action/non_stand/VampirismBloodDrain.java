@@ -173,7 +173,7 @@ public class VampirismBloodDrain extends VampirismAction {
     public boolean heldAllowsOtherAction(INonStandPower power, Action<INonStandPower> action) {
         return true;
     }
-
+    
     @Override
     protected int maxCuringStage() {
         return 2;
