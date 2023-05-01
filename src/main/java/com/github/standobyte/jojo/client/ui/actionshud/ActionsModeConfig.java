@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.ui.hud;
+package com.github.standobyte.jojo.client.ui.actionshud;
 
 import java.util.List;
 

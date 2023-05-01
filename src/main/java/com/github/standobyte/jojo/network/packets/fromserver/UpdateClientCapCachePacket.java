@@ -4,7 +4,7 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.SoulController;
-import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
+import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 
 import net.minecraft.network.PacketBuffer;

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Random;
 
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.StandEntityRenderer;
-import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
+import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.network.PacketManager;

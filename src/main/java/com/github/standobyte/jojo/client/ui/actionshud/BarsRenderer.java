@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.ui.hud;
+package com.github.standobyte.jojo.client.ui.actionshud;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -7,9 +7,9 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui.Alignment;
-import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui.BarsOrientation;
-import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui.ElementTransparency;
+import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.Alignment;
+import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.BarsOrientation;
+import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.ElementTransparency;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.IPower;

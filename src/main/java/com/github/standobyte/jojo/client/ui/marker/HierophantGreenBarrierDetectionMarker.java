@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.ui.hud.marker;
+package com.github.standobyte.jojo.client.ui.marker;
 
 import java.util.List;
 

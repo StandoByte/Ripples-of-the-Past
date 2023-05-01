@@ -75,11 +75,11 @@ import com.github.standobyte.jojo.client.render.entity.renderer.stand.StarPlatin
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.TheWorldRenderer;
 import com.github.standobyte.jojo.client.render.item.RoadRollerBakedModel;
 import com.github.standobyte.jojo.client.resources.CustomResources;
-import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
-import com.github.standobyte.jojo.client.ui.hud.marker.CrazyDiamondAnchorMarker;
-import com.github.standobyte.jojo.client.ui.hud.marker.CrazyDiamondBloodHomingMarker;
-import com.github.standobyte.jojo.client.ui.hud.marker.HierophantGreenBarrierDetectionMarker;
-import com.github.standobyte.jojo.client.ui.hud.marker.MarkerRenderer;
+import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
+import com.github.standobyte.jojo.client.ui.marker.CrazyDiamondAnchorMarker;
+import com.github.standobyte.jojo.client.ui.marker.CrazyDiamondBloodHomingMarker;
+import com.github.standobyte.jojo.client.ui.marker.HierophantGreenBarrierDetectionMarker;
+import com.github.standobyte.jojo.client.ui.marker.MarkerRenderer;
 import com.github.standobyte.jojo.client.ui.screen.walkman.WalkmanScreen;
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModContainers;
