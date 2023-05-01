@@ -1,6 +1,6 @@
 {
   "parent": "jojo:block/coffin2_open",
   "textures": {
-    "1": "block/purple_wool"
+    "1" : "jojo:block/coffin_inside/purple_wool"
   }
 }

@@ -557,7 +557,7 @@ public class JojoModConfig {
         public final ForgeConfigSpec.EnumValue<ActionsOverlayGui.PositionConfig> hotbarsPosition;
         public final ForgeConfigSpec.EnumValue<ActionsOverlayGui.HudNamesRender> hudNamesRender;
         
-        public final ForgeConfigSpec.BooleanValue slotHotkeys;
+        public final ForgeConfigSpec.BooleanValue actionSlotHotkeys;
         
         public final ForgeConfigSpec.BooleanValue resolveShaders;
         public final ForgeConfigSpec.BooleanValue menacingParticles;
@@ -580,11 +580,11 @@ public class JojoModConfig {
                     .translation("jojo.config.client.hudNamesRender")
                     .defineEnum("hudNamesRender", ActionsOverlayGui.HudNamesRender.ALWAYS);
             
-            slotHotkeys = builder
+            actionSlotHotkeys = builder
                     .comment(" Enable hotkey settings for each individual attack and ability from 1 to 9.", 
                             "  If your client is launched, changing the setting requires restarting the game.")
                     .translation("jojo.config.client.slotHotkeys")
-                    .define("slotHotkeys", true);
+                    .define("actionSlotHotkeys", false);
             
             resolveShaders = builder
                     .comment(" Enable shaders during Resolve effect.")

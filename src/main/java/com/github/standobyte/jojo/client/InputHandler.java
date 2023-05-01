@@ -161,7 +161,7 @@ public class InputHandler {
         ClientRegistry.registerKeyBinding(scrollAttack = new KeyBinding(JojoMod.MOD_ID + ".key.scroll_attack", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
         ClientRegistry.registerKeyBinding(scrollAbility = new KeyBinding(JojoMod.MOD_ID + ".key.scroll_ability", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
         
-        if (JojoModConfig.CLIENT.slotHotkeys.get()) {
+        if (JojoModConfig.CLIENT.actionSlotHotkeys.get()) {
             attackSlots = new KeyBinding[9];
             abilitySlots = new KeyBinding[9];
             for (int i = 0; i < 9; i++) {

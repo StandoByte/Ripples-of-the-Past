@@ -1,9 +1,9 @@
 {
     "credit": "Made with Blockbench",
     "textures": {
-        "0": "block/stripped_dark_oak_log",
-        "1": "block/red_wool",
-        "particle": "block/stripped_dark_oak_log"
+        "0": "jojo:block/coffin_box",
+        "1": "jojo:block/coffin_inside/red_wool",
+        "particle": "jojo:block/coffin_box"
     },
     "elements": [
         {
