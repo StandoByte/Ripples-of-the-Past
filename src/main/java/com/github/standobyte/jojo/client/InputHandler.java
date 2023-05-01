@@ -29,6 +29,7 @@ import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClDoubleShiftPressPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClHamonMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHasInputPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHeldActionTargetPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnLeapPacket;
@@ -42,6 +43,7 @@ import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
@@ -366,6 +368,15 @@ public class InputHandler {
         }
     }
     
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void cancelClickInput(ClickInputEvent event) {
+        INonStandPower.getPlayerNonStandPower(mc.player).getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
+            if (hamon.isMeditating()) {
+                event.setCanceled(true);
+            }
+        });
+    }
+    
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void modActionClick(ClickInputEvent event) {
         doubleShift.reset();
@@ -485,6 +496,30 @@ public class InputHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void invertMovementInput(InputUpdateEvent event) {
+        if (GeneralUtil.orElseFalse(INonStandPower.getNonStandPowerOptional(event.getPlayer()).resolve().flatMap(
+                power -> power.getTypeSpecificData(ModPowers.HAMON.get())), hamon -> {
+                    if (hamon.isMeditating()) {
+                        MovementInput input = event.getMovementInput();
+                        if (hamon.getMeditationTicks() >= 40) {
+                            boolean hasInput = input.up || input.down || input.left || input.right || input.jumping;
+                            if (hasInput) {
+                                PacketManager.sendToServer(new ClHamonMeditationPacket(false));
+                            }
+                        }
+                        input.up = false;
+                        input.down = false;
+                        input.left = false;
+                        input.right = false;
+                        input.jumping = false;
+                        input.forwardImpulse = 0;
+                        input.leftImpulse = 0;
+                        return true;
+                    }
+                    return false;
+                })) {
+            return;
+        }
+        
         if (event.getPlayer().hasEffect(ModEffects.MISSHAPEN_LEGS.get())) {
             MovementInput input = event.getMovementInput();
             input.forwardImpulse *= -1;

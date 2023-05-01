@@ -1,9 +1,13 @@
 package com.github.standobyte.jojo.client.ui.screen.hamon;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.InputHandler;
@@ -13,6 +17,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClHamonWindowOpened
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonStat;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -23,6 +28,7 @@ import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
 
+@SuppressWarnings("deprecation")
 public class HamonScreen extends Screen {
     static final int WINDOW_WIDTH = 230;
     static final int WINDOW_HEIGHT = 228;
@@ -33,10 +39,12 @@ public class HamonScreen extends Screen {
     public static final ResourceLocation WINDOW = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/hamon_window.png");
     static final ResourceLocation TABS = new ResourceLocation("textures/gui/advancements/tabs.png");
     
-    private HamonTabGui[] tabs;
-    private HamonTabGui selectedTab;
+    HamonTabGui[] selectableTabs;
+    HamonAbandonTabGui abandonTrainingTab;
+    HamonTabGui selectedTab;
+    private Set<HamonTabGui> tabsWithSkillRequirements = new HashSet<>();
     boolean isTeacherNearby = false;
-    Set<HamonSkill> teacherSkills = EnumSet.noneOf(HamonSkill.class);
+    @Nullable Collection<HamonSkill> teacherSkills = Collections.emptyList();
     
     HamonData hamon;
     
@@ -51,22 +59,30 @@ public class HamonScreen extends Screen {
         hamon = INonStandPower.getPlayerNonStandPower(minecraft.player)
                 .getTypeSpecificData(ModPowers.HAMON.get()).get();
         int i = 0;
-        tabs = new HamonTabGui[] {
+        selectableTabs = new HamonTabGui[] {
                 new HamonStatsTabGui(minecraft, this, i++, "hamon.stats.tab"),
-                new HamonGeneralSkillsTabGui(minecraft, this, i++, "hamon.strength_skills.tab", HamonSkill.HamonStat.STRENGTH),
-                new HamonGeneralSkillsTabGui(minecraft, this, i++, "hamon.control_skills.tab", HamonSkill.HamonStat.CONTROL),
+                new HamonGeneralSkillsTabGui(minecraft, this, i++, "hamon.strength_skills.tab", HamonStat.STRENGTH),
+                new HamonGeneralSkillsTabGui(minecraft, this, i++, "hamon.control_skills.tab", HamonStat.CONTROL),
                 new HamonTechniqueTabGui(minecraft, this, i++, "hamon.techniques.tab")
         };
-        for (HamonTabGui tab : tabs) {
+        for (HamonTabGui tab : selectableTabs) {
             tab.addButtons();
+            tab.updateButton();
         }
-        selectTab(tabs[0]);
+        abandonTrainingTab = new HamonAbandonTabGui(minecraft, this, i++, "hamon.abandon.tab");
+        abandonTrainingTab.addButtons();
+        selectTab(selectableTabs[0]);
         PacketManager.sendToServer(new ClHamonWindowOpenedPacket());
     }
     
     @Override
     public <T extends Widget> T addButton(T button) {
         return super.addButton(button);
+    }
+
+    public void removeButton(Widget button) {
+        buttons.remove(button);
+        children.remove(button);
     }
 
     @Override
@@ -79,14 +95,13 @@ public class HamonScreen extends Screen {
         setDragging(false);
         int x = windowPosX();
         int y = windowPosY();
-        for (HamonTabGui hamonTabGui : tabs) {
+        for (HamonTabGui hamonTabGui : selectableTabs) {
             if (hamonTabGui.isMouseOnTabIcon(x, y, mouseX, mouseY)) {
                 selectTab(hamonTabGui);
                 return true;
             }
         }
-        if (selectedTab != null && mouseX > x + WINDOW_THIN_BORDER && mouseX < x + WINDOW_WIDTH - WINDOW_THIN_BORDER 
-                && mouseY > y + WINDOW_UPPER_BORDER && mouseY < y + WINDOW_HEIGHT - WINDOW_THIN_BORDER) {
+        if (selectedTab != null && mouseInsideWindow(mouseX, mouseY)) {
             if (selectedTab.mouseClicked(mouseX - x - WINDOW_THIN_BORDER, mouseY - y - WINDOW_UPPER_BORDER, mouseButton)) {
                 return true;
             }
@@ -123,12 +138,29 @@ public class HamonScreen extends Screen {
         }
         return super.mouseDragged(xPos, yPos, mouseButton, xMovement, yMovement);
     }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scroll) {
+        if (mouseInsideWindow(mouseX, mouseY) && selectedTab != null) {
+            selectedTab.mouseScrolled(mouseX - windowPosX() - WINDOW_THIN_BORDER, mouseY - windowPosY() - WINDOW_UPPER_BORDER, scroll);
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, scroll);
+    }
     
-    private void selectTab(HamonTabGui tab) {
+    boolean mouseInsideWindow(double mouseX, double mouseY) {
+        int x = windowPosX();
+        int y = windowPosY();
+        return mouseX > x + WINDOW_THIN_BORDER && mouseX < x + WINDOW_WIDTH - WINDOW_THIN_BORDER 
+                && mouseY > y + WINDOW_UPPER_BORDER && mouseY < y + WINDOW_HEIGHT - WINDOW_THIN_BORDER;
+    }
+    
+    void selectTab(HamonTabGui tab) {
         selectedTab = tab;
-        for (HamonTabGui hamonTabGui : tabs) {
+        for (HamonTabGui hamonTabGui : selectableTabs) {
             hamonTabGui.getButtons().forEach(button -> button.active = hamonTabGui == tab);
         }
+        abandonTrainingTab.getButtons().forEach(button -> button.active = abandonTrainingTab == tab);
         tab.updateTab();
     }
     
@@ -147,12 +179,17 @@ public class HamonScreen extends Screen {
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
         int x = windowPosX();
         int y = windowPosY();
+        tabsWithSkillRequirements.clear();
         renderBackground(matrixStack);
-        renderInside(matrixStack, mouseX, mouseY, x, y);
+        renderInside(matrixStack, mouseX, mouseY, x, y, partialTick);
         renderWindow(matrixStack, x, y);
         renderToolTips(matrixStack, mouseX, mouseY, x, y);
-        if (selectedTab != null) {
-            selectedTab.renderButtons(matrixStack, mouseX, mouseY, partialTick);
+    }
+
+    @Override
+    public void tick() {
+        for (HamonTabGui tabGui : selectableTabs) {
+            tabGui.tick();
         }
     }
     
@@ -163,31 +200,31 @@ public class HamonScreen extends Screen {
     int windowPosY() {
         return (height - WINDOW_HEIGHT) / 2;
     }
+    
+    void addSkillRequirementTab(HamonTabGui tab) {
+        tabsWithSkillRequirements.add(tab);
+    }
 
-    @SuppressWarnings("deprecation")
-    private void renderInside(MatrixStack matrixStack, int mouseX, int mouseY, int windowX, int windowY) {
+    private void renderInside(MatrixStack matrixStack, int mouseX, int mouseY, int windowX, int windowY, float partialTick) {
         if (selectedTab != null) {
-            RenderSystem.pushMatrix();
-            RenderSystem.translatef((float)(windowX + WINDOW_THIN_BORDER), (float)(windowY + WINDOW_UPPER_BORDER), 0.0F);
-            selectedTab.drawContents(matrixStack);
-            RenderSystem.popMatrix();
+            selectedTab.drawContents(this, matrixStack, mouseX, mouseY, partialTick, 
+                    (float)(windowX + WINDOW_THIN_BORDER), (float)(windowY + WINDOW_UPPER_BORDER));
             RenderSystem.depthFunc(515);
             RenderSystem.disableDepthTest();
         }
     }
 
-    @SuppressWarnings("deprecation")
     public void renderWindow(MatrixStack matrixStack, int windowX, int windowY) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.enableBlend();
         minecraft.getTextureManager().bind(WINDOW);
         blit(matrixStack, windowX, windowY, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-        for (HamonTabGui tabGui : tabs) {
-            tabGui.drawTab(matrixStack, windowX, windowY, tabGui == selectedTab);
+        for (HamonTabGui tabGui : selectableTabs) {
+            tabGui.drawTab(matrixStack, windowX, windowY, tabGui == selectedTab, tabsWithSkillRequirements.contains(tabGui));
         }
         RenderSystem.enableRescaleNormal();
         RenderSystem.defaultBlendFunc();
-        for (HamonTabGui tabGui : tabs) {
+        for (HamonTabGui tabGui : selectableTabs) {
             tabGui.drawIcon(matrixStack, windowX, windowY, itemRenderer);
         }
         RenderSystem.disableBlend();
@@ -196,10 +233,9 @@ public class HamonScreen extends Screen {
         }
     }
 
-    @SuppressWarnings("deprecation")
     private void renderToolTips(MatrixStack matrixStack, int mouseX, int mouseY, int windowX, int windowY) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        if (selectedTab != null) {
+        if (selectedTab != null && mouseInsideWindow(mouseX, mouseY)) {
             RenderSystem.pushMatrix();
             RenderSystem.enableDepthTest();
             RenderSystem.translatef((float)(windowX + WINDOW_THIN_BORDER), (float)(windowY + WINDOW_UPPER_BORDER), 400.0F);
@@ -207,7 +243,7 @@ public class HamonScreen extends Screen {
             RenderSystem.disableDepthTest();
             RenderSystem.popMatrix();
         }
-        for (HamonTabGui hamonTabGui : tabs) {
+        for (HamonTabGui hamonTabGui : selectableTabs) {
             if (hamonTabGui.isMouseOnTabIcon(windowX, windowY, (double)mouseX, (double)mouseY)) {
                 List<IReorderingProcessor> tooltipLines = new ArrayList<IReorderingProcessor>();
                 tooltipLines.add(hamonTabGui.getTitle().getVisualOrderText());
@@ -219,7 +255,7 @@ public class HamonScreen extends Screen {
     }
 
     @SuppressWarnings("resource")
-    public static void setTeacherSkills(Set<HamonSkill> skills) {
+    public static void setTeacherSkills(Collection<HamonSkill> skills) {
         Screen screen = Minecraft.getInstance().screen;
         if (screen instanceof HamonScreen) {
             HamonScreen hamonScreen = ((HamonScreen) screen);
@@ -227,13 +263,13 @@ public class HamonScreen extends Screen {
             hamonScreen.teacherSkills = skills;
         }
     }
-    
+
     @SuppressWarnings("resource")
     public static void updateTabs() {
         Screen screen = Minecraft.getInstance().screen;
         if (screen instanceof HamonScreen) {
             HamonScreen hamonScreen = ((HamonScreen) screen);
-            for (HamonTabGui tab : hamonScreen.tabs) {
+            for (HamonTabGui tab : hamonScreen.selectableTabs) {
                 tab.updateTab();
             }
         }

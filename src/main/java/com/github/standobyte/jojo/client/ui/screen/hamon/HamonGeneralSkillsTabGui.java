@@ -17,28 +17,58 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class HamonGeneralSkillsTabGui extends HamonSkillsTabGui {
-    private static final HamonSkill[][] SKILLS_STRENGTH = {
-            {HamonSkill.OVERDRIVE, HamonSkill.SENDO_OVERDRIVE, HamonSkill.TURQUOISE_BLUE_OVERDRIVE, HamonSkill.SUNLIGHT_YELLOW_OVERDRIVE},
-            {HamonSkill.PLANT_INFUSION, HamonSkill.THROWABLES_INFUSION, HamonSkill.ANIMAL_INFUSION, HamonSkill.ARROW_INFUSION},
-            {HamonSkill.ZOOM_PUNCH, HamonSkill.JUMP, HamonSkill.SPEED_BOOST, HamonSkill.AFTERIMAGES}
-    };
+    private static final HamonSkill[][] SKILLS_STRENGTH;
     private static final ITextComponent[] NAMES_STRENGTH = {
             new TranslationTextComponent("hamon.skills.overdrive"),
             new TranslationTextComponent("hamon.skills.infusion"),
             new TranslationTextComponent("hamon.skills.flexibility")
     };
-    private static final HamonSkill[][] SKILLS_CONTROL = {
-            {HamonSkill.HEALING, HamonSkill.PLANTS_GROWTH, HamonSkill.EXPEL_VENOM, HamonSkill.HEALING_TOUCH},
-            {HamonSkill.WALL_CLIMBING, HamonSkill.DETECTOR, HamonSkill.LIFE_MAGNETISM, HamonSkill.HAMON_SPREAD},
-            {HamonSkill.REPELLING_OVERDRIVE, HamonSkill.PROJECTILE_SHIELD, HamonSkill.WATER_WALKING, HamonSkill.LAVA_WALKING}
-    };
+    private static final HamonSkill[][] SKILLS_CONTROL;
     private static final ITextComponent[] NAMES_CONTROL = {
             new TranslationTextComponent("hamon.skills.life"),
             new TranslationTextComponent("hamon.skills.attractant"),
             new TranslationTextComponent("hamon.skills.repellent")
     };
+    static {
+        SKILLS_STRENGTH = new HamonSkill[][] {
+            {
+                HamonSkill.OVERDRIVE, 
+                HamonSkill.SENDO_OVERDRIVE, 
+                HamonSkill.TURQUOISE_BLUE_OVERDRIVE, 
+                HamonSkill.SUNLIGHT_YELLOW_OVERDRIVE},
+            {
+                HamonSkill.THROWABLES_INFUSION, 
+                HamonSkill.PLANT_INFUSION, 
+                HamonSkill.ARROW_INFUSION, 
+                HamonSkill.ANIMAL_INFUSION},
+            {
+                HamonSkill.ZOOM_PUNCH, 
+                HamonSkill.JUMP, 
+                HamonSkill.SPEED_BOOST, 
+                HamonSkill.AFTERIMAGES}
+        };
+        SKILLS_CONTROL = new HamonSkill[][] {
+            {
+                HamonSkill.HEALING, 
+                HamonSkill.PLANTS_GROWTH, 
+                HamonSkill.EXPEL_VENOM, 
+                HamonSkill.HEALING_TOUCH},
+            {
+                HamonSkill.WALL_CLIMBING, 
+                HamonSkill.DETECTOR, 
+                HamonSkill.LIFE_MAGNETISM, 
+                HamonSkill.HAMON_SPREAD},
+            {
+                HamonSkill.WATER_WALKING, 
+                HamonSkill.PROJECTILE_SHIELD, 
+                HamonSkill.LAVA_WALKING, 
+                HamonSkill.REPELLING_OVERDRIVE}
+        };
+    }
+    
     private static final int[] X_OFFSET = {16, 3, 29, 16};
-    private static final int[] Y_OFFSET = {10, 40, 40, 72};
+    private static final int[] Y_OFFSET = {18, 44, 44, 72};
+    private int[][] skillTreeNamePos;
 
     private final HamonStat skillsType;
     private List<IReorderingProcessor> nextPointHintLines;
@@ -55,17 +85,20 @@ public class HamonGeneralSkillsTabGui extends HamonSkillsTabGui {
     }
     
     private void fillSkillLines() {
+        skills.clear();
         HamonSkill[][] skillsOnTab = skillsType == HamonStat.STRENGTH ? SKILLS_STRENGTH : SKILLS_CONTROL;
         skillTreeNames = skillsType == HamonStat.STRENGTH ? NAMES_STRENGTH : NAMES_CONTROL;
-        skillArrays = new HamonSkillGuiElement[3][4];
+        skillTreeNamePos = new int[3][2];
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 4; j++) {
                 HamonSkill skill = skillsOnTab[i][j];
                 int x = 9 + i * 68 + X_OFFSET[j];
                 int y = HamonScreen.WINDOW_HEIGHT - 131 + Y_OFFSET[j];
-                skillArrays[i][j] = new HamonSkillGuiElement
-                        (skill, j == 3, screen.hamon.canLearnSkill(skill, screen.teacherSkills), screen.hamon.isSkillLearned(skill), x, y, minecraft.font);
+                skills.put(skill, new HamonSkillElementLearnable(skill, 
+                        screen.hamon, minecraft.player, screen.teacherSkills, j == 3, x, y));
             }
+            skillTreeNamePos[i][0] = 9 + i * 68 + X_OFFSET[0] + 13;
+            skillTreeNamePos[i][1] = HamonScreen.WINDOW_HEIGHT - 131 + Y_OFFSET[0] - 18;
         }
     }
     
@@ -75,14 +108,19 @@ public class HamonGeneralSkillsTabGui extends HamonSkillsTabGui {
     }
 
     @Override
-    void drawTab(MatrixStack matrixStack, int windowX, int windowY, boolean isSelected) {
-        super.drawTab(matrixStack, windowX, windowY, isSelected);
+    void drawTab(MatrixStack matrixStack, int windowX, int windowY, boolean isSelected, boolean red) {
+        super.drawTab(matrixStack, windowX, windowY, isSelected, red);
+        
+        minecraft.getTextureManager().bind(HamonSkillsTabGui.HAMON_SKILLS);
+        int texY = skillsType == HamonStat.STRENGTH ? 0 : 64;
+        blit(matrixStack, windowX - 32 + 13, windowY + getTabY() + 6, 16, 16, 128, texY, 64, 64, 256, 256);
+        
         int points = screen.hamon.getSkillPoints(skillsType);
-            if (points > 0) {
-                minecraft.getTextureManager().bind(HamonScreen.WINDOW);
-                int textureX = screen.isTeacherNearby ? 248 : 239;
-                blit(matrixStack, windowX - 32 + 7, windowY + getTabY(tabIndex) + 3, textureX, 156, 8, 8);
-            }
+        if (points > 0) {
+            minecraft.getTextureManager().bind(HamonScreen.WINDOW);
+            int textureX = screen.isTeacherNearby ? 248 : 239;
+            blit(matrixStack, windowX - 32 + 7, windowY + getTabY() + 3, textureX, 206, 8, 8);
+        }
     }
 
     @Override
@@ -97,7 +135,9 @@ public class HamonGeneralSkillsTabGui extends HamonSkillsTabGui {
         for (int i = 0; i < 3; i++) {
             List<IReorderingProcessor> nameLines = minecraft.font.split(skillTreeNames[i], 75);
             for (int line = 0; line < nameLines.size(); line++) {
-                ClientUtil.drawCenteredString(matrixStack, minecraft.font, nameLines.get(line), skillArrays[i][0].x + 13 + intScrollX, skillArrays[i][0].y - 18 + line * 9 + intScrollY, 0xFFFFFF);
+                ClientUtil.drawCenteredString(matrixStack, minecraft.font, nameLines.get(line), 
+                        skillTreeNamePos[i][0] + intScrollX, 
+                        skillTreeNamePos[i][1] + line * 9 + intScrollY, 0xFFFFFF);
             }
         }
     }
@@ -105,7 +145,7 @@ public class HamonGeneralSkillsTabGui extends HamonSkillsTabGui {
     @Override
     protected void drawDesc(MatrixStack matrixStack) {
         int points = screen.hamon.getSkillPoints(skillsType);
-        if (selectedSkill != null) {
+        if (getSelectedSkill() != null) {
             drawSkillDesc(matrixStack);
         }
         else {
@@ -122,7 +162,7 @@ public class HamonGeneralSkillsTabGui extends HamonSkillsTabGui {
     @Override
     void drawToolTips(MatrixStack matrixStack, int mouseX, int mouseY, int windowPosX, int windowPosY) {
         super.drawToolTips(matrixStack, mouseX, mouseY, windowPosX, windowPosY);
-        if (selectedSkill == null) {
+        if (getSelectedSkill() == null) {
             if (mouseX >= 193 && mouseX <= 205 && mouseY >= 4 && mouseY <= 12) {
                 screen.renderTooltip(matrixStack, nextPointHintLines, mouseX, mouseY);
             }

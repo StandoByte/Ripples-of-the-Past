@@ -26,7 +26,7 @@ public class HamonSkillSet {
     }
     
     public boolean parentsLearned(HamonSkill skill) {
-       return skill.getParent1() == null || (wrappedSkillSet.contains(skill.getParent1()) && (skill.getParent2() == null || wrappedSkillSet.contains(skill.getParent2())));
+        return skill.getRequiredSkills().stream().allMatch(parent -> wrappedSkillSet.contains(parent));
     }
     
     public void addSkill(HamonSkill skill) {
@@ -96,7 +96,8 @@ public class HamonSkillSet {
     public int getSpentControlPoints() {
         return spentControlPoints;
     }
-    
+
+    public static final int MAX_TECHNIQUE_SKILLS = 3;
     public static final int TECHNIQUE_MINIMAL_STAT_LVL = 20;
     public int getTechniqueLevelReq() {
         return techniqueLevelReq(techniqueSkillsLearned);

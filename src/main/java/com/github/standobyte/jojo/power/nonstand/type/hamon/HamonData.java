@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.power.nonstand.type.hamon;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -693,10 +694,6 @@ public class HamonData extends TypeSpecificData {
         return Collections.unmodifiableSet(hamonSkills.wrappedSkillSet);
     }
     
-    public HamonSkill.Technique getTechnique() {
-        return hamonSkills.technique;
-    }
-    
     public boolean isSkillLearned(HamonSkill skill) {
         return hamonSkills.isSkillLearned(skill);
     }
@@ -705,18 +702,20 @@ public class HamonData extends TypeSpecificData {
         return canLearnSkill(user, skill, false, null);
     }
     
-    public ActionConditionResult canLearnSkill(LivingEntity user, HamonSkill skill, boolean isTeacherNearby, @Nullable Set<HamonSkill> teachersSkills) {
+    public ActionConditionResult canLearnSkill(LivingEntity user, HamonSkill skill, boolean isTeacherNearby, @Nullable Collection<HamonSkill> teachersSkills) {
         if (!hamonSkills.parentsLearned(skill)) {
             return ActionConditionResult.createNegative(new TranslationTextComponent("hamon.closed.parents"));
         }
         if (!haveSkillPoints(skill)) {
             return ActionConditionResult.createNegative(new TranslationTextComponent("hamon.closed.points"));
         }
-        if (!techniqueSkillRequirement(skill)) {
-            return ActionConditionResult.createNegative(new TranslationTextComponent("hamon.closed.technique.locked"));
-        }
-        if (!rightTechnique(skill)) {
-            return ActionConditionResult.createNegative(new TranslationTextComponent("hamon.closed.technique.bug"));
+        if (skill.getTechnique() != null) {
+            if (!canLearnNewTechniqueSkill()) {
+                return ActionConditionResult.createNegative(new TranslationTextComponent("hamon.closed.technique.locked"));
+            }
+            if (!rightTechnique(skill)) {
+                return ActionConditionResult.createNegative(new TranslationTextComponent("hamon.closed.technique.bug"));
+            }
         }
         if (teachersSkills != null && skill.requiresTeacher()) {
             if (!isTeacherNearby) {
@@ -732,25 +731,25 @@ public class HamonData extends TypeSpecificData {
     private boolean haveSkillPoints(HamonSkill skill) {
         return skill.getStat() == null || getSkillPoints(skill.getStat()) > 0;
     }
-
-    private boolean techniqueSkillRequirement(HamonSkill skill) {
-        if (!(skill.getTechnique() == null)) {
-            return haveTechniqueLevel();
-        }
-        return true;
-    }
-
-    public boolean haveTechniqueLevel() {
-        return hamonSkills.techniqueSkillsLearned < 3 && 
-                getHamonStrengthLevel() >= hamonSkills.getTechniqueLevelReq()
-                && getHamonControlLevel() >= hamonSkills.getTechniqueLevelReq();
+    
+    
+    
+    public HamonSkill.Technique getTechnique() {
+        return hamonSkills.technique;
     }
     
-    public boolean techniquesUnlocked() {
-        return getHamonStrengthLevel() >= HamonSkillSet.TECHNIQUE_MINIMAL_STAT_LVL
-                && getHamonControlLevel() >= HamonSkillSet.TECHNIQUE_MINIMAL_STAT_LVL;
+    public boolean hasTechniqueLevel(int techniqueSkillSlot) {
+        if (techniqueSkillSlot >= HamonSkillSet.MAX_TECHNIQUE_SKILLS) {
+            return false;
+        }
+        return getHamonStrengthLevel() >= HamonSkillSet.techniqueLevelReq(techniqueSkillSlot)
+                && getHamonControlLevel() >= HamonSkillSet.techniqueLevelReq(techniqueSkillSlot);
     }
-
+    
+    public boolean canLearnNewTechniqueSkill() {
+        return hasTechniqueLevel(hamonSkills.techniqueSkillsLearned);
+    }
+    
     private boolean rightTechnique(HamonSkill skill) {
         return skill.getTechnique() == null || hamonSkills.technique == null || skill.getTechnique() == hamonSkills.technique;
     }

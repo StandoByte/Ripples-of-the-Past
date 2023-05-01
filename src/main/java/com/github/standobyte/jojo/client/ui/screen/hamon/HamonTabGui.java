@@ -9,7 +9,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.IReorderingProcessor;
@@ -18,6 +17,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
+@SuppressWarnings("deprecation")
 public abstract class HamonTabGui extends AbstractGui {
     protected static final ResourceLocation ADV_WIDGETS = new ResourceLocation("textures/gui/advancements/widgets.png");
     protected final Minecraft minecraft;
@@ -31,7 +31,6 @@ public abstract class HamonTabGui extends AbstractGui {
     protected double scrollY;
     protected int intScrollX;
     protected int intScrollY;
-    protected int buttonY = -1;
     private final int minX = 0;
     private final int minY = 0;
     protected int maxX;
@@ -57,12 +56,18 @@ public abstract class HamonTabGui extends AbstractGui {
        return title;
     }
 
-    void drawTab(MatrixStack matrixStack, int windowX, int windowY, boolean isSelected) {
+    void drawTab(MatrixStack matrixStack, int windowX, int windowY, boolean isSelected, boolean red) {
+        int x = windowX - 32 + 4;
+        int y = windowY + getTabY();
         int textureX = tabIndex > 0 ? 32 : 0;
         int textureY = 64;
         textureY += (isSelected) ? 28 : 0;
         minecraft.getTextureManager().bind(HamonScreen.TABS);
-        blit(matrixStack, windowX - 32 + 4, windowY + getTabY(tabIndex), textureX, textureY, 32, 28);
+        blit(matrixStack, x, y, textureX, textureY, 32, 28);
+        if (!isSelected && red) {
+            minecraft.getTextureManager().bind(HamonScreen.WINDOW);
+            blit(matrixStack, x + 3, y, 230, 0, 26, 28);
+        }
     }
     
     List<IReorderingProcessor> additionalTabNameTooltipInfo() {
@@ -71,18 +76,17 @@ public abstract class HamonTabGui extends AbstractGui {
 
     boolean isMouseOnTabIcon(int windowX, int windowY, double mouseX, double mouseY) {
         int i = windowX - 32 + 4;
-        int j = windowY + getTabY(tabIndex);
+        int j = windowY + getTabY();
         return mouseX > (double)i && mouseX < (double)(i + 28) && mouseY > (double)j && mouseY < (double)(j + 32);
     }
 
     void drawIcon(MatrixStack matrixStack, int windowX, int windowY, ItemRenderer itemRenderer) {} // TODO tab icons
     
-    protected int getTabY(int index) {
-        return 28 * index;
+    protected int getTabY() {
+        return 28 * tabIndex;
     }
     
-    @SuppressWarnings("deprecation")
-    void drawContents(MatrixStack matrixStack) {
+    void drawContents(HamonScreen screen, MatrixStack matrixStack, int mouseX, int mouseY, float partialTick, float xOffset, float yOffset) {
         if (!leftUpperCorner) {
             scrollX = 0;
             scrollY = 0;
@@ -91,6 +95,8 @@ public abstract class HamonTabGui extends AbstractGui {
         RenderSystem.pushMatrix();
         RenderSystem.enableDepthTest();
         RenderSystem.translatef(0.0F, 0.0F, 950.0F);
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(xOffset, yOffset, 0);
         RenderSystem.colorMask(false, false, false, false);
         fill(matrixStack, 4680, 2260, -4680, -2260, -16777216);
         RenderSystem.colorMask(true, true, true, true);
@@ -113,14 +119,30 @@ public abstract class HamonTabGui extends AbstractGui {
                 blit(matrixStack, k + 16 * i1, l + 16 * j1, 0.0F, 0.0F, 16, 16, 16, 16);
             }
         }
-        
+
+        drawOnBackground(screen, matrixStack, mouseX - (int) xOffset, mouseY - (int) yOffset);
         RenderSystem.disableRescaleNormal();
         RenderSystem.disableDepthTest();
         drawText(matrixStack);
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(-xOffset, -yOffset, 0);
+        updateButtons(matrixStack, mouseX, mouseY);
+        drawButtonNames(matrixStack);
+        RenderSystem.popMatrix();
+        
         RenderSystem.enableDepthTest();
         RenderSystem.enableRescaleNormal();
-        drawActualContents(matrixStack);
+        drawActualContents(screen, matrixStack, mouseX - (int) xOffset, mouseY - (int) yOffset);
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(-xOffset, -yOffset, 0);
+        renderButtons(matrixStack, mouseX, mouseY, partialTick);
+        RenderSystem.popMatrix();
+
+        RenderSystem.popMatrix();
         
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(xOffset, yOffset, 0);
+        RenderSystem.enableDepthTest();
         RenderSystem.depthFunc(518);
         RenderSystem.translatef(0.0F, 0.0F, -950.0F);
         RenderSystem.colorMask(false, false, false, false);
@@ -129,15 +151,21 @@ public abstract class HamonTabGui extends AbstractGui {
         RenderSystem.translatef(0.0F, 0.0F, 950.0F);
         RenderSystem.depthFunc(515);
         RenderSystem.popMatrix();
+        
+        RenderSystem.popMatrix();
     }
     
     abstract void addButtons();
     
-    abstract List<Widget> getButtons();
+    protected void updateButton() {}
+    
+    abstract List<HamonScreenButton> getButtons();
 
-    protected abstract void drawActualContents(MatrixStack matrixStack);
+    protected void drawOnBackground(HamonScreen screen, MatrixStack matrixStack, int mouseX, int mouseY) {}
 
     protected abstract void drawText(MatrixStack matrixStack);
+
+    protected abstract void drawActualContents(HamonScreen screen, MatrixStack matrixStack, int mouseX, int mouseY);
     
     protected void drawDesc(MatrixStack matrixStack) {
         for (int i = 0; i < descLines.size(); i++) {
@@ -145,13 +173,37 @@ public abstract class HamonTabGui extends AbstractGui {
         }
     }
     
-    abstract void renderButtons(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick);
+    private void updateButtons(MatrixStack matrixStack, int mouseX, int mouseY) {
+        boolean mouseInWindow = screen.mouseInsideWindow(mouseX, mouseY);
+        for (HamonScreenButton button : getButtons()) {
+            button.updateY(intScrollY);
+            button.setMouseInWindow(mouseInWindow);
+        }
+    }
+    
+    private void drawButtonNames(MatrixStack matrixStack) {
+        for (HamonScreenButton button : getButtons()) {
+            if (button.visible) {
+                button.drawName(matrixStack);
+            }
+        }
+    }
+    
+    private void renderButtons(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
+        for (HamonScreenButton button : getButtons()) {
+            button.render(matrixStack, mouseX, mouseY, partialTick);
+        }
+    }
     
     abstract boolean mouseClicked(double mouseX, double mouseY, int mouseButton);
     
     abstract boolean mouseReleased(double mouseX, double mouseY, int mouseButton);
 
     void drawToolTips(MatrixStack matrixStack, int mouseX, int mouseY, int windowPosX, int windowPosY) {}
+
+    void mouseScrolled(double mouseX, double mouseY, double scroll) {
+        scroll(0, scroll * 16);
+    }
 
     void scroll(double xMovement, double yMovement) {
         if (maxX - minX > HamonScreen.WINDOW_WIDTH - 8) {
@@ -163,4 +215,6 @@ public abstract class HamonTabGui extends AbstractGui {
     }
     
     abstract void updateTab();
+    
+    void tick() {}
 }
