@@ -22,6 +22,7 @@ import com.github.standobyte.jojo.client.render.world.TimeStopWeatherHandler;
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
+import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
@@ -478,6 +479,13 @@ public class ClientEventHandler {
                 if (event.getHand() == Hand.MAIN_HAND && power.isActionOnCooldown(ModHamonActions.HAMON_ZOOM_PUNCH.get())) {
                     event.setCanceled(true);
                 }
+                else {
+                    power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
+                        if (hamon.isMeditating()) {
+                            event.setCanceled(true);
+                        }
+                    });
+                }
             });
         }
     }
@@ -522,13 +530,29 @@ public class ClientEventHandler {
             if (title instanceof TranslationTextComponent && ((TranslationTextComponent) title).getKey().endsWith(".hardcore")) {
                 return;
             }
-            int x = event.getGui().width - 5 - 
-                    (int) ((event.getGui().width - 10) * Math.min(deathScreenTick + event.getRenderPartialTicks(), 20F) / 20F);
-            int y = event.getGui().height - 29;
-            mc.textureManager.bind(ClientUtil.ADDITIONAL_UI);
-            event.getGui().blit(event.getMatrixStack(), x, y, 0, 231, 130, 25);
-            AbstractGui.drawCenteredString(event.getMatrixStack(), mc.font, new TranslationTextComponent("jojo.to_be_continued"), x + 61, y + 8, 0x525544);
+            renderToBeContinuedArrow(event.getMatrixStack(), event.getGui(), event.getGui().width, event.getGui().height, event.getRenderPartialTicks());
         }
+
+        else if (event.getGui() instanceof IngameMenuScreen && ClientReflection.showsPauseMenu((IngameMenuScreen) event.getGui())) {
+            float alpha = JojoModConfig.CLIENT.standStatsTranslucency.get().floatValue();
+            if (alpha <= 0) return;
+            int xButtonsRightEdge = event.getGui().width / 2 + 102;
+            int windowWidth = event.getGui().width;
+            int windowHeight = event.getGui().height;
+
+            if (windowWidth - xButtonsRightEdge >= 167 && windowHeight > 204) {
+                StandStatsRenderer.renderStandStats(event.getMatrixStack(), mc, windowWidth - 160, windowHeight - 160, windowWidth, windowHeight,
+                        pauseMenuScreenTick, event.getRenderPartialTicks(), alpha, event.getMouseX(), event.getMouseY(), windowWidth - xButtonsRightEdge - 14);
+            }
+        }
+    }
+
+    private void renderToBeContinuedArrow(MatrixStack matrixStack, AbstractGui ui, int screenWidth, int screenHeight, float partialTick) {
+        int x = screenWidth - 5 - (int) ((screenWidth - 10) * Math.min(deathScreenTick + partialTick, 20F) / 20F);
+        int y = screenHeight - 29;
+        mc.textureManager.bind(ClientUtil.ADDITIONAL_UI);
+        ui.blit(matrixStack, x, y, 0, 231, 130, 25);
+        AbstractGui.drawCenteredString(matrixStack, mc.font, new TranslationTextComponent("jojo.to_be_continued"), x + 61, y + 8, 0x525544);
     }
 
     @SubscribeEvent
