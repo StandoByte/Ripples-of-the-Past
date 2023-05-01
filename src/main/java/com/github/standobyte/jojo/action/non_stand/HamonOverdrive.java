@@ -86,15 +86,10 @@ public class HamonOverdrive extends HamonAction {
                 HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
                 
                 float damage = 0.5F;
-                float knockback = 0;
                 boolean metalSilverOverdrive = metalSilverOverdrive(hamon, user.getMainHandItem());
                 
                 if (metalSilverOverdrive) {
 //                    damage *= 0.75F;
-                }
-                else if (turquoiseBlueOverdrive(hamon, user, targetEntity)) {
-                    damage *= 2F;
-                    knockback = 1F;
                 }
                 float dmgScale = 1;
                 if (user instanceof PlayerEntity) {
@@ -135,9 +130,4 @@ public class HamonOverdrive extends HamonAction {
     private boolean metalSilverOverdrive(HamonData hamon, ItemStack heldItemStack) {
         return hamon.isSkillLearned(HamonSkill.METAL_SILVER_OVERDRIVE) && heldItemStack.getItem() instanceof TieredItem;
     }
-    
-    private boolean turquoiseBlueOverdrive(HamonData hamon, LivingEntity user, LivingEntity target) {
-        return hamon.isSkillLearned(HamonSkill.TURQUOISE_BLUE_OVERDRIVE) && user.isInWater() && target.isInWater();
-    }
-
 }

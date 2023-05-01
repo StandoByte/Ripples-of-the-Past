@@ -22,6 +22,7 @@ import com.github.standobyte.jojo.action.non_stand.HamonSendoOverdrive;
 import com.github.standobyte.jojo.action.non_stand.HamonSpeedBoost;
 import com.github.standobyte.jojo.action.non_stand.HamonSunlightYellowOverdrive;
 import com.github.standobyte.jojo.action.non_stand.HamonTornadoOverdrive;
+import com.github.standobyte.jojo.action.non_stand.HamonTurquoiseBlueOverdrive;
 import com.github.standobyte.jojo.action.non_stand.HamonWallClimbing;
 import com.github.standobyte.jojo.action.non_stand.HamonZoomPunch;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -48,6 +49,10 @@ public class ModHamonActions {
     public static final RegistryObject<HamonAction> HAMON_SENDO_OVERDRIVE = ACTIONS.registerEntry("hamon_sendo_overdrive", 
             () -> new HamonSendoOverdrive(new HamonAction.Builder().energyCost(1000F)
                     .emptyMainHand().swingHand().shout(Technique.JONATHAN, ModSounds.JONATHAN_SENDO_OVERDRIVE)));
+
+    public static final RegistryObject<HamonAction> HAMON_TURQUOISE_BLUE_OVERDRIVE = ACTIONS.registerEntry("hamon_turquoise_blue_overdrive", 
+            () -> new HamonTurquoiseBlueOverdrive(new HamonAction.Builder().energyCost(250F)
+                    .emptyMainHand().swingHand()));
     
     public static final RegistryObject<HamonAction> HAMON_ZOOM_PUNCH = ACTIONS.registerEntry("hamon_zoom_punch", 
             () -> new HamonZoomPunch(new HamonAction.Builder().energyCost(800F).cooldown(14, 0)
@@ -92,6 +97,7 @@ public class ModHamonActions {
                     0xFFFF00, 
                     new HamonAction[] {
                             HAMON_SENDO_OVERDRIVE.get(), 
+                            HAMON_TURQUOISE_BLUE_OVERDRIVE.get(), 
                             HAMON_PLANT_INFUSION.get(), 
                             HAMON_ZOOM_PUNCH.get()}, 
                     new HamonAction[] {

@@ -664,7 +664,7 @@
   "hamonSkill.sendo_overdrive.name": "Sendo Overdrive",
   "hamonSkill.sendo_overdrive.desc": "Applying this attack to a wall creates a wave of Hamon energy, which damages mobs and players in a small area behind the wall.",
   "hamonSkill.turquoise_blue_overdrive.name": "Turquoise Blue Overdrive",
-  "hamonSkill.turquoise_blue_overdrive.desc": "While underwater, the Overdrive attack deals twice as much damage.",
+  "hamonSkill.turquoise_blue_overdrive.desc": "While underwater, the user can transfer a powerful wave of Hamon energy.",
   "hamonSkill.sunlight_yellow_overdrive.name": "Sunlight Yellow Overdrive",
   "hamonSkill.sunlight_yellow_overdrive.desc": "Punching while sneaking close to a target unleashes a more powerful, but costly Sunlight Yellow Overdrive.",
   "hamonSkill.plant_infusion.name": "Plants Infusion",
@@ -751,6 +751,7 @@
   
   "non_stand.jojo.hamon": "Hamon",
   "action.jojo.hamon_sendo_overdrive": "Sendo Overdrive",
+  "action.jojo.hamon_turquoise_blue_overdrive": "Turquoise Blue Overdrive",
   "action.jojo.hamon_plant_infusion": "Plant Infusion",
   "action.jojo.hamon_organism_infusion": "Living Organism Infusion",
   "action.jojo.hamon_zoom_punch": "Zoom Punch",

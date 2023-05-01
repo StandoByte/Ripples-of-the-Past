@@ -105,7 +105,12 @@ public class HamonData extends TypeSpecificData {
     }
     
     public float tickEnergy() {
-        return power.getEnergy() + (1F + getHamonControlLevel() * 0.033F) * (1F + (int) getBreathingLevel() * 0.08F);
+        float energyGain = 0;
+        LivingEntity user = power.getUser();
+        if (user.getAirSupply() >= user.getMaxAirSupply()) {
+            energyGain = (1F + getHamonControlLevel() * 0.033F) * (1F + (int) getBreathingLevel() * 0.08F);
+        }
+        return power.getEnergy() + energyGain;
     }
 
     public float getMaxEnergy() {

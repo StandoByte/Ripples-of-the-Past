@@ -30,7 +30,7 @@ public enum HamonSkill {
             OVERDRIVE),
     TURQUOISE_BLUE_OVERDRIVE("turquoise_blue_overdrive", 
             HamonStat.STRENGTH, null, 
-            RewardType.PASSIVE, null,
+            RewardType.ATTACK, ModHamonActions.HAMON_TURQUOISE_BLUE_OVERDRIVE,
             OVERDRIVE),
     SUNLIGHT_YELLOW_OVERDRIVE("sunlight_yellow_overdrive", 
             HamonStat.STRENGTH, null, 

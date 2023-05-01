@@ -7,7 +7,6 @@ public class ProjectileHamonChargeCap {
     public final Entity projectile;
     public float hamonBaseDmg;
     public int maxChargeTicks;
-    public boolean water;
     public float spentEnergy;
     
     public ProjectileHamonChargeCap(Entity projectile) {

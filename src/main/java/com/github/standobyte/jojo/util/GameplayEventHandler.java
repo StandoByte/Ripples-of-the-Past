@@ -1179,13 +1179,11 @@ public class GameplayEventHandler {
                                 HamonSkill requiredSkill;
                                 float hamonBaseDmg = 0;
                                 int maxChargeTicks = 0;
-                                boolean water = false;
                                 if (projectile instanceof AbstractArrowEntity && !alreadyHasHamon(projectile)) {
                                     requiredSkill = HamonSkill.ARROW_INFUSION;
                                     energyCost = 1000;
                                     hamonBaseDmg = 0.25F;
                                     maxChargeTicks = 10;
-                                    water = projectile.getType() == EntityType.ARROW && ((ArrowEntity) projectile).getColor() != -1;
                                 }
                                 else {
                                     EntityType<?> type = projectile.getType();
@@ -1194,10 +1192,9 @@ public class GameplayEventHandler {
                                         energyCost = 600;
                                         hamonBaseDmg = 0.125F;
                                         maxChargeTicks = 25;
-                                        water = true;
                                     }
                                     else if (type == EntityType.EGG) {
-                                        energyCost = 600;
+                                        energyCost = 400;
                                         hamonBaseDmg = 0.125F;
                                         maxChargeTicks = Integer.MAX_VALUE;
                                     }
@@ -1205,13 +1202,11 @@ public class GameplayEventHandler {
                                         energyCost = 800;
                                         hamonBaseDmg = 0.15F; 
                                         maxChargeTicks = 20;
-                                        water = true;
                                     }
                                 }
                                 if (energyCost > -1 && hamon.isSkillLearned(requiredSkill) && power.consumeEnergy(energyCost)) {
                                     projCap.hamonBaseDmg = hamonBaseDmg;
                                     projCap.maxChargeTicks = maxChargeTicks;
-                                    projCap.water = water;
                                     projCap.spentEnergy = energyCost;
                                 }
                             });
@@ -1240,23 +1235,20 @@ public class GameplayEventHandler {
                 if (cap.hamonBaseDmg > 0 && entity instanceof ProjectileEntity) {
                     ProjectileEntity projectile = (ProjectileEntity) entity;
                     addHamonDamageToProjectile((EntityRayTraceResult) rayTrace, 
-                            projectile.getOwner(), projectile, cap.getHamonDamage(), cap.water, cap.spentEnergy);
+                            projectile.getOwner(), projectile, cap.getHamonDamage(), cap.spentEnergy);
                 }
             });
         }
     }
     
     private static void addHamonDamageToProjectile(EntityRayTraceResult rayTrace, Entity thrower, Entity thrown, 
-            float damage, boolean waterProjectile, float spentEnergy) {
+            float damage, float spentEnergy) {
         if (thrown.level.isClientSide() || damage <= 0 || !(thrower instanceof LivingEntity)) {
             return;
         }
         INonStandPower.getNonStandPowerOptional((LivingEntity) thrower).ifPresent(power -> {
             power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                 float dmgCheckWater = damage;
-                if (waterProjectile && hamon.isSkillLearned(HamonSkill.TURQUOISE_BLUE_OVERDRIVE)) {
-                    dmgCheckWater *= 1.25;
-                }
                 DamageUtil.dealHamonDamage(rayTrace.getEntity(), dmgCheckWater, thrown, thrower);
                 hamon.hamonPointsFromAction(HamonStat.STRENGTH, spentEnergy);
             });

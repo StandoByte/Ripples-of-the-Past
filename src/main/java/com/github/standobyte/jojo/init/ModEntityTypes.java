@@ -20,6 +20,7 @@ import com.github.standobyte.jojo.entity.damaging.projectile.HamonBubbleBarrierE
 import com.github.standobyte.jojo.entity.damaging.projectile.HamonBubbleCutterEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.HamonBubbleEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.HamonCutterEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.HamonTurquoiseBlueOverdriveEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRCrossfireHurricaneEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRFireballEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRFlameEntity;
@@ -82,6 +83,10 @@ public class ModEntityTypes {
     public static final RegistryObject<EntityType<SpaceRipperStingyEyesEntity>> SPACE_RIPPER_STINGY_EYES = ENTITIES.register("space_ripper_stingy_eyes", 
             () -> EntityType.Builder.<SpaceRipperStingyEyesEntity>of(SpaceRipperStingyEyesEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().setUpdateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "space_ripper_stingy_eyes").toString()));
+    
+    public static final RegistryObject<EntityType<HamonTurquoiseBlueOverdriveEntity>> TURQUOISE_BLUE_OVERDRIVE = ENTITIES.register("turquoise_blue_overdrive", 
+            () -> EntityType.Builder.<HamonTurquoiseBlueOverdriveEntity>of(HamonTurquoiseBlueOverdriveEntity::new, EntityClassification.MISC).sized(4F, 4F).noSummon().setUpdateInterval(20)
+            .build(new ResourceLocation(JojoMod.MOD_ID, "turquoise_blue_overdrive").toString()));
     
     public static final RegistryObject<EntityType<ZoomPunchEntity>> ZOOM_PUNCH = ENTITIES.register("zoom_punch", 
             () -> EntityType.Builder.<ZoomPunchEntity>of(ZoomPunchEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().setUpdateInterval(20)
