@@ -37,7 +37,7 @@ public class ClHamonResetSkillsButtonPacket {
             ServerPlayerEntity player = ctx.get().getSender();
             INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
                 power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                    hamon.resetHamonSkills(msg.type);
+                    hamon.resetHamonSkills(player, msg.type);
                 });
             });
         }

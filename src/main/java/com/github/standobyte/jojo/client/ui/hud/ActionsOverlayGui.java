@@ -459,7 +459,7 @@ public class ActionsOverlayGui extends AbstractGui {
             ElementPosition position, ActionType actionType, ActionsModeConfig<P> mode, ActionTarget target, float partialTick) {
         P power = mode.getPower();
         if (power.hasPower()) {
-            List<Action<P>> actions = power.getActions(actionType);
+            List<Action<P>> actions = power.getActions(actionType).getEnabled();
             if (actions.size() > 0) {
                 int x = position.x;
                 int y = position.y + getHotbarsYDiff() - 6;
@@ -538,7 +538,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 Action<P> heldAction = power.getHeldAction();
                 int slot = -1;
                 if (heldAction != null) {
-                    slot = power.getActions(actionType).indexOf(
+                    slot = power.getActions(actionType).getEnabled().indexOf(
                             heldAction.isShiftVariation() ? heldAction.getBaseVariation() : heldAction);
                     if (slot > -1) {
                         renderActionHoldProgress(matrixStack, power, heldAction, power.getHeldActionTicks(), partialTick, x + slot * 20, y);
@@ -1308,7 +1308,7 @@ public class ActionsOverlayGui extends AbstractGui {
     private static final IntBinaryOperator DEC = (i, n) -> (i + n + 1) % (n + 1) - 1;
     private <P extends IPower<P, ?>> void scrollAction(ActionsModeConfig<P> mode, ActionType hotbar, boolean backwards) {
         P power = mode.getPower();
-        List<Action<P>> actions = power.getActions(hotbar);
+        List<Action<P>> actions = power.getActions(hotbar).getEnabled();
         if (actions.size() == 0) {
             return;
         }
@@ -1338,7 +1338,7 @@ public class ActionsOverlayGui extends AbstractGui {
                     return Pair.of(action, true);
                 }
                 RayTraceResult target = InputHandler.getInstance().mouseTarget;
-                ClClickActionPacket packet = ClClickActionPacket.withRayTraceResult(power.getPowerClassification(), actionType, shift, index, target);
+                ClClickActionPacket packet = ClClickActionPacket.actionClicked(power.getPowerClassification(), actionType, shift, index, target);
                 if (action.validateInput()) packet.validateInput(action);
                 PacketManager.sendToServer(packet);
                 ActionTarget actionTarget = ActionTarget.fromRayTraceResult(target);
@@ -1348,7 +1348,29 @@ public class ActionsOverlayGui extends AbstractGui {
         }
         return null;
     }
-
+    
+    @Nullable
+    public <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onQuickAccessClick(P power, boolean shift) {
+        if (power != null) {
+            Action<P> action = power.getActionsLayout().getQuickAccessAction();
+            if (action != null) {
+                if (power.getHeldAction() != null && action.getHoldDurationMax(power) > 0) {
+                    return Pair.of(action, true);
+                }
+                RayTraceResult target = InputHandler.getInstance().mouseTarget;
+                ClClickActionPacket packet = ClClickActionPacket.quickAccess(power.getPowerClassification(), shift, target);
+                if (action.validateInput()) packet.validateInput(action);
+                PacketManager.sendToServer(packet);
+                ActionTarget actionTarget = ActionTarget.fromRayTraceResult(target);
+                boolean actionWentOff = power.clickAction(power.getQuickAccessAction(shift), shift, actionTarget);
+                return Pair.of(action, actionWentOff);
+            }
+        }
+        return null;
+    }
+    
+    
+    
     @Nullable
     public Action<?> getSelectedAction(ActionType type) {
         if (currentMode == null) {

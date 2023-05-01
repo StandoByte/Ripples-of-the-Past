@@ -39,6 +39,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     private final int color;
     private final StandAction[] attacks;
     private final StandAction[] abilities;
+    private final StandAction defaultQuickAccess;
     private String translationKey;
     private ResourceLocation iconTexture;
     
@@ -51,12 +52,13 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     private final Map<Integer, List<ItemStack>> resolveLevelItems;
     
     public StandType(int color, ITextComponent partName, 
-            StandAction[] attacks, StandAction[] abilities, 
+            StandAction[] attacks, StandAction[] abilities, StandAction defaultQuickAccess, 
             Class<T> statsClass, T defaultStats, @Nullable StandTypeOptionals additions) {
         this.color = color;
         this.partName = partName;
         this.attacks = attacks;
-        this.abilities = abilities;
+        this.abilities = abilities;;
+        this.defaultQuickAccess = defaultQuickAccess;
         this.statsClass = statsClass;
         this.defaultStats = defaultStats;
         
@@ -115,6 +117,11 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     @Override
     public StandAction[] getAbilities() {
         return abilities;
+    }
+    
+    @Override
+    public StandAction getDefaultQuickAccess() {
+        return defaultQuickAccess;
     }
     
     public boolean usesStamina() {

@@ -84,7 +84,7 @@ import net.minecraftforge.event.entity.living.LivingAttackEvent;
 public class HamonPowerType extends NonStandPowerType<HamonData> {
 
     public HamonPowerType(int color, HamonAction[] startingAttacks, HamonAction[] startingAbilities) {
-        super(color, startingAttacks, startingAbilities, HamonData::new);
+        super(color, startingAttacks, startingAbilities, startingAbilities[0], HamonData::new);
     }
     
     @Override

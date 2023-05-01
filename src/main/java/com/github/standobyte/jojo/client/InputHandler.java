@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.client;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_B;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_BACKSLASH;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_H;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_J;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_K;
@@ -9,6 +10,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_M;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_O;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_UNKNOWN;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_V;
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +24,7 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ui.hud.ActionsOverlayGui;
+import com.github.standobyte.jojo.client.ui.screen.hudlayout.HudLayoutEditingScreen;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.ItemProjectileEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -93,6 +96,8 @@ public class InputHandler {
     public KeyBinding nonStandMode;
     public KeyBinding standMode;
     private KeyBinding scrollMode;
+    public KeyBinding editHotbars;
+    public KeyBinding actionQuickAccess;
     public KeyBinding disableHotbars;
     
     private KeyBinding attackHotbar;
@@ -145,6 +150,8 @@ public class InputHandler {
         
         ClientRegistry.registerKeyBinding(nonStandMode = new KeyBinding(JojoMod.MOD_ID + ".key.non_stand_mode", GLFW_KEY_J, HUD_CATEGORY));
         ClientRegistry.registerKeyBinding(standMode = new KeyBinding(JojoMod.MOD_ID + ".key.stand_mode", GLFW_KEY_K, HUD_CATEGORY));
+        ClientRegistry.registerKeyBinding(editHotbars = new KeyBinding(JojoMod.MOD_ID + ".key.edit_hud", GLFW_KEY_BACKSLASH, HUD_CATEGORY));
+        ClientRegistry.registerKeyBinding(actionQuickAccess = new KeyBinding(JojoMod.MOD_ID + ".key.quick_access", InputMappings.Type.MOUSE, GLFW_MOUSE_BUTTON_MIDDLE, HUD_CATEGORY));
         
         ClientRegistry.registerKeyBinding(attackHotbar = new KeyBinding(JojoMod.MOD_ID + ".key.attack_hotbar", GLFW_KEY_V, HUD_CATEGORY));
         ClientRegistry.registerKeyBinding(abilityHotbar = new KeyBinding(JojoMod.MOD_ID + ".key.ability_hotbar", GLFW_KEY_B, HUD_CATEGORY));
@@ -236,8 +243,7 @@ public class InputHandler {
                     actionsOverlay.scrollAction(ActionType.ABILITY, mc.player.isShiftKeyDown());
                 }
 
-                // otherwise it's not triggered when no block is selected
-                while (mc.options.keyPickItem.consumeClick()) {
+                while (actionQuickAccess.consumeClick()) {
                     handleMouseClickPowerHud(null, ActionKey.QUICK_ACCESS);
                 }
             }
@@ -291,6 +297,10 @@ public class InputHandler {
                 }
             }
             
+            if (editHotbars.consumeClick() && (standPower.hasPower() || nonStandPower.hasPower())) {
+                mc.setScreen(new HudLayoutEditingScreen());
+            }
+            
             if (!mc.options.keyAttack.isDown()) {
                 leftClickBlockDelay = 0;
             }
@@ -323,7 +333,7 @@ public class InputHandler {
         },
         QUICK_ACCESS(null) {
             @Override
-            protected KeyBinding getKey(Minecraft mc, InputHandler modInput) { return mc.options.keyPickItem; }
+            protected KeyBinding getKey(Minecraft mc, InputHandler modInput) { return modInput.actionQuickAccess; }
         };
         
         private final ActionType hotbar;
@@ -416,7 +426,7 @@ public class InputHandler {
         boolean actionClick = false;
         if (power != null) {
             if (key == ActionKey.QUICK_ACCESS) {
-                actionClick = actionsOverlay.isActive() && !power.getAbilities().isEmpty();
+                actionClick = power.getActionsLayout().getQuickAccessAction() != null;
             }
             else {
                 actionClick = !actionsOverlay.noActionSelected(actionType);
@@ -442,7 +452,7 @@ public class InputHandler {
         
         Pair<Action<P>, Boolean> click = null;
         if (key == ActionKey.QUICK_ACCESS) {
-            click = actionsOverlay.onClick(power, ActionType.ABILITY, shift, 0);
+            click = actionsOverlay.onQuickAccessClick(power, shift);
         }
         else if (!(leftClickedBlock && leftClickBlockDelay > 0)) {
             click = actionsOverlay.onClick(power, key.getHotbar(), shift);

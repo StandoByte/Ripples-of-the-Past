@@ -663,6 +663,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             }
             continuousEffects.syncWithUserOnly(player);
         });
+        syncLayoutWithUser();
     }
     
     @Override

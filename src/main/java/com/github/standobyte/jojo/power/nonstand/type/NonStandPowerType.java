@@ -19,14 +19,18 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
     private final int color;
     protected final Action<INonStandPower>[] attacks;
     protected final Action<INonStandPower>[] abilities;
-    private final Supplier<T> dataFactory;
+    protected final Action<INonStandPower> defaultQuickAccess;
     private String translationKey;
     private ResourceLocation iconTexture;
     
-    public NonStandPowerType(int color, Action<INonStandPower>[] startingAttacks, Action<INonStandPower>[] startingAbilities, Supplier<T> dataFactory) {
+    private final Supplier<T> dataFactory;
+
+    public NonStandPowerType(int color, Action<INonStandPower>[] startingAttacks, Action<INonStandPower>[] startingAbilities, 
+            Action<INonStandPower> defaultQuickAccess, Supplier<T> dataFactory) {
         this.color = color;
         this.attacks = startingAttacks;
         this.abilities = startingAbilities;
+        this.defaultQuickAccess = defaultQuickAccess;
         this.dataFactory = dataFactory;
     }
     
@@ -63,6 +67,11 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
     @Override
     public Action<INonStandPower>[] getAbilities() {
         return abilities;
+    }
+
+    @Override
+    public Action<INonStandPower> getDefaultQuickAccess() {
+        return defaultQuickAccess;
     }
 
     public float getMaxEnergy(INonStandPower power) {

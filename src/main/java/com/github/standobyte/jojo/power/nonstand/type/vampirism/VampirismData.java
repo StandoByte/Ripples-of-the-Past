@@ -1,9 +1,6 @@
 package com.github.standobyte.jojo.power.nonstand.type.vampirism;
 
-import java.util.List;
-
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.action.non_stand.VampirismAction;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.vampirism.ModVampirismActions;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -56,13 +53,14 @@ public class VampirismData extends TypeSpecificData {
             addHamonSuicideAbility();
         }
     }
-    
+
+    // FIXME (layout editing) !! hamon suicide addition
     private void addHamonSuicideAbility() {
-        VampirismAction hamonAbility = ModVampirismActions.VAMPIRISM_HAMON_SUICIDE.get();
-        List<Action<INonStandPower>> abilities = power.getAbilities();
-        if (vampireHamonUser && !abilities.contains(hamonAbility)) {
-            abilities.add(hamonAbility);
-        }
+//        VampirismAction hamonAbility = ModActions.VAMPIRISM_HAMON_SUICIDE.get();
+//        List<Action<INonStandPower>> abilities = power.getAbilities();
+//        if (vampireHamonUser && !abilities.contains(hamonAbility)) {
+//            abilities.add(hamonAbility);
+//        }
     }
 
     public boolean isVampireAtFullPower() {

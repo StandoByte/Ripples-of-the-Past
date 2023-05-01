@@ -37,7 +37,7 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
     public EntityStandType(int color, ITextComponent partName, 
             StandAction[] attacks, StandAction[] abilities, 
             Class<T> statsClass, T defaultStats, @Nullable StandTypeOptionals additions) {
-        super(color, partName, attacks, abilities, statsClass, defaultStats, additions);
+        super(color, partName, attacks, abilities, abilities.length > 0 ? abilities[0] : null, statsClass, defaultStats, additions);
         
         hasHeavyAttack = Arrays.stream(attacks).anyMatch(
                 attack -> attack instanceof StandEntityHeavyAttack || attack.getShiftVariationIfPresent() instanceof StandEntityHeavyAttack);

@@ -329,6 +329,7 @@
   "jojo.key.scroll_mode": "Scroll Mode",
   "jojo.key.scroll_attack": "Scroll Attack",
   "jojo.key.scroll_ability": "Scroll Ability",
+  "jojo.key.quick_access": "Quick Access Slot",
   
   "key.categories.jojo.hud.slots": "JoJo HUD Slot Hotkeys",
   "jojo.key.attack_1": "Attack 1",
@@ -352,12 +353,19 @@
   "jojo.key.ability_9": "Ability 9",
   "jojo.key.deselect_ability": "Deselect Ability",
   
+  "jojo.screen.edit_hud_layout": "Edit Hotbars Layout",
+  "jojo.screen.edit_hud_layout.attacks": "Attacks",
+  "jojo.screen.edit_hud_layout.abilities": "Abilities",
+  "jojo.screen.edit_hud_layout.mmb": "Quick Access",
+  "jojo.screen.edit_hud_layout.reset": "Reset Layout",
+  
   "jojo.overlay.mode_deselect": "Deselect",
   "jojo.overlay.mode_key": "[%s] %s",
   "jojo.overlay.shift": "%s (%s: %s)",
   "jojo.overlay.hold": "(hold) %s",
   "jojo.overlay.action.attack": "Attack: %s",
   "jojo.overlay.action.ability": "Ability: %s",
+  "jojo.overlay.action.quick_access": "Quick access: %s",
   "jojo.overlay.stand_strength": "Stand Strength: %s",
   
   "jojo.chat.controls.message": "You've got a JoJo power! Type %s to get a detailed guide on the mod's controls",
@@ -368,6 +376,7 @@
   "jojo.chat.command.controls.overlay.scroll": "With an overlay on, you'll see two new hotbars for attacks and abilities available to you in this mode. While holding %s or %s, your 1-9 keys and mouse wheel can be used to choose an attack or ability respectively. Empty slots are for attacks/abilities which you haven't yet unlocked and therefore are skipped over.\n",
   "jojo.chat.command.controls.overlay.use": "You can perform the attack you have selected by pressing %1$s. Similarly, to use the selected ability, press %2$s. Performing an attack/ability will (in most cases) cancel vanilla attack/interaction.\n",
   "jojo.chat.command.controls.stand": "If you have a summonable Stand, press %s to summon/unsummon it. If the Stand you have summoned can be controlled manually (i.e. most of the Stands which take form of an entity), pressing %s will switch between normal mode and manual control mode, in which you can directly control your Stand's movements.\n",
+  "jojo.chat.command.controls.layout_edit": "Pressing %s will open a window where you can swap and disable the individual attacks and abilities.\n",
   "jojo.chat.command.controls.changeable": "The keys and control schemes can be changed in the game's controls options.\nHave fun playing with your newly acquired powers!",
   "jojo.chat.message.no_stand": "You do not have a Stand",
   "jojo.chat.message.no_entity_stand": "Your Stand can't be controlled remotely",
@@ -382,6 +391,11 @@
   "jojo.chat.message.hamon_window_hint": "(Press %s or interact with a Hamon user to open Hamon skill window)",
   "jojo.chat.message.cant_learn_hamon": "You already have a power incompatible with Hamon",
   "jojo.chat.message.stone_mask_peaceful": "You can't turn into a vampire on Peaceful difficulty",
+  
+  "jojo.layout_edit.locked": "Locked",
+  "jojo.layout_edit.locked.stand": "Unlocks at %s level %s",
+  "jojo.layout_edit.locked.stand.resolve": "Resolve",
+  "jojo.layout_edit.locked.hamon": "",
   
   "jojo.command_description": "%s - %s",
   "jojo.command.desc.genstandstats": "Generates a Stand stats data pack",

@@ -122,7 +122,7 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser,
         hamon.setHamonStatPoints(HamonSkill.HamonStat.CONTROL, HamonData.MAX_HAMON_POINTS, true, true);
         for (HamonSkill skill : HamonSkill.values()) {
             if (skill.getTechnique() == null) {
-                hamon.learnHamonSkill(this, skill, false);
+                hamon.addHamonSkill(this, skill, false, true);
             }
         }
         hamonPower.setEnergy(hamonPower.getMaxEnergy());

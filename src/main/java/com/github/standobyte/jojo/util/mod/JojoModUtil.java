@@ -338,8 +338,8 @@ public class JojoModUtil {
     
     public static <T extends IPower<T, ?>> boolean hasAction(T power, Predicate<Action<T>> find) {
         return Streams.concat(
-                power.getActions(ActionType.ATTACK).stream(), 
-                power.getActions(ActionType.ABILITY).stream())
+                power.getActions(ActionType.ATTACK).getAll().stream(), 
+                power.getActions(ActionType.ABILITY).getAll().stream())
                 .anyMatch(find);
     }
 }

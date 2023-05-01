@@ -25,7 +25,7 @@ import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillAddPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillsResetPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillRemovePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonStatsPacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
@@ -731,6 +731,68 @@ public class HamonData extends TypeSpecificData {
     private boolean haveSkillPoints(HamonSkill skill) {
         return skill.getStat() == null || getSkillPoints(skill.getStat()) > 0;
     }
+
+    public boolean addHamonSkill(LivingEntity user, HamonSkill skill, boolean checkRequirements, boolean sync) {
+        if (!checkRequirements || !isSkillLearned(skill) && canLearnSkill(user, skill, true, HamonPowerType.nearbyTeachersSkills(power.getUser())).isPositive()) {
+            hamonSkills.addSkill(skill);
+            addSkillAction(skill);
+            serverPlayer.ifPresent(player -> {
+                if (skill == HamonSkill.CHEAT_DEATH) {
+                    HamonPowerType.updateCheatDeathEffect(player);
+                }
+                else if (skill == HamonSkill.SATIPOROJA_SCARF) {
+                    player.addItem(new ItemStack(ModItems.SATIPOROJA_SCARF.get()));
+                }
+                if (sync) {
+                    PacketManager.sendToClient(new HamonSkillAddPacket(skill), (ServerPlayerEntity) player);
+                }
+            });
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void updateExtraActions() {
+        for (HamonSkill skill : getSkillSetImmutable()) {
+            if (skill.getTechnique() != null) {
+                addSkillAction(skill);
+            }
+        }
+    }
+
+    private void addSkillAction(HamonSkill skill) {
+        if (skill.getRewardAction() != null && !skill.isBaseSkill()) {
+            power.getActions(skill.getRewardType().getActionType()).addExtraAction(skill.getRewardAction());
+        }
+    }
+    
+    public void removeHamonSkill(HamonSkill skill) {
+        if (!skill.isUnlockedByDefault() && isSkillLearned(skill)) {
+            hamonSkills.removeSkill(skill);
+            removeSkillAction(skill);
+            serverPlayer.ifPresent(player -> {
+                PacketManager.sendToClient(new HamonSkillRemovePacket(skill), player);
+                if (skill == HamonSkill.CHEAT_DEATH) {
+                    player.removeEffect(ModEffects.CHEAT_DEATH.get());
+                }
+            });
+        }
+    }
+
+    private void removeSkillAction(HamonSkill skill) {
+        if (skill.getRewardAction() != null && !skill.isBaseSkill()) {
+            power.getActions(skill.getRewardType().getActionType()).removeAction(skill.getRewardAction());
+        }
+    }
+
+    public void resetHamonSkills(LivingEntity user, HamonSkillType type) {
+        for (HamonSkill skill : HamonSkill.values()) {
+            if (!skill.isUnlockedByDefault() && skill.getSkillType() == type && isSkillLearned(skill)) {
+                removeHamonSkill(skill);
+            }
+        }
+    }
     
     
     
@@ -752,77 +814,6 @@ public class HamonData extends TypeSpecificData {
     
     private boolean rightTechnique(HamonSkill skill) {
         return skill.getTechnique() == null || hamonSkills.technique == null || skill.getTechnique() == hamonSkills.technique;
-    }
-
-    public boolean learnHamonSkill(LivingEntity user, HamonSkill skill, boolean checkRequirements) {
-        if (!isSkillLearned(skill) && (!checkRequirements
-                || canLearnSkill(user, skill, true, HamonPowerType.nearbyTeachersSkills(power.getUser())).isPositive())) {
-            hamonSkills.addSkill(skill);
-            onSkillAdded(skill);
-            serverPlayer.ifPresent(player -> {
-                switch (skill) {
-                case CHEAT_DEATH:
-                    HamonPowerType.updateCheatDeathEffect(player);
-                    break;
-                case SATIPOROJA_SCARF:
-                    player.addItem(new ItemStack(ModItems.SATIPOROJA_SCARF.get()));
-                    break;
-                default:
-                    break;
-                }
-                PacketManager.sendToClient(new HamonSkillAddPacket(skill), (ServerPlayerEntity) player);
-            });
-            return true;
-        }
-        return false;
-    }
-    
-    private void onSkillAdded(HamonSkill skill) {
-        if (skill.getRewardAction() != null) {
-            if (skill.getTechnique() != null) {
-                if (skill.getTechnique() == getTechnique()) {
-                    switch (skill.getRewardType()) {
-                    case ATTACK:
-                        power.getAttacks().add(skill.getRewardAction());
-                        break;
-                    case ABILITY:
-                        power.getAbilities().add(skill.getRewardAction());
-                        break;
-                    default:
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    
-    public void resetHamonSkills(HamonSkillType type) {
-        for (HamonSkill skill : HamonSkill.values()) {
-            if (skill != HamonSkill.OVERDRIVE && skill != HamonSkill.HEALING && skill.getSkillType() == type && isSkillLearned(skill)) {
-                hamonSkills.removeSkill(skill);
-                onSkillRemoved(skill);
-            }
-        }
-        serverPlayer.ifPresent(player -> {
-            PacketManager.sendToClient(new HamonSkillsResetPacket(type), player);
-        });
-    }
-    
-    private void onSkillRemoved(HamonSkill skill) {
-        if (skill.getRewardAction() != null) {
-            if (skill.getTechnique() != null) {
-                switch (skill.getRewardType()) {
-                case ATTACK:
-                    power.getAttacks().remove(skill.getRewardAction());
-                    break;
-                case ABILITY:
-                    power.getAbilities().remove(skill.getRewardAction());
-                    break;
-                default:
-                    break;
-                }
-            }
-        }
     }
     
     public void addNewPlayerLearner(PlayerEntity player) {
@@ -901,7 +892,6 @@ public class HamonData extends TypeSpecificData {
         for (HamonSkill skill : HamonSkill.values()) {
             if (isSkillLearned(skill)) {
                 PacketManager.sendToClient(new HamonSkillAddPacket(skill), user);
-                onSkillAdded(skill);
             }
         }
         updateExerciseAttributes(user);

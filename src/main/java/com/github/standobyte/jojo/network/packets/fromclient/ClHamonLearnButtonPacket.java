@@ -37,7 +37,7 @@ public class ClHamonLearnButtonPacket {
             ServerPlayerEntity player = ctx.get().getSender();
             INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
                 power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                    hamon.learnHamonSkill(player, msg.skill, true);
+                    hamon.addHamonSkill(player, msg.skill, true, true);
                 });
             });
         }

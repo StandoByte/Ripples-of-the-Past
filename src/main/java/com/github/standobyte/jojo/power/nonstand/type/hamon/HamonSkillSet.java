@@ -32,11 +32,11 @@ public class HamonSkillSet {
     public void addSkill(HamonSkill skill) {
         if (!wrappedSkillSet.contains(skill)) {
             HamonSkill.Technique technique = skill.getTechnique();
-            if (technique == null) {
-                if (skill.getStat() == HamonStat.STRENGTH && skill != HamonSkill.OVERDRIVE) {
+            if (technique == null && !skill.isUnlockedByDefault()) {
+                if (skill.getStat() == HamonStat.STRENGTH) {
                     spentStrengthPoints++;
                 }
-                else if (skill.getStat() == HamonStat.CONTROL && skill != HamonSkill.HEALING) {
+                else if (skill.getStat() == HamonStat.CONTROL) {
                     spentControlPoints++;
                 }
             }
@@ -44,7 +44,7 @@ public class HamonSkillSet {
                 if (this.technique == null) {
                     this.technique = technique; 
                 }
-                if (this.technique == technique) {
+                if (technique != null) {
                     techniqueSkillsLearned++;
                 }
             }
@@ -60,7 +60,7 @@ public class HamonSkillSet {
     }
     
     public void removeSkill(HamonSkill skill) {
-        if (skill != HamonSkill.OVERDRIVE && skill != HamonSkill.HEALING && wrappedSkillSet.contains(skill)) {
+        if (!skill.isUnlockedByDefault() && wrappedSkillSet.contains(skill)) {
             HamonSkill.Technique technique = skill.getTechnique();
             if (technique == null) {
                 if (skill.getStat() == HamonStat.STRENGTH) {
@@ -71,7 +71,7 @@ public class HamonSkillSet {
                 }
             }
             else {
-                if (this.technique == technique) {
+                if (technique != null) {
                     techniqueSkillsLearned--;
                 }
                 if (techniqueSkillsLearned == 0) {

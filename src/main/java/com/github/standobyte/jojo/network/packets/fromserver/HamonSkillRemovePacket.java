@@ -9,45 +9,45 @@ import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
 
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-public class HamonSkillAddPacket {
+public class HamonSkillRemovePacket {
     private final HamonSkill skill;
 
-    public HamonSkillAddPacket(HamonSkill skill) {
+    public HamonSkillRemovePacket(HamonSkill skill) {
         this.skill = skill;
     }
     
     
     
-    public static class Handler implements IModPacketHandler<HamonSkillAddPacket> {
+    public static class Handler implements IModPacketHandler<HamonSkillRemovePacket> {
 
         @Override
-        public void encode(HamonSkillAddPacket msg, PacketBuffer buf) {
+        public void encode(HamonSkillRemovePacket msg, PacketBuffer buf) {
             buf.writeEnum(msg.skill);
         }
 
         @Override
-        public HamonSkillAddPacket decode(PacketBuffer buf) {
-            return new HamonSkillAddPacket(buf.readEnum(HamonSkill.class));
+        public HamonSkillRemovePacket decode(PacketBuffer buf) {
+            return new HamonSkillRemovePacket(buf.readEnum(HamonSkill.class));
         }
 
         @Override
-        public void handle(HamonSkillAddPacket msg, Supplier<NetworkEvent.Context> ctx) {
-            LivingEntity player = ClientUtil.getClientPlayer();
+        public void handle(HamonSkillRemovePacket msg, Supplier<NetworkEvent.Context> ctx) {
+            PlayerEntity player = ClientUtil.getClientPlayer();
             INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
                 power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                    hamon.addHamonSkill(player, msg.skill, false, false);
+                    hamon.removeHamonSkill(msg.skill);
                     HamonScreen.updateTabs();
                 });
             });
         }
 
         @Override
-        public Class<HamonSkillAddPacket> getPacketClass() {
-            return HamonSkillAddPacket.class;
+        public Class<HamonSkillRemovePacket> getPacketClass() {
+            return HamonSkillRemovePacket.class;
         }
     }
 }

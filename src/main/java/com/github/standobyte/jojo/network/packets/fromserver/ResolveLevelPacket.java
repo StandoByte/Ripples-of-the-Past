@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.toasts.ActionToast;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
+import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 
@@ -45,7 +46,7 @@ public class ResolveLevelPacket {
                 boolean wasComboUnlocked = msg.fromEffect && StandUtil.isComboUnlocked(power);
                 power.setResolveLevel(msg.level, msg.fromEffect);
                 if (msg.fromEffect && !wasComboUnlocked && StandUtil.isComboUnlocked(power)) {
-                    power.getAttacks().stream()
+                    power.getActions(ActionType.ATTACK).getAll().stream()
                     .flatMap(attack -> attack.hasShiftVariation() ? Stream.of(attack, attack.getShiftVariationIfPresent()) : Stream.of(attack))
                     .flatMap(attack -> {
                         if (attack instanceof StandEntityHeavyAttack) {

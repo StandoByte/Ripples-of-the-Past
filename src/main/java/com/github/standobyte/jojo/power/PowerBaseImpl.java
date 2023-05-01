@@ -1,8 +1,5 @@
 package com.github.standobyte.jojo.power;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +22,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHeldActionPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.Container;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -44,8 +42,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     protected final LivingEntity user;
     protected final Optional<ServerPlayerEntity> serverPlayerUser;
     
-    protected List<Action<P>> attacks = new ArrayList<>();
-    protected List<Action<P>> abilities = new ArrayList<>();
+    private ActionsLayout<P> actionsLayout = new ActionsLayout<>();
     private ActionCooldownTracker cooldowns = new ActionCooldownTracker();
     private int leapCooldown;
     protected HeldActionData<P> heldActionData;
@@ -78,14 +75,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
     
     protected void onPowerSet(T type) {
-        if (type != null) {
-            attacks = new ArrayList<>(Arrays.asList(type.getAttacks()));
-            abilities = new ArrayList<>(Arrays.asList(type.getAbilities()));
-        }
-        else {
-            attacks = Collections.emptyList();
-            abilities = Collections.emptyList();
-        }
+        actionsLayout.onPowerSet(type);
     }
 
     @Override
@@ -127,7 +117,6 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             if (prevDay == -1) {
                 return;
             }
-            // FIXME (?) ticks for offline players on servers?
             if (prevDay != day) {
                 onNewDay(prevDay, day);
             }
@@ -141,13 +130,8 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
     
     @Override
-    public List<Action<P>> getAttacks() {
-        return attacks;
-    }
-
-    @Override
-    public List<Action<P>> getAbilities() {
-        return abilities;
+    public ActionsLayout<P> getActionsLayout() {
+        return actionsLayout;
     }
     
     @Override
@@ -195,22 +179,33 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     @Nullable
     @Override
     public final Action<P> getAction(ActionType type, int index, boolean shift) {
-        List<Action<P>> actions = getActions(type);
+        List<Action<P>> actions = getActions(type).getEnabled();
         if (index < 0 || index >= actions.size()) {
             return null;
         }
-        Action<P> action = actions.get(index).getVisibleAction(getThis());
+        return getActionOnClick(actions.get(index), shift);
+    }
+    
+    @Nullable
+    @Override
+    public final Action<P> getQuickAccessAction(boolean shift) {
+        return getActionOnClick(getActionsLayout().getQuickAccessAction(), shift);
+    }
+
+    @Nullable
+    private Action<P> getActionOnClick(Action<P> actionInSlot, boolean shift) {
+        actionInSlot = actionInSlot.getVisibleAction(getThis());
         Action<P> held = getHeldAction();
-        if (action == held) {
-            return action;
+        if (actionInSlot == held) {
+            return actionInSlot;
         }
-        if (action != null && action.hasShiftVariation()) {
-            Action<P> shiftVar = action.getShiftVariationIfPresent().getVisibleAction(getThis());
+        if (actionInSlot != null && actionInSlot.hasShiftVariation()) {
+            Action<P> shiftVar = actionInSlot.getShiftVariationIfPresent().getVisibleAction(getThis());
             if (shiftVar != null && (shift || shiftVar == held)) {
-                action = shiftVar;
+                actionInSlot = shiftVar;
             }
         }
-        return action;
+        return actionInSlot;
     }
     
     @Override
@@ -549,6 +544,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         cnbt.putLong("LastDay", lastTickedDay);
         cnbt.put("Cooldowns", cooldowns.writeNBT());
         cnbt.putInt("LeapCd", leapCooldown);
+        cnbt.put("Layout", actionsLayout.toNBT());
         return cnbt;
     }
 
@@ -557,6 +553,9 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         lastTickedDay = nbt.getLong("LastDay");
         cooldowns = new ActionCooldownTracker(nbt.getCompound("Cooldowns"));
         leapCooldown = nbt.getInt("LeapCd");
+        if (nbt.contains("Layout", MCUtil.getNbtId(CompoundNBT.class))) {
+            actionsLayout.fromNBT(nbt.getCompound("Layout"));
+        }
     }
 
     @Override
@@ -564,11 +563,16 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         if (oldPower.hasPower() && (!wasDeath || oldPower.getType().keepOnDeath(oldPower))) {
             keepPower(oldPower, wasDeath);
         }
+        keepActionsLayout(oldPower);
     }
 
     protected void keepPower(P oldPower, boolean wasDeath) {
         this.leapCooldown = oldPower.getLeapCooldown();
         this.cooldowns = oldPower.getCooldowns();
+    }
+    
+    protected void keepActionsLayout(P oldPower) {
+        actionsLayout.keepLayoutOnClone(oldPower);
     }
     
     @Override
@@ -582,10 +586,21 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         });
     }
 
+    protected final void syncLayoutWithUser() {
+        serverPlayerUser.ifPresent(player -> {
+            if (hasPower()) {
+                actionsLayout.syncWithUser(player, getPowerClassification());
+            }
+        });
+    }
+
     @Override
     public void syncWithTrackingOrUser(ServerPlayerEntity player) {
         if (hasPower() && user != null) {
             cooldowns.syncWithTrackingOrUser(user.getId(), getPowerClassification(), player);
+            if (getHeldAction() != null) {
+                PacketManager.sendToClient(new TrHeldActionPacket(user.getId(), getPowerClassification(), getHeldAction(), false), player);
+            }
         }
     }
     

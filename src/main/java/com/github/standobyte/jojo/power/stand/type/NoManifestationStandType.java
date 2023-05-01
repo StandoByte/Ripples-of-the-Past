@@ -11,7 +11,7 @@ public class NoManifestationStandType<T extends StandStats> extends StandType<T>
 
     public NoManifestationStandType(int color, ITextComponent partName, StandAction[] attacks, StandAction[] abilities,
             Class<T> statsClass, T defaultStats, StandTypeOptionals additions) {
-        super(color, partName, attacks, abilities, statsClass, defaultStats, additions);
+        super(color, partName, attacks, abilities, abilities.length > 0 ? abilities[0] : null, statsClass, defaultStats, additions);
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.power;
 
-import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -41,14 +40,12 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     default ITextComponent getName() {
         return hasPower() ? getType().getName() : StringTextComponent.EMPTY;
     }
-
-    List<Action<P>> getAttacks();
-    List<Action<P>> getAbilities();
     
-    default List<Action<P>> getActions(ActionType type) {
-        return type == ActionType.ATTACK ? getAttacks() : getAbilities();
+    ActionsLayout<P> getActionsLayout();
+    default ActionHotbarData<P> getActions(ActionType hotbar) {
+        return getActionsLayout().getHotbar(hotbar);
     }
-
+    
     boolean isActionOnCooldown(Action<?> action);
     float getCooldownRatio(Action<?> action, float partialTick);
     void setCooldownTimer(Action<?> action, int value);
@@ -57,6 +54,7 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     ActionCooldownTracker getCooldowns();
 
     @Nullable Action<P> getAction(ActionType type, int index, boolean shift);
+    @Nullable Action<P> getQuickAccessAction(boolean shift);
     boolean clickAction(Action<P> action, boolean shift, ActionTarget target);
     ActionConditionResult checkRequirements(Action<P> action, Container<ActionTarget> targetContainer, boolean checkTargetType);
     ActionConditionResult checkTarget(Action<P> action, Container<ActionTarget> targetContainer);
@@ -101,6 +99,10 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
 
     default boolean onClickAction(ActionType type, int index, boolean shift, ActionTarget target, Optional<Action<?>> inputValidation) {
         return onClickAction(this.getAction(type, index, shift), shift, target, inputValidation);
+    }
+    
+    default boolean onClickQuickAccess(boolean shift, ActionTarget target, Optional<Action<?>> inputValidation) {
+        return onClickAction(this.getQuickAccessAction(shift), shift, target, inputValidation);
     }
     
     default boolean onClickAction(Action<P> action, boolean shift, ActionTarget target, Optional<Action<?>> inputValidation) {

@@ -16,6 +16,8 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClHamonResetSkillsB
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonWindowOpenedPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHasInputPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHeldActionTargetPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClLayoutHotbarPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClLayoutQuickAccessPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnLeapPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnStandDashPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRPSGameInputPacket;
@@ -28,12 +30,13 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClStopHeldActionPac
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandManualControlPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandSummonPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClWalkmanControlsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ActionsFullLayoutPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.BrokenChunkBlocksPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.CommonConfigPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillAddPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillsResetPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillRemovePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonTeachersSkillsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.LeapCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.MaxAchievedResolvePacket;
@@ -114,6 +117,8 @@ public class PacketManager {
         
         registerMessage(channel, new ClHasInputPacket.Handler(),                     Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClDoubleShiftPressPacket.Handler(),             Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        registerMessage(channel, new ClLayoutHotbarPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        registerMessage(channel, new ClLayoutQuickAccessPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClToggleStandSummonPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClToggleStandManualControlPacket.Handler(),     Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClClickActionPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_SERVER));
@@ -138,6 +143,7 @@ public class PacketManager {
         registerMessage(channel, new TrTypeNonStandPowerPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrTypeStandInstancePacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrHeldActionPacket.Handler(),                   Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(channel, new ActionsFullLayoutPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrEnergyPacket.Handler(),                       Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrCooldownPacket.Handler(),                     Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new BloodParticlesPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_CLIENT));
@@ -146,7 +152,7 @@ public class PacketManager {
         registerMessage(channel, new TrHamonMeditationPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new HamonTeachersSkillsPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new HamonSkillAddPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        registerMessage(channel, new HamonSkillsResetPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(channel, new HamonSkillRemovePacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrHamonParticlesPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrVampirismDataPacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrStaminaPacket.Handler(),                      Optional.of(NetworkDirection.PLAY_TO_CLIENT));

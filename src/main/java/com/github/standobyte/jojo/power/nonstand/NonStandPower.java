@@ -54,6 +54,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
         setType(type);
         onNewPowerGiven(type);
         typeSpecificData.onPowerGiven(oldType);
+        typeSpecificData.updateExtraActions();
         return true;
     }
     
@@ -242,6 +243,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
                 if (data != null) {
                     setTypeSpecificData(data);
                     data.readNBT(nbt.getCompound("AdditionalData"));
+                    data.updateExtraActions();
                 }
             }
         }
@@ -262,6 +264,14 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     }
     
     @Override
+    protected void keepActionsLayout(INonStandPower oldPower) {
+        if (typeSpecificData != null) {
+            typeSpecificData.updateExtraActions();
+        }
+        super.keepActionsLayout(oldPower);
+    }
+    
+    @Override
     public void syncWithUserOnly() {
         super.syncWithUserOnly();
         serverPlayerUser.ifPresent(player -> {
@@ -272,6 +282,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
                 PacketManager.sendToClient(new TrEnergyPacket(player.getId(), energy), player);
             }
         });
+        syncLayoutWithUser();
     }
     
     @Override

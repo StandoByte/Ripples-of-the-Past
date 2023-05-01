@@ -39,7 +39,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismData> {
     }
 
     public VampirismPowerType(int color, VampirismAction[] startingAttacks, VampirismAction[] startingAbilities) {
-        super(color, startingAttacks, startingAbilities, VampirismData::new);
+        super(color, startingAttacks, startingAbilities, startingAttacks[0], VampirismData::new);
     }
     
     @Override

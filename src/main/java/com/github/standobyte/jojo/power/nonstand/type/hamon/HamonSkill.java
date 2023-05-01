@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.non_stand.HamonAction;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
+import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.google.common.collect.Maps;
 
 import net.minecraft.util.ResourceLocation;
@@ -234,8 +235,16 @@ public enum HamonSkill {
         return technique;
     }
     
-    public boolean requiresTeacher() {
+    public boolean isBaseSkill() {
         return stat != null;
+    }
+    
+    public boolean requiresTeacher() {
+        return isBaseSkill();
+    }
+    
+    public boolean isUnlockedByDefault() {
+        return this == HamonSkill.OVERDRIVE || this == HamonSkill.HEALING;
     }
     
     public HamonSkillType getSkillType() {
@@ -246,19 +255,26 @@ public enum HamonSkill {
     }
     
     public enum RewardType {
-        ATTACK("attack"),
-        ABILITY("ability"),
-        PASSIVE("passive"),
-        ITEM("item");
+        ATTACK("attack", ActionType.ATTACK),
+        ABILITY("ability", ActionType.ATTACK),
+        PASSIVE("passive", null),
+        ITEM("item", null);
         
         private final ITextComponent name;
+        private final ActionType actionType;
         
-        private RewardType(String key) {
+        private RewardType(String key, ActionType actionType) {
             this.name = new TranslationTextComponent("hamon.skill_type." + key).withStyle(TextFormatting.ITALIC);
+            this.actionType = actionType;
         }
         
         public ITextComponent getName() {
             return name;
+        }
+        
+        @Nullable
+        public ActionType getActionType() {
+            return actionType;
         }
     }
     

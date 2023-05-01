@@ -26,6 +26,7 @@ import net.minecraftforge.fml.network.NetworkEvent;
 
 public class ClClickActionPacket {
     private final PowerClassification classification;
+    private final boolean quickAccess;
     private final ActionType actionType;
     private final boolean shift;
     private final int index;
@@ -36,34 +37,44 @@ public class ClClickActionPacket {
     @Nullable
     private Direction blockFace;
 
-    private ClClickActionPacket(PowerClassification classification, ActionType actionType, boolean shift, int index) {
+    private ClClickActionPacket(PowerClassification classification, boolean quickAccess, ActionType actionType, boolean shift, int index) {
         this.classification = classification;
+        this.quickAccess = quickAccess;
         this.actionType = actionType;
         this.shift = shift;
         this.index = index;
     }
 
-    private ClClickActionPacket(PowerClassification classification, ActionType actionType, boolean shift, int index, int targetEntityId) {
-        this(classification, actionType, shift, index);
-        this.targetEntityId = targetEntityId;
+    private static ClClickActionPacket actionClicked(PowerClassification classification, ActionType actionType, boolean shift, int index) {
+        return new ClClickActionPacket(classification, false, actionType, shift, index);
     }
 
-    private ClClickActionPacket(PowerClassification classification, ActionType actionType, boolean shift, int index, BlockPos targetBlock, Direction blockFace) {
-        this(classification, actionType, shift, index);
-        this.targetBlock = targetBlock;
-        this.blockFace = blockFace;
+    private static ClClickActionPacket quickAccess(PowerClassification classification, boolean shift) {
+        return new ClClickActionPacket(classification, true, null, shift, -1);
     }
-
-    public static ClClickActionPacket withRayTraceResult(PowerClassification classification, ActionType actionType, boolean shift, int index, RayTraceResult target) {
+    
+    private ClClickActionPacket withTarget(RayTraceResult target) {
         switch (target.getType()) {
         case ENTITY:
-            return new ClClickActionPacket(classification, actionType, shift, index, ((EntityRayTraceResult) target).getEntity().getId());
+            this.targetEntityId = ((EntityRayTraceResult) target).getEntity().getId();
+            break;
         case BLOCK:
             BlockRayTraceResult blockTarget = (BlockRayTraceResult) target;
-            return new ClClickActionPacket(classification, actionType, shift, index, blockTarget.getBlockPos(), blockTarget.getDirection());
+            this.targetBlock = blockTarget.getBlockPos();
+            this.blockFace = blockTarget.getDirection();
+            break;
         default:
-            return new ClClickActionPacket(classification, actionType, shift, index);
+            break;
         }
+        return this;
+    }
+
+    public static ClClickActionPacket actionClicked(PowerClassification classification, ActionType actionType, boolean shift, int index, RayTraceResult target) {
+        return actionClicked(classification, actionType, shift, index).withTarget(target);
+    }
+
+    public static ClClickActionPacket quickAccess(PowerClassification classification, boolean shift, RayTraceResult target) {
+        return quickAccess(classification, shift).withTarget(target);
     }
     
     public ClClickActionPacket validateInput(@Nonnull Action<?> clientClickedAction) {
@@ -74,7 +85,7 @@ public class ClClickActionPacket {
     
     
     public static class Handler implements IModPacketHandler<ClClickActionPacket> {
-
+    
         @Override
         public void encode(ClClickActionPacket msg, PacketBuffer buf) {
             byte flags = 0;
@@ -88,9 +99,12 @@ public class ClClickActionPacket {
                 flags |= 2;
             }
             buf.writeByte(flags);
+            buf.writeBoolean(msg.quickAccess);
             buf.writeEnum(msg.classification);
-            buf.writeEnum(msg.actionType);
-            buf.writeVarInt(msg.index);
+            if (!msg.quickAccess) {
+                buf.writeEnum(msg.actionType);
+                buf.writeVarInt(msg.index);
+            }
             if (msg.targetBlock != null) {
                 buf.writeBlockPos(msg.targetBlock);
                 buf.writeEnum(msg.blockFace);
@@ -104,19 +118,19 @@ public class ClClickActionPacket {
         @Override
         public ClClickActionPacket decode(PacketBuffer buf) {
             byte flags = buf.readByte();
-            ClClickActionPacket packet;
+            boolean quickAccess = buf.readBoolean();
+            
+            ClClickActionPacket packet = quickAccess ? 
+                    ClClickActionPacket.quickAccess(buf.readEnum(PowerClassification.class), (flags & 4) > 0) 
+                    : ClClickActionPacket.actionClicked(buf.readEnum(PowerClassification.class), buf.readEnum(ActionType.class), (flags & 4) > 0, buf.readVarInt());
             switch (flags & 3) {
             case 1:
-                packet = new ClClickActionPacket(buf.readEnum(PowerClassification.class), buf.readEnum(ActionType.class), 
-                        (flags & 4) > 0, buf.readVarInt(), buf.readBlockPos(), buf.readEnum(Direction.class));
+                packet.targetBlock = buf.readBlockPos();
+                packet.blockFace = buf.readEnum(Direction.class);
                 break;
             case 2:
-                packet = new ClClickActionPacket(buf.readEnum(PowerClassification.class), buf.readEnum(ActionType.class), 
-                        (flags & 4) > 0, buf.readVarInt(), buf.readInt());
-                break;
+                packet.targetEntityId = buf.readInt();
             default: // 0
-                packet = new ClClickActionPacket(buf.readEnum(PowerClassification.class), buf.readEnum(ActionType.class), 
-                        (flags & 4) > 0, buf.readVarInt());
                 break;
             }
             packet.inputValidation = NetworkUtil.readOptional(buf, buffer -> buffer.readRegistryIdSafe(Action.class));
@@ -133,7 +147,12 @@ public class ClClickActionPacket {
                             ActionTarget.EMPTY
                             : new ActionTarget(msg.targetBlock, msg.blockFace)
                             : new ActionTarget(targetEntity);
-                    power.onClickAction(msg.actionType, msg.index, msg.shift, target, msg.inputValidation);
+                    if (msg.quickAccess) {
+                        power.onClickQuickAccess(msg.shift, target, msg.inputValidation);
+                    }
+                    else {
+                        power.onClickAction(msg.actionType, msg.index, msg.shift, target, msg.inputValidation);
+                    }
                 });
             }
         }

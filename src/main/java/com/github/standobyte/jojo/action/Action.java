@@ -378,7 +378,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     @Nullable
     public ActionType getActionType(P power) {
         for (ActionType actionType : ActionType.values()) {
-            for (Action<P> action : power.getActions(actionType)) {
+            for (Action<P> action : power.getActions(actionType).getAll()) {
                 if (action == this || action.getShiftVariationIfPresent() == this) {
                     return actionType;
                 }
