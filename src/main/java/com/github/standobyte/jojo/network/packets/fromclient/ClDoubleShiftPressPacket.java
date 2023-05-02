@@ -4,9 +4,9 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 
 import net.minecraft.entity.player.PlayerEntity;
@@ -41,7 +41,7 @@ public class ClDoubleShiftPressPacket {
         public static boolean sendOnPress(PlayerEntity player) {
             return player.isAlive() && player.isOnGround() && GeneralUtil.orElseFalse(
                     INonStandPower.getPlayerNonStandPower(player).getTypeSpecificData(ModPowers.HAMON.get()), 
-                    hamon -> hamon.isSkillLearned(HamonSkill.WATER_WALKING) || hamon.isSkillLearned(HamonSkill.LAVA_WALKING));
+                    hamon -> hamon.isSkillLearned(ModHamonSkills.WATER_WALKING.get()) || hamon.isSkillLearned(ModHamonSkills.LAVA_WALKING.get()));
         }
     }
 

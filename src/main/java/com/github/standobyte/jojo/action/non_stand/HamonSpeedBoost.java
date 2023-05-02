@@ -3,11 +3,11 @@ package com.github.standobyte.jojo.action.non_stand;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonPowerType;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -29,13 +29,13 @@ public class HamonSpeedBoost extends HamonAction {
         float effectStr = (float) hamon.getHamonControlLevel() / (float) HamonData.MAX_STAT_LEVEL * hamonEfficiency;
         int speedLvl = MathHelper.floor(1.5F * effectStr);
         int hasteLvl = MathHelper.floor(1.5F * effectStr);
-        if (hamon.isSkillLearned(HamonSkill.AFTERIMAGES)) {
+        if (hamon.isSkillLearned(ModHamonSkills.AFTERIMAGES.get())) {
             speedLvl++;
             hasteLvl++;
         }
         if (!world.isClientSide()) {
             int duration = 20 + MathHelper.floor(180F * effectStr);
-            if (hamonEfficiency == 1 && hamon.isSkillLearned(HamonSkill.AFTERIMAGES)) {
+            if (hamonEfficiency == 1 && hamon.isSkillLearned(ModHamonSkills.AFTERIMAGES.get())) {
                 user.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                     cap.addAfterimages(Math.min((int) (effectStr * 7F / 1.5F), 7), duration);
                 });

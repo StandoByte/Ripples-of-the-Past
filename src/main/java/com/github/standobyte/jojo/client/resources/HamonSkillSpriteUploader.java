@@ -2,7 +2,8 @@ package com.github.standobyte.jojo.client.resources;
 
 import java.util.stream.Stream;
 
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.AbstractHamonSkill;
 
 import net.minecraft.client.renderer.texture.SpriteUploader;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -16,10 +17,10 @@ public class HamonSkillSpriteUploader extends SpriteUploader {
 
     @Override
     protected Stream<ResourceLocation> getResourcesToLoad() {
-        return HamonSkill.iconTextureMap.values().stream();
+        return ModHamonSkills.HAMON_SKILLS.getRegistry().getValues().stream().map(AbstractHamonSkill::getRegistryName);
     }
 
-    public TextureAtlasSprite getSprite(HamonSkill skill) {
-        return this.getSprite(HamonSkill.iconTextureMap.get(skill));
+    public TextureAtlasSprite getSprite(AbstractHamonSkill skill) {
+        return this.getSprite(skill.getRegistryName());
     }
 }

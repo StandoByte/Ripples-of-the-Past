@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonData;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.gui.AbstractGui;
@@ -19,16 +19,16 @@ public class HamonSkillElementLearnable extends HamonSkillGuiElement {
     private final boolean isFinal;
     private State state;
     
-    public HamonSkillElementLearnable(HamonSkill skill, 
-            HamonData hamon, LivingEntity user, Collection<HamonSkill> teacherSkills, 
+    public HamonSkillElementLearnable(AbstractHamonSkill skill, 
+            HamonData hamon, LivingEntity user, Collection<? extends AbstractHamonSkill> teacherSkills, 
             boolean isFinal, int x, int y) {
         super(skill, x, y, 26, 26);
         this.isFinal = isFinal;
         updateState(hamon, user, teacherSkills);
     }
     
-    void updateState(HamonData hamon, LivingEntity user, Collection<HamonSkill> teacherSkills) {
-        boolean canBeLearned = hamon.canLearnSkill(user, skill, true, teacherSkills).isPositive();
+    void updateState(HamonData hamon, LivingEntity user, Collection<? extends AbstractHamonSkill> teacherSkills) {
+        boolean canBeLearned = hamon.canLearnSkill(user, skill, teacherSkills).isPositive();
         boolean isLearned = hamon.isSkillLearned(skill);
         updateState(canBeLearned, isLearned);
     }
@@ -63,15 +63,15 @@ public class HamonSkillElementLearnable extends HamonSkillGuiElement {
         List<ITextComponent> tooltip = new ArrayList<>();
         tooltip.add(getName());
         
-        List<HamonSkill> missingSkills = skill.getRequiredSkills().stream().filter(skill -> 
+        List<AbstractHamonSkill> missingSkills = skill.getRequiredSkills().filter(skill -> 
         !hamonScreen.hamon.isSkillLearned(skill)).collect(Collectors.toList());
         if (!missingSkills.isEmpty()) {
             tooltip.add(new TranslationTextComponent("hamon.skill.required_skills_list").withStyle(TextFormatting.GRAY, TextFormatting.ITALIC));
-            for (HamonSkill skill : missingSkills) {
+            for (AbstractHamonSkill skill : missingSkills) {
                 tooltip.add(new TranslationTextComponent("hamonSkill." + skill.getName() + ".name").withStyle(TextFormatting.RED));
             }
         }
-            
+        
         hamonScreen.renderComponentTooltip(matrixStack, tooltip, mouseX, mouseY);
     }
     

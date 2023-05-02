@@ -21,6 +21,7 @@ import com.github.standobyte.jojo.init.ModStructures;
 import com.github.standobyte.jojo.init.ModTileEntities;
 import com.github.standobyte.jojo.init.power.ModCommonRegistries;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.init.power.non_stand.vampirism.ModVampirismActions;
 import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
@@ -62,6 +63,8 @@ public class JojoMod {
         ModItems.ITEMS.register(modEventBus);
         
         ModCommonRegistries.ACTIONS.initRegister(modEventBus);
+        ModHamonSkills.HAMON_SKILLS.initRegister(modEventBus);
+        ModHamonSkills.HAMON_CHARACTER_TECHNIQUES.initRegister(modEventBus);
         ModCommonRegistries.NON_STAND_POWERS.initRegister(modEventBus);
         ModStandActions.STANDS.initRegister(modEventBus);
         ModStandEffects.STAND_EFFECTS.initRegister(modEventBus);

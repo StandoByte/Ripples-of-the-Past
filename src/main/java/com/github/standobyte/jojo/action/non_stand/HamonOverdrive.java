@@ -7,10 +7,10 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonData;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 
@@ -128,6 +128,6 @@ public class HamonOverdrive extends HamonAction {
     }
     
     private boolean metalSilverOverdrive(HamonData hamon, ItemStack heldItemStack) {
-        return hamon.isSkillLearned(HamonSkill.METAL_SILVER_OVERDRIVE) && heldItemStack.getItem() instanceof TieredItem;
+        return hamon.isSkillLearned(ModHamonSkills.METAL_SILVER_OVERDRIVE.get()) && heldItemStack.getItem() instanceof TieredItem;
     }
 }

@@ -41,6 +41,7 @@ import com.github.standobyte.jojo.init.ModPaintings;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.init.power.stand.ModStandActions;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
@@ -55,9 +56,8 @@ import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonPowerType;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.Technique;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.AbstractHamonSkill;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.nonstand.type.vampirism.VampirismData;
 import com.github.standobyte.jojo.power.nonstand.type.vampirism.VampirismPowerType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -970,7 +970,7 @@ public class GameplayEventHandler {
                 if (blockState.getBlock() == Blocks.TRIPWIRE) {
                     INonStandPower.getNonStandPowerOptional(event.getPlayer()).ifPresent(power -> {
                         power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                            if (hamon.isSkillLearned(HamonSkill.ROPE_TRAP)) {
+                            if (hamon.isSkillLearned(ModHamonSkills.ROPE_TRAP.get())) {
                                 event.setCanceled(true);
                                 event.setCancellationResult(ActionResultType.SUCCESS);
                                 if (!world.isClientSide()) {
@@ -1109,7 +1109,7 @@ public class GameplayEventHandler {
                     mob -> mob.getTarget() == dead).forEach(mob -> mob.setTarget(null));
             INonStandPower.getNonStandPowerOptional(dead).ifPresent(power -> {
                 power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                    if (hamon.getTechnique() == Technique.JOSEPH) {
+                    if (hamon.characterIs(ModHamonSkills.CHARACTER_JOSEPH.get())) {
                         if (dead instanceof ServerPlayerEntity) {
                             ServerPlayerEntity joseph = (ServerPlayerEntity) dead;
                             sendMemeDeathMessage(joseph, event.getSource().getLocalizedDeathMessage(dead));
@@ -1176,18 +1176,18 @@ public class GameplayEventHandler {
                         INonStandPower.getNonStandPowerOptional((LivingEntity) shooter).ifPresent(power -> {
                             power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                                 float energyCost = -1;
-                                HamonSkill requiredSkill;
+                                AbstractHamonSkill requiredSkill;
                                 float hamonBaseDmg = 0;
                                 int maxChargeTicks = 0;
                                 if (projectile instanceof AbstractArrowEntity && !alreadyHasHamon(projectile)) {
-                                    requiredSkill = HamonSkill.ARROW_INFUSION;
+                                    requiredSkill = ModHamonSkills.ARROW_INFUSION.get();
                                     energyCost = 1000;
                                     hamonBaseDmg = 0.25F;
                                     maxChargeTicks = 10;
                                 }
                                 else {
                                     EntityType<?> type = projectile.getType();
-                                    requiredSkill = HamonSkill.THROWABLES_INFUSION;
+                                    requiredSkill = ModHamonSkills.THROWABLES_INFUSION.get();
                                     if (type == EntityType.SNOWBALL) {
                                         energyCost = 600;
                                         hamonBaseDmg = 0.125F;
@@ -1275,7 +1275,7 @@ public class GameplayEventHandler {
         List<ServerPlayerEntity> josephTechniqueUsers = MCUtil.entitiesAround(ServerPlayerEntity.class, event.getPlayer(), 8, false, 
                 pl -> INonStandPower.getNonStandPowerOptional(pl).map(power -> 
                 power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> 
-                hamon.getTechnique() == Technique.JOSEPH).orElse(false)).orElse(false));
+                hamon.characterIs(ModHamonSkills.CHARACTER_JOSEPH.get())).orElse(false)).orElse(false));
         for (ServerPlayerEntity joseph : josephTechniqueUsers) {
             if (joseph.getChatVisibility() != ChatVisibility.HIDDEN && joseph.getRandom().nextFloat() < 0.05F) {
                 String tlKey = "jojo.chat.joseph.next_line." + (joseph.getRandom().nextInt(3) + 1);

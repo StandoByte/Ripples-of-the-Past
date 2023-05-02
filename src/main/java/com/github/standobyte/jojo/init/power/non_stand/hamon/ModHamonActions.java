@@ -25,9 +25,9 @@ import com.github.standobyte.jojo.action.non_stand.HamonTornadoOverdrive;
 import com.github.standobyte.jojo.action.non_stand.HamonTurquoiseBlueOverdrive;
 import com.github.standobyte.jojo.action.non_stand.HamonWallClimbing;
 import com.github.standobyte.jojo.action.non_stand.HamonZoomPunch;
+import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonPowerType;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.Technique;
 
 import net.minecraftforge.fml.RegistryObject;
 
@@ -37,18 +37,18 @@ public class ModHamonActions {
 
     public static final RegistryObject<HamonAction> HAMON_OVERDRIVE = ACTIONS.registerEntry("hamon_overdrive", 
             () -> new HamonOverdrive(new HamonAction.Builder().energyCost(750F)));
-     
-    public static final RegistryObject<HamonAction> HAMON_SUNLIGHT_YELLOW_OVERDRIVE = ACTIONS.registerEntry("hamon_sunlight_yellow_overdrive", 
-            () -> new HamonSunlightYellowOverdrive(new HamonAction.Builder().energyCost(1500F)
-                    .shout(Technique.JONATHAN, ModSounds.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE)
-                    .shout(Technique.ZEPPELI, ModSounds.ZEPPELI_SUNLIGHT_YELLOW_OVERDRIVE)
-                    .shout(Technique.JOSEPH, ModSounds.JOSEPH_SUNLIGHT_YELLOW_OVERDRIVE)
-                    .shout(Technique.CAESAR, ModSounds.CAESAR_SUNLIGHT_YELLOW_OVERDRIVE)
-                    .shiftVariationOf(HAMON_OVERDRIVE)));
     
-    public static final RegistryObject<HamonAction> HAMON_SENDO_OVERDRIVE = ACTIONS.registerEntry("hamon_sendo_overdrive", 
-            () -> new HamonSendoOverdrive(new HamonAction.Builder().energyCost(1000F)
-                    .emptyMainHand().swingHand().shout(Technique.JONATHAN, ModSounds.JONATHAN_SENDO_OVERDRIVE)));
+   public static final RegistryObject<HamonAction> HAMON_SUNLIGHT_YELLOW_OVERDRIVE = ACTIONS.registerEntry("hamon_sunlight_yellow_overdrive", 
+           () -> new HamonSunlightYellowOverdrive(new HamonAction.Builder().heldWalkSpeed(0.9999F).holdToFire(0, true).holdType(80)
+                   .shout(ModHamonSkills.CHARACTER_JONATHAN, ModSounds.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE)
+                   .shout(ModHamonSkills.CHARACTER_ZEPPELI, ModSounds.ZEPPELI_SUNLIGHT_YELLOW_OVERDRIVE)
+                   .shout(ModHamonSkills.CHARACTER_JOSEPH, ModSounds.JOSEPH_SUNLIGHT_YELLOW_OVERDRIVE)
+                   .shout(ModHamonSkills.CHARACTER_CAESAR, ModSounds.CAESAR_SUNLIGHT_YELLOW_OVERDRIVE)));
+   
+   public static final RegistryObject<HamonAction> HAMON_SENDO_OVERDRIVE = ACTIONS.registerEntry("hamon_sendo_overdrive", 
+           () -> new HamonSendoOverdrive(new HamonAction.Builder().energyCost(1000F)
+                   .emptyMainHand().swingHand()
+                   .shout(ModHamonSkills.CHARACTER_JONATHAN, ModSounds.JONATHAN_SENDO_OVERDRIVE)));
 
     public static final RegistryObject<HamonAction> HAMON_TURQUOISE_BLUE_OVERDRIVE = ACTIONS.registerEntry("hamon_turquoise_blue_overdrive", 
             () -> new HamonTurquoiseBlueOverdrive(new HamonAction.Builder().energyCost(250F)
@@ -56,9 +56,9 @@ public class ModHamonActions {
     
     public static final RegistryObject<HamonAction> HAMON_ZOOM_PUNCH = ACTIONS.registerEntry("hamon_zoom_punch", 
             () -> new HamonZoomPunch(new HamonAction.Builder().energyCost(800F).cooldown(14, 0)
-                    .shout(Technique.JONATHAN, ModSounds.JONATHAN_ZOOM_PUNCH)
-                    .shout(Technique.ZEPPELI, ModSounds.ZEPPELI_ZOOM_PUNCH)
-                    .shout(Technique.JOSEPH, ModSounds.JOSEPH_ZOOM_PUNCH)));
+                    .shout(ModHamonSkills.CHARACTER_JONATHAN, ModSounds.JONATHAN_ZOOM_PUNCH)
+                    .shout(ModHamonSkills.CHARACTER_ZEPPELI, ModSounds.ZEPPELI_ZOOM_PUNCH)
+                    .shout(ModHamonSkills.CHARACTER_JOSEPH, ModSounds.JOSEPH_ZOOM_PUNCH)));
 
     public static final RegistryObject<HamonAction> HAMON_SPEED_BOOST = ACTIONS.registerEntry("hamon_speed_boost", 
             () -> new HamonSpeedBoost(new HamonAction.Builder().energyCost(600F)));
@@ -76,30 +76,33 @@ public class ModHamonActions {
                     .emptyMainHand().swingHand()));
     
     public static final RegistryObject<HamonAction> HAMON_WALL_CLIMBING = ACTIONS.registerEntry("hamon_wall_climbing", 
-            () -> new HamonWallClimbing(new HamonAction.Builder().holdEnergyCost(15F)));
+            () -> new HamonWallClimbing(new HamonAction.Builder().holdEnergyCost(10F)));
     
     public static final RegistryObject<HamonAction> HAMON_DETECTOR = ACTIONS.registerEntry("hamon_detector", 
-            () -> new HamonDetector(new HamonAction.Builder().holdEnergyCost(7.5F).heldWalkSpeed(0.5F)));
-    
+            () -> new HamonDetector(new HamonAction.Builder().holdEnergyCost(5F).heldWalkSpeed(0.5F)));
+
     public static final RegistryObject<HamonAction> HAMON_LIFE_MAGNETISM = ACTIONS.registerEntry("hamon_life_magnetism", 
-            () -> new HamonLifeMagnetism(new HamonAction.Builder().energyCost(200F).shout(Technique.ZEPPELI, ModSounds.ZEPPELI_LIFE_MAGNETISM_OVERDRIVE)));
-    
+            () -> new HamonLifeMagnetism(new HamonAction.Builder().energyCost(LeavesGliderEntity.MAX_ENERGY)
+                    .shout(ModHamonSkills.CHARACTER_ZEPPELI, ModSounds.ZEPPELI_LIFE_MAGNETISM_OVERDRIVE)));
+
     public static final RegistryObject<HamonAction> HAMON_PROJECTILE_SHIELD = ACTIONS.registerEntry("hamon_projectile_shield", 
-            () -> new HamonProjectileShield(new HamonAction.Builder().holdEnergyCost(30F).heldWalkSpeed(0.5F).shout(Technique.JOSEPH, ModSounds.JOSEPH_BARRIER)));
+            () -> new HamonProjectileShield(new HamonAction.Builder().holdEnergyCost(15F).heldWalkSpeed(0.5F)
+                    .shout(ModHamonSkills.CHARACTER_JOSEPH, ModSounds.JOSEPH_BARRIER)));
     
     public static final RegistryObject<HamonAction> HAMON_REPELLING_OVERDRIVE = ACTIONS.registerEntry("hamon_repelling_overdrive", 
             () -> new HamonRepellingOverdrive(new HamonAction.Builder().energyCost(1000F)));
     
     
-
+    
     public static final RegistryObject<HamonPowerType> HAMON = NON_STAND_POWERS.registerEntry("hamon", 
             () -> new HamonPowerType(
                     0xFFFF00, 
                     new HamonAction[] {
                             HAMON_SENDO_OVERDRIVE.get(), 
-                            HAMON_TURQUOISE_BLUE_OVERDRIVE.get(), 
+                            HAMON_SUNLIGHT_YELLOW_OVERDRIVE.get(), 
                             HAMON_PLANT_INFUSION.get(), 
-                            HAMON_ZOOM_PUNCH.get()}, 
+                            HAMON_ZOOM_PUNCH.get(), 
+                            HAMON_TURQUOISE_BLUE_OVERDRIVE.get()}, 
                     new HamonAction[] {
                             HAMON_HEALING.get(), 
                             HAMON_SPEED_BOOST.get(), 
@@ -111,13 +114,13 @@ public class ModHamonActions {
                     ));
     
     
-
-    public static final RegistryObject<HamonAction> JONATHAN_OVERDRIVE_BARRAGE = ACTIONS.registerEntry("jonathan_overdrive_barrage", 
-            () -> new HamonOverdriveBarrage(new HamonAction.Builder().holdEnergyCost(70F).heldWalkSpeed(0.5F).shout(ModSounds.JONATHAN_OVERDRIVE_BARRAGE)));
-
+    
     public static final RegistryObject<HamonAction> JONATHAN_SCARLET_OVERDRIVE = ACTIONS.registerEntry("jonathan_scarlet_overdrive", 
             () -> new HamonScarletOverdrive(new HamonAction.Builder().energyCost(150F)
                     .emptyMainHand().swingHand().shout(ModSounds.JONATHAN_SCARLET_OVERDRIVE)));
+    
+    public static final RegistryObject<HamonAction> JONATHAN_OVERDRIVE_BARRAGE = ACTIONS.registerEntry("jonathan_overdrive_barrage", 
+            () -> new HamonOverdriveBarrage(new HamonAction.Builder().holdEnergyCost(70F).heldWalkSpeed(0.5F).shout(ModSounds.JONATHAN_OVERDRIVE_BARRAGE)));
     
     public static final RegistryObject<HamonAction> ZEPPELI_HAMON_CUTTER = ACTIONS.registerEntry("zeppeli_hamon_cutter", 
             () -> new HamonCutter(new HamonAction.Builder().energyCost(400F).shout(ModSounds.ZEPPELI_HAMON_CUTTER)));

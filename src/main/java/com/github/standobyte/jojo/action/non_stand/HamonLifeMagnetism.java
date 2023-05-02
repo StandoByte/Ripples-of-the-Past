@@ -6,7 +6,7 @@ import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonData;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 
 import net.minecraft.block.LeavesBlock;
 import net.minecraft.entity.LivingEntity;

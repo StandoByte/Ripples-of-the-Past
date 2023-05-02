@@ -1,10 +1,10 @@
 package com.github.standobyte.jojo.action.stand;
 
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.Technique;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
@@ -22,7 +22,7 @@ public class TheWorldTimeStop extends TimeStop {
         if (user.getRandom().nextFloat() < 0.05F && 
                 INonStandPower.getNonStandPowerOptional(user).map(otherPower -> 
                 otherPower.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> 
-                hamon.getTechnique() == Technique.JONATHAN).orElse(false)).orElse(false)) {
+                hamon.characterIs(ModHamonSkills.CHARACTER_JONATHAN.get())).orElse(false)).orElse(false)) {
             return ModSounds.JONATHAN_THE_WORLD.get();
         }
         return super.getShout(user, power, target, wasActive);

@@ -1,20 +1,20 @@
 package com.github.standobyte.jojo.client.ui.screen.hamon;
 
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class HamonSkillGuiElement {
-    protected final HamonSkill skill;
+    protected final AbstractHamonSkill skill;
     private final IFormattableTextComponent name;
     protected int x;
     protected int y;
     protected final int width;
     protected final int height;
     
-    public HamonSkillGuiElement(HamonSkill skill, 
+    public HamonSkillGuiElement(AbstractHamonSkill skill, 
             int x, int y, int width, int height) {
         this.skill = skill;
         this.name = new TranslationTextComponent("hamonSkill." + skill.getName() + ".name");
@@ -54,7 +54,7 @@ public class HamonSkillGuiElement {
         hamonScreen.renderTooltip(matrixStack, name, mouseX, mouseY);
     }
     
-    public HamonSkill getHamonSkill() {
+    public AbstractHamonSkill getHamonSkill() {
         return skill;
     }
 }

@@ -1,12 +1,12 @@
 package com.github.standobyte.jojo.item;
 
 import com.github.standobyte.jojo.entity.itemprojectile.ClackersEntity;
-import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonPowerType;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.collect.ImmutableMultimap;
@@ -45,7 +45,7 @@ public class ClackersItem extends Item {
         ItemStack stack = player.getItemInHand(hand);
         INonStandPower power = INonStandPower.getPlayerNonStandPower(player);
         if (power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
-            if (hamon.isSkillLearned(HamonSkill.CLACKER_VOLLEY)) {
+            if (hamon.isSkillLearned(ModHamonSkills.CLACKER_VOLLEY.get())) {
                 return true;
             }
             return false;
@@ -141,7 +141,7 @@ public class ClackersItem extends Item {
     public boolean hurtEnemy(ItemStack itemStack, LivingEntity target, LivingEntity user) {
         return INonStandPower.getNonStandPowerOptional(user).map(power -> 
         power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
-            if (hamon.isSkillLearned(HamonSkill.CLACKER_VOLLEY)) {
+            if (hamon.isSkillLearned(ModHamonSkills.CLACKER_VOLLEY.get())) {
                 if (!user.level.isClientSide()) {
                     if (power.consumeEnergy(200) && DamageUtil.dealHamonDamage(target, 0.15F, user, null)) {
                         target.invulnerableTime = 0;

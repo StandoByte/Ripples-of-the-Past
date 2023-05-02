@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.network.packets.fromserver;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
@@ -10,9 +9,11 @@ import java.util.stream.Collectors;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.toasts.HamonSkillToast;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.AbstractHamonSkill;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.BaseHamonSkill;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.toasts.ToastGui;
@@ -38,7 +39,7 @@ public class TrHamonStatsPacket {
         this.breathing = breathing;
     }
 
-    public TrHamonStatsPacket(int entityId, boolean showToasts, HamonSkill.HamonStat stat, int value) {
+    public TrHamonStatsPacket(int entityId, boolean showToasts, BaseHamonSkill.HamonStat stat, int value) {
         this.entityId = entityId;
         this.showToasts = showToasts;
         switch (stat) {
@@ -94,9 +95,9 @@ public class TrHamonStatsPacket {
             case BREATHING:
                 return new TrHamonStatsPacket(buf.readInt(), buf.readBoolean(), buf.readFloat());
             case STRENGTH:
-                return new TrHamonStatsPacket(buf.readInt(), buf.readBoolean(), HamonSkill.HamonStat.STRENGTH, buf.readShort());
+                return new TrHamonStatsPacket(buf.readInt(), buf.readBoolean(), BaseHamonSkill.HamonStat.STRENGTH, buf.readShort());
             case CONTROL:
-                return new TrHamonStatsPacket(buf.readInt(), buf.readBoolean(), HamonSkill.HamonStat.CONTROL, buf.readShort());
+                return new TrHamonStatsPacket(buf.readInt(), buf.readBoolean(), BaseHamonSkill.HamonStat.CONTROL, buf.readShort());
             default:
                 return new TrHamonStatsPacket(buf.readInt(), buf.readBoolean(), buf.readShort(), buf.readShort(), buf.readFloat());
             }
@@ -110,18 +111,18 @@ public class TrHamonStatsPacket {
                 INonStandPower.getNonStandPowerOptional(user).ifPresent(power -> {
                     power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                         final boolean showToasts = msg.showToasts && entity == ClientUtil.getClientPlayer();
-                        Predicate<HamonSkill> canBeLearned = skill -> !hamon.isSkillLearned(skill)
-                                && hamon.canLearnSkillTeacherIrrelevant(user, skill).isPositive();
-                        List<HamonSkill> oldSkills = Collections.emptyList();
+                        Predicate<AbstractHamonSkill> canBeLearned = skill -> !hamon.isSkillLearned(skill) && hamon.canLearnSkillTeacherIrrelevant(user, skill).isPositive();
+                        List<AbstractHamonSkill> oldSkills = Collections.emptyList();
                         if (showToasts) {
-                            oldSkills = Arrays.stream(HamonSkill.values()).filter(skill -> canBeLearned.test(skill)).collect(Collectors.toList());
+                            oldSkills = ModHamonSkills.HAMON_SKILLS.getRegistry().getValues().stream()
+                                    .filter(skill -> canBeLearned.test(skill)).collect(Collectors.toList());
                         }
 
                         if (msg.stat == Stat.ALL || msg.stat == Stat.STRENGTH) {
-                            hamon.setHamonStatPoints(HamonSkill.HamonStat.STRENGTH, msg.strength, true, true);
+                            hamon.setHamonStatPoints(BaseHamonSkill.HamonStat.STRENGTH, msg.strength, true, true);
                         }
                         if (msg.stat == Stat.ALL || msg.stat == Stat.CONTROL) {
-                            hamon.setHamonStatPoints(HamonSkill.HamonStat.CONTROL, msg.control, true, true);
+                            hamon.setHamonStatPoints(BaseHamonSkill.HamonStat.CONTROL, msg.control, true, true);
                         }
                         if (msg.stat == Stat.ALL || msg.stat == Stat.BREATHING) {
                             hamon.setBreathingLevel(msg.breathing);
@@ -129,10 +130,12 @@ public class TrHamonStatsPacket {
 
                         ToastGui toastGui = Minecraft.getInstance().getToasts();
                         if (showToasts) {
-                            for (HamonSkill skill : HamonSkill.values()) {
+                            for (AbstractHamonSkill skill : ModHamonSkills.HAMON_SKILLS.getRegistry().getValues()) {
                                 if (canBeLearned.test(skill) && !oldSkills.contains(skill)) {
-                                    HamonSkillToast.Type toastType = skill.getTechnique() != null ? HamonSkillToast.Type.TECHNIQUE : 
-                                        skill.getStat() == HamonSkill.HamonStat.STRENGTH ? HamonSkillToast.Type.STRENGTH : HamonSkillToast.Type.CONTROL;
+                                    HamonSkillToast.Type toastType = skill instanceof BaseHamonSkill ? 
+                                            ((BaseHamonSkill) skill).getStat() == BaseHamonSkill.HamonStat.STRENGTH
+                                            ? HamonSkillToast.Type.STRENGTH : HamonSkillToast.Type.CONTROL
+                                                    : HamonSkillToast.Type.TECHNIQUE;
                                     HamonSkillToast.addOrUpdate(toastGui, toastType, skill);
                                 }
                             }

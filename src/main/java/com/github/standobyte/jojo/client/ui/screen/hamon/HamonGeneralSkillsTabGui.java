@@ -3,10 +3,11 @@ package com.github.standobyte.jojo.client.ui.screen.hamon;
 import java.util.List;
 
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
+import com.github.standobyte.jojo.network.packets.fromclient.ClHamonResetSkillsButtonPacket.HamonSkillsTab;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonData;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonSkillType;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.BaseHamonSkill;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
@@ -17,52 +18,52 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class HamonGeneralSkillsTabGui extends HamonSkillsTabGui {
-    private static final HamonSkill[][] SKILLS_STRENGTH;
+    private static final BaseHamonSkill[][] SKILLS_STRENGTH;
     private static final ITextComponent[] NAMES_STRENGTH = {
             new TranslationTextComponent("hamon.skills.overdrive"),
             new TranslationTextComponent("hamon.skills.infusion"),
             new TranslationTextComponent("hamon.skills.flexibility")
     };
-    private static final HamonSkill[][] SKILLS_CONTROL;
+    private static final BaseHamonSkill[][] SKILLS_CONTROL;
     private static final ITextComponent[] NAMES_CONTROL = {
             new TranslationTextComponent("hamon.skills.life"),
             new TranslationTextComponent("hamon.skills.attractant"),
             new TranslationTextComponent("hamon.skills.repellent")
     };
     static {
-        SKILLS_STRENGTH = new HamonSkill[][] {
+        SKILLS_STRENGTH = new BaseHamonSkill[][] {
             {
-                HamonSkill.OVERDRIVE, 
-                HamonSkill.SENDO_OVERDRIVE, 
-                HamonSkill.TURQUOISE_BLUE_OVERDRIVE, 
-                HamonSkill.SUNLIGHT_YELLOW_OVERDRIVE},
+                ModHamonSkills.OVERDRIVE.get(), 
+                ModHamonSkills.SENDO_OVERDRIVE.get(), 
+                ModHamonSkills.TURQUOISE_BLUE_OVERDRIVE.get(), 
+                ModHamonSkills.SUNLIGHT_YELLOW_OVERDRIVE.get()},
             {
-                HamonSkill.THROWABLES_INFUSION, 
-                HamonSkill.PLANT_INFUSION, 
-                HamonSkill.ARROW_INFUSION, 
-                HamonSkill.ANIMAL_INFUSION},
+                ModHamonSkills.THROWABLES_INFUSION.get(), 
+                ModHamonSkills.PLANT_INFUSION.get(), 
+                ModHamonSkills.ARROW_INFUSION.get(), 
+                ModHamonSkills.ANIMAL_INFUSION.get()},
             {
-                HamonSkill.ZOOM_PUNCH, 
-                HamonSkill.JUMP, 
-                HamonSkill.SPEED_BOOST, 
-                HamonSkill.AFTERIMAGES}
+                ModHamonSkills.ZOOM_PUNCH.get(), 
+                ModHamonSkills.JUMP.get(), 
+                ModHamonSkills.SPEED_BOOST.get(), 
+                ModHamonSkills.AFTERIMAGES.get()}
         };
-        SKILLS_CONTROL = new HamonSkill[][] {
+        SKILLS_CONTROL = new BaseHamonSkill[][] {
             {
-                HamonSkill.HEALING, 
-                HamonSkill.PLANTS_GROWTH, 
-                HamonSkill.EXPEL_VENOM, 
-                HamonSkill.HEALING_TOUCH},
+                ModHamonSkills.HEALING.get(), 
+                ModHamonSkills.PLANTS_GROWTH.get(), 
+                ModHamonSkills.EXPEL_VENOM.get(), 
+                ModHamonSkills.HEALING_TOUCH.get()},
             {
-                HamonSkill.WALL_CLIMBING, 
-                HamonSkill.DETECTOR, 
-                HamonSkill.LIFE_MAGNETISM, 
-                HamonSkill.HAMON_SPREAD},
+                ModHamonSkills.WALL_CLIMBING.get(), 
+                ModHamonSkills.DETECTOR.get(), 
+                ModHamonSkills.LIFE_MAGNETISM.get(), 
+                ModHamonSkills.HAMON_SPREAD.get()},
             {
-                HamonSkill.WATER_WALKING, 
-                HamonSkill.PROJECTILE_SHIELD, 
-                HamonSkill.LAVA_WALKING, 
-                HamonSkill.REPELLING_OVERDRIVE}
+                ModHamonSkills.WATER_WALKING.get(), 
+                ModHamonSkills.PROJECTILE_SHIELD.get(), 
+                ModHamonSkills.LAVA_WALKING.get(), 
+                ModHamonSkills.REPELLING_OVERDRIVE.get()}
         };
     }
     
@@ -86,12 +87,12 @@ public class HamonGeneralSkillsTabGui extends HamonSkillsTabGui {
     
     private void fillSkillLines() {
         skills.clear();
-        HamonSkill[][] skillsOnTab = skillsType == HamonStat.STRENGTH ? SKILLS_STRENGTH : SKILLS_CONTROL;
+        BaseHamonSkill[][] skillsOnTab = skillsType == HamonStat.STRENGTH ? SKILLS_STRENGTH : SKILLS_CONTROL;
         skillTreeNames = skillsType == HamonStat.STRENGTH ? NAMES_STRENGTH : NAMES_CONTROL;
         skillTreeNamePos = new int[3][2];
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 4; j++) {
-                HamonSkill skill = skillsOnTab[i][j];
+                BaseHamonSkill skill = skillsOnTab[i][j];
                 int x = 9 + i * 68 + X_OFFSET[j];
                 int y = HamonScreen.WINDOW_HEIGHT - 131 + Y_OFFSET[j];
                 skills.put(skill, new HamonSkillElementLearnable(skill, 
@@ -103,8 +104,8 @@ public class HamonGeneralSkillsTabGui extends HamonSkillsTabGui {
     }
     
     @Override
-    protected HamonSkillType getSkillsType() {
-        return skillsType == HamonStat.STRENGTH ? HamonSkillType.STRENGTH : HamonSkillType.CONTROL;
+    protected HamonSkillsTab getSkillsType() {
+        return skillsType == HamonStat.STRENGTH ? HamonSkillsTab.STRENGTH : HamonSkillsTab.CONTROL;
     }
 
     @Override

@@ -17,8 +17,8 @@ import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonLearnButtonPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonResetSkillsButtonPacket;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonSkillType;
+import com.github.standobyte.jojo.network.packets.fromclient.ClHamonResetSkillsButtonPacket.HamonSkillsTab;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
@@ -39,7 +39,7 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
     public static final ResourceLocation HAMON_SKILLS = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/hamon_window_2.png");
     
     private final List<IReorderingProcessor> creativeResetButtonTooltip;
-    protected final Map<HamonSkill, HamonSkillElementLearnable> skills = new HashMap<>();
+    protected final Map<AbstractHamonSkill, HamonSkillElementLearnable> skills = new HashMap<>();
     protected HamonScreenButton learnButton;
     protected HamonScreenButton creativeResetButton;
     @Nullable private HamonSkillElementLearnable selectedSkill = null;
@@ -70,7 +70,7 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
         screen.addButton(creativeResetButton);
     }
     
-    protected abstract HamonSkillType getSkillsType();
+    protected abstract HamonSkillsTab getSkillsType();
     
     @Override
     List<HamonScreenButton> getButtons() {
@@ -112,9 +112,9 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
         // selected/hovered skill requirements (red overlay)
         HamonSkillGuiElement renderMissing = selectedSkill != null ? selectedSkill : hovered != null ? hovered : null;
         if (renderMissing != null) {
-            List<HamonSkill> missingSkills = renderMissing.getHamonSkill().getRequiredSkills().stream().filter(skill -> 
+            List<AbstractHamonSkill> missingSkills = renderMissing.getHamonSkill().getRequiredSkills().filter(skill -> 
             !screen.hamon.isSkillLearned(skill)).collect(Collectors.toList());
-            for (HamonSkill skill : missingSkills) {
+            for (AbstractHamonSkill skill : missingSkills) {
                 if (!GeneralUtil.orElseFalse(findSkillSquare(skill), skillElement -> {
                     minecraft.getTextureManager().bind(HAMON_SKILLS);
                     skillElement.blitBgSquareRequirement(matrixStack, intScrollX, intScrollY);
@@ -159,13 +159,13 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
         RenderSystem.disableBlend();
     }
     
-    public static void renderHamonSkillIcon(MatrixStack matrixStack, HamonSkill skill, int x, int y) {
+    public static void renderHamonSkillIcon(MatrixStack matrixStack, AbstractHamonSkill skill, int x, int y) {
         TextureAtlasSprite textureAtlasSprite = CustomResources.getHamonSkillSprites().getSprite(skill);
         Minecraft.getInstance().getTextureManager().bind(textureAtlasSprite.atlas().location());
         blit(matrixStack, x, y, 0, 16, 16, textureAtlasSprite);
     }
     
-    public Optional<HamonSkillElementLearnable> findSkillSquare(HamonSkill skill) {
+    public Optional<HamonSkillElementLearnable> findSkillSquare(AbstractHamonSkill skill) {
         return Optional.ofNullable(skills.get(skill));
     }
     
@@ -238,7 +238,7 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
             }
             for (HamonSkillGuiElement requirement : skillRequirements) {
                 if (requirement.isMouseOver(intScrollX, intScrollY, (int) mouseX, (int) mouseY)) {
-                    HamonSkill skill = requirement.getHamonSkill();
+                    AbstractHamonSkill skill = requirement.getHamonSkill();
                     for (HamonTabGui tab : screen.selectableTabs) {
                         if (tab instanceof HamonSkillsTabGui) {
                             if (GeneralUtil.orElseFalse(((HamonSkillsTabGui) tab).findSkillSquare(skill), skillElement -> {
@@ -293,7 +293,7 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
         updateButton();
     }
     
-    protected HamonSkillDescBox createSkillDesc(@Nonnull HamonSkill skill) {
+    protected HamonSkillDescBox createSkillDesc(@Nonnull AbstractHamonSkill skill) {
         return new HamonSkillDescBox(skill, minecraft.font, 192, 7, 25);
     }
     
@@ -307,7 +307,7 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
         learnButton.active = false;
         if (selectedSkill != null) {
             learnButton.visible = !screen.hamon.isSkillLearned(selectedSkill.getHamonSkill());
-            ActionConditionResult canLearnSkill = screen.hamon.canLearnSkill(minecraft.player, selectedSkill.getHamonSkill(), screen.isTeacherNearby, screen.teacherSkills);
+            ActionConditionResult canLearnSkill = screen.hamon.canLearnSkill(minecraft.player, selectedSkill.getHamonSkill(), screen.teacherSkills);
             ITextComponent closedReason = canLearnSkill.getWarning();
             if (closedReason instanceof IFormattableTextComponent) {
                 ((IFormattableTextComponent) closedReason).withStyle(TextFormatting.RED);
@@ -318,8 +318,8 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
         creativeResetButton.visible = selectedSkill == null && screen.getMinecraft().player.abilities.instabuild;
         
         if (selectedSkill != null && learnButton.visible) {
-            int reqCount = (int) selectedSkill.skill.getRequiredSkills().size();
-            skillRequirements = Streams.mapWithIndex(selectedSkill.skill.getRequiredSkills().stream(), 
+            int reqCount = (int) selectedSkill.skill.getRequiredSkills().count();
+            skillRequirements = Streams.mapWithIndex(selectedSkill.skill.getRequiredSkills(), 
                     (skill, i) -> new HamonSkillElementRequirement(skill, 138 + ((int) i - reqCount) * 20, 77))
                     .collect(Collectors.toList());
         }

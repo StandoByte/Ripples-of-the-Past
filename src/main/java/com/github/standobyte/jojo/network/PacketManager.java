@@ -65,6 +65,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDirectEntityPosPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDoubleShiftPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrEnergyPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHamonCharacterTechniquePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonStatsPacket;
@@ -152,6 +153,7 @@ public class PacketManager {
         registerMessage(channel, new TrHamonMeditationPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new HamonTeachersSkillsPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new HamonSkillAddPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(channel, new TrHamonCharacterTechniquePacket.Handler(),      Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new HamonSkillRemovePacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrHamonParticlesPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrVampirismDataPacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_CLIENT));

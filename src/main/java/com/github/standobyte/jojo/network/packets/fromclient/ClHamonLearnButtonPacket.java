@@ -5,16 +5,16 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.AbstractHamonSkill;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 public class ClHamonLearnButtonPacket {
-    private final HamonSkill skill;
+    private final AbstractHamonSkill skill;
     
-    public ClHamonLearnButtonPacket(HamonSkill skill) {
+    public ClHamonLearnButtonPacket(AbstractHamonSkill skill) {
         this.skill = skill;
     }
     
@@ -24,12 +24,12 @@ public class ClHamonLearnButtonPacket {
 
         @Override
         public void encode(ClHamonLearnButtonPacket msg, PacketBuffer buf) {
-            buf.writeEnum(msg.skill);
+            buf.writeRegistryId(msg.skill);
         }
 
         @Override
         public ClHamonLearnButtonPacket decode(PacketBuffer buf) {
-            return new ClHamonLearnButtonPacket(buf.readEnum(HamonSkill.class));
+            return new ClHamonLearnButtonPacket(buf.readRegistryIdSafe(AbstractHamonSkill.class));
         }
 
         @Override
@@ -37,7 +37,7 @@ public class ClHamonLearnButtonPacket {
             ServerPlayerEntity player = ctx.get().getSender();
             INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
                 power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                    hamon.addHamonSkill(player, msg.skill, true, true);
+                    msg.skill.learnNewSkill(hamon, player);
                 });
             });
         }

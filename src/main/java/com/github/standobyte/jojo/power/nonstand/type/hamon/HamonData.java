@@ -1,13 +1,13 @@
 package com.github.standobyte.jojo.power.nonstand.type.hamon;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -22,7 +22,9 @@ import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromclient.ClHamonResetSkillsButtonPacket.HamonSkillsTab;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillAddPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillRemovePacket;
@@ -32,8 +34,11 @@ import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.nonstand.TypeSpecificData;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonSkillType;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.AbstractHamonSkill;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.BaseHamonSkill;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.CharacterHamonTechnique;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.HamonTechniqueManager;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
 
@@ -83,8 +88,8 @@ public class HamonData extends TypeSpecificData {
     private float hamonDamageFactor = 1F;
     private EnumMap<Exercise, Integer> exerciseTicks = new EnumMap<Exercise, Integer>(Exercise.class);
     private float avgExercisePoints;
-    
-    private HamonSkillSet hamonSkills;
+
+    private MainHamonSkillsManager hamonSkills;
     
     private boolean isMeditating;
     private int meditationTicks;
@@ -92,7 +97,7 @@ public class HamonData extends TypeSpecificData {
     private Set<PlayerEntity> newLearners = new HashSet<>();
 
     public HamonData() {
-        hamonSkills = new HamonSkillSet();
+        hamonSkills = new MainHamonSkillsManager();
         for (Exercise exercise : Exercise.values()) {
             exerciseTicks.put(exercise, 0);
         }
@@ -169,16 +174,15 @@ public class HamonData extends TypeSpecificData {
     
     @Override
     public boolean isActionUnlocked(Action<INonStandPower> action, INonStandPower powerData) {
-        if (action == ModHamonActions.HAMON_SUNLIGHT_YELLOW_OVERDRIVE.get()) {
-            return hamonSkills.isSkillLearned(HamonSkill.SUNLIGHT_YELLOW_OVERDRIVE);
-        }
-        return action == ModHamonActions.HAMON_OVERDRIVE.get() || action == ModHamonActions.HAMON_HEALING.get() || hamonSkills.unlockedActions.contains(action);
+        return action == ModHamonActions.HAMON_OVERDRIVE.get()
+                || action == ModHamonActions.HAMON_HEALING.get()
+                || hamonSkills.isUnlockedFromSkills(action);
     }
     
     @Override
     public void onPowerGiven(NonStandPowerType<?> oldType) {
-        hamonSkills.addSkill(HamonSkill.OVERDRIVE);
-        hamonSkills.addSkill(HamonSkill.HEALING);
+        hamonSkills.addSkill(ModHamonSkills.OVERDRIVE.get());
+        hamonSkills.addSkill(ModHamonSkills.HEALING.get());
     }
     
     
@@ -305,10 +309,10 @@ public class HamonData extends TypeSpecificData {
         int spentPoints;
         switch (stat) {
         case STRENGTH:
-            spentPoints = hamonSkills.getSpentStrengthPoints();
+            spentPoints = hamonSkills.getBaseSkills().getSpentStrengthPoints();
             break;
         case CONTROL:
-            spentPoints = hamonSkills.getSpentControlPoints();
+            spentPoints = hamonSkills.getBaseSkills().getSpentControlPoints();
             break;
         default:
             throw new IllegalArgumentException("Unexpected HamonStat constant: " + stat.name());
@@ -322,7 +326,7 @@ public class HamonData extends TypeSpecificData {
     
     private static final float ENERGY_PER_POINT = 750F;
     public void hamonPointsFromAction(HamonStat stat, float energyCost) {
-        if (isSkillLearned(HamonSkill.NATURAL_TALENT)) {
+        if (isSkillLearned(ModHamonSkills.NATURAL_TALENT.get())) {
             energyCost *= 2;
         }
         energyCost *= JojoModConfig.getCommonConfigInstance(false).hamonPointsMultiplier.get().floatValue();
@@ -645,7 +649,7 @@ public class HamonData extends TypeSpecificData {
     
     public float multiplyPositiveBreathingTraining(float training) {
         if (training > 0) {
-            if (isSkillLearned(HamonSkill.NATURAL_TALENT)) {
+            if (isSkillLearned(ModHamonSkills.NATURAL_TALENT.get())) {
                 training *= 2;
             }
             training *= JojoModConfig.getCommonConfigInstance(false).breathingTrainingMultiplier.get().floatValue();
@@ -678,7 +682,7 @@ public class HamonData extends TypeSpecificData {
             }
             setBreathingLevel(getBreathingLevel() + lvlInc);
             avgExercisePoints = 0;
-            if (isSkillLearned(HamonSkill.CHEAT_DEATH)) {
+            if (isSkillLearned(ModHamonSkills.CHEAT_DEATH.get())) {
                 HamonPowerType.updateCheatDeathEffect(power.getUser());
             }
         }
@@ -695,61 +699,32 @@ public class HamonData extends TypeSpecificData {
     
     
     
-    public Set<HamonSkill> getSkillSetImmutable() {
-        return Collections.unmodifiableSet(hamonSkills.wrappedSkillSet);
+    public boolean isSkillLearned(AbstractHamonSkill skill) {
+        return hamonSkills.containsSkill(skill);
     }
     
-    public boolean isSkillLearned(HamonSkill skill) {
-        return hamonSkills.isSkillLearned(skill);
+    public ActionConditionResult canLearnSkillTeacherIrrelevant(LivingEntity user, AbstractHamonSkill skill) {
+        return hamonSkills.canLearnSkill(user, this, skill);
+    }
+    
+    public ActionConditionResult canLearnSkill(LivingEntity user, AbstractHamonSkill skill, @Nullable Collection<? extends AbstractHamonSkill> teachersSkills) {
+        return hamonSkills.canLearnSkill(user, this, skill, teachersSkills);
     }
 
-    public ActionConditionResult canLearnSkillTeacherIrrelevant(LivingEntity user, HamonSkill skill) {
-        return canLearnSkill(user, skill, false, null);
-    }
-    
-    public ActionConditionResult canLearnSkill(LivingEntity user, HamonSkill skill, boolean isTeacherNearby, @Nullable Collection<HamonSkill> teachersSkills) {
-        if (!hamonSkills.parentsLearned(skill)) {
-            return ActionConditionResult.createNegative(new TranslationTextComponent("hamon.closed.parents"));
-        }
-        if (!haveSkillPoints(skill)) {
-            return ActionConditionResult.createNegative(new TranslationTextComponent("hamon.closed.points"));
-        }
-        if (skill.getTechnique() != null) {
-            if (!canLearnNewTechniqueSkill()) {
-                return ActionConditionResult.createNegative(new TranslationTextComponent("hamon.closed.technique.locked"));
-            }
-            if (!rightTechnique(skill)) {
-                return ActionConditionResult.createNegative(new TranslationTextComponent("hamon.closed.technique.bug"));
-            }
-        }
-        if (teachersSkills != null && skill.requiresTeacher()) {
-            if (!isTeacherNearby) {
-                return ActionConditionResult.createNegative(new TranslationTextComponent("hamon.closed.teacher.required"));
-            }
-            else if (!teachersSkills.contains(skill)) {
-                return ActionConditionResult.createNegative(new TranslationTextComponent("hamon.closed.teacher.no_skill"));
-            }
-        }
-        return ActionConditionResult.POSITIVE;
-    }
-    
-    private boolean haveSkillPoints(HamonSkill skill) {
-        return skill.getStat() == null || getSkillPoints(skill.getStat()) > 0;
-    }
-
-    public boolean addHamonSkill(LivingEntity user, HamonSkill skill, boolean checkRequirements, boolean sync) {
-        if (!checkRequirements || !isSkillLearned(skill) && canLearnSkill(user, skill, true, HamonPowerType.nearbyTeachersSkills(power.getUser())).isPositive()) {
+    public boolean addHamonSkill(LivingEntity user, AbstractHamonSkill skill, boolean checkRequirements, boolean sync) {
+        if (!checkRequirements || !isSkillLearned(skill) && canLearnSkill(user, skill, HamonPowerType.nearbyTeachersSkills(power.getUser())).isPositive()) {
             hamonSkills.addSkill(skill);
             addSkillAction(skill);
             serverPlayer.ifPresent(player -> {
-                if (skill == HamonSkill.CHEAT_DEATH) {
+                if (skill == ModHamonSkills.CHEAT_DEATH.get()) {
                     HamonPowerType.updateCheatDeathEffect(player);
                 }
-                else if (skill == HamonSkill.SATIPOROJA_SCARF) {
+                else if (skill == ModHamonSkills.SATIPOROJA_SCARF.get()) {
                     player.addItem(new ItemStack(ModItems.SATIPOROJA_SCARF.get()));
                 }
                 if (sync) {
                     PacketManager.sendToClient(new HamonSkillAddPacket(skill), (ServerPlayerEntity) player);
+                    hamonSkills.getTechniqueData().updateTechnique(user);
                 }
             });
             return true;
@@ -759,67 +734,93 @@ public class HamonData extends TypeSpecificData {
 
     @Override
     public void updateExtraActions() {
-        for (HamonSkill skill : getSkillSetImmutable()) {
-            if (skill.getTechnique() != null) {
-                addSkillAction(skill);
-            }
+        HamonTechniqueManager data = hamonSkills.getTechniqueData();
+        if (data.getTechnique() != null) {
+            data.getTechnique().getPerksOnPick().forEach(techniquePerk -> {
+                addSkillAction(techniquePerk);
+            });
+        }
+        for (AbstractHamonSkill techniqueSkill : data.getLearnedSkills()) {
+            addSkillAction(techniqueSkill);
         }
     }
 
-    private void addSkillAction(HamonSkill skill) {
+    private void addSkillAction(AbstractHamonSkill skill) {
         if (skill.getRewardAction() != null && !skill.isBaseSkill()) {
             power.getActions(skill.getRewardType().getActionType()).addExtraAction(skill.getRewardAction());
         }
     }
     
-    public void removeHamonSkill(HamonSkill skill) {
+    public void removeHamonSkill(AbstractHamonSkill skill) {
         if (!skill.isUnlockedByDefault() && isSkillLearned(skill)) {
             hamonSkills.removeSkill(skill);
             removeSkillAction(skill);
             serverPlayer.ifPresent(player -> {
                 PacketManager.sendToClient(new HamonSkillRemovePacket(skill), player);
-                if (skill == HamonSkill.CHEAT_DEATH) {
+                if (skill == ModHamonSkills.CHEAT_DEATH.get()) {
                     player.removeEffect(ModEffects.CHEAT_DEATH.get());
                 }
+                hamonSkills.getTechniqueData().updateTechnique(player);
             });
         }
     }
 
-    private void removeSkillAction(HamonSkill skill) {
+    private void removeSkillAction(AbstractHamonSkill skill) {
         if (skill.getRewardAction() != null && !skill.isBaseSkill()) {
             power.getActions(skill.getRewardType().getActionType()).removeAction(skill.getRewardAction());
         }
     }
 
-    public void resetHamonSkills(LivingEntity user, HamonSkillType type) {
-        for (HamonSkill skill : HamonSkill.values()) {
-            if (!skill.isUnlockedByDefault() && skill.getSkillType() == type && isSkillLearned(skill)) {
-                removeHamonSkill(skill);
-            }
+    public void resetHamonSkills(LivingEntity user, HamonSkillsTab type) {
+        Stream<? extends AbstractHamonSkill> toReset;
+        switch (type) {
+        case STRENGTH:
+            toReset = ModHamonSkills.HAMON_SKILLS.getRegistry().getValues().stream()
+                    .filter(skill -> skill instanceof BaseHamonSkill && ((BaseHamonSkill) skill).getStat() == HamonStat.STRENGTH);
+            break;
+        case CONTROL:
+            toReset = ModHamonSkills.HAMON_SKILLS.getRegistry().getValues().stream()
+                    .filter(skill -> skill instanceof BaseHamonSkill && ((BaseHamonSkill) skill).getStat() == HamonStat.CONTROL);
+            break;
+        case TECHNIQUE:
+            toReset = ModHamonSkills.HAMON_SKILLS.getRegistry().getValues().stream()
+                    .filter(skill -> !skill.isBaseSkill());
+            break;
+        default:
+            toReset = Stream.empty();
+            break;
         }
+        toReset.forEach(this::removeHamonSkill);
+    }
+    
+    public Iterable<AbstractHamonSkill> getLearnedSkills() {
+        return hamonSkills.getLearnedSkills();
     }
     
     
     
-    public HamonSkill.Technique getTechnique() {
-        return hamonSkills.technique;
+    @Nullable
+    public CharacterHamonTechnique getCharacterTechnique() {
+        return hamonSkills.getTechniqueData().getTechnique();
+    }
+    
+    public boolean characterIs(CharacterHamonTechnique character) {
+        return getCharacterTechnique() == character;
     }
     
     public boolean hasTechniqueLevel(int techniqueSkillSlot) {
-        if (techniqueSkillSlot >= HamonSkillSet.MAX_TECHNIQUE_SKILLS) {
+        if (techniqueSkillSlot > HamonTechniqueManager.MAX_TECHNIQUE_SKILLS) {
             return false;
         }
-        return getHamonStrengthLevel() >= HamonSkillSet.techniqueLevelReq(techniqueSkillSlot)
-                && getHamonControlLevel() >= HamonSkillSet.techniqueLevelReq(techniqueSkillSlot);
+        return getHamonStrengthLevel() >= HamonTechniqueManager.techniqueSkillRequirement(techniqueSkillSlot)
+                && getHamonControlLevel() >= HamonTechniqueManager.techniqueSkillRequirement(techniqueSkillSlot);
     }
     
-    public boolean canLearnNewTechniqueSkill() {
-        return hasTechniqueLevel(hamonSkills.techniqueSkillsLearned);
+    public HamonTechniqueManager.Accessor getTechniqueData() {
+        return new HamonTechniqueManager.Accessor(hamonSkills.getTechniqueData());
     }
     
-    private boolean rightTechnique(HamonSkill skill) {
-        return skill.getTechnique() == null || hamonSkills.technique == null || skill.getTechnique() == hamonSkills.technique;
-    }
+    
     
     public void addNewPlayerLearner(PlayerEntity player) {
         newLearners.add(player);
@@ -851,11 +852,7 @@ public class HamonData extends TypeSpecificData {
         nbt.putInt("StrengthPoints", hamonStrengthPoints);
         nbt.putInt("ControlPoints", hamonControlPoints);
         nbt.putFloat("BreathingTechnique", breathingTrainingLevel);
-        CompoundNBT skillsMapNbt = new CompoundNBT();
-        for (HamonSkill skill : HamonSkill.values()) {
-            skillsMapNbt.putBoolean(skill.getName(), hamonSkills.isSkillLearned(skill));
-        }
-        nbt.put("Skills", skillsMapNbt);
+        nbt.put("Skills", hamonSkills.toNBT());
         CompoundNBT exercises = new CompoundNBT();
         for (Exercise exercise : Exercise.values()) {
             exercises.putInt(exercise.toString(), Math.min(exerciseTicks.get(exercise), exercise.getMaxTicks(this)));
@@ -873,7 +870,7 @@ public class HamonData extends TypeSpecificData {
         hamonControlLevel = levelFromPoints(hamonControlPoints);
         breathingTrainingLevel = nbt.getFloat("BreathingTechnique");
         recalcHamonDamage();
-        fillSkillsFromNbt(nbt.getCompound("Skills"));
+        hamonSkills.fromNbt(nbt.getCompound("Skills"));
         CompoundNBT exercises = nbt.getCompound("Exercises");
         int[] exercisesNbt = new int[4];
         for (Exercise exercise : Exercise.values()) {
@@ -882,34 +879,23 @@ public class HamonData extends TypeSpecificData {
         setExerciseTicks(exercisesNbt[0], exercisesNbt[1], exercisesNbt[2], exercisesNbt[3], false);
         breathingTrainingDayBonus = nbt.getFloat("TrainingBonus");
     }
-
-    private void fillSkillsFromNbt(CompoundNBT nbt) {
-        for (HamonSkill skill : HamonSkill.values()) {
-            if (nbt.contains(skill.getName()) && nbt.getBoolean(skill.getName())) {
-                hamonSkills.addSkill(skill);
-            }
-        }
-    }
-
+    
     @Override
     public void syncWithUserOnly(ServerPlayerEntity user) {
         giveBreathingTrainingBuffs(user);
-        for (HamonSkill skill : HamonSkill.values()) {
-            if (isSkillLearned(skill)) {
-                PacketManager.sendToClient(new HamonSkillAddPacket(skill), user);
-            }
-        }
         updateExerciseAttributes(user);
+        hamonSkills.syncWithUser(user, this);
         PacketManager.sendToClient(new HamonExercisesPacket(this), user);
         ModCriteriaTriggers.HAMON_STATS.get().trigger(user, hamonStrengthLevel, hamonControlLevel, breathingTrainingLevel);
     }
-
+    
     @Override
     public void syncWithTrackingOrUser(LivingEntity user, ServerPlayerEntity entity) {
         PacketManager.sendToClient(new TrHamonStatsPacket(
                 user.getId(), false, getHamonStrengthPoints(), getHamonControlPoints(), getBreathingLevel()), entity);
+        hamonSkills.syncWithTrackingOrUser(user, entity, this);
     }
-
+    
     public enum Exercise {
         MINING(150),
         RUNNING(135),

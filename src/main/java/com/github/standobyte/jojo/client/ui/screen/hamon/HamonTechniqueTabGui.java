@@ -1,20 +1,22 @@
 package com.github.standobyte.jojo.client.ui.screen.hamon;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonSkillType;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.Technique;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkillSet;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
+import com.github.standobyte.jojo.network.packets.fromclient.ClHamonResetSkillsButtonPacket.HamonSkillsTab;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.CharacterHamonTechnique;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.CharacterTechniqueHamonSkill;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.HamonTechniqueManager;
+import com.github.standobyte.jojo.util.general.LazyUnmodifiableArrayList;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
@@ -24,9 +26,9 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class HamonTechniqueTabGui extends HamonSkillsTabGui {
-    private Technique technique;
-    private Map<Technique, HamonCharacterTechniqueBox> availableHamonTechniques = Collections.emptyMap();
-    private Technique selectedTechnique = null;
+    private CharacterHamonTechnique technique;
+    private Map<CharacterHamonTechnique, HamonCharacterTechniqueBox> availableHamonTechniques = Collections.emptyMap();
+    private CharacterHamonTechnique selectedTechnique = null;
     private final List<IReorderingProcessor> availableTechniqueSkillLines;
     private final List<IReorderingProcessor> tabLockedLines;
     
@@ -37,7 +39,7 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
         }
         availableTechniqueSkillLines = minecraft.font.split(new TranslationTextComponent("hamon.technique_available"), 100);
         tabLockedLines = minecraft.font.split(new TranslationTextComponent("hamon.techniques_locked", 
-                        HamonSkillSet.techniqueLevelReq(0)), 200);
+                HamonTechniqueManager.techniqueSkillRequirement(0)), 200);
     }
     
     @Override
@@ -54,29 +56,27 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
         skills.clear();
         
         // available techniques
-        List<Technique> techniques;
-        this.technique = screen.hamon.getTechnique();
+        List<CharacterHamonTechnique> techniques;
+        this.technique = screen.hamon.getCharacterTechnique();
         if (technique != null) {
             techniques = Util.make(new ArrayList<>(), list -> list.add(technique));
         }
         else {
-            techniques = new ArrayList<>(Arrays.asList(Technique.values()));
+            techniques = new ArrayList<>(ModHamonSkills.HAMON_CHARACTER_TECHNIQUES.getRegistry().getValues());
             Collections.sort(techniques, TECHNIQUES_ORDER);
         }
         
-        List<HamonScreenButton> newButtons = new ArrayList<>();
-        
-        // technique names, buttons, skill squares and y coordinates
+        // technique names, skill squares and y coordinates
         availableHamonTechniques = new LinkedHashMap<>();
         int techniqueY = techniqueYStarting();
-        for (Technique technique : techniques) {
-            List<IReorderingProcessor> name = minecraft.font.split(new TranslationTextComponent("hamon.technique." + technique.name().toLowerCase()), 192);
+        for (CharacterHamonTechnique technique : techniques) {
+            List<IReorderingProcessor> name = minecraft.font.split(new TranslationTextComponent("hamon.technique." + technique.getName()), 192);
             HamonCharacterTechniqueBox techniqueBox = new HamonCharacterTechniqueBox(technique, techniqueY, name, minecraft.font);
             availableHamonTechniques.put(technique, techniqueBox);
             
-            List<HamonSkill> skills = technique.getSkills();
+            List<CharacterTechniqueHamonSkill> skills = technique.getSkills().collect(Collectors.toList());
             int j = 0;
-            for (HamonSkill skill : skills) {
+            for (CharacterTechniqueHamonSkill skill : skills) {
                 int x = HamonScreen.WINDOW_WIDTH - 21 - (skills.size() - j) * 28;
                 int y = techniqueY + name.size() * 9 + 4;
                 HamonSkillElementLearnable skillSquare = new HamonSkillElementLearnable(skill, 
@@ -103,19 +103,17 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
         if (getSelectedSkill() != null) {
             selectSkill(skills.get(getSelectedSkill().getHamonSkill()));
         }
-        
-        newButtons.forEach(screen::addButton);
     }
     
     @Override
-    protected HamonSkillType getSkillsType() {
-        return HamonSkillType.TECHNIQUE;
+    protected HamonSkillsTab getSkillsType() {
+        return HamonSkillsTab.TECHNIQUE;
     }
     
     @Override
     void drawTab(MatrixStack matrixStack, int windowX, int windowY, boolean isSelected, boolean red) {
         super.drawTab(matrixStack, windowX, windowY, isSelected, red);
-        if (screen.hamon.canLearnNewTechniqueSkill()) {
+        if (screen.hamon.getTechniqueData().canLearnNewTechniqueSkill(screen.hamon, minecraft.player)) {
             minecraft.getTextureManager().bind(HamonScreen.WINDOW);
             blit(matrixStack, windowX - 32 + 7, windowY + getTabY() + 3, 248, 206, 8, 8);
         }
@@ -135,14 +133,14 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
     
     @Override
     List<IReorderingProcessor> additionalTabNameTooltipInfo() {
-        if (screen.hamon.canLearnNewTechniqueSkill()) {
+        if (screen.hamon.getTechniqueData().canLearnNewTechniqueSkill(screen.hamon, minecraft.player)) {
             return availableTechniqueSkillLines;
         }
         return super.additionalTabNameTooltipInfo();
     }
     
     private boolean isLocked() {
-        return screen.hamon.getTechnique() == null && !screen.hamon.hasTechniqueLevel(0);
+        return screen.hamon.getCharacterTechnique() == null && !screen.hamon.hasTechniqueLevel(0);
     }
     
     @Override
@@ -153,10 +151,11 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
         }
         else {
             super.updateButton();
-            this.technique = screen.hamon.getTechnique();
-            Technique technique = null;
-            if (getSelectedSkill() != null) {
-                technique = getSelectedSkill().getHamonSkill().getTechnique();
+            this.technique = screen.hamon.getCharacterTechnique();
+            
+            CharacterHamonTechnique technique = null;
+            if (getSelectedSkill() != null && getSelectedSkill().getHamonSkill() instanceof CharacterTechniqueHamonSkill) {
+                technique = ((CharacterTechniqueHamonSkill) getSelectedSkill().getHamonSkill()).getTechnique();
             }
             reorderTechniqueBoxes(technique);
         }
@@ -216,7 +215,7 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
     void updateTab() {
         if (!isLocked()) {
             super.updateTab();
-            Technique newTechnique = screen.hamon.getTechnique();
+            CharacterHamonTechnique newTechnique = screen.hamon.getCharacterTechnique();
             this.technique = newTechnique;
             fillSkillLines();
             updateButton();
@@ -227,20 +226,21 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
 //            }
         }
     }
+
     
-    private void reorderTechniqueBoxes(@Nullable Technique firstTechnique) {
+    private void reorderTechniqueBoxes(@Nullable CharacterHamonTechnique firstTechnique) {
         selectedTechnique = firstTechnique;
         if (availableHamonTechniques.size() <= 1) {
             return;
         }
-        List<Technique> techniques = new ArrayList<>(Arrays.asList(Technique.values()));
+        List<CharacterHamonTechnique> techniques = new ArrayList<>(ModHamonSkills.HAMON_CHARACTER_TECHNIQUES.getRegistry().getValues());
         Collections.sort(techniques, TECHNIQUES_ORDER);
         if (firstTechnique != null) {
             Collections.sort(techniques, (t1, t2) -> t1 == firstTechnique ? -1 : t2 == firstTechnique ? 1 : 0);
         }
         
         int y = techniqueYStarting();
-        for (Technique technique : techniques) {
+        for (CharacterHamonTechnique technique : techniques) {
             HamonCharacterTechniqueBox characterBox = availableHamonTechniques.get(technique);
             if (characterBox != null) {
                 characterBox.setY(y);
@@ -248,9 +248,31 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
             }
         }
     }
-    
-    
-    private static final Comparator<Technique> TECHNIQUES_ORDER = (technique1, technique2) -> {
-        return technique1.ordinal() - technique2.ordinal();
+
+    private static final LazyUnmodifiableArrayList<CharacterHamonTechnique> MOD_TECHNIQUES_ORDER = LazyUnmodifiableArrayList.of(
+            Util.make(new ArrayList<>(), list -> {
+                list.add(ModHamonSkills.CHARACTER_JONATHAN);
+                list.add(ModHamonSkills.CHARACTER_ZEPPELI);
+                list.add(ModHamonSkills.CHARACTER_JOSEPH);
+                list.add(ModHamonSkills.CHARACTER_CAESAR);
+                list.add(ModHamonSkills.CHARACTER_LISA_LISA);
+            }));
+    private static final Comparator<CharacterHamonTechnique> TECHNIQUES_ORDER = (technique1, technique2) -> {
+        int t1 = MOD_TECHNIQUES_ORDER.indexOf(technique1);
+        int t2 = MOD_TECHNIQUES_ORDER.indexOf(technique2);
+        // one is from base mod, other isn't, base mod techniques are first
+        if (t1 > -1 ^ t2 > -1) {
+            return t1 > -1 ? -1 : 1;
+        }
+        else {
+            // specific order for base mod techniques
+            if (t1 > -1 /*&& t2 > -1*/) {
+                return t1 - t2;
+            }
+            // the rest are in alphabetical order
+            else /*if (t1 == -1 && t2 == -1)*/ {
+                return technique1.getRegistryName().toString().compareTo(technique2.getRegistryName().toString());
+            }
+        }
     };
 }

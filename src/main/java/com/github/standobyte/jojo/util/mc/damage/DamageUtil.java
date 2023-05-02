@@ -18,11 +18,11 @@ import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonPowerType;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.collect.Multimap;
@@ -168,7 +168,7 @@ public class DamageUtil {
                 Optional<HamonData> hamonOptional = INonStandPower.getNonStandPowerOptional(sourceLiving).resolve()
                         .flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()));
                 hamonOptional.ifPresent(hamon -> {
-                    if (undeadTarget && !scarf && hamon.isSkillLearned(HamonSkill.HAMON_SPREAD)) {
+                    if (undeadTarget && !scarf && hamon.isSkillLearned(ModHamonSkills.HAMON_SPREAD.get())) {
                         float effectStr = (hamon.getHamonDamageMultiplier() - 1) / (HamonData.MAX_HAMON_STRENGTH_MULTIPLIER - 1) * hamon.getHamonEfficiency();
                         int effectDuration = 25 + MathHelper.floor(125F * effectStr);
                         int effectLvl = MathHelper.clamp(MathHelper.floor(1.5F * effectStr * dmgAmount * hamon.getHamonEfficiency()), 0, 3);

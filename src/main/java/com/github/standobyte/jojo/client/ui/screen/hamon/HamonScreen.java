@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.client.ui.screen.hamon;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,8 +15,8 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonWindowOpenedPacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonData;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.AbstractHamonSkill;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -44,7 +43,7 @@ public class HamonScreen extends Screen {
     HamonTabGui selectedTab;
     private Set<HamonTabGui> tabsWithSkillRequirements = new HashSet<>();
     boolean isTeacherNearby = false;
-    @Nullable Collection<HamonSkill> teacherSkills = Collections.emptyList();
+    @Nullable Collection<? extends AbstractHamonSkill> teacherSkills = null;
     
     HamonData hamon;
     
@@ -255,7 +254,7 @@ public class HamonScreen extends Screen {
     }
 
     @SuppressWarnings("resource")
-    public static void setTeacherSkills(Collection<HamonSkill> skills) {
+    public static void setTeacherSkills(Collection<? extends AbstractHamonSkill> skills) {
         Screen screen = Minecraft.getInstance().screen;
         if (screen instanceof HamonScreen) {
             HamonScreen hamonScreen = ((HamonScreen) screen);

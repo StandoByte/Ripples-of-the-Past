@@ -6,11 +6,13 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonPowerType;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.AbstractHamonSkill;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.EntityType;
@@ -90,7 +92,7 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser,
     @Override
     public boolean canStandOnFluid(Fluid fluid) {
         return hamonPower.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> 
-        hamon.isSkillLearned(HamonSkill.LAVA_WALKING) || hamon.isSkillLearned(HamonSkill.WATER_WALKING) && fluid.is(FluidTags.WATER))
+        hamon.isSkillLearned(ModHamonSkills.LAVA_WALKING.get()) || hamon.isSkillLearned(ModHamonSkills.WATER_WALKING.get()) && fluid.is(FluidTags.WATER))
                 .orElse(false);
     }
 
@@ -118,14 +120,13 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser,
         hamonPower.givePower(ModPowers.HAMON.get());
         HamonData hamon = hamonPower.getTypeSpecificData(ModPowers.HAMON.get()).get();
         hamon.setBreathingLevel(HamonData.MAX_BREATHING_LEVEL);
-        hamon.setHamonStatPoints(HamonSkill.HamonStat.STRENGTH, HamonData.MAX_HAMON_POINTS, true, true);
-        hamon.setHamonStatPoints(HamonSkill.HamonStat.CONTROL, HamonData.MAX_HAMON_POINTS, true, true);
-        for (HamonSkill skill : HamonSkill.values()) {
-            if (skill.getTechnique() == null) {
-                hamon.addHamonSkill(this, skill, false, true);
+        hamon.setHamonStatPoints(HamonStat.STRENGTH, HamonData.MAX_HAMON_POINTS, true, true);
+        hamon.setHamonStatPoints(HamonStat.CONTROL, HamonData.MAX_HAMON_POINTS, true, true);
+        for (AbstractHamonSkill skill : ModHamonSkills.HAMON_SKILLS.getRegistry().getValues()) {
+            if (skill.isBaseSkill()) {
+                hamon.addHamonSkill(this, skill, false, false);
             }
         }
-        hamonPower.setEnergy(hamonPower.getMaxEnergy());
     }
 
     @Override

@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.client.ui.screen.hamon;
 import java.util.List;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -30,7 +30,7 @@ public class HamonSkillDescBox {
     protected static final int HEIGHT = 44;
     protected static final int EDGE_TEXT_OFFSET = 3;
     protected final FontRenderer font;
-    protected final HamonSkill skill;
+    protected final AbstractHamonSkill skill;
     protected final int x;
     protected final int y;
     protected final int textWidth;
@@ -39,7 +39,7 @@ public class HamonSkillDescBox {
     protected float yTextScroll = 0;
     protected List<IReorderingProcessor> skillDesc;
     
-    public HamonSkillDescBox(HamonSkill skill, FontRenderer font, int textWidth, int x, int y) {
+    public HamonSkillDescBox(AbstractHamonSkill skill, FontRenderer font, int textWidth, int x, int y) {
         this.skill = skill;
         this.font = font;
         this.x = x;
@@ -60,7 +60,7 @@ public class HamonSkillDescBox {
         this.hasScrolling = scroll;
     }
     
-    protected List<IReorderingProcessor> createFullDescText(HamonSkill skill, FontRenderer font, int textWidth) {
+    protected List<IReorderingProcessor> createFullDescText(AbstractHamonSkill skill, FontRenderer font, int textWidth) {
         return font.split(new TranslationTextComponent("hamonSkill." + skill.getName() + ".desc"), textWidth);
     }
     

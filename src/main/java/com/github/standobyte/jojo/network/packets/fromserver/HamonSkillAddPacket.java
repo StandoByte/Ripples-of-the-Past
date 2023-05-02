@@ -7,16 +7,16 @@ import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.AbstractHamonSkill;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 public class HamonSkillAddPacket {
-    private final HamonSkill skill;
+    private final AbstractHamonSkill skill;
 
-    public HamonSkillAddPacket(HamonSkill skill) {
+    public HamonSkillAddPacket(AbstractHamonSkill skill) {
         this.skill = skill;
     }
     
@@ -26,12 +26,12 @@ public class HamonSkillAddPacket {
 
         @Override
         public void encode(HamonSkillAddPacket msg, PacketBuffer buf) {
-            buf.writeEnum(msg.skill);
+            buf.writeRegistryId(msg.skill);
         }
 
         @Override
         public HamonSkillAddPacket decode(PacketBuffer buf) {
-            return new HamonSkillAddPacket(buf.readEnum(HamonSkill.class));
+            return new HamonSkillAddPacket(buf.readRegistryIdSafe(AbstractHamonSkill.class));
         }
 
         @Override

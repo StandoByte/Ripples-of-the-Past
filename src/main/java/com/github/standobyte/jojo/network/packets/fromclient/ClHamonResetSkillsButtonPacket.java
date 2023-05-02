@@ -5,16 +5,15 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonSkillType;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 public class ClHamonResetSkillsButtonPacket {
-    private final HamonSkillType type;
+    private final HamonSkillsTab type;
     
-    public ClHamonResetSkillsButtonPacket(HamonSkillType type) {
+    public ClHamonResetSkillsButtonPacket(HamonSkillsTab type) {
         this.type = type;
     }
     
@@ -29,7 +28,7 @@ public class ClHamonResetSkillsButtonPacket {
 
         @Override
         public ClHamonResetSkillsButtonPacket decode(PacketBuffer buf) {
-            return new ClHamonResetSkillsButtonPacket(buf.readEnum(HamonSkillType.class));
+            return new ClHamonResetSkillsButtonPacket(buf.readEnum(HamonSkillsTab.class));
         }
 
         @Override
@@ -46,5 +45,13 @@ public class ClHamonResetSkillsButtonPacket {
         public Class<ClHamonResetSkillsButtonPacket> getPacketClass() {
             return ClHamonResetSkillsButtonPacket.class;
         }
+    }
+    
+    
+    
+    public static enum HamonSkillsTab {
+        STRENGTH,
+        CONTROL,
+        TECHNIQUE
     }
 }

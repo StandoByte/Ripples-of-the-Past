@@ -4,9 +4,9 @@ import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.Satiporo
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.SatiporojaScarfEntity;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.entity.LivingEntity;
@@ -32,7 +32,7 @@ public class SatiporojaScarfItem extends CustomModelArmorItem {
         ItemStack stack = player.getItemInHand(hand);
         INonStandPower power = INonStandPower.getPlayerNonStandPower(player);
         if (power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
-            if (hamon.isSkillLearned(HamonSkill.SATIPOROJA_SCARF)) {
+            if (hamon.isSkillLearned(ModHamonSkills.SATIPOROJA_SCARF.get())) {
                 if (!world.isClientSide()) {
                     if (power.consumeEnergy(SCARF_SWING_ENERGY_COST)) {
                         SatiporojaScarfEntity scarf = new SatiporojaScarfEntity(world, player, 
@@ -61,7 +61,7 @@ public class SatiporojaScarfItem extends CustomModelArmorItem {
         power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
             if (!user.level.isClientSide()) {
                 if (power.consumeEnergy(500) && DamageUtil.dealHamonDamage(target, 0.6F, user, null)) {
-                    if (user.isShiftKeyDown() && hamon.isSkillLearned(HamonSkill.SNAKE_MUFFLER) && power.consumeEnergy(100)) {
+                    if (user.isShiftKeyDown() && hamon.isSkillLearned(ModHamonSkills.SNAKE_MUFFLER.get()) && power.consumeEnergy(100)) {
                         SatiporojaScarfBindingEntity scarf = new SatiporojaScarfBindingEntity(user.level, user);
                         scarf.attachToEntity(target);
                         target.addEffect(new EffectInstance(ModEffects.STUN.get(), scarf.ticksLifespan()));

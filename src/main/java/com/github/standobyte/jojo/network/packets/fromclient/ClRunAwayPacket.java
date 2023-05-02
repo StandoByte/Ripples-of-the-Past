@@ -4,9 +4,9 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.Technique;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.player.PlayerEntity;
@@ -33,7 +33,7 @@ public class ClRunAwayPacket {
                 if (player.isSprinting()) {
                 INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
                     power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                        if (hamon.getTechnique() == Technique.JOSEPH) {
+                        if (hamon.characterIs(ModHamonSkills.CHARACTER_JOSEPH.get())) {
                             JojoModUtil.sayVoiceLine(player, ModSounds.JOSEPH_RUN_AWAY.get());
                         }
                     });

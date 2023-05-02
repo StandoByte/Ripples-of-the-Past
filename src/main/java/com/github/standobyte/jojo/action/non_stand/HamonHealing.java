@@ -3,11 +3,11 @@ package com.github.standobyte.jojo.action.non_stand;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonPowerType;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.BlockState;
@@ -36,7 +36,7 @@ public class HamonHealing extends HamonAction {
         float hamonEfficiency = hamon.getHamonEfficiency();
         float hamonControl = hamon.getHamonControlLevelRatio();
         if (!world.isClientSide()) {
-            Entity targetEntity = target.getType() == TargetType.ENTITY && hamon.isSkillLearned(HamonSkill.HEALING_TOUCH) ? target.getEntity() : null;
+            Entity targetEntity = target.getType() == TargetType.ENTITY && hamon.isSkillLearned(ModHamonSkills.HEALING_TOUCH.get()) ? target.getEntity() : null;
             LivingEntity targetLiving = targetEntity instanceof LivingEntity ? (LivingEntity) targetEntity : null;
             LivingEntity entityToHeal = targetEntity != null && canBeHealed(targetLiving, user) ? targetLiving : user;
             int regenDuration = (int) ((50F + hamonEfficiency * 50F) * (1 + hamonControl));
@@ -45,13 +45,13 @@ public class HamonHealing extends HamonAction {
                 hamon.hamonPointsFromAction(HamonStat.CONTROL, getEnergyCost(power) * hamonEfficiency);
 //            }
             entityToHeal.addEffect(new EffectInstance(Effects.REGENERATION, regenDuration, regenLvl));
-            if (hamon.isSkillLearned(HamonSkill.EXPEL_VENOM)) {
+            if (hamon.isSkillLearned(ModHamonSkills.EXPEL_VENOM.get())) {
                 entityToHeal.removeEffect(Effects.POISON);
                 entityToHeal.removeEffect(Effects.WITHER);
                 entityToHeal.removeEffect(Effects.HUNGER);
                 entityToHeal.removeEffect(Effects.CONFUSION);
             }
-            if (hamon.isSkillLearned(HamonSkill.PLANTS_GROWTH) && user instanceof PlayerEntity && target.getType() == TargetType.BLOCK) {
+            if (hamon.isSkillLearned(ModHamonSkills.PLANTS_GROWTH.get()) && user instanceof PlayerEntity && target.getType() == TargetType.BLOCK) {
                 Direction face = target.getType() == TargetType.BLOCK ? target.getFace() : Direction.UP;
                 bonemealEffect(user.level, (PlayerEntity) user, target.getBlockPos(), face);
             }
@@ -88,7 +88,7 @@ public class HamonHealing extends HamonAction {
     public String getTranslationKey(INonStandPower power, ActionTarget target) {
         String key = super.getTranslationKey(power, target);
         if (power.getTypeSpecificData(ModPowers.HAMON.get())
-                .map(hamon -> hamon.isSkillLearned(HamonSkill.HEALING_TOUCH)).orElse(false)
+                .map(hamon -> hamon.isSkillLearned(ModHamonSkills.HEALING_TOUCH.get())).orElse(false)
                 && target.getType() == TargetType.ENTITY) {
             Entity targetEntity = target.getEntity();
             if (targetEntity instanceof LivingEntity && canBeHealed((LivingEntity) targetEntity, power.getUser())) {

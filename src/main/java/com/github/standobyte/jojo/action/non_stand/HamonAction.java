@@ -1,8 +1,9 @@
 package com.github.standobyte.jojo.action.non_stand;
 
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -10,18 +11,18 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.Technique;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.CharacterHamonTechnique;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.SoundEvent;
 
 public abstract class HamonAction extends NonStandAction {
-    private final Map<HamonSkill.Technique, Supplier<SoundEvent>> voiceLines;
+    private final Map<Supplier<CharacterHamonTechnique>, Supplier<SoundEvent>> voiceLinesUnregistered;
+    private Map<CharacterHamonTechnique, Supplier<SoundEvent>> voiceLines = null;
     
     public HamonAction(HamonAction.Builder builder) {
         super(builder);
-        voiceLines = builder.voiceLines;
+        voiceLinesUnregistered = builder.voiceLines;
     }
     
     @Override
@@ -33,19 +34,23 @@ public abstract class HamonAction extends NonStandAction {
         }
         return super.checkConditions(user, power, target);
     }
-
+    
     @Override
     @Nullable
     protected SoundEvent getShout(LivingEntity user, INonStandPower power, ActionTarget target, boolean wasActive) {
-        SoundEvent shout = super.getShout(user, power, target, wasActive);
-        if (shout == null) {
-            Technique technique = power.getTypeSpecificData(ModPowers.HAMON.get()).get().getTechnique();
-            if (technique != null) {
-                Supplier<SoundEvent> shoutSupplier = voiceLines.get(technique);
-                if (shoutSupplier != null) {
-                    shout = shoutSupplier.get();
-                }
+        SoundEvent shout = null;
+        CharacterHamonTechnique technique = power.getTypeSpecificData(ModPowers.HAMON.get()).get().getCharacterTechnique();
+        if (technique != null) {
+            if (voiceLines == null) {
+                voiceLines = voiceLinesUnregistered.entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey().get(), entry -> entry.getValue()));
             }
+            Supplier<SoundEvent> shoutSupplier = voiceLines.get(technique);
+            if (shoutSupplier != null) {
+                shout = shoutSupplier.get();
+            }
+        }
+        if (shout == null) {
+            shout = super.getShout(user, power, target, wasActive);
         }
         return shout;
     }
@@ -53,14 +58,14 @@ public abstract class HamonAction extends NonStandAction {
     
     
     public static class Builder extends NonStandAction.AbstractBuilder<HamonAction.Builder> {
-        private Map<HamonSkill.Technique, Supplier<SoundEvent>> voiceLines = new EnumMap<>(HamonSkill.Technique.class);
-
+        private Map<Supplier<CharacterHamonTechnique>, Supplier<SoundEvent>> voiceLines = new HashMap<>();
+        
         @Override
         protected HamonAction.Builder getThis() {
             return this;
         }
         
-        public HamonAction.Builder shout(HamonSkill.Technique technique, Supplier<SoundEvent> shoutSupplier) {
+        public HamonAction.Builder shout(Supplier<CharacterHamonTechnique> technique, Supplier<SoundEvent> shoutSupplier) {
             if (technique != null) {
                 voiceLines.put(technique, shoutSupplier);
             }

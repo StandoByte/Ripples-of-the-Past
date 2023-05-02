@@ -2,10 +2,11 @@ package com.github.standobyte.jojo.power.nonstand.type.hamon;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -31,13 +32,14 @@ import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRunAwayPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonParticlesPacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.HamonStat;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonSkill.Technique;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.AbstractHamonSkill;
+import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
@@ -122,7 +124,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     
     @Override
     public boolean isLeapUnlocked(INonStandPower power) {
-        return power.getTypeSpecificData(this).get().isSkillLearned(HamonSkill.JUMP);
+        return power.getTypeSpecificData(this).get().isSkillLearned(ModHamonSkills.JUMP.get());
     }
     
     @Override
@@ -134,7 +136,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     @Override
     public float getLeapStrength(INonStandPower power) {
         HamonData hamon = power.getTypeSpecificData(this).get();
-        return hamon.isSkillLearned(HamonSkill.AFTERIMAGES) ? 2F : 1.25F;
+        return hamon.isSkillLearned(ModHamonSkills.AFTERIMAGES.get()) ? 2F : 1.25F;
     }
     
     @Override
@@ -175,7 +177,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
             }
             if (user instanceof PlayerEntity) {
                 ServerPlayerEntity player = (ServerPlayerEntity) user;
-                if (hamon.isSkillLearned(HamonSkill.ROPE_TRAP)) {
+                if (hamon.isSkillLearned(ModHamonSkills.ROPE_TRAP.get())) {
                     if (player.isOnGround() && player.isShiftKeyDown()) {
                         BlockPos pos = player.blockPosition();
                         if (player.level.isEmptyBlock(pos)) {
@@ -224,7 +226,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
         }
         
         if (!world.isClientSide() || user.is(ClientUtil.getClientPlayer())) {
-            if (hamon.getTechnique() == Technique.JOSEPH) {
+            if (hamon.characterIs(ModHamonSkills.CHARACTER_JOSEPH.get())) {
                 if (user.isSprinting()) {
                     Vector3d vecBehind = Vector3d.directionFromRotation(0, 180F + user.yRot).scale(8D);
                     AxisAlignedBB aabb = new AxisAlignedBB(user.position().subtract(0, 2D, 0), user.position().add(vecBehind.x, 2D, vecBehind.z));
@@ -265,7 +267,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     }
     
     public static boolean ropeTrap(LivingEntity user, BlockPos pos, BlockState blockState, World world, INonStandPower power, HamonData hamon) {
-        if (hamon.isSkillLearned(HamonSkill.ROPE_TRAP)) {
+        if (hamon.isSkillLearned(ModHamonSkills.ROPE_TRAP.get())) {
             createChargedCobweb(user, pos, blockState, world, 64, null, power, 
                     40 + (int) ((float) (160 * hamon.getHamonStrengthLevel()) / (float) HamonData.MAX_STAT_LEVEL * hamon.getHamonEfficiency()), 
                     0.02F * hamon.getHamonDamageMultiplier() * hamon.getHamonEfficiency(), hamon);
@@ -327,7 +329,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                     float energyCost = 500F;
                     if (power.hasEnergy(energyCost)) {
                         if (power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
-                            if (hamon.isSkillLearned(HamonSkill.SNAKE_MUFFLER)) {
+                            if (hamon.isSkillLearned(ModHamonSkills.SNAKE_MUFFLER.get())) {
                                 playerTarget.getCooldowns().addCooldown(ModItems.SATIPOROJA_SCARF.get(), 80);
                                 float efficiency = hamon.getHamonEfficiency();
                                 if (efficiency == 1 || efficiency >= dmgAmount / target.getMaxHealth()) {
@@ -353,16 +355,20 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     
 
     @Nullable
-    public static EnumSet<HamonSkill> nearbyTeachersSkills(LivingEntity learner) {
-        EnumSet<HamonSkill> skills = EnumSet.noneOf(HamonSkill.class);
-        MCUtil.entitiesAround(LivingEntity.class, learner, 3D, false, 
-                entity -> INonStandPower.getNonStandPowerOptional((LivingEntity) entity).map(power -> 
+    public static Set<AbstractHamonSkill> nearbyTeachersSkills(LivingEntity learner) {
+        Set<AbstractHamonSkill> skills = new HashSet<>();
+        if (MCUtil.entitiesAround(LivingEntity.class, learner, 3D, false, 
+                entity -> INonStandPower.getNonStandPowerOptional(entity).map(power -> 
                 power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
-                    for (HamonSkill learnedSkill : hamon.getSkillSetImmutable()) {
-                        skills.add(learnedSkill);
-                    }
+                    hamon.getLearnedSkills().forEach(skill -> {
+                        if (skill.requiresTeacher()) {
+                            skills.add(skill);
+                        }
+                    });
                     return true;
-                }).orElse(false)).orElse(false));
+                }).orElse(false)).orElse(false)).isEmpty()) {
+            return null;
+        }
         return skills;
     }
     
@@ -384,8 +390,8 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                 else {
                     if (player.abilities.instabuild) {
                         hamon.setBreathingLevel(HamonData.MAX_BREATHING_LEVEL);
-                        hamon.setHamonStatPoints(HamonSkill.HamonStat.STRENGTH, HamonData.MAX_HAMON_POINTS, true, true);
-                        hamon.setHamonStatPoints(HamonSkill.HamonStat.CONTROL, HamonData.MAX_HAMON_POINTS, true, true);
+                        hamon.setHamonStatPoints(HamonStat.STRENGTH, HamonData.MAX_HAMON_POINTS, true, true);
+                        hamon.setHamonStatPoints(HamonStat.CONTROL, HamonData.MAX_HAMON_POINTS, true, true);
                     }
                 }
             });
@@ -394,7 +400,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     
     public static void startLearningHamon(World world, PlayerEntity player, INonStandPower playerPower, LivingEntity teacher, HamonData teacherHamon) {
         if (playerPower.givePower(ModPowers.HAMON.get())) {
-            if (teacherHamon.getTechnique() == Technique.ZEPPELI) {
+            if (teacherHamon.characterIs(ModHamonSkills.CHARACTER_ZEPPELI.get())) {
                 JojoModUtil.sayVoiceLine(teacher, ModSounds.ZEPPELI_FORCE_BREATH.get());
                 teacher.swing(Hand.MAIN_HAND, true);
                 if (player.getRandom().nextFloat() <= 0.01F) {
@@ -409,8 +415,8 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
             playerPower.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                 if (player.abilities.instabuild) {
                     hamon.setBreathingLevel(HamonData.MAX_BREATHING_LEVEL);
-                    hamon.setHamonStatPoints(HamonSkill.HamonStat.STRENGTH, HamonData.MAX_HAMON_POINTS, true, true);
-                    hamon.setHamonStatPoints(HamonSkill.HamonStat.CONTROL, HamonData.MAX_HAMON_POINTS, true, true);
+                    hamon.setHamonStatPoints(HamonStat.STRENGTH, HamonData.MAX_HAMON_POINTS, true, true);
+                    hamon.setHamonStatPoints(HamonStat.CONTROL, HamonData.MAX_HAMON_POINTS, true, true);
                 }
                 player.sendMessage(new TranslationTextComponent("jojo.chat.message.learnt_hamon"), Util.NIL_UUID);
                 PlayerUtilCap utilCap = player.getCapability(PlayerUtilCapProvider.CAPABILITY).orElseThrow(() -> new IllegalStateException());
@@ -444,53 +450,43 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
         if (JojoModConfig.getCommonConfigInstance(false).keepHamonOnDeath.get() && !dead.level.getLevelData().isHardcore()) return;
         INonStandPower.getNonStandPowerOptional(dead).ifPresent(power -> {
             power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                if (hamon.getTechnique() != null) {
-                    switch (hamon.getTechnique()) {
-                    case CAESAR:
-                        if (hamon.isSkillLearned(HamonSkill.CRIMSON_BUBBLE)) {
-                            CrimsonBubbleEntity bubble = new CrimsonBubbleEntity(dead.level);
-                            ItemStack heldItem = dead.getMainHandItem();
-                            if (!heldItem.isEmpty()) {
-                                dead.setItemInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
-                                ItemEntity item = new ItemEntity(dead.level, dead.getX(), dead.getEyeY() - 0.3D, dead.getZ(), heldItem);
-                                item.setPickUpDelay(2);
-                                dead.level.addFreshEntity(item);
-                                bubble.putItem(item);
-                            }
-                            dead.level.playSound(null, dead.getX(), dead.getY(), dead.getZ(), 
-                                    ModSounds.CAESAR_LAST_HAMON.get(), dead.getSoundSource(), 1.0F, 1.0F);
-                            bubble.moveTo(dead.getX(), dead.getEyeY(), dead.getZ(), dead.yRot, dead.xRot);
-                            bubble.setHamonPoints(hamon.getHamonStrengthPoints(), hamon.getHamonControlPoints());
-                            dead.level.addFreshEntity(bubble);
+                if (hamon.isSkillLearned(ModHamonSkills.CRIMSON_BUBBLE.get())) {
+                    CrimsonBubbleEntity bubble = new CrimsonBubbleEntity(dead.level);
+                    ItemStack heldItem = dead.getMainHandItem();
+                    if (!heldItem.isEmpty()) {
+                        dead.setItemInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
+                        ItemEntity item = new ItemEntity(dead.level, dead.getX(), dead.getEyeY() - 0.3D, dead.getZ(), heldItem);
+                        item.setPickUpDelay(2);
+                        dead.level.addFreshEntity(item);
+                        bubble.putItem(item);
+                    }
+                    dead.level.playSound(null, dead.getX(), dead.getY(), dead.getZ(), 
+                            ModSounds.CAESAR_LAST_HAMON.get(), dead.getSoundSource(), 1.0F, 1.0F);
+                    bubble.moveTo(dead.getX(), dead.getEyeY(), dead.getZ(), dead.yRot, dead.xRot);
+                    bubble.setHamonPoints(hamon.getHamonStrengthPoints(), hamon.getHamonControlPoints());
+                    dead.level.addFreshEntity(bubble);
+                }
+                else if (hamon.isSkillLearned(ModHamonSkills.DEEP_PASS.get())) {
+                    PlayerEntity closestHamonUser = MCUtil.entitiesAround(PlayerEntity.class, dead, 8, false, player -> 
+                    INonStandPower.getNonStandPowerOptional(player).map(pwr -> pwr.getType() == ModPowers.HAMON.get()).orElse(false))
+                            .stream()
+                            .min(Comparator.comparingDouble(player -> player.distanceToSqr(dead)))
+                            .orElse(null);
+                    if (closestHamonUser != null) {
+                        dead.level.playSound(null, dead.getX(), dead.getY(), dead.getZ(), 
+                                ModSounds.ZEPPELI_DEEP_PASS.get(), dead.getSoundSource(), 1.0F, 1.0F);
+                        HamonData receiverHamon = INonStandPower.getPlayerNonStandPower(closestHamonUser).getTypeSpecificData(ModPowers.HAMON.get()).get();
+                        if (receiverHamon.characterIs(ModHamonSkills.CHARACTER_JONATHAN.get())) {
+                            JojoModUtil.sayVoiceLine(closestHamonUser, ModSounds.JONATHAN_DEEP_PASS_REACTION.get());
                         }
-                        break;
-                    case ZEPPELI:
-                        if (hamon.isSkillLearned(HamonSkill.DEEP_PASS)) {
-                            PlayerEntity closestHamonUser = MCUtil.entitiesAround(PlayerEntity.class, dead, 8, false, player -> 
-                            INonStandPower.getNonStandPowerOptional(player).map(pwr -> pwr.getType() == ModPowers.HAMON.get()).orElse(false))
-                                    .stream()
-                                    .min(Comparator.comparingDouble(player -> player.distanceToSqr(dead)))
-                                    .orElse(null);
-                            if (closestHamonUser != null) {
-                                dead.level.playSound(null, dead.getX(), dead.getY(), dead.getZ(), 
-                                        ModSounds.ZEPPELI_DEEP_PASS.get(), dead.getSoundSource(), 1.0F, 1.0F);
-                                HamonData receiverHamon = INonStandPower.getPlayerNonStandPower(closestHamonUser).getTypeSpecificData(ModPowers.HAMON.get()).get();
-                                if (receiverHamon.getTechnique() == Technique.JONATHAN) {
-                                    JojoModUtil.sayVoiceLine(closestHamonUser, ModSounds.JONATHAN_DEEP_PASS_REACTION.get());
-                                }
-                                receiverHamon.setHamonStatPoints(HamonSkill.HamonStat.STRENGTH, 
-                                        receiverHamon.getHamonStrengthPoints() + hamon.getHamonStrengthPoints(), true, false);
-                                receiverHamon.setHamonStatPoints(HamonSkill.HamonStat.CONTROL, 
-                                        receiverHamon.getHamonControlPoints() + hamon.getHamonControlPoints(), true, false);
-                                if (closestHamonUser instanceof ServerPlayerEntity) {
-                                    ModCriteriaTriggers.LAST_HAMON.get().trigger((ServerPlayerEntity) closestHamonUser, dead);
-                                }
-                                createHamonSparkParticlesEmitter(closestHamonUser, 1.0F);
-                            }
+                        receiverHamon.setHamonStatPoints(HamonStat.STRENGTH, 
+                                receiverHamon.getHamonStrengthPoints() + hamon.getHamonStrengthPoints(), true, false);
+                        receiverHamon.setHamonStatPoints(HamonStat.CONTROL, 
+                                receiverHamon.getHamonControlPoints() + hamon.getHamonControlPoints(), true, false);
+                        if (closestHamonUser instanceof ServerPlayerEntity) {
+                            ModCriteriaTriggers.LAST_HAMON.get().trigger((ServerPlayerEntity) closestHamonUser, dead);
                         }
-                        break;
-                    default:
-                        break;
+                        createHamonSparkParticlesEmitter(closestHamonUser, 1.0F);
                     }
                 }
             });
