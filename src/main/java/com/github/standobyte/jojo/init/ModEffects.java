@@ -50,9 +50,6 @@ public class ModEffects {
     public static final RegistryObject<StunEffect> STUN = EFFECTS.register("stun", 
             () -> new StunEffect(0x404040));
     
-    public static final RegistryObject<UncurableEffect> MEDITATION = EFFECTS.register("meditation", 
-            () -> new UncurableEffect(EffectType.NEUTRAL, 0xDD6000));
-    
     public static final RegistryObject<StunEffect> IMMOBILIZE = EFFECTS.register("immobilize", 
             () -> new StunEffect(0x404040));
     

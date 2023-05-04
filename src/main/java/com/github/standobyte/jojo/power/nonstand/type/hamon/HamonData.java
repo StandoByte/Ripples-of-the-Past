@@ -83,17 +83,17 @@ public class HamonData extends TypeSpecificData {
     private int hamonStrengthLevel;
     private int hamonControlPoints;
     private int hamonControlLevel;
+    private float hamonDamageFactor = 1F;
     
     private float breathingTrainingLevel;
     private float breathingTrainingDayBonus;
-    private float hamonDamageFactor = 1F;
     private EnumMap<Exercise, Integer> exerciseTicks = new EnumMap<Exercise, Integer>(Exercise.class);
     private float avgExercisePoints;
-
-    private MainHamonSkillsManager hamonSkills;
     
     private boolean isMeditating;
     private int meditationTicks;
+
+    private MainHamonSkillsManager hamonSkills;
     
     private Set<PlayerEntity> newLearners = new HashSet<>();
 
