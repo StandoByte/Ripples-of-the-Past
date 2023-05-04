@@ -8,11 +8,17 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
+import com.github.standobyte.jojo.action.player.IPlayerAction;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDoubleShiftPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerContinuousActionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrWalkmanEarbudsPacket;
+import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
+import com.github.standobyte.jojo.util.general.OptionalFloat;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -37,6 +43,10 @@ public class PlayerUtilCap {
     
     private boolean walkmanEarbuds = false;
     
+    private Optional<ContinuousActionInstance<?, ?>> continuousAction = Optional.empty();
+    private OptionalFloat lockedYRot = OptionalFloat.empty();
+    private OptionalFloat lockedXRot = OptionalFloat.empty();
+    
     private boolean doubleShiftPress = false;
     private boolean shiftSynced = false;
     
@@ -57,7 +67,71 @@ public class PlayerUtilCap {
             }
         }
         
+        tickContinuousAction();
         tickDoubleShift();
+    }
+    
+    
+    
+    public void setContinuousAction(@Nullable ContinuousActionInstance<?, ?> action) {
+        continuousAction = Optional.ofNullable(action);
+        if (!player.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(new TrPlayerContinuousActionPacket(
+                    player.getId(), continuousAction.map(ContinuousActionInstance::getActionSync)), player);
+        }
+    }
+    
+    private void tickContinuousAction() {
+        continuousAction.ifPresent(cap -> {
+            if (!cap.isStopped()) {
+                cap.tick();
+            }
+            if (!player.level.isClientSide() && cap.isStopped()) {
+                stopContinuousAction();
+            }
+        });
+    }
+    
+    public void stopContinuousAction() {
+        continuousAction.ifPresent(action -> action.stopAction());
+        setContinuousAction(null);
+    }
+    
+    public Optional<ContinuousActionInstance<?, ?>> getContinuousAction() {
+        return continuousAction;
+    }
+    
+    public <T extends ContinuousActionInstance<T, P>, P extends IPower<P, ?>> Optional<T> getContinuousActionIfItIs(IPlayerAction<T, P> action) {
+        if (GeneralUtil.orElseFalse(continuousAction.map(ContinuousActionInstance::getAction), currentAction -> currentAction == action)) {
+            return (Optional<T>) continuousAction;
+        }
+        return Optional.empty();
+    }
+    
+    
+    
+    public void lockYRot(float value) {
+        lockedYRot = OptionalFloat.of(value);
+    }
+    
+    public void clearLockedYRot() {
+        lockedYRot = OptionalFloat.empty();
+    }
+    
+    public OptionalFloat getLockedYRot() {
+        return lockedYRot;
+    }
+    
+    public void lockXRot(float value) {
+        lockedXRot = OptionalFloat.of(value);
+    }
+    
+    public void clearLockedXRot() {
+        lockedXRot = OptionalFloat.empty();
+    }
+    
+    public OptionalFloat getLockedXRot() {
+        return lockedXRot;
     }
     
     

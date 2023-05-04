@@ -16,6 +16,7 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.render.block.overlay.TranslucentBlockRenderHelper;
 import com.github.standobyte.jojo.client.render.world.ParticleManagerWrapperTS;
 import com.github.standobyte.jojo.client.render.world.TimeStopWeatherHandler;
@@ -26,8 +27,8 @@ import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
-import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
+import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -256,6 +257,19 @@ public class ClientEventHandler {
                         clientTimer.partialTick = 0.0F;
                     }
                 }
+                
+                mc.player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                    cap.getLockedYRot().ifPresent(yRot -> {
+                        mc.player.yBodyRot = yRot;
+                        mc.player.yBodyRotO = yRot;
+                        mc.player.yRot = yRot;
+                        mc.player.yRotO = yRot;
+                    });
+                    cap.getLockedXRot().ifPresent(xRot -> {
+                        mc.player.xRot = xRot;
+                        mc.player.xRotO = xRot;
+                    });
+                });
             }
         }
     }

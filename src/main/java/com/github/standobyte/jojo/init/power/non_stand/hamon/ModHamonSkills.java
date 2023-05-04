@@ -176,10 +176,10 @@ public class ModHamonSkills {
             .unlocks(ModHamonActions.ZEPPELI_HAMON_CUTTER)
             .requiredSkill(THROWABLES_INFUSION).build());
     
-//    public static final RegistryObject<CharacterTechniqueHamonSkill> SENDO_WAVE_KICK = HAMON_SKILLS.registerEntry("sendo_wave_kick",
-//            () -> new CharacterTechniqueHamonSkill.Builder("sendo_wave_kick", RewardType.ATTACK)
-//            .unlocks(ModHamonActions.ZEPPELI_SENDO_WAVE_KICK)
-//            .requiredSkill(JUMP).build());
+    public static final RegistryObject<CharacterTechniqueHamonSkill> SENDO_WAVE_KICK = HAMON_SKILLS.register("sendo_wave_kick",
+            () -> new CharacterTechniqueHamonSkill.Builder("sendo_wave_kick", RewardType.ATTACK)
+            .unlocks(ModHamonActions.ZEPPELI_SENDO_WAVE_KICK)
+            .requiredSkill(JUMP).build());
     
     public static final RegistryObject<CharacterTechniqueHamonSkill> TORNADO_OVERDRIVE = HAMON_SKILLS.register("tornado_overdrive",
             () -> new CharacterTechniqueHamonSkill.Builder("tornado_overdrive", RewardType.ATTACK)
@@ -189,7 +189,7 @@ public class ModHamonSkills {
     public static final RegistryObject<CharacterHamonTechnique> CHARACTER_ZEPPELI = HAMON_CHARACTER_TECHNIQUES.register("zeppeli", 
             () -> new CharacterHamonTechnique.Builder("zeppeli", Util.make(new ArrayList<>(), list -> {
                 list.add(ModHamonSkills.HAMON_CUTTER);
-//                list.add(ModHamonSkills.SENDO_WAVE_KICK);
+                list.add(ModHamonSkills.SENDO_WAVE_KICK);
                 list.add(ModHamonSkills.TORNADO_OVERDRIVE);
             }))
             .perkOnPick(ModHamonSkills.DEEP_PASS)

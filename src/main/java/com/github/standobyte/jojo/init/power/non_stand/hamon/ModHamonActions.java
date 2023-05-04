@@ -19,6 +19,7 @@ import com.github.standobyte.jojo.action.non_stand.HamonProjectileShield;
 import com.github.standobyte.jojo.action.non_stand.HamonRepellingOverdrive;
 import com.github.standobyte.jojo.action.non_stand.HamonScarletOverdrive;
 import com.github.standobyte.jojo.action.non_stand.HamonSendoOverdrive;
+import com.github.standobyte.jojo.action.non_stand.HamonSendoWaveKick;
 import com.github.standobyte.jojo.action.non_stand.HamonSpeedBoost;
 import com.github.standobyte.jojo.action.non_stand.HamonSunlightYellowOverdrive;
 import com.github.standobyte.jojo.action.non_stand.HamonTornadoOverdrive;
@@ -124,6 +125,9 @@ public class ModHamonActions {
     
     public static final RegistryObject<HamonAction> ZEPPELI_HAMON_CUTTER = ACTIONS.register("zeppeli_hamon_cutter", 
             () -> new HamonCutter(new HamonAction.Builder().energyCost(400F).shout(ModSounds.ZEPPELI_HAMON_CUTTER)));
+    
+    public static final RegistryObject<HamonSendoWaveKick> ZEPPELI_SENDO_WAVE_KICK = ACTIONS.register("zeppeli_sendo_wave_kick", 
+            () -> new HamonSendoWaveKick(new HamonAction.Builder().energyCost(1000F).shout(ModSounds.ZEPPELI_SENDO_WAVE_KICK)));
     
     public static final RegistryObject<HamonAction> ZEPPELI_TORNADO_OVERDRIVE = ACTIONS.register("zeppeli_tornado_overdrive", 
             () -> new HamonTornadoOverdrive(new HamonAction.Builder().holdEnergyCost(75F).shout(ModSounds.ZEPPELI_TORNADO_OVERDRIVE)));

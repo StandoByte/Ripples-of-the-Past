@@ -14,6 +14,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -22,6 +23,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.hudlayout.HudLayoutEditingScreen;
@@ -630,6 +632,7 @@ public class InputHandler {
             boolean slowedDown = slowDownFromHeldAction(mc.player, input, standPower);
             slowedDown = slowDownFromHeldAction(mc.player, input, nonStandPower) || slowedDown;
             slowedDown = slowDownFromStandEntity(mc.player, input) || slowedDown;
+            slowedDown = slowDownFromContinuousAction(mc.player, input) || slowedDown;
             
             if (!mc.player.isPassenger()) {
                 IPower<?, ?> power = actionsOverlay.getCurrentPower();
@@ -707,6 +710,16 @@ public class InputHandler {
         Action<?> heldAction = power.getHeldAction();
         if (heldAction != null) {
             float speed = heldAction.getHeldWalkSpeed();
+            return slowDown(player, input, speed);
+        }
+        return false;
+    }
+    
+    private boolean slowDownFromContinuousAction(PlayerEntity player, MovementInput input) {
+        Optional<ContinuousActionInstance<?, ?>> action = player.getCapability(PlayerUtilCapProvider.CAPABILITY)
+                .resolve().flatMap(cap -> cap.getContinuousAction());
+        if (action.isPresent()) {
+            float speed = action.get().getWalkSpeed();
             return slowDown(player, input, speed);
         }
         return false;
