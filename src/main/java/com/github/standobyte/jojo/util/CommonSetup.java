@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.util;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.chunk.ChunkCap;
 import com.github.standobyte.jojo.capability.chunk.ChunkCapStorage;
@@ -73,6 +74,8 @@ public class CommonSetup {
             StandStatsManager.init();
             
             ModPotions.registerRecipes();
+            
+            Action.initShiftVariations();
         });
     }
 }

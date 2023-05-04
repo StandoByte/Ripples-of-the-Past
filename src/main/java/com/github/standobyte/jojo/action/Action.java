@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.action;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -41,7 +42,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
 public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<Action<?>> {
-    private static Map<Supplier<? extends Action<?>>, Supplier<? extends Action<?>>> SHIFT_VARIATIONS; 
+    private static final Map<Supplier<? extends Action<?>>, Supplier<? extends Action<?>>> SHIFT_VARIATIONS = new HashMap<>(); 
     
     private final int holdDurationToFire;
     private final int holdDurationMax;
@@ -409,16 +410,14 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     
     
-    public static void prepareShiftVariationsMap() {
-        SHIFT_VARIATIONS = new HashMap<>();
-    }
-    
     public static void initShiftVariations() {
         if (SHIFT_VARIATIONS != null) {
-            for (Map.Entry<Supplier<? extends Action<?>>, Supplier<? extends Action<?>>> entry : SHIFT_VARIATIONS.entrySet()) {
+            Iterator<Map.Entry<Supplier<? extends Action<?>>, Supplier<? extends Action<?>>>> it = SHIFT_VARIATIONS.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<Supplier<? extends Action<?>>, Supplier<? extends Action<?>>> entry = it.next();
                 entry.getKey().get().setShiftVariation(entry.getValue().get());
+                it.remove();
             }
-            SHIFT_VARIATIONS = null;
         }
     }
     

@@ -12,12 +12,11 @@ import com.github.standobyte.jojo.power.stand.type.EntityStandType;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 
 import net.minecraft.entity.EntityType;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.registries.DeferredRegister;
 
 @EventBusSubscriber(modid = JojoMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
@@ -55,14 +54,14 @@ public class EntityStandRegistryObject<ST extends EntityStandType<? extends Stan
         DEFAULT_STAND_ATTRIBUTES.forEach(standEntityType -> event.put(standEntityType.get(), StandEntity.createAttributes().build()));
     }
     
-    @SubscribeEvent(priority = EventPriority.LOW)
-    public static final void afterStandsRegister(RegistryEvent.Register<StandType<?>> event) {
-        ENTITY_STANDS_LINKAGE.forEach(entry -> entry.getStandType().setEntityType(entry.entityType));
-    }
-    
-    @SubscribeEvent(priority = EventPriority.LOW)
-    public static final void afterEntitiesRegister(RegistryEvent.Register<EntityType<?>> event) {
-        ENTITY_STANDS_LINKAGE.forEach(entry -> entry.getEntityType().setStandType(entry.standType));
+    @SubscribeEvent
+    public static final void afterStandsRegister(FMLCommonSetupEvent event) {
+        event.enqueueWork(() -> {
+            ENTITY_STANDS_LINKAGE.forEach(entry -> {
+                entry.getStandType().setEntityType(entry.entityType);
+                entry.getEntityType().setStandType(entry.standType);
+            });
+        });
     }
     
     

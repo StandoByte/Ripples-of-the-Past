@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.init.power;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectType;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
@@ -17,9 +16,7 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
-@EventBusSubscriber(modid = JojoMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public class JojoCustomRegistries {
     
     public static final CustomRegistryHolder<Action<?>> ACTIONS = new CustomRegistryHolder<>(
@@ -54,11 +51,6 @@ public class JojoCustomRegistries {
         // otherwise the classes with just RegistryObject instances won't load in time
         ModHamonActions.loadRegistryObjects();
         ModVampirismActions.loadRegistryObjects();
-    }
-    
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void beforeActionsInit(RegistryEvent.Register<Action<?>> event) {
-        Action.prepareShiftVariationsMap();
     }
     
     @SubscribeEvent(priority = EventPriority.LOW)
