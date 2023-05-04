@@ -1248,8 +1248,7 @@ public class GameplayEventHandler {
         }
         INonStandPower.getNonStandPowerOptional((LivingEntity) thrower).ifPresent(power -> {
             power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                float dmgCheckWater = damage;
-                DamageUtil.dealHamonDamage(rayTrace.getEntity(), dmgCheckWater, thrown, thrower);
+                DamageUtil.dealHamonDamage(rayTrace.getEntity(), damage, thrown, thrower);
                 hamon.hamonPointsFromAction(HamonStat.STRENGTH, spentEnergy);
             });
         });
