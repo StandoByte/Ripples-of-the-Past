@@ -6,14 +6,16 @@ import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 
 public class ClientPlayerUtilCap {
-//    private final AbstractClientPlayerEntity player;
+    @SuppressWarnings("unused")
+    private final AbstractClientPlayerEntity player;
     private final SoundHandler soundManager;
     private ISound currentVoiceLine;
     public boolean lastVoiceLineTriggered;
-    public boolean syoSound;
+    
+    public boolean isWalkingOnLiquid;
     
     public ClientPlayerUtilCap(AbstractClientPlayerEntity player) {
-//        this.player = player;
+        this.player = player;
         this.soundManager = Minecraft.getInstance().getSoundManager();
     }
     

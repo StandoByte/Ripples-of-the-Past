@@ -16,7 +16,6 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.non_stand.HamonAction;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
-import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
@@ -213,16 +212,6 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
 //                    }
                 }
             }
-        }
-        else {
-            user.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                boolean prevTickSound = cap.syoSound;
-                HamonAction SYOverdrive = ModHamonActions.HAMON_SUNLIGHT_YELLOW_OVERDRIVE.get();
-                cap.syoSound = user.isShiftKeyDown() && SYOverdrive.checkConditions(user, power, new ActionTarget(ClientUtil.getCrosshairPickEntity())).isPositive();
-                if (!prevTickSound && cap.syoSound) {
-                    ClientTickingSoundsHelper.playHamonConcentrationSound(user, entity -> !cap.syoSound, 1.0F);
-                }
-            });
         }
         
         if (!world.isClientSide() || user.is(ClientUtil.getClientPlayer())) {

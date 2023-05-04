@@ -25,11 +25,13 @@ import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.block.StoneMaskBlock;
 import com.github.standobyte.jojo.block.WoodenCoffinBlock;
 import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
+import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCap;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.ProjectileHamonChargeCapProvider;
+import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBloodCutterEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRCrossfireHurricaneEntity;
@@ -84,6 +86,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.HorizontalFaceBlock;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityPredicate;
@@ -108,6 +111,8 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.fluid.Fluid;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -119,6 +124,7 @@ import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.scoreboard.Team;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
@@ -248,6 +254,15 @@ public class GameplayEventHandler {
                 }
             }
         }
+        // FIXME ! (liquid walking) sound & sparks for tracking players
+        // FIXME ! (liquid walking) double shift
+        // FIXME ! (liquid walking) energy cost
+        // FIXME ! (liquid walking) camera bobbing
+        boolean liquidWalking = checkLiquidWalking(player);
+        if (player.level.isClientSide() && !liquidWalking) {
+            player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.isWalkingOnLiquid = liquidWalking);
+        }
+        
         INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
             power.tick();
         });
@@ -255,7 +270,84 @@ public class GameplayEventHandler {
             power.tick();
         }); 
     }
+    
+    private static boolean checkLiquidWalking(PlayerEntity player) {
+        // FIXME !!! (liquid walking) fix not being able to move on shift (PlayerEntity#maybeBackOffFromEdge (989))
+        // FIXME !!!! (liquid walking) double-shift
+        if (player.abilities.flying || player.isInWater()) {
+            return false;
+        }
+        boolean doubleShift = player.isShiftKeyDown() && player.getCapability(PlayerUtilCapProvider.CAPABILITY).map(
+                cap -> cap.getDoubleShiftPress()).orElse(false);
+        if (doubleShift) {
+            return false;
+        }
+        
+        return INonStandPower.getNonStandPowerOptional(player).map(power -> {
+            return power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
+                boolean waterWalking = hamon.isSkillLearned(ModHamonSkills.WATER_WALKING.get());
+                boolean anyLiquidWalking = hamon.isSkillLearned(ModHamonSkills.LAVA_WALKING.get());
+                if (anyLiquidWalking || waterWalking) {
+                    BlockPos blockPos = new BlockPos(player.position().add(0, -0.3, 0));
+                    FluidState fluidBelow = player.level.getBlockState(blockPos).getFluidState();
+                    Fluid fluidType = fluidBelow.getType();
+                    if (!fluidBelow.isEmpty() && 
+                            !(fluidType.is(FluidTags.WATER) && player.isOnFire()) && 
+                            (fluidType.is(FluidTags.WATER) || anyLiquidWalking)) {
+                        player.setOnGround(true);
+                        if (!player.level.isClientSide() || player.isLocalPlayer()) {
+//                            InputHandler input = InputHandler.getInstance();
+//                            if (input.pressedDoubleShift) {
+//                                input.cancelingLiquidWalking = true;
+//                            }
+//                            if (input.cancelingLiquidWalking) {
+//                                return false;
+//                            }
+                            Vector3d deltaMovement = player.getDeltaMovement();
+                            if (player.isShiftKeyDown()) {
+                                deltaMovement = new Vector3d(deltaMovement.x, 0, deltaMovement.z);
+                            }
+                            else {
+                                deltaMovement = new Vector3d(deltaMovement.x, Math.max(deltaMovement.y, 0), deltaMovement.z);
+                            }
+                            player.setDeltaMovement(deltaMovement);
+                            player.fallDistance = 0;
+                        }
 
+                        if (player.level.isClientSide()) {
+                            boolean doSound = player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).map(cap -> {
+                                if (!cap.isWalkingOnLiquid) {
+                                    cap.isWalkingOnLiquid = true;
+                                    ClientTickingSoundsHelper.playHamonSparksLoopSound(player, 
+                                            entity -> !cap.isWalkingOnLiquid, 
+                                            1.0F);
+                                    return true;
+                                }
+                                return false;
+                            }).orElse(true);
+                            if (doSound) {
+                                HamonPowerType.createHamonSparkParticles(player.level, player, 
+                                        player.getRandomX(0.5), player.getY(), player.getRandomZ(0.5), 0.05F);
+                            }
+                            else {
+                                HamonPowerType.createHamonSparkParticles(player.level, player, 
+                                        player.getRandomX(0.5), player.getY(), player.getRandomZ(0.5), 0.1F, null);
+                            }
+                        }
+                        else {
+                            if (fluidType.is(FluidTags.LAVA) 
+                                    && !player.fireImmune() && !EnchantmentHelper.hasFrostWalker(player)) {
+                                player.hurt(DamageSource.HOT_FLOOR, 1.0F);
+                            }
+                        }
+                        return true;
+                    }
+                }
+                return false;
+            }).orElse(false);
+        }).orElse(false);
+    }
+    
 //    private static final float MAX_SUN_DAMAGE = 10;
 //    private static final float MIN_SUN_DAMAGE = 2;
     private static float getSunDamage(LivingEntity entity) {
