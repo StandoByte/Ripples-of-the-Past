@@ -12,10 +12,7 @@ import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.AbstractHamonS
 import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.CharacterHamonTechnique;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class JojoCustomRegistries {
     
@@ -51,10 +48,5 @@ public class JojoCustomRegistries {
         // otherwise the classes with just RegistryObject instances won't load in time
         ModHamonActions.loadRegistryObjects();
         ModVampirismActions.loadRegistryObjects();
-    }
-    
-    @SubscribeEvent(priority = EventPriority.LOW)
-    public static void afterActionsInit(RegistryEvent.Register<Action<?>> event) {
-        Action.initShiftVariations();
     }
 }

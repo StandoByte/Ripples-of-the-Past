@@ -1331,6 +1331,7 @@ public class GameplayEventHandler {
                 }
             });
         }
+        VampirismData.finishCuringOnWakingUp(event.getPlayer());
     }
     
     @SubscribeEvent(priority = EventPriority.LOWEST)

@@ -89,7 +89,7 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser,
         }
     }
 
-    // FIXME liquid walking
+    // FIXME !!! (hamon) npc liquid walking
     @Override
     public boolean canStandOnFluid(Fluid fluid) {
         return hamonPower.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> 
