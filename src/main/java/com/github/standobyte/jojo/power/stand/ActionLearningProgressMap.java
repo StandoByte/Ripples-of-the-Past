@@ -6,7 +6,7 @@ import java.util.function.BiConsumer;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.StandAction;
-import com.github.standobyte.jojo.init.power.ModCommonRegistries;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPower;
 
 import net.minecraft.nbt.CompoundNBT;
@@ -42,7 +42,7 @@ public class ActionLearningProgressMap<P extends IPower<P, ?>> {
     
     void fromNBT(CompoundNBT nbt) {
         nbt.getAllKeys().forEach(actionName -> {
-            Action<?> action = ModCommonRegistries.ACTIONS.getRegistry().getValue(new ResourceLocation(actionName));
+            Action<?> action = JojoCustomRegistries.ACTIONS.getRegistry().getValue(new ResourceLocation(actionName));
             if (action instanceof StandAction && nbt.contains(actionName, 5)) {
                 wrappedMap.put((Action<P>) action, nbt.getFloat(actionName));
             }

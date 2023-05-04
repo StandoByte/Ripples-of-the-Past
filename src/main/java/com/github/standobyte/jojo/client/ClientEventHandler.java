@@ -26,7 +26,7 @@ import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
-import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
@@ -568,7 +568,7 @@ public class ClientEventHandler {
     @SubscribeEvent
     public void renderBlocksOverlay(RenderWorldLastEvent event) {
         ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-        if (hud.getSelectedActionIfEnabled(ActionType.ABILITY) == ModStandActions.CRAZY_DIAMOND_RESTORE_TERRAIN.get()) {
+        if (hud.getSelectedActionIfEnabled(ActionType.ABILITY) == ModStandsInit.CRAZY_DIAMOND_RESTORE_TERRAIN.get()) {
             MatrixStack matrixStack = event.getMatrixStack();
             IStandPower stand = ActionsOverlayGui.getInstance().standUiMode.getPower();
             Entity entity = CrazyDiamondRestoreTerrain.restorationCenterEntity(mc.player, stand);

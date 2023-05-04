@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.init.power.non_stand.vampirism;
 
-import static com.github.standobyte.jojo.init.power.ModCommonRegistries.ACTIONS;
-import static com.github.standobyte.jojo.init.power.ModCommonRegistries.NON_STAND_POWERS;
+import static com.github.standobyte.jojo.init.power.ModCommonRegisters.ACTIONS;
+import static com.github.standobyte.jojo.init.power.ModCommonRegisters.NON_STAND_POWERS;
 
 import com.github.standobyte.jojo.action.non_stand.NonStandAction;
 import com.github.standobyte.jojo.action.non_stand.VampirismAction;
@@ -20,32 +20,32 @@ public class ModVampirismActions {
     
     public static void loadRegistryObjects() {}
     
-    public static final RegistryObject<VampirismAction> VAMPIRISM_BLOOD_DRAIN = ACTIONS.registerEntry("vampirism_blood_drain", 
+    public static final RegistryObject<VampirismAction> VAMPIRISM_BLOOD_DRAIN = ACTIONS.register("vampirism_blood_drain", 
             () -> new VampirismBloodDrain(new NonStandAction.Builder().emptyMainHand()));
 
-    public static final RegistryObject<VampirismAction> VAMPIRISM_FREEZE = ACTIONS.registerEntry("vampirism_freeze", 
+    public static final RegistryObject<VampirismAction> VAMPIRISM_FREEZE = ACTIONS.register("vampirism_freeze", 
             () -> new VampirismFreeze(new NonStandAction.Builder().holdEnergyCost(0.5F).heldWalkSpeed(0.75F).emptyMainHand()));
 
-    public static final RegistryObject<VampirismAction> VAMPIRISM_SPACE_RIPPER_STINGY_EYES = ACTIONS.registerEntry("vampirism_space_ripper_stingy_eyes", 
+    public static final RegistryObject<VampirismAction> VAMPIRISM_SPACE_RIPPER_STINGY_EYES = ACTIONS.register("vampirism_space_ripper_stingy_eyes", 
             () -> new VampirismSpaceRipperStingyEyes(new NonStandAction.Builder().holdType(20)
                     .holdEnergyCost(20F).cooldown(50).heldWalkSpeed(0.3F).ignoresPerformerStun()));
 
-    public static final RegistryObject<VampirismAction> VAMPIRISM_BLOOD_GIFT = ACTIONS.registerEntry("vampirism_blood_gift", 
+    public static final RegistryObject<VampirismAction> VAMPIRISM_BLOOD_GIFT = ACTIONS.register("vampirism_blood_gift", 
             () -> new VampirismBloodGift(new NonStandAction.Builder().holdToFire(60, false)
                     .holdEnergyCost(5F).heldWalkSpeed(0.3F).emptyMainHand()));
 
-    public static final RegistryObject<VampirismAction> VAMPIRISM_ZOMBIE_SUMMON = ACTIONS.registerEntry("vampirism_zombie_summon", 
+    public static final RegistryObject<VampirismAction> VAMPIRISM_ZOMBIE_SUMMON = ACTIONS.register("vampirism_zombie_summon", 
             () -> new VampirismZombieSummon(new NonStandAction.Builder().energyCost(100F).cooldown(100)));
 
-    public static final RegistryObject<VampirismAction> VAMPIRISM_DARK_AURA = ACTIONS.registerEntry("vampirism_dark_aura", 
+    public static final RegistryObject<VampirismAction> VAMPIRISM_DARK_AURA = ACTIONS.register("vampirism_dark_aura", 
             () -> new VampirismDarkAura(new NonStandAction.Builder().energyCost(25F).cooldown(300).ignoresPerformerStun()));
 
-    public static final RegistryObject<VampirismAction> VAMPIRISM_HAMON_SUICIDE = ACTIONS.registerEntry("vampirism_hamon_suicide", 
+    public static final RegistryObject<VampirismAction> VAMPIRISM_HAMON_SUICIDE = ACTIONS.register("vampirism_hamon_suicide", 
             () -> new VampirismHamonSuicide(new NonStandAction.Builder().holdToFire(100, false).ignoresPerformerStun()));
 
 
 
-    public static final RegistryObject<VampirismPowerType> VAMPIRISM = NON_STAND_POWERS.registerEntry("vampirism", 
+    public static final RegistryObject<VampirismPowerType> VAMPIRISM = NON_STAND_POWERS.register("vampirism", 
             () -> new VampirismPowerType(
                     0xFF0000, 
                     new VampirismAction[] {

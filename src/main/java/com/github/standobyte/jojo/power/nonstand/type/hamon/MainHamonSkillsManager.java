@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.non_stand.HamonAction;
-import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillAddPacket;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
@@ -98,7 +98,7 @@ public class MainHamonSkillsManager implements IHamonSkillsManager<AbstractHamon
     
     // bruh
     private void fillBaseSkills(CompoundNBT nbt) {
-        for (AbstractHamonSkill skill : ModHamonSkills.HAMON_SKILLS.getRegistry().getValues()) {
+        for (AbstractHamonSkill skill : JojoCustomRegistries.HAMON_SKILLS.getRegistry().getValues()) {
             if (skill instanceof BaseHamonSkill && nbt.contains(skill.getName()) && nbt.getBoolean(skill.getName())) {
                 addSkill(skill);
             }

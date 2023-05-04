@@ -13,7 +13,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.init.power.ModCommonRegistries;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -141,8 +141,8 @@ public class ActionHotbarData<P extends IPower<P, ?>> {
                     String actionName = actionCNBT.getString("Action");
                     if (!"".equals(actionName)) {
                         ResourceLocation actionId = new ResourceLocation(actionName);
-                        if (ModCommonRegistries.ACTIONS.getRegistry().containsKey(actionId)) {
-                            Action<P> action = (Action<P>) ModCommonRegistries.ACTIONS.getRegistry().getValue(actionId);
+                        if (JojoCustomRegistries.ACTIONS.getRegistry().containsKey(actionId)) {
+                            Action<P> action = (Action<P>) JojoCustomRegistries.ACTIONS.getRegistry().getValue(actionId);
                             actionEnableSwitch.add(new ActionSwitch<P>(action, actionCNBT.getBoolean("Enabled")));
                         }
                     }

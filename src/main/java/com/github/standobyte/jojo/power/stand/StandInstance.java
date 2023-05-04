@@ -7,7 +7,7 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrTypeStandInstancePacket;
 import com.github.standobyte.jojo.power.stand.type.StandType;
@@ -79,7 +79,7 @@ public class StandInstance {
     public CompoundNBT writeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         
-        nbt.putString("StandType", ModStandActions.STANDS.getKeyAsString(standType));
+        nbt.putString("StandType", JojoCustomRegistries.STANDS.getKeyAsString(standType));
         
         CompoundNBT missingLimbsNbt = new CompoundNBT();
         boolean limbsMissing = false;
@@ -100,7 +100,7 @@ public class StandInstance {
 
     public static StandInstance fromNBT(CompoundNBT nbt) {
         String standName = nbt.getString("StandType");
-        StandType<?> standType = ModStandActions.STANDS.getRegistry().getValue(new ResourceLocation(standName));
+        StandType<?> standType = JojoCustomRegistries.STANDS.getRegistry().getValue(new ResourceLocation(standName));
         if (standType == null) {
             return null;
         }

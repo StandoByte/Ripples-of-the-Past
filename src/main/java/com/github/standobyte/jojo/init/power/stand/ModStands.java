@@ -23,20 +23,20 @@ import com.github.standobyte.jojo.power.stand.type.EntityStandType;
 public class ModStands {
 
     public static final EntityStandSupplier<EntityStandType<TimeStopperStandStats>, StandEntityType<StarPlatinumEntity>> 
-    STAR_PLATINUM = new EntityStandSupplier<>(ModStandActions.STAND_STAR_PLATINUM);
+    STAR_PLATINUM = new EntityStandSupplier<>(ModStandsInit.STAND_STAR_PLATINUM);
 
     public static final EntityStandSupplier<EntityStandType<TimeStopperStandStats>, StandEntityType<TheWorldEntity>> 
-    THE_WORLD = new EntityStandSupplier<>(ModStandActions.STAND_THE_WORLD);
+    THE_WORLD = new EntityStandSupplier<>(ModStandsInit.STAND_THE_WORLD);
 
     public static final EntityStandSupplier<EntityStandType<StandStats>, StandEntityType<HierophantGreenEntity>> 
-    HIEROPHANT_GREEN = new EntityStandSupplier<>(ModStandActions.STAND_HIEROPHANT_GREEN);
+    HIEROPHANT_GREEN = new EntityStandSupplier<>(ModStandsInit.STAND_HIEROPHANT_GREEN);
 
     public static final EntityStandSupplier<EntityStandType<StandStats>, StandEntityType<SilverChariotEntity>> 
-    SILVER_CHARIOT = new EntityStandSupplier<>(ModStandActions.STAND_SILVER_CHARIOT);
+    SILVER_CHARIOT = new EntityStandSupplier<>(ModStandsInit.STAND_SILVER_CHARIOT);
 
     public static final EntityStandSupplier<EntityStandType<StandStats>, StandEntityType<MagiciansRedEntity>> 
-    MAGICIANS_RED = new EntityStandSupplier<>(ModStandActions.STAND_MAGICIANS_RED);
+    MAGICIANS_RED = new EntityStandSupplier<>(ModStandsInit.STAND_MAGICIANS_RED);
 
     public static final EntityStandSupplier<EntityStandType<StandStats>, StandEntityType<CrazyDiamondEntity>> 
-    CRAZY_DIAMOND = new EntityStandSupplier<>(ModStandActions.STAND_CRAZY_DIAMOND);
+    CRAZY_DIAMOND = new EntityStandSupplier<>(ModStandsInit.STAND_CRAZY_DIAMOND);
 }

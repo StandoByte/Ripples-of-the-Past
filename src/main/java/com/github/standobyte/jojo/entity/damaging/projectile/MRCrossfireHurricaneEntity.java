@@ -9,7 +9,7 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
@@ -261,7 +261,7 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
             if (!entity.is(magiciansRed)) {
                 DamageUtil.setOnFire(entity, 10, true);
                 if (!level.isClientSide() && userStandPower != null && StandUtil.worthyTarget(entity)) {
-                    userStandPower.addLearningProgressPoints(ModStandActions.MAGICIANS_RED_CROSSFIRE_HURRICANE.get(), 0.03125F);
+                    userStandPower.addLearningProgressPoints(ModStandsInit.MAGICIANS_RED_CROSSFIRE_HURRICANE.get(), 0.03125F);
                 }
             }
         }

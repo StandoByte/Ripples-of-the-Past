@@ -5,7 +5,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.init.power.ModCommonRegistries;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
@@ -39,7 +39,7 @@ public class ActionPredicate {
             JsonObject jsonObject = JSONUtils.convertToJsonObject(json, "JoJo action");
             
             ResourceLocation resLoc = new ResourceLocation(JSONUtils.getAsString(jsonObject, "name"));
-            Action<?> action = Optional.ofNullable(((ForgeRegistry<Action<?>>) ModCommonRegistries.ACTIONS.getRegistry())
+            Action<?> action = Optional.ofNullable(((ForgeRegistry<Action<?>>) JojoCustomRegistries.ACTIONS.getRegistry())
                     .getRaw(resLoc)).orElseThrow(() -> {
                         return new JsonSyntaxException("Unknown action '" + resLoc + "'");
                     });

@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
-import com.github.standobyte.jojo.init.power.ModCommonRegistries;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
@@ -45,7 +45,7 @@ public class TrHeldActionPacket {
             buf.writeInt(msg.userId);
             buf.writeEnum(msg.classification);
             if (!stopHeld) {
-                buf.writeRegistryIdUnsafe(ModCommonRegistries.ACTIONS.getRegistry(), msg.action);
+                buf.writeRegistryIdUnsafe(JojoCustomRegistries.ACTIONS.getRegistry(), msg.action);
                 buf.writeBoolean(msg.requirementsFulfilled);
             }
         }
@@ -56,7 +56,7 @@ public class TrHeldActionPacket {
             if (stopHeld) {
                 return actionStopped(buf.readInt(), buf.readEnum(PowerClassification.class));
             }
-            return new TrHeldActionPacket(buf.readInt(), buf.readEnum(PowerClassification.class), buf.readRegistryIdUnsafe(ModCommonRegistries.ACTIONS.getRegistry()), buf.readBoolean());
+            return new TrHeldActionPacket(buf.readInt(), buf.readEnum(PowerClassification.class), buf.readRegistryIdUnsafe(JojoCustomRegistries.ACTIONS.getRegistry()), buf.readBoolean());
         }
 
         @Override

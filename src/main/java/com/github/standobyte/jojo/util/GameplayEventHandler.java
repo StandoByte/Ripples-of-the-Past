@@ -42,7 +42,7 @@ import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
-import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.item.StandDiscItem;
@@ -452,7 +452,7 @@ public class GameplayEventHandler {
                 List<LivingEntity> KQUsers = painting.level.getEntitiesOfClass(
                         LivingEntity.class, painting.getBoundingBox().expandTowards(painting.getLookAngle().scale(3)).inflate(1), 
                             entity -> IStandPower.getStandPowerOptional(entity).map(
-                                    stand -> stand.hasPower() && stand.getType() == ModStandActions.KILLER_QUEEN.get())
+                                    stand -> stand.hasPower() && stand.getType() == ModStandsInit.KILLER_QUEEN.get())
                             .orElse(false));
                 if (!KQUsers.isEmpty()) {
                     if (monaLisaFull) {
@@ -742,8 +742,8 @@ public class GameplayEventHandler {
 
         
         IStandPower.getStandPowerOptional(target).ifPresent(power -> {
-            if (ModStandActions.CRAZY_DIAMOND_BLOOD_CUTTER.get().isUnlocked(power)) {
-                power.setCooldownTimer(ModStandActions.CRAZY_DIAMOND_BLOOD_CUTTER.get(), 0);
+            if (ModStandsInit.CRAZY_DIAMOND_BLOOD_CUTTER.get().isUnlocked(power)) {
+                power.setCooldownTimer(ModStandsInit.CRAZY_DIAMOND_BLOOD_CUTTER.get(), 0);
             }
         });
         
@@ -813,7 +813,7 @@ public class GameplayEventHandler {
         dropped |= GeneralUtil.orElseFalse(bleedingEntity, entity -> {
             return nearbyEntity.getRandom().nextFloat() < bleedAmount / 5 && 
                     GeneralUtil.orElseFalse(IStandPower.getStandPowerOptional(entity), (IStandPower power) -> {
-                        if (ModStandActions.CRAZY_DIAMOND_BLOOD_CUTTER.get().isUnlocked(power) && CDBloodCutterEntity.canHaveBloodDropsOn(nearbyEntity, power)) {
+                        if (ModStandsInit.CRAZY_DIAMOND_BLOOD_CUTTER.get().isUnlocked(power) && CDBloodCutterEntity.canHaveBloodDropsOn(nearbyEntity, power)) {
                             DriedBloodDrops bloodDrops = power.getContinuousEffects().getOrCreateEffect(ModStandEffects.DRIED_BLOOD_DROPS.get(), nearbyEntity);
                             return bloodDrops.tickCount > 0;
                         }

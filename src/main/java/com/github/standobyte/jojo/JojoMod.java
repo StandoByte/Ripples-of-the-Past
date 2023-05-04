@@ -19,12 +19,7 @@ import com.github.standobyte.jojo.init.ModRecipeSerializers;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStructures;
 import com.github.standobyte.jojo.init.ModTileEntities;
-import com.github.standobyte.jojo.init.power.ModCommonRegistries;
-import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
-import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
-import com.github.standobyte.jojo.init.power.non_stand.vampirism.ModVampirismActions;
-import com.github.standobyte.jojo.init.power.stand.ModStandActions;
-import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.util.mod.JojoModVersion;
 
 import net.minecraft.enchantment.EnchantmentType;
@@ -62,13 +57,11 @@ public class JojoMod {
         ModBlocks.BLOCKS.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
         
-        ModCommonRegistries.ACTIONS.initRegister(modEventBus);
-        ModHamonSkills.HAMON_SKILLS.initRegister(modEventBus);
-        ModHamonSkills.HAMON_CHARACTER_TECHNIQUES.initRegister(modEventBus);
-        ModCommonRegistries.NON_STAND_POWERS.initRegister(modEventBus);
-        ModStandActions.STANDS.initRegister(modEventBus);
-        ModStandEffects.STAND_EFFECTS.initRegister(modEventBus);
-        
+        JojoCustomRegistries.initCustomRegistries(modEventBus);
+        registerVanillaDeferredRegisters(modEventBus);
+    }
+
+    private void registerVanillaDeferredRegisters(IEventBus modEventBus) {
         ModEntityAttributes.ATTRIBUTES.register(modEventBus);
         ModContainers.CONTAINERS.register(modEventBus);
         ModDataSerializers.DATA_SERIALIZERS.register(modEventBus);
@@ -83,10 +76,5 @@ public class JojoMod {
         ModSounds.SOUNDS.register(modEventBus);
         ModStructures.STRUCTURES.register(modEventBus);
         ModTileEntities.TILE_ENTITIES.register(modEventBus);
-        
-        // just for the sake of splitting the actions to different files
-        // otherwise the classes with just RegistryObject instances won't load in time
-        ModHamonActions.loadRegistryObjects();
-        ModVampirismActions.loadRegistryObjects();
     }
 }

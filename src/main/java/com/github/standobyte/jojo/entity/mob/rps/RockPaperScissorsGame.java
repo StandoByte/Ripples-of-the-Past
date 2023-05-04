@@ -17,7 +17,7 @@ import com.github.standobyte.jojo.action.stand.effect.BoyIIManStandPartTakenEffe
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
-import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.RPSGameStatePacket;
@@ -190,7 +190,7 @@ public class RockPaperScissorsGame {
         IStandPower winnerStand = IStandPower.getStandPowerOptional(roundWinner).orElse(null);
         IStandPower loserStand = IStandPower.getStandPowerOptional(roundLoser).orElse(null);
         if (winnerStand == null || loserStand == null) return;
-        if (loserStand.hasPower() && winnerStand.getType() == ModStandActions.BOY_II_MAN.get()) {
+        if (loserStand.hasPower() && winnerStand.getType() == ModStandsInit.BOY_II_MAN.get()) {
             // FIXME (BIIM)
             if (round < ROUNDS_TO_WIN) {
                 StandPart limbs = round == 1 ? StandPart.ARMS : round == 2 ? StandPart.LEGS : null;
@@ -216,7 +216,7 @@ public class RockPaperScissorsGame {
                 boyIIManTookStand = true;
             }
         }
-        else if (loserStand.getType() == ModStandActions.BOY_II_MAN.get() && round == ROUNDS_TO_WIN) {
+        else if (loserStand.getType() == ModStandsInit.BOY_II_MAN.get() && round == ROUNDS_TO_WIN) {
             StandEffectsTracker boyIIManEffects = loserStand.getContinuousEffects();
             boyIIManEffects.getEffects(effect -> effect.effectType == ModStandEffects.BOY_II_MAN_PART_TAKE.get()
                     && roundWinner.is(effect.getTarget())).forEach(effect -> {

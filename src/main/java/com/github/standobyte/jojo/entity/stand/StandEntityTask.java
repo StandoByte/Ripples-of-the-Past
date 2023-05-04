@@ -15,7 +15,7 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.IStandPhasedAction;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.action.stand.StandEntityActionModifier;
-import com.github.standobyte.jojo.init.power.ModCommonRegistries;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandTaskModifierPacket;
@@ -268,7 +268,7 @@ public class StandEntityTask {
             if (taskNotEmplty) {
                 StandEntityTask task = value.get();
                 
-                buf.writeRegistryIdUnsafe(ModCommonRegistries.ACTIONS.getRegistry(), task.action);
+                buf.writeRegistryIdUnsafe(JojoCustomRegistries.ACTIONS.getRegistry(), task.action);
                 
                 buf.writeVarInt(task.startingTicks);
                 buf.writeEnum(task.phase);
@@ -292,7 +292,7 @@ public class StandEntityTask {
                 return Optional.empty();
             }
             
-            Action<?> action = buf.readRegistryIdUnsafe(ModCommonRegistries.ACTIONS.getRegistry());
+            Action<?> action = buf.readRegistryIdUnsafe(JojoCustomRegistries.ACTIONS.getRegistry());
             if (!(action instanceof StandEntityAction)) {
                 return Optional.empty();
             }

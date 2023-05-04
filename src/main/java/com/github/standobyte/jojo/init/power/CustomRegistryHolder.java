@@ -8,7 +8,6 @@ import com.github.standobyte.jojo.power.IPowerType;
 
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -25,11 +24,7 @@ public class CustomRegistryHolder<V extends IForgeRegistryEntry<V>> {
         this.name = name;
     }
     
-    public <I extends V> RegistryObject<I> registerEntry(String name, Supplier<? extends I> sup) {
-        return deferredRegister.register(name, sup);
-    }
-    
-    public void initRegister(IEventBus modEventBus) {
+    public void initRegistry(IEventBus modEventBus) {
         if (registrySupplier == null) {
             registrySupplier = deferredRegister.makeRegistry(name, () -> new RegistryBuilder<>());
             deferredRegister.register(modEventBus);

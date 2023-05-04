@@ -20,6 +20,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModItems;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
@@ -775,15 +776,15 @@ public class HamonData extends TypeSpecificData {
         Stream<? extends AbstractHamonSkill> toReset;
         switch (type) {
         case STRENGTH:
-            toReset = ModHamonSkills.HAMON_SKILLS.getRegistry().getValues().stream()
+            toReset = JojoCustomRegistries.HAMON_SKILLS.getRegistry().getValues().stream()
                     .filter(skill -> skill instanceof BaseHamonSkill && ((BaseHamonSkill) skill).getStat() == HamonStat.STRENGTH);
             break;
         case CONTROL:
-            toReset = ModHamonSkills.HAMON_SKILLS.getRegistry().getValues().stream()
+            toReset = JojoCustomRegistries.HAMON_SKILLS.getRegistry().getValues().stream()
                     .filter(skill -> skill instanceof BaseHamonSkill && ((BaseHamonSkill) skill).getStat() == HamonStat.CONTROL);
             break;
         case TECHNIQUE:
-            toReset = ModHamonSkills.HAMON_SKILLS.getRegistry().getValues().stream()
+            toReset = JojoCustomRegistries.HAMON_SKILLS.getRegistry().getValues().stream()
                     .filter(skill -> !skill.isBaseSkill());
             break;
         default:

@@ -16,7 +16,8 @@ import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.InMemoryCommentedFormat;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
-import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
+import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.CommonConfigPacket;
@@ -297,7 +298,7 @@ public class JojoModConfig {
         }
         
         private void initBannedStands() {
-            IForgeRegistry<StandType<?>> registry = ModStandActions.STANDS.getRegistry();
+            IForgeRegistry<StandType<?>> registry = JojoCustomRegistries.STANDS.getRegistry();
             
             Stream<ResourceLocation> resLocs = bannedStandsSynced != null ? 
                     bannedStandsSynced.stream()
@@ -328,7 +329,7 @@ public class JojoModConfig {
         
         public boolean isStandBanned(StandType<?> stand) {
             // FIXME (BIIM) temporary
-            if (stand == ModStandActions.BOY_II_MAN.get()) return true;
+            if (stand == ModStandsInit.BOY_II_MAN.get()) return true;
             return bannedStandsResLocs.contains(stand.getRegistryName());
         }
         
@@ -455,7 +456,7 @@ public class JojoModConfig {
                 standTiers = config.standTiers.get();
                 standTierXpLevels = config.standTierXpLevels.get().stream().mapToInt(Integer::intValue).toArray();
                 bannedStands = config.bannedStandsResLocs.stream()
-                        .map(key -> ModStandActions.STANDS.getRegistry().getValue(key))
+                        .map(key -> JojoCustomRegistries.STANDS.getRegistry().getValue(key))
                         .collect(Collectors.toList());
                 abilitiesBreakBlocks = config.abilitiesBreakBlocks.get();
 //                standDamageMultiplier = config.standDamageMultiplier.get()

@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.capability.item.cassette;
 
-import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
@@ -20,7 +20,7 @@ public class TrackSourceStandDisc extends TrackSource {
     
     static TrackSource fromNBT(CompoundNBT nbt) {
         if (nbt.contains("Stand", MCUtil.getNbtId(StringNBT.class))) {
-            StandType<?> standType = ModStandActions.STANDS.getRegistry().getValue(new ResourceLocation(nbt.getString("Stand")));
+            StandType<?> standType = JojoCustomRegistries.STANDS.getRegistry().getValue(new ResourceLocation(nbt.getString("Stand")));
             if (standType != null) {
                 return new TrackSourceStandDisc(standType);
             }

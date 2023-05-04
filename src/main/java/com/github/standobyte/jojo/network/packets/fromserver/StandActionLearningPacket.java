@@ -6,7 +6,7 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.toasts.ActionToast;
-import com.github.standobyte.jojo.init.power.ModCommonRegistries;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -33,14 +33,14 @@ public class StandActionLearningPacket {
 
         @Override
         public void encode(StandActionLearningPacket msg, PacketBuffer buf) {
-            buf.writeRegistryIdUnsafe(ModCommonRegistries.ACTIONS.getRegistry(), msg.action);
+            buf.writeRegistryIdUnsafe(JojoCustomRegistries.ACTIONS.getRegistry(), msg.action);
             buf.writeFloat(msg.progress);
             buf.writeBoolean(msg.showToast);
         }
 
         @Override
         public StandActionLearningPacket decode(PacketBuffer buf) {
-            return new StandActionLearningPacket(buf.readRegistryIdUnsafe(ModCommonRegistries.ACTIONS.getRegistry()), 
+            return new StandActionLearningPacket(buf.readRegistryIdUnsafe(JojoCustomRegistries.ACTIONS.getRegistry()), 
                     buf.readFloat(), buf.readBoolean());
         }
 

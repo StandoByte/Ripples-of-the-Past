@@ -5,7 +5,7 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondMisshapeBodyPart.TargetHitPart;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
-import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
@@ -30,11 +30,11 @@ public class CrazyDiamondMisshapingPunch extends StandEntityHeavyAttack {
         if (hitPart != null) {
             switch (hitPart) {
             case HEAD:
-                return ModStandActions.CRAZY_DIAMOND_MISSHAPE_FACE.get();
+                return ModStandsInit.CRAZY_DIAMOND_MISSHAPE_FACE.get();
             case TORSO_ARMS:
-                return ModStandActions.CRAZY_DIAMOND_MISSHAPE_ARMS.get();
+                return ModStandsInit.CRAZY_DIAMOND_MISSHAPE_ARMS.get();
             case LEGS:
-                return ModStandActions.CRAZY_DIAMOND_MISSHAPE_LEGS.get();
+                return ModStandsInit.CRAZY_DIAMOND_MISSHAPE_LEGS.get();
             }
         }
         return null;

@@ -5,6 +5,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
@@ -122,7 +123,7 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser,
         hamon.setBreathingLevel(HamonData.MAX_BREATHING_LEVEL);
         hamon.setHamonStatPoints(HamonStat.STRENGTH, HamonData.MAX_HAMON_POINTS, true, true);
         hamon.setHamonStatPoints(HamonStat.CONTROL, HamonData.MAX_HAMON_POINTS, true, true);
-        for (AbstractHamonSkill skill : ModHamonSkills.HAMON_SKILLS.getRegistry().getValues()) {
+        for (AbstractHamonSkill skill : JojoCustomRegistries.HAMON_SKILLS.getRegistry().getValues()) {
             if (skill.isBaseSkill()) {
                 hamon.addHamonSkill(this, skill, false, false);
             }

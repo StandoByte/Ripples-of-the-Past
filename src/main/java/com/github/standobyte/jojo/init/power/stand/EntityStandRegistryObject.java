@@ -7,7 +7,6 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
-import com.github.standobyte.jojo.init.power.CustomRegistryHolder;
 import com.github.standobyte.jojo.power.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.stand.type.EntityStandType;
 import com.github.standobyte.jojo.power.stand.type.StandType;
@@ -30,9 +29,9 @@ public class EntityStandRegistryObject<ST extends EntityStandType<? extends Stan
     private final RegistryObject<ET> entityType;
 
     public EntityStandRegistryObject(String name, 
-            CustomRegistryHolder<StandType<?>> standsRegister, Supplier<? extends ST> standType, 
+            DeferredRegister<StandType<?>> standsRegister, Supplier<? extends ST> standType, 
             DeferredRegister<EntityType<?>> entitiesRegister, Supplier<? extends ET> entityType) {
-        this.standType = standsRegister.registerEntry(name, standType);
+        this.standType = standsRegister.register(name, standType);
         this.entityType = entitiesRegister.register(name, entityType);
         ENTITY_STANDS_LINKAGE.add(this);
     }

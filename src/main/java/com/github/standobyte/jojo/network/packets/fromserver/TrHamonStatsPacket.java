@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.toasts.HamonSkillToast;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
-import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.AbstractHamonSkill;
@@ -114,7 +114,7 @@ public class TrHamonStatsPacket {
                         Predicate<AbstractHamonSkill> canBeLearned = skill -> !hamon.isSkillLearned(skill) && hamon.canLearnSkillTeacherIrrelevant(user, skill).isPositive();
                         List<AbstractHamonSkill> oldSkills = Collections.emptyList();
                         if (showToasts) {
-                            oldSkills = ModHamonSkills.HAMON_SKILLS.getRegistry().getValues().stream()
+                            oldSkills = JojoCustomRegistries.HAMON_SKILLS.getRegistry().getValues().stream()
                                     .filter(skill -> canBeLearned.test(skill)).collect(Collectors.toList());
                         }
 
@@ -130,7 +130,7 @@ public class TrHamonStatsPacket {
 
                         ToastGui toastGui = Minecraft.getInstance().getToasts();
                         if (showToasts) {
-                            for (AbstractHamonSkill skill : ModHamonSkills.HAMON_SKILLS.getRegistry().getValues()) {
+                            for (AbstractHamonSkill skill : JojoCustomRegistries.HAMON_SKILLS.getRegistry().getValues()) {
                                 if (canBeLearned.test(skill) && !oldSkills.contains(skill)) {
                                     HamonSkillToast.Type toastType = skill instanceof BaseHamonSkill ? 
                                             ((BaseHamonSkill) skill).getStat() == BaseHamonSkill.HamonStat.STRENGTH

@@ -35,7 +35,7 @@ import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityAttributes;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
-import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandTaskTargetPacket;
@@ -493,7 +493,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
 //            scheduledTask = null;
             getCurrentTask().ifPresent(task -> {
                 StandEntityAction action = task.getAction();
-                if (action == ModStandActions.UNSUMMON_STAND_ENTITY.get()) {
+                if (action == ModStandsInit.UNSUMMON_STAND_ENTITY.get()) {
                     stopTask();
                 }
             });
@@ -767,7 +767,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         boolean blockableAngle = canBlockOrParryFromAngle(dmgSource.getSourcePosition());
         if (!isManuallyControlled() && canBlockDamage(dmgSource) && blockableAngle && !getCurrentTask().isPresent() && canStartBlocking()) {
             // FIXME extend the task if it's already blocking
-            setTask(ModStandActions.BLOCK_STAND_ENTITY.get(), 5, StandEntityAction.Phase.PERFORM, ActionTarget.EMPTY);
+            setTask(ModStandsInit.BLOCK_STAND_ENTITY.get(), 5, StandEntityAction.Phase.PERFORM, ActionTarget.EMPTY);
         }
         if (transfersDamage() && hasUser()) {
             LivingEntity user = getUser();
@@ -868,7 +868,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             return false;
         }
         return getCurrentTask().map(task -> task.getAction().canBeCanceled(userPower, 
-                this, task.getPhase(), ModStandActions.BLOCK_STAND_ENTITY.get())).orElse(true);
+                this, task.getPhase(), ModStandsInit.BLOCK_STAND_ENTITY.get())).orElse(true);
     }
 
     public boolean isStandBlocking() {
@@ -1295,7 +1295,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         
         if (newAction == null && !checkInputBuffer()) {
             if (isArmsOnlyMode()) {
-                StandEntityAction unsummon = ModStandActions.UNSUMMON_STAND_ENTITY.get();
+                StandEntityAction unsummon = ModStandsInit.UNSUMMON_STAND_ENTITY.get();
                 setTask(StandEntityTask.makeServerSideTask(this, userPower, unsummon, unsummon.getStandActionTicks(userPower, this), 
                         StandEntityAction.Phase.PERFORM, isArmsOnlyMode(), ActionTarget.EMPTY));
             }
@@ -1796,14 +1796,14 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     public void stopRetraction() {
         setStandFlag(StandFlag.BEING_RETRACTED, false);
         getCurrentTask().ifPresent(task -> {
-            if (task.getAction() == ModStandActions.UNSUMMON_STAND_ENTITY.get()) {
+            if (task.getAction() == ModStandsInit.UNSUMMON_STAND_ENTITY.get()) {
                 this.stopTask();
             }
         });
     }
     
     private void startStandUnsummon() {
-        StandEntityAction unsummon = ModStandActions.UNSUMMON_STAND_ENTITY.get();
+        StandEntityAction unsummon = ModStandsInit.UNSUMMON_STAND_ENTITY.get();
         setTask(unsummon, unsummon.getStandActionTicks(userPower, this), StandEntityAction.Phase.PERFORM, ActionTarget.EMPTY);
     }
     

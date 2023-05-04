@@ -20,7 +20,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.power.nonstand.type.vampirism.VampirismData;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
@@ -92,7 +92,7 @@ public class CrazyDiamondLeaveObject extends StandEntityActionModifier {
     
     @Override
     public boolean isUnlocked(IStandPower power) {
-        return ModStandActions.CRAZY_DIAMOND_HEAL.get().isUnlocked(power);
+        return ModStandsInit.CRAZY_DIAMOND_HEAL.get().isUnlocked(power);
     }
     
     @Override

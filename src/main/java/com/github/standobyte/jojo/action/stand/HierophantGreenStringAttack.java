@@ -6,7 +6,7 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGStringEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
-import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.MathUtil;
 
@@ -44,8 +44,8 @@ public class HierophantGreenStringAttack extends StandEntityAction {
     
     protected boolean isCancelable(IStandPower standPower, StandEntity standEntity, @Nullable StandEntityAction newAction, Phase phase) {
         return !this.hasShiftVariation() && 
-                (newAction == ModStandActions.HIEROPHANT_GREEN_EMERALD_SPLASH.get()
-                || newAction == ModStandActions.HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED.get())
+                (newAction == ModStandsInit.HIEROPHANT_GREEN_EMERALD_SPLASH.get()
+                || newAction == ModStandsInit.HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED.get())
                 || super.isCancelable(standPower, standEntity, newAction, phase);
     }
     

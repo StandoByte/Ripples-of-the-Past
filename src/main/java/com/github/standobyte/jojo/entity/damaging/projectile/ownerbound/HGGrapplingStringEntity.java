@@ -6,7 +6,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 
 import net.minecraft.entity.Entity;
@@ -49,8 +49,8 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
             return;
         }
         if (!level.isClientSide() && (userStandPower == null || userStandPower.getHeldAction() != (
-                bindEntities ? ModStandActions.HIEROPHANT_GREEN_GRAPPLE_ENTITY.get() : 
-                    ModStandActions.HIEROPHANT_GREEN_GRAPPLE.get()))) {
+                bindEntities ? ModStandsInit.HIEROPHANT_GREEN_GRAPPLE_ENTITY.get() : 
+                    ModStandsInit.HIEROPHANT_GREEN_GRAPPLE.get()))) {
             remove();
             return;
         }

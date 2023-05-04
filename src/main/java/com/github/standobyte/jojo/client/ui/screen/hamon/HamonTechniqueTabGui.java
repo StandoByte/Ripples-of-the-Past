@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonResetSkillsButtonPacket.HamonSkillsTab;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.CharacterHamonTechnique;
@@ -62,7 +63,7 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
             techniques = Util.make(new ArrayList<>(), list -> list.add(technique));
         }
         else {
-            techniques = new ArrayList<>(ModHamonSkills.HAMON_CHARACTER_TECHNIQUES.getRegistry().getValues());
+            techniques = new ArrayList<>(JojoCustomRegistries.HAMON_CHARACTER_TECHNIQUES.getRegistry().getValues());
             Collections.sort(techniques, TECHNIQUES_ORDER);
         }
         
@@ -233,7 +234,7 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
         if (availableHamonTechniques.size() <= 1) {
             return;
         }
-        List<CharacterHamonTechnique> techniques = new ArrayList<>(ModHamonSkills.HAMON_CHARACTER_TECHNIQUES.getRegistry().getValues());
+        List<CharacterHamonTechnique> techniques = new ArrayList<>(JojoCustomRegistries.HAMON_CHARACTER_TECHNIQUES.getRegistry().getValues());
         Collections.sort(techniques, TECHNIQUES_ORDER);
         if (firstTechnique != null) {
             Collections.sort(techniques, (t1, t2) -> t1 == firstTechnique ? -1 : t2 == firstTechnique ? 1 : 0);

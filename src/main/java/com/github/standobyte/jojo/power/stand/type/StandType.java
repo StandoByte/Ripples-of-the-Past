@@ -14,7 +14,7 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
-import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -191,7 +191,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     @Override
     public String getTranslationKey() {
         if (translationKey == null) {
-            translationKey = Util.makeDescriptionId("stand", ModStandActions.STANDS.getRegistry().getKey(this));
+            translationKey = Util.makeDescriptionId("stand", JojoCustomRegistries.STANDS.getRegistry().getKey(this));
         }
         return this.translationKey;
     }

@@ -21,7 +21,7 @@ import org.apache.logging.log4j.Logger;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.command.GenStandStatsCommand;
-import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.StandStatsDataPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandStatsDataPacket.StandStatsDataEntry;
@@ -77,7 +77,7 @@ public class StandStatsManager extends JsonReloadListener {
     protected void apply(Map<ResourceLocation, JsonElement> resourceList, IResourceManager resourceManager, IProfiler profiler) {
         Map<StandType<?>, StandStats> stats = new HashMap<>();
         
-        IForgeRegistry<StandType<?>> registry = ModStandActions.STANDS.getRegistry();
+        IForgeRegistry<StandType<?>> registry = JojoCustomRegistries.STANDS.getRegistry();
         resourceList.forEach((location, object) -> {
             if (registry.containsKey(location)) {
                 StandType<?> stand = registry.getValue(location);
@@ -108,7 +108,7 @@ public class StandStatsManager extends JsonReloadListener {
         Path folderPath = getPackFolderPath(world.getServer());
         if (!savedStatsWorlds.contains(folderPath)) {
             Path dataFolderPath = folderPath.resolve("data");
-            Set<Map.Entry<RegistryKey<StandType<?>>, StandType<?>>> standTypes = ModStandActions.STANDS.getRegistry().getEntries();
+            Set<Map.Entry<RegistryKey<StandType<?>>, StandType<?>>> standTypes = JojoCustomRegistries.STANDS.getRegistry().getEntries();
             for (Map.Entry<RegistryKey<StandType<?>>, StandType<?>> entry : standTypes) {
                 Path jsonFilePath = getJsonPath(dataFolderPath, entry.getKey().location());
                 File jsonFile = jsonFilePath.toFile();
@@ -181,7 +181,7 @@ public class StandStatsManager extends JsonReloadListener {
     }
     
     public void clSetStats(Iterable<StandStatsDataEntry> stats) {
-        IForgeRegistry<StandType<?>> registry = ModStandActions.STANDS.getRegistry();
+        IForgeRegistry<StandType<?>> registry = JojoCustomRegistries.STANDS.getRegistry();
         Map<StandType<?>, StandStats> map = new HashMap<>();
         stats.forEach(entry -> {
             StandType<?> stand = registry.getValue(entry.getStandTypeLocation());

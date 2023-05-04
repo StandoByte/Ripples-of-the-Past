@@ -12,7 +12,7 @@ import java.util.Random;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
@@ -40,7 +40,7 @@ public class ResolveShadersListManager extends ReloadListener<Map<ResourceLocati
         map.put(DEFAULT_LOCATION, readArray(resourceManager, DEFAULT_LOCATION));
         map.put(NO_STAND_LOCATION, readArray(resourceManager, NO_STAND_LOCATION));
 
-        ModStandActions.STANDS.getRegistry().getKeys().forEach(stand -> {
+        JojoCustomRegistries.STANDS.getRegistry().getKeys().forEach(stand -> {
             JsonArray jsonArray = readArray(resourceManager, stand);
             if (jsonArray != null) {
                 map.put(stand, jsonArray);

@@ -5,7 +5,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
@@ -173,8 +173,8 @@ public class SCRapierEntity extends ModdedProjectileEntity {
             stand.playSound(SoundEvents.ITEM_PICKUP, 1.0F, 1.0F);
             stand.setRapier(true);
             IStandPower.getStandPowerOptional(stand.getUser()).ifPresent(power -> {
-                if (ModStandActions.SILVER_CHARIOT_RAPIER_LAUNCH.get().isUnlocked(power)) {
-                    power.setCooldownTimer(ModStandActions.SILVER_CHARIOT_RAPIER_LAUNCH.get(), 0);
+                if (ModStandsInit.SILVER_CHARIOT_RAPIER_LAUNCH.get().isUnlocked(power)) {
+                    power.setCooldownTimer(ModStandsInit.SILVER_CHARIOT_RAPIER_LAUNCH.get(), 0);
                 }
             });
             remove();

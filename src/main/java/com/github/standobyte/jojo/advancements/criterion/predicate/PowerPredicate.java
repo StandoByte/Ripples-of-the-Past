@@ -5,8 +5,7 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.init.power.ModCommonRegistries;
-import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.IPowerType;
@@ -111,10 +110,10 @@ public class PowerPredicate {
                     ForgeRegistry<? extends IPowerType<?, ?>> registry;
                     switch (classification) {
                     case STAND:
-                        registry = (ForgeRegistry<StandType<?>>) ModStandActions.STANDS.getRegistry();
+                        registry = (ForgeRegistry<StandType<?>>) JojoCustomRegistries.STANDS.getRegistry();
                         break;
                     case NON_STAND:
-                        registry = (ForgeRegistry<NonStandPowerType<?>>) ModCommonRegistries.NON_STAND_POWERS.getRegistry();
+                        registry = (ForgeRegistry<NonStandPowerType<?>>) JojoCustomRegistries.NON_STAND_POWERS.getRegistry();
                         break;
                     default:
                         registry = null;

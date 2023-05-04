@@ -11,7 +11,7 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.TimeStopInstance;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrNoMotionLerpPacket;
 import com.github.standobyte.jojo.power.stand.IStandPower;
@@ -59,7 +59,7 @@ public class TimeStopInstant extends StandAction {
 
     @Override
     protected Action<IStandPower> replaceAction(IStandPower power) {
-        Action<IStandPower> timeResume = ModStandActions.TIME_RESUME.get();
+        Action<IStandPower> timeResume = ModStandsInit.TIME_RESUME.get();
         timeResume = timeResume.getVisibleAction(power);
         return timeResume != null ? timeResume : this;
     }

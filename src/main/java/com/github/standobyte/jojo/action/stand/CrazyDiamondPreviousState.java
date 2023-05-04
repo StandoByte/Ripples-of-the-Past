@@ -20,7 +20,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -263,7 +263,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
         default:
             if (!world.isClientSide()) {
                 ItemStack heldItem = userPower.getUser().getOffhandItem();
-                if (ModStandActions.CRAZY_DIAMOND_REPAIR.get().repairTick(userPower.getUser(), standEntity, heldItem, task.getTick()) == 0
+                if (ModStandsInit.CRAZY_DIAMOND_REPAIR.get().repairTick(userPower.getUser(), standEntity, heldItem, task.getTick()) == 0
                         && userPower.getUser() instanceof PlayerEntity && CrazyDiamondRepairItem.itemTransformationTick(task.getTick(), standEntity)) {
                     PlayerEntity player = (PlayerEntity) userPower.getUser();
                     CrazyDiamondRepairItem.dropExperience(player, heldItem);

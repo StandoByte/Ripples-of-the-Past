@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.power.nonstand.type;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.init.power.ModCommonRegistries;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.NonStandPower;
@@ -46,7 +46,7 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
     @Override
     public String getTranslationKey() {
         if (translationKey == null) {
-            translationKey = Util.makeDescriptionId("non_stand", ModCommonRegistries.NON_STAND_POWERS.getRegistry().getKey(this));
+            translationKey = Util.makeDescriptionId("non_stand", JojoCustomRegistries.NON_STAND_POWERS.getRegistry().getKey(this));
         }
         return this.translationKey;
     }

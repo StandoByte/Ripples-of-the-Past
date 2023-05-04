@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.init.power.ModCommonRegistries;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrEnergyPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrTypeNonStandPowerPacket;
@@ -225,7 +225,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     public CompoundNBT writeNBT() {
         CompoundNBT cnbt = super.writeNBT();
         cnbt.putFloat("Energy", energy);
-        cnbt.putString("Type", ModCommonRegistries.NON_STAND_POWERS.getKeyAsString(getType()));
+        cnbt.putString("Type", JojoCustomRegistries.NON_STAND_POWERS.getKeyAsString(getType()));
         getTypeSpecificData(null).ifPresent(data -> {
             cnbt.put("AdditionalData", data.writeNBT());
         });
@@ -236,7 +236,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     public void readNBT(CompoundNBT nbt) {
         String powerName = nbt.getString("Type");
         if (powerName != IPowerType.NO_POWER_NAME) {
-            NonStandPowerType<?> type = ModCommonRegistries.NON_STAND_POWERS.getRegistry().getValue(new ResourceLocation(powerName));
+            NonStandPowerType<?> type = JojoCustomRegistries.NON_STAND_POWERS.getRegistry().getValue(new ResourceLocation(powerName));
             if (type != null) {
                 setType(type);
                 TypeSpecificData data = type.newSpecificDataInstance();

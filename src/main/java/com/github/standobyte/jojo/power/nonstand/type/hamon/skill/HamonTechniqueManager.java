@@ -8,7 +8,7 @@ import java.util.Set;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonCharacterTechniquePacket;
 import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonData;
@@ -140,7 +140,7 @@ public class HamonTechniqueManager implements IHamonSkillsManager<CharacterTechn
             if (entry instanceof CompoundNBT) {
                 CompoundNBT skillNbt = (CompoundNBT) entry;
                 if (skillNbt.contains("Name", MCUtil.getNbtId(StringNBT.class))) {
-                    AbstractHamonSkill s = ModHamonSkills.HAMON_SKILLS.getRegistry().getValue(new ResourceLocation(skillNbt.getString("Name")));
+                    AbstractHamonSkill s = JojoCustomRegistries.HAMON_SKILLS.getRegistry().getValue(new ResourceLocation(skillNbt.getString("Name")));
                     if (s instanceof CharacterTechniqueHamonSkill) {
                         CharacterTechniqueHamonSkill skill = (CharacterTechniqueHamonSkill) s;
                         mainSkillsHolder.addSkill(skill);
@@ -151,7 +151,7 @@ public class HamonTechniqueManager implements IHamonSkillsManager<CharacterTechn
         
         if (nbt.contains("CharacterTechnique", MCUtil.getNbtId(StringNBT.class))) {
             ResourceLocation techniqueId = new ResourceLocation(nbt.getString("CharacterTechnique"));
-            IForgeRegistry<CharacterHamonTechnique> registry = ModHamonSkills.HAMON_CHARACTER_TECHNIQUES.getRegistry();
+            IForgeRegistry<CharacterHamonTechnique> registry = JojoCustomRegistries.HAMON_CHARACTER_TECHNIQUES.getRegistry();
             if (registry.containsKey(techniqueId)) {
                 this.technique = registry.getValue(techniqueId);
                 

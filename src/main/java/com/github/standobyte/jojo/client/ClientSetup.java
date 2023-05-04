@@ -86,7 +86,7 @@ import com.github.standobyte.jojo.init.ModContainers;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModParticles;
-import com.github.standobyte.jojo.init.power.stand.ModStandActions;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.item.ClackersItem;
 import com.github.standobyte.jojo.item.StandArrowItem;
@@ -231,7 +231,7 @@ public class ClientSetup {
                         CrossbowItem.containsChargedProjectile(itemStack, ModItems.STAND_ARROW_BEETLE.get())) ? 1 : 0;
             });
             ItemModelsProperties.register(ModItems.STAND_DISC.get(), new ResourceLocation(JojoMod.MOD_ID, "stand_id"), (itemStack, clientWorld, livingEntity) -> {
-                return StandDiscItem.validStandDisc(itemStack, true) ? ModStandActions.STANDS.getNumericId(StandDiscItem.getStandFromStack(itemStack, true).getType().getRegistryName()) : -1;
+                return StandDiscItem.validStandDisc(itemStack, true) ? JojoCustomRegistries.STANDS.getNumericId(StandDiscItem.getStandFromStack(itemStack, true).getType().getRegistryName()) : -1;
             });
             ItemModelsProperties.register(ModItems.CASSETTE_RECORDED.get(), new ResourceLocation(JojoMod.MOD_ID, "cassette_distortion"), (itemStack, clientWorld, livingEntity) -> {
                 return itemStack.getCapability(CassetteCapProvider.CAPABILITY)
