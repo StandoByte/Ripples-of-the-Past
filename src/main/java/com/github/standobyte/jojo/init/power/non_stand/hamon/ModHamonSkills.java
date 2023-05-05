@@ -151,6 +151,7 @@ public class ModHamonSkills {
     
     public static final RegistryObject<CharacterTechniqueHamonSkill> METAL_SILVER_OVERDRIVE = HAMON_SKILLS.register("metal_silver_overdrive",
             () -> new CharacterTechniqueHamonSkill.Builder("metal_silver_overdrive", RewardType.PASSIVE)
+            .unlocks(ModHamonActions.JONATHAN_METAL_SILVER_OVERDRIVE, false)
             .requiredSkill(SENDO_OVERDRIVE).build());
     
     public static final RegistryObject<CharacterTechniqueHamonSkill> OVERDRIVE_BARRAGE = HAMON_SKILLS.register("overdrive_barrage",

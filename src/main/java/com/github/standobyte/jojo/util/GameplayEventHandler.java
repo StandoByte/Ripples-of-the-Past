@@ -178,7 +178,6 @@ import net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionApplicableEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionExpiryEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
@@ -1014,18 +1013,10 @@ public class GameplayEventHandler {
         }
     }
     
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onPlayerAttack(AttackEntityEvent event) {
-        if (event.getTarget() instanceof LivingEntity) {
-            INonStandPower.getNonStandPowerOptional(event.getPlayer()).ifPresent(power -> {
-                if (power.getHeldAction() == null) {
-                    power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                        HamonPowerType.overdriveAttack(event.getPlayer(), (LivingEntity) event.getTarget(), power, hamon);
-                    });
-                }
-            });
-        }
-    }
+//    @SubscribeEvent(priority = EventPriority.LOWEST)
+//    public static void onPlayerAttack(AttackEntityEvent event) {
+//        overdrive was there
+//    }
     
     @SubscribeEvent(priority = EventPriority.LOW, receiveCanceled = true)
     public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {

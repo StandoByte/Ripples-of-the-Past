@@ -35,10 +35,8 @@ public class MainHamonSkillsManager implements IHamonSkillsManager<AbstractHamon
     @Override
     public void addSkill(AbstractHamonSkill skill) {
         handlerForSkill(skill).addSkill();
-        addUnlockedAction(skill.getRewardAction());
-    }
-
-    public void addUnlockedAction(Action<INonStandPower> action) {
+        
+        HamonAction action = skill.getRewardAction();
         if (action != null) {
             unlockedActions.add(action);
         }
@@ -51,9 +49,6 @@ public class MainHamonSkillsManager implements IHamonSkillsManager<AbstractHamon
         HamonAction action = skill.getRewardAction();
         if (action != null) {
             unlockedActions.remove(action);
-            if (action.getShiftVariationIfPresent() != action) {
-                unlockedActions.remove(action.getShiftVariationIfPresent());
-            }
         }
     }
     

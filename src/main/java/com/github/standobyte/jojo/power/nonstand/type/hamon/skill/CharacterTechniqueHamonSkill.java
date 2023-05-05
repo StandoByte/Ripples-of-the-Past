@@ -10,9 +10,11 @@ import com.github.standobyte.jojo.action.non_stand.HamonAction;
 
 public class CharacterTechniqueHamonSkill extends AbstractHamonSkill {
     private CharacterHamonTechnique technique;
+    private final boolean addsActionToHUD;
     
     public CharacterTechniqueHamonSkill(Builder builder) {
         super(builder.name, builder.rewardType, builder.rewardAction, builder.requiredSkills);
+        this.addsActionToHUD = builder.addsActionToHUD;
     }
     
     @Override
@@ -28,12 +30,18 @@ public class CharacterTechniqueHamonSkill extends AbstractHamonSkill {
         return technique;
     }
     
+    @Override
+    public boolean addsActionToHUD() {
+        return addsActionToHUD;
+    }
+    
     
     
     public static class Builder {
         private final String name;
         private final RewardType rewardType;
         private @Nullable Supplier<? extends HamonAction> rewardAction = null;
+        private boolean addsActionToHUD = false;
         private final List<Supplier<? extends AbstractHamonSkill>> requiredSkills = new ArrayList<>();
         
         public Builder(String name, RewardType rewardType) {
@@ -42,7 +50,12 @@ public class CharacterTechniqueHamonSkill extends AbstractHamonSkill {
         }
         
         public Builder unlocks(Supplier<? extends HamonAction> rewardAction) {
+            return unlocks(rewardAction, true);
+        }
+        
+        public Builder unlocks(Supplier<? extends HamonAction> rewardAction, boolean addToHUD) {
             this.rewardAction = rewardAction;
+            this.addsActionToHUD = addToHUD;
             return this;
         }
         

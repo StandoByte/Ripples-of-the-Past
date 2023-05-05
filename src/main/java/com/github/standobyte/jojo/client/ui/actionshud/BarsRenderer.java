@@ -11,7 +11,6 @@ import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.Alignme
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.BarsOrientation;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.ElementTransparency;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
-import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
@@ -135,9 +134,6 @@ public abstract class BarsRenderer {
     
     protected <P extends IPower<P, ?>> float getActionCost(ActionsModeConfig<P> mode, ActionType hotbar, LivingEntity user, boolean shift) {
         Action<P> action = mode.getSelectedAction(hotbar, shift);
-        if (action == null && mode.getPower().getPowerClassification() == PowerClassification.NON_STAND && mode.getPower().getType() == ModPowers.HAMON.get()) {
-            action = (Action<P>) ModHamonActions.HAMON_OVERDRIVE.get();
-        }
         
         if (action != null) {
             return action.getCostToRender(mode.getPower());

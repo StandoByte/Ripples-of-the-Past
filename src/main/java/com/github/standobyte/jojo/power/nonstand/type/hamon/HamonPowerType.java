@@ -13,7 +13,6 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
-import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.non_stand.HamonAction;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
@@ -30,7 +29,6 @@ import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
-import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRunAwayPacket;
@@ -284,14 +282,6 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                 createChargedCobweb(user, nextPos, world.getBlockState(nextPos), world, 
                         range - 1, direction.getOpposite(), power, chargeTicks, charge, hamon);
             }
-        }
-    }
-    
-    public static void overdriveAttack(LivingEntity user, LivingEntity targetEntity, INonStandPower power, HamonData hamon) {
-        ActionTarget target = new ActionTarget(targetEntity);
-        boolean shift = user.isShiftKeyDown();
-        if (!(shift && power.clickAction(ModHamonActions.HAMON_SUNLIGHT_YELLOW_OVERDRIVE.get(), true, target))) {
-            power.clickAction(ModHamonActions.HAMON_OVERDRIVE.get(), shift, target);
         }
     }
     

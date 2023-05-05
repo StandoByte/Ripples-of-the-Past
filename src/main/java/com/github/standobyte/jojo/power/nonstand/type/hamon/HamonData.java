@@ -38,6 +38,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrHamonBreathStabil
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonEnergyTicksPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonStatsPacket;
+import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.nonstand.TypeSpecificData;
@@ -926,8 +927,11 @@ public class HamonData extends TypeSpecificData {
     }
 
     private void addSkillAction(AbstractHamonSkill skill) {
-        if (skill.getRewardAction() != null && !skill.isBaseSkill()) {
-            power.getActions(skill.getRewardType().getActionType()).addExtraAction(skill.getRewardAction());
+        if (skill.getRewardAction() != null && skill.addsActionToHUD()) {
+            ActionType hotbar = skill.getRewardType().getActionType();
+            if (hotbar != null) {
+                power.getActions(hotbar).addExtraAction(skill.getRewardAction());
+            }
         }
     }
     
@@ -946,8 +950,11 @@ public class HamonData extends TypeSpecificData {
     }
 
     private void removeSkillAction(AbstractHamonSkill skill) {
-        if (skill.getRewardAction() != null && !skill.isBaseSkill()) {
-            power.getActions(skill.getRewardType().getActionType()).removeAction(skill.getRewardAction());
+        if (skill.getRewardAction() != null && skill.addsActionToHUD()) {
+            ActionType hotbar = skill.getRewardType().getActionType();
+            if (hotbar != null) {
+                power.getActions(hotbar).removeAction(skill.getRewardAction());
+            }
         }
     }
 

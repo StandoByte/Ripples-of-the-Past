@@ -42,6 +42,10 @@ public abstract class AbstractHamonSkill extends ForgeRegistryEntry<AbstractHamo
         return rewardAction != null ? rewardAction.get() : null;
     }
     
+    public boolean addsActionToHUD() {
+        return false;
+    }
+    
     public boolean isUnlockedByDefault() {
         return false;
     }

@@ -38,11 +38,6 @@ public class HamonSunlightYellowOverdrive extends HamonAction {
     }
     
     @Override
-    public boolean sendsConditionMessage() {
-        return false;
-    }
-
-    @Override
     public float getEnergyCost(INonStandPower power) {
         return Math.max(power.getEnergy(), super.getEnergyCost(power));
     }
