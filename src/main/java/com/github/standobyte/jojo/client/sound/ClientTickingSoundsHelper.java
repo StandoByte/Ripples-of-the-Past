@@ -155,6 +155,10 @@ public abstract class ClientTickingSoundsHelper {
         Minecraft.getInstance().getSoundManager().play(new HamonSparksLoopSound<>(entity, stopCondition, volume, 1.0F));
     }
     
+    public static void playHamonEnergyConcentrationSound(LivingEntity entity, float volume) {
+        Minecraft.getInstance().getSoundManager().play(new HamonEnergySound(entity, volume, 1.0F));
+    }
+    
     public static void playHamonConcentrationSound(LivingEntity hamonUser, Predicate<LivingEntity> stopCondition, float volume) {
         Minecraft.getInstance().getSoundManager().play(new StoppableEntityTickableSound<LivingEntity>(
                 ModSounds.HAMON_CONCENTRATION.get(), hamonUser.getSoundSource(), volume, 1.0F, false, hamonUser, stopCondition));

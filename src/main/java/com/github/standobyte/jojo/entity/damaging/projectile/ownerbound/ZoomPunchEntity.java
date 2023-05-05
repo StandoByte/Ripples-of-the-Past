@@ -115,7 +115,10 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
     @Override
     protected boolean hurtTarget(Entity target, LivingEntity owner) {
         boolean regularAttack = super.hurtTarget(target, owner);
-        boolean hamonAttack = DamageUtil.dealHamonDamage(target, 0.1F, this, owner);
+        boolean hamonAttack = getUserHamon().map(hamon -> {
+            Boolean dealtDamage = hamon.consumeHamonEnergyTo(eff -> DamageUtil.dealHamonDamage(target, hamonDamage * eff, this, owner), hamonDamageCost);
+            return dealtDamage != null && dealtDamage;
+        }).orElse(false);
         
         if (regularAttack) {
             float knockback = (float) owner.getAttributeValue(Attributes.ATTACK_KNOCKBACK);

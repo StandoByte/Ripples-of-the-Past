@@ -27,7 +27,7 @@ public class HamonScarletOverdrive extends HamonAction {
                 Entity targetEntity = target.getEntity();
                 if (DamageUtil.dealDamageAndSetOnFire(targetEntity, 
                         entity -> DamageUtil.dealHamonDamage(entity, 0.1F, user, null), 
-                        MathHelper.floor(2 + 8F * (float) hamon.getHamonStrengthLevel() / (float) HamonData.MAX_STAT_LEVEL * hamon.getHamonEfficiency()), false)) {
+                        MathHelper.floor(2 + 8F * (float) hamon.getHamonStrengthLevel() / (float) HamonData.MAX_STAT_LEVEL * hamon.getHamonEfficiency(getEnergyCost(power))), false)) {
                     hamon.hamonPointsFromAction(HamonStat.STRENGTH, getEnergyCost(power));
                 }
                 user.doHurtTarget(targetEntity);

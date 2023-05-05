@@ -4,6 +4,7 @@ import static com.github.standobyte.jojo.init.power.ModCommonRegisters.ACTIONS;
 import static com.github.standobyte.jojo.init.power.ModCommonRegisters.NON_STAND_POWERS;
 
 import com.github.standobyte.jojo.action.non_stand.HamonAction;
+import com.github.standobyte.jojo.action.non_stand.HamonBreath;
 import com.github.standobyte.jojo.action.non_stand.HamonBubbleBarrier;
 import com.github.standobyte.jojo.action.non_stand.HamonBubbleCutter;
 import com.github.standobyte.jojo.action.non_stand.HamonBubbleLauncher;
@@ -56,7 +57,7 @@ public class ModHamonActions {
                     .emptyMainHand().swingHand()));
     
     public static final RegistryObject<HamonAction> HAMON_ZOOM_PUNCH = ACTIONS.register("hamon_zoom_punch", 
-            () -> new HamonZoomPunch(new HamonAction.Builder().energyCost(800F).cooldown(14, 0)
+            () -> new HamonZoomPunch(new HamonAction.Builder().energyCost(150F).cooldown(14, 0)
                     .shout(ModHamonSkills.CHARACTER_JONATHAN, ModSounds.JONATHAN_ZOOM_PUNCH)
                     .shout(ModHamonSkills.CHARACTER_ZEPPELI, ModSounds.ZEPPELI_ZOOM_PUNCH)
                     .shout(ModHamonSkills.CHARACTER_JOSEPH, ModSounds.JOSEPH_ZOOM_PUNCH)));
@@ -71,6 +72,16 @@ public class ModHamonActions {
     public static final RegistryObject<HamonAction> HAMON_ORGANISM_INFUSION = ACTIONS.register("hamon_organism_infusion", 
             () -> new HamonOrganismInfusion(new HamonAction.Builder().energyCost(200F)
                     .emptyMainHand().swingHand()));
+    
+    // FIXME ! (hamon) hamon breath icon
+    public static final RegistryObject<HamonAction> HAMON_BREATH = ACTIONS.register("hamon_breath", 
+            () -> new HamonBreath(new HamonAction.Builder().holdType().heldWalkSpeed(0.0F)
+                    .shout(ModSounds.BREATH_DEFAULT)
+                    .shout(ModHamonSkills.CHARACTER_JONATHAN, ModSounds.BREATH_JONATHAN)
+                    .shout(ModHamonSkills.CHARACTER_ZEPPELI, ModSounds.BREATH_ZEPPELI)
+                    .shout(ModHamonSkills.CHARACTER_JOSEPH, ModSounds.BREATH_JOSEPH)
+                    .shout(ModHamonSkills.CHARACTER_CAESAR, ModSounds.BREATH_CAESAR)
+                    .shout(ModHamonSkills.CHARACTER_LISA_LISA, ModSounds.BREATH_LISA_LISA)));
     
     public static final RegistryObject<HamonAction> HAMON_HEALING = ACTIONS.register("hamon_healing", 
             () -> new HamonHealing(new HamonAction.Builder().energyCost(670F)
@@ -105,6 +116,7 @@ public class ModHamonActions {
                             HAMON_ZOOM_PUNCH.get(), 
                             HAMON_TURQUOISE_BLUE_OVERDRIVE.get()}, 
                     new HamonAction[] {
+                            HAMON_BREATH.get(), 
                             HAMON_HEALING.get(), 
                             HAMON_SPEED_BOOST.get(), 
                             HAMON_WALL_CLIMBING.get(), 

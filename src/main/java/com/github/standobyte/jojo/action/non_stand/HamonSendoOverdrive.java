@@ -36,7 +36,7 @@ public class HamonSendoOverdrive extends HamonAction {
             BlockPos pos = target.getBlockPos();
             Direction face = target.getFace();
             double diameter = 4 + (double) (hamon.getHamonStrengthLevel() * 8) / (double) HamonData.MAX_STAT_LEVEL
-                    * hamon.getHamonEfficiency();
+                    * hamon.getHamonEfficiency(getEnergyCost(power));
             double radiusMinus1 = (diameter - 1) / 2;
             AxisAlignedBB aabb = new AxisAlignedBB(pos).inflate(radiusMinus1).expandTowards(Vector3d.atLowerCornerOf(face.getNormal()))
                     .move(Vector3d.atLowerCornerOf(face.getNormal()).scale(-radiusMinus1));

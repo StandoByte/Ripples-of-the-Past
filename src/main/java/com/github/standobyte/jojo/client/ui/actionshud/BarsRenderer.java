@@ -81,8 +81,13 @@ public abstract class BarsRenderer {
         if (nonStandPower != null && nonStandPower.hasPower()) {
             float energy = nonStandPower.getEnergy();
             
-            float translucentVal = 0;
-            float maxEnergy = nonStandPower.getMaxEnergy();
+            float translucentVal = nonStandPower
+                    .getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> MathHelper.lerp(partialTick, hamon.getBreathStability(), hamon.getPrevBreathStability()))
+                    .orElse(0F);
+            
+            float maxEnergy = nonStandPower
+                    .getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> hamon.getMaxBreathStability())
+                    .orElse(nonStandPower.getMaxEnergy());
             
             BarType type = null;
             if (nonStandPower.getType() == ModPowers.HAMON.get()) {

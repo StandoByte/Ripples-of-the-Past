@@ -46,13 +46,16 @@ import com.github.standobyte.jojo.util.general.Container;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.settings.AttackIndicatorStatus;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.ColorHelper;
@@ -143,7 +146,13 @@ public class ActionsOverlayGui extends AbstractGui {
         
         INonStandPower power = nonStandUiMode.getPower();
         if (power != null) {
-            boolean showEnergyBar = power.getEnergy() < power.getMaxEnergy();
+            boolean showEnergyBar;
+            if (power.getType() == ModPowers.HAMON.get()) {
+                showEnergyBar = power.getEnergy() > 0;
+            }
+            else {
+                showEnergyBar = power.getEnergy() < power.getMaxEnergy();
+            }
             if (showEnergyBar) {
                 energyBarTransparency.reset();
             }
@@ -157,6 +166,8 @@ public class ActionsOverlayGui extends AbstractGui {
                 resolveBarTransparency.reset();
             }
         }
+        
+        tickOutOfBreathEffect();
         
         tickCount++;
         if (currentMode != null) {
@@ -244,6 +255,8 @@ public class ActionsOverlayGui extends AbstractGui {
             }
             renderPowerIcon(matrixStack, hotbarsPosition, modeIcon, standAlpha);
             
+            renderOutOfBreathSprite(matrixStack, partialTick, screenWidth, screenHeight);
+            
             RenderSystem.disableRescaleNormal();
             RenderSystem.disableBlend();
             break;
@@ -261,6 +274,9 @@ public class ActionsOverlayGui extends AbstractGui {
             
             RenderSystem.disableRescaleNormal();
             RenderSystem.disableBlend();
+            break;
+        case VIGNETTE:
+            renderOutOfBreathVignette(matrixStack, partialTick);
             break;
         default:
             break;
@@ -295,7 +311,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 break;
             case TEXT:
                 drawPowerName(matrixStack, hotbarsPosition, currentMode, partialTick);
-
+                
                 drawHotbarText(matrixStack, hotbarsPosition, ActionType.ATTACK, currentMode, getTargetLazy(), partialTick);
                 drawHotbarText(matrixStack, hotbarsPosition, ActionType.ABILITY, currentMode, getTargetLazy(), partialTick);
 //                drawQuickAccessText(matrixStack, hotbarsPosition, currentMode, getTargetLazy());
@@ -447,7 +463,6 @@ public class ActionsOverlayGui extends AbstractGui {
 
     
 
-    @SuppressWarnings("deprecation")
     private <P extends IPower<P, ?>> void renderActionsHotbar(MatrixStack matrixStack, 
             ElementPosition position, ActionType actionType, ActionsModeConfig<P> mode, ActionTarget target, float partialTick) {
         P power = mode.getPower();
@@ -837,7 +852,6 @@ public class ActionsOverlayGui extends AbstractGui {
     
     
 
-    @SuppressWarnings("deprecation")
     private void renderPowerIcon(MatrixStack matrixStack, ElementPosition position, @Nullable ActionsModeConfig<?> mode, float alpha) {
         int x = position.x;
         if (position.alignment == Alignment.RIGHT) {
@@ -956,7 +970,6 @@ public class ActionsOverlayGui extends AbstractGui {
             nonStandUiMode,
             standUiMode
             ));
-    @SuppressWarnings("deprecation")
     private void renderModeSelector(MatrixStack matrixStack, ElementPosition position, float partialTick) {
         if (modeSelectorTransparency.shouldRender()) {
             mc.getTextureManager().bind(WIDGETS_LOCATION);
@@ -1096,7 +1109,6 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
 
-    @SuppressWarnings("deprecation")
     private void renderFilledIcon(MatrixStack matrixStack, int x, int y, boolean translucent, float fill, 
             int texX, int texY, int texWidth, int texHeight, int color) {
         blit(matrixStack, x, y, texX, texY, texWidth, texHeight);
@@ -1385,6 +1397,80 @@ public class ActionsOverlayGui extends AbstractGui {
         standUiMode.autoOpened = false;
         nonStandUiMode.setPower(INonStandPower.getPlayerNonStandPower(mc.player));
         nonStandUiMode.autoOpened = false;
+    }
+    
+    
+    
+    private boolean outOfBreath = false;
+    private boolean outOfBreathDueToMask = false;
+    private int outOfBreathSpriteTicks = 0;
+    private float prevAir;
+    private float vignetteBeforeFadeAway = -1;
+    public void setOutOfBreath(boolean mask) {
+        outOfBreath = true;
+        outOfBreathDueToMask = mask;
+        outOfBreathSpriteTicks = 15;
+        vignetteBeforeFadeAway = -1;
+        prevAir = 0;
+    }
+    
+    private void tickOutOfBreathEffect() {
+        if (outOfBreath) {
+            prevAir = mc.player.getAirSupply();
+            if (prevAir >= mc.player.getMaxAirSupply()) {
+                outOfBreath = false;
+            }
+        }
+        if (outOfBreathSpriteTicks > 0) outOfBreathSpriteTicks--;
+    }
+    
+    private void renderOutOfBreathSprite(MatrixStack matrixStack, float partialTick, int windowWidth, int windowHeight) {
+        if (outOfBreathSpriteTicks > 0) {
+            boolean bubblePopped = outOfBreathSpriteTicks < 11;
+            mc.getTextureManager().bind(ClientUtil.ADDITIONAL_UI);
+            blit(matrixStack, windowWidth / 2 - 16, windowHeight / 2 - 16, bubblePopped ? 160 : 128, outOfBreathDueToMask ? 32 : 0, 32, 32);
+        }
+    }
+    
+    private void renderOutOfBreathVignette(MatrixStack matrixStack, float partialTick) {
+        if (outOfBreath) {
+            float air = MathHelper.lerp(partialTick, prevAir, (float) mc.player.getAirSupply()) / (float) mc.player.getMaxAirSupply();
+            float vignette;
+            if (air < 0.75F) {
+                vignette = 0.8F + (MathHelper.sin((tickCount + partialTick) * 0.2F) + 1) * 0.1F;
+            }
+            else {
+                if (vignetteBeforeFadeAway < 0) {
+                    vignetteBeforeFadeAway = 0.8F + (MathHelper.sin((tickCount + partialTick) * 0.2F) + 1) * 0.1F;
+                }
+                vignette = 4 * (-air + 1) * vignetteBeforeFadeAway;
+            }
+            renderVignette(matrixStack, vignette, vignette, vignette);
+        }
+    }
+
+    private static final ResourceLocation VIGNETTE_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/vignette.png");
+    private void renderVignette(MatrixStack matrixStack, float r, float g, float b) {
+        RenderSystem.disableDepthTest();
+        RenderSystem.depthMask(false);
+        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        RenderSystem.color4f(r, g, b, 1.0F);
+
+        double screenWidth = mc.getWindow().getGuiScaledWidth();
+        double screenHeight = mc.getWindow().getGuiScaledHeight();
+        mc.getTextureManager().bind(VIGNETTE_LOCATION);
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuilder();
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
+        bufferbuilder.vertex(0.0D, screenHeight, -90.0D).uv(0.0F, 1.0F).endVertex();
+        bufferbuilder.vertex(screenWidth, screenHeight, -90.0D).uv(1.0F, 1.0F).endVertex();
+        bufferbuilder.vertex(screenWidth, 0.0D, -90.0D).uv(1.0F, 0.0F).endVertex();
+        bufferbuilder.vertex(0.0D, 0.0D, -90.0D).uv(0.0F, 0.0F).endVertex();
+        tessellator.end();
+        RenderSystem.depthMask(true);
+        RenderSystem.enableDepthTest();
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.defaultBlendFunc();
     }
 
     

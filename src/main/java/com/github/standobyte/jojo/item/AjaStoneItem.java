@@ -46,7 +46,7 @@ public class AjaStoneItem extends Item {
                     HamonData hamon = hamonOptional.get();
                     if (hamon.isSkillLearned(ModHamonSkills.AJA_STONE_KEEPER.get()) && power.consumeEnergy(getHamonChargeCost())) {
                         if (!world.isClientSide()) {
-                            useStone(world, player, stack, 0.75F * hamon.getHamonDamageMultiplier() * hamon.getHamonEfficiency(), true, false);
+                            useStone(world, player, stack, 0.75F * hamon.getHamonDamageMultiplier() * hamon.getHamonEfficiency(getHamonChargeCost()), true, false);
                             hamon.hamonPointsFromAction(HamonStat.STRENGTH, getHamonChargeCost());
                             JojoModUtil.sayVoiceLine(player, getHamonChargeVoiceLine());
                         }

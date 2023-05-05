@@ -37,7 +37,7 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
         super(ModEntityTypes.HAMON_BUBBLE_BARRIER.get(), shooter, world);
         this.power = power;
         barrierMaxTicks = (int) (100F * power.getTypeSpecificData(ModPowers.HAMON.get())
-                .map(hamon -> hamon.getHamonEfficiency()).orElse(1F));
+                .map(hamon -> hamon.getHamonEfficiency(0)).orElse(1F));
     }
 
     public HamonBubbleBarrierEntity(EntityType<? extends HamonBubbleBarrierEntity> type, World world) {

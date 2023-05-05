@@ -102,23 +102,16 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     public float getTargetResolveMultiplier(INonStandPower power, IStandPower attackingStand) {
         return 2;
     }
-    
+
+    // FIXME ! (breath stability) move all hasEnergy and consumeEnergy calls into actions
     @Override
     public boolean hasEnergy(INonStandPower power, float amount) {
-        return amount == 0 || power.getEnergy() >= HamonData.reduceEnergyConsumed(amount, power, power.getUser());
+        return amount == 0 || power.getEnergy() > 0 || power.getTypeSpecificData(this).get().getBreathStability() > 0;
     }
 
     @Override
     public boolean consumeEnergy(INonStandPower power, float amount) {
-        if (power.isUserCreative()) {
-            return true;
-        }
-        amount = HamonData.reduceEnergyConsumed(amount, power, power.getUser());
-        if (power.hasEnergy(amount)) {
-            power.setEnergy(power.getEnergy() - amount);
-            return true;
-        }
-        return false;
+        return power.getTypeSpecificData(this).get().getHamonEnergyUsageEfficiency(amount, true) > 0;
     }
     
     @Override
@@ -258,8 +251,8 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     public static boolean ropeTrap(LivingEntity user, BlockPos pos, BlockState blockState, World world, INonStandPower power, HamonData hamon) {
         if (hamon.isSkillLearned(ModHamonSkills.ROPE_TRAP.get())) {
             createChargedCobweb(user, pos, blockState, world, 64, null, power, 
-                    40 + (int) ((float) (160 * hamon.getHamonStrengthLevel()) / (float) HamonData.MAX_STAT_LEVEL * hamon.getHamonEfficiency()), 
-                    0.02F * hamon.getHamonDamageMultiplier() * hamon.getHamonEfficiency(), hamon);
+                    40 + (int) ((float) (160 * hamon.getHamonStrengthLevel()) / (float) HamonData.MAX_STAT_LEVEL * hamon.getHamonEfficiency(STRING_CHARGE_COST)), 
+                    0.02F * hamon.getHamonDamageMultiplier() * hamon.getHamonEfficiency(STRING_CHARGE_COST), hamon);
             return true;
         }
         return false;
@@ -320,7 +313,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                         if (power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
                             if (hamon.isSkillLearned(ModHamonSkills.SNAKE_MUFFLER.get())) {
                                 playerTarget.getCooldowns().addCooldown(ModItems.SATIPOROJA_SCARF.get(), 80);
-                                float efficiency = hamon.getHamonEfficiency();
+                                float efficiency = hamon.getHamonEfficiency(energyCost);
                                 if (efficiency == 1 || efficiency >= dmgAmount / target.getMaxHealth()) {
                                     JojoModUtil.sayVoiceLine(target, ModSounds.LISA_LISA_SNAKE_MUFFLER.get());
                                     power.consumeEnergy(energyCost);
