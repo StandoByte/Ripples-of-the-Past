@@ -17,6 +17,7 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
@@ -118,6 +119,7 @@ public class HamonData extends TypeSpecificData {
     }
     
     public void tick() {
+        updateHeight = false;
         if (!power.getUser().level.isClientSide()) {
             tickNewPlayerLearners(power.getUser());
         }
@@ -799,6 +801,17 @@ public class HamonData extends TypeSpecificData {
             if (!isMeditating) {
                 updateBbHeight(user);
             }
+            
+            user.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                if (isMeditating) {
+                    cap.lockYRot(user.yBodyRot);
+                    cap.lockXRot(0);
+                }
+                else {
+                    cap.clearLockedYRot();
+                    cap.clearLockedXRot();
+                }
+            });
         }
     }
     
@@ -1029,7 +1042,7 @@ public class HamonData extends TypeSpecificData {
     }
     
     
-
+    
     @Override
     public CompoundNBT writeNBT() {
         CompoundNBT nbt = new CompoundNBT();

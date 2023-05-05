@@ -279,6 +279,7 @@ public class ClientEventHandler {
         if (mc.level != null) {
             if (event.phase == TickEvent.Phase.START) {
                 ActionsOverlayGui.getInstance().tick();
+                ClientTicking.tickAll();
             }
             setTimeStoppedState(isTimeStopped(mc.player.blockPosition()));
 

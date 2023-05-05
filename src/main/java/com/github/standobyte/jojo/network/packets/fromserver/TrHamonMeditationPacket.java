@@ -3,12 +3,14 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
@@ -44,6 +46,13 @@ public class TrHamonMeditationPacket {
                 INonStandPower.getNonStandPowerOptional(userLiving).ifPresent(power -> {
                     power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                         hamon.setIsMeditating(userLiving, msg.meditation);
+                        if (userLiving instanceof PlayerEntity) {
+                            PlayerEntity userPlayer = (PlayerEntity) userLiving;
+                            PlayerAnimationHandler.getPlayerAnimator().onMeditationSet(userPlayer, msg.meditation);
+                            if (msg.meditation && userPlayer == ClientUtil.getClientPlayer()) {
+                                ClientUtil.setThirdPerson();
+                            }
+                        }
                     });
                 });
             }

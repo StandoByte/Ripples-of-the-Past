@@ -18,6 +18,7 @@ import com.github.standobyte.jojo.client.particle.MeteoriteVirusParticle;
 import com.github.standobyte.jojo.client.particle.OneTickFlameParticle;
 import com.github.standobyte.jojo.client.particle.OnomatopoeiaParticle;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
+import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
 import com.github.standobyte.jojo.client.render.armor.ArmorModelRegistry;
 import com.github.standobyte.jojo.client.render.armor.model.BladeHatArmorModel;
 import com.github.standobyte.jojo.client.render.armor.model.BreathControlMaskModel;
@@ -26,6 +27,7 @@ import com.github.standobyte.jojo.client.render.armor.model.StoneMaskModel;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonBurnLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.KnifeLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.TornadoOverdriveEffectLayer;
+import com.github.standobyte.jojo.client.render.entity.layerrenderer.barrage.BarrageFistAfterimagesLayer;
 import com.github.standobyte.jojo.client.render.entity.renderer.AfterimageRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.CrimsonBubbleRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.HamonBlockChargeRenderer;
@@ -262,6 +264,8 @@ public class ClientSetup {
             MarkerRenderer.Handler.addRenderer(new HierophantGreenBarrierDetectionMarker(mc));
             MarkerRenderer.Handler.addRenderer(new CrazyDiamondAnchorMarker(mc));
             MarkerRenderer.Handler.addRenderer(new CrazyDiamondBloodHomingMarker(mc));
+            
+            PlayerAnimationHandler.initAnimator();
         });
     }
 
@@ -280,6 +284,7 @@ public class ClientSetup {
     private static void addLayers(PlayerRenderer renderer) {
         renderer.addLayer(new KnifeLayer<>(renderer));
         renderer.addLayer(new TornadoOverdriveEffectLayer<>(renderer));
+        renderer.addLayer(new BarrageFistAfterimagesLayer(renderer));
         addLivingLayers(renderer);
 //        addBipedLayers(renderer);
     }
