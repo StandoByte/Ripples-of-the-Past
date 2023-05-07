@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.client;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -8,6 +9,7 @@ import javax.annotation.Nullable;
 import org.lwjgl.opengl.GL11;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.client.render.world.shader.CustomShaderGroup;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
 import com.github.standobyte.jojo.client.ui.screen.mob.RockPaperScissorsScreen;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
@@ -15,6 +17,7 @@ import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.general.MathUtil.Matrix4ZYX;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
+import com.google.gson.JsonSyntaxException;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
@@ -32,6 +35,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -40,6 +44,7 @@ import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.client.settings.PointOfView;
+import net.minecraft.client.shader.ShaderGroup;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -115,10 +120,7 @@ public class ClientUtil {
     public static void setCameraEntityPreventShaderSwitch(Minecraft mc, Entity entity) {
         mc.setCameraEntity(entity);
         if (mc.gameRenderer.currentEffect() == null) {
-            ResourceLocation shader = ClientEventHandler.getInstance().getCurrentShader();
-            if (shader != null) {
-                mc.gameRenderer.loadEffect(shader);
-            }
+            ClientEventHandler.getInstance().updateCurrentShader();
         }
     }
     
@@ -303,6 +305,27 @@ public class ClientUtil {
     
     public static boolean decreasedParticlesSetting() {
         return Minecraft.getInstance().options.particles == ParticleStatus.DECREASED;
+    }
+    
+    public static void loadCustomParametersEffect(GameRenderer gameRenderer, Minecraft minecraft, ResourceLocation name) {
+        if (gameRenderer.currentEffect() != null) {
+            gameRenderer.currentEffect().close();
+        }
+
+        try {
+            ShaderGroup effect = new CustomShaderGroup(minecraft.getTextureManager(), minecraft.getResourceManager(), minecraft.getMainRenderTarget(), name);
+            ClientReflection.setPostEffect(gameRenderer, effect);
+            effect.resize(minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight());
+            ClientReflection.setEffectActive(gameRenderer, true);
+        } catch (IOException ioexception) {
+            JojoMod.getLogger().warn("Failed to load shader: {}", name, ioexception);
+            ClientReflection.setEffectIndex(gameRenderer, GameRenderer.EFFECT_NONE);
+            ClientReflection.setEffectActive(gameRenderer, false);
+        } catch (JsonSyntaxException jsonsyntaxexception) {
+            JojoMod.getLogger().warn("Failed to parse shader: {}", name, jsonsyntaxexception);
+            ClientReflection.setEffectIndex(gameRenderer, GameRenderer.EFFECT_NONE);
+            ClientReflection.setEffectActive(gameRenderer, false);
+        }
     }
     
     public static float[] rgb(int color) {

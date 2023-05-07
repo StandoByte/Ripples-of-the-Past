@@ -16,11 +16,13 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
+import com.github.standobyte.jojo.action.stand.TimeStop;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.render.block.overlay.TranslucentBlockRenderHelper;
 import com.github.standobyte.jojo.client.render.world.ParticleManagerWrapperTS;
 import com.github.standobyte.jojo.client.render.world.TimeStopWeatherHandler;
+import com.github.standobyte.jojo.client.render.world.shader.CustomShaderGroup;
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
@@ -60,6 +62,7 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.texture.ITickable;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.shader.ShaderGroup;
+import net.minecraft.client.shader.ShaderInstance;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.client.world.DimensionRenderInfo;
 import net.minecraft.entity.Entity;
@@ -115,7 +118,8 @@ public class ClientEventHandler {
     private boolean canSeeInStoppedTime = true;
     private boolean canMoveInStoppedTime = true;
     private float partialTickStoppedAt;
-    private static final ResourceLocation SHADER_TIME_STOP = new ResourceLocation("shaders/post/desaturate.json");
+    private int timeStopTicks = 0;
+    private int timeStopLength = 0;
 
     private Random random = new Random();
     private ResourceLocation resolveShader = null;
@@ -181,6 +185,7 @@ public class ClientEventHandler {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public <T extends LivingEntity, M extends EntityModel<T>> void onRenderLiving(RenderLivingEvent.Pre<T, M> event) {
         LivingEntity entity = event.getEntity();
+        
         if (entity.hasEffect(ModEffects.FULL_INVISIBILITY.get())) {
             event.setCanceled(true);
             return;
@@ -283,12 +288,16 @@ public class ClientEventHandler {
                 
                 if (!mc.isPaused()) {
                     ClientTicking.tickAll();
+                    if (isTimeStopped) {
+                        timeStopTicks++;
+                    }
                     
                     mc.level.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                         cap.tick();
                     });
                 }
             }
+            
             setTimeStoppedState(isTimeStopped(mc.player.blockPosition()));
 
             switch (event.phase) {
@@ -311,10 +320,7 @@ public class ClientEventHandler {
         }
 
         if (mc.gameRenderer.currentEffect() == null) {
-            ResourceLocation shader = getCurrentShader();
-            if (shader != null && shader != DUMMY) {
-                mc.gameRenderer.loadEffect(shader);
-            }
+            updateCurrentShader();
         }
 
         deathScreenTick = mc.screen instanceof DeathScreen ? deathScreenTick + 1 : 0;
@@ -327,6 +333,11 @@ public class ClientEventHandler {
     private void setTimeStoppedState(boolean isTimeStopped) {
         if (this.isTimeStopped != isTimeStopped) {
             this.isTimeStopped = isTimeStopped;
+            
+            if (!isTimeStopped) {
+                timeStopLength = 0;
+            }
+            
             if (JojoModConfig.CLIENT.timeStopFreezesVisuals.get()) {
                 if (isTimeStopped) {
                     if (mc.level != null) {
@@ -362,24 +373,78 @@ public class ClientEventHandler {
                     ParticleManagerWrapperTS.onTimeStopEnd(mc);
                 }
             }
+            timeStopTicks = 0;
         }
     }
     
-    public ResourceLocation getCurrentShader() {
+    public void updateCurrentShader() {
+        ResourceLocation shader = getCurrentShader();
+        if (shader != null && shader != DUMMY) {
+            loadShader(shader);
+        }
+    }
+    
+    private ResourceLocation getCurrentShader() {
         if (mc.level == null) {
             return null;
         }
+        
         if (isTimeStopped && canSeeInStoppedTime) {
-            return SHADER_TIME_STOP;
+            if (timeStopAction == ModStandsInit.STAR_PLATINUM_TIME_STOP.get()) {
+                return CustomShaderGroup.TIME_STOP_SP;
+            }
+            else {
+                return CustomShaderGroup.TIME_STOP_TW;
+            }
         }
+        else {
+            tsShaderStarted = false;
+        }
+        
         if (JojoModConfig.CLIENT.resolveShaders.get() && resolveShader != null) {
             return resolveShader;
         }
         return null;
     }
-
-
-
+    
+    private void loadShader(ResourceLocation shader) {
+        if (CustomShaderGroup.hasCustomParameters(shader)) {
+            ClientUtil.loadCustomParametersEffect(mc.gameRenderer, mc, shader);
+        }
+        else {
+            mc.gameRenderer.loadEffect(shader);
+        }
+    }
+    
+    public void addTsShaderUniforms(ShaderInstance tsShader, float partialSecond, float tsEffectLength) {
+        if (isTimeStopped) {
+            float partialTick = MathHelper.frac(partialSecond * 20F);
+            float tsTick = timeStopTicks + partialTick;
+            tsShader.safeGetUniform("TSTicks") .set(tsTick);
+            tsShader.safeGetUniform("TSLength").set(timeStopLength);
+        }
+        else {
+            tsShader.safeGetUniform("TSTicks") .set(0);
+            tsShader.safeGetUniform("TSLength").set(-1);
+        }
+    }
+    
+    private boolean tsShaderStarted;
+    // TODO determine the position of the time stopper entity on the screen
+    private Entity timeStopper;
+    private TimeStop timeStopAction;
+    public void setTimeStopVisuals(int length, Entity timeStopper, TimeStop action) {
+        // FIXME !!!!!!!! (ts shader) time stop can also be prematurely stopped (manual time resume/0 stamina)
+        this.timeStopLength += length;
+        if (!tsShaderStarted) {
+            this.timeStopper = timeStopper;
+            this.timeStopAction = action;
+            tsShaderStarted = true;
+        }
+    }
+    
+    
+    
     public void onResolveEffectStart(int effectAmplifier) {
         if (resolveShader == null) {
             setResolveShader();

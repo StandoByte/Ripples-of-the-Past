@@ -6,6 +6,7 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.TimeStop;
 import com.github.standobyte.jojo.capability.world.TimeStopInstance;
+import com.github.standobyte.jojo.client.ClientEventHandler;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.util.mod.TimeUtil;
@@ -77,6 +78,7 @@ public class TimeStopInstancePacket {
             World world = ClientUtil.getClientWorld();
             if (msg.timeStopTicks > 0) {
                 Entity entity = ClientUtil.getEntityById(msg.timeStopperId);
+                ClientEventHandler.getInstance().setTimeStopVisuals(msg.timeStopTicks, entity, msg.action);
                 TimeUtil.stopTime(world, new TimeStopInstance(world, msg.timeStopTicks, msg.chunkPos, 
                         JojoModConfig.getCommonConfigInstance(true).timeStopChunkRange.get(), 
                         entity instanceof LivingEntity ? (LivingEntity) entity : null, msg.action,

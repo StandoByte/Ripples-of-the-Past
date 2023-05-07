@@ -19,6 +19,7 @@ import net.minecraft.client.particle.IAnimatedSprite;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.FirstPersonRenderer;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.ModelBakery;
@@ -26,6 +27,8 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.client.renderer.texture.ITickable;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.shader.Shader;
+import net.minecraft.client.shader.ShaderGroup;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Timer;
@@ -57,6 +60,10 @@ public class ClientReflection {
                 TEXTURE_MANAGER_TICKABLE_TEXTURES = ObfuscationReflectionHelper.findField(TextureManager.class, "field_110583_b");
                 MINECRAFT_PARTICLE_ENGINE = ObfuscationReflectionHelper.findField(Minecraft.class, "field_71452_i");
                 PARTICLE_MANAGER_TEXTURE_MANAGER = ObfuscationReflectionHelper.findField(ParticleManager.class, "field_78877_c");
+                SHADER_GROUP_PASSES = ObfuscationReflectionHelper.findField(ShaderGroup.class, "field_148031_d");
+                GAME_RENDERER_POST_EFFECT = ObfuscationReflectionHelper.findField(GameRenderer.class, "field_147707_d");
+                GAME_RENDERER_EFFECT_ACTIVE = ObfuscationReflectionHelper.findField(GameRenderer.class, "field_175083_ad");
+                GAME_RENDERER_EFFECT_INDEX = ObfuscationReflectionHelper.findField(GameRenderer.class, "field_147713_ae");
             }
         });
     }
@@ -167,5 +174,26 @@ public class ClientReflection {
     private static Field PARTICLE_MANAGER_TEXTURE_MANAGER;
     public static void setTextureManager(ParticleManager particleManager, TextureManager textureManager) {
         ReflectionUtil.setFieldValue(PARTICLE_MANAGER_TEXTURE_MANAGER, particleManager, textureManager);
+    }
+    
+    
+    private static Field SHADER_GROUP_PASSES;
+    public static List<Shader> getShaderGroupPasses(ShaderGroup shaderGroup) {
+        return ReflectionUtil.getFieldValue(SHADER_GROUP_PASSES, shaderGroup);
+    }
+    
+    private static Field GAME_RENDERER_POST_EFFECT;
+    public static void setPostEffect(GameRenderer gameRenderer, ShaderGroup postEffect) {
+        ReflectionUtil.setFieldValue(GAME_RENDERER_POST_EFFECT, gameRenderer, postEffect);
+    }
+    
+    private static Field GAME_RENDERER_EFFECT_ACTIVE;
+    public static void setEffectActive(GameRenderer gameRenderer, boolean effectActive) {
+        ReflectionUtil.setFieldValue(GAME_RENDERER_EFFECT_ACTIVE, gameRenderer, effectActive);
+    }
+    
+    private static Field GAME_RENDERER_EFFECT_INDEX;
+    public static void setEffectIndex(GameRenderer gameRenderer, int effectIndex) {
+        ReflectionUtil.setFieldValue(GAME_RENDERER_EFFECT_INDEX, gameRenderer, effectIndex);
     }
 }
