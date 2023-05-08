@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.capability.world;
 import net.minecraft.world.World;
 
 public class WorldUtilCap {
+    @SuppressWarnings("unused")
     private final World world;
     final TimeStopHandler timeStops;
     

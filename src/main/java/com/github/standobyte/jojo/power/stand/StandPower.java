@@ -148,7 +148,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public Optional<StandInstance> putOutStand() {
         Optional<StandInstance> standInstance = getStandInstance();
-        return clear(false) ? standInstance : null;
+        return clear(false) ? standInstance : Optional.empty();
     }
 
     private boolean clear(boolean countTaken) {

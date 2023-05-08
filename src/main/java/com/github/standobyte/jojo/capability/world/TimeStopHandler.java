@@ -46,22 +46,28 @@ public class TimeStopHandler {
             if (!entity.isAlive()) {
                 entityIter.remove();
             }
-            
-            else if (entity instanceof LivingEntity && !entity.canUpdate()) {
+
+            else if (!world.isClientSide() && entity instanceof LivingEntity && !entity.canUpdate()) {
                 if (entity.invulnerableTime > 0) {
                     entity.invulnerableTime--;
                 }
                 entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.lastHurtByStandTick());
             }
         }
-        
-        Iterator<Map.Entry<Integer, TimeStopInstance>> instanceIter = timeStopInstances.entrySet().iterator();
-        while (instanceIter.hasNext()) {
-            Map.Entry<Integer, TimeStopInstance> entry = instanceIter.next();
-            if (entry.getValue().tick() && !world.isClientSide()) {
-                instanceIter.remove();
-                onRemovedTimeStop(entry.getValue());
+
+        if (!world.isClientSide()) {
+            Iterator<Map.Entry<Integer, TimeStopInstance>> instanceIter = timeStopInstances.entrySet().iterator();
+            while (instanceIter.hasNext()) {
+                Map.Entry<Integer, TimeStopInstance> entry = instanceIter.next();
+                if (entry.getValue().tick()) {
+                    instanceIter.remove();
+                    onRemovedTimeStop(entry.getValue());
+                }
             }
+        }
+        
+        for (Entity entity : stoppedInTime) {
+            entity.tickCount--;
         }
     }
     
@@ -153,6 +159,9 @@ public class TimeStopHandler {
         
         if (stopInTime) {
             stoppedInTime.add(entity);
+        }
+        else {
+            stoppedInTime.remove(entity);
         }
     }
     

@@ -17,6 +17,7 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.render.block.overlay.TranslucentBlockRenderHelper;
 import com.github.standobyte.jojo.client.render.world.ParticleManagerWrapperTS;
 import com.github.standobyte.jojo.client.render.world.TimeStopWeatherHandler;
@@ -279,7 +280,14 @@ public class ClientEventHandler {
         if (mc.level != null) {
             if (event.phase == TickEvent.Phase.START) {
                 ActionsOverlayGui.getInstance().tick();
-                ClientTicking.tickAll();
+                
+                if (!mc.isPaused()) {
+                    ClientTicking.tickAll();
+                    
+                    mc.level.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                        cap.tick();
+                    });
+                }
             }
             setTimeStoppedState(isTimeStopped(mc.player.blockPosition()));
 
