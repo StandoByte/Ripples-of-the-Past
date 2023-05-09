@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -168,9 +169,9 @@ public abstract class HamonTabGui extends AbstractGui {
     protected abstract void drawActualContents(HamonScreen screen, MatrixStack matrixStack, int mouseX, int mouseY);
     
     protected void drawDesc(MatrixStack matrixStack) {
-        for (int i = 0; i < descLines.size(); i++) {
-            minecraft.font.draw(matrixStack, descLines.get(i), (float) scrollX + 6, (float) scrollY + 22 + i * 9, 0xFFFFFF);
-        }
+        ClientUtil.drawLines(matrixStack, minecraft.font, descLines, 
+                (float) scrollX + 6, (float) scrollY + 22, 
+                0, 0xFFFFFF, false);
     }
     
     private void updateButtons(MatrixStack matrixStack, int mouseX, int mouseY) {

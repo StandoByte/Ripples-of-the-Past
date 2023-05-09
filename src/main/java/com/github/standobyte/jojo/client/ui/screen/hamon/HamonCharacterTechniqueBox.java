@@ -65,10 +65,9 @@ public class HamonCharacterTechniqueBox {
     
     public void drawText(MatrixStack matrixStack, FontRenderer font, HamonData hamon, int x, int y) {
         int perksCount = renderPerks(hamon) ? (int) perks.stream().filter(HamonSkillElementTechniquePerk::isVisible).count() : 0;
-        for (int line = 0; line < name.size(); line++) {
-            font.drawShadow(matrixStack, name.get(line), 
-                    this.x + x + perksCount * 18 + 3, this.y + y + 1 + line * 9, 0xFFFFFF);
-        }
+        ClientUtil.drawLines(matrixStack, font, name, 
+                this.x + x + perksCount * 18 + 3, this.y + y + 1, 
+                0, 0xFFFFFF, true);
     }
     
     public void drawTooltip(HamonScreen hamonScreen, MatrixStack matrixStack, int x, int y, int mouseX, int mouseY) {

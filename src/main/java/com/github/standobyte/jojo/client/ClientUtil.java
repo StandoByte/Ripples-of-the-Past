@@ -170,6 +170,19 @@ public class ClientUtil {
         font.draw(matrixStack, line, x - font.width(line) / 2, y, color);
     }
     
+    public static void drawLines(MatrixStack matrixStack, FontRenderer font, List<IReorderingProcessor> lines, float x, float y, float lineGap, int color, boolean shadow) {
+        if (shadow) {
+            for (int i = 0; i < lines.size(); i++) {
+                font.drawShadow(matrixStack, lines.get(i), x, y + i * (font.lineHeight + lineGap), 0xFFFFFF);
+            }
+        }
+        else {
+            for (int i = 0; i < lines.size(); i++) {
+                font.draw(matrixStack, lines.get(i), x, y + i * (font.lineHeight + lineGap), 0xFFFFFF);
+            }
+        }
+    }
+    
     public static void drawTooltipRectangle(MatrixStack matrixStack, int x, int y, int width, int height) {
         drawTooltipRectangle(matrixStack, x, y, width, height, 
                 GuiUtils.DEFAULT_BACKGROUND_COLOR, GuiUtils.DEFAULT_BORDER_COLOR_START, GuiUtils.DEFAULT_BORDER_COLOR_END, 400);

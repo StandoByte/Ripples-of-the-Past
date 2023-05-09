@@ -116,11 +116,9 @@ public class HamonSkillDescBox {
     }
     
     public void drawDesc(MatrixStack matrixStack, FontRenderer font, int x, int y) {
-        for (int i = 0; i < skillDesc.size(); i++) {
-            font.draw(matrixStack, skillDesc.get(i), 
-                    this.x + x + EDGE_TEXT_OFFSET, this.y + y + EDGE_TEXT_OFFSET + i * font.lineHeight - yTextScroll, 
-                    0xFFFFFF);
-        }
+        ClientUtil.drawLines(matrixStack, font, skillDesc, 
+                this.x + x + EDGE_TEXT_OFFSET, this.y + y + EDGE_TEXT_OFFSET - yTextScroll, 
+                0, 0xFFFFFF, false);
     }
     
     public boolean isMouseOver(double mouseX, double mouseY, double offsetX, double offsetY) {

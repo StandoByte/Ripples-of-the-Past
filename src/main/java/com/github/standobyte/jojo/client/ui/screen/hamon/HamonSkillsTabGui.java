@@ -180,10 +180,15 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
     }
     
     protected void drawSkillDesc(MatrixStack matrixStack) {
-        drawString(matrixStack, minecraft.font, selectedSkill.getName(), intScrollX + 22, intScrollY + 5, 0xFFFFFF);
+        List<IReorderingProcessor> skillName = minecraft.font.split(selectedSkill.getName(), 120);
+        ClientUtil.drawLines(matrixStack, minecraft.font, skillName, 
+                intScrollX + 22, intScrollY + 8 - minecraft.font.lineHeight * (skillName.size() - 1) * 0.5F, 
+                0, 0xFFFFFF, true);
+        
         ClientUtil.drawRightAlignedString(matrixStack, minecraft.font, 
                 selectedSkill.getHamonSkill().getRewardType().getName(), 
-                intScrollX + 205, intScrollY + 5, 0xFFFFFF);
+                intScrollX + 205, intScrollY + 8, 0xFFFFFF);
+        
         if (selectedSkillDesc != null) {
             selectedSkillDesc.drawDesc(matrixStack, minecraft.font, intScrollX, intScrollY);
         }

@@ -157,9 +157,8 @@ public class StandStatsRenderer {
 
                 mc.getTextureManager().bind(power.getType().getIconTexture());
                 AbstractGui.blit(matrixStack, x + 135 - width, standIconY, 0, 0, 16, 16, 16, 16);
-                for (int i = 0; i < standName.size(); i++) {
-                    mc.font.draw(matrixStack, standName.get(i), x + 153 - width, standNameY + i * 9, color);
-                }
+                ClientUtil.drawLines(matrixStack, mc.font, standName, 
+                        x + 153 - width, standNameY, 0, color, false);
 
                 GameProfile profile = mc.player.getGameProfile();
                 ResourceLocation playerFace = DefaultPlayerSkin.getDefaultSkin();
@@ -183,9 +182,8 @@ public class StandStatsRenderer {
                     AbstractGui.blit(matrixStack, 0, 0, 80, 16, 16, 16, 128, 128);
                     matrixStack.popPose();
                 }
-                for (int i = 0; i < standUser.size(); i++) {
-                    mc.font.draw(matrixStack, standUser.get(i), x + 153 - width, standUserY + i * 9, color);
-                }
+                ClientUtil.drawLines(matrixStack, mc.font, standUser, 
+                        x + 153 - width, standUserY, 0, color, false);
 
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             }

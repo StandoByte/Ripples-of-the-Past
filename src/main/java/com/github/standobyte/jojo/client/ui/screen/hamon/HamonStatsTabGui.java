@@ -182,7 +182,7 @@ public class HamonStatsTabGui extends HamonTabGui {
         drawString(matrixStack, minecraft.font, new TranslationTextComponent("hamon.strength_level", screen.hamon.getHamonStrengthLevel(), HamonData.MAX_STAT_LEVEL), textX - 3, textY, 0xFFFFFF);
         textY += 2;
         for (int i = 0; i < strengthDescLines.size(); i++) {
-            textY += 9;
+            textY += minecraft.font.lineHeight;
             minecraft.font.draw(matrixStack, strengthDescLines.get(i), (float) textX, (float) textY, 0xFFFFFF);
         }
         textY += 15;
@@ -190,7 +190,7 @@ public class HamonStatsTabGui extends HamonTabGui {
         drawString(matrixStack, minecraft.font, new TranslationTextComponent("hamon.control_level", screen.hamon.getHamonControlLevel(), HamonData.MAX_STAT_LEVEL), textX - 3, textY, 0xFFFFFF);
         textY += 2;
         for (int i = 0; i < controlDescLines.size(); i++) {
-            textY += 9;
+            textY += minecraft.font.lineHeight;
             minecraft.font.draw(matrixStack, controlDescLines.get(i), (float) textX, (float) textY, 0xFFFFFF);
         }
         textY += 15;
@@ -198,7 +198,7 @@ public class HamonStatsTabGui extends HamonTabGui {
         drawString(matrixStack, minecraft.font, new TranslationTextComponent("hamon.breathing_level", (int) screen.hamon.getBreathingLevel(), (int) HamonData.MAX_BREATHING_LEVEL), textX - 3, textY, 0xFFFFFF);
         textY += 2;
         for (int i = 0; i < breathingDescLines.size(); i++) {
-            textY += 9;
+            textY += minecraft.font.lineHeight;
             minecraft.font.draw(matrixStack, breathingDescLines.get(i), (float) textX, (float) textY, 0xFFFFFF);
         }
         textY += 11;
@@ -212,7 +212,7 @@ public class HamonStatsTabGui extends HamonTabGui {
         textY += 11;
         exercisesAvgY = textY;
         for (int i = 0; i < exercisesDescLines.size(); i++) {
-            textY += 9;
+            textY += minecraft.font.lineHeight;
             minecraft.font.draw(matrixStack, exercisesDescLines.get(i), (float) textX, (float) textY, 0xFFFFFF);
         }
         maxY = textY + 39 - intScrollY;
