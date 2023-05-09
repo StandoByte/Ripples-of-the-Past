@@ -211,7 +211,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
         return false;
     }
     
-    protected boolean canHitOwner() {
+    public boolean canHitOwner() {
         return false;
     }
 

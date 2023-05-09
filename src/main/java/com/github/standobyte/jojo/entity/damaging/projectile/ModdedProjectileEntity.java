@@ -191,7 +191,7 @@ public abstract class ModdedProjectileEntity extends DamagingEntity {
     }
     
     @Override
-    protected boolean canHitOwner() {
+    public boolean canHitOwner() {
         return entityData.get(IS_DEFLECTED);
     }
     

@@ -1552,6 +1552,12 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         if (target instanceof LivingEntity) {
             return canAttack((LivingEntity) target);
         }
+        if (target instanceof ProjectileEntity) {
+            Entity owner = ((ProjectileEntity) target).getOwner();
+            if (owner != null && (owner.is(this) || owner.is(getUser()))) {
+                return target instanceof DamagingEntity && ((DamagingEntity) target).canHitOwner();
+            }
+        }
         return true;
     }
     
