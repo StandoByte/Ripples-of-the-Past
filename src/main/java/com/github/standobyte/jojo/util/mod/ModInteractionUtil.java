@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.util.mod;
 import java.util.Comparator;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.util.ResourceLocation;
@@ -26,9 +27,18 @@ public class ModInteractionUtil {
     private static final ResourceLocation MUTANT_ENDERMAN_ID_2 = new ResourceLocation("mutantbeasts", "endersoul_clone");
     private static final ResourceLocation MUTANT_ENDERMAN_ID_3 = new ResourceLocation("mutantbeasts", "endersoul_fragment");
     public static boolean isEntityEnderman(Entity entity) {
-        return entity instanceof EndermanEntity
-                || entity.getType().getRegistryName().equals(MUTANT_ENDERMAN_ID)
-                || entity.getType().getRegistryName().equals(MUTANT_ENDERMAN_ID_2)
-                || entity.getType().getRegistryName().equals(MUTANT_ENDERMAN_ID_3);
+        if (entity == null) return false;
+        
+        if (entity instanceof EndermanEntity) {
+            return true;
+        }
+        
+        EntityType<?> type = entity.getType();
+        if (type == null) return false;
+        ResourceLocation typeId = type.getRegistryName();
+        return 
+                MUTANT_ENDERMAN_ID.equals(typeId) ||
+                MUTANT_ENDERMAN_ID_2.equals(typeId) ||
+                MUTANT_ENDERMAN_ID_3.equals(typeId);
     }
 }
