@@ -1,15 +1,15 @@
 {
   "textures": [
-    "jojo:hamon_charge_1",
-    "jojo:hamon_charge_2",
-    "jojo:hamon_charge_3",
-    "jojo:hamon_charge_4",
-    "jojo:hamon_charge_5",
-    "jojo:hamon_charge_6",
-    "jojo:hamon_charge_7",
-    "jojo:hamon_charge_8",
-    "jojo:hamon_charge_9",
-    "jojo:hamon_charge_10",
-    "jojo:hamon_charge_11"
+    "jojo:hamon/hamon_charge_1",
+    "jojo:hamon/hamon_charge_2",
+    "jojo:hamon/hamon_charge_3",
+    "jojo:hamon/hamon_charge_4",
+    "jojo:hamon/hamon_charge_5",
+    "jojo:hamon/hamon_charge_6",
+    "jojo:hamon/hamon_charge_7",
+    "jojo:hamon/hamon_charge_8",
+    "jojo:hamon/hamon_charge_9",
+    "jojo:hamon/hamon_charge_10",
+    "jojo:hamon/hamon_charge_11"
   ]
 }
