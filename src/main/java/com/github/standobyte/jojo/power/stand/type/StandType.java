@@ -69,6 +69,8 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         this.resolveLevelItems = additions.resolveLevelItems;
     }
     
+    public void onCommonSetup() {}
+    
     @Override
     public boolean keepOnDeath(IStandPower power) {
         return JojoModConfig.getCommonConfigInstance(false).keepStandOnDeath.get();

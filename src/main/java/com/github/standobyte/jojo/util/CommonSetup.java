@@ -24,11 +24,13 @@ import com.github.standobyte.jojo.capability.world.WorldUtilCap;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapStorage;
 import com.github.standobyte.jojo.command.StandArgument;
 import com.github.standobyte.jojo.init.ModPotions;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandPower;
+import com.github.standobyte.jojo.power.stand.type.StandType;
 import com.github.standobyte.jojo.util.mc.data.StandStatsManager;
 
 import net.minecraft.command.arguments.ArgumentSerializer;
@@ -76,6 +78,9 @@ public class CommonSetup {
             ModPotions.registerRecipes();
             
             Action.initShiftVariations();
+            for (StandType<?> stand : JojoCustomRegistries.STANDS.getRegistry()) {
+                stand.onCommonSetup();
+            }
         });
     }
 }
