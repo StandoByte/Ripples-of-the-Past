@@ -13,6 +13,7 @@ import com.github.standobyte.jojo.potion.StunEffect;
 import com.github.standobyte.jojo.potion.UncurableEffect;
 import com.github.standobyte.jojo.potion.UndeadRegenerationEffect;
 import com.github.standobyte.jojo.potion.VampireSunBurnEffect;
+import com.github.standobyte.jojo.power.nonstand.type.vampirism.VampirismPowerType;
 import com.google.common.collect.ImmutableSet;
 
 import net.minecraft.entity.LivingEntity;
@@ -86,8 +87,9 @@ public class ModEffects {
     private static Set<Effect> TRACKED_EFFECTS;
     @SubscribeEvent(priority = EventPriority.LOW)
     public static final void afterEffectsRegister(RegistryEvent.Register<Effect> event) {
+        VampirismPowerType.initVampiricEffects();
         StandEntity.addSharedEffects(TIME_STOP.get(), Effects.BLINDNESS);
-        TRACKED_EFFECTS = ImmutableSet.of(RESOLVE.get(), TIME_STOP.get(), IMMOBILIZE.get(), STUN.get(), HAMON_SPREAD.get(), FULL_INVISIBILITY.get());
+        TRACKED_EFFECTS = ImmutableSet.of(RESOLVE.get(), TIME_STOP.get(), IMMOBILIZE.get(), STUN.get(), HAMON_SPREAD.get(), FULL_INVISIBILITY.get(), VAMPIRE_SUN_BURN.get());
     }
     
     public static boolean isEffectTracked(Effect effect) {
