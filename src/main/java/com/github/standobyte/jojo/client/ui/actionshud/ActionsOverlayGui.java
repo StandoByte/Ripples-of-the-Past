@@ -10,7 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.IntBinaryOperator;
 import java.util.function.IntUnaryOperator;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -24,7 +26,6 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
-import com.github.standobyte.jojo.client.InputHandler.MouseButton;
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsModeConfig.SelectedTargetIcon;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
@@ -45,6 +46,7 @@ import com.github.standobyte.jojo.power.stand.StandUtil;
 import com.github.standobyte.jojo.util.general.Container;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Streams;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -61,6 +63,7 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.ColorHelper;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3f;
@@ -94,9 +97,9 @@ public class ActionsOverlayGui extends AbstractGui {
     private final ElementTransparency staminaBarTransparency = new ElementTransparency(40, 10);
     private final ElementTransparency resolveBarTransparency = new ElementTransparency(40, 10);
     private final ElementTransparency powerNameTransparency = new ElementTransparency(40, 10);
-    private final ImmutableMap<ActionType, ElementTransparency> actionNameTransparency = Arrays.stream(ActionType.values())
+    private final ImmutableMap<InputHandler.ActionKey, ElementTransparency> actionNameTransparency = Arrays.stream(InputHandler.ActionKey.values())
             .collect(Maps.toImmutableEnumMap(hotbar -> hotbar, hotbar -> new ElementTransparency(40, 10)));
-    private final Map<ActionType, ITextComponent> lastActionName = new EnumMap<>(ActionType.class);
+    private final Map<InputHandler.ActionKey, ITextComponent> lastActionName = new EnumMap<>(InputHandler.ActionKey.class);
     private final ImmutableMap<Exercise, ElementTransparency> exerciseBarsTransparency = Arrays.stream(Exercise.values())
             .collect(Maps.toImmutableEnumMap(ex -> ex, ex -> new ElementTransparency(40, 10)));
     
@@ -104,19 +107,16 @@ public class ActionsOverlayGui extends AbstractGui {
             energyBarTransparency, staminaBarTransparency, resolveBarTransparency);
     private final BarsRenderer horizontalBars = new HorizontalBarsRenderer(this, 
             energyBarTransparency, staminaBarTransparency, resolveBarTransparency);
-    private ElementTransparency[] tickingTransparencies = new ElementTransparency[] {
+    
+    private ElementTransparency[] tickingTransparencies = Streams.concat(Streams.concat(Stream.of(
             modeSelectorTransparency,
             energyBarTransparency,
             staminaBarTransparency,
             resolveBarTransparency,
-            powerNameTransparency,
-            actionNameTransparency.get(ActionType.ATTACK),
-            actionNameTransparency.get(ActionType.ABILITY),
-            exerciseBarsTransparency.get(Exercise.MINING),
-            exerciseBarsTransparency.get(Exercise.RUNNING),
-            exerciseBarsTransparency.get(Exercise.SWIMMING),
-            exerciseBarsTransparency.get(Exercise.MEDITATION)
-    };
+            powerNameTransparency), 
+            actionNameTransparency.values().stream()),
+            exerciseBarsTransparency.values().stream())
+            .toArray(ElementTransparency[]::new);
     
     private boolean attackSelection;
     private boolean abilitySelection;
@@ -222,8 +222,9 @@ public class ActionsOverlayGui extends AbstractGui {
         PositionConfig hotbarsPosConfig = JojoModConfig.CLIENT.hotbarsPosition.get();
         PositionConfig barsPosConfig = JojoModConfig.CLIENT.barsPosition.get();
         boolean showModeSelector = false;
+        boolean renderQuickAccessSlot = true;
         updateWarnings(currentMode);
-        updateElementPositions(barsPosConfig, hotbarsPosConfig, screenWidth, screenHeight);
+        updateElementPositions(barsPosConfig, hotbarsPosConfig, renderQuickAccessSlot, screenWidth, screenHeight);
 
         RenderGameOverlayEvent.ElementType elementTypeRender = event.getType();
         switch (elementTypeRender) {
@@ -295,9 +296,11 @@ public class ActionsOverlayGui extends AbstractGui {
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
                 
-                renderActionsHotbar(matrixStack, hotbarsPosition, ActionType.ATTACK, currentMode, getTargetLazy(), partialTick);
-                renderActionsHotbar(matrixStack, hotbarsPosition, ActionType.ABILITY, currentMode, getTargetLazy(), partialTick);
-//                isQuickAccessSlotRendered(matrixStack, hotbarsPosition, currentMode, getTargetLazy(), partialTick);
+                renderActionsHotbar(matrixStack, hotbarsPosition, InputHandler.ActionKey.ATTACK, currentMode, getTargetLazy(), partialTick);
+                renderActionsHotbar(matrixStack, hotbarsPosition, InputHandler.ActionKey.ABILITY, currentMode, getTargetLazy(), partialTick);
+                if (renderQuickAccessSlot) {
+                    renderActionsHotbar(matrixStack, hotbarsPosition, InputHandler.ActionKey.QUICK_ACCESS, currentMode, getTargetLazy(), partialTick);
+                }
                 
                 renderWarningIcons(matrixStack, warningsPosition, warningLines);
                 
@@ -312,9 +315,11 @@ public class ActionsOverlayGui extends AbstractGui {
             case TEXT:
                 drawPowerName(matrixStack, hotbarsPosition, currentMode, partialTick);
                 
-                drawHotbarText(matrixStack, hotbarsPosition, ActionType.ATTACK, currentMode, getTargetLazy(), partialTick);
-                drawHotbarText(matrixStack, hotbarsPosition, ActionType.ABILITY, currentMode, getTargetLazy(), partialTick);
-//                drawQuickAccessText(matrixStack, hotbarsPosition, currentMode, getTargetLazy());
+                drawHotbarText(matrixStack, hotbarsPosition, InputHandler.ActionKey.ATTACK, currentMode, getTargetLazy(), partialTick);
+                drawHotbarText(matrixStack, hotbarsPosition, InputHandler.ActionKey.ABILITY, currentMode, getTargetLazy(), partialTick);
+                if (renderQuickAccessSlot) {
+                    drawHotbarText(matrixStack, hotbarsPosition, InputHandler.ActionKey.QUICK_ACCESS, currentMode, getTargetLazy(), partialTick);
+                }
                 
                 drawWarningText(matrixStack, warningsPosition, warningLines);
                 break;
@@ -349,7 +354,7 @@ public class ActionsOverlayGui extends AbstractGui {
     private final ElementPosition modeSelectorPosition = new ElementPosition();
     private final ElementPosition hamonExerciseBarsPosition = new ElementPosition();
     
-    private void updateElementPositions(PositionConfig barsConfig, PositionConfig hotbarsConfig, int screenWidth, int screenHeight) {
+    private void updateElementPositions(PositionConfig barsConfig, PositionConfig hotbarsConfig, boolean isQuickAccessSlotRendered, int screenWidth, int screenHeight) {
         int halfWidth = screenWidth / 2;
         int halfHeight = screenHeight / 2;
         barsRenderer = barsConfig.barsOrientation == BarsOrientation.HORIZONTAL ? horizontalBars : verticalBars;
@@ -385,9 +390,9 @@ public class ActionsOverlayGui extends AbstractGui {
         
         warningsPosition.x = hotbarsPosition.x;
         warningsPosition.y = hotbarsPosition.y + 92;
-//        if (isQuickAccessSlotRendered()) {
-//            warningsPosition.y += 34;
-//        }
+        if (isQuickAccessSlotRendered) {
+            warningsPosition.y += 34;
+        }
         warningsPosition.alignment = hotbarsPosition.alignment;
         if (hotbarsConfig == PositionConfig.TOP_LEFT && barsConfig == PositionConfig.LEFT) {
             warningsPosition.x += 32;
@@ -401,9 +406,9 @@ public class ActionsOverlayGui extends AbstractGui {
         
         standStrengthPosition.x = hotbarsPosition.x;
         standStrengthPosition.y = hotbarsPosition.y + 92 + warningLines.size() * 16;
-//        if (isQuickAccessSlotRendered()) {
-//            standStrengthPosition.y += 34;
-//        }
+        if (isQuickAccessSlotRendered) {
+            standStrengthPosition.y += 34;
+        }
         standStrengthPosition.alignment = hotbarsPosition.alignment;
         if (hotbarsConfig == PositionConfig.TOP_LEFT && barsConfig == PositionConfig.LEFT) {
             standStrengthPosition.x += 32;
@@ -464,47 +469,48 @@ public class ActionsOverlayGui extends AbstractGui {
     
 
     private <P extends IPower<P, ?>> void renderActionsHotbar(MatrixStack matrixStack, 
-            ElementPosition position, ActionType actionType, ActionsModeConfig<P> mode, ActionTarget target, float partialTick) {
+            ElementPosition position, InputHandler.ActionKey actionKey, ActionsModeConfig<P> mode, ActionTarget target, float partialTick) {
         P power = mode.getPower();
         if (power.hasPower()) {
-            List<Action<P>> actions = power.getActions(actionType).getEnabled();
+            List<Action<P>> actions = getEnabledActions(power, actionKey);
             if (actions.size() > 0) {
                 int x = position.x;
-                int y = position.y + getHotbarsYDiff() - 6;
+                int y = position.y + getHotbarsYDiff() - 6 + getHotbarsYDiff() * actionKey.ordinal();
                 int hotbarLength = actions.size() * 20 + 2;
-                if (actionType == ActionType.ABILITY) {
-                    y += getHotbarsYDiff();
-                }
+                ActionType actionHotbar = actionKey.getHotbar();
                 if (position.alignment == Alignment.RIGHT) {
                     x -= hotbarLength;
                 }
-                int selected = mode.getSelectedSlot(actionType);
+                int selected = actionHotbar != null ? mode.getSelectedSlot(actionHotbar) : 0;
                 boolean shift = mc.player.isShiftKeyDown();
                 float alpha = selected < 0 || !hotbarsEnabled ? 0.25F : 1.0F;
                 // mouse button icon
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
                 mc.getTextureManager().bind(OVERLAY_LOCATION);
                 if (position.alignment == Alignment.LEFT) {
-                    renderMouseIcon(matrixStack, x, y + 2, actionType);
+                    renderMouseIcon(matrixStack, x, y + 2, actionKey);
                     x += 12;
                 }
                 else {
-                    renderMouseIcon(matrixStack, x + hotbarLength - 9, y + 2, actionType);
+                    renderMouseIcon(matrixStack, x + hotbarLength - 9, y + 2, actionKey);
                     x -= 12;
                 }
+                
                 // hotbar
                 mc.getTextureManager().bind(WIDGETS_LOCATION);
                 renderHotbar(matrixStack, x, y, actions.size(), alpha);
+                
                 // action icons
                 x += 3;
                 y += 3;
                 for (int i = 0; i < actions.size(); i++) {
-                    Action<P> action = power.getAction(actionType, i, shift);
-                    renderActionIcon(matrixStack, actionType, mode, action, target, x + 20 * i, y, partialTick, i == selected, alpha);
+                    Action<P> action = power.getActionOnClick(actions.get(i), shift);
+                    renderActionIcon(matrixStack, actionKey, mode, action, target, x + 20 * i, y, partialTick, i == selected, alpha);
                 }
+                
                 // target type icon
                 if (selected >= 0 && selected < actions.size()) {
-                    SelectedTargetIcon icon = mode.getTargetIcon(actionType);
+                    SelectedTargetIcon icon = mode.getTargetIcon(actionKey);
                     if (icon != null) {
                         int[] tex = icon.getIconTex();
                         if (tex != null) {
@@ -522,8 +528,19 @@ public class ActionsOverlayGui extends AbstractGui {
                         }
                     }
                 }
+                
                 // highlight when hotbar key is pressed
-                boolean highlightSelection = actionType == ActionType.ATTACK ? attackSelection : abilitySelection;
+                boolean highlightSelection = false;
+                switch (actionKey) {
+                case ATTACK:
+                    highlightSelection = attackSelection;
+                    break;
+                case ABILITY:
+                    highlightSelection = abilitySelection;
+                    break;
+                default:
+                    break;
+                }
                 if (highlightSelection) {
                     int highlightAlpha = (int) (ClientUtil.getHighlightAlpha(tickCount + partialTick, 40F, 40F, 0.25F, 0.5F) * 255F);
                     if (selected >= 0) {
@@ -546,16 +563,16 @@ public class ActionsOverlayGui extends AbstractGui {
                 Action<P> heldAction = power.getHeldAction();
                 int slot = -1;
                 if (heldAction != null) {
-                    slot = power.getActions(actionType).getEnabled().indexOf(
+                    slot = actions.indexOf(
                             heldAction.isShiftVariation() ? heldAction.getBaseVariation() : heldAction);
                     if (slot > -1) {
                         renderActionHoldProgress(matrixStack, power, heldAction, power.getHeldActionTicks(), partialTick, x + slot * 20, y);
                     }
                 }
                 
-                Action<P> selectedAction = mode.getSelectedAction(actionType, mc.player.isShiftKeyDown());
+                Action<P> selectedAction = actionHotbar != null ? mode.getSelectedAction(actionHotbar, shift) : actions.get(0);
                 if (selectedAction != null && selectedAction != heldAction) {
-                    slot = mode.getSelectedSlot(actionType);
+                    slot = selected;
                     if (slot > -1) {
                         renderActionHoldProgress(matrixStack, power, selectedAction, -1, partialTick, x + slot * 20, y);
                     }
@@ -564,11 +581,42 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private void renderMouseIcon(MatrixStack matrixStack, int x, int y, ActionType hotbar) {
-        renderMouseIcon(matrixStack, x, y, hotbar == ActionType.ATTACK ? MouseButton.LEFT : MouseButton.RIGHT);
+    private <P extends IPower<P, ?>> List<Action<P>> getEnabledActions(P power, InputHandler.ActionKey actionKey) {
+        switch (actionKey) {
+        case ATTACK:
+        case ABILITY:
+            return power.getActions(actionKey.getHotbar()).getEnabled();
+        case QUICK_ACCESS:
+            Action<P> action = getQuickAccessAction(power, false);
+            if (action != null) {
+                return Collections.singletonList(action);
+            }
+            break;
+        }
+        return Collections.emptyList();
     }
     
-    private void renderMouseIcon(MatrixStack matrixStack, int x, int y, MouseButton button) {
+    private void renderMouseIcon(MatrixStack matrixStack, int x, int y, InputHandler.ActionKey actionKey) {
+        InputHandler.MouseButton button = null;
+        switch (actionKey) {
+        case ATTACK:
+            button = InputHandler.MouseButton.LEFT;
+            break;
+        case ABILITY:
+            button = InputHandler.MouseButton.RIGHT;
+            break;
+        case QUICK_ACCESS:
+            if (InputHandler.getInstance().actionQuickAccess.isDefault()) {
+                button = InputHandler.MouseButton.MIDDLE;
+            }
+            break;
+        }
+        if (button != null) {
+            renderMouseIcon(matrixStack, x, y, button);
+        }
+    }
+    
+    private void renderMouseIcon(MatrixStack matrixStack, int x, int y, InputHandler.MouseButton button) {
         blit(matrixStack, x, y, 216 + button.ordinal() * 10, 128, 9, 16);
     }
     
@@ -583,58 +631,7 @@ public class ActionsOverlayGui extends AbstractGui {
         blit(matrixStack, x + hotbarLength, y, 181, 0, 1, 22);
     }
     
-//    private <P extends IPower<P, ?>> void renderQuickAccessSlot(MatrixStack matrixStack, 
-//            ElementPosition position, ActionsModeConfig<P> mode, ActionTarget target, float partialTick) {
-//        P power = mode.getPower();
-//        if (power.hasPower()) {
-//            boolean shift = mc.player.isShiftKeyDown();
-//            Action<P> action = power.getQuickAccessAction(shift);
-//            if (action != null) {
-//                int x = position.x;
-//                int y = position.y + getHotbarsYDiff() * 3 - 6;
-//                if (position.alignment == Alignment.RIGHT) {
-//                    x -= 22;
-//                }
-//                // mouse button icon
-//                mc.getTextureManager().bind(OVERLAY_LOCATION);
-//                if (position.alignment == Alignment.LEFT) {
-//                    renderMouseIcon(matrixStack, x, y + 2, MouseButton.MIDDLE);
-//                    x += 12;
-//                }
-//                else {
-//                    renderMouseIcon(matrixStack, x + 13, y + 2, MouseButton.MIDDLE);
-//                    x -= 12;
-//                }
-//                // slot
-//                mc.getTextureManager().bind(WIDGETS_LOCATION);
-//                blit(matrixStack, x, y, 24, 23, 22, 22);
-//                // action icon
-//                x += 3;
-//                y += 3;
-////                renderActionIcon(matrixStack, actionType, mode, action, target, x + 20 * i, y, partialTick, i == selected, alpha);
-//                // target type icon
-////                SelectedTargetIcon icon = mode.getTargetIcon(actionType);
-////                if (icon != null) {
-////                    int[] tex = icon.getIconTex();
-////                    if (tex != null) {
-////                        mc.getTextureManager().bind(OVERLAY_LOCATION);
-////                        RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
-////                        int texX = tex[0];
-////                        int texY = tex[1];
-////                        int iconX = x + 20 * selected + 10;
-////                        int iconY = y - 4;
-////                        matrixStack.pushPose();
-////                        matrixStack.scale(0.5F, 0.5F, 1F);
-////                        matrixStack.translate(iconX, iconY, 0);
-////                        blit(matrixStack, iconX, iconY, texX, texY, 32, 32);
-////                        matrixStack.popPose();
-////                    }
-////                }
-//            }
-//        }
-//    }
-    
-    private <P extends IPower<P, ?>> void renderActionIcon(MatrixStack matrixStack, ActionType actionType, ActionsModeConfig<P> mode, 
+    private <P extends IPower<P, ?>> void renderActionIcon(MatrixStack matrixStack, InputHandler.ActionKey actionKey, ActionsModeConfig<P> mode, 
             Action<P> action, ActionTarget target, int x, int y, float partialTick, boolean isSelected, float hotbarAlpha) {
         P power = mode.getPower();
         
@@ -647,9 +644,9 @@ public class ActionsOverlayGui extends AbstractGui {
             TextureAtlasSprite textureAtlasSprite = CustomResources.getActionSprites().getSprite(action, power);
             mc.getTextureManager().bind(textureAtlasSprite.atlas().location());
             
-            ActionConditionResult result = actionAvailability(action, mode, actionType, target, isSelected);
+            ActionConditionResult result = actionAvailability(action, mode, actionKey, target, isSelected);
             if (!result.isPositive()) {
-                if (!result.isHighlighted()) {
+                if (!result.isQueued()) {
                     RenderSystem.color4f(0.2F, 0.2F, 0.2F, 0.5F * hotbarAlpha);
                 }
                 else {
@@ -697,12 +694,12 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     private <P extends IPower<P, ?>> ActionConditionResult actionAvailability(Action<P> action, ActionsModeConfig<P> mode, 
-            ActionType hotbar, ActionTarget mouseTarget, boolean isSelected) {
+            InputHandler.ActionKey actionKey, ActionTarget mouseTarget, boolean isSelected) {
         P power = mode.getPower();
         Container<ActionTarget> targetContainer = new Container<>(mouseTarget);
         if (isSelected) {
             ActionConditionResult targetCheck = power.checkTarget(action, targetContainer);
-            mode.getTargetIcon(hotbar).update(action.getTargetRequirement(), targetCheck.isPositive());
+            mode.getTargetIcon(actionKey).update(action.getTargetRequirement(), targetCheck.isPositive());
             if (!targetCheck.isPositive()) {
                 return targetCheck;
             }
@@ -723,15 +720,19 @@ public class ActionsOverlayGui extends AbstractGui {
         return hotbarsEnabled;
     }
     
+    private static final Map<InputHandler.ActionKey, String> ACTION_TYPE_NAME_KEY = Util.make(new EnumMap<>(InputHandler.ActionKey.class), map -> {
+        map.put(InputHandler.ActionKey.ATTACK, "jojo.overlay.action.attack");
+        map.put(InputHandler.ActionKey.ABILITY, "jojo.overlay.action.ability");
+        map.put(InputHandler.ActionKey.QUICK_ACCESS, "jojo.overlay.action.quick_access");
+    });
     private <P extends IPower<P, ?>> void drawHotbarText(MatrixStack matrixStack, ElementPosition position, 
-            ActionType actionType, @Nonnull ActionsModeConfig<P> mode, ActionTarget target, float partialTick) {
+            InputHandler.ActionKey actionKey, @Nonnull ActionsModeConfig<P> mode, ActionTarget target, float partialTick) {
         P power = mode.getPower();
         int x = position.x;
-        int y = position.y + 16 + 3;
-        if (actionType == ActionType.ABILITY) {
-            y += getHotbarsYDiff();
-        }
-        Action<P> selectedAction = mode.getSelectedAction(actionType, mc.player.isShiftKeyDown());
+        int y = position.y + 16 + 3 + getHotbarsYDiff() * actionKey.ordinal();
+        boolean shift = mc.player.isShiftKeyDown();
+        Action<P> selectedAction = actionKey == InputHandler.ActionKey.QUICK_ACCESS ?
+                getQuickAccessAction(power, shift) : mode.getSelectedAction(actionKey.getHotbar(), shift);
         if (selectedAction != null) {
             // action name
             String translationKey = selectedAction.getTranslationKey(power, target);
@@ -748,11 +749,13 @@ public class ActionsOverlayGui extends AbstractGui {
                 }
             }
             
-            actionName = new TranslationTextComponent(
-                    actionType == ActionType.ATTACK ? "jojo.overlay.action.attack" : "jojo.overlay.action.ability", actionName);
+            String actionTypeKey = ACTION_TYPE_NAME_KEY.get(actionKey);
+            if (actionTypeKey != null) {
+                actionName = new TranslationTextComponent(actionTypeKey, actionName);
+            }
             
-            ElementTransparency transparency = actionNameTransparency.get(actionType);
-            if (!actionName.equals(lastActionName.put(actionType, actionName))) {
+            ElementTransparency transparency = actionNameTransparency.get(actionKey);
+            if (!actionName.equals(lastActionName.put(actionKey, actionName))) {
                 transparency.reset();
             }
             float alpha = getNameAlpha(transparency, partialTick);
@@ -772,53 +775,9 @@ public class ActionsOverlayGui extends AbstractGui {
             }
         }
         else {
-            lastActionName.remove(actionType);
+            lastActionName.remove(actionKey);
         }
-
-//        y += 10;
-//        if (position.alignment == Alignment.RIGHT) {
-//            x -= 20 * power.getActions(actionType).getEnabled().size();
-//        }
-//        
-//        Action<P> heldAction = power.getHeldAction();
-//        int slot = -1;
-//        if (heldAction != null) {
-//            slot = power.getActions(actionType).getEnabled().indexOf(
-//                    heldAction.isShiftVariation() ? heldAction.getBaseVariation() : heldAction);
-//            if (slot > -1) {
-//                drawHoldDuration(matrixStack, x, y, slot, position.alignment, heldAction, power, power.getHeldActionTicks());
-//
-//                renderActionHoldProgress(matrixStack, currentMode, partialTick, 1, screenWidth, screenHeight);
-//            }
-//        }
-//        if (selectedAction != null && selectedAction != heldAction) {
-//            slot = mode.getSelectedSlot(actionType);
-//            if (slot > -1) {
-//                drawHoldDuration(matrixStack, x, y, slot, position.alignment, selectedAction, power, 0);
-//            }
-//        }
     }
-    
-//    private <P extends IPower<P, ?>> void drawQuickAccessText(MatrixStack matrixStack, ElementPosition position, 
-//            @Nonnull ActionsModeConfig<P> mode, ActionTarget target) {
-//    }
-//    
-//    private <P extends IPower<P, ?>> void drawHoldDuration(MatrixStack matrixStack, int x, int y, 
-//            int slot, Alignment hotbarAlignment, Action<P> action, P power, int ticksHeld) {
-//        int ticksToFire = action.getHoldDurationToFire(power);
-//        if (ticksToFire > 0 && ticksToFire > ticksHeld) {
-//            ticksToFire -= ticksHeld;
-//
-//            x += slot * 20 + 20;
-//            if (hotbarAlignment == Alignment.RIGHT) {
-//                x -= 2;
-//            }
-//
-//            int seconds = (ticksToFire - 1) / 20 + 1;
-//            int color = ticksHeld == 0 ? 0x808080 : 0xFFFFFF;
-//            ClientUtil.drawRightAlignedString(matrixStack, mc.font, String.valueOf(seconds), x, y + 12, color);
-//        }
-//    }
     
     private float getNameAlpha(ElementTransparency transparency, float partialTick) {
         HudNamesRender renderMode = JojoModConfig.CLIENT.hudNamesRender.get();
@@ -932,7 +891,7 @@ public class ActionsOverlayGui extends AbstractGui {
     
 
     private <P extends IPower<P, ?>> void renderActionHoldProgress(MatrixStack matrixStack, P power, Action<P> action, 
-            int ticks, float partialTick, int x, int y/*, int screenWidth, int screenHeight, float scale*/) {
+            int ticks, float partialTick, int x, int y) {
         if (action == null) return;
 
         int ticksToFire = action.getHoldDurationToFire(power);
@@ -952,14 +911,8 @@ public class ActionsOverlayGui extends AbstractGui {
             }
             mc.getTextureManager().bind(RADIAL_INDICATOR);
             int deg = (int) (ratio * 360F);
-//            matrixStack.pushPose();
-//            if (scale > 1) {
-//                matrixStack.translate(-screenWidth / scale, -screenHeight / scale, 0);
-//                matrixStack.scale(scale, scale, 1);
-//            }
             blit(matrixStack, x, y, deg % 19 * 13, deg / 19 * 13, 13, 13);
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-//            matrixStack.popPose();
         }
     }
     
@@ -1280,6 +1233,11 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
+    public void revealActionNames() {
+        powerNameTransparency.reset();
+        actionNameTransparency.values().forEach(ElementTransparency::reset);
+    }
+    
     public void onStandSummon() {
         if (currentMode != standUiMode) {
             setPowerMode(standUiMode);
@@ -1336,57 +1294,64 @@ public class ActionsOverlayGui extends AbstractGui {
 
     @Nullable
     public <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onClick(P power, ActionType actionType, boolean shift, int index) {
-        if (power != null) {
-            Action<P> action = power.getAction(actionType, index, shift);
-            if (action != null) {
-                if (power.getHeldAction() != null && action.getHoldDurationMax(power) > 0) {
-                    return Pair.of(action, true);
-                }
-                RayTraceResult target = InputHandler.getInstance().mouseTarget;
-                ClClickActionPacket packet = ClClickActionPacket.actionClicked(power.getPowerClassification(), actionType, shift, index, target);
-                if (action.validateInput()) packet.validateInput(action);
-                PacketManager.sendToServer(packet);
-                ActionTarget actionTarget = ActionTarget.fromRayTraceResult(target);
-                boolean actionWentOff = power.clickAction(power.getAction(actionType, index, shift), shift, actionTarget);
-                return Pair.of(action, actionWentOff);
-            }
-        }
-        return null;
+        return onActionClick(power, power.getAction(actionType, index, shift), shift, 
+                () -> ClClickActionPacket.actionClicked(power.getPowerClassification(), actionType, shift, index, InputHandler.getInstance().mouseTarget));
     }
     
     @Nullable
     public <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onQuickAccessClick(P power, boolean shift) {
-        if (power != null) {
-            Action<P> action = power.getActionsLayout().getQuickAccessAction();
-            if (action != null) {
-                if (power.getHeldAction() != null && action.getHoldDurationMax(power) > 0) {
-                    return Pair.of(action, true);
-                }
-                RayTraceResult target = InputHandler.getInstance().mouseTarget;
-                ClClickActionPacket packet = ClClickActionPacket.quickAccess(power.getPowerClassification(), shift, target);
-                if (action.validateInput()) packet.validateInput(action);
-                PacketManager.sendToServer(packet);
-                ActionTarget actionTarget = ActionTarget.fromRayTraceResult(target);
-                boolean actionWentOff = power.clickAction(power.getQuickAccessAction(shift), shift, actionTarget);
-                return Pair.of(action, actionWentOff);
+        return onActionClick(power, getQuickAccessAction(power, shift), shift, 
+                () -> ClClickActionPacket.quickAccess(power.getPowerClassification(), shift, InputHandler.getInstance().mouseTarget));
+    }
+
+    @Nullable
+    private <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onActionClick(P power, Action<P> action, boolean shift, Supplier<ClClickActionPacket> createPacket) {
+        if (power != null && action != null) {
+            if (power.getHeldAction() != null && action.getHoldDurationMax(power) > 0) {
+                return Pair.of(action, true);
             }
+            RayTraceResult target = InputHandler.getInstance().mouseTarget;
+            ClClickActionPacket packet = createPacket.get();
+            if (action.validateInput()) packet.validateInput(action);
+            PacketManager.sendToServer(packet);
+            ActionTarget actionTarget = ActionTarget.fromRayTraceResult(target);
+            boolean actionWentOff = power.clickAction(action, shift, actionTarget);
+            return Pair.of(action, actionWentOff);
         }
         return null;
     }
     
-    
-    
     @Nullable
-    public Action<?> getSelectedAction(ActionType type) {
-        if (currentMode == null) {
-            return null;
-        }
-        return currentMode.getSelectedAction(type, mc.player.isShiftKeyDown());
+    private <P extends IPower<P, ?>> Action<P> getQuickAccessAction(P power, boolean shift) {
+        return power.getQuickAccessAction(shift);
     }
-
-    @Nullable
-    public Action<?> getSelectedActionIfEnabled(ActionType type) {
-        return areHotbarsEnabled() ? getSelectedAction(type) : null;
+    
+    public <P extends IPower<P, ?>> boolean isQuickAccessActive() {
+        if (isActive() && getCurrentPower() != null) {
+            P power = (P) getCurrentPower();
+            Action<P> quickAccess = getQuickAccessAction(power, mc.player.isShiftKeyDown());
+            return quickAccess != null;
+        }
+        return false;
+    }
+    
+    
+    
+    public boolean isActionSelectedAndEnabled(Action<?> action) {
+        return isActionSelectedAndEnabled(a -> a == action);
+    }
+    
+    public boolean isActionSelectedAndEnabled(Action<?>... anyOf) {
+        return isActionSelectedAndEnabled(a -> Stream.of(anyOf).anyMatch(action -> a == action));
+    }
+    
+    public boolean isActionSelectedAndEnabled(Predicate<Action<?>> action) {
+        if (!areHotbarsEnabled() || currentMode == null) {
+            return false;
+        }
+        boolean shift = mc.player.isShiftKeyDown();
+        return Stream.of(ActionType.values()).map(hotbar -> currentMode.getSelectedAction(hotbar, shift)).anyMatch(action) 
+                || action.test(getQuickAccessAction(currentMode.getPower(), shift));
     }
     
     

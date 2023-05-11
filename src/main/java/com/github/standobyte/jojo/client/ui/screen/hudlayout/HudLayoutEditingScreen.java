@@ -81,7 +81,7 @@ public class HudLayoutEditingScreen extends Screen {
             IPower.getPowerOptional(minecraft.player, powerClassification).ifPresent(power -> {
                 if (power.hasPower()) {
                     powersPresent.add(power);
-                    if (selectedTab == null) {
+                    if (selectedTab == null || powerClassification == ActionsOverlayGui.getInstance().getCurrentMode()) {
                         selectedTab = powerClassification;
                     }
                 }
@@ -474,6 +474,7 @@ public class HudLayoutEditingScreen extends Screen {
         changedQuickAccessSlots.forEach((power, action) -> {
             PacketManager.sendToServer(new ClLayoutQuickAccessPacket(power, action));
         });
+        ActionsOverlayGui.getInstance().revealActionNames();
     }
     
     private static class ActionData<P extends IPower<P, ?>> {

@@ -2,13 +2,11 @@ package com.github.standobyte.jojo.client.ui.marker;
 
 import java.util.List;
 
-import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.client.resources.ActionSpriteUploader;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
-import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
-import com.github.standobyte.jojo.power.IPower.ActionType;
+import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.vector.Vector3d;
@@ -30,9 +28,7 @@ public class CrazyDiamondAnchorMarker extends MarkerRenderer {
         CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(mc.level, mc.player.getMainHandItem()).ifPresent(pos -> 
             list.add(new MarkerInstance(Vector3d.atCenterOf(pos), false)));
         CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(mc.level, mc.player.getOffhandItem()).ifPresent(pos -> {
-            Action<?> selectedAbility = ActionsOverlayGui.getInstance().getSelectedActionIfEnabled(ActionType.ABILITY);
-            boolean abilitySelected = selectedAbility != null && selectedAbility.getShiftVariationIfPresent()
-                    == ModStandsInit.CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE.get().getShiftVariationIfPresent();
+            boolean abilitySelected = ActionsOverlayGui.getInstance().isActionSelectedAndEnabled(ModStandsInit.CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE.get());
             list.add(new MarkerInstance(Vector3d.atCenterOf(pos), abilitySelected));
         });
     }

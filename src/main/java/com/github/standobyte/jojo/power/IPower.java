@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.power;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -53,8 +54,19 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     void resetCooldowns();
     ActionCooldownTracker getCooldowns();
 
-    @Nullable Action<P> getAction(ActionType type, int index, boolean shift);
-    @Nullable Action<P> getQuickAccessAction(boolean shift);
+    @Nullable default Action<P> getAction(ActionType type, int index, boolean shift) {
+        List<Action<P>> actions = getActions(type).getEnabled();
+        if (index < 0 || index >= actions.size()) {
+            return null;
+        }
+        return getActionOnClick(actions.get(index), shift);
+    }
+    
+    @Nullable default Action<P> getQuickAccessAction(boolean shift) {
+        return getActionOnClick(getActionsLayout().getQuickAccessAction(), shift);
+    }
+    
+    @Nullable Action<P> getActionOnClick(Action<P> actionInSlot, boolean shift);
     boolean clickAction(Action<P> action, boolean shift, ActionTarget target);
     ActionConditionResult checkRequirements(Action<P> action, Container<ActionTarget> targetContainer, boolean checkTargetType);
     ActionConditionResult checkTarget(Action<P> action, Container<ActionTarget> targetContainer);

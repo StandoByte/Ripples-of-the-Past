@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.power;
 
-import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
@@ -173,27 +172,13 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     private void tickCooldown() {
         cooldowns.tick();
     }
-
     
-
-    @Nullable
-    @Override
-    public final Action<P> getAction(ActionType type, int index, boolean shift) {
-        List<Action<P>> actions = getActions(type).getEnabled();
-        if (index < 0 || index >= actions.size()) {
-            return null;
-        }
-        return getActionOnClick(actions.get(index), shift);
-    }
+    
     
     @Nullable
     @Override
-    public final Action<P> getQuickAccessAction(boolean shift) {
-        return getActionOnClick(getActionsLayout().getQuickAccessAction(), shift);
-    }
-
-    @Nullable
-    private Action<P> getActionOnClick(Action<P> actionInSlot, boolean shift) {
+    public Action<P> getActionOnClick(Action<P> actionInSlot, boolean shift) {
+        if (actionInSlot == null) return null;
         actionInSlot = actionInSlot.getVisibleAction(getThis());
         Action<P> held = getHeldAction();
         if (actionInSlot == held) {

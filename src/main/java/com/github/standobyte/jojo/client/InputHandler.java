@@ -26,6 +26,7 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
+import com.github.standobyte.jojo.client.ui.actionshud.QuickAccess.QuickAccessKeyConflictContext;
 import com.github.standobyte.jojo.client.ui.screen.hudlayout.HudLayoutEditingScreen;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.ItemProjectileEntity;
@@ -68,9 +69,9 @@ import net.minecraft.util.math.RayTraceResult.Type;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.InputEvent.ClickInputEvent;
 import net.minecraftforge.client.event.InputEvent.MouseScrollEvent;
+import net.minecraftforge.client.settings.KeyBindingMap;
 import net.minecraftforge.client.event.InputUpdateEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
@@ -117,7 +118,12 @@ public class InputHandler {
     @Nullable
     private KeyBinding deselectAbility;
     
+    // it works because the actual map is static, not sure if that's intended or just an implementation detail
+    // but hey, i'll take it
+    private KeyBindingMap keyBindingMap = new KeyBindingMap();
+    
     private int leftClickBlockDelay;
+    private int quickAccessMmbDelay;
     
     public boolean hasInput;
     
@@ -153,7 +159,7 @@ public class InputHandler {
         ClientRegistry.registerKeyBinding(nonStandMode = new KeyBinding(JojoMod.MOD_ID + ".key.non_stand_mode", GLFW_KEY_J, HUD_CATEGORY));
         ClientRegistry.registerKeyBinding(standMode = new KeyBinding(JojoMod.MOD_ID + ".key.stand_mode", GLFW_KEY_K, HUD_CATEGORY));
         ClientRegistry.registerKeyBinding(editHotbars = new KeyBinding(JojoMod.MOD_ID + ".key.edit_hud", GLFW_KEY_BACKSLASH, HUD_CATEGORY));
-        ClientRegistry.registerKeyBinding(actionQuickAccess = new KeyBinding(JojoMod.MOD_ID + ".key.quick_access", InputMappings.Type.MOUSE, GLFW_MOUSE_BUTTON_MIDDLE, HUD_CATEGORY));
+        ClientRegistry.registerKeyBinding(actionQuickAccess = new KeyBinding(JojoMod.MOD_ID + ".key.quick_access", QuickAccessKeyConflictContext.INSTANCE, InputMappings.Type.MOUSE, GLFW_MOUSE_BUTTON_MIDDLE, HUD_CATEGORY));
         
         ClientRegistry.registerKeyBinding(attackHotbar = new KeyBinding(JojoMod.MOD_ID + ".key.attack_hotbar", GLFW_KEY_V, HUD_CATEGORY));
         ClientRegistry.registerKeyBinding(abilityHotbar = new KeyBinding(JojoMod.MOD_ID + ".key.ability_hotbar", GLFW_KEY_B, HUD_CATEGORY));
@@ -244,9 +250,20 @@ public class InputHandler {
                 if (scrollAbility.consumeClick()) {
                     actionsOverlay.scrollAction(ActionType.ABILITY, mc.player.isShiftKeyDown());
                 }
-
-                while (actionQuickAccess.consumeClick()) {
-                    handleMouseClickPowerHud(null, ActionKey.QUICK_ACCESS);
+                
+                if (actionQuickAccess.isDown() && quickAccessMmbDelay <= 0
+                        && !mc.player.isSpectator() && !disableHotbars.isDown()) {
+                    HudClickResult result = handleMouseClickPowerHud(ActionKey.QUICK_ACCESS);
+                    if (result.vanillaInput == HudClickResult.Behavior.CANCEL) {
+                        KeyBinding keybinding = keyBindingMap.lookupActive(actionQuickAccess.getKey());
+                        if (keybinding != null) {
+                            while (keybinding.consumeClick());
+                        }
+                    }
+                    if (result.handSwing == HudClickResult.Behavior.FORCE) {
+                        mc.player.swing(Hand.MAIN_HAND);
+                    }
+                    quickAccessMmbDelay = 4;
                 }
             }
             
@@ -257,6 +274,9 @@ public class InputHandler {
             
             if (leftClickBlockDelay > 0) {
                 leftClickBlockDelay--;
+            }
+            if (quickAccessMmbDelay > 0) {
+                quickAccessMmbDelay--;
             }
             
             if (standMode.consumeClick()) {
@@ -306,6 +326,9 @@ public class InputHandler {
             if (!mc.options.keyAttack.isDown()) {
                 leftClickBlockDelay = 0;
             }
+            if (!actionQuickAccess.isDown()) {
+                quickAccessMmbDelay = 0;
+            }
             
             checkHeldActionAndTarget(standPower);
             checkHeldActionAndTarget(nonStandPower);
@@ -324,7 +347,7 @@ public class InputHandler {
     
     private final Map<IPower<?, ?>, ActionKey> heldKeys = new HashMap<>();
     
-    private enum ActionKey {
+    public enum ActionKey {
         ATTACK(ActionType.ATTACK) {
             @Override
             protected KeyBinding getKey(Minecraft mc, InputHandler modInput) { return mc.options.keyAttack; }
@@ -347,7 +370,7 @@ public class InputHandler {
         protected abstract KeyBinding getKey(Minecraft mc, InputHandler modInput);
         
         @Nullable
-        private ActionType getHotbar() {
+        public ActionType getHotbar() {
             return hotbar;
         }
     }
@@ -408,27 +431,28 @@ public class InputHandler {
             return;
         }
         
-        handleMouseClickPowerHud(event, key);
+        HudClickResult clickResult = handleMouseClickPowerHud(key);
+        if (clickResult.vanillaInput == HudClickResult.Behavior.CANCEL) {
+            event.setCanceled(true);
+        }
+        if (clickResult.handSwing == HudClickResult.Behavior.CANCEL) {
+            event.setSwingHand(false);
+        }
     }
 
-    private void handleMouseClickPowerHud(@Nullable ClickInputEvent event, ActionKey key) {
+    private <P extends IPower<P, ?>> HudClickResult handleMouseClickPowerHud(ActionKey key) {
+        HudClickResult result = new HudClickResult();
         if (mc.player.isSpectator()) {
-            return;
-        }
-        
-        if (key == ActionKey.ATTACK && leftClickBlockDelay > 0) {
-            event.setSwingHand(false);
-            event.setCanceled(true);
-            return;
+            return result;
         }
 
-        IPower<?, ?> power = actionsOverlay.getCurrentPower();
+        P power = (P) actionsOverlay.getCurrentPower();
 
         ActionType actionType = key.getHotbar();
         boolean actionClick = false;
         if (power != null) {
             if (key == ActionKey.QUICK_ACCESS) {
-                actionClick = power.getActionsLayout().getQuickAccessAction() != null;
+                actionClick = actionsOverlay.isQuickAccessActive();
             }
             else {
                 actionClick = !actionsOverlay.noActionSelected(actionType);
@@ -436,66 +460,80 @@ public class InputHandler {
         }
         
         if (!actionClick) {
-            if (handleStun(event)) {
-                event.setSwingHand(false);
+            // cancel vanilla click
+            if (shouldVanillaInputStun()) {
+                result.cancelVanillaInput();
             }
-            return;
+            return result;
+        }
+        
+        if (key == ActionKey.ATTACK && leftClickBlockDelay > 0) {
+            result.cancelHandSwing();
+            result.cancelVanillaInput();
+            return result;
         }
         
         if (power != null) {
-            onHudClick(power, event, key);
+            boolean leftClickedBlock = key == ActionKey.ATTACK && mc.hitResult.getType() == Type.BLOCK;
+            boolean shift = mc.player.isShiftKeyDown();
+            
+            Pair<Action<P>, Boolean> click = null;
+            if (key == ActionKey.QUICK_ACCESS) {
+                click = actionsOverlay.onQuickAccessClick(power, shift);
+            }
+            else if (!(leftClickedBlock && leftClickBlockDelay > 0)) {
+                click = actionsOverlay.onClick(power, key.getHotbar(), shift);
+            }
+            if (click != null && click.getRight()) {
+                Action<P> action = click.getLeft();
+                if (action != null) {
+                    result.handSwing = action.swingHand() ? HudClickResult.Behavior.FORCE : HudClickResult.Behavior.CANCEL;
+                    if (action.cancelsVanillaClick()) result.cancelVanillaInput();
+                }
+                if (action.getHoldDurationMax(power) > 0) {
+                    heldKeys.put(power, key);
+                }
+                if (leftClickedBlock && leftClickBlockDelay <= 0) {
+                    leftClickBlockDelay = 4;
+                }
+            }
+            else {
+                if (heldKeys.get(power) == key) {
+                    result.cancelHandSwing();
+                    result.cancelVanillaInput();
+                }
+                else if (shouldVanillaInputStun()) {
+                    result.cancelHandSwing();
+                }
+            }
         }
-    }
-    
-    private <P extends IPower<P, ?>> void onHudClick(IPower<?, ?> p, @Nullable ClickInputEvent event, ActionKey key) {
-        P power = (P) p;
-        boolean leftClickedBlock = key == ActionKey.ATTACK && mc.hitResult.getType() == Type.BLOCK;
-        boolean shift = mc.player.isShiftKeyDown();
         
-        Pair<Action<P>, Boolean> click = null;
-        if (key == ActionKey.QUICK_ACCESS) {
-            click = actionsOverlay.onQuickAccessClick(power, shift);
+        return result;
+    }
+    
+    private static class HudClickResult {
+        private Behavior vanillaInput = Behavior.PASS;
+        private Behavior handSwing = Behavior.PASS;
+        
+        public void cancelVanillaInput() {
+            vanillaInput = Behavior.CANCEL;
         }
-        else if (!(leftClickedBlock && leftClickBlockDelay > 0)) {
-            click = actionsOverlay.onClick(power, key.getHotbar(), shift);
+        
+        public void cancelHandSwing() {
+            handSwing = Behavior.CANCEL;
         }
-        if (click != null && click.getRight()) {
-            Action<P> action = click.getLeft();
-            if (action != null) {
-                if (event != null) {
-                    event.setSwingHand(action.swingHand());
-                    event.setCanceled(action.cancelsVanillaClick());
-                }
-                else if (action.swingHand()) {
-                    mc.player.swing(Hand.MAIN_HAND);
-                }
-            }
-            if (action.getHoldDurationMax(power) > 0) {
-                heldKeys.put(power, key);
-            }
-            if (leftClickedBlock && leftClickBlockDelay <= 0) {
-                leftClickBlockDelay = 4;
-            }
-        }
-        else if (event != null) {
-            if (heldKeys.get(power) == key) {
-                event.setSwingHand(false);
-                event.setCanceled(true);
-            }
-            else if (handleStun(event)) {
-                event.setSwingHand(false);
-            }
+        
+        public enum Behavior {
+            CANCEL,
+            PASS,
+            FORCE
         }
     }
     
-    private boolean handleStun(InputEvent event) {
-        if (event != null && event.isCancelable() && (ModEffects.isStunned(mc.player) || !mc.player.canUpdate())) {
-            event.setCanceled(true);
-            return true;
-        }
-        return false;
+    private boolean shouldVanillaInputStun() {
+        return ModEffects.isStunned(mc.player) || !mc.player.canUpdate();
     }
-
+    
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onClickInput(ClickInputEvent event) {
         if (event.isAttack() && mc.hitResult.getType() == Type.ENTITY) {

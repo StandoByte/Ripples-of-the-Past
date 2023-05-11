@@ -32,7 +32,6 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
-import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.stand.IStandPower;
 import com.github.standobyte.jojo.power.stand.StandUtil;
@@ -590,7 +589,7 @@ public class ClientEventHandler {
                     }
                     else {
                         ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-                        if ((hud.getSelectedAction(ActionType.ATTACK) == ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get())
+                        if ((hud.isActionSelectedAndEnabled(ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get()))
                                 && livingEntity.getMainHandItem().isEmpty() && livingEntity.getOffhandItem().isEmpty()) {
                             FirstPersonRenderer renderer = mc.getItemInHandRenderer();
                             ClientPlayerEntity player = mc.player;
@@ -656,7 +655,7 @@ public class ClientEventHandler {
     @SubscribeEvent
     public void renderBlocksOverlay(RenderWorldLastEvent event) {
         ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-        if (hud.getSelectedActionIfEnabled(ActionType.ABILITY) == ModStandsInit.CRAZY_DIAMOND_RESTORE_TERRAIN.get()) {
+        if (hud.isActionSelectedAndEnabled(ModStandsInit.CRAZY_DIAMOND_RESTORE_TERRAIN.get())) {
             MatrixStack matrixStack = event.getMatrixStack();
             IStandPower stand = ActionsOverlayGui.getInstance().standUiMode.getPower();
             Entity entity = CrazyDiamondRestoreTerrain.restorationCenterEntity(mc.player, stand);

@@ -7,7 +7,7 @@ import net.minecraft.util.text.ITextComponent;
 public class ActionConditionResult {
     private final boolean positive;
     private final boolean stopHeldAction;
-    private final boolean highlight;
+    private final boolean isQueued;
     private final ITextComponent warning;
     
     public static final ActionConditionResult POSITIVE = new ActionConditionResult(true, false, false, null);
@@ -27,10 +27,10 @@ public class ActionConditionResult {
         return isPositive ? POSITIVE : NEGATIVE;
     }
     
-    private ActionConditionResult(boolean positive, boolean stopHeldAction, boolean highlight, ITextComponent warning) {
+    private ActionConditionResult(boolean positive, boolean stopHeldAction, boolean isQueued, ITextComponent warning) {
         this.positive = positive;
         this.stopHeldAction = stopHeldAction;
-        this.highlight = highlight;
+        this.isQueued = isQueued;
         this.warning = warning;
     }
     
@@ -42,8 +42,8 @@ public class ActionConditionResult {
         return !isPositive() && stopHeldAction;
     }
     
-    public boolean isHighlighted() {
-        return highlight;
+    public boolean isQueued() {
+        return isQueued;
     }
     
     @Nullable

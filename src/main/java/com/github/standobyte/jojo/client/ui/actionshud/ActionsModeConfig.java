@@ -1,13 +1,18 @@
 package com.github.standobyte.jojo.client.ui.actionshud;
 
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.client.InputHandler.ActionKey;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
+
+import net.minecraft.util.Util;
 
 public class ActionsModeConfig<P extends IPower<P, ?>> {
     final PowerClassification powerClassification;
@@ -18,8 +23,11 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
     private int selectedAbility = 0;
     int costOverlayTick = 0;
     
-    private final SelectedTargetIcon attackTargetIcon = new SelectedTargetIcon();
-    private final SelectedTargetIcon abilityTargetIcon = new SelectedTargetIcon();
+    private final Map<ActionKey, SelectedTargetIcon> targetIcons = Util.make(new EnumMap<>(ActionKey.class), map -> {
+        for (ActionKey key : ActionKey.values()) {
+            map.put(key, new SelectedTargetIcon());
+        }
+    });
     
     ActionsModeConfig(PowerClassification powerClassification) {
         this.powerClassification = powerClassification;
@@ -90,14 +98,8 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
         return costOverlayTick;
     }
     
-    SelectedTargetIcon getTargetIcon(ActionType hotbar) {
-        switch (hotbar) {
-        case ATTACK:
-            return attackTargetIcon;
-        case ABILITY:
-            return abilityTargetIcon;
-        }
-        return null;
+    SelectedTargetIcon getTargetIcon(ActionKey actionKey) {
+        return targetIcons.get(actionKey);
     }
     
     static class SelectedTargetIcon {
