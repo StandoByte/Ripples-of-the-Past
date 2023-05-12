@@ -18,15 +18,15 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Util;
 
 public class ActionsLayout<P extends IPower<P, ?>> {
-    private Map<ActionType, ActionHotbarData<P>> actions = Util.make(new EnumMap<>(ActionType.class), map -> {
+    private Map<ActionType, ActionHotbarLayout<P>> actions = Util.make(new EnumMap<>(ActionType.class), map -> {
         for (ActionType actionType : ActionType.values()) {
-            map.put(actionType, new ActionHotbarData<>());
+            map.put(actionType, new ActionHotbarLayout<>());
         }
     });
     private Action<P> mmbActionStarting;
     private Action<P> mmbActionCurrent;
 
-    public ActionHotbarData<P> getHotbar(ActionType actionType) {
+    public ActionHotbarLayout<P> getHotbar(ActionType actionType) {
         return actions.get(actionType);
     }
 
@@ -48,7 +48,7 @@ public class ActionsLayout<P extends IPower<P, ?>> {
 
     void onPowerSet(IPowerType<P, ?> type) {
         for (ActionType actionType : ActionType.values()) {
-            actions.get(actionType).onNewPowerType(type != null ? 
+            actions.get(actionType).initActions(type != null ? 
                     type.getDefaultActions(actionType) : null);
         }
         mmbActionStarting = type != null ? type.getDefaultQuickAccess() : null;
@@ -58,15 +58,18 @@ public class ActionsLayout<P extends IPower<P, ?>> {
     // FIXME !!! (mmb action) keep
     void keepLayoutOnClone(P oldPower) {
         for (ActionType type : ActionType.values()) {
-            actions.get(type).keepLayout(oldPower.getActions(type));
+            actions.get(type).keepLayoutOnClone(oldPower.getActions(type));
         }
     }
 
     // FIXME !!! (mmb action) sync
     void syncWithUser(ServerPlayerEntity player, PowerClassification powerClassification) {
-        for (ActionType hotbar : ActionType.values()) {
-            PacketManager.sendToClient(new ActionsFullLayoutPacket(powerClassification, 
-                    hotbar, actions.get(hotbar).getLayout()), player);
+        for (ActionType type : ActionType.values()) {
+            ActionHotbarLayout<P> hotbar = actions.get(type);
+            if (hotbar.wasEdited()) {
+                PacketManager.sendToClient(new ActionsFullLayoutPacket(
+                        powerClassification, type, hotbar), player);
+            }
         }
     }
     
@@ -75,8 +78,8 @@ public class ActionsLayout<P extends IPower<P, ?>> {
     // FIXME !!! (mmb action) save
     CompoundNBT toNBT() {
         CompoundNBT layoutNBT = new CompoundNBT();
-        actions.get(ActionType.ATTACK).layoutNBT().ifPresent(hotbarNBT -> layoutNBT.put("AttacksLayout", hotbarNBT));
-        actions.get(ActionType.ABILITY).layoutNBT().ifPresent(hotbarNBT -> layoutNBT.put("AbilitiesLayout", hotbarNBT));
+        actions.get(ActionType.ATTACK).toNBT().ifPresent(hotbarNBT -> layoutNBT.put("AttacksLayout", hotbarNBT));
+        actions.get(ActionType.ABILITY).toNBT().ifPresent(hotbarNBT -> layoutNBT.put("AbilitiesLayout", hotbarNBT));
         return layoutNBT;
     }
 
@@ -88,7 +91,7 @@ public class ActionsLayout<P extends IPower<P, ?>> {
     
     private void actionLayoutFromNBT(CompoundNBT nbt, String key, ActionType hotbar) {
         if (nbt.contains(key, MCUtil.getNbtId(ListNBT.class))) {
-            actions.get(hotbar).updateLayoutFromNBT(nbt.getList(key, MCUtil.getNbtId(CompoundNBT.class)));
+            actions.get(hotbar).fromNBT(nbt.getList(key, MCUtil.getNbtId(CompoundNBT.class)));
         }
         else {
             actions.get(hotbar).resetLayout();

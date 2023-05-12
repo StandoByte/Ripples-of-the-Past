@@ -1,10 +1,10 @@
 package com.github.standobyte.jojo.network.packets.fromclient;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
-import com.github.standobyte.jojo.power.ActionHotbarData;
-import com.github.standobyte.jojo.power.ActionHotbarData.ActionHotbarLayout;
+import com.github.standobyte.jojo.power.ActionHotbarLayout;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
@@ -17,39 +17,41 @@ public class ClLayoutHotbarPacket {
     private final PowerClassification classification;
     private final ActionType hotbar;
     private final boolean reset;
-    private final ActionHotbarLayout<?> layout;
+    private final ActionHotbarLayout<?> layoutIn;
+    private final List<ActionHotbarLayout.ActionSwitch<?>> layoutOut;
     
     public static ClLayoutHotbarPacket resetLayout(PowerClassification classification) {
-        return new ClLayoutHotbarPacket(classification, null, true, null);
+        return new ClLayoutHotbarPacket(classification, null, true, null, null);
     }
     
     public static ClLayoutHotbarPacket withLayout(PowerClassification classification, 
             ActionType hotbar, ActionHotbarLayout<?> layout) {
-        return new ClLayoutHotbarPacket(classification, hotbar, false, layout);
+        return new ClLayoutHotbarPacket(classification, hotbar, false, layout, null);
     }
 
-    private ClLayoutHotbarPacket(PowerClassification classification, 
-            ActionType hotbar, boolean reset, ActionHotbarLayout<?> layout) {
+    private ClLayoutHotbarPacket(PowerClassification classification, ActionType hotbar, boolean reset, 
+            ActionHotbarLayout<?> layoutFromCl, List<ActionHotbarLayout.ActionSwitch<?>> layoutOnSrv) {
         this.classification = classification;
         this.hotbar = hotbar;
         this.reset = reset;
-        this.layout = layout;
+        this.layoutIn = layoutFromCl;
+        this.layoutOut = layoutOnSrv;
     }
     
     
     
     public static class Handler implements IModPacketHandler<ClLayoutHotbarPacket> {
-    
+        
         @Override
         public void encode(ClLayoutHotbarPacket msg, PacketBuffer buf) {
             buf.writeBoolean(msg.reset);
             buf.writeEnum(msg.classification);
             if (!msg.reset) {
                 buf.writeEnum(msg.hotbar);
-                msg.layout.toBuf(buf);
+                msg.layoutIn.toBuf(buf);
             }
         }
-
+        
         @Override
         public ClLayoutHotbarPacket decode(PacketBuffer buf) {
             boolean reset = buf.readBoolean();
@@ -57,11 +59,12 @@ public class ClLayoutHotbarPacket {
                 return resetLayout(buf.readEnum(PowerClassification.class));
             }
             else {
-                return withLayout(buf.readEnum(PowerClassification.class), buf.readEnum(ActionType.class), 
-                        ActionHotbarLayout.fromBuf(buf));
+                return new ClLayoutHotbarPacket(
+                        buf.readEnum(PowerClassification.class), buf.readEnum(ActionType.class), false, 
+                        null, ActionHotbarLayout.fromBuf(buf));
             }
         }
-
+        
         @Override
         public void handle(ClLayoutHotbarPacket msg, Supplier<NetworkEvent.Context> ctx) {
             ServerPlayerEntity player = ctx.get().getSender();
@@ -70,16 +73,11 @@ public class ClLayoutHotbarPacket {
                     power.getActionsLayout().resetLayout();
                 }
                 else {
-                    // FIXME (layout editing) more guarding
-                    setLayout(power.getActions(msg.hotbar), msg.layout);
+                    power.getActions(msg.hotbar).setFromPacket(msg.layoutOut, false);
                 }
             });
         }
         
-        private <P extends IPower<P, ?>> void setLayout(ActionHotbarData<P> actions, ActionHotbarLayout<?> layout) {
-            actions.setLayout((ActionHotbarLayout<P>) layout);
-        }
-
         @Override
         public Class<ClLayoutHotbarPacket> getPacketClass() {
             return ClLayoutHotbarPacket.class;

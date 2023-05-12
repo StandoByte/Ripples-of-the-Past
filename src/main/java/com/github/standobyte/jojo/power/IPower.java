@@ -43,7 +43,7 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     }
     
     ActionsLayout<P> getActionsLayout();
-    default ActionHotbarData<P> getActions(ActionType hotbar) {
+    default ActionHotbarLayout<P> getActions(ActionType hotbar) {
         return getActionsLayout().getHotbar(hotbar);
     }
     

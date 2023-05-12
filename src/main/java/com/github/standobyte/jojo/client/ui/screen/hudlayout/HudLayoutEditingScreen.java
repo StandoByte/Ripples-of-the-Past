@@ -19,8 +19,8 @@ import com.github.standobyte.jojo.client.ui.screen.CustomButton;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClLayoutHotbarPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClLayoutQuickAccessPacket;
-import com.github.standobyte.jojo.power.ActionHotbarData;
-import com.github.standobyte.jojo.power.ActionHotbarData.ActionSwitch;
+import com.github.standobyte.jojo.power.ActionHotbarLayout;
+import com.github.standobyte.jojo.power.ActionHotbarLayout.ActionSwitch;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
@@ -38,7 +38,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 
 /* 
- * FIXME (layout editing) !! close the window when the player's power being changed/replaced
+ * FIXME (layout editing) !!!! close the window when the player's power being changed/replaced
  */
 // TODO saving layout variants
 @SuppressWarnings("deprecation")
@@ -346,8 +346,9 @@ public class HudLayoutEditingScreen extends Screen {
         if (draggedAction.isPresent()) {
             clickedSlot.ifPresent(clicked -> {
                 if (draggedAction.get().hotbar == clicked.hotbar) {
-                    selectedPower.getActions(clicked.hotbar).editLayout(
-                            layout -> layout.swapActions(draggedAction.get().actionSwitch, clicked.actionSwitch));
+                    selectedPower.getActions(clicked.hotbar).swapActionsOrder(
+                            draggedAction.get().actionSwitch.getAction(), 
+                            clicked.actionSwitch.getAction());
                     markLayoutEdited(clicked.hotbar);
                 }
             });
@@ -373,7 +374,7 @@ public class HudLayoutEditingScreen extends Screen {
                     return true;
                 case RIGHT:
                     ActionSwitch<?> slot = clickedSlot.get().actionSwitch;
-                    selectedPower.getActions(hotbar).editLayout(layout -> slot.setIsEnabled(!slot.isEnabled()));                    
+                    selectedPower.getActions(hotbar).setIsEnabled(slot.getAction(), !slot.isEnabled());
                     markLayoutEdited(hotbar);
                     
                     if (slot.isEnabled() && selectedPower == ActionsOverlayGui.getInstance().getCurrentPower()
@@ -416,10 +417,11 @@ public class HudLayoutEditingScreen extends Screen {
                 Optional<ActionData<?>> toMove = draggedAction;
                 if (!toMove.isPresent()) toMove = hoveredAction;
                 if (toMove.map(action -> {
-                    ActionHotbarData<?> actionsHotbar = selectedPower.getActions(action.hotbar);
+                    ActionHotbarLayout<?> actionsHotbar = selectedPower.getActions(action.hotbar);
                     if (numKey < actionsHotbar.getLayoutView().size()) {
-                        actionsHotbar.editLayout(
-                                layout -> layout.swapActions(action.actionSwitch, actionsHotbar.getLayoutView().get(numKey)));
+                        actionsHotbar.swapActionsOrder(
+                                action.actionSwitch.getAction(), 
+                                actionsHotbar.getLayoutView().get(numKey).getAction());
                         markLayoutEdited(action.hotbar);
                         return true;
                     }
@@ -461,14 +463,13 @@ public class HudLayoutEditingScreen extends Screen {
         return super.keyReleased(key, scanCode, modifiers);
     }
 
-    // FIXME (layout editing) protection from client packet data
     @Override
     public void onClose() {
         super.onClose();
         editedLayouts.forEach((power, hotbars) -> {
             hotbars.forEach(hotbar -> {
                 PacketManager.sendToServer(ClLayoutHotbarPacket.withLayout(power, hotbar, 
-                        IPower.getPlayerPower(minecraft.player, power).getActions(hotbar).getLayout()));
+                        IPower.getPlayerPower(minecraft.player, power).getActions(hotbar)));
             });
         });
         changedQuickAccessSlots.forEach((power, action) -> {
