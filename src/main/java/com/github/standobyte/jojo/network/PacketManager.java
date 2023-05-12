@@ -16,8 +16,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClHamonResetSkillsB
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonWindowOpenedPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHasInputPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHeldActionTargetPacket;
-import com.github.standobyte.jojo.network.packets.fromclient.ClLayoutHotbarPacket;
-import com.github.standobyte.jojo.network.packets.fromclient.ClLayoutQuickAccessPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClHotbarLayoutPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnLeapPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnStandDashPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRPSGameInputPacket;
@@ -122,8 +121,7 @@ public class PacketManager {
         
         registerMessage(channel, new ClHasInputPacket.Handler(),                     Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClDoubleShiftPressPacket.Handler(),             Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        registerMessage(channel, new ClLayoutHotbarPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        registerMessage(channel, new ClLayoutQuickAccessPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        registerMessage(channel, new ClHotbarLayoutPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClToggleStandSummonPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClToggleStandManualControlPacket.Handler(),     Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClClickActionPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_SERVER));

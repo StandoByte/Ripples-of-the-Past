@@ -557,7 +557,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
     
     protected void keepActionsLayout(P oldPower) {
-        actionsLayout.keepLayoutOnClone(oldPower);
+        actionsLayout.keepLayoutOnClone(oldPower.getActionsLayout());
     }
     
     @Override

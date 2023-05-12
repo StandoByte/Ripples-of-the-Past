@@ -17,8 +17,7 @@ import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.CustomButton;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromclient.ClLayoutHotbarPacket;
-import com.github.standobyte.jojo.network.packets.fromclient.ClLayoutQuickAccessPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClHotbarLayoutPacket;
 import com.github.standobyte.jojo.power.ActionHotbarLayout;
 import com.github.standobyte.jojo.power.ActionHotbarLayout.ActionSwitch;
 import com.github.standobyte.jojo.power.IPower;
@@ -92,7 +91,7 @@ public class HudLayoutEditingScreen extends Screen {
         
         addButton(new CustomButton(getWindowX() + WINDOW_WIDTH - 30, getWindowY() + WINDOW_HEIGHT - 30, 24, 24, 
                 button -> {
-                    PacketManager.sendToServer(ClLayoutHotbarPacket.resetLayout(selectedPower.getPowerClassification()));
+                    PacketManager.sendToServer(ClHotbarLayoutPacket.resetLayout(selectedPower.getPowerClassification()));
                     selectedPower.getActionsLayout().resetLayout();
                     editedLayouts.put(selectedPower.getPowerClassification(), EnumSet.noneOf(ActionType.class));
                 }, 
@@ -468,12 +467,12 @@ public class HudLayoutEditingScreen extends Screen {
         super.onClose();
         editedLayouts.forEach((power, hotbars) -> {
             hotbars.forEach(hotbar -> {
-                PacketManager.sendToServer(ClLayoutHotbarPacket.withLayout(power, hotbar, 
+                PacketManager.sendToServer(ClHotbarLayoutPacket.withLayout(power, hotbar, 
                         IPower.getPlayerPower(minecraft.player, power).getActions(hotbar)));
             });
         });
         changedQuickAccessSlots.forEach((power, action) -> {
-            PacketManager.sendToServer(new ClLayoutQuickAccessPacket(power, action));
+            PacketManager.sendToServer(ClHotbarLayoutPacket.quickAccessAction(power, action));
         });
         ActionsOverlayGui.getInstance().revealActionNames();
     }
