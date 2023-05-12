@@ -35,8 +35,8 @@ public class BrokenChunkBlocksPacket {
 
         @Override
         public void encode(BrokenChunkBlocksPacket msg, PacketBuffer buf) {
-            NetworkUtil.writeCollection(buf, msg.blocks, (buffer, block) -> {
-                buffer.writeBlockPos(block.pos);
+            NetworkUtil.writeCollection(buf, msg.blocks, block -> {
+                buf.writeBlockPos(block.pos);
                 buf.writeVarInt(Block.getId(block.state));
             }, true);
             buf.writeBoolean(msg.reset);
@@ -44,8 +44,8 @@ public class BrokenChunkBlocksPacket {
 
         @Override
         public BrokenChunkBlocksPacket decode(PacketBuffer buf) {
-            return new BrokenChunkBlocksPacket(NetworkUtil.readCollection(buf, buffer -> 
-            PrevBlockInfo.clientInstance(buffer.readBlockPos(), Block.stateById(buf.readVarInt()))), 
+            return new BrokenChunkBlocksPacket(NetworkUtil.readCollection(buf, () -> 
+            PrevBlockInfo.clientInstance(buf.readBlockPos(), Block.stateById(buf.readVarInt()))), 
                     buf.readBoolean());
         }
 

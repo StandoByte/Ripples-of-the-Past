@@ -52,7 +52,7 @@ public class ActionsFullLayoutPacket {
         public void encode(ActionsFullLayoutPacket msg, PacketBuffer buf) {
             buf.writeEnum(msg.classification);
             
-            NetworkUtil.writeOptional(buf, msg.quickAccessAction, (buffer, action) -> buffer.writeRegistryId(action));
+            NetworkUtil.writeOptional(buf, msg.quickAccessAction, action -> buf.writeRegistryId(action));
             if (msg.quickAccessAction.isPresent()) return;
             
             buf.writeEnum(msg.hotbar);
@@ -63,7 +63,7 @@ public class ActionsFullLayoutPacket {
         public ActionsFullLayoutPacket decode(PacketBuffer buf) {
             PowerClassification power = buf.readEnum(PowerClassification.class);
             
-            Optional<Action<?>> quickAccess = NetworkUtil.readOptional(buf, buffer -> buffer.readRegistryIdSafe(Action.class));
+            Optional<Action<?>> quickAccess = NetworkUtil.readOptional(buf, () -> buf.readRegistryIdSafe(Action.class));
             if (quickAccess.isPresent()) {
                 return quickAccessAction(power, quickAccess.get());
             }

@@ -24,17 +24,17 @@ public class ModDataSerializers {
 
         @Override
         public void write(PacketBuffer buf, Optional<Vector3d> value) {
-            NetworkUtil.writeOptional(buf, value, (buffer, vector) -> {
-                buffer.writeDouble(vector.x);
-                buffer.writeDouble(vector.y);
-                buffer.writeDouble(vector.z);
+            NetworkUtil.writeOptional(buf, value, vector -> {
+                buf.writeDouble(vector.x);
+                buf.writeDouble(vector.y);
+                buf.writeDouble(vector.z);
             });
         }
 
         @Override
         public Optional<Vector3d> read(PacketBuffer buf) {
-            return NetworkUtil.readOptional(buf, buffer -> {
-                Vector3d vec = new Vector3d(buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
+            return NetworkUtil.readOptional(buf, () -> {
+                Vector3d vec = new Vector3d(buf.readDouble(), buf.readDouble(), buf.readDouble());
                 return vec;
             });
         }

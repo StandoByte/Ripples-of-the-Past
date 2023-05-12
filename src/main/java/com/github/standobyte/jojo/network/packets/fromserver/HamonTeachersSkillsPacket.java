@@ -32,14 +32,14 @@ public class HamonTeachersSkillsPacket {
         public void encode(HamonTeachersSkillsPacket msg, PacketBuffer buf) {
             buf.writeBoolean(msg.teacherNearby);
             if (msg.teacherNearby) {
-                NetworkUtil.writeCollection(buf, msg.skills, (buffer, skill) -> buffer.writeRegistryId(skill), false);
+                NetworkUtil.writeCollection(buf, msg.skills, skill -> buf.writeRegistryId(skill), false);
             }
         }
 
         @Override
         public HamonTeachersSkillsPacket decode(PacketBuffer buf) {
             return buf.readBoolean() ? new HamonTeachersSkillsPacket(NetworkUtil.readCollection(buf, 
-                    buffer -> buffer.readRegistryIdSafe(AbstractHamonSkill.class))) : new HamonTeachersSkillsPacket();
+                    () -> buf.readRegistryIdSafe(AbstractHamonSkill.class))) : new HamonTeachersSkillsPacket();
         }
 
         @Override

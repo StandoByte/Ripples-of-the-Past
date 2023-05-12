@@ -36,14 +36,14 @@ public class TrHamonCharacterTechniquePacket {
         @Override
         public void encode(TrHamonCharacterTechniquePacket msg, PacketBuffer buf) {
             buf.writeInt(msg.entityId);
-            NetworkUtil.writeOptional(buf, msg.technique, (buffer, technique) -> buffer.writeRegistryId(technique));
+            NetworkUtil.writeOptional(buf, msg.technique, technique -> buf.writeRegistryId(technique));
         }
 
         @Override
         public TrHamonCharacterTechniquePacket decode(PacketBuffer buf) {
             return new TrHamonCharacterTechniquePacket(
                     buf.readInt(), 
-                    NetworkUtil.readOptional(buf, buffer -> buffer.readRegistryIdSafe(CharacterHamonTechnique.class)));
+                    NetworkUtil.readOptional(buf, () -> buf.readRegistryIdSafe(CharacterHamonTechnique.class)));
         }
 
         @Override

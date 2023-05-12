@@ -70,7 +70,7 @@ public class SpawnParticlePacket {
             buf.writeFloat(msg.maxSpeed);
             buf.writeInt(msg.count);
             msg.particle.writeToNetwork(buf);
-            NetworkUtil.writeOptionally(buf, msg.context, (buffer, context) -> buffer.writeEnum(context));
+            NetworkUtil.writeOptionally(buf, msg.context, context -> buf.writeEnum(context));
         }
         
         @Override
@@ -90,7 +90,7 @@ public class SpawnParticlePacket {
             float maxSpeed = buf.readFloat();
             int count = buf.readInt();
             IParticleData particle = readParticle(buf, particleType);
-            SpecialContext context = NetworkUtil.readOptional(buf, buffer -> buffer.readEnum(SpecialContext.class)).orElse(null);
+            SpecialContext context = NetworkUtil.readOptional(buf, () -> buf.readEnum(SpecialContext.class)).orElse(null);
             
             return new SpawnParticlePacket(particle, overrideLimiter, x, y, z, xDist, yDist, zDist, maxSpeed, count, context);
         }

@@ -57,14 +57,14 @@ public class CrazyDiamondMisshapingPunch extends StandEntityHeavyAttack {
     
     @Override
     public void taskWriteAdditional(StandEntityTask task, PacketBuffer buffer) {
-        NetworkUtil.writeOptionally(buffer, task.getAdditionalData().peekOrNull(TargetHitPart.class), (buf, part) -> {
-            buf.writeEnum(part);
+        NetworkUtil.writeOptionally(buffer, task.getAdditionalData().peekOrNull(TargetHitPart.class), part -> {
+            buffer.writeEnum(part);
         });
     }
 
     @Override
     public void taskReadAdditional(StandEntityTask task, PacketBuffer buffer) {
-        NetworkUtil.readOptional(buffer, buf -> buf.readEnum(TargetHitPart.class)).ifPresent(part -> {
+        NetworkUtil.readOptional(buffer, () -> buffer.readEnum(TargetHitPart.class)).ifPresent(part -> {
             task.getAdditionalData().push(TargetHitPart.class, part);
         });;
     }

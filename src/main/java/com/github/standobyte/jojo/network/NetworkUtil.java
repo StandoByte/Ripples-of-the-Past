@@ -7,8 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -166,23 +165,23 @@ public class NetworkUtil {
                 buf.readInt() / 8.0);
     }
     
-    public static <T> void writeOptionally(PacketBuffer buf, @Nullable T obj, BiConsumer<PacketBuffer, T> write) {
+    public static <T> void writeOptionally(PacketBuffer buf, @Nullable T obj, Consumer<T> write) {
         buf.writeBoolean(obj != null);
         if (obj != null) {
-            write.accept(buf, obj);
+            write.accept(obj);
         }
     }
     
-    public static <T> void writeOptional(PacketBuffer buf, @Nonnull Optional<T> objOptional, BiConsumer<PacketBuffer, T> write) {
+    public static <T> void writeOptional(PacketBuffer buf, @Nonnull Optional<T> objOptional, Consumer<T> write) {
         buf.writeBoolean(objOptional.isPresent());
-        objOptional.ifPresent(obj -> write.accept(buf, obj));
+        objOptional.ifPresent(obj -> write.accept(obj));
     }
     
-    public static <T> Optional<T> readOptional(PacketBuffer buf, Function<PacketBuffer, T> read) {
-        return buf.readBoolean() ? Optional.of(read.apply(buf)) : Optional.empty();
+    public static <T> Optional<T> readOptional(PacketBuffer buf, Supplier<T> read) {
+        return buf.readBoolean() ? Optional.of(read.get()) : Optional.empty();
     }
     
-    public static <T> int writeCollection(PacketBuffer buf, Collection<T> collection, BiConsumer<PacketBuffer, T> writeElement, 
+    public static <T> int writeCollection(PacketBuffer buf, Collection<T> collection, Consumer<T> writeElement, 
             boolean removeWrittenFromCollection) {
         int i = 0;
         int initialWriterIndex = buf.writerIndex();
@@ -194,7 +193,7 @@ public class NetworkUtil {
         while (iter.hasNext()) {
             if (buf.capacity() < maxElemSize) break;
             T element = iter.next();
-            writeElement.accept(buf, element);
+            writeElement.accept(element);
             i++;
             if (removeWrittenFromCollection) {
                 iter.remove();
@@ -208,18 +207,18 @@ public class NetworkUtil {
         return i;
     }
     
-    public static <T, C extends Collection<T>> C readCollection(Supplier<C> createCollection, PacketBuffer buf, Function<PacketBuffer, T> readElement) {
+    public static <T, C extends Collection<T>> C readCollection(Supplier<C> createCollection, PacketBuffer buf, Supplier<T> readElement) {
         C collection = createCollection.get();
         int size = buf.readInt();
         if (size > 0) {
             for (int i = 0; i < size; i++) {
-                collection.add(readElement.apply(buf));
+                collection.add(readElement.get());
             }
         }
         return collection;
     }
     
-    public static <T> List<T> readCollection(PacketBuffer buf, Function<PacketBuffer, T> readElement) {
+    public static <T> List<T> readCollection(PacketBuffer buf, Supplier<T> readElement) {
         return readCollection(ArrayList::new, buf, readElement);
     }
 }

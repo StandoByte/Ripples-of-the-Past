@@ -41,13 +41,13 @@ public class TrHamonParticlesPacket {
             buf.writeFloat(msg.intensity);
             buf.writeFloat(msg.soundVolumeMultiplier);
     
-            NetworkUtil.writeOptionally(buf, msg.particleType, (buffer, particle) -> writeParticle(particle, buffer));
+            NetworkUtil.writeOptionally(buf, msg.particleType, particle -> writeParticle(particle, buf));
         }
 
         @Override
         public TrHamonParticlesPacket decode(PacketBuffer buf) {
             return new TrHamonParticlesPacket(buf.readInt(), buf.readFloat(), buf.readFloat(), 
-                    NetworkUtil.readOptional(buf, buffer -> readParticle(buffer).orElse(ModParticles.HAMON_SPARK.get())).orElse(ModParticles.HAMON_SPARK.get()));
+                    NetworkUtil.readOptional(buf, () -> readParticle(buf).orElse(ModParticles.HAMON_SPARK.get())).orElse(ModParticles.HAMON_SPARK.get()));
         }
         
         private void writeParticle(IParticleData particleData, PacketBuffer buf) {

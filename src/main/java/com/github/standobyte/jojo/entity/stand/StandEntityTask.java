@@ -280,7 +280,7 @@ public class StandEntityTask {
                     task.offsetFromUserOverride.writeToBuf(buf);
                 }
                 
-                NetworkUtil.writeCollection(buf, task.taskModifiers, (buffer, action) -> buffer.writeRegistryId(action), false);
+                NetworkUtil.writeCollection(buf, task.taskModifiers, action -> buf.writeRegistryId(action), false);
                 
                 task.action.taskWriteAdditional(task, buf);
             }
@@ -310,7 +310,7 @@ public class StandEntityTask {
                 task.overrideOffsetFromUser(offset);
             }
             
-            NetworkUtil.readCollection(buf, buffer -> buffer.readRegistryIdSafe(Action.class)).forEach(modifier -> {
+            NetworkUtil.readCollection(buf, () -> buf.readRegistryIdSafe(Action.class)).forEach(modifier -> {
                 if (modifier instanceof StandEntityActionModifier) {
                     task.taskModifiers.add((StandEntityActionModifier) modifier);
                 }

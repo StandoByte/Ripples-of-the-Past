@@ -34,14 +34,14 @@ public class TrPlayerContinuousActionPacket {
         @Override
         public void encode(TrPlayerContinuousActionPacket msg, PacketBuffer buf) {
             buf.writeInt(msg.entityId);
-            NetworkUtil.writeOptional(buf, msg.action, (buffer, action) -> buffer.writeRegistryId(action));
+            NetworkUtil.writeOptional(buf, msg.action, action -> buf.writeRegistryId(action));
         }
 
         @Override
         public TrPlayerContinuousActionPacket decode(PacketBuffer buf) {
             return new TrPlayerContinuousActionPacket(
                     buf.readInt(), 
-                    NetworkUtil.readOptional(buf, buffer -> buffer.readRegistryIdSafe(Action.class)));
+                    NetworkUtil.readOptional(buf, () -> buf.readRegistryIdSafe(Action.class)));
         }
 
         @Override

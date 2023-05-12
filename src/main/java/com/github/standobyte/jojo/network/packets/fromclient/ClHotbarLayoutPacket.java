@@ -62,7 +62,7 @@ public class ClHotbarLayoutPacket {
             buf.writeBoolean(msg.reset);
             if (msg.reset) return;
             
-            NetworkUtil.writeOptional(buf, msg.quickAccessAction, (buffer, action) -> buffer.writeRegistryId(action));
+            NetworkUtil.writeOptional(buf, msg.quickAccessAction, action -> buf.writeRegistryId(action));
             if (msg.quickAccessAction.isPresent()) return;
             
             buf.writeEnum(msg.hotbar);
@@ -78,7 +78,7 @@ public class ClHotbarLayoutPacket {
                 return resetLayout(power);
             }
             
-            Optional<Action<?>> quickAccess = NetworkUtil.readOptional(buf, buffer -> buffer.readRegistryIdSafe(Action.class));
+            Optional<Action<?>> quickAccess = NetworkUtil.readOptional(buf, () -> buf.readRegistryIdSafe(Action.class));
             if (quickAccess.isPresent()) {
                 return quickAccessAction(power, quickAccess.get());
             }

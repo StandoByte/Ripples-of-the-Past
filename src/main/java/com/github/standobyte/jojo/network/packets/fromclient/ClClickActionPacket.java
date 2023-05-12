@@ -112,7 +112,7 @@ public class ClClickActionPacket {
             else if (msg.targetEntityId > 0){
                 buf.writeInt(msg.targetEntityId);
             }
-            NetworkUtil.writeOptional(buf, msg.inputValidation, (buffer, action) -> buffer.writeRegistryId(action));
+            NetworkUtil.writeOptional(buf, msg.inputValidation, action -> buf.writeRegistryId(action));
         }
 
         @Override
@@ -133,7 +133,7 @@ public class ClClickActionPacket {
             default: // 0
                 break;
             }
-            packet.inputValidation = NetworkUtil.readOptional(buf, buffer -> buffer.readRegistryIdSafe(Action.class));
+            packet.inputValidation = NetworkUtil.readOptional(buf, () -> buf.readRegistryIdSafe(Action.class));
             return packet;
         }
 
