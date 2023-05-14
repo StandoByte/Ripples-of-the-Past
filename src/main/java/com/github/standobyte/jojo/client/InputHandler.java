@@ -405,11 +405,13 @@ public class InputHandler {
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void cancelClickInput(ClickInputEvent event) {
-        INonStandPower.getPlayerNonStandPower(mc.player).getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-            if (hamon.isMeditating()) {
-                event.setCanceled(true);
-            }
-        });
+        if (nonStandPower != null) {
+            nonStandPower.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
+                if (hamon.isMeditating()) {
+                    event.setCanceled(true);
+                }
+            });
+        }
     }
     
     @SubscribeEvent(priority = EventPriority.HIGH)

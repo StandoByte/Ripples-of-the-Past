@@ -39,7 +39,7 @@ public class SilverChariotTakeOffArmor extends StandEntityAction {
                 SilverChariotEntity chariot = (SilverChariotEntity) standEntity;
                 chariot.setArmor(!chariot.hasArmor());
                 chariot.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                    cap.addAfterimages(10, Integer.MAX_VALUE);
+                    cap.addAfterimages(10, -1);
                 });
                 chariot.playSound(ModSounds.SILVER_CHARIOT_ARMOR_OFF.get(), 1.0F, 1.0F);
             }

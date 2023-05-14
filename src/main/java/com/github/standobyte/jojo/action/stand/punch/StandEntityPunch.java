@@ -221,9 +221,7 @@ public class StandEntityPunch implements IPunch {
                 }
             }
             
-            if (target instanceof LivingEntity) {
-                stand.addComboMeter(addCombo, StandEntity.COMBO_TICKS);
-            }
+            stand.addComboMeter(addCombo, StandEntity.COMBO_TICKS);
         }
         return targetHit;
     }

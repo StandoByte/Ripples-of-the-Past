@@ -24,6 +24,11 @@ public class HamonOverdrive extends HamonAction {
     public HamonOverdrive(HamonAction.Builder builder) {
         super(builder.doNotCancelClick());
     }
+
+    @Override
+    public TargetRequirement getTargetRequirement() {
+        return TargetRequirement.ENTITY;
+    }
     
     @Override
     public ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {

@@ -175,12 +175,12 @@ public class ClientUtil {
     public static void drawLines(MatrixStack matrixStack, FontRenderer font, List<IReorderingProcessor> lines, float x, float y, float lineGap, int color, boolean shadow) {
         if (shadow) {
             for (int i = 0; i < lines.size(); i++) {
-                font.drawShadow(matrixStack, lines.get(i), x, y + i * (font.lineHeight + lineGap), 0xFFFFFF);
+                font.drawShadow(matrixStack, lines.get(i), x, y + i * (font.lineHeight + lineGap), color);
             }
         }
         else {
             for (int i = 0; i < lines.size(); i++) {
-                font.draw(matrixStack, lines.get(i), x, y + i * (font.lineHeight + lineGap), 0xFFFFFF);
+                font.draw(matrixStack, lines.get(i), x, y + i * (font.lineHeight + lineGap), color);
             }
         }
     }

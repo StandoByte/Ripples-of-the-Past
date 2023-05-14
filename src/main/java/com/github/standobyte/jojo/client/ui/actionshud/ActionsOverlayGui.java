@@ -1350,8 +1350,9 @@ public class ActionsOverlayGui extends AbstractGui {
             return false;
         }
         boolean shift = mc.player.isShiftKeyDown();
-        return Stream.of(ActionType.values()).map(hotbar -> currentMode.getSelectedAction(hotbar, shift)).anyMatch(action) 
-                || action.test(getQuickAccessAction(currentMode.getPower(), shift));
+        return Stream.of(ActionType.values()).map(hotbar -> currentMode.getSelectedAction(hotbar, shift)).anyMatch(action);
+        // FIXME !!!! (hud) generics moment
+//                || action.test(getQuickAccessAction(currentMode.getPower(), shift));
     }
     
     

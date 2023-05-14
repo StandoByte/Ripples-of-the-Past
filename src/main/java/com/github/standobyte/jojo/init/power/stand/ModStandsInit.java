@@ -684,7 +684,7 @@ public class ModStandsInit {
             new EntityStandRegistryObject<>("crazy_diamond", 
                     STAND_TYPES, 
                     () -> new EntityStandType<>(
-                            0xEA6E7C, PART_4_NAME,
+                            0x4BEDE6, PART_4_NAME,
                             
                             new StandAction[] {
                                     CRAZY_DIAMOND_PUNCH.get(), 
