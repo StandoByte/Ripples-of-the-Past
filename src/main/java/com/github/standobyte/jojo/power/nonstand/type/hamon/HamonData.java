@@ -137,11 +137,11 @@ public class HamonData extends TypeSpecificData {
                 ClientTickingSoundsHelper.playHamonEnergyConcentrationSound(user, 1.0F);
                 playedEnergySound = true;
             }
-            if (breathStability < getMaxBreathStability()) {
-                return power.getEnergy();
-            }
+//            if (breathStability < getMaxBreathStability()) {
+//                return power.getEnergy();
+//            }
             updateNoEnergyDecayTicks();
-            return power.getEnergy() + power.getMaxEnergy() / fullEnergyTicks();
+            return power.getEnergy() + getMaxBreathStability() / fullEnergyTicks();
         }
         else {
             playedEnergySound = false;
@@ -184,12 +184,13 @@ public class HamonData extends TypeSpecificData {
         int hamonBreathTicks = power.getHeldAction() == ModHamonActions.HAMON_BREATH.get() ? power.getHeldActionTicks() : 0;
         boolean outOfBreath = user.getAirSupply() < user.getMaxAirSupply();
         boolean mask = user.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.BREATH_CONTROL_MASK.get();
+        boolean meditation = isMeditating() && meditationTicks >= MEDITATION_INC_START;
         float inc = 0;
         
-        if (!outOfBreath && (!mask || hamonBreathTicks > 0)) {
+        if (!outOfBreath && (!mask || meditation || hamonBreathTicks > 0)) {
             inc = getMaxBreathStability() / fullBreathStabilityTicks();
             if (hamonBreathTicks > 0) {
-                inc *= 5 * MathHelper.sqrt(hamonBreathTicks);
+                inc *= MathHelper.sqrt(hamonBreathTicks);
             }
         }
         
@@ -666,8 +667,8 @@ public class HamonData extends TypeSpecificData {
             incExerciseTicks(Exercise.RUNNING, multiplier, user.level.isClientSide());
         }
         
-        if (isMeditating) {
-            if (++meditationTicks >= 40) {
+        if (isMeditating()) {
+            if (++meditationTicks >= MEDITATION_INC_START) {
                 incExerciseTicks(Exercise.MEDITATION, multiplier, user.level.isClientSide());
             }
             updateBbHeight(user);
@@ -693,6 +694,7 @@ public class HamonData extends TypeSpecificData {
         incExerciseLastTick = incExerciseThisTick;
     }
     
+    private static final int MEDITATION_INC_START = 40;
     // FIXME !!! do not update if playerAnimator isn't installed
     private float bbHeightMult = 1;
     private boolean updateHeight = false;
