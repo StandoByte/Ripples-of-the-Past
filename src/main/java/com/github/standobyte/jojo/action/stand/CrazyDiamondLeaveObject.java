@@ -21,8 +21,8 @@ import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
-import com.github.standobyte.jojo.power.nonstand.type.vampirism.VampirismData;
-import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismData;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
 

@@ -9,7 +9,7 @@ import com.github.standobyte.jojo.client.ui.toasts.ActionToast;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.IPower.ActionType;
-import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.toasts.ToastGui;

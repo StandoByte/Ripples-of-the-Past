@@ -8,9 +8,9 @@ import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.entity.stand.stands.StarPlatinumEntity;
 import com.github.standobyte.jojo.entity.stand.stands.TheWorldEntity;
 import com.github.standobyte.jojo.init.power.stand.EntityStandRegistryObject.EntityStandSupplier;
-import com.github.standobyte.jojo.power.stand.stats.StandStats;
-import com.github.standobyte.jojo.power.stand.stats.TimeStopperStandStats;
-import com.github.standobyte.jojo.power.stand.type.EntityStandType;
+import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
+import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
+import com.github.standobyte.jojo.power.impl.stand.type.EntityStandType;
 
 /* 
  * that's just for the sake of distinguishing between "stand types" and "stand objects" when writing code

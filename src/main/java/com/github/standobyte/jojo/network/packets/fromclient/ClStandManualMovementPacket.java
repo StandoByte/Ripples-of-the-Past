@@ -7,8 +7,8 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.network.packets.fromserver.StandCancelManualMovementPacket;
-import com.github.standobyte.jojo.power.stand.IStandManifestation;
-import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.google.common.primitives.Doubles;
 
 import net.minecraft.entity.MoverType;

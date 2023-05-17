@@ -4,10 +4,10 @@ import java.util.Optional;
 
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPowerType;
-import com.github.standobyte.jojo.power.stand.IStandPower;
-import com.github.standobyte.jojo.power.stand.ResolveLevelsMap;
-import com.github.standobyte.jojo.power.stand.StandInstance;
-import com.github.standobyte.jojo.power.stand.type.StandType;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.ResolveLevelsMap;
+import com.github.standobyte.jojo.power.impl.stand.StandInstance;
+import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.item.ItemStack;

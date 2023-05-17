@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.advancements.criterion;
 import com.github.standobyte.jojo.advancements.criterion.predicate.PowerPredicate;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
-import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.google.gson.JsonObject;
 
 import net.minecraft.advancements.criterion.AbstractCriterionTrigger;

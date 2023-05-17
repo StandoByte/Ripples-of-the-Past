@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.capability.entity.power;
 
-import com.github.standobyte.jojo.power.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.nonstand.NonStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.NonStandPower;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.INBT;

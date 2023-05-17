@@ -7,9 +7,9 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
-import com.github.standobyte.jojo.power.stand.stats.StandStats;
-import com.github.standobyte.jojo.power.stand.type.EntityStandType;
-import com.github.standobyte.jojo.power.stand.type.StandType;
+import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
+import com.github.standobyte.jojo.power.impl.stand.type.EntityStandType;
+import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 
 import net.minecraft.entity.EntityType;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;

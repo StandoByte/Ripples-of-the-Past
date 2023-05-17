@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.capability.entity.power;
 
-import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;

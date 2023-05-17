@@ -9,7 +9,7 @@ import java.util.function.Function;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
-import com.github.standobyte.jojo.power.stand.type.StandType;
+import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;

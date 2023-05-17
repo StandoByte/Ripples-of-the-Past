@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.potion;
 
 import com.github.standobyte.jojo.init.ModParticles;
-import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifierManager;

@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.command;
 
 import java.util.Collection;
 
-import com.github.standobyte.jojo.power.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;

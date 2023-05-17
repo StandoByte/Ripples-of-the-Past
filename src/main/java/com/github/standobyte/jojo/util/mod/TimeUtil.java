@@ -15,7 +15,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.RefreshMovementInTi
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerJoinPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerJoinPacket.Phase;
 import com.github.standobyte.jojo.power.IPower;
-import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;

@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.entity.stand;
 
 import java.util.Random;
 
-import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
 import net.minecraft.util.math.MathHelper;
 

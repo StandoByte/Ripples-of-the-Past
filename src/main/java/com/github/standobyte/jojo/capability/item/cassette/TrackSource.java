@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.item.StandDiscItem;
-import com.github.standobyte.jojo.power.stand.StandInstance;
+import com.github.standobyte.jojo.power.impl.stand.StandInstance;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.item.DyeColor;

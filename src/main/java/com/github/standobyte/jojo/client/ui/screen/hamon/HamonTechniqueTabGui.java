@@ -14,9 +14,9 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonResetSkillsButtonPacket.HamonSkillsTab;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.CharacterHamonTechnique;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.CharacterTechniqueHamonSkill;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.HamonTechniqueManager;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterTechniqueHamonSkill;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.HamonTechniqueManager;
 import com.github.standobyte.jojo.util.general.LazyUnmodifiableArrayList;
 import com.mojang.blaze3d.matrix.MatrixStack;
 

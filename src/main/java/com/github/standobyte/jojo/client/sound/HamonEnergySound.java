@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
-import com.github.standobyte.jojo.power.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 
 import net.minecraft.client.audio.TickableSound;
 import net.minecraft.entity.LivingEntity;

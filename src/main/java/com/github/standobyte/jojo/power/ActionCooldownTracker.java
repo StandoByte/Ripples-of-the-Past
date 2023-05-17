@@ -86,7 +86,7 @@ public class ActionCooldownTracker {
         cooldowns.clear();
     }
     
-    void syncWithTrackingOrUser(int userId, PowerClassification classification, ServerPlayerEntity player) {
+    public void syncWithTrackingOrUser(int userId, PowerClassification classification, ServerPlayerEntity player) {
         for (Entry<Action<?>, ActionCooldownTracker.Cooldown> entry : cooldowns.entrySet()) {
             Cooldown cooldown = entry.getValue();
             PacketManager.sendToClient(new TrCooldownPacket(userId, classification, entry.getKey(), 

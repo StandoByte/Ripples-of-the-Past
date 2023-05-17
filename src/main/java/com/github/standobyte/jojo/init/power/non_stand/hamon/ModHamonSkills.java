@@ -4,12 +4,12 @@ import java.util.ArrayList;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.AbstractHamonSkill;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.AbstractHamonSkill.RewardType;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.BaseHamonSkill;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.CharacterHamonTechnique;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.CharacterTechniqueHamonSkill;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterTechniqueHamonSkill;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill.RewardType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 
 import net.minecraft.util.Util;
 import net.minecraftforge.fml.RegistryObject;

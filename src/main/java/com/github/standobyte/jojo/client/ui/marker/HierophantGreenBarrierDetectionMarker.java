@@ -5,7 +5,7 @@ import java.util.List;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
-import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;

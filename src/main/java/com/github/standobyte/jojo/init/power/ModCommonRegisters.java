@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.init.power;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.power.nonstand.type.NonStandPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 
 import net.minecraftforge.registries.DeferredRegister;
 

@@ -30,7 +30,7 @@ import com.github.standobyte.jojo.action.non_stand.HamonWallClimbing;
 import com.github.standobyte.jojo.action.non_stand.HamonZoomPunch;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.power.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
 
 import net.minecraftforge.fml.RegistryObject;
 

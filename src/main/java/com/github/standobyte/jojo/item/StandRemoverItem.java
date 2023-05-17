@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.item;
 
-import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.block.DispenserBlock;

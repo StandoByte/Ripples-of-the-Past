@@ -18,11 +18,11 @@ import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.CustomButton;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHotbarLayoutPacket;
-import com.github.standobyte.jojo.power.ActionHotbarLayout;
-import com.github.standobyte.jojo.power.ActionHotbarLayout.ActionSwitch;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
+import com.github.standobyte.jojo.power.layout.ActionHotbarLayout;
+import com.github.standobyte.jojo.power.layout.ActionHotbarLayout.ActionSwitch;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 

@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.power;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.power.IPower.ActionType;
-import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;

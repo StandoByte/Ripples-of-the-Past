@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.client.ui.screen.hamon;
 
-import com.github.standobyte.jojo.power.nonstand.type.hamon.skill.AbstractHamonSkill;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.util.text.TextFormatting;

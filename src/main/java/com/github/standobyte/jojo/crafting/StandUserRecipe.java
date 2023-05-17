@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.crafting;
 
-import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 

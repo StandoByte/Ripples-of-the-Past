@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.advancements.criterion;
 
 import com.github.standobyte.jojo.advancements.criterion.predicate.StandArrowHitPredicate;
 import com.github.standobyte.jojo.entity.itemprojectile.StandArrowEntity;
-import com.github.standobyte.jojo.power.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.google.gson.JsonObject;
 
 import net.minecraft.advancements.criterion.AbstractCriterionTrigger;

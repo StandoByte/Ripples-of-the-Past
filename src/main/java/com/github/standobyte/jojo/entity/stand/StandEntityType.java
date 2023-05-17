@@ -8,8 +8,8 @@ import java.util.function.ToIntFunction;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.power.stand.stats.StandStats;
-import com.github.standobyte.jojo.power.stand.type.StandType;
+import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
+import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntitySize;

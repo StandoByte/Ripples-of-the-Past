@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
-import com.github.standobyte.jojo.power.stand.stats.StandStats;
-import com.github.standobyte.jojo.power.stand.type.StandType;
+import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
+import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.mc.data.StandStatsManager;
 
 import net.minecraft.network.PacketBuffer;
