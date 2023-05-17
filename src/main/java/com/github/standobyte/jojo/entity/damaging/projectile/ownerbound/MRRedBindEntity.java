@@ -123,14 +123,14 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
     }
     
     @Override
-    public void remove() {
+    public void onRemovedFromWorld() {
+        super.onRemovedFromWorld();
         if (!level.isClientSide() && immobilizedEffect != null) {
             LivingEntity bound = getEntityAttachedTo();
             if (bound != null) {
                 MCUtil.removeEffectInstance(bound, immobilizedEffect);
             }
         }
-        super.remove();
     }
 
     @Override

@@ -82,9 +82,9 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     }
     
     @Override
-    public void remove() {
+    public void onRemovedFromWorld() {
+        super.onRemovedFromWorld();
         dragged.forEach(entity -> entity.setDeltaMovement(Vector3d.ZERO));
-        super.remove();
     }
     
     @Override

@@ -86,8 +86,8 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
     }
     
     @Override
-    public void remove() {
-        super.remove();
+    public void onRemovedFromWorld() {
+        super.onRemovedFromWorld();
         if (tickCount < ticksLifespan()) {
             INonStandPower.getNonStandPowerOptional(getOwner()).ifPresent(power -> {
                 power.updateCooldownTimer(ModHamonActions.HAMON_ZOOM_PUNCH.get(), 0, ModHamonActions.HAMON_ZOOM_PUNCH.get().getCooldownTechnical(null));

@@ -35,8 +35,8 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
     }
     
     @Override
-    public void remove() {
-        super.remove();
+    public void onRemovedFromWorld() {
+        super.onRemovedFromWorld();
         if (!level.isClientSide() && stand != null && caughtAnEntity) {
             stand.getManualMovementLocks().removeLock(MANUAL_MOVEMENT_LOCK);
         }

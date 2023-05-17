@@ -161,11 +161,11 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
     }
     
     @Override
-    public void remove() {
+    public void onRemovedFromWorld() {
+        super.onRemovedFromWorld();
         if (level.isClientSide()) {
             addCloudParticles();
         }
-        super.remove();
     }
     
     public void skipAscension() {

@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack;
 import com.github.standobyte.jojo.action.stand.StandEntityLightAttack;
 import com.github.standobyte.jojo.action.stand.StandEntityMeleeBarrage;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -18,6 +19,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPac
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
+import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
@@ -203,6 +205,9 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
                 PacketManager.sendToClientsTrackingAndSelf(new TrSetStandEntityPacket(user.getId(), -1), user);
                 standEntity.remove();
             }
+        }
+        else if (user.is(ClientUtil.getClientPlayer())) {
+            StandUtil.setManualControl(ClientUtil.getClientPlayer(), false, false);
         }
     }
     

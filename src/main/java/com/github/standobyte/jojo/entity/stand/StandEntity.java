@@ -2161,11 +2161,14 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
     
     @Override
-    public void remove() {
+    public void onRemovedFromWorld() {
+        super.onRemovedFromWorld();
         if (!level.isClientSide()) {
             dropHeldItems();
         }
-        super.remove();
+        else if (isManuallyControlled() && getUser() == ClientUtil.getClientPlayer()) {
+            StandUtil.setManualControl(ClientUtil.getClientPlayer(), false, false);
+        }
     }
     
     public final EquipmentSlotType handItemSlot(Hand hand) {
