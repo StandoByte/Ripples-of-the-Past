@@ -17,12 +17,13 @@ import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.CustomButton;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromclient.ClHotbarLayoutPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClActionsLayoutPacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.layout.ActionHotbarLayout;
 import com.github.standobyte.jojo.power.layout.ActionHotbarLayout.ActionSwitch;
+import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -53,6 +54,7 @@ public class HudLayoutEditingScreen extends Screen {
     private Optional<ActionData<?>> draggedAction = Optional.empty();
     private Optional<ActionData<?>> hoveredAction = Optional.empty();
     private boolean isQuickActionSlotHovered;
+    private VisibilityButton quickAccessHudVisibilityButton;
     
     private Map<PowerClassification, Set<ActionType>> editedLayouts = Util.make(new EnumMap<>(PowerClassification.class), map -> {
         for (PowerClassification power : PowerClassification.values()) {
@@ -67,6 +69,15 @@ public class HudLayoutEditingScreen extends Screen {
     
     @Override
     protected void init() {
+        quickAccessHudVisibilityButton = new VisibilityButton(getWindowX() + 30, getWindowY() + WINDOW_HEIGHT - 28,
+                button -> {
+                    ActionsLayout<?> layout = selectedPower.getActionsLayout();
+                    boolean newValue = !layout.isMmbActionHudVisible();
+                    layout.setMmbActionHudVisibility(newValue);
+                    quickAccessHudVisibilityButton.setVisibilityState(newValue);
+                    PacketManager.sendToServer(ClActionsLayoutPacket.saveQuickAccessVisibility(selectedPower.getPowerClassification(), newValue));
+                });
+        
         if (selectedTab != null) {
             IPower.getPowerOptional(minecraft.player, selectedTab).ifPresent(power -> {
                 if (!power.hasPower()) {
@@ -81,17 +92,19 @@ public class HudLayoutEditingScreen extends Screen {
                 if (power.hasPower()) {
                     powersPresent.add(power);
                     if (selectedTab == null || powerClassification == ActionsOverlayGui.getInstance().getCurrentMode()) {
-                        selectedTab = powerClassification;
+                        selectTab(power);
                     }
                 }
             });
         }
         
-        selectedPower = IPower.getPlayerPower(minecraft.player, selectedTab);
+        if (selectedTab != null && selectedPower == null) {
+            selectTab(IPower.getPlayerPower(minecraft.player, selectedTab));
+        }
         
         addButton(new CustomButton(getWindowX() + WINDOW_WIDTH - 30, getWindowY() + WINDOW_HEIGHT - 30, 24, 24, 
                 button -> {
-                    PacketManager.sendToServer(ClHotbarLayoutPacket.resetLayout(selectedPower.getPowerClassification()));
+                    PacketManager.sendToServer(ClActionsLayoutPacket.resetLayout(selectedPower.getPowerClassification()));
                     selectedPower.getActionsLayout().resetLayout();
                     editedLayouts.put(selectedPower.getPowerClassification(), EnumSet.noneOf(ActionType.class));
                 }, 
@@ -110,10 +123,17 @@ public class HudLayoutEditingScreen extends Screen {
                 blit(matrixStack, x, y, 0, 184 + getYImage(isHovered()) * 24, width, height);
             }
         });
+        
+        addButton(quickAccessHudVisibilityButton);
+    }
+    
+    public boolean works() {
+        return selectedPower != null && selectedPower.hasPower();
     }
 
     @Override
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
+        if (!works()) return;
         hoveredAction = getActionAt(mouseX, mouseY);
         isQuickActionSlotHovered = isQuickAccessActionSlotAt(mouseX, mouseY);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -361,8 +381,7 @@ public class HudLayoutEditingScreen extends Screen {
         else {
             int tab = getTabButtonAt(mouseX, mouseY);
             if (tab >= 0 && tab < powersPresent.size()) {
-                selectedPower = powersPresent.get(tab);
-                selectedTab = selectedPower.getPowerClassification();
+                selectTab(powersPresent.get(tab));
                 return true;
             }
             if (clickedSlot.isPresent()) {
@@ -394,6 +413,14 @@ public class HudLayoutEditingScreen extends Screen {
         }
         
         return super.mouseClicked(mouseX, mouseY, mouseButton);
+    }
+    
+    private void selectTab(IPower<?, ?> power) {
+        if (power != null && power.hasPower()) {
+            selectedPower = power;
+            selectedTab = power.getPowerClassification();
+            quickAccessHudVisibilityButton.setVisibilityState(power.getActionsLayout().isMmbActionHudVisible());
+        }
     }
     
     private <P extends IPower<P, ?>> boolean isActionVisible(Action<P> action, IPower<?, ?> power) {
@@ -467,12 +494,12 @@ public class HudLayoutEditingScreen extends Screen {
         super.onClose();
         editedLayouts.forEach((power, hotbars) -> {
             hotbars.forEach(hotbar -> {
-                PacketManager.sendToServer(ClHotbarLayoutPacket.withLayout(power, hotbar, 
+                PacketManager.sendToServer(ClActionsLayoutPacket.withLayout(power, hotbar, 
                         IPower.getPlayerPower(minecraft.player, power).getActions(hotbar)));
             });
         });
         changedQuickAccessSlots.forEach((power, action) -> {
-            PacketManager.sendToServer(ClHotbarLayoutPacket.quickAccessAction(power, action));
+            PacketManager.sendToServer(ClActionsLayoutPacket.quickAccessAction(power, action));
         });
         ActionsOverlayGui.getInstance().revealActionNames();
     }

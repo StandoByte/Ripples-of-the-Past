@@ -222,7 +222,7 @@ public class ActionsOverlayGui extends AbstractGui {
         PositionConfig hotbarsPosConfig = JojoModConfig.CLIENT.hotbarsPosition.get();
         PositionConfig barsPosConfig = JojoModConfig.CLIENT.barsPosition.get();
         boolean showModeSelector = false;
-        boolean renderQuickAccessSlot = true;
+        boolean renderQuickAccessSlot = currentMode != null && currentMode.getPower().getActionsLayout().isMmbActionHudVisible();
         updateWarnings(currentMode);
         updateElementPositions(barsPosConfig, hotbarsPosConfig, renderQuickAccessSlot, screenWidth, screenHeight);
 

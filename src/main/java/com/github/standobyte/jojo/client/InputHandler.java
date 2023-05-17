@@ -320,7 +320,8 @@ public class InputHandler {
             }
             
             if (editHotbars.consumeClick() && (standPower.hasPower() || nonStandPower.hasPower())) {
-                mc.setScreen(new HudLayoutEditingScreen());
+                HudLayoutEditingScreen screen = new HudLayoutEditingScreen();
+                mc.setScreen(screen);
             }
             
             if (!mc.options.keyAttack.isDown()) {
