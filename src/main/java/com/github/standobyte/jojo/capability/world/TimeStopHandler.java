@@ -67,7 +67,9 @@ public class TimeStopHandler {
         }
         
         for (Entity entity : stoppedInTime) {
-            entity.tickCount--;
+            if (!entity.canUpdate()) {
+                entity.tickCount--;
+            }
         }
     }
     
