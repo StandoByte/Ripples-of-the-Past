@@ -52,8 +52,13 @@ public class HamonCharacterTechniqueBox {
             for (HamonSkillElementTechniquePerk perk : perks) {
                 if (perk.isVisible()) {
                     CharacterHamonTechnique userTechnique = hamon.getCharacterTechnique();
-                    if (!(userTechnique == this.technique || perk.isMouseOver(x, y, mouseX, mouseY))) {
-                        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 0.4F);
+                    if (!perk.isMouseOver(x, y, mouseX, mouseY)) {
+                        if (userTechnique == this.technique) {
+                            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 0.4F);
+                        }
+                        else {
+                            RenderSystem.color4f(0.0F, 0.0F, 0.0F, 1.0F);
+                        }
                     }
                     perk.renderSkillIcon(matrixStack, x, y);
                     RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
