@@ -69,14 +69,95 @@ public abstract class TrackSource {
     
     
     public static enum TrackSourceType {
-        MUSIC_DISC(TrackSourceMusicDisc::fromNBT),
-        STAND_DISC(TrackSourceStandDisc::fromNBT),
-        DYE_COLOR(TrackSourceDye::fromNBT);
+        MUSIC_DISC(
+                false,
+                TrackSourceMusicDisc::fromNBT) {
+            
+            @Override
+            public boolean isItemMusicSource(ItemStack item) {
+                return item.getItem() instanceof MusicDiscItem;
+            }
+            
+            @Override
+            public TrackSource getMusic(ItemStack item) {
+                return new TrackSourceMusicDisc((MusicDiscItem) item.getItem());
+            }
+        },
         
+        STAND_DISC(
+                false,
+                TrackSourceStandDisc::fromNBT) {
+            
+            @Override
+            public boolean isItemMusicSource(ItemStack item) {
+                return item.getItem() == ModItems.STAND_DISC.get();
+            }
+            
+            @Override
+            public TrackSource getMusic(ItemStack item) {
+                StandInstance stand = StandDiscItem.getStandFromStack(item, false);
+                if (stand != null) {
+                    return new TrackSourceStandDisc(stand.getType());
+                }
+                return null;
+            }
+        },
+        
+        DYE_COLOR(
+                true,
+                TrackSourceDye::fromNBT) {
+            
+            @Override
+            public boolean isItemMusicSource(ItemStack item) {
+                return item.getItem() instanceof DyeItem;
+            }
+            
+            @Override
+            public TrackSource getMusic(ItemStack item) {
+                DyeColor dye = ((DyeItem) item.getItem()).getDyeColor();
+                if (dye != null) {
+                    return new TrackSourceDye(dye);
+                }
+                return null;
+            }
+        };
+
+        private final boolean spendCraftingItem;
         private final Function<CompoundNBT, TrackSource> read;
-        private TrackSourceType(Function<CompoundNBT, TrackSource> read) {
+        private TrackSourceType(boolean spendCraftingItem, Function<CompoundNBT, TrackSource> read) {
+            this.spendCraftingItem = spendCraftingItem;
             this.read = read;
         }
+        
+        
+        @Nullable
+        public static TrackSourceType getTrackSourceType(ItemStack item) {
+            for (TrackSourceType type : values()) {
+                if (type.isItemMusicSource(item)) {
+                    return type;
+                }
+            }
+            return null;
+        }
+
+        @Nullable
+        public abstract boolean isItemMusicSource(ItemStack item);
+        
+        
+        @Nullable
+        public static TrackSource getMusicFromItem(ItemStack item) {
+            TrackSourceType type = getTrackSourceType(item);
+            return type != null ? type.getMusic(item) : null;
+        }
+
+        @Nullable
+        public abstract TrackSource getMusic(ItemStack item);
+        
+        
+        public boolean isRecordingSourceItemSpent() {
+            return spendCraftingItem;
+        }
+        
         
         public static TrackSource fromNBT(CompoundNBT nbt) {
             TrackSource source = null;
@@ -85,33 +166,6 @@ public abstract class TrackSource {
                 source = values()[type - 1].read.apply(nbt);
             }
             return source != null ? source : TrackSource.BROKEN_CASSETTE;
-        }
-        
-        public static boolean canBeRecordedFrom(ItemStack item) {
-            return item.getItem() instanceof MusicDiscItem || item.getItem() == ModItems.STAND_DISC.get() || item.getItem() instanceof DyeItem;
-        }
-
-        @Nullable
-        public static TrackSource getMusicFromItem(ItemStack item) {
-            if (item.getItem() instanceof MusicDiscItem) {
-                return new TrackSourceMusicDisc((MusicDiscItem) item.getItem());
-            }
-
-            if (item.getItem() == ModItems.STAND_DISC.get()) {
-                StandInstance stand = StandDiscItem.getStandFromStack(item, false);
-                if (stand != null) {
-                    return new TrackSourceStandDisc(stand.getType());
-                }
-            }
-
-            if (item.getItem() instanceof DyeItem) {
-                DyeColor dye = ((DyeItem) item.getItem()).getDyeColor();
-                if (dye != null) {
-                    return new TrackSourceDye(dye);
-                }
-            }
-
-            return null;
         }
     }
 }

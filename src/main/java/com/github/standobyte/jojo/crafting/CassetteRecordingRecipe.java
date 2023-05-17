@@ -97,8 +97,11 @@ public class CassetteRecordingRecipe extends SpecialRecipe {
 
         for(int i = 0; i < items.size(); ++i) {
             ItemStack item = inventory.getItem(i);
-            if (TrackSourceType.canBeRecordedFrom(item)) {
-                items.set(i, item.copy());
+            TrackSourceType type = TrackSourceType.getTrackSourceType(item);
+            if (type != null && !type.isRecordingSourceItemSpent()) {
+                ItemStack recordMaterial = item.copy();
+                recordMaterial.setCount(1);
+                items.set(i, recordMaterial);
             }
             else if (item.hasContainerItem()) {
                 items.set(i, item.getContainerItem());
