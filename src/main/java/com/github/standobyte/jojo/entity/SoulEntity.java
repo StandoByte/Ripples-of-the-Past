@@ -102,19 +102,20 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
         else {
             level.getEntitiesOfClass(LivingEntity.class, 
                     new AxisAlignedBB(getBoundingBox().getCenter(), getBoundingBox().getCenter()).inflate(24), 
-                    entity -> !entity.is(originEntity) && originEntity.isAlliedTo(entity)).forEach(entity -> {
+                    entity -> !entity.is(originEntity) && originEntity.isAlliedTo(entity) && !(entity instanceof StandEntity)).forEach(entity -> {
                         IStandPower.getStandPowerOptional(entity).ifPresent(stand -> {
                             if (giveResolve(entity, stand)) {
                                 stand.getResolveCounter().soulAddResolveTeammate();
                             }
                         });
                     });
-            RayTraceResult rayTrace = JojoModUtil.rayTrace(this, 32, entity -> !entity.is(originEntity), 1.0);
+            RayTraceResult rayTrace = JojoModUtil.rayTrace(this, 32, 
+                    entity -> entity instanceof LivingEntity && !StandUtil.getStandUser((LivingEntity) entity).is(originEntity), 1.0);
             if (rayTrace.getType() == RayTraceResult.Type.ENTITY) {
                 Entity lookEntity = ((EntityRayTraceResult) rayTrace).getEntity();
                 if (lookEntity instanceof LivingEntity) {
-                    LivingEntity entity = (LivingEntity) lookEntity;
-                    IStandPower.getStandPowerOptional(lookEntity instanceof StandEntity ? ((StandEntity) entity).getUser() : entity)
+                    LivingEntity entity = StandUtil.getStandUser((LivingEntity) lookEntity);
+                    IStandPower.getStandPowerOptional(entity)
                     .ifPresent(stand -> {
                         if (giveResolve(entity, stand)) {
                             stand.getResolveCounter().soulAddResolveLook();
