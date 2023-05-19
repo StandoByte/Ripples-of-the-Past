@@ -14,6 +14,7 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.particles.BasicParticleType;
 
 public class HamonAuraParticle extends RisingParticle {
+    private final int startingSpriteRandom;
 
     protected HamonAuraParticle(ClientWorld world, double x, double y, double z, double xda, double yda, double zda, float sizeM, IAnimatedSprite sprites) {
         super(world, x, y, z, 0.1F, 0.1F, 0.1F, xda, yda, zda, sizeM, sprites, 0.3F, 8, 0.004D, true);
@@ -21,6 +22,7 @@ public class HamonAuraParticle extends RisingParticle {
         this.gCol = 1;
         this.bCol = 1;
         lifetime = 25 + random.nextInt(10);
+        startingSpriteRandom = random.nextInt(lifetime);
         alpha = 0.25F;
     }
     
@@ -34,13 +36,19 @@ public class HamonAuraParticle extends RisingParticle {
         return 0xF000F0;
     }
 
+    private static final float ALPHA_MIN = 0.05F;
+    private static final float ALPHA_DIFF = 0.3F;
     @Override
     public void render(IVertexBuilder vertexBuilder, ActiveRenderInfo camera, float partialTick) {
         float ageF = ((float) age + partialTick) / (float) lifetime;
-        this.alpha = ageF <= 0.5F ? 
-                0.05F + ageF * 0.6F
-                : 0.65F - ageF * 0.6F;
+        float alphaFunc = ageF <= 0.5F ? ageF * 2 : (1 - ageF) * 2;
+        this.alpha = ALPHA_MIN + alphaFunc * ALPHA_DIFF;
         super.render(vertexBuilder, camera, partialTick);
+    }
+    
+    @Override
+    public void setSpriteFromAge(IAnimatedSprite pSprite) {
+        setSprite(pSprite.get((age + startingSpriteRandom) % lifetime, lifetime));
     }
 
     public static class Factory implements IParticleFactory<BasicParticleType> {

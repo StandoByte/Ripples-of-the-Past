@@ -45,9 +45,9 @@ import com.github.standobyte.jojo.power.impl.nonstand.TypeSpecificData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.HamonTechniqueManager;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -65,6 +65,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.particles.IParticleData;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.util.math.MathHelper;
@@ -1042,12 +1043,16 @@ public class HamonData extends TypeSpecificData {
         float particlesPerTick = power.getEnergy() / power.getMaxEnergy() * getHamonDamageMultiplier();
         LivingEntity user = power.getUser();
         GeneralUtil.doFractionTimes(() -> {
-            user.level.addParticle(ModParticles.HAMON_AURA.get(), 
+            user.level.addParticle(getHamonAuraParticle(), 
                     user.getX() + (random.nextDouble() - 0.5) * (user.getBbWidth() + 0.5F), 
                     user.getY() + random.nextDouble() * (user.getBbHeight() * 0.5F), 
                     user.getZ() + (random.nextDouble() - 0.5) * (user.getBbWidth() + 0.5F), 
                     0, 0, 0);
         }, particlesPerTick);
+    }
+    
+    private IParticleData getHamonAuraParticle() {
+        return ModParticles.HAMON_AURA.get();
     }
     
     

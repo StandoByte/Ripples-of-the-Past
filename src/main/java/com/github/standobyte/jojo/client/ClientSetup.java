@@ -368,6 +368,10 @@ public class ClientSetup {
         mc.particleEngine.register(ModParticles.HAMON_SPARK_RED.get(),      HamonSparkParticle.HamonParticleFactory::new);
         mc.particleEngine.register(ModParticles.HAMON_SPARK_SILVER.get(),   HamonSparkParticle.HamonParticleFactory::new);
         mc.particleEngine.register(ModParticles.HAMON_AURA.get(),           HamonAuraParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.HAMON_AURA_BLUE.get(),      HamonAuraParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.HAMON_AURA_YELLOW.get(),    HamonAuraParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.HAMON_AURA_RED.get(),       HamonAuraParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.HAMON_AURA_SILVER.get(),    HamonAuraParticle.Factory::new);
         mc.particleEngine.register(ModParticles.METEORITE_VIRUS.get(),      MeteoriteVirusParticle.Factory::new);
         mc.particleEngine.register(ModParticles.MENACING.get(),             OnomatopoeiaParticle.GoFactory::new);
         mc.particleEngine.register(ModParticles.RESOLVE.get(),              OnomatopoeiaParticle.DoFactory::new);
