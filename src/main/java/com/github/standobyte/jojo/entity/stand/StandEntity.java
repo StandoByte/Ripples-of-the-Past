@@ -51,7 +51,6 @@ import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 import com.github.standobyte.jojo.util.mc.damage.StandLinkDamageSource;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
-import com.google.common.collect.ImmutableList;
 
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -113,8 +112,6 @@ import net.minecraftforge.fml.network.FMLPlayMessages;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 public class StandEntity extends LivingEntity implements IStandManifestation, IEntityAdditionalSpawnData {
-    private static final List<Effect> SHARED_EFFECTS = new ArrayList<>();
-
     protected static final DataParameter<Byte> STAND_FLAGS = EntityDataManager.defineId(StandEntity.class, DataSerializers.BYTE);
 
     private final StandEntityType<?> type;
@@ -538,6 +535,18 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         this.userPower = power;
         if (!level.isClientSide() && power != null) {
             modifiersFromResolveLevel(power.getStatsDevelopment());
+        }
+    }
+    
+    public void onStandSummonServerSide() {
+        LivingEntity user = getUser();
+        if (user != null) {
+            for (Effect effect : SHARED_EFFECTS_FROM_USER) {
+                EffectInstance userEffectInstance = user.getEffect(effect);
+                if (userEffectInstance != null) {
+                    addEffect(new EffectInstance(userEffectInstance));
+                }
+            }
         }
     }
     
@@ -2014,17 +2023,23 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     protected void onClientRenderTick(float partialTick) {
         this.barrageSounds.playSound(this, tickCount + partialTick);
     }
-
-
-
-    public static void addSharedEffects(Effect... effects) {
-        Collections.addAll(SHARED_EFFECTS, effects);
+    
+    
+    
+    private static final List<Effect> SHARED_EFFECTS_FROM_USER = new ArrayList<>();
+    private static final List<Effect> SHARED_EFFECTS_FROM_STAND = new ArrayList<>();
+    public static void addSharedEffectsFromUser(Effect... effects) {
+        Collections.addAll(SHARED_EFFECTS_FROM_USER, effects);
     }
     
-    public List<Effect> getEffectsSharedToStand() {
-        return ImmutableList.copyOf(SHARED_EFFECTS);
+    public static void addSharedEffectsFromStand(Effect... effects) {
+        Collections.addAll(SHARED_EFFECTS_FROM_USER, effects);
     }
-
+    
+    public boolean isEffectSharedFromUser(Effect effect) {
+        return SHARED_EFFECTS_FROM_USER.contains(effect);
+    }
+    
     @Override
     protected void onEffectAdded(EffectInstance effectInstance) {
         super.onEffectAdded(effectInstance);
@@ -2033,7 +2048,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             if (user instanceof ServerPlayerEntity) {
                 ((ServerPlayerEntity) user).connection.send(new SPlayEntityEffectPacket(this.getId(), effectInstance));
             }
-            if (effectInstance.getEffect() == ModEffects.STUN.get()) {
+            if (SHARED_EFFECTS_FROM_STAND.contains(effectInstance.getEffect())) {
                 user.addEffect(new EffectInstance(effectInstance));
                 stopTask();
             }
@@ -2048,7 +2063,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             if (user instanceof ServerPlayerEntity) {
                 ((ServerPlayerEntity) user).connection.send(new SPlayEntityEffectPacket(this.getId(), effectInstance));
             }
-            if (effectInstance.getEffect() == ModEffects.STUN.get()) {
+            if (SHARED_EFFECTS_FROM_STAND.contains(effectInstance.getEffect())) {
                 user.addEffect(new EffectInstance(effectInstance));
             }
         }

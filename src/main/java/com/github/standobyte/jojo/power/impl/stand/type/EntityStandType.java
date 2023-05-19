@@ -1,7 +1,6 @@
 package com.github.standobyte.jojo.power.impl.stand.type;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -149,13 +148,7 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
                 finalizeStandSummonFromAction(user, standPower, standEntity, true);
             }
             
-            List<Effect> effectsToCopy = standEntity.getEffectsSharedToStand();
-            for (Effect effect : effectsToCopy) {
-                EffectInstance userEffectInstance = user.getEffect(effect);
-                if (userEffectInstance != null) {
-                    standEntity.addEffect(new EffectInstance(userEffectInstance));
-                }
-            }
+            standEntity.onStandSummonServerSide();
         }
         return true;
     }
@@ -245,7 +238,7 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
         IStandPower.getStandPowerOptional(user).ifPresent(power -> {
             if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
                 StandEntity stand = (StandEntity) power.getStandManifestation();
-                if (stand.getEffectsSharedToStand().contains(effectInstance.getEffect())) {
+                if (stand.isEffectSharedFromUser(effectInstance.getEffect())) {
                     stand.addEffect(new EffectInstance(effectInstance));
                 }
             }
@@ -256,7 +249,7 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
         IStandPower.getStandPowerOptional(user).ifPresent(power -> {
             if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
                 StandEntity stand = (StandEntity) power.getStandManifestation();
-                if (stand.getEffectsSharedToStand().contains(effect)) {
+                if (stand.isEffectSharedFromUser(effect)) {
                     stand.removeEffect(effect);
                 }
             }

@@ -88,7 +88,8 @@ public class ModEffects {
     @SubscribeEvent(priority = EventPriority.LOW)
     public static final void afterEffectsRegister(RegistryEvent.Register<Effect> event) {
         VampirismPowerType.initVampiricEffects();
-        StandEntity.addSharedEffects(TIME_STOP.get(), Effects.BLINDNESS);
+        StandEntity.addSharedEffectsFromUser(TIME_STOP.get(), Effects.BLINDNESS);
+        StandEntity.addSharedEffectsFromStand(STUN.get(), IMMOBILIZE.get());
         TRACKED_EFFECTS = ImmutableSet.of(RESOLVE.get(), TIME_STOP.get(), IMMOBILIZE.get(), STUN.get(), HAMON_SPREAD.get(), FULL_INVISIBILITY.get(), VAMPIRE_SUN_BURN.get());
     }
     
