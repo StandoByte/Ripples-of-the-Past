@@ -23,6 +23,7 @@ import com.github.standobyte.jojo.action.non_stand.HamonMetalSilverOverdrive;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.ModEffects;
@@ -1054,7 +1055,6 @@ public class HamonData extends TypeSpecificData {
     private HamonAuraColor auraColor = HamonAuraColor.ORANGE;
     private Action<?> lastUsedAction = null;
     
-    // FIXME !!!!!! (particles) only summon them at the arm in 1st person
     private void tickChargeParticles() {
         LivingEntity user = power.getUser();
         HamonAuraColor auraColor = getThisTickAuraColor(user);
@@ -1066,13 +1066,18 @@ public class HamonData extends TypeSpecificData {
         }
         if (user.level.isClientSide()) {
             float particlesPerTick = power.getEnergy() / power.getMaxEnergy() * getHamonDamageMultiplier();
+            boolean isUserTheCameraEntity = user == ClientUtil.getClientPlayer();
+            IParticleData particleType = PARTICLE_TYPE.get(auraColor).get();
+            
             GeneralUtil.doFractionTimes(() -> {
-                user.level.addParticle(PARTICLE_TYPE.get(auraColor).get(), 
+                CustomParticlesHelper.createHamonAuraParticle(particleType, user, 
                         user.getX() + (random.nextDouble() - 0.5) * (user.getBbWidth() + 0.5F), 
                         user.getY() + random.nextDouble() * (user.getBbHeight() * 0.5F), 
-                        user.getZ() + (random.nextDouble() - 0.5) * (user.getBbWidth() + 0.5F), 
-                        0, 0, 0);
+                        user.getZ() + (random.nextDouble() - 0.5) * (user.getBbWidth() + 0.5F));
             }, particlesPerTick);
+            if (isUserTheCameraEntity) {
+                CustomParticlesHelper.summonHamonAuraParticlesFirstPerson(particleType, user, particlesPerTick);
+            }
         }
     }
     

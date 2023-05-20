@@ -36,4 +36,9 @@ public class HamonBreath extends HamonAction {
     public boolean isHeldSentToTracking() {
         return true;
     }
+    
+    @Override
+    protected boolean changesAuraColor() {
+        return false;
+    }
 }

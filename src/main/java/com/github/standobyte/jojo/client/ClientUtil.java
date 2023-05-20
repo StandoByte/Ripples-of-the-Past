@@ -105,6 +105,10 @@ public class ClientUtil {
         return Minecraft.getInstance().crosshairPickEntity;
     }
     
+    public static Entity getCameraEntity() {
+        return Minecraft.getInstance().cameraEntity;
+    }
+    
     public static float getPartialTick() {
         return Minecraft.getInstance().getFrameTime();
     }

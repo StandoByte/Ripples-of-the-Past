@@ -63,9 +63,13 @@ public abstract class HamonAction extends NonStandAction {
     
     @Override
     public void afterClick(World world, LivingEntity user, INonStandPower power, boolean passedRequirements) {
-        if (!world.isClientSide() && passedRequirements) {
+        if (changesAuraColor() && passedRequirements) {
             power.getTypeSpecificData(ModPowers.HAMON.get()).get().setLastUsedAction(this);
         }
+    }
+    
+    protected boolean changesAuraColor() {
+        return true;
     }
     
     

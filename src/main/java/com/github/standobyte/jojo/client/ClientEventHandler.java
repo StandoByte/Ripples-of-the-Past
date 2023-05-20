@@ -85,6 +85,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.IWeatherParticleRenderHandler;
 import net.minecraftforge.client.IWeatherRenderHandler;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
@@ -576,7 +577,7 @@ public class ClientEventHandler {
             });
         }
     }
-
+    
     @SubscribeEvent(priority = EventPriority.LOW)
     public void onRenderHand(RenderHandEvent event) {
         if (!event.isCanceled() && event.getHand() == Hand.MAIN_HAND) {
@@ -591,20 +592,48 @@ public class ClientEventHandler {
                         ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
                         if ((hud.isActionSelectedAndEnabled(ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get()))
                                 && livingEntity.getMainHandItem().isEmpty() && livingEntity.getOffhandItem().isEmpty()) {
+                            
                             FirstPersonRenderer renderer = mc.getItemInHandRenderer();
                             ClientPlayerEntity player = mc.player;
                             Hand swingingArm = MoreObjects.firstNonNull(player.swingingArm, Hand.MAIN_HAND);
                             float f6 = swingingArm == Hand.OFF_HAND ? player.getAttackAnim(event.getPartialTicks()) : 0.0F;
                             float f7 = 1.0F - MathHelper.lerp(event.getPartialTicks(), ClientReflection.getOffHandHeightPrev(renderer), ClientReflection.getOffHandHeight(renderer));
                             MatrixStack matrixStack = event.getMatrixStack();
-                            matrixStack.pushPose();
-                            ClientReflection.renderPlayerArm(matrixStack, event.getBuffers(), event.getLight(), f7, f6, player.getMainArm().getOpposite(), renderer);
-                            matrixStack.popPose();
-                            // i've won... but at what cost?
+                            
+                            if (!ForgeHooksClient.renderSpecificFirstPersonHand(Hand.OFF_HAND, 
+                                    matrixStack, event.getBuffers(), event.getLight(), 
+                                    event.getPartialTicks(), event.getInterpolatedPitch(), 
+                                    f6, f7, ((LivingEntity) entity).getOffhandItem())) {
+                                matrixStack.pushPose();
+                                ClientReflection.renderPlayerArm(matrixStack, event.getBuffers(), event.getLight(), f7, f6, player.getMainArm().getOpposite(), renderer);
+                                matrixStack.popPose();
+                                // i've won... but at what cost?
+                            }
                         }
                     }
                 });
             }
+        }
+    }
+    
+    public static boolean mainHandRendered;
+    public static boolean offHandRendered;
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void resetHandsRenderFlags(RenderHandEvent event) {
+        mainHandRendered = false;
+        offHandRendered = false;
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void areHandsRendered(RenderHandEvent event) {
+        switch (event.getHand()) {
+        case MAIN_HAND:
+            mainHandRendered = true;
+            break;
+        case OFF_HAND:
+            offHandRendered = true;
+            break;
         }
     }
 

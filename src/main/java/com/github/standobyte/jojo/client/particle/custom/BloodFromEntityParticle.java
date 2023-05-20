@@ -9,7 +9,7 @@ import com.github.standobyte.jojo.init.ModEntityTypes;
 
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
-import net.minecraft.particles.BasicParticleType;
+import net.minecraft.particles.IParticleData;
 
 public class BloodFromEntityParticle extends BloodParticle {
     private final Entity entity;
@@ -25,7 +25,7 @@ public class BloodFromEntityParticle extends BloodParticle {
                 entity -> entity.getType() != ModEntityTypes.CD_BLOOD_CUTTER.get());
     }
 
-    public static BloodFromEntityParticle createCustomParticle(BasicParticleType type, ClientWorld world, @Nullable Entity entity,
+    public static BloodFromEntityParticle createCustomParticle(IParticleData type, ClientWorld world, @Nullable Entity entity,
             double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
         BloodFromEntityParticle particle = new BloodFromEntityParticle(world, entity, x, y, z, xSpeed, ySpeed, zSpeed);
         particle.pickSprite(BloodParticle.Factory.getSprite());

@@ -20,6 +20,11 @@ public class HamonSparkParticle extends CritParticle {
         gCol = 1;
         bCol = 1;
     }
+    
+    @Override
+    protected int getLightColor(float partialTick) {
+        return 0xF000F0;
+    }
 
 
     public static class HamonParticleFactory extends CritParticle.Factory {
