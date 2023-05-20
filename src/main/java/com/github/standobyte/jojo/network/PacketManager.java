@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
+import com.github.standobyte.jojo.network.packets.fromclient.ClActionsLayoutPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClClickActionPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClDoubleShiftPressPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonAbandonButtonPacket;
@@ -16,7 +17,6 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClHamonResetSkillsB
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonWindowOpenedPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHasInputPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHeldActionTargetPacket;
-import com.github.standobyte.jojo.network.packets.fromclient.ClActionsLayoutPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnLeapPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnStandDashPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRPSGameInputPacket;
@@ -65,6 +65,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDirectEntityPosPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDoubleShiftPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrEnergyPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHamonAuraColorPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonBreathStabilityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonCharacterTechniquePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonEnergyTicksPacket;
@@ -146,7 +147,7 @@ public class PacketManager {
         registerMessage(channel, new TrTypeNonStandPowerPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrTypeStandInstancePacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrHeldActionPacket.Handler(),                   Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        registerMessage(channel, new ActionsLayoutPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(channel, new ActionsLayoutPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrEnergyPacket.Handler(),                       Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrCooldownPacket.Handler(),                     Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new BloodParticlesPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_CLIENT));
@@ -160,6 +161,7 @@ public class PacketManager {
         registerMessage(channel, new TrHamonParticlesPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrHamonBreathStabilityPacket.Handler(),         Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrHamonEnergyTicksPacket.Handler(),             Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(channel, new TrHamonAuraColorPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new HamonOutOfBreathPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrVampirismDataPacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrStaminaPacket.Handler(),                      Optional.of(NetworkDirection.PLAY_TO_CLIENT));

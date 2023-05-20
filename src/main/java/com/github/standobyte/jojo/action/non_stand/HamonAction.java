@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.Character
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.world.World;
 
 public abstract class HamonAction extends NonStandAction {
     private final Map<Supplier<CharacterHamonTechnique>, Supplier<SoundEvent>> voiceLinesUnregistered;
@@ -58,6 +59,13 @@ public abstract class HamonAction extends NonStandAction {
             shout = super.getShout(user, power, target, wasActive);
         }
         return shout;
+    }
+    
+    @Override
+    public void afterClick(World world, LivingEntity user, INonStandPower power, boolean passedRequirements) {
+        if (!world.isClientSide() && passedRequirements) {
+            power.getTypeSpecificData(ModPowers.HAMON.get()).get().setLastUsedAction(this);
+        }
     }
     
     
