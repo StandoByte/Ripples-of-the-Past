@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -48,7 +49,7 @@ public class StandUtil {
     
     public static StandType<?> randomStandFromTiers(@Nullable int[] tiers, LivingEntity entity, Random random) {
         if (!entity.level.isClientSide()) {
-            List<StandType<?>> stands = availableStands(tiers, entity);
+            List<StandType<?>> stands = availableStands(tiers, entity.level.isClientSide()).collect(Collectors.toList());
 
             if (stands.isEmpty()) {
                 return null;
@@ -65,14 +66,13 @@ public class StandUtil {
         return null;
     }
     
-    public static List<StandType<?>> availableStands(int[] tiers, LivingEntity entity) {
+    public static Stream<StandType<?>> availableStands(@Nullable int[] tiers, boolean clientSide) {
         Collection<StandType<?>> stands = JojoCustomRegistries.STANDS.getRegistry().getValues();
         return stands.stream()
                 .filter(stand -> (
                         tiers == null ||
                         Arrays.stream(tiers).anyMatch(tier -> tier == stand.getTier()))
-                        && !JojoModConfig.getCommonConfigInstance(entity.level.isClientSide()).isStandBanned(stand))
-                .collect(Collectors.toList());
+                        && !JojoModConfig.getCommonConfigInstance(clientSide).isStandBanned(stand));
     }
     
     public static int[] standTiersFromXp(int playerXpLvl, boolean withConfigBans, boolean isClientSide) {

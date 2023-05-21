@@ -6,9 +6,11 @@ import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
+import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -22,6 +24,8 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.ResourceLocationException;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.fml.common.thread.SidedThreadGroups;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 
 public class StandArgument implements ArgumentType<StandType<?>> {
     private static final Collection<String> EXAMPLES = Arrays.asList("star_platinum", "jojo:hierophant_green");
@@ -67,18 +71,19 @@ public class StandArgument implements ArgumentType<StandType<?>> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(final CommandContext<S> context, final SuggestionsBuilder builder) {
-        return suggestIterable(JojoCustomRegistries.STANDS.getRegistry().getKeys(), builder);
+        boolean isClientSide = Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT;
+        return suggestIterable(StandUtil.availableStands(null, isClientSide).map(IForgeRegistryEntry::getRegistryName), builder);
     }
 
-    private static CompletableFuture<Suggestions> suggestIterable(Iterable<ResourceLocation> registryKeys, SuggestionsBuilder builder) {
+    private static CompletableFuture<Suggestions> suggestIterable(Stream<ResourceLocation> registryKeys, SuggestionsBuilder builder) {
         String s = builder.getRemaining().toLowerCase(Locale.ROOT);
         addSuggestions(registryKeys, s, (resLoc) -> resLoc, (resLoc) -> builder.suggest(resLoc.toString()));
         return builder.buildFuture();
     }
 
-    private static <T> void addSuggestions(Iterable<T> iterable, String remaining, Function<T, ResourceLocation> toResLoc, Consumer<T> suggest) {
+    private static <T> void addSuggestions(Stream<T> stream, String remaining, Function<T, ResourceLocation> toResLoc, Consumer<T> suggest) {
         boolean inputColon = remaining.indexOf(':') > -1;
-        for(T t : iterable) {
+        stream.forEach(t -> {
             ResourceLocation resourceLocation = toResLoc.apply(t);
             if (inputColon) {
                 String s = resourceLocation.toString();
@@ -88,7 +93,7 @@ public class StandArgument implements ArgumentType<StandType<?>> {
             } else if (resourceLocation.getNamespace().startsWith(remaining) || resourceLocation.getNamespace().equals(JojoMod.MOD_ID) && resourceLocation.getPath().startsWith(remaining)) {
                 suggest.accept(t);
             }
-        }
+        });
     }
 
     @Override

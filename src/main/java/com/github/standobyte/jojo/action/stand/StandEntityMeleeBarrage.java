@@ -221,7 +221,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
         public Builder() {
             super();
             standPose(StandPose.BARRAGE)
-            .standAutoSummonMode(AutoSummonMode.ARMS).holdType().staminaCostTick(3F)
+            .standAutoSummonMode(AutoSummonMode.ARMS).holdType().staminaCostTick(4F)
             .standUserWalkSpeed(0.15F).standOffsetFront()
             .partsRequired(StandPart.ARMS);
         }

@@ -409,6 +409,7 @@
   "jojo.command.desc.rockpaperscissors": "Play rock-paper-scissors with another player!",
   "jojo.command.desc.stand": "Gives, clears or retrieves the name of a player's Stand",
   "jojo.command.desc.standlevel": "Sets, adds or retrieves the Stand level value",
+  "jojo.command.desc.standdisc": "Gives a Stand Disc item with a specific/random Stand",
   
   "jojo.message.skip_soul_ascension": "Press %s to skip the soul ascension",
   

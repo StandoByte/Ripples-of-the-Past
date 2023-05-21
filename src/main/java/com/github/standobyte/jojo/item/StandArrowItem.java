@@ -208,7 +208,7 @@ public class StandArrowItem extends ArrowItem {
                 boolean shift = ClientUtil.isShiftPressed();
                 if (shift) {
                     tooltip.add(new TranslationTextComponent("jojo.arrow.stands_list"));
-                    StandUtil.availableStands(currentTiers, player).forEach(
+                    StandUtil.availableStands(currentTiers, true).forEach(
                             stand -> tooltip.add(stand.getName().withStyle(TextFormatting.GRAY)));
                 }
                 else {

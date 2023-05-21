@@ -183,16 +183,16 @@ public class JojoModConfig {
             
             builder.comment(" Settings of Stand Arrow and the Stands pool.").push("Stand Arrow");
                 prioritizeLeastTakenStands = builder
-                        .comment("    If enabled, random Stand gain effects (Stand Arrow, /stand random) give Stands that less players already have.", 
+                        .comment("    If enabled, random Stand gain effects (Stand Arrow, \"/stand random\") give Stands that less players already have.", 
                                  "     Otherwise the Stand selection is random.")
                         .translation("jojo.config.prioritizeLeastTakenStands")
                         .define("prioritizeLeastTakenStands", false);
                 
                 bannedStands = builder
-                        .comment("    List of Stands excluded from Stand Arrow and /stand random pool.",
-                                 "     These stands will still be available via /stand give command",
+                        .comment("    List of Stands excluded from Stand Arrow, as well as \"/stand random\" and \"/standdisc random\" pools.",
+                                 "     These stands will still be available via commands such as \"/stand give\", but won't be suggested for autocompletion.",
                                  "     Their Discs won't be added to the mod's Creative tab, but they can still be found in the Search tab (although they can't be used to gain a banned Stand).\"",
-                                 "     The format is the same as for /stand give command (e.g., \"jojo:star_platinum\").")
+                                 "     The format is the same as for \"/stand give\" command (e.g., \"jojo:star_platinum\").")
                         .translation("jojo.config.bannedStands")
                         .defineListAllowEmpty(Lists.newArrayList("bannedStands"), 
                                 () -> Arrays.asList("jojo:example_1", "jojo:example_2"), 
