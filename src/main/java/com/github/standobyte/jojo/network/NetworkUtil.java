@@ -37,8 +37,7 @@ public class NetworkUtil {
     public static void broadcastWithCondition(List<ServerPlayerEntity> players, @Nullable PlayerEntity clientHandled, 
             double x, double y, double z, double radius, RegistryKey<World> dimension, IPacket<IClientPlayNetHandler> packet, 
             Predicate<PlayerEntity> condition) {
-        for (int i = 0; i < players.size(); ++i) {
-            ServerPlayerEntity player = players.get(i);
+        for (ServerPlayerEntity player : players) {
             if (player != clientHandled && player.level.dimension() == dimension && condition.test(player)) {
                 double d0 = x - player.getX();
                 double d1 = y - player.getY();
@@ -46,6 +45,15 @@ public class NetworkUtil {
                 if (d0 * d0 + d1 * d1 + d2 * d2 < radius * radius) {
                     player.connection.send(packet);
                 }
+            }
+        }
+    }
+
+    public static void broadcastWithCondition(List<ServerPlayerEntity> players, 
+            IPacket<IClientPlayNetHandler> packet, Predicate<PlayerEntity> condition) {
+        for (ServerPlayerEntity player : players) {
+            if (condition.test(player)) {
+                player.connection.send(packet);
             }
         }
     }

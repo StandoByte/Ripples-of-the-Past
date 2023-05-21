@@ -50,6 +50,7 @@ import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
+import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartPacket;
@@ -66,8 +67,8 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismPo
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
-import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
+import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.type.EntityStandType;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.tileentity.StoneMaskTileEntity;
@@ -116,6 +117,7 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.network.play.server.SChatPacket;
 import net.minecraft.network.play.server.SPlayEntityEffectPacket;
 import net.minecraft.network.play.server.SPlaySoundEffectPacket;
 import net.minecraft.network.play.server.SRemoveEntityEffectPacket;
@@ -124,6 +126,7 @@ import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.scoreboard.Team;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraft.tileentity.TileEntity;
@@ -1353,6 +1356,35 @@ public class GameplayEventHandler {
                 event.setDistance(Math.max(event.getDistance() - (leapStrength + 5) * 3, 0));
             }
         }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void messageAsStand(ServerChatEvent event) {
+        ServerPlayerEntity player = event.getPlayer();
+        IStandPower.getStandPowerOptional(player).ifPresent(stand -> {
+            if (stand.hasPower() && stand.isActive() && stand.getStandManifestation() instanceof StandEntity) {
+                StandEntity standEntity = (StandEntity) stand.getStandManifestation();
+                if (standEntity.isManuallyControlled()) {
+                    event.setCanceled(true);
+                    MinecraftServer server = player.server;
+                    
+                    ITextComponent msg = new TranslationTextComponent("chat.type.text", 
+                            standEntity.getDisplayName(), ForgeHooks.newChatWithLinks(event.getMessage()));
+                    server.sendMessage(msg, player.getUUID());
+                    SChatPacket messagePacket = new SChatPacket(msg, ChatType.CHAT, player.getUUID());
+                    
+                    if (standEntity.isVisibleForAll()) {
+                        server.getPlayerList().broadcastAll(messagePacket);
+                    }
+                    else {
+                        NetworkUtil.broadcastWithCondition(server.getPlayerList().getPlayers(), messagePacket, StandUtil::playerCanHearStands);
+                    }
+                    
+                    player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(
+                            cap -> cap.onChatMsgBypassingSpamCheck(server, player));
+                }
+            }
+        });
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)

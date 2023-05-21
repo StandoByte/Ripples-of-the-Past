@@ -12,6 +12,7 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.GameplayEventHandler;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -57,17 +58,20 @@ public class CDBloodCutterEntity extends ModdedProjectileEntity {
     
     @Override
     protected boolean hurtTarget(Entity target, @Nullable LivingEntity owner) {
-        if (target instanceof LivingEntity && INonStandPower.getNonStandPowerOptional((LivingEntity) target)
-                .map(power -> {
-                    if (power.getType() == ModPowers.VAMPIRISM.get()) {
-                        target.playSound(ModSounds.VAMPIRE_BLOOD_DRAIN.get(), 1.0F, 1.0F);
-                        power.addEnergy(5F);
-                        return true;
-                    }
-                    return false;
-                }).orElse(false)) {
-            remove();
-            return false;
+        if (target instanceof LivingEntity){
+            LivingEntity targetLiving = (LivingEntity) target;
+            
+            if (GeneralUtil.orElseFalse(INonStandPower.getNonStandPowerOptional(targetLiving), power -> {
+                if (power.getType() == ModPowers.VAMPIRISM.get()) {
+                    target.playSound(ModSounds.VAMPIRE_BLOOD_DRAIN.get(), 1.0F, 1.0F);
+                    power.addEnergy(5F);
+                    return true;
+                }
+                return false;
+            })) {
+                remove();
+                return false;
+            }
         }
         return super.hurtTarget(target, owner);
     }

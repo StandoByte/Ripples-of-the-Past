@@ -22,9 +22,11 @@ import com.github.standobyte.jojo.util.general.OptionalFloat;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 
 public class PlayerUtilCap {
     private final PlayerEntity player;
@@ -50,6 +52,8 @@ public class PlayerUtilCap {
     private boolean doubleShiftPress = false;
     private boolean shiftSynced = false;
     
+    private int chatSpamTickCount = 0;
+    
     public PlayerUtilCap(PlayerEntity player) {
         this.player = player;
     }
@@ -62,9 +66,8 @@ public class PlayerUtilCap {
             tickVoiceLines();
             tickClientInputTimer();
             
-            if (knivesThrewTicks > 0) {
-                knivesThrewTicks--;
-            }
+            if (knivesThrewTicks > 0) knivesThrewTicks--;
+            if (chatSpamTickCount > 0) chatSpamTickCount--;
         }
         
         tickContinuousAction();
@@ -276,6 +279,15 @@ public class PlayerUtilCap {
     
     public boolean hasEarbuds() {
         return walkmanEarbuds;
+    }
+    
+    
+    
+    public void onChatMsgBypassingSpamCheck(MinecraftServer server, ServerPlayerEntity serverPlayer) {
+        chatSpamTickCount += 20;
+        if (chatSpamTickCount > 200 && !server.getPlayerList().isOp(player.getGameProfile())) {
+            serverPlayer.connection.disconnect(new TranslationTextComponent("disconnect.spam"));
+        }
     }
     
     

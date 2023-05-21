@@ -578,6 +578,7 @@ public class ClientEventHandler {
         }
     }
     
+    private boolean eventPosted = false;
     @SubscribeEvent(priority = EventPriority.LOW)
     public void onRenderHand(RenderHandEvent event) {
         if (!event.isCanceled() && event.getHand() == Hand.MAIN_HAND) {
@@ -588,7 +589,7 @@ public class ClientEventHandler {
                     if (power.isActionOnCooldown(ModHamonActions.HAMON_ZOOM_PUNCH.get())) {
                         event.setCanceled(true);
                     }
-                    else {
+                    else if (!eventPosted) {
                         ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
                         if ((hud.isActionSelectedAndEnabled(ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get()))
                                 && livingEntity.getMainHandItem().isEmpty() && livingEntity.getOffhandItem().isEmpty()) {
@@ -600,6 +601,7 @@ public class ClientEventHandler {
                             float f7 = 1.0F - MathHelper.lerp(event.getPartialTicks(), ClientReflection.getOffHandHeightPrev(renderer), ClientReflection.getOffHandHeight(renderer));
                             MatrixStack matrixStack = event.getMatrixStack();
                             
+                            eventPosted = true;
                             if (!ForgeHooksClient.renderSpecificFirstPersonHand(Hand.OFF_HAND, 
                                     matrixStack, event.getBuffers(), event.getLight(), 
                                     event.getPartialTicks(), event.getInterpolatedPitch(), 
@@ -609,6 +611,7 @@ public class ClientEventHandler {
                                 matrixStack.popPose();
                                 // i've won... but at what cost?
                             }
+                            eventPosted = false;
                         }
                     }
                 });

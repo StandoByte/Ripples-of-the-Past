@@ -168,7 +168,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     private IPunch lastPunch;
     private BarrageSwingsHolder<?, ?> barrageSwings;
     private final BarrageHitSoundHandler barrageSounds;
-
+    
     public StandEntity(StandEntityType<? extends StandEntity> type, World world) {
         super(type, world);
         this.type = type;
