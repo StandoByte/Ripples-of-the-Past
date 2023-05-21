@@ -153,6 +153,7 @@ public class StandDiscItem extends Item {
                 }
             }
         }
+        tooltip.add(new TranslationTextComponent("item.jojo.creative_only_tooltip").withStyle(TextFormatting.DARK_GRAY));
     }
     
     @Nullable

@@ -128,7 +128,16 @@ public class ModItems {
             () -> new StandDiscItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1)));
 
     public static final RegistryObject<StandRemoverItem> STAND_REMOVER = ITEMS.register("stand_remover",
-            () -> new StandRemoverItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1)));
+            () -> new StandRemoverItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1), StandRemoverItem.Mode.CLEAR, false));
+
+    public static final RegistryObject<StandRemoverItem> STAND_REMOVER_ONE_TIME = ITEMS.register("stand_remover_one_time",
+            () -> new StandRemoverItem(new Item.Properties().stacksTo(1), StandRemoverItem.Mode.CLEAR, true));
+
+    public static final RegistryObject<StandRemoverItem> STAND_EJECT = ITEMS.register("stand_eject",
+            () -> new StandRemoverItem(new Item.Properties().stacksTo(1), StandRemoverItem.Mode.EJECT, false));
+
+    public static final RegistryObject<StandRemoverItem> STAND_EJECT_ONE_TIME = ITEMS.register("stand_eject_one_time",
+            () -> new StandRemoverItem(new Item.Properties().stacksTo(1), StandRemoverItem.Mode.EJECT, true));
 
     public static final RegistryObject<Item> COCOA_GUM = ITEMS.register("cocoa_gum", 
             () -> new GumItem(new Item.Properties()/*.tab(JojoMod.MAIN_TAB)*/.food(new Food.Builder().nutrition(2).saturationMod(0.1F).build())));
