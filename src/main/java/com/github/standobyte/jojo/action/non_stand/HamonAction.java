@@ -11,10 +11,13 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
 public abstract class HamonAction extends NonStandAction {
@@ -70,6 +73,17 @@ public abstract class HamonAction extends NonStandAction {
     
     protected boolean changesAuraColor() {
         return true;
+    }
+    
+    @Override
+    public IFormattableTextComponent getNameLocked(INonStandPower power) {
+        AbstractHamonSkill skill = getSkillToUnlock();
+        return skill != null ? new TranslationTextComponent("jojo.layout_edit.locked.hamon_skill", skill.getNameTranslated())
+                : super.getNameLocked(power);
+    }
+    
+    private AbstractHamonSkill getSkillToUnlock() {
+        return null;
     }
     
     

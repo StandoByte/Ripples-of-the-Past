@@ -12,7 +12,6 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
 
 public class HamonSkillElementTechniquePerk extends HamonSkillGuiElement {
     private final List<IReorderingProcessor> perkDesc;
@@ -20,8 +19,8 @@ public class HamonSkillElementTechniquePerk extends HamonSkillGuiElement {
     public HamonSkillElementTechniquePerk(AbstractHamonSkill skill, int x, int y, FontRenderer font) {
         super(skill, x, y, 16, 16);
         this.perkDesc = Stream.concat(
-                font.split(new TranslationTextComponent("hamonSkill." + skill.getName() + ".name"), 200).stream(), 
-                font.split(new TranslationTextComponent("hamonSkill." + skill.getName() + ".desc").withStyle(TextFormatting.ITALIC), 200).stream()).collect(Collectors.toList());
+                font.split(skill.getNameTranslated(), 200).stream(), 
+                font.split(skill.getDescTranslated().withStyle(TextFormatting.ITALIC), 200).stream()).collect(Collectors.toList());
     }
 
     @Override

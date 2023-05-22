@@ -236,8 +236,8 @@ public class HamonStatsTabGui extends HamonTabGui {
     }
 
     @Override
-    boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
-        if (mouseAtMeditationBar((int) mouseX, (int) mouseY)) {
+    boolean mouseClicked(double mouseX, double mouseY, int mouseButton, boolean mouseInsideWindow) {
+        if (mouseInsideWindow && mouseAtMeditationBar((int) mouseX, (int) mouseY)) {
             PacketManager.sendToServer(new ClHamonMeditationPacket(!screen.hamon.isMeditating()));
             screen.onClose();
         }

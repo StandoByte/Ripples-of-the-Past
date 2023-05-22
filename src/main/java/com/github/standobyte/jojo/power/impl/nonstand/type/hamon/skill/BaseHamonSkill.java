@@ -13,7 +13,7 @@ public class BaseHamonSkill extends AbstractHamonSkill {
     private final boolean unlockedByDefault;
 
     public BaseHamonSkill(Builder builder) {
-        super(builder.name, builder.rewardType, builder.rewardAction, builder.requiredSkills);
+        super(builder.rewardType, builder.rewardAction, builder.requiredSkills);
         this.hamonStat = builder.hamonStat;
         this.unlockedByDefault = builder.unlockedByDefault;
     }
@@ -46,15 +46,13 @@ public class BaseHamonSkill extends AbstractHamonSkill {
     
     
     public static class Builder {
-        private final String name;
         private final RewardType rewardType;
         private final HamonStat hamonStat;
         private @Nullable Supplier<? extends HamonAction> rewardAction = null;
         private boolean unlockedByDefault = false;
         private final List<Supplier<? extends AbstractHamonSkill>> requiredSkills = new ArrayList<>();
         
-        public Builder(String name, HamonStat hamonStat, RewardType rewardType) {
-            this.name = name;
+        public Builder(HamonStat hamonStat, RewardType rewardType) {
             this.hamonStat = hamonStat;
             this.rewardType = rewardType;
         }

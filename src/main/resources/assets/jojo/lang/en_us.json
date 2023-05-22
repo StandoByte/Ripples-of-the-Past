@@ -361,6 +361,7 @@
   "jojo.screen.edit_hud_layout.abilities": "Abilities",
   "jojo.screen.edit_hud_layout.mmb": "Quick Access",
   "jojo.screen.edit_hud_layout.reset": "Reset Layout",
+  "jojo.screen.edit_hud_layout.hint": "Left mouse button - move\nRight mouse button - enable/disable\nMiddle mouse button - quickly move to the quick access slot",
   
   "jojo.overlay.mode_deselect": "Deselect",
   "jojo.overlay.mode_key": "[%s] %s",
@@ -398,7 +399,7 @@
   "jojo.layout_edit.locked": "Locked",
   "jojo.layout_edit.locked.stand": "Unlocks at %s level %s",
   "jojo.layout_edit.locked.stand.resolve": "Resolve",
-  "jojo.layout_edit.locked.hamon": "",
+  "jojo.layout_edit.locked.hamon_skill": "Unlocks with %s skill",
   
   "jojo.command_description": "%s - %s",
   "jojo.command.desc.genstandstats": "Generates a Stand stats data pack",

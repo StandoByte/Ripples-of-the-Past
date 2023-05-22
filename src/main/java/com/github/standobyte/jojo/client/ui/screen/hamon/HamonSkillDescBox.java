@@ -15,7 +15,6 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.TranslationTextComponent;
 
 // FIXME !!!!! (hamon ui) skill desc box
 /*
@@ -61,7 +60,7 @@ public class HamonSkillDescBox {
     }
     
     protected List<IReorderingProcessor> createFullDescText(AbstractHamonSkill skill, FontRenderer font, int textWidth) {
-        return font.split(new TranslationTextComponent("hamonSkill." + skill.getName() + ".desc"), textWidth);
+        return font.split(skill.getDescTranslated(), textWidth);
     }
     
     public void renderBg(MatrixStack matrixStack, int x, int y, int mouseX, int mouseY) {

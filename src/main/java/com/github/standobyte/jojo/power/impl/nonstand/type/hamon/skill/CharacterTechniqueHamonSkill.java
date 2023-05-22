@@ -13,7 +13,7 @@ public class CharacterTechniqueHamonSkill extends AbstractHamonSkill {
     private final boolean addsActionToHUD;
     
     public CharacterTechniqueHamonSkill(Builder builder) {
-        super(builder.name, builder.rewardType, builder.rewardAction, builder.requiredSkills);
+        super(builder.rewardType, builder.rewardAction, builder.requiredSkills);
         this.addsActionToHUD = builder.addsActionToHUD;
     }
     
@@ -38,14 +38,12 @@ public class CharacterTechniqueHamonSkill extends AbstractHamonSkill {
     
     
     public static class Builder {
-        private final String name;
         private final RewardType rewardType;
         private @Nullable Supplier<? extends HamonAction> rewardAction = null;
         private boolean addsActionToHUD = false;
         private final List<Supplier<? extends AbstractHamonSkill>> requiredSkills = new ArrayList<>();
         
-        public Builder(String name, RewardType rewardType) {
-            this.name = name;
+        public Builder(RewardType rewardType) {
             this.rewardType = rewardType;
         }
         

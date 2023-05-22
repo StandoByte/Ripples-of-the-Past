@@ -100,8 +100,11 @@ public class HamonScreen extends Screen {
                 return true;
             }
         }
-        if (selectedTab != null && mouseInsideWindow(mouseX, mouseY)) {
-            if (selectedTab.mouseClicked(mouseX - x - WINDOW_THIN_BORDER, mouseY - y - WINDOW_UPPER_BORDER, mouseButton)) {
+        if (selectedTab != null) {
+            if (selectedTab.mouseClicked(
+                    mouseX - x - WINDOW_THIN_BORDER, 
+                    mouseY - y - WINDOW_UPPER_BORDER, 
+                    mouseButton, mouseInsideWindow(mouseX, mouseY))) {
                 return true;
             }
         }

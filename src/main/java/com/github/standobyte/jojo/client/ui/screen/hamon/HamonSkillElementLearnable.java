@@ -68,7 +68,7 @@ public class HamonSkillElementLearnable extends HamonSkillGuiElement {
         if (!missingSkills.isEmpty()) {
             tooltip.add(new TranslationTextComponent("hamon.skill.required_skills_list").withStyle(TextFormatting.GRAY, TextFormatting.ITALIC));
             for (AbstractHamonSkill skill : missingSkills) {
-                tooltip.add(new TranslationTextComponent("hamonSkill." + skill.getName() + ".name").withStyle(TextFormatting.RED));
+                tooltip.add(skill.getNameTranslated().withStyle(TextFormatting.RED));
             }
         }
         

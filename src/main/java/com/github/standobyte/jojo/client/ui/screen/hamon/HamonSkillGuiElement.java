@@ -4,7 +4,6 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractH
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 
 public class HamonSkillGuiElement {
     protected final AbstractHamonSkill skill;
@@ -17,7 +16,7 @@ public class HamonSkillGuiElement {
     public HamonSkillGuiElement(AbstractHamonSkill skill, 
             int x, int y, int width, int height) {
         this.skill = skill;
-        this.name = new TranslationTextComponent("hamonSkill." + skill.getName() + ".name");
+        this.name = skill.getNameTranslated();
         this.x = x;
         this.y = y;
         this.width = width;

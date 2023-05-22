@@ -196,7 +196,7 @@ public abstract class HamonTabGui extends AbstractGui {
         }
     }
     
-    abstract boolean mouseClicked(double mouseX, double mouseY, int mouseButton);
+    abstract boolean mouseClicked(double mouseX, double mouseY, int mouseButton, boolean mouseInsideWindow);
     
     abstract boolean mouseReleased(double mouseX, double mouseY, int mouseButton);
 

@@ -140,6 +140,7 @@ public class HudLayoutEditingScreen extends Screen {
         renderTabButtons(matrixStack, false);
         renderWindow(matrixStack);
         renderTabButtons(matrixStack, true);
+        renderHint(matrixStack);
         renderSlots(matrixStack, mouseX, mouseY);
         renderDragged(matrixStack, mouseX, mouseY);
         renderToolTips(matrixStack, mouseX, mouseY);
@@ -288,6 +289,13 @@ public class HudLayoutEditingScreen extends Screen {
         return mouseX >= HOTBARS_X && mouseX < HOTBARS_X + 18 && mouseY >= QUICK_ACCESS_Y && mouseY < QUICK_ACCESS_Y + 18;
     }
     
+    private void renderHint(MatrixStack matrixStack) {
+        minecraft.getTextureManager().bind(WINDOW);
+        int x = getWindowX() + WINDOW_WIDTH - 48;
+        int y = getWindowY() + WINDOW_HEIGHT - 17;
+        blit(matrixStack, x, y, 32, 245, 11, 11);
+    }
+    
     private void renderToolTips(MatrixStack matrixStack, int mouseX, int mouseY) {
         if (draggedAction.isPresent()) return;
         int tab = getTabButtonAt(mouseX, mouseY);
@@ -296,6 +304,12 @@ public class HudLayoutEditingScreen extends Screen {
         }
         else {
             renderActionNameTooltip(matrixStack, mouseX, mouseY);
+        }
+        
+        int hintX = getWindowX() + WINDOW_WIDTH - 48;
+        int hintY = getWindowY() + WINDOW_HEIGHT - 17;
+        if (mouseX >= hintX && mouseX < hintX + 11 && mouseY >= hintY && mouseY < hintY + 11) {
+            renderTooltip(matrixStack, new TranslationTextComponent("jojo.screen.edit_hud_layout.hint"), mouseX, mouseY);
         }
     }
     
@@ -425,6 +439,18 @@ public class HudLayoutEditingScreen extends Screen {
     
     private <P extends IPower<P, ?>> boolean isActionVisible(Action<P> action, IPower<?, ?> power) {
         return action.getVisibleAction((P) power) != null;
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scroll) {
+        if (hoveredAction.isPresent()) {
+            ActionType hotbar = hoveredAction.get().hotbar;
+            if (hotbar != null) {
+                ActionsOverlayGui.getInstance().scrollAction(hotbar, scroll > 0);
+                return true;
+            }
+        }
+        return super.mouseScrolled(mouseX, mouseY, scroll);
     }
     
     private boolean shift = false;

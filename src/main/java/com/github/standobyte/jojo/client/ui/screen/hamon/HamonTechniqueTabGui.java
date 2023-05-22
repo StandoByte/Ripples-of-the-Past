@@ -185,9 +185,9 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
     }
     
     @Override
-    boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
+    boolean mouseClicked(double mouseX, double mouseY, int mouseButton, boolean mouseInsideWindow) {
         if (isLocked()) return false;
-        return super.mouseClicked(mouseX, mouseY, mouseButton);
+        return super.mouseClicked(mouseX, mouseY, mouseButton, mouseInsideWindow);
     }
 
     @Override

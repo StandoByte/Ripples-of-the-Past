@@ -225,8 +225,8 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
     }
 
     @Override
-    boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
-        if (mouseButton == 0) {
+    boolean mouseClicked(double mouseX, double mouseY, int mouseButton, boolean mouseInsideWindow) {
+        if (mouseInsideWindow && mouseButton == 0) {
             for (HamonSkillElementLearnable skill : skills.values()) {
                 if (skill.isMouseOver(intScrollX, intScrollY, (int) mouseX, (int) mouseY)) {
                     selectSkill(skill);

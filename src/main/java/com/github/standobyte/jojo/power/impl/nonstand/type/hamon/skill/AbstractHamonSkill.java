@@ -6,32 +6,29 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.non_stand.HamonAction;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
 public abstract class AbstractHamonSkill extends ForgeRegistryEntry<AbstractHamonSkill> {
-    private final String name;
     private final RewardType rewardType;
     private final @Nullable Supplier<? extends HamonAction> rewardAction;
     private final List<Supplier<? extends AbstractHamonSkill>> requiredSkills;
 
-    protected AbstractHamonSkill(String name, RewardType rewardType, @Nullable Supplier<? extends HamonAction> rewardAction, 
+    protected AbstractHamonSkill(RewardType rewardType, @Nullable Supplier<? extends HamonAction> rewardAction, 
             List<Supplier<? extends AbstractHamonSkill>> requiredSkills) {
-        this.name = name;
         this.rewardType = rewardType;
         this.rewardAction = rewardAction;
         this.requiredSkills = requiredSkills;
-    }
-
-    public String getName() {
-        return name;
     }
     
     public RewardType getRewardType() {
@@ -66,6 +63,26 @@ public abstract class AbstractHamonSkill extends ForgeRegistryEntry<AbstractHamo
     
     public void learnNewSkill(HamonData hamon, LivingEntity user) {
         hamon.addHamonSkill(user, this, true, true);
+    }
+    
+    public IFormattableTextComponent getNameTranslated() {
+        return new TranslationTextComponent("hamonSkill." + getName() + ".name");
+    }
+    
+    public IFormattableTextComponent getDescTranslated() {
+        return new TranslationTextComponent("hamonSkill." + getName() + ".desc");
+    }
+    
+    private String translationKey = null;
+    public String getName() {
+        if (translationKey == null) {
+            ResourceLocation regName = getRegistryName();
+            translationKey = regName.getPath();
+            if (!JojoMod.MOD_ID.equals(regName.getNamespace())) {
+                translationKey = regName.getNamespace() + "." + translationKey;
+            }
+        }
+        return this.translationKey;
     }
     
     

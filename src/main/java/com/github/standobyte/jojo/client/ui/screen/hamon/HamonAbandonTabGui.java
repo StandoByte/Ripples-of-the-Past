@@ -61,7 +61,7 @@ public class HamonAbandonTabGui extends HamonTabGui {
     }
 
     @Override
-    boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
+    boolean mouseClicked(double mouseX, double mouseY, int mouseButton, boolean mouseInsideWindow) {
         return false;
     }
 
