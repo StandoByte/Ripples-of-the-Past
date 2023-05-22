@@ -361,6 +361,9 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> HIEROPHANT_GREEN_SUMMON = SOUNDS.register("hierophant_green_summon", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "hierophant_green_summon")));
     
+    public static final RegistryObject<SoundEvent> HIEROPHANT_GREEN_UNSUMMON = SOUNDS.register("hierophant_green_unsummon", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "hierophant_green_unsummon")));
+    
     public static final RegistryObject<SoundEvent> HIEROPHANT_GREEN_TENTACLES = SOUNDS.register("hierophant_green_tentacles", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "hierophant_green_tentacles")));
     
@@ -422,6 +425,9 @@ public class ModSounds {
 
     public static final RegistryObject<SoundEvent> THE_WORLD_SUMMON = SOUNDS.register("the_world_summon", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "the_world_summon")));
+
+    public static final RegistryObject<SoundEvent> THE_WORLD_UNSUMMON = SOUNDS.register("the_world_unsummon", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "the_world_unsummon")));
     
     public static final RegistryObject<SoundEvent> THE_WORLD_MUDA_MUDA_MUDA = SOUNDS.register("the_world_muda_muda_muda", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "the_world_muda_muda_muda")));
@@ -518,6 +524,9 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> MAGICIANS_RED_SUMMON = SOUNDS.register("magicians_red_summon", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "magicians_red_summon")));
+    
+    public static final RegistryObject<SoundEvent> MAGICIANS_RED_UNSUMMON = SOUNDS.register("magicians_red_unsummon", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "magicians_red_unsummon")));
 
     public static final RegistryObject<SoundEvent> MAGICIANS_RED_FIRE_BLAST = SOUNDS.register("magicians_red_fire_ability", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "magicians_red_fire_ability")));

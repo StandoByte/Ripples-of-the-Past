@@ -316,7 +316,8 @@ public class ModStandsInit {
 
                     ENTITIES, 
                     () -> new StandEntityType<TheWorldEntity>(TheWorldEntity::new, 0.7F, 2.1F)
-                    .summonSound(ModSounds.THE_WORLD_SUMMON))
+                    .summonSound(ModSounds.THE_WORLD_SUMMON)
+                    .unsummonSound(ModSounds.THE_WORLD_UNSUMMON))
             .withDefaultStandAttributes();
     
     
@@ -398,7 +399,8 @@ public class ModStandsInit {
 
                     ENTITIES, 
                     () -> new StandEntityType<HierophantGreenEntity>(HierophantGreenEntity::new, 0.6F, 1.9F)
-                    .summonSound(ModSounds.HIEROPHANT_GREEN_SUMMON))
+                    .summonSound(ModSounds.HIEROPHANT_GREEN_SUMMON)
+                    .unsummonSound(ModSounds.HIEROPHANT_GREEN_UNSUMMON))
             .withDefaultStandAttributes();
     
     
@@ -572,7 +574,8 @@ public class ModStandsInit {
                     
                     ENTITIES, 
                     () -> new StandEntityType<MagiciansRedEntity>(MagiciansRedEntity::new, 0.65F, 1.95F)
-                    .summonSound(ModSounds.MAGICIANS_RED_SUMMON))
+                    .summonSound(ModSounds.MAGICIANS_RED_SUMMON)
+                    .unsummonSound(ModSounds.MAGICIANS_RED_UNSUMMON))
             .withDefaultStandAttributes();
     
     
