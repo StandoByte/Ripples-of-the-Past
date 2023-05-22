@@ -1,11 +1,14 @@
 package com.github.standobyte.jojo.client.ui.actionshud;
 
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.client.ClientTicking.ITicking;
+import com.github.standobyte.jojo.client.ClientTicking;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.Alignment;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.BarsOrientation;
@@ -24,6 +27,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -171,7 +175,7 @@ public abstract class BarsRenderer {
             int texX, int texY, int width, int length, int fill, int barColor, float barAlpha, 
             int borderTexX, int borderTexY, int scaleTexX, int scaleTexY, 
             int tranclucentFill, int cost1Fill, int cost2Fill, float costTick, 
-            boolean fillEffect, BarType barType) {
+            boolean fillEffect, BarType barType, float partialTick) {
         if (barAlpha > 0) {
             float[] rgb = ClientUtil.rgb(barColor);
             if (tranclucentFill > 0) {
@@ -192,11 +196,19 @@ public abstract class BarsRenderer {
             // FIXME cost
             float costAlpha = ClientUtil.getHighlightAlpha(costTick + 40F, 80F, 60F, 0.15F, 0.6F);
             renderCost(matrixStack, x, y, alignment, 
-                    texX, texY, width, length, cost1Fill, fill, 0, 
+                    width, length, cost1Fill, fill, 0, 
                     barAlpha * costAlpha);
             renderCost(matrixStack, x, y, alignment, 
-                    texX, texY, width, length, cost2Fill, fill, 3, 
+                    width, length, cost2Fill, fill, 3, 
                     barAlpha * costAlpha);
+            // red highlight
+            BarEffects barEffects = getBarEffects(barType);
+            if (barEffects.redHighlightTick > 0) {
+                float tick = barEffects.redHighlightTick - partialTick;
+                float alpha = ClientUtil.getHighlightAlpha(tick, 10F, 8F, tick > 5F ? 0.25F : 0, 0.75F);
+                renderRedHighlight(matrixStack, x, y, alignment, 
+                        width, length, alpha);
+            }
             // scale
             drawBarElement(matrixStack, x + 1, y + 1, scaleTexX, scaleTexY, width - 2, length);
             if (barAlpha != 1.0F) {
@@ -215,10 +227,16 @@ public abstract class BarsRenderer {
         gui.blit(matrixStack, x, y, texX, texY, width, length);
     }
     
-    protected void renderCost(MatrixStack matrixStack, int x, int y, Alignment alignment, 
-            int texX, int texY, int width, int length, 
+    protected void renderCost(MatrixStack matrixStack, 
+            int x, int y, Alignment alignment, 
+            int width, int length, 
             int costFill, int barFill, 
             int offset, float alpha) {}
+
+    protected void renderRedHighlight(MatrixStack matrixStack, 
+            int x, int y, Alignment alignment, 
+            int width, int length, 
+            float alpha) {}
     
     protected static final int ICON_WIDTH = 12;
     protected static final int ICON_HEIGHT = 16;
@@ -256,11 +274,44 @@ public abstract class BarsRenderer {
         }
     }
     
-    protected enum BarType {
+    public enum BarType {
         ENERGY_HAMON,
         ENERGY_VAMPIRE,
         STAMINA,
         RESOLVE
+    }
+    
+    
+    
+    private static final Map<BarType, BarEffects> BAR_EFFECTS = Util.make(new HashMap<>(), map -> {
+        for (BarType barType : BarType.values()) {
+            map.put(barType, new BarEffects());
+        }
+    });
+    
+    public static class BarEffects implements ITicking {
+        private int redHighlightTick = 0;
+        
+        private BarEffects() {
+            ClientTicking.addTicking(this);
+        }
+        
+        @Override
+        public void tick() {
+            if (redHighlightTick > 0) redHighlightTick--;
+        }
+        
+        public void triggerRedHighlight() {
+            this.redHighlightTick = 60;
+        }
+        
+        public void resetRedHighlight() {
+            this.redHighlightTick = redHighlightTick % 10;
+        }
+    }
+    
+    public static BarEffects getBarEffects(BarType barType) {
+        return BAR_EFFECTS.get(barType);
     }
     
     

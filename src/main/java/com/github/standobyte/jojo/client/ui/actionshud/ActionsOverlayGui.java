@@ -225,7 +225,7 @@ public class ActionsOverlayGui extends AbstractGui {
         boolean renderQuickAccessSlot = currentMode != null && currentMode.getPower().getActionsLayout().isMmbActionHudVisible();
         updateWarnings(currentMode);
         updateElementPositions(barsPosConfig, hotbarsPosConfig, renderQuickAccessSlot, screenWidth, screenHeight);
-
+        
         RenderGameOverlayEvent.ElementType elementTypeRender = event.getType();
         switch (elementTypeRender) {
         case ALL:
@@ -363,7 +363,11 @@ public class ActionsOverlayGui extends AbstractGui {
                 barsConfig.barsOrientation == BarsOrientation.HORIZONTAL ? BARS_WIDTH_PX : VerticalBarsRenderer.BAR_HEIGHT);
         if (isActive() && (hotbarsConfig == PositionConfig.TOP_LEFT && barsConfig == PositionConfig.LEFT
                 || hotbarsConfig == PositionConfig.TOP_RIGHT && barsConfig == PositionConfig.RIGHT)) {
-            barsPosition.y = Math.max(hotbarsPosition.y + HOTBARS_ELEMENT_HEIGHT_PX + INDENT + VerticalBarsRenderer.ICON_HEIGHT, barsPosition.y);
+            int offset = HOTBARS_ELEMENT_HEIGHT_PX + INDENT + VerticalBarsRenderer.ICON_HEIGHT;
+            if (isQuickAccessSlotRendered) {
+                offset += 24;
+            }
+            barsPosition.y = Math.max(hotbarsPosition.y + offset, barsPosition.y);
         }
         barsPosition.alignment = barsConfig.aligment;
         

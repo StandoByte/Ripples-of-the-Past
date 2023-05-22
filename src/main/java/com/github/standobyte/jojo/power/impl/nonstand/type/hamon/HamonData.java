@@ -26,6 +26,8 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
+import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer;
+import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer.BarType;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModParticles;
@@ -36,9 +38,9 @@ import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonResetSkillsButtonPacket.HamonSkillsTab;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.HamonOutOfBreathPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillAddPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillRemovePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.HamonUiEffectPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonAuraColorPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonAuraColorPacket.HamonAuraColor;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonBreathStabilityPacket;
@@ -144,9 +146,6 @@ public class HamonData extends TypeSpecificData {
                 ClientTickingSoundsHelper.playHamonEnergyConcentrationSound(user, 1.0F);
                 playedEnergySound = true;
             }
-//            if (breathStability < getMaxBreathStability()) {
-//                return power.getEnergy();
-//            }
             updateNoEnergyDecayTicks();
             return power.getEnergy() + getMaxBreathStability() / fullEnergyTicks();
         }
@@ -175,6 +174,7 @@ public class HamonData extends TypeSpecificData {
     }
     
     public void setBreathStability(float value) {
+        value = Math.min(value, getMaxBreathStability());
         boolean send = this.breathStability != value;
         this.breathStability = value;
         this.prevBreathStability = value;
@@ -188,24 +188,27 @@ public class HamonData extends TypeSpecificData {
     private int prevAir = 300;
     private void tickBreathStability() {
         LivingEntity user = power.getUser();
-        int hamonBreathTicks = power.getHeldAction() == ModHamonActions.HAMON_BREATH.get() ? power.getHeldActionTicks() : 0;
         boolean outOfBreath = user.getAirSupply() < user.getMaxAirSupply();
-        boolean mask = user.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.BREATH_CONTROL_MASK.get();
-        boolean meditation = isMeditating() && meditationTicks >= MEDITATION_INC_START;
+        int meditationTicks = isMeditating() ? Math.max(this.meditationTicks - MEDITATION_INC_START, 0) : 0;
         float inc = 0;
         
-        if (!outOfBreath && (!mask || meditation || hamonBreathTicks > 0)) {
+        if (!outOfBreath) {
             inc = getMaxBreathStability() / fullBreathStabilityTicks();
-            if (hamonBreathTicks > 0) {
-                inc *= MathHelper.sqrt(hamonBreathTicks);
+            if (meditationTicks > 0) {
+                inc *= MathHelper.sqrt(meditationTicks);
             }
         }
         
         breathStability = MathHelper.clamp(breathStability + inc, 0, getMaxBreathStability());
         int air = user.getAirSupply();
-        if (!user.level.isClientSide() && breathStability == 0) {
-            if (prevBreathStability > 0 || prevAir > air && air > 0) {
+        if (!user.level.isClientSide()) {
+            if (breathStability == 0 && (prevBreathStability > 0 || prevAir > air && air > 0)) {
                 outOfBreath();
+            }
+        }
+        else if (user == ClientUtil.getClientPlayer()) {
+            if (breathStability >= getMaxBreathStability()) {
+                BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).resetRedHighlight();
             }
         }
         prevBreathStability = breathStability;
@@ -222,14 +225,15 @@ public class HamonData extends TypeSpecificData {
     
     private float fullBreathStabilityTicks() {
         float ticks = 1000F - (600F * breathingTrainingLevel / MAX_BREATHING_LEVEL);
-        if (swimmingCompleted) {
-            ticks *= SWIMMING_COMPLETED_BREATH_STABILITY_TIME_MULTIPLIER;
-        }
         return ticks;
     }
     
     public float getMaxBreathStability() {
-        return NonStandPower.BASE_MAX_ENERGY * (1F + getHamonControlLevel() * 0.1F);
+        float max = NonStandPower.BASE_MAX_ENERGY * (1F + getHamonControlLevel() * 0.1F);
+        if (swimmingCompleted) {
+            max *= SWIMMING_COMPLETED_MAX_ENERGY_MULTIPLIER;
+        }
+        return max;
     }
     
     public void setNoEnergyDecayTicks(TrHamonEnergyTicksPacket packet) {
@@ -285,36 +289,41 @@ public class HamonData extends TypeSpecificData {
             return 1;
         }
         
-        else {
-            float energyFirst = power.getEnergy();
-            float energyRatio = energyFirst / energyNeeded;
+        else if (power.getEnergy() > 0) {
+            float energyRatio = power.getEnergy() / energyNeeded;
             if (doConsume) {
                 power.setEnergy(0);
             }
-            energyNeeded -= energyFirst;
-            
-            float energyLeft = getBreathStability() * 3;
-            if (energyLeft == 0) {
+            return 0.25F + 0.75F * energyRatio;
+        }
+        
+        else {
+            float energyFromStability = getBreathStability() * 3;
+            if (energyFromStability == 0) {
                 return 0;
             }
-            
+            float energyRatio = Math.min(energyFromStability / energyNeeded, 1);
             if (doConsume) {
-                if (energyLeft < energyNeeded) {
+                if (energyFromStability < energyNeeded) {
                     setBreathStability(0);
                     outOfBreath();
                 }
                 else {
-                    setBreathStability((energyLeft - energyNeeded) / 3);
+                    setBreathStability((energyFromStability - energyNeeded) / 3);
                 }
+                
+                serverPlayer.ifPresent(player -> {
+                    PacketManager.sendToClient(new HamonUiEffectPacket(HamonUiEffectPacket.Type.NO_ENERGY), player);
+                });
             }
-            return 0.25F * Math.min(energyLeft / energyNeeded, 1) + 0.75F * energyRatio;
+            return 0.25F * energyRatio;
         }
     }
     
     private void outOfBreath() {
         power.getUser().setAirSupply(0);
         serverPlayer.ifPresent(player -> {
-            PacketManager.sendToClient(new HamonOutOfBreathPacket(), player);
+            PacketManager.sendToClient(new HamonUiEffectPacket(HamonUiEffectPacket.Type.OUT_OF_BREATH), player);
         });
     }
     
@@ -561,7 +570,7 @@ public class HamonData extends TypeSpecificData {
             UUID.fromString("b730b24e-e970-4a94-b300-57e2555b42b5"), "Movement speed from running exercise", 0.1D, AttributeModifier.Operation.MULTIPLY_BASE);
     public static final AttributeModifier MINING_COMPLETED = new AttributeModifier(
             UUID.fromString("8674ea35-6eaf-4e22-98da-4ec0c5a4d20d"), "Attack speed from running exercise", 0.05D, AttributeModifier.Operation.MULTIPLY_BASE);
-    public static final float SWIMMING_COMPLETED_BREATH_STABILITY_TIME_MULTIPLIER = 0.8F;
+    public static final float SWIMMING_COMPLETED_MAX_ENERGY_MULTIPLIER = 1.1F;
     public static final float MEDITATION_COMPLETED_ENERGY_REGEN_TIME_REDUCTION = 10;
     private boolean swimmingCompleted = false;
     private boolean meditationCompleted = false;
@@ -583,6 +592,9 @@ public class HamonData extends TypeSpecificData {
                     }
                     break;
                 case SWIMMING:
+                    if (!entity.level.isClientSide()) {
+                        setBreathStability(getBreathStability() * SWIMMING_COMPLETED_MAX_ENERGY_MULTIPLIER);
+                    }
                     swimmingCompleted = true;
                     break;
                 case MEDITATION:

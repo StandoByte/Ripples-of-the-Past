@@ -341,7 +341,7 @@ public class HamonStatsTabGui extends HamonTabGui {
             args = new Object[] { PERCENTAGE_FORMAT.format(HamonData.RUNNING_COMPLETED.getAmount() * 100) };
             break;
         case SWIMMING:
-            args = new Object[] { PERCENTAGE_FORMAT.format((1 / HamonData.SWIMMING_COMPLETED_BREATH_STABILITY_TIME_MULTIPLIER - 1) * 100) }; 
+            args = new Object[] { PERCENTAGE_FORMAT.format((HamonData.SWIMMING_COMPLETED_MAX_ENERGY_MULTIPLIER - 1) * 100) }; 
             break;
         case MEDITATION:
             args = new Object[] { PERCENTAGE_FORMAT.format(HamonData.MEDITATION_COMPLETED_ENERGY_REGEN_TIME_REDUCTION / 20) }; 

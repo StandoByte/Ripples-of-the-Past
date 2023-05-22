@@ -43,7 +43,7 @@ public class VerticalBarsRenderer extends BarsRenderer {
                     0, 0, 17, 1, 
                     translucentFill, 
                     (int) (barHeight * attackCostValue / maxValue), (int) (barHeight * abilityCostValue / maxValue), costTick, 
-                    fullSize, barType);
+                    fullSize, barType, partialTick);
             int[] iconTex = getIconTex(barType, BarsOrientation.VERTICAL);
             renderIcon(matrixStack, x - 2, y - iconTex[3] - 1, 
                     iconTex[0], iconTex[1], iconTex[2], iconTex[3], iconTex[4]);
@@ -60,7 +60,7 @@ public class VerticalBarsRenderer extends BarsRenderer {
                         texX + 8, 0, 5, barHeight, fill, color, transparency.getAlpha(partialTick) * alpha, 
                         8, 0, 25, 1, 
                         translucentFill, 0, 0, 0, 
-                        fullSize, barType);
+                        fullSize, barType, partialTick);
             }
             x += 9;
         }
@@ -82,18 +82,31 @@ public class VerticalBarsRenderer extends BarsRenderer {
     }
 
     @Override
-    protected void renderCost(MatrixStack matrixStack, int x, int y, Alignment alignment, 
-            int texX, int texY, int width, int height, 
+    protected void renderCost(MatrixStack matrixStack, 
+            int x, int y, Alignment alignment, 
+            int width, int height, 
             int costFill, int barFill, 
             int xOffset, float alpha) {
         if (costFill > 0) {
             int diff = Math.max(barFill - costFill, 0);
             AbstractGui.fill(matrixStack, 
-                    x + xOffset + 1, y - diff + height + 1 - costFill, 
-                    x + xOffset + 4, y - diff + height + 1, 
+                    x + xOffset + 1,               y - diff + height + 1 - costFill, 
+                    x + xOffset + (width / 2) - 1, y - diff + height + 1, 
                     ElementTransparency.addAlpha(0xFFFFFF, alpha));
             RenderSystem.enableBlend();
         }
+    }
+
+    @Override
+    protected void renderRedHighlight(MatrixStack matrixStack, 
+            int x, int y, Alignment alignment, 
+            int width, int height, 
+            float alpha) {
+        AbstractGui.fill(matrixStack, 
+                x + 1,         y + 1, 
+                x + width - 1, y + height + 1, 
+                ElementTransparency.addAlpha(0xFF0000, alpha));
+        RenderSystem.enableBlend();
     }
 
     @Override

@@ -21,7 +21,8 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
     
     private int selectedAttack = 0;
     private int selectedAbility = 0;
-    int costOverlayTick = 0;
+    
+    private int costOverlayTick = 0;
     
     private final Map<ActionKey, SelectedTargetIcon> targetIcons = Util.make(new EnumMap<>(ActionKey.class), map -> {
         for (ActionKey key : ActionKey.values()) {

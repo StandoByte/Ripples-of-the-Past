@@ -6,6 +6,7 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
@@ -178,6 +179,7 @@ public class DamageUtil {
             }
             amount *= JojoModConfig.getCommonConfigInstance(false).hamonDamageMultiplier.get().floatValue();
             
+            JojoMod.LOGGER.debug("{} {}", amount, target.getId());
             if (hurtThroughInvulTicks(target, dmgSource, amount)) {
                 HamonPowerType.createHamonSparkParticlesEmitter(target, amount / HamonData.MAX_HAMON_STRENGTH_MULTIPLIER, attack.soundVolumeMultiplier, attack.hamonParticle);
                 if (scarf && undeadTarget && livingTarget instanceof ServerPlayerEntity) {

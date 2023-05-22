@@ -34,7 +34,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacke
 import com.github.standobyte.jojo.network.packets.fromserver.BrokenChunkBlocksPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.CommonConfigPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.HamonOutOfBreathPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.HamonUiEffectPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillAddPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillRemovePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonTeachersSkillsPacket;
@@ -162,7 +162,7 @@ public class PacketManager {
         registerMessage(channel, new TrHamonBreathStabilityPacket.Handler(),         Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrHamonEnergyTicksPacket.Handler(),             Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrHamonAuraColorPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        registerMessage(channel, new HamonOutOfBreathPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(channel, new HamonUiEffectPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrVampirismDataPacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrStaminaPacket.Handler(),                      Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new ResolvePacket.Handler(),                        Optional.of(NetworkDirection.PLAY_TO_CLIENT));

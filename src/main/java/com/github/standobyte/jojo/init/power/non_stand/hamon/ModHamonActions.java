@@ -140,7 +140,7 @@ public class ModHamonActions {
                     .swingHand().shout(ModSounds.JONATHAN_SCARLET_OVERDRIVE)));
     
     public static final RegistryObject<HamonAction> JONATHAN_OVERDRIVE_BARRAGE = ACTIONS.register("jonathan_overdrive_barrage", 
-            () -> new HamonOverdriveBarrage(new HamonAction.Builder().holdEnergyCost(70F).heldWalkSpeed(0.5F).shout(ModSounds.JONATHAN_OVERDRIVE_BARRAGE)));
+            () -> new HamonOverdriveBarrage(new HamonAction.Builder().holdEnergyCost(70F).heldWalkSpeed(0).shout(ModSounds.JONATHAN_OVERDRIVE_BARRAGE)));
     
     public static final RegistryObject<HamonAction> ZEPPELI_HAMON_CUTTER = ACTIONS.register("zeppeli_hamon_cutter", 
             () -> new HamonCutter(new HamonAction.Builder().energyCost(400F).shout(ModSounds.ZEPPELI_HAMON_CUTTER)));

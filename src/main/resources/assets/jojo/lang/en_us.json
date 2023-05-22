@@ -5,7 +5,7 @@
   "item.jojo.sledgehammer": "Iron Sledgehammer",
   "item.jojo.blade_hat": "Blade Hat",
   "item.jojo.breath_control_mask": "Breath Control Mask",
-  "item.jojo.breath_control_mask.hint": "Halves the time needed to complete breath training exercises, but in exchange the breath stability doesn't restore passively.",
+  "item.jojo.breath_control_mask.hint": "Halves the time needed to complete breath training exercises, but in exchange _____________________________.",
   "item.jojo.hamon_master_spawn_egg": "Hamon Master Spawn Egg",
   "item.jojo.hungry_zombie_spawn_egg": "Zombie Minion Spawn Egg",
   "item.jojo.aja_stone": "Aja Red Stone",
@@ -618,7 +618,7 @@
   "hamon.exercise.completion_buff_hint": "After completion: %s",
   "hamon.exercise.mining.completion_buff": "+%s%% attack speed",
   "hamon.exercise.running.completion_buff": "+%s%% moving speed",
-  "hamon.exercise.swimming.completion_buff": "+%s%% breath stability regain",
+  "hamon.exercise.swimming.completion_buff": "+%s%% maximum Hamon energy",
   "hamon.exercise.meditation.completion_buff": "-%s seconds for full Hamon charge",
   "hamon.exercise.full_completion_buff": "+%s%% efficiency of all Hamon skills",
   

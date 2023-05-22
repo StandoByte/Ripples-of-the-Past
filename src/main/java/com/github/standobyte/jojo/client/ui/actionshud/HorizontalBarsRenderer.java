@@ -52,7 +52,7 @@ public class HorizontalBarsRenderer extends BarsRenderer {
                     0, 128, 1, 145, 
                     translucentFill, 
                     (int) (barLength * attackCostValue / maxValue), (int) (barLength * abilityCostValue / maxValue), costTick, 
-                    fullSize, barType);
+                    fullSize, barType, partialTick);
             int[] iconTex = getIconTex(barType, BarsOrientation.HORIZONTAL);
             int iconX = x;
             if (alignment == Alignment.RIGHT) {
@@ -78,7 +78,7 @@ public class HorizontalBarsRenderer extends BarsRenderer {
                         0, texY + 8, 5, barLength, fill, color, transparency.getAlpha(partialTick) * alpha, 
                         0, 136, 1, 153, 
                         translucentFill, 0, 0, 0, 
-                        fullSize, barType);
+                        fullSize, barType, partialTick);
             }
             y += 9;
         }
@@ -115,8 +115,9 @@ public class HorizontalBarsRenderer extends BarsRenderer {
     }
 
     @Override
-    protected void renderCost(MatrixStack matrixStack, int x, int y, Alignment alignment, 
-            int texX, int texY, int height, int length, 
+    protected void renderCost(MatrixStack matrixStack, 
+            int x, int y, Alignment alignment, 
+            int height, int length, 
             int costFill, int barFill, 
             int yOffset, float alpha) {
         if (costFill > 0) {
@@ -124,17 +125,29 @@ public class HorizontalBarsRenderer extends BarsRenderer {
             if (alignment == Alignment.RIGHT) {
                 AbstractGui.fill(matrixStack, 
                         x + 1 - diff + length - costFill,  y + yOffset + 1, 
-                        x + 1 - diff + length,             y + yOffset + 4, 
+                        x + 1 - diff + length,             y + yOffset + (height / 2) - 1, 
                         ElementTransparency.addAlpha(0xFFFFFF, alpha));
             }
             else {
                 AbstractGui.fill(matrixStack, 
                         x + 1 + diff,                y + yOffset + 1, 
-                        x + 1 + diff + costFill,     y + yOffset + 4, 
+                        x + 1 + diff + costFill,     y + yOffset + (height / 2) - 1, 
                         ElementTransparency.addAlpha(0xFFFFFF, alpha));
             }
             RenderSystem.enableBlend();
         }
+    }
+
+    @Override
+    protected void renderRedHighlight(MatrixStack matrixStack, 
+            int x, int y, Alignment alignment, 
+            int height, int length, 
+            float alpha) {
+        AbstractGui.fill(matrixStack, 
+                x + 1,          y + 1, 
+                x + 1 + length, y + height - 1, 
+                ElementTransparency.addAlpha(0xFF0000, alpha));
+        RenderSystem.enableBlend();
     }
     
     @Override
