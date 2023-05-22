@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -67,8 +68,10 @@ public class HGStringEntity extends OwnerBoundProjectileEntity {
             if (isBinding) {
                 if (target instanceof LivingEntity) {
                     LivingEntity livingTarget = (LivingEntity) target;
-                    attachToEntity(livingTarget);
-                    livingTarget.addEffect(new EffectInstance(ModEffects.IMMOBILIZE.get(), ticksLifespan() - tickCount));
+                    if (!JojoModUtil.isTargetBlocking(livingTarget)) {
+                        attachToEntity(livingTarget);
+                        livingTarget.addEffect(new EffectInstance(ModEffects.IMMOBILIZE.get(), ticksLifespan() - tickCount));
+                    }
                 }
             }
             else {

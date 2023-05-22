@@ -352,13 +352,13 @@ public class ModStandsInit {
             () -> new StandEntityBlock());
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_GRAPPLE = ACTIONS.register("hierophant_green_grapple", 
-            () -> new HierophantGreenGrapple(new StandEntityAction.Builder().staminaCostTick(1).holdType().standUserWalkSpeed(1.0F)
+            () -> new HierophantGreenGrapple(new StandEntityAction.Builder().staminaCostTick(1).holdType().standUserWalkSpeed(0.0F)
                     .resolveLevelToUnlock(2)
                     .standPose(HierophantGreenGrapple.GRAPPLE_POSE).standOffsetFromUser(-0.5, 0.25)
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_GRAPPLE_ENTITY = ACTIONS.register("hierophant_green_grapple_entity", 
-            () -> new HierophantGreenGrapple(new StandEntityAction.Builder().staminaCostTick(1).holdType().standUserWalkSpeed(1.0F)
+            () -> new HierophantGreenGrapple(new StandEntityAction.Builder().staminaCostTick(1).holdType().standUserWalkSpeed(0.0F)
                     .resolveLevelToUnlock(2)
                     .standPose(HierophantGreenGrapple.GRAPPLE_POSE)
                     .partsRequired(StandPart.ARMS)

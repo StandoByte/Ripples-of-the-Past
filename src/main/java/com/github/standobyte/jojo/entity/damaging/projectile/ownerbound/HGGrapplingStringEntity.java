@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -71,7 +72,7 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
                     }
                 }
                 else {
-                    dragTarget(bound, vecToOwner.normalize().scale(2));
+                    dragTarget(bound, vecToOwner.normalize().scale(1));
                     bound.fallDistance = 0;
                 }
             }
@@ -149,10 +150,13 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
     protected boolean hurtTarget(Entity target, LivingEntity owner) {
         if (getEntityAttachedTo() == null && bindEntities) {
             if (target instanceof LivingEntity) {
-                attachToEntity((LivingEntity) target);
-                playSound(ModSounds.HIEROPHANT_GREEN_GRAPPLE_CATCH.get(), 1.0F, 1.0F);
-                caughtAnEntity = true;
-                return true;
+                LivingEntity livingTarget = (LivingEntity) target;
+                if (!JojoModUtil.isTargetBlocking(livingTarget)) {
+                    attachToEntity(livingTarget);
+                    playSound(ModSounds.HIEROPHANT_GREEN_GRAPPLE_CATCH.get(), 1.0F, 1.0F);
+                    caughtAnEntity = true;
+                    return true;
+                }
             }
         }
         return false;

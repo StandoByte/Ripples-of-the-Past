@@ -103,15 +103,17 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
         if (getEntityAttachedTo() == null) {
             if (target instanceof LivingEntity && !target.isInvulnerableTo(getDamageSource(owner))) {
                 LivingEntity targetLiving = (LivingEntity) target;
-                attachToEntity(targetLiving);
-                if (!level.isClientSide()) {
-                    boolean thisEffect = immobilizedEffect == targetLiving.getEffect(ModEffects.IMMOBILIZE.get());
-                    targetLiving.addEffect(new EffectInstance(ModEffects.IMMOBILIZE.get(), ticksLifespan() - tickCount));
-                    if (thisEffect) {
-                        immobilizedEffect = targetLiving.getEffect(ModEffects.IMMOBILIZE.get());
+                if (!JojoModUtil.isTargetBlocking(targetLiving)) {
+                    attachToEntity(targetLiving);
+                    if (!level.isClientSide()) {
+                        boolean thisEffect = immobilizedEffect == targetLiving.getEffect(ModEffects.IMMOBILIZE.get());
+                        targetLiving.addEffect(new EffectInstance(ModEffects.IMMOBILIZE.get(), ticksLifespan() - tickCount));
+                        if (thisEffect) {
+                            immobilizedEffect = targetLiving.getEffect(ModEffects.IMMOBILIZE.get());
+                        }
                     }
+                    return true;
                 }
-                return true;
             }
         }
         return false;

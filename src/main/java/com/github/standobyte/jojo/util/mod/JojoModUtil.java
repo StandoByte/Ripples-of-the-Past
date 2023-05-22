@@ -39,6 +39,7 @@ import net.minecraft.entity.monster.AbstractIllagerEntity;
 import net.minecraft.entity.passive.WaterMobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileHelper;
+import net.minecraft.item.ItemStack;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.ResourceLocation;
@@ -274,6 +275,20 @@ public class JojoModUtil {
         if (projectile instanceof ModdedProjectileEntity) {
             ((ModdedProjectileEntity) projectile).setIsDeflected();
         }
+    }
+    
+    public static boolean isTargetBlocking(LivingEntity target) {
+        ItemStack usedItem = target.getUseItem();
+        if (!usedItem.isEmpty() && usedItem.isShield(target)) {
+            return true;
+        }
+        if (target instanceof StandEntity) {
+            StandEntity stand = (StandEntity) target;
+            if (stand.isBlocking()) {
+                return true;
+            }
+        }
+        return false;
     }
     
     
