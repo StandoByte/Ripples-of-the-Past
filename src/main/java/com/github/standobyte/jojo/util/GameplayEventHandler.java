@@ -636,6 +636,13 @@ public class GameplayEventHandler {
         if (VampirismFreeze.onUserAttacked(event)) {
             event.setCanceled(true);
         }
+        
+        if (GeneralUtil.orElseFalse(target.getSleepingPos(), sleepingPos -> {
+            BlockState blockState = target.level.getBlockState(sleepingPos);
+            return blockState.getBlock() instanceof WoodenCoffinBlock && blockState.getValue(WoodenCoffinBlock.CLOSED);
+        })) {
+            event.setCanceled(true);
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
