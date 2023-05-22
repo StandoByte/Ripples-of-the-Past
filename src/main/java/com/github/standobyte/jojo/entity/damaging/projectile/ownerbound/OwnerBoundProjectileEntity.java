@@ -321,10 +321,8 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
                 }
             }
         }
-        else {
-            entity.setDeltaMovement(vec);
-            dragged.add(entity);
-        }
+        entity.setDeltaMovement(vec);
+        dragged.add(entity);
     }
     
     public void attachToBlockPos(BlockPos blockPos) {
