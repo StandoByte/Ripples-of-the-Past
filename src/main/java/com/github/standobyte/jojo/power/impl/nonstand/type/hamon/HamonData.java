@@ -145,6 +145,9 @@ public class HamonData extends TypeSpecificData {
             if (user.level.isClientSide() && power.getEnergy() > 0 && !playedEnergySound) {
                 ClientTickingSoundsHelper.playHamonEnergyConcentrationSound(user, 1.0F);
                 playedEnergySound = true;
+                if (user == ClientUtil.getClientPlayer()) {
+                    BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).resetRedHighlight();
+                }
             }
             updateNoEnergyDecayTicks();
             return power.getEnergy() + getMaxBreathStability() / fullEnergyTicks();

@@ -37,8 +37,10 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 public class ModItems {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, JojoMod.MOD_ID);
-
-
+    
+    
+    
+    public static final RegistryObject<Item> DUMMY_ITEM = ITEMS.register("dummy_item", () -> new Item(new Item.Properties()));
     
     public static final RegistryObject<SledgehammerItem> IRON_SLEDGEHAMMER = ITEMS.register("sledgehammer", 
             () -> new SledgehammerItem(ItemTier.IRON, 9, -3.3F, new Item.Properties().tab(JojoMod.MAIN_TAB)));

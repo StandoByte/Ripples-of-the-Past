@@ -2,7 +2,7 @@
   "parent": "jojo:jojo/time_ability",
   "display": {
     "icon": {
-      "item": "jojo:meteoric_scrap",
+      "item": "jojo:dummy_item",
       "nbt": "{Icon:7}"
     },
     "title": {

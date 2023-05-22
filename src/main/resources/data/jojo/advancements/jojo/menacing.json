@@ -2,7 +2,7 @@
   "parent": "jojo:jojo/root",
   "display": {
     "icon": {
-      "item": "jojo:meteoric_scrap",
+      "item": "jojo:dummy_item",
       "nbt": "{Icon:1}"
     },
     "title": {

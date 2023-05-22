@@ -2,7 +2,7 @@
   "parent": "jojo:jojo/get_hamon",
   "display": {
     "icon": {
-      "item": "jojo:meteoric_scrap",
+      "item": "jojo:dummy_item",
       "nbt": "{Icon:2}"
     },
     "title": {

@@ -2,7 +2,7 @@
   "parent": "jojo:jojo/get_stand",
   "display": {
     "icon": {
-      "item": "jojo:meteoric_scrap",
+      "item": "jojo:dummy_item",
       "nbt": "{Icon:9}"
     },
     "title": {
