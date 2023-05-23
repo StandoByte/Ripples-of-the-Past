@@ -125,8 +125,8 @@ public class SilverChariotEntity extends StandEntity {
     }
     
     @Override
-    protected float getPhysicalResistance(float blockedRatio) {
-        return StandStatFormulas.getPhysicalResistance(0, 0, blockedRatio);
+    protected float getPhysicalResistance(float blockedRatio, float damageDealt) {
+        return StandStatFormulas.getPhysicalResistance(0, 0, blockedRatio, damageDealt);
     }
     
     @Override

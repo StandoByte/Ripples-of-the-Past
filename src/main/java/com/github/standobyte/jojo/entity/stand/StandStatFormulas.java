@@ -84,9 +84,16 @@ public class StandStatFormulas {
     
     
     
-    public static float getPhysicalResistance(double durability, double strength, float blocked) {
+    public static float getPhysicalResistance(double durability, double strength, float blocked, float damageDealt) {
         double resistance = MathHelper.clamp(durability * 0.01875 + strength * 0.0125, 0, 1);
-        resistance += (1 - resistance) * blocked * 0.8;
+        if (blocked > 0) {
+            double dmgBlockingCoeff = 0.8;
+            double furtherReductionCap = durability / 8;
+            if (damageDealt < furtherReductionCap) {
+                dmgBlockingCoeff += (1 - dmgBlockingCoeff) * (1 - damageDealt / furtherReductionCap);
+            }
+            resistance += (1 - resistance) * blocked * dmgBlockingCoeff;
+        }
         return (float) resistance;
     }
     
@@ -95,7 +102,7 @@ public class StandStatFormulas {
     }
     
     public static float getBlockStaminaCost(float incomingDamage) {
-        return 0.5F * (float) Math.pow(incomingDamage, 2);
+        return 0.5F + (float) Math.pow(incomingDamage, 2);
     }
     
     public static int getSummonLockTicks(double speed) {

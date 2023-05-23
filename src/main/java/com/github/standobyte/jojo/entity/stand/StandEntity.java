@@ -904,7 +904,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
 //                    ((StandEntity) damageSrc.getEntity()).playPunchSound = false;
 //                }
             }
-            return damageAmount * (1 - getPhysicalResistance(blockedRatio));
+            return damageAmount * (1 - getPhysicalResistance(blockedRatio, damageAmount));
         }
         return damageAmount;
     }
@@ -927,8 +927,8 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return super.getVoicePitch();
     }
     
-    protected float getPhysicalResistance(float blockedRatio) {
-        return StandStatFormulas.getPhysicalResistance(getDurability(), getAttackDamage(), blockedRatio);
+    protected float getPhysicalResistance(float blockedRatio, float damageDealt) {
+        return StandStatFormulas.getPhysicalResistance(getDurability(), getAttackDamage(), blockedRatio, damageDealt);
     }
 
     public boolean canBlockOrParryFromAngle(Vector3d dmgPosition) {

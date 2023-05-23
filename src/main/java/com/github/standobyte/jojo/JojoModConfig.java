@@ -599,7 +599,7 @@ public class JojoModConfig {
             
             timeStopFreezesVisuals = builder
                     .comment(" Freeze particles, block texture animations and rain/snow during time stop.",
-                            "  Experimental feature - it may cause errors, so the option is disabled by default.")
+                            "  Experimental feature - it may cause errors or crashes with other mods, so the option is disabled by default.")
                     .translation("jojo.config.client.timeStopFreezesParticles")
                     .define("timeStopFreezesParticles", false);
             
