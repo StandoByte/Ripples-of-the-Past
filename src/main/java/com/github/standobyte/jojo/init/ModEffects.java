@@ -6,6 +6,7 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.potion.FreezeEffect;
 import com.github.standobyte.jojo.potion.HamonSpreadEffect;
+import com.github.standobyte.jojo.potion.ImmobilizeEffect;
 import com.github.standobyte.jojo.potion.ResolveEffect;
 import com.github.standobyte.jojo.potion.StaminaRegenEffect;
 import com.github.standobyte.jojo.potion.StatusEffect;
@@ -51,8 +52,8 @@ public class ModEffects {
     public static final RegistryObject<StunEffect> STUN = EFFECTS.register("stun", 
             () -> new StunEffect(0x404040));
     
-    public static final RegistryObject<StunEffect> IMMOBILIZE = EFFECTS.register("immobilize", 
-            () -> new StunEffect(0x404040));
+    public static final RegistryObject<ImmobilizeEffect> IMMOBILIZE = EFFECTS.register("immobilize", 
+            () -> new ImmobilizeEffect(0x404040));
     
     public static final RegistryObject<UncurableEffect> CHEAT_DEATH = EFFECTS.register("cheat_death", 
             () -> new UncurableEffect(EffectType.BENEFICIAL, 0xEADB84));
