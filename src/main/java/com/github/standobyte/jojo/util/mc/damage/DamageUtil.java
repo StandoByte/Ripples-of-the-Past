@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.util.mc.damage;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -159,7 +160,7 @@ public class DamageUtil {
                     
             boolean undeadTarget = JojoModUtil.isUndead(livingTarget);
             if (!undeadTarget) {
-                amount *= 0.1F;
+                amount *= 0.125F;
             }
             
             final float dmgAmount = amount;
@@ -178,10 +179,11 @@ public class DamageUtil {
                 amount *= hamonMultiplier;
             }
             amount *= JojoModConfig.getCommonConfigInstance(false).hamonDamageMultiplier.get().floatValue();
-            
-            JojoMod.LOGGER.debug("{} {}", amount, target.getId());
+
+            // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! logger
+            JojoMod.LOGGER.debug("{}    {} {}", amount, target.getType().getRegistryName().getPath(), target.getId());
             if (hurtThroughInvulTicks(target, dmgSource, amount)) {
-                HamonPowerType.createHamonSparkParticlesEmitter(target, amount / HamonData.MAX_HAMON_STRENGTH_MULTIPLIER, attack.soundVolumeMultiplier, attack.hamonParticle);
+                HamonPowerType.createHamonSparkParticlesEmitter(target, amount / (HamonData.MAX_HAMON_STRENGTH_MULTIPLIER * 5), attack.soundVolumeMultiplier, attack.hamonParticle);
                 if (scarf && undeadTarget && livingTarget instanceof ServerPlayerEntity) {
                     ModCriteriaTriggers.VAMPIRE_HAMON_DAMAGE_SCARF.get().trigger((ServerPlayerEntity) livingTarget);
                 }
@@ -350,7 +352,14 @@ public class DamageUtil {
                 || entity instanceof IronGolemEntity) return;
         
         if (entity.getAirSupply() > 0) {
-            int airReduction = Math.max((int) ((float) entity.getMaxAirSupply() * MathHelper.clamp(speed, 0F, 1F)), 1);
+            Optional<HamonData> hamonOptional = INonStandPower.getNonStandPowerOptional(entity).resolve().flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()));
+            if (hamonOptional.isPresent()) {
+                HamonData hamon = hamonOptional.get();
+                speed /= 1 + hamonOptional.get().getBreathingLevel() * 0.04F;
+                hamon.suffocateTick(speed);
+            }
+            
+            int airReduction = MathUtil.fractionRandomInc((double) entity.getMaxAirSupply() * MathHelper.clamp(speed, 0.0, 1.0)) + 4;
             entity.setAirSupply(Math.max(entity.getAirSupply() - airReduction, -18));
         }
         else {

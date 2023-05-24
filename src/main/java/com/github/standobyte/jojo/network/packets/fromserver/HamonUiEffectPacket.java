@@ -40,6 +40,9 @@ public class HamonUiEffectPacket {
             case OUT_OF_BREATH:
                 ActionsOverlayGui.getInstance().setOutOfBreath(false);
                 break;
+            case OUT_OF_BREATH_MASK:
+                ActionsOverlayGui.getInstance().setOutOfBreath(true);
+                break;
             }
         }
 
@@ -51,6 +54,7 @@ public class HamonUiEffectPacket {
     
     public static enum Type {
         OUT_OF_BREATH,
+        OUT_OF_BREATH_MASK,
         NO_ENERGY
     }
 }

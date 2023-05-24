@@ -113,6 +113,7 @@ public class HamonData extends TypeSpecificData {
     
     private boolean isMeditating;
     private int meditationTicks;
+    private int breathStabilityIncTicks;
 
     private MainHamonSkillsManager hamonSkills;
     
@@ -132,8 +133,10 @@ public class HamonData extends TypeSpecificData {
     
     public void tick() {
         updateHeight = false;
-        if (!power.getUser().level.isClientSide()) {
-            tickNewPlayerLearners(power.getUser());
+        LivingEntity user = power.getUser();
+        if (!user.level.isClientSide()) {
+            tickNewPlayerLearners(user);
+            tickAirSupply(user);
         }
         tickChargeParticles();
         tickBreathStability();
@@ -177,7 +180,7 @@ public class HamonData extends TypeSpecificData {
     }
     
     public void setBreathStability(float value) {
-        value = Math.min(value, getMaxBreathStability());
+        value = MathHelper.clamp(value, 0, getMaxBreathStability());
         boolean send = this.breathStability != value;
         this.breathStability = value;
         this.prevBreathStability = value;
@@ -192,13 +195,12 @@ public class HamonData extends TypeSpecificData {
     private void tickBreathStability() {
         LivingEntity user = power.getUser();
         boolean outOfBreath = user.getAirSupply() < user.getMaxAirSupply();
-        int meditationTicks = isMeditating() ? Math.max(this.meditationTicks - MEDITATION_INC_START, 0) : 0;
         float inc = 0;
         
         if (!outOfBreath) {
             inc = getMaxBreathStability() / fullBreathStabilityTicks();
-            if (meditationTicks > 0) {
-                inc *= MathHelper.sqrt(meditationTicks);
+            if (isMeditating() && breathStabilityIncTicks > 0) {
+                inc *= MathHelper.sqrt((float) Math.min(breathStabilityIncTicks, 100));
             }
         }
         
@@ -206,7 +208,7 @@ public class HamonData extends TypeSpecificData {
         int air = user.getAirSupply();
         if (!user.level.isClientSide()) {
             if (breathStability == 0 && (prevBreathStability > 0 || prevAir > air && air > 0)) {
-                outOfBreath();
+                outOfBreath(false);
             }
         }
         else if (user == ClientUtil.getClientPlayer()) {
@@ -276,8 +278,9 @@ public class HamonData extends TypeSpecificData {
     
     
     float getHamonEnergyUsageEfficiency(float energyNeeded, boolean doConsume) {
-        doConsume &= !power.getUser().level.isClientSide() && !power.isUserCreative();
-        energyNeeded = reduceEnergyConsumed(energyNeeded, power, power.getUser());
+        LivingEntity user = power.getUser();
+        doConsume &= !user.level.isClientSide() && !power.isUserCreative();
+        energyNeeded = reduceEnergyConsumed(energyNeeded, power, user);
         
         if (power.getEnergy() >= energyNeeded || energyNeeded == 0) {
             if (doConsume) {
@@ -295,7 +298,22 @@ public class HamonData extends TypeSpecificData {
         }
         
         else {
-            float energyFromStability = getBreathStability() * 3;
+            if (doConsume) {
+                serverPlayer.ifPresent(player -> {
+                    PacketManager.sendToClient(new HamonUiEffectPacket(HamonUiEffectPacket.Type.NO_ENERGY), player);
+                });
+            }
+            
+            ItemStack headItem = user.getItemBySlot(EquipmentSlotType.HEAD);
+            if (!headItem.isEmpty() && headItem.getItem() == ModItems.BREATH_CONTROL_MASK.get()) {
+                if (doConsume) {
+                    setBreathStability(0);
+                    outOfBreath(true);
+                }
+                return 0;
+            }
+            
+            float energyFromStability = getBreathStability() * 2;
             if (energyFromStability == 0) {
                 return 0;
             }
@@ -303,24 +321,21 @@ public class HamonData extends TypeSpecificData {
             if (doConsume) {
                 if (energyFromStability < energyNeeded) {
                     setBreathStability(0);
-                    outOfBreath();
+                    outOfBreath(false);
                 }
                 else {
                     setBreathStability((energyFromStability - energyNeeded) / 3);
                 }
-                
-                serverPlayer.ifPresent(player -> {
-                    PacketManager.sendToClient(new HamonUiEffectPacket(HamonUiEffectPacket.Type.NO_ENERGY), player);
-                });
             }
             return 0.25F * energyRatio;
         }
     }
     
-    private void outOfBreath() {
+    private void outOfBreath(boolean mask) {
         power.getUser().setAirSupply(0);
         serverPlayer.ifPresent(player -> {
-            PacketManager.sendToClient(new HamonUiEffectPacket(HamonUiEffectPacket.Type.OUT_OF_BREATH), player);
+            PacketManager.sendToClient(new HamonUiEffectPacket(
+                    mask ? HamonUiEffectPacket.Type.OUT_OF_BREATH_MASK : HamonUiEffectPacket.Type.OUT_OF_BREATH), player);
         });
     }
     
@@ -436,16 +451,13 @@ public class HamonData extends TypeSpecificData {
         }
     }
     
-    public static final float MAX_HAMON_STRENGTH_MULTIPLIER = dmgFormula(MAX_STAT_LEVEL, MAX_BREATHING_LEVEL); // 35.6908 // 7
+    public static final float MAX_HAMON_STRENGTH_MULTIPLIER = dmgFormula(MAX_STAT_LEVEL); // 7
     private void recalcHamonDamage() {
-        hamonDamageFactor = dmgFormula(hamonStrengthLevel, breathingTrainingLevel);
+        hamonDamageFactor = dmgFormula(hamonStrengthLevel);
     }
     
-    private static final double STR_EXP_SCALING = 1.0333; // 
-    private static final double BRTH_SCALING = 0.04; // 
-    private static float dmgFormula(float strength, float breathingTraining) {
-//        return (float) 1F + strength * 0.1F;
-        return (float) (Math.pow(STR_EXP_SCALING, strength) * (1 + BRTH_SCALING * breathingTraining));
+    private static float dmgFormula(float strength) {
+        return (float) 1F + strength * 0.1F;
     }
     
     public int getHamonStrengthPoints() {
@@ -523,6 +535,8 @@ public class HamonData extends TypeSpecificData {
         energyCost *= JojoModConfig.getCommonConfigInstance(false).hamonPointsMultiplier.get().floatValue();
         int points = (int) (energyCost / ENERGY_PER_POINT);
         if (random.nextFloat() < (energyCost % ENERGY_PER_POINT) / ENERGY_PER_POINT) points++;
+        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! logger
+        JojoMod.LOGGER.debug("Adding {} points to {}", energyCost / ENERGY_PER_POINT, stat);
         setHamonStatPoints(stat, getStatPoints(stat) + points, false, false);
     }
     
@@ -693,6 +707,7 @@ public class HamonData extends TypeSpecificData {
         if (isMeditating()) {
             if (++meditationTicks >= MEDITATION_INC_START) {
                 incExerciseTicks(Exercise.MEDITATION, multiplier, user.level.isClientSide());
+                breathStabilityIncTicks++;
             }
             updateBbHeight(user);
             if (!user.level.isClientSide()) {
@@ -821,6 +836,7 @@ public class HamonData extends TypeSpecificData {
         if (this.isMeditating != isMeditating) {
             this.isMeditating = isMeditating;
             this.meditationTicks = 0;
+            this.breathStabilityIncTicks = 0;
             if (!user.level.isClientSide()) {
                 PacketManager.sendToClientsTrackingAndSelf(new TrHamonMeditationPacket(user.getId(), isMeditating), user);
             }
@@ -1133,6 +1149,24 @@ public class HamonData extends TypeSpecificData {
     
     public void setAuraColor(HamonAuraColor color) {
         this.auraColor = color;
+    }
+    
+    
+    
+    private boolean isBeingSuffocated;
+    private void tickAirSupply(LivingEntity user) {
+        if (!isBeingSuffocated) {
+            int air = user.getAirSupply();
+            if (air < user.getMaxAirSupply() - 1 && air > 0 && user.tickCount % 100 < (int) getBreathingLevel() - 1) {
+                user.setAirSupply(air + 1);
+            }
+        }
+        isBeingSuffocated = false;
+    }
+    
+    public void suffocateTick(float suffocationSpeed) {
+        setBreathStability(Math.max(getBreathStability() - getMaxBreathStability() * suffocationSpeed, 1));
+        this.isBeingSuffocated = true;
     }
     
     

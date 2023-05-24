@@ -39,7 +39,7 @@ public class StarPlatinumInhale extends StandEntityAction {
                                 entity.getDeltaMovement().add(suctionVec.scale(1 / distance))
                                 : suctionVec.scale(Math.max(distance - 1, 0)));
                         if (!world.isClientSide() && distance < 4 && entity instanceof LivingEntity) {
-                            DamageUtil.suffocateTick((LivingEntity) entity, 0.05F);
+                            DamageUtil.suffocateTick((LivingEntity) entity, 0.025F);
                         }
                     }
                 });

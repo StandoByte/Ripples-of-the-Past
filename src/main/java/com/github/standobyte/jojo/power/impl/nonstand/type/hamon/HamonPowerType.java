@@ -101,7 +101,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
         return 2;
     }
 
-    // FIXME ! (breath stability) move all hasEnergy and consumeEnergy calls into actions
+    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!! (breath stability) move all hasEnergy and consumeEnergy calls into actions?
     @Override
     public boolean hasEnergy(INonStandPower power, float amount) {
         return amount == 0 || power.getEnergy() > 0 || power.getTypeSpecificData(this).get().getBreathStability() > 0;
@@ -157,14 +157,9 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     @Override
     public void tickUser(LivingEntity user, INonStandPower power) {
         HamonData hamon = power.getTypeSpecificData(this).get();
-        float breathing = hamon.getBreathingLevel();
         World world = user.level;
         hamon.tick();
         if (!world.isClientSide()) {
-            int air = user.getAirSupply();
-            if (air < user.getMaxAirSupply() - 1 && air > 0 && user.tickCount % 100 < (int) breathing - 1) {
-                user.setAirSupply(air + 1);
-            }
             if (user instanceof PlayerEntity) {
                 ServerPlayerEntity player = (ServerPlayerEntity) user;
                 if (hamon.isSkillLearned(ModHamonSkills.ROPE_TRAP.get())) {

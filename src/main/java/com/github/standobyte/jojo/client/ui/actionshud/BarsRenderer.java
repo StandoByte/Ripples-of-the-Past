@@ -302,7 +302,7 @@ public abstract class BarsRenderer {
         }
         
         public void triggerRedHighlight() {
-            this.redHighlightTick = 60;
+            this.redHighlightTick = 80;
         }
         
         public void resetRedHighlight() {

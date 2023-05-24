@@ -64,9 +64,7 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
                     if (bound.getRemainingFireTicks() % 20 == 0 || bound.getRemainingFireTicks() <= 0) {
                         DamageUtil.setOnFire(bound, 3, true);
                     }
-                    if (isInKickCombo()) {
-                        DamageUtil.suffocateTick(bound, 1);
-                    }
+                    DamageUtil.suffocateTick(bound, isInKickCombo() ? 1 : 0.0025F);
                 }
                 Vector3d vecToOwner = owner.position().subtract(bound.position());
                 if (vecToOwner.lengthSqr() > 4) {
