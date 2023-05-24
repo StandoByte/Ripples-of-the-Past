@@ -78,7 +78,9 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
         }
         int barrageHits = hitsThisTick;
         standEntity.setBarrageHitsThisTick(barrageHits);
-        standEntity.punch(task, this, task.getTarget());
+        if (barrageHits > 0) {
+            standEntity.punch(task, this, task.getTarget());
+        }
     }
     
     @Override
@@ -111,13 +113,13 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     }
     
     @Override
-    public void playPunchSound(IPunch punch, TargetType punchType, boolean canPlay, boolean playAlways) {
+    public void playPunchImpactSound(IPunch punch, TargetType punchType, boolean canPlay, boolean playAlways) {
         StandEntity stand = punch.getStand();
         if (!stand.level.isClientSide()) {
-            SoundEvent sound = punch.getSound();
-            Vector3d pos = punch.getSoundPos();
+            SoundEvent sound = punch.getImpactSound();
+            Vector3d pos = punch.getImpactSoundPos();
             PacketManager.sendToClientsTracking(
-                    sound != null && pos != null && canPlay && (playAlways || punch.playSound()) ? 
+                    sound != null && pos != null && canPlay && (playAlways || punch.playImpactSound()) ? 
                             new TrBarrageHitSoundPacket(stand.getId(), sound, pos)
                             : TrBarrageHitSoundPacket.noSound(stand.getId()), 
             stand);

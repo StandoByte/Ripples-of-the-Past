@@ -1457,7 +1457,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         onTargetHit(CallOrder.AFTER, punchInstance);
         lastPunch = punchInstance;
         if (!level.isClientSide()) {
-            punchAction.playPunchSound(punchInstance, target.getType(), playPunchSound == null || playPunchSound, playPunchSound != null && playPunchSound);
+            punchAction.playPunchImpactSound(punchInstance, target.getType(), playPunchSound == null || playPunchSound, playPunchSound != null && playPunchSound);
         }
         return punchInstance.targetWasHit();
     }

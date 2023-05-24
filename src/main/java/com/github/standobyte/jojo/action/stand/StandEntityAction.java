@@ -322,29 +322,17 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     public void taskCopyAdditional(StandEntityTask task, StandEntityTask sourceTask) {}
     
     public void playSound(StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task) {
-        SoundEvent soundOverride = getSoundOverride(standEntity, standPower, phase, task);
-        if (soundOverride != null) {
-            playSoundAtStand(standEntity.level, standEntity, soundOverride, standPower, phase);
-        }
-        
-        else {
-            List<Supplier<SoundEvent>> sounds = getSounds(standEntity, standPower, phase, task);
-            if (sounds != null) {
-                sounds.forEach(soundSupplier -> {
-                    if (soundSupplier != null) {
-                        SoundEvent sound = soundSupplier.get();
-                        if (sound != null) {
-                            playSoundAtStand(standEntity.level, standEntity, sound, standPower, phase);
-                        }
+        List<Supplier<SoundEvent>> sounds = getSounds(standEntity, standPower, phase, task);
+        if (sounds != null) {
+            sounds.forEach(soundSupplier -> {
+                if (soundSupplier != null) {
+                    SoundEvent sound = soundSupplier.get();
+                    if (sound != null) {
+                        playSoundAtStand(standEntity.level, standEntity, sound, standPower, phase);
                     }
-                });
-            }
+                }
+            });
         }
-    }
-    
-    @Nullable
-    protected SoundEvent getSoundOverride(StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task) {
-        return null;
     }
     
     @Nullable

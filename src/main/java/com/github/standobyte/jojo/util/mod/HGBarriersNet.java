@@ -133,7 +133,7 @@ public class HGBarriersNet {
             emeraldEntity.setBreakBlocks(breakBlocks);
             emeraldEntity.setLowerKnockback(true);
             Vector3d shootVec = targetPos.subtract(shootingPos);
-            emeraldEntity.shoot(shootVec.x, shootVec.y, shootVec.z, 1F, stand.getProjectileInaccuracy(2.0F));
+            emeraldEntity.shoot(shootVec.x, shootVec.y, shootVec.z, 1.5F, stand.getProjectileInaccuracy(2.0F));
             emeraldEntity.setDamageFactor(0.75F);
             stand.addProjectile(emeraldEntity);
             if (playSound) {

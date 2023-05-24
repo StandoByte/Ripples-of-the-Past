@@ -75,12 +75,17 @@ public class HGStringEntity extends OwnerBoundProjectileEntity {
                 }
             }
             else {
-                if (target instanceof LivingEntity) {
+                if (knockback > 0 && target instanceof LivingEntity) {
                     DamageUtil.knockback((LivingEntity) target, knockback, yRot);
                 }
                 setIsRetracting(true);
             }
         }
+    }
+    
+    @Override
+    protected float knockbackReduction() {
+        return 0F;
     }
     
     @Override

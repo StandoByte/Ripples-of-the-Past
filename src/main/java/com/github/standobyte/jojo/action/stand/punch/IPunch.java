@@ -13,9 +13,9 @@ public interface IPunch {
     
     StandEntity getStand();
     
-    SoundEvent getSound();
-    Vector3d getSoundPos();
-    default boolean playSound() {
+    SoundEvent getImpactSound();
+    Vector3d getImpactSoundPos();
+    default boolean playImpactSound() {
         return targetWasHit();
     }
     

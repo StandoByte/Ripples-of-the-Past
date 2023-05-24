@@ -190,12 +190,12 @@ public class StandEntityPunch implements IPunch {
     }
 
     @Override
-    public SoundEvent getSound() {
+    public SoundEvent getImpactSound() {
         return punchSound != null ? punchSound.get() : null;
     }
     
     @Override
-    public Vector3d getSoundPos() {
+    public Vector3d getImpactSoundPos() {
         return target.getBoundingBox().getCenter();
     }
     

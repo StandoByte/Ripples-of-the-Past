@@ -283,6 +283,15 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> STAND_PUNCH_HEAVY = SOUNDS.register("stand_punch_heavy", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_punch_heavy")));
 
+    public static final RegistryObject<SoundEvent> STAND_PUNCH_SWING = SOUNDS.register("stand_punch_swing", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_punch_swing")));
+
+    public static final RegistryObject<SoundEvent> STAND_PUNCH_HEAVY_SWING = SOUNDS.register("stand_punch_heavy_swing", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_punch_heavy_swing")));
+
+    public static final RegistryObject<SoundEvent> STAND_PUNCH_BARRAGE_SWING = SOUNDS.register("stand_punch_barrage_swing", 
+            () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_punch_barrage_swing")));
+
     public static final RegistryObject<SoundEvent> STAND_PARRY = SOUNDS.register("stand_parry", 
             () -> new SoundEvent(new ResourceLocation(JojoMod.MOD_ID, "stand_parry")));
 

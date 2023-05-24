@@ -275,12 +275,6 @@ public class HamonData extends TypeSpecificData {
     
     
     
-    private static final double STR_EXP_SCALING = 1.0333;
-    private static final double BRTH_SCALING = 0.04;
-    private static float dmgFormula(float strength, float breathingTraining) {
-        return (float) (Math.pow(STR_EXP_SCALING, strength) * (1 + BRTH_SCALING * breathingTraining));
-    }
-    
     float getHamonEnergyUsageEfficiency(float energyNeeded, boolean doConsume) {
         doConsume &= !power.getUser().level.isClientSide() && !power.isUserCreative();
         energyNeeded = reduceEnergyConsumed(energyNeeded, power, power.getUser());
@@ -442,9 +436,16 @@ public class HamonData extends TypeSpecificData {
         }
     }
     
-    public static final float MAX_HAMON_STRENGTH_MULTIPLIER = dmgFormula(MAX_STAT_LEVEL, MAX_BREATHING_LEVEL); // 35.6908
+    public static final float MAX_HAMON_STRENGTH_MULTIPLIER = dmgFormula(MAX_STAT_LEVEL, MAX_BREATHING_LEVEL); // 35.6908 // 7
     private void recalcHamonDamage() {
         hamonDamageFactor = dmgFormula(hamonStrengthLevel, breathingTrainingLevel);
+    }
+    
+    private static final double STR_EXP_SCALING = 1.0333; // 
+    private static final double BRTH_SCALING = 0.04; // 
+    private static float dmgFormula(float strength, float breathingTraining) {
+//        return (float) 1F + strength * 0.1F;
+        return (float) (Math.pow(STR_EXP_SCALING, strength) * (1 + BRTH_SCALING * breathingTraining));
     }
     
     public int getHamonStrengthPoints() {

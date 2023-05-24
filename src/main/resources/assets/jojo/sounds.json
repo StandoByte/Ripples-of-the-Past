@@ -386,6 +386,30 @@
   "stand_leap": {
     "sounds": [ "jojo:stand/stand_leap" ]
   },
+  "stand_punch_swing": {
+    "subtitle": "jojo.subtitle.stand_punch_swing",
+    "sounds": [ "jojo:swing1", "jojo:swing2", "jojo:swing3", "jojo:swing4", "jojo:swing5" ]
+  },
+  "stand_punch_heavy_swing": {
+    "subtitle": "jojo.subtitle.stand_punch_swing",
+    "sounds": [ 
+      {
+        "name": "jojo:stand_punch_swing",
+        "type": "event",
+        "pitch" : 0.5
+      }
+    ]
+  },
+  "stand_punch_barrage_swing": {
+    "subtitle": "jojo.subtitle.stand_punch_swing",
+    "sounds": [ 
+      {
+        "name": "jojo:stand_punch_swing",
+        "type": "event",
+        "pitch" : 1.0
+      }
+    ]
+  },
   
   
   

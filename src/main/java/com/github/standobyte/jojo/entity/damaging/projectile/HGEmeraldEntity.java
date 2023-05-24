@@ -6,12 +6,10 @@ import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
-import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -42,12 +40,8 @@ public class HGEmeraldEntity extends ModdedProjectileEntity {
     }
     
     @Override
-    protected DamageSource getDamageSource(LivingEntity owner) {
-        DamageSource dmgSource = super.getDamageSource(owner);
-        if (lowerKnockback) {
-            ((IModdedDamageSource) dmgSource).setKnockbackReduction(0.5F);
-        }
-        return dmgSource;
+    protected float knockbackReduction() {
+        return lowerKnockback ? 0.5F : super.knockbackReduction();
     }
 
     @Override

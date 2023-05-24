@@ -98,6 +98,11 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
             }
         }
     }
+    
+    @Override
+    protected float knockbackReduction() {
+        return 0;
+    }
 
     @Override
     protected boolean moveBoundToOwner() {

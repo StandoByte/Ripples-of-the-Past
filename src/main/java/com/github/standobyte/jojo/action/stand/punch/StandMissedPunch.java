@@ -39,12 +39,12 @@ public class StandMissedPunch implements IPunch {
     }
 
     @Override
-    public SoundEvent getSound() {
+    public SoundEvent getImpactSound() {
         return swingSound != null ? swingSound.get() : null;
     }
 
     @Override
-    public Vector3d getSoundPos() {
+    public Vector3d getImpactSoundPos() {
         return stand.position().add(
                 new Vector3d(0, stand.getBbHeight() * 0.75F, stand.getBbWidth())
                 .yRot((180 - stand.yRot) * MathUtil.DEG_TO_RAD));

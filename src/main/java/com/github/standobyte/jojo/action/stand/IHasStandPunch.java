@@ -28,11 +28,11 @@ public interface IHasStandPunch {
         return new StandMissedPunch(stand);
     }
     
-    default void playPunchSound(IPunch punch, TargetType punchType, boolean canPlay, boolean playAlways) {
-        if (canPlay && (playAlways || punch.playSound())) {
-            SoundEvent punchSound = punch.getSound();
+    default void playPunchImpactSound(IPunch punch, TargetType punchType, boolean canPlay, boolean playAlways) {
+        if (canPlay && (playAlways || punch.playImpactSound())) {
+            SoundEvent punchSound = punch.getImpactSound();
             if (punchSound != null) {
-                Vector3d soundPos = punch.getSoundPos();
+                Vector3d soundPos = punch.getImpactSoundPos();
                 if (soundPos != null) {
                     punch.getStand().playSound(punchSound, 1.0F, 1.0F, null, soundPos);
                 }

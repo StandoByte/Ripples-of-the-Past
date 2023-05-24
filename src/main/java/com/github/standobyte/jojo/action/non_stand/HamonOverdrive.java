@@ -75,6 +75,7 @@ public class HamonOverdrive extends HamonAction {
     }
     
     protected float getDamage() {
+//        return 3.0F;
         return 0.5F;
     }
     

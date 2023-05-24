@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
+import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
 import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.mc.damage.IndirectStandEntityDamageSource;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -183,8 +184,24 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     }
     
     protected DamageSource getDamageSource(LivingEntity owner) { // TODO damage sources/death messages
-        return standDamage() ? new IndirectStandEntityDamageSource("arrow", this, owner).setProjectile() :
+        DamageSource damageSource = standDamage() ? new IndirectStandEntityDamageSource("arrow", this, owner).setProjectile() :
             new IndirectEntityDamageSource("arrow", this, owner).setProjectile();
+        
+        float knockbackReduction = knockbackReduction();
+        if (knockbackReduction < 1
+                && standDamage() // delete this condition later
+                ) {
+//            if (!standDamage()) {
+                // TODO IModdedDamageSource wrapper
+//            }
+            ((IModdedDamageSource) damageSource).setKnockbackReduction(Math.max(knockbackReduction, 0));
+        }
+        
+        return damageSource;
+    }
+    
+    protected float knockbackReduction() {
+        return 1F;
     }
     
     protected void afterEntityHit(EntityRayTraceResult entityRayTraceResult, boolean entityHurt) {}

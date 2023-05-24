@@ -47,17 +47,17 @@ public class StandBlockPunch implements IPunch {
     }
 
     @Override
-    public SoundEvent getSound() {
+    public SoundEvent getImpactSound() {
         return punchSound != null ? punchSound.get() : null;
     }
     
     @Override
-    public Vector3d getSoundPos() {
+    public Vector3d getImpactSoundPos() {
         return Vector3d.atCenterOf(blockPos);
     }
     
     @Override
-    public boolean playSound() {
+    public boolean playImpactSound() {
         return blockState.getDestroySpeed(stand.level, blockPos) != 0;
     }
     
