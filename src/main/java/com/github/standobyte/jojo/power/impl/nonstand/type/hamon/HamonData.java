@@ -430,6 +430,7 @@ public class HamonData extends TypeSpecificData {
             hamonStrengthLevel = levelFromPoints(newPoints);
             break;
         case CONTROL:
+            // FIXME also update energy count
             hamonControlPoints = newPoints;
             hamonControlLevel = levelFromPoints(newPoints);
             break;
@@ -610,9 +611,7 @@ public class HamonData extends TypeSpecificData {
                     }
                     break;
                 case SWIMMING:
-                    if (!entity.level.isClientSide()) {
-                        setBreathStability(getBreathStability() * SWIMMING_COMPLETED_MAX_ENERGY_MULTIPLIER);
-                    }
+                    // FIXME also update energy count
                     swimmingCompleted = true;
                     break;
                 case MEDITATION:

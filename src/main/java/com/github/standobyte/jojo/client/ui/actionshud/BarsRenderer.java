@@ -7,8 +7,8 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.client.ClientTicking.ITicking;
 import com.github.standobyte.jojo.client.ClientTicking;
+import com.github.standobyte.jojo.client.ClientTicking.ITicking;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.Alignment;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.BarsOrientation;
@@ -102,7 +102,7 @@ public abstract class BarsRenderer {
             
             if (type != null) {
                 // FIXME ! (hamon energy) bar render effect
-                renderBarWithIcon(matrixStack, type, 
+                renderBarStart(matrixStack, type, 
                         currentModeType == PowerClassification.NON_STAND, nonStandPower.getType().getColor(), 1, 
                         energy, maxEnergy, 
                         attackCost, abilityCost, nonStandMode.getSelectedTick() + partialTick, 
@@ -113,7 +113,7 @@ public abstract class BarsRenderer {
         if (standPower != null && standPower.hasPower()) {
             if (standPower.usesStamina() && !standPower.isStaminaInfinite()) {
                 float stamina = standPower.getStamina();
-                renderBarWithIcon(matrixStack, BarType.STAMINA, 
+                renderBarStart(matrixStack, BarType.STAMINA, 
                         currentModeType == PowerClassification.STAND, 0xFFFFFF, 1, 
                         stamina, standPower.getMaxStamina(), 
                         attackCost, abilityCost, standMode.getSelectedTick() + partialTick,  
@@ -125,7 +125,7 @@ public abstract class BarsRenderer {
                         Math.min(standPower.getPrevTickResolve(), standPower.getResolve()), 
                         Math.max(standPower.getPrevTickResolve(), standPower.getResolve()));
                 int color = standPower.getColor();
-                renderBarWithIcon(matrixStack, BarType.RESOLVE, 
+                renderBarStart(matrixStack, BarType.RESOLVE, 
                         currentModeType == PowerClassification.STAND, color, (float) standPower.getResolveLevel() / (float) standPower.getMaxResolveLevel(), 
                         resolve, standPower.getMaxResolve(), 
                         0, 0, 0, 
@@ -164,11 +164,26 @@ public abstract class BarsRenderer {
     
     protected abstract void align(Alignment alignment);
     
+    private void renderBarStart(MatrixStack matrixStack, BarType barType, 
+            boolean fullSize, int color, float iconFill, 
+            float value, float maxValue, 
+            float attackCostValue, float abilityCostValue, float costTick, 
+            float translucentBarValue, 
+            float alpha, int ticks, float partialTick) {
+        BarEffects lerpData = getBarEffects(barType);
+        renderBarWithIcon(matrixStack, barType, 
+                fullSize, color, iconFill, 
+                lerpData.lerpValue(value, partialTick), maxValue, 
+                attackCostValue, abilityCostValue, costTick, 
+                lerpData.lerpTranslucentValue(translucentBarValue, partialTick), 
+                alpha, ticks, partialTick);
+    }
+    
     protected abstract void renderBarWithIcon(MatrixStack matrixStack, BarType barType, 
             boolean fullSize, int color, float iconFill, 
             float value, float maxValue, 
             float attackCostValue, float abilityCostValue, float costTick, 
-            float tranclucentBarValue, 
+            float translucentBarValue, 
             float alpha, int ticks, float partialTick);
     
     protected final void renderBar(MatrixStack matrixStack, int x, int y, Alignment alignment, 
@@ -292,12 +307,20 @@ public abstract class BarsRenderer {
     public static class BarEffects implements ITicking {
         private int redHighlightTick = 0;
         
+        private float prevTickValue;
+        private float prevTickTranslucentValue;
+        private float thisTickValue;
+        private float thisTickTranslucentValue;
+        
         private BarEffects() {
             ClientTicking.addTicking(this);
         }
         
         @Override
         public void tick() {
+            this.prevTickValue = this.thisTickValue;
+            this.prevTickTranslucentValue = this.thisTickTranslucentValue;
+            
             if (redHighlightTick > 0) redHighlightTick--;
         }
         
@@ -307,6 +330,16 @@ public abstract class BarsRenderer {
         
         public void resetRedHighlight() {
             this.redHighlightTick = redHighlightTick % 10;
+        }
+        
+        private float lerpValue(float value, float partialTick) {
+            this.thisTickValue = value;
+            return MathHelper.lerp(partialTick, prevTickValue, value);
+        }
+        
+        private float lerpTranslucentValue(float value, float partialTick) {
+            this.thisTickTranslucentValue = value;
+            return MathHelper.lerp(partialTick, prevTickTranslucentValue, value);
         }
     }
     

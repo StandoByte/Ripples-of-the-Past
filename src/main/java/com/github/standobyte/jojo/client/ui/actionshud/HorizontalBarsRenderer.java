@@ -32,12 +32,12 @@ public class HorizontalBarsRenderer extends BarsRenderer {
             boolean fullSize, int color, float iconFill, 
             float value, float maxValue, 
             float attackCostValue, float abilityCostValue, float costTick, 
-            float tranclucentBarValue, 
+            float translucentBarValue, 
             float alpha, int ticks, float partialTick) {
         int barLength = fullSize ? BAR_LENGTH : BAR_LENGTH_SHORTENED;
         int fill = (int) ((float) barLength * (value / maxValue));
         fill = Math.min(fill, barLength);
-        int translucentFill = (int) ((float) barLength * (tranclucentBarValue / maxValue));
+        int translucentFill = (int) ((float) barLength * (translucentBarValue / maxValue));
         translucentFill = Math.min(translucentFill, barLength);
         int texY = barType == BarType.STAMINA ? 176 : 160;
         

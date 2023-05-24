@@ -28,12 +28,12 @@ public class VerticalBarsRenderer extends BarsRenderer {
             boolean fullSize, int color, float iconFill, 
             float value, float maxValue, 
             float attackCostValue, float abilityCostValue, float costTick, 
-            float tranclucentBarValue, 
+            float translucentBarValue, 
             float alpha, int ticks, float partialTick) {
         int barHeight = fullSize ? BAR_HEIGHT : BAR_HEIGHT_SHORTENED;
         int fill = (int) ((float) barHeight * (value / maxValue));
         fill = Math.min(fill, barHeight);
-        int translucentFill = (int) ((float) barHeight * (tranclucentBarValue / maxValue));
+        int translucentFill = (int) ((float) barHeight * (translucentBarValue / maxValue));
         fill = Math.min(fill, barHeight);
         int texX = barType == BarType.STAMINA ? 48 : 32;
         
