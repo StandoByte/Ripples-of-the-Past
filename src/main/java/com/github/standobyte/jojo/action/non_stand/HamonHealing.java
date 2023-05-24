@@ -44,7 +44,7 @@ public class HamonHealing extends HamonAction {
             int regenDuration = (int) ((50F + hamonEfficiency * 50F) * (1 + hamonControl));
             int regenLvl = MathHelper.clamp((int) ((hamonControl - 0.0001F) * 3 + (hamonEfficiency - 0.25F) * 4F/3F - 1), 0, 2);
 //            if (entityToHeal.getHealth() < entityToHeal.getMaxHealth()) {
-                addPointsForAction(power, hamon, HamonStat.STRENGTH, cost, hamonEfficiency);
+                addPointsForAction(power, hamon, HamonStat.CONTROL, cost, hamonEfficiency);
 //            }
             entityToHeal.addEffect(new EffectInstance(Effects.REGENERATION, regenDuration, regenLvl));
             if (hamon.isSkillLearned(ModHamonSkills.EXPEL_VENOM.get())) {

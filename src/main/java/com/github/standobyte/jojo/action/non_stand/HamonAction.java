@@ -91,7 +91,7 @@ public abstract class HamonAction extends NonStandAction {
     
     
     public static void addPointsForAction(INonStandPower power, HamonData hamon, HamonStat stat, float energyCost, float hamonEfficiency) {
-        hamon.hamonPointsFromAction(HamonStat.STRENGTH, Math.min(energyCost, power.getEnergy()) * hamonEfficiency);
+        hamon.hamonPointsFromAction(stat, Math.min(energyCost, power.getEnergy()) * hamonEfficiency);
     }
     
     
