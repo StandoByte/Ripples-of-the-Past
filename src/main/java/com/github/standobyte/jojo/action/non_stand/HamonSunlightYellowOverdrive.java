@@ -99,7 +99,7 @@ public class HamonSunlightYellowOverdrive extends HamonAction {
                 if (!power.isUserCreative()) {
                     power.setEnergy(Math.max(power.getEnergy(), power.getMaxEnergy() * (1F - holdRatio)));
                 }
-                float efficiency = hamon.getHamonEfficiency(0);
+                float efficiency = hamon.getActionEfficiency(0);
                 
                 float damage = 3F + 12F * holdRatio;
                 damage *= efficiency;

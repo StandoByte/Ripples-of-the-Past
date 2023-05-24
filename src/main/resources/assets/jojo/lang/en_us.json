@@ -690,7 +690,7 @@
   "hamonSkill.speed_boost.name": "Speed Boost",
   "hamonSkill.speed_boost.desc": "Gives the user Speed and Haste effects for a short amount of time.",
   "hamonSkill.afterimages.name": "Body Control Mastery",
-  "hamonSkill.afterimages.desc": "Speed Boost ability gives stronger effects and summons the user's afterimages. Leap's strength is increased.",
+  "hamonSkill.afterimages.desc": "Speed Boost ability gives stronger effects. Leap's strength is increased. Maximum speed boost summons the user's afterimages. ",
   "hamonSkill.healing.name": "Healing",
   "hamonSkill.healing.desc": "Gives the user Regeneration effect.",
   "hamonSkill.healing_touch.name": "Healing Touch",

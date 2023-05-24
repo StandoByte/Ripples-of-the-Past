@@ -55,9 +55,11 @@ public class HamonOverdrive extends HamonAction {
             if (entity instanceof LivingEntity) {
                 LivingEntity targetEntity = (LivingEntity) entity;
                 HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
+                float cost = getEnergyCost(power);
+                float efficiency = hamon.getActionEfficiency(cost);
                 
                 float damage = getDamage();
-                float dmgScale = getActionEfficiency(power, hamon);
+                float dmgScale = efficiency;
                 if (user instanceof PlayerEntity) {
                     float swingStrengthScale = ((PlayerEntity) user).getAttackStrengthScale(0.5F);
                     dmgScale *= (0.2F + swingStrengthScale * swingStrengthScale * 0.8F);
@@ -66,7 +68,7 @@ public class HamonOverdrive extends HamonAction {
                 
                 int attackStrengthTicker = CommonReflection.getAttackStrengthTicker(user);
                 if (dealDamage(targetEntity, damage, user, power, hamon)) {
-                    addStatPointsOnPerform(power, hamon, HamonStat.STRENGTH);
+                    addPointsForAction(power, hamon, HamonStat.STRENGTH, cost, efficiency);
                 }
                 // FIXME (hamon) !! ClientPlayerEntity#swing sends the packet to server, and THEN ServerPlayerEntity#swing resets attackStrengthTicker
                 CommonReflection.setAttackStrengthTicker(user, attackStrengthTicker);

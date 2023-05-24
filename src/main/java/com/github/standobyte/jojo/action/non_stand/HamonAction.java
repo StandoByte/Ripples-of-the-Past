@@ -13,7 +13,7 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
 
 import net.minecraft.entity.LivingEntity;
@@ -44,16 +44,6 @@ public abstract class HamonAction extends NonStandAction {
         }
         
         return super.checkConditions(user, power, target);
-    }
-    
-    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! check other calls
-    protected float getActionEfficiency(INonStandPower power, HamonData hamon) {
-        return hamon.getHamonEfficiency(getEnergyCost(power));
-    }
-
-    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! check other calls
-    protected void addStatPointsOnPerform(INonStandPower power, HamonData hamon, BaseHamonSkill.HamonStat stat) {
-        hamon.hamonPointsFromAction(stat, Math.min(getEnergyCost(power), power.getEnergy()) * hamon.getBloodstreamEfficiency());
     }
     
     @Override
@@ -96,6 +86,12 @@ public abstract class HamonAction extends NonStandAction {
     
     private AbstractHamonSkill getSkillToUnlock() {
         return null;
+    }
+    
+    
+    
+    public static void addPointsForAction(INonStandPower power, HamonData hamon, HamonStat stat, float energyCost, float hamonEfficiency) {
+        hamon.hamonPointsFromAction(HamonStat.STRENGTH, Math.min(energyCost, power.getEnergy()) * hamonEfficiency);
     }
     
     

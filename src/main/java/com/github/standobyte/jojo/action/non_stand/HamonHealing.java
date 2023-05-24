@@ -33,8 +33,10 @@ public class HamonHealing extends HamonAction {
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
-        float hamonEfficiency = hamon.getHamonEfficiency(getEnergyCost(power));
+        float cost = getEnergyCost(power);
+        float hamonEfficiency = hamon.getActionEfficiency(cost);
         float hamonControl = hamon.getHamonControlLevelRatio();
+        
         if (!world.isClientSide()) {
             Entity targetEntity = target.getType() == TargetType.ENTITY && hamon.isSkillLearned(ModHamonSkills.HEALING_TOUCH.get()) ? target.getEntity() : null;
             LivingEntity targetLiving = targetEntity instanceof LivingEntity ? (LivingEntity) targetEntity : null;
@@ -42,7 +44,7 @@ public class HamonHealing extends HamonAction {
             int regenDuration = (int) ((50F + hamonEfficiency * 50F) * (1 + hamonControl));
             int regenLvl = MathHelper.clamp((int) ((hamonControl - 0.0001F) * 3 + (hamonEfficiency - 0.25F) * 4F/3F - 1), 0, 2);
 //            if (entityToHeal.getHealth() < entityToHeal.getMaxHealth()) {
-                hamon.hamonPointsFromAction(HamonStat.CONTROL, getEnergyCost(power) * hamonEfficiency);
+                addPointsForAction(power, hamon, HamonStat.STRENGTH, cost, hamonEfficiency);
 //            }
             entityToHeal.addEffect(new EffectInstance(Effects.REGENERATION, regenDuration, regenLvl));
             if (hamon.isSkillLearned(ModHamonSkills.EXPEL_VENOM.get())) {

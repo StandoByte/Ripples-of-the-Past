@@ -252,7 +252,7 @@ public class HamonData extends TypeSpecificData {
     
     
     public static final float ALL_EXERCISES_EFFICIENCY_MULTIPLIER = 1.05F;
-    public float getHamonEfficiency(float energyCost) {
+    public float getActionEfficiency(float energyCost) {
         float efficiency = getHamonEnergyUsageEfficiency(energyCost, false) * getBloodstreamEfficiency();
         if (allExercisesCompleted) {
             efficiency *= ALL_EXERCISES_EFFICIENCY_MULTIPLIER;
@@ -262,7 +262,7 @@ public class HamonData extends TypeSpecificData {
     
     @Nullable
     public <T> T consumeHamonEnergyTo(Function<Float, T> actionWithHamonEfficiency, float energyCost) {
-        float efficiency = getHamonEfficiency(energyCost);
+        float efficiency = getActionEfficiency(energyCost);
         if (efficiency > 0) {
             T result = actionWithHamonEfficiency.apply(efficiency);
             getHamonEnergyUsageEfficiency(energyCost, true);
@@ -351,8 +351,8 @@ public class HamonData extends TypeSpecificData {
         LivingEntity user = power.getUser();
         
         float healthRatio = user.getHealth() / user.getMaxHealth();
-        if (healthRatio < 0.5F) {
-            efficiency *= healthRatio * 1.5F + 0.25F;
+        if (healthRatio < 0.25F) {
+            efficiency *= healthRatio * 3F + 0.25F;
         }
         
         float freeze = 0;
