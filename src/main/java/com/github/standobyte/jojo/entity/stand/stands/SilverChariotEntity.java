@@ -65,7 +65,6 @@ public class SilverChariotEntity extends StandEntity {
 
     public SilverChariotEntity(StandEntityType<SilverChariotEntity> type, World world) {
         super(type, world);
-        getAttribute(Attributes.ARMOR).setBaseValue(15);
     }
 
     @Override

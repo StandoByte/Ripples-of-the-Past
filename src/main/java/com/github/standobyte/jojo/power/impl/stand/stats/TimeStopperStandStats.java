@@ -86,17 +86,17 @@ public class TimeStopperStandStats extends StandStats {
         
         public Builder timeStopLearningPerTick(float points) {
             this.timeStopLearningPerTick = points;
-            return this;
+            return getThis();
         }
         
         public Builder timeStopDecayPerDay(float points) {
             this.timeStopDecayPerDay = points;
-            return this;
+            return getThis();
         }
         
         public Builder timeStopCooldownPerTick(float ticks) {
             this.timeStopCooldownPerTick = ticks;
-            return this;
+            return getThis();
         }
 
         @Override

@@ -126,6 +126,14 @@ public class StandStats {
         return tier;
     }
     
+    public double getArmor() {
+        return 0;
+    }
+    
+    public double getArmorToughness() {
+        return 0;
+    }
+    
     
     
     public static class Builder extends AbstractBuilder<Builder, StandStats> {

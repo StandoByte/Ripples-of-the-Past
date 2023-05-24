@@ -71,6 +71,7 @@ import com.github.standobyte.jojo.entity.stand.stands.TheWorldEntity;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
+import com.github.standobyte.jojo.power.impl.stand.stats.ArmoredStandStats;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.power.impl.stand.type.BoyIIManStandType;
@@ -449,7 +450,7 @@ public class ModStandsInit {
                     .partsRequired(StandPart.MAIN_BODY)));
     
     
-    public static final EntityStandRegistryObject<EntityStandType<StandStats>, StandEntityType<SilverChariotEntity>> STAND_SILVER_CHARIOT = 
+    public static final EntityStandRegistryObject<EntityStandType<ArmoredStandStats>, StandEntityType<SilverChariotEntity>> STAND_SILVER_CHARIOT = 
             new EntityStandRegistryObject<>("silver_chariot", 
                     STAND_TYPES, 
                     () -> new EntityStandType<>(
@@ -463,12 +464,13 @@ public class ModStandsInit {
                                     SILVER_CHARIOT_BLOCK.get(), 
                                     SILVER_CHARIOT_TAKE_OFF_ARMOR.get()},
                             
-                            StandStats.class, new StandStats.Builder()
+                            ArmoredStandStats.class, new ArmoredStandStats.Builder()
                             .tier(5)
                             .power(9.0)
                             .speed(14.0)
                             .range(10.0)
                             .durability(12.0)
+                            .armor(15.0F)
                             .precision(16.0)
                             .build("Silver Chariot"), 
 

@@ -291,13 +291,15 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
                 .add(ModEntityAttributes.STAND_PRECISION.get());
     }
 
-    private void initStandAttributes(StandStats stats) {
+    protected void initStandAttributes(StandStats stats) {
         getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(stats.getBasePower());
         getAttribute(Attributes.ATTACK_SPEED).setBaseValue(stats.getBaseAttackSpeed());
         getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(stats.getBaseMovementSpeed());
         getAttribute(ForgeMod.REACH_DISTANCE.get()).setBaseValue(getDefaultMeleeAttackRange());
         getAttribute(ModEntityAttributes.STAND_DURABILITY.get()).setBaseValue(stats.getBaseDurability());
         getAttribute(ModEntityAttributes.STAND_PRECISION.get()).setBaseValue(stats.getBasePrecision());
+        getAttribute(Attributes.ARMOR).setBaseValue(stats.getArmor());
+        getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(stats.getArmorToughness());
     }
 
     protected double getDefaultMeleeAttackRange() {

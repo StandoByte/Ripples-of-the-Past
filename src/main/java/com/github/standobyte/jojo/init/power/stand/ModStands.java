@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.entity.stand.stands.StarPlatinumEntity;
 import com.github.standobyte.jojo.entity.stand.stands.TheWorldEntity;
 import com.github.standobyte.jojo.init.power.stand.EntityStandRegistryObject.EntityStandSupplier;
+import com.github.standobyte.jojo.power.impl.stand.stats.ArmoredStandStats;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.power.impl.stand.type.EntityStandType;
@@ -31,7 +32,7 @@ public class ModStands {
     public static final EntityStandSupplier<EntityStandType<StandStats>, StandEntityType<HierophantGreenEntity>> 
     HIEROPHANT_GREEN = new EntityStandSupplier<>(ModStandsInit.STAND_HIEROPHANT_GREEN);
 
-    public static final EntityStandSupplier<EntityStandType<StandStats>, StandEntityType<SilverChariotEntity>> 
+    public static final EntityStandSupplier<EntityStandType<ArmoredStandStats>, StandEntityType<SilverChariotEntity>> 
     SILVER_CHARIOT = new EntityStandSupplier<>(ModStandsInit.STAND_SILVER_CHARIOT);
 
     public static final EntityStandSupplier<EntityStandType<StandStats>, StandEntityType<MagiciansRedEntity>> 
