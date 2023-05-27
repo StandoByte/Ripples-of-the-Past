@@ -427,6 +427,7 @@ public class JojoModConfig {
             public void writeToBuf(PacketBuffer buf) {
 //                buf.writeDouble(hamonPointsMultiplier);
 //                buf.writeDouble(breathingTrainingMultiplier);
+                buf.writeVarIntArray(techniqueSkillsRequirement);
                 NetworkUtil.writeFloatArray(buf, maxBloodMultiplier);
 //                NetworkUtil.writeFloatArray(buf, bloodDrainMultiplier);
                 NetworkUtil.writeFloatArray(buf, bloodTickDown);
