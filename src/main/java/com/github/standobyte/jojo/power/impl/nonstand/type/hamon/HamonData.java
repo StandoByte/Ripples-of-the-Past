@@ -100,6 +100,7 @@ public class HamonData extends TypeSpecificData {
     public static final int MAX_HAMON_POINTS = pointsAtLevel(MAX_STAT_LEVEL);
     
     private final Random random = new Random();
+    private boolean tcsa = true;
 
     private int hamonStrengthPoints;
     private int hamonStrengthLevel;
@@ -138,6 +139,9 @@ public class HamonData extends TypeSpecificData {
         if (!user.level.isClientSide()) {
             tickNewPlayerLearners(user);
             tickAirSupply(user);
+            if (tcsa && (power.isUserCreative() || getCharacterTechnique() != null)) {
+                tcsa = false;
+            }
         }
         tickChargeParticles();
         tickBreathStability();
@@ -1208,6 +1212,7 @@ public class HamonData extends TypeSpecificData {
         nbt.putFloat("TrainingBonus", breathingTrainingDayBonus);
         nbt.putFloat("BreathStability", breathStability);
         nbt.putInt("EnergyTicks", noEnergyDecayTicks);
+        nbt.putBoolean("TCSA", tcsa);
         return nbt;
     }
 
@@ -1230,6 +1235,7 @@ public class HamonData extends TypeSpecificData {
         breathStability = nbt.contains("BreathStability") ? nbt.getFloat("BreathStability") : getMaxBreathStability();
         prevBreathStability = breathStability;
         noEnergyDecayTicks = nbt.getInt("EnergyTicks");
+        tcsa = nbt.getBoolean("TCSA");
     }
     
     @Override

@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.power.impl.nonstand.type.vampirism;
 
+import java.util.Random;
+
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -12,11 +14,15 @@ import com.github.standobyte.jojo.power.impl.nonstand.TypeSpecificData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
+import net.minecraft.block.BedBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class VampirismData extends TypeSpecificData {
@@ -125,7 +131,7 @@ public class VampirismData extends TypeSpecificData {
             
             if (curingTicks < CURING_MAX_TICKS) {
                 if (power.getEnergy() == 0) {
-                    curingTicks++;
+                    curingTicks = Math.min(curingTicks + getCuringTickProgress(), CURING_MAX_TICKS);
                 }
                 curingStageChanged = curingStage != getCuringStage();
             }
@@ -159,6 +165,33 @@ public class VampirismData extends TypeSpecificData {
                 });
             });
         }
+    }
+    
+    private int getCuringTickProgress() {
+        int i = 1;
+        LivingEntity user = power.getUser();
+        Random random = user.getRandom();
+        if (random.nextFloat() < 0.01F) {
+            int accelBlocks = 0;
+            BlockPos pos = user.blockPosition();
+            BlockPos.Mutable blockPos = new BlockPos.Mutable();
+            for (int x = pos.getX() - 4; x < pos.getX() + 4; ++x) {
+                for (int y = pos.getY() - 4; y < pos.getY() + 4; ++y) {
+                    for (int z = pos.getZ() - 4; z < pos.getZ() + 4; ++z) {
+                        Block block = user.level.getBlockState(blockPos.set(x, y, z)).getBlock();
+                        if (block == Blocks.IRON_BARS || block instanceof BedBlock) {
+                            if (random.nextFloat() < 0.3F) {
+                                ++i;
+                            }
+                            if (++accelBlocks >= 14) {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return i;
     }
     
     public static void finishCuringOnWakingUp(LivingEntity entity) {
