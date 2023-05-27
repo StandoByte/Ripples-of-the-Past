@@ -17,6 +17,7 @@ public class StandEntityDamageSource extends EntityDamageSource implements IStan
 //    protected final Entity standUser;
     private float knockbackFactor = 1;
     private boolean bypassInvulTicks = false;
+    private boolean preventDamagingArmor = false;
     protected boolean showStandUserName;
     private int barrageHits = 0;
     private int standInvulTicks = 0;
@@ -80,6 +81,11 @@ public class StandEntityDamageSource extends EntityDamageSource implements IStan
     public boolean bypassInvulTicks() {
         return bypassInvulTicks;
     }
+    
+    public StandEntityDamageSource setPreventsDamagingArmor() {
+        this.preventDamagingArmor = true;
+        return this;
+    }
 
     public StandEntityDamageSource setStandInvulTicks(int ticks) {
         this.standInvulTicks = ticks;
@@ -89,6 +95,10 @@ public class StandEntityDamageSource extends EntityDamageSource implements IStan
     @Override
     public int getStandInvulTicks() {
         return standInvulTicks;
+    }
+    
+    public boolean preventDamagingArmor() {
+        return preventDamagingArmor;
     }
 
     public StandEntityDamageSource setShowStandUserName() {

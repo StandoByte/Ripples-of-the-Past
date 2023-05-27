@@ -131,6 +131,7 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
+import net.minecraft.util.CombatRules;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
@@ -755,6 +756,18 @@ public class GameplayEventHandler {
                     }
                 }
             });
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void preventDamagingArmor(LivingHurtEvent event) {
+        DamageSource dmgSource = event.getSource();
+        if (!dmgSource.isBypassArmor() && dmgSource instanceof IModdedDamageSource
+                && ((IModdedDamageSource) dmgSource).preventDamagingArmor()) {
+            dmgSource.bypassArmor();
+            LivingEntity target = event.getEntityLiving();
+            event.setAmount(CombatRules.getDamageAfterAbsorb(event.getAmount(), 
+                    (float) target.getArmorValue(), (float) target.getAttributeValue(Attributes.ARMOR_TOUGHNESS)));
         }
     }
 

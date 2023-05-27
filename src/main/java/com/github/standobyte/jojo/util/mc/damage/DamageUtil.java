@@ -266,10 +266,14 @@ public class DamageUtil {
     
     public static boolean hurtThroughInvulTicks(Entity target, DamageSource dmgSource, float amount) {
         int invulTime = target.invulnerableTime;
+        target.invulnerableTime = 0;
         LivingEntity targetLiving = target instanceof LivingEntity ? (LivingEntity) target : null;
         float lastHurt = targetLiving != null ? targetLiving.lastHurt : 0;
         
-        target.invulnerableTime = 0;
+        if (!dmgSource.isBypassArmor() && dmgSource instanceof IModdedDamageSource && targetLiving != null) {
+            targetLiving.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(
+                    cap -> cap.onHurtThroughInvul((IModdedDamageSource) dmgSource));
+        }
         boolean dealtDamage = target.hurt(dmgSource, amount);
         
         target.invulnerableTime = invulTime;

@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.entity.AfterimageEntity;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonCharge;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 
 import net.minecraft.entity.LivingEntity;
@@ -25,6 +26,8 @@ public class LivingUtilCap {
     private int lastHurtByStandTicks;
     public float lastStandDamage;
     public int standInvulnerableTime;
+    
+    private int hurtThroughInvulTime;
     
     private boolean reduceKnockback;
     private float futureKnockbackFactor;
@@ -75,15 +78,12 @@ public class LivingUtilCap {
     }
     
     public void lastHurtByStandTick() {
-        if (lastHurtByStandTicks > 0) {
-            lastHurtByStandTicks--;
-            if (lastHurtByStandTicks == 0) {
-                lastHurtByStand = null;
-            }
+        if (lastHurtByStandTicks > 0 && --lastHurtByStandTicks == 0) {
+            lastHurtByStand = null;
         }
-        if (standInvulnerableTime > 0) {
-            standInvulnerableTime--;
-        }
+        
+        if (standInvulnerableTime > 0) --standInvulnerableTime;
+        if (hurtThroughInvulTime > 0) --hurtThroughInvulTime;
     }
     
     public void setFutureKnockbackFactor(float factor) {
@@ -108,6 +108,13 @@ public class LivingUtilCap {
         Vector3d pos = this.latestExplosionPos;
         this.latestExplosionPos = null;
         return pos;
+    }
+    
+    public void onHurtThroughInvul(IModdedDamageSource dmgSource) {
+        if (hurtThroughInvulTime > 0) {
+            dmgSource.preventDamagingArmor();
+        }
+        hurtThroughInvulTime = 5;
     }
     
     
