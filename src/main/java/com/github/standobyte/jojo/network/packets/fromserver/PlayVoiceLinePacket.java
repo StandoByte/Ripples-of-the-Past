@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 
 import java.util.function.Supplier;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
@@ -65,7 +66,7 @@ public class PlayVoiceLinePacket {
         public void handle(PlayVoiceLinePacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity != null) {
-                if (msg.sound != null) {
+                if (msg.sound != null && JojoModConfig.CLIENT.characterVoiceLines.get()) {
                     ClientTickingSoundsHelper.playVoiceLine(entity, msg.sound, msg.source, msg.volume, msg.pitch, msg.interrupt);
                 }
                 else {

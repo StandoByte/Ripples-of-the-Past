@@ -593,6 +593,8 @@ public class JojoModConfig {
         public final ForgeConfigSpec.BooleanValue timeStopFreezesVisuals;
         public final ForgeConfigSpec.DoubleValue standStatsTranslucency;
         
+        public final ForgeConfigSpec.BooleanValue characterVoiceLines;
+        
         private Client(ForgeConfigSpec.Builder builder) {
             barsPosition = builder
                     .comment(" Position of Energy, Stamina and Resolve bars in the HUD.")
@@ -636,6 +638,11 @@ public class JojoModConfig {
                             "  If set to 0, it will not show up.")
                     .translation("jojo.config.standStatsTranslucency")
                     .defineInRange("standStatsTranslucency", 1.0, 0.0, 1.0);
+            
+            characterVoiceLines = builder
+                    .comment(" Whether or not voice lines of the JoJo characters whose powers the players use are played.")
+                    .translation("jojo.config.client.characterVoiceLines")
+                    .define("characterVoiceLines", true);
         }
     }
 
