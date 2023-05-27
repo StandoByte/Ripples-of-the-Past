@@ -2,10 +2,10 @@ package com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Optional;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
@@ -25,7 +25,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.registries.IForgeRegistry;
 
 public class HamonTechniqueManager implements IHamonSkillsManager<CharacterTechniqueHamonSkill> {
-    private final Set<CharacterTechniqueHamonSkill> wrappedSkillSet = new HashSet<>();
+    private final Set<CharacterTechniqueHamonSkill> wrappedSkillSet = new LinkedHashSet<>();
     private CharacterHamonTechnique technique = null;
     
     public HamonTechniqueManager() {}
@@ -38,25 +38,12 @@ public class HamonTechniqueManager implements IHamonSkillsManager<CharacterTechn
     public void addSkill(CharacterTechniqueHamonSkill skill) {
         if (!isCurrentTechniquePerk(skill) && !wrappedSkillSet.contains(skill)) {
             wrappedSkillSet.add(skill);
-            CharacterHamonTechnique skillTechnique = skill.getTechnique();
-            if (this.technique == null) {
-                this.technique = skillTechnique; 
-            }
         }
     }
 
     @Override
     public void removeSkill(CharacterTechniqueHamonSkill skill) {
         wrappedSkillSet.remove(skill);
-        if (!wrappedSkillSet.stream().anyMatch(s -> s.getTechnique() != null)) {
-            this.technique = null;
-        }
-    }
-    
-    public void updateTechnique(LivingEntity user) {
-        if (!user.level.isClientSide()) {
-            PacketManager.sendToClientsTrackingAndSelf(new TrHamonCharacterTechniquePacket(user.getId(), Optional.ofNullable(getTechnique())), user);
-        }
     }
     
     @Override
@@ -69,27 +56,45 @@ public class HamonTechniqueManager implements IHamonSkillsManager<CharacterTechn
     private static final ActionConditionResult WRONG_TECHNIQUE = ActionConditionResult.createNegative(new TranslationTextComponent("hamon.closed.technique.bug"));
     @Override
     public ActionConditionResult canLearnSkill(LivingEntity user, HamonData hamon, CharacterTechniqueHamonSkill skill) {
-        if (this.technique != null && skill.getTechnique() != this.technique) {
+        boolean clientSide = user.level.isClientSide();
+        if (!techniquesEnabled(clientSide)) {
+            return ActionConditionResult.NEGATIVE;
+        }
+        
+        if (!JojoModConfig.getCommonConfigInstance(clientSide).mixHamonTechniques.get()
+                && skill.getTechnique() != null && skill.getTechnique() != this.technique) {
             return WRONG_TECHNIQUE;
         }
         
-        if (atMaxTechniqueSkills()) {
+        if (atMaxTechniqueSkills(clientSide)) {
             return TECHNIQUE_MAX;
         }
         
-        if (!hamon.hasTechniqueLevel(wrappedSkillSet.size())) {
+        if (!hamon.hasTechniqueLevel(wrappedSkillSet.size(), clientSide)) {
             return TECHNIQUE_LOCKED;
         }
-
+        
         return ActionConditionResult.POSITIVE;
     }
     
-    private boolean atMaxTechniqueSkills() {
-        return wrappedSkillSet.size() >= MAX_TECHNIQUE_SKILLS;
+    private boolean atMaxTechniqueSkills(boolean clientSide) {
+        return wrappedSkillSet.size() >= techniqueSlotsCount(clientSide);
     }
     
     public CharacterHamonTechnique getTechnique() {
         return technique;
+    }
+    
+    public boolean canPickTechnique(LivingEntity user) {
+        return techniquesEnabled(user.level.isClientSide()) && this.technique == null;
+    }
+    
+    public void setTechnique(CharacterHamonTechnique technique) {
+        this.technique = technique;
+    }
+    
+    public void resetTechnique() {
+        technique = null;
     }
     
     public void addPerks(LivingEntity user, HamonData hamon) {
@@ -108,10 +113,17 @@ public class HamonTechniqueManager implements IHamonSkillsManager<CharacterTechn
     
     
     
-    public static final int MAX_TECHNIQUE_SKILLS = 3;
-    public static final int TECHNIQUE_MINIMAL_STAT_LVL = 20;
-    public static int techniqueSkillRequirement(int skillsLearned) {
-        return skillsLearned * 10 + TECHNIQUE_MINIMAL_STAT_LVL;
+    public static int techniqueSlotsCount(boolean clientSide) {
+        int count = JojoModConfig.getCommonConfigInstance(clientSide).techniqueSkillsRequirement.get().size();
+        return count;
+    }
+    
+    public static boolean techniquesEnabled(boolean clientSide) {
+        return techniqueSlotsCount(clientSide) > 0;
+    }
+    
+    public static int techniqueSkillRequirement(int i, boolean clientSide) {
+        return JojoModConfig.getCommonConfigInstance(clientSide).techniqueSkillsRequirement.get().get(i);
     }
     
     
@@ -168,7 +180,7 @@ public class HamonTechniqueManager implements IHamonSkillsManager<CharacterTechn
     
     public void syncWithTrackingOrUser(LivingEntity user, ServerPlayerEntity tracking, HamonData hamon) {
         if (getTechnique() != null) {
-            PacketManager.sendToClient(new TrHamonCharacterTechniquePacket(user.getId(), Optional.of(getTechnique())), tracking);
+            PacketManager.sendToClient(new TrHamonCharacterTechniquePacket(user.getId(), getTechnique()), tracking);
         }
     }
     
@@ -186,11 +198,9 @@ public class HamonTechniqueManager implements IHamonSkillsManager<CharacterTechn
         }
         
         public boolean canLearnNewTechniqueSkill(HamonData hamon, LivingEntity user) {
-            return !techniqueData.atMaxTechniqueSkills() && hamon.hasTechniqueLevel(getLearnedSkills().size());
-        }
-        
-        public void setCharacterTechnique(Optional<CharacterHamonTechnique> technique) {
-            techniqueData.technique = technique.orElse(null);
+            boolean clientSide = user.level.isClientSide();
+            return !techniqueData.atMaxTechniqueSkills(clientSide)
+                    && hamon.hasTechniqueLevel(getLearnedSkills().size(), clientSide);
         }
     }
 }

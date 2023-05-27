@@ -7,16 +7,22 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromclient.ClHamonPickTechniquePacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonResetSkillsButtonPacket.HamonSkillsTab;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterTechniqueHamonSkill;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.HamonTechniqueManager;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.LazyUnmodifiableArrayList;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
@@ -30,8 +36,10 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
     private CharacterHamonTechnique technique;
     private Map<CharacterHamonTechnique, HamonCharacterTechniqueBox> availableHamonTechniques = Collections.emptyMap();
     private CharacterHamonTechnique selectedTechnique = null;
+    private List<HamonScreenButton> pickTechniqueButtons = Collections.emptyList();
     private final List<IReorderingProcessor> availableTechniqueSkillLines;
     private final List<IReorderingProcessor> tabLockedLines;
+    private List<HamonTechniqueSlotElement> techniqueSkillSlots = Collections.emptyList();
     
     HamonTechniqueTabGui(Minecraft minecraft, HamonScreen screen, int index, String title) {
         super(minecraft, screen, index, title, -1, -1);
@@ -39,19 +47,25 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
             fillSkillLines();
         }
         availableTechniqueSkillLines = minecraft.font.split(new TranslationTextComponent("hamon.technique_available"), 100);
-        tabLockedLines = minecraft.font.split(new TranslationTextComponent("hamon.techniques_locked", 
-                HamonTechniqueManager.techniqueSkillRequirement(0)), 200);
+        tabLockedLines = HamonTechniqueManager.techniquesEnabled(true) ? 
+                minecraft.font.split(new TranslationTextComponent("hamon.techniques_locked", 
+                        HamonTechniqueManager.techniqueSkillRequirement(0, true)), 200) 
+                : Collections.emptyList();
     }
     
     @Override
     protected ITextComponent createTabDescription(String key) {
-        return new TranslationTextComponent(key, new TranslationTextComponent("hamon.techniques.tab.desc.only_one"));
+        return new TranslationTextComponent(key, 
+                JojoModConfig.getCommonConfigInstance(true).mixHamonTechniques.get() ? ""
+                        : new TranslationTextComponent("hamon.techniques.tab.desc.only_one"));
     }
     
     private int techniqueYStarting() {
-        return 103;
+        return 135 + (techniqueSkillSlots.size() - 1) / MAX_ROW_SKILL_SLOTS * SKILL_SLOTS_ROW_HEIGHT;
     }
     private static final int TECHNIQUE_Y_GAP = 10;
+    private static final int MAX_ROW_SKILL_SLOTS = 7;
+    private static final int SKILL_SLOTS_ROW_HEIGHT = 32;
     
     private void fillSkillLines() {
         skills.clear();
@@ -59,7 +73,7 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
         // available techniques
         List<CharacterHamonTechnique> techniques;
         this.technique = screen.hamon.getCharacterTechnique();
-        if (technique != null) {
+        if (technique != null && !JojoModConfig.getCommonConfigInstance(true).mixHamonTechniques.get()) {
             techniques = Util.make(new ArrayList<>(), list -> list.add(technique));
         }
         else {
@@ -67,13 +81,36 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
             Collections.sort(techniques, TECHNIQUES_ORDER);
         }
         
-        // technique names, skill squares and y coordinates
+        List<HamonScreenButton> newButtons = new ArrayList<>();
+        
+        // technique skill slots
+        int slotsCount = HamonTechniqueManager.techniqueSlotsCount(true);
+        int rowsCount = slotsCount / MAX_ROW_SKILL_SLOTS;
+        techniqueSkillSlots = HamonTechniqueSlotElement.createSlots(screen, i -> {
+            int row = i / MAX_ROW_SKILL_SLOTS;
+            float skillsInRow = row < rowsCount ? MAX_ROW_SKILL_SLOTS : slotsCount % MAX_ROW_SKILL_SLOTS;
+            int x = (int) ((i % MAX_ROW_SKILL_SLOTS + 0.5F) * (float) (HamonScreen.WINDOW_WIDTH - HamonScreen.WINDOW_THIN_BORDER * 2) / skillsInRow) - 14;
+            int y = 97 + row * SKILL_SLOTS_ROW_HEIGHT;
+            return new HamonTechniqueSlotElement(i, x, y);
+        });
+        
+        // technique names, buttons, skill squares and y coordinates
         availableHamonTechniques = new LinkedHashMap<>();
         int techniqueY = techniqueYStarting();
         for (CharacterHamonTechnique technique : techniques) {
             List<IReorderingProcessor> name = minecraft.font.split(new TranslationTextComponent("hamon.technique." + technique.getName()), 192);
             HamonCharacterTechniqueBox techniqueBox = new HamonCharacterTechniqueBox(technique, techniqueY, name, minecraft.font);
             availableHamonTechniques.put(technique, techniqueBox);
+            
+            HamonScreenButton pickButton = new HamonScreenButton(
+                    screen.windowPosX() + 16, screen.windowPosY() + techniqueY + techniqueBox.getHeight() - 1, 
+                    80, 20, 
+                    new TranslationTextComponent("hamon.pick_technique"), 
+                    button -> {
+                        PacketManager.sendToServer(new ClHamonPickTechniquePacket(technique));
+                    });
+            newButtons.add(pickButton);
+            techniqueBox.addPickButton(pickButton);
             
             List<CharacterTechniqueHamonSkill> skills = technique.getSkills().collect(Collectors.toList());
             int j = 0;
@@ -104,6 +141,18 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
         if (getSelectedSkill() != null) {
             selectSkill(skills.get(getSelectedSkill().getHamonSkill()));
         }
+        
+        pickTechniqueButtons.forEach(screen::removeButton);
+        pickTechniqueButtons = newButtons;
+        newButtons.forEach(screen::addButton);
+    }
+    
+    @Override
+    List<HamonScreenButton> getButtons() {
+        return Stream.concat(
+                super.getButtons().stream(), 
+                pickTechniqueButtons.stream())
+                .collect(Collectors.toList());
     }
     
     @Override
@@ -140,7 +189,8 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
     }
     
     private boolean isLocked() {
-        return screen.hamon.getCharacterTechnique() == null && !screen.hamon.hasTechniqueLevel(0);
+        return !HamonTechniqueManager.techniquesEnabled(true)
+                || screen.hamon.getCharacterTechnique() == null && !screen.hamon.hasTechniqueLevel(0, true);
     }
     
     @Override
@@ -148,10 +198,19 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
         if (isLocked()) {
             learnButton.visible = false;
             creativeResetButton.visible = false;
+            pickTechniqueButtons.forEach(button -> button.visible = false);
         }
         else {
             super.updateButton();
             this.technique = screen.hamon.getCharacterTechnique();
+            if (learnButton.visible && technique == null
+                    && getSelectedSkill().getHamonSkill() instanceof CharacterTechniqueHamonSkill) {
+                learnButton.visible = false;
+                skillRequirements = skillRequirements.stream().map(skillIcon -> 
+                new HamonSkillElementRequirement(skillIcon.getHamonSkill(), skillIcon.getX() + learnButton.getWidth() + 0, skillIcon.getY()))
+                        .collect(Collectors.toList());
+            }
+            pickTechniqueButtons.forEach(button -> button.visible = technique == null);
             
             CharacterHamonTechnique technique = null;
             if (getSelectedSkill() != null && getSelectedSkill().getHamonSkill() instanceof CharacterTechniqueHamonSkill) {
@@ -174,19 +233,51 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
             }
         }
     }
-
+    
     @Override
     protected void drawActualContents(HamonScreen screen, MatrixStack matrixStack, int mouseX, int mouseY) {
         if (!isLocked()) {
             availableHamonTechniques.values().forEach(technique -> 
             technique.render(matrixStack, screen.hamon, intScrollX, intScrollY, mouseX, mouseY, selectedTechnique == technique.technique));
             super.drawActualContents(screen, matrixStack, mouseX, mouseY);
+        }        drawTechniqueSlots(matrixStack, mouseX, mouseY);
+    }
+    
+    private void drawTechniqueSlots(MatrixStack matrixStack, int mouseX, int mouseY) {
+        for (HamonTechniqueSlotElement slot : techniqueSkillSlots) {
+            slot.renderSlot(matrixStack, intScrollX, intScrollY);
         }
     }
     
     @Override
     boolean mouseClicked(double mouseX, double mouseY, int mouseButton, boolean mouseInsideWindow) {
         if (isLocked()) return false;
+        
+        if (mouseButton == 0) {
+            for (HamonTechniqueSlotElement slot : techniqueSkillSlots) {
+                if (GeneralUtil.orElseFalse(slot.getSkillElement(), skillSlot -> {
+                    if (skillSlot.isMouseOver(intScrollX, intScrollY, (int) mouseX, (int) mouseY)) {
+                        AbstractHamonSkill skill = skillSlot.getHamonSkill();
+                        for (HamonTabGui tab : screen.selectableTabs) {
+                            if (tab instanceof HamonSkillsTabGui) {
+                                Map<AbstractHamonSkill, HamonSkillElementLearnable> tabSkills = ((HamonSkillsTabGui) tab).skills;
+                                if (tabSkills.containsKey(skill)) {
+                                    HamonSkillElementLearnable skillElement = tabSkills.get(skill);
+                                    screen.selectTab(tab);
+                                    ((HamonSkillsTabGui) tab).selectSkill(skillElement);
+                                    screen.clickedOnSkill = true;
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                    return false;
+                })) {
+                    return true;
+                }
+            }
+        }
+        
         return super.mouseClicked(mouseX, mouseY, mouseButton, mouseInsideWindow);
     }
 
@@ -208,6 +299,10 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
             super.drawToolTips(matrixStack, mouseX, mouseY, windowPosX, windowPosY);
             availableHamonTechniques.values().forEach(technique -> technique.drawTooltip(
                     screen, matrixStack, intScrollX, intScrollY, mouseX, mouseY));
+            
+            for (HamonTechniqueSlotElement skillSlot : techniqueSkillSlots) {
+                skillSlot.drawTooltip(matrixStack, screen, intScrollX, intScrollY, mouseX, mouseY);
+            }
         }
     }
     

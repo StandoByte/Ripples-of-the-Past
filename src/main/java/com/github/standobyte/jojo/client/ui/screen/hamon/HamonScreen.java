@@ -8,6 +8,8 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
@@ -17,6 +19,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.HamonTechniqueManager;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -61,9 +64,11 @@ public class HamonScreen extends Screen {
         selectableTabs = new HamonTabGui[] {
                 new HamonStatsTabGui(minecraft, this, i++, "hamon.stats.tab"),
                 new HamonGeneralSkillsTabGui(minecraft, this, i++, "hamon.strength_skills.tab", HamonStat.STRENGTH),
-                new HamonGeneralSkillsTabGui(minecraft, this, i++, "hamon.control_skills.tab", HamonStat.CONTROL),
-                new HamonTechniqueTabGui(minecraft, this, i++, "hamon.techniques.tab")
+                new HamonGeneralSkillsTabGui(minecraft, this, i++, "hamon.control_skills.tab", HamonStat.CONTROL)
         };
+        if (HamonTechniqueManager.techniquesEnabled(true)) {
+            selectableTabs = ArrayUtils.add(selectableTabs, new HamonTechniqueTabGui(minecraft, this, i++, "hamon.techniques.tab"));
+        }
         for (HamonTabGui tab : selectableTabs) {
             tab.addButtons();
             tab.updateButton();

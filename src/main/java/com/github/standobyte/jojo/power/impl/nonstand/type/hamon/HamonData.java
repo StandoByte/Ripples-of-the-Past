@@ -44,6 +44,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.HamonUiEffectPacket
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonAuraColorPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonAuraColorPacket.HamonAuraColor;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonBreathStabilityPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHamonCharacterTechniquePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonEnergyTicksPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonStatsPacket;
@@ -945,7 +946,6 @@ public class HamonData extends TypeSpecificData {
                 }
                 if (sync) {
                     PacketManager.sendToClient(new HamonSkillAddPacket(skill), (ServerPlayerEntity) player);
-                    hamonSkills.getTechniqueData().updateTechnique(user);
                 }
             });
             return true;
@@ -984,7 +984,6 @@ public class HamonData extends TypeSpecificData {
                 if (skill == ModHamonSkills.CHEAT_DEATH.get()) {
                     player.removeEffect(ModEffects.CHEAT_DEATH.get());
                 }
-                hamonSkills.getTechniqueData().updateTechnique(player);
             });
         }
     }
@@ -1018,10 +1017,34 @@ public class HamonData extends TypeSpecificData {
             break;
         }
         toReset.forEach(this::removeHamonSkill);
+        if (type == HamonSkillsTab.TECHNIQUE) {
+            resetCharacterTechnique(user);
+        }
     }
     
     public Iterable<AbstractHamonSkill> getLearnedSkills() {
         return hamonSkills.getLearnedSkills();
+    }
+    
+    public void pickHamonTechnique(LivingEntity user, CharacterHamonTechnique technique) {
+        HamonTechniqueManager data = hamonSkills.getTechniqueData();
+        if (data.canPickTechnique(user)) {
+            data.setTechnique(technique);
+            data.addPerks(user, this);
+            if (!user.level.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(new TrHamonCharacterTechniquePacket(user.getId(), technique, true), user);
+            }
+        }
+    }
+    
+    public void resetCharacterTechnique(LivingEntity user) {
+        HamonTechniqueManager data = hamonSkills.getTechniqueData();
+        if (data.getTechnique() != null) {
+            data.resetTechnique();
+            if (!user.level.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(TrHamonCharacterTechniquePacket.reset(user.getId()), user);
+            }
+        }
     }
     
     
@@ -1035,12 +1058,12 @@ public class HamonData extends TypeSpecificData {
         return getCharacterTechnique() == character;
     }
     
-    public boolean hasTechniqueLevel(int techniqueSkillSlot) {
-        if (techniqueSkillSlot > HamonTechniqueManager.MAX_TECHNIQUE_SKILLS) {
+    public boolean hasTechniqueLevel(int techniqueSkillSlot, boolean clientSide) {
+        if (techniqueSkillSlot > HamonTechniqueManager.techniqueSlotsCount(clientSide)) {
             return false;
         }
-        return getHamonStrengthLevel() >= HamonTechniqueManager.techniqueSkillRequirement(techniqueSkillSlot)
-                && getHamonControlLevel() >= HamonTechniqueManager.techniqueSkillRequirement(techniqueSkillSlot);
+        return getHamonStrengthLevel() >= HamonTechniqueManager.techniqueSkillRequirement(techniqueSkillSlot, clientSide)
+                && getHamonControlLevel() >= HamonTechniqueManager.techniqueSkillRequirement(techniqueSkillSlot, clientSide);
     }
     
     public HamonTechniqueManager.Accessor getTechniqueData() {

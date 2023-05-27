@@ -641,6 +641,7 @@
   "hamon.technique_slot.free": "You can learn a new technique skill!",
   "hamon.learnButton": "Learn Skill",
   "hamon.resetButton": "Reset Skills",
+  "hamon.pick_technique": "Pick Technique",
   "hamon.reset_creative_only": "Reset skills from this tab (creative only)",
   "hamon.abandon.tab": "Abandon Training",
   "hamon.abandon.tab.desc": "Do you really want to fully abandon your Hamon training?\n\nAll progress will be reset.",

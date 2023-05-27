@@ -58,6 +58,8 @@ public class JojoModConfig {
         public final ForgeConfigSpec.DoubleValue hamonPointsMultiplier;
         public final ForgeConfigSpec.DoubleValue breathingTrainingMultiplier;
         public final ForgeConfigSpec.BooleanValue breathingTrainingDeterioration;
+        public final ForgeConfigSpec.BooleanValue mixHamonTechniques;
+        public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> techniqueSkillsRequirement;
         
         public final ForgeConfigSpec.ConfigValue<List<? extends Double>> maxBloodMultiplier;
         public final ForgeConfigSpec.ConfigValue<List<? extends Double>> bloodDrainMultiplier;
@@ -147,6 +149,19 @@ public class JojoModConfig {
                         .comment("    Whether or not breathing training deteriorates over time.")
                         .translation("jojo.config.breathingTrainingDeterioration")
                         .define("breathingTrainingDeterioration", true);
+                
+                mixHamonTechniques = builder
+                        .comment("    Whether or not picking skills from different character-specific Hamon techniques is allowed.")
+                        .translation("jojo.config.mixHamonTechniques")
+                        .define("mixHamonTechniques", false);
+                
+                techniqueSkillsRequirement = builder
+                        .comment("    At what levels of Hamon Strength and Hamon Control each slot for a skill from the Technique tab is unlocked, and how many slots are there.", 
+                                 "     Could be used to increase the default limit of 3 slots when paired with mixHamonTechniques setting enabled.")
+                        .translation("jojo.config.techniqueSkillRequirements")
+                        .defineListAllowEmpty(Lists.newArrayList("techniqueSkillRequirements"), 
+                                () -> Arrays.asList(20, 30, 40), 
+                                s -> s instanceof Integer && (Integer) s >= 0);
             builder.pop();
             
             builder.push("Vampirism settings");
@@ -351,6 +366,8 @@ public class JojoModConfig {
 //            private final double hamonPointsMultiplier;
 //            private final double breathingTrainingMultiplier;
             private final boolean breathingTrainingDeterioration;
+            private final boolean mixHamonTechniques;
+            private final int[] techniqueSkillsRequirement;
 
             private final float[] maxBloodMultiplier;
 //            private final float[] bloodDrainMultiplier;
@@ -377,6 +394,7 @@ public class JojoModConfig {
             public SyncedValues(PacketBuffer buf) {
 //                hamonPointsMultiplier = buf.readDouble();
 //                breathingTrainingMultiplier = buf.readDouble();
+                techniqueSkillsRequirement = buf.readVarIntArray();
                 maxBloodMultiplier = NetworkUtil.readFloatArray(buf);
 //                bloodDrainMultiplier = NetworkUtil.readFloatArray(buf);
                 bloodTickDown = NetworkUtil.readFloatArray(buf);
@@ -395,6 +413,7 @@ public class JojoModConfig {
                 pillarManTempleSpawn =              (flags[0] & 32) > 0;
                 breathingTrainingDeterioration =    (flags[0] & 64) > 0;
                 prioritizeLeastTakenStands =        (flags[0] & 128) > 0;
+                
                 standTiers =                        (flags[1] & 1) > 0;
                 abilitiesBreakBlocks =              (flags[1] & 2) > 0;
                 skipStandProgression =              (flags[1] & 4) > 0;
@@ -402,6 +421,7 @@ public class JojoModConfig {
                 dropStandDisc =                     (flags[1] & 16) > 0;
                 soulAscension =                     (flags[1] & 32) > 0;
                 endermenBeyondTimeSpace =           (flags[1] & 64) > 0;
+                mixHamonTechniques =                (flags[1] & 128) > 0;
             }
 
             public void writeToBuf(PacketBuffer buf) {
@@ -425,6 +445,7 @@ public class JojoModConfig {
                 if (pillarManTempleSpawn)               flags[0] |= 32;
                 if (breathingTrainingDeterioration)     flags[0] |= 64;
                 if (prioritizeLeastTakenStands)         flags[0] |= 128;
+                
                 if (standTiers)                         flags[1] |= 1;
                 if (abilitiesBreakBlocks)               flags[1] |= 2;
                 if (skipStandProgression)               flags[1] |= 4;
@@ -432,6 +453,7 @@ public class JojoModConfig {
                 if (dropStandDisc)                      flags[1] |= 16;
                 if (soulAscension)                      flags[1] |= 32;
                 if (endermenBeyondTimeSpace)            flags[1] |= 64;
+                if (mixHamonTechniques)                 flags[1] |= 128;
                 buf.writeByteArray(flags);
             }
 
@@ -446,6 +468,8 @@ public class JojoModConfig {
 //                hamonPointsMultiplier = config.standDamageMultiplier.get();
 //                breathingTrainingMultiplier = config.breathingTrainingMultiplier.get();
                 breathingTrainingDeterioration = config.breathingTrainingDeterioration.get();
+                mixHamonTechniques = config.mixHamonTechniques.get();
+                techniqueSkillsRequirement = config.techniqueSkillsRequirement.get().stream().mapToInt(Integer::intValue).toArray();
                 maxBloodMultiplier = Floats.toArray(config.maxBloodMultiplier.get());
 //                bloodDrainMultiplier = Floats.toArray(config.bloodDrainMultiplier.get());
                 bloodTickDown = Floats.toArray(config.bloodTickDown.get());
@@ -479,6 +503,8 @@ public class JojoModConfig {
 //                COMMON_SYNCED_TO_CLIENT.hamonPointsMultiplier.set(hamonPointsMultiplier);
 //                COMMON_SYNCED_TO_CLIENT.breathingTrainingMultiplier.set(breathingTrainingMultiplier);
                 COMMON_SYNCED_TO_CLIENT.breathingTrainingDeterioration.set(breathingTrainingDeterioration);
+                COMMON_SYNCED_TO_CLIENT.mixHamonTechniques.set(mixHamonTechniques);
+                COMMON_SYNCED_TO_CLIENT.techniqueSkillsRequirement.set(IntStream.of(techniqueSkillsRequirement).boxed().collect(Collectors.toList()));
                 COMMON_SYNCED_TO_CLIENT.maxBloodMultiplier.set(Floats.asList(maxBloodMultiplier).stream().map(Float::doubleValue).collect(Collectors.toList()));
 //                COMMON_SYNCED_TO_CLIENT.bloodDrainMultiplier.set(Floats.asList(bloodDrainMultiplier).stream().map(Float::doubleValue).collect(Collectors.toList()));
                 COMMON_SYNCED_TO_CLIENT.bloodTickDown.set(Floats.asList(bloodTickDown).stream().map(Float::doubleValue).collect(Collectors.toList()));
@@ -510,6 +536,8 @@ public class JojoModConfig {
 //                COMMON_SYNCED_TO_CLIENT.hamonPointsMultiplier.clearCache();
 //                COMMON_SYNCED_TO_CLIENT.breathingTrainingMultiplier.clearCache();
                 COMMON_SYNCED_TO_CLIENT.breathingTrainingDeterioration.clearCache();
+                COMMON_SYNCED_TO_CLIENT.mixHamonTechniques.clearCache();
+                COMMON_SYNCED_TO_CLIENT.techniqueSkillsRequirement.clearCache();
                 COMMON_SYNCED_TO_CLIENT.maxBloodMultiplier.clearCache();
                 COMMON_SYNCED_TO_CLIENT.bloodDrainMultiplier.clearCache();
                 COMMON_SYNCED_TO_CLIENT.bloodTickDown.clearCache();

@@ -19,6 +19,7 @@ public class HamonCharacterTechniqueBox {
     private final List<IReorderingProcessor> name;
     private final List<HamonSkillElementTechniquePerk> perks;
     private final List<HamonSkillElementLearnable> skills = new ArrayList<>();
+    private HamonScreenButton pickTechniqueButton;
     private int x;
     private int y;
     private final int width;
@@ -101,6 +102,10 @@ public class HamonCharacterTechniqueBox {
         skills.add(skill);
     }
     
+    public void addPickButton(HamonScreenButton pickTechniqueButton) {
+        this.pickTechniqueButton = pickTechniqueButton;
+    }
+    
     public int getY() {
         return y;
     }
@@ -112,6 +117,9 @@ public class HamonCharacterTechniqueBox {
         }
         for (HamonSkillGuiElement perk : perks) {
             perk.setY(perk.getY() + yDiff);
+        }
+        if (pickTechniqueButton != null) {
+            pickTechniqueButton.setY(pickTechniqueButton.getYStarting() + yDiff);
         }
         this.y = y;
     }

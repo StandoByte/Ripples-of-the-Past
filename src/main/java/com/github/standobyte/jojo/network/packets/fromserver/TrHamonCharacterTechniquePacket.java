@@ -14,19 +14,30 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.Character
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 public class TrHamonCharacterTechniquePacket {
     private final int entityId;
     private final Optional<CharacterHamonTechnique> technique;
+    private final boolean playPickSound;
     
     public static TrHamonCharacterTechniquePacket reset(int entityId) {
-        return new TrHamonCharacterTechniquePacket(entityId, Optional.empty());
+        return new TrHamonCharacterTechniquePacket(entityId, Optional.empty(), false);
     }
     
-    public TrHamonCharacterTechniquePacket(int entityId, Optional<CharacterHamonTechnique> technique) {
+    public TrHamonCharacterTechniquePacket(int entityId, CharacterHamonTechnique technique) {
+        this(entityId, technique, false);
+    }
+    
+    public TrHamonCharacterTechniquePacket(int entityId, CharacterHamonTechnique technique, boolean playPickSound) {
+        this(entityId, Optional.of(technique), playPickSound);
+    }
+    
+    private TrHamonCharacterTechniquePacket(int entityId, Optional<CharacterHamonTechnique> technique, boolean playPickSound) {
         this.entityId = entityId;
         this.technique = technique;
+        this.playPickSound = playPickSound;
     }
     
     
@@ -37,13 +48,15 @@ public class TrHamonCharacterTechniquePacket {
         public void encode(TrHamonCharacterTechniquePacket msg, PacketBuffer buf) {
             buf.writeInt(msg.entityId);
             NetworkUtil.writeOptional(buf, msg.technique, technique -> buf.writeRegistryId(technique));
+            buf.writeBoolean(msg.playPickSound);
         }
 
         @Override
         public TrHamonCharacterTechniquePacket decode(PacketBuffer buf) {
             return new TrHamonCharacterTechniquePacket(
                     buf.readInt(), 
-                    NetworkUtil.readOptional(buf, () -> buf.readRegistryIdSafe(CharacterHamonTechnique.class)));
+                    NetworkUtil.readOptional(buf, () -> buf.readRegistryIdSafe(CharacterHamonTechnique.class)), 
+                    buf.readBoolean());
         }
 
         @Override
@@ -53,7 +66,18 @@ public class TrHamonCharacterTechniquePacket {
                 LivingEntity user = (LivingEntity) entity;
                 INonStandPower.getNonStandPowerOptional(user).ifPresent(power -> {
                     power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                        hamon.getTechniqueData().setCharacterTechnique(msg.technique);
+                        if (msg.technique.isPresent()) {
+                            hamon.pickHamonTechnique(user, msg.technique.get());
+                            if (msg.playPickSound && user.is(ClientUtil.getClientPlayer())) {
+                                SoundEvent techniquePickMusic = msg.technique.get().getMusicOnPick();
+                                if (techniquePickMusic != null) {
+                                    ClientUtil.playMusic(techniquePickMusic, 1.0F, 1.0F);
+                                }
+                            }
+                        }
+                        else {
+                            hamon.resetCharacterTechnique(user);
+                        }
                         if (user.is(ClientUtil.getClientPlayer())) {
                             HamonScreen.updateTabs();
                         }
