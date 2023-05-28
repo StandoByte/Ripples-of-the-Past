@@ -11,18 +11,16 @@ public class CustomResources {
     private static HamonSkillSpriteUploader hamonSkillSprites;
     private static ResolveShadersListManager resolveShadersListManager;
     private static ModSplashes modSplashes;
+    private static StandGlowTextureChecker standGlowTextureChecker;
 
     public static void initCustomResourceManagers(Minecraft mc) {
-        actionSprites = new ActionSpriteUploader(mc.textureManager);
-        ((IReloadableResourceManager) mc.getResourceManager()).registerReloadListener(actionSprites);
-        hamonSkillSprites = new HamonSkillSpriteUploader(mc.textureManager);
-        ((IReloadableResourceManager) mc.getResourceManager()).registerReloadListener(hamonSkillSprites);
+        IReloadableResourceManager resourceManager = (IReloadableResourceManager) mc.getResourceManager();
         
-        resolveShadersListManager = new ResolveShadersListManager();
-        ((IReloadableResourceManager) mc.getResourceManager()).registerReloadListener(resolveShadersListManager);
-        
-        modSplashes = new ModSplashes(mc.getUser(), new ResourceLocation(JojoMod.MOD_ID, "texts/splashes.txt"));
-        ((IReloadableResourceManager) mc.getResourceManager()).registerReloadListener(modSplashes);
+        resourceManager.registerReloadListener(actionSprites = new ActionSpriteUploader(mc.textureManager));
+        resourceManager.registerReloadListener(hamonSkillSprites = new HamonSkillSpriteUploader(mc.textureManager));
+        resourceManager.registerReloadListener(resolveShadersListManager = new ResolveShadersListManager());
+        resourceManager.registerReloadListener(modSplashes = new ModSplashes(mc.getUser(), new ResourceLocation(JojoMod.MOD_ID, "texts/splashes.txt")));
+        resourceManager.registerReloadListener(standGlowTextureChecker = new StandGlowTextureChecker());
     }
 
     public static ActionSpriteUploader getActionSprites() {
@@ -39,6 +37,10 @@ public class CustomResources {
     
     public static ModSplashes getModSplashes() {
         return modSplashes;
+    }
+    
+    public static StandGlowTextureChecker getStandGlowTextureChecker() {
+        return standGlowTextureChecker;
     }
 
 }

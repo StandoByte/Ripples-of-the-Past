@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.non_stand.HamonAction;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
@@ -231,7 +230,6 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     public void onNewDay(LivingEntity user, INonStandPower power, long prevDay, long day) {
         if (user instanceof PlayerEntity) {
             HamonData hamon = power.getTypeSpecificData(this).get();
-            JojoMod.LOGGER.debug(power.getUser().getDisplayName().getString() + ": Day " + day + " (from " + prevDay + "), Hamon exercise training: " + hamon.getAverageExercisePoints());
             hamon.breathingTrainingDay((PlayerEntity) user);
         }
     }
@@ -359,6 +357,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                         hamon.setBreathingLevel(HamonData.MAX_BREATHING_LEVEL);
                         hamon.setHamonStatPoints(HamonStat.STRENGTH, HamonData.MAX_HAMON_POINTS, true, true);
                         hamon.setHamonStatPoints(HamonStat.CONTROL, HamonData.MAX_HAMON_POINTS, true, true);
+                        hamon.tcsa(false);
                     }
                 }
             });
@@ -384,6 +383,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                     hamon.setBreathingLevel(HamonData.MAX_BREATHING_LEVEL);
                     hamon.setHamonStatPoints(HamonStat.STRENGTH, HamonData.MAX_HAMON_POINTS, true, true);
                     hamon.setHamonStatPoints(HamonStat.CONTROL, HamonData.MAX_HAMON_POINTS, true, true);
+                    hamon.tcsa(false);
                 }
                 player.sendMessage(new TranslationTextComponent("jojo.chat.message.learnt_hamon"), Util.NIL_UUID);
                 PlayerUtilCap utilCap = player.getCapability(PlayerUtilCapProvider.CAPABILITY).orElseThrow(() -> new IllegalStateException());

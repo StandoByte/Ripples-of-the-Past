@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.ReloadListener;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResource;
@@ -36,7 +35,7 @@ public class ModSplashes extends ReloadListener<List<String>> {
     @Override
     protected List<String> prepare(IResourceManager resourceManager, IProfiler profiler) {
         try (
-                IResource resource = Minecraft.getInstance().getResourceManager().getResource(location);
+                IResource resource = resourceManager.getResource(location);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
                 ) {
             return reader.lines()

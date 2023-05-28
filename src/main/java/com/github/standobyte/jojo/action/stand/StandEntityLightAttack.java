@@ -5,7 +5,6 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
@@ -57,7 +56,6 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
     
     @Override
     public StandEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
-        JojoMod.LOGGER.debug(stand.guardCounter());
         return IHasStandPunch.super.punchEntity(stand, target, dmgSource)
                 .damage(StandStatFormulas.getLightAttackDamage(stand.getAttackDamage()))
                 .addKnockback(stand.guardCounter())

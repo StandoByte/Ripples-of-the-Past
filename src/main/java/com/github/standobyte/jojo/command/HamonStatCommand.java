@@ -84,6 +84,7 @@ public class HamonStatCommand {
                     float levelToSet = operation.apply(curLevel, level);
                     int pointsToSet = HamonData.pointsAtLevelFraction(levelToSet);
                     hamon.setHamonStatPoints(stat, pointsToSet, ignoreBreathing, true);
+                    hamon.tcsa(false);
                 });
                 return hamonOptional.isPresent() ? 1 : 0;
             }).orElse(0);

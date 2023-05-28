@@ -12,6 +12,6 @@ public class SilverChariotArmorGlowLayer extends StandGlowLayer<SilverChariotEnt
     
     @Override
     public boolean shouldRender(SilverChariotEntity entity) {
-        return entity.hasArmor();
+        return super.shouldRender(entity) && entity.hasArmor();
     }
 }

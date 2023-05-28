@@ -1195,6 +1195,10 @@ public class HamonData extends TypeSpecificData {
         this.isBeingSuffocated = true;
     }
     
+    public void tcsa(boolean tcsa) {
+        this.tcsa = tcsa;
+    }
+    
     
     
     @Override
