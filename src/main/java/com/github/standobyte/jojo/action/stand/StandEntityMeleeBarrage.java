@@ -223,7 +223,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
         public Builder() {
             super();
             standPose(StandPose.BARRAGE)
-            .standAutoSummonMode(AutoSummonMode.ARMS).holdType().staminaCostTick(4F)
+            .standAutoSummonMode(AutoSummonMode.ARMS).holdType().staminaCostTick(5F)
             .standUserWalkSpeed(0.15F).standOffsetFront()
             .partsRequired(StandPart.ARMS);
         }
@@ -265,7 +265,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
                 dmgSource.setBarrageHitsCount(barrageHits);
             }
             boolean hit = super.doHit(task);
-            target.setDeltaMovement(target.getDeltaMovement().multiply(1, 0, 1));
+//            target.setDeltaMovement(target.getDeltaMovement().multiply(1, 0, 1));
             return hit;
         }
 

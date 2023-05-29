@@ -491,6 +491,8 @@
   "jojo.config.bannedStands.tooltip": "List of Stands excluded from Stand Arrow and /stand random pool. The format is the same as for /stand give command (e.g., \"jojo:star_platinum\").",
   "jojo.config.skipStandProgression": "Skip Stand progression",
   "jojo.config.skipStandProgression.tooltip": "Whether or not all of the abilities are unlocked after gaining a Stand in Survival.",
+  "jojo.config.resolveLvlPoints": "Resolve level points",
+  "jojo.config.resolveLvlPoints.tooltip": "Max resolve points at each Resolve level (starting from 0).",
   "jojo.config.standStamina": "Stand Stamina",
   "jojo.config.standStamina.tooltip": "Whether or not Stand stamina mechanic is enabled.",
   "jojo.config.standDamageMultiplier": "Stand damage multiplier",
@@ -522,6 +524,8 @@
   "jojo.config.client.menacingParticles.tooltip": "Enable ゴゴゴゴゴ particles when AFK.",
   "jojo.config.client.timeStopFreezesVisuals": "Time stop freezes visuals",
   "jojo.config.client.timeStopFreezesVisuals.tooltip": "Enable particles, block texture animations and rain/snow being frozen during time stop. Experimental feature.",
+  "jojo.config.client.timeStopAnimation": "Time stop animation",
+  "jojo.config.client.timeStopAnimation.tooltip": "Enables the visual effect at the beginning of time stop when its duration is 5 seconds or longer.",
   "jojo.config.client.standStatsTranslucency": "Stand Stats translucency",
   "jojo.config.client.standStatsTranslucency.tooltip": "Translucency of Stand stats hexagon in the pause menu. If set to 0, it will not show up.",
   

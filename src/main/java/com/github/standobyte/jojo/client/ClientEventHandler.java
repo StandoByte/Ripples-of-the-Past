@@ -422,6 +422,9 @@ public class ClientEventHandler {
             float tsTick = timeStopTicks + partialTick;
             tsShader.safeGetUniform("TSTicks") .set(tsTick);
             tsShader.safeGetUniform("TSLength").set(timeStopLength);
+            if (!JojoModConfig.CLIENT.timeStopAnimation.get()) {
+                tsShader.safeGetUniform("TSEffectLength").set(0);
+            }
         }
         else {
             tsShader.safeGetUniform("TSTicks") .set(0);

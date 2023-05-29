@@ -240,7 +240,7 @@ public class JojoModConfig {
                             .comment("    Max resolve points at each Resolve level (starting from 0).", 
                                      "     Decrease these values to make getting to each level easier.", 
                                      "     All values must be higher than 0.")
-                            .translation("jojo.config.resolvePoints")
+                            .translation("jojo.config.resolveLvlPoints")
                             .defineList("resolveLvlPoints", Arrays.asList(ResolveCounter.DEFAULT_MAX_RESOLVE_VALUES), e -> isElementNonNegativeFloat(e, true));
                 builder.pop();
 
@@ -592,6 +592,7 @@ public class JojoModConfig {
         public final ForgeConfigSpec.BooleanValue resolveShaders;
         public final ForgeConfigSpec.BooleanValue menacingParticles;
         public final ForgeConfigSpec.BooleanValue timeStopFreezesVisuals;
+        public final ForgeConfigSpec.BooleanValue timeStopAnimation;
         public final ForgeConfigSpec.DoubleValue standStatsTranslucency;
         
         public final ForgeConfigSpec.BooleanValue characterVoiceLines;
@@ -633,6 +634,11 @@ public class JojoModConfig {
                             "  Experimental feature - it may cause errors or crashes with other mods, so the option is disabled by default.")
                     .translation("jojo.config.client.timeStopFreezesParticles")
                     .define("timeStopFreezesParticles", false);
+            
+            timeStopAnimation = builder
+                    .comment(" Enables the visual effect at the beginning of time stop when its duration is 5 seconds or longer.")
+                    .translation("jojo.config.client.timeStopAnimation")
+                    .define("timeStopAnimation", true);
             
             standStatsTranslucency = builder
                     .comment(" Translucency of Stand stats hexagon in the pause menu.", 
