@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandMissedPunch;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandPose;
@@ -29,12 +30,14 @@ import net.minecraft.world.World;
 
 public class StandEntityLightAttack extends StandEntityAction implements IHasStandPunch {
     private final Supplier<SoundEvent> punchSound;
-
+    private final Supplier<SoundEvent> swingSound;
+    
     public StandEntityLightAttack(StandEntityLightAttack.Builder builder) {
         super(builder);
         this.punchSound = builder.punchSound;
+        this.swingSound = builder.swingSound;
     }
-
+    
     @Override
     protected ActionConditionResult checkStandConditions(StandEntity stand, IStandPower power, ActionTarget target) {
         return !stand.canAttackMelee() ? ActionConditionResult.NEGATIVE : super.checkStandConditions(stand, power, target);
@@ -73,6 +76,22 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
     @Override
     public StandMissedPunch punchMissed(StandEntity stand) {
         return IHasStandPunch.super.punchMissed(stand).swingSound(punchSound);
+    }
+    
+    @Override
+    public SoundEvent getPunchSwingSound() {
+        return swingSound.get();
+    }
+    
+    @Override
+    public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
+        IHasStandPunch.playPunchSwingSound(task, Phase.PERFORM, 5, this, standEntity);
+    }
+    
+    @Override
+    public void clPlayPunchSwingSound(StandEntity standEntity, SoundEvent sound) {
+        standEntity.playSound(sound, 1.0F, 0.9F + standEntity.getRandom().nextFloat() * 0.2F, ClientUtil.getClientPlayer());
+
     }
     
     @Override
@@ -128,18 +147,24 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
     
     
     public static class Builder extends StandEntityAction.AbstractBuilder<StandEntityLightAttack.Builder>  {
-        private Supplier<SoundEvent> punchSound = () -> null;
+        private Supplier<SoundEvent> punchSound = ModSounds.STAND_PUNCH_LIGHT;
+        private Supplier<SoundEvent> swingSound = ModSounds.STAND_PUNCH_SWING;
         
         public Builder() {
             staminaCost(10F).standUserWalkSpeed(1.0F)
             .standOffsetFront().standOffsetFromUser(-0.75, 0.75)
-            .standPose(StandPose.LIGHT_ATTACK).punchSound(ModSounds.STAND_PUNCH_LIGHT)
+            .standPose(StandPose.LIGHT_ATTACK)
             .standAutoSummonMode(AutoSummonMode.MAIN_ARM)
             .partsRequired(StandPart.ARMS);
         }
         
         public Builder punchSound(Supplier<SoundEvent> punchSound) {
             this.punchSound = punchSound != null ? punchSound : () -> null;
+            return getThis();
+        }
+        
+        public Builder swingSound(Supplier<SoundEvent> swingSound) {
+            this.swingSound = swingSound != null ? swingSound : () -> null;
             return getThis();
         }
         

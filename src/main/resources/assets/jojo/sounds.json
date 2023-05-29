@@ -699,9 +699,9 @@
     "subtitle": "jojo.subtitle.stand_unsummon",
     "sounds": [ "jojo:stand/silver_chariot_unsummon", "jojo:stand/silver_chariot_unsummon_2" ]
   },
-  "silver_chariot_barrage": {
+  "silver_chariot_barrage_swipe": {
     "subtitle": "jojo.subtitle.stand_attack_light",
-    "sounds": [ "jojo:stand/silver_chariot_barrage", "jojo:stand/silver_chariot_barrage_2" ]
+    "sounds": [ "jojo:stand/silver_chariot_barrage_swipe", "jojo:stand/silver_chariot_barrage_swipe_2" ]
   },
   "silver_chariot_sweep_light": {
     "subtitle": "jojo.subtitle.stand_attack_light",

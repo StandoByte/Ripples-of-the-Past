@@ -360,7 +360,7 @@ public class ModSounds {
 
     public static final RegistryObject<SoundEvent> SILVER_CHARIOT_SWEEP_LIGHT = register("silver_chariot_sweep_light");
 
-    public static final RegistryObject<SoundEvent> SILVER_CHARIOT_BARRAGE = register("silver_chariot_barrage");
+    public static final RegistryObject<SoundEvent> SILVER_CHARIOT_BARRAGE_SWIPE = register("silver_chariot_barrage_swipe");
 
     public static final RegistryObject<SoundEvent> SILVER_CHARIOT_DASH = register("silver_chariot_dash");
 

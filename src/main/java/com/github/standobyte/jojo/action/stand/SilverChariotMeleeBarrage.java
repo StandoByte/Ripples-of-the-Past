@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.stand;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -56,5 +57,14 @@ public class SilverChariotMeleeBarrage extends StandEntityMeleeBarrage {
             stabBarrage.damage(stabBarrage.getDamage() * 0.75F);
         }
         return stabBarrage;
+    }
+    
+    @Override
+    protected void clTtickSwingSound(int tick, StandEntity standEntity) {
+        SoundEvent swingSound = getPunchSwingSound();
+        if (swingSound != null) {
+            standEntity.playSound(swingSound, 0.25F, 
+                    0.9F + standEntity.getRandom().nextFloat() * 0.2F, ClientUtil.getClientPlayer());
+        }
     }
 }

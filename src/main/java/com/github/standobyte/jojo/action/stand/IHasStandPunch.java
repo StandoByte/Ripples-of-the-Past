@@ -1,11 +1,15 @@
 package com.github.standobyte.jojo.action.stand;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.action.stand.StandEntityAction.Phase;
 import com.github.standobyte.jojo.action.stand.punch.IPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandMissedPunch;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 
 import net.minecraft.block.BlockState;
@@ -39,4 +43,19 @@ public interface IHasStandPunch {
             }
         }
     }
+    
+    @Nullable
+    SoundEvent getPunchSwingSound();
+    
+    static void playPunchSwingSound(StandEntityTask punchTask, Phase phase, int phaseTicksLeft, IHasStandPunch action, StandEntity standEntity) {
+        if (standEntity.level.isClientSide() && punchTask.getPhase() == phase && 
+                (punchTask.getStartingTicks() < phaseTicksLeft && punchTask.getTick() == 0 || punchTask.getTicksLeft() == phaseTicksLeft)) {
+            SoundEvent sound = action.getPunchSwingSound();
+            if (sound != null) {
+                action.clPlayPunchSwingSound(standEntity, sound);
+            }
+        }
+    }
+    
+    default void clPlayPunchSwingSound(StandEntity standEntity, SoundEvent sound) {}
 }

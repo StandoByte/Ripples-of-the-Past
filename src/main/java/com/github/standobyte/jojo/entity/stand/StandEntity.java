@@ -1464,6 +1464,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return punchInstance.targetWasHit();
     }
     
+    @Deprecated
     protected void onTargetHit(CallOrder called, IPunch punch) {}
     
     protected enum CallOrder {

@@ -12,14 +12,15 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandMissedPunch;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
+import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.general.Container;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 
@@ -35,12 +36,14 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     private final Supplier<StandEntityActionModifier> recoveryAction;
     boolean isFinisher = false;
     private final Supplier<SoundEvent> punchSound;
+    private final Supplier<SoundEvent> swingSound;
 
     public StandEntityHeavyAttack(StandEntityHeavyAttack.Builder builder) {
         super(builder);
         this.finisherVariation = builder.finisherVariation;
         this.recoveryAction = builder.recoveryAction;
         this.punchSound = builder.punchSound;
+        this.swingSound = builder.swingSound;
     }
 
     @Override
@@ -145,7 +148,22 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     public StandMissedPunch punchMissed(StandEntity stand) {
         return IHasStandPunch.super.punchMissed(stand).swingSound(punchSound);
     }
-
+    
+    @Override
+    public SoundEvent getPunchSwingSound() {
+        return swingSound.get();
+    }
+    
+    @Override
+    public void standTickWindup(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
+        IHasStandPunch.playPunchSwingSound(task, Phase.WINDUP, 3, this, standEntity);
+    }
+    
+    @Override
+    public void clPlayPunchSwingSound(StandEntity standEntity, SoundEvent sound) {
+        standEntity.playSound(sound, 1.0F, 0.65F + standEntity.getRandom().nextFloat() * 0.2F, ClientUtil.getClientPlayer());
+    }
+    
     @Override
     public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
         return StandStatFormulas.getHeavyAttackWindup(standEntity.getAttackSpeed(), standEntity.getComboMeter());
@@ -200,11 +218,11 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     public static class Builder extends StandEntityAction.AbstractBuilder<StandEntityHeavyAttack.Builder> {
         private Supplier<StandEntityHeavyAttack> finisherVariation = () -> null;
         private Supplier<StandEntityActionModifier> recoveryAction = () -> null;
-        private Supplier<SoundEvent> punchSound = () -> null;
+        private Supplier<SoundEvent> punchSound = ModSounds.STAND_PUNCH_HEAVY;
+        private Supplier<SoundEvent> swingSound = ModSounds.STAND_PUNCH_HEAVY_SWING;
         
         public Builder() {
             standPose(StandPose.HEAVY_ATTACK).staminaCost(50F)
-            .punchSound(ModSounds.STAND_PUNCH_HEAVY)
             .standOffsetFromUser(-0.75, 0.75);
         }
         
@@ -223,6 +241,11 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         
         public Builder punchSound(Supplier<SoundEvent> punchSound) {
             this.punchSound = punchSound != null ? punchSound : () -> null;
+            return getThis();
+        }
+        
+        public Builder swingSound(Supplier<SoundEvent> swingSound) {
+            this.swingSound = swingSound != null ? swingSound : () -> null;
             return getThis();
         }
 

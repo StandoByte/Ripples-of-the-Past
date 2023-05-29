@@ -12,12 +12,14 @@ import com.github.standobyte.jojo.action.stand.punch.IPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandMissedPunch;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrBarrageHitSoundPacket;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -37,10 +39,12 @@ import net.minecraft.world.World;
 
 public class StandEntityMeleeBarrage extends StandEntityAction implements IHasStandPunch {
     protected final Supplier<SoundEvent> hitSound;
+    protected final Supplier<SoundEvent> swingSound;
 
     public StandEntityMeleeBarrage(StandEntityMeleeBarrage.Builder builder) {
         super(builder);
         this.hitSound = builder.hitSound;
+        this.swingSound = builder.swingSound;
     }
 
     @Override
@@ -80,6 +84,9 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
         standEntity.setBarrageHitsThisTick(barrageHits);
         if (barrageHits > 0) {
             standEntity.punch(task, this, task.getTarget());
+            if (world.isClientSide()) {
+                clTtickSwingSound(task.getStartingTicks(), standEntity);
+            }
         }
     }
     
@@ -110,6 +117,22 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     
     public SoundEvent getHitSound() {
         return hitSound == null ? null : hitSound.get();
+    }
+    
+    protected void clTtickSwingSound(int tick, StandEntity standEntity) {
+        if (tick % 2 == 0) {
+            SoundEvent swingSound = getPunchSwingSound();
+            if (swingSound != null) {
+                standEntity.playSound(swingSound, 0.25F, 
+                        1.8F - (float) standEntity.getAttackDamage() * 0.05F + standEntity.getRandom().nextFloat() * 0.2F, 
+                        ClientUtil.getClientPlayer());
+            }
+        }
+    }
+    
+    @Override
+    public SoundEvent getPunchSwingSound() {
+        return swingSound.get();
     }
     
     @Override
@@ -218,7 +241,8 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     
     
     public static class Builder extends StandEntityAction.AbstractBuilder<StandEntityMeleeBarrage.Builder> {
-        private Supplier<SoundEvent> hitSound = () -> null;
+        private Supplier<SoundEvent> hitSound = ModSounds.STAND_PUNCH_LIGHT;
+        private Supplier<SoundEvent> swingSound = ModSounds.STAND_PUNCH_BARRAGE_SWING;
         
         public Builder() {
             super();
@@ -230,6 +254,11 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
         
         public Builder barrageHitSound(Supplier<SoundEvent> barrageHitSound) {
             this.hitSound = barrageHitSound != null ? barrageHitSound : () -> null;
+            return getThis();
+        }
+        
+        public Builder barrageSwingSound(Supplier<SoundEvent> barrageSwingSound) {
+            this.swingSound = barrageSwingSound != null ? barrageSwingSound : () -> null;
             return getThis();
         }
         

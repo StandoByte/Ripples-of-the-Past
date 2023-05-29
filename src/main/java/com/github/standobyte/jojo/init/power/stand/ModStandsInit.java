@@ -413,22 +413,23 @@ public class ModStandsInit {
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_ATTACK = ACTIONS.register("silver_chariot_attack", 
             () -> new SilverChariotLightAttack(new StandEntityLightAttack.Builder()
-                    .punchSound(() -> null).standSound(ModSounds.SILVER_CHARIOT_SWEEP_LIGHT), 
+                    .punchSound(() -> null).swingSound(ModSounds.SILVER_CHARIOT_SWEEP_LIGHT), 
                     SILVER_CHARIOT_NO_RAPIER_ATTACK));
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_RAPIER_BARRAGE = ACTIONS.register("silver_chariot_barrage", 
             () -> new SilverChariotMeleeBarrage(new StandEntityMeleeBarrage.Builder()
-                    .shout(ModSounds.POLNAREFF_HORA_HORA_HORA).barrageHitSound(ModSounds.SILVER_CHARIOT_BARRAGE)
+                    .shout(ModSounds.POLNAREFF_HORA_HORA_HORA)
+                    .barrageSwingSound(ModSounds.SILVER_CHARIOT_BARRAGE_SWIPE).barrageHitSound(null)
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<StandEntityHeavyAttack> SILVER_CHARIOT_SWEEPING_ATTACK = ACTIONS.register("silver_chariot_sweeping_attack", 
             () -> new SilverChariotSweepingAttack(new StandEntityHeavyAttack.Builder().standPerformDuration(3)
-                    .punchSound(() -> null)
+                    .punchSound(() -> null).swingSound(ModSounds.SILVER_CHARIOT_SWEEP_HEAVY)
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_DASH_ATTACK = ACTIONS.register("silver_chariot_dash_attack", 
             () -> new SilverChariotDashAttack(new StandEntityHeavyAttack.Builder()
-                    .punchSound(() -> null).standSound(ModSounds.SILVER_CHARIOT_DASH)
+                    .punchSound(null).swingSound(null).standSound(ModSounds.SILVER_CHARIOT_DASH)
                     .partsRequired(StandPart.MAIN_BODY, StandPart.ARMS)
                     .setFinisherVariation(SILVER_CHARIOT_SWEEPING_ATTACK)
                     .shiftVariationOf(SILVER_CHARIOT_ATTACK).shiftVariationOf(SILVER_CHARIOT_RAPIER_BARRAGE)));

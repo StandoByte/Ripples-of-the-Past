@@ -355,7 +355,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         }
     }
     
-
+    
     protected boolean barrageVisuals(StandEntity standEntity, IStandPower standPower, StandEntityTask task) {
         return barrageVisuals.get() != null;
     }

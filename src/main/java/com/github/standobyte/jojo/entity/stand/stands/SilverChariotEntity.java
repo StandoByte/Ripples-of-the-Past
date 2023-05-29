@@ -6,7 +6,6 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.stand.IHasStandPunch;
-import com.github.standobyte.jojo.action.stand.punch.IPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.client.sound.BarrageHitSoundHandler;
 import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
@@ -224,13 +223,6 @@ public class SilverChariotEntity extends StandEntity {
             return true;
         }
         return false;
-    }
-    
-    @Override
-    protected void onTargetHit(CallOrder called, IPunch punch) {
-        if (called == CallOrder.AFTER && hasRapier()) {
-            playPunchSound = true;
-        }
     }
     
     public void removeRapierFire() {

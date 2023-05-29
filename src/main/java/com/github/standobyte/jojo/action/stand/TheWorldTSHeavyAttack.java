@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack.HeavyPunch
 import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandPose;
@@ -30,6 +31,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
@@ -182,6 +184,21 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
     public StandBlockPunch punchBlock(StandEntity stand, BlockPos pos, BlockState state) {
         return IHasStandPunch.super.punchBlock(stand, pos, state)
                 .impactSound(ModSounds.THE_WORLD_PUNCH_HEAVY);
+    }
+    
+    @Override
+    public SoundEvent getPunchSwingSound() {
+        return ModSounds.STAND_PUNCH_HEAVY_SWING.get();
+    }
+    
+    @Override
+    public void standTickWindup(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
+        IHasStandPunch.playPunchSwingSound(task, Phase.WINDUP, 3, this, standEntity);
+    }
+    
+    @Override
+    public void clPlayPunchSwingSound(StandEntity standEntity, SoundEvent sound) {
+        standEntity.playSound(sound, 1.0F, 0.65F + standEntity.getRandom().nextFloat() * 0.2F, ClientUtil.getClientPlayer());
     }
     
     @Override
