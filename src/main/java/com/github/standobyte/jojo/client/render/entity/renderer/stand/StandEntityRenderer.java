@@ -84,28 +84,45 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
         return renderType(entity, getModel(), getTextureLocation(entity), isVisible, isVisibleForSpectator, isGlowing);
     }
     
-    protected float getAlpha(T entity, float partialTick) {
+    protected float calcAlpha(T entity, float partialTick) {
         if (visibleForSpectator(entity)) {
             return 0.15F;
         }
-        return entity.getAlpha(partialTick);
+        return entity.getAlpha(partialTick) * viewObstructionPrevention.alphaFactor;
     }
     
-    protected boolean obstructsView(T entity, float partialTick) {
+    protected ViewObstructionPrevention obstructsView(T entity, float partialTick) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.options.getCameraType().isFirstPerson()) {
             Entity user = entity.getUser();
             if (mc.player != null && mc.player.is(user)) {
                 if (ClientEventHandler.getInstance().isZooming) {
-                    return true;
+                    return ViewObstructionPrevention.ARMS_ONLY;
                 }
                 if (entity.isFollowingUser() && !entity.isArmsOnlyMode()) {
                     Vector3d diffVec = entity.getPosition(partialTick).subtract(user.getPosition(partialTick));
-                    return diffVec.lengthSqr() < 0.09 || diffVec.lengthSqr() < 1 && user.getViewVector(partialTick).dot(diffVec) > diffVec.lengthSqr() / 2;
+                    double distanceSqr = diffVec.lengthSqr();
+                    if (distanceSqr < 0.25 || distanceSqr < 1 && user.getViewVector(partialTick).dot(diffVec) > distanceSqr / 2) {
+                        return ViewObstructionPrevention.ARMS_ONLY;
+                    }
                 }
             }
         }
-        return false;
+        return ViewObstructionPrevention.NONE;
+    }
+    
+    protected enum ViewObstructionPrevention {
+        NONE(false, 1),
+        ARMS_ONLY(true, 1),
+        TRANSLUCENCY(false, 0.25F);
+        
+        private final boolean armsOnly;
+        private final float alphaFactor;
+        
+        private ViewObstructionPrevention(boolean armsOnly, float alphaFactor) {
+            this.armsOnly = armsOnly;
+            this.alphaFactor = alphaFactor;
+        }
     }
 
     private static final float PLAYER_RENDER_SCALE = 0.9375F;
@@ -124,6 +141,8 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
             (OVERLAY_TICKS - MathHelper.clamp(entity.overlayTickCount + partialTick, 0.0F, OVERLAY_TICKS)) / OVERLAY_TICKS;
     }
 
+    private float alpha;
+    private ViewObstructionPrevention viewObstructionPrevention;
     @Override
     public void render(T entity, float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
         if (MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Pre<T, M>(entity, this, partialTick, matrixStack, buffer, packedLight))) return;
@@ -132,7 +151,8 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
         boolean shouldSit = entity.isPassenger() && (entity.getVehicle() != null && entity.getVehicle().shouldRiderSit());
         model.riding = shouldSit;
         model.young = entity.isBaby();
-        model.setVisibility(entity, visibilityMode(entity), obstructsView(entity, partialTick));
+        viewObstructionPrevention = obstructsView(entity, partialTick);
+        model.setVisibility(entity, visibilityMode(entity), viewObstructionPrevention.armsOnly);
         float yBodyRotation = MathHelper.rotLerp(partialTick, entity.yBodyRotO, entity.yBodyRot);
         float yHeadRotation = MathHelper.rotLerp(partialTick, entity.yHeadRotO, entity.yHeadRot);
         float f2 = yHeadRotation - yBodyRotation;
@@ -189,7 +209,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
         if (renderType != null) {
             IVertexBuilder vertexBuilder = buffer.getBuffer(renderType);
             int packedOverlay = getOverlayCoords(entity, getWhiteOverlayProgress(entity, partialTick));
-            float alpha = getAlpha(entity, partialTick);
+            alpha = calcAlpha(entity, partialTick);
             model.render(entity, matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
         }
         
@@ -207,7 +227,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
             this.renderNameTag(entity, renderNameplateEvent.getContent(), matrixStack, buffer, packedLight);
         }
 
-        MinecraftForge.EVENT_BUS.post(new net.minecraftforge.client.event.RenderLivingEvent.Post<T, M>(entity, this, partialTick, matrixStack, buffer, packedLight));
+        MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Post<T, M>(entity, this, partialTick, matrixStack, buffer, packedLight));
     }
 
     public void renderLayer(MatrixStack matrixStack, IVertexBuilder vertexBuilder, int packedLight,
@@ -215,11 +235,10 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
             float ticks, float yRotationOffset, float xRotation, 
             ResourceLocation layerModelTexture, M model) {
         getModel().copyPropertiesTo(model);
-        model.setVisibility(entity, visibilityMode(entity), obstructsView(entity, partialTick));
+        model.setVisibility(entity, visibilityMode(entity), viewObstructionPrevention.armsOnly);
         model.prepareMobModel(entity, walkAnimSpeed, walkAnimPos, partialTick);
         model.setupAnim(entity, walkAnimSpeed, walkAnimPos, ticks, yRotationOffset, xRotation);
         int packedOverlay = getOverlayCoords(entity, getWhiteOverlayProgress(entity, partialTick));
-        float alpha = getAlpha(entity, partialTick);
         model.render(entity, matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
     }
 

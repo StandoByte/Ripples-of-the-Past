@@ -249,7 +249,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
             this
             .damage(StandStatFormulas.getBarrageHitDamage(stand.getAttackDamage(), stand.getPrecision()))
             .addCombo(0.005F)
-            .reduceKnockback(0.025F);
+            .reduceKnockback((float) stand.getAttackDamage() * 0.0075F);
         }
         
         public BarrageEntityPunch barrageHits(StandEntity stand, int hits) {

@@ -276,7 +276,7 @@ public class ActionsOverlayGui extends AbstractGui {
             RenderSystem.disableRescaleNormal();
             RenderSystem.disableBlend();
             break;
-        case VIGNETTE:
+        case HELMET: // VIGNETTE only gets called when the graphics settings are on Fancy, and this overlay is pretty important
             renderOutOfBreathVignette(matrixStack, partialTick);
             break;
         default:
@@ -1372,16 +1372,20 @@ public class ActionsOverlayGui extends AbstractGui {
     
     
     private boolean outOfBreath = false;
-    private boolean outOfBreathDueToMask = false;
+    private boolean outOfBreathMaskSprite = false;
     private int outOfBreathSpriteTicks = 0;
     private float prevAir;
     private float vignetteBeforeFadeAway = -1;
     public void setOutOfBreath(boolean mask) {
         outOfBreath = true;
-        outOfBreathDueToMask = mask;
+        outOfBreathMaskSprite = mask;
         outOfBreathSpriteTicks = 15;
         vignetteBeforeFadeAway = -1;
         prevAir = 0;
+    }
+    
+    public boolean isPlayerOutOfBreath() {
+        return outOfBreath;
     }
     
     private void tickOutOfBreathEffect() {
@@ -1398,7 +1402,7 @@ public class ActionsOverlayGui extends AbstractGui {
         if (outOfBreathSpriteTicks > 0) {
             boolean bubblePopped = outOfBreathSpriteTicks < 11;
             mc.getTextureManager().bind(ClientUtil.ADDITIONAL_UI);
-            blit(matrixStack, windowWidth / 2 - 16, windowHeight / 2 - 16, bubblePopped ? 160 : 128, outOfBreathDueToMask ? 32 : 0, 32, 32);
+            blit(matrixStack, windowWidth / 2 - 16, windowHeight / 2 - 16, bubblePopped ? 160 : 128, outOfBreathMaskSprite ? 32 : 0, 32, 32);
         }
     }
     

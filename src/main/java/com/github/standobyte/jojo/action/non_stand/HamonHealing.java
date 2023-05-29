@@ -37,7 +37,7 @@ public class HamonHealing extends HamonAction {
         float hamonEfficiency = hamon.getActionEfficiency(cost);
         float hamonControl = hamon.getHamonControlLevelRatio();
         
-        if (!world.isClientSide()) {
+        if (!world.isClientSide() && hamonEfficiency > 0) {
             Entity targetEntity = target.getType() == TargetType.ENTITY && hamon.isSkillLearned(ModHamonSkills.HEALING_TOUCH.get()) ? target.getEntity() : null;
             LivingEntity targetLiving = targetEntity instanceof LivingEntity ? (LivingEntity) targetEntity : null;
             LivingEntity entityToHeal = targetEntity != null && canBeHealed(targetLiving, user) ? targetLiving : user;

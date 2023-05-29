@@ -674,6 +674,7 @@ public class InputHandler {
             slowedDown = slowDownFromHeldAction(mc.player, input, nonStandPower) || slowedDown;
             slowedDown = slowDownFromStandEntity(mc.player, input) || slowedDown;
             slowedDown = slowDownFromContinuousAction(mc.player, input) || slowedDown;
+            slowedDown = actionsOverlay.isPlayerOutOfBreath() && slowDown(mc.player, input, 0.8F) || slowedDown;
             
             if (!mc.player.isPassenger()) {
                 IPower<?, ?> power = actionsOverlay.getCurrentPower();

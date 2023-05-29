@@ -94,11 +94,11 @@ public class ModHamonActions {
     
     public static final RegistryObject<HamonAction> HAMON_DETECTOR = ACTIONS.register("hamon_detector", 
             () -> new HamonDetector(new HamonAction.Builder().holdEnergyCost(5F).heldWalkSpeed(0.5F)));
-
+    
     public static final RegistryObject<HamonAction> HAMON_LIFE_MAGNETISM = ACTIONS.register("hamon_life_magnetism", 
             () -> new HamonLifeMagnetism(new HamonAction.Builder().energyCost(LeavesGliderEntity.MAX_ENERGY)
                     .shout(ModHamonSkills.CHARACTER_ZEPPELI, ModSounds.ZEPPELI_LIFE_MAGNETISM_OVERDRIVE)));
-
+    
     public static final RegistryObject<HamonAction> HAMON_PROJECTILE_SHIELD = ACTIONS.register("hamon_projectile_shield", 
             () -> new HamonProjectileShield(new HamonAction.Builder().holdEnergyCost(15F).heldWalkSpeed(0.5F)
                     .shout(ModHamonSkills.CHARACTER_JOSEPH, ModSounds.JOSEPH_BARRIER)));
