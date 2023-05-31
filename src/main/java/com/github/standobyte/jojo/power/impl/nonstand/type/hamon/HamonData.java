@@ -318,7 +318,7 @@ public class HamonData extends TypeSpecificData {
                 return 0;
             }
             
-            float energyFromStability = getBreathStability() * 2;
+            float energyFromStability = getBreathStability() * 4;
             if (energyFromStability == 0) {
                 return 0;
             }
