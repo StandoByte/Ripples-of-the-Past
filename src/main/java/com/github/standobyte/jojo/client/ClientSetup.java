@@ -26,6 +26,7 @@ import com.github.standobyte.jojo.client.render.armor.model.SatiporojaScarfArmor
 import com.github.standobyte.jojo.client.render.armor.model.StoneMaskModel;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonBurnLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.KnifeLayer;
+import com.github.standobyte.jojo.client.render.entity.layerrenderer.SpecialHeldItemLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.TornadoOverdriveEffectLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.barrage.BarrageFistAfterimagesLayer;
 import com.github.standobyte.jojo.client.render.entity.renderer.AfterimageRenderer;
@@ -91,7 +92,6 @@ import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
-import com.github.standobyte.jojo.item.ClackersItem;
 import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
@@ -214,13 +214,6 @@ public class ClientSetup {
             ItemModelsProperties.register(ModItems.STONE_MASK.get(), new ResourceLocation(JojoMod.MOD_ID, "stone_mask_activated"), (itemStack, clientWorld, livingEntity) -> {
                 return itemStack.getTag().getByte(StoneMaskItem.NBT_ACTIVATION_KEY) > 0 ? 1 : 0;
             });
-            ItemModelsProperties.register(ModItems.CLACKERS.get(), new ResourceLocation(JojoMod.MOD_ID, "clackers_spin"), (itemStack, clientWorld, livingEntity) -> {
-                if (livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack) {
-                    int ticksUsed = itemStack.getUseDuration() - livingEntity.getUseItemRemainingTicks();
-                    return ClackersItem.clackersTexVariant(ticksUsed, ClackersItem.TICKS_MAX_POWER);
-                }
-                return 0;
-            });
             ItemModelsProperties.register(ModItems.TOMMY_GUN.get(), new ResourceLocation(JojoMod.MOD_ID, "swing"), (itemStack, clientWorld, livingEntity) -> {
                 return livingEntity != null && livingEntity.swinging && livingEntity.getItemInHand(livingEntity.swingingArm) == itemStack ? 1 : 0;
             });
@@ -259,7 +252,7 @@ public class ClientSetup {
             Map<String, PlayerRenderer> skinMap = mc.getEntityRenderDispatcher().getSkinMap();
             addLayers(skinMap.get("default"));
             addLayers(skinMap.get("slim"));
-            mc.getEntityRenderDispatcher().renderers.forEach((entityType, renderer) -> addLayersToEntities(renderer));
+            mc.getEntityRenderDispatcher().renderers.values().forEach(ClientSetup::addLayersToEntities);
 
             MarkerRenderer.Handler.addRenderer(new HierophantGreenBarrierDetectionMarker(mc));
             MarkerRenderer.Handler.addRenderer(new CrazyDiamondAnchorMarker(mc));
@@ -286,15 +279,15 @@ public class ClientSetup {
         renderer.addLayer(new TornadoOverdriveEffectLayer<>(renderer));
         renderer.addLayer(new BarrageFistAfterimagesLayer(renderer));
         addLivingLayers(renderer);
-//        addBipedLayers(renderer);
+        addBipedLayers(renderer);
     }
     
     private static <T extends LivingEntity, M extends BipedModel<T>> void addLayersToEntities(EntityRenderer<?> renderer) {
         if (renderer instanceof LivingRenderer<?, ?>) {
             addLivingLayers((LivingRenderer<T, ?>) renderer);
-//            if (((LivingRenderer<?, ?>) renderer).getModel() instanceof BipedModel<?>) {
-//                addBipedLayers((LivingRenderer<T, M>) renderer);
-//            }
+            if (((LivingRenderer<?, ?>) renderer).getModel() instanceof BipedModel<?>) {
+                addBipedLayers((LivingRenderer<T, M>) renderer);
+            }
         }
     }
     
@@ -302,8 +295,9 @@ public class ClientSetup {
         renderer.addLayer(new HamonBurnLayer<>(renderer));
     }
     
-//    private static <T extends LivingEntity, M extends BipedModel<T>> void addBipedLayers(LivingRenderer<T, M> renderer) {
-//    }
+    private static <T extends LivingEntity, M extends BipedModel<T>> void addBipedLayers(LivingRenderer<T, M> renderer) {
+        renderer.addLayer(new SpecialHeldItemLayer<>(renderer));
+    }
 
     @SubscribeEvent
     public static void registerItemColoring(ColorHandlerEvent.Item event) {

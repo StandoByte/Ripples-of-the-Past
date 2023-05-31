@@ -1,6 +1,0 @@
-{
-  "parent": "jojo:item/clackers",
-  "textures": {
-    "layer0": "jojo:item/clackers2"
-  }
-}

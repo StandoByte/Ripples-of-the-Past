@@ -70,7 +70,7 @@ public class ClackersItem extends Item {
         int ticksUsed = getUseDuration(stack) - remainingTicks;
         int ticksMaxPower = TICKS_MAX_POWER;
         if (clackersTexVariant(ticksUsed, ticksMaxPower) > 0) {
-            playClackSound(world, entity);
+//            playClackSound(world, entity);
             if (ticksUsed >= ticksMaxPower / 2 && !world.isClientSide()) {
                 Vector3d sparkVec = entity.getLookAngle().scale(0.75)
                         .add(entity.getX(), entity.getY(0.6), entity.getZ());
@@ -156,7 +156,7 @@ public class ClackersItem extends Item {
         }).orElse(false)).orElse(false);
     }
 
-    private void playClackSound(World world, LivingEntity entity) {
+    public static void playClackSound(World world, LivingEntity entity) {
         world.playSound(entity instanceof PlayerEntity ? (PlayerEntity) entity : null, entity.getX(), entity.getY(), entity.getZ(), 
                 ModSounds.CLACKERS.get(), entity.getSoundSource(), 0.5F, 1.0F + (random.nextFloat() - 0.5F) * 0.1F);
     }
