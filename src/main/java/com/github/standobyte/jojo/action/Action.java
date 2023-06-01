@@ -19,6 +19,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.Blocks;
@@ -485,7 +486,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         }
         
         public T emptyMainHand() {
-            return itemCheck(Hand.MAIN_HAND, ItemStack::isEmpty, "hand");
+            return itemCheck(Hand.MAIN_HAND, MCUtil.EMPTY_ITEM_OR_GLOVES, "hand");
         }
         
         public T ignoresPerformerStun() {

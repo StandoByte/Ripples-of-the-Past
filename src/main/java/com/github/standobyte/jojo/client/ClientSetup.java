@@ -22,6 +22,7 @@ import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
 import com.github.standobyte.jojo.client.render.armor.ArmorModelRegistry;
 import com.github.standobyte.jojo.client.render.armor.model.BladeHatArmorModel;
 import com.github.standobyte.jojo.client.render.armor.model.BreathControlMaskModel;
+import com.github.standobyte.jojo.client.render.armor.model.GlovesModel;
 import com.github.standobyte.jojo.client.render.armor.model.SatiporojaScarfArmorModel;
 import com.github.standobyte.jojo.client.render.armor.model.StoneMaskModel;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonBurnLayer;
@@ -250,8 +251,8 @@ public class ClientSetup {
             InputHandler.getInstance().setActionsOverlay(ActionsOverlayGui.getInstance());
             
             Map<String, PlayerRenderer> skinMap = mc.getEntityRenderDispatcher().getSkinMap();
-            addLayers(skinMap.get("default"));
-            addLayers(skinMap.get("slim"));
+            addLayers(skinMap.get("default"), false);
+            addLayers(skinMap.get("slim"), true);
             mc.getEntityRenderDispatcher().renderers.values().forEach(ClientSetup::addLayersToEntities);
 
             MarkerRenderer.Handler.addRenderer(new HierophantGreenBarrierDetectionMarker(mc));
@@ -274,10 +275,11 @@ public class ClientSetup {
 //        Map<String, PlayerRenderer> skinMap = event.getMinecraftSupplier().get().getEntityRenderDispatcher().getSkinMap();
 //    }
 
-    private static void addLayers(PlayerRenderer renderer) {
+    private static void addLayers(PlayerRenderer renderer, boolean slim) {
         renderer.addLayer(new KnifeLayer<>(renderer));
         renderer.addLayer(new TornadoOverdriveEffectLayer<>(renderer));
         renderer.addLayer(new BarrageFistAfterimagesLayer(renderer));
+        renderer.addLayer(new SpecialHeldItemLayer<>(renderer, new GlovesModel<>(0.3F, slim)));
         addLivingLayers(renderer);
         addBipedLayers(renderer);
     }
@@ -296,7 +298,6 @@ public class ClientSetup {
     }
     
     private static <T extends LivingEntity, M extends BipedModel<T>> void addBipedLayers(LivingRenderer<T, M> renderer) {
-        renderer.addLayer(new SpecialHeldItemLayer<>(renderer));
     }
 
     @SubscribeEvent

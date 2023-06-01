@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket;
@@ -304,4 +305,15 @@ public class MCUtil {
         }
     }
 
+    
+    
+    public static final Predicate<ItemStack> EMPTY_ITEM_OR_GLOVES = item -> {
+        if (item.isEmpty()) {
+            return true;
+        }
+        if (item.getItem() instanceof GlovesItem) {
+            return ((GlovesItem) item.getItem()).openFingers();
+        }
+        return false;
+    };
 }

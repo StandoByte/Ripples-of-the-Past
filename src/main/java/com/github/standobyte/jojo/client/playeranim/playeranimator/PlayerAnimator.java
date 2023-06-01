@@ -29,13 +29,16 @@ import dev.kosmx.playerAnim.core.util.SetableSupplier;
 import dev.kosmx.playerAnim.impl.Helper;
 import dev.kosmx.playerAnim.impl.IBendHelper;
 import dev.kosmx.playerAnim.impl.IMutableModel;
+import dev.kosmx.playerAnim.impl.IUpperPartHelper;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationFactory;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationRegistry;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
+import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
@@ -140,6 +143,13 @@ public class PlayerAnimator implements PlayerAnimationHandler.IPlayerAnimator {
     public IPlayerBarrageAnimation createBarrageAfterimagesAnim(
             PlayerModel<AbstractClientPlayerEntity> model, BarrageFistAfterimagesLayer layer) {
         return new PlayerBarrageAfterimagesAnim(model, barrage.createSwingAnim(model), layer);
+    }
+    
+    
+    
+    @Override
+    public <T extends LivingEntity, M extends BipedModel<T>> void onPlayerLayerInit(LayerRenderer<T, M> layer) {
+        ((IUpperPartHelper) layer).setUpperPart(false);
     }
     
     

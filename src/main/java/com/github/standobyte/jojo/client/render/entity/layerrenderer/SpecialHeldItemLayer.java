@@ -4,17 +4,21 @@ import java.util.Random;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
 import com.github.standobyte.jojo.client.render.item.ClackersItemModel;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.item.ClackersItem;
+import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.ItemRenderer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.IEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
-import net.minecraft.client.renderer.entity.model.BipedModel;
+import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.entity.LivingEntity;
@@ -27,19 +31,29 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 
-public class SpecialHeldItemLayer<T extends LivingEntity, M extends BipedModel<T>> extends LayerRenderer<T, M> {
+public class SpecialHeldItemLayer<T extends LivingEntity, M extends PlayerModel<T>> extends LayerRenderer<T, M> {
     private final ClackersItemModel clackersModel = new ClackersItemModel();
     private final ResourceLocation clackersTexture = new ResourceLocation(JojoMod.MOD_ID, "textures/entity/projectiles/clackers.png");
     
-    public SpecialHeldItemLayer(IEntityRenderer<T, M> renderer) {
+    private final M glovesModel;
+    private boolean playerAnimHandled = false;
+    
+    public SpecialHeldItemLayer(IEntityRenderer<T, M> renderer, M glovesModel) {
         super(renderer);
+        this.glovesModel = glovesModel;
     }
     
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, T entity, 
             float limbSwing, float limbSwingAmount, float partialTick, float ticks, float yRot, float xRot) {
+        if (!playerAnimHandled) {
+            PlayerAnimationHandler.getPlayerAnimator().onPlayerLayerInit(this);
+            playerAnimHandled = true;
+        }
         boolean rightHanded = entity.getMainArm() == HandSide.RIGHT;
         ItemStack leftHandItem = rightHanded ? entity.getOffhandItem() : entity.getMainHandItem();
         ItemStack rightHandItem = rightHanded ? entity.getMainHandItem() : entity.getOffhandItem();
+        
+        // clackers
         if (specialRender(leftHandItem) || specialRender(rightHandItem)) {
             matrixStack.pushPose();
             if (getParentModel().young) {
@@ -52,6 +66,23 @@ public class SpecialHeldItemLayer<T extends LivingEntity, M extends BipedModel<T
             renderItemSpecial(entity, leftHandItem, HandSide.LEFT, matrixStack, buffer, packedLight, 
                     limbSwing, limbSwingAmount, partialTick, ticks, yRot, xRot);
             matrixStack.popPose();
+        }
+        
+        // gloves
+        ItemStack glovesItem = entity.getMainHandItem();
+        if (!(!glovesItem.isEmpty() && glovesItem.getItem() instanceof GlovesItem)) {
+            glovesItem = entity.getOffhandItem();
+        }
+        if (  !glovesItem.isEmpty() && glovesItem.getItem() instanceof GlovesItem) {
+            GlovesItem gloves = (GlovesItem) glovesItem.getItem();
+            getParentModel().copyPropertiesTo(glovesModel);
+            glovesModel.setupAnim(entity, limbSwing, limbSwingAmount, ticks, yRot, xRot);
+            boolean slim = false;
+            ResourceLocation texture = new ResourceLocation(
+                    gloves.getRegistryName().getNamespace(), 
+                    "textures/entity/biped/layer/" + gloves.getRegistryName().getPath() + (slim ? "_slim" : "") + ".png");
+            IVertexBuilder vertexBuilder = ItemRenderer.getArmorFoilBuffer(buffer, RenderType.armorCutoutNoCull(texture), false, glovesItem.hasFoil());
+            glovesModel.renderToBuffer(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
         }
     }
     
@@ -76,7 +107,7 @@ public class SpecialHeldItemLayer<T extends LivingEntity, M extends BipedModel<T
             matrixStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
             boolean leftHand = side == HandSide.LEFT;
             matrixStack.translate((double)((float)(leftHand ? -1 : 1) / 16.0F), 0.125D, -0.625D);
-//            if (item.getItem() == ModItems.CLACKERS.get()) {
+            if (item.getItem() == ModItems.CLACKERS.get()) {
                 ModelRenderer clackers = clackersModel.getMainPart();
                 ModelRenderer arm = leftHand ? entityModel.leftArm : entityModel.rightArm;
                 
@@ -177,7 +208,7 @@ public class SpecialHeldItemLayer<T extends LivingEntity, M extends BipedModel<T
                     }
                 }
                 clackersModel.renderToBuffer(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
-//            }
+            }
             matrixStack.popPose();
         }
     }

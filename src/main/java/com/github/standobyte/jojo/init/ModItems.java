@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.item.CassetteBlankItem;
 import com.github.standobyte.jojo.item.CassetteRecordedItem;
 import com.github.standobyte.jojo.item.ClackersItem;
 import com.github.standobyte.jojo.item.CustomModelArmorItem;
+import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.item.GumItem;
 import com.github.standobyte.jojo.item.KnifeItem;
 import com.github.standobyte.jojo.item.ModArmorMaterials;
@@ -70,6 +71,9 @@ public class ModItems {
     
     public static final RegistryObject<CustomModelArmorItem> BREATH_CONTROL_MASK = ITEMS.register("breath_control_mask", 
             () -> new BreathControlMaskItem(new Item.Properties().tab(JojoMod.MAIN_TAB)));
+    
+    public static final RegistryObject<GlovesItem> GLOVES = ITEMS.register("gloves", 
+            () -> new GlovesItem(new Item.Properties().tab(JojoMod.MAIN_TAB)));
 
     public static final RegistryObject<SpawnEggItem> HAMON_MASTER_SPAWN_EGG = ITEMS.register("hamon_master_spawn_egg", 
             () -> new ForgeSpawnEggItem(ModEntityTypes.HAMON_MASTER, 0xF8D100, 0x542722, new Item.Properties().tab(JojoMod.MAIN_TAB)));

@@ -1,10 +1,10 @@
 package com.github.standobyte.jojo.action.non_stand;
 
-import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
@@ -14,7 +14,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
@@ -25,15 +24,7 @@ import net.minecraftforge.common.ForgeHooks;
 public class HamonOverdriveBarrage extends HamonAction {
 
     public HamonOverdriveBarrage(HamonAction.Builder builder) {
-        super(builder.holdType().itemCheck(Hand.MAIN_HAND, ItemStack::isEmpty, "hands").itemCheck(Hand.OFF_HAND, ItemStack::isEmpty, "hands"));
-    }
-    
-    @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
-        if (!user.getMainHandItem().isEmpty() || !user.getOffhandItem().isEmpty()) {
-            return conditionMessage("hands");
-        }
-        return ActionConditionResult.POSITIVE;
+        super(builder.holdType().itemCheck(Hand.MAIN_HAND, MCUtil.EMPTY_ITEM_OR_GLOVES, "hands").itemCheck(Hand.OFF_HAND, MCUtil.EMPTY_ITEM_OR_GLOVES, "hands"));
     }
     
     @Override

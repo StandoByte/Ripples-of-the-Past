@@ -13,8 +13,10 @@ import com.github.standobyte.jojo.client.render.entity.model.mob.HamonMasterMode
 import com.github.standobyte.jojo.entity.mob.HamonMasterEntity;
 
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
+import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.ModList;
@@ -48,6 +50,8 @@ public class PlayerAnimationHandler {
         @Nullable default void setBarrageAnim(PlayerEntity player, boolean val) { }
         @Nullable default IPlayerBarrageAnimation createBarrageAfterimagesAnim(
                 PlayerModel<AbstractClientPlayerEntity> model, BarrageFistAfterimagesLayer layer) { return null; }
+        
+        default <T extends LivingEntity, M extends BipedModel<T>> void onPlayerLayerInit(LayerRenderer<T, M> layer) {}
     }
     
     public static IPlayerAnimator getPlayerAnimator() {
