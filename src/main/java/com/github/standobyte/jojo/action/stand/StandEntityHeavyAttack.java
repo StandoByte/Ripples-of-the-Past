@@ -86,7 +86,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
                 }
             }
             
-            if (standEntity != null && (standEntity.getCurrentTaskAction() == finisherVariation || standEntity.willHeavyPunchCombo())) {
+            if (standEntity != null && (standEntity.getCurrentTaskAction() == finisherVariation || standEntity.willHeavyPunchBeFinisher())) {
                 return finisherVariation;
             }
         }

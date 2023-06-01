@@ -1636,11 +1636,11 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return entityData.get(LAST_HEAVY_PUNCH_COMBO);
     }
 
-    public boolean willHeavyPunchCombo() {
+    public boolean willHeavyPunchBeFinisher() {
         return getComboMeter() >= 0.5F;
     }
 
-    public boolean isHeavyComboPunching() {
+    public boolean isCurrentHeavyPunchFinisher() {
         return getLastHeavyPunchCombo() >= 0.5F;
     }
     

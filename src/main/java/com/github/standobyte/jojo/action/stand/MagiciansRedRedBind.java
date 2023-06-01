@@ -34,7 +34,7 @@ public class MagiciansRedRedBind extends StandEntityAction {
     public void stoppedHolding(World world, LivingEntity user, IStandPower power, int ticksHeld, boolean willFire) {
         invokeForStand(power, stand -> {
             if (stand.getCurrentTaskAction() == this) {
-                if (stand.willHeavyPunchCombo() && getLandedRedBind(stand).isPresent()) {
+                if (stand.willHeavyPunchBeFinisher() && getLandedRedBind(stand).isPresent()) {
                     return;
                 }
                 else {
@@ -52,7 +52,7 @@ public class MagiciansRedRedBind extends StandEntityAction {
     
     @Override
     protected SoundEvent getShout(LivingEntity user, IStandPower power, ActionTarget target, boolean wasActive) {
-        if (power.isActive() && ((StandEntity) power.getStandManifestation()).willHeavyPunchCombo()) {
+        if (power.isActive() && ((StandEntity) power.getStandManifestation()).willHeavyPunchBeFinisher()) {
             return null;
         }
         return super.getShout(user, power, target, wasActive);

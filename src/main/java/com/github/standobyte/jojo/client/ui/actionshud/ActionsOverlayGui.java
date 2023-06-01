@@ -1048,7 +1048,8 @@ public class ActionsOverlayGui extends AbstractGui {
                     1F - (float) power.getLeapCooldown() / (float) power.getLeapCooldownPeriod() : 1;
             boolean translucent = !InputHandler.getInstance().canPlayerLeap();
             
-            renderFilledIcon(matrixStack, iconX, iconY, translucent, iconFill, 96, 238, 18, 18, 0xFFFFFF);
+            renderFilledIcon(matrixStack, iconX, iconY, translucent, iconFill, 
+                    96, 238, 114, 238, 18, 18, 0xFFFFFF);
         }
     }
     
@@ -1060,14 +1061,15 @@ public class ActionsOverlayGui extends AbstractGui {
                 int x = screenWidth / 2 + (modeSelectorPosition.alignment == Alignment.LEFT ? -24 : 6);
                 int y = screenHeight / 2 - 9;
                 float combo = ((StandEntity) stand).getComboMeter();
-                int color = ((StandEntity) stand).willHeavyPunchCombo() ? 0x00FF00 : 0xFFFFFF;
-                renderFilledIcon(matrixStack, x, y, false, combo, 96, 216, 18, 18, color);
+                boolean finisher = ((StandEntity) stand).willHeavyPunchBeFinisher();
+                renderFilledIcon(matrixStack, x, y, false, combo, 
+                        96, 216, finisher ? 132 : 114, 216, 18, 18, 0xFFFFFF);
             }
         }
     }
 
     private void renderFilledIcon(MatrixStack matrixStack, int x, int y, boolean translucent, float fill, 
-            int texX, int texY, int texWidth, int texHeight, int color) {
+            int texX, int texY, int fillTexX, int fillTexY, int texWidth, int texHeight, int color) {
         blit(matrixStack, x, y, texX, texY, texWidth, texHeight);
         float[] rgb = ClientUtil.rgb(color);
         float alpha = 1.0F;
@@ -1079,7 +1081,7 @@ public class ActionsOverlayGui extends AbstractGui {
         }
         RenderSystem.color4f(rgb[0], rgb[1], rgb[2], alpha);
         int px = (int) (18F * fill);
-        blit(matrixStack, x, y + texHeight - px, texX + texWidth, texY + texHeight - px, texWidth, px);
+        blit(matrixStack, x, y + texHeight - px, fillTexX, fillTexY + texHeight - px, texWidth, px);
         if (translucent) {
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         }
