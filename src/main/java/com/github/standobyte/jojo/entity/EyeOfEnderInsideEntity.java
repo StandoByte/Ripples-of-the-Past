@@ -11,6 +11,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.projectile.EyeOfEnderEntity;
 import net.minecraft.network.IPacket;
 import net.minecraft.util.SoundEvents;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.network.NetworkHooks;
@@ -77,7 +78,12 @@ public class EyeOfEnderInsideEntity extends EyeOfEnderEntity {
     public boolean shouldRiderSit() {
         return false;
     }
-
+    
+    @Override
+    protected ITextComponent getTypeName() {
+        return EntityType.EYE_OF_ENDER.getDescription();
+    }
+    
     @Override
     public IPacket<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);

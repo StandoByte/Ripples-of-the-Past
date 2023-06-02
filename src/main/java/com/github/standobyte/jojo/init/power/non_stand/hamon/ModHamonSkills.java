@@ -157,7 +157,7 @@ public class ModHamonSkills {
     public static final RegistryObject<CharacterTechniqueHamonSkill> OVERDRIVE_BARRAGE = HAMON_SKILLS.register("overdrive_barrage",
             () -> new CharacterTechniqueHamonSkill.Builder(RewardType.ATTACK)
             .unlocks(ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE)
-            .requiredSkill(ZOOM_PUNCH).requiredSkill(SUNLIGHT_YELLOW_OVERDRIVE).build());
+            .requiredSkill(SPEED_BOOST).requiredSkill(SUNLIGHT_YELLOW_OVERDRIVE).build());
     
     public static final RegistryObject<CharacterHamonTechnique> CHARACTER_JONATHAN = HAMON_CHARACTER_TECHNIQUES.register("jonathan", 
             () -> new CharacterHamonTechnique.Builder("jonathan", Util.make(new ArrayList<>(), list -> {

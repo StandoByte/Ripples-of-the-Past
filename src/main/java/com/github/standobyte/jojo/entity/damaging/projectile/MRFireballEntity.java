@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.entity.damaging.projectile;
 
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
@@ -10,17 +11,17 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.IRendersAsItem;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.ForgeEventFactory;
 
-@OnlyIn(value = Dist.CLIENT, _interface = IRendersAsItem.class)
 public class MRFireballEntity extends ModdedProjectileEntity implements IRendersAsItem {
+    private static final ItemStack MR_FIREBALL_SPRITE_ITEM = Util.make(new ItemStack(ModItems.DUMMY_ITEM.get()), item -> {
+        item.getOrCreateTag().putInt("Icon", 12);
+    });
     
     public MRFireballEntity(LivingEntity shooter, World world) {
         super(ModEntityTypes.MR_FIREBALL.get(), shooter, world);
@@ -79,7 +80,7 @@ public class MRFireballEntity extends ModdedProjectileEntity implements IRenders
 
     @Override
     public ItemStack getItem() {
-        return new ItemStack(Items.FIRE_CHARGE);
+        return MR_FIREBALL_SPRITE_ITEM;
     }
 
     @Override

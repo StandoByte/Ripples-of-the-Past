@@ -11,6 +11,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.IPacket;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.network.NetworkHooks;
@@ -76,7 +77,12 @@ public class FireworkInsideEntity extends FireworkRocketEntity {
     public boolean shouldRiderSit() {
         return false;
     }
-
+    
+    @Override
+    protected ITextComponent getTypeName() {
+        return EntityType.FIREWORK_ROCKET.getDescription();
+    }
+    
     @Override
     public IPacket<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);

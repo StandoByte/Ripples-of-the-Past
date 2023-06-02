@@ -8,67 +8,73 @@
       "predicate": {
         "jojo:icon": 1
       },
-      "model": "jojo:item/item_icon1"
+      "model": "jojo:item/item_icon_katakana_go"
     },
     {
       "predicate": {
         "jojo:icon": 2
       },
-      "model": "jojo:item/item_icon2"
+      "model": "jojo:item/item_icon_crimson_bubble"
     },
     {
       "predicate": {
         "jojo:icon": 3
       },
-      "model": "jojo:item/item_icon3"
+      "model": "jojo:item/item_icon_vampirism_freeze"
     },
     {
       "predicate": {
         "jojo:icon": 4
       },
-      "model": "jojo:item/item_icon4"
+      "model": "jojo:item/item_icon_star_platinum_barrage"
     },
     {
       "predicate": {
         "jojo:icon": 5
       },
-      "model": "jojo:item/item_icon5"
+      "model": "jojo:item/item_icon_resolve_full"
     },
     {
       "predicate": {
         "jojo:icon": 6
       },
-      "model": "jojo:item/item_icon6"
+      "model": "jojo:item/item_icon_resolve_effect"
     },
     {
       "predicate": {
         "jojo:icon": 7
       },
-      "model": "jojo:item/item_icon7"
+      "model": "jojo:item/item_icon_time_stop"
     },
     {
       "predicate": {
         "jojo:icon": 8
       },
-      "model": "jojo:item/item_icon8"
+      "model": "jojo:item/item_icon_sp_translucent"
     },
     {
       "predicate": {
         "jojo:icon": 9
       },
-      "model": "jojo:item/item_icon9"
+      "model": "jojo:item/item_icon_sp"
     },
     {
       "predicate": {
         "jojo:icon": 10
       },
-      "model": "jojo:item/item_icon10"
+      "model": "jojo:item/item_icon_soul_cloud"
     },
     {
       "predicate": {
         "jojo:icon": 11
       },
-      "model": "jojo:item/item_icon11"
+      "model": "jojo:item/item_icon_rps_icons"
+    },
+    {
+      "predicate": {
+        "jojo:icon": 12
+      },
+      "model": "jojo:item/item_icon_mr_fireball"
     }
   ]
 }
