@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.client.render.entity.model.stand;
 
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.action.stand.TheWorldTSHeavyAttack;
+import com.github.standobyte.jojo.client.render.SlopeModelBox;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPoseTransition;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPoseTransitionMultiple;
@@ -24,9 +25,10 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         addHumanoidBaseBoxes(null);
 
         ModelRenderer headpiece;
-        ModelRenderer slope;
-        ModelRenderer slope2;
-        ModelRenderer slopeBack;
+        ModelRenderer slopeOld;
+        ModelRenderer slopeOld2;
+        ModelRenderer slopeOldBack;
+        ModelRenderer slopeNew;
         ModelRenderer faceRight;
         ModelRenderer faceLeft;
         ModelRenderer leftCable;
@@ -90,34 +92,44 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         headpiece.texOffs(90, 22).addBox(3.0F, -6.2F, 1.5F, 1.0F, 5.0F, 1.0F, 0.2F, true);
         headpiece.texOffs(65, 22).addBox(-4.0F, -6.2F, 1.5F, 1.0F, 5.0F, 1.0F, 0.2F, false);
 
-        slope = new ModelRenderer(this);
-        slope.setPos(0.0F, -6.4F, 1.3F);
-        headpiece.addChild(slope);
-        setRotationAngle(slope, 0.3578F, 0.0F, 0.0F);
-        slope.texOffs(64, 9).addBox(-4.0F, 0.2F, 0.2F, 8.0F, 4.0F, 8.0F, 0.2F, false);
-        slope.texOffs(56, 7).addBox(-4.2F, 0.06F, 6.35F, 1.0F, 4.0F, 3.0F, -1.0F, true);
-        slope.texOffs(56, 14).addBox(-4.2F, 2.21F, 5.25F, 1.0F, 4.0F, 3.0F, -1.0F, true);
-        slope.texOffs(96, 14).addBox(3.2F, 2.21F, 5.25F, 1.0F, 4.0F, 3.0F, -1.0F, false);
-        slope.texOffs(96, 7).addBox(3.2F, 0.06F, 6.35F, 1.0F, 4.0F, 3.0F, -1.0F, false);
+        slopeOld = new ModelRenderer(this);
+        slopeOld.setPos(0.0F, -6.4F, 1.3F);
+        headpiece.addChild(slopeOld);
+        setRotationAngle(slopeOld, 0.3578F, 0.0F, 0.0F);
+        slopeOld.texOffs(64, 9).addBox(-4.0F, 0.2F, 0.2F, 8.0F, 4.0F, 8.0F, 0.2F, false);
+        slopeOld.texOffs(56, 7).addBox(-4.2F, 0.06F, 6.35F, 1.0F, 4.0F, 3.0F, -1.0F, true);
+        slopeOld.texOffs(56, 14).addBox(-4.2F, 2.21F, 5.25F, 1.0F, 4.0F, 3.0F, -1.0F, true);
+        slopeOld.texOffs(96, 14).addBox(3.2F, 2.21F, 5.25F, 1.0F, 4.0F, 3.0F, -1.0F, false);
+        slopeOld.texOffs(96, 7).addBox(3.2F, 0.06F, 6.35F, 1.0F, 4.0F, 3.0F, -1.0F, false);
 
-        slopeBack = new ModelRenderer(this);
-        slopeBack.setPos(0.0F, 0.0F, 8.4F);
-        slope.addChild(slopeBack);
-        setRotationAngle(slopeBack, -0.3578F, 0.0F, 0.0F);
-        slopeBack.texOffs(65, 1).addBox(-4.0F, 0.2F, 0.2F, 8.0F, 7.0F, 0.0F, 0.2F, false);
+        slopeOldBack = new ModelRenderer(this);
+        slopeOldBack.setPos(0.0F, 0.0F, 8.4F);
+        slopeOld.addChild(slopeOldBack);
+        setRotationAngle(slopeOldBack, -0.3578F, 0.0F, 0.0F);
+        slopeOldBack.texOffs(65, 1).addBox(-4.0F, 0.2F, 0.2F, 8.0F, 7.0F, 0.0F, 0.2F, false);
 
-        slope2 = new ModelRenderer(this);
-        slope2.setPos(0.0F, 0.0F, 2.7F);
-        headpiece.addChild(slope2);
-        setRotationAngle(slope2, 0.2755F, 0.0F, 0.0F);
-        slope2.texOffs(98, 14).addBox(-4.0F, -3.2F, 0.2F, 8.0F, 3.0F, 7.0F, 0.2F, false);
-        slope2.texOffs(82, 0).addBox(-4.0F, -1.2F, 5.9372F, 8.0F, 1.0F, 1.0F, 0.2F, false);
+        slopeOld2 = new ModelRenderer(this);
+        slopeOld2.setPos(0.0F, 0.0F, 2.7F);
+        headpiece.addChild(slopeOld2);
+        setRotationAngle(slopeOld2, 0.2755F, 0.0F, 0.0F);
+        slopeOld2.texOffs(98, 14).addBox(-4.0F, -3.2F, 0.2F, 8.0F, 3.0F, 7.0F, 0.2F, false);
+        slopeOld2.texOffs(82, 0).addBox(-4.0F, -1.2F, 5.9372F, 8.0F, 1.0F, 1.0F, 0.2F, false);
+
+        slopeNew = new ModelRenderer(this);
+        slopeNew.setPos(0.0F, -6.4F, 1.3F);
+        headpiece.addChild(slopeNew);
+        SlopeModelBox.addSlopeBox(slopeNew, 
+                30, 14, 
+                -4.0F, 0.2F, -2.8F, 0.2F, 
+                8.0F, 6.0F, 7.0F, 8.0F, 
+                0.2F, false, texWidth, texHeight);
 
         faceRight = new ModelRenderer(this);
         faceRight.setPos(-4.2F, -6.4F, 1.3F);
         headpiece.addChild(faceRight);
         setRotationAngle(faceRight, 0.0F, 0.3023F, 0.0F);
         faceRight.texOffs(69, 21).addBox(0.2F, 0.2F, 0.2F, 4.0F, 6.0F, 1.0F, 0.2F, false);
+        // TODO same slope angle for faceRight and faceLeft cubes (more vertices control)
 
         faceLeft = new ModelRenderer(this);
         faceLeft.setPos(4.2F, -6.4F, 1.3F);

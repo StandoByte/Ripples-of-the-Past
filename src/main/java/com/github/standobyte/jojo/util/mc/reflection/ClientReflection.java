@@ -112,21 +112,25 @@ public class ClientReflection {
     public static Map<RenderType, BufferBuilder> getFixedBuffers(IRenderTypeBuffer.Impl buffers) {
         return ReflectionUtil.getFieldValue(RENDER_TYPE_BUFFER_IMPL_FIXED_BUFFERS, buffers);
     }
-
+    
     
     private static Field MODEL_RENDERER_CUBES;
     public static void setCubes(ModelRenderer modelRenderer, ObjectList<ModelRenderer.ModelBox> cubes) {
         ReflectionUtil.setFieldValue(MODEL_RENDERER_CUBES, modelRenderer, cubes);
     }
-
+    
+    public static void addCube(ModelRenderer modelRenderer, ModelRenderer.ModelBox cube) {
+        List<ModelRenderer.ModelBox> cubes = ReflectionUtil.getFieldValue(MODEL_RENDERER_CUBES, modelRenderer);
+        cubes.add(cube);
+    }
+    
     
     private static Field MODEL_BOX_POLYGONS;
     @Deprecated
     public static ModelRenderer.TexturedQuad[] getPolygons(ModelRenderer.ModelBox modelBox) {
         return ReflectionUtil.getFieldValue(MODEL_BOX_POLYGONS, modelBox);
     }
-
-    @Deprecated
+    
     public static void setPolygons(ModelRenderer.ModelBox modelBox, ModelRenderer.TexturedQuad[] polygons) {
         ReflectionUtil.setFieldValue(MODEL_BOX_POLYGONS, modelBox, polygons);
     }
