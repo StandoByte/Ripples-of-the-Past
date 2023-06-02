@@ -32,6 +32,7 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
@@ -126,7 +127,12 @@ public class RockPaperScissorsKidEntity extends VillagerEntity implements IMobSt
     public IStandPower getStandPower() {
         return standPower;
     }
-
+    
+    @Override
+    protected ITextComponent getTypeName() {
+        return getType().getDescription();
+    }
+    
     @Override
     public void addAdditionalSaveData(CompoundNBT nbt) {
         super.addAdditionalSaveData(nbt);

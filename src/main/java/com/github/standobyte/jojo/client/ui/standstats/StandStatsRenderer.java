@@ -2,15 +2,12 @@ package com.github.standobyte.jojo.client.ui.standstats;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -19,8 +16,6 @@ import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.resources.DefaultPlayerSkin;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
@@ -160,17 +155,7 @@ public class StandStatsRenderer {
                 ClientUtil.drawLines(matrixStack, mc.font, standName, 
                         x + 153 - width, standNameY, 0, color, false);
 
-                GameProfile profile = mc.player.getGameProfile();
-                ResourceLocation playerFace = DefaultPlayerSkin.getDefaultSkin();
-                if (profile != null) {
-                    Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> map = mc.getSkinManager().getInsecureSkinInformation(profile);
-                    if (map.containsKey(MinecraftProfileTexture.Type.SKIN)) {
-                        playerFace = mc.getSkinManager().registerTexture(map.get(MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN);
-                    }
-                    else {  
-                        playerFace = DefaultPlayerSkin.getDefaultSkin(PlayerEntity.createPlayerUUID(profile));
-                    }
-                }
+                ResourceLocation playerFace = mc.player.getSkinTextureLocation();
                 mc.getTextureManager().bind(playerFace);
 
                 AbstractGui.blit(matrixStack, x + 135 - width, userIconY, 16, 16, 16, 16, 128, 128);

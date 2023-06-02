@@ -11,7 +11,6 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.TimeStopInstance;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrNoMotionLerpPacket;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -38,11 +37,14 @@ import net.minecraft.world.World;
 public class TimeStopInstant extends StandAction {
     final Supplier<SoundEvent> blinkSound;
     private final Supplier<TimeStop> baseTimeStop;
+    private final Supplier<TimeResume> timeResumeAction;
 
-    public TimeStopInstant(StandAction.Builder builder, @Nonnull Supplier<TimeStop> baseTimeStop, @Nonnull Supplier<SoundEvent> blinkSound) {
+    public TimeStopInstant(StandAction.Builder builder, @Nonnull Supplier<TimeStop> baseTimeStop, 
+            @Nonnull Supplier<TimeResume> timeResumeAction, @Nonnull Supplier<SoundEvent> blinkSound) {
         super(builder);
         this.blinkSound = blinkSound;
         this.baseTimeStop = baseTimeStop;
+        this.timeResumeAction = timeResumeAction;
     }
     
     @Override
@@ -59,8 +61,10 @@ public class TimeStopInstant extends StandAction {
 
     @Override
     protected Action<IStandPower> replaceAction(IStandPower power) {
-        Action<IStandPower> timeResume = ModStandsInit.TIME_RESUME.get();
-        timeResume = timeResume.getVisibleAction(power);
+        Action<IStandPower> timeResume = timeResumeAction.get();
+        if (timeResume != null) {
+            timeResume = timeResume.getVisibleAction(power);
+        }
         return timeResume != null ? timeResume : this;
     }
     

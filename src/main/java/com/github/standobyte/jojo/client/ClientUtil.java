@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.client;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -18,9 +17,6 @@ import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.general.MathUtil.Matrix4ZYX;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import com.google.gson.JsonSyntaxException;
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.minecraft.MinecraftProfileTexture;
-import com.mojang.authlib.minecraft.MinecraftProfileTexture.Type;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -31,6 +27,7 @@ import net.minecraft.client.GameSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.ActiveRenderInfo;
@@ -40,7 +37,6 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.client.settings.PointOfView;
@@ -387,16 +383,24 @@ public class ClientUtil {
         return Math.min(alpha, maxAlpha - minAlpha) + minAlpha;
     }
     
-    public static ResourceLocation getPlayerSkin(GameProfile gameProfile) {
-        Minecraft minecraft = Minecraft.getInstance();
-        Map<Type, MinecraftProfileTexture> map = minecraft.getSkinManager().getInsecureSkinInformation(gameProfile);
-        if (map.containsKey(Type.SKIN)) {
-            return minecraft.getSkinManager().registerTexture(map.get(Type.SKIN), Type.SKIN);
-        } else {
-            return DefaultPlayerSkin.getDefaultSkin(PlayerEntity.createPlayerUUID(gameProfile));
+    public static DefaultPlayerSkinType getPlayerDefaultSkinType(AbstractClientPlayerEntity player) {
+        ResourceLocation skinLocation = player.getSkinTextureLocation();
+        if (DefaultPlayerSkinType.STEVE.skinTex.equals(skinLocation)) return DefaultPlayerSkinType.STEVE;
+        if (DefaultPlayerSkinType.ALEX .skinTex.equals(skinLocation)) return DefaultPlayerSkinType.ALEX;
+        return DefaultPlayerSkinType.NONE;
+    }
+    
+    public static enum DefaultPlayerSkinType {
+        STEVE(new ResourceLocation("textures/entity/steve.png")),
+        ALEX(new ResourceLocation("textures/entity/alex.png")),
+        NONE(null);
+        
+        private final ResourceLocation skinTex;
+        private DefaultPlayerSkinType(ResourceLocation skinTex) {
+            this.skinTex = skinTex;
         }
     }
-
+    
     public static void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
         modelRenderer.xRot = x;
         modelRenderer.yRot = y;

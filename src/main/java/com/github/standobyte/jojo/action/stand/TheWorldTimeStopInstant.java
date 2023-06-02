@@ -10,8 +10,9 @@ import net.minecraft.util.math.vector.Vector3d;
 
 public class TheWorldTimeStopInstant extends TimeStopInstant {
 
-    public TheWorldTimeStopInstant(Builder builder, @Nonnull Supplier<TimeStop> baseTimeStop, @Nonnull Supplier<SoundEvent> blinkSound) {
-        super(builder, baseTimeStop, blinkSound);
+    public TheWorldTimeStopInstant(StandAction.Builder builder, @Nonnull Supplier<TimeStop> baseTimeStop, 
+            @Nonnull Supplier<TimeResume> timeResumeAction, @Nonnull Supplier<SoundEvent> blinkSound) {
+        super(builder, baseTimeStop, timeResumeAction, blinkSound);
     }
     
     @Override

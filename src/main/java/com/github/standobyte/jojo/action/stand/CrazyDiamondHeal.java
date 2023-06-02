@@ -92,7 +92,7 @@ public class CrazyDiamondHeal extends StandEntityAction {
     }
 
     public static double healingSpeed(StandEntity standEntity) {
-        return standEntity.getAttackSpeed() * 0.05F + 0.6;
+        return standEntity.getAttackSpeed() * 0.05F + 0.55;
     }
 
     public static boolean healLivingEntity(World world, LivingEntity entity, StandEntity standEntity) {
