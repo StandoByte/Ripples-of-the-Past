@@ -687,6 +687,7 @@ public class InputHandler {
                                 (playerVehicle.isOnGround()
                                 || playerVehicle.getType() == ModEntityTypes.LEAVES_GLIDER.get()
                                 && MCUtil.collide(playerVehicle, new Vector3d(0, -1, 0)).y > -1);
+                        // TODO wall leap
                         boolean atWall = false && mc.player.horizontalCollision;
                         
                         boolean groundLeap = onGround && (mc.player.isPassenger() || input.shiftKeyDown) && input.jumping;

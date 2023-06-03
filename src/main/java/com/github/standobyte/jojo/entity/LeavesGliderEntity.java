@@ -7,7 +7,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.init.ModEntityTypes;
@@ -196,7 +195,7 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
     
     private void updateFlying() {
         boolean prevIsFlying = isFlying();
-        boolean isFlying = !isOnGround();
+        boolean isFlying = !isOnGround() && !isInWaterOrBubble();
         if (prevIsFlying && !isFlying) {
             setDeltaMovement(Vector3d.ZERO);
             if (!level.isClientSide()) {
@@ -260,12 +259,18 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
         if (!isVehicle()) {
             xRot = entity.xRot;
             yRot = entity.yRot;
-            // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            move(MoverType.SELF, new Vector3d(0, entity.getBbHeight() + 2F, 0));
+            
+            float minGap = 1;
+            double groundGap = -MCUtil.collide(this, new Vector3d(0, -minGap, 0)).y;
+            if (groundGap < minGap) {
+                float liftUp = minGap - (float) groundGap;
+                move(MoverType.SELF, new Vector3d(0, entity.getBbHeight() + liftUp, 0));
+            }
+            
             Vector3d riderMovement = entity.getDeltaMovement().multiply(1, 0, 1);
             Vector3d gliderRotVec = Vector3d.directionFromRotation(0, yRot);
             // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            JojoMod.LOGGER.debug("{} {}", riderMovement, riderMovement.dot(gliderRotVec));
+//            JojoMod.LOGGER.debug("{} {}", riderMovement, riderMovement.dot(gliderRotVec));
             setDeltaMovement(gliderRotVec.scale(Math.max(riderMovement.dot(gliderRotVec), 0.05D)));
         }
         super.addPassenger(entity);
