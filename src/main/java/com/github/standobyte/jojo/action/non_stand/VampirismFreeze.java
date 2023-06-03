@@ -54,9 +54,6 @@ public class VampirismFreeze extends VampirismAction {
         if (user.level.dimensionType().ultraWarm()) {
             return conditionMessage("ultrawarm");
         }
-        if (!user.getMainHandItem().isEmpty()) {
-            return conditionMessage("hand");
-        }
         return ActionConditionResult.POSITIVE;
     }
 

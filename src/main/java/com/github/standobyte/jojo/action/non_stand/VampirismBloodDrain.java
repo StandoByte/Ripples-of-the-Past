@@ -58,9 +58,6 @@ public class VampirismBloodDrain extends VampirismAction {
         if (user.level.getDifficulty() == Difficulty.PEACEFUL) {
             return conditionMessage("peaceful");
         }
-        if (!user.getMainHandItem().isEmpty()) {
-            return conditionMessage("hand");
-        }
         return ActionConditionResult.POSITIVE;
     }
     
