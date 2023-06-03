@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.client.playeranim.playeranimator.IEntityAnimAp
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.barrage.BarrageFistAfterimagesLayer;
 import com.github.standobyte.jojo.client.render.entity.model.mob.HamonMasterModel;
 import com.github.standobyte.jojo.entity.mob.HamonMasterEntity;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
@@ -18,6 +19,7 @@ import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.HandSide;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -51,7 +53,11 @@ public class PlayerAnimationHandler {
         @Nullable default IPlayerBarrageAnimation createBarrageAfterimagesAnim(
                 PlayerModel<AbstractClientPlayerEntity> model, BarrageFistAfterimagesLayer layer) { return null; }
         
-        default <T extends LivingEntity, M extends BipedModel<T>> void onPlayerLayerInit(LayerRenderer<T, M> layer) {}
+        default <T extends LivingEntity, M extends BipedModel<T>> void onArmorLayerInit(LayerRenderer<T, M> layer) {}
+        default <T extends LivingEntity, M extends BipedModel<T>> void heldItemLayerRender(
+                LivingEntity livingEntity, MatrixStack matrices, HandSide arm) {}
+        default <T extends LivingEntity, M extends BipedModel<T>> void heldItemLayerChangeItemLocation(
+                LivingEntity livingEntity, MatrixStack matrices, HandSide arm) {}
     }
     
     public static IPlayerAnimator getPlayerAnimator() {
