@@ -62,7 +62,7 @@ vec3 desaturate(vec3 rgb) { // copied desaturate shader
     
     float timeLeft = TSLength - TSTicks;
     if (FadeInLength > 0.0 && TSLength - TSTicks < FadeInLength) {
-        fadeIn = timeLeft / FadeInLength;
+        fadeIn = max(timeLeft, 0.0) / FadeInLength;
         saturation = 1.0 - fadeIn * (1.0 - saturation);
     }
     

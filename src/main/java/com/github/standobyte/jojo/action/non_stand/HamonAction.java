@@ -37,6 +37,9 @@ public abstract class HamonAction extends NonStandAction {
             if (hamon.getBloodstreamEfficiency() <= 0F) {
                 return conditionMessage("hamon_no_bloodstream");
             }
+            if (hamon.isMeditating()) {
+                return ActionConditionResult.NEGATIVE;
+            }
             return ActionConditionResult.POSITIVE;
         }).orElseThrow(() -> new IllegalStateException("Non-Hamon users can't have Hamon actions!"));
         if (!hamonCheck.isPositive()) {
