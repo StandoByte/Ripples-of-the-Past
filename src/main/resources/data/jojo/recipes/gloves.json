@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "l l",
+    "n n"
+  ],
+  "key": {
+    "l": {
+      "tag": "forge:leather"
+    },
+    "n": {
+      "tag": "forge:nuggets/gold"
+    }
+  },
+  "result": {
+    "item": "jojo:gloves"
+  }
+}

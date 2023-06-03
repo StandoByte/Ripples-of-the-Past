@@ -23,7 +23,7 @@ public class HamonZoomPunch extends HamonAction {
             float length = (8 + hamon.getHamonControlLevel() * 0.1F);
             int duration = Math.max(getCooldownTechnical(power), 1);
             ZoomPunchEntity zoomPunch = new ZoomPunchEntity(world, user, 
-                    length / (float) duration * (0.4F + 0.6F * hamonEfficiency), duration,
+                    2 * length / (float) duration * (0.4F + 0.6F * hamonEfficiency), duration,
                     0.75F, getEnergyCost(power), 
                     getEnergyCost(power) * hamonEfficiency);
             world.addFreshEntity(zoomPunch);
