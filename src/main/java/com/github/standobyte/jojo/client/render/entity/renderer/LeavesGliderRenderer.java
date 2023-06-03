@@ -1,8 +1,8 @@
 package com.github.standobyte.jojo.client.render.entity.renderer;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.render.entity.model.LeavesGliderModel;
+import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.CDBlockBulletRenderer;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -12,9 +12,20 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.ResourceLocation;
 
 public class LeavesGliderRenderer extends SimpleEntityRenderer<LeavesGliderEntity, LeavesGliderModel> {
+    private static final ResourceLocation DEFAULT_OAK_LEAVES = new ResourceLocation("textures/block/oak_leaves.png");
 
     public LeavesGliderRenderer(EntityRendererManager renderManager) {
-        super(renderManager, new LeavesGliderModel(), new ResourceLocation(JojoMod.MOD_ID, "textures/entity/leaves_glider.png"));
+        super(renderManager, new LeavesGliderModel(), null);
+    }
+    
+    @Override
+    public ResourceLocation getTextureLocation(LeavesGliderEntity entity) {
+        ResourceLocation tex = entity.getLeavesTexture();
+        if (tex == null) {
+            tex = CDBlockBulletRenderer.getTexture(entity.getLeavesBlock(), DEFAULT_OAK_LEAVES);
+            entity.setLeavesTex(tex);
+        }
+        return tex;
     }
     
     @Override

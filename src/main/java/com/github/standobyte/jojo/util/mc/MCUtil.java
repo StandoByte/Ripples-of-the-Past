@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.item.GlovesItem;
@@ -104,6 +105,7 @@ public class MCUtil {
     
     
     
+    @Nonnull
     public static ItemStack findInInventory(IInventory inventory, Predicate<ItemStack> itemMatches) {
         int size = inventory.getContainerSize();
         for (int i = 0; i < size; i++) {
@@ -178,12 +180,12 @@ public class MCUtil {
                     vector3d1 = vector3d3;
                 }
             }
-
+            
             if (Entity.getHorizontalDistanceSqr(vector3d1) > Entity.getHorizontalDistanceSqr(vector3d)) {
                 return vector3d1.add(Entity.collideBoundingBoxHeuristically(entity, new Vector3d(0.0D, -vector3d1.y + offsetVec.y, 0.0D), axisalignedbb.move(vector3d1), entity.level, iselectioncontext, reuseablestream));
             }
         }
-
+        
         return vector3d;
     }
 

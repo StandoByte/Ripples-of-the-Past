@@ -18,6 +18,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClHamonResetSkillsB
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonWindowOpenedPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHasInputPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHeldActionTargetPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClLeavesGliderColorPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnLeapPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnStandDashPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRPSGameInputPacket;
@@ -135,6 +136,7 @@ public class PacketManager {
         registerMessage(channel, new ClHamonAbandonButtonPacket.Handler(),           Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClHamonResetSkillsButtonPacket.Handler(),       Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClHamonMeditationPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        registerMessage(channel, new ClLeavesGliderColorPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClRunAwayPacket.Handler(),                      Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClStandManualMovementPacket.Handler(),          Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClOnLeapPacket.Handler(),                       Optional.of(NetworkDirection.PLAY_TO_SERVER));

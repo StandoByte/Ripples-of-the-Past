@@ -7,7 +7,7 @@ import com.github.standobyte.jojo.client.render.entity.model.projectile.CDBlockB
 import com.github.standobyte.jojo.client.render.entity.renderer.SimpleEntityRenderer;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBlockBulletEntity;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.model.BakedQuad;
@@ -36,9 +36,12 @@ public class CDBlockBulletRenderer extends SimpleEntityRenderer<CDBlockBulletEnt
     private static final Random RANDOM = new Random();
     private static final ResourceLocation GLASS_TEXTURE = new ResourceLocation("textures/block/glass.png");
     private ResourceLocation getBlockTexture(CDBlockBulletEntity entity) {
-        Block block = entity.getBlock();
-        IBakedModel blockModel = Minecraft.getInstance().getBlockRenderer().getBlockModel(block.defaultBlockState());
-        List<BakedQuad> quads = blockModel.getQuads(block.defaultBlockState(), Direction.NORTH, RANDOM, EmptyModelData.INSTANCE);
+        return getTexture(entity.getBlock().defaultBlockState(), GLASS_TEXTURE);
+    }
+    
+    public static ResourceLocation getTexture(BlockState blockState, ResourceLocation defaultTex) {
+        IBakedModel blockModel = Minecraft.getInstance().getBlockRenderer().getBlockModel(blockState);
+        List<BakedQuad> quads = blockModel.getQuads(blockState, Direction.NORTH, RANDOM, EmptyModelData.INSTANCE);
         if (!quads.isEmpty()) {
             TextureAtlasSprite sprite = quads.get(0).getSprite();
             if (sprite != null) {
@@ -48,7 +51,6 @@ public class CDBlockBulletRenderer extends SimpleEntityRenderer<CDBlockBulletEnt
                 }
             }
         }
-        return GLASS_TEXTURE;
+        return defaultTex;
     }
-
 }

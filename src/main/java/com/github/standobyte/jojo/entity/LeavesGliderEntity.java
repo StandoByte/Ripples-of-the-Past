@@ -5,16 +5,24 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromclient.ClLeavesGliderColorPacket;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.general.MathUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntitySize;
@@ -24,6 +32,7 @@ import net.minecraft.entity.MoverType;
 import net.minecraft.entity.Pose;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
@@ -32,11 +41,13 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraftforge.registries.GameData;
 
 public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawnData, IHasHealth {
     private static final double GRAVITY = -0.01D;
@@ -47,9 +58,9 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
     private static final DataParameter<Float> ENERGY = EntityDataManager.defineId(LeavesGliderEntity.class, DataSerializers.FLOAT);
     private static final DataParameter<Float> HEALTH = EntityDataManager.defineId(LeavesGliderEntity.class, DataSerializers.FLOAT);
     
- // TODO texture matching the leaves block
-//    private Block leavesBlock = Blocks.OAK_LEAVES;
-    private int foliageColor;
+    private BlockState leavesBlock = Blocks.OAK_LEAVES.defaultBlockState();
+    private ResourceLocation leavesBlockTex = null;
+    private int foliageColor = -1;
     private List<INonStandPower> passengerPowers = new ArrayList<>();
     private float passengersHeight;
 
@@ -91,7 +102,7 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
             }
             double gravity = isNoGravity() ? 0.0D : GRAVITY * (1 + getPassengers().size());
             Vector3d movement = prevMovement.normalize().scale(Math.min(prevMovement.length() + 0.01D, 0.5D));
-            setDeltaMovement(movement.x, gravity, movement.z);
+            setDeltaMovement(movement.x, Math.max(getDeltaMovement().y, 0) + gravity, movement.z);
             move(MoverType.SELF, getDeltaMovement());
         }
         
@@ -249,8 +260,13 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
         if (!isVehicle()) {
             xRot = entity.xRot;
             yRot = entity.yRot;
+            // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             move(MoverType.SELF, new Vector3d(0, entity.getBbHeight() + 2F, 0));
-            setDeltaMovement(Vector3d.directionFromRotation(0, yRot).scale(0.05D));
+            Vector3d riderMovement = entity.getDeltaMovement().multiply(1, 0, 1);
+            Vector3d gliderRotVec = Vector3d.directionFromRotation(0, yRot);
+            // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            JojoMod.LOGGER.debug("{} {}", riderMovement, riderMovement.dot(gliderRotVec));
+            setDeltaMovement(gliderRotVec.scale(Math.max(riderMovement.dot(gliderRotVec), 0.05D)));
         }
         super.addPassenger(entity);
         if (isControlledByLocalInstance() && lerpSteps > 0) {
@@ -391,15 +407,29 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
         return MAX_HEALTH;
     }
     
-//    public void setLeavesBlock(LeavesBlock block) {
-//        if (block != null) {
-//            this.leavesBlock = block;
-//        }
-//    }
-//    
-//    public LeavesBlock getLeavesBlock() {
-//        return leavesBlock;
-//    }
+    public void setLeavesBlock(BlockState block) {
+        if (block != null && block.getBlock() != Blocks.AIR) {
+            this.leavesBlock = block;
+            this.leavesBlockTex = null;
+        }
+    }
+    
+    public BlockState getLeavesBlock() {
+        return leavesBlock;
+    }
+    
+    @Nullable
+    public ResourceLocation getLeavesTexture() {
+        return leavesBlockTex;
+    }
+    
+    public void setLeavesTex(ResourceLocation texture) {
+        this.leavesBlockTex = texture;
+    }
+    
+    public void setFoliageColor(int color) {
+        this.foliageColor = color;
+    }
     
     public int getFoliageColor() {
         return foliageColor;
@@ -425,6 +455,10 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
         setIsFlying(nbt.getBoolean("Flight"));
         if (nbt.contains("Energy")) setEnergy(nbt.getFloat("Energy"));
         if (nbt.contains("Health")) setHealth(nbt.getFloat("Health"));
+        if (nbt.contains("Color"))  foliageColor = nbt.getInt("Color");
+        if (nbt.contains("Block", MCUtil.getNbtId(CompoundNBT.class))) {
+            setLeavesBlock(NBTUtil.readBlockState(nbt.getCompound("Block")));
+        }
     }
 
     @Override
@@ -432,6 +466,10 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
         nbt.putBoolean("Flight", isFlying());
         nbt.putFloat("Energy", getEnergy());
         nbt.putFloat("Health", getHealth());
+        if (foliageColor >= 0) {
+            nbt.putInt("Color", foliageColor);
+        }
+        nbt.put("Block", NBTUtil.writeBlockState(leavesBlock));
     }
 
     @Override
@@ -441,16 +479,20 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
 
     @Override
     public void writeSpawnData(PacketBuffer buffer) {
-//        buffer.writeRegistryId(leavesBlock);
+        buffer.writeInt(foliageColor);
+        
+        buffer.writeVarInt(Block.getId(leavesBlock));
     }
 
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
-//        Block block = additionalData.readRegistryIdSafe(Block.class);
-//        if (block instanceof LeavesBlock) {
-//            setLeavesBlock((LeavesBlock) block);
-//        }
-        foliageColor = ClientUtil.getFoliageColor(Blocks.OAK_LEAVES.defaultBlockState(), level, this.blockPosition());
+        foliageColor = additionalData.readInt();
+        if (foliageColor < 0) {
+            foliageColor = ClientUtil.getFoliageColor(Blocks.OAK_LEAVES.defaultBlockState(), level, this.blockPosition());
+            PacketManager.sendToServer(new ClLeavesGliderColorPacket(getId(), foliageColor));
+        }
+        
+        setLeavesBlock(GameData.getBlockStateIDMap().byId(additionalData.readVarInt()));
     }
 
 }

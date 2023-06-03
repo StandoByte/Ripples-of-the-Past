@@ -32,6 +32,7 @@ import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.ItemProjectileEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClDoubleShiftPressPacket;
@@ -669,33 +670,41 @@ public class InputHandler {
             this.hasInput = hasInput;
         }
         
-        if (hasInput) {
+//        if (hasInput) {
             boolean slowedDown = slowDownFromHeldAction(mc.player, input, standPower);
             slowedDown = slowDownFromHeldAction(mc.player, input, nonStandPower) || slowedDown;
             slowedDown = slowDownFromStandEntity(mc.player, input) || slowedDown;
             slowedDown = slowDownFromContinuousAction(mc.player, input) || slowedDown;
             slowedDown = actionsOverlay.isPlayerOutOfBreath() && slowDown(mc.player, input, 0.8F) || slowedDown;
-            
-            if (!mc.player.isPassenger()) {
+
+            canLeap = false;
+//            if (!mc.player.isPassenger()) {
                 IPower<?, ?> power = actionsOverlay.getCurrentPower();
                 if (power != null) {
                     if (power.canLeap() && !slowedDown) {
-                        boolean onGround = mc.player.isOnGround();
-                        boolean atWall = mc.player.horizontalCollision;
+                        Entity playerVehicle = mc.player.getVehicle();
+                        boolean onGround = mc.player.isOnGround() || playerVehicle != null && 
+                                (playerVehicle.isOnGround()
+                                || playerVehicle.getType() == ModEntityTypes.LEAVES_GLIDER.get()
+                                && MCUtil.collide(playerVehicle, new Vector3d(0, -1, 0)).y > -1);
+                        boolean atWall = false && mc.player.horizontalCollision;
                         
-                        boolean groundLeap = onGround && input.shiftKeyDown && input.jumping;
+                        boolean groundLeap = onGround && (mc.player.isPassenger() || input.shiftKeyDown) && input.jumping;
                         // FIXME wall leap without pressing shift
-                        boolean wallLeap = atWall && !groundLeap && input.jumping &&
-                                (input.shiftKeyDown || false);
+                        boolean wallLeap = false;
+//                                atWall && !groundLeap && input.jumping &&
+//                                (!leapNeedsShiift || input.shiftKeyDown || false);
                         
                         if (groundLeap || wallLeap) {
                             float leapStrength = power.leapStrength();
                             if (leapStrength > 0) {
-                                input.shiftKeyDown = false;
+                                if (!mc.player.isPassenger()) {
+                                    input.shiftKeyDown = false;
+                                }
                                 input.jumping = false;
                                 PacketManager.sendToServer(new ClOnLeapPacket(power.getPowerClassification()));
                                 if (groundLeap) {
-                                    leap(mc.player, leapStrength);
+                                    leap(playerVehicle != null ? playerVehicle : mc.player, leapStrength);
                                 }
                                 else if (wallLeap) {
                                     wallLeap(mc.player, input, leapStrength);
@@ -709,15 +718,9 @@ public class InputHandler {
 //                        }
                         canLeap = onGround || atWall;
                     }
-                    else {
-                        canLeap = false;
-                    }
                 }
-            }
-        }
-        else {
-            canLeap = false;
-        }
+//            }
+//        }
         
         Entity vehicle = mc.player.getVehicle();
         if (vehicle instanceof LeavesGliderEntity) {
@@ -781,7 +784,7 @@ public class InputHandler {
         return false;
     }
     
-    private void leap(ClientPlayerEntity player, float strength) {
+    private void leap(Entity player, float strength) {
         player.setOnGround(false);
         player.hasImpulse = true;
         Vector3d leap = Vector3d.directionFromRotation(Math.min(player.xRot, -30F), player.yRot).scale(strength);

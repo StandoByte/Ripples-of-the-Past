@@ -16,8 +16,8 @@ public class LeavesGliderModel extends EntityModel<LeavesGliderEntity> {
     private final ModelRenderer frontRight;
 
     public LeavesGliderModel() {
-        texWidth = 128;
-        texHeight = 128;
+        texWidth = 16;
+        texHeight = 16;
 
         glider = new ModelRenderer(this);
         glider.setPos(0.0F, 0.0F, 0.0F);
