@@ -318,7 +318,7 @@ public class HamonData extends TypeSpecificData {
                 return 0;
             }
             
-            float energyFromStability = getBreathStability() * 4;
+            float energyFromStability = getBreathStability() * ENERGY_STABILITY_USAGE_RATIO;
             if (energyFromStability == 0) {
                 return 0;
             }
@@ -329,12 +329,13 @@ public class HamonData extends TypeSpecificData {
                     outOfBreath(false);
                 }
                 else {
-                    setBreathStability((energyFromStability - energyNeeded) / 3);
+                    setBreathStability((energyFromStability - energyNeeded) / ENERGY_STABILITY_USAGE_RATIO);
                 }
             }
             return 0.25F * energyRatio;
         }
     }
+    private static final float ENERGY_STABILITY_USAGE_RATIO = 4;
     
     private void outOfBreath(boolean mask) {
         power.getUser().setAirSupply(0);

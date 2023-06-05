@@ -266,11 +266,10 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
                 float liftUp = minGap - (float) groundGap;
                 move(MoverType.SELF, new Vector3d(0, entity.getBbHeight() + liftUp, 0));
             }
-            
+
             Vector3d riderMovement = entity.getDeltaMovement().multiply(1, 0, 1);
             Vector3d gliderRotVec = Vector3d.directionFromRotation(0, yRot);
-            // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//            JojoMod.LOGGER.debug("{} {}", riderMovement, riderMovement.dot(gliderRotVec));
+            // FIXME add the entity's movement (when making a glider after leap)
             setDeltaMovement(gliderRotVec.scale(Math.max(riderMovement.dot(gliderRotVec), 0.05D)));
         }
         super.addPassenger(entity);

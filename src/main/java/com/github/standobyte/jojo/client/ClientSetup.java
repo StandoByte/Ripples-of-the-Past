@@ -39,6 +39,7 @@ import com.github.standobyte.jojo.client.render.entity.renderer.LeavesGliderRend
 import com.github.standobyte.jojo.client.render.entity.renderer.MRDetectorRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.PillarmanTempleEngravingRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.RoadRollerRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.SendoHamonOverdriveRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.SoulRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.TurquoiseBlueOverdriveRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.MRFlameRenderer;
@@ -150,6 +151,7 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.BLADE_HAT.get(), BladeHatRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SPACE_RIPPER_STINGY_EYES.get(), SpaceRipperStingyEyesRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.TURQUOISE_BLUE_OVERDRIVE.get(), TurquoiseBlueOverdriveRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SENDO_HAMON_OVERDRIVE.get(), SendoHamonOverdriveRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.ZOOM_PUNCH.get(), ZoomPunchRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.AFTERIMAGE.get(), AfterimageRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HAMON_PROJECTILE_SHIELD.get(), HamonProjectileShieldRenderer::new);

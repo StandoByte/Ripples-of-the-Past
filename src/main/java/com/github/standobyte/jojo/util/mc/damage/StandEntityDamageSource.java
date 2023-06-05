@@ -82,9 +82,15 @@ public class StandEntityDamageSource extends EntityDamageSource implements IStan
         return bypassInvulTicks;
     }
     
+    @Override
     public StandEntityDamageSource setPreventsDamagingArmor() {
         this.preventDamagingArmor = true;
         return this;
+    }
+    
+    @Override
+    public boolean preventDamagingArmor() {
+        return preventDamagingArmor;
     }
 
     public StandEntityDamageSource setStandInvulTicks(int ticks) {
@@ -95,10 +101,6 @@ public class StandEntityDamageSource extends EntityDamageSource implements IStan
     @Override
     public int getStandInvulTicks() {
         return standInvulTicks;
-    }
-    
-    public boolean preventDamagingArmor() {
-        return preventDamagingArmor;
     }
 
     public StandEntityDamageSource setShowStandUserName() {

@@ -103,6 +103,20 @@ public class MCUtil {
         return original;
     }
     
+    public static <T extends Enum<T>> void nbtPutEnum(CompoundNBT nbt, String key, T enumVal) {
+        nbt.putInt(key, enumVal.ordinal());
+    }
+    
+    @Nullable
+    public static <T extends Enum<T>> T nbtGetEnum(CompoundNBT nbt, String key, Class<T> enumClass) {
+        int ordinal = nbt.getInt(key);
+        T[] values = enumClass.getEnumConstants();
+        if (ordinal >= 0 && ordinal < values.length) {
+            return values[ordinal];
+        }
+        return null;
+    }
+    
     
     
     @Nonnull
