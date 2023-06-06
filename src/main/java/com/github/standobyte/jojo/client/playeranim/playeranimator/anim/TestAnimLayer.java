@@ -5,8 +5,6 @@ import com.github.standobyte.jojo.client.playeranim.playeranimator.PlayerAnimato
 
 import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.api.layered.ModifierLayer;
-import dev.kosmx.playerAnim.api.layered.modifier.AbstractFadeModifier;
-import dev.kosmx.playerAnim.core.util.Ease;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.util.ResourceLocation;
@@ -47,12 +45,12 @@ public class TestAnimLayer extends AnimLayerHandler {
     }
     
     private void testAnim(AbstractClientPlayerEntity player, boolean enabled) {
-        if (enabled) {
-            setAnimFromName(player, new ResourceLocation(JojoMod.MOD_ID, "glider_hold"));
-        }
-        else {
-            fadeOutAnim((AbstractClientPlayerEntity) player, AbstractFadeModifier.standardFadeIn(10, Ease.OUTCUBIC), null);
-        }
+//        if (enabled) {
+//            setAnimFromName(player, new ResourceLocation(JojoMod.MOD_ID, "glider_hold"));
+//        }
+//        else {
+//            fadeOutAnim((AbstractClientPlayerEntity) player, AbstractFadeModifier.standardFadeIn(10, Ease.OUTCUBIC), null);
+//        }
     }
     
 }

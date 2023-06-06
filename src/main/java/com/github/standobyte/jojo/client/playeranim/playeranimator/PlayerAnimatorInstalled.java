@@ -18,6 +18,7 @@ import com.github.standobyte.jojo.client.playeranim.playeranimator.anim.hamon.Pl
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.barrage.BarrageFistAfterimagesLayer;
 import com.github.standobyte.jojo.client.render.entity.model.mob.HamonMasterModel;
 import com.github.standobyte.jojo.entity.mob.HamonMasterEntity;
+import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
@@ -44,6 +45,7 @@ import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.HandSide;
@@ -62,7 +64,7 @@ public class PlayerAnimatorInstalled implements PlayerAnimationHandler.IPlayerAn
         heldAction = register(new ResourceLocation(JojoMod.MOD_ID, "hamon_breath"), 1, HeldActionAnimLayer::new);
         barrage = register(new ResourceLocation(JojoMod.MOD_ID, "barrage"), 1, BarrageAnimLayer::new);
         meditation = register(new ResourceLocation(JojoMod.MOD_ID, "meditation"), 1, MeditationPoseLayer::new);
-        busyArms = register(new ResourceLocation(JojoMod.MOD_ID, "busyArms"), 10, BusyArmsLayer::new);
+        busyArms = register(new ResourceLocation(JojoMod.MOD_ID, "busy_arms"), 10, BusyArmsLayer::new);
         register(new ResourceLocation(JojoMod.MOD_ID, "test"), 1, TestAnimLayer::new);
     }
     
@@ -205,6 +207,13 @@ public class PlayerAnimatorInstalled implements PlayerAnimationHandler.IPlayerAn
                 matrices.mulPose(Vector3f.XP.rotation(rot.getX()));    //yaw
             }
         }
+    }
+    
+    
+    
+    @Override
+    public void onVehicleMount(AbstractClientPlayerEntity player, @Nullable EntityType<?> vehicleType) {
+        busyArms.setGliderGrabEnabled(player, vehicleType == ModEntityTypes.LEAVES_GLIDER.get());
     }
     
     

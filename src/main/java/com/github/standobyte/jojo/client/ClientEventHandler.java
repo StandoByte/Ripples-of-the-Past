@@ -17,6 +17,7 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.action.stand.TimeStop;
+import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.render.block.overlay.TranslucentBlockRenderHelper;
@@ -65,6 +66,7 @@ import net.minecraft.client.shader.ShaderInstance;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.client.world.DimensionRenderInfo;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.EnchantedBookItem;
@@ -101,6 +103,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.event.TickEvent.RenderTickEvent;
+import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -748,4 +751,14 @@ public class ClientEventHandler {
     //            }
     //        }
     //    }
+    
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onMount(EntityMountEvent event) {
+        if (event.getWorldObj().isClientSide() && event.getEntityMounting() instanceof PlayerEntity) {
+            Entity mounted = event.getEntityBeingMounted();
+            EntityType<?> mountedType = event.isMounting() && mounted != null ? mounted.getType() : null;
+            event.getEntityMounting().getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(
+                    cap -> cap.setVehicleType(mountedType));
+        }
+    }
 }

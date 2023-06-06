@@ -17,6 +17,7 @@ import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.HandSide;
@@ -58,6 +59,8 @@ public class PlayerAnimationHandler {
                 LivingEntity livingEntity, MatrixStack matrices, HandSide arm) {}
         default <T extends LivingEntity, M extends BipedModel<T>> void heldItemLayerChangeItemLocation(
                 LivingEntity livingEntity, MatrixStack matrices, HandSide arm) {}
+        
+        default void onVehicleMount(AbstractClientPlayerEntity player, @Nullable EntityType<?> vehicleType) {}
     }
     
     public static IPlayerAnimator getPlayerAnimator() {
