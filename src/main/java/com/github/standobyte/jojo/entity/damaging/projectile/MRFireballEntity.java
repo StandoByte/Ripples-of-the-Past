@@ -16,8 +16,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.ForgeEventFactory;
 
+@OnlyIn(value = Dist.CLIENT, _interface = IRendersAsItem.class) // without this OnlyIn annotation dedicated server will crash
 public class MRFireballEntity extends ModdedProjectileEntity implements IRendersAsItem {
     private static final ItemStack MR_FIREBALL_SPRITE_ITEM = Util.make(new ItemStack(ModItems.DUMMY_ITEM.get()), item -> {
         item.getOrCreateTag().putInt("Icon", 12);
