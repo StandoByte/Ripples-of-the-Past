@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.client.playeranim.playeranimator.anim;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.playeranim.playeranimator.PlayerAnimatorInstalled.AnimLayerHandler;
 
 import dev.kosmx.playerAnim.api.layered.IAnimation;
@@ -30,7 +29,6 @@ public class TestAnimLayer extends AnimLayerHandler {
     
     @SubscribeEvent
     public void onChat(ClientChatReceivedEvent event) {
-        JojoMod.LOGGER.debug("event");
         if (event.getMessage().getString().contains("anim start")) {
             testAnim((AbstractClientPlayerEntity) Minecraft.getInstance().level.getPlayerByUUID(event.getSenderUUID()), true);
         }

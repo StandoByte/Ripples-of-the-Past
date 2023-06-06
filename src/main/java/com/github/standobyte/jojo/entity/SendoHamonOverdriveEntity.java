@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
 
+import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
@@ -177,7 +178,7 @@ public class SendoHamonOverdriveEntity extends Entity implements IEntityAddition
     
 
     
-    private static final int WAVE_TICK_LENGTH = 10;
+    private static final int WAVE_TICK_LENGTH = 15;
     private static final int WAVE_ADD_TICK = 4;
     private final Predicate<LivingEntity> filter = 
             EntityPredicates.LIVING_ENTITY_STILL_ALIVE.and(EntityPredicates.NO_CREATIVE_OR_SPECTATOR)
@@ -280,10 +281,10 @@ public class SendoHamonOverdriveEntity extends Entity implements IEntityAddition
                     break;
                 }
                 // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! (sendo hamon overdrive) fix particles distance/velocity
-                particleVec = particleVec.scale(radius / WAVE_TICK_LENGTH * 5);
-                level.addParticle(ModParticles.HAMON_SPARK.get(), 
+                particleVec = particleVec.scale(radius / WAVE_TICK_LENGTH);
+                CustomParticlesHelper.addSendoHamonOverdriveParticle(level, ModParticles.HAMON_SPARK.get(), 
                         center.x, center.y, center.z, 
-                        particleVec.x, particleVec.y, particleVec.z);
+                        particleVec.x, particleVec.y, particleVec.z, WAVE_TICK_LENGTH);
             }
         }
     }

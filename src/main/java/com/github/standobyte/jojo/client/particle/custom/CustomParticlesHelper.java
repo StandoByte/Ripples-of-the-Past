@@ -7,13 +7,14 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.HamonAuraParticle;
+import com.github.standobyte.jojo.client.particle.SendoHamonOverdriveParticle;
 import com.github.standobyte.jojo.init.ModParticles;
-import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.IAnimatedSprite;
 import net.minecraft.client.particle.Particle;
+import net.minecraft.client.particle.SpriteTexturedParticle;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.client.world.ClientWorld;
@@ -22,9 +23,9 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.particles.ParticleType;
 import net.minecraft.util.Hand;
-import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class CustomParticlesHelper {
@@ -98,6 +99,15 @@ public class CustomParticlesHelper {
 //                addParticle(HamonAuraParticle.firstPersonHandParticle(sprite, mc.level, user, HandSide.LEFT, vec), vec, false, false);
 //            }, particlesPerTick);
 //        }
+    }
+    
+    public static void addSendoHamonOverdriveParticle(World level, IParticleData pParticleData, 
+            double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed, int lifeTime) {
+        SpriteTexturedParticle particle = new SendoHamonOverdriveParticle((ClientWorld) level, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
+        particle.setLifetime(lifeTime);
+        particle.pickSprite(getSavedSpriteSet(pParticleData.getType()));
+        particle.setColor(1, 1, 1);
+        addParticle(particle, new Vector3d(pX, pY, pZ), pParticleData.getType().getOverrideLimiter(), false);
     }
     
     public static boolean addParticle(Particle particle, Vector3d particlePos, boolean overrideLimiter, boolean alwaysVisible) {

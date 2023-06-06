@@ -11,6 +11,9 @@ public class HamonSparkParticle extends CritParticle {
     public HamonSparkParticle(ClientWorld world, double x, double y, double z,
             double xDDDDD, double yd, double zd) {
         super(world, x, y, z, xDDDDD, yd, zd);
+        this.xd = xDDDDD;
+        this.yd = yd;
+        this.zd = zd;
     }
     
     @Override

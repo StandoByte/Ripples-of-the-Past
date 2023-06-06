@@ -84,7 +84,6 @@ public class DamageUtil {
                 return ((IModdedDamageSource) source).getKnockbackFactor();
             }
             if (source.getDirectEntity() instanceof SendoHamonOverdriveEntity) {
-                JojoMod.LOGGER.debug(SendoHamonOverdriveEntity.KNOCKBACK_FACTOR);
                 return SendoHamonOverdriveEntity.KNOCKBACK_FACTOR;
             }
         }
