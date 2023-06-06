@@ -18,6 +18,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonLearnButtonPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonResetSkillsButtonPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonResetSkillsButtonPacket.HamonSkillsTab;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.google.common.collect.ImmutableList;
@@ -38,7 +39,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 public abstract class HamonSkillsTabGui extends HamonTabGui {
     public static final ResourceLocation HAMON_SKILLS = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/hamon_window_2.png");
     
-    private final List<IReorderingProcessor> creativeResetButtonTooltip;
+    protected List<IReorderingProcessor> creativeResetButtonTooltip;
     protected final Map<AbstractHamonSkill, HamonSkillElementLearnable> skills = new HashMap<>();
     protected HamonScreenButton learnButton;
     protected HamonScreenButton creativeResetButton;
@@ -320,7 +321,7 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
             this.skillClosedReason = closedReason != null ? minecraft.font.split(canLearnSkill.getWarning(), 100) : Collections.emptyList();
             learnButton.active = canLearnSkill.isPositive();
         }
-        creativeResetButton.visible = selectedSkill == null && screen.getMinecraft().player.abilities.instabuild;
+        creativeResetButton.visible = selectedSkill == null && HamonData.canResetTab(screen.getMinecraft().player, getSkillsType());
         
         if (selectedSkill != null && learnButton.visible) {
             int reqCount = (int) selectedSkill.skill.getRequiredSkills().count();

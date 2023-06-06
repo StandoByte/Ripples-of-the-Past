@@ -1001,8 +1001,16 @@ public class HamonData extends TypeSpecificData {
             }
         }
     }
+    
+    public static boolean canResetTab(PlayerEntity user, HamonSkillsTab type) {
+        return user.abilities.instabuild
+                // FIXME tmp
+                || type == HamonSkillsTab.TECHNIQUE;
+    }
 
     public void resetHamonSkills(LivingEntity user, HamonSkillsTab type) {
+        if (user instanceof PlayerEntity && !canResetTab((PlayerEntity) user, type)) return;
+        
         Stream<? extends AbstractHamonSkill> toReset;
         switch (type) {
         case STRENGTH:

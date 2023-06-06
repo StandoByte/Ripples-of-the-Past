@@ -51,6 +51,9 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
                 minecraft.font.split(new TranslationTextComponent("hamon.techniques_locked", 
                         HamonTechniqueManager.techniqueSkillRequirement(0, true)), 200) 
                 : Collections.emptyList();
+        
+        // FIXME tmp
+        creativeResetButtonTooltip = minecraft.font.split(new TranslationTextComponent("hamon.reset_tmp"), 100);
     }
     
     @Override
