@@ -335,7 +335,7 @@ public class HamonData extends TypeSpecificData {
             return 0.25F * energyRatio;
         }
     }
-    private static final float ENERGY_STABILITY_USAGE_RATIO = 4;
+    private static final float ENERGY_STABILITY_USAGE_RATIO = 2.5F;
     
     private void outOfBreath(boolean mask) {
         power.getUser().setAirSupply(0);
