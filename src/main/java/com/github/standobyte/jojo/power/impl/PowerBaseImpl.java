@@ -279,6 +279,9 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         if (!action.ignoresPerformerStun() && performer != null && ModEffects.isStunned(performer)) {
             return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition.stun"));
         }
+        if (performer != null && !performer.isAlive()) {
+            return ActionConditionResult.NEGATIVE;
+        }
 
         if (checkTarget) {
             ActionConditionResult targetCheckResult = checkTarget(action, targetContainer);
@@ -299,7 +302,6 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
 
     @Override
-
     public ActionConditionResult checkTarget(Action<P> action, Container<ActionTarget> targetContainer) {
         ActionTarget targetInitial = targetContainer.get();
         if (targetInitial.getType() == TargetType.ENTITY && targetInitial.getEntity() == null 
