@@ -32,7 +32,7 @@ public class SilverChariotLightAttack extends StandEntityLightAttack {
     }
 
     @Override
-    protected Action<IStandPower> replaceAction(IStandPower power) {
+    protected Action<IStandPower> replaceAction(IStandPower power, ActionTarget target) {
         return power.isActive() && power.getStandManifestation() instanceof SilverChariotEntity
                 && !((SilverChariotEntity) power.getStandManifestation()).hasRapier() && noRapierAttack.get() != null
                 ? noRapierAttack.get() : this;

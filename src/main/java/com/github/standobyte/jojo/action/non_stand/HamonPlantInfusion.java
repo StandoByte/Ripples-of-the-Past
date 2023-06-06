@@ -20,7 +20,7 @@ public class HamonPlantInfusion extends HamonOrganismInfusion {
     }
     
     @Override
-    public HamonAction replaceAction(INonStandPower power) {
+    public HamonAction replaceAction(INonStandPower power, ActionTarget target) {
         return ModHamonActions.HAMON_ORGANISM_INFUSION.get();
     }
 

@@ -56,19 +56,19 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     void resetCooldowns();
     ActionCooldownTracker getCooldowns();
 
-    @Nullable default Action<P> getAction(ActionType type, int index, boolean shift) {
+    @Nullable default Action<P> getAction(ActionType type, int index, boolean shift, ActionTarget target) {
         List<Action<P>> actions = getActions(type).getEnabled();
         if (index < 0 || index >= actions.size()) {
             return null;
         }
-        return getActionOnClick(actions.get(index), shift);
+        return getActionOnClick(actions.get(index), shift, target);
     }
     
-    @Nullable default Action<P> getQuickAccessAction(boolean shift) {
-        return getActionOnClick(getActionsLayout().getQuickAccessAction(), shift);
+    @Nullable default Action<P> getQuickAccessAction(boolean shift, ActionTarget target) {
+        return getActionOnClick(getActionsLayout().getQuickAccessAction(), shift, target);
     }
     
-    @Nullable Action<P> getActionOnClick(Action<P> actionInSlot, boolean shift);
+    @Nullable Action<P> getActionOnClick(Action<P> actionInSlot, boolean shift, ActionTarget target);
     boolean clickAction(Action<P> action, boolean shift, ActionTarget target);
     ActionConditionResult checkRequirements(Action<P> action, Container<ActionTarget> targetContainer, boolean checkTargetType);
     ActionConditionResult checkTarget(Action<P> action, Container<ActionTarget> targetContainer);
@@ -112,11 +112,11 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     void syncWithTrackingOrUser(ServerPlayerEntity player);
 
     default boolean onClickAction(ActionType type, int index, boolean shift, ActionTarget target, Optional<Action<?>> inputValidation) {
-        return onClickAction(this.getAction(type, index, shift), shift, target, inputValidation);
+        return onClickAction(this.getAction(type, index, shift, target), shift, target, inputValidation);
     }
     
     default boolean onClickQuickAccess(boolean shift, ActionTarget target, Optional<Action<?>> inputValidation) {
-        return onClickAction(this.getQuickAccessAction(shift), shift, target, inputValidation);
+        return onClickAction(this.getQuickAccessAction(shift, target), shift, target, inputValidation);
     }
     
     default boolean onClickAction(Action<P> action, boolean shift, ActionTarget target, Optional<Action<?>> inputValidation) {

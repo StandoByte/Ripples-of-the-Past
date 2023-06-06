@@ -60,10 +60,10 @@ public class TimeStopInstant extends StandAction {
     }
 
     @Override
-    protected Action<IStandPower> replaceAction(IStandPower power) {
+    protected Action<IStandPower> replaceAction(IStandPower power, ActionTarget target) {
         Action<IStandPower> timeResume = timeResumeAction.get();
         if (timeResume != null) {
-            timeResume = timeResume.getVisibleAction(power);
+            timeResume = timeResume.getVisibleAction(power, target);
         }
         return timeResume != null ? timeResume : this;
     }

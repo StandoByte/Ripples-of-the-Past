@@ -182,15 +182,15 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     
     @Nullable
     @Override
-    public Action<P> getActionOnClick(Action<P> actionInSlot, boolean shift) {
+    public Action<P> getActionOnClick(Action<P> actionInSlot, boolean shift, ActionTarget target) {
         if (actionInSlot == null) return null;
-        actionInSlot = actionInSlot.getVisibleAction(getThis());
+        actionInSlot = actionInSlot.getVisibleAction(getThis(), target);
         Action<P> held = getHeldAction();
         if (actionInSlot == held) {
             return actionInSlot;
         }
         if (actionInSlot != null && actionInSlot.hasShiftVariation()) {
-            Action<P> shiftVar = actionInSlot.getShiftVariationIfPresent().getVisibleAction(getThis());
+            Action<P> shiftVar = actionInSlot.getShiftVariationIfPresent().getVisibleAction(getThis(), target);
             if (shiftVar != null && (shift || shiftVar == held)) {
                 actionInSlot = shiftVar;
             }

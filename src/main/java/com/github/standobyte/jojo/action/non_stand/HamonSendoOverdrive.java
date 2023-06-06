@@ -1,8 +1,12 @@
 package com.github.standobyte.jojo.action.non_stand;
 
+import javax.annotation.Nullable;
+
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.SendoHamonOverdriveEntity;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 
@@ -40,5 +44,13 @@ public class HamonSendoOverdrive extends HamonAction {
     @Override
     public TargetRequirement getTargetRequirement() {
         return TargetRequirement.BLOCK;
+    }
+    
+    @Nullable
+    protected Action<INonStandPower> replaceAction(INonStandPower power, ActionTarget target) {
+        if (!power.getUser().level.isClientSide() && !getTargetRequirement().checkTargetType(target.getType())) {
+            return ModHamonActions.HAMON_OVERDRIVE.get().getVisibleAction(power, target);
+        }
+        return super.replaceAction(power, target);
     }
 }

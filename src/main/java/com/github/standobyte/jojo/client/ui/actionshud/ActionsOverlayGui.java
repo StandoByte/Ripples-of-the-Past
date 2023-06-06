@@ -444,7 +444,7 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     private <P extends IPower<P, ?>> void appendWarnings(List<ITextComponent> list, ActionsModeConfig<P> powerMode, ActionType actionType) {
-        Action<P> action = powerMode.getSelectedAction(actionType, mc.player.isShiftKeyDown());
+        Action<P> action = powerMode.getSelectedAction(actionType, mc.player.isShiftKeyDown(), getTargetLazy());
         if (action != null) {
             action.appendWarnings(list, powerMode.getPower(), mc.player);
         }
@@ -508,7 +508,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 x += 3;
                 y += 3;
                 for (int i = 0; i < actions.size(); i++) {
-                    Action<P> action = power.getActionOnClick(actions.get(i), shift);
+                    Action<P> action = power.getActionOnClick(actions.get(i), shift, getTargetLazy());
                     renderActionIcon(matrixStack, actionKey, mode, action, target, x + 20 * i, y, partialTick, i == selected, alpha);
                 }
                 
@@ -574,7 +574,7 @@ public class ActionsOverlayGui extends AbstractGui {
                     }
                 }
                 
-                Action<P> selectedAction = actionHotbar != null ? mode.getSelectedAction(actionHotbar, shift) : actions.get(0);
+                Action<P> selectedAction = actionHotbar != null ? mode.getSelectedAction(actionHotbar, shift, getTargetLazy()) : actions.get(0);
                 if (selectedAction != null && selectedAction != heldAction) {
                     slot = selected;
                     if (slot > -1) {
@@ -736,7 +736,7 @@ public class ActionsOverlayGui extends AbstractGui {
         int y = position.y + 16 + 3 + getHotbarsYDiff() * actionKey.ordinal();
         boolean shift = mc.player.isShiftKeyDown();
         Action<P> selectedAction = actionKey == InputHandler.ActionKey.QUICK_ACCESS ?
-                getQuickAccessAction(power, shift) : mode.getSelectedAction(actionKey.getHotbar(), shift);
+                getQuickAccessAction(power, shift) : mode.getSelectedAction(actionKey.getHotbar(), shift, getTargetLazy());
         if (selectedAction != null) {
             // action name
             String translationKey = selectedAction.getTranslationKey(power, target);
@@ -745,7 +745,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 actionName = new TranslationTextComponent("jojo.overlay.hold", actionName);
             }
             if (selectedAction.hasShiftVariation()) {
-                Action<P> shiftVar = selectedAction.getShiftVariationIfPresent().getVisibleAction(power);
+                Action<P> shiftVar = selectedAction.getShiftVariationIfPresent().getVisibleAction(power, getTargetLazy());
                 if (shiftVar != null) {
                     actionName = new TranslationTextComponent("jojo.overlay.shift", actionName, 
                             new KeybindTextComponent(mc.options.keyShift.getName()), 
@@ -1262,7 +1262,7 @@ public class ActionsOverlayGui extends AbstractGui {
     
     public void selectAction(ActionType hotbar, int slot) {
         if (currentMode != null) {
-            currentMode.setSelectedSlot(hotbar, slot);
+            currentMode.setSelectedSlot(hotbar, slot, getTargetLazy());
         }
     }
 
@@ -1285,10 +1285,10 @@ public class ActionsOverlayGui extends AbstractGui {
         IntBinaryOperator operator = backwards ? DEC : INC;
         int i;
         for (i = operator.applyAsInt(startingIndex, actions.size()); 
-             i > -1 && i % actions.size() != startingIndex && actions.get(i).getVisibleAction(power) == null;
+             i > -1 && i % actions.size() != startingIndex && actions.get(i).getVisibleAction(power, getTargetLazy()) == null;
              i = operator.applyAsInt(i, actions.size())) {
         }
-        mode.setSelectedSlot(hotbar, i);
+        mode.setSelectedSlot(hotbar, i, getTargetLazy());
     }
     
 
@@ -1300,7 +1300,7 @@ public class ActionsOverlayGui extends AbstractGui {
 
     @Nullable
     public <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onClick(P power, ActionType actionType, boolean shift, int index) {
-        return onActionClick(power, power.getAction(actionType, index, shift), shift, 
+        return onActionClick(power, power.getAction(actionType, index, shift, getTargetLazy()), shift, 
                 () -> ClClickActionPacket.actionClicked(power.getPowerClassification(), actionType, shift, index, InputHandler.getInstance().mouseTarget));
     }
     
@@ -1329,7 +1329,7 @@ public class ActionsOverlayGui extends AbstractGui {
     
     @Nullable
     private <P extends IPower<P, ?>> Action<P> getQuickAccessAction(P power, boolean shift) {
-        return power.getQuickAccessAction(shift);
+        return power.getQuickAccessAction(shift, getTargetLazy());
     }
     
     public <P extends IPower<P, ?>> boolean isQuickAccessActive() {
@@ -1356,7 +1356,7 @@ public class ActionsOverlayGui extends AbstractGui {
             return false;
         }
         boolean shift = mc.player.isShiftKeyDown();
-        return Stream.of(ActionType.values()).map(hotbar -> currentMode.getSelectedAction(hotbar, shift)).anyMatch(action);
+        return Stream.of(ActionType.values()).map(hotbar -> currentMode.getSelectedAction(hotbar, shift, getTargetLazy())).anyMatch(action);
         // FIXME !!!! (hud) generics moment
 //                || action.test(getQuickAccessAction(currentMode.getPower(), shift));
     }

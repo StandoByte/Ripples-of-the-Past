@@ -438,7 +438,7 @@ public class HudLayoutEditingScreen extends Screen {
     }
     
     private <P extends IPower<P, ?>> boolean isActionVisible(Action<P> action, IPower<?, ?> power) {
-        return action.getVisibleAction((P) power) != null;
+        return action.getVisibleAction((P) power, ActionTarget.EMPTY) != null;
     }
 
     @Override

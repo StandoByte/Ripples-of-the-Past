@@ -47,12 +47,12 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     }
 
     @Override
-    protected Action<IStandPower> replaceAction(IStandPower power) {
+    protected Action<IStandPower> replaceAction(IStandPower power, ActionTarget target) {
         StandEntity standEntity = power.isActive() ? (StandEntity) power.getStandManifestation() : null;
         
         StandEntityHeavyAttack finisherVariation = getFinisherVariationIfPresent(power, standEntity);
         if (finisherVariation != this) {
-            return finisherVariation.replaceAction(power);
+            return finisherVariation.replaceAction(power, target);
         }
         
         StandEntityActionModifier followUp = getRecoveryFollowup(power, standEntity);

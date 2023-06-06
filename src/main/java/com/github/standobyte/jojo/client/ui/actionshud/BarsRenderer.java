@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.ClientTicking;
 import com.github.standobyte.jojo.client.ClientTicking.ITicking;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -136,8 +137,8 @@ public abstract class BarsRenderer {
         }
     }
     
-    protected <P extends IPower<P, ?>> float getActionCost(ActionsModeConfig<P> mode, ActionType hotbar, LivingEntity user, boolean shift) {
-        Action<P> action = mode.getSelectedAction(hotbar, shift);
+    protected <P extends IPower<P, ?>> float getActionCost(ActionsModeConfig<P> mode, ActionType hotbar, LivingEntity user, boolean shift, ActionTarget target) {
+        Action<P> action = mode.getSelectedAction(hotbar, shift, target);
         
         if (action != null) {
             return action.getCostToRender(mode.getPower());

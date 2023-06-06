@@ -39,13 +39,13 @@ public class HamonOverdrive extends HamonAction {
     }
     
     @Override
-    protected Action<INonStandPower> replaceAction(INonStandPower power) {
+    protected Action<INonStandPower> replaceAction(INonStandPower power, ActionTarget target) {
         if (GeneralUtil.orElseFalse(power.getTypeSpecificData(ModPowers.HAMON.get()), hamon -> {
             return hamon.isSkillLearned(ModHamonSkills.METAL_SILVER_OVERDRIVE.get());
         }) && HamonMetalSilverOverdrive.itemUsesMSO(power.getUser())) {
             return ModHamonActions.JONATHAN_METAL_SILVER_OVERDRIVE.get();
         }
-        return super.replaceAction(power);
+        return super.replaceAction(power, target);
     }
     
     @Override

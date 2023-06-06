@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.InputHandler.ActionKey;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.ActionType;
@@ -52,10 +53,10 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
         return -1;
     }
     
-    void setSelectedSlot(ActionType hotbar, int slot) {
+    void setSelectedSlot(ActionType hotbar, int slot, ActionTarget target) {
         if (slot > -1) {
             List<Action<P>> actions = power.getActions(hotbar).getEnabled();
-            if (slot >= actions.size() || actions.get(slot).getVisibleAction(power) == null) {
+            if (slot >= actions.size() || actions.get(slot).getVisibleAction(power, target) == null) {
                 slot = -1;
             }
         }
@@ -75,14 +76,14 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
     }
     
     @Nullable
-    Action<P> getSelectedAction(ActionType hotbar, boolean shift) {
+    Action<P> getSelectedAction(ActionType hotbar, boolean shift, ActionTarget target) {
         int slot = getSelectedSlot(hotbar);
         if (slot == -1) {
             return null;
         }
-        Action<P> action = getPower().getAction(hotbar, slot, shift);
+        Action<P> action = getPower().getAction(hotbar, slot, shift, target);
         if (action == null) {
-            setSelectedSlot(hotbar, -1);
+            setSelectedSlot(hotbar, -1, target);
         }
         return action;
     }
