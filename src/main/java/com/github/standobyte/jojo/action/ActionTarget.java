@@ -110,7 +110,7 @@ public class ActionTarget {
             break;
         case BLOCK:
             BlockState blockState = world.getBlockState(blockPos);
-            VoxelShape blockShape = blockState.getCollisionShape(world, blockPos);
+            VoxelShape blockShape = blockState.getShape(world, blockPos);
             if (!blockShape.isEmpty()) {
                 aabb = blockShape.bounds().move(blockPos);
             }
