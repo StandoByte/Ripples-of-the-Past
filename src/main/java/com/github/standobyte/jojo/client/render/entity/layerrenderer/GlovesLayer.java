@@ -18,11 +18,13 @@ import net.minecraft.util.ResourceLocation;
 
 public class GlovesLayer<T extends LivingEntity, M extends PlayerModel<T>> extends LayerRenderer<T, M> {
     private final M glovesModel;
+    private final boolean slim;
     private boolean playerAnimHandled = false;
     
-    public GlovesLayer(IEntityRenderer<T, M> renderer, M glovesModel) {
+    public GlovesLayer(IEntityRenderer<T, M> renderer, M glovesModel, boolean slim) {
         super(renderer);
         this.glovesModel = glovesModel;
+        this.slim = slim;
     }
 
     @Override
@@ -47,7 +49,6 @@ public class GlovesLayer<T extends LivingEntity, M extends PlayerModel<T>> exten
             glovesModel.leftSleeve.visible = playerModel.leftArm.visible;
             glovesModel.rightArm.visible = playerModel.rightArm.visible;
             glovesModel.rightSleeve.visible = playerModel.rightArm.visible;
-            boolean slim = false;
             ResourceLocation texture = new ResourceLocation(
                     gloves.getRegistryName().getNamespace(), 
                     "textures/entity/biped/layer/" + gloves.getRegistryName().getPath() + (slim ? "_slim" : "") + ".png");

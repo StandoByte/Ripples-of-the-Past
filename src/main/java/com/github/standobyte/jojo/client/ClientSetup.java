@@ -283,7 +283,7 @@ public class ClientSetup {
         renderer.addLayer(new TornadoOverdriveEffectLayer<>(renderer));
         renderer.addLayer(new BarrageFistAfterimagesLayer(renderer));
         renderer.addLayer(new SpecialHeldItemLayer<>(renderer));
-        renderer.addLayer(new GlovesLayer<>(renderer, new GlovesModel<>(0.3F, slim)));
+        renderer.addLayer(new GlovesLayer<>(renderer, new GlovesModel<>(0.3F, slim), slim));
         addLivingLayers(renderer);
         addBipedLayers(renderer);
     }

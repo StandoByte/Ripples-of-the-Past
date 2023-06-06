@@ -73,7 +73,7 @@ public class ModItems {
             () -> new BreathControlMaskItem(new Item.Properties().tab(JojoMod.MAIN_TAB)));
     
     public static final RegistryObject<GlovesItem> GLOVES = ITEMS.register("gloves", 
-            () -> new GlovesItem(new Item.Properties().tab(JojoMod.MAIN_TAB)));
+            () -> new GlovesItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1)));
 
     public static final RegistryObject<SpawnEggItem> HAMON_MASTER_SPAWN_EGG = ITEMS.register("hamon_master_spawn_egg", 
             () -> new ForgeSpawnEggItem(ModEntityTypes.HAMON_MASTER, 0xF8D100, 0x542722, new Item.Properties().tab(JojoMod.MAIN_TAB)));

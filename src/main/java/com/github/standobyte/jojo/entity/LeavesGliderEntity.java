@@ -96,6 +96,12 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
                 if (isVehicle()) {
                     updateRotationDelta();
                     yRot += yRotDelta;
+                    for (Entity passenger : getPassengers()) {
+                        passenger.yRot += yRotDelta;
+                        if (passenger instanceof LivingEntity) {
+                            ((LivingEntity) passenger).yBodyRot += yRotDelta;
+                        }
+                    }
                     prevMovement = Vector3d.directionFromRotation(0, yRot).scale(prevMovement.length());
                 }
             }
@@ -259,6 +265,7 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
         if (!isVehicle()) {
             xRot = entity.xRot;
             yRot = entity.yRot;
+            entity.setYBodyRot(entity.yRot);
             
             float minGap = 1;
             double groundGap = -MCUtil.collide(this, new Vector3d(0, -minGap, 0)).y;
