@@ -21,10 +21,10 @@ public class ModVampirismActions {
     public static void loadRegistryObjects() {}
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_BLOOD_DRAIN = ACTIONS.register("vampirism_blood_drain", 
-            () -> new VampirismBloodDrain(new NonStandAction.Builder().emptyMainHand()));
+            () -> new VampirismBloodDrain(new NonStandAction.Builder().needsFreeMainHand()));
 
     public static final RegistryObject<VampirismAction> VAMPIRISM_FREEZE = ACTIONS.register("vampirism_freeze", 
-            () -> new VampirismFreeze(new NonStandAction.Builder().holdEnergyCost(0.5F).heldWalkSpeed(0.75F).emptyMainHand()));
+            () -> new VampirismFreeze(new NonStandAction.Builder().holdEnergyCost(0.5F).heldWalkSpeed(0.75F).needsFreeMainHand()));
 
     public static final RegistryObject<VampirismAction> VAMPIRISM_SPACE_RIPPER_STINGY_EYES = ACTIONS.register("vampirism_space_ripper_stingy_eyes", 
             () -> new VampirismSpaceRipperStingyEyes(new NonStandAction.Builder().holdType(20)
@@ -32,7 +32,7 @@ public class ModVampirismActions {
 
     public static final RegistryObject<VampirismAction> VAMPIRISM_BLOOD_GIFT = ACTIONS.register("vampirism_blood_gift", 
             () -> new VampirismBloodGift(new NonStandAction.Builder().holdToFire(60, false)
-                    .holdEnergyCost(5F).heldWalkSpeed(0.3F).emptyMainHand()));
+                    .holdEnergyCost(5F).heldWalkSpeed(0.3F).needsFreeMainHand()));
 
     public static final RegistryObject<VampirismAction> VAMPIRISM_ZOMBIE_SUMMON = ACTIONS.register("vampirism_zombie_summon", 
             () -> new VampirismZombieSummon(new NonStandAction.Builder().energyCost(100F).cooldown(100)));

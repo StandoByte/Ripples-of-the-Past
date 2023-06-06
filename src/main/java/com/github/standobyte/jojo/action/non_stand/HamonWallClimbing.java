@@ -16,7 +16,7 @@ import net.minecraft.world.World;
 public class HamonWallClimbing extends HamonAction {
 
     public HamonWallClimbing(HamonAction.Builder builder) {
-        super(builder.holdType().emptyMainHand());
+        super(builder.holdType().needsFreeMainHand());
     }
     
     @Override

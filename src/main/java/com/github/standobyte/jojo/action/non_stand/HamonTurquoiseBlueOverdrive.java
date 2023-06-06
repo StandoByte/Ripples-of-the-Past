@@ -13,7 +13,7 @@ import net.minecraft.world.World;
 public class HamonTurquoiseBlueOverdrive extends HamonAction {
 
     public HamonTurquoiseBlueOverdrive(HamonAction.Builder builder) {
-        super(builder.emptyMainHand());
+        super(builder.needsFreeMainHand());
     }
     
     @Override

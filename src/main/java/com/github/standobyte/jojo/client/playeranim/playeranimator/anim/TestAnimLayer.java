@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.client.playeranim.playeranimator.anim;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.client.playeranim.playeranimator.PlayerAnimator.AnimLayerHandler;
+import com.github.standobyte.jojo.client.playeranim.playeranimator.PlayerAnimatorInstalled.AnimLayerHandler;
 
 import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.api.layered.ModifierLayer;
@@ -32,6 +32,7 @@ public class TestAnimLayer extends AnimLayerHandler {
     
     @SubscribeEvent
     public void onChat(ClientChatReceivedEvent event) {
+        JojoMod.LOGGER.debug("event");
         if (event.getMessage().getString().contains("anim start")) {
             testAnim((AbstractClientPlayerEntity) Minecraft.getInstance().level.getPlayerByUUID(event.getSenderUUID()), true);
         }
@@ -47,7 +48,7 @@ public class TestAnimLayer extends AnimLayerHandler {
     
     private void testAnim(AbstractClientPlayerEntity player, boolean enabled) {
         if (enabled) {
-            setAnimFromName(player, new ResourceLocation(JojoMod.MOD_ID, "meditation"));
+            setAnimFromName(player, new ResourceLocation(JojoMod.MOD_ID, "glider_hold"));
         }
         else {
             fadeOutAnim((AbstractClientPlayerEntity) player, AbstractFadeModifier.standardFadeIn(10, Ease.OUTCUBIC), null);

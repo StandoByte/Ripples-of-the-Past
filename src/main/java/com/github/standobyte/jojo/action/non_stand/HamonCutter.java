@@ -21,27 +21,17 @@ public class HamonCutter extends HamonAction {
     
     @Override
     protected ActionConditionResult checkHeldItems(LivingEntity user, INonStandPower power) {
-        if (!(user.getMainHandItem().getItem() instanceof PotionItem || user.getOffhandItem().getItem() instanceof PotionItem)) {
+        if (getUseableItem(user).isEmpty()) {
             return conditionMessage("potion");
         }
         return ActionConditionResult.POSITIVE;
     }
-
-//    @Override
-//    public boolean cancelHandRender(LivingEntity user, Hand hand) {
-//        return hand == Hand.OFF_HAND ? !(user.getOffhandItem().getItem() instanceof PotionItem) : false;
-//    }
-
+    
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
-            ItemStack potionItem = user.getMainHandItem();
-            if (!(potionItem.getItem() instanceof PotionItem)) {
-                potionItem = user.getOffhandItem();
-                if (!(potionItem.getItem() instanceof PotionItem)) {
-                    return;
-                }
-            }
+            ItemStack potionItem = getUseableItem(user);
+            if (potionItem.isEmpty()) return;
 
             PlayerEntity player = null;
             if (user instanceof PlayerEntity) {
@@ -59,6 +49,17 @@ public class HamonCutter extends HamonAction {
                 world.addFreshEntity(hamonCutterEntity);
             }
         }
+    }
+    
+    private ItemStack getUseableItem(LivingEntity entity) {
+        ItemStack potionItem = entity.getMainHandItem();
+        if (potionItem.isEmpty() || !(potionItem.getItem() instanceof PotionItem)) {
+            potionItem = entity.getOffhandItem();
+            if (potionItem.isEmpty() || !(potionItem.getItem() instanceof PotionItem)) {
+                return ItemStack.EMPTY;
+            }
+        }
+        return potionItem;
     }
 }
 

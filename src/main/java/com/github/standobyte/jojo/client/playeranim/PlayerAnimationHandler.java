@@ -69,7 +69,7 @@ public class PlayerAnimationHandler {
     public static void initAnimator() {
         if (ModList.get().isLoaded("playeranimator")) {
             try {
-                Class<? extends IPlayerAnimator> animatorClass = Class.forName("com.github.standobyte.jojo.client.playeranim.playeranimator.PlayerAnimator").asSubclass(IPlayerAnimator.class);
+                Class<? extends IPlayerAnimator> animatorClass = Class.forName("com.github.standobyte.jojo.client.playeranim.playeranimator.PlayerAnimatorInstalled").asSubclass(IPlayerAnimator.class);
                 Constructor<? extends IPlayerAnimator> constructor = animatorClass.getConstructor();
                 instance = constructor.newInstance();
                 instance.initAnims();

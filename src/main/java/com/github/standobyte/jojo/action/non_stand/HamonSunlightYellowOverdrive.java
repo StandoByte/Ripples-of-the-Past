@@ -23,7 +23,7 @@ import net.minecraft.world.World;
 public class HamonSunlightYellowOverdrive extends HamonAction {
 
     public HamonSunlightYellowOverdrive(HamonAction.Builder builder) {
-        super(builder.emptyMainHand());
+        super(builder.needsFreeMainHand());
     }
     
     @Override

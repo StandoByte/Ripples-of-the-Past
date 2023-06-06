@@ -1,12 +1,10 @@
 package com.github.standobyte.jojo.action;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -27,7 +25,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
@@ -51,7 +48,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     private final float heldWalkSpeed;
     private final int cooldownTechnical;
     private final int cooldownAdditional;
-    private final Map<Hand, Function<ItemStack, String>> itemChecks;
+    private final boolean needsFreeMainHand;
     private final boolean ignoresPerformerStun;
     private final boolean swingHand;
     private final boolean cancelsVanillaClick;
@@ -67,7 +64,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         this.heldWalkSpeed = builder.heldWalkSpeed;
         this.cooldownTechnical = builder.cooldownTechnical;
         this.cooldownAdditional = builder.cooldownAdditional;
-        this.itemChecks = builder.itemChecks;
+        this.needsFreeMainHand = builder.needsFreeMainHand;
         this.ignoresPerformerStun = builder.ignoresPerformerStun;
         this.swingHand = builder.swingHand;
         this.cancelsVanillaClick = builder.cancelsVanillaClick;
@@ -176,11 +173,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     public abstract float getCostToRender(P power);
     
     protected ActionConditionResult checkHeldItems(LivingEntity user, P power) {
-        for (Map.Entry<Hand, Function<ItemStack, String>> check : itemChecks.entrySet()) {
-            String message = check.getValue().apply(user.getItemInHand(check.getKey()));
-            if (message != null) {
-                return conditionMessage(message);
-            }
+        if (needsFreeMainHand && !MCUtil.isHandFree(user, Hand.MAIN_HAND)) {
+            return conditionMessage("hand");
         }
         return ActionConditionResult.POSITIVE;
     }
@@ -463,7 +457,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
 //        private double maxRangeSqEntityTarget = MAX_RANGE_ENTITY_TARGET * MAX_RANGE_ENTITY_TARGET;
 //        private double maxRangeSqBlockTarget = MAX_RANGE_BLOCK_TARGET * MAX_RANGE_BLOCK_TARGET;
         
-        private Map<Hand, Function<ItemStack, String>> itemChecks = new EnumMap<>(Hand.class);
+        private boolean needsFreeMainHand = false;
         private boolean ignoresPerformerStun = false;
         private boolean swingHand = false;
         private boolean cancelsVanillaClick = true;
@@ -480,13 +474,9 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
             return getThis();
         }
         
-        public T itemCheck(Hand hand, Predicate<ItemStack> itemCheck, String message) {
-            itemChecks.put(hand, itemStack -> itemCheck.test(itemStack) ? null : message);
+        public T needsFreeMainHand() {
+            this.needsFreeMainHand = true;
             return getThis();
-        }
-        
-        public T emptyMainHand() {
-            return itemCheck(Hand.MAIN_HAND, MCUtil.EMPTY_ITEM_OR_GLOVES, "hand");
         }
         
         public T ignoresPerformerStun() {

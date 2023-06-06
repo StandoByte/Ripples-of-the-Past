@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.client.playeranim.IPlayerBarrageAnimation;
 import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
+import com.github.standobyte.jojo.client.playeranim.playeranimator.anim.BusyArmsLayer;
 import com.github.standobyte.jojo.client.playeranim.playeranimator.anim.EntityAnimApplier;
 import com.github.standobyte.jojo.client.playeranim.playeranimator.anim.HeldActionAnimLayer;
 import com.github.standobyte.jojo.client.playeranim.playeranimator.anim.TestAnimLayer;
@@ -50,16 +51,18 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.common.MinecraftForge;
 
-public class PlayerAnimator implements PlayerAnimationHandler.IPlayerAnimator {
+public class PlayerAnimatorInstalled implements PlayerAnimationHandler.IPlayerAnimator {
     private HeldActionAnimLayer heldAction;
     private BarrageAnimLayer barrage;
     private MeditationPoseLayer meditation;
+    private BusyArmsLayer busyArms;
     
     @Override
     public void initAnims() {
         heldAction = register(new ResourceLocation(JojoMod.MOD_ID, "hamon_breath"), 1, HeldActionAnimLayer::new);
         barrage = register(new ResourceLocation(JojoMod.MOD_ID, "barrage"), 1, BarrageAnimLayer::new);
         meditation = register(new ResourceLocation(JojoMod.MOD_ID, "meditation"), 1, MeditationPoseLayer::new);
+        busyArms = register(new ResourceLocation(JojoMod.MOD_ID, "busyArms"), 10, BusyArmsLayer::new);
         register(new ResourceLocation(JojoMod.MOD_ID, "test"), 1, TestAnimLayer::new);
     }
     

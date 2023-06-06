@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -43,6 +44,7 @@ import net.minecraft.network.play.server.SSpawnMovingSoundEffectPacket;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.EntityPredicates;
+import net.minecraft.util.Hand;
 import net.minecraft.util.ReuseableStream;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
@@ -323,7 +325,12 @@ public class MCUtil {
 
     
     
-    public static final Predicate<ItemStack> EMPTY_ITEM_OR_GLOVES = item -> {
+    public static boolean isHandFree(LivingEntity entity, Hand hand) {
+        if (entity.level.isClientSide() && entity.is(ClientUtil.getClientPlayer()) && ClientUtil.arePlayerHandsBusy()) {
+            return false;
+        }
+        
+        ItemStack item = entity.getItemInHand(hand);
         if (item.isEmpty()) {
             return true;
         }
@@ -331,5 +338,5 @@ public class MCUtil {
             return ((GlovesItem) item.getItem()).openFingers();
         }
         return false;
-    };
+    }
 }

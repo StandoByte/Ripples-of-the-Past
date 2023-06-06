@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.action.non_stand;
 
+import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -24,7 +25,14 @@ import net.minecraftforge.common.ForgeHooks;
 public class HamonOverdriveBarrage extends HamonAction {
 
     public HamonOverdriveBarrage(HamonAction.Builder builder) {
-        super(builder.holdType().itemCheck(Hand.MAIN_HAND, MCUtil.EMPTY_ITEM_OR_GLOVES, "hands").itemCheck(Hand.OFF_HAND, MCUtil.EMPTY_ITEM_OR_GLOVES, "hands"));
+        super(builder.holdType());
+    }
+    
+    protected ActionConditionResult checkHeldItems(LivingEntity user, INonStandPower power) {
+        if (!(MCUtil.isHandFree(user, Hand.MAIN_HAND) && MCUtil.isHandFree(user, Hand.OFF_HAND))) {
+            return conditionMessage("hands");
+        }
+        return ActionConditionResult.POSITIVE;
     }
     
     @Override

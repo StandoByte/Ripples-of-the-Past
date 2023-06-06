@@ -92,6 +92,10 @@ public class ClientUtil {
     public static boolean isDestroyingBlock() {
         return Minecraft.getInstance().gameMode.isDestroying();
     }
+    
+    public static boolean arePlayerHandsBusy() {
+        return Minecraft.getInstance().player.isHandsBusy();
+    }
 
     public static Entity getEntityById(int entityId) {
         return Minecraft.getInstance().level.getEntity(entityId);
@@ -107,6 +111,10 @@ public class ClientUtil {
     
     public static float getPartialTick() {
         return Minecraft.getInstance().getFrameTime();
+    }
+    
+    public static boolean useActionShiftVar(PlayerEntity player) {
+        return player.isShiftKeyDown();
     }
     
     public static boolean canSeeStands() {

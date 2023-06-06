@@ -1,0 +1,32 @@
+{
+    "name": "glider_hold",
+    "author": "StandoByte",
+    "description": "",
+    "emote":{
+        "isLoop": "true",
+        "returnTick": 0,
+        "beginTick":0,
+        "endTick":1,
+        "stopTick":2,
+        "degrees":true,
+        "moves":[
+            
+            {
+                "tick":0,
+                "easing": "EASEINOUTQUAD",
+                "turn": 0,
+                "leftArm":{
+                    "pitch":180
+                }
+            },
+            {
+                "tick":0,
+                "easing": "EASEINOUTQUAD",
+                "turn": 0,
+                "rightArm":{
+                    "pitch":180
+                }
+            }
+        ]
+    }
+}
