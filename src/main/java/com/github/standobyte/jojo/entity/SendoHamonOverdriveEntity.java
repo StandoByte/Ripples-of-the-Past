@@ -280,7 +280,6 @@ public class SendoHamonOverdriveEntity extends Entity implements IEntityAddition
                     particleVec = new Vector3d(Math.sin(angle), Math.cos(angle), 0);
                     break;
                 }
-                // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! (sendo hamon overdrive) fix particles distance/velocity
                 particleVec = particleVec.scale(radius / WAVE_TICK_LENGTH);
                 CustomParticlesHelper.addSendoHamonOverdriveParticle(level, ModParticles.HAMON_SPARK.get(), 
                         center.x, center.y, center.z, 

@@ -4,6 +4,7 @@ import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.capability.world.TimeStopInstance;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
@@ -44,12 +45,38 @@ public class TimeResume extends StandAction {
     }
     
     @Nullable
-    public StandAction getVisibleAction(IStandPower power) {
+    @Override
+    public Action<IStandPower> getVisibleAction(IStandPower power, ActionTarget target) {
         LivingEntity user = power.getUser();
-        if (user != null && TimeUtil.isTimeStopped(user.level, user.blockPosition()) 
-                && TimeResume.userTimeStopInstance(user.level, user, null)) {
-            return this;
+        if (user != null) {
+            if (TimeUtil.isTimeStopped(user.level, user.blockPosition())) {
+                if (TimeResume.userTimeStopInstance(user.level, user, null)) {
+                    return this;
+                }
+                else {
+                    return null;
+                }
+            }
+            else {
+                return super.getVisibleAction(power, target);
+            }
         }
-        return null;
+        return this;
+    }
+    
+    @Nullable
+    @Override
+    protected Action<IStandPower> replaceAction(IStandPower power, ActionTarget target) {
+        return getInstantTSAction() != null ? getInstantTSAction() : null;
+    }
+    
+    @Nullable
+    public Action<IStandPower> getInstantTSAction() {
+        return blink;
+    }
+    
+    private Action<IStandPower> blink;
+    void setInstantTSAction(Action<IStandPower> blink) {
+        this.blink = blink;
     }
 }

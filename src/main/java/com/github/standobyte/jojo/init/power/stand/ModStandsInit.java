@@ -169,24 +169,23 @@ public class ModStandsInit {
                     .partsRequired(StandPart.MAIN_BODY)));
     
     public static final RegistryObject<TimeStop> STAR_PLATINUM_TIME_STOP = ACTIONS.register("star_platinum_time_stop", 
-            () -> new TimeStop(new StandAction.Builder().holdToFire(40, false).staminaCost(250).staminaCostTick(7.5F)
+            () -> new TimeStop(new TimeStop.Builder().holdToFire(40, false).staminaCost(250).staminaCostTick(7.5F)
                     .isTrained().resolveLevelToUnlock(4)
                     .ignoresPerformerStun().autoSummonStand()
                     .shout(ModSounds.JOTARO_STAR_PLATINUM_THE_WORLD)
-                    .partsRequired(StandPart.MAIN_BODY))
+                    .partsRequired(StandPart.MAIN_BODY)
             .timeStopSound(ModSounds.STAR_PLATINUM_TIME_STOP)
-            .addTimeResumeVoiceLine(ModSounds.JOTARO_TIME_RESUMES).timeResumeSound(ModSounds.STAR_PLATINUM_TIME_RESUME));
-    
-    public static final RegistryObject<TimeResume> STAR_PLATINUM_TIME_RESUME = ACTIONS.register("star_platinum_time_resume", 
-            () -> new TimeResume(new StandAction.Builder()));
+            .addTimeResumeVoiceLine(ModSounds.JOTARO_TIME_RESUMES).timeResumeSound(ModSounds.STAR_PLATINUM_TIME_RESUME)));
     
     public static final RegistryObject<StandAction> STAR_PLATINUM_TIME_STOP_BLINK = ACTIONS.register("star_platinum_ts_blink", 
             () -> new TimeStopInstant(new StandAction.Builder()
                     .resolveLevelToUnlock(4).isTrained()
                     .ignoresPerformerStun()
-                    .partsRequired(StandPart.MAIN_BODY)
-                    .shiftVariationOf(STAR_PLATINUM_TIME_STOP), 
-                    STAR_PLATINUM_TIME_STOP, STAR_PLATINUM_TIME_RESUME, ModSounds.STAR_PLATINUM_TIME_STOP_BLINK));
+                    .partsRequired(StandPart.MAIN_BODY), 
+                    STAR_PLATINUM_TIME_STOP, ModSounds.STAR_PLATINUM_TIME_STOP_BLINK));
+    
+    public static final RegistryObject<TimeResume> STAR_PLATINUM_TIME_RESUME = ACTIONS.register("star_platinum_time_resume", 
+            () -> new TimeResume(new StandAction.Builder().shiftVariationOf(STAR_PLATINUM_TIME_STOP)));
     
     
     public static final EntityStandRegistryObject<EntityStandType<TimeStopperStandStats>, StandEntityType<StarPlatinumEntity>> STAND_STAR_PLATINUM = 
@@ -260,25 +259,24 @@ public class ModStandsInit {
             () -> new StandEntityBlock());
     
     public static final RegistryObject<TimeStop> THE_WORLD_TIME_STOP = ACTIONS.register("the_world_time_stop", 
-            () -> new TheWorldTimeStop(new StandAction.Builder().holdToFire(30, false).staminaCost(250).staminaCostTick(7.5F)
+            () -> new TheWorldTimeStop(new TimeStop.Builder().holdToFire(30, false).staminaCost(250).staminaCostTick(7.5F)
                     .resolveLevelToUnlock(2).isTrained()
                     .ignoresPerformerStun()
                     .shout(ModSounds.DIO_THE_WORLD)
-                    .partsRequired(StandPart.MAIN_BODY))
+                    .partsRequired(StandPart.MAIN_BODY)
             .voiceLineWithStandSummoned(ModSounds.DIO_TIME_STOP).timeStopSound(ModSounds.THE_WORLD_TIME_STOP)
             .addTimeResumeVoiceLine(ModSounds.DIO_TIME_RESUMES, true).addTimeResumeVoiceLine(ModSounds.DIO_TIMES_UP, false)
-            .timeResumeSound(ModSounds.THE_WORLD_TIME_RESUME));
-    
-    public static final RegistryObject<TimeResume> THE_WORLD_TIME_RESUME = ACTIONS.register("the_world_time_resume", 
-            () -> new TimeResume(new StandAction.Builder()));
+            .timeResumeSound(ModSounds.THE_WORLD_TIME_RESUME)));
     
     public static final RegistryObject<TimeStopInstant> THE_WORLD_TIME_STOP_BLINK = ACTIONS.register("the_world_ts_blink", 
             () -> new TheWorldTimeStopInstant(new StandAction.Builder()
                     .resolveLevelToUnlock(2).isTrained()
                     .ignoresPerformerStun()
-                    .partsRequired(StandPart.MAIN_BODY)
-                    .shiftVariationOf(THE_WORLD_TIME_STOP), 
-                    THE_WORLD_TIME_STOP, THE_WORLD_TIME_RESUME, ModSounds.THE_WORLD_TIME_STOP_BLINK));
+                    .partsRequired(StandPart.MAIN_BODY), 
+                    THE_WORLD_TIME_STOP, ModSounds.THE_WORLD_TIME_STOP_BLINK));
+    
+    public static final RegistryObject<TimeResume> THE_WORLD_TIME_RESUME = ACTIONS.register("the_world_time_resume", 
+            () -> new TimeResume(new StandAction.Builder().shiftVariationOf(THE_WORLD_TIME_STOP)));
     
     public static final RegistryObject<StandEntityAction> THE_WORLD_TS_PUNCH = ACTIONS.register("the_world_ts_punch", 
             () -> new TheWorldTSHeavyAttack(new StandEntityAction.Builder().resolveLevelToUnlock(3).standUserWalkSpeed(1.0F)

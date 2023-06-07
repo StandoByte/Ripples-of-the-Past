@@ -403,6 +403,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return canUserSeeInStoppedTime(user, power);
     }
     
+    public void onCommonSetup() {}
+    
     
     
     public static void initShiftVariations() {

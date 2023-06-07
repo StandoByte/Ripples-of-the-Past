@@ -21,7 +21,6 @@ public class HamonSendoOverdrive extends HamonAction {
         super(builder);
     }
 
-    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! (sendo hamon overdrive) use regular overdrive when punching an entity
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {

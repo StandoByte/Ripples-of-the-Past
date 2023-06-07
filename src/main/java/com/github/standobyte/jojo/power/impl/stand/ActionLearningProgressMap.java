@@ -33,6 +33,14 @@ public class ActionLearningProgressMap<P extends IPower<P, ?>> {
             return false;
         }
         wrappedMap.put(action, progress);
+        
+        if (power.getUser() != null && !power.getUser().level.isClientSide()) {
+            action.onTrainingPoints(power, getLearningProgressPoints(action, power, false));
+            if (getLearningProgressPoints(action, power, true) == action.getMaxTrainingPoints(power)) {
+                action.onMaxTraining(power);
+            }
+        }
+        
         return true;
     }
     

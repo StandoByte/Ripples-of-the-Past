@@ -78,6 +78,9 @@ public class CommonSetup {
             ModPotions.registerRecipes();
             
             Action.initShiftVariations();
+            for (Action<?> action : JojoCustomRegistries.ACTIONS.getRegistry()) {
+                action.onCommonSetup();
+            }
             for (StandType<?> stand : JojoCustomRegistries.STANDS.getRegistry()) {
                 stand.onCommonSetup();
             }

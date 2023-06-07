@@ -187,8 +187,8 @@ public class TimeStopInstance {
                         statsOptional.ifPresent(stats -> {
                             float cooldown = getTimeStopCooldown(power, stats, ticksPassed);
                             power.setCooldownTimer(action, (int) cooldown);
-                            if (action.hasShiftVariation()) {
-                                power.setCooldownTimer(action.getShiftVariationIfPresent(), (int) (cooldown * TimeStopInstant.COOLDOWN_RATIO));
+                            if (action.getInstantTSVariation() != null) {
+                                power.setCooldownTimer(action.getInstantTSVariation(), (int) (cooldown * TimeStopInstant.COOLDOWN_RATIO));
                             }
 
                             if (power.getType().getStats() instanceof TimeStopperStandStats) {

@@ -4,7 +4,6 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
 
-import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
@@ -37,14 +36,12 @@ import net.minecraft.world.World;
 public class TimeStopInstant extends StandAction {
     final Supplier<SoundEvent> blinkSound;
     private final Supplier<TimeStop> baseTimeStop;
-    private final Supplier<TimeResume> timeResumeAction;
-
-    public TimeStopInstant(StandAction.Builder builder, @Nonnull Supplier<TimeStop> baseTimeStop, 
-            @Nonnull Supplier<TimeResume> timeResumeAction, @Nonnull Supplier<SoundEvent> blinkSound) {
+    
+    public TimeStopInstant(StandAction.Builder builder, 
+            @Nonnull Supplier<TimeStop> baseTimeStopAction, @Nonnull Supplier<SoundEvent> blinkSound) {
         super(builder);
+        this.baseTimeStop = baseTimeStopAction;
         this.blinkSound = blinkSound;
-        this.baseTimeStop = baseTimeStop;
-        this.timeResumeAction = timeResumeAction;
     }
     
     @Override
@@ -57,15 +54,6 @@ public class TimeStopInstant extends StandAction {
             return ActionConditionResult.NEGATIVE;
         }
         return super.checkSpecificConditions(user, power, target);
-    }
-
-    @Override
-    protected Action<IStandPower> replaceAction(IStandPower power, ActionTarget target) {
-        Action<IStandPower> timeResume = timeResumeAction.get();
-        if (timeResume != null) {
-            timeResume = timeResume.getVisibleAction(power, target);
-        }
-        return timeResume != null ? timeResume : this;
     }
     
     
@@ -116,16 +104,15 @@ public class TimeStopInstant extends StandAction {
 
             user.teleportTo(blinkPos.x, blinkPos.y, blinkPos.z);
             StandStats stats = power.getType().getStats();
-            if (baseTimeStop.get() != null && power.hasPower()
-                    && stats instanceof TimeStopperStandStats) {
+            if (power.hasPower() && stats instanceof TimeStopperStandStats) {
                 TimeStopperStandStats tsStats = (TimeStopperStandStats) stats;
 //                float learning = tsStats.timeStopLearningPerTick * impliedTicks;
 //                power.addLearningProgressPoints(baseTimeStop.get(), learning);
                 
                 int cooldown = (int) (TimeStopInstance.getTimeStopCooldown(power, tsStats, impliedTicks) * COOLDOWN_RATIO);
                 power.setCooldownTimer(this, cooldown);
-                if (!power.isActionOnCooldown(baseTimeStop.get())) {
-                    power.setCooldownTimer(baseTimeStop.get(), cooldown);
+                if (!power.isActionOnCooldown(getBaseTimeStop())) {
+                    power.setCooldownTimer(getBaseTimeStop(), cooldown);
                 }
             }
         }
@@ -147,10 +134,6 @@ public class TimeStopInstant extends StandAction {
         }
     }
     
-    TimeStop getBaseTimeStop() {
-        return baseTimeStop.get();
-    }
-    
     protected Vector3d getEntityTargetTeleportPos(Entity user, Entity target) {
         double distance = target.getBbWidth() + user.getBbWidth();
         return user.distanceToSqr(target) > distance * distance ? target.position().subtract(user.getLookAngle().scale(distance)) : user.position();
@@ -158,12 +141,12 @@ public class TimeStopInstant extends StandAction {
     
     @Override
     public float getStaminaCost(IStandPower stand) {
-        return baseTimeStop.get() != null ? baseTimeStop.get().getStaminaCost(stand) * 0.8F : super.getStaminaCost(stand);
+        return getBaseTimeStop() != null ? getBaseTimeStop().getStaminaCost(stand) * 0.8F : super.getStaminaCost(stand);
     }
     
     @Override
     public float getStaminaCostTicking(IStandPower stand) {
-        return baseTimeStop.get() != null ? baseTimeStop.get().getStaminaCostTicking(stand) * 0.8F : super.getStaminaCostTicking(stand);
+        return getBaseTimeStop() != null ? getBaseTimeStop().getStaminaCostTicking(stand) * 0.8F : super.getStaminaCostTicking(stand);
     }
 
     @Override
@@ -206,5 +189,24 @@ public class TimeStopInstant extends StandAction {
         
         // FIXME skip overlay ticks for tracking too
         entity.overlayTickCount += ticks;
+    }
+    
+    
+    
+    @Override
+    public boolean isUnlocked(IStandPower power) {
+        return getBaseTimeStop().isUnlocked(power);
+    }
+    
+    TimeStop getBaseTimeStop() {
+        return baseTimeStop.get();
+    }
+    
+    @Override
+    public void onCommonSetup() {
+        getBaseTimeStop().setInstantTSVariation(this);
+        if (getBaseTimeStop().getShiftVariationIfPresent() instanceof TimeResume) {
+            ((TimeResume) getBaseTimeStop().getShiftVariationIfPresent()).setInstantTSAction(this);
+        }
     }
 }

@@ -4,7 +4,10 @@ import java.util.Comparator;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.TimeStopHandler;
@@ -30,45 +33,19 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
 public class TimeStop extends StandAction {
-    private Supplier<SoundEvent> voiceLineWithStandSummoned = () -> null;
-    private Supplier<SoundEvent> timeStopSound = () -> null;
-    private Supplier<SoundEvent> timeResumeVoiceLine = () -> null;
-    private Supplier<SoundEvent> timeManualResumeVoiceLine = () -> null;
-    private Supplier<SoundEvent> timeResumeSound = () -> null;
+    private final Supplier<SoundEvent> voiceLineWithStandSummoned;
+    private final Supplier<SoundEvent> timeStopSound;
+    private final Supplier<SoundEvent> timeResumeVoiceLine;
+    private final Supplier<SoundEvent> timeManualResumeVoiceLine;
+    private final Supplier<SoundEvent> timeResumeSound;
 
-    public TimeStop(StandAction.Builder builder) {
+    public TimeStop(TimeStop.Builder builder) {
         super(builder);
-    }
-
-    public TimeStop voiceLineWithStandSummoned(Supplier<SoundEvent> voiceLine) {
-        this.voiceLineWithStandSummoned = voiceLine;
-        return this;
-    }
-
-    public TimeStop timeStopSound(Supplier<SoundEvent> sound) {
-        this.timeStopSound = sound;
-        return this;
-    }
-
-    public TimeStop addTimeResumeVoiceLine(Supplier<SoundEvent> voiceLine) {
-        timeManualResumeVoiceLine = voiceLine;
-        timeResumeVoiceLine = voiceLine;
-        return this;
-    }
-
-    public TimeStop addTimeResumeVoiceLine(Supplier<SoundEvent> voiceLine, boolean useOnManualResume) {
-        if (useOnManualResume) {
-            timeManualResumeVoiceLine = voiceLine;
-        }
-        else {
-            timeResumeVoiceLine = voiceLine;
-        }
-        return this;
-    }
-
-    public TimeStop timeResumeSound(Supplier<SoundEvent> sound) {
-        this.timeResumeSound = sound;
-        return this;
+        this.voiceLineWithStandSummoned = builder.voiceLineWithStandSummoned;
+        this.timeStopSound = builder.timeStopSound;
+        this.timeResumeVoiceLine = builder.timeResumeVoiceLine;
+        this.timeManualResumeVoiceLine = builder.timeManualResumeVoiceLine;
+        this.timeResumeSound = builder.timeResumeSound;
     }
 
     @Override
@@ -140,8 +117,8 @@ public class TimeStop extends StandAction {
     
     @Override
     public void onTrainingPoints(IStandPower power, float points) {
-        if (hasShiftVariation()) {
-            power.setLearningProgressPoints(getShiftVariationIfPresent(), points, false, false);
+        if (getInstantTSVariation() != null) {
+            power.setLearningProgressPoints(getInstantTSVariation(), points, false, false);
         }
     }
     
@@ -166,6 +143,16 @@ public class TimeStop extends StandAction {
         return 0;
     }
     
+    @Nullable
+    public Action<IStandPower> getInstantTSVariation() {
+        return blink;
+    }
+    
+    private Action<IStandPower> blink;
+    void setInstantTSVariation(Action<IStandPower> blink) {
+        this.blink = blink;
+    }
+    
     
     
     public static final int MIN_TIME_STOP_TICKS = 5;
@@ -180,5 +167,51 @@ public class TimeStop extends StandAction {
     
     public static boolean vampireTimeStopDuration(LivingEntity entity) {
         return ModPowers.VAMPIRISM.get().isHighOnBlood(entity);
+    }
+    
+    
+    
+    public static class Builder extends StandAction.AbstractBuilder<Builder> {
+        private Supplier<SoundEvent> voiceLineWithStandSummoned = () -> null;
+        private Supplier<SoundEvent> timeStopSound = () -> null;
+        private Supplier<SoundEvent> timeResumeVoiceLine = () -> null;
+        private Supplier<SoundEvent> timeManualResumeVoiceLine = () -> null;
+        private Supplier<SoundEvent> timeResumeSound = () -> null;
+        
+        public Builder voiceLineWithStandSummoned(Supplier<SoundEvent> voiceLine) {
+            this.voiceLineWithStandSummoned = voiceLine;
+            return getThis();
+        }
+        
+        public Builder timeStopSound(Supplier<SoundEvent> sound) {
+            this.timeStopSound = sound;
+            return getThis();
+        }
+        
+        public Builder addTimeResumeVoiceLine(Supplier<SoundEvent> voiceLine) {
+            timeManualResumeVoiceLine = voiceLine;
+            timeResumeVoiceLine = voiceLine;
+            return getThis();
+        }
+        
+        public Builder addTimeResumeVoiceLine(Supplier<SoundEvent> voiceLine, boolean useOnManualResume) {
+            if (useOnManualResume) {
+                timeManualResumeVoiceLine = voiceLine;
+            }
+            else {
+                timeResumeVoiceLine = voiceLine;
+            }
+            return getThis();
+        }
+        
+        public Builder timeResumeSound(Supplier<SoundEvent> sound) {
+            this.timeResumeSound = sound;
+            return getThis();
+        }
+        
+        @Override
+        public Builder getThis() {
+            return this;
+        }
     }
 }

@@ -464,14 +464,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             serverPlayerUser.ifPresent(player -> {
                 PacketManager.sendToClient(new StandActionLearningPacket(action, pts, true), player);
             });
-            
-            if (user != null && !user.level.isClientSide()) {
-                action.onTrainingPoints(this, actionLearningProgressMap.getLearningProgressPoints(action, this, false));
-                if (actionLearningProgressMap.getLearningProgressPoints(action, this, true)
-                        == action.getMaxTrainingPoints(this)) {
-                    action.onMaxTraining(this);
-                }
-            }
         }
     }
 
