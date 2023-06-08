@@ -683,6 +683,7 @@ public class InputHandler {
                 if (power != null) {
                     if (power.canLeap() && !slowedDown) {
                         Entity playerVehicle = mc.player.getVehicle();
+                        // FIXME let passengers other than the controlling player leap
                         boolean onGround = mc.player.isOnGround() || playerVehicle != null && 
                                 (playerVehicle.isOnGround()
                                 || playerVehicle.getType() == ModEntityTypes.LEAVES_GLIDER.get()

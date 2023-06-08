@@ -19,10 +19,12 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamon
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
+import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.EntityType;
@@ -97,6 +99,7 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
                     updateRotationDelta();
                     yRot += yRotDelta;
                     for (Entity passenger : getPassengers()) {
+                        // FIXME also turn passengers other than the controlling player
                         passenger.yRot += yRotDelta;
                         if (passenger instanceof LivingEntity) {
                             ((LivingEntity) passenger).yBodyRot += yRotDelta;
@@ -160,6 +163,12 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
                         getBbHeight(),
                         (random.nextDouble() - 0.5) * getBbWidth());
                 HamonPowerType.createHamonSparkParticles(level, ClientUtil.getClientPlayer(), sparkVec, getEnergy() * 0.0015F);
+            }
+            
+            for (Entity passenger : getPassengers()) { 
+                if (passenger instanceof ClientPlayerEntity) {
+                    ClientReflection.setHandsBusy((ClientPlayerEntity) passenger, true);
+                }
             }
         }
     }

@@ -13,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISoundEventAccessor;
 import net.minecraft.client.audio.Sound;
 import net.minecraft.client.audio.SoundEventAccessor;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.screen.IngameMenuScreen;
 import net.minecraft.client.gui.screen.MainMenuScreen;
 import net.minecraft.client.particle.IAnimatedSprite;
@@ -167,5 +168,11 @@ public class ClientReflection {
     private static final Field GAME_RENDERER_EFFECT_INDEX = ObfuscationReflectionHelper.findField(GameRenderer.class, "field_147713_ae");
     public static void setEffectIndex(GameRenderer gameRenderer, int effectIndex) {
         ReflectionUtil.setFieldValue(GAME_RENDERER_EFFECT_INDEX, gameRenderer, effectIndex);
+    }
+    
+    
+    private static final Field CLIENT_PLAYER_ENTITY_HANDS_BUSY = ObfuscationReflectionHelper.findField(ClientPlayerEntity.class, "field_184844_co");
+    public static void setHandsBusy(ClientPlayerEntity player, boolean handsBusy) {
+        ReflectionUtil.setFieldValue(CLIENT_PLAYER_ENTITY_HANDS_BUSY, player, handsBusy);
     }
 }

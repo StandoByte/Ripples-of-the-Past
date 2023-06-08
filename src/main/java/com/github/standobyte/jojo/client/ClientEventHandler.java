@@ -29,6 +29,7 @@ import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
 import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
@@ -207,7 +208,7 @@ public class ClientEventHandler {
         // FIXME (vampire\curing) shake vampire while curing
         // yRot += (float) (Math.cos((double)entity.tickCount * 3.25) * Math.PI * 0.4);
     }
-
+    
     @SubscribeEvent(priority = EventPriority.HIGH)
     public <T extends LivingEntity, M extends EntityModel<T>> void onRenderLiving2(RenderLivingEvent.Pre<T, M> event) {
         LivingEntity entity = event.getEntity();
@@ -314,6 +315,12 @@ public class ClientEventHandler {
                 if (resetShader) {
                     mc.gameRenderer.checkEntityPostEffect(mc.options.getCameraType().isFirstPerson() ? mc.getCameraEntity() : null);
                     resetShader = false;
+                }
+                
+                // FIXME make stand actions clickable when player hands are busy
+                if (mc.level != null && mc.player != null && mc.player.getVehicle() != null
+                        && mc.player.getVehicle().getType() == ModEntityTypes.LEAVES_GLIDER.get()) {
+                    ClientReflection.setHandsBusy(mc.player, true);
                 }
                 break;
             }

@@ -7,13 +7,11 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.barrage.BarrageSwingsHolder;
-import com.github.standobyte.jojo.init.ModEntityTypes;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.entity.EntityType;
 
@@ -36,13 +34,6 @@ public class ClientPlayerUtilCap {
         this.player = player;
         this.soundManager = Minecraft.getInstance().getSoundManager();
         this.barrageSwings = new BarrageSwingsHolder<>();
-    }
-    
-    public void tick() {
-        if (player.isLocalPlayer() && vehicleType == ModEntityTypes.LEAVES_GLIDER.get()) {
-            // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! set hands busy
-//            ((ClientPlayerEntity) player).isHandsBusy();
-        }
     }
     
     
