@@ -446,13 +446,21 @@ public class ClientEventHandler {
     // TODO determine the position of the time stopper entity on the screen
     private Entity timeStopper;
     private TimeStop timeStopAction;
-    public void setTimeStopVisuals(int length, Entity timeStopper, TimeStop action) {
-        // FIXME !!!!!!!! (ts shader) time stop can also be prematurely stopped (manual time resume/0 stamina)
-        this.timeStopLength += length;
+    public void setTimeStopVisuals(Entity timeStopper, TimeStop action) {
         if (!tsShaderStarted) {
             this.timeStopper = timeStopper;
             this.timeStopAction = action;
             tsShaderStarted = true;
+        }
+    }
+    
+    public void updateTimeStopTicksLeft() {
+        if (mc.level != null && mc.player != null) {
+            int ticks = TimeUtil.getTimeStopTicksLeft(mc.level, new ChunkPos(mc.player.blockPosition()));
+            this.timeStopLength = timeStopTicks + ticks;
+        }
+        else {
+            this.timeStopLength = 0;
         }
     }
     

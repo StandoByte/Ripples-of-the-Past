@@ -65,6 +65,11 @@ public class TimeUtil {
         cap.getTimeStopHandler().removeTimeStop(instance);
     }
     
+    public static TimeStopInstance getTimeStopInstance(World world, int instanceId) {
+        TimeStopHandler timeStopHandler = world.getCapability(WorldUtilCapProvider.CAPABILITY).resolve().get().getTimeStopHandler();
+        return timeStopHandler.getById(instanceId);
+    }
+    
     public static boolean canPlayerSeeInStoppedTime(PlayerEntity player) {
         return canPlayerSeeInStoppedTime(canPlayerMoveInStoppedTime(player, true), hasTimeStopAbility(player));
     }
@@ -270,9 +275,17 @@ public class TimeUtil {
     
     public static boolean isTimeStopped(World world, BlockPos blockPos) {
         return isTimeStopped(world, new ChunkPos(blockPos));
-    }  
+    }
     
     public static boolean isTimeStopped(World world, ChunkPos chunkPos) {
         return world.getCapability(WorldUtilCapProvider.CAPABILITY).map(cap -> cap.getTimeStopHandler().isTimeStopped(chunkPos)).orElse(false);
+    }
+    
+    public static int getTimeStopTicksLeft(World world, ChunkPos chunkPos) {
+        return world.getCapability(WorldUtilCapProvider.CAPABILITY).resolve()
+                .flatMap(cap -> cap.getTimeStopHandler().getInstancesInPos(chunkPos).stream()
+                        .max((i1, i2) -> i1.getTicksLeft() - i2.getTicksLeft())
+                        .map(TimeStopInstance::getTicksLeft))
+                .orElse(0);
     }
 }

@@ -47,28 +47,34 @@ public class TimeStopHandler {
                 entityIter.remove();
             }
 
-            else if (!world.isClientSide() && entity instanceof LivingEntity && !entity.canUpdate()) {
-                if (entity.invulnerableTime > 0) {
-                    entity.invulnerableTime--;
-                }
-                entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.lastHurtByStandTick());
+            else if (!entity.canUpdate()) {
+                tickInStoppedTime(entity);
             }
         }
-
-        if (!world.isClientSide()) {
-            Iterator<Map.Entry<Integer, TimeStopInstance>> instanceIter = timeStopInstances.entrySet().iterator();
-            while (instanceIter.hasNext()) {
-                Map.Entry<Integer, TimeStopInstance> entry = instanceIter.next();
-                if (entry.getValue().tick()) {
-                    instanceIter.remove();
-                    onRemovedTimeStop(entry.getValue());
-                }
+        
+        Iterator<Map.Entry<Integer, TimeStopInstance>> instanceIter = timeStopInstances.entrySet().iterator();
+        while (instanceIter.hasNext()) {
+            Map.Entry<Integer, TimeStopInstance> entry = instanceIter.next();
+            if (entry.getValue().tick() && !world.isClientSide()) {
+                instanceIter.remove();
+                onRemovedTimeStop(entry.getValue());
             }
         }
         
         for (Entity entity : stoppedInTime) {
             if (!entity.canUpdate()) {
                 entity.tickCount--;
+            }
+        }
+    }
+    
+    private void tickInStoppedTime(Entity entity) {
+        if (!world.isClientSide()) {
+            if (entity instanceof LivingEntity) {
+                if (entity.invulnerableTime > 0) {
+                    entity.invulnerableTime--;
+                }
+                entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.lastHurtByStandTick());
             }
         }
     }

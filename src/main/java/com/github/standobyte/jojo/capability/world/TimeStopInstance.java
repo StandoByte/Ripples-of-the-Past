@@ -24,6 +24,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.LazyOptional;
 
 // TODO implement IStandEffect
@@ -86,7 +87,7 @@ public class TimeStopInstance {
     
     public boolean tick() {
         ticksPassed++;
-        if (user != null) {
+        if (user != null && !user.level.isClientSide()) {
             if (!user.isAlive()) {
                 return true;
             }
@@ -124,6 +125,15 @@ public class TimeStopInstance {
         }
         this.ticksLeft = ticks;
         ticksManuallySet = true;
+        if (!world.isClientSide()) {
+            ServerWorld serverWorld = (ServerWorld) world;
+            
+            serverWorld.players().forEach(player -> {
+                if (player.level == world) {
+                    PacketManager.sendToClient(TimeStopInstancePacket.setTicks(id, ticksLeft), player);
+                }
+            });
+        }
     }
     
     public boolean wereTicksManuallySet() {

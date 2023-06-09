@@ -75,6 +75,7 @@ public class TimeStopInstant extends StandAction {
             }
             target = ActionTarget.fromRayTraceResult(rayTrace);
         }
+        
         switch (target.getType()) {
         case ENTITY:
             blinkPos = getEntityTargetTeleportPos(user, target.getEntity());
@@ -95,8 +96,8 @@ public class TimeStopInstant extends StandAction {
             blinkPos = new Vector3d(pos.x, blockPos.getY() > 0 ? blockPos.getY() : user.position().y, pos.z);
             break;
         }
-
-        int impliedTicks = MathHelper.ceil(user.position().subtract(blinkPos).length() / speed);
+        
+        int impliedTicks = MathHelper.clamp(MathHelper.ceil(user.position().subtract(blinkPos).length() / speed), 0, timeStopTicks);
         skipTicksForStandAndUser(power, impliedTicks);
         
         if (!world.isClientSide()) {
