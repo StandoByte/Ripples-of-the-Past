@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.client.ui.actionshud;
 
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.Alignment;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.BarsOrientation;
-import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.ElementTransparency;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 

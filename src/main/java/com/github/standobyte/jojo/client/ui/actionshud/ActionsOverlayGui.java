@@ -100,6 +100,8 @@ public class ActionsOverlayGui extends AbstractGui {
     private final ImmutableMap<InputHandler.ActionKey, ElementTransparency> actionNameTransparency = Arrays.stream(InputHandler.ActionKey.values())
             .collect(Maps.toImmutableEnumMap(hotbar -> hotbar, hotbar -> new ElementTransparency(40, 10)));
     private final Map<InputHandler.ActionKey, ITextComponent> lastActionName = new EnumMap<>(InputHandler.ActionKey.class);
+    private final ImmutableMap<ActionType, FadeOut> actionHotbarFold = Arrays.stream(ActionType.values())
+            .collect(Maps.toImmutableEnumMap(hotbar -> hotbar, hotbar -> new FadeOut(40, 10)));
     private final ImmutableMap<Exercise, ElementTransparency> exerciseBarsTransparency = Arrays.stream(Exercise.values())
             .collect(Maps.toImmutableEnumMap(ex -> ex, ex -> new ElementTransparency(40, 10)));
     
@@ -108,15 +110,16 @@ public class ActionsOverlayGui extends AbstractGui {
     private final BarsRenderer horizontalBars = new HorizontalBarsRenderer(this, 
             energyBarTransparency, staminaBarTransparency, resolveBarTransparency);
     
-    private ElementTransparency[] tickingTransparencies = Streams.concat(Streams.concat(Stream.of(
+    private FadeOut[] tickingFadeOut = Streams.concat(Streams.concat(Streams.concat(Stream.of(
             modeSelectorTransparency,
             energyBarTransparency,
             staminaBarTransparency,
             resolveBarTransparency,
             powerNameTransparency), 
             actionNameTransparency.values().stream()),
+            actionHotbarFold.values().stream()),
             exerciseBarsTransparency.values().stream())
-            .toArray(ElementTransparency[]::new);
+            .toArray(FadeOut[]::new);
     
     private boolean attackSelection;
     private boolean abilitySelection;
@@ -139,7 +142,7 @@ public class ActionsOverlayGui extends AbstractGui {
     
     public void tick() {
         if (!mc.isPaused()) {
-            for (ElementTransparency element : tickingTransparencies) {
+            for (FadeOut element : tickingFadeOut) {
                 element.tick();
             }
         }
@@ -785,14 +788,12 @@ public class ActionsOverlayGui extends AbstractGui {
     
     private float getNameAlpha(ElementTransparency transparency, float partialTick) {
         HudNamesRender renderMode = JojoModConfig.CLIENT.hudNamesRender.get();
+        renderMode = HudNamesRender.FADE_AWAY;
         switch (renderMode) {
         case NEVER:
             return 0;
         case FADE_AWAY:
             float alpha = transparency.getAlpha(partialTick);
-            if (alpha <= ElementTransparency.MIN_ALPHA) {
-                alpha = 0;
-            }
             return alpha;
         default:
             return 1;
@@ -1129,51 +1130,6 @@ public class ActionsOverlayGui extends AbstractGui {
     
     
     
-    static class ElementTransparency {
-        private final int ticksMax;
-        private final int ticksStartFadeAway;
-        private int ticks;
-        
-        private ElementTransparency(int ticksMax, int ticksStartFadeAway) {
-            this.ticksMax = ticksMax;
-            this.ticksStartFadeAway = ticksStartFadeAway;
-            this.ticks = 0;
-        }
-        
-        void reset() {
-            ticks = ticksMax;
-        }
-        
-        boolean shouldRender() {
-            return ticks > 0;
-        }
-        
-        int makeTextColorTranclucent(int color, float partialTick) {
-            return addAlpha(color, getAlpha(partialTick));
-        }
-        
-        private static final float MIN_ALPHA = 1F / 63F;
-        float getAlpha(float partialTick) {
-            if (ticks >= ticksStartFadeAway) {
-                return 1F;
-            }
-            float alpha = Math.max((ticks - partialTick) / (float) ticksStartFadeAway, MIN_ALPHA);
-            return alpha;
-        }
-        
-        private void tick() {
-            if (ticks > 0) {
-                ticks--;
-            }
-        }
-        
-        static int addAlpha(int color, float alpha) {
-            return color | ((int) (255F * alpha)) << 24 & -0x1000000;
-        }
-    }
-    
-    
-    
     public boolean setMode(@Nullable PowerClassification power) {
         if (power == null) {
             return setPowerMode(null);
@@ -1210,6 +1166,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 modeSelectorTransparency.reset();
                 powerNameTransparency.reset();
                 actionNameTransparency.values().forEach(ElementTransparency::reset);
+                actionHotbarFold.values().forEach(FadeOut::reset);
                 if (currentMode != null) {
                     if (mode != nonStandUiMode) {
                         energyBarTransparency.reset();
@@ -1263,6 +1220,7 @@ public class ActionsOverlayGui extends AbstractGui {
     public void selectAction(ActionType hotbar, int slot) {
         if (currentMode != null) {
             currentMode.setSelectedSlot(hotbar, slot, getTargetLazy());
+            actionHotbarFold.get(hotbar).reset();
         }
     }
 
@@ -1289,6 +1247,7 @@ public class ActionsOverlayGui extends AbstractGui {
              i = operator.applyAsInt(i, actions.size())) {
         }
         mode.setSelectedSlot(hotbar, i, getTargetLazy());
+        actionHotbarFold.get(hotbar).reset();
     }
     
 
@@ -1448,7 +1407,7 @@ public class ActionsOverlayGui extends AbstractGui {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.defaultBlendFunc();
     }
-
+    
     
     
     private class ElementPosition {
