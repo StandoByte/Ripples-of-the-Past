@@ -17,7 +17,7 @@ import com.github.standobyte.jojo.command.JojoControlsCommand;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.LeapCooldownPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrCooldownPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ActionCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHeldActionPacket;
 import com.github.standobyte.jojo.power.ActionCooldownTracker;
 import com.github.standobyte.jojo.power.HeldActionData;
@@ -151,9 +151,9 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     @Override
     public void setCooldownTimer(Action<?> action, int value) {
         updateCooldownTimer(action, value, value);
-        if (!user.level.isClientSide()) {
-            PacketManager.sendToClientsTrackingAndSelf(new TrCooldownPacket(user.getId(), getPowerClassification(), action, value), user);
-        }
+        serverPlayerUser.ifPresent(player -> {
+            PacketManager.sendToClient(new ActionCooldownPacket(user.getId(), getPowerClassification(), action, value), player);
+        });
     }
 
     @Override
@@ -164,9 +164,9 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     @Override
     public void resetCooldowns() {
         cooldowns.resetCooldowns();
-        if (!user.level.isClientSide()) {
-            PacketManager.sendToClientsTrackingAndSelf(TrCooldownPacket.resetAll(user.getId(), getPowerClassification()), user);
-        }
+        serverPlayerUser.ifPresent(player -> {
+            PacketManager.sendToClient(ActionCooldownPacket.resetAll(user.getId(), getPowerClassification()), player);
+        });
     }
     
     @Override
@@ -571,6 +571,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     public void syncWithUserOnly() {
         serverPlayerUser.ifPresent(player -> {
             if (hasPower()) {
+                cooldowns.syncWithUser(user.getId(), getPowerClassification(), player);
                 PacketManager.sendToClient(new LeapCooldownPacket(getPowerClassification(), leapCooldown), player);
                 ModCriteriaTriggers.GET_POWER.get().trigger(player, getPowerClassification(), this);
                 syncWithTrackingOrUser(player);
@@ -589,7 +590,6 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     @Override
     public void syncWithTrackingOrUser(ServerPlayerEntity player) {
         if (hasPower() && user != null) {
-            cooldowns.syncWithTrackingOrUser(user.getId(), getPowerClassification(), player);
             if (getHeldAction() != null) {
                 PacketManager.sendToClient(new TrHeldActionPacket(user.getId(), getPowerClassification(), getHeldAction(), false), player);
             }

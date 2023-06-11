@@ -14,7 +14,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-public class TrCooldownPacket {
+public class ActionCooldownPacket {
     private final int entityId;
     private final PowerClassification classification;
     private final boolean resetAll;
@@ -22,19 +22,19 @@ public class TrCooldownPacket {
     private final int value;
     private final int totalCooldown;
 
-    public TrCooldownPacket(int entityId, PowerClassification classification, Action<?> action, int value) {
+    public ActionCooldownPacket(int entityId, PowerClassification classification, Action<?> action, int value) {
         this(entityId, classification, action, value, value);
     }
 
-    public TrCooldownPacket(int entityId, PowerClassification classification, Action<?> action, int value, int totalCooldown) {
+    public ActionCooldownPacket(int entityId, PowerClassification classification, Action<?> action, int value, int totalCooldown) {
         this(entityId, classification, action, value, totalCooldown, false);
     }
     
-    public static TrCooldownPacket resetAll(int entityId, PowerClassification classification) {
-        return new TrCooldownPacket(entityId, classification, null, 0, 0, true);
+    public static ActionCooldownPacket resetAll(int entityId, PowerClassification classification) {
+        return new ActionCooldownPacket(entityId, classification, null, 0, 0, true);
     }
     
-    private TrCooldownPacket(int entityId, PowerClassification classification, Action<?> action, int value, int totalCooldown, boolean resetAll) {
+    private ActionCooldownPacket(int entityId, PowerClassification classification, Action<?> action, int value, int totalCooldown, boolean resetAll) {
         this.entityId = entityId;
         this.classification = classification;
         this.resetAll = resetAll;
@@ -45,9 +45,9 @@ public class TrCooldownPacket {
     
     
     
-    public static class Handler implements IModPacketHandler<TrCooldownPacket> {
+    public static class Handler implements IModPacketHandler<ActionCooldownPacket> {
 
-        public void encode(TrCooldownPacket msg, PacketBuffer buf) {
+        public void encode(ActionCooldownPacket msg, PacketBuffer buf) {
             buf.writeBoolean(msg.resetAll);
             buf.writeInt(msg.entityId);
             buf.writeEnum(msg.classification);
@@ -58,16 +58,16 @@ public class TrCooldownPacket {
             }
         }
     
-        public TrCooldownPacket decode(PacketBuffer buf) {
+        public ActionCooldownPacket decode(PacketBuffer buf) {
             boolean resetAll = buf.readBoolean();
             if (resetAll) {
                 return resetAll(buf.readInt(), buf.readEnum(PowerClassification.class));
             }
-            return new TrCooldownPacket(buf.readInt(), buf.readEnum(PowerClassification.class), 
+            return new ActionCooldownPacket(buf.readInt(), buf.readEnum(PowerClassification.class), 
                     buf.readRegistryIdUnsafe(JojoCustomRegistries.ACTIONS.getRegistry()), buf.readVarInt(), buf.readVarInt());
         }
     
-        public void handle(TrCooldownPacket msg, Supplier<NetworkEvent.Context> ctx) {
+        public void handle(ActionCooldownPacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity instanceof LivingEntity) {
                 IPower.getPowerOptional((LivingEntity) entity, msg.classification).ifPresent(power -> {
@@ -82,8 +82,8 @@ public class TrCooldownPacket {
         }
 
         @Override
-        public Class<TrCooldownPacket> getPacketClass() {
-            return TrCooldownPacket.class;
+        public Class<ActionCooldownPacket> getPacketClass() {
+            return ActionCooldownPacket.class;
         }
     }
 }
