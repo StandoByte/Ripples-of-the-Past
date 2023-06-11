@@ -32,6 +32,7 @@ public class HamonTurquoiseBlueOverdriveEntity extends ModdedProjectileEntity {
     private float points;
     private int sparksCount;
     private boolean gaveHamonPoints;
+    private int duration;
 
     public HamonTurquoiseBlueOverdriveEntity(World world, LivingEntity entity) {
         super(ModEntityTypes.TURQUOISE_BLUE_OVERDRIVE.get(), entity, world);
@@ -53,6 +54,11 @@ public class HamonTurquoiseBlueOverdriveEntity extends ModdedProjectileEntity {
     
     public HamonTurquoiseBlueOverdriveEntity setPoints(float points) {
         this.points = points;
+        return this;
+    }
+    
+    public HamonTurquoiseBlueOverdriveEntity setDuration(int ticks) {
+        this.duration = ticks;
         return this;
     }
 
@@ -137,7 +143,7 @@ public class HamonTurquoiseBlueOverdriveEntity extends ModdedProjectileEntity {
 
     @Override
     public int ticksLifespan() {
-        return 300;
+        return duration;
     }
 
     @Override
@@ -162,6 +168,7 @@ public class HamonTurquoiseBlueOverdriveEntity extends ModdedProjectileEntity {
         nbt.putBoolean("PointsGiven", gaveHamonPoints);
         nbt.putFloat("Damage", damage);
         nbt.putFloat("Points", points);
+        nbt.putInt("Duration", duration);
     }
 
     @Override
@@ -171,6 +178,7 @@ public class HamonTurquoiseBlueOverdriveEntity extends ModdedProjectileEntity {
         gaveHamonPoints = nbt.getBoolean("PointsGiven");
         damage = nbt.getFloat("Damage");
         points = nbt.getFloat("Points");
+        duration = nbt.getInt("Duration");
     }
     
     @Override
