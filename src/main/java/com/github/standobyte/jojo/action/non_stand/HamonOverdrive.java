@@ -77,7 +77,7 @@ public class HamonOverdrive extends HamonAction {
     }
     
     protected float getDamage() {
-        return 3.0F;
+        return 2.0F;
     }
     
     protected boolean dealDamage(LivingEntity target, float dmgAmount, LivingEntity user, INonStandPower power, HamonData hamon) {

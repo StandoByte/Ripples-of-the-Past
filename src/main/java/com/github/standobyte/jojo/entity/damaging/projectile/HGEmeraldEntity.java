@@ -40,8 +40,8 @@ public class HGEmeraldEntity extends ModdedProjectileEntity {
     }
     
     @Override
-    protected float knockbackReduction() {
-        return lowerKnockback ? 0.5F : super.knockbackReduction();
+    protected float knockbackMultiplier() {
+        return lowerKnockback ? 0.5F : super.knockbackMultiplier();
     }
 
     @Override

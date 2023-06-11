@@ -164,7 +164,7 @@ public class DamageUtil {
                     
             boolean undeadTarget = JojoModUtil.isUndead(livingTarget);
             if (!undeadTarget) {
-                amount *= 0.125F;
+                amount *= 0.2F;
             }
             
             final float dmgAmount = amount;

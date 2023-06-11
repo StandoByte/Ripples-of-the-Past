@@ -26,7 +26,7 @@ public abstract class HamonAction extends NonStandAction {
     private final Map<Supplier<CharacterHamonTechnique>, Supplier<SoundEvent>> voiceLinesUnregistered;
     private Map<CharacterHamonTechnique, Supplier<SoundEvent>> voiceLines = null;
     
-    public HamonAction(HamonAction.Builder builder) {
+    public HamonAction(HamonAction.AbstractBuilder<?> builder) {
         super(builder);
         voiceLinesUnregistered = builder.voiceLines;
     }
@@ -99,15 +99,18 @@ public abstract class HamonAction extends NonStandAction {
     
     
     
-    public static class Builder extends NonStandAction.AbstractBuilder<HamonAction.Builder> {
-        private Map<Supplier<CharacterHamonTechnique>, Supplier<SoundEvent>> voiceLines = new HashMap<>();
-        
+    public static class Builder extends HamonAction.AbstractBuilder<HamonAction.Builder> {
+
         @Override
         protected HamonAction.Builder getThis() {
             return this;
         }
+    }
+    
+    protected abstract static class AbstractBuilder<T extends NonStandAction.AbstractBuilder<T>> extends NonStandAction.AbstractBuilder<T> {
+        protected final Map<Supplier<CharacterHamonTechnique>, Supplier<SoundEvent>> voiceLines = new HashMap<>();
         
-        public HamonAction.Builder shout(Supplier<CharacterHamonTechnique> technique, Supplier<SoundEvent> shoutSupplier) {
+        public T shout(Supplier<CharacterHamonTechnique> technique, Supplier<SoundEvent> shoutSupplier) {
             if (technique != null) {
                 voiceLines.put(technique, shoutSupplier);
             }

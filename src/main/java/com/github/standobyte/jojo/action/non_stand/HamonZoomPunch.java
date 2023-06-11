@@ -10,24 +10,44 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.World;
 
 public class HamonZoomPunch extends HamonAction {
+    private final float hitCost;
 
-    public HamonZoomPunch(HamonAction.Builder builder) {
+    public HamonZoomPunch(HamonZoomPunch.Builder builder) {
         super(builder.needsFreeMainHand());
+        this.hitCost = builder.hitCost;
     }
     
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
-            float hamonEfficiency = hamon.getActionEfficiency(getEnergyCost(power));
-            float length = (8 + hamon.getHamonControlLevel() * 0.1F);
+            float energyCost = getEnergyCost(power);
+            float hamonEfficiency = hamon.getActionEfficiency(energyCost);
+            
+            float zoomPunchMaxLength = (8 + hamon.getHamonControlLevel() * 0.1F);
             int duration = Math.max(getCooldownTechnical(power), 1);
-            ZoomPunchEntity zoomPunch = new ZoomPunchEntity(world, user, 
-                    2 * length / (float) duration * (0.4F + 0.6F * hamonEfficiency), duration,
-                    0.75F, getEnergyCost(power), 
-                    getEnergyCost(power) * hamonEfficiency);
+            float projSpeed = 2 * zoomPunchMaxLength / (float) duration * (0.4F + 0.6F * hamonEfficiency);
+            ZoomPunchEntity zoomPunch = new ZoomPunchEntity(world, user)
+                    .setSpeed(projSpeed)
+                    .setDuration(duration)
+                    .setHamonDamageOnHit(0.7F, hitCost, power.getEnergy() <= 0)
+                    .setBaseUsageStatPoints(Math.min(energyCost, power.getEnergy()) * hamonEfficiency);
             world.addFreshEntity(zoomPunch);
         }
     }
-
+    
+    
+    public static class Builder extends HamonAction.AbstractBuilder<HamonZoomPunch.Builder> {
+        private float hitCost = 0;
+        
+        public Builder hitCost(float hitCost) {
+            this.hitCost = hitCost;
+            return getThis();
+        }
+        
+        @Override
+        protected HamonZoomPunch.Builder getThis() {
+            return this;
+        }
+    }
 }

@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 
 import java.util.Optional;
+import java.util.function.BiPredicate;
 
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
@@ -31,23 +32,39 @@ import net.minecraft.world.World;
 public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
     private HandSide side;
     private float speed;
+    
     private float hamonDamage;
     private float hamonDamageCost;
-    private float points;
-    private boolean gaveHamonPoints;
-    private int lifeSpan;
+    private boolean spendHamonStability;
+    
+    private float baseHitPoints;
+    private boolean gaveHamonPointsForBaseHit = false;
 
-    public ZoomPunchEntity(World world, LivingEntity entity, 
-            float speed, int lifeSpan, 
-            float hamonDamage, float hamonDamageCost, 
-            float points) {
-        super(ModEntityTypes.ZOOM_PUNCH.get(), entity, world);
-        this.side = entity.getMainArm();
+    public ZoomPunchEntity(World world, LivingEntity owner) {
+        super(ModEntityTypes.ZOOM_PUNCH.get(), owner, world);
+        this.side = owner.getMainArm();
+    }
+
+    public ZoomPunchEntity setSpeed(float speed) {
         this.speed = speed;
-        this.lifeSpan = lifeSpan;
-        this.hamonDamage = hamonDamage;
-        this.hamonDamageCost = hamonDamageCost;
-        this.points = points;
+        return this;
+    }
+
+    public ZoomPunchEntity setDuration(int lifeSpan) {
+        setLifeSpan(lifeSpan);
+        return this;
+    }
+
+    public ZoomPunchEntity setHamonDamageOnHit(float damage, float hitCost, boolean useBreathStab) {
+        this.hamonDamage = damage;
+        this.hamonDamageCost = hitCost;
+        this.spendHamonStability = useBreathStab;
+        return this;
+    }
+
+    public ZoomPunchEntity setBaseUsageStatPoints(float points) {
+        this.baseHitPoints = points;
+        return this;
     }
 
     public ZoomPunchEntity(EntityType<? extends ZoomPunchEntity> entityType, World world) {
@@ -73,11 +90,6 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
     @Override
     public boolean isBodyPart() {
         return true;
-    }
-
-    @Override
-    public int ticksLifespan() {
-        return lifeSpan;
     }
     
     @Override
@@ -115,10 +127,20 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
     @Override
     protected boolean hurtTarget(Entity target, LivingEntity owner) {
         boolean regularAttack = super.hurtTarget(target, owner);
-        boolean hamonAttack = getUserHamon().map(hamon -> {
-            Boolean dealtDamage = hamon.consumeHamonEnergyTo(eff -> DamageUtil.dealHamonDamage(target, hamonDamage * eff, this, owner), hamonDamageCost);
+        boolean hamonAttack = userHamon((power, hamon) -> {
+            boolean hasEnergy = power.getEnergy() > 0;
+            if (!(hasEnergy || spendHamonStability)) return false;
+            Boolean dealtDamage = hamon.consumeHamonEnergyTo(eff -> {
+                boolean dealtHamonDamage = DamageUtil.dealHamonDamage(target, hamonDamage * eff, this, owner);
+                
+                if (hasEnergy && dealtHamonDamage) {
+                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, Math.min(hamonDamageCost, power.getEnergy()) * eff);
+                }
+                
+                return dealtHamonDamage;
+            }, hamonDamageCost);
             return dealtDamage != null && dealtDamage;
-        }).orElse(false);
+        });
         
         if (regularAttack) {
             float knockback = (float) owner.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
@@ -149,21 +171,32 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
 
     @Override
     protected void afterEntityHit(EntityRayTraceResult entityRayTraceResult, boolean entityHurt) {
-        if (entityHurt && !gaveHamonPoints) {
-            getUserHamon().ifPresent(hamon -> {
-                gaveHamonPoints = true;
-                hamon.hamonPointsFromAction(HamonStat.STRENGTH, points);
+        if (entityHurt) {
+            userHamon((power, hamon) -> {
+                if (!gaveHamonPointsForBaseHit) {
+                    gaveHamonPointsForBaseHit = true;
+                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, baseHitPoints);
+                }
+                return false;
             });
         }
     }
-    
+
+    private Optional<INonStandPower> userPower = Optional.empty();
     private Optional<HamonData> hamon = Optional.empty();
-    private Optional<HamonData> getUserHamon() {
-        if (!hamon.isPresent()) {
-            hamon = INonStandPower.getNonStandPowerOptional(getOwner())
-                    .map(power -> power.getTypeSpecificData(ModPowers.HAMON.get())).orElse(hamon);
+    private boolean userHamon(BiPredicate<INonStandPower, HamonData> action) {
+        if (!userPower.isPresent()) {
+            userPower = INonStandPower.getNonStandPowerOptional(getOwner()).resolve();
         }
-        return hamon;
+        if (userPower.isPresent()) {
+            if (!hamon.isPresent()) {
+                hamon = userPower.flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()));
+            }
+            if (hamon.isPresent()) {
+                return action.test(userPower.get(), hamon.get());
+            }
+        }
+        return false;
     }
 
     @Override
@@ -176,11 +209,11 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
         super.addAdditionalSaveData(nbt);
         nbt.putBoolean("LeftArm", side == HandSide.LEFT);
         nbt.putFloat("Speed", speed);
-        nbt.putInt("LifeSpan", lifeSpan);
         nbt.putFloat("HamonDamage", hamonDamage);
         nbt.putFloat("HamonDamageCost", hamonDamageCost);
-        nbt.putBoolean("PointsGiven", gaveHamonPoints);
-        nbt.putFloat("Points", points);
+        nbt.putBoolean("SpendStab", spendHamonStability);
+        nbt.putBoolean("PointsGiven", gaveHamonPointsForBaseHit);
+        nbt.putFloat("Points", baseHitPoints);
     }
 
     @Override
@@ -188,11 +221,11 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
         super.readAdditionalSaveData(nbt);
         side = nbt.getBoolean("LeftArm") ? HandSide.LEFT : HandSide.RIGHT;
         speed = nbt.getFloat("Speed");
-        lifeSpan = nbt.getInt("LifeSpan");
         hamonDamage = nbt.getFloat("HamonDamage");
         hamonDamageCost = nbt.getFloat("HamonDamageCost");
-        gaveHamonPoints = nbt.getBoolean("PointsGiven");
-        points = nbt.getFloat("Points");
+        spendHamonStability = nbt.getBoolean("SpendStab");
+        gaveHamonPointsForBaseHit = nbt.getBoolean("PointsGiven");
+        baseHitPoints = nbt.getFloat("Points");
     }
 
     @Override
@@ -200,7 +233,6 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
         super.writeSpawnData(buffer);
         buffer.writeBoolean(side == HandSide.LEFT);
         buffer.writeFloat(speed);
-        buffer.writeVarInt(lifeSpan);
     }
 
     @Override
@@ -208,7 +240,6 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
         super.readSpawnData(additionalData);
         side = additionalData.readBoolean() ? HandSide.LEFT : HandSide.RIGHT;
         speed = additionalData.readFloat();
-        lifeSpan = additionalData.readVarInt();
     }
 
 }

@@ -107,6 +107,7 @@ public class HamonData extends TypeSpecificData {
     private int hamonControlPoints;
     private int hamonControlLevel;
     private float hamonDamageFactor = 1F;
+    private float pointsIncFrac = 0;
     
     private float breathingTrainingLevel;
     private float breathingTrainingDayBonus;
@@ -234,7 +235,7 @@ public class HamonData extends TypeSpecificData {
     }
     
     private float fullBreathStabilityTicks() {
-        float ticks = 1000F - (600F * breathingTrainingLevel / MAX_BREATHING_LEVEL);
+        float ticks = 1200F - (600F * breathingTrainingLevel / MAX_BREATHING_LEVEL);
         return ticks;
     }
     
@@ -541,7 +542,11 @@ public class HamonData extends TypeSpecificData {
         }
         energyCost *= JojoModConfig.getCommonConfigInstance(false).hamonPointsMultiplier.get().floatValue();
         int points = (int) (energyCost / ENERGY_PER_POINT);
-        if (random.nextFloat() < (energyCost % ENERGY_PER_POINT) / ENERGY_PER_POINT) points++;
+        pointsIncFrac += (energyCost % ENERGY_PER_POINT) / ENERGY_PER_POINT;
+        if (pointsIncFrac >= 1) {
+            points++;
+            pointsIncFrac--;
+        }
         // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! logger
         JojoMod.LOGGER.debug("Adding {} points to {}", energyCost / ENERGY_PER_POINT, stat);
         setHamonStatPoints(stat, getStatPoints(stat) + points, false, false);
@@ -1215,6 +1220,7 @@ public class HamonData extends TypeSpecificData {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putInt("StrengthPoints", hamonStrengthPoints);
         nbt.putInt("ControlPoints", hamonControlPoints);
+        nbt.putFloat("PointsIncFrac", pointsIncFrac);
         nbt.putFloat("BreathingTechnique", breathingTrainingLevel);
         nbt.put("Skills", hamonSkills.toNBT());
         CompoundNBT exercises = new CompoundNBT();
@@ -1235,6 +1241,7 @@ public class HamonData extends TypeSpecificData {
         hamonStrengthLevel = levelFromPoints(hamonStrengthPoints);
         hamonControlPoints = nbt.getInt("ControlPoints");
         hamonControlLevel = levelFromPoints(hamonControlPoints);
+        pointsIncFrac = nbt.getFloat("PointsIncFrac");
         breathingTrainingLevel = nbt.getFloat("BreathingTechnique");
         recalcHamonDamage();
         hamonSkills.fromNbt(nbt.getCompound("Skills"));

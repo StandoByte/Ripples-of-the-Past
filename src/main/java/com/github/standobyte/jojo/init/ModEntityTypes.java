@@ -86,11 +86,11 @@ public class ModEntityTypes {
             .build(new ResourceLocation(JojoMod.MOD_ID, "space_ripper_stingy_eyes").toString()));
     
     public static final RegistryObject<EntityType<HamonTurquoiseBlueOverdriveEntity>> TURQUOISE_BLUE_OVERDRIVE = ENTITIES.register("turquoise_blue_overdrive", 
-            () -> EntityType.Builder.<HamonTurquoiseBlueOverdriveEntity>of(HamonTurquoiseBlueOverdriveEntity::new, EntityClassification.MISC).sized(4F, 4F).noSummon().setUpdateInterval(20)
+            () -> EntityType.Builder.<HamonTurquoiseBlueOverdriveEntity>of(HamonTurquoiseBlueOverdriveEntity::new, EntityClassification.MISC).sized(4F, 4F).noSummon().setUpdateInterval(20).fireImmune()
             .build(new ResourceLocation(JojoMod.MOD_ID, "turquoise_blue_overdrive").toString()));
     
     public static final RegistryObject<EntityType<SendoHamonOverdriveEntity>> SENDO_HAMON_OVERDRIVE = ENTITIES.register("sendo_hamon_overdrive", 
-            () -> EntityType.Builder.<SendoHamonOverdriveEntity>of(SendoHamonOverdriveEntity::new, EntityClassification.MISC).sized(4, 4).setUpdateInterval(Integer.MAX_VALUE).setShouldReceiveVelocityUpdates(false)
+            () -> EntityType.Builder.<SendoHamonOverdriveEntity>of(SendoHamonOverdriveEntity::new, EntityClassification.MISC).sized(4, 4).setUpdateInterval(Integer.MAX_VALUE).setShouldReceiveVelocityUpdates(false).fireImmune()
             .build(new ResourceLocation(JojoMod.MOD_ID, "sendo_hamon_overdrive").toString()));
     
     public static final RegistryObject<EntityType<ZoomPunchEntity>> ZOOM_PUNCH = ENTITIES.register("zoom_punch", 
@@ -102,7 +102,7 @@ public class ModEntityTypes {
             .build(new ResourceLocation(JojoMod.MOD_ID, "afterimage").toString()));
     
     public static final RegistryObject<EntityType<HamonProjectileShieldEntity>> HAMON_PROJECTILE_SHIELD = ENTITIES.register("hamon_projectile_shield", 
-            () -> EntityType.Builder.<HamonProjectileShieldEntity>of(HamonProjectileShieldEntity::new, EntityClassification.MISC).sized(3.0F, 3.0F).setUpdateInterval(Integer.MAX_VALUE).setShouldReceiveVelocityUpdates(false).noSummon().noSave()
+            () -> EntityType.Builder.<HamonProjectileShieldEntity>of(HamonProjectileShieldEntity::new, EntityClassification.MISC).sized(3.0F, 3.0F).setUpdateInterval(Integer.MAX_VALUE).setShouldReceiveVelocityUpdates(false).noSummon().noSave().fireImmune()
             .build(new ResourceLocation(JojoMod.MOD_ID, "hamon_projectile_shield").toString()));
     
     public static final RegistryObject<EntityType<LeavesGliderEntity>> LEAVES_GLIDER = ENTITIES.register("leaves_glider", 
@@ -110,11 +110,11 @@ public class ModEntityTypes {
             .build(new ResourceLocation(JojoMod.MOD_ID, "leaves_glider").toString()));
     
     public static final RegistryObject<EntityType<HamonBlockChargeEntity>> HAMON_BLOCK_CHARGE = ENTITIES.register("hamon_block_charge", 
-            () -> EntityType.Builder.<HamonBlockChargeEntity>of(HamonBlockChargeEntity::new, EntityClassification.MISC).sized(1.0F, 1.0F).setUpdateInterval(Integer.MAX_VALUE).setShouldReceiveVelocityUpdates(false)
+            () -> EntityType.Builder.<HamonBlockChargeEntity>of(HamonBlockChargeEntity::new, EntityClassification.MISC).sized(1.0F, 1.0F).setUpdateInterval(Integer.MAX_VALUE).setShouldReceiveVelocityUpdates(false).fireImmune()
             .build(new ResourceLocation(JojoMod.MOD_ID, "hamon_block_charge").toString()));
     
     public static final RegistryObject<EntityType<LightBeamEntity>> AJA_STONE_BEAM = ENTITIES.register("aja_stone_beam", 
-            () -> EntityType.Builder.<LightBeamEntity>of(LightBeamEntity::new, EntityClassification.MISC).sized(0.125F, 0.125F).noSummon().setUpdateInterval(1)
+            () -> EntityType.Builder.<LightBeamEntity>of(LightBeamEntity::new, EntityClassification.MISC).sized(0.125F, 0.125F).noSummon().setUpdateInterval(1).fireImmune()
             .build(new ResourceLocation(JojoMod.MOD_ID, "aja_stone_beam").toString()));
     
     public static final RegistryObject<EntityType<HamonCutterEntity>> HAMON_CUTTER = ENTITIES.register("hamon_cutter", 
@@ -154,7 +154,7 @@ public class ModEntityTypes {
             .build(new ResourceLocation(JojoMod.MOD_ID, "snake_muffler").toString()));
     
     public static final RegistryObject<EntityType<TommyGunBulletEntity>> TOMMY_GUN_BULLET = ENTITIES.register("tommy_gun_bullet", 
-            () -> EntityType.Builder.<TommyGunBulletEntity>of(TommyGunBulletEntity::new, EntityClassification.MISC).sized(0.0625F, 0.0625F).clientTrackingRange(4).setUpdateInterval(20)
+            () -> EntityType.Builder.<TommyGunBulletEntity>of(TommyGunBulletEntity::new, EntityClassification.MISC).sized(0.0625F, 0.0625F).clientTrackingRange(4).setUpdateInterval(20).fireImmune()
             .build(new ResourceLocation(JojoMod.MOD_ID, "tommy_gun_bullet").toString()));
     
     public static final RegistryObject<EntityType<KnifeEntity>> KNIFE = ENTITIES.register("knife", 

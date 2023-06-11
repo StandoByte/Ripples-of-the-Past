@@ -84,7 +84,7 @@ public class HGStringEntity extends OwnerBoundProjectileEntity {
     }
     
     @Override
-    protected float knockbackReduction() {
+    protected float knockbackMultiplier() {
         return 0F;
     }
     

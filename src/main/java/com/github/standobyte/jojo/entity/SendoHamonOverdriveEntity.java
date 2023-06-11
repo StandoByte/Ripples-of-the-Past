@@ -192,13 +192,13 @@ public class SendoHamonOverdriveEntity extends Entity implements IEntityAddition
     private AxisAlignedBB getHurtHitbox(int tick) {
         AxisAlignedBB cache = hitboxes.get(tick);
         if (cache == null) {
-            cache = makeHitBox(this.radius * (double) (tick + 1) / (double) WAVE_TICK_LENGTH);
+            cache = makeHurtHitBox(this.radius * (double) (tick + 1) / (double) WAVE_TICK_LENGTH);
             hitboxes.set(tick, cache);
         }
         return cache;
     }
     
-    private AxisAlignedBB makeHitBox(double radius) {
+    private AxisAlignedBB makeHurtHitBox(double radius) {
         Vector3d center = getBoundingBox().getCenter();
         AxisAlignedBB hitBox = new AxisAlignedBB(center, center);
         if (axis != null) {
@@ -229,7 +229,7 @@ public class SendoHamonOverdriveEntity extends Entity implements IEntityAddition
             return EntitySize.fixed(radius * 2, radius * 2);
         }
     }
-    private static final double WIDTH = 1.5;
+    private static final double WIDTH = 2;
     
     @Override
     public void setPos(double pX, double pY, double pZ) {
@@ -253,12 +253,12 @@ public class SendoHamonOverdriveEntity extends Entity implements IEntityAddition
     }
     
     private void givePointsToUser() {
-        if (!level.isClientSide() && gavePoints++ < 16) {
+        if (!level.isClientSide() && (gavePoints++ < 6 || gavePoints % 4 == 0)) {
             Entity user = getUser();
             if (user instanceof LivingEntity) {
                 INonStandPower.getNonStandPowerOptional(((LivingEntity) user)).resolve().flatMap(power -> 
                 power.getTypeSpecificData(ModPowers.HAMON.get())).ifPresent(hamon -> {
-                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, points * 0.1F);
+                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, points * 0.25F);
                 });
             }
         }

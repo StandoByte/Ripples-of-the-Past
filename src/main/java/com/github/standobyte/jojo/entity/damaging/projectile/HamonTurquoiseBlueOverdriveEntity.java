@@ -33,19 +33,39 @@ public class HamonTurquoiseBlueOverdriveEntity extends ModdedProjectileEntity {
     private int sparksCount;
     private boolean gaveHamonPoints;
 
-    public HamonTurquoiseBlueOverdriveEntity(World world, LivingEntity entity, float radius, float damage, float points) {
+    public HamonTurquoiseBlueOverdriveEntity(World world, LivingEntity entity) {
         super(ModEntityTypes.TURQUOISE_BLUE_OVERDRIVE.get(), entity, world);
-        setRadius(radius);
+    }
+    
+    public HamonTurquoiseBlueOverdriveEntity setRadius(float radius) {
+        this.radius = radius;
+        this.sparksCount = Math.max(MathHelper.floor(radius * radius * radius), 1);
+        Vector3d pos = getBoundingBox().getCenter();
+        refreshDimensions();
+        setBoundingBox(new AxisAlignedBB(pos, pos).inflate(radius));
+        return this;
+    }
+    
+    public HamonTurquoiseBlueOverdriveEntity setDamage(float damage) {
         this.damage = damage;
+        return this;
+    }
+    
+    public HamonTurquoiseBlueOverdriveEntity setPoints(float points) {
         this.points = points;
-        setPos(getX(), getY() - radius, getZ());
+        return this;
     }
 
     public HamonTurquoiseBlueOverdriveEntity(EntityType<? extends HamonTurquoiseBlueOverdriveEntity> entityType, World world) {
         super(entityType, world);
     }
-
-
+    
+    @Override
+    public void shoot(double x, double y, double z, float velocity, float inaccuracy) {
+        setPos(getX(), getY() - radius, getZ());
+        super.shoot(x, y, z, velocity, inaccuracy);
+    }
+    
     @Override
     public void tick() {
         super.tick();
@@ -62,7 +82,7 @@ public class HamonTurquoiseBlueOverdriveEntity extends ModdedProjectileEntity {
                 }
             }
             level.playSound(ClientUtil.getClientPlayer(), center.x, center.y, center.z, ModSounds.HAMON_SPARK.get(), 
-                    SoundCategory.AMBIENT, 0.1F, 1.0F + (random.nextFloat() - 0.5F) * 0.15F);
+                    SoundCategory.AMBIENT, 0.1F + radius * 0.15F, 1.0F + (random.nextFloat() - 0.5F) * 0.15F);
         }
     }
 
@@ -109,14 +129,6 @@ public class HamonTurquoiseBlueOverdriveEntity extends ModdedProjectileEntity {
         }
     }
     
-    private void setRadius(float radius) {
-        this.radius = radius;
-        this.sparksCount = Math.max(MathHelper.floor(radius * radius * radius * 2), 1);
-        Vector3d pos = getBoundingBox().getCenter();
-        refreshDimensions();
-        setBoundingBox(new AxisAlignedBB(pos, pos).inflate(radius));
-    }
-
     @Override
     public EntitySize getDimensions(Pose pose) {
         EntitySize defaultSize = super.getDimensions(pose);
@@ -160,7 +172,7 @@ public class HamonTurquoiseBlueOverdriveEntity extends ModdedProjectileEntity {
         damage = nbt.getFloat("Damage");
         points = nbt.getFloat("Points");
     }
-
+    
     @Override
     public void writeSpawnData(PacketBuffer buffer) {
         super.writeSpawnData(buffer);

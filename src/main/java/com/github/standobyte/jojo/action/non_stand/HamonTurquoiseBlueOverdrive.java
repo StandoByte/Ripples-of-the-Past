@@ -28,11 +28,13 @@ public class HamonTurquoiseBlueOverdrive extends HamonAction {
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
-            float hamonEfficiency = hamon.getActionEfficiency(getEnergyCost(power));
-            HamonTurquoiseBlueOverdriveEntity overdriveWave = new HamonTurquoiseBlueOverdriveEntity(world, user, 
-                    1.5F + (float) (4.5F * hamon.getHamonControlLevelRatio() * hamonEfficiency), 
-                    1.5F * hamonEfficiency, 
-                    getEnergyCost(power) * hamonEfficiency);
+            float energyCost = getEnergyCost(power);
+            float hamonEfficiency = hamon.getActionEfficiency(energyCost);
+            
+            HamonTurquoiseBlueOverdriveEntity overdriveWave = new HamonTurquoiseBlueOverdriveEntity(world, user)
+                    .setRadius(1.5F + (float) (4.5F * hamon.getHamonControlLevelRatio() * hamonEfficiency))
+                    .setDamage(1F * hamonEfficiency)
+                    .setPoints(Math.min(energyCost, power.getEnergy()) * hamonEfficiency);
             overdriveWave.shootFromRotation(user, 2F, 0);
             world.addFreshEntity(overdriveWave);
         }

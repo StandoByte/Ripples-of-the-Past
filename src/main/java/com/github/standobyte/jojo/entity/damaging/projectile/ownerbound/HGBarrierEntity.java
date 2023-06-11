@@ -100,7 +100,7 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
     }
     
     @Override
-    protected float knockbackReduction() {
+    protected float knockbackMultiplier() {
         return 0;
     }
 

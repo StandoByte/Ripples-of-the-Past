@@ -158,7 +158,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismData> {
         if (effect == Effects.MOVEMENT_SPEED)                               return bloodLevel - 4;
         if (effect == Effects.DIG_SPEED)                                    return bloodLevel - 4;
         if (effect == Effects.JUMP)                                         return bloodLevel - 4;
-        if (effect == Effects.DAMAGE_RESISTANCE)                            return bloodLevel - 6;
+//        if (effect == Effects.DAMAGE_RESISTANCE)                            return bloodLevel - 6;
         if (effect == Effects.NIGHT_VISION)                                 return 0;
         return -1;
     }
@@ -172,7 +172,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismData> {
                 Effects.MOVEMENT_SPEED,
                 Effects.DIG_SPEED,
                 Effects.JUMP,
-                Effects.DAMAGE_RESISTANCE,
+//                Effects.DAMAGE_RESISTANCE,
                 Effects.NIGHT_VISION,
                 
                 Effects.MOVEMENT_SLOWDOWN,

@@ -187,7 +187,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
         DamageSource damageSource = standDamage() ? new IndirectStandEntityDamageSource("arrow", this, owner).setProjectile() :
             new IndirectEntityDamageSource("arrow", this, owner).setProjectile();
         
-        float knockbackReduction = knockbackReduction();
+        float knockbackReduction = knockbackMultiplier();
         if (knockbackReduction < 1
                 && standDamage() // delete this condition later
                 ) {
@@ -200,7 +200,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
         return damageSource;
     }
     
-    protected float knockbackReduction() {
+    protected float knockbackMultiplier() {
         return 1F;
     }
     

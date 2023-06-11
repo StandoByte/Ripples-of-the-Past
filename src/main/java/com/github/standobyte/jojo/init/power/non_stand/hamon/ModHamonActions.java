@@ -43,7 +43,7 @@ public class ModHamonActions {
                     .needsFreeMainHand().swingHand()));
    
    public static final RegistryObject<HamonAction> HAMON_SENDO_OVERDRIVE = ACTIONS.register("hamon_sendo_overdrive", 
-           () -> new HamonSendoOverdrive(new HamonAction.Builder().energyCost(1000F)
+           () -> new HamonSendoOverdrive(new HamonAction.Builder().energyCost(900F)
                    .needsFreeMainHand().swingHand()
                    .shout(ModHamonSkills.CHARACTER_JONATHAN, ModSounds.JONATHAN_SENDO_OVERDRIVE)));
 
@@ -59,7 +59,7 @@ public class ModHamonActions {
                    .shout(ModHamonSkills.CHARACTER_CAESAR, ModSounds.CAESAR_SUNLIGHT_YELLOW_OVERDRIVE)));
     
     public static final RegistryObject<HamonAction> HAMON_ZOOM_PUNCH = ACTIONS.register("hamon_zoom_punch", 
-            () -> new HamonZoomPunch(new HamonAction.Builder().energyCost(150F).cooldown(14, 0)
+            () -> new HamonZoomPunch(new HamonZoomPunch.Builder().energyCost(450F).hitCost(150F).cooldown(14, 0)
                     .shout(ModHamonSkills.CHARACTER_JONATHAN, ModSounds.JONATHAN_ZOOM_PUNCH)
                     .shout(ModHamonSkills.CHARACTER_ZEPPELI, ModSounds.ZEPPELI_ZOOM_PUNCH)
                     .shout(ModHamonSkills.CHARACTER_JOSEPH, ModSounds.JOSEPH_ZOOM_PUNCH)));
