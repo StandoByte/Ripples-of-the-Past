@@ -18,6 +18,7 @@ import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.action.stand.TimeStop;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.render.block.overlay.TranslucentBlockRenderHelper;
@@ -226,7 +227,10 @@ public class ClientEventHandler {
             if (power.getHeldAction(true) == ModHamonActions.ZEPPELI_TORNADO_OVERDRIVE.get()) {
                 event.getMatrixStack().mulPose(Vector3f.YP.rotation((power.getHeldActionTicks() + event.getPartialRenderTick()) * 2F % 360F));
             }
-            if (power.isActionOnCooldown(ModHamonActions.HAMON_ZOOM_PUNCH.get())) {
+        });
+        
+        entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+            if (cap.isUsingZoomPunch()) {
                 M model = event.getRenderer().getModel();
                 if (model instanceof BipedModel) {
                     ModelRenderer arm = entity.getMainArm() == HandSide.LEFT ? ((BipedModel<?>) model).leftArm : ((BipedModel<?>) model).rightArm;
@@ -584,18 +588,24 @@ public class ClientEventHandler {
         Entity entity = Minecraft.getInstance().getCameraEntity();
         if (entity instanceof LivingEntity) {
             LivingEntity livingEntity = (LivingEntity) entity;
-            INonStandPower.getNonStandPowerOptional(livingEntity).ifPresent(power -> {
-                if (event.getHand() == Hand.MAIN_HAND && power.isActionOnCooldown(ModHamonActions.HAMON_ZOOM_PUNCH.get())) {
-                    event.setCanceled(true);
-                }
-                else {
+            
+            if (event.getHand() == Hand.MAIN_HAND) {
+                entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                    if (cap.isUsingZoomPunch()) {
+                        event.setCanceled(true);
+                    }
+                });
+            }
+            
+            if (!event.isCanceled()) {
+                INonStandPower.getNonStandPowerOptional(livingEntity).ifPresent(power -> {
                     power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                         if (hamon.isMeditating()) {
                             event.setCanceled(true);
                         }
                     });
-                }
-            });
+                });
+            }
         }
     }
     
@@ -607,10 +617,7 @@ public class ClientEventHandler {
             if (entity instanceof LivingEntity) {
                 LivingEntity livingEntity = (LivingEntity) entity;
                 INonStandPower.getNonStandPowerOptional(livingEntity).ifPresent(power -> {
-                    if (power.isActionOnCooldown(ModHamonActions.HAMON_ZOOM_PUNCH.get())) {
-                        event.setCanceled(true);
-                    }
-                    else if (!eventPosted) {
+                    if (!eventPosted) {
                         ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
                         if ((hud.isActionSelectedAndEnabled(ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get()))
                                 && livingEntity.getMainHandItem().isEmpty() && livingEntity.getOffhandItem().isEmpty()) {

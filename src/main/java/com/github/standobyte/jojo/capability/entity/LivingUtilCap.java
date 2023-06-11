@@ -39,6 +39,8 @@ public class LivingUtilCap {
     private int noLerpTicks = 0;
     private int hurtTimeSaved;
     
+    private boolean usedZoomPunch = false;
+    
     public LivingUtilCap(LivingEntity entity) {
         this.entity = entity;
     }
@@ -197,5 +199,15 @@ public class LivingUtilCap {
             entity.hurtTime = hurtTimeSaved;
             hurtTimeSaved = 0;
         }
+    }
+    
+    
+    
+    public void setUsingZoomPunch(boolean zoomPunch) {
+        this.usedZoomPunch = zoomPunch;
+    }
+    
+    public boolean isUsingZoomPunch() {
+        return usedZoomPunch;
     }
 }

@@ -39,7 +39,7 @@ public class HamonTurquoiseBlueOverdriveEntity extends ModdedProjectileEntity {
     
     public HamonTurquoiseBlueOverdriveEntity setRadius(float radius) {
         this.radius = radius;
-        this.sparksCount = Math.max(MathHelper.floor(radius * radius * radius), 1);
+        this.sparksCount = Math.max(MathHelper.floor(radius * radius * 3), 1);
         Vector3d pos = getBoundingBox().getCenter();
         refreshDimensions();
         setBoundingBox(new AxisAlignedBB(pos, pos).inflate(radius));

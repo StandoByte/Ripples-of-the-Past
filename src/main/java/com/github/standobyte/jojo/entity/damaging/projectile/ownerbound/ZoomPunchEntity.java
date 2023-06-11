@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
@@ -105,6 +106,7 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
                 power.updateCooldownTimer(ModHamonActions.HAMON_ZOOM_PUNCH.get(), 0, ModHamonActions.HAMON_ZOOM_PUNCH.get().getCooldownTechnical(null));
             });
         }
+        setOwnerZoomPunch(false);
     }
 
     @Override
@@ -240,6 +242,17 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
         super.readSpawnData(additionalData);
         side = additionalData.readBoolean() ? HandSide.LEFT : HandSide.RIGHT;
         speed = additionalData.readFloat();
+        
+        setOwnerZoomPunch(true);
+    }
+    
+    private void setOwnerZoomPunch(boolean value) {
+        if (level.isClientSide()) {
+            LivingEntity user = getOwner();
+            if (user != null) {
+                user.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.setUsingZoomPunch(value));
+            }
+        }
     }
 
 }
