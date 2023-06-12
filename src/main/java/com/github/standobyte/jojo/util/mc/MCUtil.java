@@ -45,6 +45,7 @@ import net.minecraft.particles.IParticleData;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.ReuseableStream;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
@@ -339,4 +340,13 @@ public class MCUtil {
         }
         return false;
     }
+    
+    public static HandSide getHandSide(LivingEntity entity, Hand hand) {
+        return hand == Hand.MAIN_HAND ? entity.getMainArm() : getOppositeSide(entity.getMainArm());
+    }
+    
+    public static HandSide getOppositeSide(HandSide side) {
+        return side == HandSide.LEFT ? HandSide.RIGHT : HandSide.LEFT;
+    }
+    
 }

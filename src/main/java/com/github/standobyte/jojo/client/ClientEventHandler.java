@@ -22,6 +22,7 @@ import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.render.block.overlay.TranslucentBlockRenderHelper;
+import com.github.standobyte.jojo.client.render.entity.layerrenderer.GlovesLayer;
 import com.github.standobyte.jojo.client.render.world.ParticleManagerWrapperTS;
 import com.github.standobyte.jojo.client.render.world.TimeStopWeatherHandler;
 import com.github.standobyte.jojo.client.render.world.shader.CustomShaderGroup;
@@ -56,6 +57,7 @@ import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.IngameMenuScreen;
 import net.minecraft.client.gui.screen.MainMenuScreen;
 import net.minecraft.client.renderer.FirstPersonRenderer;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.OutlineLayerBuffer;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.EntityModel;
@@ -72,6 +74,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.EnchantedBookItem;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
@@ -88,7 +91,6 @@ import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.IWeatherParticleRenderHandler;
 import net.minecraftforge.client.IWeatherRenderHandler;
@@ -110,9 +112,7 @@ import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
-@EventBusSubscriber(modid = JojoMod.MOD_ID, value = Dist.CLIENT)
 public class ClientEventHandler {
     private static ClientEventHandler instance = null;
 
@@ -206,8 +206,30 @@ public class ClientEventHandler {
                 return;
             }
         }
+        
+        M model = event.getRenderer().getModel();
+        if (model instanceof BipedModel) {
+            BipedModel<?> bipedModel = (BipedModel<?>) model;
+            correctGlovesHeldPose(entity, bipedModel, HandSide.RIGHT);
+            correctGlovesHeldPose(entity, bipedModel, HandSide.LEFT);
+        }
         // FIXME (vampire\curing) shake vampire while curing
         // yRot += (float) (Math.cos((double)entity.tickCount * 3.25) * Math.PI * 0.4);
+    }
+    
+    private void correctGlovesHeldPose(LivingEntity entity, BipedModel<?> model, HandSide handSide) {
+        Hand hand = entity.getMainArm() == handSide ? Hand.MAIN_HAND : Hand.OFF_HAND;
+        ItemStack item = entity.getItemInHand(hand);
+        if (GlovesLayer.areGloves(item)) {
+            switch (handSide) {
+            case LEFT:
+                model.leftArmPose = BipedModel.ArmPose.EMPTY;
+                break;
+            case RIGHT:
+                model.rightArmPose = BipedModel.ArmPose.EMPTY;
+                break;
+            }
+        }
     }
     
     @SubscribeEvent(priority = EventPriority.HIGH)
@@ -609,42 +631,52 @@ public class ClientEventHandler {
         }
     }
     
-    private boolean eventPosted = false;
+    private boolean modPostedEvent = false;
+    @SuppressWarnings("resource")
     @SubscribeEvent(priority = EventPriority.LOW)
     public void onRenderHand(RenderHandEvent event) {
-        if (!event.isCanceled() && event.getHand() == Hand.MAIN_HAND) {
-            Entity entity = Minecraft.getInstance().getCameraEntity();
-            if (entity instanceof LivingEntity) {
-                LivingEntity livingEntity = (LivingEntity) entity;
-                INonStandPower.getNonStandPowerOptional(livingEntity).ifPresent(power -> {
-                    if (!eventPosted) {
-                        ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-                        if ((hud.isActionSelectedAndEnabled(ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get()))
-                                && livingEntity.getMainHandItem().isEmpty() && livingEntity.getOffhandItem().isEmpty()) {
-                            
-                            FirstPersonRenderer renderer = mc.getItemInHandRenderer();
-                            ClientPlayerEntity player = mc.player;
-                            Hand swingingArm = MoreObjects.firstNonNull(player.swingingArm, Hand.MAIN_HAND);
-                            float f6 = swingingArm == Hand.OFF_HAND ? player.getAttackAnim(event.getPartialTicks()) : 0.0F;
-                            float f7 = 1.0F - MathHelper.lerp(event.getPartialTicks(), ClientReflection.getOffHandHeightPrev(renderer), ClientReflection.getOffHandHeight(renderer));
-                            MatrixStack matrixStack = event.getMatrixStack();
-                            
-                            eventPosted = true;
-                            if (!ForgeHooksClient.renderSpecificFirstPersonHand(Hand.OFF_HAND, 
-                                    matrixStack, event.getBuffers(), event.getLight(), 
-                                    event.getPartialTicks(), event.getInterpolatedPitch(), 
-                                    f6, f7, ((LivingEntity) entity).getOffhandItem())) {
-                                matrixStack.pushPose();
-                                ClientReflection.renderPlayerArm(matrixStack, event.getBuffers(), event.getLight(), f7, f6, player.getMainArm().getOpposite(), renderer);
-                                matrixStack.popPose();
-                                // i've won... but at what cost?
-                            }
-                            eventPosted = false;
-                        }
-                    }
-                });
+        ClientPlayerEntity player = Minecraft.getInstance().player;
+        if (!event.isCanceled() && !modPostedEvent && event.getHand() == Hand.MAIN_HAND && !player.isInvisible()) {
+            INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
+                ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
+                if ((hud.isActionSelectedAndEnabled(ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get()))
+                        && MCUtil.isHandFree(player, Hand.MAIN_HAND) && MCUtil.isHandFree(player, Hand.OFF_HAND)) {
+                    renderHand(Hand.OFF_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
+                            event.getPartialTicks(), event.getInterpolatedPitch(), player);
+                }
+            });
+            
+            ItemStack item = player.getItemInHand(Hand.MAIN_HAND);
+            if (GlovesLayer.areGloves(item)) {
+                event.setCanceled(true);
+                renderHand(Hand.MAIN_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
+                        event.getPartialTicks(), event.getInterpolatedPitch(), player);
             }
         }
+    }
+    
+    private void renderHand(Hand hand, MatrixStack matrixStack, IRenderTypeBuffer buffers, int light,
+            float partialTick, float interpolatedPitch, LivingEntity entity) {
+        FirstPersonRenderer renderer = mc.getItemInHandRenderer();
+        ClientPlayerEntity player = mc.player;
+        Hand swingingArm = MoreObjects.firstNonNull(player.swingingArm, Hand.MAIN_HAND);
+        float swingProgress = swingingArm == hand ? player.getAttackAnim(partialTick) : 0.0F;
+        float equipProgress = hand == Hand.MAIN_HAND ?
+                1.0F - MathHelper.lerp(partialTick, ClientReflection.getMainHandHeightPrev(renderer), ClientReflection.getMainHandHeight(renderer))
+                : 1.0F - MathHelper.lerp(partialTick, ClientReflection.getOffHandHeightPrev(renderer), ClientReflection.getOffHandHeight(renderer));
+        
+        modPostedEvent = true;
+        if (!ForgeHooksClient.renderSpecificFirstPersonHand(hand, 
+                matrixStack, buffers, light, 
+                partialTick, interpolatedPitch, 
+                swingProgress, equipProgress, entity.getItemInHand(hand))) {
+            matrixStack.pushPose();
+            ClientReflection.renderPlayerArm(matrixStack, buffers, light, equipProgress, 
+                    swingProgress, MCUtil.getHandSide(player, hand), renderer);
+            matrixStack.popPose();
+            // i've won... but at what cost?
+        }
+        modPostedEvent = false;
     }
     
     public static boolean mainHandRendered;
@@ -667,9 +699,9 @@ public class ClientEventHandler {
             break;
         }
     }
-
-
-
+    
+    
+    
     @SubscribeEvent
     public void afterScreenRender(DrawScreenEvent.Post event) {
         if (event.getGui() instanceof DeathScreen) {

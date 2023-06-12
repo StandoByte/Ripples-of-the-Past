@@ -1602,11 +1602,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
     
     public HandSide getArm(Hand arm) {
-        return arm == Hand.MAIN_HAND ? getMainArm() : getOppositeToMainArm();
-    }
-
-    private HandSide getOppositeToMainArm() {
-        return getMainArm() == HandSide.RIGHT ? HandSide.LEFT : HandSide.RIGHT;
+        return MCUtil.getHandSide(this, arm);
     }
     
     public HandSide getPunchingHand() {

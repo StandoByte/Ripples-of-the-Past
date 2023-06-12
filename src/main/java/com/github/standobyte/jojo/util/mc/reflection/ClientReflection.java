@@ -36,6 +36,16 @@ import net.minecraft.util.Timer;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 public class ClientReflection {
+    private static final Field FIRST_PERSON_RENDERER_MAIN_HAND_HEIGHT = ObfuscationReflectionHelper.findField(FirstPersonRenderer.class, "field_187469_f");
+    public static float getMainHandHeight(FirstPersonRenderer renderer) {
+        return ReflectionUtil.getFieldValue(FIRST_PERSON_RENDERER_MAIN_HAND_HEIGHT, renderer);
+    }
+
+    private static final Field FIRST_PERSON_RENDERER_O_MAIN_HAND_HEIGHT = ObfuscationReflectionHelper.findField(FirstPersonRenderer.class, "field_187470_g");
+    public static float getMainHandHeightPrev(FirstPersonRenderer renderer) {
+        return ReflectionUtil.getFieldValue(FIRST_PERSON_RENDERER_O_MAIN_HAND_HEIGHT, renderer);
+    }
+    
     private static final Field FIRST_PERSON_RENDERER_OFF_HAND_HEIGHT = ObfuscationReflectionHelper.findField(FirstPersonRenderer.class, "field_187471_h");
     public static float getOffHandHeight(FirstPersonRenderer renderer) {
         return ReflectionUtil.getFieldValue(FIRST_PERSON_RENDERER_OFF_HAND_HEIGHT, renderer);
