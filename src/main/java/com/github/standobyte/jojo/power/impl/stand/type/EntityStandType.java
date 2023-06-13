@@ -181,7 +181,7 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
                 if (!standEntity.isBeingRetracted()) {
                     standEntity.retractStand(true);
                 }
-                else {
+                else if (standEntity.isManuallyControlled()) {
                     standEntity.stopRetraction();
                 }
             }
