@@ -48,7 +48,6 @@ public class TrDirectEntityPosPacket {
         public void handle(TrDirectEntityPosPacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity != null) {
-                entity.setPacketCoordinates(msg.x, msg.y, msg.z);
                 entity.moveTo(msg.x, msg.y, msg.z);
             }
         }

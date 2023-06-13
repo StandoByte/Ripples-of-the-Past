@@ -394,7 +394,9 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     }
     
     public void rotateStand(StandEntity standEntity, StandEntityTask task) {
-        standEntity.defaultRotation();
+        if (standEntity.isManuallyControlled() || !noAdheringToUserOffset(standEntity.getUserPower(), standEntity)) {
+            standEntity.defaultRotation();
+        }
     }
     
     protected Optional<StandRelativeOffset> offsetToTarget(IStandPower standPower, StandEntity standEntity, StandEntityTask task, 

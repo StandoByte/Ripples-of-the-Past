@@ -107,13 +107,18 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
                         if (target.getType() == TargetType.ENTITY) {
                             offset += target.getEntity().getBoundingBox().getXsize() / 2;
                         }
-                        pos = pos.subtract(pos.subtract(aimingEntity.getEyePosition(1.0F)).normalize().scale(offset)).subtract(0, standEntity.getEyeHeight(), 0);
+                        boolean shift = standPower.getUser().isShiftKeyDown();
+                        Vector3d offsetFromTarget = aimingEntity.getEyePosition(1.0F).subtract(pos).normalize().scale(offset);
+                        if (shift) {
+                            offsetFromTarget = offsetFromTarget.reverse();
+                        }
+                        pos = pos.add(offsetFromTarget);
+                        pos = pos.subtract(0, standEntity.getEyeHeight(), 0);
                     }
                     else {
                         pos = aimingEntity.position().add(standEntity.getLookAngle().scale(standEntity.getMaxRange()));
                     }
                     
-
                     double ticksForDistance = pos.subtract(standEntity.position()).length() / TimeStopInstant.getDistancePerTick(standEntity);
                     
                     if (timeStopTicks < ticksForDistance + ticksForWindup) {
@@ -124,12 +129,11 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
                     }
                     
                     pos = standEntity.collideNextPos(pos);
-//                    if (!world.isClientSide() ^ standEntity.isManuallyControlled()) {
-                        standEntity.moveTo(pos);
-                        if (standEntity.tickCount == 0 && !world.isClientSide()) {
-                            PacketManager.sendToClientsTracking(new TrDirectEntityPosPacket(standEntity.getId(), pos), standEntity);
-                        }
-//                    }
+                    standEntity.moveTo(pos.x, pos.y, pos.z);
+                    if (!world.isClientSide()) {
+                        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! doesn't work off-summon, the stand is set to retract
+                        PacketManager.sendToClientsTracking(new TrDirectEntityPosPacket(standEntity.getId(), pos), standEntity);
+                    }
                 }
                 else {
                     timeStopTicks = ticksForWindup;
