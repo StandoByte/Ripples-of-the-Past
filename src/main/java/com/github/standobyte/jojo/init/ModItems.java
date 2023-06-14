@@ -10,7 +10,6 @@ import com.github.standobyte.jojo.item.CassetteRecordedItem;
 import com.github.standobyte.jojo.item.ClackersItem;
 import com.github.standobyte.jojo.item.CustomModelArmorItem;
 import com.github.standobyte.jojo.item.GlovesItem;
-import com.github.standobyte.jojo.item.GumItem;
 import com.github.standobyte.jojo.item.KnifeItem;
 import com.github.standobyte.jojo.item.ModArmorMaterials;
 import com.github.standobyte.jojo.item.RoadRollerItem;
@@ -26,7 +25,6 @@ import com.github.standobyte.jojo.item.WalkmanItem;
 
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.BlockItem;
-import net.minecraft.item.Food;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemTier;
 import net.minecraft.item.Rarity;
@@ -45,13 +43,13 @@ public class ModItems {
     
     public static final RegistryObject<SledgehammerItem> IRON_SLEDGEHAMMER = ITEMS.register("sledgehammer", 
             () -> new SledgehammerItem(ItemTier.IRON, 9, -3.3F, new Item.Properties().tab(JojoMod.MAIN_TAB)));
-
+    
     public static final RegistryObject<BladeHatItem> BLADE_HAT = ITEMS.register("blade_hat", 
             () -> new BladeHatItem(ModArmorMaterials.BLACK_CLOTH, EquipmentSlotType.HEAD, new Item.Properties().tab(JojoMod.MAIN_TAB)));
     
     public static final RegistryObject<StoneMaskItem> STONE_MASK = ITEMS.register("stone_mask", 
             () -> new StoneMaskItem(ModArmorMaterials.STONE_MASK, EquipmentSlotType.HEAD, new Item.Properties().tab(JojoMod.MAIN_TAB).rarity(Rarity.RARE), ModBlocks.STONE_MASK.get()));
-
+    
     public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_WHITE = ITEMS.register("wooden_coffin_oak_white", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_WHITE.get(), new Item.Properties().stacksTo(1)));
     public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_ORANGE = ITEMS.register("wooden_coffin_oak_orange", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_ORANGE.get(), new Item.Properties().stacksTo(1)));
     public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_MAGENTA = ITEMS.register("wooden_coffin_oak_magenta", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_MAGENTA.get(), new Item.Properties().stacksTo(1)));
@@ -145,8 +143,8 @@ public class ModItems {
     public static final RegistryObject<StandRemoverItem> STAND_EJECT_ONE_TIME = ITEMS.register("stand_eject_one_time",
             () -> new StandRemoverItem(new Item.Properties().stacksTo(1), StandRemoverItem.Mode.EJECT, true));
 
-    public static final RegistryObject<Item> COCOA_GUM = ITEMS.register("cocoa_gum", 
-            () -> new GumItem(new Item.Properties()/*.tab(JojoMod.MAIN_TAB)*/.food(new Food.Builder().nutrition(2).saturationMod(0.1F).build())));
+//    public static final RegistryObject<Item> COCOA_GUM = ITEMS.register("cocoa_gum", 
+//            () -> new GumItem(new Item.Properties()/*.tab(JojoMod.MAIN_TAB)*/.food(new Food.Builder().nutrition(2).saturationMod(0.1F).build())));
 
     public static final RegistryObject<Item> WALKMAN = ITEMS.register("walkman", 
             () -> new WalkmanItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1)));
