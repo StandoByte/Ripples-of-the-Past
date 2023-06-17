@@ -39,8 +39,6 @@ public class ModItems {
     
     
     
-    public static final RegistryObject<Item> DUMMY_ITEM = ITEMS.register("dummy_item", () -> new Item(new Item.Properties()));
-    
     public static final RegistryObject<SledgehammerItem> IRON_SLEDGEHAMMER = ITEMS.register("sledgehammer", 
             () -> new SledgehammerItem(ItemTier.IRON, 9, -3.3F, new Item.Properties().tab(JojoMod.MAIN_TAB)));
     

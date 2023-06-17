@@ -2,7 +2,7 @@
   "parent": "jojo:jojo/stand_arrow_shot",
   "display": {
     "icon": {
-      "item": "jojo:dummy_item",
+      "item": "jojo:meteoric_scrap",
       "nbt": "{Icon:11}"
     },
     "title": {

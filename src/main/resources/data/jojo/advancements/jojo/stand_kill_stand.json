@@ -2,7 +2,7 @@
   "parent": "jojo:jojo/summon_stand",
   "display": {
     "icon": {
-      "item": "jojo:dummy_item",
+      "item": "jojo:meteoric_scrap",
       "nbt": "{Icon:4}"
     },
     "title": {

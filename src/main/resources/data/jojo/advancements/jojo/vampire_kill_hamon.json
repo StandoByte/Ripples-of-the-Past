@@ -2,7 +2,7 @@
   "parent": "jojo:jojo/get_vampirism",
   "display": {
     "icon": {
-      "item": "jojo:dummy_item",
+      "item": "jojo:meteoric_scrap",
       "nbt": "{Icon:3}"
     },
     "title": {

@@ -22,7 +22,7 @@ import net.minecraftforge.event.ForgeEventFactory;
 
 @OnlyIn(value = Dist.CLIENT, _interface = IRendersAsItem.class) // without this OnlyIn annotation dedicated server will crash
 public class MRFireballEntity extends ModdedProjectileEntity implements IRendersAsItem {
-    private static final ItemStack MR_FIREBALL_SPRITE_ITEM = Util.make(new ItemStack(ModItems.DUMMY_ITEM.get()), item -> {
+    private static final ItemStack MR_FIREBALL_SPRITE_ITEM = Util.make(new ItemStack(ModItems.METEORIC_SCRAP.get()), item -> {
         item.getOrCreateTag().putInt("Icon", 12);
     });
     

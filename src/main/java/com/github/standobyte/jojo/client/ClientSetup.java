@@ -209,7 +209,7 @@ public class ClientSetup {
         event.enqueueWork(() -> {
             Minecraft mc = event.getMinecraftSupplier().get();
 
-            ItemModelsProperties.register(ModItems.DUMMY_ITEM.get(), new ResourceLocation(JojoMod.MOD_ID, "icon"), (itemStack, clientWorld, livingEntity) -> {
+            ItemModelsProperties.register(ModItems.METEORIC_SCRAP.get(), new ResourceLocation(JojoMod.MOD_ID, "icon"), (itemStack, clientWorld, livingEntity) -> {
                 return itemStack.getOrCreateTag().getInt("Icon");
             });
             ItemModelsProperties.register(ModItems.KNIFE.get(), new ResourceLocation(JojoMod.MOD_ID, "count"), (itemStack, clientWorld, livingEntity) -> {
