@@ -21,7 +21,6 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.non_stand.HamonMetalSilverOverdrive;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
@@ -850,20 +849,23 @@ public class HamonData extends TypeSpecificData {
             if (!user.level.isClientSide()) {
                 PacketManager.sendToClientsTrackingAndSelf(new TrHamonMeditationPacket(user.getId(), isMeditating), user);
             }
-            if (!isMeditating) {
+            if (isMeditating) {
+                user.yBodyRot = user.yRot;
+            }
+            else {
                 updateBbHeight(user);
             }
             
-            user.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                if (isMeditating) {
-                    cap.lockYRot(user.yBodyRot);
-                    cap.lockXRot(0);
-                }
-                else {
-                    cap.clearLockedYRot();
-                    cap.clearLockedXRot();
-                }
-            });
+//            user.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+//                if (isMeditating) {
+//                    cap.lockYRot(user.yBodyRot);
+//                    cap.lockXRot(0);
+//                }
+//                else {
+//                    cap.clearLockedYRot();
+//                    cap.clearLockedXRot();
+//                }
+//            });
         }
     }
     

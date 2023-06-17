@@ -246,7 +246,9 @@ public class StandEntityPunch implements IPunch {
                 
                 if ((canParryHeavyAttack() || disablesBlocking())) {
                     if (canParryHeavyAttack()) {
-                        if (targetStand.getCurrentTaskAction() instanceof StandEntityHeavyAttack
+                        StandEntityAction heavyAttack = targetStand.getCurrentTaskAction();
+                        if (heavyAttack instanceof StandEntityHeavyAttack
+                                && ((StandEntityHeavyAttack) heavyAttack).canBeParried()
                                 && targetStand.getCurrentTaskPhase().get() == StandEntityAction.Phase.WINDUP
                                 && targetStand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())
                                 && 1F - targetStand.getCurrentTaskPhaseCompletion(0) < parryTiming) {

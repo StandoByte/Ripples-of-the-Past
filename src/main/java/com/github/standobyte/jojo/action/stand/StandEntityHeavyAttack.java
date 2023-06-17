@@ -213,6 +213,10 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         return isFinisher;
     }
     
+    public boolean canBeParried() {
+        return !isFinisher;
+    }
+    
     
     
     public static class Builder extends StandEntityAction.AbstractBuilder<StandEntityHeavyAttack.Builder> {
