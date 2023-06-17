@@ -94,11 +94,11 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
         ItemStack newStack = null;
         if (itemStack.getItem() == Items.CHIPPED_ANVIL) { 
             newStack = new ItemStack(Items.ANVIL);
-            damage = 1000;
+            damage = 250;
         }
         else if (itemStack.getItem() == Items.DAMAGED_ANVIL) {
             newStack = new ItemStack(Items.CHIPPED_ANVIL);
-            damage = 1000;
+            damage = 250;
         }
         else if (itemStack.getItem() == Items.COBBLESTONE) {
             damage = 1;
@@ -137,7 +137,7 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
             itemStack.setRepairCost(0);
         }
         
-        return (float) damage * 0.000025F;
+        return (float) damage * 0.00005F;
     }
     
     public static boolean itemTransformationTick(int taskTicks, StandEntity standEntity) {

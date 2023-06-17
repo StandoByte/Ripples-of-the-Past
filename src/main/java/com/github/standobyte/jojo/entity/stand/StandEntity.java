@@ -1404,7 +1404,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
 
     public Predicate<Entity> canTarget() {
-        return entity -> !entity.is(this) && !entity.is(getUser())
+        return entity -> !entity.is(this) && !entity.is(getUser()) && entity.isAlive()
                 && !(entity instanceof ProjectileEntity && this.is(((ProjectileEntity) entity).getOwner()));
     }
     
