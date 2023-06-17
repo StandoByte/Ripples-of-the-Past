@@ -31,12 +31,12 @@ public class HamonAbandonTabGui extends HamonTabGui {
     
     @Override
     void addButtons() {
-        screen.addButton(yesButton = new HamonScreenButton(screen.windowPosX() + 13, screen.windowPosY() + 192, 100, 20, new TranslationTextComponent("gui.yes"), button -> {
+        screen.addButton(yesButton = new HamonScreenButton(screen.windowPosX() + 13, screen.windowPosY() + 96, 100, 20, new TranslationTextComponent("gui.yes"), button -> {
             PacketManager.sendToServer(new ClHamonAbandonButtonPacket());
             minecraft.setScreen(null);
             minecraft.mouseHandler.grabMouse();
         }));
-        screen.addButton(noButton = new HamonScreenButton(screen.windowPosX() + 117, screen.windowPosY() + 192, 100, 20, new TranslationTextComponent("gui.no"), button -> {
+        screen.addButton(noButton = new HamonScreenButton(screen.windowPosX() + 117, screen.windowPosY() + 96, 100, 20, new TranslationTextComponent("gui.no"), button -> {
             if (previousTab == null) previousTab = screen.selectableTabs[0];
             screen.selectTab(previousTab);
         }));

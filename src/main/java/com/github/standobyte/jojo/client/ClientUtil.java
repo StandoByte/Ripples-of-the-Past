@@ -110,7 +110,7 @@ public class ClientUtil {
     }
     
     public static float getPartialTick() {
-        return Minecraft.getInstance().getFrameTime();
+        return ClientEventHandler.getInstance().getPartialTick();
     }
     
     public static boolean useActionShiftVar(PlayerEntity player) {

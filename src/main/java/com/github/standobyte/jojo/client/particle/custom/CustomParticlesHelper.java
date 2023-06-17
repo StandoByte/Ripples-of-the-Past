@@ -78,7 +78,7 @@ public class CustomParticlesHelper {
             LivingEntity user, double x, double y, double z) {
         IAnimatedSprite sprite = getSavedSpriteSet(type.getType());
         if (sprite != null) {
-            HamonAuraParticle particle = HamonAuraParticle.createCustomParticle(
+            HamonAuraParticle particle = HamonAura3PersonParticle.createCustomParticle(
                     sprite, Minecraft.getInstance().level, user, x, y, z);
             addParticle(particle, new Vector3d(x, y, z), false, false);
         }
@@ -86,17 +86,16 @@ public class CustomParticlesHelper {
             Minecraft.getInstance().level.addParticle(type, x, y, z, 0, 0, 0);
         }
     }
-
+    
     // FIXME !!!!!! particles at arms in 1st person
     public static void summonHamonAuraParticlesFirstPerson(IParticleData type, LivingEntity user, float particlesPerTick) {
 //        IAnimatedSprite sprite = getSavedSpriteSet(type.getType());
 //        if (sprite != null) {
 //            Minecraft mc = Minecraft.getInstance();
-//            Vector3d vec = user.position();
 //            
 //            GeneralUtil.doFractionTimes(() -> {
-//                addParticle(HamonAuraParticle.firstPersonHandParticle(sprite, mc.level, user, HandSide.RIGHT, vec), vec, false, false);
-//                addParticle(HamonAuraParticle.firstPersonHandParticle(sprite, mc.level, user, HandSide.LEFT, vec), vec, false, false);
+//                addFirstPersonParticle(HamonAura1PersonParticle.firstPersonHandParticle(sprite, mc.level, HandSide.RIGHT), false, false);
+//                addFirstPersonParticle(HamonAura1PersonParticle.firstPersonHandParticle(sprite, mc.level, HandSide.LEFT), false, false);
 //            }, particlesPerTick);
 //        }
     }
@@ -121,7 +120,7 @@ public class CustomParticlesHelper {
         }
         return false;
     }
-
+    
     private static ParticleStatus calculateParticleLevel(Minecraft mc, ClientWorld world, boolean overrideLimiter) {
         ParticleStatus status = mc.options.particles;
         if (overrideLimiter && status == ParticleStatus.MINIMAL && world.random.nextInt(10) == 0) {

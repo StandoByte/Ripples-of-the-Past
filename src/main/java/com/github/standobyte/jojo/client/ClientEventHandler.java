@@ -116,7 +116,10 @@ import net.minecraftforge.fml.ModList;
 public class ClientEventHandler {
     private static ClientEventHandler instance = null;
 
-    private Minecraft mc;
+    private final Minecraft mc;
+    
+    private float pausePartialTick;
+    private boolean prevPause = false;
 
     private Timer clientTimer;
     private boolean isTimeStopped = false;
@@ -137,7 +140,7 @@ public class ClientEventHandler {
 
     private int deathScreenTick;
     private int pauseMenuScreenTick;
-
+    
     private ClientEventHandler(Minecraft mc) {
         this.mc = mc;
         this.clientTimer = ClientReflection.getTimer(mc);
@@ -210,17 +213,18 @@ public class ClientEventHandler {
         M model = event.getRenderer().getModel();
         if (model instanceof BipedModel) {
             BipedModel<?> bipedModel = (BipedModel<?>) model;
-            correctGlovesHeldPose(entity, bipedModel, HandSide.RIGHT);
-            correctGlovesHeldPose(entity, bipedModel, HandSide.LEFT);
+            correctHeldItemPose(entity, bipedModel, HandSide.RIGHT);
+            correctHeldItemPose(entity, bipedModel, HandSide.LEFT);
         }
         // FIXME (vampire\curing) shake vampire while curing
         // yRot += (float) (Math.cos((double)entity.tickCount * 3.25) * Math.PI * 0.4);
     }
     
-    private void correctGlovesHeldPose(LivingEntity entity, BipedModel<?> model, HandSide handSide) {
+    private void correctHeldItemPose(LivingEntity entity, BipedModel<?> model, HandSide handSide) {
         Hand hand = entity.getMainArm() == handSide ? Hand.MAIN_HAND : Hand.OFF_HAND;
         ItemStack item = entity.getItemInHand(hand);
-        if (GlovesLayer.areGloves(item)) {
+        if (!item.isEmpty() && 
+                GlovesLayer.areGloves(item)) {
             switch (handSide) {
             case LEFT:
                 model.leftArmPose = BipedModel.ArmPose.EMPTY;
@@ -290,7 +294,7 @@ public class ClientEventHandler {
             if (mc.player.isAlive()) {
                 if (isTimeStopped(mc.player.blockPosition())) {
                     if (!canSeeInStoppedTime) {
-                        clientTimer.partialTick = 0.0F;
+                        clientTimer.partialTick = partialTickStoppedAt;
                     }
                 }
                 
@@ -760,6 +764,16 @@ public class ClientEventHandler {
                     block -> CrazyDiamondRestoreTerrain.blockPosSelectedForRestoration(block, entity, lookVec, eyePosD, pos, 
                             mc.player.hasEffect(ModEffects.RESOLVE.get()), mc.player.isShiftKeyDown()));
         }
+        
+        boolean paused = mc.isPaused();
+        if (prevPause && !paused) {
+            pausePartialTick = mc.getFrameTime();
+        }
+        prevPause = paused;
+    }
+    
+    public float getPartialTick() {
+        return mc.isPaused() ? pausePartialTick : mc.getFrameTime();
     }
 
     private static final Set<ResourceLocation> ENCHANTMENTS_DESC = ImmutableSet.of(

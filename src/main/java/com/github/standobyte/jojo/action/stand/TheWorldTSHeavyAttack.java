@@ -131,7 +131,6 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
                     pos = standEntity.collideNextPos(pos);
                     standEntity.moveTo(pos.x, pos.y, pos.z);
                     if (!world.isClientSide()) {
-                        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! doesn't work off-summon, the stand is set to retract
                         PacketManager.sendToClientsTracking(new TrDirectEntityPosPacket(standEntity.getId(), pos), standEntity);
                     }
                 }
