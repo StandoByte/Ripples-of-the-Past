@@ -58,6 +58,7 @@ public class JojoModConfig {
         public final ForgeConfigSpec.DoubleValue hamonPointsMultiplier;
         public final ForgeConfigSpec.DoubleValue breathingTrainingMultiplier;
         public final ForgeConfigSpec.BooleanValue breathingTrainingDeterioration;
+        public final ForgeConfigSpec.IntValue breathingStatGap;
         public final ForgeConfigSpec.BooleanValue mixHamonTechniques;
         public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> techniqueSkillsRequirement;
         
@@ -150,6 +151,13 @@ public class JojoModConfig {
                         .translation("jojo.config.breathingTrainingDeterioration")
                         .define("breathingTrainingDeterioration", true);
                 
+                breathingStatGap = builder
+                        .comment("    The maximum difference between Hamon Strength/Control and Breathing training.",
+                                "     If the Breathing training level is too low, the player won't be able to reach higher levels of the Hamon stats.",
+                                "     Defaults to 15.")
+                       .translation("jojo.config.breathingStatGap")
+                       .defineInRange("breathingStatGap", 15, 0, HamonData.MAX_STAT_LEVEL);
+                
                 mixHamonTechniques = builder
                         .comment("    Whether or not picking skills from different character-specific Hamon techniques is allowed.")
                         .translation("jojo.config.mixHamonTechniques")
@@ -157,7 +165,7 @@ public class JojoModConfig {
                 
                 techniqueSkillsRequirement = builder
                         .comment("    At what levels of Hamon Strength and Hamon Control each slot for a skill from the Technique tab is unlocked, and how many slots are there.", 
-                                 "     Could be used to increase the default limit of 3 slots when paired with mixHamonTechniques setting enabled.")
+                                "     Could be used to increase the default limit of 3 slots when paired with mixHamonTechniques setting enabled.")
                         .translation("jojo.config.techniqueSkillRequirements")
                         .defineListAllowEmpty(Lists.newArrayList("techniqueSkillRequirements"), 
                                 () -> Arrays.asList(20, 30, 40), 
@@ -366,6 +374,7 @@ public class JojoModConfig {
 //            private final double hamonPointsMultiplier;
 //            private final double breathingTrainingMultiplier;
             private final boolean breathingTrainingDeterioration;
+            private final int breathingStatGap;
             private final boolean mixHamonTechniques;
             private final int[] techniqueSkillsRequirement;
 
@@ -394,6 +403,7 @@ public class JojoModConfig {
             public SyncedValues(PacketBuffer buf) {
 //                hamonPointsMultiplier = buf.readDouble();
 //                breathingTrainingMultiplier = buf.readDouble();
+                breathingStatGap = buf.readVarInt();
                 techniqueSkillsRequirement = buf.readVarIntArray();
                 maxBloodMultiplier = NetworkUtil.readFloatArray(buf);
 //                bloodDrainMultiplier = NetworkUtil.readFloatArray(buf);
@@ -427,6 +437,7 @@ public class JojoModConfig {
             public void writeToBuf(PacketBuffer buf) {
 //                buf.writeDouble(hamonPointsMultiplier);
 //                buf.writeDouble(breathingTrainingMultiplier);
+                buf.writeVarInt(breathingStatGap);
                 buf.writeVarIntArray(techniqueSkillsRequirement);
                 NetworkUtil.writeFloatArray(buf, maxBloodMultiplier);
 //                NetworkUtil.writeFloatArray(buf, bloodDrainMultiplier);
@@ -469,6 +480,7 @@ public class JojoModConfig {
 //                hamonPointsMultiplier = config.standDamageMultiplier.get();
 //                breathingTrainingMultiplier = config.breathingTrainingMultiplier.get();
                 breathingTrainingDeterioration = config.breathingTrainingDeterioration.get();
+                breathingStatGap = config.breathingStatGap.get();
                 mixHamonTechniques = config.mixHamonTechniques.get();
                 techniqueSkillsRequirement = config.techniqueSkillsRequirement.get().stream().mapToInt(Integer::intValue).toArray();
                 maxBloodMultiplier = Floats.toArray(config.maxBloodMultiplier.get());
@@ -504,6 +516,7 @@ public class JojoModConfig {
 //                COMMON_SYNCED_TO_CLIENT.hamonPointsMultiplier.set(hamonPointsMultiplier);
 //                COMMON_SYNCED_TO_CLIENT.breathingTrainingMultiplier.set(breathingTrainingMultiplier);
                 COMMON_SYNCED_TO_CLIENT.breathingTrainingDeterioration.set(breathingTrainingDeterioration);
+                COMMON_SYNCED_TO_CLIENT.breathingStatGap.set(breathingStatGap);
                 COMMON_SYNCED_TO_CLIENT.mixHamonTechniques.set(mixHamonTechniques);
                 COMMON_SYNCED_TO_CLIENT.techniqueSkillsRequirement.set(IntStream.of(techniqueSkillsRequirement).boxed().collect(Collectors.toList()));
                 COMMON_SYNCED_TO_CLIENT.maxBloodMultiplier.set(Floats.asList(maxBloodMultiplier).stream().map(Float::doubleValue).collect(Collectors.toList()));
@@ -537,6 +550,7 @@ public class JojoModConfig {
 //                COMMON_SYNCED_TO_CLIENT.hamonPointsMultiplier.clearCache();
 //                COMMON_SYNCED_TO_CLIENT.breathingTrainingMultiplier.clearCache();
                 COMMON_SYNCED_TO_CLIENT.breathingTrainingDeterioration.clearCache();
+                COMMON_SYNCED_TO_CLIENT.breathingStatGap.clearCache();
                 COMMON_SYNCED_TO_CLIENT.mixHamonTechniques.clearCache();
                 COMMON_SYNCED_TO_CLIENT.techniqueSkillsRequirement.clearCache();
                 COMMON_SYNCED_TO_CLIENT.maxBloodMultiplier.clearCache();

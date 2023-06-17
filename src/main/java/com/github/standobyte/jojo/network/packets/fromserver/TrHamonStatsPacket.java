@@ -119,10 +119,10 @@ public class TrHamonStatsPacket {
                         }
 
                         if (msg.stat == Stat.ALL || msg.stat == Stat.STRENGTH) {
-                            hamon.setHamonStatPoints(BaseHamonSkill.HamonStat.STRENGTH, msg.strength, true, true);
+                            hamon.setHamonStatPoints(BaseHamonSkill.HamonStat.STRENGTH, msg.strength, true, true, true);
                         }
                         if (msg.stat == Stat.ALL || msg.stat == Stat.CONTROL) {
-                            hamon.setHamonStatPoints(BaseHamonSkill.HamonStat.CONTROL, msg.control, true, true);
+                            hamon.setHamonStatPoints(BaseHamonSkill.HamonStat.CONTROL, msg.control, true, true, true);
                         }
                         if (msg.stat == Stat.ALL || msg.stat == Stat.BREATHING) {
                             hamon.setBreathingLevel(msg.breathing);

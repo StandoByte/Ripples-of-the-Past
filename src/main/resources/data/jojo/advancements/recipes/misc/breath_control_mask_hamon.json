@@ -1,0 +1,31 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "jojo:breath_control_mask"
+    ]
+  },
+  "criteria": {
+    "get_hamon": {
+      "trigger": "jojo:get_power",
+      "conditions": {
+        "jojopower": {
+          "classification": "non_stand",
+          "type": "jojo:hamon"
+        }
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "jojo:breath_control_mask"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "get_hamon",
+      "has_the_recipe"
+    ]
+  ]
+}
