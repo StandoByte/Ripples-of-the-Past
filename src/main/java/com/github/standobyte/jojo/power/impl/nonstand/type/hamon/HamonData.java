@@ -135,15 +135,20 @@ public class HamonData extends TypeSpecificData {
     public void tick() {
         updateHeight = false;
         LivingEntity user = power.getUser();
-        if (!user.level.isClientSide()) {
-            tickNewPlayerLearners(user);
-            tickAirSupply(user);
-            if (tcsa && (power.isUserCreative() || getCharacterTechnique() != null)) {
-                tcsa = false;
+        if (user.isAlive()) {
+            if (!user.level.isClientSide()) {
+                tickNewPlayerLearners(user);
+                tickAirSupply(user);
+                if (tcsa && (power.isUserCreative() || getCharacterTechnique() != null)) {
+                    tcsa = false;
+                }
             }
+            tickChargeParticles();
+            tickBreathStability();
         }
-        tickChargeParticles();
-        tickBreathStability();
+        else {
+            setIsMeditating(user, false);
+        }
     }
     
     public float tickEnergy() {
