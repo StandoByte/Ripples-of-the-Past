@@ -1134,11 +1134,13 @@ public class HamonData extends TypeSpecificData {
     
     private void tickChargeParticles() {
         LivingEntity user = power.getUser();
-        HamonAuraColor auraColor = getThisTickAuraColor(user);
-        if (auraColor != this.auraColor) {
-            this.auraColor = auraColor;
-            if (!user.level.isClientSide()) {
-                PacketManager.sendToClientsTracking(new TrHamonAuraColorPacket(user.getId(), auraColor), user);
+        if (!user.level.isClientSide() || ClientUtil.getClientPlayer() == user) {
+            HamonAuraColor auraColor = getThisTickAuraColor(user);
+            if (auraColor != this.auraColor) {
+                this.auraColor = auraColor;
+                if (!user.level.isClientSide()) {
+                    PacketManager.sendToClientsTracking(new TrHamonAuraColorPacket(user.getId(), auraColor), user);
+                }
             }
         }
         if (user.level.isClientSide()) {
