@@ -66,6 +66,7 @@ import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 
 public class MCUtil {
     public static final IFormattableTextComponent EMPTY_TEXT = new StringTextComponent("");
+    public static final IFormattableTextComponent NEW_LINE = new StringTextComponent("\n");
     private static final ImmutableMap<Class<? extends INBT>, Integer> NBT_ID = new ImmutableMap.Builder<Class<? extends INBT>, Integer>()
             .put(EndNBT.class, 0)
             .put(ByteNBT.class, 1)

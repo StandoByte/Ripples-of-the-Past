@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.command;
 
+import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -48,7 +49,11 @@ public class JojoControlsCommand {
     private static int writePage(int page, CommandContext<CommandSource> ctx) {
         page = MathHelper.clamp(page, 1, TEXT_PAGES.length);
         IFormattableTextComponent text = new TranslationTextComponent("jojo.chat.command.controls.page", String.valueOf(page), TEXT_PAGES.length).withStyle(TextFormatting.DARK_GRAY);
+        text.append(MCUtil.NEW_LINE);
         text.append(getPage(page - 1));
+        if (page < TEXT_PAGES.length) {
+            text.append(MCUtil.NEW_LINE);
+        }
         if (page < TEXT_PAGES.length) {
             final int pageNext = page + 1;
             text.append(new TranslationTextComponent("jojo.chat.command.controls.next_page").withStyle((style) -> {

@@ -15,6 +15,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 public class HamonAbandonTabGui extends HamonTabGui {
     private HamonTabGui previousTab;
     private final List<IReorderingProcessor> descLines;
+    private final List<IReorderingProcessor> descLines2;
     private HamonScreenButton yesButton;
     private HamonScreenButton noButton;
 
@@ -22,6 +23,7 @@ public class HamonAbandonTabGui extends HamonTabGui {
         super(minecraft, screen, index, title, -1, -1);
         int textWidth = HamonScreen.WINDOW_WIDTH - 30;
         descLines = minecraft.font.split(new TranslationTextComponent("hamon.abandon.tab.desc"), textWidth);
+        descLines2 = minecraft.font.split(new TranslationTextComponent("hamon.abandon.tab.desc2"), textWidth);
         setPrevTab(screen.selectedTab);
     }
     
@@ -57,6 +59,11 @@ public class HamonAbandonTabGui extends HamonTabGui {
         for (int i = 0; i < descLines.size(); i++) {
             textY += 9;
             ClientUtil.drawCenteredString(matrixStack, minecraft.font, descLines.get(i), textX, textY, 0xFFFFFF);
+        }
+        textY += 18;
+        for (int i = 0; i < descLines2.size(); i++) {
+            textY += 9;
+            ClientUtil.drawCenteredString(matrixStack, minecraft.font, descLines2.get(i), textX, textY, 0xFFFFFF);
         }
     }
 

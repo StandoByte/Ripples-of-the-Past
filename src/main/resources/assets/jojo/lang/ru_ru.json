@@ -220,7 +220,7 @@
   "jojo.overlay.stand_strength": "Сила Стенда: %s",
   
   "jojo.chat.controls.tooltip": "Нажмите, чтобы вставить команду",
-  "jojo.chat.command.controls.page": " --- Страница %s/%s --- \n",
+  "jojo.chat.command.controls.page": " --- Страница %s/%s --- ",
   "jojo.chat.command.controls.next_page": "След. страница --->",
   "jojo.chat.message.no_stand": "У вас нет Стенда",
   "jojo.chat.message.no_entity_stand": "Ваш Стенд не может управляться удалённо",
@@ -344,7 +344,8 @@
   "hamon.reset_creative_only": "Сбросить навыки на этой вкладке (только для творческого режима)",
   "hamon.reset_tmp": "Сбросить навыки на этой вкладке (временно включено в выживании)",
   "hamon.abandon.tab": "Бросить тренировки",
-  "hamon.abandon.tab.desc": "Вы действительно хотите полностью бросить тренировку Хамона? \n\nВесь ваш прогресс будет сброшен.",
+  "hamon.abandon.tab.desc": "Вы действительно хотите полностью бросить тренировку Хамона?",
+  "hamon.abandon.tab.desc2": "Весь ваш прогресс будет сброшен.",
   
   "hamon.closed.parents": "Сначала необходимо изучить предыдущие навыки!",
   "hamon.closed.points": "У вас недостаточно очков навыков!",

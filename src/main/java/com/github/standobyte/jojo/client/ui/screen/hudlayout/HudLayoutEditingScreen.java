@@ -24,6 +24,7 @@ import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.layout.ActionHotbarLayout;
 import com.github.standobyte.jojo.power.layout.ActionHotbarLayout.ActionSwitch;
 import com.github.standobyte.jojo.power.layout.ActionsLayout;
+import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -34,6 +35,7 @@ import net.minecraft.client.util.InputMappings;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 
@@ -296,6 +298,10 @@ public class HudLayoutEditingScreen extends Screen {
         blit(matrixStack, x, y, 32, 245, 11, 11);
     }
     
+    private final List<ITextComponent> hintTooltip = ImmutableList.of(
+            new TranslationTextComponent("jojo.screen.edit_hud_layout.hint.lmb"), 
+            new TranslationTextComponent("jojo.screen.edit_hud_layout.hint.rmb"), 
+            new TranslationTextComponent("jojo.screen.edit_hud_layout.hint.mmb"));
     private void renderToolTips(MatrixStack matrixStack, int mouseX, int mouseY) {
         if (draggedAction.isPresent()) return;
         int tab = getTabButtonAt(mouseX, mouseY);
@@ -309,7 +315,7 @@ public class HudLayoutEditingScreen extends Screen {
         int hintX = getWindowX() + WINDOW_WIDTH - 48;
         int hintY = getWindowY() + WINDOW_HEIGHT - 17;
         if (mouseX >= hintX && mouseX < hintX + 11 && mouseY >= hintY && mouseY < hintY + 11) {
-            renderTooltip(matrixStack, new TranslationTextComponent("jojo.screen.edit_hud_layout.hint"), mouseX, mouseY);
+            renderComponentTooltip(matrixStack, hintTooltip, mouseX, mouseY);
         }
     }
     
