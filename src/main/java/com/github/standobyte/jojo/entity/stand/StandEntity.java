@@ -1847,8 +1847,8 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         fixRemotePosition = !manualControl && fixRemotePosition;
         setStandFlag(StandFlag.FIXED_REMOTE_POSITION, fixRemotePosition);
         if (!manualControl && !fixRemotePosition) {
-            if (!isCloseToUser() && GeneralUtil.orElseFalse(getCurrentTask(), 
-                    task -> !task.getAction().noAdheringToUserOffset(userPower, this))) {
+            if (!isCloseToUser() && !GeneralUtil.orElseFalse(getCurrentTask(), 
+                    task -> task.getAction().noAdheringToUserOffset(userPower, this))) {
                 retractStand(false);
             }
         }
