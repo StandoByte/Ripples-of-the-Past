@@ -836,7 +836,7 @@
   "jojo.stand_stat.durability": "Stamina",
   "jojo.stand_stat.precision": "Precision",
   "jojo.stand_stat.dev_potential": "Development Potential",
-  "jojo.stand_stat.stand_name": "Stand Name:『%s』",
+  "jojo.stand_stat.stand_name": "Stand Name: %s",
   "jojo.stand_stat.stand_user": "Stand User: %s",
   
   "jojo.disc.stand": "Stand: %s",
