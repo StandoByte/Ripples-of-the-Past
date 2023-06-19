@@ -670,8 +670,25 @@ public class HamonData extends TypeSpecificData {
         allExercisesCompleted = allComplete;
     }
     
+    public int getExerciseTicks(Exercise exercise) {
+        return exerciseTicks.get(exercise);
+    }
+    
     public boolean isExerciseComplete(Exercise exercise) {
         return getExerciseTicks(exercise) >= exercise.getMaxTicks(this);
+    }
+    
+    public int getCompleteExercisesCount() {
+        return (int) exerciseTicks.entrySet().stream()
+                .filter(entry -> entry.getValue() >= entry.getKey().getMaxTicks(this))
+                .count();
+    }
+    
+    public float getMaxIncompleteExercise() {
+        return exerciseTicks.entrySet().stream()
+                .filter(entry -> entry.getValue() < entry.getKey().getMaxTicks(this))
+                .map(entry -> (float) entry.getValue() / (float) entry.getKey().getMaxTicks(this))
+                .max(Float::compare).orElse(0F);
     }
     
     public boolean allExercisesCompleted() {
@@ -798,10 +815,6 @@ public class HamonData extends TypeSpecificData {
         }
     }
     
-    public int getExerciseTicks(Exercise exercise) {
-        return exerciseTicks.get(exercise);
-    }
-    
     private void incExerciseTicks(Exercise exercise, float multiplier, boolean clientSide) {
         int ticks = exerciseTicks.get(exercise);
         int maxTicks = exercise.getMaxTicks(this);
@@ -840,15 +853,6 @@ public class HamonData extends TypeSpecificData {
         }
     }
     
-    private void recalcAvgExercisePoints() {
-        avgExercisePoints = (float) exerciseTicks.entrySet()
-                .stream()
-                .mapToDouble(entry -> (double) entry.getValue() / (double) entry.getKey().getMaxTicks(this))
-                .reduce(Double::sum)
-                .getAsDouble()
-                / (float) exerciseTicks.size();
-    }
-    
     public void setIsMeditating(LivingEntity user, boolean isMeditating) {
         if (this.isMeditating != isMeditating) {
             this.isMeditating = isMeditating;
@@ -885,11 +889,11 @@ public class HamonData extends TypeSpecificData {
         return meditationTicks;
     }
     
-    public float getTrainingBonus() {
-        return breathingTrainingDayBonus;
+    public float getTrainingBonus(boolean perksAndConfigMult) {
+        return perksAndConfigMult ? multiplyPositiveBreathingTraining(breathingTrainingDayBonus) : breathingTrainingDayBonus;
     }
     
-    public float multiplyPositiveBreathingTraining(float training) {
+    private float multiplyPositiveBreathingTraining(float training) {
         if (training > 0) {
             if (isSkillLearned(ModHamonSkills.NATURAL_TALENT.get())) {
                 training *= 2;
@@ -906,22 +910,7 @@ public class HamonData extends TypeSpecificData {
     public void breathingTrainingDay(PlayerEntity user) {
         World world = user.level;
         if (!world.isClientSide()) {
-            float lvlInc = (2 * MathHelper.clamp(getAverageExercisePoints(), 0F, 1F)) - 1F;
-            recalcAvgExercisePoints();
-            if (lvlInc < 0) {
-                if (!JojoModConfig.getCommonConfigInstance(false).breathingTrainingDeterioration.get() || user.abilities.instabuild) {
-                    lvlInc = 0;
-                }
-                else {
-                    lvlInc *= 0.25F;
-                }
-                breathingTrainingDayBonus = 0;
-            }
-            else {
-                float bonus = breathingTrainingDayBonus;
-                breathingTrainingDayBonus += lvlInc * 0.25F;
-                lvlInc = multiplyPositiveBreathingTraining(lvlInc + bonus);
-            }
+            float lvlInc = getBreathingIncrease(user, true);
             setBreathingLevel(getBreathingLevel() + lvlInc);
             avgExercisePoints = 0;
             if (isSkillLearned(ModHamonSkills.CHEAT_DEATH.get())) {
@@ -937,6 +926,45 @@ public class HamonData extends TypeSpecificData {
     
     public float getAverageExercisePoints() {
         return avgExercisePoints;
+    }
+    
+    private void recalcAvgExercisePoints() {
+        avgExercisePoints = (float) exerciseTicks.entrySet()
+                .stream()
+                .mapToDouble(entry -> (double) entry.getValue() / (double) entry.getKey().getMaxTicks(this))
+                .reduce(Double::sum)
+                .getAsDouble()
+                / (float) exerciseTicks.size();
+    }
+    
+    public float getBreathingIncrease(PlayerEntity user, boolean newTrainingDay) {
+        float lvlInc = (2 * MathHelper.clamp(getAverageExercisePoints(), 0F, 1F)) - 1F;
+        if (newTrainingDay) {
+            recalcAvgExercisePoints();
+        }
+        
+        if (lvlInc <= 0) {
+            if (!JojoModConfig.getCommonConfigInstance(false).breathingTrainingDeterioration.get() || user.abilities.instabuild) {
+                lvlInc = 0;
+            }
+            else {
+                lvlInc *= 0.25F;
+            }
+            
+            if (newTrainingDay) {
+                breathingTrainingDayBonus = 0;
+            }
+        }
+        
+        else {
+            float bonus = breathingTrainingDayBonus;
+            if (newTrainingDay) {
+                breathingTrainingDayBonus += lvlInc * 0.25F;
+            }
+            lvlInc = multiplyPositiveBreathingTraining(lvlInc + bonus);
+        }
+        
+        return lvlInc;
     }
     
     

@@ -34,7 +34,7 @@ public class HamonExercisesPacket {
                 hamon.getExerciseTicks(Exercise.RUNNING), 
                 hamon.getExerciseTicks(Exercise.SWIMMING), 
                 hamon.getExerciseTicks(Exercise.MEDITATION), 
-                hamon.getTrainingBonus());
+                hamon.getTrainingBonus(false));
     }
 
     private HamonExercisesPacket(int miningTicks, int runningTicks, int swimmingTicks, int meditationTicks, float trainingBonus) {

@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.client.ui.screen.hamon;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.github.standobyte.jojo.JojoModConfig;
@@ -56,7 +57,7 @@ public class HamonStatsTabGui extends HamonTabGui {
         breathingStatGapLines = minecraft.font.split(new TranslationTextComponent("hamon.breathing_stat.desc4", JojoModConfig.getCommonConfigInstance(true).breathingStatGap.get()), textWidth);
         statLimitTooltip = minecraft.font.split(new TranslationTextComponent("hamon.stat_limited"), 150);
         meditationTooltip = minecraft.font.split(new TranslationTextComponent("hamon.meditation_button", 
-                new KeybindTextComponent("key.sneak"), new KeybindTextComponent("jojo.key.hamon_skills_window")), 100);
+                new KeybindTextComponent("key.sneak"), new KeybindTextComponent("jojo.key.hamon_skills_window")), 120);
     }
 
     @Override
@@ -132,18 +133,25 @@ public class HamonStatsTabGui extends HamonTabGui {
         }
 
         // total exercises bar
-        int length = (int) (192 * screen.hamon.getAverageExercisePoints());
+        int exercisedCompleted = screen.hamon.getCompleteExercisesCount();
+        float maxIncompleteExercise = screen.hamon.getMaxIncompleteExercise();
+        int length = 48 * exercisedCompleted;
         blit(matrixStack, intScrollX + 13,          exercisesAvgY + 1,  1,          234,  length,       5);
+        int length2 = (int) (48 * maxIncompleteExercise);
+        blit(matrixStack, intScrollX + 13 + length, exercisesAvgY + 1,  1 + length, 239,  length2,      5);
+        length += length2;
         blit(matrixStack, intScrollX + 13 + length, exercisesAvgY + 1,  1 + length, 244,  192 - length, 5);
         blit(matrixStack, intScrollX + 12,          exercisesAvgY,      0,          227,  194,          7);
         // bonus icon
-        if (screen.hamon.getTrainingBonus() > 0) {
-            blit(matrixStack, intScrollX + 3, exercisesAvgY - 1, 230, 216, 8, 8);
+        if (screen.hamon.getTrainingBonus(false) > 0) {
+            boolean bonusWillAddUp = screen.hamon.getBreathingIncrease(minecraft.player, false) > 0;
+            blit(matrixStack, intScrollX + 3, exercisesAvgY - 1, bonusWillAddUp ? 230 : 239, 216, 8, 8);
         }
         
+        // all exercises checkmark
         matrixStack.pushPose();
         matrixStack.scale(0.5F, 0.5F, 0.5F);
-        if (screen.hamon.getAverageExercisePoints() < 1.0F) {
+        if (!screen.hamon.allExercisesCompleted()) {
             RenderSystem.color4f(0.0F, 0.0F, 0.0F, 1.0F);
         }
         blit(matrixStack, (intScrollX + 198) * 2, (exercisesAvgY - 1) * 2, 230, 188, 16, 16);
@@ -308,13 +316,19 @@ public class HamonStatsTabGui extends HamonTabGui {
             }
         }
 
-        DecimalFormat format = new DecimalFormat("#.##");
-        float bonus = screen.hamon.multiplyPositiveBreathingTraining(screen.hamon.getTrainingBonus());
-        if (bonus > 0 && 
+        float breathingIncrease = screen.hamon.getBreathingIncrease(minecraft.player, false);
+        DecimalFormat decimalFormat = new DecimalFormat("#.##");
+        float breathingBonus = screen.hamon.getTrainingBonus(true);
+        IFormattableTextComponent bonusTooltip = new TranslationTextComponent(
+                "hamon.training_bonus", decimalFormat.format(breathingBonus));
+        boolean bonusWillAddUp = breathingIncrease > 0;
+        if (!bonusWillAddUp) {
+            bonusTooltip.withStyle(TextFormatting.DARK_GRAY, TextFormatting.ITALIC);
+        }
+        if (breathingBonus > 0 && 
                 mouseX >= 3 && mouseX <= 11 && 
                 mouseY >= exercisesAvgY && mouseY <= exercisesAvgY + 7) {
-            screen.renderTooltip(matrixStack, minecraft.font.split(new TranslationTextComponent(
-                    "hamon.training_bonus", format.format(bonus)), 100), mouseX, mouseY);
+            screen.renderTooltip(matrixStack, minecraft.font.split(bonusTooltip, 120), mouseX, mouseY);
         }
         
         else if (mouseX >= 199 && mouseX < 207 && mouseY > exercisesAvgY && mouseY < exercisesAvgY + 8) {
@@ -324,11 +338,35 @@ public class HamonStatsTabGui extends HamonTabGui {
                 tooltip = new TranslationTextComponent("hamon.exercise.full_completion_hint", tooltip, 
                         new TranslationTextComponent("hamon.exercise.completion_buff_hint2")).withStyle(TextFormatting.ITALIC);
             }
-            screen.renderTooltip(matrixStack, minecraft.font.split(tooltip, 100), mouseX, mouseY);
+            screen.renderTooltip(matrixStack, minecraft.font.split(tooltip, 120), mouseX, mouseY);
         }
         
         else if (mouseX >= 12 && mouseX < 207 && mouseY > exercisesAvgY && mouseY < exercisesAvgY + 8) {
-            screen.renderTooltip(matrixStack, StringTextComponent.EMPTY, mouseX, mouseY);
+            ITextComponent totalExercises1 = new TranslationTextComponent("hamon.exercise.all.count", 
+                    screen.hamon.getCompleteExercisesCount(), Exercise.values().length);
+            
+            ITextComponent totalExercises2 = null;
+            if (breathingIncrease > 0) {
+                ITextComponent incWord = new TranslationTextComponent("hamon.exercise.all.tooltip_green").withStyle(TextFormatting.GREEN);
+                if (breathingBonus > 0) {
+                    totalExercises2 = new TranslationTextComponent("hamon.exercise.all.day_end_increase.bonus", 
+                            incWord, decimalFormat.format(breathingIncrease - breathingBonus), breathingBonus);
+                }
+                else {
+                    totalExercises2 = new TranslationTextComponent("hamon.exercise.all.day_end_increase", 
+                            incWord, decimalFormat.format(breathingIncrease));
+                }
+            }
+            else if (breathingIncrease < 0) {
+                totalExercises2 = new TranslationTextComponent("hamon.exercise.all.day_end_decrease", 
+                        new TranslationTextComponent("hamon.exercise.all.tooltip_red").withStyle(TextFormatting.RED), decimalFormat.format(-breathingIncrease));
+            }
+            
+            List<IReorderingProcessor> totalExercisesTooltip = new ArrayList<>(minecraft.font.split(totalExercises1, 120));
+            if (totalExercises2 != null) {
+                totalExercisesTooltip.addAll(minecraft.font.split(totalExercises2, 120));
+            }
+            screen.renderTooltip(matrixStack, totalExercisesTooltip, mouseX, mouseY);
         }
         
         else {
@@ -336,7 +374,7 @@ public class HamonStatsTabGui extends HamonTabGui {
                 int x = intScrollX + 100 + exercise.ordinal() % 2 * 96;
                 int y = (exercise.ordinal() < 2 ? exercises1Y : exercises2Y) - 1;
                 if (mouseX >= x && mouseX < x + 8 && mouseY >= y && mouseY < y + 8) {
-                    screen.renderTooltip(matrixStack, minecraft.font.split(completedExerciseTooltip(exercise), 100), mouseX, mouseY);
+                    screen.renderTooltip(matrixStack, minecraft.font.split(completedExerciseTooltip(exercise), 120), mouseX, mouseY);
                     return;
                 }
             }
