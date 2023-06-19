@@ -236,7 +236,6 @@
   "jojo.layout_edit.locked.stand": "Откроется на %s уровне %s",
   "jojo.layout_edit.locked.stand.resolve": "Решимости",
   
-  "jojo.command.desc.genstandstats": "Создаёт дата пак характеристик Стенда",
   "jojo.command.desc.jojocontrols": "Обучение интерфейсу и управлению мода",
   "jojo.command.desc.rockpaperscissors": "Сыграйте в \"камень, ножницы, бумага\" с другим игроком!",
   "jojo.command.desc.standdisc": "Выдаёт диск с определённым/случайным Стендом",

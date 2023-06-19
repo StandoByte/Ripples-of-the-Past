@@ -387,7 +387,6 @@
   "jojo.layout_edit.locked.hamon": "",
   
   "jojo.command_description": "%s - %s",
-  "jojo.command.desc.genstandstats": "Se ha generado un datapack de estadisticas de stand",
   "jojo.command.desc.hamonstat": "Establece la estadística Hamon de un jugador (Fuerza, Control o Tecnica de respiracion)",
   "jojo.command.desc.jojocontrols": "Tutorial de HUD y controles del mod",
   "jojo.command.desc.jojoenergy": "Comprueba o establece el valor del medidor de energía que no es de Stand de un jugador",
@@ -565,9 +564,7 @@
   "commands.hamon.breathing.add.success.multiple": "Dio %s niveles de respiración a %s jugadores",
   "commands.hamon.failed.single": "%s no es usuario de Hamon",
   "commands.hamon.failed.multiple": "Todos %s Los jugadores no son usuarios de Hamon",
-  "commands.genstandstats.success": "Paquete de datos de estadísticas de stand predeterminado generado como %s carpeta",
-  "commands.genstandstats.folder_link": "Haz clic para abrir el paquete de datos (dentro de la carpeta %s de este guardado).",
-  "commands.genstandstats.hint": "Encuéntralo dentro del %s carpeta de este guardar y editar el paquete (verifica %s archivo para instrucciones detalladas)",
+  "commands.jojoconfigpack.folder_link": "Haz clic para abrir el paquete de datos (dentro de la carpeta %s de este guardado).",
   
   "jojo.action.toast.title": "¡Nuevas acciones desbloqueadas!",
   "jojo.action.toast.stand.attack.description": "Nuevos ataques de Stand",

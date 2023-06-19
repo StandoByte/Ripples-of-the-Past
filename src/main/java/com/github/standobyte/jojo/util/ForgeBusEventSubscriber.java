@@ -18,7 +18,7 @@ import com.github.standobyte.jojo.capability.entity.power.NonStandCapProvider;
 import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
-import com.github.standobyte.jojo.command.GenStandStatsCommand;
+import com.github.standobyte.jojo.command.ConfigPackCommand;
 import com.github.standobyte.jojo.command.HamonStatCommand;
 import com.github.standobyte.jojo.command.JojoCommandsCommand;
 import com.github.standobyte.jojo.command.JojoControlsCommand;
@@ -34,7 +34,6 @@ import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCach
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.util.mc.data.StandStatsManager;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.mojang.brigadier.CommandDispatcher;
 
@@ -54,9 +53,7 @@ import net.minecraft.world.gen.settings.DimensionStructuresSettings;
 import net.minecraft.world.gen.settings.StructureSeparationSettings;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerChangedDimensionEvent;
@@ -94,7 +91,7 @@ public class ForgeBusEventSubscriber {
         JojoControlsCommand.register(dispatcher);
         HamonStatCommand.register(dispatcher);
         RockPaperScissorsCommand.register(dispatcher);
-        GenStandStatsCommand.register(dispatcher);
+        ConfigPackCommand.register(dispatcher);
         JojoCommandsCommand.register(dispatcher);
     }
     
@@ -247,23 +244,6 @@ public class ForgeBusEventSubscriber {
             if (entry.getValue() != null && entry.getValue().test(event)) {
                 structureStarts.add(entry.getKey());
             }
-        }
-    }
-    
-    
-    
-    @SubscribeEvent
-    public static void onResourcePackLoad(AddReloadListenerEvent event) {
-        event.addListener(StandStatsManager.getInstance());
-    }
-    
-    @SubscribeEvent
-    public static void syncCustomData(OnDatapackSyncEvent event) {
-        if (event.getPlayer() != null) {
-            StandStatsManager.getInstance().syncToClient(event.getPlayer());
-        }
-        else {
-            StandStatsManager.getInstance().syncToClients(event.getPlayerList());
         }
     }
 }

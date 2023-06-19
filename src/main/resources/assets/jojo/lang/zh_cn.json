@@ -373,7 +373,6 @@
  "jojo.layout_edit.locked.stand.resolve": "解决",
  "jojo.layout_edit.locked.hamon": "",
  "jojo.command_description": "%s - %s",
- "jojo.command.desc.genstandstats": "生成替身数据包在datapack文件夹",
  "jojo.command.desc.hamonstat": "设置玩家的波纹数据（力量、控制以及呼吸技巧）",
  "jojo.command.desc.jojocontrols": "该模组的HUD和教程",
  "jojo.command.desc.jojoenergy": "检查或设置玩家的非替身能量数量值",

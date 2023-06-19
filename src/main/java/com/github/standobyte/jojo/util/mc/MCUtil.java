@@ -43,6 +43,7 @@ import net.minecraft.network.play.server.SPlaySoundEffectPacket;
 import net.minecraft.network.play.server.SSpawnMovingSoundEffectPacket;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
@@ -350,4 +351,9 @@ public class MCUtil {
         return side == HandSide.LEFT ? HandSide.RIGHT : HandSide.LEFT;
     }
     
+    
+    
+    public static String getLanguageCode(MinecraftServer server) {
+        return server.isDedicatedServer() ? "en_us" : ClientUtil.getCurrentLanguageCode();
+    }
 }

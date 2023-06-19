@@ -14,6 +14,7 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.command.configpack.StandStatsConfig;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
@@ -21,7 +22,6 @@ import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
-import com.github.standobyte.jojo.util.mc.data.StandStatsManager;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.LivingEntity;
@@ -77,7 +77,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     public T getStats() {
-        StandStatsManager statsManager = StandStatsManager.getInstance();
+        StandStatsConfig statsManager = StandStatsConfig.getInstance();
         return statsManager != null ? statsManager.getStats(this) : getDefaultStats();
     }
     

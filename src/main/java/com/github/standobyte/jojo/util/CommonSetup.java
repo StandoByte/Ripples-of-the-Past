@@ -23,6 +23,7 @@ import com.github.standobyte.jojo.capability.world.SaveFileUtilCapStorage;
 import com.github.standobyte.jojo.capability.world.WorldUtilCap;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapStorage;
 import com.github.standobyte.jojo.command.StandArgument;
+import com.github.standobyte.jojo.command.configpack.StandStatsConfig;
 import com.github.standobyte.jojo.init.ModPotions;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -31,12 +32,12 @@ import com.github.standobyte.jojo.power.impl.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandPower;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
-import com.github.standobyte.jojo.util.mc.data.StandStatsManager;
 
 import net.minecraft.command.arguments.ArgumentSerializer;
 import net.minecraft.command.arguments.ArgumentTypes;
 import net.minecraft.nbt.INBT;
 import net.minecraft.util.Direction;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.Capability.IStorage;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -73,7 +74,8 @@ public class CommonSetup {
             ModCriteriaTriggers.CriteriaTriggerSupplier.registerAll();
             
             PacketManager.init();
-            StandStatsManager.init();
+            
+            StandStatsConfig.init(MinecraftForge.EVENT_BUS);
             
             ModPotions.registerRecipes();
             

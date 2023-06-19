@@ -408,7 +408,7 @@
   "jojo.layout_edit.locked.hamon_skill": "Unlocks with %s skill",
   
   "jojo.command_description": "%s - %s",
-  "jojo.command.desc.genstandstats": "Generates a Stand stats data pack",
+  "jojo.command.desc.jojoconfigpack": "Generates a data pack for editing Stand stats",
   "jojo.command.desc.hamonstat": "Sets a player's Hamon stat (Strength, Control or Breathing training)",
   "jojo.command.desc.jojocontrols": "The mod's HUD and controls tutorial",
   "jojo.command.desc.jojoenergy": "Checks or sets a player's non-Stand energy meter value",
@@ -592,9 +592,16 @@
   "commands.hamon.breathing.add.success.multiple": "Gave %s breathing levels to %s players",
   "commands.hamon.failed.single": "%s is not a Hamon user",
   "commands.hamon.failed.multiple": "All %s players are not Hamon users",
-  "commands.genstandstats.success": "Generated default Stand stats data pack as %s folder.",
-  "commands.genstandstats.folder_link": "Click to open the data pack (inside the %s folder of this save).",
-  "commands.genstandstats.hint": "Check %s file for detailed instructions on editing the pack.",
+  
+  "commands.jojoconfigpack.base_created.link_name": "Generated",
+  "commands.jojoconfigpack.base_created": "%s config data pack named %s.",
+  "commands.jojoconfigpack.folder_link": "Click to open the data pack (inside the %s folder of this save).",
+  "commands.jojoconfigpack.standstats.all.link_name": "Generated",
+  "commands.jojoconfigpack.standstats.all": "%s default Stand stats files.",
+  "commands.jojoconfigpack.standstats.all.folder_link": "Click to open the file path.",
+  "commands.jojoconfigpack.standstats.single.link_name": "Generated",
+  "commands.jojoconfigpack.standstats.single": "%s default Stand stats file for %s.",
+  "commands.jojoconfigpack.standstats.single.folder_link": "Click to open the file path.",
   
   "jojo.action.toast.title": "New actions unlocked!",
   "jojo.action.toast.stand.attack.description": "New Stand attacks",

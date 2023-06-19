@@ -113,6 +113,10 @@ public class ClientUtil {
         return ClientEventHandler.getInstance().getPartialTick();
     }
     
+    public static String getCurrentLanguageCode() {
+        return Minecraft.getInstance().getLanguageManager().getSelected().getCode();
+    }
+    
     public static boolean useActionShiftVar(PlayerEntity player) {
         return player.isShiftKeyDown();
     }
