@@ -110,7 +110,6 @@ public class HamonData extends TypeSpecificData {
     private float breathingTrainingLevel;
     private float breathingTrainingDayBonus;
     private EnumMap<Exercise, Integer> exerciseTicks = new EnumMap<Exercise, Integer>(Exercise.class);
-    private float avgExercisePoints;
     
     private boolean isMeditating;
     private int meditationTicks;
@@ -752,9 +751,6 @@ public class HamonData extends TypeSpecificData {
             }
         }
         
-        if (incExerciseThisTick) {
-            recalcAvgExercisePoints();
-        }
         if (incExerciseLastTick && !incExerciseThisTick || exerciseCompleted) {
             serverPlayer.ifPresent(player -> {
                 PacketManager.sendToClient(new HamonExercisesPacket(this), player);
@@ -843,7 +839,6 @@ public class HamonData extends TypeSpecificData {
         setExerciseValue(Exercise.RUNNING, running, clientSide);
         setExerciseValue(Exercise.SWIMMING, swimming, clientSide);
         setExerciseValue(Exercise.MEDITATION, meditation, clientSide);
-        recalcAvgExercisePoints();
         updateExerciseAttributes(power.getUser());
     }
     
@@ -912,36 +907,21 @@ public class HamonData extends TypeSpecificData {
         if (!world.isClientSide()) {
             float lvlInc = getBreathingIncrease(user, true);
             setBreathingLevel(getBreathingLevel() + lvlInc);
-            avgExercisePoints = 0;
             if (isSkillLearned(ModHamonSkills.CHEAT_DEATH.get())) {
                 HamonPowerType.updateCheatDeathEffect(power.getUser());
             }
         }
         for (Exercise exercise : exerciseTicks.keySet()) {
             setExerciseValue(exercise, 0, world.isClientSide());
-            avgExercisePoints = 0;
         }
         updateExerciseAttributes(user);
     }
     
-    public float getAverageExercisePoints() {
-        return avgExercisePoints;
-    }
-    
-    private void recalcAvgExercisePoints() {
-        avgExercisePoints = (float) exerciseTicks.entrySet()
-                .stream()
-                .mapToDouble(entry -> (double) entry.getValue() / (double) entry.getKey().getMaxTicks(this))
-                .reduce(Double::sum)
-                .getAsDouble()
-                / (float) exerciseTicks.size();
-    }
-    
     public float getBreathingIncrease(PlayerEntity user, boolean newTrainingDay) {
-        float lvlInc = (2 * MathHelper.clamp(getAverageExercisePoints(), 0F, 1F)) - 1F;
-        if (newTrainingDay) {
-            recalcAvgExercisePoints();
-        }
+        float completedExercises = getCompleteExercisesCount() + getMaxIncompleteExercise();
+        /* at least 2 exercises to get positive increase, 
+           >= 3 exercises give max increase */
+        float lvlInc = MathHelper.clamp(completedExercises - 2, -1, 1); 
         
         if (lvlInc <= 0) {
             if (!JojoModConfig.getCommonConfigInstance(false).breathingTrainingDeterioration.get() || user.abilities.instabuild) {
