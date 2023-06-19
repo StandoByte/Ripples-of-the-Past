@@ -33,7 +33,7 @@ import net.minecraft.util.ResourceLocation;
 @SuppressWarnings("deprecation")
 public class HamonScreen extends Screen {
     static final int WINDOW_WIDTH = 230;
-    static final int WINDOW_HEIGHT = 228;
+    static final int WINDOW_HEIGHT = 227;
     
     static final int WINDOW_THIN_BORDER = 9;
     static final int WINDOW_UPPER_BORDER = 18;

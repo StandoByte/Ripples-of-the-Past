@@ -643,6 +643,12 @@
   "hamon.exercise.completion_buff_hint2": "until the end of the day",
   "hamon.exercise.full_completion_hint": "After completing all 4 exercises: %s %s",
   "hamon.exercise.full_completion_buff": "+%s%% efficiency of all Hamon skills",
+  "hamon.exercise.all.count": "Completed %s out of %s exercises for today",
+  "hamon.exercise.all.day_end_increase": "Breathing training will %s by %s levels",
+  "hamon.exercise.all.day_end_increase_bonus": "Breathing training will %s by %s (+%s) levels",
+  "hamon.exercise.all.tooltip_green": "increase",
+  "hamon.exercise.all.day_end_decrease": "Breathing training will %s by %s levels",
+  "hamon.exercise.all.tooltip_red": "decrease",
   
   "hamon.next_point.strength": "Next skill point at level %s Hamon strength",
   "hamon.next_point.control": "Next skill point at level %s Hamon control",
