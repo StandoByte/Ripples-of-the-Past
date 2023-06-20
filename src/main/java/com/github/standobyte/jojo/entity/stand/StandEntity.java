@@ -875,7 +875,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
 
 
     public boolean canStartBlocking() {
-        if (entityData.get(NO_BLOCKING_TICKS) > 0) {
+        if (!canUpdate() || entityData.get(NO_BLOCKING_TICKS) > 0) {
             return false;
         }
         return getCurrentTask().map(task -> task.getAction().canBeCanceled(userPower, 
@@ -971,7 +971,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
     
     public boolean canBlockDamage(DamageSource dmgSource) {
-        return dmgSource.getDirectEntity() != null && !dmgSource.isBypassArmor() && canUpdate() && !ModEffects.isStunned(this);
+        return dmgSource.getDirectEntity() != null && !dmgSource.isBypassArmor() && !ModEffects.isStunned(this);
     }
 
     @Override
