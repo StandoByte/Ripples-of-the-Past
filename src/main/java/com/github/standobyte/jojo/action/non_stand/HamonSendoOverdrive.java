@@ -3,14 +3,18 @@ package com.github.standobyte.jojo.action.non_stand;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.SendoHamonOverdriveEntity;
+import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.Direction;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -20,7 +24,18 @@ public class HamonSendoOverdrive extends HamonAction {
     public HamonSendoOverdrive(HamonAction.Builder builder) {
         super(builder);
     }
-
+    
+    @Override
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
+        BlockPos blockPos = target.getBlockPos();
+        Direction face = target.getFace();
+        if (!user.level.getEntities(ModEntityTypes.SENDO_HAMON_OVERDRIVE.get(), new AxisAlignedBB(blockPos), 
+                entity -> blockPos.equals(entity.getTargetedBlockPos()) && face == entity.getTargetedFace()).isEmpty()) {
+            return ActionConditionResult.NEGATIVE;
+        }
+        return super.checkSpecificConditions(user, power, target);
+    }
+    
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
@@ -36,6 +51,7 @@ public class HamonSendoOverdrive extends HamonAction {
                     .setWavesCount(2 + (int) ((2 + Math.min(hamon.getHamonControlLevelRatio() * 3, 2)) * hamonEfficiency))
                     .setStatPoints(Math.min(energyCost, power.getEnergy()) * hamonEfficiency);
             sendoOverdrive.moveTo(Vector3d.atCenterOf(blockPos).subtract(0, sendoOverdrive.getDimensions(null).height * 0.5, 0));
+            sendoOverdrive.setBlockTarget(target.getBlockPos(), target.getFace());
             world.addFreshEntity(sendoOverdrive);
         }
     }

@@ -26,12 +26,14 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.IntNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -42,6 +44,9 @@ public class SendoHamonOverdriveEntity extends Entity implements IEntityAddition
     private Entity user;
     private UUID userUUID;
     private int userNetworkId;
+    
+    private BlockPos targetedBlockPos;
+    private Direction targetedFace;
     
     private int gavePoints = 0;
     private float points;
@@ -287,6 +292,19 @@ public class SendoHamonOverdriveEntity extends Entity implements IEntityAddition
             }
         }
     }
+    
+    public void setBlockTarget(BlockPos targetedBlockPos, Direction targetedFace) {
+        this.targetedBlockPos = targetedBlockPos;
+        this.targetedFace = targetedFace;
+    }
+    
+    public BlockPos getTargetedBlockPos() {
+        return targetedBlockPos;
+    }
+    
+    public Direction getTargetedFace() {
+        return targetedFace;
+    }
 
     @Override
     protected void defineSynchedData() {}
@@ -308,6 +326,13 @@ public class SendoHamonOverdriveEntity extends Entity implements IEntityAddition
         this.tickLifeSpan = nbt.getInt("LifeSpan");
         this.tickCount = nbt.getInt("Age");
         this.damage = nbt.getFloat("Damage");
+        
+        if (nbt.contains("TargetedBlock", MCUtil.getNbtId(CompoundNBT.class))) {
+            this.targetedBlockPos = NBTUtil.readBlockPos(nbt.getCompound("TargetedBlock"));
+        }
+        if (nbt.contains("TargetedFace")) {
+            this.targetedFace = MCUtil.nbtGetEnum(nbt, "TargetedFace", Direction.class);
+        }
     }
 
     @Override
@@ -325,6 +350,13 @@ public class SendoHamonOverdriveEntity extends Entity implements IEntityAddition
         nbt.putInt("LifeSpan", tickLifeSpan);
         nbt.putInt("Age", tickCount);
         nbt.putFloat("Damage", damage);
+        
+        if (targetedBlockPos != null) {
+            nbt.put("TargetedBlock", NBTUtil.writeBlockPos(targetedBlockPos));
+        }
+        if (targetedFace != null) {
+            MCUtil.nbtPutEnum(nbt, "TargetedFace", targetedFace);
+        }
     }
     
     @Override
@@ -340,6 +372,9 @@ public class SendoHamonOverdriveEntity extends Entity implements IEntityAddition
         buffer.writeVarInt(addedWaves);
         buffer.writeVarInt(tickLifeSpan);
         buffer.writeVarInt(tickCount);
+        
+        NetworkUtil.writeOptionally(buffer, targetedBlockPos, pos -> buffer.writeBlockPos(pos));
+        NetworkUtil.writeOptionally(buffer, targetedFace, face -> buffer.writeEnum(face));
     }
 
     @Override
@@ -351,5 +386,8 @@ public class SendoHamonOverdriveEntity extends Entity implements IEntityAddition
         this.tickLifeSpan = additionalData.readVarInt();
         this.tickCount = additionalData.readVarInt();
         absMoveTo(xo, yo, zo, yRot, xRot);
+        
+        NetworkUtil.readOptional(additionalData, () -> additionalData.readBlockPos()).ifPresent(pos -> this.targetedBlockPos = pos);
+        NetworkUtil.readOptional(additionalData, () -> additionalData.readEnum(Direction.class)).ifPresent(face -> this.targetedFace = face);
     }
 }
