@@ -125,7 +125,7 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
     
     
     
-    private static final int ARBITRARY_ACTIONS_LIMIT = 16;
+    public static final int ARBITRARY_ACTIONS_LIMIT = 16;
     public void toBuf(PacketBuffer buf) {
         List<ActionSwitch<P>> switches = getLayoutView();
         int size = switches.size();

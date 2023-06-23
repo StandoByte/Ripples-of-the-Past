@@ -637,26 +637,28 @@ public class JojoModConfig {
         public final ForgeConfigSpec.BooleanValue characterVoiceLines;
         
         private Client(ForgeConfigSpec.Builder builder) {
-            barsPosition = builder
-                    .comment(" Position of Energy, Stamina and Resolve bars in the HUD.")
-                    .translation("jojo.config.client.barsPosition") 
-                    .defineEnum("barsPosition", ActionsOverlayGui.PositionConfig.TOP_LEFT);
+            builder.push("HUD settings");
+                barsPosition = builder
+                        .comment(" Position of Energy, Stamina and Resolve bars in the HUD.")
+                        .translation("jojo.config.client.barsPosition") 
+                        .defineEnum("barsPosition", ActionsOverlayGui.PositionConfig.TOP_LEFT);
+                
+                hotbarsPosition = builder
+                        .comment(" Position of Power name, Attack and Ability hotbars in the HUD.")
+                        .translation("jojo.config.client.hotbarsPosition")
+                        .defineEnum("hotbarsPosition", ActionsOverlayGui.PositionConfig.TOP_LEFT);
+                
+                hudNamesRender = builder
+                        .comment(" How Power, Attack and Ability names should render in the HUD.")
+                        .translation("jojo.config.client.hudNamesRender")
+                        .defineEnum("hudNamesRender", ActionsOverlayGui.HudNamesRender.ALWAYS);
             
-            hotbarsPosition = builder
-                    .comment(" Position of Power name, Attack and Ability hotbars in the HUD.")
-                    .translation("jojo.config.client.hotbarsPosition")
-                    .defineEnum("hotbarsPosition", ActionsOverlayGui.PositionConfig.TOP_LEFT);
-            
-            hudNamesRender = builder
-                    .comment(" How Power, Attack and Ability names should render in the HUD.")
-                    .translation("jojo.config.client.hudNamesRender")
-                    .defineEnum("hudNamesRender", ActionsOverlayGui.HudNamesRender.ALWAYS);
-            
-            actionSlotHotkeys = builder
-                    .comment(" Enable hotkey settings for each individual attack and ability from 1 to 9.", 
-                            "  If your client is launched, changing the setting requires restarting the game.")
-                    .translation("jojo.config.client.slotHotkeys")
-                    .define("actionSlotHotkeys", false);
+                actionSlotHotkeys = builder
+                        .comment(" Enable hotkey settings for each individual attack and ability from 1 to 9 (that's a lot of keybinds!).", 
+                                "  If your client is launched, changing the setting requires restarting the game.")
+                        .translation("jojo.config.client.slotHotkeys")
+                        .define("actionSlotHotkeys", false);
+            builder.pop();
             
             resolveShaders = builder
                     .comment(" Enable shaders during Resolve effect.")
