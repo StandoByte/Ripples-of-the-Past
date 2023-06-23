@@ -53,6 +53,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Matrix3f;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Quaternion;
+import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.Color;
@@ -461,5 +462,22 @@ public class ClientUtil {
     
     public static ITextComponent donoItemTooltip(String donoUsername) {
         return new TranslationTextComponent("item.jojo.dono_tooltip", donoUsername).withStyle(TextFormatting.DARK_GRAY);
+    }
+    
+    
+    @Nullable
+    public static Vector2f posOnScreen(Vector3d posInWorld, ActiveRenderInfo camera, MatrixStack matrixStack, Matrix4f projection) {
+        Vector3d cameraPos = camera.getPosition();
+        Vector3d vecToEntity = posInWorld.subtract(cameraPos);
+        
+        Matrix4f projectionMatrix = projection.copy();
+        Matrix4f viewMatrix = matrixStack.last().pose();
+        projectionMatrix.multiply(viewMatrix);
+        Vector3f clip = MathUtil.multiplyPoint(projectionMatrix, vecToEntity);
+        
+//        if (Math.abs(clip.x()) > 1 || Math.abs(clip.y()) > 1) {}
+        
+        Vector2f posOnScreen = new Vector2f(clip.x() * 0.5F + 0.5F, clip.y() * 0.5F + 0.5F);
+        return posOnScreen;
     }
 }

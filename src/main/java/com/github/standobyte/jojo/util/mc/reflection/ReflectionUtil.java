@@ -16,7 +16,7 @@ public class ReflectionUtil {
     static final Marker REFLECTION = MarkerManager.getMarker("REFLECTION");
 
     @Nullable
-    static <T, E> T getFieldValue(Field field, E instance) {
+    public static <T, E> T getFieldValue(Field field, E instance) {
         try {
             return (T) field.get(instance);
         } catch (IllegalAccessException e) {

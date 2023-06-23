@@ -1,10 +1,16 @@
 package com.github.standobyte.jojo.util.general;
 
+import java.lang.reflect.Field;
+
+import com.github.standobyte.jojo.util.mc.reflection.ReflectionUtil;
+
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 public class MathUtil {
     public static final float DEG_TO_RAD = (float) (Math.PI / 180D);
@@ -92,6 +98,48 @@ public class MathUtil {
     }
     
     
+    public static Vector3f multiplyPoint(Matrix4f matrix, Vector3d point) {
+        Vector3f pointF = new Vector3f((float) point.x, (float) point.y, (float) point.z);
+        Vector3f res = new Vector3f();
+        float w;
+        res.setX(getM(matrix, 0, 0) * pointF.x() + getM(matrix, 0, 1) * pointF.y() + getM(matrix, 0, 2) * pointF.z() + getM(matrix, 0, 3));
+        res.setY(getM(matrix, 1, 0) * pointF.x() + getM(matrix, 1, 1) * pointF.y() + getM(matrix, 1, 2) * pointF.z() + getM(matrix, 1, 3));
+        res.setZ(getM(matrix, 2, 0) * pointF.x() + getM(matrix, 2, 1) * pointF.y() + getM(matrix, 2, 2) * pointF.z() + getM(matrix, 2, 3));
+        w = getM(matrix, 3, 0) * pointF.x() + getM(matrix, 3, 1) * pointF.y() + getM(matrix, 3, 2) * pointF.z() + getM(matrix, 3, 3);
+        
+        w = 1F / w;
+        res.mul(w);
+        return res;
+    }
+    
+    private static float getM(Matrix4f matrix, int i, int j) {
+        return ReflectionUtil.getFieldValue(M_FIELDS[i][j], matrix);
+    }
+    
+    private static final Field M00 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226575_a_");
+    private static final Field M01 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226576_b_");
+    private static final Field M02 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226577_c_");
+    private static final Field M03 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226578_d_");
+    private static final Field M10 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226579_e_");
+    private static final Field M11 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226580_f_");
+    private static final Field M12 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226581_g_");
+    private static final Field M13 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226582_h_");
+    private static final Field M20 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226583_i_");
+    private static final Field M21 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226584_j_");
+    private static final Field M22 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226585_k_");
+    private static final Field M23 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226586_l_");
+    private static final Field M30 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226587_m_");
+    private static final Field M31 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226588_n_");
+    private static final Field M32 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226589_o_");
+    private static final Field M33 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226590_p_");
+    private static final Field[][] M_FIELDS = new Field[][] {
+        {M00, M01, M02, M03},
+        {M10, M11, M12, M13},
+        {M20, M21, M22, M23},
+        {M30, M31, M32, M33}
+    };
+    
+    
     
     
     public static Quaternion quaternionZYX(float x, float y, float z, boolean degrees) {
@@ -115,7 +163,9 @@ public class MathUtil {
         
         return new Quaternion(i, j, k, r);
     }
-
+    
+    
+    
     @SuppressWarnings("unused")
     public static class Matrix4ZYX {
         private float m00;
