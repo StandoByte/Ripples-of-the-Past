@@ -46,7 +46,7 @@ public class HamonHealing extends HamonAction {
 //            if (entityToHeal.getHealth() < entityToHeal.getMaxHealth()) {
                 addPointsForAction(power, hamon, HamonStat.CONTROL, cost, hamonEfficiency);
 //            }
-            entityToHeal.addEffect(new EffectInstance(Effects.REGENERATION, regenDuration, regenLvl));
+            updateRegenEffect(entityToHeal, regenDuration, regenLvl);
             if (hamon.isSkillLearned(ModHamonSkills.EXPEL_VENOM.get())) {
                 entityToHeal.removeEffect(Effects.POISON);
                 entityToHeal.removeEffect(Effects.WITHER);
@@ -60,6 +60,33 @@ public class HamonHealing extends HamonAction {
             Vector3d sparksPos = new Vector3d(entityToHeal.getX(), entityToHeal.getY(0.5), entityToHeal.getZ());
             HamonPowerType.createHamonSparkParticles(world, null, sparksPos, Math.max(0.5F * hamonControl * hamonEfficiency, 0.1F));
         }
+    }
+    
+    // prevents the health regeneration being faster or slower when spamming the ability
+    private void updateRegenEffect(LivingEntity entity, int duration, int level) {
+        EffectInstance currentRegen = entity.getEffect(Effects.REGENERATION);
+        if (currentRegen != null && currentRegen.getAmplifier() < 5 && currentRegen.getAmplifier() <= level) {
+            int regenGap = 50 >> currentRegen.getAmplifier();
+            if (regenGap > 0) {
+                int oldRegenAppliesIn = currentRegen.getDuration() % (50 >> currentRegen.getAmplifier());
+                int newRegenGap = 50 >> level;
+                int newRegenAppliesIn = duration % newRegenGap;
+                
+                if (oldRegenAppliesIn > newRegenAppliesIn) {
+                    int newDuration = duration + (oldRegenAppliesIn - newRegenAppliesIn);
+                    while (newDuration > duration) {
+                        newDuration -= newRegenGap;
+                    }
+                    if (newDuration > 0) {
+                        duration = newDuration;
+                    }
+                }
+                else {
+                    duration -= (newRegenAppliesIn - oldRegenAppliesIn);
+                }
+            }
+        }
+        entity.addEffect(new EffectInstance(Effects.REGENERATION, duration, level));
     }
     
     private boolean canBeHealed(LivingEntity targetEntity, LivingEntity user) {
