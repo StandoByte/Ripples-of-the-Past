@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.playeranim.playeranimator;
+package com.github.standobyte.jojo.client.playeranim;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 

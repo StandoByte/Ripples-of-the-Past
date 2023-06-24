@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.client.playeranim.playeranimator.anim;
 
-import com.github.standobyte.jojo.client.playeranim.playeranimator.IEntityAnimApplier;
+import com.github.standobyte.jojo.client.playeranim.IEntityAnimApplier;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import dev.kosmx.playerAnim.api.TransformType;

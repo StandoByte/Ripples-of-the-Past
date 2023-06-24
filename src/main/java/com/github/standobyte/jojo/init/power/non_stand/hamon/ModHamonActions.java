@@ -137,7 +137,7 @@ public class ModHamonActions {
     
     public static final RegistryObject<HamonAction> JONATHAN_METAL_SILVER_OVERDRIVE = ACTIONS.register("jonathan_metal_silver_overdrive", 
             () -> new HamonMetalSilverOverdrive(new HamonAction.Builder().energyCost(750)
-                    .swingHand().shout(ModSounds.JONATHAN_SCARLET_OVERDRIVE)));
+                    .swingHand()));
     
     public static final RegistryObject<HamonAction> JONATHAN_OVERDRIVE_BARRAGE = ACTIONS.register("jonathan_overdrive_barrage", 
             () -> new HamonOverdriveBarrage(new HamonAction.Builder().holdEnergyCost(70F).heldWalkSpeed(0).shout(ModSounds.JONATHAN_OVERDRIVE_BARRAGE)));

@@ -1,8 +1,8 @@
 package com.github.standobyte.jojo.client.render.entity.model.mob;
 
 import com.github.standobyte.jojo.client.ClientTicking;
+import com.github.standobyte.jojo.client.playeranim.IEntityAnimApplier;
 import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
-import com.github.standobyte.jojo.client.playeranim.playeranimator.IEntityAnimApplier;
 import com.github.standobyte.jojo.entity.mob.HamonMasterEntity;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
