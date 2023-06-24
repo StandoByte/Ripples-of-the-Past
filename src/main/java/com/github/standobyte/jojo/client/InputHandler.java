@@ -297,9 +297,9 @@ public class InputHandler {
                 if (!standPower.isActive()) {
                     actionsOverlay.onStandSummon();
                 }
-//                else {
-//                    actionsOverlay.onStandUnsummon();
-//                }
+                else {
+                    actionsOverlay.onStandUnsummon();
+                }
                 PacketManager.sendToServer(new ClToggleStandSummonPacket());
             }
             
