@@ -27,7 +27,7 @@ public class WalkmanItemContainer extends Container {
         super(ModContainers.WALKMAN.get(), id);
         this.walkmanItem = walkmanItem;
         this.cassetteSlot = itemCap;
-        addSlot(new SlotItemHandler(cassetteSlot, 0, 9, 111));
+        addSlot(new SlotItemHandler(cassetteSlot, 0, 10, 111));
 
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 9; ++j) {

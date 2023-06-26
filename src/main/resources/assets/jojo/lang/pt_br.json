@@ -446,7 +446,7 @@
   "hamon.control_skills.tab": "Habilidades de Suporte",
   "hamon.control_skills.tab.desc": "Habilidades de Hamon além de movimentos de combate. A maioria delas são capacidades defensivas ou habilidades de utilidade. Para cada 5 níveis de Controle Hamon você ganha um ponto de habilidade para aprender uma habilidade nesta aba.",
   "hamon.skill_points": "Pontos: %s",
-  "hamon.techniques.tab": "Técnicas",
+  "hamon.techniques.tab": "Técnicas (WIP)",
   "hamon.learnButton": "Aprender Habilidade",
   "hamon.resetButton": "Resetar Habilidades",
   "hamon.reset_creative_only": "Redefinir habilidades nesta guia (somente criativo)",

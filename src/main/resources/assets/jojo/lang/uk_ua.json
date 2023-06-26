@@ -462,7 +462,7 @@
   "hamon.control_skills.tab" : "Supportive Skills",
   "hamon.control_skills.tab.desc" : "Здібності Хамона, крім бойових рухів. Більшість із них — це захисні здібності або корисні навички. За кожні 5 рівнів контролю Хамона ви отримуєте очко навичок, щоб вивчити навичку на цій вкладці.",
   "hamon.skill_points" : "Очки навичок: %s",
-  "hamon.techniques.tab" : "Техніки",
+  "hamon.techniques.tab" : "Техніки (WIP)",
   "hamon.learnButton" : "Вивчити Навички",
   "hamon.resetButton" : "Скинути навички",
   "hamon.reset_creative_only" : "Скинути навички з цієї вкладки (працює лише в творчому режимі)",

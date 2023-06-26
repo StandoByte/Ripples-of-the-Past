@@ -185,6 +185,9 @@ public class StandUtil {
     }
     
     public static boolean worthyTarget(Entity target) {
+        if (!target.isAlive()) {
+            return false;
+        }
         if (target.getClassification(false) == EntityClassification.MONSTER || target.getType() == EntityType.PLAYER) {
             return true;
         }

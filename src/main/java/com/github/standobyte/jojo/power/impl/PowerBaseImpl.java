@@ -58,7 +58,8 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         this.serverPlayerUser = user instanceof ServerPlayerEntity ? Optional.of((ServerPlayerEntity) user) : Optional.empty();
     }
     
-    protected boolean canGetPower(T type) {
+    @Override
+    public boolean canGetPower(T type) {
         return type != null && (!hasPower() || getType().isReplaceableWith(type));
     }
 

@@ -45,8 +45,6 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.IForgeRegistry;
 
 public class StandStatsConfig extends JsonReloadListener implements IDataConfig {
-    public static final String COMMAND_ARG = "standstats";
-    
     private static StandStatsConfig instance;
     private static final String RESOURCE_NAME = "stand_stats";
     
@@ -69,8 +67,9 @@ public class StandStatsConfig extends JsonReloadListener implements IDataConfig 
     }
     
     @Override
-    public LiteralArgumentBuilder<CommandSource> commandRegister(LiteralArgumentBuilder<CommandSource> builder) {
-        return builder.then(Commands.literal(COMMAND_ARG).executes(ctx -> genAllStandsStats(ctx.getSource()))
+    public LiteralArgumentBuilder<CommandSource> commandRegister(LiteralArgumentBuilder<CommandSource> builder, String literal) {
+        return builder.then(Commands.literal(literal)
+                .executes(ctx -> genAllStandsStats(ctx.getSource()))
                 .then(Commands.argument("stand", new StandArgument()).executes(ctx -> genSingleStandStats(ctx.getSource(), StandArgument.getStandType(ctx, "stand"))))
                 );
     }

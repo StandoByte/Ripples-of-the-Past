@@ -69,6 +69,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.RayTraceResult.Type;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ChatType;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.event.InputEvent.ClickInputEvent;
 import net.minecraftforge.client.event.InputEvent.MouseScrollEvent;
@@ -312,11 +313,18 @@ public class InputHandler {
                     ClientUtil.openHamonTeacherUi();
                 }
                 else {
-                    mc.gui.handleChat(ChatType.GAME_INFO, new TranslationTextComponent(
-                            nonStandPower.getTypeSpecificData(ModPowers.VAMPIRISM.get())
-                            .map(vampirism -> vampirism.isVampireHamonUser()).orElse(false) ? 
-                                    "jojo.chat.message.no_hamon_vampire"
-                                    : "jojo.chat.message.no_hamon"), Util.NIL_UUID);
+                    ITextComponent message;
+                    if (nonStandPower.getTypeSpecificData(ModPowers.VAMPIRISM.get())
+                            .map(vampirism -> vampirism.isVampireHamonUser()).orElse(false)) {
+                        message = new TranslationTextComponent("jojo.chat.message.no_hamon_vampire");
+                    }
+                    else if (nonStandPower.hadPowerBefore(ModPowers.HAMON.get())) {
+                        message = new TranslationTextComponent("jojo.chat.message.no_hamon_abandoned");
+                    }
+                    else {
+                        message = new TranslationTextComponent("jojo.chat.message.no_hamon");
+                    }
+                    mc.gui.handleChat(ChatType.GAME_INFO, message, Util.NIL_UUID);
                 }
             }
             
@@ -595,10 +603,11 @@ public class InputHandler {
     
     private boolean wasStunned = false;
     private double prevSensitivity = 0.5;
+    private static final double ZERO_SENSITIVITY = -1.0 / 3.0;
     @SubscribeEvent
     public void setMouseSensitivity(ClientTickEvent event) {
         if (mc.player == null) {
-            if (mc.options.sensitivity <= -1.0 / 3.0) {
+            if (mc.options.sensitivity <= ZERO_SENSITIVITY) {
                 mc.options.sensitivity = prevSensitivity;
             }
             return;
@@ -609,7 +618,7 @@ public class InputHandler {
                 prevSensitivity = mc.options.sensitivity;
                 wasStunned = true;
             }
-            mc.options.sensitivity = -1.0 / 3.0;
+            mc.options.sensitivity = ZERO_SENSITIVITY;
             return;
         }
         else if (wasStunned) {
@@ -619,7 +628,7 @@ public class InputHandler {
         
         boolean invert = mc.player.hasEffect(ModEffects.MISSHAPEN_FACE.get());
         if (invert ^ mc.options.sensitivity < 0) {
-            mc.options.sensitivity = -mc.options.sensitivity - 2.0 / 3.0;
+            mc.options.sensitivity = -mc.options.sensitivity + ZERO_SENSITIVITY * 2;
         }
     }
     

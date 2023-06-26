@@ -30,6 +30,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class HamonTechniqueTabGui extends HamonSkillsTabGui {
@@ -46,14 +47,15 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
         if (!isLocked()) {
             fillSkillLines();
         }
-        availableTechniqueSkillLines = minecraft.font.split(new TranslationTextComponent("hamon.technique_available"), 100);
+        availableTechniqueSkillLines = minecraft.font.split(new TranslationTextComponent("hamon.technique_available")
+                .withStyle(TextFormatting.ITALIC, TextFormatting.GRAY), 100);
         tabLockedLines = HamonTechniqueManager.techniquesEnabled(true) ? 
                 minecraft.font.split(new TranslationTextComponent("hamon.techniques_locked", 
                         HamonTechniqueManager.techniqueSkillRequirement(0, true)), 200) 
                 : Collections.emptyList();
         
         // FIXME tmp
-        creativeResetButtonTooltip = minecraft.font.split(new TranslationTextComponent("hamon.reset_tmp"), 100);
+        creativeResetButtonTooltip = minecraft.font.split(new TranslationTextComponent("hamon.reset_tmp"), 150);
     }
     
     @Override

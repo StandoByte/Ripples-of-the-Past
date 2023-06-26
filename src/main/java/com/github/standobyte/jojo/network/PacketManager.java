@@ -31,10 +31,12 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClStopHeldActionPac
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandManualControlPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandSummonPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClWalkmanControlsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ActionCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ActionsLayoutPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.BrokenChunkBlocksPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.CommonConfigPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.HadPowerTypesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillAddPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillRemovePacket;
@@ -63,7 +65,6 @@ import com.github.standobyte.jojo.network.packets.fromserver.TimeStopInstancePac
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerJoinPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerStatePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrBarrageHitSoundPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.ActionCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDirectEntityPosPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDoubleShiftPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrEnergyPacket;
@@ -153,7 +154,7 @@ public class PacketManager {
         registerMessage(channel, new TrHeldActionPacket.Handler(),                   Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new ActionsLayoutPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrEnergyPacket.Handler(),                       Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        registerMessage(channel, new ActionCooldownPacket.Handler(),                     Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(channel, new ActionCooldownPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new BloodParticlesPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrHamonStatsPacket.Handler(),                   Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new HamonExercisesPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_CLIENT));
@@ -169,6 +170,7 @@ public class PacketManager {
         registerMessage(channel, new HamonUiEffectPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrVampirismDataPacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrStaminaPacket.Handler(),                      Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(channel, new HadPowerTypesPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new ResolvePacket.Handler(),                        Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrStandEffectPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new ResetResolveValuePacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_CLIENT));

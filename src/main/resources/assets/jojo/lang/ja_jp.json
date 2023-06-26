@@ -467,7 +467,7 @@
   "hamon.control_skills.tab": "サポート技能",
   "hamon.control_skills.tab.desc": "戦闘以外の波紋能力。これらのほとんどは防御能力または有益なスキルです。波紋制御が5レベルごとに1つのスキルポイントを習得できます",
   "hamon.skill_points": "スキルポイント: %s",
-  "hamon.techniques.tab": "技",
+  "hamon.techniques.tab": "技 (仕掛品)",
   "hamon.learnButton": "スキルを学ぶ",
   "hamon.resetButton": "スキルをリセットする",
   "hamon.reset_creative_only": "このタブのスキルをリセットします（クリエイティブ限定）",

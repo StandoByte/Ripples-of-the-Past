@@ -328,7 +328,7 @@ public class HamonStatsTabGui extends HamonTabGui {
         if (breathingBonus > 0 && 
                 mouseX >= 3 && mouseX <= 11 && 
                 mouseY >= exercisesAvgY && mouseY <= exercisesAvgY + 7) {
-            screen.renderTooltip(matrixStack, minecraft.font.split(bonusTooltip, 120), mouseX, mouseY);
+            screen.renderTooltip(matrixStack, minecraft.font.split(bonusTooltip, 150), mouseX, mouseY);
         }
         
         else if (mouseX >= 199 && mouseX < 207 && mouseY > exercisesAvgY && mouseY < exercisesAvgY + 8) {
@@ -338,7 +338,7 @@ public class HamonStatsTabGui extends HamonTabGui {
                 tooltip = new TranslationTextComponent("hamon.exercise.full_completion_hint", tooltip, 
                         new TranslationTextComponent("hamon.exercise.completion_buff_hint2")).withStyle(TextFormatting.ITALIC);
             }
-            screen.renderTooltip(matrixStack, minecraft.font.split(tooltip, 120), mouseX, mouseY);
+            screen.renderTooltip(matrixStack, minecraft.font.split(tooltip, 150), mouseX, mouseY);
         }
         
         else if (mouseX >= 12 && mouseX < 207 && mouseY > exercisesAvgY && mouseY < exercisesAvgY + 8) {

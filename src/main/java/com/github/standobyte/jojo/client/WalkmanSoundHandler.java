@@ -340,7 +340,6 @@ public class WalkmanSoundHandler {
 
     
 
-    // FIXME ! (cassette) test on dedicated server
     public static Stream<Track> getTracksOnClient(TrackList trackSourcesList) {
         if (trackSourcesList.isBroken()) {
             return Stream.empty();
@@ -391,7 +390,7 @@ public class WalkmanSoundHandler {
         if (accessor instanceof Sound) {
             return Stream.of(accessor.getSound());
         }
-        // FIXME ! (cassette) this... is not okay
+        
         if ("net.minecraft.client.audio.SoundHandler$Loader$1".equals(accessor.getClass().getName())) {
             for (Field field : accessor.getClass().getDeclaredFields()) {
                 if (field.getType() == ResourceLocation.class) {
@@ -403,7 +402,7 @@ public class WalkmanSoundHandler {
                             return unpackSounds(soundManager, nextAccessor);
                         }
                     } catch (IllegalArgumentException | IllegalAccessException e) {
-                        // FIXME ! (cassette) Auto-generated catch block
+                        JojoMod.getLogger().error("Couldn't read track list from a cassette");
                         e.printStackTrace();
                     }
                 }

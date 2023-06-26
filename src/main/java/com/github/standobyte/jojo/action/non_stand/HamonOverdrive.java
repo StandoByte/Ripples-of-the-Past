@@ -70,7 +70,7 @@ public class HamonOverdrive extends HamonAction {
                 if (dealDamage(targetEntity, damage, user, power, hamon)) {
                     addPointsForAction(power, hamon, HamonStat.STRENGTH, cost, efficiency);
                 }
-                // FIXME (hamon) !! ClientPlayerEntity#swing sends the packet to server, and THEN ServerPlayerEntity#swing resets attackStrengthTicker
+                // FIXME !! (hamon) ClientPlayerEntity#swing sends the packet to server, and THEN ServerPlayerEntity#swing resets attackStrengthTicker
                 CommonReflection.setAttackStrengthTicker(user, attackStrengthTicker);
             }
         }

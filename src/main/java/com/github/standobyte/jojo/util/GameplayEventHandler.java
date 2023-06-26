@@ -275,7 +275,7 @@ public class GameplayEventHandler {
     }
     
     private static boolean checkLiquidWalking(PlayerEntity player) {
-        // FIXME !!! (liquid walking) fix not being able to move on shift (PlayerEntity#maybeBackOffFromEdge (989))
+        // FIXME fix not being able to walk on liquid on shift (PlayerEntity#maybeBackOffFromEdge (989))
         // FIXME !!!! (liquid walking) double-shift
         if (player.abilities.flying || player.isInWater()) {
             return false;

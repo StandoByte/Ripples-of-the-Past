@@ -75,7 +75,6 @@ public class ModHamonActions {
             () -> new HamonOrganismInfusion(new HamonAction.Builder().energyCost(200F)
                     .needsFreeMainHand().swingHand()));
     
-    // FIXME ! (hamon) hamon breath icon
     public static final RegistryObject<HamonAction> HAMON_BREATH = ACTIONS.register("hamon_breath", 
             () -> new HamonBreath(new HamonAction.Builder().holdType().heldWalkSpeed(0.0F)
                     .shout(ModSounds.BREATH_DEFAULT)

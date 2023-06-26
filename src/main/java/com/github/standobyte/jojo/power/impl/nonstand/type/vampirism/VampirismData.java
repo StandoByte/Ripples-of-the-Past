@@ -76,7 +76,7 @@ public class VampirismData extends TypeSpecificData {
         }
     }
     
-    // FIXME (layout editing) !! hamon suicide addition
+    // FIXME !! (layout editing) hamon suicide addition
     private void addHamonSuicideAbility() {
 //        VampirismAction hamonAbility = ModActions.VAMPIRISM_HAMON_SUICIDE.get();
 //        List<Action<INonStandPower>> abilities = power.getAbilities();

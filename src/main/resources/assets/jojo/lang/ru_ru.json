@@ -333,7 +333,7 @@
   "hamon.unspent_points": "У вас есть неиспользованные очки навыков, используйте их для изучения новых навыков Хамона!",
   "hamon.strength_skills.tab": "Боевые навыки",
   "hamon.skill_points": "Очки навыков: %s",
-  "hamon.techniques.tab": "Техники",
+  "hamon.techniques.tab": "Техники (WIP)",
   "hamon.techniques.tab.desc.only_one": "Вы можете выбрать только одну технику (ряд из 3 навыков). ",
   "hamon.technique_slot.locked": "Откроется на %s уровне силы Хамона и контроля Хамона",
   "hamon.technique_slot.free": "Вы можете изучить новый навык техники!",

@@ -365,19 +365,19 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     }
     
     public static void startLearningHamon(World world, PlayerEntity player, INonStandPower playerPower, LivingEntity teacher, HamonData teacherHamon) {
-        if (playerPower.givePower(ModPowers.HAMON.get())) {
-            if (teacherHamon.characterIs(ModHamonSkills.CHARACTER_ZEPPELI.get())) {
-                JojoModUtil.sayVoiceLine(teacher, ModSounds.ZEPPELI_FORCE_BREATH.get());
-                teacher.swing(Hand.MAIN_HAND, true);
-                if (player.getRandom().nextFloat() <= 0.01F) {
-                    player.hurt(DamageSource.GENERIC, 4.0F);
-                    player.setAirSupply(0);
-                    return;
-                }
-                else {
-                    player.hurt(DamageSource.GENERIC, 0.1F);
-                }
+        if (playerPower.canGetPower(ModPowers.HAMON.get()) && teacherHamon.characterIs(ModHamonSkills.CHARACTER_ZEPPELI.get())) {
+            JojoModUtil.sayVoiceLine(teacher, ModSounds.ZEPPELI_FORCE_BREATH.get());
+            teacher.swing(Hand.MAIN_HAND, true);
+            if (player.getRandom().nextFloat() <= 0.01F) {
+                player.hurt(DamageSource.GENERIC, 4.0F);
+                player.setAirSupply(0);
+                return;
             }
+            else {
+                player.hurt(DamageSource.GENERIC, 0.1F);
+            }
+        } 
+        if (playerPower.givePower(ModPowers.HAMON.get())) {
             playerPower.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                 if (player.abilities.instabuild) {
                     hamon.setBreathingLevel(HamonData.MAX_BREATHING_LEVEL);

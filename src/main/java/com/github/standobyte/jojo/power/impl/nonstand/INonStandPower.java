@@ -21,6 +21,9 @@ public interface INonStandPower extends IPower<INonStandPower, NonStandPowerType
     boolean consumeEnergy(float amount);
     void setEnergy(float amount);
     
+    boolean hadPowerBefore(NonStandPowerType<?> type);
+    void addHadPowerBefore(NonStandPowerType<?> type);
+    
     <T extends NonStandPowerType<D>, D extends TypeSpecificData> Optional<D> getTypeSpecificData(@Nullable T requiredType);
     
     public static LazyOptional<INonStandPower> getNonStandPowerOptional(LivingEntity entity) {

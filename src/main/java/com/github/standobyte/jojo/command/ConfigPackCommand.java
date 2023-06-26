@@ -11,7 +11,7 @@ public class ConfigPackCommand {
     
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         LiteralArgumentBuilder<CommandSource> command = Commands.literal("jojoconfigpack").requires(ctx -> ctx.hasPermission(2));
-        StandStatsConfig.getInstance().commandRegister(command);
+        StandStatsConfig.getInstance().commandRegister(command, "standstats");
         dispatcher.register(command);
         JojoCommandsCommand.addCommand("jojoconfigpack");
     }

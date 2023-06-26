@@ -29,6 +29,7 @@ import net.minecraftforge.common.util.LazyOptional;
 public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     PowerClassification getPowerClassification();
     boolean hasPower();
+    boolean canGetPower(T type);
     boolean givePower(T type);
     boolean clear();
     T getType();
@@ -148,6 +149,48 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
             return powerClass;
         }
     }
+    
+    // TODO change PowerClassification from Enum to the custom one
+//    public static class PowerClassification<P extends IPower<P, T>, T extends IPowerType<P, T>> {
+//        public static final PowerClassification<IStandPower, StandType<?>> STAND = new PowerClassification<>("stand", 0);
+//        public static final PowerClassification<INonStandPower, NonStandPowerType<?>> NON_STAND = new PowerClassification<>("non_stand", 1);
+//        
+//        private static final List<PowerClassification<?, ?>> VALUES = ImmutableList.of(STAND, NON_STAND);
+//        private final String name;
+//        private final int id;
+//        
+//        private PowerClassification(String name, int id) {
+//            this.name = name;
+//            this.id = id;
+//        }
+//        
+//        public String name() {
+//            return name;
+//        }
+//        
+//        @Nullable
+//        public static PowerClassification<?, ?> valueOf(String name) {
+//            if (STAND.name.equals(name)) {
+//                return STAND;
+//            }
+//            if (NON_STAND.name.equals(name)) {
+//                return NON_STAND;
+//            }
+//            return null;
+//        }
+//        
+//        public static PowerClassification<?, ?> read(PacketBuffer buf) {
+//            return VALUES.get(buf.readVarInt());
+//        }
+//        
+//        public void write(PacketBuffer buf) {
+//            buf.writeVarInt(id);
+//        }
+//        
+//        public static List<PowerClassification<?, ?>> values() {
+//            return VALUES;
+//        }
+//    }
     
     public static enum ActionType {
         ATTACK,

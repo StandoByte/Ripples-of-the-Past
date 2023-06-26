@@ -584,7 +584,7 @@
  "hamon.control_skills.tab": "辅助能力",
  "hamon.control_skills.tab.desc": "波纹战斗技能以外的其他能力。其中大多数是防御能力或实用能力。每达成5级的波纹控制，你都会获得一个控制技能点，从此面板中学习一个能力。",
  "hamon.skill_points": "技能点: %s",
- "hamon.techniques.tab": "天赋",
+ "hamon.techniques.tab": "天赋 (未完成)",
  "hamon.technique_slot.locked": "将在%s级的波纹控制和波纹力量解锁",
  "hamon.technique_slot.free": "你可以学习一项新能力！",
  "hamon.learnButton": "学习此能力",

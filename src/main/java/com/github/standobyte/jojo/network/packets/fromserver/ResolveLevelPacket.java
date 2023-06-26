@@ -42,7 +42,7 @@ public class ResolveLevelPacket {
         @Override
         public void handle(ResolveLevelPacket msg, Supplier<NetworkEvent.Context> ctx) {
             IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
-                // FIXME !! make the toast show up when getting the level up from /standlevel command
+                // FIXME make the toast show up when getting the level up from /standlevel command
                 boolean wasComboUnlocked = msg.fromEffect && StandUtil.isComboUnlocked(power);
                 power.setResolveLevel(msg.level, msg.fromEffect);
                 if (msg.fromEffect && !wasComboUnlocked && StandUtil.isComboUnlocked(power)) {

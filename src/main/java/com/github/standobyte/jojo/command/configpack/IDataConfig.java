@@ -35,7 +35,7 @@ public interface IDataConfig {
     public static final Logger LOGGER = LogManager.getLogger();
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     
-    LiteralArgumentBuilder<CommandSource> commandRegister(LiteralArgumentBuilder<CommandSource> builder);
+    LiteralArgumentBuilder<CommandSource> commandRegister(LiteralArgumentBuilder<CommandSource> builder, String literal);
     
     default String getDataPackName() {
         return "jojoconfig";

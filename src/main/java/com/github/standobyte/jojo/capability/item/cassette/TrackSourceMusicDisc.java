@@ -36,13 +36,11 @@ public class TrackSourceMusicDisc extends TrackSource {
         return nbt;
     }
 
-    // FIXME ! (cassette) test on dedicated server
     @Override
     public SoundEvent getSoundEvent() {
         return musicDisc.getSound();
     }
 
-    // FIXME ! (cassette) test on dedicated server
     @Override
     protected String getTranslationKey(ResourceLocation trackId) {
         return musicDisc.getDescriptionId() + ".desc";

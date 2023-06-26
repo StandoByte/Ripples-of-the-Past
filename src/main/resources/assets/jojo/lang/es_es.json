@@ -615,7 +615,7 @@
   "hamon.control_skills.tab": "Habilidades de apoyo",
   "hamon.control_skills.tab.desc": "Hamon Habilidades que no sean movimientos de combate. La mayoría de estos son capacidades defensivas o de utilidad. Por cada 5 niveles de Control Hamon obtienes un punto.",
   "hamon.skill_points": "Puntos de habilidad: %s",
-  "hamon.techniques.tab": "Tecnicas",
+  "hamon.techniques.tab": "Tecnicas (WIP)",
   "hamon.techniques.tab.desc": "Las técnicas son conjuntos de habilidades específicas de ciertos personajes de las partes 1 y 2 de JJBA. %sSe desbloquean nuevas habilidades técnicas en ciertos niveles tanto de Hamon Strength como de Hamon Control.",
   "hamon.techniques.tab.desc.only_one": "Puedes elegir solo una técnica (una fila de 3 habilidades). ",
   "hamon.technique_slot.locked": "Se desbloqueará en los niveles %s de Hamon Strength y Hamon Control.",

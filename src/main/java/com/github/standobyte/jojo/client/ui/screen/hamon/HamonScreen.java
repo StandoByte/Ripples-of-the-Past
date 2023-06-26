@@ -24,6 +24,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
@@ -240,12 +241,16 @@ public class HamonScreen extends Screen {
         }
     }
 
+    private int tooltipOffsetX;
+    private int tooltipOffsetY;
     private void renderToolTips(MatrixStack matrixStack, int mouseX, int mouseY, int windowX, int windowY) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         if (selectedTab != null && mouseInsideWindow(mouseX, mouseY)) {
             RenderSystem.pushMatrix();
             RenderSystem.enableDepthTest();
-            RenderSystem.translatef((float)(windowX + WINDOW_THIN_BORDER), (float)(windowY + WINDOW_UPPER_BORDER), 400.0F);
+            tooltipOffsetX = windowX + WINDOW_THIN_BORDER;
+            tooltipOffsetY = windowY + WINDOW_UPPER_BORDER;
+            RenderSystem.translatef((float) tooltipOffsetX, (float) tooltipOffsetY, 400.0F);
             selectedTab.drawToolTips(matrixStack, mouseX - windowX - WINDOW_THIN_BORDER, mouseY - windowY - WINDOW_UPPER_BORDER, windowX, windowY);
             RenderSystem.disableDepthTest();
             RenderSystem.popMatrix();
@@ -259,6 +264,15 @@ public class HamonScreen extends Screen {
                 break;
             }
         }
+    }
+    
+    @Override
+    public void renderToolTip(MatrixStack matrixStack, List<? extends IReorderingProcessor> tooltips, 
+            int mouseX, int mouseY, FontRenderer font) {
+        matrixStack.translate(-tooltipOffsetX, -tooltipOffsetY, 0);
+        // makes the tooltip wrap at the right edge of the screen correctly
+        super.renderToolTip(matrixStack, tooltips, mouseX + tooltipOffsetX, mouseY + tooltipOffsetY, font);
+        matrixStack.translate(tooltipOffsetX, tooltipOffsetY, 0);
     }
 
     @SuppressWarnings("resource")

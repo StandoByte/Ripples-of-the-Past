@@ -463,7 +463,7 @@
   "hamon.control_skills.tab": "Abilità supportive",
   "hamon.control_skills.tab.desc": "Hamon Abilità diverse dalle mosse di combattimento. La maggior parte di queste sono capacità difensive o abilità di utilità. Per ogni 5 livelli di Hamon Control ottieni un punto abilità per apprendere un'abilità da questa scheda.",
   "hamon.skill_points": "Punti Abilità: %s",
-  "hamon.techniques.tab": "Tecniche",
+  "hamon.techniques.tab": "Tecniche (WIP)",
   "hamon.learnButton": "Apprendi Abilità",
   "hamon.resetButton": "Reimposta Abilità",
   "hamon.reset_creative_only": "Reimposta Abilità da questa scheda (solo in Creativa)",

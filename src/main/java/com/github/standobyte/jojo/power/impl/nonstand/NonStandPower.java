@@ -1,6 +1,9 @@
 package com.github.standobyte.jojo.power.impl.nonstand;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -9,20 +12,25 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.HadPowerTypesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrEnergyPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrTypeNonStandPowerPacket;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.impl.PowerBaseImpl;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.util.general.Container;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.registries.IForgeRegistry;
 
 public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerType<?>> implements INonStandPower {
     public static final float BASE_MAX_ENERGY = 1000;
@@ -30,6 +38,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     private float energy = 0;
     protected NonStandPowerType<?> type;
     private TypeSpecificData typeSpecificData;
+    private Set<NonStandPowerType<?>> hadPowers = new HashSet<>();
     
     public NonStandPower(LivingEntity user) {
         super(user);
@@ -55,6 +64,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
         onNewPowerGiven(type);
         typeSpecificData.onPowerGiven(oldType);
         typeSpecificData.updateExtraActions();
+        addHadPowerBefore(type);
         return true;
     }
     
@@ -220,7 +230,20 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
         this.typeSpecificData = data;
         this.typeSpecificData.setPower(this);
     }
-
+    
+    @Override
+    public boolean hadPowerBefore(NonStandPowerType<?> type) {
+        return hadPowers.contains(type);
+    }
+    
+    @Override
+    public void addHadPowerBefore(NonStandPowerType<?> type) {
+        hadPowers.add(type);
+        serverPlayerUser.ifPresent(player -> {
+            PacketManager.sendToClient(new HadPowerTypesPacket(hadPowers), player);
+        });
+    }
+    
     @Override
     public CompoundNBT writeNBT() {
         CompoundNBT cnbt = super.writeNBT();
@@ -229,14 +252,18 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
         getTypeSpecificData(null).ifPresent(data -> {
             cnbt.put("AdditionalData", data.writeNBT());
         });
+        cnbt.put("HadPowers", hadPowers.stream()
+                .map(type -> StringNBT.valueOf(type.getRegistryName().toString()))
+                .collect(Collectors.toCollection(ListNBT::new)));
         return cnbt;
     }
 
     @Override
     public void readNBT(CompoundNBT nbt) {
+        IForgeRegistry<NonStandPowerType<?>> powerTypeRegistry = JojoCustomRegistries.NON_STAND_POWERS.getRegistry();
         String powerName = nbt.getString("Type");
         if (powerName != IPowerType.NO_POWER_NAME) {
-            NonStandPowerType<?> type = JojoCustomRegistries.NON_STAND_POWERS.getRegistry().getValue(new ResourceLocation(powerName));
+            NonStandPowerType<?> type = powerTypeRegistry.getValue(new ResourceLocation(powerName));
             if (type != null) {
                 setType(type);
                 TypeSpecificData data = type.newSpecificDataInstance();
@@ -247,6 +274,20 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
                 }
             }
         }
+        
+        if (nbt.contains("HadPowers", MCUtil.getNbtId(ListNBT.class))) {
+            ListNBT list = nbt.getList("HadPowers", MCUtil.getNbtId(StringNBT.class));
+            for (int i = 0; i < list.size(); i++) {
+                String name = list.getString(i);
+                if (!name.isEmpty()) {
+                    ResourceLocation id = new ResourceLocation(name);
+                    if (powerTypeRegistry.containsKey(id)) {
+                        hadPowers.add(powerTypeRegistry.getValue(id));
+                    }
+                }
+            }
+        }
+        
         energy = nbt.contains("Mana", 5) ? // TODO remove in a later version
                 nbt.getFloat("Mana")
                 : nbt.getFloat("Energy");
@@ -281,6 +322,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
                 });
                 PacketManager.sendToClient(new TrEnergyPacket(player.getId(), energy), player);
             }
+            PacketManager.sendToClient(new HadPowerTypesPacket(hadPowers), player);
         });
         syncLayoutWithUser();
     }

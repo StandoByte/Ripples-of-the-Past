@@ -81,8 +81,10 @@ public class HamonGeneralSkillsTabGui extends HamonSkillsTabGui {
         super(minecraft, screen, index, title, -1, -1);
         this.skillsType = skillsType;
         fillSkillLines();
-        unspentPointsLines = minecraft.font.split(new TranslationTextComponent("hamon.unspent_points"), 100);
-        unspentPointsNoTeacherLines = minecraft.font.split(new TranslationTextComponent("hamon.unspent_points_no_teacher"), 100);
+        unspentPointsLines = minecraft.font.split(new TranslationTextComponent("hamon.unspent_points")
+                .withStyle(TextFormatting.ITALIC, TextFormatting.GRAY), 100);
+        unspentPointsNoTeacherLines = minecraft.font.split(new TranslationTextComponent("hamon.unspent_points_no_teacher")
+                .withStyle(TextFormatting.ITALIC, TextFormatting.GRAY), 100);
     }
     
     private void fillSkillLines() {
