@@ -54,6 +54,9 @@ public class HamonScreen extends Screen {
     HamonData hamon;
     
     boolean clickedOnSkill;
+    
+    public static int screenX;
+    public static int screenY;
 
     public HamonScreen() {
         super(NarratorChatListener.NO_TITLE);
@@ -189,6 +192,8 @@ public class HamonScreen extends Screen {
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
         int x = windowPosX();
         int y = windowPosY();
+        screenX = x;
+        screenY = y;
         tabsWithSkillRequirements.clear();
         renderBackground(matrixStack);
         renderInside(matrixStack, mouseX, mouseY, x, y, partialTick);

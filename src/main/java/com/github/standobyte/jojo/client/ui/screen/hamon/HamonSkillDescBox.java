@@ -2,6 +2,8 @@ package com.github.standobyte.jojo.client.ui.screen.hamon;
 
 import java.util.List;
 
+import org.lwjgl.opengl.GL11;
+
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -21,8 +23,6 @@ import net.minecraft.util.math.MathHelper;
  * y scroll
  *     mouse drag
  *     elevator drag
- * 
- * render only text fitting inside the box
  */
 public class HamonSkillDescBox {
     protected static final int WIDTH = 198;
@@ -66,7 +66,7 @@ public class HamonSkillDescBox {
     public void renderBg(MatrixStack matrixStack, int x, int y, int mouseX, int mouseY) {
         Minecraft.getInstance().getTextureManager().bind(HamonSkillsTabGui.HAMON_SKILLS);
         AbstractGui.blit(matrixStack, this.x + x - 3, this.y + y - 3, 52, 206, WIDTH + 6, HEIGHT + 6, 256, 256);
-
+        
         AbstractGui.blit(matrixStack, this.x + x - 3, this.y + y - 3, 52, 156, WIDTH + 6, HEIGHT + 6, 256, 256);
         
         if (hasScrolling) {
@@ -115,9 +115,23 @@ public class HamonSkillDescBox {
     }
     
     public void drawDesc(MatrixStack matrixStack, FontRenderer font, int x, int y) {
-        ClientUtil.drawLines(matrixStack, font, skillDesc, 
-                this.x + x + EDGE_TEXT_OFFSET, this.y + y + EDGE_TEXT_OFFSET - yTextScroll, 
-                0, 0xFFFFFF, false);
+        Minecraft mc = Minecraft.getInstance();
+        int scale = mc.getWindow().calculateScale(mc.options.guiScale, mc.isEnforceUnicode());
+        int scissorX = (HamonScreen.screenX + this.x + x + HamonScreen.WINDOW_THIN_BORDER) * scale;
+        int scissorY = (HamonScreen.screenY + this.y + y + HamonScreen.WINDOW_UPPER_BORDER) * scale;
+        int scissorWidth = WIDTH * scale;
+        int scissorHeight = HEIGHT * scale;
+        GL11.glEnable(GL11.GL_SCISSOR_TEST);
+        GL11.glScissor(scissorX, mc.getWindow().getHeight() - scissorY - scissorHeight, scissorWidth, scissorHeight);
+        
+        for (int i = 0; i < skillDesc.size(); i++) {
+            float lineY = this.y + y + EDGE_TEXT_OFFSET - yTextScroll + i * font.lineHeight;
+            if (lineY + font.lineHeight >= this.y + y && lineY <= this.y + y + HEIGHT) {
+                font.draw(matrixStack, skillDesc.get(i), this.x + x + EDGE_TEXT_OFFSET, lineY, 0xFFFFFF);
+            }
+        }
+        
+        GL11.glDisable(GL11.GL_SCISSOR_TEST);
     }
     
     public boolean isMouseOver(double mouseX, double mouseY, double offsetX, double offsetY) {
