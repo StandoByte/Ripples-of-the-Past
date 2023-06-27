@@ -251,8 +251,9 @@ public class TommyGunItem extends Item {
                 .orElse(false);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlotType slot, ItemStack stack) {
+    public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlotType slot) {
         if (slot == EquipmentSlotType.MAINHAND) {
             if (attributeModifiers == null) {
                 Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
@@ -264,7 +265,7 @@ public class TommyGunItem extends Item {
             }
             return attributeModifiers;
         }
-        return super.getAttributeModifiers(slot, stack);
+        return super.getDefaultAttributeModifiers(slot);
     }
     
     @Override

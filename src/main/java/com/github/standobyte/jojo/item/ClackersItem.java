@@ -161,12 +161,13 @@ public class ClackersItem extends Item {
                 ModSounds.CLACKERS.get(), entity.getSoundSource(), 0.5F, 1.0F + (random.nextFloat() - 0.5F) * 0.1F);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlotType slot, ItemStack stack) {
+    public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlotType slot) {
         if (slot == EquipmentSlotType.MAINHAND) {
             return attributeModifiers;
         }
-        return super.getAttributeModifiers(slot, stack);
+        return super.getDefaultAttributeModifiers(slot);
     }
 
 }

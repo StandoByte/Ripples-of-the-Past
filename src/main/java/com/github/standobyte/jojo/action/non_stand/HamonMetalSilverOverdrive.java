@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.action.non_stand;
 
+import java.util.Collection;
+
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -7,6 +9,9 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.TieredItem;
 
@@ -23,7 +28,23 @@ public class HamonMetalSilverOverdrive extends HamonOverdrive {
     
     public static boolean itemUsesMSO(LivingEntity user) {
         ItemStack heldItemStack = user.getMainHandItem();
-        return !heldItemStack.isEmpty() && heldItemStack.getItem() instanceof TieredItem;
+        if (heldItemStack.isEmpty()) {
+            return false;
+        }
+        
+        // tiered items (swords, axes, tools, sledgehammer, modded weapons)
+        if (heldItemStack.getItem() instanceof TieredItem) {
+            return true;
+        }
+        
+        // other items dealing extra damage (trident, knife, potentially unique modded weapons)
+        Collection<AttributeModifier> damageModifiers = heldItemStack
+                .getItem().getAttributeModifiers(EquipmentSlotType.MAINHAND, heldItemStack).get(Attributes.ATTACK_DAMAGE);
+        if (damageModifiers != null) {
+            return damageModifiers.stream().anyMatch(modifier -> modifier.getOperation() == AttributeModifier.Operation.ADDITION && modifier.getAmount() > 0);
+        }
+        
+        return false;
     }
 
 //    @Override
