@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonMeditationPacket;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
@@ -16,14 +17,17 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.util.text.event.HoverEvent;
 
 @SuppressWarnings("deprecation")
 public class HamonStatsTabGui extends HamonTabGui {
@@ -31,6 +35,7 @@ public class HamonStatsTabGui extends HamonTabGui {
     private final List<IReorderingProcessor> controlDescLines;
     private final List<IReorderingProcessor> breathingDescLines;
     private final List<IReorderingProcessor> exercisesDescLines;
+    private final IFormattableTextComponent breathMaskHoverable;
     private final List<IReorderingProcessor> breathingDeteriorationLines;
     private final List<IReorderingProcessor> breathingStatGapLines;
     private final List<IReorderingProcessor> statLimitTooltip;
@@ -52,7 +57,12 @@ public class HamonStatsTabGui extends HamonTabGui {
         strengthDescLines = minecraft.font.split(new TranslationTextComponent("hamon.strength_stat.desc"), textWidth);
         controlDescLines = minecraft.font.split(new TranslationTextComponent("hamon.control_stat.desc"), textWidth);
         breathingDescLines = minecraft.font.split(new TranslationTextComponent("hamon.breathing_stat.desc"), textWidth);
-        exercisesDescLines = minecraft.font.split(new TranslationTextComponent("hamon.breathing_stat.desc2"), textWidth);
+        breathMaskHoverable = new TranslationTextComponent("hamon.breathing_stat.desc2.mask")
+                .withStyle(TextFormatting.UNDERLINE)
+                .withStyle(style -> {
+                    return style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemHover(new ItemStack(ModItems.BREATH_CONTROL_MASK.get()))));
+                });
+        exercisesDescLines = minecraft.font.split(new TranslationTextComponent("hamon.breathing_stat.desc2", breathMaskHoverable), textWidth);
         breathingDeteriorationLines = minecraft.font.split(new TranslationTextComponent("hamon.breathing_stat.desc3"), textWidth);
         breathingStatGapLines = minecraft.font.split(new TranslationTextComponent("hamon.breathing_stat.desc4", JojoModConfig.getCommonConfigInstance(true).breathingStatGap.get()), textWidth);
         statLimitTooltip = minecraft.font.split(new TranslationTextComponent("hamon.stat_limited"), 150);
@@ -383,6 +393,17 @@ public class HamonStatsTabGui extends HamonTabGui {
                 screen.renderTooltip(matrixStack, meditationTooltip, mouseX, mouseY);
             }
         }
+        
+        int exercisesDescLine = (mouseY - exercisesAvgY) / minecraft.font.lineHeight - 1;
+        boolean maskNameTooltip = false;
+        if (exercisesDescLine >= 0 && exercisesDescLine < exercisesDescLines.size()) {
+            Style style = minecraft.font.getSplitter().componentStyleAtWidth(exercisesDescLines.get(exercisesDescLine), mouseX - HamonScreen.WINDOW_THIN_BORDER);
+            if (style != null && style.getHoverEvent() != null) {
+                screen.renderComponentHoverEffect(matrixStack, style, mouseX, mouseY);
+                maskNameTooltip = true;
+            }
+        }
+        breathMaskHoverable.getStyle().setUnderlined(!maskNameTooltip);
     }
     
     private static final DecimalFormat PERCENTAGE_FORMAT = new DecimalFormat("#.#");

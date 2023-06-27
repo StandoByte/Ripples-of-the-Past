@@ -30,6 +30,8 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextProperties;
+import net.minecraft.util.text.Style;
 
 @SuppressWarnings("deprecation")
 public class HamonScreen extends Screen {
@@ -267,14 +269,27 @@ public class HamonScreen extends Screen {
     }
     
     @Override
+    public void renderComponentHoverEffect(MatrixStack matrixStack, @Nullable Style style, int mouseX, int mouseY) {
+        super.renderComponentHoverEffect(matrixStack, style, mouseX, mouseY);
+    }
+
+    // these two overrides make the tooltip wrap at the right edge of the screen correctly
+    @Override
     public void renderToolTip(MatrixStack matrixStack, List<? extends IReorderingProcessor> tooltips, 
             int mouseX, int mouseY, FontRenderer font) {
         matrixStack.translate(-tooltipOffsetX, -tooltipOffsetY, 0);
-        // makes the tooltip wrap at the right edge of the screen correctly
         super.renderToolTip(matrixStack, tooltips, mouseX + tooltipOffsetX, mouseY + tooltipOffsetY, font);
         matrixStack.translate(tooltipOffsetX, tooltipOffsetY, 0);
     }
-
+    
+    @Override
+    public void renderWrappedToolTip(MatrixStack matrixStack, List<? extends ITextProperties> tooltips, 
+            int mouseX, int mouseY, FontRenderer font) {
+        matrixStack.translate(-tooltipOffsetX, -tooltipOffsetY, 0);
+        super.renderWrappedToolTip(matrixStack, tooltips, mouseX + tooltipOffsetX, mouseY + tooltipOffsetY, font);
+        matrixStack.translate(tooltipOffsetX, tooltipOffsetY, 0);
+    }
+    
     @SuppressWarnings("resource")
     public static void setTeacherSkills(Collection<? extends AbstractHamonSkill> skills) {
         Screen screen = Minecraft.getInstance().screen;
