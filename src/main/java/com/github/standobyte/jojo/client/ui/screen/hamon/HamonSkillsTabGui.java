@@ -228,6 +228,10 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
     @Override
     boolean mouseClicked(double mouseX, double mouseY, int mouseButton, boolean mouseInsideWindow) {
         if (mouseInsideWindow && mouseButton == 0) {
+            if (selectedSkillDesc != null && selectedSkillDesc.onClick((int) mouseX, (int) mouseY, intScrollX, intScrollY)) {
+                return true;
+            }
+            
             for (HamonSkillElementLearnable skill : skills.values()) {
                 if (skill.isMouseOver(intScrollX, intScrollY, (int) mouseX, (int) mouseY)) {
                     selectSkill(skill);
@@ -242,6 +246,7 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
                     return true;
                 }
             }
+            
             for (HamonSkillGuiElement requirement : skillRequirements) {
                 if (requirement.isMouseOver(intScrollX, intScrollY, (int) mouseX, (int) mouseY)) {
                     AbstractHamonSkill skill = requirement.getHamonSkill();
@@ -270,6 +275,9 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
 
     @Override
     boolean mouseReleased(double mouseX, double mouseY, int mouseButton) {
+        if (selectedSkillDesc != null && selectedSkillDesc.onRelease()) {
+            return true;
+        }
         if (mouseButton == 1 || !screen.clickedOnSkill && !screen.isDragging() && mouseButton == 0 && 
                 !learnButton.isMouseOver(mouseX + screen.windowPosX() + HamonScreen.WINDOW_THIN_BORDER, mouseY + screen.windowPosY() + HamonScreen.WINDOW_UPPER_BORDER)) {
             selectSkill(null);
@@ -280,11 +288,19 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
 
     @Override
     void mouseScrolled(double mouseX, double mouseY, double scroll) {
-        if (selectedSkillDesc != null && selectedSkillDesc.isMouseOver(mouseX, mouseY, scrollX, scrollY)
-                && selectedSkillDesc.scroll((float) -scroll * 2.5F)) {
+        if (selectedSkillDesc != null && selectedSkillDesc.isMouseOver(mouseX, mouseY, scrollX, scrollY)) {
+            selectedSkillDesc.scroll((float) -scroll * 2.5F);
             return;
         }
         super.mouseScrolled(mouseX, mouseY, scroll);
+    }
+
+    @Override
+    void mouseDragged(double xMovement, double yMovement) {
+        if (selectedSkillDesc != null && selectedSkillDesc.onDrag(yMovement)) {
+            return;
+        }
+        super.mouseDragged(xMovement, yMovement);
     }
     
     protected void selectSkill(@Nullable HamonSkillElementLearnable guiElement) {

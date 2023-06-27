@@ -146,7 +146,7 @@ public class HamonScreen extends Screen {
             setDragging(true);
         }
         if (selectedTab != null) {
-            selectedTab.scroll(xMovement, yMovement);
+            selectedTab.mouseDragged(xMovement, yMovement);
             return true;
         }
         return super.mouseDragged(xPos, yPos, mouseButton, xMovement, yMovement);

@@ -214,6 +214,10 @@ public abstract class HamonTabGui extends AbstractGui {
             scrollY = MathHelper.clamp(scrollY + yMovement, (double)(-(maxY - (HamonScreen.WINDOW_HEIGHT - 27))), 0.0D);
         }
     }
+
+    void mouseDragged(double xMovement, double yMovement) {
+        scroll(xMovement, yMovement);
+    }
     
     abstract void updateTab();
     

@@ -18,12 +18,6 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.math.MathHelper;
 
-// FIXME !!!!! (hamon ui) skill desc box
-/*
- * y scroll
- *     mouse drag
- *     elevator drag
- */
 public class HamonSkillDescBox {
     protected static final int WIDTH = 198;
     protected static final int HEIGHT = 44;
@@ -36,6 +30,8 @@ public class HamonSkillDescBox {
     protected final int textHeight;
     protected final boolean hasScrolling;
     protected float yTextScroll = 0;
+    protected boolean isDragged = false;
+    protected boolean isScrollBarDragged = false;
     protected List<IReorderingProcessor> skillDesc;
     
     public HamonSkillDescBox(AbstractHamonSkill skill, FontRenderer font, int textWidth, int x, int y) {
@@ -76,7 +72,7 @@ public class HamonSkillDescBox {
     
     private void renderScrollBar(MatrixStack matrixStack, int xOffset, int yOffset, int mouseX, int mouseY) {
         int brightness;
-        if (isDragging()) {
+        if (isScrollBarDragged) {
             brightness = 255;
         }
         else if (isMouseOverScrollBar(mouseX, mouseY, xOffset, yOffset)) {
@@ -110,10 +106,6 @@ public class HamonSkillDescBox {
                 mouseY >= scrollBar[1] && mouseY <= scrollBar[1] + scrollBar[3];
     }
     
-    public boolean isDragging() {
-        return false;
-    }
-    
     public void drawDesc(MatrixStack matrixStack, FontRenderer font, int x, int y) {
         Minecraft mc = Minecraft.getInstance();
         int scale = mc.getWindow().calculateScale(mc.options.guiScale, mc.isEnforceUnicode());
@@ -145,6 +137,40 @@ public class HamonSkillDescBox {
     public boolean scroll(float yMovement) {
         if (hasScrolling) {
             yTextScroll = MathHelper.clamp(yTextScroll + yMovement, 0, getMaxYTextScroll());
+            return true;
+        }
+        return false;
+    }
+    
+    public boolean onClick(int mouseX, int mouseY, int x, int y) {
+        if (hasScrolling && isMouseOver(mouseX, mouseY, x, y)) {
+            if (isMouseOverScrollBar(mouseX, mouseY, x, y)) {
+                isScrollBarDragged = true;
+            }
+            else {
+                isDragged = true;
+            }
+            return true;
+        }
+        return false;
+    }
+    
+    public boolean onDrag(double yMovement) {
+        if (isScrollBarDragged) {
+            scroll((float) yMovement);
+            return true;
+        }
+        else if (isDragged) {
+            scroll((float) -yMovement);
+            return true;
+        }
+        return false;
+    }
+    
+    public boolean onRelease() {
+        if (isDragged || isScrollBarDragged) {
+            isDragged = false;
+            isScrollBarDragged = false;
             return true;
         }
         return false;
