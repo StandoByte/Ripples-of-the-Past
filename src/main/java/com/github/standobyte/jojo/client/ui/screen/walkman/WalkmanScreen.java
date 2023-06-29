@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.capability.item.cassette.CassetteCap.TrackSourceList;
 import com.github.standobyte.jojo.capability.item.walkman.WalkmanDataCap;
 import com.github.standobyte.jojo.capability.item.walkman.WalkmanDataCap.PlaybackMode;
 import com.github.standobyte.jojo.client.WalkmanSoundHandler;
@@ -45,7 +46,7 @@ public class WalkmanScreen extends ContainerScreen<WalkmanItemContainer> {
 
     private PlaybackMode mode;
     
-    private ItemStack cassetteItem = ItemStack.EMPTY;
+    private ItemStack prevCassetteItem = ItemStack.EMPTY;
     private CassetteTracksSided cassetteTracks = CassetteTracksSided.EMPTY_TRACK_LIST;
     private CassetteSide currentSide;
     private TrackInfo currentTrack;
@@ -83,13 +84,13 @@ public class WalkmanScreen extends ContainerScreen<WalkmanItemContainer> {
             cassetteTracks = playlist.getAllTracks();
         }
         
-        initWidgetd();
+        initWidgets();
         volumeWheel.setValue(walkmanData.getVolume());
     }
     
     @Override
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
-        checkCassette();
+        updateCassette();
         updateButtons();
         this.renderBackground(matrixStack);
         super.render(matrixStack, mouseX, mouseY, partialTick);
@@ -104,53 +105,53 @@ public class WalkmanScreen extends ContainerScreen<WalkmanItemContainer> {
         return true;
     }
     
-    private void checkCassette() {
-        ItemStack cassette = menu.getCassetteItem();
-        if (!ItemStack.matches(this.cassetteItem, cassette)) {
-            ItemStack prevCassette = this.cassetteItem;
-            this.cassetteItem = cassette.copy();
-            updateCassette(prevCassette);
+    private void updateCassette() {
+        ItemStack cassetteItem = getCassetteItem();
+        if (!ItemStack.matches(this.prevCassetteItem, cassetteItem)) {
+            if (cassetteItem.isEmpty()) {
+                setCassetteChanged(CassetteTracksSided.EMPTY_TRACK_LIST);
+            }
+            else {
+                CassetteRecordedItem.getCapability(cassetteItem).ifPresent(cap -> {
+                    TrackSourceList cassetteSources = cap.getTracks();
+                    if (cassetteSources.isBroken()) {
+                        setCassetteChanged(CassetteTracksSided.EMPTY_TRACK_LIST);
+                    }
+                    
+                    CassetteTracksSided cassetteTracks = CassetteTracksSided.fromSourceList(cassetteSources);
+                    if (!cassetteTracks.matches(this.cassetteTracks)) {
+                        setCassetteChanged(cassetteTracks);
+                    }
+                    
+                    currentSide = cap.getSide();
+                    cassetteGeneration = cap.getGeneration();
+                    
+                    List<Track> tracks = cassetteTracks.get(currentSide);
+                    setTrack(tracks.isEmpty() ? null : TrackInfo.of(cassetteTracks, currentSide, 
+                            MathHelper.clamp(cap.getTrackOn(), 0, tracks.size() - 1)));
+                });
+            }
+            
+            this.prevCassetteItem = cassetteItem.copy();
         }
     }
-
-    private void updateCassette(ItemStack prevCassette) {
+    
+    private void setCassetteChanged(CassetteTracksSided newTracks) {
         currentTrack = null;
         tracksToShow = null;
-        
-        if (!cassetteItem.isEmpty()) {
-            CassetteRecordedItem.getCapability(cassetteItem).ifPresent(cap -> {
-                if (cap.getTracks().isBroken()) return;
-
-                Playlist playlist = WalkmanSoundHandler.getCurrentPlaylist();
-                // FIXME ! (walkman) also reset when the cassette is getting replaced by another one
-                boolean resetTracks = false;
-                if (playlist == null || resetTracks) {
-                    if (resetTracks) {
-                        WalkmanSoundHandler.clearPlaylist();
-                    }
-                    cassetteTracks = CassetteTracksSided.fromSourceList(cap.getTracks());
-                }
-                else {
-                    cassetteTracks = playlist.getAllTracks();
-                }
-                
-                currentSide = cap.getSide();
-                cassetteGeneration = cap.getGeneration();
-                
-                List<Track> tracks = cassetteTracks.get(currentSide);
-                setTrack(tracks.isEmpty() ? null : TrackInfo.of(cassetteTracks, currentSide, 
-                        MathHelper.clamp(cap.getTrackOn(), 0, tracks.size() - 1)));
-            });
-        }
-        else {
+        if (WalkmanSoundHandler.getPlaylist(walkmanId) != null) {
             WalkmanSoundHandler.clearPlaylist();
-            cassetteTracks = CassetteTracksSided.EMPTY_TRACK_LIST;
         }
+        this.cassetteTracks = newTracks;
+    }
+    
+    private ItemStack getCassetteItem() {
+        return menu.getCassetteItem();
     }
     
     
     
-    private void initWidgetd() {
+    private void initWidgets() {
         int x = getWindowX();
         int y = getWindowY();
         
@@ -174,7 +175,7 @@ public class WalkmanScreen extends ContainerScreen<WalkmanItemContainer> {
         
         playButton = addButton(new WalkmanButton(x + 58, y + 107, 41, 13, 
                 button -> {
-                    Playlist playlist = WalkmanSoundHandler.initPlaylist(cassetteTracks, cassetteItem, walkmanId);
+                    Playlist playlist = WalkmanSoundHandler.initPlaylist(cassetteTracks, getCassetteItem(), walkmanId);
                     playlist.setVolume(volumeWheel.getValue());
                     playlist.setPlaybackMode(mode);
                     playlist.setTrack(currentTrack);
@@ -273,7 +274,7 @@ public class WalkmanScreen extends ContainerScreen<WalkmanItemContainer> {
         this.currentTrack = track;
         
         if (track != null) {
-            CassetteRecordedItem.getCapability(cassetteItem).ifPresent(cap -> {
+            CassetteRecordedItem.getCapability(getCassetteItem()).ifPresent(cap -> {
                 if (cap.getTracks().isBroken()) return;
                 
                 int trackNumber = track.number;
@@ -363,6 +364,7 @@ public class WalkmanScreen extends ContainerScreen<WalkmanItemContainer> {
     }
     
     private void renderCassette(MatrixStack matrixStack, float partialTick, int windowX, int windowY) {
+        ItemStack cassetteItem = getCassetteItem();
         if (!cassetteItem.isEmpty()) {
             minecraft.getTextureManager().bind(WALKMAN_CASSETTE_TEXTURE);
             blit(matrixStack, windowX + 35, windowY + 7, 0, 0, 150, 95);
@@ -380,6 +382,7 @@ public class WalkmanScreen extends ContainerScreen<WalkmanItemContainer> {
 
     @Override
     protected void renderLabels(MatrixStack matrixStack, int mouseX, int mouseY) {
+        ItemStack cassetteItem = getCassetteItem();
         if (!cassetteItem.isEmpty()) {
             if (cassetteItem.hasCustomHoverName()) {
                 ITextComponent cassetteName = cassetteItem.getHoverName();
@@ -398,7 +401,7 @@ public class WalkmanScreen extends ContainerScreen<WalkmanItemContainer> {
                         trackName = new TranslationTextComponent("jojo.textutil.shortened", shortenedTrackName.getString());
                     }
 
-                    if (currentTrack != null && track == currentTrack.track) {
+                    if (currentTrack != null && currentTrack.track.equals(track)) {
                         trackName.withStyle(TextFormatting.UNDERLINE);
                     }
 

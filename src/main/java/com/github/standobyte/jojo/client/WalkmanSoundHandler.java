@@ -368,16 +368,31 @@ public class WalkmanSoundHandler {
         public IFormattableTextComponent getName(boolean shortened) {
             return name.apply(shortened);
         }
+        
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof Track)) {
+                return false;
+            }
+            return this.sound.getLocation().equals(((Track) obj).sound.getLocation());
+        }
+        
+        @Override
+        public int hashCode() {
+            return sound.getLocation().hashCode();
+        }
     }
     
     public static class CassetteTracksSided {
         public static final CassetteTracksSided EMPTY_TRACK_LIST = new CassetteTracksSided(ImmutableList.of(), ImmutableList.of());
         
         private final Map<CassetteSide, List<Track>> tracksMap = new EnumMap<>(CassetteSide.class);
+        private final boolean isEmpty;
         
         private CassetteTracksSided(List<Track> sideA, List<Track> sideB) {
             tracksMap.put(CassetteSide.SIDE_A, sideA);
             tracksMap.put(CassetteSide.SIDE_B, sideB);
+            isEmpty = sideA.isEmpty() && sideB.isEmpty();
         }
         
         public List<Track> get(CassetteSide side) {
@@ -386,6 +401,17 @@ public class WalkmanSoundHandler {
         
         public void forEach(BiConsumer<CassetteSide, List<Track>> action) {
             tracksMap.forEach(action);
+        }
+        
+        public boolean isEmpty() {
+            return isEmpty;
+        }
+        
+        public boolean matches(CassetteTracksSided other) {
+            if (this.isEmpty && other.isEmpty) return true;
+            if (this.isEmpty || other.isEmpty) return false;
+            return this.get(CassetteSide.SIDE_A).equals(other.get(CassetteSide.SIDE_A))
+                    && this.get(CassetteSide.SIDE_B).equals(other.get(CassetteSide.SIDE_B));
         }
         
         

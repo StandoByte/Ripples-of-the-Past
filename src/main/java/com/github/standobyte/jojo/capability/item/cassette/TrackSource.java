@@ -34,6 +34,7 @@ public abstract class TrackSource {
     }
 
     public abstract SoundEvent getSoundEvent();
+    
     public IFormattableTextComponent trackName(ResourceLocation trackId, boolean shortened) {
         String key = getTranslationKey(trackId);
         if (shortened) {
@@ -41,6 +42,7 @@ public abstract class TrackSource {
         }
         return new TranslationTextComponent(key);
     }
+    
     protected abstract String getTranslationKey(ResourceLocation trackId);
     
     
