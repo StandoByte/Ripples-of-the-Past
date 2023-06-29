@@ -17,12 +17,12 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.capability.item.cassette.CassetteCap;
 import com.github.standobyte.jojo.capability.item.cassette.CassetteCap.TrackList;
+import com.github.standobyte.jojo.capability.item.walkman.WalkmanDataCap.PlaybackMode;
 import com.github.standobyte.jojo.client.sound.WalkmanRewindSound;
 import com.github.standobyte.jojo.client.sound.WalkmanTrackSound;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.item.CassetteRecordedItem;
 import com.github.standobyte.jojo.item.WalkmanItem;
-import com.github.standobyte.jojo.item.WalkmanItem.PlaybackMode;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClWalkmanControlsPacket;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -233,7 +233,7 @@ public class WalkmanSoundHandler {
                 if (mc.player != null) {
                     Predicate<ItemStack> walkmanPlaying = item -> {
                         if (!item.isEmpty() && item.getItem() == ModItems.WALKMAN.get()) {
-                            return WalkmanItem.getId(item) == walkmanId;
+                            return WalkmanItem.getWalkmanData(item).map(walkman -> walkman.checkId(walkmanId)).orElse(false);
                         }
                         return false;
                     };

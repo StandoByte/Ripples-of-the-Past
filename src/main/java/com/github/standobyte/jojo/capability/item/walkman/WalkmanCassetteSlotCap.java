@@ -14,10 +14,10 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.items.ItemStackHandler;
 
-public class WalkmanSlotHandlerCap extends ItemStackHandler implements INamedContainerProvider {
+public class WalkmanCassetteSlotCap extends ItemStackHandler implements INamedContainerProvider {
     private final ItemStack walkmanItem;
 
-    public WalkmanSlotHandlerCap(ItemStack walkmanItem) {
+    public WalkmanCassetteSlotCap(ItemStack walkmanItem) {
         super(1);
         this.walkmanItem = walkmanItem;
     }

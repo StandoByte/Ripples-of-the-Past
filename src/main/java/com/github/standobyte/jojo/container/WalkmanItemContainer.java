@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.container;
 
-import com.github.standobyte.jojo.capability.item.walkman.WalkmanSlotHandlerCap;
+import com.github.standobyte.jojo.capability.item.walkman.WalkmanCassetteSlotCap;
 import com.github.standobyte.jojo.init.ModContainers;
 
 import net.minecraft.entity.player.PlayerEntity;
@@ -13,17 +13,17 @@ import net.minecraftforge.items.SlotItemHandler;
 
 public class WalkmanItemContainer extends Container {
     private final ItemStack walkmanItem;
-    private final WalkmanSlotHandlerCap cassetteSlot;
+    private final WalkmanCassetteSlotCap cassetteSlot;
 
     public WalkmanItemContainer(int id, PlayerInventory inventory, PacketBuffer dataFromServer) {
-        this(id, inventory, new WalkmanSlotHandlerCap(ItemStack.EMPTY), dataFromServer.readItem());
+        this(id, inventory, new WalkmanCassetteSlotCap(ItemStack.EMPTY), dataFromServer.readItem());
     }
     
     public static void writeAdditionalData(PacketBuffer buffer, ItemStack walkmanItem) {
         buffer.writeItem(walkmanItem);
     }
 
-    public WalkmanItemContainer(int id, PlayerInventory inventory, WalkmanSlotHandlerCap itemCap, ItemStack walkmanItem) {
+    public WalkmanItemContainer(int id, PlayerInventory inventory, WalkmanCassetteSlotCap itemCap, ItemStack walkmanItem) {
         super(ModContainers.WALKMAN.get(), id);
         this.walkmanItem = walkmanItem;
         this.cassetteSlot = itemCap;

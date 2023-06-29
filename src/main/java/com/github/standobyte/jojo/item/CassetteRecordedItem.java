@@ -44,9 +44,7 @@ public class CassetteRecordedItem extends Item {
         CompoundNBT nbt = super.getShareTag(stack);
         if (nbt == null) nbt = new CompoundNBT();
         
-        CompoundNBT cassetteNBT = null;
-        CassetteCap cassetteCap = getCapability(stack).orElse(null);
-        if (cassetteCap != null) cassetteNBT = cassetteCap.toNBT();
+        CompoundNBT cassetteNBT = getCapability(stack).map(CassetteCap::toNBT).orElse(null);
         if (cassetteNBT != null) nbt.put("Cassette", cassetteNBT);
         
         return nbt;

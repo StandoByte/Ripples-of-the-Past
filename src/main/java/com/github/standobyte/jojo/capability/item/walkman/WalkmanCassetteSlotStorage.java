@@ -6,15 +6,15 @@ import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.Capability.IStorage;
 
-public class WalkmanCapStorage implements IStorage<WalkmanSlotHandlerCap> {
+public class WalkmanCassetteSlotStorage implements IStorage<WalkmanCassetteSlotCap> {
 
     @Override
-    public INBT writeNBT(Capability<WalkmanSlotHandlerCap> capability, WalkmanSlotHandlerCap instance, Direction side) {
+    public INBT writeNBT(Capability<WalkmanCassetteSlotCap> capability, WalkmanCassetteSlotCap instance, Direction side) {
         return instance.serializeNBT();
     }
 
     @Override
-    public void readNBT(Capability<WalkmanSlotHandlerCap> capability, WalkmanSlotHandlerCap instance, Direction side, INBT nbt) {
+    public void readNBT(Capability<WalkmanCassetteSlotCap> capability, WalkmanCassetteSlotCap instance, Direction side, INBT nbt) {
         instance.deserializeNBT((CompoundNBT) nbt);
     }
 }
