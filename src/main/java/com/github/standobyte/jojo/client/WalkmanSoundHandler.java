@@ -248,7 +248,11 @@ public class WalkmanSoundHandler {
                     }
                 }
                 
-                if (!mc.getSoundManager().isActive(currentSound)) {
+                if (mc.options.getSoundSourceVolume(SoundCategory.MASTER) <= 0 ||
+                    mc.options.getSoundSourceVolume(currentSound.getSource()) <= 0) {
+                    stopPlaying();
+                }
+                else if (!mc.getSoundManager().isActive(currentSound)) {
                     if (mc.player != null && mc.level != null) {
                         setAndPlayNext();
                     }

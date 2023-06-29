@@ -38,4 +38,9 @@ public class WalkmanTrackSound extends ResolvedLocationTickingSound {
     public void setVolume(float volume) {
         this.volume = volume;
     }
+    
+    @Override
+    public boolean canStartSilent() {
+        return true;
+    }
 }
