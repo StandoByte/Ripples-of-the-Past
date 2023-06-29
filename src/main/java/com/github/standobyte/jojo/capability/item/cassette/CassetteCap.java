@@ -21,7 +21,7 @@ import net.minecraft.nbt.ListNBT;
 
 // FIXME ! (cassette) crazy diamond clearing the cassettes for lulz
 public class CassetteCap {
-    @Nonnull private TrackList tracks = TrackList.BROKEN_CASSETTE;
+    @Nonnull private TrackSourceList tracks = TrackSourceList.BROKEN_CASSETTE;
     private int generation = 0;
     @Nonnull private Optional<DyeColor> color = Optional.empty();
     
@@ -33,10 +33,10 @@ public class CassetteCap {
 
     
     public void recordTracks(List<TrackSource> tracks) {
-        this.tracks = new TrackList(tracks);
+        this.tracks = new TrackSourceList(tracks);
     }
     
-    public TrackList getTracks() {
+    public TrackSourceList getTracks() {
         return tracks;
     }
     
@@ -101,7 +101,7 @@ public class CassetteCap {
     }
     
     public void fromNBT(CompoundNBT nbt) {
-        if (nbt.contains("Tracks", MCUtil.getNbtId(ListNBT.class))) tracks = TrackList.fromNBT(nbt.getList("Tracks", MCUtil.getNbtId(CompoundNBT.class)));
+        if (nbt.contains("Tracks", MCUtil.getNbtId(ListNBT.class))) tracks = TrackSourceList.fromNBT(nbt.getList("Tracks", MCUtil.getNbtId(CompoundNBT.class)));
         generation = nbt.getInt("Generation");
         color = getColor(nbt, "Dye");
         side = nbt.getBoolean("Side") ? CassetteSide.SIDE_B : CassetteSide.SIDE_A;
@@ -121,11 +121,11 @@ public class CassetteCap {
     
     
     
-    public static class TrackList {
-        public static final TrackList BROKEN_CASSETTE = new TrackList(Collections.emptyList());
+    public static class TrackSourceList {
+        public static final TrackSourceList BROKEN_CASSETTE = new TrackSourceList(Collections.emptyList());
         private final List<TrackSource> tracks;
 
-        private TrackList(List<TrackSource> tracks) {
+        private TrackSourceList(List<TrackSource> tracks) {
             this.tracks = Collections.unmodifiableList(tracks);
         }
 
@@ -145,20 +145,20 @@ public class CassetteCap {
             return tracksNBT;
         }
         
-        private static TrackList fromNBT(ListNBT nbt) {
+        private static TrackSourceList fromNBT(ListNBT nbt) {
             if (nbt == null || nbt.isEmpty()) return BROKEN_CASSETTE;
             
             List<TrackSource> tracks = new ArrayList<>();
             for (int i = 0; i < nbt.size(); i++) {
                 TrackSource trackSource = TrackSourceType.fromNBT(nbt.getCompound(i));
                 if (trackSource == TrackSource.BROKEN_CASSETTE) {
-                    return TrackList.BROKEN_CASSETTE;
+                    return TrackSourceList.BROKEN_CASSETTE;
                 }
                 tracks.add(trackSource);
             }
-            if (tracks.isEmpty()) return TrackList.BROKEN_CASSETTE;
+            if (tracks.isEmpty()) return TrackSourceList.BROKEN_CASSETTE;
 
-            return new TrackList(tracks);
+            return new TrackSourceList(tracks);
         }
     }
 }

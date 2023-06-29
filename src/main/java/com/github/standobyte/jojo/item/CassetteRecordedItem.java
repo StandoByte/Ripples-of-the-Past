@@ -5,7 +5,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.capability.item.cassette.CassetteCap;
-import com.github.standobyte.jojo.capability.item.cassette.CassetteCap.TrackList;
+import com.github.standobyte.jojo.capability.item.cassette.CassetteCap.TrackSourceList;
 import com.github.standobyte.jojo.capability.item.cassette.CassetteCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.WalkmanSoundHandler;
@@ -64,12 +64,12 @@ public class CassetteRecordedItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
         CassetteCap cassette = CassetteRecordedItem.getCapability(stack).orElse(null);
-        TrackList trackSources = cassette != null ? cassette.getTracks() : TrackList.BROKEN_CASSETTE;
+        TrackSourceList trackSources = cassette != null ? cassette.getTracks() : TrackSourceList.BROKEN_CASSETTE;
         if (trackSources.isBroken()) {
             tooltip.add(new TranslationTextComponent("jojo.cassette.bad_recording").withStyle(TextFormatting.GRAY, TextFormatting.ITALIC));
         }
         else {
-            WalkmanSoundHandler.splitIntoSides(WalkmanSoundHandler.getTracksOnClient(trackSources)).forEach((side, tracks) -> {
+            WalkmanSoundHandler.CassetteTracksSided.fromSourceList(trackSources).forEach((side, tracks) -> {
                 if (!tracks.isEmpty()) {
                     tooltip.add((new TranslationTextComponent("jojo.cassette." + side.name().toLowerCase())).withStyle(TextFormatting.GRAY, TextFormatting.ITALIC));
                     tracks.forEach(track -> tooltip.add(track.getName().withStyle(TextFormatting.GRAY)));

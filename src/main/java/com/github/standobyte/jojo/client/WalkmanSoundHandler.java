@@ -1,12 +1,12 @@
 package com.github.standobyte.jojo.client;
 
 import java.lang.reflect.Field;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -16,7 +16,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.capability.item.cassette.CassetteCap;
-import com.github.standobyte.jojo.capability.item.cassette.CassetteCap.TrackList;
+import com.github.standobyte.jojo.capability.item.cassette.CassetteCap.TrackSourceList;
 import com.github.standobyte.jojo.capability.item.walkman.WalkmanDataCap.PlaybackMode;
 import com.github.standobyte.jojo.client.sound.WalkmanRewindSound;
 import com.github.standobyte.jojo.client.sound.WalkmanTrackSound;
@@ -27,6 +27,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClWalkmanControlsPacket;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
+import com.google.common.collect.ImmutableList;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISoundEventAccessor;
@@ -62,7 +63,7 @@ public class WalkmanSoundHandler {
         return playlist;
     }
     
-    public static Playlist initPlaylist(Map<CassetteSide, List<Track>> cassetteTracks, ItemStack cassetteItem, int walkmanId) {
+    public static Playlist initPlaylist(CassetteTracksSided cassetteTracks, ItemStack cassetteItem, int walkmanId) {
         clearPlaylist();
         CassetteRecordedItem.getCapability(cassetteItem).ifPresent(cap -> {
             if (!cap.getTracks().isBroken()) {
@@ -82,7 +83,7 @@ public class WalkmanSoundHandler {
     
     
     public static class Playlist {
-        private final Map<CassetteSide, List<Track>> cassetteTracks;
+        private final CassetteTracksSided cassetteTracks;
         private final int distortion;
         private final int walkmanId;
 
@@ -103,7 +104,7 @@ public class WalkmanSoundHandler {
         private WalkmanRewindSound rewindSound = null;
         private IndicatorStatus indicatorStatus;
         
-        private Playlist(Map<CassetteSide, List<Track>> cassetteTracks, CassetteCap cassette, int walkmanId) {
+        private Playlist(CassetteTracksSided cassetteTracks, CassetteCap cassette, int walkmanId) {
             this.cassetteTracks = cassetteTracks;
             this.distortion = cassette.getGeneration();
             this.walkmanId = walkmanId;
@@ -295,7 +296,7 @@ public class WalkmanSoundHandler {
             return fastForwardTrack;
         }
         
-        public Map<CassetteSide, List<Track>> getAllTracks() {
+        public CassetteTracksSided getAllTracks() {
             return cassetteTracks;
         }
         
@@ -329,7 +330,7 @@ public class WalkmanSoundHandler {
             this.number = number;
         }
         
-        public static TrackInfo of(Map<CassetteSide, List<Track>> allTracks, CassetteSide side, int number) {
+        public static TrackInfo of(CassetteTracksSided allTracks, CassetteSide side, int number) {
             List<Track> tracksThisSide = allTracks.get(side);
             if (number < 0 || number >= tracksThisSide.size()) {
                 throw new IllegalArgumentException("The track number is supposed to be checked already");
@@ -337,79 +338,14 @@ public class WalkmanSoundHandler {
             return new TrackInfo(Objects.requireNonNull(tracksThisSide.get(number)), side, number);
         }
     }
-
     
-
-    public static Stream<Track> getTracksOnClient(TrackList trackSourcesList) {
-        if (trackSourcesList.isBroken()) {
-            return Stream.empty();
-        }
-        return trackSourcesList.getTracks().flatMap(trackSource -> {
-            SoundEvent soundEvent = trackSource.getSoundEvent();
-            if (soundEvent == null) return Stream.empty();
-            SoundHandler soundManager = Minecraft.getInstance().getSoundManager();
-            SoundEventAccessor soundEventAccessor = soundManager.getSoundEvent(soundEvent.getLocation());
-            if (soundEventAccessor == null) return Stream.empty();
-            Stream<Sound> loadedSounds = unpackSounds(soundManager, soundEventAccessor);
-            Stream<Track> tracks = loadedSounds
-                    .map(sound -> new Track(sound, shortened -> trackSource.trackName(sound.getLocation(), shortened)));
-            return tracks;
-        });
-    }
     
-    public static Map<CassetteSide, List<Track>> splitIntoSides(Stream<Track> cassetteTracks) {
-        List<Track> tracks = cassetteTracks.collect(Collectors.toCollection(LinkedList::new));
-        Map<CassetteSide, List<Track>> sides = new EnumMap<>(CassetteSide.class);
-        if (tracks.isEmpty()) {
-            sides.put(CassetteSide.SIDE_A, Collections.emptyList());
-            sides.put(CassetteSide.SIDE_B, Collections.emptyList());
-        }
-        else {
-            int lastSideATrack = (tracks.size() - 1) / 2;
-            sides.put(CassetteSide.SIDE_A, tracks.subList(0, lastSideATrack + 1));
-            sides.put(CassetteSide.SIDE_B, tracks.subList(lastSideATrack + 1, tracks.size()));
-        }
-        return sides;
-    }
     
     public static enum CassetteSide {
         SIDE_A { @Override public CassetteSide getOpposite() { return SIDE_B; }},
         SIDE_B { @Override public CassetteSide getOpposite() { return SIDE_A; }};
         
         public abstract CassetteSide getOpposite();
-    }
-    
-    private static Stream<Sound> unpackSounds(SoundHandler soundManager, ISoundEventAccessor<Sound> accessor) {
-        if (accessor == null) {
-            return Stream.of(SoundHandler.EMPTY_SOUND);
-        }
-        if (accessor instanceof SoundEventAccessor) {
-            List<ISoundEventAccessor<Sound>> list = ClientReflection.getSubAccessorsList((SoundEventAccessor) accessor);
-            return list.stream().flatMap(sound -> unpackSounds(soundManager, sound));
-        }
-        if (accessor instanceof Sound) {
-            return Stream.of(accessor.getSound());
-        }
-        
-        if ("net.minecraft.client.audio.SoundHandler$Loader$1".equals(accessor.getClass().getName())) {
-            for (Field field : accessor.getClass().getDeclaredFields()) {
-                if (field.getType() == ResourceLocation.class) {
-                    try {
-                        field.setAccessible(true);
-                        ResourceLocation id = (ResourceLocation) field.get(accessor);
-                        SoundEventAccessor nextAccessor = soundManager.getSoundEvent(id);
-                        if (nextAccessor != null) {
-                            return unpackSounds(soundManager, nextAccessor);
-                        }
-                    } catch (IllegalArgumentException | IllegalAccessException e) {
-                        JojoMod.getLogger().error("Couldn't read track list from a cassette");
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-        
-        return Stream.of(accessor.getSound());
     }
     
     public static class Track {
@@ -431,6 +367,90 @@ public class WalkmanSoundHandler {
         
         public IFormattableTextComponent getName(boolean shortened) {
             return name.apply(shortened);
+        }
+    }
+    
+    public static class CassetteTracksSided {
+        public static final CassetteTracksSided EMPTY_TRACK_LIST = new CassetteTracksSided(ImmutableList.of(), ImmutableList.of());
+        
+        private final Map<CassetteSide, List<Track>> tracksMap = new EnumMap<>(CassetteSide.class);
+        
+        private CassetteTracksSided(List<Track> sideA, List<Track> sideB) {
+            tracksMap.put(CassetteSide.SIDE_A, sideA);
+            tracksMap.put(CassetteSide.SIDE_B, sideB);
+        }
+        
+        public List<Track> get(CassetteSide side) {
+            return tracksMap.get(side);
+        }
+        
+        public void forEach(BiConsumer<CassetteSide, List<Track>> action) {
+            tracksMap.forEach(action);
+        }
+        
+        
+        
+        public static CassetteTracksSided fromSourceList(TrackSourceList sourceList) {
+            List<Track> tracks = getTracksOnClient(sourceList).collect(Collectors.toCollection(LinkedList::new));
+            if (tracks.isEmpty()) {
+                return EMPTY_TRACK_LIST;
+            }
+            else {
+                int lastSideATrack = (tracks.size() - 1) / 2;
+                return new CassetteTracksSided(
+                        tracks.subList(0, lastSideATrack + 1), 
+                        tracks.subList(lastSideATrack + 1, tracks.size()));
+            }
+        }
+
+        private static Stream<Track> getTracksOnClient(TrackSourceList trackSourcesList) {
+            if (trackSourcesList.isBroken()) {
+                return Stream.empty();
+            }
+            return trackSourcesList.getTracks().flatMap(trackSource -> {
+                SoundEvent soundEvent = trackSource.getSoundEvent();
+                if (soundEvent == null) return Stream.empty();
+                SoundHandler soundManager = Minecraft.getInstance().getSoundManager();
+                SoundEventAccessor soundEventAccessor = soundManager.getSoundEvent(soundEvent.getLocation());
+                if (soundEventAccessor == null) return Stream.empty();
+                Stream<Sound> loadedSounds = unpackSounds(soundManager, soundEventAccessor);
+                Stream<Track> tracks = loadedSounds
+                        .map(sound -> new Track(sound, shortened -> trackSource.trackName(sound.getLocation(), shortened)));
+                return tracks;
+            });
+        }
+        
+        private static Stream<Sound> unpackSounds(SoundHandler soundManager, ISoundEventAccessor<Sound> accessor) {
+            if (accessor == null) {
+                return Stream.of(SoundHandler.EMPTY_SOUND);
+            }
+            if (accessor instanceof SoundEventAccessor) {
+                List<ISoundEventAccessor<Sound>> list = ClientReflection.getSubAccessorsList((SoundEventAccessor) accessor);
+                return list.stream().flatMap(sound -> unpackSounds(soundManager, sound));
+            }
+            if (accessor instanceof Sound) {
+                return Stream.of(accessor.getSound());
+            }
+            
+            if ("net.minecraft.client.audio.SoundHandler$Loader$1".equals(accessor.getClass().getName())) {
+                for (Field field : accessor.getClass().getDeclaredFields()) {
+                    if (field.getType() == ResourceLocation.class) {
+                        try {
+                            field.setAccessible(true);
+                            ResourceLocation id = (ResourceLocation) field.get(accessor);
+                            SoundEventAccessor nextAccessor = soundManager.getSoundEvent(id);
+                            if (nextAccessor != null) {
+                                return unpackSounds(soundManager, nextAccessor);
+                            }
+                        } catch (IllegalArgumentException | IllegalAccessException e) {
+                            JojoMod.getLogger().error("Couldn't read track list from a cassette");
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+            
+            return Stream.of(accessor.getSound());
         }
     }
 }

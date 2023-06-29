@@ -1,7 +1,6 @@
 package com.github.standobyte.jojo.client.ui.screen.walkman;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import com.github.standobyte.jojo.JojoMod;
@@ -9,6 +8,7 @@ import com.github.standobyte.jojo.capability.item.walkman.WalkmanDataCap;
 import com.github.standobyte.jojo.capability.item.walkman.WalkmanDataCap.PlaybackMode;
 import com.github.standobyte.jojo.client.WalkmanSoundHandler;
 import com.github.standobyte.jojo.client.WalkmanSoundHandler.CassetteSide;
+import com.github.standobyte.jojo.client.WalkmanSoundHandler.CassetteTracksSided;
 import com.github.standobyte.jojo.client.WalkmanSoundHandler.IndicatorStatus;
 import com.github.standobyte.jojo.client.WalkmanSoundHandler.Playlist;
 import com.github.standobyte.jojo.client.WalkmanSoundHandler.Track;
@@ -46,7 +46,7 @@ public class WalkmanScreen extends ContainerScreen<WalkmanItemContainer> {
     private PlaybackMode mode;
     
     private ItemStack cassetteItem = ItemStack.EMPTY;
-    private Map<CassetteSide, List<Track>> cassetteTracks;
+    private CassetteTracksSided cassetteTracks = CassetteTracksSided.EMPTY_TRACK_LIST;
     private CassetteSide currentSide;
     private TrackInfo currentTrack;
     private List<Track> tracksToShow;
@@ -128,7 +128,7 @@ public class WalkmanScreen extends ContainerScreen<WalkmanItemContainer> {
                     if (resetTracks) {
                         WalkmanSoundHandler.clearPlaylist();
                     }
-                    cassetteTracks = WalkmanSoundHandler.splitIntoSides(WalkmanSoundHandler.getTracksOnClient(cap.getTracks()));
+                    cassetteTracks = CassetteTracksSided.fromSourceList(cap.getTracks());
                 }
                 else {
                     cassetteTracks = playlist.getAllTracks();
@@ -144,7 +144,7 @@ public class WalkmanScreen extends ContainerScreen<WalkmanItemContainer> {
         }
         else {
             WalkmanSoundHandler.clearPlaylist();
-            cassetteTracks = null;
+            cassetteTracks = CassetteTracksSided.EMPTY_TRACK_LIST;
         }
     }
     
