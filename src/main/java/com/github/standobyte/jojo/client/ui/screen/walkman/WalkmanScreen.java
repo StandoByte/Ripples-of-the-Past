@@ -327,11 +327,6 @@ public class WalkmanScreen extends ContainerScreen<WalkmanItemContainer> {
         return (height - imageHeight) / 2;
     }
     
-    private boolean isVolumeWheelHovered(int mouseX, int mouseY) {
-        return mouseX - leftPos >= 17 && mouseX - leftPos <= 28 && 
-                mouseY - topPos >= 61 && mouseY - topPos <= 98;
-    }
-    
     private void renderIndicators(MatrixStack matrixStack, float partialTick, int windowX, int windowY) {
         Playlist playlist = WalkmanSoundHandler.getPlaylist(walkmanId);
         if (playlist != null && playlist.isPlaying()) {

@@ -212,15 +212,15 @@ public class StandEntityPunch implements IPunch {
         targetHit = stand.attackEntity(() -> doAttack(stand, target, dmgSource, damage), this, task);
         afterAttack(stand, target, dmgSource, task, targetHit, !target.isAlive());
         
-        if (targetHit) {
-            if (isSweepingAttack()) {
-                for (LivingEntity sweepingTarget : stand.level.getEntitiesOfClass(LivingEntity.class, sweepingAttackAabb(target.getBoundingBox()), 
-                        e -> !e.isSpectator() && e.isPickable() && e != target
-                        && JojoModUtil.getDistance(stand, e.getBoundingBox()) < stand.getAttributeValue(ForgeMod.REACH_DISTANCE.get()) && stand.canHarm(e))) {
-                    doAttack(stand, sweepingTarget, dmgSource, sweepingDamage);
-                }
+        if (isSweepingAttack()) {
+            for (LivingEntity sweepingTarget : stand.level.getEntitiesOfClass(LivingEntity.class, sweepingAttackAabb(target.getBoundingBox()), 
+                    e -> !e.isSpectator() && e.isPickable() && e != target
+                    && JojoModUtil.getDistance(stand, e.getBoundingBox()) < stand.getAttributeValue(ForgeMod.REACH_DISTANCE.get()) && stand.canHarm(e))) {
+                doAttack(stand, sweepingTarget, dmgSource, sweepingDamage);
             }
-            
+        }
+        
+        if (targetHit) {
             stand.addComboMeter(addCombo, StandEntity.COMBO_TICKS);
         }
         return targetHit;
