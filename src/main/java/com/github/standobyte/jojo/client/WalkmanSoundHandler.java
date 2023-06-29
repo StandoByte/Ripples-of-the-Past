@@ -63,7 +63,7 @@ public class WalkmanSoundHandler {
     }
     
     public static Playlist initPlaylist(Map<CassetteSide, List<Track>> cassetteTracks, ItemStack cassetteItem, int walkmanId) {
-        playlist = null;
+        clearPlaylist();
         CassetteRecordedItem.getCapability(cassetteItem).ifPresent(cap -> {
             if (!cap.getTracks().isBroken()) {
                 playlist = new Playlist(cassetteTracks, cap, walkmanId);
