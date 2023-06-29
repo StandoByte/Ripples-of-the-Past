@@ -8,7 +8,6 @@ import java.util.function.UnaryOperator;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.capability.item.cassette.CassetteCap;
-import com.github.standobyte.jojo.capability.item.cassette.CassetteCapProvider;
 import com.github.standobyte.jojo.client.particle.AirStreamParticle;
 import com.github.standobyte.jojo.client.particle.BloodParticle;
 import com.github.standobyte.jojo.client.particle.CDRestorationParticle;
@@ -95,6 +94,7 @@ import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
+import com.github.standobyte.jojo.item.CassetteRecordedItem;
 import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
@@ -234,7 +234,7 @@ public class ClientSetup {
                 return StandDiscItem.validStandDisc(itemStack, true) ? JojoCustomRegistries.STANDS.getNumericId(StandDiscItem.getStandFromStack(itemStack, true).getType().getRegistryName()) : -1;
             });
             ItemModelsProperties.register(ModItems.CASSETTE_RECORDED.get(), new ResourceLocation(JojoMod.MOD_ID, "cassette_distortion"), (itemStack, clientWorld, livingEntity) -> {
-                return itemStack.getCapability(CassetteCapProvider.CAPABILITY)
+                return CassetteRecordedItem.getCapability(itemStack)
                         .map(cap -> MathHelper.clamp(cap.getGeneration(), 0, CassetteCap.MAX_GENERATION))
                         .orElse(0).floatValue();
             });
@@ -317,7 +317,7 @@ public class ClientSetup {
         itemColors.register((stack, layer) -> {
             if (layer != 1) return -1;
 
-            Optional<DyeColor> dye = stack.getCapability(CassetteCapProvider.CAPABILITY).map(cap -> cap.getDye()).orElse(Optional.empty());
+            Optional<DyeColor> dye = CassetteRecordedItem.getCapability(stack).map(cap -> cap.getDye()).orElse(Optional.empty());
             return dye.isPresent() ? dye.get().getColorValue() : 0xeff0e0;
         }, ModItems.CASSETTE_RECORDED.get());
     }

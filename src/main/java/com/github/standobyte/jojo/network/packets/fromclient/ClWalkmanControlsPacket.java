@@ -3,10 +3,10 @@ package com.github.standobyte.jojo.network.packets.fromclient;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import com.github.standobyte.jojo.capability.item.cassette.CassetteCapProvider;
 import com.github.standobyte.jojo.client.WalkmanSoundHandler.CassetteSide;
 import com.github.standobyte.jojo.container.WalkmanItemContainer;
 import com.github.standobyte.jojo.init.ModItems;
+import com.github.standobyte.jojo.item.CassetteRecordedItem;
 import com.github.standobyte.jojo.item.WalkmanItem;
 import com.github.standobyte.jojo.item.WalkmanItem.PlaybackMode;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
@@ -96,7 +96,7 @@ public class ClWalkmanControlsPacket {
                     ItemStack cassette = walkman.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).map(
                             walkmanSlot -> walkmanSlot.getStackInSlot(0)).orElse(ItemStack.EMPTY);
                     if (!cassette.isEmpty() && cassette.getItem() == ModItems.CASSETTE_RECORDED.get()) {
-                        cassette.getCapability(CassetteCapProvider.CAPABILITY).ifPresent(cap -> {
+                        CassetteRecordedItem.getCapability(cassette).ifPresent(cap -> {
                             cap.setSide(msg.side);
                             cap.setTrackOn(msg.track);
                         });

@@ -21,6 +21,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.util.LazyOptional;
 
 public class CassetteRecordedItem extends Item {
 
@@ -32,6 +33,10 @@ public class CassetteRecordedItem extends Item {
     public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundNBT nbt) {
         return new CassetteCapProvider(stack, nbt);
     }
+    
+    public static LazyOptional<CassetteCap> getCapability(ItemStack stack) {
+        return !stack.isEmpty() ? stack.getCapability(CassetteCapProvider.CAPABILITY) : LazyOptional.empty();
+    }
 
     @Nullable
     @Override
@@ -40,7 +45,7 @@ public class CassetteRecordedItem extends Item {
         if (nbt == null) nbt = new CompoundNBT();
         
         CompoundNBT cassetteNBT = null;
-        CassetteCap cassetteCap = stack.getCapability(CassetteCapProvider.CAPABILITY).orElse(null);
+        CassetteCap cassetteCap = getCapability(stack).orElse(null);
         if (cassetteCap != null) cassetteNBT = cassetteCap.toNBT();
         if (cassetteNBT != null) nbt.put("Cassette", cassetteNBT);
         
@@ -53,14 +58,14 @@ public class CassetteRecordedItem extends Item {
             super.readShareTag(stack, nbt);
             if (nbt.contains("Cassette", MCUtil.getNbtId(CompoundNBT.class))) {
                 CompoundNBT cassetteNBT = nbt.getCompound("Cassette");
-                if (cassetteNBT != null) stack.getCapability(CassetteCapProvider.CAPABILITY).ifPresent(cap -> cap.fromNBT(cassetteNBT));
+                if (cassetteNBT != null) getCapability(stack).ifPresent(cap -> cap.fromNBT(cassetteNBT));
             }
         }
     }
 
     @Override
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
-        CassetteCap cassette = stack.getCapability(CassetteCapProvider.CAPABILITY).orElse(null);
+        CassetteCap cassette = CassetteRecordedItem.getCapability(stack).orElse(null);
         TrackList trackSources = cassette != null ? cassette.getTracks() : TrackList.BROKEN_CASSETTE;
         if (trackSources.isBroken()) {
             tooltip.add(new TranslationTextComponent("jojo.cassette.bad_recording").withStyle(TextFormatting.GRAY, TextFormatting.ITALIC));

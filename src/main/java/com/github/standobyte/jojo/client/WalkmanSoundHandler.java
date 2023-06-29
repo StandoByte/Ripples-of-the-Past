@@ -17,10 +17,10 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.capability.item.cassette.CassetteCap;
 import com.github.standobyte.jojo.capability.item.cassette.CassetteCap.TrackList;
-import com.github.standobyte.jojo.capability.item.cassette.CassetteCapProvider;
 import com.github.standobyte.jojo.client.sound.WalkmanRewindSound;
 import com.github.standobyte.jojo.client.sound.WalkmanTrackSound;
 import com.github.standobyte.jojo.init.ModItems;
+import com.github.standobyte.jojo.item.CassetteRecordedItem;
 import com.github.standobyte.jojo.item.WalkmanItem;
 import com.github.standobyte.jojo.item.WalkmanItem.PlaybackMode;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -64,7 +64,7 @@ public class WalkmanSoundHandler {
     
     public static Playlist initPlaylist(Map<CassetteSide, List<Track>> cassetteTracks, ItemStack cassetteItem, int walkmanId) {
         playlist = null;
-        cassetteItem.getCapability(CassetteCapProvider.CAPABILITY).ifPresent(cap -> {
+        CassetteRecordedItem.getCapability(cassetteItem).ifPresent(cap -> {
             if (!cap.getTracks().isBroken()) {
                 playlist = new Playlist(cassetteTracks, cap, walkmanId);
             }

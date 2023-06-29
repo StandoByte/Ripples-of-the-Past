@@ -6,11 +6,11 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.capability.item.cassette.CassetteCapProvider;
 import com.github.standobyte.jojo.capability.item.cassette.TrackSource;
 import com.github.standobyte.jojo.capability.item.cassette.TrackSource.TrackSourceType;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModRecipeSerializers;
+import com.github.standobyte.jojo.item.CassetteRecordedItem;
 
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.DyeColor;
@@ -44,7 +44,7 @@ public class CassetteRecordingRecipe extends SpecialRecipe {
         TrackRecording result = originalRecordingsAndCopyCount(inventory);
         if (result != null && !result.trackSources.isEmpty() && result.copiesCount > 0) {
             ItemStack copies = new ItemStack(ModItems.CASSETTE_RECORDED.get(), result.copiesCount);
-            copies.getCapability(CassetteCapProvider.CAPABILITY).ifPresent(cap -> {
+            CassetteRecordedItem.getCapability(copies).ifPresent(cap -> {
                 cap.recordTracks(result.trackSources);
                 result.ribbonColor.ifPresent(color -> cap.setDye(color));
             });

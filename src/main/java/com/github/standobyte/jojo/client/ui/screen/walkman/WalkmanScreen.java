@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.capability.item.cassette.CassetteCapProvider;
 import com.github.standobyte.jojo.client.WalkmanSoundHandler;
 import com.github.standobyte.jojo.client.WalkmanSoundHandler.CassetteSide;
 import com.github.standobyte.jojo.client.WalkmanSoundHandler.IndicatorStatus;
@@ -13,6 +12,7 @@ import com.github.standobyte.jojo.client.WalkmanSoundHandler.Playlist;
 import com.github.standobyte.jojo.client.WalkmanSoundHandler.Track;
 import com.github.standobyte.jojo.client.WalkmanSoundHandler.TrackInfo;
 import com.github.standobyte.jojo.container.WalkmanItemContainer;
+import com.github.standobyte.jojo.item.CassetteRecordedItem;
 import com.github.standobyte.jojo.item.WalkmanItem;
 import com.github.standobyte.jojo.item.WalkmanItem.PlaybackMode;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -116,7 +116,7 @@ public class WalkmanScreen extends ContainerScreen<WalkmanItemContainer> {
         tracksToShow = null;
         
         if (!cassetteItem.isEmpty()) {
-            cassetteItem.getCapability(CassetteCapProvider.CAPABILITY).ifPresent(cap -> {
+            CassetteRecordedItem.getCapability(cassetteItem).ifPresent(cap -> {
                 if (cap.getTracks().isBroken()) return;
 
                 Playlist playlist = WalkmanSoundHandler.getCurrentPlaylist();
@@ -271,7 +271,7 @@ public class WalkmanScreen extends ContainerScreen<WalkmanItemContainer> {
         this.currentTrack = track;
         
         if (track != null) {
-            cassetteItem.getCapability(CassetteCapProvider.CAPABILITY).ifPresent(cap -> {
+            CassetteRecordedItem.getCapability(cassetteItem).ifPresent(cap -> {
                 if (cap.getTracks().isBroken()) return;
                 
                 int trackNumber = track.number;
@@ -365,7 +365,7 @@ public class WalkmanScreen extends ContainerScreen<WalkmanItemContainer> {
             minecraft.getTextureManager().bind(WALKMAN_CASSETTE_TEXTURE);
             blit(matrixStack, windowX + 35, windowY + 7, 0, 0, 150, 95);
             
-            Optional<DyeColor> color = cassetteItem.getCapability(CassetteCapProvider.CAPABILITY).map(cap -> cap.getDye()).orElse(Optional.empty());
+            Optional<DyeColor> color = CassetteRecordedItem.getCapability(cassetteItem).map(cap -> cap.getDye()).orElse(Optional.empty());
             if (color.isPresent()) {
                 blit(matrixStack, windowX + 40, windowY + 41, 5, 128 + color.get().ordinal() * 8, 140, 7);
             }

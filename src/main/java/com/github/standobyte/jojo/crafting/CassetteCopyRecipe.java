@@ -5,9 +5,9 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.github.standobyte.jojo.capability.item.cassette.CassetteCap;
-import com.github.standobyte.jojo.capability.item.cassette.CassetteCapProvider;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModRecipeSerializers;
+import com.github.standobyte.jojo.item.CassetteRecordedItem;
 
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
@@ -39,12 +39,12 @@ public class CassetteCopyRecipe extends SpecialRecipe {
     public ItemStack assemble(CraftingInventory inventory) {
         Pair<ItemStack, Integer> result = originalRecordingAndCopyCount(inventory);
         if (result != null && !result.getLeft().isEmpty() && result.getRight() > 0) {
-            LazyOptional<CassetteCap> cassetteCap = result.getLeft().getCapability(CassetteCapProvider.CAPABILITY);
+            LazyOptional<CassetteCap> cassetteCap = CassetteRecordedItem.getCapability(result.getLeft());
             if (cassetteCap.isPresent()) {
                 CassetteCap originalRecording = cassetteCap.resolve().get();
                 if (originalRecording.getGeneration() < CassetteCap.MAX_GENERATION) {
                     ItemStack copies = new ItemStack(ModItems.CASSETTE_RECORDED.get(), result.getRight());
-                    copies.getCapability(CassetteCapProvider.CAPABILITY).ifPresent(cap -> {
+                    CassetteRecordedItem.getCapability(copies).ifPresent(cap -> {
                         cap.copyFrom(originalRecording);
                         cap.incGeneration();
                     });

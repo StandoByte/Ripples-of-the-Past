@@ -79,26 +79,26 @@ public class ParticleManagerWrapperTS extends ParticleManager {
         actualParticleEngine.close();
     }
 
-    // FIXME !!!!!!!!!!!!!!!! hmmmm
+    // FIXME add certain particles during time stop
     @Override
     public void createTrackingEmitter(Entity pEntity, IParticleData pParticleData) {
         
     }
 
-    // FIXME !!!!!!!!!!!!!!!! hmmmm
+    // FIXME add certain particles during time stop
     @Override
     public void createTrackingEmitter(Entity pEntity, IParticleData pData, int pLifetime) {
         
     }
 
-    // FIXME !!!!!!!!!!!!!!!! hmmmm
+    // FIXME add certain particles during time stop
     @Override
     @Nullable
     public Particle createParticle(IParticleData pParticleData, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
         return null;
     }
 
-    // FIXME !!!!!!!!!!!!!!!! hmmmm
+    // FIXME add certain particles during time stop
     @Override
     public void add(Particle pEffect) {
         
