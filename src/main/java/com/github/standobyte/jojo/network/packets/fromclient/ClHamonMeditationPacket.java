@@ -34,7 +34,7 @@ public class ClHamonMeditationPacket {
         @Override
         public void handle(ClHamonMeditationPacket msg, Supplier<NetworkEvent.Context> ctx) {
             PlayerEntity player = ctx.get().getSender();
-            if (player.isOnGround()) {
+            if (player.isOnGround() || !msg.value) {
                 INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
                     power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                         hamon.setIsMeditating(player, msg.value);
