@@ -112,6 +112,7 @@ public class PlayerAnimatorInstalled implements PlayerAnimationHandler.IPlayerAn
             if (sittingAnim != null) {
                 AnimationProcessor anim = new AnimationProcessor(sittingAnim);
                 animProcessor.set(anim);
+                modelWithMixin.setEmoteSupplier(animProcessor);
                 return new EntityAnimApplier<HamonMasterEntity, HamonMasterModel>(model, modelWithMixin);
             }
         }

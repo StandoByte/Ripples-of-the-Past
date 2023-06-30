@@ -26,17 +26,20 @@ public class EntityAnimApplier<T extends LivingEntity, M extends BipedModel<T>> 
     @Override
     public void applyBodyTransforms(MatrixStack matrixStack, float partialTick) {
         AnimationProcessor pose = modelWithMixin.getEmoteSupplier().get();
-        pose.setTickDelta(partialTick);
-        if (pose.isActive()) {
-            
-            //These are additive properties
-            Vec3f vec3d = pose.get3DTransform("body", TransformType.POSITION, Vec3f.ZERO);
-            matrixStack.translate(vec3d.getX(), vec3d.getY() + 0.7, vec3d.getZ());
-            Vec3f vec3f = pose.get3DTransform("body", TransformType.ROTATION, Vec3f.ZERO);
-            matrixStack.mulPose(Vector3f.ZP.rotation(vec3f.getZ()));    //roll
-            matrixStack.mulPose(Vector3f.YP.rotation(vec3f.getY()));    //pitch
-            matrixStack.mulPose(Vector3f.XP.rotation(vec3f.getX()));    //yaw
-            matrixStack.translate(0, - 0.7d, 0);
+        
+        if (pose != null) {
+            pose.setTickDelta(partialTick);
+            if (pose.isActive()) {
+                
+                //These are additive properties
+                Vec3f vec3d = pose.get3DTransform("body", TransformType.POSITION, Vec3f.ZERO);
+                matrixStack.translate(vec3d.getX(), vec3d.getY() + 0.7, vec3d.getZ());
+                Vec3f vec3f = pose.get3DTransform("body", TransformType.ROTATION, Vec3f.ZERO);
+                matrixStack.mulPose(Vector3f.ZP.rotation(vec3f.getZ()));    //roll
+                matrixStack.mulPose(Vector3f.YP.rotation(vec3f.getY()));    //pitch
+                matrixStack.mulPose(Vector3f.XP.rotation(vec3f.getX()));    //yaw
+                matrixStack.translate(0, - 0.7d, 0);
+            }
         }
     }
     
@@ -44,25 +47,28 @@ public class EntityAnimApplier<T extends LivingEntity, M extends BipedModel<T>> 
     public void setEmote() {
         AnimationProcessor pose = modelWithMixin.getEmoteSupplier().get();
 
-        updatePart(pose, "head", model.head);
-        model.hat.copyFrom(model.head);
-
-        updatePart(pose, "leftArm", model.leftArm);
-        updatePart(pose, "rightArm", model.rightArm);
-        updatePart(pose, "leftLeg", model.leftLeg);
-        updatePart(pose, "rightLeg", model.rightLeg);
-        updatePart(pose, "torso", model.body);
-        
-        // FIXME !!! (hamon master model) bend isn't working
-        Pair<Float, Float> torsoBend = pose.getBend("torso");
-        Pair<Float, Float> bodyBend = pose.getBend("body");
-        modelWithMixin.getTorso().bend(new Pair<>(torsoBend.getLeft() + bodyBend.getLeft(), torsoBend.getRight() + bodyBend.getRight()));
-        modelWithMixin.getLeftArm().bend(pose.getBend("leftArm"));
-        modelWithMixin.getLeftLeg().bend(pose.getBend("leftLeg"));
-        modelWithMixin.getRightArm().bend(pose.getBend("rightArm"));
-        modelWithMixin.getRightLeg().bend(pose.getBend("rightLeg"));
-        IBendHelper rightLeg = modelWithMixin.getRightLeg();
-        IBendHelper leftLeg = modelWithMixin.getLeftLeg();
+        if (pose != null) {
+            updatePart(pose, "head", model.head);
+            model.hat.copyFrom(model.head);
+    
+            updatePart(pose, "leftArm", model.leftArm);
+            updatePart(pose, "rightArm", model.rightArm);
+            updatePart(pose, "leftLeg", model.leftLeg);
+            updatePart(pose, "rightLeg", model.rightLeg);
+            updatePart(pose, "torso", model.body);
+            
+            // FIXME !!! (hamon master model) bend isn't working
+            Pair<Float, Float> torsoBend = pose.getBend("torso");
+            Pair<Float, Float> bodyBend = pose.getBend("body");
+            modelWithMixin.getTorso().bend(new Pair<>(torsoBend.getLeft() + bodyBend.getLeft(), torsoBend.getRight() + bodyBend.getRight()));
+            modelWithMixin.getLeftArm().bend(pose.getBend("leftArm"));
+            modelWithMixin.getLeftLeg().bend(pose.getBend("leftLeg"));
+            modelWithMixin.getRightArm().bend(pose.getBend("rightArm"));
+            modelWithMixin.getRightLeg().bend(pose.getBend("rightLeg"));
+            
+            IBendHelper rightLeg = modelWithMixin.getRightLeg();
+            IBendHelper leftLeg = modelWithMixin.getLeftLeg();
+        }
     }
 
     private void updatePart(AnimationProcessor pose, String partName, ModelRenderer part) {
@@ -79,6 +85,9 @@ public class EntityAnimApplier<T extends LivingEntity, M extends BipedModel<T>> 
     @Override
     public void tick() {
         AnimationProcessor pose = modelWithMixin.getEmoteSupplier().get();
-        pose.tick();
+        
+        if (pose != null) {
+            pose.tick();
+        }
     }
 }
