@@ -1,5 +1,6 @@
-package com.github.standobyte.jojo.client.playeranim.playeranimator.anim;
+package com.github.standobyte.jojo.client.playeranim.playeranimator.anim.mob;
 
+import com.github.standobyte.jojo.client.ClientTicking;
 import com.github.standobyte.jojo.client.playeranim.IEntityAnimApplier;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
@@ -14,13 +15,14 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.vector.Vector3f;
 
 // TODO a more generalized way to apply animations to custom mobs
-public class EntityAnimApplier<T extends LivingEntity, M extends BipedModel<T>> implements IEntityAnimApplier<T, M> {
-    private final M model;
-    private final IMutableModel modelWithMixin;
+public abstract class EntityAnimApplier<T extends LivingEntity, M extends BipedModel<T>> implements IEntityAnimApplier<T, M> {
+    protected final M model;
+    protected final IMutableModel modelWithMixin;
     
     public EntityAnimApplier(M model, IMutableModel modelWithMixin) {
         this.model = model;
         this.modelWithMixin = modelWithMixin;
+        ClientTicking.addTicking(this);
     }
 
     @Override

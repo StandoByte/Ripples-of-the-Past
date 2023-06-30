@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.client.render.entity.model.mob;
 
-import com.github.standobyte.jojo.client.ClientTicking;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.playeranim.IEntityAnimApplier;
 import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
@@ -10,7 +9,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 
-public class HamonMasterModel extends BipedModel<HamonMasterEntity> implements ClientTicking.ITicking {
+public class HamonMasterModel extends BipedModel<HamonMasterEntity> {
     private IEntityAnimApplier<HamonMasterEntity, HamonMasterModel> sittingAnim;
     private boolean animInit = false;
     
@@ -74,10 +73,6 @@ public class HamonMasterModel extends BipedModel<HamonMasterEntity> implements C
         lowLeftCape.texOffs(0, 46).addBox(0.0F, 0.0F, -5.0F, 0.0F, 7.0F, 5.0F, 0.0F, false);
         lowLeftCape.texOffs(23, 43).addBox(-4.0F, 0.0F, 0.0F, 4.0F, 7.0F, 0.0F, 0.0F, false);
 
-        rightArm = new ModelRenderer(this);
-        rightArm.setPos(-5.0F, 2.0F, 0.0F);
-        rightArm.texOffs(40, 16).addBox(-3.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, 0.0F, false);
-
         ModelRenderer rightShoulder = new ModelRenderer(this);
         rightShoulder.setPos(5.0F, 22.2F, 0.0F);
         rightArm.addChild(rightShoulder);
@@ -89,10 +84,6 @@ public class HamonMasterModel extends BipedModel<HamonMasterEntity> implements C
         rightArm.addChild(rightCuff);
         ClientUtil.setRotationAngle(rightCuff, 0.0F, 0.0F, 0.0436F);
         rightCuff.texOffs(40, 32).addBox(-9.0F, -23.7F, -2.0F, 4.0F, 2.0F, 4.0F, 0.25F, false);
-
-        leftArm = new ModelRenderer(this);
-        leftArm.setPos(5.0F, 2.0F, 0.0F);
-        leftArm.texOffs(40, 16).addBox(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, 0.0F, true);
 
         ModelRenderer leftShoulder = new ModelRenderer(this);
         leftShoulder.setPos(-5.0F, 22.2F, 0.0F);
@@ -155,12 +146,5 @@ public class HamonMasterModel extends BipedModel<HamonMasterEntity> implements C
         this.body.z = 0f;
         this.body.yRot = 0;
         this.body.zRot = 0;
-    }
-    
-    @Override
-    public void tick() {
-        if (sittingAnim != null) {
-            sittingAnim.tick();
-        }
     }
 }

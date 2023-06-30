@@ -10,12 +10,12 @@ import com.github.standobyte.jojo.client.playeranim.IEntityAnimApplier;
 import com.github.standobyte.jojo.client.playeranim.IPlayerBarrageAnimation;
 import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
 import com.github.standobyte.jojo.client.playeranim.playeranimator.anim.BusyArmsLayer;
-import com.github.standobyte.jojo.client.playeranim.playeranimator.anim.EntityAnimApplier;
 import com.github.standobyte.jojo.client.playeranim.playeranimator.anim.HeldActionAnimLayer;
 import com.github.standobyte.jojo.client.playeranim.playeranimator.anim.TestAnimLayer;
 import com.github.standobyte.jojo.client.playeranim.playeranimator.anim.hamon.BarrageAnimLayer;
 import com.github.standobyte.jojo.client.playeranim.playeranimator.anim.hamon.MeditationPoseLayer;
 import com.github.standobyte.jojo.client.playeranim.playeranimator.anim.hamon.PlayerBarrageAfterimagesAnim;
+import com.github.standobyte.jojo.client.playeranim.playeranimator.anim.mob.HamonMasterAnimApplier;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.barrage.BarrageFistAfterimagesLayer;
 import com.github.standobyte.jojo.client.render.entity.model.mob.HamonMasterModel;
 import com.github.standobyte.jojo.entity.mob.HamonMasterEntity;
@@ -31,7 +31,6 @@ import dev.kosmx.playerAnim.api.layered.modifier.AbstractFadeModifier;
 import dev.kosmx.playerAnim.core.data.KeyframeAnimation;
 import dev.kosmx.playerAnim.core.impl.AnimationProcessor;
 import dev.kosmx.playerAnim.core.util.Pair;
-import dev.kosmx.playerAnim.core.util.SetableSupplier;
 import dev.kosmx.playerAnim.core.util.Vec3f;
 import dev.kosmx.playerAnim.impl.Helper;
 import dev.kosmx.playerAnim.impl.IAnimatedPlayer;
@@ -107,14 +106,10 @@ public class PlayerAnimatorInstalled implements PlayerAnimationHandler.IPlayerAn
     public IEntityAnimApplier<HamonMasterEntity, HamonMasterModel> initHamonMasterPose(HamonMasterModel model) {
         if (model instanceof IMutableModel) {
             IMutableModel modelWithMixin = ((IMutableModel) model);
-            SetableSupplier<AnimationProcessor> animProcessor = modelWithMixin.getEmoteSupplier();
-            IAnimation sittingAnim = meditation.getHamonMasterAnim();
-            if (sittingAnim != null) {
-                AnimationProcessor anim = new AnimationProcessor(sittingAnim);
-                animProcessor.set(anim);
-                modelWithMixin.setEmoteSupplier(animProcessor);
-                return new EntityAnimApplier<HamonMasterEntity, HamonMasterModel>(model, modelWithMixin);
-            }
+            IEntityAnimApplier<HamonMasterEntity, HamonMasterModel> animApplier =
+                    new HamonMasterAnimApplier(model, modelWithMixin, meditation.getHamonMasterAnim());
+            animApplier.onInit();
+            return animApplier;
         }
         return PlayerAnimationHandler.IPlayerAnimator.super.initHamonMasterPose(model);
     }
