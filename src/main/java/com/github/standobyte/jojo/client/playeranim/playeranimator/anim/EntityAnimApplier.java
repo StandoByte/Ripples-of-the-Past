@@ -7,13 +7,13 @@ import dev.kosmx.playerAnim.api.TransformType;
 import dev.kosmx.playerAnim.core.impl.AnimationProcessor;
 import dev.kosmx.playerAnim.core.util.Pair;
 import dev.kosmx.playerAnim.core.util.Vec3f;
-import dev.kosmx.playerAnim.impl.IBendHelper;
 import dev.kosmx.playerAnim.impl.IMutableModel;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.vector.Vector3f;
 
+// TODO a more generalized way to apply animations to custom mobs
 public class EntityAnimApplier<T extends LivingEntity, M extends BipedModel<T>> implements IEntityAnimApplier<T, M> {
     private final M model;
     private final IMutableModel modelWithMixin;
@@ -50,14 +50,13 @@ public class EntityAnimApplier<T extends LivingEntity, M extends BipedModel<T>> 
         if (pose != null) {
             updatePart(pose, "head", model.head);
             model.hat.copyFrom(model.head);
-    
             updatePart(pose, "leftArm", model.leftArm);
             updatePart(pose, "rightArm", model.rightArm);
             updatePart(pose, "leftLeg", model.leftLeg);
             updatePart(pose, "rightLeg", model.rightLeg);
             updatePart(pose, "torso", model.body);
             
-            // FIXME !!! (hamon master model) bend isn't working
+            // FIXME !!! (hamon master model) bend isn't working with additional cubes/ModelRenderer children
             Pair<Float, Float> torsoBend = pose.getBend("torso");
             Pair<Float, Float> bodyBend = pose.getBend("body");
             modelWithMixin.getTorso().bend(new Pair<>(torsoBend.getLeft() + bodyBend.getLeft(), torsoBend.getRight() + bodyBend.getRight()));
@@ -65,9 +64,6 @@ public class EntityAnimApplier<T extends LivingEntity, M extends BipedModel<T>> 
             modelWithMixin.getLeftLeg().bend(pose.getBend("leftLeg"));
             modelWithMixin.getRightArm().bend(pose.getBend("rightArm"));
             modelWithMixin.getRightLeg().bend(pose.getBend("rightLeg"));
-            
-            IBendHelper rightLeg = modelWithMixin.getRightLeg();
-            IBendHelper leftLeg = modelWithMixin.getLeftLeg();
         }
     }
 
