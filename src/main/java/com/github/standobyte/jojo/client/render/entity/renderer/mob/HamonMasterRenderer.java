@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.client.render.entity.renderer.mob;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonMasterExtraLayer;
 import com.github.standobyte.jojo.client.render.entity.model.mob.HamonMasterModel;
 import com.github.standobyte.jojo.entity.mob.HamonMasterEntity;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -13,7 +14,8 @@ public class HamonMasterRenderer extends BipedRenderer<HamonMasterEntity, HamonM
     private static final ResourceLocation TEXTURE = new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/hamon_master.png");
 
     public HamonMasterRenderer(EntityRendererManager renderManager) {
-        super(renderManager, new HamonMasterModel(), 0.5F);
+        super(renderManager, new HamonMasterModel(false), 0.5F);
+        addLayer(new HamonMasterExtraLayer(this, new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/hamon_master_extra.png")));
     }
     
     @Override

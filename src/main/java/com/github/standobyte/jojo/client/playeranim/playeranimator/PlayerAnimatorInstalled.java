@@ -106,8 +106,8 @@ public class PlayerAnimatorInstalled implements PlayerAnimationHandler.IPlayerAn
     public IEntityAnimApplier<HamonMasterEntity, HamonMasterModel> initHamonMasterPose(HamonMasterModel model) {
         if (model instanceof IMutableModel) {
             IMutableModel modelWithMixin = ((IMutableModel) model);
-            IEntityAnimApplier<HamonMasterEntity, HamonMasterModel> animApplier =
-                    new HamonMasterAnimApplier(model, modelWithMixin, meditation.getHamonMasterAnim());
+            IEntityAnimApplier<HamonMasterEntity, HamonMasterModel> animApplier;
+            animApplier = new HamonMasterAnimApplier(model, modelWithMixin, meditation.getHamonMasterAnim());
             animApplier.onInit();
             return animApplier;
         }
