@@ -58,7 +58,6 @@ public abstract class EntityAnimApplier<T extends LivingEntity, M extends BipedM
             updatePart(pose, "rightLeg", model.rightLeg);
             updatePart(pose, "torso", model.body);
             
-            // FIXME !!! (hamon master model) bend isn't working with additional cubes/ModelRenderer children
             Pair<Float, Float> torsoBend = pose.getBend("torso");
             Pair<Float, Float> bodyBend = pose.getBend("body");
             modelWithMixin.getTorso().bend(new Pair<>(torsoBend.getLeft() + bodyBend.getLeft(), torsoBend.getRight() + bodyBend.getRight()));
