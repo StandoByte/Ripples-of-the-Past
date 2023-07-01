@@ -99,9 +99,8 @@ public class HamonMasterModel extends BipedModel<HamonMasterEntity> {
             ClientUtil.clearCubes(rightLeg);
             ClientUtil.clearCubes(rightPants);
             
-            // FIXME !!! (hamon master model) doesn't rotate/bend accordingly
-            body.texOffs(16, 16).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 2.0F, 4.0F, 0.2F, false);
-            body.texOffs(21, 22).addBox(-3.0F, 1.9F, -2.1F, 6.0F, 3.0F, 0.0F, 0.0F, false);
+//            body.texOffs(16, 16).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 2.0F, 4.0F, 0.2F, false);
+//            body.texOffs(21, 22).addBox(-3.0F, 1.9F, -2.1F, 6.0F, 3.0F, 0.0F, 0.0F, false);
             
             rightCapeBinding.texOffs(36, 36).addBox(-2.0F, -0.8F, -2.0F, 4.0F, 3.0F, 4.0F, 0.225F, false);
             
@@ -119,35 +118,29 @@ public class HamonMasterModel extends BipedModel<HamonMasterEntity> {
             lowLeftCape.texOffs(2, 44).addBox(0.0F, 0.0F, -5.0F, 0.0F, 7.0F, 5.0F, 0.0F, false);
             lowLeftCape.texOffs(12, 49).addBox(-4.0F, 0.0F, 0.0F, 4.0F, 7.0F, 0.0F, 0.0F, false);
             
-            // FIXME !!! (hamon master model) doesn't rotate accordingly
-            ModelRenderer rightShoulder = new ModelRenderer(this);
-            rightShoulder.setPos(-1.0F, -1.0F, 0.0F);
-            rightArm.addChild(rightShoulder);
-            ClientUtil.setRotationAngle(rightShoulder, 0.0F, 0.0F, -0.0873F);
-            rightShoulder.texOffs(40, 16).addBox(-2.0F, -1.0F, -2.0F, 4.0F, 2.0F, 4.0F, 0.25F, false);
-
-            // FIXME !!! (hamon master model) doesn't rotate accordingly
-            // FIXME !!! (hamon master model) cuff and arm bend
-            ModelRenderer rightCuff = new ModelRenderer(this);
-            rightCuff.setPos(-1.0F, 7.0F, 0.0F);
-            rightArm.addChild(rightCuff);
-            ClientUtil.setRotationAngle(rightCuff, 0.0F, 0.0F, 0.0436F);
-            rightCuff.texOffs(40, 24).addBox(-2.0F, -1.0F, -2.0F, 4.0F, 2.0F, 4.0F, 0.25F, false);
-
-            // FIXME !!! (hamon master model) doesn't rotate accordingly
-            ModelRenderer leftShoulder = new ModelRenderer(this);
-            leftShoulder.setPos(1.0F, -1.0F, 0.0F);
-            leftArm.addChild(leftShoulder);
-            ClientUtil.setRotationAngle(leftShoulder, 0.0F, 0.0F, 0.0873F);
-            leftShoulder.texOffs(0, 16).addBox(-2.0F, -1.0F, -2.0F, 4.0F, 2.0F, 4.0F, 0.25F, false);
-
-            // FIXME !!! (hamon master model) doesn't rotate accordingly
-            // FIXME !!! (hamon master model) cuff and arm bend
-            ModelRenderer leftCuff = new ModelRenderer(this);
-            leftCuff.setPos(1.0F, 7.0F, 0.0F);
-            leftArm.addChild(leftCuff);
-            ClientUtil.setRotationAngle(leftCuff, 0.0F, 0.0F, -0.0436F);
-            leftCuff.texOffs(0, 24).addBox(-2.0F, -1.0F, -2.0F, 4.0F, 2.0F, 4.0F, 0.25F, false);
+//            ModelRenderer rightShoulder = new ModelRenderer(this);
+//            rightShoulder.setPos(-1.0F, -1.0F, 0.0F);
+//            rightArm.addChild(rightShoulder);
+//            ClientUtil.setRotationAngle(rightShoulder, 0.0F, 0.0F, -0.0873F);
+//            rightShoulder.texOffs(40, 16).addBox(-2.0F, -1.0F, -2.0F, 4.0F, 2.0F, 4.0F, 0.25F, false);
+//
+//            ModelRenderer rightCuff = new ModelRenderer(this);
+//            rightCuff.setPos(-1.0F, 7.0F, 0.0F);
+//            rightArm.addChild(rightCuff);
+//            ClientUtil.setRotationAngle(rightCuff, 0.0F, 0.0F, 0.0436F);
+//            rightCuff.texOffs(40, 24).addBox(-2.0F, -1.0F, -2.0F, 4.0F, 2.0F, 4.0F, 0.25F, false);
+//
+//            ModelRenderer leftShoulder = new ModelRenderer(this);
+//            leftShoulder.setPos(1.0F, -1.0F, 0.0F);
+//            leftArm.addChild(leftShoulder);
+//            ClientUtil.setRotationAngle(leftShoulder, 0.0F, 0.0F, 0.0873F);
+//            leftShoulder.texOffs(0, 16).addBox(-2.0F, -1.0F, -2.0F, 4.0F, 2.0F, 4.0F, 0.25F, false);
+//
+//            ModelRenderer leftCuff = new ModelRenderer(this);
+//            leftCuff.setPos(1.0F, 7.0F, 0.0F);
+//            leftArm.addChild(leftCuff);
+//            ClientUtil.setRotationAngle(leftCuff, 0.0F, 0.0F, -0.0436F);
+//            leftCuff.texOffs(0, 24).addBox(-2.0F, -1.0F, -2.0F, 4.0F, 2.0F, 4.0F, 0.25F, false);
         }
     }
     
