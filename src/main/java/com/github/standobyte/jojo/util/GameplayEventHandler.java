@@ -1153,11 +1153,24 @@ public class GameplayEventHandler {
                     ModCriteriaTriggers.ENTITY_KILLED_PLAYER.get().trigger((ServerPlayerEntity) dead, killer, dmgSource);
                 }
             }
+            
             LazyOptional<IStandPower> standOptional = IStandPower.getStandPowerOptional(dead);
             standOptional.ifPresent(stand -> {
                 stand.getContinuousEffects().onStandUserDeath(dead);
                 summonSoul(stand, dead, dmgSource);
             });
+            
+
+            LivingEntity killerCredited = dead.getKillCredit();
+            if (killerCredited != null) {
+                LivingEntity killerStandUser = StandUtil.getStandUser(killerCredited);
+                if (!killerCredited.is(killerStandUser)) {
+                    killerStandUser.awardKillScore(dead, 
+                            0 /* the deathScore variable seems to be unused in vanilla, 
+                                 and i don't feel like using reflection here */, 
+                            dmgSource);
+                }
+            }
         }
     }
     
