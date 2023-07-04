@@ -124,6 +124,8 @@ public class ActionsOverlayGui extends AbstractGui {
     private boolean attackSelection;
     private boolean abilitySelection;
     private boolean hotbarsEnabled;
+    private boolean altDeselectsAttack;
+    private boolean altDeselectsAbility;
     
     private ActionsOverlayGui(Minecraft mc) {
         this.mc = mc;
@@ -715,11 +717,28 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     public void setHotbarButtonsDows(boolean attack, boolean ability) {
+        if (hotbarsEnabled) {
+            altDeselectsAttack = attack;
+            altDeselectsAbility = ability;
+        }
+        else {
+            altDeselectsAttack = false;
+            altDeselectsAbility = false;
+        }
+        
         this.attackSelection = attack;
         this.abilitySelection = ability;
     }
     
     public void setHotbarsEnabled(boolean enabled) {
+        if (this.hotbarsEnabled && !enabled) {
+            if (altDeselectsAttack) {
+                selectAction(ActionType.ATTACK, -1);
+            }
+            if (altDeselectsAbility) {
+                selectAction(ActionType.ABILITY, -1);
+            }
+        }
         this.hotbarsEnabled = enabled;
     }
     
