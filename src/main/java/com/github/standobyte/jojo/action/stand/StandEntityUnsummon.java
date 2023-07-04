@@ -2,7 +2,9 @@ package com.github.standobyte.jojo.action.stand;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
+import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
@@ -95,5 +97,15 @@ public final class StandEntityUnsummon extends StandEntityAction {
     @Override
     public int getStandActionTicks(IStandPower standPower, StandEntity standEntity) {
         return Integer.MAX_VALUE;
+    }
+    
+    @Override
+    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task, int ticks) {
+        if (world.isClientSide()) {
+            LivingEntity user = standPower.getUser();
+            if (user != null && user == ClientUtil.getClientPlayer()) {
+                ActionsOverlayGui.getInstance().onStandUnsummon();
+            }
+        }
     }
 }
