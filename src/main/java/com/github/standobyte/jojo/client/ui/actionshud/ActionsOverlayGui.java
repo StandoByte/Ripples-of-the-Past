@@ -807,7 +807,6 @@ public class ActionsOverlayGui extends AbstractGui {
     
     private float getNameAlpha(ElementTransparency transparency, float partialTick) {
         HudNamesRender renderMode = JojoModConfig.CLIENT.hudNamesRender.get();
-        renderMode = HudNamesRender.FADE_AWAY;
         switch (renderMode) {
         case NEVER:
             return 0;
@@ -1335,7 +1334,7 @@ public class ActionsOverlayGui extends AbstractGui {
         }
         boolean shift = mc.player.isShiftKeyDown();
         return Stream.of(ActionType.values()).map(hotbar -> currentMode.getSelectedAction(hotbar, shift, getTargetLazy())).anyMatch(action);
-        // FIXME !!!! (hud) generics moment
+        // FIXME (hud) generics moment
 //                || action.test(getQuickAccessAction(currentMode.getPower(), shift));
     }
     
