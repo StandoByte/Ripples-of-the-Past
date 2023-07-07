@@ -6,7 +6,6 @@ import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
-import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
@@ -40,19 +39,8 @@ public class HamonSunlightYellowOverdrive extends HamonAction {
     }
     
     @Override
-    public int getHoldDurationToFire(INonStandPower power) {
-        int maxTicks = getHoldDurationMax(power);
-        if (maxTicks == 0) return 0;
-        int ret = MathHelper.ceil(ModHamonActions.HAMON_OVERDRIVE.get().getEnergyCost(power) * maxTicks / power.getMaxEnergy());
-        return Math.min(ret, maxTicks);
-    }
-    
-    @Override
-    public int getHoldDurationMax(INonStandPower power) {
-        int ticks = super.getHoldDurationMax(power);
-        if (ticks == 0) return 0;
-        float control = power.getTypeSpecificData(ModPowers.HAMON.get()).map(HamonData::getHamonControlLevelRatio).orElse(0F);
-        return Math.max((int) ((float) ticks * (1 - control * 0.25F)), 1);
+    protected ActionConditionResult checkEnergy(LivingEntity user, INonStandPower power, ActionTarget target) {
+        return ActionConditionResult.POSITIVE;
     }
     
     @Override
@@ -62,7 +50,7 @@ public class HamonSunlightYellowOverdrive extends HamonAction {
     
     @Override
     public float getHeldTickEnergyCost(INonStandPower power) {
-        return power.getMaxEnergy() / Math.max(getHoldDurationMax(power), 1);
+        return Math.min(power.getMaxEnergy() / Math.max(getHoldDurationToFire(power), 1), power.getEnergy());
     }
     
     @Override
@@ -76,7 +64,7 @@ public class HamonSunlightYellowOverdrive extends HamonAction {
     @Override
     public void stoppedHolding(World world, LivingEntity user, INonStandPower power, int ticksHeld, boolean willFire) {
         if (!world.isClientSide() && !power.isUserCreative()) {
-            float holdRatio = (float) ticksHeld / (float) Math.max(getHoldDurationMax(power), 1);
+            float holdRatio = (float) ticksHeld / (float) Math.max(getHoldDurationToFire(power), 1);
             power.setEnergy(Math.min(power.getEnergy(), power.getMaxEnergy() * (1F - holdRatio)));
         }
     }
@@ -95,20 +83,20 @@ public class HamonSunlightYellowOverdrive extends HamonAction {
             
             if (!world.isClientSide()) {
                 HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
-                float holdRatio = (float) power.getHeldActionTicks() / (float) Math.max(getHoldDurationMax(power), 1);
-                if (!power.isUserCreative()) {
-                    power.setEnergy(Math.max(power.getEnergy(), power.getMaxEnergy() * (1F - holdRatio)));
-                }
+                int maxTicks = Math.max(getHoldDurationToFire(power), 1);
+                int ticksHeld = Math.min(power.getHeldActionTicks(), maxTicks);
+                float holdRatio = (float) ticksHeld / (float) maxTicks;
+                
                 float efficiency = hamon.getActionEfficiency(0);
                 
-                float damage = 3F + 12F * holdRatio;
+                float damage = 2.5F + 10F * holdRatio;
                 damage *= efficiency;
 
                 if (DamageUtil.dealHamonDamage(targetEntity, damage, user, null, attack -> attack.hamonParticle(ModParticles.HAMON_SPARK_YELLOW.get()))) {
                     if (holdRatio > 0.25F) {
                         world.playSound(null, targetEntity.getX(), targetEntity.getEyeY(), targetEntity.getZ(), ModSounds.HAMON_SYO_PUNCH.get(), targetEntity.getSoundSource(), holdRatio, 1.0F);
                     }
-                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, getHeldTickEnergyCost(power) * holdRatio * efficiency);
+                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, power.getMaxEnergy() * holdRatio * efficiency);
                 }
             }
 
