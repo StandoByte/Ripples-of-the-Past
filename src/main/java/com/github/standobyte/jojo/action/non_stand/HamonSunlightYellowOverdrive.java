@@ -108,6 +108,9 @@ public class HamonSunlightYellowOverdrive extends HamonAction {
                 user.swing(Hand.MAIN_HAND);
             }
         }
+        else {
+            // FIXME !! (SYO) "attack missed" sound
+        }
     }
 
     @Override
