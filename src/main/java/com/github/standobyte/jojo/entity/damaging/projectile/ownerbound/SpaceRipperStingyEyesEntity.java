@@ -141,7 +141,12 @@ public class SpaceRipperStingyEyesEntity extends OwnerBoundProjectileEntity {
     protected float getMaxHardnessBreakable() {
         return 3.0F;
     }
-
+    
+    @Override
+    protected float knockbackMultiplier() {
+        return 0;
+    }
+    
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();

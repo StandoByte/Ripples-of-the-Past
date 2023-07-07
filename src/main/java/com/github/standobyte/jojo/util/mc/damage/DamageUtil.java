@@ -70,6 +70,9 @@ public class DamageUtil {
         if (source instanceof StandLinkDamageSource || ROAD_ROLLER_MSG.equals(source.msgId)) {
             return 0;
         }
+        if (source instanceof IModdedDamageSource) {
+            return ((IModdedDamageSource) source).getKnockbackFactor();
+        }
         if (source instanceof EntityDamageSource) {
             if (source.getDirectEntity() instanceof LivingEntity && 
                     INonStandPower.getNonStandPowerOptional((LivingEntity) source.getDirectEntity())
@@ -79,9 +82,6 @@ public class DamageUtil {
             String msgId = source.getMsgId();
             if (msgId != null && (msgId.startsWith(BLOOD_DRAIN_MSG) || msgId.startsWith(COLD.msgId) || msgId.startsWith(ROAD_ROLLER_MSG))) {
                 return 0;
-            }
-            if (source instanceof IModdedDamageSource) {
-                return ((IModdedDamageSource) source).getKnockbackFactor();
             }
             if (source.getDirectEntity() instanceof SendoHamonOverdriveEntity) {
                 return SendoHamonOverdriveEntity.KNOCKBACK_FACTOR;

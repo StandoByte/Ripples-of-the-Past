@@ -13,6 +13,7 @@ import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
 import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.mc.damage.IndirectStandEntityDamageSource;
+import com.github.standobyte.jojo.util.mc.damage.ModdedDamageSourceWrapper;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.BlockState;
@@ -188,12 +189,10 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
             new IndirectEntityDamageSource("arrow", this, owner).setProjectile();
         
         float knockbackReduction = knockbackMultiplier();
-        if (knockbackReduction < 1
-                && standDamage() // delete this condition later
-                ) {
-//            if (!standDamage()) {
-                // TODO IModdedDamageSource wrapper
-//            }
+        if (knockbackReduction < 1) {
+            if (!(damageSource instanceof IModdedDamageSource)) {
+                damageSource = new ModdedDamageSourceWrapper(damageSource);
+            }
             ((IModdedDamageSource) damageSource).setKnockbackReduction(Math.max(knockbackReduction, 0));
         }
         
