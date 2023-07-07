@@ -41,7 +41,7 @@ public class HamonSendoOverdrive extends HamonAction {
         if (!world.isClientSide()) {
             HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
             float energyCost = getEnergyCost(power);
-            float hamonEfficiency = hamon.getActionEfficiency(energyCost);
+            float hamonEfficiency = hamon.getActionEfficiency(energyCost, true);
             
             BlockPos blockPos = target.getBlockPos();
             SendoHamonOverdriveEntity sendoOverdrive = new SendoHamonOverdriveEntity(world, 

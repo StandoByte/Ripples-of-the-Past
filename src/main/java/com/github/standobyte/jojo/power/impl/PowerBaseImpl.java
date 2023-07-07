@@ -33,6 +33,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.Hand;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -450,6 +451,9 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                         checkRequirements(heldAction, targetContainer, true).isPositive();
 
                 heldAction.stoppedHolding(user.level, user, getThis(), ticksHeld, fire);
+                if (fire && heldAction.swingHand()) {
+                    user.swing(Hand.MAIN_HAND);
+                }
                 
                 if (fire) {
                     target = targetContainer.get();

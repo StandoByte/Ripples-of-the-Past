@@ -30,6 +30,6 @@ public class HamonScarletOverdrive extends HamonOverdrive {
     protected boolean dealDamage(LivingEntity target, float dmgAmount, LivingEntity user, INonStandPower power, HamonData hamon) {
         return DamageUtil.dealDamageAndSetOnFire(target, 
                 entity -> DamageUtil.dealHamonDamage(entity, dmgAmount, user, null, attack -> attack.hamonParticle(ModParticles.HAMON_SPARK_RED.get())), 
-                MathHelper.floor(2 + 8F * (float) hamon.getHamonStrengthLevel() / (float) HamonData.MAX_STAT_LEVEL * hamon.getActionEfficiency(getEnergyCost(power))), false);
+                MathHelper.floor(2 + 8F * (float) hamon.getHamonStrengthLevel() / (float) HamonData.MAX_STAT_LEVEL * hamon.getActionEfficiency(getEnergyCost(power), true)), false);
     }
 }

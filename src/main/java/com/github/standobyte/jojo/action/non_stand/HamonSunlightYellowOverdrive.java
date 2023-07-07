@@ -31,9 +31,6 @@ public class HamonSunlightYellowOverdrive extends HamonAction {
             if (power.getEnergy() < power.getMaxEnergy()) {
                 return conditionMessage("full_energy");
             }
-            if (user instanceof PlayerEntity && ((PlayerEntity) user).getAttackStrengthScale(0.5F) < 0.9F) {
-                return ActionConditionResult.NEGATIVE;
-            }
         }
         return ActionConditionResult.POSITIVE;
     }
@@ -87,7 +84,7 @@ public class HamonSunlightYellowOverdrive extends HamonAction {
                 int ticksHeld = Math.min(power.getHeldActionTicks(), maxTicks);
                 float holdRatio = (float) ticksHeld / (float) maxTicks;
                 
-                float efficiency = hamon.getActionEfficiency(0);
+                float efficiency = hamon.getActionEfficiency(0, true);
                 
                 float damage = 2.5F + 10F * holdRatio;
                 damage *= efficiency;

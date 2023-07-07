@@ -260,17 +260,21 @@ public class HamonData extends TypeSpecificData {
     
     
     public static final float ALL_EXERCISES_EFFICIENCY_MULTIPLIER = 1.05F;
-    public float getActionEfficiency(float energyCost) {
+    public float getActionEfficiency(float energyCost, boolean handSwingTimer) {
         float efficiency = getHamonEnergyUsageEfficiency(energyCost, false) * getBloodstreamEfficiency();
         if (allExercisesCompleted) {
             efficiency *= ALL_EXERCISES_EFFICIENCY_MULTIPLIER;
+        }
+        if (handSwingTimer && power.getUser() instanceof PlayerEntity) {
+            float swingStrengthScale = ((PlayerEntity) power.getUser()).getAttackStrengthScale(0.5F);
+            efficiency *= (0.2F + swingStrengthScale * swingStrengthScale * 0.8F);
         }
         return efficiency;
     }
     
     @Nullable
     public <T> T consumeHamonEnergyTo(Function<Float, T> actionWithHamonEfficiency, float energyCost) {
-        float efficiency = getActionEfficiency(energyCost);
+        float efficiency = getActionEfficiency(energyCost, false);
         if (efficiency > 0) {
             T result = actionWithHamonEfficiency.apply(efficiency);
             getHamonEnergyUsageEfficiency(energyCost, true);

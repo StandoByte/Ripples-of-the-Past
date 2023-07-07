@@ -17,6 +17,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamon
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -89,6 +90,14 @@ public abstract class HamonAction extends NonStandAction {
     
     private AbstractHamonSkill getSkillToUnlock() {
         return null;
+    }
+    
+    @Override
+    public void onPerform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
+        super.onPerform(world, user, power, target);
+        if (swingHand() && user instanceof PlayerEntity) {
+            ((PlayerEntity) user).resetAttackStrengthTicker();
+        }
     }
     
     

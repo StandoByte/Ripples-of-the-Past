@@ -242,8 +242,8 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     public static boolean ropeTrap(LivingEntity user, BlockPos pos, BlockState blockState, World world, INonStandPower power, HamonData hamon) {
         if (hamon.isSkillLearned(ModHamonSkills.ROPE_TRAP.get())) {
             createChargedCobweb(user, pos, blockState, world, 64, null, power, 
-                    40 + (int) ((float) (160 * hamon.getHamonStrengthLevel()) / (float) HamonData.MAX_STAT_LEVEL * hamon.getActionEfficiency(STRING_CHARGE_COST)), 
-                    0.02F * hamon.getHamonDamageMultiplier() * hamon.getActionEfficiency(STRING_CHARGE_COST), hamon);
+                    40 + (int) ((float) (160 * hamon.getHamonStrengthLevel()) / (float) HamonData.MAX_STAT_LEVEL * hamon.getActionEfficiency(STRING_CHARGE_COST, false)), 
+                    0.02F * hamon.getHamonDamageMultiplier() * hamon.getActionEfficiency(STRING_CHARGE_COST, false), hamon);
             return true;
         }
         return false;
@@ -296,7 +296,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                         if (power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
                             if (hamon.isSkillLearned(ModHamonSkills.SNAKE_MUFFLER.get())) {
                                 playerTarget.getCooldowns().addCooldown(ModItems.SATIPOROJA_SCARF.get(), 80);
-                                float efficiency = hamon.getActionEfficiency(energyCost);
+                                float efficiency = hamon.getActionEfficiency(energyCost, false);
                                 if (efficiency == 1 || efficiency >= dmgAmount / target.getMaxHealth()) {
                                     JojoModUtil.sayVoiceLine(target, ModSounds.LISA_LISA_SNAKE_MUFFLER.get());
                                     power.consumeEnergy(energyCost);

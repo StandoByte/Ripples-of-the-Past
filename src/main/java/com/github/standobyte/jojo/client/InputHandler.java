@@ -499,7 +499,7 @@ public class InputHandler {
             if (click != null && click.getRight()) {
                 Action<P> action = click.getLeft();
                 if (action != null) {
-                    result.handSwing = action.swingHand() ? HudClickResult.Behavior.FORCE : HudClickResult.Behavior.CANCEL;
+                    result.handSwing = action.getHoldDurationMax(power) <= 0 && action.swingHand() ? HudClickResult.Behavior.FORCE : HudClickResult.Behavior.CANCEL;
                     if (action.cancelsVanillaClick()) result.cancelVanillaInput();
                 }
                 if (action.getHoldDurationMax(power) > 0) {

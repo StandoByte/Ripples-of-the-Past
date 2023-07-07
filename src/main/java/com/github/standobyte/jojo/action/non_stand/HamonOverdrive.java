@@ -1,7 +1,6 @@
 package com.github.standobyte.jojo.action.non_stand;
 
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
@@ -16,7 +15,6 @@ import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
 
 public class HamonOverdrive extends HamonAction {
@@ -28,14 +26,6 @@ public class HamonOverdrive extends HamonAction {
     @Override
     public TargetRequirement getTargetRequirement() {
         return TargetRequirement.ENTITY;
-    }
-    
-    @Override
-    public ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
-        if (user instanceof PlayerEntity && ((PlayerEntity) user).getAttackStrengthScale(0.5F) < 0.9F) {
-            return ActionConditionResult.NEGATIVE;
-        }
-        return ActionConditionResult.POSITIVE;
     }
     
     @Override
@@ -56,18 +46,10 @@ public class HamonOverdrive extends HamonAction {
                 LivingEntity targetEntity = (LivingEntity) entity;
                 HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
                 float cost = getEnergyCost(power);
-                float efficiency = hamon.getActionEfficiency(cost);
-                
-                float damage = getDamage();
-                float dmgScale = efficiency;
-                if (user instanceof PlayerEntity) {
-                    float swingStrengthScale = ((PlayerEntity) user).getAttackStrengthScale(0.5F);
-                    dmgScale *= (0.2F + swingStrengthScale * swingStrengthScale * 0.8F);
-                }
-                damage *= dmgScale;
+                float efficiency = hamon.getActionEfficiency(cost, true);
                 
                 int attackStrengthTicker = CommonReflection.getAttackStrengthTicker(user);
-                if (dealDamage(targetEntity, damage, user, power, hamon)) {
+                if (dealDamage(targetEntity, getDamage() * efficiency, user, power, hamon)) {
                     addPointsForAction(power, hamon, HamonStat.STRENGTH, cost, efficiency);
                 }
                 // FIXME !! (hamon) ClientPlayerEntity#swing sends the packet to server, and THEN ServerPlayerEntity#swing resets attackStrengthTicker
