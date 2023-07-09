@@ -124,6 +124,7 @@ import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
+import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tags.FluidTags;
@@ -148,6 +149,7 @@ import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.LanguageMap;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.GameRules;
@@ -1403,15 +1405,18 @@ public class GameplayEventHandler {
                     
                     ITextComponent msg = new TranslationTextComponent("chat.type.text", 
                             standEntity.getDisplayName(), ForgeHooks.newChatWithLinks(event.getMessage()));
-                    server.sendMessage(msg, playerSending.getUUID());
+                    ITextComponent msgUserTooltip = new TranslationTextComponent("chat.type.text", 
+                            getDisplayNameWithUser(standEntity, playerSending), ForgeHooks.newChatWithLinks(event.getMessage()));
                     SChatPacket messagePacket = new SChatPacket(msg, ChatType.CHAT, playerSending.getUUID());
+                    SChatPacket messagePacketUser = new SChatPacket(msgUserTooltip, ChatType.CHAT, playerSending.getUUID());
                     
+                    server.sendMessage(event.getComponent() /*sending the message with the original user name*/, playerSending.getUUID());
                     for (ServerPlayerEntity player : server.getPlayerList().getPlayers()) {
                         if (player == playerSending || 
                                 player.level.dimension() == playerSending.level.dimension() 
                                 && player.position().subtract(standEntity.position()).lengthSqr() < STAND_MESSAGE_RANGE * STAND_MESSAGE_RANGE
                                 && (StandUtil.playerCanHearStands(player) || standEntity.isVisibleForAll())) {
-                            player.connection.send(messagePacket);
+                            player.connection.send(server.getProfilePermissions(player.getGameProfile()) >= 3 ? messagePacketUser : messagePacket);
                         }
                     }
                     
@@ -1419,6 +1424,16 @@ public class GameplayEventHandler {
                             cap -> cap.onChatMsgBypassingSpamCheck(server, playerSending));
                 }
             }
+        });
+    }
+    
+    private static ITextComponent getDisplayNameWithUser(StandEntity stand, PlayerEntity user) {
+        return ScorePlayerTeam.formatNameForTeam(stand.getTeam(), stand.getName()).withStyle(style -> {
+            return style
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, 
+                            new HoverEvent.EntityHover(stand.getType(), stand.getUUID(), 
+                                    new TranslationTextComponent("chat.stand_remote_reveal_name", stand.getName(), user.getName()))))
+                    .withInsertion(user.getGameProfile().getName());
         });
     }
 

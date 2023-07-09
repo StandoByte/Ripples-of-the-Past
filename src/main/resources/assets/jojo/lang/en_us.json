@@ -604,6 +604,8 @@
   "commands.jojoconfigpack.standstats.single": "%s default Stand stats file for %s.",
   "commands.jojoconfigpack.standstats.single.folder_link": "Click to open the file path.",
   
+  "chat.stand_remote_reveal_name": "%s (Stand User: %s)",
+  
   "jojo.action.toast.title": "New actions unlocked!",
   "jojo.action.toast.stand.attack.description": "New Stand attacks",
   "jojo.action.toast.stand.ability.description": "New Stand abilities",
