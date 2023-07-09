@@ -579,7 +579,9 @@ public class ActionsOverlayGui extends AbstractGui {
                     }
                 }
                 
-                Action<P> selectedAction = actionHotbar != null ? mode.getSelectedAction(actionHotbar, shift, getTargetLazy()) : actions.get(0);
+                Action<P> selectedAction = actionHotbar != null ?
+                        mode.getSelectedAction(actionHotbar, shift, getTargetLazy())
+                        : power.getActionOnClick(actions.get(0), shift, target);
                 if (selectedAction != null && selectedAction != heldAction) {
                     slot = selected;
                     if (slot > -1) {
@@ -645,7 +647,9 @@ public class ActionsOverlayGui extends AbstractGui {
         P power = mode.getPower();
         
         if (action != null) {
-            boolean heldReadyToFire = power.getHeldAction() == action && action.getHoldDurationToFire(power) > 0 && power.getHeldActionTicks() >= action.getHoldDurationToFire(power);
+            boolean heldReadyToFire = power.getHeldAction() == action
+                    && action.getHoldDurationToFire(power) > 0
+                    && power.getHeldActionTicks() >= action.getHoldDurationToFire(power);
             if (heldReadyToFire) {
                 ClientUtil.fillSingleRect(x - 2, y - 2, 20, 20, 0, 255, 0, 127);
             }
@@ -732,14 +736,18 @@ public class ActionsOverlayGui extends AbstractGui {
     
     public void setHotbarsEnabled(boolean enabled) {
         if (this.hotbarsEnabled && !enabled) {
-            if (altDeselectsAttack) {
-                selectAction(ActionType.ATTACK, -1);
-            }
-            if (altDeselectsAbility) {
-                selectAction(ActionType.ABILITY, -1);
-            }
+            specialKeyDeselect();
         }
         this.hotbarsEnabled = enabled;
+    }
+    
+    public void specialKeyDeselect() {
+        if (altDeselectsAttack) {
+            selectAction(ActionType.ATTACK, -1);
+        }
+        if (altDeselectsAbility) {
+            selectAction(ActionType.ABILITY, -1);
+        }
     }
     
     public boolean areHotbarsEnabled() {

@@ -360,7 +360,7 @@ public class HamonStatsTabGui extends HamonTabGui {
                 ITextComponent incWord = new TranslationTextComponent("hamon.exercise.all.tooltip_green").withStyle(TextFormatting.GREEN);
                 if (breathingBonus > 0) {
                     totalExercises2 = new TranslationTextComponent("hamon.exercise.all.day_end_increase.bonus", 
-                            incWord, decimalFormat.format(breathingIncrease - breathingBonus), breathingBonus);
+                            incWord, decimalFormat.format(breathingIncrease - breathingBonus), decimalFormat.format(breathingBonus));
                 }
                 else {
                     totalExercises2 = new TranslationTextComponent("hamon.exercise.all.day_end_increase", 
@@ -374,6 +374,7 @@ public class HamonStatsTabGui extends HamonTabGui {
             
             List<IReorderingProcessor> totalExercisesTooltip = new ArrayList<>(minecraft.font.split(totalExercises1, 120));
             if (totalExercises2 != null) {
+                totalExercisesTooltip.add(StringTextComponent.EMPTY.getVisualOrderText());
                 totalExercisesTooltip.addAll(minecraft.font.split(totalExercises2, 120));
             }
             screen.renderTooltip(matrixStack, totalExercisesTooltip, mouseX, mouseY);

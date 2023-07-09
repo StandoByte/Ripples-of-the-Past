@@ -419,6 +419,7 @@ public class InputHandler {
             nonStandPower.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                 if (hamon.isMeditating()) {
                     event.setCanceled(true);
+                    event.setSwingHand(false);
                 }
             });
         }

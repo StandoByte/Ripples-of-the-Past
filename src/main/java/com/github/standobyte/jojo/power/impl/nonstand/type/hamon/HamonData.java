@@ -1304,11 +1304,11 @@ public class HamonData extends TypeSpecificData {
     public enum Exercise {
         MINING(150),
         RUNNING(135),
-        SWIMMING(135),
-        MEDITATION(60);
-
+        SWIMMING(120),
+        MEDITATION(75);
+        
         private final float maxTicks;
-
+        
         private Exercise(float seconds) {
             this.maxTicks = seconds * 20F;
         }
