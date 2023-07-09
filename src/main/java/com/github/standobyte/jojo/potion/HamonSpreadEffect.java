@@ -13,7 +13,10 @@ public class HamonSpreadEffect extends UncurableEffect implements IApplicableEff
     public HamonSpreadEffect(EffectType type, int liquidColor) {
         super(type, liquidColor);
     }
-    
+
+    // FIXME !!! (hamon) hamon spread perk rework
+    // reduce healing
+    // do smth to mobs too
     @Override
     public void applyEffectTick(LivingEntity livingEntity, int amplifier) {
 //        DamageUtil.dealHamonDamage(livingEntity, 1F, null, null);

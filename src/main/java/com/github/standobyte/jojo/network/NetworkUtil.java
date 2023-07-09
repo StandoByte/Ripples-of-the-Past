@@ -22,7 +22,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -35,16 +34,12 @@ import net.minecraftforge.registries.RegistryManager;
 public class NetworkUtil {
 
     public static void broadcastWithCondition(List<ServerPlayerEntity> players, @Nullable PlayerEntity clientHandled, 
-            double x, double y, double z, double radius, RegistryKey<World> dimension, IPacket<IClientPlayNetHandler> packet, 
-            Predicate<PlayerEntity> condition) {
+            double x, double y, double z, double radius, World world, 
+            IPacket<IClientPlayNetHandler> packet, Predicate<PlayerEntity> condition) {
         for (ServerPlayerEntity player : players) {
-            if (player != clientHandled && player.level.dimension() == dimension && condition.test(player)) {
-                double d0 = x - player.getX();
-                double d1 = y - player.getY();
-                double d2 = z - player.getZ();
-                if (d0 * d0 + d1 * d1 + d2 * d2 < radius * radius) {
-                    player.connection.send(packet);
-                }
+            if (player != clientHandled && player.level.dimension() == world.dimension()
+                    && condition.test(player) && player.position().subtract(x, y, z).lengthSqr() < radius * radius) {
+                player.connection.send(packet);
             }
         }
     }

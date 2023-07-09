@@ -173,10 +173,11 @@ public class DamageUtil {
                 float hamonMultiplier = INonStandPower.getNonStandPowerOptional(sourceLiving).map(power -> 
                 power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
                     if (undeadTarget && !scarf && hamon.isSkillLearned(ModHamonSkills.HAMON_SPREAD.get())) {
-                        float effectStr = (hamon.getHamonDamageMultiplier() - 1) / (HamonData.MAX_HAMON_STRENGTH_MULTIPLIER - 1) * hamon.getBloodstreamEfficiency();
-                        int effectDuration = 25 + MathHelper.floor(125F * effectStr);
-                        int effectLvl = MathHelper.clamp(MathHelper.floor(1.5F * effectStr * dmgAmount * hamon.getBloodstreamEfficiency()), 0, 3);
-                        livingTarget.addEffect(new EffectInstance(ModEffects.HAMON_SPREAD.get(), effectDuration, effectLvl));
+                        livingTarget.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.hamonSpread(dmgAmount));
+//                        float effectStr = (hamon.getHamonDamageMultiplier() - 1) / (HamonData.MAX_HAMON_STRENGTH_MULTIPLIER - 1) * hamon.getBloodstreamEfficiency();
+//                        int effectDuration = 25 + MathHelper.floor(125F * effectStr);
+//                        int effectLvl = MathHelper.clamp(MathHelper.floor(1.5F * effectStr * dmgAmount * hamon.getBloodstreamEfficiency()), 0, 3);
+//                        livingTarget.addEffect(new EffectInstance(ModEffects.HAMON_SPREAD.get(), effectDuration, effectLvl));
                     }
                     return hamon.getHamonDamageMultiplier();
                 }).orElse(1F)).orElse(1F);

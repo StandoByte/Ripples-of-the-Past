@@ -50,7 +50,6 @@ import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
-import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartPacket;
@@ -1391,30 +1390,33 @@ public class GameplayEventHandler {
         }
     }
 
+    private static final double STAND_MESSAGE_RANGE = 16;
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void messageAsStand(ServerChatEvent event) {
-        ServerPlayerEntity player = event.getPlayer();
-        IStandPower.getStandPowerOptional(player).ifPresent(stand -> {
+        ServerPlayerEntity playerSending = event.getPlayer();
+        IStandPower.getStandPowerOptional(playerSending).ifPresent(stand -> {
             if (stand.hasPower() && stand.isActive() && stand.getStandManifestation() instanceof StandEntity) {
                 StandEntity standEntity = (StandEntity) stand.getStandManifestation();
                 if (standEntity.isManuallyControlled()) {
                     event.setCanceled(true);
-                    MinecraftServer server = player.server;
+                    MinecraftServer server = playerSending.server;
                     
                     ITextComponent msg = new TranslationTextComponent("chat.type.text", 
                             standEntity.getDisplayName(), ForgeHooks.newChatWithLinks(event.getMessage()));
-                    server.sendMessage(msg, player.getUUID());
-                    SChatPacket messagePacket = new SChatPacket(msg, ChatType.CHAT, player.getUUID());
+                    server.sendMessage(msg, playerSending.getUUID());
+                    SChatPacket messagePacket = new SChatPacket(msg, ChatType.CHAT, playerSending.getUUID());
                     
-                    if (standEntity.isVisibleForAll()) {
-                        server.getPlayerList().broadcastAll(messagePacket);
-                    }
-                    else {
-                        NetworkUtil.broadcastWithCondition(server.getPlayerList().getPlayers(), messagePacket, StandUtil::playerCanHearStands);
+                    for (ServerPlayerEntity player : server.getPlayerList().getPlayers()) {
+                        if (player == playerSending || 
+                                player.level.dimension() == playerSending.level.dimension() 
+                                && player.position().subtract(standEntity.position()).lengthSqr() < STAND_MESSAGE_RANGE * STAND_MESSAGE_RANGE
+                                && (StandUtil.playerCanHearStands(player) || standEntity.isVisibleForAll())) {
+                            player.connection.send(messagePacket);
+                        }
                     }
                     
-                    player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(
-                            cap -> cap.onChatMsgBypassingSpamCheck(server, player));
+                    playerSending.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(
+                            cap -> cap.onChatMsgBypassingSpamCheck(server, playerSending));
                 }
             }
         });

@@ -254,7 +254,7 @@ public class MCUtil {
             volume = event.getVolume();
             pitch = event.getPitch();
             NetworkUtil.broadcastWithCondition(((ServerWorld) world).getServer().getPlayerList().getPlayers(), clientHandled, 
-                    x, y, z, volume > 1.0F ? (double)(16.0F * volume) : 16.0D, world.dimension(), 
+                    x, y, z, volume > 1.0F ? (double)(16.0F * volume) : 16.0D, world, 
                             new SPlaySoundEffectPacket(sound, category, x, y, z, volume, pitch), condition);
         }
         else if (clientHandled != null && condition.test(clientHandled)) {
@@ -278,7 +278,7 @@ public class MCUtil {
             volume = event.getVolume();
             pitch = event.getPitch();
             NetworkUtil.broadcastWithCondition(((ServerWorld) world).getServer().getPlayerList().getPlayers(), clientHandled, 
-                    entity.getX(), entity.getY(), entity.getZ(), volume > 1.0F ? (double)(16.0F * volume) : 16.0D, world.dimension(), 
+                    entity.getX(), entity.getY(), entity.getZ(), volume > 1.0F ? (double)(16.0F * volume) : 16.0D, world, 
                             new SSpawnMovingSoundEffectPacket(sound, category, entity, volume, pitch), condition);
         }
         else if (clientHandled != null && condition.test(clientHandled)) {

@@ -16,6 +16,7 @@ import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 
@@ -33,7 +34,8 @@ public class LivingUtilCap {
     private float futureKnockbackFactor;
     private Vector3d latestExplosionPos = null;
     
-    HamonCharge hamonCharge;
+    private HamonCharge hamonCharge;
+    private float receivedHamonDamage = 0;
     private final List<AfterimageEntity> afterimages = new ArrayList<>();
     public boolean hasUsedTimeStopToday = false;
     private int noLerpTicks = 0;
@@ -50,6 +52,7 @@ public class LivingUtilCap {
         hamonChargeTick();
         tickNoLerp();
         tickHurtAnim();
+        tickDownHamonDamage();
         
         Iterator<AfterimageEntity> it = afterimages.iterator();
         while (it.hasNext()) {
@@ -170,6 +173,17 @@ public class LivingUtilCap {
     
     
     
+    // FIXME !!! (hamon) hamon spread perk rework
+    public void hamonSpread(float damageReceived) {
+        receivedHamonDamage += damageReceived;
+    }
+    
+    private void tickDownHamonDamage() {
+        receivedHamonDamage = Math.max(receivedHamonDamage - 0.1F, 0);
+    }
+    
+    
+    
     public void onTracking(ServerPlayerEntity tracking) {
     }
     
@@ -209,5 +223,25 @@ public class LivingUtilCap {
     
     public boolean isUsingZoomPunch() {
         return usedZoomPunch;
+    }
+    
+    
+    
+    public CompoundNBT toNBT() {
+        CompoundNBT nbt = new CompoundNBT();
+        if (hamonCharge != null) {
+            nbt.put("HamonCharge", hamonCharge.writeNBT());
+        }
+        nbt.putFloat("HamonSpread", receivedHamonDamage);
+        nbt.putBoolean("UsedTimeStop", hasUsedTimeStopToday);
+        return nbt;
+    }
+    
+    public void fromNBT(CompoundNBT nbt) {
+        if (nbt.contains("HamonCharge", 10)) {
+            hamonCharge = new HamonCharge(nbt.getCompound("HamonCharge"));
+        }
+        receivedHamonDamage = nbt.getFloat("HamonSpread");
+        hasUsedTimeStopToday = nbt.getBoolean("UsedTimeStop");
     }
 }
