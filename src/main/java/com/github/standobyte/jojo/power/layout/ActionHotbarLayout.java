@@ -73,7 +73,7 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
     
     void resetLayout() {
         actionsOrder = new ArrayList<>(_actions.values());
-        editLayout(() -> actionsOrder.forEach(actionSwitch -> actionSwitch.setIsEnabled(true)));
+        editLayout(() -> actionsOrder.forEach(actionSwitch -> actionSwitch.reset()));
         wasEdited = false;
     }
     
@@ -261,7 +261,7 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
         private boolean isEnabled = true;
         
         private ActionSwitch(Action<P> action) {
-            this(action, true);
+            this(action, action.enabledInHudDefault());
         }
         
         private ActionSwitch(Action<P> action, boolean isEnabled) {
@@ -279,6 +279,10 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
         
         private void setIsEnabled(boolean enable) {
             this.isEnabled = enable;
+        }
+        
+        private void reset() {
+            this.isEnabled = action.enabledInHudDefault();
         }
         
         private void copyFrom(ActionSwitch<?> actionSwitch) {

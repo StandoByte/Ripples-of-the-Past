@@ -41,4 +41,9 @@ public class HamonBreath extends HamonAction {
     protected boolean changesAuraColor() {
         return false;
     }
+    
+    @Override
+    public boolean enabledInHudDefault() {
+        return false;
+    }
 }

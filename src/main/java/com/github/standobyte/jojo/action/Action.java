@@ -203,6 +203,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return this;
     }
     
+    public boolean enabledInHudDefault() {
+        return true;
+    }
+    
     public boolean validateInput() {
         return false;
     }
