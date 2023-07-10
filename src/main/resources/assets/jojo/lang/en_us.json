@@ -596,7 +596,8 @@
   
   "commands.jojoconfigpack.base_created.link_name": "Generated",
   "commands.jojoconfigpack.base_created": "%s config data pack named %s.",
-  "commands.jojoconfigpack.folder_link": "Click to open the data pack (inside the %s folder of this save).",
+  "commands.jojoconfigpack.folder_link": "%s data pack link",
+  "commands.jojoconfigpack.folder_link.tooltip": "Click to open the data pack (inside the %s folder of this save).",
   "commands.jojoconfigpack.standstats.all.link_name": "Generated",
   "commands.jojoconfigpack.standstats.all": "%s default Stand stats files.",
   "commands.jojoconfigpack.standstats.all.folder_link": "Click to open the file path.",

@@ -45,7 +45,7 @@ public interface IDataConfig {
         return server.getWorldPath(FolderName.DATAPACK_DIR).resolve(getDataPackName());
     }
     
-    default void genDataPackBase(CommandSource src) throws IOException {
+    default boolean genDataPackBase(CommandSource src) throws IOException {
         boolean generatedPack = false;
         Path packPath = dataPackPath(src.getServer());
         if (!java.nio.file.Files.exists(packPath)) {
@@ -79,13 +79,14 @@ public interface IDataConfig {
                         return style
                                 .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, packPath.normalize().toString()))
                                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
-                                        new TranslationTextComponent("commands.jojoconfigpack.folder_link", 
+                                        new TranslationTextComponent("commands.jojoconfigpack.folder_link.tooltip", 
                                                 new StringTextComponent("datapacks").withStyle(TextFormatting.ITALIC)
                                                 )));
                     }),
                     new StringTextComponent(getDataPackName()).withStyle(TextFormatting.ITALIC))
                     .withStyle(TextFormatting.GRAY), true);
         }
+        return generatedPack;
     }
     
     default void genJsonFromObj(Object object, ResourceLocation resourcePath, String resourceName, MinecraftServer server) throws JsonWriteException {
