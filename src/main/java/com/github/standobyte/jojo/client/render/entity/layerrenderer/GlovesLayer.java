@@ -52,8 +52,10 @@ public class GlovesLayer<T extends LivingEntity, M extends PlayerModel<T>> exten
         if (!glovesItemStack.isEmpty()) {
             GlovesItem gloves = (GlovesItem) glovesItemStack.getItem();
             M playerModel = getParentModel();
+            glovesModel.prepareMobModel(entity, limbSwing, limbSwingAmount, partialTick);
             playerModel.copyPropertiesTo(glovesModel);
             glovesModel.setupAnim(entity, limbSwing, limbSwingAmount, ticks, yRot, xRot);
+            
             glovesModel.leftArm.visible = playerModel.leftArm.visible;
             glovesModel.leftSleeve.visible = playerModel.leftArm.visible;
             glovesModel.rightArm.visible = playerModel.rightArm.visible;
@@ -63,6 +65,8 @@ public class GlovesLayer<T extends LivingEntity, M extends PlayerModel<T>> exten
             glovesModel.renderToBuffer(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
         }
     }
+    
+    
     
     @SubscribeEvent(priority = EventPriority.LOW)
     public void renderGloves(RenderArmEvent event) {
