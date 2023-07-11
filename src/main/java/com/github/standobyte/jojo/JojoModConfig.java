@@ -174,7 +174,7 @@ public class JojoModConfig {
             
             builder.push("Vampirism settings");
                 maxBloodMultiplier = builder
-                        .comment("    Max vampire energy multiplier on each difficulty level.")
+                        .comment("    Max vampire energy multiplier on each difficulty level (from Peaceful to Hard).")
                         .translation("jojo.config.maxBloodMultiplier")
                         .defineList("maxBloodMultiplier", Arrays.asList(1D, 1D, 1D, 1D), e -> isElementNonNegativeFloat(e, true));
 
