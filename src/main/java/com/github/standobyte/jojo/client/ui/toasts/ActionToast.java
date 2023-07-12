@@ -21,29 +21,30 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class ActionToast implements IToast {
-    private static final ITextComponent NAME = new TranslationTextComponent("jojo.action.toast.title");
-    private final ITextComponent description;
-    private final IActionToastType type;
-    private final List<Action<?>> actions = Lists.newArrayList();
+    protected static final ITextComponent NAME = new TranslationTextComponent("jojo.action.toast.title");
+    protected static final int TIME_MS = 5000;
+    protected final ITextComponent description;
+    protected final IActionToastType type;
+    protected final List<Action<?>> actions = Lists.newArrayList();
     private IPowerType<?, ?> powerType;
-    private long lastChanged;
+    private int lastChanged;
     private boolean changed;
-
-    private ActionToast(IActionToastType type, Action<?> action, IPowerType<?, ?> powerType) {
+    
+    protected ActionToast(IActionToastType type, Action<?> action, IPowerType<?, ?> powerType) {
         this.type = type;
         this.description = new TranslationTextComponent("jojo.action.toast." + type.getName() + ".description");
         this.powerType = powerType;
         this.actions.add(action);
     }
-
+    
     @SuppressWarnings("deprecation")
     @Override
-    public IToast.Visibility render(MatrixStack matrixStack, ToastGui toastGui, long delta) {
+    public IToast.Visibility render(MatrixStack matrixStack, ToastGui toastGui, long timeMs) {
         if (changed) {
-            lastChanged = delta;
+            lastChanged = (int) timeMs;
             changed = false;
         }
-
+        
         if (actions.isEmpty()) {
             return IToast.Visibility.HIDE;
         } else {
@@ -53,7 +54,6 @@ public class ActionToast implements IToast {
             toastGui.blit(matrixStack, 0, 0, 0, 32, 160, 32);
             mc.font.draw(matrixStack, NAME, 30.0F, 7.0F, -11534256);
             mc.font.draw(matrixStack, description, 30.0F, 18.0F, -16777216);
-            Action<?> action = actions.get((int)(delta / Math.max(1L, 5000L / (long)actions.size()) % (long)actions.size()));
             RenderSystem.pushMatrix();
 //            RenderSystem.scalef(0.6F, 0.6F, 1.0F);
             matrixStack.pushPose();
@@ -62,29 +62,29 @@ public class ActionToast implements IToast {
             ToastGui.blit(matrixStack, 3, 3, 0, 0, 16, 16, 16, 16);
             RenderSystem.popMatrix();
             matrixStack.popPose();
-            TextureAtlasSprite textureAtlasSprite = CustomResources.getActionSprites().getSprite(action.getRegistryName());
-            mc.getTextureManager().bind(textureAtlasSprite.atlas().location());
-            ToastGui.blit(matrixStack, 8, 8, 0, 16, 16, textureAtlasSprite);
-            return delta - this.lastChanged >= 5000L ? IToast.Visibility.HIDE : IToast.Visibility.SHOW;
+            renderIcon(matrixStack, toastGui, (int) timeMs);
+            return timeMs - lastChanged >= TIME_MS ? IToast.Visibility.HIDE : IToast.Visibility.SHOW;
         }
     }
-
+    
+    protected void renderIcon(MatrixStack matrixStack, ToastGui toastGui, int timeMs) {
+        int actionsCount = actions.size();
+        int actionShowUpTime = Math.max(1, TIME_MS / actionsCount);
+        int actionIndex = timeMs / actionShowUpTime % actionsCount;
+        
+        Action<?> action = actions.get(actionIndex);
+        TextureAtlasSprite textureAtlasSprite = CustomResources.getActionSprites().getSprite(action.getRegistryName());
+        toastGui.getMinecraft().getTextureManager().bind(textureAtlasSprite.atlas().location());
+        ToastGui.blit(matrixStack, 8, 8, 0, 16, 16, textureAtlasSprite);
+    }
+    
     protected void addAction(Action<?> action, IPowerType<?, ?> powerType) {
         if (actions.add(action)) {
             this.powerType = powerType;
             changed = true;
         }
     }
-
-    public static void addOrUpdate(ToastGui toastGui, SpecialToastType type, Action<?> action, IPowerType<?, ?> powerType) {
-        ActionToast toast = toastGui.getToast(ActionToast.class, type);
-        if (toast == null) {
-            toastGui.addToast(new ActionToast(type, action, powerType));
-        } else {
-            toast.addAction(action, powerType);
-        }
-    }
-
+    
     public static void addOrUpdate(ToastGui toastGui, Type type, Action<?> action, IPowerType<?, ?> powerType) {
         ActionToast toast = toastGui.getToast(ActionToast.class, type);
         if (toast == null) {
@@ -93,12 +93,12 @@ public class ActionToast implements IToast {
             toast.addAction(action, powerType);
         }
     }
-
+    
     @Override
     public IActionToastType getToken() {
         return type;
     }
-
+    
     public static enum Type implements IActionToastType {
 //        NON_STAND_ATTACK("non_stand.attack", PowerClassification.NON_STAND, ActionType.ATTACK, false),
 //        NON_STAND_ABILITY("non_stand.ability", PowerClassification.NON_STAND, ActionType.ABILITY, false),
@@ -137,22 +137,7 @@ public class ActionToast implements IToast {
         }
     }
     
-    public static enum SpecialToastType implements IActionToastType {
-        FINISHER_HEAVY_ATTACK("stand.attack.heavy_finisher");
-        
-        private final String name;
-        
-        private SpecialToastType(String name) {
-            this.name = name;
-        }
-        
-        @Override
-        public String getName() {
-            return name;
-        }
-    }
-    
-    private static interface IActionToastType {
+    protected static interface IActionToastType {
         String getName();
     }
 }

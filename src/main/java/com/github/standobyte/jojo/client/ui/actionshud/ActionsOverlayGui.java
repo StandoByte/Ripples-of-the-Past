@@ -80,7 +80,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 @SuppressWarnings("deprecation")
 public class ActionsOverlayGui extends AbstractGui {
     private static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");
-    private static final ResourceLocation OVERLAY_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/overlay.png");
+    public static final ResourceLocation OVERLAY_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/overlay.png");
     private static final ResourceLocation RADIAL_INDICATOR = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/radial_indicator.png");
     
     private static ActionsOverlayGui instance = null;
