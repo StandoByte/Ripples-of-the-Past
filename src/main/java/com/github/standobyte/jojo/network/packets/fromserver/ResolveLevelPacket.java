@@ -17,11 +17,11 @@ import net.minecraftforge.fml.network.NetworkEvent;
 
 public class ResolveLevelPacket {
     private final int level;
-    private final boolean fromEffect;
+    private final boolean showUnlockToast;
     
-    public ResolveLevelPacket(int level, boolean fromEffect) {
+    public ResolveLevelPacket(int level, boolean showUnlockToast) {
         this.level = level;
-        this.fromEffect = fromEffect;
+        this.showUnlockToast = showUnlockToast;
     }
     
     
@@ -31,7 +31,7 @@ public class ResolveLevelPacket {
         @Override
         public void encode(ResolveLevelPacket msg, PacketBuffer buf) {
             buf.writeVarInt(msg.level);
-            buf.writeBoolean(msg.fromEffect);
+            buf.writeBoolean(msg.showUnlockToast);
         }
 
         @Override
@@ -43,9 +43,9 @@ public class ResolveLevelPacket {
         public void handle(ResolveLevelPacket msg, Supplier<NetworkEvent.Context> ctx) {
             IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
                 // FIXME make the toast show up when getting the level up from /standlevel command
-                boolean wasFinisherUnlocked = msg.fromEffect && StandUtil.isFinisherUnlocked(power);
-                power.setResolveLevel(msg.level, msg.fromEffect);
-                if (msg.fromEffect && !wasFinisherUnlocked && StandUtil.isFinisherUnlocked(power)) {
+                boolean wasFinisherUnlocked = msg.showUnlockToast && StandUtil.isFinisherUnlocked(power);
+                power.setResolveLevel(msg.level, msg.showUnlockToast);
+                if (msg.showUnlockToast && !wasFinisherUnlocked && StandUtil.isFinisherUnlocked(power)) {
                     power.getActions(ActionType.ATTACK).getAll().stream()
                     .flatMap(attack -> attack.hasShiftVariation() ? Stream.of(attack, attack.getShiftVariationIfPresent()) : Stream.of(attack))
                     .flatMap(attack -> {

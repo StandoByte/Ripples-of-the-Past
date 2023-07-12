@@ -33,9 +33,9 @@ public class StandCommand {
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         dispatcher.register(Commands.literal("stand").requires(ctx -> ctx.hasPermission(2))
                 .then(Commands.literal("give").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("stand", new StandArgument())
-                        .executes(ctx -> giveStands(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), StandArgument.getStandType(ctx, "stand"))))))
+                        .executes(ctx -> giveStands(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), StandArgument.getStandType(ctx, "stand"), false)))))
                 .then(Commands.literal("random").then(Commands.argument("targets", EntityArgument.players()) // /stand random <player(s)>
-                        .executes(ctx -> giveRandomStands(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets")))))
+                        .executes(ctx -> giveRandomStands(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), false))))
                 .then(Commands.literal("clear").then(Commands.argument("targets", EntityArgument.players())
                         .executes(ctx -> removeStands(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets")))))
                 .then(Commands.literal("type").then(Commands.argument("targets", EntityArgument.player())
@@ -44,7 +44,7 @@ public class StandCommand {
         JojoCommandsCommand.addCommand("stand");
     }
 
-    private static int giveStands(CommandSource source, Collection<ServerPlayerEntity> targets, StandType<?> standType) throws CommandSyntaxException {
+    private static int giveStands(CommandSource source, Collection<ServerPlayerEntity> targets, StandType<?> standType, boolean replace) throws CommandSyntaxException {
         int i = 0;
         for (ServerPlayerEntity player : targets) {
             IStandPower power = IStandPower.getStandPowerOptional(player).orElse(null);
@@ -79,7 +79,7 @@ public class StandCommand {
         }
     }
     
-    private static int giveRandomStands(CommandSource source, Collection<ServerPlayerEntity> targets) throws CommandSyntaxException {
+    private static int giveRandomStands(CommandSource source, Collection<ServerPlayerEntity> targets, boolean replace) throws CommandSyntaxException {
         int i = 0;
         StandType<?> stand = null;
         if (!targets.isEmpty()) {

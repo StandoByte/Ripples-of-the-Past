@@ -265,11 +265,11 @@ public class ResolveCounter {
         return boost;
     }
 
-    void setResolveLevel(int level, boolean fromEffect) {
+    void setResolveLevel(int level, boolean showUnlockToast) {
         boolean send = levels.setResolveLevel(stand, level);
         if (send) {
             serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new ResolveLevelPacket(getResolveLevel(), fromEffect), player);
+                PacketManager.sendToClient(new ResolveLevelPacket(getResolveLevel(), showUnlockToast), player);
             });
         }
     }

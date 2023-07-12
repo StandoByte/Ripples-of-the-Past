@@ -344,9 +344,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
     
     @Override
-    public void setResolveLevel(int level, boolean fromEffect) {
+    public void setResolveLevel(int level, boolean showUnlockToast) {
         if (usesResolve()) {
-            resolveCounter.setResolveLevel(level, fromEffect);
+            resolveCounter.setResolveLevel(level, showUnlockToast);
             if (!user.level.isClientSide() && hasPower()) {
                 getType().onNewResolveLevel(this);
                 if (level >= getType().getMaxResolveLevel()) {
@@ -407,15 +407,17 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         StandType<?> standType = getType();
         if (standType != null) {
             setProgressionSkipped();
-            resolveCounter.setResolveLevel(getMaxResolveLevel(), false);
-            Stream.concat(
-                    Arrays.stream(standType.getAttacks()), 
-                    Arrays.stream(standType.getAbilities()))
-            .flatMap(action -> action.hasShiftVariation() && action.getShiftVariationIfPresent() instanceof StandAction
-                    ? Stream.of(action, (StandAction) action.getShiftVariationIfPresent()) : Stream.of(action))
-            .forEach(action -> {
-                actionLearningProgressMap.setLearningProgressPoints(action, action.getMaxTrainingPoints(this), this);
-            });
+            resolveCounter.setResolveLevel(getMaxResolveLevel(), true);
+            if (!user.level.isClientSide()) {
+                Stream.concat(
+                        Arrays.stream(standType.getAttacks()), 
+                        Arrays.stream(standType.getAbilities()))
+                .flatMap(action -> action.hasShiftVariation() && action.getShiftVariationIfPresent() instanceof StandAction
+                        ? Stream.of(action, (StandAction) action.getShiftVariationIfPresent()) : Stream.of(action))
+                .forEach(action -> {
+                    setLearningProgressPoints(action, action.getMaxTrainingPoints(this), false, false);
+                });
+            }
         }
     }
     
