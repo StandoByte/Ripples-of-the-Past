@@ -310,9 +310,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 renderWarningIcons(matrixStack, warningsPosition, warningLines);
                 
                 renderLeapIcon(matrixStack, currentMode, screenWidth, screenHeight);
-                if (currentMode == standUiMode) {
-                    renderStandComboIcon(matrixStack, standUiMode.getPower(), screenWidth, screenHeight);
-                }
+                renderIconBarAtCrosshair(matrixStack, screenWidth, screenHeight);
                 
                 RenderSystem.disableRescaleNormal();
                 RenderSystem.disableBlend();
@@ -1080,17 +1078,26 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private void renderStandComboIcon(MatrixStack matrixStack, IStandPower standPower, int screenWidth, int screenHeight) {
-        if (standPower.isActive() && StandUtil.isComboUnlocked(standPower) && standPower.getType().usesStandComboMechanic()) {
-            mc.getTextureManager().bind(OVERLAY_LOCATION);
-            IStandManifestation stand = standPower.getStandManifestation();
-            if (stand instanceof StandEntity) {
-                int x = screenWidth / 2 + (modeSelectorPosition.alignment == Alignment.LEFT ? -24 : 6);
-                int y = screenHeight / 2 - 9;
-                float combo = ((StandEntity) stand).getComboMeter();
-                boolean finisher = ((StandEntity) stand).willHeavyPunchBeFinisher();
-                renderFilledIcon(matrixStack, x, y, false, combo, 
-                        96, 216, finisher ? 132 : 114, 216, 18, 18, 0xFFFFFF);
+    private void renderIconBarAtCrosshair(MatrixStack matrixStack, int screenWidth, int screenHeight) {
+//        if (mc.player.isUsingItem() && mc.player.getUseItem()) {
+//            
+//        }
+        
+        if (currentMode == standUiMode) {
+            IStandPower standPower = standUiMode.getPower();
+            if (standPower.isActive() && StandUtil.isFinisherUnlocked(standPower) && standPower.getType().usesStandFinisherMechanic()) {
+                mc.getTextureManager().bind(OVERLAY_LOCATION);
+                IStandManifestation stand = standPower.getStandManifestation();
+                if (stand instanceof StandEntity) {
+                    float finisherValue = ((StandEntity) stand).getFinisherMeter();
+                    if (finisherValue > 0) {
+                        int x = screenWidth / 2 + (modeSelectorPosition.alignment == Alignment.LEFT ? -24 : 6);
+                        int y = screenHeight / 2 - 9;
+                        boolean heavyVariation = ((StandEntity) stand).willHeavyPunchBeFinisher();
+                        renderFilledIcon(matrixStack, x, y, false, finisherValue, 
+                                96, 216, heavyVariation ? 132 : 114, 216, 18, 18, 0xFFFFFF);
+                    }
+                }
             }
         }
     }

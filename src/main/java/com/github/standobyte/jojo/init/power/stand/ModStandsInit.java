@@ -597,7 +597,7 @@ public class ModStandsInit {
                     .barrageHitSound(ModSounds.CRAZY_DIAMOND_PUNCH_BARRAGE)
                     .standSound(ModSounds.CRAZY_DIAMOND_DORARARA)));
     
-    public static final RegistryObject<StandEntityHeavyAttack> CRAZY_DIAMOND_COMBO_PUNCH = ACTIONS.register("crazy_diamond_misshaping_punch", 
+    public static final RegistryObject<StandEntityHeavyAttack> CRAZY_DIAMOND_FINISHER_PUNCH = ACTIONS.register("crazy_diamond_misshaping_punch", 
             () -> new CrazyDiamondMisshapingPunch(new StandEntityHeavyAttack.Builder()
                     .punchSound(ModSounds.CRAZY_DIAMOND_PUNCH_HEAVY)
                     .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_DORA_LONG)
@@ -617,7 +617,7 @@ public class ModStandsInit {
                     .punchSound(ModSounds.CRAZY_DIAMOND_PUNCH_HEAVY)
                     .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_DORA_LONG)
                     .partsRequired(StandPart.ARMS)
-                    .setFinisherVariation(CRAZY_DIAMOND_COMBO_PUNCH)
+                    .setFinisherVariation(CRAZY_DIAMOND_FINISHER_PUNCH)
                     .shiftVariationOf(CRAZY_DIAMOND_PUNCH).shiftVariationOf(CRAZY_DIAMOND_BARRAGE)));
     
     public static final RegistryObject<StandEntityActionModifier> CRAZY_DIAMOND_LEAVE_OBJECT = ACTIONS.register("crazy_diamond_leave_object", 
@@ -682,7 +682,7 @@ public class ModStandsInit {
     public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_BLOCK_ANCHOR_MAKE = ACTIONS.register("crazy_diamond_anchor_make", 
             () -> new CrazyDiamondBlockCheckpointMake(new StandEntityAction.Builder().standWindupDuration(10).standRecoveryTicks(5).staminaCost(25)
                     .resolveLevelToUnlock(3)
-                    .standPose(StandPose.HEAVY_ATTACK_COMBO)
+                    .standPose(StandPose.HEAVY_ATTACK_FINISHER)
                     .partsRequired(StandPart.ARMS)
                     .shiftVariationOf(CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE)));
     

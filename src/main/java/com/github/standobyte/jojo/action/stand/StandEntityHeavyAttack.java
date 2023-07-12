@@ -111,7 +111,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     public void onClick(World world, LivingEntity user, IStandPower power) {
         super.onClick(world, user, power);
         if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
-            ((StandEntity) power.getStandManifestation()).setHeavyPunchCombo();
+            ((StandEntity) power.getStandManifestation()).setHeavyPunchFinisher();
         }
     }
     
@@ -119,7 +119,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task, int ticks) {
         standEntity.alternateHands();
         if (!world.isClientSide()) {
-            standEntity.addComboMeter(-0.51F, 0);
+            standEntity.addFinisherMeter(-0.51F, 0);
         }
     }
     
@@ -166,7 +166,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     
     @Override
     public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
-        return StandStatFormulas.getHeavyAttackWindup(standEntity.getAttackSpeed(), standEntity.getComboMeter());
+        return StandStatFormulas.getHeavyAttackWindup(standEntity.getAttackSpeed(), standEntity.getFinisherMeter());
     }
 
     @Override
@@ -180,7 +180,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     }
     
     @Override
-    public boolean noComboDecay() {
+    public boolean noFinisherDecay() {
         return true;
     }
     
@@ -191,7 +191,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     
     @Override
     public boolean isUnlocked(IStandPower power) {
-        return isFinisher ? StandUtil.isComboUnlocked(power) : super.isUnlocked(power);
+        return isFinisher ? StandUtil.isFinisherUnlocked(power) : super.isUnlocked(power);
     }
     
     @Override
@@ -201,7 +201,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     
     @Override
     public StandPose getStandPose(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
-        return isFinisher ? StandPose.HEAVY_ATTACK_COMBO : super.getStandPose(standPower, standEntity, task);
+        return isFinisher ? StandPose.HEAVY_ATTACK_FINISHER : super.getStandPose(standPower, standEntity, task);
     }
     
     @Override

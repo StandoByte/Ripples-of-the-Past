@@ -232,7 +232,7 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
         });
         ModelPose<MagiciansRedEntity> kickRecoveryArmHackyFix = ((ModelPose<MagiciansRedEntity>) idlePose).copy()
                 .putRotation(new RotationAngle(rightArm, 0.1309F, 0.0F, 0.4363F).noDegreesWrapping());
-        actionAnim.put(StandPose.HEAVY_ATTACK_COMBO, new PosedActionAnimation.Builder<MagiciansRedEntity>()
+        actionAnim.put(StandPose.HEAVY_ATTACK_FINISHER, new PosedActionAnimation.Builder<MagiciansRedEntity>()
                 .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<>(kickPose1, kickPose2))
                 .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransition<>(kickPose2, kickPose3))
                 .build(kickRecoveryArmHackyFix));

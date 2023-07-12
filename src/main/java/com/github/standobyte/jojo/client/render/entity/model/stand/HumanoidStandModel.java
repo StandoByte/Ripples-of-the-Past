@@ -369,7 +369,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
                 .build(idlePose);
         actionAnim.putIfAbsent(StandPose.HEAVY_ATTACK, heavyAttackAnim);
         
-        actionAnim.putIfAbsent(StandPose.HEAVY_ATTACK_COMBO, heavyAttackAnim);
+        actionAnim.putIfAbsent(StandPose.HEAVY_ATTACK_FINISHER, heavyAttackAnim);
         
         
         

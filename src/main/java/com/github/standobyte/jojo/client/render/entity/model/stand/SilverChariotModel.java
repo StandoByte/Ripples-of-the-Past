@@ -269,7 +269,7 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
                 RotationAngle.fromDegrees(leftForeArm, 0F, 0F, 30F),
                 RotationAngle.fromDegrees(rightArm, 12.5F, 0F, 120F)
         });
-        rapierAnim.putIfAbsent(StandPose.HEAVY_ATTACK_COMBO, new PosedActionAnimation.Builder<SilverChariotEntity>()
+        rapierAnim.putIfAbsent(StandPose.HEAVY_ATTACK_FINISHER, new PosedActionAnimation.Builder<SilverChariotEntity>()
                 .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<>(idlePose, sweepPose1))
                 .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransitionMultiple.Builder<>(sweepPose1)
                         .addPose(0.2F, sweepPose2)

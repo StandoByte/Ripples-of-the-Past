@@ -475,7 +475,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         return getHoldDurationToFire(standPower) == 0;
     }
     
-    public boolean noComboDecay() {
+    public boolean noFinisherDecay() {
         return false;
     }
     

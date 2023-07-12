@@ -207,7 +207,7 @@ public class StandUtil {
         return false;
     }
     
-    public static boolean isComboUnlocked(IStandPower power) {
+    public static boolean isFinisherUnlocked(IStandPower power) {
         return power.getResolveLevel() >= 1;
     }
 }

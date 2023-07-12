@@ -31,7 +31,7 @@ public class StandEntityPunch implements IPunch {
     private float damageDealtToLiving;
     
     protected float damage;
-    protected float addCombo;
+    protected float addFinisher;
     protected float knockback = 1.0F;
     protected float knockbackYRot = 0;
     protected float knockbackXRot = 0;
@@ -57,7 +57,7 @@ public class StandEntityPunch implements IPunch {
     public StandEntityPunch copyProperties(StandEntityPunch original) {
         return this
         .damage(original.damage)
-        .addCombo(original.addCombo)
+        .addFinisher(original.addFinisher)
         .knockbackVal(original.knockback)
         .knockbackYRotDeg(original.knockbackXRot)
         .knockbackXRot(original.knockbackXRot)
@@ -74,8 +74,8 @@ public class StandEntityPunch implements IPunch {
         return this;
     }
     
-    public StandEntityPunch addCombo(float combo) {
-        this.addCombo = combo;
+    public StandEntityPunch addFinisher(float value) {
+        this.addFinisher = value;
         return this;
     }
     
@@ -221,7 +221,7 @@ public class StandEntityPunch implements IPunch {
         }
         
         if (targetHit) {
-            stand.addComboMeter(addCombo, StandEntity.COMBO_TICKS);
+            stand.addFinisherMeter(addFinisher, StandEntity.FINISHER_NO_DECAY_TICKS);
         }
         return targetHit;
     }

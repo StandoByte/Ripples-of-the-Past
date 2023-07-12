@@ -211,7 +211,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     }
     
     @Override
-    public boolean noComboDecay() {
+    public boolean noFinisherDecay() {
         return true;
     }
     
@@ -277,7 +277,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
             super(stand, target, dmgSource);
             this
             .damage(StandStatFormulas.getBarrageHitDamage(stand.getAttackDamage(), stand.getPrecision()))
-            .addCombo(0.005F)
+            .addFinisher(0.005F)
             .reduceKnockback((float) stand.getAttackDamage() * 0.0075F);
         }
         
@@ -301,7 +301,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
         @Override
         protected void afterAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, StandEntityTask task, boolean hurt, boolean killed) {
             if (hurt && dmgSource.getBarrageHitsCount() > 0) {
-                addCombo *= dmgSource.getBarrageHitsCount();
+                addFinisher *= dmgSource.getBarrageHitsCount();
             }
             super.afterAttack(stand, target, dmgSource, task, hurt, killed);
         }

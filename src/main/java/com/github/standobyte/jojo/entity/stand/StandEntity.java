@@ -138,11 +138,11 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     private float blockDamage = 0;
     private float prevBlockDamage = 0;
     
-    private static final DataParameter<Float> PUNCHES_COMBO = EntityDataManager.defineId(StandEntity.class, DataSerializers.FLOAT);
-    private static final DataParameter<Float> LAST_HEAVY_PUNCH_COMBO = EntityDataManager.defineId(StandEntity.class, DataSerializers.FLOAT);
-    private int noComboDecayTicks;
-    public static final int COMBO_TICKS = 40;
-    private static final float COMBO_DECAY = 0.025F;
+    private static final DataParameter<Float> FINISHER_VALUE = EntityDataManager.defineId(StandEntity.class, DataSerializers.FLOAT);
+    private static final DataParameter<Float> LAST_HEAVY_FINISHER_VALUE = EntityDataManager.defineId(StandEntity.class, DataSerializers.FLOAT);
+    private int noFinisherDecayTicks;
+    public static final int FINISHER_NO_DECAY_TICKS = 40;
+    private static final float FINISHER_DECAY = 0.025F;
     
     private static final DataParameter<Optional<StandEntityTask>> CURRENT_TASK = EntityDataManager.defineId(StandEntity.class, 
             (IDataSerializer<Optional<StandEntityTask>>) ModDataSerializers.STAND_ENTITY_TASK.get().getSerializer());
@@ -207,8 +207,8 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         entityData.define(ARMS_ONLY_MODE, (byte) 0);
         entityData.define(SWING_OFF_HAND, false);
         entityData.define(BARRAGE_CLASH_OPPONENT_ID, -1);
-        entityData.define(PUNCHES_COMBO, 0F);
-        entityData.define(LAST_HEAVY_PUNCH_COMBO, 0F);
+        entityData.define(FINISHER_VALUE, 0F);
+        entityData.define(LAST_HEAVY_FINISHER_VALUE, 0F);
         entityData.define(NO_BLOCKING_TICKS, 0);
         entityData.define(CURRENT_TASK, Optional.empty());
         entityData.define(MANUAL_MOVEMENT_LOCK, (byte) 0);
@@ -743,7 +743,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
                     punchesCanParry = Math.min(punchesCanParry, punchesIncoming);
                     standDmgSource.setBarrageHitsCount(punchesIncoming - punchesCanParry);
                     barrageHandler.parryCount -= punchesCanParry;
-                    addComboMeter(0.0125F, COMBO_TICKS);
+                    addFinisherMeter(0.0125F, FINISHER_NO_DECAY_TICKS);
                     setBarrageClashOpponent(attacker);
                     
                     if (punchesCanParry == punchesIncoming) {
@@ -1034,21 +1034,21 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         updateStrengthMultipliers();
         
         if (!level.isClientSide()) {
-            if (noComboDecayTicks > 0) {
-                noComboDecayTicks--;
+            if (noFinisherDecayTicks > 0) {
+                noFinisherDecayTicks--;
             }
             else {
                 StandEntityAction currentAction = getCurrentTaskAction();
-                if (currentAction == null || !currentAction.noComboDecay()) {
-                    float decay = COMBO_DECAY;
-                    float combo = entityData.get(PUNCHES_COMBO);
-                    if (combo < 0.5F) {
+                if (currentAction == null || !currentAction.noFinisherDecay()) {
+                    float decay = FINISHER_DECAY;
+                    float value = entityData.get(FINISHER_VALUE);
+                    if (value < 0.5F) {
                         decay *= 0.5F;
                     }
                     if (user != null && user.hasEffect(ModEffects.RESOLVE.get())) {
                         decay *= 0.5F;
                     }
-                    setComboMeter(Math.max(combo - decay, 0));
+                    setFinisherMeter(Math.max(value - decay, 0));
                 }
             }
             
@@ -1609,43 +1609,43 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return getArm(swingingArm);
     }
     
-    public float getComboMeter() {
-        if (userPower != null && !StandUtil.isComboUnlocked(userPower)) {
+    public float getFinisherMeter() {
+        if (userPower != null && !StandUtil.isFinisherUnlocked(userPower)) {
             return 0;
         }
-        return entityData.get(PUNCHES_COMBO);
+        return entityData.get(FINISHER_VALUE);
     }
     
-    public void addComboMeter(float combo, int noDecayTicks) {
-        if (combo > 0 && getUser() != null && getUser().hasEffect(ModEffects.RESOLVE.get())) {
-            combo *= 2F;
+    public void addFinisherMeter(float value, int noDecayTicks) {
+        if (value > 0 && getUser() != null && getUser().hasEffect(ModEffects.RESOLVE.get())) {
+            value *= 2F;
         }
-        setComboMeter(getComboMeter() + combo);
-        this.noComboDecayTicks = Math.max(this.noComboDecayTicks, noDecayTicks);
+        setFinisherMeter(getFinisherMeter() + value);
+        this.noFinisherDecayTicks = Math.max(this.noFinisherDecayTicks, noDecayTicks);
     }
     
-    protected void setComboMeter(float combo) {
-        entityData.set(PUNCHES_COMBO, MathHelper.clamp(combo, 0F, 1F));
+    protected void setFinisherMeter(float value) {
+        entityData.set(FINISHER_VALUE, MathHelper.clamp(value, 0F, 1F));
     }
     
-    public void setHeavyPunchCombo() {
-        entityData.set(LAST_HEAVY_PUNCH_COMBO, getComboMeter());
+    public void setHeavyPunchFinisher() {
+        entityData.set(LAST_HEAVY_FINISHER_VALUE, getFinisherMeter());
     }
     
-    public float getLastHeavyPunchCombo() {
-        return entityData.get(LAST_HEAVY_PUNCH_COMBO);
+    public float getLastHeavyFinisherValue() {
+        return entityData.get(LAST_HEAVY_FINISHER_VALUE);
     }
 
     public boolean willHeavyPunchBeFinisher() {
-        return getComboMeter() >= 0.5F;
+        return getFinisherMeter() >= 0.5F;
     }
 
     public boolean isCurrentHeavyPunchFinisher() {
-        return getLastHeavyPunchCombo() >= 0.5F;
+        return getLastHeavyFinisherValue() >= 0.5F;
     }
     
-    public int getNoComboDecayTicks() {
-        return noComboDecayTicks;
+    public int getNoFinisherDecayTicks() {
+        return noFinisherDecayTicks;
     }
     
     public void parryHeavyAttack() {

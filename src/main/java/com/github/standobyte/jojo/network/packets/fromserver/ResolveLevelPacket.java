@@ -43,9 +43,9 @@ public class ResolveLevelPacket {
         public void handle(ResolveLevelPacket msg, Supplier<NetworkEvent.Context> ctx) {
             IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
                 // FIXME make the toast show up when getting the level up from /standlevel command
-                boolean wasComboUnlocked = msg.fromEffect && StandUtil.isComboUnlocked(power);
+                boolean wasFinisherUnlocked = msg.fromEffect && StandUtil.isFinisherUnlocked(power);
                 power.setResolveLevel(msg.level, msg.fromEffect);
-                if (msg.fromEffect && !wasComboUnlocked && StandUtil.isComboUnlocked(power)) {
+                if (msg.fromEffect && !wasFinisherUnlocked && StandUtil.isFinisherUnlocked(power)) {
                     power.getActions(ActionType.ATTACK).getAll().stream()
                     .flatMap(attack -> attack.hasShiftVariation() ? Stream.of(attack, attack.getShiftVariationIfPresent()) : Stream.of(attack))
                     .flatMap(attack -> {

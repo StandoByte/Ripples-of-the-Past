@@ -59,7 +59,7 @@ public class MagiciansRedRedBind extends StandEntityAction {
     }
     
     @Override
-    public boolean noComboDecay() {
+    public boolean noFinisherDecay() {
         return true;
     }
 }

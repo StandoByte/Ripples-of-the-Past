@@ -210,7 +210,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
     }
     
     @Override
-    public boolean noComboDecay() {
+    public boolean noFinisherDecay() {
         return true;
     }
     

@@ -177,7 +177,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         }
     }
     
-    public boolean usesStandComboMechanic() {
+    public boolean usesStandFinisherMechanic() {
         return false;
     }
     

@@ -53,7 +53,7 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
     
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-        standEntity.addComboMeter(0.05F, StandEntity.COMBO_TICKS);
+        standEntity.addFinisherMeter(0.05F, StandEntity.FINISHER_NO_DECAY_TICKS);
         standEntity.punch(task, this, task.getTarget());
     }
     
@@ -62,8 +62,8 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
         return IHasStandPunch.super.punchEntity(stand, target, dmgSource)
                 .damage(StandStatFormulas.getLightAttackDamage(stand.getAttackDamage()))
                 .addKnockback(stand.guardCounter())
-                .addCombo(0.15F)
-                .parryTiming(stand.getComboMeter() == 0 ? StandStatFormulas.getParryTiming(stand.getPrecision()) : 0)
+                .addFinisher(0.15F)
+                .parryTiming(stand.getFinisherMeter() == 0 ? StandStatFormulas.getParryTiming(stand.getPrecision()) : 0)
                 .impactSound(punchSound);
     }
     
@@ -97,25 +97,25 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
     @Override
     public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
         double speed = standEntity.getAttackSpeed();
-        return StandStatFormulas.getLightAttackWindup(speed, standEntity.getComboMeter(), standEntity.guardCounter());
+        return StandStatFormulas.getLightAttackWindup(speed, standEntity.getFinisherMeter(), standEntity.guardCounter());
     }
     
     @Override
     public int getStandActionTicks(IStandPower standPower, StandEntity standEntity) {
         double speed = standEntity.getAttackSpeed();
-        return StandStatFormulas.getLightAttackRecovery(speed, standEntity.getComboMeter());
+        return StandStatFormulas.getLightAttackRecovery(speed, standEntity.getFinisherMeter());
     }
     
     @Override
     public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
         double speed = standEntity.getAttackSpeed();
-        return StandStatFormulas.getLightAttackRecovery(speed, standEntity.getComboMeter())
+        return StandStatFormulas.getLightAttackRecovery(speed, standEntity.getFinisherMeter())
                 * (standEntity.isArmsOnlyMode() ? 2 : 4);
     }
     
     @Override
     public List<Supplier<SoundEvent>> getSounds(StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task) {
-        return task.getTarget().getType() != TargetType.ENTITY || standEntity.isArmsOnlyMode() || standEntity.getComboMeter() > 0
+        return task.getTarget().getType() != TargetType.ENTITY || standEntity.isArmsOnlyMode() || standEntity.getFinisherMeter() > 0
                 ? null : super.getSounds(standEntity, standPower, phase, task);
     }
     
@@ -135,7 +135,7 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
     }
     
     @Override
-    public boolean noComboDecay() {
+    public boolean noFinisherDecay() {
         return true;
     }
     

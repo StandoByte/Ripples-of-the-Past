@@ -428,7 +428,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
                 RotationAngle.fromDegrees(rightLeg, -30F, 0, 105F),
                 RotationAngle.fromDegrees(rightLowerLeg, 0F, 0F, 0F)
         });
-        actionAnim.put(StandPose.HEAVY_ATTACK_COMBO, new PosedActionAnimation.Builder<TheWorldEntity>()
+        actionAnim.put(StandPose.HEAVY_ATTACK_FINISHER, new PosedActionAnimation.Builder<TheWorldEntity>()
                 .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransitionMultiple.Builder<>(idlePose)
                         .addPose(0.5F, kickPose1)
                         .addPose(0.75F, kickPose2)

@@ -20,7 +20,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
 public class MRRedBindEntity extends OwnerBoundProjectileEntity {
-    protected static final DataParameter<Boolean> KICK_COMBO = EntityDataManager.defineId(MRRedBindEntity.class, DataSerializers.BOOLEAN);
+    protected static final DataParameter<Boolean> KICK_FINISHER = EntityDataManager.defineId(MRRedBindEntity.class, DataSerializers.BOOLEAN);
     
     private StandEntity ownerStand;
     private EffectInstance immobilizedEffect = null;
@@ -46,7 +46,7 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
             return;
         }
         if (!level.isClientSide()) {
-            if (ownerStand == null || ownerStand.getCurrentTaskAction() != ModStandsInit.MAGICIANS_RED_RED_BIND.get() && !isInKickCombo()) {
+            if (ownerStand == null || ownerStand.getCurrentTaskAction() != ModStandsInit.MAGICIANS_RED_RED_BIND.get() && !isInKickAttack()) {
                 remove();
                 return;
             }
@@ -64,14 +64,14 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
                     if (bound.getRemainingFireTicks() % 20 == 0 || bound.getRemainingFireTicks() <= 0) {
                         DamageUtil.setOnFire(bound, 3, true);
                     }
-                    DamageUtil.suffocateTick(bound, isInKickCombo() ? 1 : 0.0025F);
+                    DamageUtil.suffocateTick(bound, isInKickAttack() ? 1 : 0.0025F);
                 }
                 Vector3d vecToOwner = owner.position().subtract(bound.position());
                 if (vecToOwner.lengthSqr() > 4) {
                     dragTarget(bound, vecToOwner.normalize().scale(0.2));
                     ticksTargetClose = 0;
                 }
-                else if (!level.isClientSide() && !isInKickCombo() && ticksTargetClose++ > 10) {
+                else if (!level.isClientSide() && !isInKickAttack() && ticksTargetClose++ > 10) {
                     remove();
                 }
             }
@@ -119,7 +119,7 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
     
     @Override
     protected double attachedTargetHeight() {
-        return this.isInKickCombo() ? 0.75 : super.attachedTargetHeight();
+        return this.isInKickAttack() ? 0.75 : super.attachedTargetHeight();
     }
     
     @Override
@@ -136,11 +136,11 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        entityData.define(KICK_COMBO, false);
+        entityData.define(KICK_FINISHER, false);
     }
     
-    public void setKickCombo() {
-        entityData.set(KICK_COMBO, true);
+    public void setKickAttack() {
+        entityData.set(KICK_FINISHER, true);
         LivingEntity target = getEntityAttachedTo();
         if (target != null) {
             MCUtil.removeEffectInstance(target, immobilizedEffect);
@@ -149,8 +149,8 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
         }
     }
     
-    public boolean isInKickCombo() {
-        return entityData.get(KICK_COMBO);
+    public boolean isInKickAttack() {
+        return entityData.get(KICK_FINISHER);
     }
     
     public StandEntity getOwnerAsStand() {
@@ -185,7 +185,7 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
     @Override
     public int ticksLifespan() {
         return isAttachedToAnEntity() ? 
-                isInKickCombo() ? Integer.MAX_VALUE : 100
+                isInKickAttack() ? Integer.MAX_VALUE : 100
                 : 7;
     }
     

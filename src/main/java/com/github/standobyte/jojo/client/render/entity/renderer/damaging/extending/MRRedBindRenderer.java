@@ -29,7 +29,7 @@ public class MRRedBindRenderer extends ExtendingEntityRenderer<MRRedBindEntity, 
     @Override
     public void render(MRRedBindEntity entity, float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
         super.render(entity, yRotation, partialTick, matrixStack, buffer, packedLight);
-        if (entity.isInKickCombo()) {
+        if (entity.isInKickAttack()) {
             second = !second;
             super.render(entity, yRotation, partialTick, matrixStack, buffer, packedLight);
             second = !second;
@@ -104,7 +104,7 @@ public class MRRedBindRenderer extends ExtendingEntityRenderer<MRRedBindEntity, 
     @Override
     protected Vector3d getOriginPos(MRRedBindEntity entity, float partialTick) {
         Vector3d originPos = super.getOriginPos(entity, partialTick);
-        if (entity.isInKickCombo() && entity.getOwner() instanceof StandEntity) {
+        if (entity.isInKickAttack() && entity.getOwner() instanceof StandEntity) {
             StandEntity magiciansRed = (StandEntity) entity.getOwner();
             if (magiciansRed.getCurrentTask().isPresent()) {
                 StandEntityAction.Phase phase = magiciansRed.getCurrentTaskPhase().get();

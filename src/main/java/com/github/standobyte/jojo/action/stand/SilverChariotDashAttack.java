@@ -41,7 +41,7 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
     
     @Override
     public int getStandActionTicks(IStandPower standPower, StandEntity standEntity) {
-        return Math.max(StandStatFormulas.getHeavyAttackWindup(standEntity.getAttackSpeed(), standEntity.getLastHeavyPunchCombo()), 2);
+        return Math.max(StandStatFormulas.getHeavyAttackWindup(standEntity.getAttackSpeed(), standEntity.getLastHeavyFinisherValue()), 2);
     }
     
     @Override

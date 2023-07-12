@@ -594,7 +594,7 @@ public class CrazyDiamondModel extends HumanoidStandModel<CrazyDiamondEntity> {
         
         
         
-        IModelPose<CrazyDiamondEntity> heavyComboPose1 = new ModelPose<>(new RotationAngle[] {
+        IModelPose<CrazyDiamondEntity> heavyFinisherPose1 = new ModelPose<>(new RotationAngle[] {
                 RotationAngle.fromDegrees(head, 5, 0, 6.36F), 
                 RotationAngle.fromDegrees(body, 4.2341F, 39.7845F, 6.5861F), 
                 RotationAngle.fromDegrees(upperPart, 0F, 5F, 0F), 
@@ -607,7 +607,7 @@ public class CrazyDiamondModel extends HumanoidStandModel<CrazyDiamondEntity> {
                 RotationAngle.fromDegrees(rightLeg, 8.2781F, -2.4033F, -0.0432F),
                 RotationAngle.fromDegrees(rightLowerLeg, 10, -5, 0)
         });
-        IModelPose<CrazyDiamondEntity> heavyComboPose2 = new ModelPose<>(new RotationAngle[] {
+        IModelPose<CrazyDiamondEntity> heavyFinisherPose2 = new ModelPose<>(new RotationAngle[] {
                 RotationAngle.fromDegrees(head, -6.9176F, 15.7939F, 16.6495F), 
                 RotationAngle.fromDegrees(body, 16.7396F, 58.5251F, 19.4254F), 
                 RotationAngle.fromDegrees(upperPart, 0F, 15F, 0F), 
@@ -620,11 +620,11 @@ public class CrazyDiamondModel extends HumanoidStandModel<CrazyDiamondEntity> {
                 RotationAngle.fromDegrees(rightLeg, 24.8305F, -0.7714F, 0),
                 RotationAngle.fromDegrees(rightLowerLeg, 0.7594F, -5, 0)
         });
-        IModelPose<CrazyDiamondEntity> heavyComboPose3 = new ModelPose<>(new RotationAngle[] {
+        IModelPose<CrazyDiamondEntity> heavyFinisherPose3 = new ModelPose<>(new RotationAngle[] {
                 RotationAngle.fromDegrees(rightArm, -38.3F, 20.47F, 63.55F), 
                 RotationAngle.fromDegrees(rightForeArm, -67.5782F, 1.503F, -72.9104F),
         });
-        IModelPose<CrazyDiamondEntity> heavyComboPose4 = new ModelPose<>(new RotationAngle[] {
+        IModelPose<CrazyDiamondEntity> heavyFinisherPose4 = new ModelPose<>(new RotationAngle[] {
                 RotationAngle.fromDegrees(body, 0, -30, 0), 
                 RotationAngle.fromDegrees(upperPart, 0F, -15F, 0F), 
                 RotationAngle.fromDegrees(leftArm, 17.8981F, 11.9128F, -21.186F),
@@ -637,13 +637,13 @@ public class CrazyDiamondModel extends HumanoidStandModel<CrazyDiamondEntity> {
                 RotationAngle.fromDegrees(rightLowerLeg, 22.5F, -5, 0)
         });
 
-        actionAnim.put(StandPose.HEAVY_ATTACK_COMBO, new PosedActionAnimation.Builder<CrazyDiamondEntity>()
-                .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<>(heavyComboPose1, heavyComboPose2))
-                .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransitionMultiple.Builder<>(heavyComboPose2)
-                        .addPose(0.5F, heavyComboPose3)
-                        .build(heavyComboPose4))
-                .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransitionMultiple.Builder<>(heavyComboPose4)
-                        .addPose(0.5F, heavyComboPose4)
+        actionAnim.put(StandPose.HEAVY_ATTACK_FINISHER, new PosedActionAnimation.Builder<CrazyDiamondEntity>()
+                .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<>(heavyFinisherPose1, heavyFinisherPose2))
+                .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransitionMultiple.Builder<>(heavyFinisherPose2)
+                        .addPose(0.5F, heavyFinisherPose3)
+                        .build(heavyFinisherPose4))
+                .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransitionMultiple.Builder<>(heavyFinisherPose4)
+                        .addPose(0.5F, heavyFinisherPose4)
                         .build(idlePose))
                 .build(idlePose));
         

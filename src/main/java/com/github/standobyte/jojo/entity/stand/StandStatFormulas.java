@@ -13,11 +13,11 @@ public class StandStatFormulas {
         return damage;
     }
     
-    public static int getHeavyAttackWindup(double speed, float comboMeter) {
+    public static int getHeavyAttackWindup(double speed, float finisherMeter) {
         float f = (40 - (float) speed * 1.25F);
         float min = f / 3;
         float max = f * 2 / 3;
-        return MathHelper.ceil(MathHelper.lerp(comboMeter, max, min));
+        return MathHelper.ceil(MathHelper.lerp(finisherMeter, max, min));
     }
     
     public static int getHeavyAttackRecovery(double speed) {
@@ -31,12 +31,12 @@ public class StandStatFormulas {
     }
     
     private static final Random RANDOM = new Random();
-    public static int getLightAttackWindup(double speed, float comboMeter, float guardCounter) {
+    public static int getLightAttackWindup(double speed, float finisherMeter, float guardCounter) {
         double val = (24 - speed) / 4;
         if (val <= 0) return 0;
         
         if (val > 2) {
-            val = Math.max(val * (1.0F - comboMeter * 0.4F), 2);
+            val = Math.max(val * (1.0F - finisherMeter * 0.4F), 2);
         }
         val *= (1F - guardCounter);
         
@@ -45,11 +45,11 @@ public class StandStatFormulas {
         return ticks;
     }
     
-    public static int getLightAttackRecovery(double speed, float comboMeter) {
+    public static int getLightAttackRecovery(double speed, float finisherMeter) {
         double val = (24 - speed) / 2;
         if (val <= 1) return 1;
         if (val > 4) {
-            val = Math.max(val * (1.0F - comboMeter * 0.4F), 4);
+            val = Math.max(val * (1.0F - finisherMeter * 0.4F), 4);
         }
         int ticks = MathHelper.ceil(val);
         return ticks;

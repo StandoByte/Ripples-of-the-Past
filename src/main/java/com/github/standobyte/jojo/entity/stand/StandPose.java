@@ -23,7 +23,7 @@ public class StandPose {
     public static final StandPose BLOCK = new StandPose("BLOCK");
     public static final StandPose LIGHT_ATTACK = new StandPose("LIGHT_ATTACK");
     public static final StandPose HEAVY_ATTACK = new StandPose("HEAVY_ATTACK");
-    public static final StandPose HEAVY_ATTACK_COMBO = new StandPose("HEAVY_ATTACK_COMBO");
+    public static final StandPose HEAVY_ATTACK_FINISHER = new StandPose("HEAVY_ATTACK_FINISHER");
     public static final StandPose RANGED_ATTACK = new StandPose("RANGED_ATTACK");
     public static final StandPose BARRAGE = new StandPose("BARRAGE");
 }

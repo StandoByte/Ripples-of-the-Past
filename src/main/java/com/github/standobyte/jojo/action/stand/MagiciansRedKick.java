@@ -39,7 +39,7 @@ public class MagiciansRedKick extends StandEntityHeavyAttack {
     @Override
     protected void setAction(IStandPower standPower, StandEntity standEntity, int ticks, Phase phase, ActionTarget target) {
         MagiciansRedRedBind.getLandedRedBind(standEntity).ifPresent(redBind -> {
-            redBind.setKickCombo();
+            redBind.setKickAttack();
         });
         super.setAction(standPower, standEntity, ticks, phase, target);
     }
@@ -65,7 +65,7 @@ public class MagiciansRedKick extends StandEntityHeavyAttack {
             
             if (!world.isClientSide()) {
                 MagiciansRedRedBind.getLandedRedBind(standEntity).ifPresent(redBind -> {
-                    if (redBind.isInKickCombo()) {
+                    if (redBind.isInKickAttack()) {
                         redBind.remove();
                     }
                 });

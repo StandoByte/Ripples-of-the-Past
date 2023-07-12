@@ -108,7 +108,7 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
     }
     
     @Override
-    public boolean usesStandComboMechanic() {
+    public boolean usesStandFinisherMechanic() {
         return hasHeavyAttack && hasFastAttack;
     }
     
