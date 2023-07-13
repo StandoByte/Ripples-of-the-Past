@@ -330,9 +330,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         ModifiableAttributeInstance attributeInstance = getAttribute(attribute);
         if (attributeInstance != null) {
             attributeInstance.removeModifier(modifierId);
-            if (value > 0) {
-                attributeInstance.addTransientModifier(new AttributeModifier(modifierId, name, value, operation));
-            }
+            attributeInstance.addTransientModifier(new AttributeModifier(modifierId, name, value, operation));
         }
     }
     
