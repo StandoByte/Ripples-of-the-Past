@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
-import com.github.standobyte.jojo.util.mc.damage.CustomExplosion.CustomExplosionType;
+import com.github.standobyte.jojo.util.mc.damage.explosion.CustomExplosion.CustomExplosionType;
 import com.google.common.collect.Lists;
 
 import net.minecraft.entity.player.PlayerEntity;

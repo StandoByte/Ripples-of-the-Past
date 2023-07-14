@@ -34,7 +34,6 @@ import com.github.standobyte.jojo.capability.entity.ProjectileHamonChargeCapProv
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBloodCutterEntity;
-import com.github.standobyte.jojo.entity.damaging.projectile.MRCrossfireHurricaneEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEffects;
@@ -1502,16 +1501,6 @@ public class GameplayEventHandler {
         });
     }
     
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void explosionFilterEntities(ExplosionEvent.Detonate event) {
-        Explosion explosion = event.getExplosion();
-        
-        if (explosion.getExploder() instanceof MRCrossfireHurricaneEntity) {
-            ((MRCrossfireHurricaneEntity) explosion.getExploder())
-            .explosionFilterEntities(event.getAffectedEntities());
-        }
-    }
-    
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onExplosionDetonate(ExplosionEvent.Detonate event) {
         Explosion explosion = event.getExplosion();
@@ -1523,11 +1512,6 @@ public class GameplayEventHandler {
                 });
             }
         });
-        
-        if (explosion.getExploder() instanceof MRCrossfireHurricaneEntity) {
-            ((MRCrossfireHurricaneEntity) explosion.getExploder())
-            .onExplode(event.getAffectedEntities(), event.getAffectedBlocks());
-        }
     }
     
     @SubscribeEvent

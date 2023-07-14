@@ -15,6 +15,8 @@ import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mc.damage.IndirectStandEntityDamageSource;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
+import com.github.standobyte.jojo.util.mc.damage.explosion.CustomExplosion;
+import com.github.standobyte.jojo.util.mc.damage.explosion.CustomExplosion.CustomExplosionType;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.BlockState;
@@ -33,6 +35,7 @@ import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.Explosion;
+import net.minecraft.world.ExplosionContext;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.ForgeEventFactory;
@@ -237,52 +240,78 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
             if (small) {
                 dmgSource.setBypassInvulTicksInEvent();
             }
-            level.explode(this, dmgSource.setExplosion(), null, getX(), getY(), getZ(), (small ? 1.0F : 3.0F) * getScale(), false, Explosion.Mode.NONE);
+            CustomExplosion.explode(level, this, dmgSource.setExplosion(), null, 
+                    getX(), getY(), getZ(), (small ? 1.0F : 3.0F) * getScale(), 
+                    true, Explosion.Mode.NONE, CustomExplosionType.CROSSFIRE_HURRICANE);
         }
     }
     
-    public void explosionFilterEntities(List<Entity> inExplosion) {
-        LivingEntity owner = getOwner();
-        LivingEntity standUser = getOwner() instanceof StandEntity ? ((StandEntity) owner).getUser() : null;
-        boolean canAffectStandUser = standUser != null
-                && IStandPower.getStandPowerOptional(standUser).map(stand -> stand.getResolveLevel() < 4).orElse(true);
-        Iterator<Entity> it = inExplosion.iterator();
-        while (it.hasNext()) {
-            Entity entity = it.next();
-            if (entity.is(owner) || !canAffectStandUser && entity.is(standUser)) {
-                it.remove();
+    
+    public static class CrossfireHurricaneExplosion extends CustomExplosion {
+        private final MRCrossfireHurricaneEntity sourceProjectile;
+        
+        public CrossfireHurricaneExplosion(World pLevel, @Nullable Entity pSource, 
+                @Nullable DamageSource pDamageSource, @Nullable ExplosionContext pDamageCalculator, 
+                double pToBlowX, double pToBlowY, double pToBlowZ, 
+                float pRadius, boolean pFire, Explosion.Mode pBlockInteraction) {
+            super(pLevel, pSource, pDamageSource, pDamageCalculator, pToBlowX, pToBlowY, pToBlowZ, pRadius, pFire, pBlockInteraction);
+            this.sourceProjectile = pSource instanceof MRCrossfireHurricaneEntity ? (MRCrossfireHurricaneEntity) pSource : null;
+        }
+        
+        @Override
+        protected void filterEntities(List<Entity> entities) {
+            if (sourceProjectile != null) {
+                LivingEntity owner = sourceProjectile.getOwner();
+                LivingEntity standUser = owner instanceof StandEntity ? ((StandEntity) owner).getUser() : null;
+                boolean canAffectStandUser = standUser != null
+                        && IStandPower.getStandPowerOptional(standUser).map(stand -> stand.getResolveLevel() < 4).orElse(true);
+                Iterator<Entity> it = entities.iterator();
+                while (it.hasNext()) {
+                    Entity entity = it.next();
+                    if (entity.is(owner) || !canAffectStandUser && entity.is(standUser)) {
+                        it.remove();
+                    }
+                }
             }
         }
-    }
-    
-    public void onExplode(List<Entity> affectedEntities, List<BlockPos> affectedBlocks) {
-        LivingEntity magiciansRed = getOwner();
-        for (Entity entity : affectedEntities) {
+        
+        @Override
+        protected void hurtEntity(Entity entity, float damage, double knockback, Vector3d vecToEntityNorm) {
+            super.hurtEntity(entity, damage, knockback, vecToEntityNorm);
+            
+            LivingEntity magiciansRed = sourceProjectile != null ? sourceProjectile.getOwner() : null;
             if (!entity.is(magiciansRed)) {
                 DamageUtil.setOnFire(entity, 10, true);
-                if (!level.isClientSide() && userStandPower != null && StandUtil.worthyTarget(entity)) {
-                    userStandPower.addLearningProgressPoints(ModStandsInit.MAGICIANS_RED_CROSSFIRE_HURRICANE.get(), 0.03125F);
+                if (sourceProjectile != null && !level.isClientSide()
+                        && sourceProjectile.userStandPower != null && StandUtil.worthyTarget(entity)) {
+                    sourceProjectile.userStandPower.addLearningProgressPoints(ModStandsInit.MAGICIANS_RED_CROSSFIRE_HURRICANE.get(), 0.03125F);
                 }
             }
         }
-        if (magiciansRed != null && ForgeEventFactory.getMobGriefingEvent(level, magiciansRed)) {
-            for (BlockPos pos : affectedBlocks) {
-                if (level.isEmptyBlock(pos)) {
-                    level.setBlockAndUpdate(pos, ModBlocks.MAGICIANS_RED_FIRE.get().getStateForPlacement(level, pos));
-                }
-                else if (!small) {
-                    BlockState blockState = level.getBlockState(pos);
-                    if (!MRFlameEntity.meltIceAndSnow(level, blockState, pos) && random.nextFloat() <= 0.25F) {
-                        // FIXME (MR)
-//                        if (blockState.getMaterial() == Material.STONE && blockState.getDestroySpeed(level, pos) <= 1.5F) {
-//                            level.setBlockAndUpdate(pos, Blocks.LAVA.defaultBlockState());
-//                            level.neighborChanged(pos, Blocks.LAVA, pos);
-//                        }
+        
+        @Override
+        protected void spawnFire() {
+            LivingEntity magiciansRed = sourceProjectile != null ? sourceProjectile.getOwner() : null;
+            if (magiciansRed == null || ForgeEventFactory.getMobGriefingEvent(level, magiciansRed)) {
+                for (BlockPos pos : getToBlow()) {
+                    if (level.isEmptyBlock(pos)) {
+                        level.setBlockAndUpdate(pos, ModBlocks.MAGICIANS_RED_FIRE.get().getStateForPlacement(level, pos));
+                    }
+                    else if (sourceProjectile == null || !sourceProjectile.small) {
+                        BlockState blockState = level.getBlockState(pos);
+                        if (!MRFlameEntity.meltIceAndSnow(level, blockState, pos) && random.nextFloat() <= 0.25F) {
+                            // FIXME (MR)
+//                            if (blockState.getMaterial() == Material.STONE && blockState.getDestroySpeed(level, pos) <= 1.5F) {
+//                                level.setBlockAndUpdate(pos, Blocks.LAVA.defaultBlockState());
+//                                level.neighborChanged(pos, Blocks.LAVA, pos);
+//                            }
+                        }
                     }
                 }
             }
         }
     }
+    
     
     @Override
     public boolean ignoreExplosion() {
