@@ -461,6 +461,11 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
             });
         });
     }
+    
+    public static void hamonExplosion(World world, @Nullable Entity source, @Nullable Entity hamonUser, 
+            float radius, float damage) {
+        
+    }
 
     public static void createHamonSparkParticles(World world, @Nullable PlayerEntity clientHandled, 
             double x, double y, double z, float intensity, @Nullable SoundEvent hamonSound) {

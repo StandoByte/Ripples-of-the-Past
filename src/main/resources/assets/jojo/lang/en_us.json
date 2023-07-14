@@ -448,7 +448,7 @@
   "jojo.message.action_condition.full_energy": "You need full energy",
   "jojo.message.action_condition.underwater": "You have to be underwater",
   "jojo.message.action_condition.animal_infusion": "You haven't learned a way to infuse animals with Hamon",
-  "jojo.message.action_condition.animal": "Only animal mobs can be infused",
+  "jojo.message.action_condition.living_mob": "Only living mobs can be infused",
   "jojo.message.action_condition.living_plant": "Only blocks made of a living matter can be infused",
   "jojo.message.action_condition.leaves": "You need a block of leaves",
   "jojo.message.action_condition.potion": "You need to hold a bottle with a liquid",
