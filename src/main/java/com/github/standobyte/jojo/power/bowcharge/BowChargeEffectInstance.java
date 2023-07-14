@@ -42,19 +42,15 @@ public class BowChargeEffectInstance<P extends IPower<P, T>, T extends IPowerTyp
         return user.isUsingItem() && itemFits(user.getUseItem());
     }
     
-    public void onStart() {
-        
-    }
+    public void onStart() {}
     
     public boolean isFullyCharged() {
         return isActive() && user.getTicksUsingItem() >= CHARGE_TICKS;
     }
     
-    public void onRelease() {
-        if (isFullyCharged()) {
-            
-        }
-    }
+    public void onRelease(boolean fullyCharged) {}
+    
+//    public void affectArrow(boolean fullyCharged) {}
     
     public T getPowerType() {
         return powerType;

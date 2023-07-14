@@ -554,7 +554,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     @Override
     public void onItemUseStop(ItemStack item, int duration) {
         if (bowCharge != null) {
-            bowCharge.onRelease();
+            bowCharge.onRelease(bowCharge.isFullyCharged());
             bowCharge = null;
         }
     }

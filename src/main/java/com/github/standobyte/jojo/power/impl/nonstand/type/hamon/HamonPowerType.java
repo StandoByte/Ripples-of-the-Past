@@ -32,7 +32,6 @@ import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRunAwayPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonParticlesPacket;
-import com.github.standobyte.jojo.power.bowcharge.IBowChargeEffect;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
@@ -81,7 +80,6 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 
 public class HamonPowerType extends NonStandPowerType<HamonData> {
-    private final HamonBowChargeEffect hamonBowCharge = new HamonBowChargeEffect();
 
     public HamonPowerType(int color, HamonAction[] startingAttacks, HamonAction[] startingAbilities) {
         super(color, startingAttacks, startingAbilities, startingAbilities[0], HamonData::new);
@@ -153,11 +151,6 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     @Override
     public float getStaminaRegenFactor(INonStandPower power, IStandPower standPower) {
         return 1F + power.getTypeSpecificData(this).get().getBreathingLevel() * 0.01F;
-    }
-    
-    @Override
-    public IBowChargeEffect<INonStandPower, NonStandPowerType<?>> getBowChargeEffect() {
-        return hamonBowCharge;
     }
 
     @Override

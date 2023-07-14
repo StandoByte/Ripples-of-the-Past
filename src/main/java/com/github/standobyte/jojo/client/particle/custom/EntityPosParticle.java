@@ -1,7 +1,12 @@
 package com.github.standobyte.jojo.client.particle.custom;
 
+import com.mojang.blaze3d.vertex.IVertexBuilder;
+
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.IParticleRenderType;
 import net.minecraft.client.particle.SpriteTexturedParticle;
+import net.minecraft.client.renderer.ActiveRenderInfo;
+import net.minecraft.client.settings.PointOfView;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.vector.Vector3d;
@@ -45,6 +50,22 @@ public abstract class EntityPosParticle extends SpriteTexturedParticle {
         x = nextPos.x;
         y = nextPos.y;
         z = nextPos.z;
+    }
+    
+    @Override
+    public void render(IVertexBuilder vertexBuilder, ActiveRenderInfo camera, float partialTick) {
+        if (entity != null) {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.cameraEntity == entity && mc.options.getCameraType() == PointOfView.FIRST_PERSON) {
+                renderFirstPerson(vertexBuilder, camera, partialTick);
+                return;
+            }
+        }
+        super.render(vertexBuilder, camera, partialTick);
+    }
+    
+    private void renderFirstPerson(IVertexBuilder vertexBuilder, ActiveRenderInfo camera, float partialTick) {
+        
     }
     
     public Vector3d getPos() {

@@ -1325,7 +1325,7 @@ public class GameplayEventHandler {
                                 AbstractHamonSkill requiredSkill;
                                 float hamonBaseDmg = 0;
                                 int maxChargeTicks = 0;
-                                if (projectile instanceof AbstractArrowEntity && !alreadyHasHamon(projectile)) {
+                                if (projectile instanceof AbstractArrowEntity && !isChargedInOtherWay(projectile)) {
                                     requiredSkill = ModHamonSkills.ARROW_INFUSION.get();
                                     energyCost = 1000;
                                     hamonBaseDmg = 0.25F;
@@ -1364,11 +1364,11 @@ public class GameplayEventHandler {
     }
     
     public static boolean projectileCanBeChargedWithHamon(Entity entity) {
-        return entity instanceof AbstractArrowEntity && !alreadyHasHamon(entity) || 
+        return entity instanceof AbstractArrowEntity && !isChargedInOtherWay(entity) || 
                 entity.getType() == EntityType.SNOWBALL || entity.getType() == EntityType.EGG || entity.getType() == EntityType.POTION;
     }
     
-    private static boolean alreadyHasHamon(Entity projectile) {
+    private static boolean isChargedInOtherWay(Entity projectile) {
         return projectile.getType() == ModEntityTypes.CLACKERS.get();
     }
     
