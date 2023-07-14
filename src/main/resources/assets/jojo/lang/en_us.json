@@ -703,7 +703,7 @@
   "hamon.skill_type.item": "Item Ability",
   
   "hamonSkill.overdrive.name": "Overdrive",
-  "hamonSkill.overdrive.desc": "The user's unarmed punches deal additional Hamon damage.",
+  "hamonSkill.overdrive.desc": "The user's unarmed punches deal additional Hamon damage. Hamon is especially effective against undead creatures.",
   "hamonSkill.sendo_overdrive.name": "Sendo Overdrive",
   "hamonSkill.sendo_overdrive.desc": "Applying this attack to a wall or floor creates a wave of Hamon energy, which damages mobs and players in the area.",
   "hamonSkill.turquoise_blue_overdrive.name": "Turquoise Blue Overdrive",
