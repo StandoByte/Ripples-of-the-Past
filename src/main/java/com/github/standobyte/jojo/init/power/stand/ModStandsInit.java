@@ -169,7 +169,7 @@ public class ModStandsInit {
                     .partsRequired(StandPart.MAIN_BODY)));
     
     public static final RegistryObject<TimeStop> STAR_PLATINUM_TIME_STOP = ACTIONS.register("star_platinum_time_stop", 
-            () -> new TimeStop(new TimeStop.Builder().holdToFire(40, false).staminaCost(250).staminaCostTick(7.5F)
+            () -> new TimeStop(new TimeStop.Builder().holdToFire(40, false).staminaCost(250).staminaCostTick(7.5F).heldWalkSpeed(0)
                     .isTrained().resolveLevelToUnlock(4)
                     .ignoresPerformerStun().autoSummonStand()
                     .shout(ModSounds.JOTARO_STAR_PLATINUM_THE_WORLD)
@@ -259,7 +259,7 @@ public class ModStandsInit {
             () -> new StandEntityBlock());
     
     public static final RegistryObject<TimeStop> THE_WORLD_TIME_STOP = ACTIONS.register("the_world_time_stop", 
-            () -> new TheWorldTimeStop(new TimeStop.Builder().holdToFire(30, false).staminaCost(250).staminaCostTick(7.5F)
+            () -> new TheWorldTimeStop(new TimeStop.Builder().holdToFire(30, false).staminaCost(250).staminaCostTick(7.5F).heldWalkSpeed(0)
                     .resolveLevelToUnlock(2).isTrained()
                     .ignoresPerformerStun()
                     .shout(ModSounds.DIO_THE_WORLD)

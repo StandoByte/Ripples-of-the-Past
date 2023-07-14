@@ -240,6 +240,10 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
         return wereMissing;
     }
     
+    public boolean containsAction(Action<P> action) {
+        return _actions.containsKey(action);
+    }
+    
     
     
     void keepLayoutOnClone(ActionHotbarLayout<P> oldLayout) {

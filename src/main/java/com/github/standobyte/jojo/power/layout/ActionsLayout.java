@@ -42,8 +42,10 @@ public class ActionsLayout<P extends IPower<P, ?>> {
         return mmbActionCurrent;
     }
     
-    public void setQuickAccessAction(Action<P> action) {
-        this.mmbActionCurrent = action;
+    public void setQuickAccessAction(@Nullable Action<P> action) {
+        if (action == null || hasAction(action)) {
+            this.mmbActionCurrent = action;
+        }
     }
     
     public boolean isMmbActionHudVisible() {
@@ -68,6 +70,10 @@ public class ActionsLayout<P extends IPower<P, ?>> {
         }
         mmbActionStarting = type != null ? type.getDefaultQuickAccess() : null;
         resetLayout();
+    }
+    
+    public boolean hasAction(Action<P> action) {
+        return actions.values().stream().anyMatch(hotbar -> hotbar.containsAction(action));
     }
     
     public void keepLayoutOnClone(ActionsLayout<P> oldLayout) {

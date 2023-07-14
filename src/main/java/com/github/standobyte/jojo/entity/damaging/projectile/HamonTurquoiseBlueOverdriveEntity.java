@@ -88,7 +88,7 @@ public class HamonTurquoiseBlueOverdriveEntity extends ModdedProjectileEntity {
                 }
             }
             level.playSound(ClientUtil.getClientPlayer(), center.x, center.y, center.z, ModSounds.HAMON_SPARK.get(), 
-                    SoundCategory.AMBIENT, 0.1F + radius * 0.15F, 1.0F + (random.nextFloat() - 0.5F) * 0.15F);
+                    SoundCategory.AMBIENT, Math.min(0.1F + radius * 0.15F, 1), 1.0F + (random.nextFloat() - 0.5F) * 0.15F);
         }
     }
 
