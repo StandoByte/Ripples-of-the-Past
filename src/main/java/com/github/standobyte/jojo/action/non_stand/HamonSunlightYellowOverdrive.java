@@ -109,7 +109,7 @@ public class HamonSunlightYellowOverdrive extends HamonAction {
             }
         }
         else {
-            // FIXME !! (SYO) "attack missed" sound
+            user.playSound(ModSounds.HAMON_SYO_SWING.get(), 1.0F, 1.0F);
         }
     }
 

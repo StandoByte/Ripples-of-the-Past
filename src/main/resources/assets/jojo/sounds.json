@@ -125,6 +125,16 @@
     "subtitle": "subtitles.entity.player.attack.strong",
     "sounds": [ "jojo:punch_heavy" ]
   },
+  "hamon_syo_swing": {
+    "subtitle": "jojo.subtitle.stand_punch_swing",
+    "sounds": [ 
+      {
+        "name": "jojo:stand_punch_heavy_swing",
+        "type": "event"
+      }
+    ]
+  },
+  
   "hamon_concentration": {
     "subtitle": "jojo.subtitle.hamon_concentration",
     "sounds": [ "jojo:hamon_concentration" ]

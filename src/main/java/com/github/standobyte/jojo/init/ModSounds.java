@@ -96,6 +96,8 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> HAMON_SYO_PUNCH = register("hamon_syo_punch");
     
+    public static final RegistryObject<SoundEvent> HAMON_SYO_SWING = register("hamon_syo_swing");
+    
     public static final RegistryObject<SoundEvent> BREATH_DEFAULT = SOUNDS.register("player_breath", 
             () -> new SoundEvent(new ResourceLocation("entity.player.breath")));
     
