@@ -32,6 +32,7 @@ import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRunAwayPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonParticlesPacket;
+import com.github.standobyte.jojo.power.bowcharge.IBowChargeEffect;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
@@ -80,6 +81,7 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 
 public class HamonPowerType extends NonStandPowerType<HamonData> {
+    private final HamonBowChargeEffect hamonBowCharge = new HamonBowChargeEffect();
 
     public HamonPowerType(int color, HamonAction[] startingAttacks, HamonAction[] startingAbilities) {
         super(color, startingAttacks, startingAbilities, startingAbilities[0], HamonData::new);
@@ -152,6 +154,11 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     public float getStaminaRegenFactor(INonStandPower power, IStandPower standPower) {
         return 1F + power.getTypeSpecificData(this).get().getBreathingLevel() * 0.01F;
     }
+    
+    @Override
+    public IBowChargeEffect<INonStandPower, NonStandPowerType<?>> getBowChargeEffect() {
+        return hamonBowCharge;
+    }
 
     @Override
     public void tickUser(LivingEntity user, INonStandPower power) {
@@ -169,9 +176,11 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                             for (int i = 8; i >= 0; i--) {
                                 ItemStack stack = inventory.items.get(i);
                                 if (!stack.isEmpty() && stack.getItem() == Items.STRING) {
-                                    BlockItemUseContext ctx = new BlockItemUseContext(player, Hand.OFF_HAND, stack, new BlockRayTraceResult(Vector3d.atCenterOf(pos), Direction.UP, pos, false));
+                                    BlockItemUseContext ctx = new BlockItemUseContext(player, Hand.OFF_HAND, stack, 
+                                            new BlockRayTraceResult(Vector3d.atCenterOf(pos), Direction.UP, pos, false));
                                     BlockState state = Blocks.TRIPWIRE.getStateForPlacement(ctx);
-                                    if (state != null && !ForgeEventFactory.onBlockPlace(player, BlockSnapshot.create(world.dimension(), world, pos.below()), Direction.UP) && world.setBlock(pos, state, 3) && !player.abilities.instabuild) {
+                                    if (state != null && !ForgeEventFactory.onBlockPlace(player, BlockSnapshot.create(
+                                            world.dimension(), world, pos.below()), Direction.UP) && world.setBlock(pos, state, 3) && !player.abilities.instabuild) {
                                         stack.shrink(1);
                                     }
                                     break;

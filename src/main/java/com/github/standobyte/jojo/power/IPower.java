@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.power.bowcharge.BowChargeEffectInstance;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.layout.ActionHotbarLayout;
@@ -18,6 +19,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.util.DamageSource;
@@ -105,7 +107,11 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     int getLeapCooldown();
     void setLeapCooldown(int cooldown);
     int getLeapCooldownPeriod();
-
+    
+    void onItemUseStart(ItemStack item, int duration);
+    void onItemUseStop(ItemStack item, int duration);
+    @Nullable BowChargeEffectInstance<P, T> getBowChargeEffect();
+    
     INBT writeNBT();
     void readNBT(CompoundNBT nbt);
     void onClone(P oldPower, boolean wasDeath);

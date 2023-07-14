@@ -16,13 +16,15 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.command.JojoControlsCommand;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.LeapCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ActionCooldownPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.LeapCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHeldActionPacket;
 import com.github.standobyte.jojo.power.ActionCooldownTracker;
 import com.github.standobyte.jojo.power.HeldActionData;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPowerType;
+import com.github.standobyte.jojo.power.bowcharge.IBowChargeEffect;
+import com.github.standobyte.jojo.power.bowcharge.BowChargeEffectInstance;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.general.Container;
@@ -31,6 +33,7 @@ import com.github.standobyte.jojo.util.mc.MCUtil;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
@@ -111,6 +114,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                 leapCooldown--;
             }
             getType().tickUser(getUser(), getThis());
+            tickBowCharge();
         }
         newDayCheck();
     }
@@ -533,6 +537,42 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                 PacketManager.sendToClient(new LeapCooldownPacket(getPowerClassification(), leapCooldown), player);
             });
         }
+    }
+    
+    @Nullable private BowChargeEffectInstance<P, T> bowCharge;
+    @Override
+    public void onItemUseStart(ItemStack item, int duration) {
+        if (hasPower() && BowChargeEffectInstance.itemFits(item)) {
+            IBowChargeEffect<P, T> onBowCharge = getType().getBowChargeEffect();
+            if (onBowCharge != null && onBowCharge.canStart(getThis())) {
+                bowCharge = new BowChargeEffectInstance<>(user, getThis(), getType());
+                bowCharge.onStart();
+            }
+        }
+    }
+    
+    @Override
+    public void onItemUseStop(ItemStack item, int duration) {
+        if (bowCharge != null) {
+            bowCharge.onRelease();
+            bowCharge = null;
+        }
+    }
+    
+    private void tickBowCharge() {
+        if (bowCharge != null) {
+            if (!bowCharge.isActive()) {
+                bowCharge = null;
+            }
+            else {
+                bowCharge.tick();
+            }
+        }
+    }
+    
+    @Override
+    public BowChargeEffectInstance<P, T> getBowChargeEffect() {
+        return bowCharge;
     }
     
     @Override

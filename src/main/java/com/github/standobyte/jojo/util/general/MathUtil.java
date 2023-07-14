@@ -85,6 +85,12 @@ public class MathUtil {
         return numInt;
     }
     
+    public static float fadeOut(float time, float maxTime, float fractionUntilFadeOut) {
+        if (fractionUntilFadeOut >= 1) return 1;
+        float f = 1 / (1 - fractionUntilFadeOut);
+        return MathHelper.clamp(time * -f / maxTime + f, 0, 1);
+    }
+    
     
     
     

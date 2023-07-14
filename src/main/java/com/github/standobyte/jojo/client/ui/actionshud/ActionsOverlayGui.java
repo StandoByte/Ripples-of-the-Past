@@ -37,6 +37,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClClickActionPacket
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
+import com.github.standobyte.jojo.power.bowcharge.BowChargeEffectInstance;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData.Exercise;
@@ -44,6 +45,7 @@ import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.general.Container;
+import com.github.standobyte.jojo.util.general.MathUtil;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Streams;
@@ -56,6 +58,7 @@ import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldVertexBufferUploader;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.settings.AttackIndicatorStatus;
@@ -66,6 +69,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.KeybindTextComponent;
@@ -260,6 +264,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 }
             }
             renderPowerIcon(matrixStack, hotbarsPosition, modeIcon, standAlpha);
+            renderIconBarAtCrosshair(matrixStack, screenWidth, screenHeight, partialTick);
             
             renderOutOfBreathSprite(matrixStack, partialTick, screenWidth, screenHeight);
             
@@ -310,7 +315,6 @@ public class ActionsOverlayGui extends AbstractGui {
                 renderWarningIcons(matrixStack, warningsPosition, warningLines);
                 
                 renderLeapIcon(matrixStack, currentMode, screenWidth, screenHeight);
-                renderIconBarAtCrosshair(matrixStack, screenWidth, screenHeight);
                 
                 RenderSystem.disableRescaleNormal();
                 RenderSystem.disableBlend();
@@ -1078,10 +1082,21 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private void renderIconBarAtCrosshair(MatrixStack matrixStack, int screenWidth, int screenHeight) {
-//        if (mc.player.isUsingItem() && mc.player.getUseItem()) {
-//            
-//        }
+    private void renderIconBarAtCrosshair(MatrixStack matrixStack, int screenWidth, int screenHeight, float partialTick) {
+        int xLeft = screenWidth / 2 - 24;
+        int xRight = screenWidth / 2 + 8;
+        int y = screenHeight / 2 - 8;
+        
+        boolean renderedBowCharge = false;
+        if (nonStandUiMode != null && nonStandUiMode.getPower() != null) {
+            renderedBowCharge |= renderBowChargeIcon(matrixStack, nonStandUiMode.getPower().getBowChargeEffect(), 
+                    partialTick, xLeft, y);
+        }
+        if (standUiMode != null && standUiMode.getPower() != null) {
+            renderedBowCharge |= renderBowChargeIcon(matrixStack, standUiMode.getPower().getBowChargeEffect(), 
+                    partialTick, renderedBowCharge ? xRight : xLeft, y);
+        }
+        if (renderedBowCharge) return;
         
         if (currentMode == standUiMode) {
             IStandPower standPower = standUiMode.getPower();
@@ -1091,15 +1106,58 @@ public class ActionsOverlayGui extends AbstractGui {
                 if (stand instanceof StandEntity) {
                     float finisherValue = ((StandEntity) stand).getFinisherMeter();
                     if (finisherValue > 0) {
-                        int x = screenWidth / 2 + (modeSelectorPosition.alignment == Alignment.LEFT ? -24 : 6);
-                        int y = screenHeight / 2 - 9;
+                        int x = modeSelectorPosition.alignment == Alignment.LEFT ? xLeft - 1 : xRight + 1;
                         boolean heavyVariation = ((StandEntity) stand).willHeavyPunchBeFinisher();
-                        renderFilledIcon(matrixStack, x, y, false, finisherValue, 
+                        renderFilledIcon(matrixStack, x, y - 1, false, finisherValue, 
                                 96, 216, heavyVariation ? 132 : 114, 216, 18, 18, 0xFFFFFF);
                     }
                 }
             }
         }
+    }
+    
+    private boolean renderBowChargeIcon(MatrixStack matrixStack, BowChargeEffectInstance<?, ?> bowCharge, float partialTick, int x, int y) {
+        if (bowCharge != null) {
+            mc.getTextureManager().bind(bowCharge.getPowerType().getIconTexture());
+            float fill = bowCharge.getProgress(partialTick);
+            if (fill < 1) {
+                RenderSystem.color4f(0, 0, 0, 1);
+                blitFloat(matrixStack, x, y, 0, 0, 16, 16 * (1 - fill), 16, 16);
+                RenderSystem.color4f(1, 1, 1, 1);
+                float px = 16F * fill;
+                blitFloat(matrixStack, x, y + 16 - px, 0, 16 - px, 16, px, 16, 16);
+            }
+            else {
+                blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
+                float chargeCompletionTicks = bowCharge.getTicksAfterFullCharge() + partialTick;
+                if (chargeCompletionTicks < 10) {
+                    float whiteHighlight;
+                    if (chargeCompletionTicks < 2F) {
+                        whiteHighlight = chargeCompletionTicks * 0.5F;
+                    }
+                    else {
+                        whiteHighlight = MathUtil.fadeOut(chargeCompletionTicks, 10, 0.3F);
+                    }
+                    // no idea how that works in the slightest
+                    // wanted to make the icon fully white
+                    // instead it just gets a bit brighter
+                    // it is what it is
+                    RenderSystem.blendFuncSeparate(
+                            GlStateManager.SourceFactor.SRC_ALPHA, 
+                            GlStateManager.DestFactor.CONSTANT_ALPHA, 
+                            GlStateManager.SourceFactor.ONE, 
+                            GlStateManager.DestFactor.ZERO);
+                    RenderSystem.color4f(whiteHighlight, whiteHighlight, whiteHighlight, 1.0F);
+                    
+                    blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
+                    
+                    RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                    RenderSystem.defaultBlendFunc();
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     private void renderFilledIcon(MatrixStack matrixStack, int x, int y, boolean translucent, float fill, 
@@ -1114,8 +1172,8 @@ public class ActionsOverlayGui extends AbstractGui {
             alpha = 0.75F;
         }
         RenderSystem.color4f(rgb[0], rgb[1], rgb[2], alpha);
-        int px = (int) (18F * fill);
-        blit(matrixStack, x, y + texHeight - px, fillTexX, fillTexY + texHeight - px, texWidth, px);
+        float px = 18F * fill;
+        blitFloat(matrixStack, x, y + texHeight - px, fillTexX, fillTexY + texHeight - px, texWidth, px);
         if (translucent) {
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         }
@@ -1361,6 +1419,80 @@ public class ActionsOverlayGui extends AbstractGui {
         standUiMode.autoOpened = false;
         nonStandUiMode.setPower(INonStandPower.getPlayerNonStandPower(mc.player));
         nonStandUiMode.autoOpened = false;
+    }
+    
+    private void blitFloat(MatrixStack pMatrixStack, float pX, float pY, 
+            float pUOffset, float pVOffset, float pUWidth, float pVHeight) {
+        blitFloat(pMatrixStack, 
+                pX, pY, this.getBlitOffset(), 
+                pUOffset, pVOffset, pUWidth, pVHeight, 256, 256);
+    }
+    
+    private static void blitFloat(MatrixStack pMatrixStack, float pX, float pY, int pBlitOffset, 
+            float pUOffset, float pVOffset, float pUWidth, float pVHeight, int pTextureHeight, int pTextureWidth) {
+        innerBlitFloat(pMatrixStack, 
+                pX, pX + pUWidth, pY, pY + pVHeight, pBlitOffset, 
+                pUWidth, pVHeight, pUOffset, pVOffset, pTextureWidth, pTextureHeight);
+    }
+    
+//    private static void blitFloat(MatrixStack pMatrixStack, 
+//            float pX, float pY, float pBlitOffset, float pWidth, float pHeight, TextureAtlasSprite pSprite) {
+//        innerBlitFloat(pMatrixStack.last().pose(), 
+//                pX, pX + pWidth, pY, pY + pHeight, pBlitOffset, 
+//                pSprite.getU0(), pSprite.getU1(), pSprite.getV0(), pSprite.getV1());
+//    }
+    
+    private static void blitFloat(MatrixStack pMatrixStack, float pX, float pY, 
+            float pUOffset, float pVOffset, float pWidth, float pHeight, float pTextureWidth, float pTextureHeight) {
+        blitFloat(pMatrixStack, pX, pY, pWidth, pHeight, pUOffset, pVOffset, pWidth, pHeight, pTextureWidth, pTextureHeight);
+    }
+    
+    public static void blitFloat(MatrixStack pMatrixStack, float pX, float pY, 
+            float pWidth, float pHeight, float pUOffset, float pVOffset, float pUWidth, float pVHeight, float pTextureWidth, float pTextureHeight) {
+        innerBlitFloat(pMatrixStack, pX, pX + pWidth, pY, pY + pHeight, 0, pUWidth, pVHeight, pUOffset, pVOffset, pTextureWidth, pTextureHeight);
+    }
+    
+    private static void blitFloat(MatrixStack pMatrixStack, 
+            float pX, float pY, float pBlitOffset, float pWidth, float pHeight, TextureAtlasSprite pSprite,
+            float uOffsetMult, float uWidthMult, float vOffsetMult, float vHeightMult) {
+        float u0 = pSprite.getU0();
+        float u1 = pSprite.getU1();
+        float v0 = pSprite.getV0();
+        float v1 = pSprite.getV1();
+        float width = u1 - u0;
+        float height = v1 - v0;
+        u0 += width * uOffsetMult;
+        v0 += height * vOffsetMult;
+        u1 = u0 + width * uWidthMult;
+        v1 = v0 + height * vHeightMult;
+        innerBlitFloat(pMatrixStack.last().pose(), 
+                pX, pX + pWidth, pY, pY + pHeight, pBlitOffset, 
+                u0, u1, v0, v1);
+    }
+    
+    private static void innerBlitFloat(MatrixStack pMatrixStack, 
+            float pX1, float pX2, float pY1, float pY2, float pBlitOffset, 
+            float pUWidth, float pVHeight, float pUOffset, float pVOffset, float pTextureWidth, float pTextureHeight) {
+        innerBlitFloat(pMatrixStack.last().pose(), 
+                pX1, pX2, pY1, pY2, pBlitOffset, 
+                (pUOffset + 0.0F) / pTextureWidth, 
+                (pUOffset + pUWidth) / pTextureWidth, 
+                (pVOffset + 0.0F) / pTextureHeight, 
+                (pVOffset + pVHeight) / pTextureHeight);
+    }
+    
+    private static void innerBlitFloat(Matrix4f pMatrix, 
+            float pX1, float pX2, float pY1, float pY2, float pBlitOffset, 
+            float pMinU, float pMaxU, float pMinV, float pMaxV) {
+        BufferBuilder bufferbuilder = Tessellator.getInstance().getBuilder();
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
+        bufferbuilder.vertex(pMatrix, pX1, pY2, pBlitOffset).uv(pMinU, pMaxV).endVertex();
+        bufferbuilder.vertex(pMatrix, pX2, pY2, pBlitOffset).uv(pMaxU, pMaxV).endVertex();
+        bufferbuilder.vertex(pMatrix, pX2, pY1, pBlitOffset).uv(pMaxU, pMinV).endVertex();
+        bufferbuilder.vertex(pMatrix, pX1, pY1, pBlitOffset).uv(pMinU, pMinV).endVertex();
+        bufferbuilder.end();
+        RenderSystem.enableAlphaTest();
+        WorldVertexBufferUploader.end(bufferbuilder);
     }
     
     

@@ -57,6 +57,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket
 import com.github.standobyte.jojo.potion.IApplicableEffect;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
+import com.github.standobyte.jojo.power.bowcharge.BowChargeEffectInstance;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
@@ -534,7 +535,29 @@ public class GameplayEventHandler {
         }
     }
     
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void onBowDrawStart(LivingEntityUseItemEvent.Start event) {
+        if (BowChargeEffectInstance.itemFits(event.getItem())) {
+            LivingEntity entity = event.getEntityLiving();
+            for (PowerClassification powerClassification : PowerClassification.values()) {
+                IPower.getPowerOptional(entity, powerClassification).ifPresent(
+                        power -> power.onItemUseStart(event.getItem(), event.getDuration()));
+            }
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void onBowDrawStop(LivingEntityUseItemEvent.Stop event) {
+        if (BowChargeEffectInstance.itemFits(event.getItem())) {
+            LivingEntity entity = event.getEntityLiving();
+            for (PowerClassification powerClassification : PowerClassification.values()) {
+                IPower.getPowerOptional(entity, powerClassification).ifPresent(
+                        power -> power.onItemUseStop(event.getItem(), event.getDuration()));
+            }
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOW)
     public static void onFoodEaten(LivingEntityUseItemEvent.Finish event) {
         if (event.getItem().getItem() == Items.ENCHANTED_GOLDEN_APPLE) {
             VampirismData.onEnchantedGoldenAppleEaten(event.getEntityLiving());
