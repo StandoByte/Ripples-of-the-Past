@@ -1424,16 +1424,55 @@ public class GameplayEventHandler {
             }
         }
     }
+    
+    private static ITextComponent getDisplayNameWithUser(StandEntity stand, PlayerEntity user) {
+        return ScorePlayerTeam.formatNameForTeam(stand.getTeam(), stand.getName()).withStyle(style -> {
+            return style
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, 
+                            new HoverEvent.EntityHover(stand.getType(), stand.getUUID(), 
+                                    new TranslationTextComponent("chat.stand_remote_reveal_name", stand.getName(), user.getName()))))
+                    .withInsertion(user.getGameProfile().getName());
+        });
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void onChatMessage(ServerChatEvent event) {
+        boolean messageAsStand = messageAsStand(event);
+        if (messageAsStand) {
+            event.setCanceled(true);
+        }
+        
+        List<ServerPlayerEntity> josephTechniqueUsers = MCUtil.entitiesAround(ServerPlayerEntity.class, event.getPlayer(), 8, false, 
+                pl -> (!messageAsStand || StandUtil.playerCanHearStands(pl)) &&
+                INonStandPower.getNonStandPowerOptional(pl).map(power -> 
+                power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> 
+                hamon.characterIs(ModHamonSkills.CHARACTER_JOSEPH.get())).orElse(false)).orElse(false));
+        for (ServerPlayerEntity joseph : josephTechniqueUsers) {
+            if (joseph.getChatVisibility() != ChatVisibility.HIDDEN && joseph.getRandom().nextFloat() < 0.05F) {
+                String tlKey = "jojo.chat.joseph.next_line." + (joseph.getRandom().nextInt(3) + 1);
+                ITextComponent message = new TranslationTextComponent("chat.type.text", joseph.getDisplayName(), 
+                        new TranslationTextComponent(tlKey, event.getMessage()));
+                LanguageMap map = LanguageMap.getInstance();
+                if (map != null) {
+                    message = ForgeHooks.onServerChatEvent(joseph.connection, String.format(map.getOrDefault(tlKey), event.getMessage()), message);
+                }
+                if (message != null) {
+                    JojoModUtil.sayVoiceLine(joseph, ModSounds.JOSEPH_GIGGLE.get());
+                    joseph.server.getPlayerList().broadcastMessage(message, ChatType.CHAT, joseph.getUUID());
+                }
+            }
+        }
+        
+        IStandPower.getStandPowerOptional(event.getPlayer()).ifPresent(stand -> stand.getResolveCounter().onChatMessage(event.getMessage()));
+    }
 
     private static final double STAND_MESSAGE_RANGE = 16;
-    @SubscribeEvent(priority = EventPriority.LOW)
-    public static void messageAsStand(ServerChatEvent event) {
+    private static boolean messageAsStand(ServerChatEvent event) {
         ServerPlayerEntity playerSending = event.getPlayer();
-        IStandPower.getStandPowerOptional(playerSending).ifPresent(stand -> {
+        return GeneralUtil.orElseFalse(IStandPower.getStandPowerOptional(playerSending), stand -> {
             if (stand.hasPower() && stand.isActive() && stand.getStandManifestation() instanceof StandEntity) {
                 StandEntity standEntity = (StandEntity) stand.getStandManifestation();
                 if (standEntity.isManuallyControlled()) {
-                    event.setCanceled(true);
                     MinecraftServer server = playerSending.server;
                     
                     ITextComponent msg = new TranslationTextComponent("chat.type.text", 
@@ -1455,44 +1494,12 @@ public class GameplayEventHandler {
                     
                     playerSending.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(
                             cap -> cap.onChatMsgBypassingSpamCheck(server, playerSending));
+                    
+                    return true;
                 }
             }
+            return false;
         });
-    }
-    
-    private static ITextComponent getDisplayNameWithUser(StandEntity stand, PlayerEntity user) {
-        return ScorePlayerTeam.formatNameForTeam(stand.getTeam(), stand.getName()).withStyle(style -> {
-            return style
-                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, 
-                            new HoverEvent.EntityHover(stand.getType(), stand.getUUID(), 
-                                    new TranslationTextComponent("chat.stand_remote_reveal_name", stand.getName(), user.getName()))))
-                    .withInsertion(user.getGameProfile().getName());
-        });
-    }
-
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onChatMessage(ServerChatEvent event) {
-        List<ServerPlayerEntity> josephTechniqueUsers = MCUtil.entitiesAround(ServerPlayerEntity.class, event.getPlayer(), 8, false, 
-                pl -> INonStandPower.getNonStandPowerOptional(pl).map(power -> 
-                power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> 
-                hamon.characterIs(ModHamonSkills.CHARACTER_JOSEPH.get())).orElse(false)).orElse(false));
-        for (ServerPlayerEntity joseph : josephTechniqueUsers) {
-            if (joseph.getChatVisibility() != ChatVisibility.HIDDEN && joseph.getRandom().nextFloat() < 0.05F) {
-                String tlKey = "jojo.chat.joseph.next_line." + (joseph.getRandom().nextInt(3) + 1);
-                ITextComponent message = new TranslationTextComponent("chat.type.text", joseph.getDisplayName(), 
-                        new TranslationTextComponent(tlKey, event.getMessage()));
-                LanguageMap map = LanguageMap.getInstance();
-                if (map != null) {
-                    message = ForgeHooks.onServerChatEvent(joseph.connection, String.format(map.getOrDefault(tlKey), event.getMessage()), message);
-                }
-                if (message != null) {
-                    JojoModUtil.sayVoiceLine(joseph, ModSounds.JOSEPH_GIGGLE.get());
-                    joseph.server.getPlayerList().broadcastMessage(message, ChatType.CHAT, joseph.getUUID());
-                }
-            }
-        }
-        
-        IStandPower.getStandPowerOptional(event.getPlayer()).ifPresent(stand -> stand.getResolveCounter().onChatMessage(event.getMessage()));
     }
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
