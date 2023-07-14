@@ -1314,12 +1314,22 @@ public class GameplayEventHandler {
     public static void onProjectileShot(EntityJoinWorldEvent event) {
         Entity entity = event.getEntity();
         if (!entity.level.isClientSide()) {
-            entity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(projCap -> {
-                if (entity instanceof ProjectileEntity) {
-                    ProjectileEntity projectile = (ProjectileEntity) entity;
-                    Entity shooter = projectile.getOwner();
-                    if (shooter instanceof LivingEntity) {
-                        INonStandPower.getNonStandPowerOptional((LivingEntity) shooter).ifPresent(power -> {
+            if (entity instanceof ProjectileEntity) {
+                ProjectileEntity projectile = (ProjectileEntity) entity;
+                Entity shooter = projectile.getOwner();
+                if (shooter instanceof LivingEntity) {
+                    LivingEntity user = (LivingEntity) shooter;
+                    if (projectile instanceof AbstractArrowEntity) {
+                        IStandPower.getStandPowerOptional(user).ifPresent(stand -> {
+                            BowChargeEffectInstance<?, ?> bowCharge = stand.getBowChargeEffect();
+                            if (bowCharge != null) {
+                                bowCharge.onArrowShot((AbstractArrowEntity) projectile);
+                            }
+                        });
+                    }
+                    
+                    entity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(projCap -> {
+                        INonStandPower.getNonStandPowerOptional(user).ifPresent(power -> {
                             power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                                 float energyCost = -1;
                                 AbstractHamonSkill requiredSkill;
@@ -1357,9 +1367,9 @@ public class GameplayEventHandler {
                                 }
                             });
                         });
-                    }
+                    });
                 }
-            });
+            }
         }
     }
     

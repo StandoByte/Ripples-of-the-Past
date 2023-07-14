@@ -23,8 +23,8 @@ import com.github.standobyte.jojo.power.ActionCooldownTracker;
 import com.github.standobyte.jojo.power.HeldActionData;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPowerType;
-import com.github.standobyte.jojo.power.bowcharge.IBowChargeEffect;
 import com.github.standobyte.jojo.power.bowcharge.BowChargeEffectInstance;
+import com.github.standobyte.jojo.power.bowcharge.IBowChargeEffect;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.general.Container;
@@ -555,13 +555,12 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     public void onItemUseStop(ItemStack item, int duration) {
         if (bowCharge != null) {
             bowCharge.onRelease(bowCharge.isFullyCharged());
-            bowCharge = null;
         }
     }
     
     private void tickBowCharge() {
         if (bowCharge != null) {
-            if (!bowCharge.isActive()) {
+            if (bowCharge.shouldBeRemoved()) {
                 bowCharge = null;
             }
             else {

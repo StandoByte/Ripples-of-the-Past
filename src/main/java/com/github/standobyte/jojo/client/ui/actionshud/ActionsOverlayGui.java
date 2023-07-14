@@ -1117,7 +1117,7 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     private boolean renderBowChargeIcon(MatrixStack matrixStack, BowChargeEffectInstance<?, ?> bowCharge, float partialTick, int x, int y) {
-        if (bowCharge != null) {
+        if (bowCharge != null && bowCharge.isBeingCharged()) {
             mc.getTextureManager().bind(bowCharge.getPowerType().getIconTexture());
             float fill = bowCharge.getProgress(partialTick);
             if (fill < 1) {

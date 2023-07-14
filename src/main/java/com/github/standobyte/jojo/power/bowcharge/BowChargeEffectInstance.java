@@ -4,6 +4,7 @@ import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPowerType;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.item.BowItem;
 import net.minecraft.item.ItemStack;
 
@@ -13,6 +14,9 @@ public class BowChargeEffectInstance<P extends IPower<P, T>, T extends IPowerTyp
     private final P power;
     private final T powerType;
     private int tick = 0;
+    
+    private boolean wasFullyCharged;
+    private int arrowWait = -1;
     
     public BowChargeEffectInstance(LivingEntity user, P power, T powerType) {
         this.user = user;
@@ -36,21 +40,45 @@ public class BowChargeEffectInstance<P extends IPower<P, T>, T extends IPowerTyp
     
     public void tick() {
         tick++;
+        if (arrowWait > -1) {
+            arrowWait++;
+        }
     }
     
-    public boolean isActive() {
+    public boolean isBeingCharged() {
         return user.isUsingItem() && itemFits(user.getUseItem());
     }
     
     public void onStart() {}
     
     public boolean isFullyCharged() {
-        return isActive() && user.getTicksUsingItem() >= CHARGE_TICKS;
+        return isBeingCharged() && user.getTicksUsingItem() >= CHARGE_TICKS;
     }
     
-    public void onRelease(boolean fullyCharged) {}
+    public void onRelease(boolean fullyCharged) {
+        this.wasFullyCharged = fullyCharged;
+        if (fullyCharged) {
+            this.arrowWait = 0;
+        }
+    }
     
-//    public void affectArrow(boolean fullyCharged) {}
+    public void onArrowShot(AbstractArrowEntity arrow) {
+        if (wasFullyCharged && arrowWait >= 0) {
+            if (!power.getUser().level.isClientSide()) {
+                modifyArrow(arrow);
+            }
+            wasFullyCharged = false;
+            arrowWait = 5;
+        }
+    }
+    
+    protected void modifyArrow(AbstractArrowEntity arrow) {
+        
+    }
+    
+    public boolean shouldBeRemoved() {
+        return !isBeingCharged() && (!wasFullyCharged || arrowWait >= 5);
+    }
     
     public T getPowerType() {
         return powerType;
