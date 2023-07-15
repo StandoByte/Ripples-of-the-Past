@@ -4,6 +4,8 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModItems;
@@ -342,13 +344,7 @@ public class HamonStatsTabGui extends HamonTabGui {
         }
         
         else if (mouseX >= 199 && mouseX < 207 && mouseY > exercisesAvgY && mouseY < exercisesAvgY + 8) {
-            IFormattableTextComponent tooltip = new TranslationTextComponent(
-                    "hamon.exercise.full_completion_buff", PERCENTAGE_FORMAT.format((HamonData.ALL_EXERCISES_EFFICIENCY_MULTIPLIER - 1F) * 100F));
-            if (!screen.hamon.allExercisesCompleted()) {
-                tooltip = new TranslationTextComponent("hamon.exercise.full_completion_hint", tooltip, 
-                        new TranslationTextComponent("hamon.exercise.completion_buff_hint2")).withStyle(TextFormatting.ITALIC);
-            }
-            screen.renderTooltip(matrixStack, minecraft.font.split(tooltip, 150), mouseX, mouseY);
+            screen.renderTooltip(matrixStack, completedExerciseTooltip(null), mouseX, mouseY);
         }
         
         else if (mouseX >= 12 && mouseX < 207 && mouseY > exercisesAvgY && mouseY < exercisesAvgY + 8) {
@@ -385,7 +381,7 @@ public class HamonStatsTabGui extends HamonTabGui {
                 int x = intScrollX + 100 + exercise.ordinal() % 2 * 96;
                 int y = (exercise.ordinal() < 2 ? exercises1Y : exercises2Y) - 1;
                 if (mouseX >= x && mouseX < x + 8 && mouseY >= y && mouseY < y + 8) {
-                    screen.renderTooltip(matrixStack, minecraft.font.split(completedExerciseTooltip(exercise), 120), mouseX, mouseY);
+                    screen.renderTooltip(matrixStack, completedExerciseTooltip(exercise), mouseX, mouseY);
                     return;
                 }
             }
@@ -409,30 +405,38 @@ public class HamonStatsTabGui extends HamonTabGui {
     
     private static final DecimalFormat PERCENTAGE_FORMAT = new DecimalFormat("#.#");
     
-    private ITextComponent completedExerciseTooltip(Exercise exercise) {
-        String key = "hamon.exercise." + exercise.name().toLowerCase() + ".completion_buff";
-        Object[] args = {};
-        switch (exercise) {
-        case MINING:
-            args = new Object[] { PERCENTAGE_FORMAT.format(HamonData.MINING_COMPLETED.getAmount() * 100) };
-            break;
-        case RUNNING:
-            args = new Object[] { PERCENTAGE_FORMAT.format(HamonData.RUNNING_COMPLETED.getAmount() * 100) };
-            break;
-        case SWIMMING:
-            args = new Object[] { PERCENTAGE_FORMAT.format((HamonData.SWIMMING_COMPLETED_MAX_ENERGY_MULTIPLIER - 1) * 100) }; 
-            break;
-        case MEDITATION:
-            args = new Object[] { PERCENTAGE_FORMAT.format(HamonData.MEDITATION_COMPLETED_ENERGY_REGEN_TIME_REDUCTION / 20) }; 
-            break;
+    private List<IReorderingProcessor> completedExerciseTooltip(
+            @Nullable Exercise exercise /*null signifies the tooltip about the bonus for completing all 4 exercises */) {
+        String tooltip1Key;
+        boolean hasBuff;
+        IFormattableTextComponent tooltip2;
+        
+        if (exercise != null) {
+            tooltip1Key = "hamon.exercise.completion_buff_hint";
+            hasBuff = screen.hamon.isExerciseComplete(exercise);
+            tooltip2 = new TranslationTextComponent(String.format("hamon.exercise.%s.completion_buff", exercise.name().toLowerCase()), 
+                    PERCENTAGE_FORMAT.format(exercise.getBuffPercentage()), 
+                    new TranslationTextComponent("hamon.exercise.completion_buff_hint2"));
         }
         
-        IFormattableTextComponent tooltip = new TranslationTextComponent(key, args);
-        if (!screen.hamon.isExerciseComplete(exercise)) {
-            tooltip = new TranslationTextComponent("hamon.exercise.completion_buff_hint", tooltip, 
-                    new TranslationTextComponent("hamon.exercise.completion_buff_hint2")).withStyle(TextFormatting.ITALIC);
+        else {
+            tooltip1Key = "hamon.exercise.full_completion_hint";
+            hasBuff = screen.hamon.allExercisesCompleted();
+            tooltip2 = new TranslationTextComponent("hamon.exercise.full_completion_buff", 
+                    PERCENTAGE_FORMAT.format((HamonData.ALL_EXERCISES_EFFICIENCY_MULTIPLIER - 1F) * 100F), 
+                    new TranslationTextComponent("hamon.exercise.completion_buff_hint2"));
         }
-        
+
+        List<IReorderingProcessor> tooltip;
+        if (hasBuff) {
+            tooltip = minecraft.font.split(tooltip2, 150);
+        }
+        else {
+            tooltip = new ArrayList<>();
+            tooltip.addAll(minecraft.font.split(new TranslationTextComponent(tooltip1Key), 150));
+            tooltip2.withStyle(TextFormatting.GRAY, TextFormatting.ITALIC);
+            tooltip.addAll(minecraft.font.split(tooltip2, 150));
+        }
         return tooltip;
     }
     

@@ -1317,5 +1317,19 @@ public class HamonData extends TypeSpecificData {
             float multiplier = hamon != null ? (MAX_BREATHING_LEVEL - hamon.getBreathingLevel()) / MAX_BREATHING_LEVEL * 0.75F + 0.25F : 1;
             return MathHelper.floor(maxTicks * multiplier);
         }
+        
+        public double getBuffPercentage() {
+            switch (this) {
+            case MINING:
+                return HamonData.MINING_COMPLETED.getAmount() * 100;
+            case RUNNING:
+                return HamonData.RUNNING_COMPLETED.getAmount() * 100;
+            case SWIMMING:
+                return (HamonData.SWIMMING_COMPLETED_MAX_ENERGY_MULTIPLIER - 1) * 100; 
+            case MEDITATION:
+                return HamonData.MEDITATION_COMPLETED_ENERGY_REGEN_TIME_REDUCTION / 20;
+            }
+            throw new IllegalArgumentException();
+        }
     }
 }

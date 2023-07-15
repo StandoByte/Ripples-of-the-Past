@@ -324,9 +324,9 @@
   "hamon.running_exercise": "Бег",
   "hamon.swimming_exercise": "Плавание",
   "hamon.meditation": "Медитация",
-  "hamon.exercise.mining.completion_buff": "+%s%% к скорости атаки",
-  "hamon.exercise.running.completion_buff": "+%s%% к скорости",
-  "hamon.exercise.full_completion_buff": "+%s%% к эффективности всех навыков Хамона",
+  "hamon.exercise.mining.completion_buff": "+%s%% к скорости атаки %s",
+  "hamon.exercise.running.completion_buff": "+%s%% к скорости %s",
+  "hamon.exercise.full_completion_buff": "+%s%% к эффективности всех навыков Хамона %s",
   
   "hamon.next_point.strength": "Следующее очко навыка на %s уровне силы Хамона",
   "hamon.next_point.control": "Следующее очко навыка на %s уровне контроля Хамона",
