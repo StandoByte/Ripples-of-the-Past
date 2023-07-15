@@ -73,6 +73,7 @@ public abstract class CustomExplosion extends Explosion {
     
     /**
      * Does the first part of the explosion (destroy blocks)
+     * Is only called on server
      */
     @Override
     public void explode() {
@@ -80,14 +81,14 @@ public abstract class CustomExplosion extends Explosion {
         
         double diameter = radius * 2.0F;
         Vector3d pos = getPosition();
-        List<Entity> entities = level.getEntities(getExploder(), 
-                new AxisAlignedBB(
-                        MathHelper.floor(pos.x - diameter - 1.0D), 
-                        MathHelper.floor(pos.x + diameter + 1.0D), 
-                        MathHelper.floor(pos.y - diameter - 1.0D), 
-                        MathHelper.floor(pos.y + diameter + 1.0D), 
-                        MathHelper.floor(pos.z - diameter - 1.0D), 
-                        MathHelper.floor(pos.z + diameter + 1.0D)));
+        AxisAlignedBB aabb = new AxisAlignedBB(
+                MathHelper.floor(pos.x - diameter - 1.0D), 
+                MathHelper.floor(pos.y - diameter - 1.0D), 
+                MathHelper.floor(pos.z - diameter - 1.0D), 
+                MathHelper.floor(pos.x + diameter + 1.0D), 
+                MathHelper.floor(pos.y + diameter + 1.0D), 
+                MathHelper.floor(pos.z + diameter + 1.0D));
+        List<Entity> entities = level.getEntities(getExploder(), aabb);
         filterEntities(entities);
         ForgeEventFactory.onExplosionDetonate(level, this, entities, diameter);
         hurtEntities(entities);
@@ -140,6 +141,7 @@ public abstract class CustomExplosion extends Explosion {
     
     /**
      * Does the second part of the explosion (sound, particles, drop spawn)
+     * Is called on both sides
      */
     @Override
     public void finalizeExplosion(boolean pSpawnParticles) {
@@ -178,7 +180,7 @@ public abstract class CustomExplosion extends Explosion {
                     if (length > 1.0E-4D) {
                         double seenPercent = getSeenPercent(pos, entity);
                         double impact = (1.0D - distRatio) * seenPercent;
-                        float damage = (float) ((impact * impact + impact) / 2.0D * 7.0D * diameter + 1.0D);
+                        float damage = calcDamage(impact, diameter);
                         double knockback = impact;
                         if (entity instanceof LivingEntity) {
                             knockback = ProtectionEnchantment.getExplosionKnockbackAfterDampener((LivingEntity) entity, knockback);
@@ -188,6 +190,10 @@ public abstract class CustomExplosion extends Explosion {
                 }
             }
         }
+    }
+    
+    protected float calcDamage(double impact, double diameter) {
+        return (float) ((impact * impact + impact) / 2.0D * 7.0D * diameter + 1.0D);
     }
     
     protected void hurtEntity(Entity entity, float damage, double knockback, Vector3d vecToEntityNorm) {
@@ -293,26 +299,31 @@ public abstract class CustomExplosion extends Explosion {
         return explode(pLevel, pEntity, (DamageSource)null, (ExplosionContext)null, pX, pY, pZ, pExplosionRadius, pCausesFire, pMode, explosionType);
     }
 
-    public static Explosion explode(World pLevel, @Nullable Entity pExploder, 
+    public static CustomExplosion explode(World pLevel, @Nullable Entity pExploder, 
             @Nullable DamageSource pDamageSource, @Nullable ExplosionContext pContext, 
             double pX, double pY, double pZ, float pSize, boolean pCausesFire, Explosion.Mode pMode, CustomExplosionType explosionType) {
-        Explosion explosion = explosionType.createExplosion(pLevel, pExploder, 
+        CustomExplosion explosion = explosionType.createExplosion(pLevel, pExploder, 
                 pDamageSource, pContext, 
                 pX, pY, pZ, 
                 pSize, pCausesFire, pMode);
+        return explodePreCreated(explosion, pLevel, explosionType);
+    }
+    
+    public static CustomExplosion explodePreCreated(CustomExplosion explosion, World pLevel, CustomExplosionType explosionType) {
         if (ForgeEventFactory.onExplosionStart(pLevel, explosion)) return explosion;
         explosion.explode();
         explosion.finalizeExplosion(true);
         
         if (!pLevel.isClientSide()) {
-            if (pMode == Explosion.Mode.NONE) {
+            if (explosion.blockInteraction == Explosion.Mode.NONE) {
                 explosion.clearToBlow();
             }
             
+            Vector3d pos = explosion.getPosition();
             for (ServerPlayerEntity player : ((ServerWorld) pLevel).players()) {
-                if (player.distanceToSqr(pX, pY, pZ) < 4096.0D) {
-                    PacketManager.sendToClient(new CustomExplosionPacket(pX, pY, pZ, 
-                            pSize, explosion.getToBlow(), explosion.getHitPlayers().get(player), explosionType), player);
+                if (player.distanceToSqr(pos.x, pos.y, pos.z) < 4096.0D) {
+                    PacketManager.sendToClient(new CustomExplosionPacket(pos.x, pos.y, pos.z, 
+                            explosion.radius, explosion.getToBlow(), explosion.getHitPlayers().get(player), explosionType), player);
                 }
             }
         }
@@ -326,9 +337,20 @@ public abstract class CustomExplosion extends Explosion {
             @Override public CustomExplosionSupplier explosionSupplier() {
                 return MRCrossfireHurricaneEntity.CrossfireHurricaneExplosion::new;
             }
+        },
+        HAMON {
+            @Deprecated @Override public CustomExplosionSupplier explosionSupplier() { return null; }
+            
+            @Override
+            public CustomExplosion createExplosion(World pLevel, @Nullable Entity pSource, 
+                    @Nullable DamageSource pDamageSource, @Nullable ExplosionContext pDamageCalculator, 
+                    double pToBlowX, double pToBlowY, double pToBlowZ, 
+                    float pRadius, boolean pFire, Explosion.Mode pBlockInteraction) {
+                return new HamonOnlyExplosion(pLevel, pSource, pDamageCalculator, pToBlowX, pToBlowY, pToBlowZ, pRadius);
+            }
         };
         
-        @Nonnull public Explosion createExplosion(World pLevel, @Nullable Entity pSource, 
+        @Nonnull public CustomExplosion createExplosion(World pLevel, @Nullable Entity pSource, 
                 @Nullable DamageSource pDamageSource, @Nullable ExplosionContext pDamageCalculator, 
                 double pToBlowX, double pToBlowY, double pToBlowZ, 
                 float pRadius, boolean pFire, Explosion.Mode pBlockInteraction) {
@@ -343,7 +365,7 @@ public abstract class CustomExplosion extends Explosion {
         @Nonnull public Explosion createExplosionOnClient(World pLevel, @Nullable Entity pSource, 
                 double pToBlowX, double pToBlowY, double pToBlowZ, 
                 float pRadius, List<BlockPos> pPositions) {
-            Explosion explosion = createExplosion(pLevel, pSource, 
+            CustomExplosion explosion = createExplosion(pLevel, pSource, 
                     null, null, 
                     pToBlowX, pToBlowY, pToBlowZ, 
                     pRadius, false, Explosion.Mode.DESTROY);
@@ -354,7 +376,7 @@ public abstract class CustomExplosion extends Explosion {
         
         @FunctionalInterface
         private static interface CustomExplosionSupplier {
-            Explosion createExplosion(World pLevel, Entity pSource, DamageSource pDamageSource,
+            CustomExplosion createExplosion(World pLevel, Entity pSource, DamageSource pDamageSource,
                     ExplosionContext pDamageCalculator, double pToBlowX, double pToBlowY, double pToBlowZ,
                     float pRadius, boolean pFire, Mode pBlockInteraction);
         }
