@@ -346,7 +346,7 @@ public abstract class CustomExplosion extends Explosion {
                     @Nullable DamageSource pDamageSource, @Nullable ExplosionContext pDamageCalculator, 
                     double pToBlowX, double pToBlowY, double pToBlowZ, 
                     float pRadius, boolean pFire, Explosion.Mode pBlockInteraction) {
-                return new HamonOnlyExplosion(pLevel, pSource, pDamageCalculator, pToBlowX, pToBlowY, pToBlowZ, pRadius);
+                return new HamonBlastExplosion(pLevel, pSource, pDamageCalculator, pToBlowX, pToBlowY, pToBlowZ, pRadius);
             }
         };
         

@@ -127,8 +127,8 @@ public class LivingUtilCap {
     
     
     
-    public void setHamonCharge(float hamonCharge, int chargeTicks, LivingEntity hamonUser, float energySpent) {
-        this.hamonCharge = new HamonCharge(hamonCharge, chargeTicks, hamonUser, energySpent);
+    public void setHamonCharge(float tickDamage, int chargeTicks, LivingEntity hamonUser, float energySpent) {
+        this.hamonCharge = new HamonCharge(tickDamage, chargeTicks, hamonUser, energySpent);
     }
     
     private void hamonChargeTick() {
@@ -142,13 +142,18 @@ public class LivingUtilCap {
             }
             hamonCharge.tick(entity, null, entity.level, entity.getBoundingBox().inflate(1.0D));
             if (entity.getRandom().nextInt(10) == 0) {
-                HamonPowerType.createHamonSparkParticlesEmitter(entity, hamonCharge.getCharge() / 40F);
+                HamonPowerType.createHamonSparkParticlesEmitter(entity, hamonCharge.getTickDamage() / 40F);
             }
         }
     }
     
     public boolean hasHamonCharge() {
         return hamonCharge != null && !hamonCharge.shouldBeRemoved();
+    }
+    
+    @Nullable
+    public HamonCharge getHamonCharge() {
+        return hasHamonCharge() ? hamonCharge : null;
     }
     
     

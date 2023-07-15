@@ -39,6 +39,9 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamon
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
+import com.github.standobyte.jojo.util.mc.damage.explosion.CustomExplosion;
+import com.github.standobyte.jojo.util.mc.damage.explosion.CustomExplosion.CustomExplosionType;
+import com.github.standobyte.jojo.util.mc.damage.explosion.HamonBlastExplosion;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.collect.ImmutableMap;
 
@@ -463,8 +466,11 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     }
     
     public static void hamonExplosion(World world, @Nullable Entity source, @Nullable Entity hamonUser, 
-            float radius, float damage) {
-        
+            Vector3d position, float radius, float damage) {
+        HamonBlastExplosion hamonBlast = new HamonBlastExplosion(world, source, null, 
+                position.x, position.y, position.z, radius);
+        hamonBlast.setHamonDamage(damage);
+        CustomExplosion.explodePreCreated(hamonBlast, world, CustomExplosionType.HAMON);
     }
 
     public static void createHamonSparkParticles(World world, @Nullable PlayerEntity clientHandled, 

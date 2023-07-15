@@ -25,6 +25,7 @@ import net.minecraft.inventory.container.WorkbenchContainer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.tileentity.AbstractFurnaceTileEntity;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.gen.FlatGenerationSettings;
 import net.minecraft.world.gen.feature.StructureFeature;
@@ -157,6 +158,10 @@ public class CommonReflection {
         return CREEPER_DATA_IS_POWERED;
     }
     
+    private static final Field EXPLOSION_RADIUS = ObfuscationReflectionHelper.findField(Explosion.class, "field_77280_f");
+    public static float getRadius(Explosion explosion) {
+        return ReflectionUtil.getFieldValue(EXPLOSION_RADIUS, explosion);
+    }
     
     
     private static final Field LIVING_ENTITY_ATTACK_STRENGTH_TICKER = ObfuscationReflectionHelper.findField(LivingEntity.class, "field_184617_aD");

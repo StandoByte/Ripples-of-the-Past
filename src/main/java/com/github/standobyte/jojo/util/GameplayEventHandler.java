@@ -58,6 +58,7 @@ import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.bowcharge.BowChargeEffectInstance;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonCharge;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
@@ -78,6 +79,7 @@ import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
 import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.mc.damage.StandLinkDamageSource;
+import com.github.standobyte.jojo.util.mc.damage.explosion.HamonBlastExplosion;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
@@ -1505,6 +1507,21 @@ public class GameplayEventHandler {
                 });
             }
         });
+        
+        if (!(explosion instanceof HamonBlastExplosion)) {
+            Entity exploder = explosion.getExploder();
+            if (exploder != null) {
+                exploder.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                    if (cap.hasHamonCharge()) {
+                        HamonCharge hamonCharge = cap.getHamonCharge();
+                        float radius = CommonReflection.getRadius(explosion);
+                        HamonPowerType.hamonExplosion(exploder.level, exploder, 
+                                hamonCharge.getUserServerSide(exploder.level), explosion.getPosition(),
+                                radius, hamonCharge.getTickDamage());
+                    }
+                });
+            }
+        }
     }
     
     @SubscribeEvent

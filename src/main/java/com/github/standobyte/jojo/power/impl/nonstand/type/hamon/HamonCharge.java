@@ -22,15 +22,15 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
 public class HamonCharge {
-    private float charge;
+    private float tickDamage;
     private int chargeTicks;
     private UUID hamonUserId;
     private Entity hamonUser;
     private boolean gavePoints;
     private float energySpent;
     
-    public HamonCharge(float charge, int chargeTicks, @Nullable LivingEntity hamonUser, float energySpent) {
-        this.charge = charge;
+    public HamonCharge(float tickDamage, int chargeTicks, @Nullable LivingEntity hamonUser, float energySpent) {
+        this.tickDamage = tickDamage;
         this.chargeTicks = chargeTicks;
         if (hamonUser != null) {
             this.hamonUserId = hamonUser.getUUID();
@@ -39,7 +39,7 @@ public class HamonCharge {
     }
     
     public HamonCharge(CompoundNBT nbt) {
-        this.charge = nbt.getFloat("Charge");
+        this.tickDamage = nbt.getFloat("Charge");
         this.chargeTicks = nbt.getInt("ChargeTicks");
         if (nbt.hasUUID("HamonUser")) {
             this.hamonUserId = nbt.getUUID("HamonUser");
@@ -50,7 +50,7 @@ public class HamonCharge {
     
     public CompoundNBT writeNBT() {
         CompoundNBT chargeNbt = new CompoundNBT();
-        chargeNbt.putFloat("Charge", charge);
+        chargeNbt.putFloat("Charge", tickDamage);
         chargeNbt.putInt("ChargeTicks", chargeTicks);
         if (hamonUserId != null) {
             chargeNbt.putUUID("HamonUser", hamonUserId);
@@ -60,8 +60,8 @@ public class HamonCharge {
         return chargeNbt;
     }
     
-    public float getCharge() {
-        return charge;
+    public float getTickDamage() {
+        return tickDamage;
     }
     
     public void tick(@Nullable Entity chargedEntity, @Nullable BlockPos chargedBlock, World world, AxisAlignedBB aabb) {
@@ -69,8 +69,8 @@ public class HamonCharge {
             List<LivingEntity> entities = world.getEntitiesOfClass(LivingEntity.class, aabb, EntityPredicates.NO_CREATIVE_OR_SPECTATOR);
             for (LivingEntity target : entities) {
                 if (!target.is(chargedEntity) && target.isAlive() && target.getUUID() != hamonUserId) {
-                    if (DamageUtil.dealHamonDamage(target, charge, chargedEntity, null, attack -> attack.noSrcEntityHamonMultiplier())) {
-                        Entity user = getUser(world);
+                    if (DamageUtil.dealHamonDamage(target, tickDamage, chargedEntity, null, attack -> attack.noSrcEntityHamonMultiplier())) {
+                        Entity user = getUserServerSide(world);
                         if (!target.isAlive() && user instanceof ServerPlayerEntity) {
                             ModCriteriaTriggers.HAMON_CHARGE_KILL.get().trigger((ServerPlayerEntity) user, target, chargedEntity, chargedBlock);
                         }
@@ -91,7 +91,7 @@ public class HamonCharge {
         }
     }
     
-    private Entity getUser(World world) {
+    public Entity getUserServerSide(World world) {
         if (hamonUser == null && world instanceof ServerWorld) {
             hamonUser = ((ServerWorld) world).getEntity(hamonUserId);
         }

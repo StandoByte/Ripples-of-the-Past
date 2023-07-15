@@ -45,8 +45,8 @@ public class HamonBlockChargeEntity extends Entity {
         setNoGravity(true);
     }
     
-    public void setCharge(float charge, int chargeTicks, @Nullable LivingEntity hamonUser, float energySpent) {
-        this.hamonCharge = new HamonCharge(charge, chargeTicks, hamonUser, energySpent);
+    public void setCharge(float tickDamage, int chargeTicks, @Nullable LivingEntity hamonUser, float energySpent) {
+        this.hamonCharge = new HamonCharge(tickDamage, chargeTicks, hamonUser, energySpent);
     }
     
     private static final int CACTUS_EXPLOSION_RANGE = 4;
@@ -78,7 +78,7 @@ public class HamonBlockChargeEntity extends Entity {
             }
             float rng = random.nextFloat();
             if (rng <= 0.02F || rng <= 0.1F && level.getBlockState(blockPos).getBlock() != Blocks.COBWEB) {
-                HamonPowerType.createHamonSparkParticlesEmitter(this, hamonCharge.getCharge() / 4F);
+                HamonPowerType.createHamonSparkParticlesEmitter(this, hamonCharge.getTickDamage() / 4F);
             }
         }
     }
