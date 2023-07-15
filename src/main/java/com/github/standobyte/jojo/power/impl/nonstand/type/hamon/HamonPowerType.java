@@ -472,7 +472,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
         hamonBlast.setHamonDamage(damage);
         CustomExplosion.explodePreCreated(hamonBlast, world, CustomExplosionType.HAMON);
     }
-
+    
     public static void createHamonSparkParticles(World world, @Nullable PlayerEntity clientHandled, 
             double x, double y, double z, float intensity, @Nullable SoundEvent hamonSound) {
         if (intensity > 0) {

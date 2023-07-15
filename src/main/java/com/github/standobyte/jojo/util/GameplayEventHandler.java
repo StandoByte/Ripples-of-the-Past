@@ -60,7 +60,6 @@ import com.github.standobyte.jojo.power.bowcharge.BowChargeEffectInstance;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonCharge;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismPowerType;
@@ -1322,45 +1321,54 @@ public class GameplayEventHandler {
                         });
                     }
                     
-                    entity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(projCap -> {
+                    projectile.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(projCharge -> {
+                        // projectiles charges by a hamon user
                         INonStandPower.getNonStandPowerOptional(user).ifPresent(power -> {
                             power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                                float energyCost = -1;
-                                AbstractHamonSkill requiredSkill;
-                                float hamonBaseDmg = 0;
-                                int maxChargeTicks = 0;
-                                if (projectile instanceof AbstractArrowEntity && !isChargedInOtherWay(projectile)) {
-                                    requiredSkill = ModHamonSkills.ARROW_INFUSION.get();
-                                    energyCost = 1000;
-                                    hamonBaseDmg = 0.25F;
-                                    maxChargeTicks = 10;
+                                if (projectile instanceof AbstractArrowEntity && !isChargedInOtherWay(projectile) 
+                                        && hamon.isSkillLearned(ModHamonSkills.ARROW_INFUSION.get())) {
+                                    hamon.consumeHamonEnergyTo(efficiency -> {
+                                        projCharge
+                                        .withBaseDmg(1.5F * efficiency)
+                                        .withMaxChargeTicks(10)
+                                        .withSpentEnergy(Math.min(power.getEnergy(), 1000));
+                                        return null;
+                                    }, 1000);
                                 }
-                                else {
+                                else if (hamon.isSkillLearned(ModHamonSkills.THROWABLES_INFUSION.get())) {
                                     EntityType<?> type = projectile.getType();
-                                    requiredSkill = ModHamonSkills.THROWABLES_INFUSION.get();
                                     if (type == EntityType.SNOWBALL) {
-                                        energyCost = 600;
-                                        hamonBaseDmg = 0.125F;
-                                        maxChargeTicks = 25;
+                                        hamon.consumeHamonEnergyTo(efficiency -> {
+                                            projCharge
+                                            .withBaseDmg(0.75F * efficiency)
+                                            .withMaxChargeTicks(25)
+                                            .withSpentEnergy(Math.min(power.getEnergy(), 600));
+                                            return null;
+                                        }, 600);
                                     }
                                     else if (type == EntityType.EGG) {
-                                        energyCost = 400;
-                                        hamonBaseDmg = 0.125F;
-                                        maxChargeTicks = Integer.MAX_VALUE;
+                                        hamon.consumeHamonEnergyTo(efficiency -> {
+                                            projCharge
+                                            .withBaseDmg(0.75F * efficiency)
+                                            .withInfiniteChargeTime()
+                                            .withSpentEnergy(Math.min(power.getEnergy(), 400));
+                                            return null;
+                                        }, 400);
                                     }
                                     else if (type == EntityType.POTION) {
-                                        energyCost = 800;
-                                        hamonBaseDmg = 0.15F; 
-                                        maxChargeTicks = 20;
+                                        hamon.consumeHamonEnergyTo(efficiency -> {
+                                            projCharge
+                                            .withBaseDmg(1.0F * efficiency)
+                                            .withMaxChargeTicks(20)
+                                            .withSpentEnergy(Math.min(power.getEnergy(), 800));
+                                            return null;
+                                        }, 800);
                                     }
-                                }
-                                if (energyCost > -1 && hamon.isSkillLearned(requiredSkill) && power.consumeEnergy(energyCost)) {
-                                    projCap.hamonBaseDmg = hamonBaseDmg;
-                                    projCap.maxChargeTicks = maxChargeTicks;
-                                    projCap.spentEnergy = energyCost;
                                 }
                             });
                         });
+                        
+                        // todo: projectiles charged by an infused entity
                     });
                 }
             }
