@@ -730,13 +730,6 @@ public class GameplayEventHandler {
                 || HamonPowerType.snakeMuffler(event.getEntityLiving(), event.getSource(), event.getAmount())) 
             event.setCanceled(true);
     }
-
-    @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
-    public static void inCaseOfExplosionCancel(LivingAttackEvent event) {
-        if (event.isCanceled() && event.getSource().isExplosion()) {
-            event.getEntityLiving().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(util -> util.popLatestExplosionPos());
-        }
-    }
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onLivingHurt(LivingHurtEvent event) {
@@ -754,13 +747,13 @@ public class GameplayEventHandler {
         LivingEntity target = event.getEntityLiving();
         if (dmgSource.isExplosion()) {
             target.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(util -> {
-                Vector3d explosionPos = util.popLatestExplosionPos();
-                if (explosionPos != null) {
+                Explosion explosion = util.getSourceExplosion(dmgSource);
+                if (explosion != null) {
                     StandEntity stand = getTargetStand(target);
                     if (stand != null && stand.isFollowingUser() && stand.isStandBlocking()) {
                         double standDurability = stand.getDurability();
                         if (standDurability > 4) {
-                            double cos = explosionPos.subtract(target.position()).normalize().dot(stand.getLookAngle());
+                            double cos = explosion.getPosition().subtract(target.position()).normalize().dot(stand.getLookAngle());
                             if (cos > 0) {
                                 float multiplier = Math.max((1F - (float) cos), 4F / (float) standDurability);
                                 event.setAmount(event.getAmount() * multiplier);
@@ -1508,7 +1501,7 @@ public class GameplayEventHandler {
         event.getAffectedEntities().forEach(entity -> {
             if (entity instanceof LivingEntity) {
                 ((LivingEntity) entity).getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(util -> {
-                    util.setLatestExplosionPos(explosion.getPosition());
+                    util.setLatestExplosion(explosion);
                 });
             }
         });

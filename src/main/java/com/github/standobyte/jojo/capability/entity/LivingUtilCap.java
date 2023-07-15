@@ -17,8 +17,9 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.Explosion;
 
 public class LivingUtilCap {
     private final LivingEntity entity;
@@ -32,7 +33,7 @@ public class LivingUtilCap {
     
     private boolean reduceKnockback;
     private float futureKnockbackFactor;
-    private Vector3d latestExplosionPos = null;
+    @Nullable private Explosion latestExplosion;
     
     private HamonCharge hamonCharge;
     private float receivedHamonDamage = 0;
@@ -105,14 +106,16 @@ public class LivingUtilCap {
         return futureKnockbackFactor;
     }
     
-    public void setLatestExplosionPos(Vector3d pos) {
-        this.latestExplosionPos = pos;
+    public void setLatestExplosion(Explosion explosion) {
+        this.latestExplosion = explosion;
     }
     
-    public Vector3d popLatestExplosionPos() {
-        Vector3d pos = this.latestExplosionPos;
-        this.latestExplosionPos = null;
-        return pos;
+    @Nullable
+    public Explosion getSourceExplosion(DamageSource damageSource) {
+        if (latestExplosion != null && damageSource == latestExplosion.getDamageSource()) {
+            return latestExplosion;
+        }
+        return null;
     }
     
     public void onHurtThroughInvul(IModdedDamageSource dmgSource) {
