@@ -324,8 +324,8 @@ public abstract class BarsRenderer {
             if (redHighlightTick > 0) redHighlightTick--;
         }
         
-        public void triggerRedHighlight() {
-            this.redHighlightTick = 80;
+        public void triggerRedHighlight(int ticks) {
+            this.redHighlightTick = ticks;
         }
         
         public void resetRedHighlight() {

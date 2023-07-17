@@ -12,6 +12,7 @@ import net.minecraft.entity.LivingEntity;
 public class HamonEnergySound extends TickableSound {
     private final LivingEntity entity;
     private Optional<INonStandPower> power = Optional.empty();
+    private boolean soundStarted = false;
     private boolean stoppedBreath = false;
 
     public HamonEnergySound(LivingEntity entity, float volume, float pitch) {
@@ -33,12 +34,19 @@ public class HamonEnergySound extends TickableSound {
                 stoppedBreath = true;
             }
             if (stoppedBreath) {
-                volume = Math.max(volume - 0.1F, 0);
-                if (volume == 0) stop();
+                if (soundStarted) {
+                    volume = Math.max(volume - 0.1F, 0);
+                    if (volume == 0) stop();
+                }
+                else {
+                    volume = 0;
+                    stop();
+                }
             }
             else {
                 volume = getEntityStand().map(power -> power.getEnergy() / power.getMaxEnergy()).orElse(1F);
             }
+            soundStarted = true;
         }
         else {
             stop();

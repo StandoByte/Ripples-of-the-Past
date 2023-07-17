@@ -123,6 +123,7 @@ public class HamonData extends TypeSpecificData {
     private boolean playedEnergySound = false;
     private float breathStability;
     private float prevBreathStability;
+    private int ticksMaskWithNoHamonBreath;
 
     public HamonData() {
         hamonSkills = new MainHamonSkillsManager();
@@ -153,6 +154,7 @@ public class HamonData extends TypeSpecificData {
     public float tickEnergy() {
         LivingEntity user = power.getUser();
         if (power.getHeldAction() == ModHamonActions.HAMON_BREATH.get() && user.getAirSupply() >= user.getMaxAirSupply()) {
+            ticksMaskWithNoHamonBreath = 0;
             if (user.level.isClientSide() && power.getEnergy() > 0 && !playedEnergySound) {
                 ClientTickingSoundsHelper.playHamonEnergyConcentrationSound(user, 1.0F);
                 playedEnergySound = true;
@@ -164,6 +166,12 @@ public class HamonData extends TypeSpecificData {
             return power.getEnergy() + getMaxBreathStability() / fullEnergyTicks();
         }
         else {
+            if (isUserWearingBreathMask()) {
+                ticksMaskWithNoHamonBreath++;
+            }
+            else {
+                ticksMaskWithNoHamonBreath = 0;
+            }
             playedEnergySound = false;
             if (noEnergyDecayTicks > 0) {
                 noEnergyDecayTicks--;
@@ -203,20 +211,47 @@ public class HamonData extends TypeSpecificData {
     private void tickBreathStability() {
         LivingEntity user = power.getUser();
         boolean outOfBreath = user.getAirSupply() < user.getMaxAirSupply();
-        float inc = 0;
+        float inc;
+        float maxStability = getMaxBreathStability();
+        boolean maskNoBreath = false;
         
-        if (!outOfBreath) {
-            inc = getMaxBreathStability() / fullBreathStabilityTicks();
-            if (isMeditating() && breathStabilityIncTicks > 0) {
-                inc *= MathHelper.sqrt((float) Math.min(breathStabilityIncTicks, 100));
+        if (isUserWearingBreathMask()) {
+            float breathMaskHandicap = MathHelper.clamp((400f - ticksMaskWithNoHamonBreath) / 200f, -1, 1);
+            // slowed down recovery when not using hamon breath for too long (10s)
+            if (breathMaskHandicap >= 0) {
+                inc = maxStability / fullBreathStabilityTicks() * breathMaskHandicap;
             }
+            // go down when not using hamon breath for even longer (20s)
+            else {
+                inc = maxStability / 1200 * breathMaskHandicap;
+                maskNoBreath = true;
+                
+                if (user.level.isClientSide() && ClientUtil.getClientPlayer() == user &&
+                        breathStability / maxStability > 0.2F &&
+                        (breathStability + inc) / maxStability < 0.2F) {
+                    BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).triggerRedHighlight(999999);
+                }
+            }
+        }
+        else {
+            // normal recovery
+            inc = maxStability / fullBreathStabilityTicks();
+        }
+        
+        // meditation speeding up the recovery (if there's no mask handicap)
+        if (inc >= 0 && isMeditating() && breathStabilityIncTicks > 0) {
+            inc *= MathHelper.sqrt((float) Math.min(breathStabilityIncTicks, 100));
+        }
+        
+        if (outOfBreath) {
+            inc = Math.min(inc, 0);
         }
         
         breathStability = MathHelper.clamp(breathStability + inc, 0, getMaxBreathStability());
         int air = user.getAirSupply();
         if (!user.level.isClientSide()) {
             if (breathStability == 0 && (prevBreathStability > 0 || prevAir > air && air > 0)) {
-                outOfBreath(false);
+                outOfBreath(maskNoBreath);
             }
         }
         else if (user == ClientUtil.getClientPlayer()) {
@@ -316,19 +351,11 @@ public class HamonData extends TypeSpecificData {
                 });
             }
             
-            ItemStack headItem = user.getItemBySlot(EquipmentSlotType.HEAD);
-            if (!headItem.isEmpty() && headItem.getItem() == ModItems.BREATH_CONTROL_MASK.get()) {
-                if (doConsume) {
-                    setBreathStability(0);
-                    outOfBreath(true);
-                }
-                return 0;
+            float energyFromStability = getBreathStability();
+            if (!isUserWearingBreathMask()) {
+                energyFromStability *= ENERGY_STABILITY_USAGE_RATIO;
             }
             
-            float energyFromStability = getBreathStability() * ENERGY_STABILITY_USAGE_RATIO;
-            if (energyFromStability == 0) {
-                return 0;
-            }
             float energyRatio = Math.min(energyFromStability / energyNeeded, 1);
             if (doConsume) {
                 if (energyFromStability < energyNeeded) {
@@ -343,6 +370,11 @@ public class HamonData extends TypeSpecificData {
         }
     }
     private static final float ENERGY_STABILITY_USAGE_RATIO = 2.5F;
+    
+    private boolean isUserWearingBreathMask() {
+        ItemStack headItem = power.getUser().getItemBySlot(EquipmentSlotType.HEAD);
+        return !headItem.isEmpty() && headItem.getItem() == ModItems.BREATH_CONTROL_MASK.get();
+    }
     
     private void outOfBreath(boolean mask) {
         power.getUser().setAirSupply(0);
@@ -711,7 +743,7 @@ public class HamonData extends TypeSpecificData {
         incExerciseThisTick = false;
         exerciseCompleted = false;
         
-        float multiplier = user.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.BREATH_CONTROL_MASK.get() ? 2F : 0;
+        float multiplier = user.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.BREATH_CONTROL_MASK.get() ? 2F : 1;
         
         boolean isMining;
         if (!user.level.isClientSide()) {

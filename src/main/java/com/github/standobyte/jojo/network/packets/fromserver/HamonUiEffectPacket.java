@@ -35,13 +35,15 @@ public class HamonUiEffectPacket {
         public void handle(HamonUiEffectPacket msg, Supplier<NetworkEvent.Context> ctx) {
             switch (msg.effectType) {
             case NO_ENERGY:
-                BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).triggerRedHighlight();
+                BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).triggerRedHighlight(80);
                 break;
             case OUT_OF_BREATH:
                 ActionsOverlayGui.getInstance().setOutOfBreath(false);
+                BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).resetRedHighlight();
                 break;
             case OUT_OF_BREATH_MASK:
                 ActionsOverlayGui.getInstance().setOutOfBreath(true);
+                BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).resetRedHighlight();
                 break;
             }
         }

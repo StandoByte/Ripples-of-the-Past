@@ -12,7 +12,6 @@ import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.entity.MRDetectorEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.BladeHatEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 
@@ -157,11 +156,6 @@ public abstract class ClientTickingSoundsHelper {
     
     public static void playHamonEnergyConcentrationSound(LivingEntity entity, float volume) {
         Minecraft.getInstance().getSoundManager().play(new HamonEnergySound(entity, volume, 1.0F));
-    }
-    
-    public static void playHamonConcentrationSound(LivingEntity hamonUser, Predicate<LivingEntity> stopCondition, float volume) {
-        Minecraft.getInstance().getSoundManager().play(new StoppableEntityTickableSound<LivingEntity>(
-                ModSounds.HAMON_CONCENTRATION.get(), hamonUser.getSoundSource(), volume, 1.0F, false, hamonUser, stopCondition));
     }
     
     public static void playGliderFlightSound(LeavesGliderEntity entity) {
