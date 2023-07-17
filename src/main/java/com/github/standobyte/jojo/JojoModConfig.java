@@ -298,7 +298,8 @@ public class JojoModConfig {
                     .define("saveDestroyedBlocks", false);
             
             endermenBeyondTimeSpace = builder
-                    .comment("    Disable this if you're boring.")
+                    .comment("    Disable this to make endermen also be frozen in stopped time.",
+                            "      But what if there is an in-mod lore reason for this...")
                     .translation("jojo.config.endermenBeyondTimeSpace")
                     .define("endermenBeyondTimeSpace", true);
             

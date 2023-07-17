@@ -491,8 +491,6 @@
   "hamonSkill.plant_infusion.desc" : "Користувач тимчасово заряджає блок рослини Хамоном. Поки він заряджений, моби та гравці отримають пошкодження Хамона, торкаючись його.",
   "hamonSkill.throwables_infusion.name" : "Вливання Хамону в предмети котрі можемо кинути",
   "hamonSkill.throwables_infusion.desc" : "Сніжки, яйця та пляшки з водою, які кидає користувач, завдають додаткової шкоди Хамону.",
-  "hamonSkill.animal_infusion.name" : "Вливання Хамону в тварин",
-  "hamonSkill.animal_infusion.desc" : "Дозволяє користувачеві також наповнювати тварин і яйця черепах Хамоном.",
   "hamonSkill.arrow_infusion.name" : "Вливання Хамону в Стріли",
   "hamonSkill.arrow_infusion.desc" : "Стріли та тризуби, якими стріляє користувач, завдають додаткової шкоди Хамону.",
   "hamonSkill.zoom_punch.name" : "Приближений Удар",

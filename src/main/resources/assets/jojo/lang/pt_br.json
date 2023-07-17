@@ -479,8 +479,6 @@
   "hamonSkill.plant_infusion.desc": "O usuário carrega temporariamente um bloco de uma planta com Hamon. Enquanto estiver carregado, mobs e jogadores receberão dano de Hamon ao tocá-lo.",
   "hamonSkill.throwables_infusion.name": "Infusão de Arremessáveis",
   "hamonSkill.throwables_infusion.desc": "Bolas de neve, ovos e garrafas de água que o usuário joga causam dano adicional ao Hamon.",
-  "hamonSkill.animal_infusion.name": "Infusão Animal",
-  "hamonSkill.animal_infusion.desc": "Permite que o usuário também infunda animais e ovos de tartaruga com Hamon.",
   "hamonSkill.arrow_infusion.name": "Infusão de Flecha",
   "hamonSkill.arrow_infusion.desc": "Flechas e tridentes disparados pelo usuário causam dano adicional ao Hamon.",
   "hamonSkill.zoom_punch.name": "Soco Estendido",

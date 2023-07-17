@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -30,6 +31,7 @@ import com.github.standobyte.jojo.capability.entity.EntityUtilCap;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.ProjectileHamonChargeCap;
 import com.github.standobyte.jojo.capability.entity.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.SoulEntity;
@@ -60,7 +62,7 @@ import com.github.standobyte.jojo.power.bowcharge.BowChargeEffectInstance;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonCharge;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -436,12 +438,7 @@ public class GameplayEventHandler {
     public static void onWorldTick(WorldTickEvent event) {
         if (event.side == LogicalSide.SERVER && event.phase == TickEvent.Phase.END) {
             ((ServerWorld) event.world).getAllEntities().forEach(entity -> {
-                entity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> {
-                    if (cap.hamonBaseDmg > 0 && entity.canUpdate()) {
-                        HamonPowerType.createHamonSparkParticles(entity.level, null, 
-                                entity.getX(), entity.getY(0.5), entity.getZ(), cap.getHamonDamage());
-                    }
-                });
+                entity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
             });
 
             ((ServerWorld) event.world).getChunkSource().chunkMap.getChunks().forEach(chunkHolder -> {
@@ -1309,11 +1306,10 @@ public class GameplayEventHandler {
         if (!entity.level.isClientSide()) {
             if (entity instanceof ProjectileEntity) {
                 ProjectileEntity projectile = (ProjectileEntity) entity;
-                Entity shooter = projectile.getOwner();
-                if (shooter instanceof LivingEntity) {
-                    LivingEntity user = (LivingEntity) shooter;
+                if (projectile.getOwner() instanceof LivingEntity) {
+                    LivingEntity shooter = (LivingEntity) projectile.getOwner();
                     if (projectile instanceof AbstractArrowEntity) {
-                        IStandPower.getStandPowerOptional(user).ifPresent(stand -> {
+                        IStandPower.getStandPowerOptional(shooter).ifPresent(stand -> {
                             BowChargeEffectInstance<?, ?> bowCharge = stand.getBowChargeEffect();
                             if (bowCharge != null) {
                                 bowCharge.onArrowShot((AbstractArrowEntity) projectile);
@@ -1321,63 +1317,90 @@ public class GameplayEventHandler {
                         });
                     }
                     
-                    projectile.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(projCharge -> {
-                        // projectiles charges by a hamon user
-                        INonStandPower.getNonStandPowerOptional(user).ifPresent(power -> {
-                            power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                                if (projectile instanceof AbstractArrowEntity && !isChargedInOtherWay(projectile) 
-                                        && hamon.isSkillLearned(ModHamonSkills.ARROW_INFUSION.get())) {
-                                    hamon.consumeHamonEnergyTo(efficiency -> {
-                                        projCharge
-                                        .withBaseDmg(1.5F * efficiency)
-                                        .withMaxChargeTicks(10)
-                                        .withSpentEnergy(Math.min(power.getEnergy(), 1000));
-                                        return null;
-                                    }, 1000);
-                                }
-                                else if (hamon.isSkillLearned(ModHamonSkills.THROWABLES_INFUSION.get())) {
-                                    EntityType<?> type = projectile.getType();
-                                    if (type == EntityType.SNOWBALL) {
+                    ProjectileChargeProperties hamonChargeProperties = ProjectileChargeProperties.getChargeProperties(projectile);
+                    if (hamonChargeProperties != null) {
+                        projectile.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(projCharge -> {
+                            
+                            // projectiles charged by a hamon user
+                            INonStandPower.getNonStandPowerOptional(shooter).ifPresent(power -> {
+                                power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
+                                    AbstractHamonSkill skillRequired = projectile instanceof AbstractArrowEntity
+                                            ? ModHamonSkills.ARROW_INFUSION.get() : ModHamonSkills.THROWABLES_INFUSION.get();
+                                    if (hamon.isSkillLearned(skillRequired)) {
                                         hamon.consumeHamonEnergyTo(efficiency -> {
-                                            projCharge
-                                            .withBaseDmg(0.75F * efficiency)
-                                            .withMaxChargeTicks(25)
-                                            .withSpentEnergy(Math.min(power.getEnergy(), 600));
+                                            hamonChargeProperties.applyCharge(projCharge, efficiency, power);
+                                            projCharge.setMultiplyWithUserStrength(true);
                                             return null;
-                                        }, 600);
+                                        }, hamonChargeProperties.energyRequired);
                                     }
-                                    else if (type == EntityType.EGG) {
-                                        hamon.consumeHamonEnergyTo(efficiency -> {
-                                            projCharge
-                                            .withBaseDmg(0.75F * efficiency)
-                                            .withInfiniteChargeTime()
-                                            .withSpentEnergy(Math.min(power.getEnergy(), 400));
-                                            return null;
-                                        }, 400);
-                                    }
-                                    else if (type == EntityType.POTION) {
-                                        hamon.consumeHamonEnergyTo(efficiency -> {
-                                            projCharge
-                                            .withBaseDmg(1.0F * efficiency)
-                                            .withMaxChargeTicks(20)
-                                            .withSpentEnergy(Math.min(power.getEnergy(), 800));
-                                            return null;
-                                        }, 800);
-                                    }
+                                });
+                            });
+
+                            // projectiles charged by an infused entity
+                            shooter.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                                if (cap.hasHamonCharge()) {
+                                    HamonCharge hamonCharge = cap.getHamonCharge();
+                                    hamonChargeProperties.applyCharge(projCharge, hamonCharge.getTickDamage() * 5, null);
+                                    projCharge.setMultiplyWithUserStrength(false);
                                 }
                             });
                         });
-                        
-                        // todo: projectiles charged by an infused entity
-                    });
+                    }
                 }
             }
         }
     }
     
+    private static final class ProjectileChargeProperties {
+        public static final ProjectileChargeProperties ABSTRACT_ARROW = new ProjectileChargeProperties(1.5F, OptionalInt.of(10), 1000);
+        public static final ProjectileChargeProperties SNOWBALL = new ProjectileChargeProperties(0.75F, OptionalInt.of(25), 600);
+        public static final ProjectileChargeProperties EGG = new ProjectileChargeProperties(0.75F, OptionalInt.empty(), 400);
+        public static final ProjectileChargeProperties SPLASH_POTION = new ProjectileChargeProperties(1.0F, OptionalInt.of(20), 800);
+        
+        private final float baseMultiplier;
+        private final OptionalInt chargeTicks;
+        public final float energyRequired;
+        
+        private ProjectileChargeProperties(float baseMultiplier, OptionalInt chargeTicks, float energyRequired) {
+            this.baseMultiplier = baseMultiplier;
+            this.chargeTicks = chargeTicks;
+            this.energyRequired = energyRequired;
+        }
+        
+        @Nullable 
+        public static ProjectileChargeProperties getChargeProperties(Entity projectile) {
+            if (projectile instanceof AbstractArrowEntity && !isChargedInOtherWay(projectile)) {
+                return ABSTRACT_ARROW;
+            }
+            EntityType<?> type = projectile.getType();
+            if (type == EntityType.SNOWBALL) {
+                return SNOWBALL;
+            }
+            else if (type == EntityType.EGG) {
+                return EGG;
+            }
+            else if (type == EntityType.POTION) {
+                return SPLASH_POTION;
+            }
+            return null;
+        }
+        
+        public void applyCharge(ProjectileHamonChargeCap chargeCap, float damageMultiplier, @Nullable INonStandPower spendingEnergy) {
+            chargeCap.setBaseDmg(this.baseMultiplier * damageMultiplier);
+            if (chargeTicks.isPresent()) {
+                chargeCap.setMaxChargeTicks(chargeTicks.getAsInt());
+            }
+            else {
+                chargeCap.setInfiniteChargeTime();
+            }
+            if (spendingEnergy != null) {
+                chargeCap.setSpentEnergy(Math.min(spendingEnergy.getEnergy(), energyRequired));
+            }
+        }
+    }
+    
     public static boolean projectileCanBeChargedWithHamon(Entity entity) {
-        return entity instanceof AbstractArrowEntity && !isChargedInOtherWay(entity) || 
-                entity.getType() == EntityType.SNOWBALL || entity.getType() == EntityType.EGG || entity.getType() == EntityType.POTION;
+        return ProjectileChargeProperties.getChargeProperties(entity) != null;
     }
     
     private static boolean isChargedInOtherWay(Entity projectile) {
@@ -1390,28 +1413,39 @@ public class GameplayEventHandler {
         if (rayTrace.getType() == RayTraceResult.Type.ENTITY) {
             Entity entity = event.getEntity();
             entity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> {
-                if (cap.hamonBaseDmg > 0 && entity instanceof ProjectileEntity) {
-                    ProjectileEntity projectile = (ProjectileEntity) entity;
-                    addHamonDamageToProjectile((EntityRayTraceResult) rayTrace, 
-                            projectile.getOwner(), projectile, cap.getHamonDamage(), cap.spentEnergy);
-                }
+                cap.addHamonDamageToProjectile((EntityRayTraceResult) rayTrace);
             });
         }
     }
     
-    private static void addHamonDamageToProjectile(EntityRayTraceResult rayTrace, Entity thrower, Entity thrown, 
-            float damage, float spentEnergy) {
-        if (thrown.level.isClientSide() || damage <= 0 || !(thrower instanceof LivingEntity)) {
-            return;
-        }
-        INonStandPower.getNonStandPowerOptional((LivingEntity) thrower).ifPresent(power -> {
-            power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                DamageUtil.dealHamonDamage(rayTrace.getEntity(), damage, thrown, thrower);
-                hamon.hamonPointsFromAction(HamonStat.STRENGTH, spentEnergy);
-            });
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onExplosionDetonate(ExplosionEvent.Detonate event) {
+        Explosion explosion = event.getExplosion();
+        
+        event.getAffectedEntities().forEach(entity -> {
+            if (entity instanceof LivingEntity) {
+                ((LivingEntity) entity).getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(util -> {
+                    util.setLatestExplosion(explosion);
+                });
+            }
         });
+        
+        if (!(explosion instanceof HamonBlastExplosion)) {
+            Entity exploder = explosion.getExploder();
+            if (exploder != null) {
+                exploder.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                    if (cap.hasHamonCharge()) {
+                        HamonCharge hamonCharge = cap.getHamonCharge();
+                        float radius = CommonReflection.getRadius(explosion);
+                        HamonPowerType.hamonExplosion(exploder.level, exploder, 
+                                hamonCharge.getUserServerSide(exploder.level), explosion.getPosition(),
+                                radius, hamonCharge.getTickDamage());
+                    }
+                });
+            }
+        }
     }
-
+    
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onLivingFall(LivingFallEvent event) {
         if (event.getDistance() > 3) {
@@ -1502,34 +1536,6 @@ public class GameplayEventHandler {
             }
             return false;
         });
-    }
-    
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onExplosionDetonate(ExplosionEvent.Detonate event) {
-        Explosion explosion = event.getExplosion();
-        
-        event.getAffectedEntities().forEach(entity -> {
-            if (entity instanceof LivingEntity) {
-                ((LivingEntity) entity).getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(util -> {
-                    util.setLatestExplosion(explosion);
-                });
-            }
-        });
-        
-        if (!(explosion instanceof HamonBlastExplosion)) {
-            Entity exploder = explosion.getExploder();
-            if (exploder != null) {
-                exploder.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                    if (cap.hasHamonCharge()) {
-                        HamonCharge hamonCharge = cap.getHamonCharge();
-                        float radius = CommonReflection.getRadius(explosion);
-                        HamonPowerType.hamonExplosion(exploder.level, exploder, 
-                                hamonCharge.getUserServerSide(exploder.level), explosion.getPosition(),
-                                radius, hamonCharge.getTickDamage());
-                    }
-                });
-            }
-        }
     }
     
     @SubscribeEvent

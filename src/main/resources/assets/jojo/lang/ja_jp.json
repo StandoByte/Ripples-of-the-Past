@@ -500,8 +500,6 @@
   "hamonSkill.plant_infusion.desc": "一時的に植物のブロックに波紋を送り込む。送り込まれた間、モブやプレイヤーが触れると波紋ダメージを受ける。",
   "hamonSkill.throwables_infusion.name": "投擲物への波紋注入",
   "hamonSkill.throwables_infusion.desc": "使用者が投げる雪玉、卵、水瓶は追加の波紋ダメージを与える。",
-  "hamonSkill.animal_infusion.name": "動物への波紋注入",
-  "hamonSkill.animal_infusion.desc": "使用者は動物や亀の卵にも波紋を注入することができる。",
   "hamonSkill.arrow_infusion.name": "矢への波紋注入",
   "hamonSkill.arrow_infusion.desc": "使用者が放つ矢やトライデントは追加の波紋ダメージを与える。",
   "hamonSkill.zoom_punch.name": "ズームパンチ",

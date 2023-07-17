@@ -619,8 +619,6 @@
  "hamonSkill.plant_infusion.desc": "玩家用波纹向方块灌注波纹。当它处于被灌注波纹的时侯，生物和玩家会在触碰它时受到波纹伤害",
  "hamonSkill.throwables_infusion.name": "投掷灌注",
  "hamonSkill.throwables_infusion.desc": "玩家投掷的雪球、鸡蛋和水瓶等投掷物都会灌注波纹进行攻击伤害。",
- "hamonSkill.animal_infusion.name": "动物灌注",
- "hamonSkill.animal_infusion.desc": "允许玩家向生物和海龟蛋灌注波纹",
  "hamonSkill.arrow_infusion.name": "箭矢灌注",
  "hamonSkill.arrow_infusion.desc": "玩家发射出的箭矢和三叉戟会造成额外的波纹伤害。",
  "hamonSkill.zoom_punch.name": "伸缩脱臼拳",

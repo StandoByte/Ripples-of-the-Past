@@ -496,8 +496,6 @@
   "hamonSkill.plant_infusion.desc": "L'utente carica temporaneamente un blocco di una pianta con Hamon. Mentre è carico, mob e giocatori subiranno danni dall'Hamon toccandolo.",
   "hamonSkill.throwables_infusion.name": "Infusione di Lanciabili",
   "hamonSkill.throwables_infusion.desc": "Palle di neve, uova e bottiglie d'acqua lanciate dall'utilizzatore infliggono ulteriori danni Hamon.",
-  "hamonSkill.animal_infusion.name": "Infusione Animale",
-  "hamonSkill.animal_infusion.desc": "Consente all'utente di infondere anche animali e uova di tartaruga con Hamon.",
   "hamonSkill.arrow_infusion.name": "Infusione Freccie",
   "hamonSkill.arrow_infusion.desc": "Frecce e tridenti lanciati dall'utilizzatore infliggono ulteriori danni Hamon.",
   "hamonSkill.zoom_punch.name": "Pugno Zoom",

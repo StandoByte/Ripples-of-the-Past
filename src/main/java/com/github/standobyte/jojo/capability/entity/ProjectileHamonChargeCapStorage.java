@@ -10,18 +10,11 @@ public class ProjectileHamonChargeCapStorage implements IStorage<ProjectileHamon
 
     @Override
     public INBT writeNBT(Capability<ProjectileHamonChargeCap> capability, ProjectileHamonChargeCap instance, Direction side) {
-        CompoundNBT cnbt = new CompoundNBT();
-        cnbt.putFloat("HamonDamage", instance.hamonBaseDmg);
-        cnbt.putInt("ChargeTicks", instance.maxChargeTicks);
-        cnbt.putFloat("SpentEnergy", instance.spentEnergy);
-        return cnbt;
+        return instance.toNBT();
     }
 
     @Override
     public void readNBT(Capability<ProjectileHamonChargeCap> capability, ProjectileHamonChargeCap instance, Direction side, INBT nbt) {
-        CompoundNBT cnbt = (CompoundNBT) nbt;
-        instance.hamonBaseDmg = cnbt.getFloat("HamonDamage");
-        instance.maxChargeTicks = cnbt.getInt("ChargeTicks");
-        instance.spentEnergy = cnbt.getFloat("SpentEnergy");
+        instance.fromNBT((CompoundNBT) nbt);
     }
 }

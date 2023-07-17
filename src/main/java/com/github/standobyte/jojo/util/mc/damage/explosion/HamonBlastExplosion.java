@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.util.mc.damage.explosion;
 
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
+import com.github.standobyte.jojo.util.mc.damage.DamageUtil.HamonAttackProperties;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.util.DamageSource;
@@ -33,7 +34,7 @@ public class HamonBlastExplosion extends CustomExplosion {
     
     @Override
     protected void hurtEntity(Entity entity, float damage, double knockback, Vector3d vecToEntityNorm) {
-        DamageUtil.dealHamonDamage(entity, damage, getSourceMob(), null, attack -> attack.noSrcEntityHamonMultiplier());
+        DamageUtil.dealHamonDamage(entity, damage, getSourceMob(), null, HamonAttackProperties::noSrcEntityHamonMultiplier);
     }
     
     @Override
