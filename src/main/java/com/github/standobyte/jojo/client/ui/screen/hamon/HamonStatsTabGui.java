@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.client.ui.screen.hamon;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -13,7 +14,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonMeditationPacket;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData.Exercise;
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Streams;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -68,26 +69,25 @@ public class HamonStatsTabGui extends HamonTabGui {
         breathingDeteriorationLines = minecraft.font.split(new TranslationTextComponent("hamon.breathing_stat.desc3"), textWidth);
         breathingStatGapLines = minecraft.font.split(new TranslationTextComponent("hamon.breathing_stat.desc4", JojoModConfig.getCommonConfigInstance(true).breathingStatGap.get()), textWidth);
         statLimitTooltip = minecraft.font.split(new TranslationTextComponent("hamon.stat_limited"), 150);
-        meditationTooltip = minecraft.font.split(new TranslationTextComponent("hamon.meditation_button", 
-                new KeybindTextComponent("key.sneak"), new KeybindTextComponent("jojo.key.hamon_skills_window")), 120);
+        meditationTooltip = Streams.concat(
+                minecraft.font.split(new TranslationTextComponent("hamon.meditation_button", new KeybindTextComponent("key.sneak"), new KeybindTextComponent("jojo.key.hamon_skills_window")),
+                        150).stream(),
+                minecraft.font.split(new TranslationTextComponent("hamon.meditation_button.stability_hint").withStyle(TextFormatting.GRAY, TextFormatting.ITALIC),
+                        150).stream())
+                .collect(Collectors.toList());
     }
 
     @Override
-    void addButtons() {
-        screen.addButton(abandonTrainingButton = new HamonScreenButton(screen.windowPosX() + 13, screen.windowPosY() + 999, 204, 20, 
+    protected void addButtons() {
+        addButton(abandonTrainingButton = new HamonScreenButton(screen.windowPosX() + 13, screen.windowPosY() + 999, 204, 20, 
                 new TranslationTextComponent("hamon.abandon.tab"), button -> {
                     screen.abandonTrainingTab.setPrevTab(this);
                     screen.selectTab(screen.abandonTrainingTab);
                 }));
     }
-    
-    @Override
-    List<HamonScreenButton> getButtons() {
-        return ImmutableList.of(abandonTrainingButton);
-    }
 
     @Override
-    protected void drawActualContents(HamonScreen screen, MatrixStack matrixStack, int mouseX, int mouseY) {
+    protected void drawActualContents(HamonScreen screen, MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
         minecraft.getTextureManager().bind(HamonScreen.WINDOW);
         float breathingTraining = screen.hamon.getBreathingLevel();
         RenderSystem.enableBlend();
@@ -202,28 +202,35 @@ public class HamonStatsTabGui extends HamonTabGui {
         int textX = intScrollX + 5;
         int textY = intScrollY + 6;
         strengthStatY = textY;
+        
         drawString(matrixStack, minecraft.font, new TranslationTextComponent("hamon.strength_level", screen.hamon.getHamonStrengthLevel(), HamonData.MAX_STAT_LEVEL), textX - 3, textY, 0xFFFFFF);
+        
         textY += 2;
         for (int i = 0; i < strengthDescLines.size(); i++) {
             textY += minecraft.font.lineHeight;
             minecraft.font.draw(matrixStack, strengthDescLines.get(i), (float) textX, (float) textY, 0xFFFFFF);
         }
+        
         textY += 15;
         controlStatY = textY;
+        
         drawString(matrixStack, minecraft.font, new TranslationTextComponent("hamon.control_level", screen.hamon.getHamonControlLevel(), HamonData.MAX_STAT_LEVEL), textX - 3, textY, 0xFFFFFF);
         textY += 2;
         for (int i = 0; i < controlDescLines.size(); i++) {
             textY += minecraft.font.lineHeight;
             minecraft.font.draw(matrixStack, controlDescLines.get(i), (float) textX, (float) textY, 0xFFFFFF);
         }
+        
         textY += 15;
         breathingStatY = textY;
         drawString(matrixStack, minecraft.font, new TranslationTextComponent("hamon.breathing_level", (int) screen.hamon.getBreathingLevel(), (int) HamonData.MAX_BREATHING_LEVEL), textX - 3, textY, 0xFFFFFF);
+        
         textY += 2;
         for (int i = 0; i < breathingDescLines.size(); i++) {
             textY += minecraft.font.lineHeight;
             minecraft.font.draw(matrixStack, breathingDescLines.get(i), (float) textX, (float) textY, 0xFFFFFF);
         }
+        
         textY += 11;
         exercises1Y = textY;
         AbstractGui.drawCenteredString(matrixStack, minecraft.font, new TranslationTextComponent("hamon.mining_exercise"), intScrollX + 60, textY, 0xFFFFFF);
@@ -232,12 +239,14 @@ public class HamonStatsTabGui extends HamonTabGui {
         exercises2Y = textY;
         AbstractGui.drawCenteredString(matrixStack, minecraft.font, new TranslationTextComponent("hamon.swimming_exercise"), intScrollX + 60, textY, 0xFFFFFF);
         AbstractGui.drawCenteredString(matrixStack, minecraft.font, new TranslationTextComponent("hamon.meditation"), intScrollX + 156, textY, 0xFFFFFF);
+        
         textY += 11;
         exercisesAvgY = textY;
         for (int i = 0; i < exercisesDescLines.size(); i++) {
             textY += minecraft.font.lineHeight;
             minecraft.font.draw(matrixStack, exercisesDescLines.get(i), (float) textX, (float) textY, 0xFFFFFF);
         }
+        
         textY += 4;
         if (JojoModConfig.getCommonConfigInstance(true).breathingTrainingDeterioration.get()) {
             for (int i = 0; i < this.breathingDeteriorationLines.size(); i++) {
@@ -249,6 +258,7 @@ public class HamonStatsTabGui extends HamonTabGui {
             textY += minecraft.font.lineHeight;
             minecraft.font.draw(matrixStack, breathingStatGapLines.get(i), (float) textX, (float) textY, 0xFFFFFF);
         }
+        
         maxY = textY + 39 - intScrollY;
         abandonTrainingButton.setY(screen.windowPosY() + textY + 30 - intScrollY);
     }

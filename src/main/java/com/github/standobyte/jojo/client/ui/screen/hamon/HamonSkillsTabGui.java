@@ -21,7 +21,6 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClHamonResetSkillsB
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -56,27 +55,20 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
     }
 
     @Override
-    void addButtons() {
-        learnButton = new HamonScreenButton(screen.windowPosX() + 150, screen.windowPosY() + 92, 64, 20, new TranslationTextComponent("hamon.learnButton"), button -> {
+    protected void addButtons() {
+        addButton(learnButton = new HamonScreenButton(screen.windowPosX() + 150, screen.windowPosY() + 92, 64, 20, new TranslationTextComponent("hamon.learnButton"), button -> {
             if (selectedSkill != null) {
                 PacketManager.sendToServer(new ClHamonLearnButtonPacket(selectedSkill.getHamonSkill()));
                 screen.clickedOnSkill = true;
             }
-        });
-        screen.addButton(learnButton);
-
-        creativeResetButton = new HamonScreenButton(screen.windowPosX() + 16, screen.windowPosY() + 92, 64, 20, new TranslationTextComponent("hamon.resetButton"), button -> {
+        }));
+        
+        addButton(creativeResetButton = new HamonScreenButton(screen.windowPosX() + 16, screen.windowPosY() + 92, 64, 20, new TranslationTextComponent("hamon.resetButton"), button -> {
             PacketManager.sendToServer(new ClHamonResetSkillsButtonPacket(getSkillsType()));
-        });
-        screen.addButton(creativeResetButton);
+        }));
     }
     
     protected abstract HamonSkillsTab getSkillsType();
-    
-    @Override
-    List<HamonScreenButton> getButtons() {
-        return ImmutableList.of(learnButton, creativeResetButton);
-    }
 
     @Override
     protected void drawOnBackground(HamonScreen screen, MatrixStack matrixStack, int mouseX, int mouseY) {
@@ -86,7 +78,7 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
     }
 
     @Override
-    protected void drawActualContents(HamonScreen screen, MatrixStack matrixStack, int mouseX, int mouseY) {
+    protected void drawActualContents(HamonScreen screen, MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
         renderSkillTrees(screen, matrixStack, mouseX, mouseY);
     }
     
@@ -121,12 +113,13 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
                     skillElement.blitBgSquareRequirement(matrixStack, intScrollX, intScrollY);
                     return true;
                 })) {
-                    for (HamonTabGui tab : screen.selectableTabs) {
+                    screen.forEachTabUntil(tab -> {
                         if (tab != this && tab instanceof HamonSkillsTabGui && 
                                 ((HamonSkillsTabGui) tab).findSkillSquare(skill).isPresent()) {
                             screen.addSkillRequirementTab(tab);
                         }
-                    }
+                        return false;
+                    });
                 }
 //                findSkillSquare(skill).ifPresent(skillElement -> {
 //                    minecraft.getTextureManager().bind(HAMON_SKILLS);
@@ -250,18 +243,17 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
             for (HamonSkillGuiElement requirement : skillRequirements) {
                 if (requirement.isMouseOver(intScrollX, intScrollY, (int) mouseX, (int) mouseY)) {
                     AbstractHamonSkill skill = requirement.getHamonSkill();
-                    for (HamonTabGui tab : screen.selectableTabs) {
+                    return screen.forEachTabUntil(tab -> {
                         if (tab instanceof HamonSkillsTabGui) {
-                            if (GeneralUtil.orElseFalse(((HamonSkillsTabGui) tab).findSkillSquare(skill), skillElement -> {
+                            return GeneralUtil.orElseFalse(((HamonSkillsTabGui) tab).findSkillSquare(skill), skillElement -> {
                                 screen.selectTab(tab);
                                 ((HamonSkillsTabGui) tab).selectSkill(skillElement);
                                 screen.clickedOnSkill = true;
                                 return true;
-                            })) {
-                                return true;
-                            }
+                            });
                         }
-                    }
+                        return false;
+                    });
                 }
             }
         }
@@ -312,7 +304,7 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
 
         selectedSkillDesc = guiElement != null ? createSkillDesc(guiElement.getHamonSkill()) : null;
         
-        updateButton();
+        updateButtons();
     }
     
     protected HamonSkillDescBox createSkillDesc(@Nonnull AbstractHamonSkill skill) {
@@ -324,7 +316,7 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
     }
     
     @Override
-    protected void updateButton() {
+    protected void updateButtons() {
         learnButton.visible = false;
         learnButton.active = false;
         if (selectedSkill != null) {
@@ -353,7 +345,7 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
     @Override
     void updateTab() {
         if (selectedSkill != null) {
-            updateButton();
+            updateButtons();
         }
         for (HamonSkillElementLearnable skillElement : skills.values()) {
             skillElement.updateState(screen.hamon, minecraft.player, screen.teacherSkills);

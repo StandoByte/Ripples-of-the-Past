@@ -45,6 +45,7 @@ import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.general.Container;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -83,7 +84,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 @SuppressWarnings("deprecation")
 public class ActionsOverlayGui extends AbstractGui {
-    private static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");
+    public static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");
     public static final ResourceLocation OVERLAY_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/overlay.png");
     private static final ResourceLocation RADIAL_INDICATOR = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/radial_indicator.png");
     
@@ -157,7 +158,9 @@ public class ActionsOverlayGui extends AbstractGui {
         if (power != null) {
             boolean showEnergyBar;
             if (power.getType() == ModPowers.HAMON.get()) {
-                showEnergyBar = power.getEnergy() > 0;
+                showEnergyBar = power.getEnergy() > 0 || GeneralUtil.orElseFalse(power.getTypeSpecificData(ModPowers.HAMON.get()), hamon -> {
+                    return hamon.getBreathStability() < hamon.getMaxBreathStability();
+                });
             }
             else {
                 showEnergyBar = power.getEnergy() < power.getMaxEnergy();

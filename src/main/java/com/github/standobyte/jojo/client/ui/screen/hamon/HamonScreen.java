@@ -5,10 +5,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.ArrayUtils;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.InputHandler;
@@ -44,7 +43,9 @@ public class HamonScreen extends Screen {
     public static final ResourceLocation WINDOW = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/hamon_window.png");
     static final ResourceLocation TABS = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/hamon_window_tabs.png");
     
-    HamonTabGui[] selectableTabs;
+    private final List<HamonTabGui> selectableTabs = new ArrayList<>();
+    private final List<HamonTabGui> allTabs = new ArrayList<>();
+    HamonStatsTabGui statsTab;
     HamonAbandonTabGui abandonTrainingTab;
     HamonTabGui selectedTab;
     private Set<HamonTabGui> tabsWithSkillRequirements = new HashSet<>();
@@ -66,22 +67,29 @@ public class HamonScreen extends Screen {
     protected void init() {
         hamon = INonStandPower.getPlayerNonStandPower(minecraft.player)
                 .getTypeSpecificData(ModPowers.HAMON.get()).get();
+        
+        selectableTabs.clear();
+        allTabs.clear();
         int i = 0;
-        selectableTabs = new HamonTabGui[] {
-                new HamonStatsTabGui(minecraft, this, i++, "hamon.stats.tab"),
-                new HamonGeneralSkillsTabGui(minecraft, this, i++, "hamon.strength_skills.tab", HamonStat.STRENGTH),
-                new HamonGeneralSkillsTabGui(minecraft, this, i++, "hamon.control_skills.tab", HamonStat.CONTROL)
-        };
+        boolean addIntro = true;
+        if (addIntro) {
+            selectableTabs.add(new HamonIntroTabGui(minecraft, this, i++, "hamon.intro.tab"));
+        }
+        selectableTabs.add(statsTab = new HamonStatsTabGui(minecraft, this, i++, "hamon.stats.tab"));
+        selectableTabs.add(new HamonGeneralSkillsTabGui(minecraft, this, i++, "hamon.strength_skills.tab", HamonStat.STRENGTH));
+        selectableTabs.add(new HamonGeneralSkillsTabGui(minecraft, this, i++, "hamon.control_skills.tab", HamonStat.CONTROL));
         if (HamonTechniqueManager.techniquesEnabled(true)) {
-            selectableTabs = ArrayUtils.add(selectableTabs, new HamonTechniqueTabGui(minecraft, this, i++, "hamon.techniques.tab"));
+            selectableTabs.add(new HamonTechniqueTabGui(minecraft, this, i++, "hamon.techniques.tab"));
         }
-        for (HamonTabGui tab : selectableTabs) {
-            tab.addButtons();
-            tab.updateButton();
+        
+        allTabs.addAll(selectableTabs);
+        allTabs.add(abandonTrainingTab = new HamonAbandonTabGui(minecraft, this, i++, "hamon.abandon.tab"));
+        
+        for (HamonTabGui tab : allTabs) {
+            tab.initButtons();
+            tab.updateButtons();
         }
-        abandonTrainingTab = new HamonAbandonTabGui(minecraft, this, i++, "hamon.abandon.tab");
-        abandonTrainingTab.addButtons();
-        selectTab(selectableTabs[0]);
+        selectTab(selectableTabs.get(0));
         PacketManager.sendToServer(new ClHamonWindowOpenedPacket());
     }
     
@@ -170,11 +178,19 @@ public class HamonScreen extends Screen {
     
     void selectTab(HamonTabGui tab) {
         selectedTab = tab;
-        for (HamonTabGui hamonTabGui : selectableTabs) {
+        for (HamonTabGui hamonTabGui : allTabs) {
             hamonTabGui.getButtons().forEach(button -> button.active = hamonTabGui == tab);
         }
-        abandonTrainingTab.getButtons().forEach(button -> button.active = abandonTrainingTab == tab);
         tab.updateTab();
+    }
+    
+    boolean forEachTabUntil(Predicate<HamonTabGui> action) {
+        for (HamonTabGui tab : selectableTabs) {
+            if (action.test(tab)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     @Override
@@ -190,6 +206,7 @@ public class HamonScreen extends Screen {
 
     @Override
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
+        partialTick = minecraft.getFrameTime(); // i was jebaited
         int x = windowPosX();
         int y = windowPosY();
         screenX = x;

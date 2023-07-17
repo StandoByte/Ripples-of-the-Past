@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -133,7 +134,7 @@ public abstract class HamonTabGui extends AbstractGui {
         
         RenderSystem.enableDepthTest();
         RenderSystem.enableRescaleNormal();
-        drawActualContents(screen, matrixStack, mouseX - (int) xOffset, mouseY - (int) yOffset);
+        drawActualContents(screen, matrixStack, mouseX - (int) xOffset, mouseY - (int) yOffset, partialTick);
         RenderSystem.pushMatrix();
         RenderSystem.translatef(-xOffset, -yOffset, 0);
         renderButtons(matrixStack, mouseX, mouseY, partialTick);
@@ -156,17 +157,33 @@ public abstract class HamonTabGui extends AbstractGui {
         RenderSystem.popMatrix();
     }
     
-    abstract void addButtons();
+    public final void initButtons() {
+        addButtons();
+        if (buttons == null) {
+            buttons = buttonsAdded.build();
+        }
+    }
     
-    protected void updateButton() {}
+    protected abstract void addButtons();
     
-    abstract List<HamonScreenButton> getButtons();
+    private final ImmutableList.Builder<HamonScreenButton> buttonsAdded = ImmutableList.builder();
+    private List<HamonScreenButton> buttons = null;
+    protected void addButton(HamonScreenButton button) {
+        screen.addButton(button);
+        buttonsAdded.add(button);
+    }
+    
+    protected void updateButtons() {}
+    
+    List<HamonScreenButton> getButtons() {
+        return buttons;
+    }
 
     protected void drawOnBackground(HamonScreen screen, MatrixStack matrixStack, int mouseX, int mouseY) {}
 
     protected abstract void drawText(MatrixStack matrixStack);
 
-    protected abstract void drawActualContents(HamonScreen screen, MatrixStack matrixStack, int mouseX, int mouseY);
+    protected abstract void drawActualContents(HamonScreen screen, MatrixStack matrixStack, int mouseX, int mouseY, float partialTick);
     
     protected void drawDesc(MatrixStack matrixStack) {
         ClientUtil.drawLines(matrixStack, minecraft.font, descLines, 

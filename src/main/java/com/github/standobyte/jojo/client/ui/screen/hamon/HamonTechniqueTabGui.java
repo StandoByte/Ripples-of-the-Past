@@ -199,14 +199,14 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
     }
     
     @Override
-    protected void updateButton() {
+    protected void updateButtons() {
         if (isLocked()) {
             learnButton.visible = false;
             creativeResetButton.visible = false;
             pickTechniqueButtons.forEach(button -> button.visible = false);
         }
         else {
-            super.updateButton();
+            super.updateButtons();
             this.technique = screen.hamon.getCharacterTechnique();
             if (learnButton.visible && technique == null
                     && getSelectedSkill().getHamonSkill() instanceof CharacterTechniqueHamonSkill) {
@@ -240,11 +240,11 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
     }
     
     @Override
-    protected void drawActualContents(HamonScreen screen, MatrixStack matrixStack, int mouseX, int mouseY) {
+    protected void drawActualContents(HamonScreen screen, MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
         if (!isLocked()) {
             availableHamonTechniques.values().forEach(technique -> 
             technique.render(matrixStack, screen.hamon, intScrollX, intScrollY, mouseX, mouseY, selectedTechnique == technique.technique));
-            super.drawActualContents(screen, matrixStack, mouseX, mouseY);
+            super.drawActualContents(screen, matrixStack, mouseX, mouseY, partialTick);
         }        drawTechniqueSlots(matrixStack, mouseX, mouseY);
     }
     
@@ -263,7 +263,7 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
                 if (GeneralUtil.orElseFalse(slot.getSkillElement(), skillSlot -> {
                     if (skillSlot.isMouseOver(intScrollX, intScrollY, (int) mouseX, (int) mouseY)) {
                         AbstractHamonSkill skill = skillSlot.getHamonSkill();
-                        for (HamonTabGui tab : screen.selectableTabs) {
+                        screen.forEachTabUntil(tab -> {
                             if (tab instanceof HamonSkillsTabGui) {
                                 Map<AbstractHamonSkill, HamonSkillElementLearnable> tabSkills = ((HamonSkillsTabGui) tab).skills;
                                 if (tabSkills.containsKey(skill)) {
@@ -274,7 +274,8 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
                                     return true;
                                 }
                             }
-                        }
+                            return false;
+                        });
                     }
                     return false;
                 })) {
@@ -318,7 +319,7 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
             CharacterHamonTechnique newTechnique = screen.hamon.getCharacterTechnique();
             this.technique = newTechnique;
             fillSkillLines();
-            updateButton();
+            updateButtons();
             
 
 //            for (HamonSkillElementLearnable skillElement : skills.values()) {

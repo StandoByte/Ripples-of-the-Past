@@ -1269,6 +1269,10 @@ public class HamonData extends TypeSpecificData {
             }
         }
         isBeingSuffocated = false;
+        
+        if (user.getAirSupply() <= -19) {
+            setBreathStability(0);
+        }
     }
     
     public void suffocateTick(float suffocationSpeed) {
