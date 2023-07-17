@@ -326,12 +326,12 @@
   "jojo.key.hamon_skills_window": "Hamon Skills",
   
   "key.categories.jojo.hud": "JoJo HUD",
-  "jojo.key.stand_mode": "Mode: Stand",
-  "jojo.key.non_stand_mode": "Mode: Non-Stand Power",
+  "jojo.key.stand_mode": "HUD Mode: Stand",
+  "jojo.key.non_stand_mode": "HUD Mode: Non-Stand Power",
   "jojo.key.edit_hud": "Edit Hotbars Layout",
   "jojo.key.disable_hotbars": "(hold) Disable Hotbars",
-  "jojo.key.attack_hotbar": "(hold + scroll) Attack Hotbar",
-  "jojo.key.ability_hotbar": "(hold + scroll) Ability Hotbar",
+  "jojo.key.attack_hotbar": "(hold + 1-9/scroll) Select Attack",
+  "jojo.key.ability_hotbar": "(hold + 1-9/scroll) Select Ability",
   
   "key.categories.jojo.hud.alternative": "JoJo HUD (Alternative controls)",
   "jojo.key.scroll_mode": "Switch Mode",
