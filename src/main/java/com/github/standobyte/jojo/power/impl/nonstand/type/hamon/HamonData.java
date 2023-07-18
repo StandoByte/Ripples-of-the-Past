@@ -1264,8 +1264,11 @@ public class HamonData extends TypeSpecificData {
     private void tickAirSupply(LivingEntity user) {
         if (!isBeingSuffocated) {
             int air = user.getAirSupply();
-            if (air < user.getMaxAirSupply() - 1 && air > 0 && user.tickCount % 100 < (int) getBreathingLevel() - 1) {
-                user.setAirSupply(air + 1);
+            if (air < user.getMaxAirSupply() - 1 && air > 0) {
+                int airRegainChancePerc = (int) (getBreathingLevel() * getBreathStability() / getMaxBreathStability()) - 1;
+                if (user.tickCount % 100 < airRegainChancePerc) {
+                    user.setAirSupply(air + 1);
+                }
             }
         }
         isBeingSuffocated = false;
