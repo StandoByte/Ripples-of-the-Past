@@ -43,8 +43,8 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
     private final List<IReorderingProcessor> tabLockedLines;
     private List<HamonTechniqueSlotElement> techniqueSkillSlots = Collections.emptyList();
     
-    HamonTechniqueTabGui(Minecraft minecraft, HamonScreen screen, int index, String title) {
-        super(minecraft, screen, index, title, -1, -1);
+    HamonTechniqueTabGui(Minecraft minecraft, HamonScreen screen, String title) {
+        super(minecraft, screen, title, -1, -1);
         if (!isLocked()) {
             fillSkillLines();
         }
@@ -169,8 +169,11 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
     @Override
     void drawIcon(MatrixStack matrixStack, int windowX, int windowY, ItemRenderer itemRenderer) {
         if (screen.hamon.getTechniqueData().canLearnNewTechniqueSkill(screen.hamon, minecraft.player)) {
+            int x = tabPositioning.getIconX(windowX, index);
+            int y = tabPositioning.getIconY(windowY, index);
+            
             minecraft.getTextureManager().bind(HamonScreen.WINDOW);
-            blit(matrixStack, windowX - 32 + 7, windowY + getTabY() + 3, 248, 206, 8, 8);
+            blit(matrixStack, x - 6, y - 3, 248, 206, 8, 8);
         }
     }
 

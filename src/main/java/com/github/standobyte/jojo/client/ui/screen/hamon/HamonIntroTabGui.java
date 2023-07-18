@@ -36,8 +36,8 @@ public class HamonIntroTabGui extends HamonTabGui {
     private int bar2RenderTime = -1;
     private int bar3RenderTime = -1;
     
-    HamonIntroTabGui(Minecraft minecraft, HamonScreen screen, int index, String title) {
-        super(minecraft, screen, index, title, -1, 1);
+    HamonIntroTabGui(Minecraft minecraft, HamonScreen screen, String title) {
+        super(minecraft, screen, title, -1, 1);
         int textWidth = HamonScreen.WINDOW_WIDTH - 30;
         aboutName = new TranslationTextComponent("hamon.intro.about.name");
         aboutText = minecraft.font.split(new TranslationTextComponent("hamon.intro.about.text"), textWidth);
@@ -79,7 +79,7 @@ public class HamonIntroTabGui extends HamonTabGui {
         }
         y1 = textY + 11;
         
-        textY += 19;
+        textY += 24;
         for (IReorderingProcessor line : breathTextEnergy) {
             textY += minecraft.font.lineHeight;
             minecraft.font.draw(matrixStack, line, (float) textX, (float) textY, 0xFFFFFF);
@@ -91,7 +91,7 @@ public class HamonIntroTabGui extends HamonTabGui {
         }
         y2 = textY + 36;
         
-        textY += 44;
+        textY += 49;
         for (IReorderingProcessor line : breathTextStability) {
             textY += minecraft.font.lineHeight;
             minecraft.font.draw(matrixStack, line, (float) textX, (float) textY, 0xFFFFFF);
@@ -104,7 +104,7 @@ public class HamonIntroTabGui extends HamonTabGui {
             minecraft.font.draw(matrixStack, line, (float) textX, (float) textY, 0xFFFFFF);
         }
 
-        textY += 16;
+        textY += 15;
         for (IReorderingProcessor line : statsTransitionText) {
             textY += minecraft.font.lineHeight;
             minecraft.font.draw(matrixStack, line, (float) textX, (float) textY, 0xFFFFFF);
@@ -184,7 +184,9 @@ public class HamonIntroTabGui extends HamonTabGui {
     @Override
     void drawIcon(MatrixStack matrixStack, int windowX, int windowY, ItemRenderer itemRenderer) {
         minecraft.getTextureManager().bind(ModPowers.HAMON.get().getIconTexture());
-        blit(matrixStack, windowX - 32 + 13, windowY + getTabY() + 6, 0, 0, 16, 16, 16, 16);
+        int x = tabPositioning.getIconX(windowX, index);
+        int y = tabPositioning.getIconY(windowY, index);
+        blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
     }
     
     

@@ -55,8 +55,8 @@ public class HamonStatsTabGui extends HamonTabGui {
     private int exercises2Y;
     private int exercisesAvgY;
 
-    HamonStatsTabGui(Minecraft minecraft, HamonScreen screen, int index, String title) {
-        super(minecraft, screen, index, title, -1, 1);
+    HamonStatsTabGui(Minecraft minecraft, HamonScreen screen, String title) {
+        super(minecraft, screen, title, -1, 1);
         int textWidth = HamonScreen.WINDOW_WIDTH - 30;
         strengthDescLines = minecraft.font.split(new TranslationTextComponent("hamon.strength_stat.desc"), textWidth);
         controlDescLines = minecraft.font.split(new TranslationTextComponent("hamon.control_stat.desc"), textWidth);
@@ -266,8 +266,10 @@ public class HamonStatsTabGui extends HamonTabGui {
 
     @Override
     void drawIcon(MatrixStack matrixStack, int windowX, int windowY, ItemRenderer itemRenderer) {
-        int iconX = windowX - 32 + 12;
-        int iconY = windowY + getTabY() + 6;
+//        int iconX = windowX - 32 + 12;
+//        int iconY = windowY + getTabY() + 6;
+        int iconX = tabPositioning.getIconX(windowX, index);
+        int iconY = tabPositioning.getIconY(windowY, index);
         minecraft.getTextureManager().bind(HamonSkillsTabGui.HAMON_SKILLS);
         float barRatio = (float) screen.hamon.getHamonStrengthLevel() / (float) HamonData.MAX_STAT_LEVEL;
         blit(matrixStack, iconX + 3, iconY, MathHelper.floor(barRatio * 11F), 16, 229, 0, 22, 32, 256, 256);

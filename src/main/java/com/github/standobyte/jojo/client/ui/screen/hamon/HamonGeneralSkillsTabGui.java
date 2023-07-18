@@ -78,8 +78,8 @@ public class HamonGeneralSkillsTabGui extends HamonSkillsTabGui {
     private final List<IReorderingProcessor> unspentPointsNoTeacherLines;
     private ITextComponent[] skillTreeNames = new ITextComponent[3];
 
-    HamonGeneralSkillsTabGui(Minecraft minecraft, HamonScreen screen, int index, String title, HamonStat skillsType) {
-        super(minecraft, screen, index, title, -1, -1);
+    HamonGeneralSkillsTabGui(Minecraft minecraft, HamonScreen screen, String title, HamonStat skillsType) {
+        super(minecraft, screen, title, -1, -1);
         this.skillsType = skillsType;
         fillSkillLines();
         unspentPointsLines = minecraft.font.split(new TranslationTextComponent("hamon.unspent_points")
@@ -114,14 +114,17 @@ public class HamonGeneralSkillsTabGui extends HamonSkillsTabGui {
     @Override
     void drawIcon(MatrixStack matrixStack, int windowX, int windowY, ItemRenderer itemRenderer) {
         minecraft.getTextureManager().bind(HamonSkillsTabGui.HAMON_SKILLS);
+        int x = tabPositioning.getIconX(windowX, index);
+        int y = tabPositioning.getIconY(windowY, index);
+        
         int texY = skillsType == HamonStat.STRENGTH ? 0 : 64;
-        blit(matrixStack, windowX - 32 + 13, windowY + getTabY() + 6, 16, 16, 128, texY, 64, 64, 256, 256);
+        blit(matrixStack, x, y, 16, 16, 128, texY, 64, 64, 256, 256);
         
         int points = screen.hamon.getSkillPoints(skillsType);
         if (points > 0) {
             minecraft.getTextureManager().bind(HamonScreen.WINDOW);
             int textureX = screen.isTeacherNearby ? 248 : 239;
-            blit(matrixStack, windowX - 32 + 7, windowY + getTabY() + 3, textureX, 206, 8, 8);
+            blit(matrixStack, x - 6, y - 3, textureX, 206, 8, 8);
         }
     }
 

@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.InputHandler;
+import com.github.standobyte.jojo.client.ui.screen.TabPositionType;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonWindowOpenedPacket;
@@ -73,17 +74,21 @@ public class HamonScreen extends Screen {
         int i = 0;
         boolean addIntro = true;
         if (addIntro) {
-            selectableTabs.add(new HamonIntroTabGui(minecraft, this, i++, "hamon.intro.tab"));
+            selectableTabs.add(new HamonIntroTabGui(minecraft, this, "hamon.intro.tab"));
         }
-        selectableTabs.add(statsTab = new HamonStatsTabGui(minecraft, this, i++, "hamon.stats.tab"));
-        selectableTabs.add(new HamonGeneralSkillsTabGui(minecraft, this, i++, "hamon.strength_skills.tab", HamonStat.STRENGTH));
-        selectableTabs.add(new HamonGeneralSkillsTabGui(minecraft, this, i++, "hamon.control_skills.tab", HamonStat.CONTROL));
+        selectableTabs.add(statsTab = new HamonStatsTabGui(minecraft, this, "hamon.stats.tab"));
+        selectableTabs.add(new HamonGeneralSkillsTabGui(minecraft, this, "hamon.strength_skills.tab", HamonStat.STRENGTH));
+        selectableTabs.add(new HamonGeneralSkillsTabGui(minecraft, this, "hamon.control_skills.tab", HamonStat.CONTROL));
         if (HamonTechniqueManager.techniquesEnabled(true)) {
-            selectableTabs.add(new HamonTechniqueTabGui(minecraft, this, i++, "hamon.techniques.tab"));
+            selectableTabs.add(new HamonTechniqueTabGui(minecraft, this, "hamon.techniques.tab"));
+        }
+        
+        for (HamonTabGui tab : selectableTabs) {
+            tab.setPosition(TabPositionType.LEFT, i++);
         }
         
         allTabs.addAll(selectableTabs);
-        allTabs.add(abandonTrainingTab = new HamonAbandonTabGui(minecraft, this, i++, "hamon.abandon.tab"));
+        allTabs.add(abandonTrainingTab = new HamonAbandonTabGui(minecraft, this, "hamon.abandon.tab"));
         
         for (HamonTabGui tab : allTabs) {
             tab.initButtons();

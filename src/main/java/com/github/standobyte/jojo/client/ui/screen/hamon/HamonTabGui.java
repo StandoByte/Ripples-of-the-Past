@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.ui.screen.TabPositionType;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -24,10 +25,12 @@ public abstract class HamonTabGui extends AbstractGui {
     protected static final ResourceLocation ADV_WIDGETS = new ResourceLocation("textures/gui/advancements/widgets.png");
     protected final Minecraft minecraft;
     protected final HamonScreen screen;
-    protected final int tabIndex;
     private final ITextComponent title;
     protected final List<IReorderingProcessor> descLines;
     private final ResourceLocation background;
+    
+    protected TabPositionType tabPositioning;
+    protected int index;
     
     protected double scrollX;
     protected double scrollY;
@@ -39,15 +42,19 @@ public abstract class HamonTabGui extends AbstractGui {
     protected int maxY;
     protected boolean leftUpperCorner;
 
-    HamonTabGui(Minecraft minecraft, HamonScreen screen, int index, String title, int scrollWidth, int scrollHeight) {
+    HamonTabGui(Minecraft minecraft, HamonScreen screen, String title, int scrollWidth, int scrollHeight) {
         this.minecraft = minecraft;
         this.screen = screen;
-        this.tabIndex = index;
         this.title = new TranslationTextComponent(title);
         this.descLines = minecraft.font.split(createTabDescription(title + ".desc"), 200);
         this.background = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/advancements/jojo.png");
         this.maxX = scrollWidth;
         this.maxY = scrollHeight;
+    }
+    
+    public void setPosition(TabPositionType tabPositioning, int index) {
+        this.tabPositioning = tabPositioning;
+        this.index = index;
     }
     
     protected ITextComponent createTabDescription(String key) {
@@ -59,15 +66,12 @@ public abstract class HamonTabGui extends AbstractGui {
     }
 
     void drawTab(MatrixStack matrixStack, int windowX, int windowY, boolean isSelected, boolean red) {
-        int x = windowX - 32 + 4;
-        int y = windowY + getTabY();
-        int textureX = tabIndex > 0 ? 32 : 0;
-        int textureY = 64;
-        textureY += (isSelected) ? 28 : 0;
         minecraft.getTextureManager().bind(HamonScreen.TABS);
-        blit(matrixStack, x, y, textureX, textureY, 32, 28);
+        tabPositioning.draw(matrixStack, screen, windowX, windowY, isSelected, index);
         if (!isSelected && red) {
             minecraft.getTextureManager().bind(HamonScreen.WINDOW);
+            int x = windowX + tabPositioning.getX(index);
+            int y = windowY + tabPositioning.getY(index);
             blit(matrixStack, x + 3, y, 230, 0, 26, 28);
         }
     }
@@ -77,16 +81,10 @@ public abstract class HamonTabGui extends AbstractGui {
     }
 
     boolean isMouseOnTabIcon(int windowX, int windowY, double mouseX, double mouseY) {
-        int i = windowX - 32 + 4;
-        int j = windowY + getTabY();
-        return mouseX > (double)i && mouseX < (double)(i + 28) && mouseY > (double)j && mouseY < (double)(j + 32);
+        return tabPositioning.isMouseOver(windowX, windowY, index, mouseX, mouseY);
     }
 
     void drawIcon(MatrixStack matrixStack, int windowX, int windowY, ItemRenderer itemRenderer) {}
-    
-    protected int getTabY() {
-        return 28 * tabIndex;
-    }
     
     void drawContents(HamonScreen screen, MatrixStack matrixStack, int mouseX, int mouseY, float partialTick, float xOffset, float yOffset) {
         if (!leftUpperCorner) {

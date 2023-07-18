@@ -49,8 +49,8 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
     @Nullable private HamonSkillElementLearnable lastClickedSkill = null;
     private int lastClickDelay;
     
-    HamonSkillsTabGui(Minecraft minecraft, HamonScreen screen, int index, String title, int scrollWidth, int scrollHeight) {
-        super(minecraft, screen, index, title, scrollWidth, scrollHeight);
+    HamonSkillsTabGui(Minecraft minecraft, HamonScreen screen, String title, int scrollWidth, int scrollHeight) {
+        super(minecraft, screen, title, scrollWidth, scrollHeight);
         creativeResetButtonTooltip = minecraft.font.split(new TranslationTextComponent("hamon.reset_creative_only"), 150);
     }
 

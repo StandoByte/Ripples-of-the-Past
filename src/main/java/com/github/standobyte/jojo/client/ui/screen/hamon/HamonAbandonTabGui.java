@@ -16,8 +16,8 @@ public class HamonAbandonTabGui extends HamonTabGui {
     private final List<IReorderingProcessor> descLines;
     private final List<IReorderingProcessor> descLines2;
     
-    HamonAbandonTabGui(Minecraft minecraft, HamonScreen screen, int index, String title) {
-        super(minecraft, screen, index, title, -1, -1);
+    HamonAbandonTabGui(Minecraft minecraft, HamonScreen screen, String title) {
+        super(minecraft, screen, title, -1, -1);
         int textWidth = HamonScreen.WINDOW_WIDTH - 30;
         descLines = minecraft.font.split(new TranslationTextComponent("hamon.abandon.tab.desc"), textWidth);
         descLines2 = minecraft.font.split(new TranslationTextComponent("hamon.abandon.tab.desc2"), textWidth);
