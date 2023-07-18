@@ -144,12 +144,14 @@ public class ForgeBusEventSubscriber {
             IStandPower.getStandPowerOptional(livingTracked).ifPresent(power -> {
                 power.syncWithTrackingOrUser(player);
             });
-            livingTracked.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                cap.onTracking(player);
-            });
             livingTracked.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                 cap.onTracking(player);
             });
+            if (livingTracked instanceof PlayerEntity) {
+                livingTracked.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                    cap.onTracking(player);
+                });
+            }
         }
     }
 
@@ -198,6 +200,9 @@ public class ForgeBusEventSubscriber {
     private static void syncPowerData(PlayerEntity player) {
         INonStandPower.getPlayerNonStandPower(player).syncWithUserOnly();
         IStandPower.getPlayerStandPower(player).syncWithUserOnly();
+        player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+            cap.syncWithClient();
+        });
         PacketManager.sendToClient(new UpdateClientCapCachePacket(), (ServerPlayerEntity) player);
     }
     

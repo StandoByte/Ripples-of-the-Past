@@ -1,5 +1,8 @@
 package com.github.standobyte.jojo.client.ui.screen.hamon;
 
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_THIN_BORDER;
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_WIDTH;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,7 +37,7 @@ public class HamonCharacterTechniqueBox {
                 technique.getPerksOnPick().filter(perk -> perk != null), 
                 (skill, i) -> new HamonSkillElementTechniquePerk(skill, this.x + (int) i * 18, this.y, font))
                 .collect(Collectors.toList());
-        this.width = HamonScreen.WINDOW_WIDTH - HamonScreen.WINDOW_THIN_BORDER * 2 - 16;
+        this.width = WINDOW_WIDTH - WINDOW_THIN_BORDER * 2 - 16;
         this.height = Math.max(name.size() * 9 + 26, 36);
     }
 

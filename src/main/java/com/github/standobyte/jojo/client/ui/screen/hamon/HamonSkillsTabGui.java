@@ -1,5 +1,8 @@
 package com.github.standobyte.jojo.client.ui.screen.hamon;
 
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_THIN_BORDER;
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_UPPER_BORDER;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -201,13 +204,13 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
             }
         }
         if (creativeResetButton.visible && creativeResetButton.isMouseOver(
-                mouseX + screen.windowPosX() + HamonScreen.WINDOW_THIN_BORDER, 
-                mouseY + screen.windowPosY() + HamonScreen.WINDOW_UPPER_BORDER)) {
+                mouseX + screen.windowPosX() + WINDOW_THIN_BORDER, 
+                mouseY + screen.windowPosY() + WINDOW_UPPER_BORDER)) {
             screen.renderTooltip(matrixStack, creativeResetButtonTooltip, mouseX, mouseY);
         }
         if (learnButton.visible && !learnButton.active && skillClosedReason != null) {
-            int x = mouseX + screen.windowPosX() + HamonScreen.WINDOW_THIN_BORDER;
-            int y = mouseY + screen.windowPosY() + HamonScreen.WINDOW_UPPER_BORDER;
+            int x = mouseX + screen.windowPosX() + WINDOW_THIN_BORDER;
+            int y = mouseY + screen.windowPosY() + WINDOW_UPPER_BORDER;
             if (x >= (double)learnButton.x && x < (double)(learnButton.x + learnButton.getWidth())
                     && y >= (double)learnButton.y && y < (double)(learnButton.y + learnButton.getHeight())) {
                 screen.renderTooltip(matrixStack, skillClosedReason, mouseX, mouseY);
@@ -271,7 +274,7 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
             return true;
         }
         if (mouseButton == 1 || !screen.clickedOnSkill && !screen.isDragging() && mouseButton == 0 && 
-                !learnButton.isMouseOver(mouseX + screen.windowPosX() + HamonScreen.WINDOW_THIN_BORDER, mouseY + screen.windowPosY() + HamonScreen.WINDOW_UPPER_BORDER)) {
+                !learnButton.isMouseOver(mouseX + screen.windowPosX() + WINDOW_THIN_BORDER, mouseY + screen.windowPosY() + WINDOW_UPPER_BORDER)) {
             selectSkill(null);
             return true;
         }

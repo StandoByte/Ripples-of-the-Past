@@ -10,11 +10,14 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.ui.screen.TabPositionType;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonWindowOpenedPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClReadHamonBreathTabPacket;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
@@ -46,6 +49,8 @@ public class HamonScreen extends Screen {
     
     private final List<HamonTabGui> selectableTabs = new ArrayList<>();
     private final List<HamonTabGui> allTabs = new ArrayList<>();
+    private HamonTabGui introTab;
+    private boolean introWasRead;
     HamonStatsTabGui statsTab;
     HamonAbandonTabGui abandonTrainingTab;
     HamonTabGui selectedTab;
@@ -68,13 +73,14 @@ public class HamonScreen extends Screen {
     protected void init() {
         hamon = INonStandPower.getPlayerNonStandPower(minecraft.player)
                 .getTypeSpecificData(ModPowers.HAMON.get()).get();
+        introWasRead = minecraft.player.getCapability(PlayerUtilCapProvider.CAPABILITY)
+                .map(cap -> cap.sentNotification(OneTimeNotification.HAMON_BREATH_GUIDE)).orElse(false);
         
         selectableTabs.clear();
         allTabs.clear();
-        int i = 0;
         boolean addIntro = true;
         if (addIntro) {
-            selectableTabs.add(new HamonIntroTabGui(minecraft, this, "hamon.intro.tab"));
+            selectableTabs.add(introTab = new HamonIntroTabGui(minecraft, this, "hamon.intro.tab"));
         }
         selectableTabs.add(statsTab = new HamonStatsTabGui(minecraft, this, "hamon.stats.tab"));
         selectableTabs.add(new HamonGeneralSkillsTabGui(minecraft, this, "hamon.strength_skills.tab", HamonStat.STRENGTH));
@@ -83,9 +89,7 @@ public class HamonScreen extends Screen {
             selectableTabs.add(new HamonTechniqueTabGui(minecraft, this, "hamon.techniques.tab"));
         }
         
-        for (HamonTabGui tab : selectableTabs) {
-            tab.setPosition(TabPositionType.LEFT, i++);
-        }
+        reorderTabs();
         
         allTabs.addAll(selectableTabs);
         allTabs.add(abandonTrainingTab = new HamonAbandonTabGui(minecraft, this, "hamon.abandon.tab"));
@@ -94,8 +98,20 @@ public class HamonScreen extends Screen {
             tab.initButtons();
             tab.updateButtons();
         }
-        selectTab(selectableTabs.get(0));
+        selectTab(introWasRead ? selectableTabs.get(1) : introTab);
         PacketManager.sendToServer(new ClHamonWindowOpenedPacket());
+    }
+    
+    private void reorderTabs() {
+        int i = 0;
+        for (HamonTabGui tab : selectableTabs) {
+            if (introWasRead && tab == introTab) {
+                tab.setPosition(TabPositionType.RIGHT, 0);
+            }
+            else {
+                tab.setPosition(TabPositionType.LEFT, i++);
+            }
+        }
     }
     
     @Override
@@ -182,6 +198,11 @@ public class HamonScreen extends Screen {
     }
     
     void selectTab(HamonTabGui tab) {
+        if (tab != introTab && !introWasRead) {
+            introWasRead = true;
+            PacketManager.sendToServer(new ClReadHamonBreathTabPacket());
+            reorderTabs();
+        }
         selectedTab = tab;
         for (HamonTabGui hamonTabGui : allTabs) {
             hamonTabGui.getButtons().forEach(button -> button.active = hamonTabGui == tab);

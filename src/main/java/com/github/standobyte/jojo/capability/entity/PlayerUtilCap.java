@@ -12,6 +12,7 @@ import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.player.IPlayerAction;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
 import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.NotificationSyncPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDoubleShiftPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerContinuousActionPacket;
@@ -22,6 +23,7 @@ import com.github.standobyte.jojo.util.general.OptionalFloat;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
@@ -184,6 +186,9 @@ public class PlayerUtilCap {
         else {
             notificationsSent.remove(notification);
         }
+        if (!player.level.isClientSide()) {
+            PacketManager.sendToClient(new NotificationSyncPacket(notificationsSent), (ServerPlayerEntity) player);
+        }
     }
     
     public void moveNotificationsSet(PlayerUtilCap cap) {
@@ -193,7 +198,25 @@ public class PlayerUtilCap {
     public static enum OneTimeNotification {
         POWER_CONTROLS,
         HAMON_WINDOW,
-        HIGH_STAND_RANGE
+        HAMON_BREATH_GUIDE,
+        HIGH_STAND_RANGE;
+    }
+    
+    public void notificationsFromNBT(CompoundNBT nbt) {
+        notificationsSent.clear();
+        for (OneTimeNotification flag : OneTimeNotification.values()) {
+            if (nbt.getBoolean(flag.name())) {
+                notificationsSent.add(flag);
+            }
+        }
+    }
+    
+    public CompoundNBT notificationsToNBT() {
+        CompoundNBT notificationsMap = new CompoundNBT();
+        for (OneTimeNotification flag : OneTimeNotification.values()) {
+            notificationsMap.putBoolean(flag.name(), sentNotification(flag));
+        }
+        return notificationsMap;
     }
     
     
@@ -231,6 +254,10 @@ public class PlayerUtilCap {
     public void onTracking(ServerPlayerEntity tracking) {
         PacketManager.sendToClient(new TrKnivesCountPacket(player.getId(), knives), tracking);
         PacketManager.sendToClient(new TrWalkmanEarbudsPacket(player.getId(), walkmanEarbuds), tracking);
+    }
+    
+    public void syncWithClient() {
+        PacketManager.sendToClient(new NotificationSyncPacket(notificationsSent), (ServerPlayerEntity) player);
     }
     
     

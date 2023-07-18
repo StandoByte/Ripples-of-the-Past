@@ -31,7 +31,10 @@ public enum TabPositionType {
         return max;
     }
 
-    public void draw(MatrixStack matrixStack, AbstractGui gui, int offsetX, int offsetY, boolean isSelected, int index) {
+    public void draw(MatrixStack matrixStack, AbstractGui gui, 
+            int offsetX, int offsetY, 
+            int screenWidth, int screenHeight,
+            boolean isSelected, int index) {
         int i = textureX;
         if (index > 0) {
             i += width;
@@ -42,10 +45,10 @@ public enum TabPositionType {
         }
 
         int j = isSelected ? textureY + height : textureY;
-        gui.blit(matrixStack, offsetX + getX(index), offsetY + getY(index), i, j, width, height);
+        gui.blit(matrixStack, offsetX + getX(index, screenWidth), offsetY + getY(index, screenHeight), i, j, width, height);
     }
 
-    public int getX(int index) {
+    public int getX(int index, int screenWidth) {
         switch(this) {
         case ABOVE:
             return (width + 4) * index;
@@ -54,29 +57,29 @@ public enum TabPositionType {
         case LEFT:
             return -width + 4;
         case RIGHT:
-            return 248;
+            return screenWidth - 4;
         default:
             throw new UnsupportedOperationException("Don't know what this tab type is!" + this);
         }
     }
 
-    public int getY(int yndex) {
+    public int getY(int index, int screenHeight) {
         switch(this) {
         case ABOVE:
             return -height + 4;
         case BELOW:
-            return 136;
+            return screenHeight - 4;
         case LEFT:
-            return height * yndex;
+            return height * index;
         case RIGHT:
-            return height * yndex;
+            return height * index;
         default:
             throw new UnsupportedOperationException("Don't know what this tab type is!" + this);
         }
     }
 
-    public int getIconX(int offsetX, int index) {
-        int x = offsetX + getX(index);
+    public int getIconX(int offsetX, int index, int screenWidth) {
+        int x = offsetX + getX(index, screenWidth);
         switch(this) {
         case ABOVE:
             x += 6;
@@ -93,8 +96,8 @@ public enum TabPositionType {
         return x;
     }
     
-    public int getIconY(int offsetY, int index) {
-        int y = offsetY + getY(index);
+    public int getIconY(int offsetY, int index, int screenHeight) {
+        int y = offsetY + getY(index, screenHeight);
         switch(this) {
         case ABOVE:
             y += 9;
@@ -111,9 +114,10 @@ public enum TabPositionType {
         return y;
     }
 
-    public boolean isMouseOver(int offsetX, int offsetY, int index, double mouseX, double mouseY) {
-        int i = offsetX + getX(index);
-        int j = offsetY + getY(index);
+    public boolean isMouseOver(int offsetX, int offsetY, int index, 
+            int screenWidth, int screenHeight, double mouseX, double mouseY) {
+        int i = offsetX + getX(index, screenWidth);
+        int j = offsetY + getY(index, screenHeight);
         return mouseX > i && mouseX < i + width && mouseY > j && mouseY < j + height;
     }
 }

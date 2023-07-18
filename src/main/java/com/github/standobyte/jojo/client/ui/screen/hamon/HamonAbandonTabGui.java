@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.client.ui.screen.hamon;
 
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_WIDTH;
+
 import java.util.List;
 
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -46,7 +48,7 @@ public class HamonAbandonTabGui extends HamonTabGui {
 
     @Override
     protected void drawText(MatrixStack matrixStack) {
-        int textX = intScrollX + 5 + (HamonScreen.WINDOW_WIDTH - 30) / 2;
+        int textX = intScrollX + 5 + (WINDOW_WIDTH - 30) / 2;
         int textY = intScrollY + 2;
         for (IReorderingProcessor line : descLines) {
             textY += 9;

@@ -1,5 +1,8 @@
 package com.github.standobyte.jojo.client.ui.screen.hamon;
 
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_HEIGHT;
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_WIDTH;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -67,11 +70,11 @@ public abstract class HamonTabGui extends AbstractGui {
 
     void drawTab(MatrixStack matrixStack, int windowX, int windowY, boolean isSelected, boolean red) {
         minecraft.getTextureManager().bind(HamonScreen.TABS);
-        tabPositioning.draw(matrixStack, screen, windowX, windowY, isSelected, index);
+        tabPositioning.draw(matrixStack, screen, windowX, windowY, WINDOW_WIDTH, WINDOW_HEIGHT, isSelected, index);
         if (!isSelected && red) {
             minecraft.getTextureManager().bind(HamonScreen.WINDOW);
-            int x = windowX + tabPositioning.getX(index);
-            int y = windowY + tabPositioning.getY(index);
+            int x = windowX + tabPositioning.getX(index, WINDOW_WIDTH);
+            int y = windowY + tabPositioning.getY(index, WINDOW_HEIGHT);
             blit(matrixStack, x + 3, y, 230, 0, 26, 28);
         }
     }
@@ -81,7 +84,7 @@ public abstract class HamonTabGui extends AbstractGui {
     }
 
     boolean isMouseOnTabIcon(int windowX, int windowY, double mouseX, double mouseY) {
-        return tabPositioning.isMouseOver(windowX, windowY, index, mouseX, mouseY);
+        return tabPositioning.isMouseOver(windowX, windowY, index, WINDOW_WIDTH, WINDOW_HEIGHT, mouseX, mouseY);
     }
 
     void drawIcon(MatrixStack matrixStack, int windowX, int windowY, ItemRenderer itemRenderer) {}
@@ -102,7 +105,7 @@ public abstract class HamonTabGui extends AbstractGui {
         RenderSystem.colorMask(true, true, true, true);
         RenderSystem.translatef(0.0F, 0.0F, -950.0F);
         RenderSystem.depthFunc(518);
-        fill(matrixStack, HamonScreen.WINDOW_WIDTH - 18, HamonScreen.WINDOW_HEIGHT - 27, 0, 0, -16777216);
+        fill(matrixStack, WINDOW_WIDTH - 18, WINDOW_HEIGHT - 27, 0, 0, -16777216);
         RenderSystem.depthFunc(515);
         if (background != null)  {
             minecraft.getTextureManager().bind(background);
@@ -222,11 +225,11 @@ public abstract class HamonTabGui extends AbstractGui {
     }
 
     void scroll(double xMovement, double yMovement) {
-        if (maxX - minX > HamonScreen.WINDOW_WIDTH - 8) {
-            scrollX = MathHelper.clamp(scrollX + xMovement, (double)(-(maxX - (HamonScreen.WINDOW_WIDTH - 18))), 0.0D);
+        if (maxX - minX > WINDOW_WIDTH - 8) {
+            scrollX = MathHelper.clamp(scrollX + xMovement, (double)(-(maxX - (WINDOW_WIDTH - 18))), 0.0D);
         }
-        if (maxY - minY > HamonScreen.WINDOW_HEIGHT - 8) {
-            scrollY = MathHelper.clamp(scrollY + yMovement, (double)(-(maxY - (HamonScreen.WINDOW_HEIGHT - 27))), 0.0D);
+        if (maxY - minY > WINDOW_HEIGHT - 8) {
+            scrollY = MathHelper.clamp(scrollY + yMovement, (double)(-(maxY - (WINDOW_HEIGHT - 27))), 0.0D);
         }
     }
 

@@ -1,5 +1,9 @@
 package com.github.standobyte.jojo.client.ui.screen.hamon;
 
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_HEIGHT;
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_THIN_BORDER;
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_WIDTH;
+
 import java.util.List;
 
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -97,12 +101,12 @@ public class HamonGeneralSkillsTabGui extends HamonSkillsTabGui {
             for (int j = 0; j < 4; j++) {
                 BaseHamonSkill skill = skillsOnTab[i][j];
                 int x = 9 + i * 68 + X_OFFSET[j];
-                int y = HamonScreen.WINDOW_HEIGHT - 131 + Y_OFFSET[j];
+                int y = WINDOW_HEIGHT - 131 + Y_OFFSET[j];
                 skills.put(skill, new HamonSkillElementLearnable(skill, 
                         screen.hamon, minecraft.player, screen.teacherSkills, j == 3, x, y));
             }
             skillTreeNamePos[i][0] = 9 + i * 68 + X_OFFSET[0] + 13;
-            skillTreeNamePos[i][1] = HamonScreen.WINDOW_HEIGHT - 131 + Y_OFFSET[0] - 18;
+            skillTreeNamePos[i][1] = WINDOW_HEIGHT - 131 + Y_OFFSET[0] - 18;
         }
     }
     
@@ -114,8 +118,8 @@ public class HamonGeneralSkillsTabGui extends HamonSkillsTabGui {
     @Override
     void drawIcon(MatrixStack matrixStack, int windowX, int windowY, ItemRenderer itemRenderer) {
         minecraft.getTextureManager().bind(HamonSkillsTabGui.HAMON_SKILLS);
-        int x = tabPositioning.getIconX(windowX, index);
-        int y = tabPositioning.getIconY(windowY, index);
+        int x = tabPositioning.getIconX(windowX, index, WINDOW_WIDTH);
+        int y = tabPositioning.getIconY(windowY, index, WINDOW_HEIGHT);
         
         int texY = skillsType == HamonStat.STRENGTH ? 0 : 64;
         blit(matrixStack, x, y, 16, 16, 128, texY, 64, 64, 256, 256);
@@ -159,7 +163,7 @@ public class HamonGeneralSkillsTabGui extends HamonSkillsTabGui {
             drawString(matrixStack, minecraft.font, lvl, intScrollX + 6, intScrollY + 5, 0xFFFFFF);
             ClientUtil.drawRightAlignedString(matrixStack, minecraft.font, new TranslationTextComponent("hamon.skill_points", 
                     new StringTextComponent(String.valueOf(points)).withStyle(points > 0 ? TextFormatting.DARK_GREEN : TextFormatting.DARK_RED)),
-                    intScrollX + HamonScreen.WINDOW_WIDTH - 15 - HamonScreen.WINDOW_THIN_BORDER, intScrollY + 5, 0xFFFFFF);
+                    intScrollX + WINDOW_WIDTH - 15 - WINDOW_THIN_BORDER, intScrollY + 5, 0xFFFFFF);
             super.drawDesc(matrixStack);
         }
     }

@@ -1,5 +1,8 @@
 package com.github.standobyte.jojo.client.ui.screen.hamon;
 
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_THIN_BORDER;
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_UPPER_BORDER;
+
 import java.util.List;
 
 import org.lwjgl.opengl.GL11;
@@ -109,8 +112,8 @@ public class HamonSkillDescBox {
     public void drawDesc(MatrixStack matrixStack, FontRenderer font, int x, int y) {
         Minecraft mc = Minecraft.getInstance();
         int scale = mc.getWindow().calculateScale(mc.options.guiScale, mc.isEnforceUnicode());
-        int scissorX = (HamonScreen.screenX + this.x + x + HamonScreen.WINDOW_THIN_BORDER) * scale;
-        int scissorY = (HamonScreen.screenY + this.y + y + HamonScreen.WINDOW_UPPER_BORDER) * scale;
+        int scissorX = (HamonScreen.screenX + this.x + x + WINDOW_THIN_BORDER) * scale;
+        int scissorY = (HamonScreen.screenY + this.y + y + WINDOW_UPPER_BORDER) * scale;
         int scissorWidth = WIDTH * scale;
         int scissorHeight = HEIGHT * scale;
         GL11.glEnable(GL11.GL_SCISSOR_TEST);

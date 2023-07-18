@@ -1,5 +1,8 @@
 package com.github.standobyte.jojo.client.ui.screen.hamon;
 
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_HEIGHT;
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_WIDTH;
+
 import java.util.List;
 
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -38,7 +41,7 @@ public class HamonIntroTabGui extends HamonTabGui {
     
     HamonIntroTabGui(Minecraft minecraft, HamonScreen screen, String title) {
         super(minecraft, screen, title, -1, 1);
-        int textWidth = HamonScreen.WINDOW_WIDTH - 30;
+        int textWidth = WINDOW_WIDTH - 30;
         aboutName = new TranslationTextComponent("hamon.intro.about.name");
         aboutText = minecraft.font.split(new TranslationTextComponent("hamon.intro.about.text"), textWidth);
         breathName = new TranslationTextComponent("hamon.intro.breath.name");
@@ -184,8 +187,8 @@ public class HamonIntroTabGui extends HamonTabGui {
     @Override
     void drawIcon(MatrixStack matrixStack, int windowX, int windowY, ItemRenderer itemRenderer) {
         minecraft.getTextureManager().bind(ModPowers.HAMON.get().getIconTexture());
-        int x = tabPositioning.getIconX(windowX, index);
-        int y = tabPositioning.getIconY(windowY, index);
+        int x = tabPositioning.getIconX(windowX, index, WINDOW_WIDTH);
+        int y = tabPositioning.getIconY(windowY, index, WINDOW_HEIGHT);
         blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
     }
     

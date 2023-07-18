@@ -1,5 +1,10 @@
 package com.github.standobyte.jojo.client.ui.screen.hamon;
 
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_HEIGHT;
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_THIN_BORDER;
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_UPPER_BORDER;
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_WIDTH;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +62,7 @@ public class HamonStatsTabGui extends HamonTabGui {
 
     HamonStatsTabGui(Minecraft minecraft, HamonScreen screen, String title) {
         super(minecraft, screen, title, -1, 1);
-        int textWidth = HamonScreen.WINDOW_WIDTH - 30;
+        int textWidth = WINDOW_WIDTH - 30;
         strengthDescLines = minecraft.font.split(new TranslationTextComponent("hamon.strength_stat.desc"), textWidth);
         controlDescLines = minecraft.font.split(new TranslationTextComponent("hamon.control_stat.desc"), textWidth);
         breathingDescLines = minecraft.font.split(new TranslationTextComponent("hamon.breathing_stat.desc"), textWidth);
@@ -139,8 +144,8 @@ public class HamonStatsTabGui extends HamonTabGui {
         drawExerciseBar(this, matrixStack, intScrollX + 15, exercises2Y, screen.hamon, Exercise.SWIMMING, 1.0F, true);
         drawExerciseBar(this, matrixStack, intScrollX + 111, exercises2Y, screen.hamon, Exercise.MEDITATION, 1.0F, true);
         if (screen.mouseInsideWindow(
-                mouseX + screen.windowPosX() + HamonScreen.WINDOW_THIN_BORDER, 
-                mouseY + screen.windowPosY() + HamonScreen.WINDOW_UPPER_BORDER)
+                mouseX + screen.windowPosX() + WINDOW_THIN_BORDER, 
+                mouseY + screen.windowPosY() + WINDOW_UPPER_BORDER)
                 && mouseAtMeditationBar(mouseX, mouseY)) {
             ClientUtil.fillSingleRect(intScrollX + 112, exercises2Y + 1, 90, 5, 255, 255, 255, 79);
         }
@@ -268,8 +273,8 @@ public class HamonStatsTabGui extends HamonTabGui {
     void drawIcon(MatrixStack matrixStack, int windowX, int windowY, ItemRenderer itemRenderer) {
 //        int iconX = windowX - 32 + 12;
 //        int iconY = windowY + getTabY() + 6;
-        int iconX = tabPositioning.getIconX(windowX, index);
-        int iconY = tabPositioning.getIconY(windowY, index);
+        int iconX = tabPositioning.getIconX(windowX, index, WINDOW_WIDTH);
+        int iconY = tabPositioning.getIconY(windowY, index, WINDOW_HEIGHT);
         minecraft.getTextureManager().bind(HamonSkillsTabGui.HAMON_SKILLS);
         float barRatio = (float) screen.hamon.getHamonStrengthLevel() / (float) HamonData.MAX_STAT_LEVEL;
         blit(matrixStack, iconX + 3, iconY, MathHelper.floor(barRatio * 11F), 16, 229, 0, 22, 32, 256, 256);
@@ -405,7 +410,7 @@ public class HamonStatsTabGui extends HamonTabGui {
         int exercisesDescLine = (mouseY - exercisesAvgY) / minecraft.font.lineHeight - 1;
         boolean maskNameTooltip = false;
         if (exercisesDescLine >= 0 && exercisesDescLine < exercisesDescLines.size()) {
-            Style style = minecraft.font.getSplitter().componentStyleAtWidth(exercisesDescLines.get(exercisesDescLine), mouseX - HamonScreen.WINDOW_THIN_BORDER);
+            Style style = minecraft.font.getSplitter().componentStyleAtWidth(exercisesDescLines.get(exercisesDescLine), mouseX - WINDOW_THIN_BORDER);
             if (style != null && style.getHoverEvent() != null) {
                 screen.renderComponentHoverEffect(matrixStack, style, mouseX, mouseY);
                 maskNameTooltip = true;

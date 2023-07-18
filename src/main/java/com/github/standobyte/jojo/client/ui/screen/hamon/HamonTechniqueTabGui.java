@@ -1,5 +1,10 @@
 package com.github.standobyte.jojo.client.ui.screen.hamon;
 
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_HEIGHT;
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_THIN_BORDER;
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_UPPER_BORDER;
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_WIDTH;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -95,7 +100,7 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
         techniqueSkillSlots = HamonTechniqueSlotElement.createSlots(screen, i -> {
             int row = i / MAX_ROW_SKILL_SLOTS;
             float skillsInRow = row < rowsCount ? MAX_ROW_SKILL_SLOTS : slotsCount % MAX_ROW_SKILL_SLOTS;
-            int x = (int) ((i % MAX_ROW_SKILL_SLOTS + 0.5F) * (float) (HamonScreen.WINDOW_WIDTH - HamonScreen.WINDOW_THIN_BORDER * 2) / skillsInRow) - 14;
+            int x = (int) ((i % MAX_ROW_SKILL_SLOTS + 0.5F) * (float) (WINDOW_WIDTH - WINDOW_THIN_BORDER * 2) / skillsInRow) - 14;
             int y = 97 + row * SKILL_SLOTS_ROW_HEIGHT;
             return new HamonTechniqueSlotElement(i, x, y);
         });
@@ -121,7 +126,7 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
             List<CharacterTechniqueHamonSkill> skills = technique.getSkills().collect(Collectors.toList());
             int j = 0;
             for (CharacterTechniqueHamonSkill skill : skills) {
-                int x = HamonScreen.WINDOW_WIDTH - 21 - (skills.size() - j) * 28;
+                int x = WINDOW_WIDTH - 21 - (skills.size() - j) * 28;
                 int y = techniqueY + name.size() * 9 + 4;
                 HamonSkillElementLearnable skillSquare = new HamonSkillElementLearnable(skill, 
                         screen.hamon, minecraft.player, screen.teacherSkills, 
@@ -135,7 +140,7 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
         }
         
         maxY = techniqueY;
-        int actualWindowHeight = HamonScreen.WINDOW_HEIGHT - HamonScreen.WINDOW_UPPER_BORDER - HamonScreen.WINDOW_THIN_BORDER;
+        int actualWindowHeight = WINDOW_HEIGHT - WINDOW_UPPER_BORDER - WINDOW_THIN_BORDER;
         if (maxY < actualWindowHeight) {
             maxY = -1;
             scrollY = 0;
@@ -169,8 +174,8 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
     @Override
     void drawIcon(MatrixStack matrixStack, int windowX, int windowY, ItemRenderer itemRenderer) {
         if (screen.hamon.getTechniqueData().canLearnNewTechniqueSkill(screen.hamon, minecraft.player)) {
-            int x = tabPositioning.getIconX(windowX, index);
-            int y = tabPositioning.getIconY(windowY, index);
+            int x = tabPositioning.getIconX(windowX, index, WINDOW_WIDTH);
+            int y = tabPositioning.getIconY(windowY, index, WINDOW_HEIGHT);
             
             minecraft.getTextureManager().bind(HamonScreen.WINDOW);
             blit(matrixStack, x - 6, y - 3, 248, 206, 8, 8);
@@ -237,7 +242,7 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
         else {
             for (int i = 0; i < tabLockedLines.size(); i++) {
                 ClientUtil.drawCenteredString(matrixStack, minecraft.font, tabLockedLines.get(i), 
-                        (float) (scrollX - HamonScreen.WINDOW_THIN_BORDER + HamonScreen.WINDOW_WIDTH / 2), (float) (scrollY + 22 + i * 9), 0xFFFFFF);
+                        (float) (scrollX - WINDOW_THIN_BORDER + WINDOW_WIDTH / 2), (float) (scrollY + 22 + i * 9), 0xFFFFFF);
             }
         }
     }

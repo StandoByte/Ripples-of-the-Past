@@ -15,11 +15,7 @@ public class PlayerUtilCapStorage implements IStorage<PlayerUtilCap> {
     public INBT writeNBT(Capability<PlayerUtilCap> capability, PlayerUtilCap instance, Direction side) {
         CompoundNBT cnbt = new CompoundNBT();
         
-        CompoundNBT notificationsMap = new CompoundNBT();
-        for (OneTimeNotification flag : OneTimeNotification.values()) {
-            notificationsMap.putBoolean(flag.name(), instance.sentNotification(flag));
-        }
-        cnbt.put("NotificationsSent", notificationsMap);
+        cnbt.put("NotificationsSent", instance.notificationsToNBT());
         
         cnbt.put("RotpVersion", JojoModVersion.getCurrentVersion().toNBT());
         
@@ -32,9 +28,7 @@ public class PlayerUtilCapStorage implements IStorage<PlayerUtilCap> {
         
         if (cnbt.contains("NotificationsSent", 10)) {
             CompoundNBT notificationsMap = cnbt.getCompound("NotificationsSent");
-            for (OneTimeNotification flag : OneTimeNotification.values()) {
-                instance.setSentNotification(flag, notificationsMap.getBoolean(flag.name()));
-            }
+            instance.notificationsFromNBT(notificationsMap);
         }
     }
 }
