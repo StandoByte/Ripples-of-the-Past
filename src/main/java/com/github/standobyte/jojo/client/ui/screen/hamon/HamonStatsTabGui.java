@@ -20,6 +20,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.math.MathHelper;
@@ -264,9 +265,7 @@ public class HamonStatsTabGui extends HamonTabGui {
     }
 
     @Override
-    void drawTab(MatrixStack matrixStack, int windowX, int windowY, boolean isSelected, boolean red) {
-        super.drawTab(matrixStack, windowX, windowY, isSelected, red);
-        
+    void drawIcon(MatrixStack matrixStack, int windowX, int windowY, ItemRenderer itemRenderer) {
         int iconX = windowX - 32 + 12;
         int iconY = windowY + getTabY() + 6;
         minecraft.getTextureManager().bind(HamonSkillsTabGui.HAMON_SKILLS);

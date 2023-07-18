@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamon
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -111,9 +112,7 @@ public class HamonGeneralSkillsTabGui extends HamonSkillsTabGui {
     }
 
     @Override
-    void drawTab(MatrixStack matrixStack, int windowX, int windowY, boolean isSelected, boolean red) {
-        super.drawTab(matrixStack, windowX, windowY, isSelected, red);
-        
+    void drawIcon(MatrixStack matrixStack, int windowX, int windowY, ItemRenderer itemRenderer) {
         minecraft.getTextureManager().bind(HamonSkillsTabGui.HAMON_SKILLS);
         int texY = skillsType == HamonStat.STRENGTH ? 0 : 64;
         blit(matrixStack, windowX - 32 + 13, windowY + getTabY() + 6, 16, 16, 128, texY, 64, 64, 256, 256);

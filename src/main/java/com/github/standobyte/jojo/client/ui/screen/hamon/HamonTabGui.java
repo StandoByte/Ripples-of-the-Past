@@ -82,7 +82,7 @@ public abstract class HamonTabGui extends AbstractGui {
         return mouseX > (double)i && mouseX < (double)(i + 28) && mouseY > (double)j && mouseY < (double)(j + 32);
     }
 
-    void drawIcon(MatrixStack matrixStack, int windowX, int windowY, ItemRenderer itemRenderer) {} // TODO tab icons
+    void drawIcon(MatrixStack matrixStack, int windowX, int windowY, ItemRenderer itemRenderer) {}
     
     protected int getTabY() {
         return 28 * tabIndex;

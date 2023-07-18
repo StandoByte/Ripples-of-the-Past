@@ -210,7 +210,7 @@ public class HamonData extends TypeSpecificData {
     private int prevAir = 300;
     private void tickBreathStability() {
         LivingEntity user = power.getUser();
-        boolean outOfBreath = user.getAirSupply() < user.getMaxAirSupply();
+        boolean canBreath = user.getAirSupply() >= user.getMaxAirSupply();
         float inc;
         float maxStability = getMaxBreathStability();
         boolean maskNoBreath = false;
@@ -243,7 +243,7 @@ public class HamonData extends TypeSpecificData {
             inc *= MathHelper.sqrt((float) Math.min(breathStabilityIncTicks, 100));
         }
         
-        if (outOfBreath) {
+        if (!canBreath) {
             inc = Math.min(inc, 0);
         }
         

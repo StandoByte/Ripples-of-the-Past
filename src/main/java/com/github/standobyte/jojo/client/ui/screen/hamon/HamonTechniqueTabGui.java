@@ -27,6 +27,7 @@ import com.github.standobyte.jojo.util.general.LazyUnmodifiableArrayList;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
@@ -166,8 +167,7 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
     }
     
     @Override
-    void drawTab(MatrixStack matrixStack, int windowX, int windowY, boolean isSelected, boolean red) {
-        super.drawTab(matrixStack, windowX, windowY, isSelected, red);
+    void drawIcon(MatrixStack matrixStack, int windowX, int windowY, ItemRenderer itemRenderer) {
         if (screen.hamon.getTechniqueData().canLearnNewTechniqueSkill(screen.hamon, minecraft.player)) {
             minecraft.getTextureManager().bind(HamonScreen.WINDOW);
             blit(matrixStack, windowX - 32 + 7, windowY + getTabY() + 3, 248, 206, 8, 8);

@@ -11,6 +11,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.math.MathHelper;
@@ -117,9 +118,10 @@ public class HamonIntroTabGui extends HamonTabGui {
         RenderSystem.enableBlend();
         minecraft.textureManager.bind(ActionsOverlayGui.OVERLAY_LOCATION);
         float ticks = tickCount + partialTick;
+        int x = intScrollX + 5;
         
         // empty energy bar
-        renderEnergyBar(matrixStack, intScrollX + 5, y1, 1, 0);
+        renderEnergyBar(matrixStack, x, y1, 1, 0);
         
         // charging energy bar
         boolean bar2InView = y2 > -7 && y2 < 199;
@@ -128,7 +130,7 @@ public class HamonIntroTabGui extends HamonTabGui {
         }
         if (bar2RenderTime >= 0) {
             float barTicks = (ticks - bar2RenderTime) % 100;
-            renderEnergyBar(matrixStack, intScrollX + 5, y2, 1, MathHelper.clamp((barTicks - 20F) / 60F, 0F, 1F));
+            renderEnergyBar(matrixStack, x, y2, 1, MathHelper.clamp((barTicks - 20F) / 60F, 0F, 1F));
         }
         
         // energy bar with lower breath stability charging not as fast
@@ -140,7 +142,7 @@ public class HamonIntroTabGui extends HamonTabGui {
             float barTicks = (ticks - bar3RenderTime) % 750;
             float fillStab = 0.4F + 0.6F * barTicks / 720;
             float fillEnergy = MathHelper.clamp((barTicks - 20) / 60, 0, fillStab);
-            renderEnergyBar(matrixStack, intScrollX + 5, y3, fillStab, fillEnergy);
+            renderEnergyBar(matrixStack, x, y3, fillStab, fillEnergy);
         }
         
         renderHamonBreathIcon(matrixStack, intScrollX + 98, y2 - 21);
@@ -177,6 +179,12 @@ public class HamonIntroTabGui extends HamonTabGui {
     @Override
     void tick() {
         tickCount++;
+    }
+
+    @Override
+    void drawIcon(MatrixStack matrixStack, int windowX, int windowY, ItemRenderer itemRenderer) {
+        minecraft.getTextureManager().bind(ModPowers.HAMON.get().getIconTexture());
+        blit(matrixStack, windowX - 32 + 13, windowY + getTabY() + 6, 0, 0, 16, 16, 16, 16);
     }
     
     
