@@ -1340,6 +1340,8 @@ public class GameplayEventHandler {
                             shooter.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                                 if (cap.hasHamonCharge()) {
                                     HamonCharge hamonCharge = cap.getHamonCharge();
+                                    hamonCharge.setTicks(hamonCharge.getTicks() - (int) 
+                                            (hamonCharge.getInitialTicks() * hamonChargeProperties.energyRequired / 1000F));
                                     hamonChargeProperties.applyCharge(projCharge, hamonCharge.getTickDamage() * 5, null);
                                     projCharge.setMultiplyWithUserStrength(false);
                                 }
@@ -1353,9 +1355,9 @@ public class GameplayEventHandler {
     
     public static final class ProjectileChargeProperties {
         public static final ProjectileChargeProperties ABSTRACT_ARROW = new ProjectileChargeProperties(1.5F, OptionalInt.of(10), 1000);
-        public static final ProjectileChargeProperties SNOWBALL = new ProjectileChargeProperties(0.75F, OptionalInt.of(20), 600);
-        public static final ProjectileChargeProperties EGG = new ProjectileChargeProperties(0.75F, OptionalInt.empty(), 400);
-        public static final ProjectileChargeProperties WATER_BOTTLE = new ProjectileChargeProperties(1.0F, OptionalInt.of(30), 800);
+        public static final ProjectileChargeProperties SNOWBALL = new ProjectileChargeProperties(0.75F, OptionalInt.of(20), 500);
+        public static final ProjectileChargeProperties EGG = new ProjectileChargeProperties(0.75F, OptionalInt.empty(), 200);
+        public static final ProjectileChargeProperties WATER_BOTTLE = new ProjectileChargeProperties(1.0F, OptionalInt.of(30), 750);
         
         private final float baseMultiplier;
         private final OptionalInt chargeTicks;

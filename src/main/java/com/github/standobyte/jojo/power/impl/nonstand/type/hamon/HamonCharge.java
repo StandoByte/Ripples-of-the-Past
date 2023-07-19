@@ -24,6 +24,7 @@ import net.minecraft.world.server.ServerWorld;
 
 public class HamonCharge {
     private float tickDamage;
+    private final int chargeTicksInitial;
     private int chargeTicks;
     private UUID hamonUserId;
     private Entity hamonUser;
@@ -32,6 +33,7 @@ public class HamonCharge {
     
     public HamonCharge(float tickDamage, int chargeTicks, @Nullable LivingEntity hamonUser, float energySpent) {
         this.tickDamage = tickDamage;
+        this.chargeTicksInitial = chargeTicks;
         this.chargeTicks = chargeTicks;
         if (hamonUser != null) {
             this.hamonUserId = hamonUser.getUUID();
@@ -81,10 +83,23 @@ public class HamonCharge {
         return chargeTicks < 0;
     }
     
+    public void setTicks(int ticks) {
+        this.chargeTicks = ticks;
+    }
+    
+    public int getTicks() {
+        return chargeTicks;
+    }
+    
+    public int getInitialTicks() {
+        return chargeTicksInitial;
+    }
+    
     
     
     public static HamonCharge fromNBT(CompoundNBT nbt) {
-        HamonCharge charge = new HamonCharge(nbt.getFloat("Charge"), nbt.getInt("ChargeTicks"), null, nbt.getFloat("EnergySpent"));
+        HamonCharge charge = new HamonCharge(nbt.getFloat("Charge"), nbt.getInt("ChargeTicksInitial"), null, nbt.getFloat("EnergySpent"));
+        charge.chargeTicks = nbt.getInt("ChargeTicks");
         if (nbt.hasUUID("HamonUser")) {
             charge.hamonUserId = nbt.getUUID("HamonUser");
         }
@@ -95,6 +110,7 @@ public class HamonCharge {
     public CompoundNBT toNBT() {
         CompoundNBT chargeNbt = new CompoundNBT();
         chargeNbt.putFloat("Charge", tickDamage);
+        chargeNbt.putInt("ChargeTicksInitial", chargeTicksInitial);
         chargeNbt.putInt("ChargeTicks", chargeTicks);
         if (hamonUserId != null) {
             chargeNbt.putUUID("HamonUser", hamonUserId);
