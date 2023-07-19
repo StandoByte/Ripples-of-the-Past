@@ -96,7 +96,7 @@ public abstract class StandAction extends Action<IStandPower> {
     }
     
     @Override
-    public float getCostToRender(IStandPower power) {
+    public float getCostToRender(IStandPower power, ActionTarget target) {
         int ticksHeld = power.getHeldAction() == this ? power.getHeldActionTicks() : 0;
         if (getHoldDurationMax(power) > 0) {
             return getStaminaCost(power) + getStaminaCostTicking(power) * Math.max((getHoldDurationToFire(power) - ticksHeld), 1);

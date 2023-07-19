@@ -29,14 +29,15 @@ public abstract class NonStandAction extends Action<INonStandPower> {
         return PowerClassification.NON_STAND;
     }
     
-    public float getEnergyNeeded(int ticksHeld, INonStandPower power) {
+    public float getEnergyNeeded(int ticksHeld, INonStandPower power, ActionTarget target) {
+        float cost = getEnergyCost(power, target);
         if (getHoldDurationMax(power) > 0) {
-            return getEnergyCost(power) + getHeldTickEnergyCost(power) * Math.max((getHoldDurationToFire(power) - ticksHeld), 1);
+            return cost += getHeldTickEnergyCost(power) * Math.max((getHoldDurationToFire(power) - ticksHeld), 1);
         }
-        return getEnergyCost(power);
+        return cost;
     }
     
-    public float getEnergyCost(INonStandPower power) {
+    public float getEnergyCost(INonStandPower power, ActionTarget target) {
         return energyCost;
     }
     
@@ -45,9 +46,9 @@ public abstract class NonStandAction extends Action<INonStandPower> {
     }
     
     @Override
-    public float getCostToRender(INonStandPower power) {
+    public float getCostToRender(INonStandPower power, ActionTarget target) {
         int ticksHeld = power.getHeldAction() == this ? power.getHeldActionTicks() : 0;
-        return getEnergyNeeded(ticksHeld, power);
+        return getEnergyNeeded(ticksHeld, power, target);
     }
     
     @Override
@@ -60,7 +61,7 @@ public abstract class NonStandAction extends Action<INonStandPower> {
     }
     
     protected ActionConditionResult checkEnergy(LivingEntity user, INonStandPower power, ActionTarget target) {
-        if (!power.hasEnergy(getEnergyNeeded(power.getHeldActionTicks(), power))) {
+        if (!power.hasEnergy(getEnergyNeeded(power.getHeldActionTicks(), power, target))) {
             ITextComponent message = new TranslationTextComponent("jojo.message.action_condition.no_energy_" + power.getType().getRegistryName().getPath());
             return ActionConditionResult.createNegative(message);
         }
@@ -77,7 +78,7 @@ public abstract class NonStandAction extends Action<INonStandPower> {
     public void onPerform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         super.onPerform(world, user, power, target);
         if (!world.isClientSide()) {
-            power.consumeEnergy(getEnergyCost(power));
+            power.consumeEnergy(getEnergyCost(power, target));
         }
     }
     

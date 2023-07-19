@@ -33,7 +33,7 @@ public class HamonHealing extends HamonAction {
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
-        float cost = getEnergyCost(power);
+        float cost = getEnergyCost(power, target);
         float hamonEfficiency = hamon.getActionEfficiency(cost, true);
         float hamonControl = hamon.getHamonControlLevelRatio();
         

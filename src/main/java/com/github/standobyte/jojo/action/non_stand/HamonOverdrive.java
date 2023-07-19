@@ -45,11 +45,11 @@ public class HamonOverdrive extends HamonAction {
             if (entity instanceof LivingEntity) {
                 LivingEntity targetEntity = (LivingEntity) entity;
                 HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
-                float cost = getEnergyCost(power);
+                float cost = getEnergyCost(power, target);
                 float efficiency = hamon.getActionEfficiency(cost, true);
                 
                 int attackStrengthTicker = CommonReflection.getAttackStrengthTicker(user);
-                if (dealDamage(targetEntity, getDamage() * efficiency, user, power, hamon)) {
+                if (dealDamage(target, targetEntity, getDamage() * efficiency, user, power, hamon)) {
                     addPointsForAction(power, hamon, HamonStat.STRENGTH, cost, efficiency);
                 }
                 // FIXME !! (hamon) ClientPlayerEntity#swing sends the packet to server, and THEN ServerPlayerEntity#swing resets attackStrengthTicker
@@ -62,7 +62,7 @@ public class HamonOverdrive extends HamonAction {
         return 2.0F;
     }
     
-    protected boolean dealDamage(LivingEntity target, float dmgAmount, LivingEntity user, INonStandPower power, HamonData hamon) {
-        return DamageUtil.dealHamonDamage(target, dmgAmount, user, null);
+    protected boolean dealDamage(ActionTarget target, LivingEntity targetEntity, float dmgAmount, LivingEntity user, INonStandPower power, HamonData hamon) {
+        return DamageUtil.dealHamonDamage(targetEntity, dmgAmount, user, null);
     }
 }

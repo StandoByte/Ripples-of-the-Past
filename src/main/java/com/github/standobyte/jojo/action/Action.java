@@ -170,7 +170,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return 100;
     }
     
-    public abstract float getCostToRender(P power);
+    public abstract float getCostToRender(P power, ActionTarget target);
     
     protected ActionConditionResult checkHeldItems(LivingEntity user, P power) {
         if (needsFreeMainHand && !MCUtil.isHandFree(user, Hand.MAIN_HAND)) {

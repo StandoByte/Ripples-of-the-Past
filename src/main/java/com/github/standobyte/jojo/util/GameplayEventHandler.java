@@ -143,7 +143,6 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.RayTraceResult;
@@ -1409,13 +1408,11 @@ public class GameplayEventHandler {
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onProjectileHit(ProjectileImpactEvent event) {
+        Entity entity = event.getEntity();
         RayTraceResult rayTrace = event.getRayTraceResult();
-        if (rayTrace.getType() == RayTraceResult.Type.ENTITY) {
-            Entity entity = event.getEntity();
-            entity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> {
-                cap.addHamonDamageToProjectile((EntityRayTraceResult) rayTrace);
-            });
-        }
+        entity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> {
+            cap.onTargetHit(rayTrace);
+        });
     }
     
     @SubscribeEvent(priority = EventPriority.LOWEST)

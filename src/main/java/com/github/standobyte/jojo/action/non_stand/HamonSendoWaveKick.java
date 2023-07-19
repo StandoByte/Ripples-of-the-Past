@@ -99,7 +99,7 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
             if (!kick.gaveThisSendoWaveKickPoints && points) {
                 INonStandPower.getNonStandPowerOptional(user).ifPresent(power -> {
                     power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                        hamon.hamonPointsFromAction(HamonStat.STRENGTH, ModHamonActions.ZEPPELI_SENDO_WAVE_KICK.get().getEnergyCost(power)); 
+                        hamon.hamonPointsFromAction(HamonStat.STRENGTH, kick.energySpent); 
                     });
                 });
                 kick.gaveThisSendoWaveKickPoints = true;
@@ -145,12 +145,18 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
     public static class SendoWaveKickInstance extends ContinuousActionInstance<SendoWaveKickInstance, INonStandPower> {
         private int sendoWaveKickPositionWaitingTimer = 0;
         private boolean gaveThisSendoWaveKickPoints = false;
+        private float energySpent;
         private final float initialYRot;
 
         public SendoWaveKickInstance(LivingEntity user, PlayerUtilCap userCap, 
                 INonStandPower playerPower, HamonSendoWaveKick action) {
             super(user, userCap, playerPower, action);
             this.initialYRot = user.yRot;
+        }
+        
+        // FIXME ! (hamon 2) set spent energy points to give hamon strength points
+        public void setEnergySpent(float energy) {
+            this.energySpent = energy;
         }
 
         @Override

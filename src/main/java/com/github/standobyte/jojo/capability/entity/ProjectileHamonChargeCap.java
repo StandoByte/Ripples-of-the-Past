@@ -16,6 +16,7 @@ import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceResult;
 
 public class ProjectileHamonChargeCap {
     @Nonnull private final Entity projectile;
@@ -63,7 +64,13 @@ public class ProjectileHamonChargeCap {
         return hamonBaseDmg * chargeRatio;
     }
     
-    public void addHamonDamageToProjectile(EntityRayTraceResult target) {
+    public void onTargetHit(RayTraceResult target) {
+        if (target.getType() == RayTraceResult.Type.ENTITY) {
+            dealHamonDamageToTarget((EntityRayTraceResult) target);
+        }
+    }
+    
+    private void dealHamonDamageToTarget(EntityRayTraceResult target) {
         if (!projectile.level.isClientSide() && hamonBaseDmg > 0) {
             Entity owner = getProjectileOwner();
             if (multiplyWithUserStrength) {

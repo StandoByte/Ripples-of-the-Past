@@ -92,6 +92,6 @@ public class HamonLifeMagnetism extends HamonAction {
             user.startRiding(glider);
         }
         HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
-        hamon.hamonPointsFromAction(HamonStat.CONTROL, getEnergyCost(power));
+        hamon.hamonPointsFromAction(HamonStat.CONTROL, getEnergyCost(power, ActionTarget.EMPTY));
     }
 }

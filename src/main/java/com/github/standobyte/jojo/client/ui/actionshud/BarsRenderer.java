@@ -140,7 +140,7 @@ public abstract class BarsRenderer {
         Action<P> action = mode.getSelectedAction(hotbar, shift, target);
         
         if (action != null) {
-            return action.getCostToRender(mode.getPower());
+            return action.getCostToRender(mode.getPower(), target);
         }
         return -1;
     }
