@@ -34,6 +34,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCach
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.util.GameplayEventHandler.ProjectileChargeProperties;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.mojang.brigadier.CommandDispatcher;
 
@@ -127,7 +128,7 @@ public class ForgeBusEventSubscriber {
             }
             event.addCapability(LIVING_UTIL_CAP, new LivingUtilCapProvider((LivingEntity) entity));
         }
-        if (entity instanceof ProjectileEntity && (GameplayEventHandler.projectileCanBeChargedWithHamon(entity))) {
+        if (entity instanceof ProjectileEntity && (ProjectileChargeProperties.canBeChargedWithHamon(entity))) {
             event.addCapability(PROJECTILE_HAMON_CAP, new ProjectileHamonChargeCapProvider(entity));
         }
     }

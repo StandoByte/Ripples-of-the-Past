@@ -88,10 +88,14 @@ public abstract class CustomExplosion extends Explosion {
                 MathHelper.floor(pos.x + diameter + 1.0D), 
                 MathHelper.floor(pos.y + diameter + 1.0D), 
                 MathHelper.floor(pos.z + diameter + 1.0D));
-        List<Entity> entities = level.getEntities(getExploder(), aabb);
+        List<Entity> entities = getAffectedEntities(aabb);
         filterEntities(entities);
         ForgeEventFactory.onExplosionDetonate(level, this, entities, diameter);
         hurtEntities(entities);
+    }
+    
+    protected List<Entity> getAffectedEntities(AxisAlignedBB area) {
+        return level.getEntities(getExploder(), area);
     }
     
     protected Set<BlockPos> calculateBlocksToBlow() {

@@ -83,7 +83,7 @@ public class MRDetectorEntity extends Entity implements IEntityAdditionalSpawnDa
     private Vector3d detectEntities() {
         AxisAlignedBB aabb = new AxisAlignedBB(position(), position()).inflate(DETECTION_RADIUS);
         List<LivingEntity> entities = level.getEntitiesOfClass(LivingEntity.class, aabb, 
-                EntityPredicates.LIVING_ENTITY_STILL_ALIVE
+                EntityPredicates.LIVING_ENTITY_STILL_ALIVE.and(EntityPredicates.NO_SPECTATORS)
                 .and(entity -> entity.getType() != EntityType.ARMOR_STAND && entity != owner && 
                 (owner == null || 
                 !(entity.isAlliedTo(owner) || IStandPower.getStandPowerOptional(owner).map(stand -> entity == stand.getStandManifestation()).orElse(false)))));

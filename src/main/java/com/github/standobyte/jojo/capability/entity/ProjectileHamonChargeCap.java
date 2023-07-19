@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.capability.entity;
 
+import java.util.List;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -7,13 +9,18 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil.HamonAttackProperties;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.projectile.PotionEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.EntityPredicates;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
@@ -65,30 +72,55 @@ public class ProjectileHamonChargeCap {
     }
     
     public void onTargetHit(RayTraceResult target) {
+        // adds hamon damage to splash water bottle
+        if (projectile instanceof PotionEntity) {
+            PotionEntity potionEntity = (PotionEntity) projectile;
+            if (MCUtil.isPotionWaterBottle(potionEntity)) {
+                AxisAlignedBB waterSplashArea = projectile.getBoundingBox().inflate(4.0D, 2.0D, 4.0D);
+                List<LivingEntity> splashedEntity = projectile.level.getEntitiesOfClass(LivingEntity.class, waterSplashArea, 
+                        EntityPredicates.LIVING_ENTITY_STILL_ALIVE.and(EntityPredicates.NO_SPECTATORS).and(entity -> !entity.is(potionEntity.getOwner())));
+                if (!splashedEntity.isEmpty()) {
+                    for (LivingEntity targetEntity : splashedEntity) {
+                        double distSqr = projectile.distanceToSqr(targetEntity);
+                        if (distSqr < 16.0) {
+                            dealHamonDamageToTarget(targetEntity, hamonBaseDmg * (1 - (float) (distSqr / 16)));
+                        }
+                    }
+                }
+            }
+            
+            return;
+        }
+        
+        // add hamon damage on direct hit
         if (target.getType() == RayTraceResult.Type.ENTITY) {
-            dealHamonDamageToTarget((EntityRayTraceResult) target);
+            dealHamonDamageToTarget(((EntityRayTraceResult) target).getEntity(), hamonBaseDmg);
         }
     }
     
-    private void dealHamonDamageToTarget(EntityRayTraceResult target) {
-        if (!projectile.level.isClientSide() && hamonBaseDmg > 0) {
+    private boolean dealHamonDamageToTarget(Entity entity, float damage) {
+        if (!projectile.level.isClientSide() && damage > 0) {
             Entity owner = getProjectileOwner();
             if (multiplyWithUserStrength) {
                 if (owner instanceof LivingEntity) {
                     LivingEntity hamonUser = (LivingEntity) owner;
-                    INonStandPower.getNonStandPowerOptional(hamonUser).ifPresent(power -> {
-                        power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                            DamageUtil.dealHamonDamage(target.getEntity(), getHamonDamage(), projectile, owner);
-                            hamon.hamonPointsFromAction(HamonStat.STRENGTH, spentEnergy);
+                    return GeneralUtil.orElseFalse(INonStandPower.getNonStandPowerOptional(hamonUser), power -> {
+                        return GeneralUtil.orElseFalse(power.getTypeSpecificData(ModPowers.HAMON.get()), hamon -> {
+                            if (DamageUtil.dealHamonDamage(entity, getHamonDamage(), projectile, owner)) {
+                                hamon.hamonPointsFromAction(HamonStat.STRENGTH, spentEnergy);
+                                return true;
+                            }
+                            return false;
                         });
                     });
-                    return;
                 }
             }
             
-            DamageUtil.dealHamonDamage(target.getEntity(), getHamonDamage(), projectile, owner, 
+            return DamageUtil.dealHamonDamage(entity, getHamonDamage(), projectile, owner, 
                     HamonAttackProperties::noSrcEntityHamonMultiplier);
         }
+        
+        return false;
     }
     
     @Nullable

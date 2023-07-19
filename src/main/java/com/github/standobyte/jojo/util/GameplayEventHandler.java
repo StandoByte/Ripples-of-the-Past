@@ -113,6 +113,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
+import net.minecraft.entity.projectile.PotionEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
@@ -1350,11 +1351,11 @@ public class GameplayEventHandler {
         }
     }
     
-    private static final class ProjectileChargeProperties {
+    public static final class ProjectileChargeProperties {
         public static final ProjectileChargeProperties ABSTRACT_ARROW = new ProjectileChargeProperties(1.5F, OptionalInt.of(10), 1000);
-        public static final ProjectileChargeProperties SNOWBALL = new ProjectileChargeProperties(0.75F, OptionalInt.of(25), 600);
+        public static final ProjectileChargeProperties SNOWBALL = new ProjectileChargeProperties(0.75F, OptionalInt.of(20), 600);
         public static final ProjectileChargeProperties EGG = new ProjectileChargeProperties(0.75F, OptionalInt.empty(), 400);
-        public static final ProjectileChargeProperties SPLASH_POTION = new ProjectileChargeProperties(1.0F, OptionalInt.of(20), 800);
+        public static final ProjectileChargeProperties WATER_BOTTLE = new ProjectileChargeProperties(1.0F, OptionalInt.of(30), 800);
         
         private final float baseMultiplier;
         private final OptionalInt chargeTicks;
@@ -1364,6 +1365,11 @@ public class GameplayEventHandler {
             this.baseMultiplier = baseMultiplier;
             this.chargeTicks = chargeTicks;
             this.energyRequired = energyRequired;
+        }
+        
+        public static boolean canBeChargedWithHamon(Entity entity) {
+            return entity.getType() == EntityType.POTION // potion item hasn't been set yet, so we can't check if it's a water bottle
+                    || ProjectileChargeProperties.getChargeProperties(entity) != null;
         }
         
         @Nullable 
@@ -1378,8 +1384,8 @@ public class GameplayEventHandler {
             else if (type == EntityType.EGG) {
                 return EGG;
             }
-            else if (type == EntityType.POTION) {
-                return SPLASH_POTION;
+            else if (type == EntityType.POTION && MCUtil.isPotionWaterBottle((PotionEntity) projectile)) {
+                return WATER_BOTTLE;
             }
             return null;
         }
@@ -1396,10 +1402,6 @@ public class GameplayEventHandler {
                 chargeCap.setSpentEnergy(Math.min(spendingEnergy.getEnergy(), energyRequired));
             }
         }
-    }
-    
-    public static boolean projectileCanBeChargedWithHamon(Entity entity) {
-        return ProjectileChargeProperties.getChargeProperties(entity) != null;
     }
     
     private static boolean isChargedInOtherWay(Entity projectile) {

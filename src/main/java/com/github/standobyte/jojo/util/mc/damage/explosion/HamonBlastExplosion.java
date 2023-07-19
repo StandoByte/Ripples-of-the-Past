@@ -1,10 +1,16 @@
 package com.github.standobyte.jojo.util.mc.damage.explosion;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil.HamonAttackProperties;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityPredicates;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.ExplosionContext;
@@ -25,6 +31,13 @@ public class HamonBlastExplosion extends CustomExplosion {
     
     public void setHamonDamage(float hamonDamage) {
         this.hamonDamage = hamonDamage;
+    }
+    
+    @Override
+    protected List<Entity> getAffectedEntities(AxisAlignedBB area) {
+        return level.getEntitiesOfClass(LivingEntity.class, area, 
+                EntityPredicates.LIVING_ENTITY_STILL_ALIVE.and(EntityPredicates.NO_SPECTATORS).and(entity -> !entity.is(getExploder())))
+                .stream().collect(Collectors.toList());
     }
     
     @Override

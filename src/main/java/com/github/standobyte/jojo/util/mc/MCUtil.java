@@ -23,6 +23,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.entity.projectile.PotionEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.ByteArrayNBT;
@@ -43,6 +44,8 @@ import net.minecraft.network.play.server.SPlaySoundEffectPacket;
 import net.minecraft.network.play.server.SSpawnMovingSoundEffectPacket;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.PotionUtils;
+import net.minecraft.potion.Potions;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
@@ -349,6 +352,13 @@ public class MCUtil {
     
     public static HandSide getOppositeSide(HandSide side) {
         return side == HandSide.LEFT ? HandSide.RIGHT : HandSide.LEFT;
+    }
+    
+    
+    
+    public static boolean isPotionWaterBottle(PotionEntity entity) {
+        ItemStack potionItem = entity.getItem();
+        return PotionUtils.getPotion(potionItem) == Potions.WATER && PotionUtils.getMobEffects(potionItem).isEmpty();
     }
     
     
