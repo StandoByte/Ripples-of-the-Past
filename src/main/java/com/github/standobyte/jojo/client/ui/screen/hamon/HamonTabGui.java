@@ -73,7 +73,8 @@ public abstract class HamonTabGui extends AbstractGui {
 
     void drawTab(MatrixStack matrixStack, int windowX, int windowY, boolean isSelected, boolean red) {
         minecraft.getTextureManager().bind(HamonScreen.TABS);
-        tabPositioning.draw(matrixStack, screen, windowX, windowY, WINDOW_WIDTH, WINDOW_HEIGHT, isSelected, index);
+        tabPositioning.draw(matrixStack, screen, windowX, windowY, WINDOW_WIDTH, WINDOW_HEIGHT, 
+                isSelected, index, false);
         if (!isSelected && red) {
             minecraft.getTextureManager().bind(HamonScreen.WINDOW);
             int x = windowX + tabPositioning.getX(index, WINDOW_WIDTH);

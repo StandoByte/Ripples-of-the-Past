@@ -34,18 +34,24 @@ public enum TabPositionType {
     public void draw(MatrixStack matrixStack, AbstractGui gui, 
             int offsetX, int offsetY, 
             int screenWidth, int screenHeight,
-            boolean isSelected, int index) {
-        int i = textureX;
+            boolean isSelected, int index,
+            boolean tmpDisabled) {
+        int texX = textureX;
         if (index > 0) {
-            i += width;
+            texX += width;
         }
-
         if (index == max - 1) {
-            i += width;
+            texX += width;
         }
 
-        int j = isSelected ? textureY + height : textureY;
-        gui.blit(matrixStack, offsetX + getX(index, screenWidth), offsetY + getY(index, screenHeight), i, j, width, height);
+        int texY = textureY;
+        if (isSelected) {
+            texY += height;
+        }
+        else if (tmpDisabled) {
+            texY += 128;
+        }
+        gui.blit(matrixStack, offsetX + getX(index, screenWidth), offsetY + getY(index, screenHeight), texX, texY, width, height);
     }
 
     public int getX(int index, int screenWidth) {
