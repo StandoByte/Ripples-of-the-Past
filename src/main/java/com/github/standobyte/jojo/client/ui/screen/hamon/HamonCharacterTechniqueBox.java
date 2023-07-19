@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.ui.screen.widgets.utils.WidgetExtension;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
 import com.google.common.collect.Streams;
@@ -122,7 +123,8 @@ public class HamonCharacterTechniqueBox {
             perk.setY(perk.getY() + yDiff);
         }
         if (pickTechniqueButton != null) {
-            pickTechniqueButton.setY(pickTechniqueButton.getYStarting() + yDiff);
+            WidgetExtension ext = pickTechniqueButton.getWidgetExtension();
+            ext.setY(ext.getYStarting() + yDiff);
         }
         this.y = y;
     }

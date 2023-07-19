@@ -1,15 +1,18 @@
 package com.github.standobyte.jojo.client.ui.screen.hamon;
 
 import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_HEIGHT;
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_THIN_BORDER;
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_UPPER_BORDER;
 import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_WIDTH;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.screen.TabPositionType;
-import com.google.common.collect.ImmutableList;
+import com.github.standobyte.jojo.client.ui.screen.widgets.utils.IExtendedWidget;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -41,8 +44,8 @@ public abstract class HamonTabGui extends AbstractGui {
     protected int intScrollY;
     private final int minX = 0;
     private final int minY = 0;
-    protected int maxX;
-    protected int maxY;
+    private int maxX;
+    private int maxY;
     protected boolean leftUpperCorner;
 
     HamonTabGui(Minecraft minecraft, HamonScreen screen, String title, int scrollWidth, int scrollHeight) {
@@ -158,26 +161,18 @@ public abstract class HamonTabGui extends AbstractGui {
         RenderSystem.popMatrix();
     }
     
-    public final void initButtons() {
-        addButtons();
-        if (buttons == null) {
-            buttons = buttonsAdded.build();
-        }
-    }
+    public abstract void addButtons();
     
-    protected abstract void addButtons();
-    
-    private final ImmutableList.Builder<HamonScreenButton> buttonsAdded = ImmutableList.builder();
-    private List<HamonScreenButton> buttons = null;
-    protected void addButton(HamonScreenButton button) {
-        screen.addButton(button);
-        buttonsAdded.add(button);
+    private List<IExtendedWidget> allWidgets = new ArrayList<>();
+    protected void addButton(IExtendedWidget button) {
+        screen.addButton(button.thisAsWidget());
+        allWidgets.add(button);
     }
     
     protected void updateButtons() {}
     
-    List<HamonScreenButton> getButtons() {
-        return buttons;
+    protected List<IExtendedWidget> getWidgets() {
+        return allWidgets;
     }
 
     protected void drawOnBackground(HamonScreen screen, MatrixStack matrixStack, int mouseX, int mouseY) {}
@@ -192,25 +187,30 @@ public abstract class HamonTabGui extends AbstractGui {
                 0, 0xFFFFFF, false);
     }
     
+    void onTabSelected(HamonTabGui selectedTab) {
+        for (IExtendedWidget button : getWidgets()) {
+            button.thisAsWidget().active = selectedTab == this;
+        }
+    }
+    
     private void updateButtons(MatrixStack matrixStack, int mouseX, int mouseY) {
-        boolean mouseInWindow = screen.mouseInsideWindow(mouseX, mouseY);
-        for (HamonScreenButton button : getButtons()) {
-            button.updateY(intScrollY);
-            button.setMouseInWindow(mouseInWindow);
+        for (IExtendedWidget button : getWidgets()) {
+            button.getWidgetExtension().updateY(intScrollY);
         }
     }
     
     private void drawButtonNames(MatrixStack matrixStack) {
-        for (HamonScreenButton button : getButtons()) {
-            if (button.visible) {
-                button.drawName(matrixStack);
+        for (IExtendedWidget button : getWidgets()) {
+            if (button instanceof HamonScreenButton && button.thisAsWidget().visible) {
+                ((HamonScreenButton) button).drawName(matrixStack);
             }
         }
     }
     
     private void renderButtons(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
-        for (HamonScreenButton button : getButtons()) {
-            button.render(matrixStack, mouseX, mouseY, partialTick);
+        if (!screen.mouseInsideWindow(mouseX, mouseY)) mouseY = -1;
+        for (IExtendedWidget button : getWidgets()) {
+            button.thisAsWidget().render(matrixStack, mouseX, mouseY, partialTick);
         }
     }
     
@@ -230,6 +230,18 @@ public abstract class HamonTabGui extends AbstractGui {
         }
         if (maxY - minY > WINDOW_HEIGHT - 8) {
             scrollY = MathHelper.clamp(scrollY + yMovement, (double)(-(maxY - (WINDOW_HEIGHT - 27))), 0.0D);
+        }
+    }
+    
+    protected void setMaxY(int maxY) {
+        this.maxY = maxY;
+        int actualWindowHeight = WINDOW_HEIGHT - WINDOW_UPPER_BORDER - WINDOW_THIN_BORDER;
+        if (maxY < actualWindowHeight) {
+            maxY = -1;
+            scrollY = 0;
+        }
+        else {
+            scrollY = Math.max(scrollY, -maxY + actualWindowHeight);
         }
     }
 

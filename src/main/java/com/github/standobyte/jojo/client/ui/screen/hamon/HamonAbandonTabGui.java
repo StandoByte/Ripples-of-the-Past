@@ -31,7 +31,7 @@ public class HamonAbandonTabGui extends HamonTabGui {
     }
     
     @Override
-    protected void addButtons() {
+    public void addButtons() {
         addButton(new HamonScreenButton(screen.windowPosX() + 13, screen.windowPosY() + 96, 100, 20, new TranslationTextComponent("gui.yes"), button -> {
             PacketManager.sendToServer(new ClHamonAbandonButtonPacket());
             minecraft.setScreen(null);

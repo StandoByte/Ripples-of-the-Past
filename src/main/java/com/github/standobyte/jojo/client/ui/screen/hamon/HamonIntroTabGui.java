@@ -1,6 +1,8 @@
 package com.github.standobyte.jojo.client.ui.screen.hamon;
 
 import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_HEIGHT;
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_THIN_BORDER;
+import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_UPPER_BORDER;
 import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_WIDTH;
 
 import java.util.List;
@@ -8,6 +10,8 @@ import java.util.List;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
+import com.github.standobyte.jojo.client.ui.screen.widgets.HideScreenPartToggleBox;
+import com.github.standobyte.jojo.client.ui.screen.widgets.HideScreenPartToggleBox.Direction;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -29,6 +33,7 @@ public class HamonIntroTabGui extends HamonTabGui {
     private final List<IReorderingProcessor> breathTextBar;
     private final List<IReorderingProcessor> breathTextEnergy;
     private final List<IReorderingProcessor> breathTextAbility;
+    private final List<IReorderingProcessor> breathTextStabilityTitle;
     private final List<IReorderingProcessor> breathTextStability;
     private final List<IReorderingProcessor> breathTextStability2;
     private final List<IReorderingProcessor> statsTransitionText;
@@ -38,6 +43,7 @@ public class HamonIntroTabGui extends HamonTabGui {
     private int tickCount = 0;
     private int bar2RenderTime = -1;
     private int bar3RenderTime = -1;
+    private HideScreenPartToggleBox breathStabilityInfoToggle;
     
     HamonIntroTabGui(Minecraft minecraft, HamonScreen screen, String title) {
         super(minecraft, screen, title, -1, 1);
@@ -51,6 +57,8 @@ public class HamonIntroTabGui extends HamonTabGui {
                 new TranslationTextComponent("hamon.intro.breath.text2.underlined").withStyle(TextFormatting.UNDERLINE)), textWidth);
         breathTextAbility = minecraft.font.split(new TranslationTextComponent("hamon.intro.breath.text3", 
                 new TranslationTextComponent("hamon.intro.breath.text3.underlined").withStyle(TextFormatting.UNDERLINE)), textWidth);
+        breathTextStabilityTitle = minecraft.font.split(new TranslationTextComponent("hamon.intro.breath.stability_hidden")
+                .withStyle(TextFormatting.ITALIC), textWidth);
         breathTextStability = minecraft.font.split(new TranslationTextComponent("hamon.intro.breath.text4", 
                 new TranslationTextComponent("hamon.intro.breath.text4.underlined").withStyle(TextFormatting.UNDERLINE)), textWidth);
         breathTextStability2 = minecraft.font.split(new TranslationTextComponent("hamon.intro.breath.text5"), textWidth);
@@ -58,7 +66,10 @@ public class HamonIntroTabGui extends HamonTabGui {
     }
     
     @Override
-    protected void addButtons() {}
+    public void addButtons() {
+        addButton(breathStabilityInfoToggle = new HideScreenPartToggleBox(
+                screen.windowPosX() + 13, -1, Direction.DOWN, screen));
+    }
     
     @Override
     protected void drawText(MatrixStack matrixStack) {
@@ -95,16 +106,24 @@ public class HamonIntroTabGui extends HamonTabGui {
         y2 = textY + 36;
         
         textY += 49;
-        for (IReorderingProcessor line : breathTextStability) {
+        for (IReorderingProcessor line : breathTextStabilityTitle) {
             textY += minecraft.font.lineHeight;
-            minecraft.font.draw(matrixStack, line, (float) textX, (float) textY, 0xFFFFFF);
+            minecraft.font.draw(matrixStack, line, (float) textX + 14, (float) textY, 0xFFFFFF);
         }
-        y3 = textY + 12;
-        
-        textY += 14;
-        for (IReorderingProcessor line : breathTextStability2) {
-            textY += minecraft.font.lineHeight;
-            minecraft.font.draw(matrixStack, line, (float) textX, (float) textY, 0xFFFFFF);
+        breathStabilityInfoToggle.getWidgetExtension().setY(screen.windowPosY() + textY + 15 - intScrollY);
+        if (breathStabilityInfoToggle.getState()) {
+            textY += 3;
+            for (IReorderingProcessor line : breathTextStability) {
+                textY += minecraft.font.lineHeight;
+                minecraft.font.draw(matrixStack, line, (float) textX, (float) textY, 0xFFFFFF);
+            }
+            y3 = textY + 12;
+            
+            textY += 14;
+            for (IReorderingProcessor line : breathTextStability2) {
+                textY += minecraft.font.lineHeight;
+                minecraft.font.draw(matrixStack, line, (float) textX, (float) textY, 0xFFFFFF);
+            }
         }
 
         textY += 15;
@@ -113,7 +132,7 @@ public class HamonIntroTabGui extends HamonTabGui {
             minecraft.font.draw(matrixStack, line, (float) textX, (float) textY, 0xFFFFFF);
         }
         
-        maxY = textY + 15 - intScrollY;
+        setMaxY(textY + 15 - intScrollY);
     }
     
     @Override
@@ -136,16 +155,18 @@ public class HamonIntroTabGui extends HamonTabGui {
             renderEnergyBar(matrixStack, x, y2, 1, MathHelper.clamp((barTicks - 20F) / 60F, 0F, 1F));
         }
         
-        // energy bar with lower breath stability charging not as fast
-        boolean bar3InView = y3 > -7 && y3 < 199;
-        if (bar3RenderTime < 0 && bar3InView) {
-            bar3RenderTime = tickCount;
-        }
-        if (bar3RenderTime >= 0) {
-            float barTicks = (ticks - bar3RenderTime) % 750;
-            float fillStab = 0.4F + 0.6F * barTicks / 720;
-            float fillEnergy = MathHelper.clamp((barTicks - 20) / 60, 0, fillStab);
-            renderEnergyBar(matrixStack, x, y3, fillStab, fillEnergy);
+        if (breathStabilityInfoToggle.getState()) {
+            // energy bar with lower breath stability charging not as fast
+            boolean bar3InView = y3 > -7 && y3 < 199;
+            if (bar3RenderTime < 0 && bar3InView) {
+                bar3RenderTime = tickCount;
+            }
+            if (bar3RenderTime >= 0) {
+                float barTicks = (ticks - bar3RenderTime) % 750;
+                float fillStab = 0.4F + 0.6F * barTicks / 720;
+                float fillEnergy = MathHelper.clamp((barTicks - 20) / 60, 0, fillStab);
+                renderEnergyBar(matrixStack, x, y3, fillStab, fillEnergy);
+            }
         }
         
         renderHamonBreathIcon(matrixStack, intScrollX + 98, y2 - 21);
@@ -190,6 +211,15 @@ public class HamonIntroTabGui extends HamonTabGui {
         int x = tabPositioning.getIconX(windowX, index, WINDOW_WIDTH);
         int y = tabPositioning.getIconY(windowY, index, WINDOW_HEIGHT);
         blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
+    }
+    
+    @Override
+    void drawToolTips(MatrixStack matrixStack, int mouseX, int mouseY, int windowPosX, int windowPosY) {
+        if (breathStabilityInfoToggle.visible && breathStabilityInfoToggle.isMouseOver(
+                mouseX + screen.windowPosX() + WINDOW_THIN_BORDER, 
+                mouseY + screen.windowPosY() + WINDOW_UPPER_BORDER)) {
+            breathStabilityInfoToggle.renderToolTip(matrixStack, mouseX, mouseY);
+        }
     }
     
     

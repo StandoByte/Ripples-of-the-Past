@@ -1,37 +1,24 @@
 package com.github.standobyte.jojo.client.ui.screen.hamon;
 
-import com.github.standobyte.jojo.client.ui.screen.CustomButton;
+import com.github.standobyte.jojo.client.ui.screen.widgets.CustomButton;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 
 @SuppressWarnings("deprecation")
 public class HamonScreenButton extends CustomButton {
-    private int yStarting;
-    private boolean mouseInWindow;
-
+    
     public HamonScreenButton(int x, int y, int width, int height, 
             ITextComponent message, IPressable onPress) {
         super(x, y, width, height, message, onPress);
-        this.yStarting = y;
     }
-
+    
     public HamonScreenButton(int x, int y, int width, int height, 
             ITextComponent message, IPressable onPress, ITooltip tooltip) {
         super(x, y, width, height, message, onPress, tooltip);
-        this.yStarting = y;
-    }
-    
-    public void setMouseInWindow(boolean mouseInWindow) {
-        this.mouseInWindow = mouseInWindow;
-    }
-
-    @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
-        if (!mouseInWindow) mouseY = -1;
-        super.render(matrixStack, mouseX, mouseY, partialTick);
     }
     
     @Override
@@ -47,21 +34,15 @@ public class HamonScreenButton extends CustomButton {
         blit(matrixStack, x + width / 2, y, 200 - width / 2, 46 + i * 20, width / 2, height);
     }
     
-    public void setY(int y) {
-        this.y = y;
-        this.yStarting = y;
-    }
-    
-    public int getYStarting() {
-        return yStarting;
-    }
-    
-    public void updateY(int scrollY) {
-        this.y = this.yStarting + scrollY;
-    }
-    
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
-        return mouseInWindow ? super.mouseClicked(mouseX, mouseY, mouseButton) : false;
+    @SuppressWarnings("resource")
+    public void drawName(MatrixStack matrixStack) {
+        // shadow is gone for whatever reason so it's rendered here
+        drawCenteredString(matrixStack, Minecraft.getInstance().font, this.getMessage(), 
+                this.x + this.getWidth() / 2 + 1, this.y + (this.getHeight() - 8) / 2 + 1, 
+                0x3E3E3E | MathHelper.ceil(this.alpha * 255.0F) << 24);
+        
+        drawCenteredString(matrixStack, Minecraft.getInstance().font, this.getMessage(), 
+                this.x + this.getWidth() / 2, this.y + (this.getHeight() - 8) / 2, 
+                getFGColor() | MathHelper.ceil(this.alpha * 255.0F) << 24);
     }
 }

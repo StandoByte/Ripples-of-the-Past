@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.client.ui.screen.hamon;
 
 import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_HEIGHT;
 import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_THIN_BORDER;
-import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_UPPER_BORDER;
 import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_WIDTH;
 
 import java.util.ArrayList;
@@ -18,6 +17,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.ui.screen.widgets.utils.IExtendedWidget;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -139,15 +139,7 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
             techniqueY += techniqueBox.getHeight() + TECHNIQUE_Y_GAP;
         }
         
-        maxY = techniqueY;
-        int actualWindowHeight = WINDOW_HEIGHT - WINDOW_UPPER_BORDER - WINDOW_THIN_BORDER;
-        if (maxY < actualWindowHeight) {
-            maxY = -1;
-            scrollY = 0;
-        }
-        else {
-            scrollY = Math.max(scrollY, -maxY + actualWindowHeight);
-        }
+        setMaxY(techniqueY);
         
         if (getSelectedSkill() != null) {
             selectSkill(skills.get(getSelectedSkill().getHamonSkill()));
@@ -159,9 +151,9 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
     }
     
     @Override
-    List<HamonScreenButton> getButtons() {
+    protected List<IExtendedWidget> getWidgets() {
         return Stream.concat(
-                super.getButtons().stream(), 
+                super.getWidgets().stream(), 
                 pickTechniqueButtons.stream())
                 .collect(Collectors.toList());
     }

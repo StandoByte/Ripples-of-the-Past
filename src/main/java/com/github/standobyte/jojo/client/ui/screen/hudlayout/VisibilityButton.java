@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.client.ui.screen.hudlayout;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.ui.screen.CustomButton;
+import com.github.standobyte.jojo.client.ui.screen.widgets.CustomButton;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -27,6 +27,7 @@ public class VisibilityButton extends CustomButton {
         this.elementVisible = elementVisible;
     }
     
+    @SuppressWarnings("deprecation")
     protected void renderCustomButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
         Minecraft minecraft = Minecraft.getInstance();
         minecraft.getTextureManager().bind(ClientUtil.ADDITIONAL_UI);

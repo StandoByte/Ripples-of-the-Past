@@ -95,7 +95,7 @@ public class HamonScreen extends Screen {
         allTabs.add(abandonTrainingTab = new HamonAbandonTabGui(minecraft, this, "hamon.abandon.tab"));
         
         for (HamonTabGui tab : allTabs) {
-            tab.initButtons();
+            tab.addButtons();
             tab.updateButtons();
         }
         selectTab(introWasRead ? selectableTabs.get(1) : introTab);
@@ -127,7 +127,7 @@ public class HamonScreen extends Screen {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
         clickedOnSkill = false;
-        if (super.mouseClicked(mouseX, mouseY, mouseButton)) {
+        if (mouseInsideWindow(mouseX, mouseY) && super.mouseClicked(mouseX, mouseY, mouseButton)) {
             setDragging(false);
             return true;
         }
@@ -205,7 +205,7 @@ public class HamonScreen extends Screen {
         }
         selectedTab = tab;
         for (HamonTabGui hamonTabGui : allTabs) {
-            hamonTabGui.getButtons().forEach(button -> button.active = hamonTabGui == tab);
+            hamonTabGui.onTabSelected(tab);
         }
         tab.updateTab();
     }

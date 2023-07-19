@@ -58,7 +58,7 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
     }
 
     @Override
-    protected void addButtons() {
+    public void addButtons() {
         addButton(learnButton = new HamonScreenButton(screen.windowPosX() + 150, screen.windowPosY() + 92, 64, 20, new TranslationTextComponent("hamon.learnButton"), button -> {
             if (selectedSkill != null) {
                 PacketManager.sendToServer(new ClHamonLearnButtonPacket(selectedSkill.getHamonSkill()));

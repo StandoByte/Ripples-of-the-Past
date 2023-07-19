@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.client.ui.screen.walkman;
 
 import java.util.function.Supplier;
 
-import com.github.standobyte.jojo.client.ui.screen.CustomButton;
+import com.github.standobyte.jojo.client.ui.screen.widgets.CustomButton;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 

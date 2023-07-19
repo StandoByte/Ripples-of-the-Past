@@ -84,7 +84,7 @@ public class HamonStatsTabGui extends HamonTabGui {
     }
 
     @Override
-    protected void addButtons() {
+    public void addButtons() {
         addButton(abandonTrainingButton = new HamonScreenButton(screen.windowPosX() + 13, screen.windowPosY() + 999, 204, 20, 
                 new TranslationTextComponent("hamon.abandon.tab"), button -> {
                     screen.abandonTrainingTab.setPrevTab(this);
@@ -265,8 +265,8 @@ public class HamonStatsTabGui extends HamonTabGui {
             minecraft.font.draw(matrixStack, breathingStatGapLines.get(i), (float) textX, (float) textY, 0xFFFFFF);
         }
         
-        maxY = textY + 39 - intScrollY;
-        abandonTrainingButton.setY(screen.windowPosY() + textY + 30 - intScrollY);
+        setMaxY(textY + 39 - intScrollY);
+        abandonTrainingButton.getWidgetExtension().setY(screen.windowPosY() + textY + 30 - intScrollY);
     }
 
     @Override
