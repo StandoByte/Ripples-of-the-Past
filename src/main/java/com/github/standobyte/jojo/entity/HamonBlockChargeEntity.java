@@ -112,7 +112,7 @@ public class HamonBlockChargeEntity extends Entity {
             blockPos = new BlockPos(posArray[0], posArray[1], posArray[2]);
         }
         if (nbt.contains("HamonCharge", 10)) {
-            this.hamonCharge = new HamonCharge(nbt.getCompound("HamonCharge"));
+            this.hamonCharge = HamonCharge.fromNBT(nbt.getCompound("HamonCharge"));
         }
     }
 
@@ -123,7 +123,7 @@ public class HamonBlockChargeEntity extends Entity {
             nbt.putIntArray("BlockPos", new int[] { blockPos.getX(), blockPos.getY(), blockPos.getZ() } );
         }
         if (hamonCharge != null) {
-            nbt.put("HamonCharge", hamonCharge.writeNBT());
+            nbt.put("HamonCharge", hamonCharge.toNBT());
         }
     }
 

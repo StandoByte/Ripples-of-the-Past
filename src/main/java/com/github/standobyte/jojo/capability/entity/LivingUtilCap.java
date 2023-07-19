@@ -238,7 +238,7 @@ public class LivingUtilCap {
     public CompoundNBT toNBT() {
         CompoundNBT nbt = new CompoundNBT();
         if (hamonCharge != null) {
-            nbt.put("HamonCharge", hamonCharge.writeNBT());
+            nbt.put("HamonCharge", hamonCharge.toNBT());
         }
         nbt.putFloat("HamonSpread", receivedHamonDamage);
         nbt.putBoolean("UsedTimeStop", hasUsedTimeStopToday);
@@ -247,7 +247,7 @@ public class LivingUtilCap {
     
     public void fromNBT(CompoundNBT nbt) {
         if (nbt.contains("HamonCharge", 10)) {
-            hamonCharge = new HamonCharge(nbt.getCompound("HamonCharge"));
+            hamonCharge = HamonCharge.fromNBT(nbt.getCompound("HamonCharge"));
         }
         receivedHamonDamage = nbt.getFloat("HamonSpread");
         hasUsedTimeStopToday = nbt.getBoolean("UsedTimeStop");

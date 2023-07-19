@@ -72,7 +72,7 @@ public class ModHamonActions {
                     .needsFreeMainHand().swingHand()));
     
     public static final RegistryObject<HamonAction> HAMON_ORGANISM_INFUSION = ACTIONS.register("hamon_organism_infusion", 
-            () -> new HamonOrganismInfusion(new HamonAction.Builder().energyCost(200F)
+            () -> new HamonOrganismInfusion(new HamonAction.Builder().energyCost(1000F)
                     .needsFreeMainHand().swingHand()));
     
     public static final RegistryObject<HamonAction> HAMON_BREATH = ACTIONS.register("hamon_breath", 

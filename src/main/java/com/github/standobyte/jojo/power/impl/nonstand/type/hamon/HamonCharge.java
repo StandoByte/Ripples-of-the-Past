@@ -39,28 +39,6 @@ public class HamonCharge {
         this.energySpent = energySpent;
     }
     
-    public HamonCharge(CompoundNBT nbt) {
-        this.tickDamage = nbt.getFloat("Charge");
-        this.chargeTicks = nbt.getInt("ChargeTicks");
-        if (nbt.hasUUID("HamonUser")) {
-            this.hamonUserId = nbt.getUUID("HamonUser");
-        }
-        this.gavePoints = nbt.getBoolean("GavePoints");
-        this.energySpent = nbt.getFloat("EnergySpent");
-    }
-    
-    public CompoundNBT writeNBT() {
-        CompoundNBT chargeNbt = new CompoundNBT();
-        chargeNbt.putFloat("Charge", tickDamage);
-        chargeNbt.putInt("ChargeTicks", chargeTicks);
-        if (hamonUserId != null) {
-            chargeNbt.putUUID("HamonUser", hamonUserId);
-        }
-        chargeNbt.putBoolean("GavePoints", gavePoints);
-        chargeNbt.putFloat("EnergySpent", energySpent);
-        return chargeNbt;
-    }
-    
     public float getTickDamage() {
         return tickDamage;
     }
@@ -101,6 +79,29 @@ public class HamonCharge {
     
     public boolean shouldBeRemoved() {
         return chargeTicks < 0;
+    }
+    
+    
+    
+    public static HamonCharge fromNBT(CompoundNBT nbt) {
+        HamonCharge charge = new HamonCharge(nbt.getFloat("Charge"), nbt.getInt("ChargeTicks"), null, nbt.getFloat("EnergySpent"));
+        if (nbt.hasUUID("HamonUser")) {
+            charge.hamonUserId = nbt.getUUID("HamonUser");
+        }
+        charge.gavePoints = nbt.getBoolean("GavePoints");
+        return charge;
+    }
+    
+    public CompoundNBT toNBT() {
+        CompoundNBT chargeNbt = new CompoundNBT();
+        chargeNbt.putFloat("Charge", tickDamage);
+        chargeNbt.putInt("ChargeTicks", chargeTicks);
+        if (hamonUserId != null) {
+            chargeNbt.putUUID("HamonUser", hamonUserId);
+        }
+        chargeNbt.putBoolean("GavePoints", gavePoints);
+        chargeNbt.putFloat("EnergySpent", energySpent);
+        return chargeNbt;
     }
 
 }

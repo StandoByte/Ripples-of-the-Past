@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.entity.HamonBlockChargeEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -73,6 +74,14 @@ public class HamonOrganismInfusion extends HamonAction {
     
     public TargetRequirement getTargetRequirement() {
         return TargetRequirement.ANY;
+    }
+    
+    @Override
+    public float getEnergyCost(INonStandPower power, ActionTarget target) {
+        if (this == ModHamonActions.HAMON_PLANT_INFUSION.get() || target.getType() == TargetType.ENTITY) {
+            return super.getEnergyCost(power, target);
+        }
+        return ModHamonActions.HAMON_PLANT_INFUSION.get().getEnergyCost(power, target);
     }
     
     @Override
