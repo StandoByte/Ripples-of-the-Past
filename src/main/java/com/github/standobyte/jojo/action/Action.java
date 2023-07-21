@@ -131,7 +131,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
             if (!performer.canSee(targetEntity)) {
                 rangeSq /= 4.0D;
             }
-            if (JojoModUtil.getDistance(performer, targetEntity.getBoundingBox()) > rangeSq) {
+            double distanceToEntity = JojoModUtil.getDistance(performer, targetEntity.getBoundingBox());
+            if (distanceToEntity * distanceToEntity > rangeSq) {
                 targetTooFar = true;
             }
             break;
@@ -139,11 +140,14 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
             BlockPos targetPos = target.getBlockPos();
             int buildLimit = 256;
             if (targetPos.getY() < buildLimit - 1 || target.getFace() != Direction.UP && targetPos.getY() < buildLimit) {
-                double distSq = getMaxRangeSqBlockTarget();
+                double maxDistSq = getMaxRangeSqBlockTarget();
                 if (user.level.getBlockState(targetPos).getBlock() == Blocks.AIR) {
                     return ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
                 }
-                targetTooFar = target.getBoundingBox(performer.level).map(aabb -> JojoModUtil.getDistance(performer, aabb) > distSq).orElse(true);
+                targetTooFar = target.getBoundingBox(performer.level).map(aabb -> {
+                    double distance = JojoModUtil.getDistance(performer, aabb);
+                    return distance * distance > maxDistSq;
+                }).orElse(true);
             }
             break;
         default:

@@ -1323,17 +1323,19 @@ public class GameplayEventHandler {
                             
                             // projectiles charged by a hamon user
                             INonStandPower.getNonStandPowerOptional(shooter).ifPresent(power -> {
-                                power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                                    AbstractHamonSkill skillRequired = projectile instanceof AbstractArrowEntity
-                                            ? ModHamonSkills.ARROW_INFUSION.get() : ModHamonSkills.THROWABLES_INFUSION.get();
-                                    if (hamon.isSkillLearned(skillRequired)) {
-                                        hamon.consumeHamonEnergyTo(efficiency -> {
-                                            hamonChargeProperties.applyCharge(projCharge, efficiency, power);
-                                            projCharge.setMultiplyWithUserStrength(true);
-                                            return null;
-                                        }, hamonChargeProperties.energyRequired);
-                                    }
-                                });
+                                if (power.getEnergy() > 0) {
+                                    power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
+                                        AbstractHamonSkill skillRequired = projectile instanceof AbstractArrowEntity
+                                                ? ModHamonSkills.ARROW_INFUSION.get() : ModHamonSkills.THROWABLES_INFUSION.get();
+                                        if (hamon.isSkillLearned(skillRequired)) {
+                                            hamon.consumeHamonEnergyTo(efficiency -> {
+                                                hamonChargeProperties.applyCharge(projCharge, efficiency, power);
+                                                projCharge.setMultiplyWithUserStrength(true);
+                                                return null;
+                                            }, hamonChargeProperties.energyRequired);
+                                        }
+                                    });
+                                }
                             });
 
                             // projectiles charged by an infused entity
