@@ -127,6 +127,7 @@ public class HamonScreen extends Screen {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
         clickedOnSkill = false;
+        
         if (mouseInsideWindow(mouseX, mouseY) && super.mouseClicked(mouseX, mouseY, mouseButton)) {
             setDragging(false);
             return true;
@@ -355,6 +356,7 @@ public class HamonScreen extends Screen {
             HamonScreen hamonScreen = ((HamonScreen) screen);
             for (HamonTabGui tab : hamonScreen.selectableTabs) {
                 tab.updateTab();
+                tab.onTabSelected(hamonScreen.selectedTab); // makes sure the learn technique buttons are disabled
             }
         }
     }
