@@ -4,109 +4,82 @@ import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WIND
 import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_THIN_BORDER;
 import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_WIDTH;
 
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonResetSkillsButtonPacket.HamonSkillsTab;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkillTree;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.util.IReorderingProcessor;
+import net.minecraft.util.Util;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class HamonGeneralSkillsTabGui extends HamonSkillsTabGui {
-    private static final BaseHamonSkill[][] SKILLS_STRENGTH;
-    private static final ITextComponent[] NAMES_STRENGTH = {
-            new TranslationTextComponent("hamon.skills.overdrive"),
-            new TranslationTextComponent("hamon.skills.infusion"),
-            new TranslationTextComponent("hamon.skills.flexibility")
-    };
-    private static final BaseHamonSkill[][] SKILLS_CONTROL;
-    private static final ITextComponent[] NAMES_CONTROL = {
-            new TranslationTextComponent("hamon.skills.life"),
-            new TranslationTextComponent("hamon.skills.attractant"),
-            new TranslationTextComponent("hamon.skills.repellent")
-    };
-    static {
-        SKILLS_STRENGTH = new BaseHamonSkill[][] {
-            {
-                ModHamonSkills.OVERDRIVE.get(), 
-                ModHamonSkills.SENDO_OVERDRIVE.get(), 
-                ModHamonSkills.TURQUOISE_BLUE_OVERDRIVE.get(), 
-                ModHamonSkills.SUNLIGHT_YELLOW_OVERDRIVE.get()},
-            {
-                ModHamonSkills.THROWABLES_INFUSION.get(), 
-                ModHamonSkills.PLANT_INFUSION.get(), 
-                ModHamonSkills.ARROW_INFUSION.get(), 
-                ModHamonSkills.ANIMAL_INFUSION.get()},
-            {
-                ModHamonSkills.ZOOM_PUNCH.get(), 
-                ModHamonSkills.JUMP.get(), 
-                ModHamonSkills.SPEED_BOOST.get(), 
-                ModHamonSkills.AFTERIMAGES.get()}
-        };
-        SKILLS_CONTROL = new BaseHamonSkill[][] {
-            {
-                ModHamonSkills.HEALING.get(), 
-                ModHamonSkills.PLANTS_GROWTH.get(), 
-                ModHamonSkills.EXPEL_VENOM.get(), 
-                ModHamonSkills.HEALING_TOUCH.get()},
-            {
-                ModHamonSkills.WALL_CLIMBING.get(), 
-                ModHamonSkills.DETECTOR.get(), 
-                ModHamonSkills.LIFE_MAGNETISM.get(), 
-                ModHamonSkills.HAMON_SPREAD.get()},
-            {
-                ModHamonSkills.WATER_WALKING.get(), 
-                ModHamonSkills.PROJECTILE_SHIELD.get(), 
-                ModHamonSkills.LAVA_WALKING.get(), 
-                ModHamonSkills.REPELLING_OVERDRIVE.get()}
-        };
-    }
+    private static final Map<HamonStat, BaseHamonSkillTree[]> SKILL_TREES = Util.make(new EnumMap<>(HamonStat.class), map -> {
+        map.put(HamonStat.STRENGTH, new BaseHamonSkillTree[] {
+                BaseHamonSkillTree.OVERDRIVE,
+                BaseHamonSkillTree.INFUSION,
+                BaseHamonSkillTree.FLEXIBILITY
+        });
+        map.put(HamonStat.CONTROL, new BaseHamonSkillTree[] {
+                BaseHamonSkillTree.LIFE_ENERGY,
+                BaseHamonSkillTree.ATTRACTANT_REPELLENT,
+                BaseHamonSkillTree.BODY_WATER_VIBRATION
+        });
+    });
     
-    private static final int[] X_OFFSET = {16, 3, 29, 16};
-    private static final int[] Y_OFFSET = {18, 44, 44, 72};
-    private int[][] skillTreeNamePos;
-
     private final HamonStat skillsType;
     private List<IReorderingProcessor> nextPointHintLines;
     private final List<IReorderingProcessor> unspentPointsLines;
     private final List<IReorderingProcessor> unspentPointsNoTeacherLines;
-    private ITextComponent[] skillTreeNames = new ITextComponent[3];
 
     HamonGeneralSkillsTabGui(Minecraft minecraft, HamonScreen screen, String title, HamonStat skillsType) {
         super(minecraft, screen, title, -1, -1);
         this.skillsType = skillsType;
-        fillSkillLines();
         unspentPointsLines = minecraft.font.split(new TranslationTextComponent("hamon.unspent_points")
                 .withStyle(TextFormatting.ITALIC, TextFormatting.GRAY), 100);
         unspentPointsNoTeacherLines = minecraft.font.split(new TranslationTextComponent("hamon.unspent_points_no_teacher")
                 .withStyle(TextFormatting.ITALIC, TextFormatting.GRAY), 100);
+        
+        fillSkillLines();
     }
     
+    private int xOffset(int gridX) { return 3 + gridX * 13; }
+    private int yOffset(int gridY) { return 18 + gridY * (gridY < 2 ? 26 : 27); }
     private void fillSkillLines() {
         skills.clear();
-        BaseHamonSkill[][] skillsOnTab = skillsType == HamonStat.STRENGTH ? SKILLS_STRENGTH : SKILLS_CONTROL;
-        skillTreeNames = skillsType == HamonStat.STRENGTH ? NAMES_STRENGTH : NAMES_CONTROL;
-        skillTreeNamePos = new int[3][2];
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 4; j++) {
-                BaseHamonSkill skill = skillsOnTab[i][j];
-                int x = 9 + i * 68 + X_OFFSET[j];
-                int y = WINDOW_HEIGHT - 131 + Y_OFFSET[j];
-                skills.put(skill, new HamonSkillElementLearnable(skill, 
-                        screen.hamon, minecraft.player, screen.teacherSkills, j == 3, x, y));
+        BaseHamonSkillTree[] skillTrees = SKILL_TREES.get(skillsType);
+        for (int treeIndex = 0; treeIndex < skillTrees.length; treeIndex++) {
+            BaseHamonSkillTree skillTree = skillTrees[treeIndex];
+            int tierCount = 0;
+            for (List<? extends AbstractHamonSkill> tier : skillTree.getAllTiers()) {
+                int tierSize = tier.size();
+                for (int tierI = 0; tierI < tierSize; tierI++) {
+                    int gridX = tierSize == 1 ? 1 : tierI * MathHelper.ceil(3f / tierSize);
+                    int gridY = tierCount;
+                    
+                    AbstractHamonSkill skill = tier.get(tierI);
+                    
+                    int x = 9 + treeIndex * 68 + xOffset(gridX);
+                    int y = WINDOW_HEIGHT - 131 + yOffset(gridY);
+                    skills.put(skill, new HamonSkillElementLearnable(skill, 
+                            screen.hamon, minecraft.player, screen.teacherSkills, gridY == 2, x, y));
+                }
+                
+                tierCount++;
             }
-            skillTreeNamePos[i][0] = 9 + i * 68 + X_OFFSET[0] + 13;
-            skillTreeNamePos[i][1] = WINDOW_HEIGHT - 131 + Y_OFFSET[0] - 18;
         }
     }
     
@@ -141,12 +114,15 @@ public class HamonGeneralSkillsTabGui extends HamonSkillsTabGui {
     @Override
     protected void drawText(MatrixStack matrixStack) {
         drawDesc(matrixStack);
+        BaseHamonSkillTree[] trees = SKILL_TREES.get(skillsType);
         for (int i = 0; i < 3; i++) {
-            List<IReorderingProcessor> nameLines = minecraft.font.split(skillTreeNames[i], 75);
+            List<IReorderingProcessor> nameLines = minecraft.font.split(
+                    new TranslationTextComponent(String.format("hamon.skills.%s", trees[i].getName())), 75);
             for (int line = 0; line < nameLines.size(); line++) {
                 ClientUtil.drawCenteredString(matrixStack, minecraft.font, nameLines.get(line), 
-                        skillTreeNamePos[i][0] + intScrollX, 
-                        skillTreeNamePos[i][1] + line * 9 + intScrollY, 0xFFFFFF);
+                        9 + i * 68 + xOffset(1) + 13 + intScrollX, 
+                        WINDOW_HEIGHT - 131 + yOffset(0) - 18 + line * 9 + intScrollY, 
+                        0xFFFFFF);
             }
         }
     }
@@ -183,7 +159,7 @@ public class HamonGeneralSkillsTabGui extends HamonSkillsTabGui {
         super.updateTab();
         int statLvl = skillsType == HamonStat.STRENGTH ? screen.hamon.getHamonStrengthLevel() : screen.hamon.getHamonControlLevel();
         ITextComponent textComponent;
-        if (statLvl < HamonData.MAX_SKILL_POINTS_LVL) {
+        if (statLvl < HamonData.MAX_STAT_LEVEL) {
             textComponent = new TranslationTextComponent("hamon.next_point." + (skillsType == HamonStat.STRENGTH ? "strength" : "control"), screen.hamon.nextSkillPointLvl(skillsType));
         }
         else {

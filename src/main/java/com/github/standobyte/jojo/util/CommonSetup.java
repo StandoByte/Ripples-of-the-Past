@@ -31,6 +31,7 @@ import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.NonStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkillTree;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandPower;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
@@ -80,6 +81,7 @@ public class CommonSetup {
             
             StandStatsConfig.init(MinecraftForge.EVENT_BUS);
             
+            // things to do after registry events
             ModPotions.registerRecipes();
             
             Action.initShiftVariations();
@@ -89,6 +91,8 @@ public class CommonSetup {
             for (StandType<?> stand : JojoCustomRegistries.STANDS.getRegistry()) {
                 stand.onCommonSetup();
             }
+            
+            BaseHamonSkillTree.initTrees();
         });
     }
 }

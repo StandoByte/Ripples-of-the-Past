@@ -28,7 +28,6 @@ import net.minecraft.fluid.Fluid;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
@@ -93,7 +92,7 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser,
     @Override
     public boolean canStandOnFluid(Fluid fluid) {
         return hamonPower.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> 
-        hamon.isSkillLearned(ModHamonSkills.LAVA_WALKING.get()) || hamon.isSkillLearned(ModHamonSkills.WATER_WALKING.get()) && fluid.is(FluidTags.WATER))
+        hamon.isSkillLearned(ModHamonSkills.LIQUID_WALKING.get()))
                 .orElse(false);
     }
 

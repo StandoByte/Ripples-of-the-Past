@@ -3,6 +3,9 @@ package com.github.standobyte.jojo.init.power.non_stand.hamon;
 import static com.github.standobyte.jojo.init.power.ModCommonRegisters.ACTIONS;
 import static com.github.standobyte.jojo.init.power.ModCommonRegisters.NON_STAND_POWERS;
 
+import java.util.List;
+import java.util.function.Supplier;
+
 import com.github.standobyte.jojo.action.non_stand.HamonAction;
 import com.github.standobyte.jojo.action.non_stand.HamonBreath;
 import com.github.standobyte.jojo.action.non_stand.HamonBubbleBarrier;
@@ -31,6 +34,7 @@ import com.github.standobyte.jojo.action.non_stand.HamonZoomPunch;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 
 import net.minecraftforge.fml.RegistryObject;
 
@@ -102,7 +106,10 @@ public class ModHamonActions {
             () -> new HamonProjectileShield(new HamonAction.Builder().holdEnergyCost(15F).heldWalkSpeed(0.5F)
                     .shout(ModHamonSkills.CHARACTER_JOSEPH, ModSounds.JOSEPH_BARRIER)));
     
-    public static final RegistryObject<HamonAction> HAMON_REPELLING_OVERDRIVE = ACTIONS.register("hamon_repelling_overdrive", 
+    public static final RegistryObject<HamonAction> HAMON_PROTECTION = ACTIONS.register("hamon_protection", 
+            () -> new HamonRepellingOverdrive(new HamonAction.Builder().energyCost(1000F)));
+    
+    public static final RegistryObject<HamonAction> HAMON_HYPNOSIS = ACTIONS.register("hamon_hypnosis", 
             () -> new HamonRepellingOverdrive(new HamonAction.Builder().energyCost(1000F)));
     
     
@@ -125,7 +132,8 @@ public class ModHamonActions {
                             HAMON_DETECTOR.get(), 
                             HAMON_LIFE_MAGNETISM.get(), 
                             HAMON_PROJECTILE_SHIELD.get(), 
-                            HAMON_REPELLING_OVERDRIVE.get()}
+                            HAMON_PROTECTION.get(), 
+                            HAMON_HYPNOSIS.get()}
                     ));
     
     

@@ -292,15 +292,13 @@ public class GameplayEventHandler {
         
         return INonStandPower.getNonStandPowerOptional(player).map(power -> {
             return power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
-                boolean waterWalking = hamon.isSkillLearned(ModHamonSkills.WATER_WALKING.get());
-                boolean anyLiquidWalking = hamon.isSkillLearned(ModHamonSkills.LAVA_WALKING.get());
-                if (anyLiquidWalking || waterWalking) {
+                boolean liquidWalking = hamon.isSkillLearned(ModHamonSkills.LIQUID_WALKING.get());
+                if (liquidWalking) {
                     BlockPos blockPos = new BlockPos(player.position().add(0, -0.3, 0));
                     FluidState fluidBelow = player.level.getBlockState(blockPos).getFluidState();
                     Fluid fluidType = fluidBelow.getType();
                     if (!fluidBelow.isEmpty() && 
-                            !(fluidType.is(FluidTags.WATER) && player.isOnFire()) && 
-                            (fluidType.is(FluidTags.WATER) || anyLiquidWalking)) {
+                            !(fluidType.is(FluidTags.WATER) && player.isOnFire())) {
                         player.setOnGround(true);
                         if (!player.level.isClientSide() || player.isLocalPlayer()) {
 //                            InputHandler input = InputHandler.getInstance();

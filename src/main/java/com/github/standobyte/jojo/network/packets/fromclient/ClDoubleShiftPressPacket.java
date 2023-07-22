@@ -41,7 +41,7 @@ public class ClDoubleShiftPressPacket {
         public static boolean sendOnPress(PlayerEntity player) {
             return player.isAlive() && player.isOnGround() && GeneralUtil.orElseFalse(
                     INonStandPower.getPlayerNonStandPower(player).getTypeSpecificData(ModPowers.HAMON.get()), 
-                    hamon -> hamon.isSkillLearned(ModHamonSkills.WATER_WALKING.get()) || hamon.isSkillLearned(ModHamonSkills.LAVA_WALKING.get()));
+                    hamon -> hamon.isSkillLearned(ModHamonSkills.LIQUID_WALKING.get()));
         }
     }
 

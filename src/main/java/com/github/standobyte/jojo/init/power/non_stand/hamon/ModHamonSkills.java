@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill.RewardType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterTechniqueHamonSkill;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill.RewardType;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 
 import net.minecraft.util.Util;
 import net.minecraftforge.fml.RegistryObject;
@@ -48,19 +48,23 @@ public class ModHamonSkills {
             () -> new BaseHamonSkill.Builder(HamonStat.STRENGTH, RewardType.PASSIVE)
             .build());
     
-    public static final RegistryObject<BaseHamonSkill> PLANT_INFUSION = HAMON_SKILLS.register("plant_infusion", 
+    public static final RegistryObject<BaseHamonSkill> PLANT_BLOCK_INFUSION = HAMON_SKILLS.register("plant_infusion", 
             () -> new BaseHamonSkill.Builder(HamonStat.STRENGTH, RewardType.ATTACK)
             .unlocks(ModHamonActions.HAMON_PLANT_INFUSION)
             .requiredSkill(THROWABLES_INFUSION).build());
     
-    public static final RegistryObject<BaseHamonSkill> ARROW_INFUSION = HAMON_SKILLS.register("arrow_infusion", 
+    public static final RegistryObject<BaseHamonSkill> PLANT_ITEM_INFUSION = HAMON_SKILLS.register("plant_item_infusion", 
             () -> new BaseHamonSkill.Builder(HamonStat.STRENGTH, RewardType.PASSIVE)
             .requiredSkill(THROWABLES_INFUSION).build());
     
     public static final RegistryObject<BaseHamonSkill> ANIMAL_INFUSION = HAMON_SKILLS.register("animal_infusion", 
             () -> new BaseHamonSkill.Builder(HamonStat.STRENGTH, RewardType.PASSIVE)
             .unlocks(ModHamonActions.HAMON_ORGANISM_INFUSION)
-            .requiredSkill(PLANT_INFUSION).requiredSkill(ARROW_INFUSION).build());
+            .requiredSkill(PLANT_BLOCK_INFUSION).build());
+    
+    public static final RegistryObject<BaseHamonSkill> ARROW_INFUSION = HAMON_SKILLS.register("arrow_infusion", 
+            () -> new BaseHamonSkill.Builder(HamonStat.STRENGTH, RewardType.PASSIVE)
+            .requiredSkill(PLANT_ITEM_INFUSION).build());
     
             
     public static final RegistryObject<BaseHamonSkill> ZOOM_PUNCH = HAMON_SKILLS.register("zoom_punch", 
@@ -90,7 +94,7 @@ public class ModHamonSkills {
     public static final RegistryObject<BaseHamonSkill> PLANTS_GROWTH = HAMON_SKILLS.register("plants_growth", 
             () -> new BaseHamonSkill.Builder(HamonStat.CONTROL, RewardType.PASSIVE)
             .requiredSkill(HEALING).build());
-            
+        
     public static final RegistryObject<BaseHamonSkill> EXPEL_VENOM = HAMON_SKILLS.register("expel_venom", 
             () -> new BaseHamonSkill.Builder(HamonStat.CONTROL, RewardType.PASSIVE)
             .requiredSkill(HEALING).build());
@@ -98,45 +102,52 @@ public class ModHamonSkills {
     public static final RegistryObject<BaseHamonSkill> HEALING_TOUCH = HAMON_SKILLS.register("healing_touch", 
             () -> new BaseHamonSkill.Builder(HamonStat.CONTROL, RewardType.PASSIVE)
             .requiredSkill(PLANTS_GROWTH).requiredSkill(EXPEL_VENOM).build());
-
-            
+    
+    
     public static final RegistryObject<BaseHamonSkill> WALL_CLIMBING = HAMON_SKILLS.register("wall_climbing", 
             () -> new BaseHamonSkill.Builder(HamonStat.CONTROL, RewardType.ABILITY)
             .unlocks(ModHamonActions.HAMON_WALL_CLIMBING)
             .build());
     
-    public static final RegistryObject<BaseHamonSkill> DETECTOR = HAMON_SKILLS.register("detector", 
-            () -> new BaseHamonSkill.Builder(HamonStat.CONTROL, RewardType.ABILITY)
-            .unlocks(ModHamonActions.HAMON_DETECTOR)
-            .requiredSkill(WALL_CLIMBING).build());
+    public static final RegistryObject<BaseHamonSkill> LIQUID_WALKING = HAMON_SKILLS.register("liquid_walking", 
+            () -> new BaseHamonSkill.Builder(HamonStat.CONTROL, RewardType.PASSIVE)
+            .build());
     
     public static final RegistryObject<BaseHamonSkill> LIFE_MAGNETISM = HAMON_SKILLS.register("life_magnetism", 
             () -> new BaseHamonSkill.Builder(HamonStat.CONTROL, RewardType.ABILITY)
             .unlocks(ModHamonActions.HAMON_LIFE_MAGNETISM)
             .requiredSkill(WALL_CLIMBING).build());
     
-    public static final RegistryObject<BaseHamonSkill> HAMON_SPREAD = HAMON_SKILLS.register("hamon_spread", 
-            () -> new BaseHamonSkill.Builder(HamonStat.CONTROL, RewardType.PASSIVE)
-            .requiredSkill(DETECTOR).requiredSkill(LIFE_MAGNETISM).build());
-
-            
-    public static final RegistryObject<BaseHamonSkill> WATER_WALKING = HAMON_SKILLS.register("water_walking", 
-            () -> new BaseHamonSkill.Builder(HamonStat.CONTROL, RewardType.PASSIVE)
-            .build());
-            
     public static final RegistryObject<BaseHamonSkill> PROJECTILE_SHIELD = HAMON_SKILLS.register("projectile_shield", 
             () -> new BaseHamonSkill.Builder(HamonStat.CONTROL, RewardType.ABILITY)
             .unlocks(ModHamonActions.HAMON_PROJECTILE_SHIELD)
-            .requiredSkill(WATER_WALKING).build());
+            .requiredSkill(LIQUID_WALKING).build());
     
-    public static final RegistryObject<BaseHamonSkill> LAVA_WALKING = HAMON_SKILLS.register("lava_walking", 
-            () -> new BaseHamonSkill.Builder(HamonStat.CONTROL, RewardType.PASSIVE)
-            .requiredSkill(WATER_WALKING).build());
-    
-    public static final RegistryObject<BaseHamonSkill> REPELLING_OVERDRIVE = HAMON_SKILLS.register("repelling_overdrive", 
+    public static final RegistryObject<BaseHamonSkill> PROTECTION = HAMON_SKILLS.register("protection", 
             () -> new BaseHamonSkill.Builder(HamonStat.CONTROL, RewardType.ABILITY)
-            .unlocks(ModHamonActions.HAMON_REPELLING_OVERDRIVE)
-            .requiredSkill(PROJECTILE_SHIELD).requiredSkill(LAVA_WALKING).build());
+            .unlocks(ModHamonActions.HAMON_PROTECTION)
+            .requiredSkill(LIFE_MAGNETISM).requiredSkill(PROJECTILE_SHIELD).build());
+    
+    
+    public static final RegistryObject<BaseHamonSkill> DETECTOR = HAMON_SKILLS.register("detector", 
+            () -> new BaseHamonSkill.Builder(HamonStat.CONTROL, RewardType.ABILITY)
+            .unlocks(ModHamonActions.HAMON_DETECTOR)
+            .build());
+    
+    public static final RegistryObject<BaseHamonSkill> HYPNOSIS = HAMON_SKILLS.register("hypnosis", 
+            () -> new BaseHamonSkill.Builder(HamonStat.CONTROL, RewardType.ABILITY)
+            .unlocks(ModHamonActions.HAMON_HYPNOSIS)
+            .requiredSkill(DETECTOR).build());
+    
+    public static final RegistryObject<BaseHamonSkill> HAMON_SHOCK = HAMON_SKILLS.register("hamon_shock", 
+            () -> new BaseHamonSkill.Builder(HamonStat.CONTROL, RewardType.PASSIVE)
+            .requiredSkill(DETECTOR).build());
+    
+    public static final RegistryObject<BaseHamonSkill> HAMON_SPREAD = HAMON_SKILLS.register("hamon_spread", 
+            () -> new BaseHamonSkill.Builder(HamonStat.CONTROL, RewardType.PASSIVE)
+            .requiredSkill(HYPNOSIS).requiredSkill(HAMON_SHOCK).build());
+    
+    
     
     
     

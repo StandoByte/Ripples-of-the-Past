@@ -123,7 +123,7 @@ public class HamonData extends TypeSpecificData {
     private boolean playedEnergySound = false;
     private float breathStability;
     private float prevBreathStability;
-    private int ticksMaskWithNoHamonBreath;
+    private int ticksMaskWithNoHamonBreath; // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! save to nbt
 
     public HamonData() {
         hamonSkills = new MainHamonSkillsManager();
@@ -567,7 +567,6 @@ public class HamonData extends TypeSpecificData {
         }
     }
     
-    public static final int MAX_SKILL_POINTS_LVL = 55;
     public int getSkillPoints(HamonStat stat) {
         int lvl = getStatLevel(stat);
         int spentPoints;
@@ -581,11 +580,11 @@ public class HamonData extends TypeSpecificData {
         default:
             throw new IllegalArgumentException("Unexpected HamonStat constant: " + stat.name());
         }
-        return MathHelper.clamp(lvl, 0, MAX_SKILL_POINTS_LVL) / 5 - spentPoints;
+        return MathHelper.clamp(lvl, 0, MAX_STAT_LEVEL) / 5 - spentPoints;
     }
     
     public int nextSkillPointLvl(HamonStat stat) {
-        return MathHelper.clamp(getStatLevel(stat), 0, MAX_SKILL_POINTS_LVL - 1) / 5 * 5 + 5;
+        return MathHelper.clamp(getStatLevel(stat), 0, MAX_STAT_LEVEL - 1) / 5 * 5 + 5;
     }
     
     private static final float ENERGY_PER_POINT = 750F;
@@ -627,7 +626,7 @@ public class HamonData extends TypeSpecificData {
     private static final AttributeModifier ATTACK_DAMAGE = new AttributeModifier(
             UUID.fromString("8dcb2ad7-6067-4615-b7b6-af5256537c10"), "Attack damage from Hamon Training", 0.02D, AttributeModifier.Operation.ADDITION);
     private static final AttributeModifier ATTACK_SPEED = new AttributeModifier(
-            UUID.fromString("995b2915-9053-472c-834c-f94251e81659"), "Attack speed from Hamon Training", 0.025D, AttributeModifier.Operation.ADDITION);
+            UUID.fromString("995b2915-9053-472c-834c-f94251e81659"), "Attack speed from Hamon Training", 0.015D, AttributeModifier.Operation.ADDITION);
     private static final AttributeModifier MOVEMENT_SPEED = new AttributeModifier(
             UUID.fromString("ffa9ba4e-3811-44f7-a4a9-887ffbd47390"), "Movement speed from Hamon Training", 0.0004D, AttributeModifier.Operation.ADDITION);
     private static final AttributeModifier SWIMMING_SPEED = new AttributeModifier(

@@ -358,8 +358,7 @@
   "hamon.skills.infusion": "Насыщение Хамоном",
   "hamon.skills.flexibility": "Гибкость",
   "hamon.skills.life": "Жизненная энергия",
-  "hamon.skills.attractant": "Удерживающий Хамон",
-  "hamon.skills.repellent": "Отталкивающий Хамон",
+  "hamon.skills.attractant_repellent": "Удерживающий и Отталкивающий",
   
   "hamon.skill_type.attack": "Атака",
   "hamon.skill_type.ability": "Способность",
